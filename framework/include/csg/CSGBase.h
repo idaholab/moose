@@ -498,17 +498,6 @@ public:
   }
 
   /**
-   * @brief Apply a translation in a single specified direction (x, y, or z) to a CSG object.
-   *
-   * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
-   * @param direction x, y, or z direction in which to apply the translation
-   * @param distance distance to translate in the specified direction
-   */
-  void applyMonodirectionalTranslation(const CSGObjectVariant & csg_object,
-                                       std::string direction,
-                                       const Real distance);
-
-  /**
    * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
    *
    * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)

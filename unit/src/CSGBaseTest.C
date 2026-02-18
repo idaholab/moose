@@ -888,70 +888,47 @@ TEST(CSGBaseTest, testApplyTranslation)
       std::make_unique<CSGCartesianLattice>("lat", 1.0, univs);
   const auto & lat = csg_obj->addLattice(std::move(lat_ptr));
 
-  // translation values to use for all tests
-  // simple monodirectional translation in each direction (x, y, z)
-  Real dist = 1.0;
-  // multidirectional translation
-  std::vector<Real> multi_dists = {1.0, -2.0, 3.0};
+  // applie 2 multidirectional translations (so that order of applicaiton can be confirmed)
+  std::vector<Real> dists1 = {1.0, -2.0, 3.0};
+  std::vector<Real> dists2 = {4.0, 5.0, -6.0};
 
   // expected vector of translations to be applied in this order (x, y, z, dists):
   std::vector<std::pair<TransformationType, std::vector<Real>>> expected_trans = {
-      {TransformationType::TRANSLATION, {1.0, 0.0, 0.0}}, // along x axis
-      {TransformationType::TRANSLATION, {0.0, 1.0, 0.0}}, // along y axis
-      {TransformationType::TRANSLATION, {0.0, 0.0, 1.0}}, // along z axis
-      {TransformationType::TRANSLATION, multi_dists}};    // multidirectional
+      {TransformationType::TRANSLATION, dists1}, {TransformationType::TRANSLATION, dists2}};
 
   // apply to surface
   {
-    csg_obj->applyMonodirectionalTranslation(surf, "x", dist);
-    csg_obj->applyMonodirectionalTranslation(surf, "y", dist);
-    csg_obj->applyMonodirectionalTranslation(surf, "z", dist);
-    csg_obj->applyTranslation(surf, multi_dists);
+    csg_obj->applyTranslation(surf, dists1);
+    csg_obj->applyTranslation(surf, dists2);
     ASSERT_EQ(surf.getTransformations(), expected_trans);
   }
   // apply to cell
   {
-    csg_obj->applyMonodirectionalTranslation(cell, "x", dist);
-    csg_obj->applyMonodirectionalTranslation(cell, "y", dist);
-    csg_obj->applyMonodirectionalTranslation(cell, "z", dist);
-    csg_obj->applyTranslation(cell, multi_dists);
+    csg_obj->applyTranslation(cell, dists1);
+    csg_obj->applyTranslation(cell, dists2);
     ASSERT_EQ(cell.getTransformations(), expected_trans);
   }
   // apply to universe
   {
-    csg_obj->applyMonodirectionalTranslation(univ, "x", dist);
-    csg_obj->applyMonodirectionalTranslation(univ, "y", dist);
-    csg_obj->applyMonodirectionalTranslation(univ, "z", dist);
-    csg_obj->applyTranslation(univ, multi_dists);
+    csg_obj->applyTranslation(univ, dists1);
+    csg_obj->applyTranslation(univ, dists2);
     ASSERT_EQ(univ.getTransformations(), expected_trans);
   }
   // apply to lattice
   {
-    csg_obj->applyMonodirectionalTranslation(lat, "x", dist);
-    csg_obj->applyMonodirectionalTranslation(lat, "y", dist);
-    csg_obj->applyMonodirectionalTranslation(lat, "z", dist);
-    csg_obj->applyTranslation(lat, multi_dists);
+    csg_obj->applyTranslation(lat, dists1);
+    csg_obj->applyTranslation(lat, dists2);
     ASSERT_EQ(lat.getTransformations(), expected_trans);
   }
   // apply to region (should apply to the surface)
   {
-    csg_obj->applyMonodirectionalTranslation(reg, "x", dist);
-    csg_obj->applyMonodirectionalTranslation(reg, "y", dist);
-    csg_obj->applyMonodirectionalTranslation(reg, "z", dist);
-    csg_obj->applyTranslation(surf, multi_dists);
+    csg_obj->applyTranslation(reg, dists1);
+    csg_obj->applyTranslation(reg, dists2);
     // surface should have the transformations applied x2 (from the above transformations applied
     // directly to the surface and then from the region)
     auto double_trans = expected_trans;
     double_trans.insert(double_trans.end(), expected_trans.begin(), expected_trans.end());
     ASSERT_EQ(surf.getTransformations(), double_trans);
-  }
-
-  // assert error is raised if invalid direction is provided
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf]()
-                                   { csg_obj->applyMonodirectionalTranslation(surf, "Fake", 1.0); },
-                                   "Invalid direction 'fake' provided for monodirectional "
-                                   "translation. Must be 'x', 'y', or 'z'.");
   }
 }
 
