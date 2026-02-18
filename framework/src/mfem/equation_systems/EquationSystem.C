@@ -288,8 +288,9 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
-  trueRHS.SyncFromBlocks();
+  // Zero out RHS and sync memory
   trueRHS = 0.0;
+  trueRHS.SyncToBlocks();
 
   for (const auto i : index_range(_test_var_names))
   {
@@ -370,11 +371,7 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
-  }
+    gridfunctions.Get(_trial_var_names.at(i))->Distribute(&(trueX.GetBlock(i)));
 }
 
 void
