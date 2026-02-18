@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Test capabilities module."""
+
 import unittest
 
 import pycapabilities

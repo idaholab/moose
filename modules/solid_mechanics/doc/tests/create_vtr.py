@@ -13,11 +13,9 @@ import sys
 from optparse import OptionParser, OptionValueError
 import vtk
 
-p = OptionParser(
-    usage="""usage: %prog [options] <out_vtr>
+p = OptionParser(usage="""usage: %prog [options] <out_vtr>
 Creates an undecorated rectilinear grid (.vtr file)
-"""
-)
+""")
 p.add_option(
     "-x",
     "--xgrid",
@@ -52,14 +50,14 @@ p.add_option(
     dest="ascii",
     help="ASCII, instead of binary, .vtr output",
 )
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 
 # get the output filename
 if len(args) != 1:
     p.print_help()
     print("Incorrect number of agruments")
     sys.exit(1)
-(out_vtr) = args[0]
+out_vtr = args[0]
 
 if not out_vtr.endswith(".vtr"):
     p.print_help()
@@ -72,7 +70,7 @@ if opts.verbose:
 xArray = vtk.vtkDoubleArray()
 min_max_num = opts.xgrid.split(":")
 if len(min_max_num) == 3:
-    (x0, x1, nx) = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
+    x0, x1, nx = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
     x_coords = [x0 + i * (x1 - x0) / float(nx - 1) for i in range(nx)]
 else:
     try:
@@ -87,7 +85,7 @@ for x in x_coords:
 yArray = vtk.vtkDoubleArray()
 min_max_num = opts.ygrid.split(":")
 if len(min_max_num) == 3:
-    (y0, y1, ny) = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
+    y0, y1, ny = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
     y_coords = [y0 + i * (y1 - y0) / float(ny - 1) for i in range(ny)]
 else:
     try:
@@ -102,7 +100,7 @@ for y in y_coords:
 zArray = vtk.vtkDoubleArray()
 min_max_num = opts.zgrid.split(":")
 if len(min_max_num) == 3:
-    (z0, z1, nz) = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
+    z0, z1, nz = (float(min_max_num[0]), float(min_max_num[1]), int(min_max_num[2]))
     z_coords = [z0 + i * (z1 - z0) / float(nz - 1) for i in range(nz)]
 else:
     try:

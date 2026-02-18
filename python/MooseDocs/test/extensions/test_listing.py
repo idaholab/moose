@@ -965,8 +965,7 @@ class TestMooseParsedInput(AppSyntaxTestCase):
 []
 !listing-end!
 """
-        cls.parsed_text_re = re.compile(
-            r"""\[Kernels\<\<\<(.*?)\>\>\>\]
+        cls.parsed_text_re = re.compile(r"""\[Kernels\<\<\<(.*?)\>\>\>\]
   \[diff\]
     type = Diffusion\<\<\<(.*?)\>\>\>
     variable\<\<\<(.*?)\>\>\> = u
@@ -978,8 +977,7 @@ class TestMooseParsedInput(AppSyntaxTestCase):
 \[\]
 
 \[UnknownSyntax\]
-\[\]"""
-        )
+\[\]""")
         return super().setUpClass()
 
     def setupContent(self):

@@ -10,6 +10,7 @@
 """
 Creates images for StitchedMesh documentation.
 """
+
 import vtk
 import chigger
 

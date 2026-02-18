@@ -44,7 +44,7 @@ p.add_option("-v", action="store_true", dest="verbose", help="Verbose")
 
 
 # extract commandline arguments
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 if len(args) < 2:
     sys.stderr.write("Number of arguments incorrect\n")
     sys.exit(1)

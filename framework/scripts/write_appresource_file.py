@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """helper script to write a meta resource file containing useful build time attributes"""
+
 import os
 import sys
 import re

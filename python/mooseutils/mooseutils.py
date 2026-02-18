@@ -245,12 +245,12 @@ def check_configuration(packages, message=True):
     missing = []
     re_operators = re.compile(r"([=<>]+)")
     for package in packages:
-        (_package, _operator, _version) = package, None, None
+        _package, _operator, _version = package, None, None
         # parse version operator
         if re_operators.findall(_package):
             try:
                 _op = re_operators.findall(_package)[0]
-                (_package, _operator, _version) = re.findall(
+                _package, _operator, _version = re.findall(
                     rf"([.\w_-]+)([{_op}]+)(.*)", _package
                 )[0]
             # Try and capture possible regex issues

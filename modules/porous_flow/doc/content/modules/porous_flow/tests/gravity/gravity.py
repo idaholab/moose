@@ -67,7 +67,7 @@ def grav02():
 
 
 water1 = grav01()
-(gas, water) = grav02()
+gas, water = grav02()
 
 xpoints = np.arange(-1.02, 0.05, 0.01)
 moosex = [-0.1 * i for i in range(11)]

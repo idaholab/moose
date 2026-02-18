@@ -71,12 +71,10 @@ def yield_function(x, y, z):
 
 
 # parse command line
-p = OptionParser(
-    usage="""usage: %prog [options] <vtk_file>
+p = OptionParser(usage="""usage: %prog [options] <vtk_file>
 Inserts yield function values into <vtk_file>.
 Only 3D input is accepted: this program assumes that the individual yield functions are functions of x, y, z.
-"""
-)
+""")
 p.add_option("-v", action="store_true", dest="verbose", help="Verbose")
 p.add_option(
     "--name",
@@ -132,7 +130,7 @@ p.add_option(
     dest="twoD_example_alternative",
     help="Yield function will contain contributions from an alternative example 2D yield function",
 )
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 
 # get the com filename
 if len(args) != 1:
@@ -167,7 +165,7 @@ yf = vtk.vtkDoubleArray()
 yf.SetName(opts.name)
 yf.SetNumberOfValues(indata.GetNumberOfPoints())
 for ptid in range(indata.GetNumberOfPoints()):
-    (x, y, z) = indata.GetPoint(ptid)
+    x, y, z = indata.GetPoint(ptid)
     yf.SetValue(ptid, yield_function(x, y, z))
 indata.GetPointData().AddArray(yf)
 

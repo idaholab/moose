@@ -10,6 +10,7 @@
 """
 Contains base classes intended to be used internal to this module.
 """
+
 import uuid
 import copy
 import MooseDocs
