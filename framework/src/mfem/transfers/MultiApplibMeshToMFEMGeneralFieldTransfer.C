@@ -18,6 +18,7 @@
 #include "MFEMVectorFromlibMeshPoint.h"
 
 #include "libmesh/mesh_function.h"
+#include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
 registerMooseObject("MooseApp", MultiApplibMeshToMFEMGeneralFieldTransfer);
 
@@ -118,10 +119,22 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
   const int NE = to_pfespace.GetParMesh()->GetNE();
   const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
   const int dim = to_pfespace.GetParMesh()->Dimension();
-
-  // Evaluate source grid function at target points
   const int nodes_cnt = vxyz.Size() / dim;
   const int to_gf_ncomp = to_gf.VectorDim();
+
+  // Point locations needed to send to from-domain
+  // processor to points
+  std::map<processor_id_type, std::vector<Point>> outgoing_points;
+
+  for (int i = 0; i < nodes_cnt*to_gf_ncomp; i++)
+  {  
+    for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
+    {    
+      const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp]});    
+      outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+    }
+  }
+  // Evaluate source grid function at target points
   mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
   std::vector<libMesh::MeshFunction> local_meshfuns;
   local_meshfuns.clear();
@@ -144,16 +157,96 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
     local_meshfuns.back().init();
     local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
   }
+
+  // Get the local bounding boxes for current processor.
+  // There could be more than one box because of the number of local apps
+  // can be larger than one
+  std::vector<BoundingBox> local_bboxes(1);
+
+  /**
+   * Gather all of the evaluations, pick out the best ones for each point, and
+   * apply them to the solution vector.  When we are transferring from
+   * multiapps, there may be multiple overlapping apps for a particular point.
+   * In that case, we'll try to use the value from the app with the lowest id.
+   */
+
+  // Fill values and app ids for incoming points
+  // We are responsible to compute values for these incoming points
+  auto gather_functor =
+      [this, &local_meshfuns, &local_bboxes](
+          processor_id_type /*pid*/,
+          const std::vector<Point> & incoming_points,
+          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
+  {
+    vals_ids_for_incoming_points.resize(incoming_points.size(), std::make_pair(OutOfMeshValue, 0));
+    for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
+    {
+      Point pt = incoming_points[i_pt];
+
+      // Loop until we've found the lowest-ranked app that actually contains
+      // the quadrature point.
+      for (MooseIndex(_from_problems.size()) i_from = 0;
+           i_from < _from_problems.size() &&
+           vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
+           ++i_from)
+      {
+        // if (local_bboxes[i_from].contains_point(pt))
+        // {
+          const auto from_global_num =
+              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+          // Use mesh function to compute interpolation values
+          vals_ids_for_incoming_points[i_pt].first =
+              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+          // Record problem ID as well
+          switch (_current_direction)
+          {
+            case FROM_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+              break;
+            case TO_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+              break;
+            default:
+              mooseError("Unsupported direction");
+          }
+        // }
+      }
+    }
+  };
+
+  // Incoming values and APP ids for outgoing points
+  std::map<processor_id_type, std::vector<std::pair<Real, unsigned int>>> incoming_vals_ids;
+  // Copy data out to incoming_vals_ids
+  auto action_functor =
+      [&incoming_vals_ids](
+          processor_id_type pid,
+          const std::vector<Point> & /*my_outgoing_points*/,
+          const std::vector<std::pair<Real, unsigned int>> & vals_ids_for_outgoing_points)
+  {
+    // This lambda function might be called multiple times
+    incoming_vals_ids[pid].reserve(vals_ids_for_outgoing_points.size());
+    // Copy data for processor 'pid'
+    std::copy(vals_ids_for_outgoing_points.begin(),
+              vals_ids_for_outgoing_points.end(),
+              std::back_inserter(incoming_vals_ids[pid]));
+  };
+
+  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
+  // Hopefully, pull_parallel_vector_data will not mess up this
+  const std::pair<Real, unsigned int> * ex = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(
+      comm(), outgoing_points, gather_functor, action_functor, ex);
+
   for (int i = 0; i < interp_vals.Size(); i++)
   {
-    int i_from = 0;
-    const auto from_global_num = getGlobalSourceAppIndex(i_from);
-    const mfem::Vector p({vxyz[i], vxyz[i+NE*nsp]});
-    const auto local_pt = _from_transforms[from_global_num]->mapBack(pointFromMFEMVector(p));
-    double val = (local_meshfuns[i_from])(local_pt);
-    interp_vals[i] = val;    
+    for (auto & group : incoming_vals_ids)
+    {
+      double val = group.second[i].first;
+      if (val == std::numeric_limits<Real>::infinity())
+        continue;
+      interp_vals[i] = val;
+    }
   }
-
   // Project DoFs to MFEM GridFunction
   mfem::Array<int> vdofs;
   mfem::Vector vals;
