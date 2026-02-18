@@ -30,7 +30,6 @@
   [sides]
     type = MFEMScalarDirichletBC
     variable = mfem_scalar_var
-    boundary = 'bottom left right top'
     coefficient = 1.0
   []
 []
