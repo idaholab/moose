@@ -36,7 +36,8 @@ CappedMohrCoulombCosseratStressUpdate::CappedMohrCoulombCosseratStressUpdate(
     _host_young(getParam<Real>("host_youngs_modulus")),
     _host_poisson(getParam<Real>("host_poissons_ratio")),
     _host_E0011(_host_young * _host_poisson / (1.0 + _host_poisson) / (1.0 - 2.0 * _host_poisson)),
-    _host_E0000(_host_E0011 + _host_young / (1.0 + _host_poisson))
+    _host_E0000(_host_E0011 + _host_young / (1.0 + _host_poisson)),
+    _eigvals_scratch(_tensor_dimensionality)
 {
 }
 
@@ -48,8 +49,10 @@ CappedMohrCoulombCosseratStressUpdate::preReturnMapV(
     const std::vector<Real> & /*yf*/,
     const RankFourTensor & /*Eijkl*/)
 {
-  std::vector<Real> eigvals;
-  stress_trial.symmetricEigenvaluesEigenvectors(eigvals, _eigvecs);
+  mooseAssert(
+      _eigvals_scratch.size() == _tensor_dimensionality,
+      "_eigvals_scratch incorrectly sized in CappedMohCoulombCosseratStressUpdate::preReturnMapV");
+  stress_trial.symmetricEigenvaluesEigenvectors(_eigvals_scratch, _eigvecs);
   _poissons_ratio = _host_poisson;
 }
 

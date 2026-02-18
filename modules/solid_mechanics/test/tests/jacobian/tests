@@ -388,6 +388,107 @@
       detail = 'cwp11'
     []
 
+    [cwp_partially_implemented_01]
+      type = 'PetscJacobianTester'
+      input = 'cwp01.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp01_partially_implemented'
+    []
+    [cwp_partially_implemented_02]
+      type = 'PetscJacobianTester'
+      input = 'cwp02.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp02_partially_implemented'
+    []
+    [cwp_partially_implemented_03]
+      type = 'PetscJacobianTester'
+      input = 'cwp03.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp03_partially_implemented'
+    []
+    [cwp_partially_implemented_04]
+      type = 'PetscJacobianTester'
+      input = 'cwp04.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp04_partially_implemented'
+    []
+    [cwp_partially_implemented_05]
+      type = 'PetscJacobianTester'
+      input = 'cwp05.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp05_partially_implemented'
+    []
+    [cwp_partially_implemented_06]
+      type = 'PetscJacobianTester'
+      input = 'cwp06.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp06_partially_implemented'
+    []
+    [cwp_partially_implemented_07]
+      type = 'PetscJacobianTester'
+      input = 'cwp07.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp07_partially_implemented'
+    []
+    [cwp_partially_implemented_08]
+      type = 'PetscJacobianTester'
+      input = 'cwp08.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp08_partially_implemented'
+    []
+    [cwp_partially_implemented_09]
+      type = 'PetscJacobianTester'
+      input = 'cwp09.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp09_partially_implemented'
+    []
+    [cwp_partially_implemented_10]
+      type = 'PetscJacobianTester'
+      input = 'cwp10.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp10_partially_implemented'
+    []
+    [cwp_partially_implemented_11]
+      type = 'PetscJacobianTester'
+      input = 'cwp11.i'
+      ratio_tol = 1E-7
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/mc/type=CappedWeakPlaneStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'cwp11_partially_implemented'
+    []
+
+
     [cwpc01]
       type = 'PetscJacobianTester'
       input = 'cwpc01.i'
@@ -520,6 +621,78 @@
       difference_tol = 1E10
       cli_args = 'Executioner/num_steps=1'
       detail = 'tensile_update8'
+    []
+    [tensile_partially_implemented_update1]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update1.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update1_partially_implemented'
+    []
+    [tensile_partially_implemented_update2]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update2.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update2_partially_implemented'
+    []
+    [tensile_partially_implemented_update3]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update3.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update3_partially_implemented'
+    []
+    [tensile_partially_implemented_update4]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update4.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update4_partially_implemented'
+    []
+    [tensile_partially_implemented_update5]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update5.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update5_partially_implemented'
+    []
+    [tensile_partially_implemented_update6]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update5.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update6_partially_implemented'
+    []
+    [tensile_partially_implemented_update7]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update7.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update7_partially_implemented'
+    []
+    [tensile_partially_implemented_update8]
+      type = 'PetscJacobianTester'
+      input = 'tensile_update8.i'
+      ratio_tol = 1E-4
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=1 Materials/tensile/type=TensileStressUpdate_PartiallyImplemented'
+      allow_test_objects = true
+      detail = 'tensile_update8_partially_implemented'
     []
 
     [mc_update1]
