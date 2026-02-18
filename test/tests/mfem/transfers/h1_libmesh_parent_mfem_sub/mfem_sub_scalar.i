@@ -26,7 +26,6 @@
   [sides]
     type = MFEMScalarDirichletBC
     variable = temperature
-    boundary = 'bottom left right top'
     coefficient = 1.0
   []
 []

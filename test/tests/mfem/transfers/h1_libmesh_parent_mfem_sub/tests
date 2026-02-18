@@ -16,12 +16,33 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
-    requirement = 'and scalar LAGRANGE variables defined on tris.'
+    requirement = 'scalar LAGRANGE variables defined on tris, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
     cli_args = 'Mesh/file=../../mesh/square_tri.e mfem_app0:Mesh/file=../../mesh/square_tri.e Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
   []
+  [MFEMTransferTolibMeshH1Hex]
+    type = CSVDiff
+    input = libmesh_parent_scalar.i
+    csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes.csv'
+    requirement = 'scalar LAGRANGE variables defined on hexes, '
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube.e BCs/sides/boundary=Sides mfem_app0:Mesh/file=../../mesh/cube.e Outputs/file_base=libmesh_parent_scalar_mfem_sub_hexes '
+  []  
+  [MFEMTransferTolibMeshH1Tet]
+    type = CSVDiff
+    input = libmesh_parent_scalar.i
+    csvdiff = 'libmesh_parent_scalar_mfem_sub_tets.csv'
+    requirement = 'and scalar LAGRANGE variables defined on tetrahedra.'
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e BCs/sides/boundary=Sides mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
+  []
 []
-
