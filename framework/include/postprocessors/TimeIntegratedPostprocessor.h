@@ -45,6 +45,6 @@ protected:
   enum TimeIntegration
   {
     ImplicitEuler,
-    ImplicitMidpoint
+    TrapezoidalRule
   };
 };

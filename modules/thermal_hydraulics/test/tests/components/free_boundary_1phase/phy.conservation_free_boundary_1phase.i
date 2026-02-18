@@ -113,7 +113,7 @@
   [massflux_integral]
     type = TimeIntegratedPostprocessor
     value = massflux_difference
-    time_integration_scheme = 'implicit-midpoint'
+    time_integration_scheme = 'trapezoidal-rule'
   []
   [mass]
     type = ElementIntegralVariablePostprocessor
@@ -157,7 +157,7 @@
   [momentumflux_integral]
     type = TimeIntegratedPostprocessor
     value = momentumflux_difference
-    time_integration_scheme = 'implicit-midpoint'
+    time_integration_scheme = 'trapezoidal-rule'
   []
   [momentum]
     type = ElementIntegralVariablePostprocessor
@@ -197,7 +197,7 @@
   [energyflux_integral]
     type = TimeIntegratedPostprocessor
     value = energyflux_difference
-    time_integration_scheme = 'implicit-midpoint'
+    time_integration_scheme = 'trapezoidal-rule'
   []
   [energy]
     type = ElementIntegralVariablePostprocessor

@@ -70,7 +70,7 @@
     execute_on = 'initial timestep_end'
 
     # To preserve previous test results
-    time_integration_scheme = 'implicit-midpoint'
+    time_integration_scheme = 'trapezoidal-rule'
   [../]
 []
 

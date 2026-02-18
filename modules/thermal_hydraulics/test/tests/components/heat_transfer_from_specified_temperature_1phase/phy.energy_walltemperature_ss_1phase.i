@@ -77,7 +77,7 @@
   [heat_added]
     type = TimeIntegratedPostprocessor
     value = hf_pipe
-    time_integration_scheme = 'implicit-midpoint'
+    time_integration_scheme = 'trapezoidal-rule'
     execute_on = 'initial timestep_end'
   []
 
