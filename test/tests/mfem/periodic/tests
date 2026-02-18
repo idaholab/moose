@@ -6,10 +6,9 @@
     xmldiff = 'OutputData/PeriodicGmsh/Run0/Run0.pvd
                 OutputData/PeriodicGmsh/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a problem defined on a mesh with pre-defined periodic boundaries using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
+    max_parallel = 2 # schemadiff with multiple ranks
     recover = false
-    platform = 'linux'
   []
 []
