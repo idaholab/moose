@@ -12,6 +12,7 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "MooseUtils.h"
+#include "Capabilities.h"
 
 #include "libmesh/libmesh_common.h"
 
@@ -90,14 +91,13 @@ Registry::addKnownLabel(const std::string & label)
 void
 Registry::addDataFilePath(const std::string & name,
                           const std::string & in_tree_path,
-                          const bool require_folder_name_data /* = true */)
+                          const bool is_app /* = true */)
 {
-  if (!std::regex_search(name, std::regex("\\w+")))
-    mooseError("Unallowed characters in '", name, "'");
+  checkDataFilePathName(name);
 
   // Enforce that the folder is called "data", because we rely on the installed path
   // to be within PREFIX/share/<name>/data (see determineDataFilePath())
-  if (require_folder_name_data)
+  if (is_app)
   {
     const std::string folder = std::filesystem::path(in_tree_path).filename().c_str();
     if (folder != "data")
@@ -117,7 +117,10 @@ Registry::addDataFilePath(const std::string & name,
   const auto it = dfp.find(name);
   // Not registered yet
   if (it == dfp.end())
+  {
     dfp.emplace(name, path);
+    addDataFilePathCapability(name, path);
+  }
   // Registered, but with a different value
   else if (it->second != path)
     mooseError("While registering data file path '",
@@ -127,6 +130,13 @@ Registry::addDataFilePath(const std::string & name,
                "': the path '",
                it->second,
                "' is already registered");
+}
+
+void
+Registry::addMissingDataFilePath(const std::string & name)
+{
+  checkDataFilePathName(name);
+  addDataFilePathCapability(name);
 }
 
 void
@@ -230,4 +240,28 @@ Registry::appNameFromAppPath(const std::string & app_path)
 
   mooseError(
       "Registry::appNameFromAppPath(): Failed to parse application name from '", app_path, "'");
+}
+
+void
+Registry::checkDataFilePathName(const std::string & name)
+{
+  if (!std::regex_search(name, std::regex("[a-z0-9_]+")))
+    mooseError("Unallowed characters in data file path name '",
+               name,
+               "'; allowed characters = a-z, 0-9, _");
+}
+
+void
+Registry::addDataFilePathCapability(const std::string & name,
+                                    const std::optional<std::string> & path /* = {} */)
+{
+  std::string doc = "Named data path '" + name + "' is ";
+  if (path)
+    doc += "available at '" + *path + "'";
+  else
+    doc += "not available";
+  doc += ".";
+
+  auto & capabilities = Moose::internal::Capabilities::getCapabilities({});
+  capabilities.add("data_" + name, bool(path), doc);
 }

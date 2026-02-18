@@ -28,15 +28,15 @@ protected:
   void SetUp() override
   {
     // Setup a temporary Capabilities for testing
-    std::swap(Capabilities::get({})._registry, _old_registry);
-    _capabilities = &Capabilities::get({});
-    ASSERT_EQ(Capabilities::get({})._registry.size(), 0);
+    std::swap(Capabilities::getCapabilities({})._registry, _old_registry);
+    _capabilities = &Capabilities::getCapabilities({});
+    ASSERT_EQ(Capabilities::getCapabilities({})._registry.size(), 0);
   }
 
   void TearDown() override
   {
     // Replace temporary Capabilities for testing with real one
-    std::swap(Capabilities::get({})._registry, _old_registry);
+    std::swap(Capabilities::getCapabilities({})._registry, _old_registry);
     _old_registry.clear();
     _capabilities = nullptr;
   }
@@ -130,7 +130,7 @@ TEST_F(CapabilitiesTest, mooseAppisInTree)
 /// Test --check-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
   capabilities.add("value_true", bool(true), "doc");
   capabilities.add("value_false", bool(false), "doc");
 
@@ -161,7 +161,7 @@ TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
 /// Test --required-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
   capabilities.add("value_true", bool(true), "doc");
   capabilities.add("value_false", bool(false), "doc");
 
@@ -282,7 +282,7 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
 /// Test Capabilities::dump
 TEST_F(CapabilitiesTest, dump)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   capabilities.add("false", bool(false), "false");
   capabilities.add("true", bool(true), "true");
@@ -307,7 +307,7 @@ TEST_F(CapabilitiesTest, dump)
 /// Test Capabilities::check
 TEST_F(CapabilitiesTest, check)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   capabilities.add("name", bool(true), "false");
   EXPECT_EQ(capabilities.check("name").state, CheckState::CERTAIN_PASS);
@@ -317,7 +317,7 @@ TEST_F(CapabilitiesTest, check)
 /// Test Capabilities::augment
 TEST_F(CapabilitiesTest, augment)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   capabilities.augment(JSON_CAPABILITIES, {});
 
@@ -363,7 +363,7 @@ TEST_F(CapabilitiesTest, augment)
 /// Test Capabilities::augment with a parsing failure
 TEST_F(CapabilitiesTest, augmentParseError)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   // missing doc
   {
@@ -385,7 +385,7 @@ TEST_F(CapabilitiesTest, augmentParseError)
 /// Test Capabilities::isRelocated with errors
 TEST_F(CapabilitiesTest, isInstallationTypeErrors)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   // capability does not exist
   EXPECT_THROW_MSG(
@@ -404,16 +404,12 @@ TEST_F(CapabilitiesTest, isInstallationTypeErrors)
 /// Test Capabilities::[isInstallationType,isRelocated,isInTree]
 TEST_F(CapabilitiesTest, isInstallationType)
 {
-  auto & capabilities = Capabilities::get({});
+  auto & capabilities = Capabilities::getCapabilities({});
 
   // We test unit tests in tree, so doing the normal registration
   // with moose should get us installation_type=in_tree
   capabilities.registerMooseCapabilities();
-  Capability * capability_ptr = capabilities.query("installation_type");
-  ASSERT_NE(capability_ptr, nullptr);
-  const auto value_ptr = capability_ptr->queryStringValue();
-  ASSERT_NE(value_ptr, nullptr);
-  ASSERT_EQ(*value_ptr, "in_tree");
+  Capability & capability = capabilities.get("installation_type");
 
   // Should be false with installation_type=in_tree
   EXPECT_FALSE(capabilities.isInstallationType("foo"));
@@ -423,13 +419,13 @@ TEST_F(CapabilitiesTest, isInstallationType)
   EXPECT_FALSE(capabilities.isRelocated());
 
   // Set the value to "relocated"
-  const auto enumeration_ptr = capability_ptr->queryEnumeration();
+  const auto enumeration_ptr = capability.queryEnumeration();
   ASSERT_TRUE(enumeration_ptr.has_value());
   const auto enumeration = *enumeration_ptr;
-  (*capability_ptr) =
-      Capability(capability_ptr->getName(), std::string("relocated"), capability_ptr->getDoc())
-          .setExplicit()
-          .setEnumeration(enumeration);
+  capability = Capability(capability.getName(), std::string("relocated"), capability.getDoc())
+                   .setExplicit()
+                   .setEnumeration(enumeration);
+  ASSERT_EQ(capability.getStringValue(), "relocated");
   EXPECT_FALSE(capabilities.isInstallationType("foo"));
   EXPECT_TRUE(capabilities.isInstallationType("relocated"));
   EXPECT_FALSE(capabilities.isInstallationType("in_tree"));

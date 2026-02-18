@@ -49,7 +49,7 @@ Capabilities::Capabilities() : CapabilityRegistry()
 }
 
 Capabilities &
-Capabilities::get(const Capabilities::GetPassKey)
+Capabilities::getCapabilities(const Capabilities::GetCapabilitiesPassKey)
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.

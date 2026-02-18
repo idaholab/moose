@@ -301,12 +301,15 @@ TEST(CapabilityRegistryTest, get)
   const auto & capability = registry.add("name", bool(false), "doc");
 
   // Exact name
+  EXPECT_EQ(&registry.get("name"), &capability);
   EXPECT_EQ(&std::as_const(registry).get("name"), &capability);
 
   // Name to lower
+  EXPECT_EQ(&registry.get("naMe"), &capability);
   EXPECT_EQ(&std::as_const(registry).get("naMe"), &capability);
 
   // Not found
+  CAP_EXPECT_THROW_MSG(registry.get("foo"), "Capability 'foo' not registered");
   CAP_EXPECT_THROW_MSG(std::as_const(registry).get("foo"), "Capability 'foo' not registered");
 }
 

@@ -94,6 +94,33 @@ Capability::setEnumeration(const std::set<std::string> & enumeration)
   return *this;
 }
 
+bool
+Capability::getBoolValue() const
+{
+  if (const auto bool_ptr = queryBoolValue())
+    return *bool_ptr;
+  throw CapabilityException("Capability::getBoolValue(): Capability " + toString() +
+                            " is not a bool");
+}
+
+int
+Capability::getIntValue() const
+{
+  if (const auto int_ptr = queryIntValue())
+    return *int_ptr;
+  throw CapabilityException("Capability::getIntValue(): Capability " + toString() +
+                            " is not an integer");
+}
+
+const std::string &
+Capability::getStringValue() const
+{
+  if (const auto string_ptr = queryStringValue())
+    return *string_ptr;
+  throw CapabilityException("Capability::getStringValue(): Capability " + toString() +
+                            " is not a string");
+}
+
 std::string
 Capability::valueToString() const
 {

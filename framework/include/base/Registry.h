@@ -16,10 +16,13 @@
 #include <set>
 #include <map>
 #include <memory>
+#include <optional>
 
 #include "libmesh/utility.h"
 
+#ifdef MOOSE_UNIT_TEST
 #include <gtest/gtest.h>
+#endif
 
 #define combineNames1(X, Y) X##Y
 #define combineNames(X, Y) combineNames1(X, Y)
@@ -84,6 +87,8 @@
 /// ../../data as a path. The app name must be the APPLICATION_NAME used to build
 /// the app (solid_mechanics instead of SolidMechanicsApp, for example)
 #define registerAppDataFilePath(app) Registry::addAppDataFilePath(app, __FILE__)
+/// Register a missing data file path (adds the data capability as missing)
+#define registerMissingDataFilePath(name) Registry::addMissingDataFilePath(name)
 /// Deprecated method; use registerAppDataFilePath instead
 #define registerDataFilePath() Registry::addDeprecatedAppDataFilePath(__FILE__)
 
@@ -209,13 +214,15 @@ public:
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
 
-  /// register general search paths
+  /// register general search paths; "app" is whether or not the path is an app path
   static void addDataFilePath(const std::string & name,
                               const std::string & in_tree_path,
-                              const bool require_folder_name_data = true);
+                              const bool app = true);
   /// register search paths for an application (path determined relative to app_path);
   /// app_path should be passed as __FILE__ from the application source file
   static void addAppDataFilePath(const std::string & app_name, const std::string & app_path);
+  /// register a data file path as missing
+  static void addMissingDataFilePath(const std::string & name);
   /// deprecated method; use addAppDataFilePath instead
   static void addDeprecatedAppDataFilePath(const std::string & app_path);
 
@@ -275,6 +282,7 @@ public:
   ///@}
 
 private:
+#ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   friend class RegistryTest;
@@ -283,7 +291,9 @@ private:
   FRIEND_TEST(RegistryTest, determineFilePathFailed);
   FRIEND_TEST(RegistryTest, appNameFromAppPath);
   FRIEND_TEST(RegistryTest, appNameFromAppPathFailed);
+  FRIEND_TEST(RegistryTest, addDataFilePathCapability);
   ///@}
+#endif
 
   Registry() {};
 
@@ -313,6 +323,13 @@ private:
   /// Internal helper for getting an application name from its path, for example:
   /// /path/to/FooBarBazApp.C -> foo_bar_baz, for use in addDeprecatedAppDataFilePath
   static std::string appNameFromAppPath(const std::string & app_path);
+
+  /// Check a data file path for valid characters
+  static void checkDataFilePathName(const std::string & name);
+
+  /// Add a data file path capability
+  static void addDataFilePathCapability(const std::string & name,
+                                        const std::optional<std::string> & path = {});
 
   std::map<std::string, std::shared_ptr<RegistryEntryBase>> _name_to_entry;
   std::map<std::string, std::vector<std::shared_ptr<RegistryEntryBase>>> _per_label_objects;

@@ -49,6 +49,11 @@ TEST(CapabilityTest, construct)
     EXPECT_TRUE(cap.hasBoolValue());
     EXPECT_FALSE(cap.hasIntValue());
     EXPECT_FALSE(cap.hasStringValue());
+    EXPECT_EQ(cap.getBoolValue(), false);
+    CAP_EXPECT_THROW_MSG(cap.getIntValue(),
+                         "Capability::getIntValue(): Capability name=false is not an integer");
+    CAP_EXPECT_THROW_MSG(cap.getStringValue(),
+                         "Capability::getStringValue(): Capability name=false is not a string");
     EXPECT_EQ(cap.valueToString(), "false");
     EXPECT_EQ(cap.toString(), "name=false");
   }
@@ -67,6 +72,11 @@ TEST(CapabilityTest, construct)
     EXPECT_TRUE(cap.hasBoolValue());
     EXPECT_FALSE(cap.hasIntValue());
     EXPECT_FALSE(cap.hasStringValue());
+    EXPECT_EQ(cap.getBoolValue(), true);
+    CAP_EXPECT_THROW_MSG(cap.getIntValue(),
+                         "Capability::getIntValue(): Capability name=true is not an integer");
+    CAP_EXPECT_THROW_MSG(cap.getStringValue(),
+                         "Capability::getStringValue(): Capability name=true is not a string");
     EXPECT_EQ(cap.valueToString(), "true");
     EXPECT_EQ(cap.toString(), "name=true");
   }
@@ -85,6 +95,11 @@ TEST(CapabilityTest, construct)
     EXPECT_FALSE(cap.hasBoolValue());
     EXPECT_TRUE(cap.hasIntValue());
     EXPECT_FALSE(cap.hasStringValue());
+    CAP_EXPECT_THROW_MSG(cap.getBoolValue(),
+                         "Capability::getBoolValue(): Capability name=1 is not a bool");
+    EXPECT_EQ(cap.getIntValue(), 1);
+    CAP_EXPECT_THROW_MSG(cap.getStringValue(),
+                         "Capability::getStringValue(): Capability name=1 is not a string");
     EXPECT_EQ(cap.valueToString(), "1");
     EXPECT_EQ(cap.toString(), "name=1");
   }
@@ -103,6 +118,11 @@ TEST(CapabilityTest, construct)
     EXPECT_FALSE(cap.hasBoolValue());
     EXPECT_FALSE(cap.hasIntValue());
     EXPECT_TRUE(cap.hasStringValue());
+    CAP_EXPECT_THROW_MSG(cap.getBoolValue(),
+                         "Capability::getBoolValue(): Capability name=foo is not a bool");
+    CAP_EXPECT_THROW_MSG(cap.getIntValue(),
+                         "Capability::getIntValue(): Capability name=foo is not an integer");
+    EXPECT_EQ(cap.getStringValue(), "foo");
     EXPECT_EQ(cap.valueToString(), "foo");
     EXPECT_EQ(cap.toString(), "name=foo");
   }

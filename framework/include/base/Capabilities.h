@@ -26,10 +26,15 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppIsRelocated);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppisInTree);
+class GTEST_TEST_CLASS_NAME_(RegistryTest, addDataFilePath);
+class GTEST_TEST_CLASS_NAME_(RegistryTest, addMissingDataFilePath);
 class CapabilitiesTest;
+class DataFileUtilsTest;
+class RegistryTest;
 #endif
 
 class AppFactory;
+class Registry;
 class MooseApp;
 
 namespace Moose::internal
@@ -47,12 +52,15 @@ class Capabilities : public CapabilityRegistry
 {
 public:
   /// Passkey for get()
-  class GetPassKey
+  class GetCapabilitiesPassKey
   {
     friend AppFactory;
     friend MooseApp;
+    friend Registry;
 #ifdef MOOSE_UNIT_TEST
     friend class ::CapabilitiesTest;
+    friend class ::DataFileUtilsTest;
+    friend class ::RegistryTest;
     FRIEND_TEST(::CapabilitiesTest, augment);
     FRIEND_TEST(::CapabilitiesTest, augmentParseError);
     FRIEND_TEST(::CapabilitiesTest, check);
@@ -61,9 +69,11 @@ public:
     FRIEND_TEST(::CapabilitiesTest, isInstallationType);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+    FRIEND_TEST(::RegistryTest, addDataFilePath);
+    FRIEND_TEST(::RegistryTest, addMissingDataFilePath);
 #endif
-    GetPassKey() {}
-    GetPassKey(const GetPassKey &) {}
+    GetCapabilitiesPassKey() {}
+    GetCapabilitiesPassKey(const GetCapabilitiesPassKey &) {}
   };
 
   /**
@@ -73,7 +83,7 @@ public:
    * of capabilities should be done through the
    * MooseApp::add[Bool,Int,String]capability() method.
    */
-  static Capabilities & get(const GetPassKey);
+  static Capabilities & getCapabilities(const GetCapabilitiesPassKey);
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
@@ -120,6 +130,8 @@ public:
 private:
 #ifdef MOOSE_UNIT_TEST
   friend class ::CapabilitiesTest;
+  friend class ::DataFileUtilsTest;
+  friend class ::RegistryTest;
   FRIEND_TEST(::CapabilitiesTest, isInstallationTypeErrors);
   FRIEND_TEST(::CapabilitiesTest, isInstallationType);
   FRIEND_TEST(::CapabilitiesTest, mooseAppIsRelocated);

@@ -7,14 +7,41 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DataFileUtilsTest.h"
+#include "gtest_include.h"
 
 #include "Registry.h"
 #include "DataFileUtils.h"
 #include "MooseUtils.h"
 #include "MooseUnitUtils.h"
+#include "Capabilities.h"
 
 #include <filesystem>
+
+using Moose::internal::Capabilities;
+
+class DataFileUtilsTest : public ::testing::Test
+{
+public:
+  DataFileUtilsTest();
+
+  virtual void SetUp() override;
+  virtual void TearDown() override;
+
+  void testData(const Moose::DataFileUtils::Path & path,
+                const unsigned int index,
+                const std::string & relative_path) const;
+  void testRelative(const Moose::DataFileUtils::Path & path,
+                    const std::string & relative_path) const;
+  void testAbsolute(const Moose::DataFileUtils::Path & path,
+                    const std::string & absolute_path) const;
+
+  const std::array<std::string, 2> _names;
+  const std::array<std::string, 2> _paths;
+  const std::array<std::string, 2> _can_paths;
+  const std::string _cwd;
+  std::map<std::string, std::string> _old_data_file_paths;
+  Capabilities::RegistryType _old_capabilities_registry;
+};
 
 DataFileUtilsTest::DataFileUtilsTest()
   : ::testing::Test(),
@@ -29,6 +56,7 @@ void
 DataFileUtilsTest::SetUp()
 {
   _old_data_file_paths = Registry::getDataFilePaths();
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
   Registry::setDataFilePaths({});
   Registry::addDataFilePath(_names[0], _paths[0]);
   Registry::addDataFilePath(_names[1], _paths[1]);
@@ -39,6 +67,8 @@ DataFileUtilsTest::TearDown()
 {
   Registry::setDataFilePaths(_old_data_file_paths);
   _old_data_file_paths.clear();
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
+  _old_capabilities_registry.clear();
 }
 
 void

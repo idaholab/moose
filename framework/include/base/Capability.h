@@ -131,6 +131,25 @@ public:
   bool hasStringValue() const { return std::holds_alternative<std::string>(_value); }
 
   /**
+   * @return The boolean capability value.
+   *
+   * Will error if the value is not a boolean.
+   */
+  bool getBoolValue() const;
+  /**
+   * @return The boolean capability value.
+   *
+   * Will error if the value is not an integer.
+   */
+  int getIntValue() const;
+  /**
+   * @return The string capability value.
+   *
+   * Will error if the value is not a string.
+   */
+  const std::string & getStringValue() const;
+
+  /**
    * @return The capability value as a string.
    */
   std::string valueToString() const;

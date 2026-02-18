@@ -16,8 +16,11 @@
 #include "CheckOutputAction.h"
 #include "MooseUtils.h"
 #include "MooseUnitUtils.h"
+#include "Capabilities.h"
 
 #include <filesystem>
+
+using Moose::internal::Capabilities;
 
 class RegistryTest : public ::testing::Test
 {
@@ -27,6 +30,7 @@ public:
 
   std::map<std::string, std::string> _old_data_file_paths;
   std::map<std::string, std::string> _old_repos;
+  Moose::internal::Capabilities::RegistryType _old_capabilities_registry;
 };
 
 void
@@ -37,6 +41,8 @@ RegistryTest::SetUp()
 
   _old_repos = Registry::getRepos();
   Registry::setRepos({});
+
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
 }
 
 void
@@ -47,6 +53,9 @@ RegistryTest::TearDown()
 
   Registry::setRepos(_old_repos);
   _old_repos.clear();
+
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
+  _old_capabilities_registry.clear();
 }
 
 TEST_F(RegistryTest, getClassName)
@@ -76,6 +85,31 @@ TEST_F(RegistryTest, appNameFromAppPathFailed)
                             app_path + "'");
 }
 
+TEST_F(RegistryTest, addDataFilePath)
+{
+  const std::string name = "name";
+  const std::string path = "files/data_file_tests/data0/data";
+  Registry::addDataFilePath(name, path);
+
+  // should add as a true capability
+  const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+  EXPECT_TRUE(capability.getBoolValue());
+  EXPECT_EQ(capability.getDoc(),
+            "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
+                "'.");
+}
+
+TEST_F(RegistryTest, addMissingDataFilePath)
+{
+  const std::string name = "name";
+  Registry::addMissingDataFilePath(name);
+
+  // should add as a false capability
+  const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+  EXPECT_FALSE(capability.getBoolValue());
+  EXPECT_EQ(capability.getDoc(), "Named data path '" + name + "' is not available.");
+}
+
 TEST_F(RegistryTest, addDataFilePathNonDataFolder)
 {
   const std::string name = "non_data_folder";
@@ -86,7 +120,7 @@ TEST_F(RegistryTest, addDataFilePathNonDataFolder)
   EXPECT_MOOSEERROR_MSG(Registry::addDataFilePath(name, path),
                         "While registering data file path '" + path + "' for '" + name +
                             "': The folder must be named 'data' and it is named '" + folder + "'");
-  // Can be allowed
+  // Can be allowed if not an app
   Registry::addDataFilePath(name, path, false);
 }
 
@@ -106,9 +140,18 @@ TEST_F(RegistryTest, addDataFilePathMismatch)
                             "': the path '" + can_path + "' is already registered");
 }
 
-TEST_F(RegistryTest, addDataFilePathUnallowedName)
+TEST_F(RegistryTest, addDataFilePathBadName)
 {
-  EXPECT_MOOSEERROR_MSG(Registry::addDataFilePath("!", "unused"), "Unallowed characters in '!'");
+  EXPECT_MOOSEERROR_MSG(
+      Registry::addDataFilePath("!", "unused"),
+      "Unallowed characters in data file path name '!'; allowed characters = a-z, 0-9, _");
+}
+
+TEST_F(RegistryTest, addMissingDataFilePathBadName)
+{
+  EXPECT_MOOSEERROR_MSG(
+      Registry::addMissingDataFilePath("!"),
+      "Unallowed characters in data file path name '!'; allowed characters = a-z, 0-9, _");
 }
 
 TEST_F(RegistryTest, getDataPath)
