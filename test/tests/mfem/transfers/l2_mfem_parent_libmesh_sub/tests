@@ -16,12 +16,34 @@
     type = CSVDiff
     input = mfem_parent_scalar.i
     csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tris.csv'
-    requirement = 'and MONOMIAL LAGRANGE variables defined on tris.'
+    requirement = 'constant MONOMIAL variables defined on tris, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
     cli_args = 'Mesh/file=../../mesh/square_tri.e libmesh_app0:Mesh/file=../../mesh/square_tri.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tris '
   []
+  [MFEMTransferFromlibMeshL2Hex]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_hexes.csv'
+    requirement = 'constant MONOMIAL variables defined on hexes, '
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube.e libmesh_app0::Mesh/file=../../mesh/cube.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_hexes '
+  []  
+  [MFEMTransferFromlibMeshL2Tet]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tets.csv'
+    requirement = 'and constant MONOMIAL variables defined on tetrahedra.'
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tets '
+  []    
 []
 
