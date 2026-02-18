@@ -120,6 +120,12 @@ public:
                                     const std::vector<Real> & timestep_begin_norms,
                                     const std::vector<Real> & timestep_end_norms) const = 0;
 
+  /// Add to the list of systems that should keep their previous fixed point solutions
+  void copyPreviousFixedPointSolutionForSystem(SystemBase * sys)
+  {
+    _systems_to_copy_previous_solutions_for.insert(sys);
+  }
+
 protected:
   /**
    * Returns true if there is relaxation.
@@ -198,6 +204,10 @@ protected:
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
 
+  /// Find the system holding the variables to be transformed (accelerated or relaxed)
+  /// @param primary whether we are looking at transformations as the parent or child app
+  void findTransformedSystem(const bool primary);
+
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
 
@@ -209,6 +219,10 @@ protected:
   const std::vector<PostprocessorName> _transformed_pps;
   /// Previous values of the relaxed postprocessors
   std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
+  /// System holding the transformed variables
+  SystemBase * _transformed_sys;
+  /// All the systems that should save their previous solutions
+  std::set<SystemBase *> _systems_to_copy_previous_solutions_for;
 
   /// Relaxation factor outside of fixed point iteration (used as a subapp)
   Real _secondary_relaxation_factor;

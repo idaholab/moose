@@ -65,19 +65,24 @@ HeatConductionCG::addFEKernels()
   {
     const std::string kernel_type = _use_ad ? "ADCoupledForce" : "CoupledForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<std::vector<VariableName>>("v") = {getParam<VariableName>("heat_source_var")};
     if (isParamValid("heat_source_blocks"))
       params.set<std::vector<SubdomainName>>("block") =
           getParam<std::vector<SubdomainName>>("heat_source_blocks");
+    else
+      assignBlocks(params, _blocks);
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
   if (isParamValid("heat_source_functor"))
   {
     const std::string kernel_type = "BodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
+    if (isParamValid("heat_source_blocks"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("heat_source_blocks");
+    else
+      assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
     if (MooseUtils::parsesToReal(functor_name))

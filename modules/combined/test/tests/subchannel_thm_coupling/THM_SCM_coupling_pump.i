@@ -511,7 +511,6 @@ m_dot_sec_in = 1. # kg/s
   fixed_point_max_its = 5
   accept_on_max_fixed_point_iteration = true
   auto_advance = true
-  relaxation_factor = 0.5
 []
 
 [Outputs]

@@ -477,6 +477,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_jacobian(false),
     _needs_old_newton_iter(false),
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
+    _previous_multiapp_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
+    _previous_multiapp_fp_aux_solution_required(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
@@ -9173,6 +9175,32 @@ FEProblemBase::needsPreviousNewtonIteration(bool state)
   if (state && !vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
     mooseError("Previous nonlinear solution is required but not added through "
                "Problem/previous_nl_solution_required=true");
+}
+
+void
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(bool needed,
+                                                                const unsigned int solver_sys_num)
+{
+  _previous_multiapp_fp_nl_solution_required[solver_sys_num] = needed;
+}
+
+bool
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(
+    const unsigned int solver_sys_num) const
+{
+  return _previous_multiapp_fp_nl_solution_required[solver_sys_num];
+}
+
+void
+FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary(bool state)
+{
+  _previous_multiapp_fp_aux_solution_required = state;
+}
+
+bool
+FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary() const
+{
+  return _previous_multiapp_fp_aux_solution_required;
 }
 
 bool
