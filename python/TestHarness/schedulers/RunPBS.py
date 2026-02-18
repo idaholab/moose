@@ -9,7 +9,7 @@
 
 import re, json
 import datetime
-from RunHPC import RunHPC
+from RunHPC import CallHPCPoolType, RunHPC
 from PBScodes import PBS_User_EXITCODES
 from TestHarness import util
 
@@ -36,7 +36,7 @@ class RunPBS(RunHPC):
     def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
         cmd = ["qstat", "-xf", "-F", "json"] + [x.id for x in hpc_jobs]
-        exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, " ".join(cmd))
+        exit_code, result, _ = self.callHPC(CallHPCPoolType.status, " ".join(cmd))
         if exit_code != 0:
             return False
 
@@ -195,9 +195,9 @@ class RunPBS(RunHPC):
         # If we're submitting/releasing/getting a status and cannot connect
         # to the scheduler, we can retry
         if pool_type in [
-            self.CallHPCPoolType.submit,
-            self.CallHPCPoolType.queue,
-            self.CallHPCPoolType.status,
+            CallHPCPoolType.submit,
+            CallHPCPoolType.queue,
+            CallHPCPoolType.status,
         ]:
             return "pbs_iff: cannot connect to host" in result
         return False
