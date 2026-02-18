@@ -137,7 +137,7 @@ public:
    */
   auto getSubdomainContiguousElementIDRange(const SubdomainID subdomain) const
   {
-    auto range = _maps->_subdomain_elem_id_ranges.at(subdomain);
+    const auto & range = libmesh_map_find(_maps->_subdomain_elem_id_ranges, subdomain);
     return libMesh::make_range(range.first, range.second);
   }
   /**

@@ -85,7 +85,7 @@ Mesh::initElement()
 {
   // Cache reference element data
 
-  auto num_elem_types = getNumLocalElementTypes();
+  const auto num_elem_types = getNumLocalElementTypes();
 
   _num_sides.create(num_elem_types);
   _num_nodes.create(num_elem_types);
@@ -110,8 +110,8 @@ Mesh::initElement()
 
   // Cache element data
 
-  auto num_elems = getNumLocalElements();
-  auto num_subdomains = getNumSubdomains();
+  const auto num_elems = getNumLocalElements();
+  const auto num_subdomains = getNumSubdomains();
 
   _elem_info.create(num_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
@@ -139,7 +139,7 @@ Mesh::initElement()
 
   // Cache node data
 
-  auto num_nodes = getContiguousNodeMap().size();
+  const auto num_nodes = getContiguousNodeMap().size();
 
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);

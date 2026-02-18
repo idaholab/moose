@@ -35,7 +35,7 @@ Assembly::init()
 {
   // Cache mesh information
 
-  auto num_subdomains = _mesh.nSubdomains();
+  const auto num_subdomains = _mesh.nSubdomains();
 
   _coord_type.create(num_subdomains);
 
@@ -67,8 +67,8 @@ Assembly::init()
 void
 Assembly::initQuadrature()
 {
-  auto num_subdomains = kokkosMesh().getNumSubdomains();
-  auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
+  const auto num_subdomains = kokkosMesh().getNumSubdomains();
+  const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
   _q_points.create(num_subdomains, num_elem_types);
   _q_points_face.create(num_subdomains, num_elem_types);
@@ -148,7 +148,7 @@ Assembly::initQuadrature()
     }
   }
 
-  auto num_elems = _mesh.nActiveLocalElem();
+  const auto num_elems = _mesh.nActiveLocalElem();
 
   _n_subdomain_qps.create(num_subdomains);
   _n_subdomain_qps_face.create(num_subdomains);
@@ -242,8 +242,8 @@ Assembly::initShape()
 
   // Cache reference shape data
 
-  auto num_subdomains = kokkosMesh().getNumSubdomains();
-  auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
+  const auto num_subdomains = kokkosMesh().getNumSubdomains();
+  const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
   _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
@@ -408,8 +408,8 @@ Assembly::initShape()
 void
 Assembly::cachePhysicalMap()
 {
-  auto num_subdomains = _mesh.nSubdomains();
-  auto num_elems = _mesh.nActiveLocalElem();
+  const auto num_subdomains = _mesh.nSubdomains();
+  const auto num_elems = _mesh.nActiveLocalElem();
 
   _jacobian.create(num_subdomains);
   _jxw.create(num_subdomains);
