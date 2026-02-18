@@ -6,7 +6,7 @@
     type = 'RunApp'
     input = 'discontinuous_value_solution_uo_p1.i'
     cli_args = "Outputs/nemesis=true Outputs/exodus=false"
-    requirement = 'The system shall be capable of writing out a solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
+    requirement = 'The system shall be capable of writing out a distributed solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
   []
   [discontinuous_value_solution_uo_p2]
     type = 'CSVDiff'
@@ -14,7 +14,7 @@
     cli_args = "UserObjects/soln/nemesis=true UserObjects/soln/force_replicated_source_mesh=true"
     csvdiff = 'discontinuous_value_solution_uo_p2.csv'
     prereq = discontinuous_value_solution_uo_p1
-    requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
+    requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields from a distributed file (though currently serializing it).'
   []
 
   [write_nemesis_multiple_vars]

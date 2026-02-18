@@ -554,6 +554,18 @@ SolutionUserObjectBase::initialSetup()
   if (_initialized)
     return;
 
+  // We need to detect exodus files early
+  const bool has_exodus_extension =
+      MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
+      MooseUtils::hasExtension(_mesh_file, "exo", true);
+  if (has_exodus_extension)
+  {
+    if (_nemesis)
+      _file_type = "nemesis";
+    else
+      _file_type = "exodusII";
+  }
+
   // Create a libmesh::Mesh object for storing the loaded data.
   if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == 1) || _force_replicated_source)
     _mesh = std::make_unique<ReplicatedMesh>(_communicator);
@@ -561,15 +573,8 @@ SolutionUserObjectBase::initialSetup()
     _mesh = std::make_unique<DistributedMesh>(_communicator);
 
   // ExodusII mesh file supplied
-  if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
-      MooseUtils::hasExtension(_mesh_file, "exo", true))
-  {
-    if (_nemesis)
-      _file_type = "nemesis";
-    else
-      _file_type = "exodusII";
+  if (has_exodus_extension)
     readExodusII();
-  }
 
   // XDA mesh file supplied
   else if (MooseUtils::hasExtension(_mesh_file, "xda"))
