@@ -326,14 +326,16 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
     {
 
       {
-        const auto & wh = auxSystem.nodalAuxWarehouse();
+        std::vector<AuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[nodal]", names) || objectsFound;
       }
 
@@ -482,9 +484,9 @@ BlockRestrictionDebugOutput::printBlockRestrictionGroups() const
       groups[blocks].insert("AuxVariable/" + vg_description.name(vn));
   }
 
-  // Custom warehouses below are not covered by theWarehouse() queries.
+  // Custom warehouses below are not covered by theWarehouse() queries. Nodal (non-mortar)
+  // AuxKernels are covered by the generic query above since they are added to theWarehouse().
   const auto & aux_system_base = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.mortarNodalAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalVectorAuxWarehouse());
   addWarehouseBlockRestrictionObjects(groups, aux_system_base.nodalArrayAuxWarehouse());
@@ -561,9 +563,9 @@ BlockRestrictionDebugOutput::printBoundaryRestrictionGroups() const
 
   // Custom warehouses below are not covered by theWarehouse() queries. For these explicit passes,
   // only boundary-restricted objects belong in boundary-restriction groups; block-only objects are
-  // already represented in the block groups.
+  // already represented in the block groups. Nodal (non-mortar) AuxKernels are covered by the
+  // generic query above since they are added to theWarehouse().
   const auto & aux_system = _problem_ptr->getAuxiliarySystem();
-  addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.mortarNodalAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalVectorAuxWarehouse(), false);
   addWarehouseBoundaryRestrictionObjects(groups, aux_system.nodalArrayAuxWarehouse(), false);
