@@ -282,7 +282,7 @@ SolutionUserObjectBase::readExodusII()
     mooseError("In SolutionUserObjectBase, exodus file contains no timesteps.");
 
   // Account for parallel mesh
-  if (dynamic_cast<DistributedMesh *>(_mesh.get()))
+  if (_fe_problem.mesh().isDistributedMesh() && (_file_type != 1) && !_force_replicated_source)
   {
     _mesh->allow_renumbering(true);
     _mesh->prepare_for_use();
