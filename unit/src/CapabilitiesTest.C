@@ -111,6 +111,22 @@ TEST_F(CapabilitiesTest, mooseAppAddCapability)
   }
 }
 
+/// Test MooseApp::isRelocated
+TEST_F(CapabilitiesTest, mooseAppIsRelocated)
+{
+  // always in-tree with unit tests
+  _capabilities->registerMooseCapabilities();
+  EXPECT_FALSE(MooseApp::isRelocated());
+}
+
+/// Test MooseApp::isInTree
+TEST_F(CapabilitiesTest, mooseAppisInTree)
+{
+  // always in-tree with unit tests
+  _capabilities->registerMooseCapabilities();
+  EXPECT_TRUE(MooseApp::isInTree());
+}
+
 /// Test --check-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
 {
@@ -364,4 +380,59 @@ TEST_F(CapabilitiesTest, augmentParseError)
                      Moose::CapabilityException,
                      "Capabilities::augment: Capability 'name' missing 'value' entry");
   }
+}
+
+/// Test Capabilities::isRelocated with errors
+TEST_F(CapabilitiesTest, isInstallationTypeErrors)
+{
+  auto & capabilities = Capabilities::get({});
+
+  // capability does not exist
+  EXPECT_THROW_MSG(
+      capabilities.isInstallationType("unused"),
+      Moose::CapabilityException,
+      "Capabilities::isInstallationType(): Capability 'installation_type' is not registered");
+
+  // capability is not a string
+  capabilities.add("installation_type", bool(false), "foo");
+  EXPECT_THROW_MSG(
+      capabilities.isInstallationType("unused"),
+      Moose::CapabilityException,
+      "Capabilities::isInstallationType(): Capability 'installation_type' is not a string");
+}
+
+/// Test Capabilities::[isInstallationType,isRelocated,isInTree]
+TEST_F(CapabilitiesTest, isInstallationType)
+{
+  auto & capabilities = Capabilities::get({});
+
+  // We test unit tests in tree, so doing the normal registration
+  // with moose should get us installation_type=in_tree
+  capabilities.registerMooseCapabilities();
+  Capability * capability_ptr = capabilities.query("installation_type");
+  ASSERT_NE(capability_ptr, nullptr);
+  const auto value_ptr = capability_ptr->queryStringValue();
+  ASSERT_NE(value_ptr, nullptr);
+  ASSERT_EQ(*value_ptr, "in_tree");
+
+  // Should be false with installation_type=in_tree
+  EXPECT_FALSE(capabilities.isInstallationType("foo"));
+  EXPECT_FALSE(capabilities.isInstallationType("relocated"));
+  EXPECT_TRUE(capabilities.isInstallationType("in_tree"));
+  EXPECT_TRUE(capabilities.isInTree());
+  EXPECT_FALSE(capabilities.isRelocated());
+
+  // Set the value to "relocated"
+  const auto enumeration_ptr = capability_ptr->queryEnumeration();
+  ASSERT_TRUE(enumeration_ptr.has_value());
+  const auto enumeration = *enumeration_ptr;
+  (*capability_ptr) =
+      Capability(capability_ptr->getName(), std::string("relocated"), capability_ptr->getDoc())
+          .setExplicit()
+          .setEnumeration(enumeration);
+  EXPECT_FALSE(capabilities.isInstallationType("foo"));
+  EXPECT_TRUE(capabilities.isInstallationType("relocated"));
+  EXPECT_FALSE(capabilities.isInstallationType("in_tree"));
+  EXPECT_FALSE(capabilities.isInTree());
+  EXPECT_TRUE(capabilities.isRelocated());
 }

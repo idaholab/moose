@@ -18,6 +18,7 @@
 // forward declare unit tests
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(CapabilityTest, negateValue);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationType);
 #endif
 
 namespace Moose
@@ -149,6 +150,7 @@ public:
 private:
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::CapabilityTest, negateValue);
+  FRIEND_TEST(::CapabilitiesTest, isInstallationType);
 #endif
 
   /// The name of capability

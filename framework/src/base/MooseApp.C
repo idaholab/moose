@@ -3317,6 +3317,18 @@ MooseApp::addCapability(const std::string_view capability,
   return addCapabilityInternal(capability, value, doc);
 }
 
+bool
+MooseApp::isRelocated()
+{
+  return Moose::internal::Capabilities::get({}).isRelocated();
+}
+
+bool
+MooseApp::isInTree()
+{
+  return Moose::internal::Capabilities::get({}).isInTree();
+}
+
 #ifdef MOOSE_MFEM_ENABLED
 void
 MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)

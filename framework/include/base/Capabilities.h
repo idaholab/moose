@@ -20,8 +20,12 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, check);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, dump);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationTypeErrors);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationType);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppIsRelocated);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppisInTree);
 class CapabilitiesTest;
 #endif
 
@@ -53,6 +57,8 @@ public:
     FRIEND_TEST(::CapabilitiesTest, augmentParseError);
     FRIEND_TEST(::CapabilitiesTest, check);
     FRIEND_TEST(::CapabilitiesTest, dump);
+    FRIEND_TEST(::CapabilitiesTest, isInstallationTypeErrors);
+    FRIEND_TEST(::CapabilitiesTest, isInstallationType);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
 #endif
@@ -101,10 +107,29 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
+  /**
+   * @return Whether or not the application is relocated
+   */
+  bool isRelocated() const { return isInstallationType("relocated"); }
+
+  /**
+   * @return Whether or not the application is in-tree
+   */
+  bool isInTree() const { return isInstallationType("in_tree"); }
+
 private:
 #ifdef MOOSE_UNIT_TEST
   friend class ::CapabilitiesTest;
+  FRIEND_TEST(::CapabilitiesTest, isInstallationTypeErrors);
+  FRIEND_TEST(::CapabilitiesTest, isInstallationType);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppIsRelocated);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppisInTree);
 #endif
+
+  /**
+   * Helper for isRelocated() and isInTree()
+   */
+  bool isInstallationType(const std::string & installation_type) const;
 
   /**
    * Register the MOOSE capabilities.
