@@ -270,15 +270,12 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           const auto & boundary_ids = elem_boundary_ids[side];
           const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
 
-          if (boundary_ids.size() > 0)
-            for (std::vector<BoundaryID>::const_iterator it = boundary_ids.cbegin();
-                 it != boundary_ids.cend();
-                 ++it)
-            {
-              preBoundary(elem, side, *it, lower_d_elem);
-              printBoundaryExecutionInformation(*it);
-              onBoundary(elem, side, *it, lower_d_elem);
-            }
+          for (const auto bnd_id : boundary_ids)
+          {
+            preBoundary(elem, side, bnd_id, lower_d_elem);
+            printBoundaryExecutionInformation(bnd_id);
+            onBoundary(elem, side, bnd_id, lower_d_elem);
+          }
 
           const Elem * neighbor = elem->neighbor_ptr(side);
           if (neighbor)
@@ -293,11 +290,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             if (shouldComputeInternalSide(*elem, *neighbor))
               onInternalSide(elem, side);
 
-            if (boundary_ids.size() > 0)
-              for (std::vector<BoundaryID>::const_iterator it = boundary_ids.cbegin();
-                   it != boundary_ids.cend();
-                   ++it)
-                onInterface(elem, side, *it);
+            for (const auto bnd_id : boundary_ids)
+              onInterface(elem, side, bnd_id);
 
             postInternalSide(elem, side);
           }
