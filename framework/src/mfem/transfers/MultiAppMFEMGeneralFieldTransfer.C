@@ -138,6 +138,7 @@ MultiAppMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, MFEMProblem
     mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
     _mfem_interpolator.Interpolate(*from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
     
+    // NE, to_pfespace, to_gf_ncomp, relative ordering
     // Project the interpolated values to the target FiniteElementSpace.
     if (fieldtype <= 1) // H1 or L2
     {
@@ -150,13 +151,13 @@ MultiAppMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, MFEMProblem
         vals.SetSize(vdofs.Size());
         for (int j = 0; j < nsp; j++)
         {
-            for (int d = 0; d < to_gf_ncomp; d++)
-            {
-              // Arrange values byNodes
-              int idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
-                        i*nsp*dim + d + j*dim : d*nsp*NE + i*nsp + j;
-              elem_dof_vals(j + d*nsp) = interp_vals(idx);
-            }
+          for (int d = 0; d < to_gf_ncomp; d++)
+          {
+            // Arrange values byNodes
+            int idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
+                      i*nsp*dim + d + j*dim : d*nsp*NE + i*nsp + j;
+            elem_dof_vals(j + d*nsp) = interp_vals(idx);
+          }
         }
         to_gf.SetSubVector(vdofs, elem_dof_vals);
       }
@@ -169,22 +170,22 @@ MultiAppMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, MFEMProblem
 
       for (int i = 0; i < NE; i++)
       {
-          to_pfespace.GetElementVDofs(i, vdofs);
-          vals.SetSize(vdofs.Size());
-          for (int j = 0; j < nsp; j++)
+        to_pfespace.GetElementVDofs(i, vdofs);
+        vals.SetSize(vdofs.Size());
+        for (int j = 0; j < nsp; j++)
+        {
+          for (int d = 0; d < to_gf_ncomp; d++)
           {
-            for (int d = 0; d < to_gf_ncomp; d++)
-            {
-                // Arrange values byVDim
-                int idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
-                          d*nsp*NE + i*nsp + j : i*nsp*dim + d + j*dim;
-                elem_dof_vals(j*to_gf_ncomp+d) = interp_vals(idx);
-            }
+            // Arrange values byVDim
+            int idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
+                      d*nsp*NE + i*nsp + j : i*nsp*dim + d + j*dim;
+            elem_dof_vals(j*to_gf_ncomp+d) = interp_vals(idx);
           }
-          to_pfespace.GetFE(i)->ProjectFromNodes(elem_dof_vals,
-                                              *to_pfespace.GetElementTransformation(i),
-                                              vals);
-          to_gf.SetSubVector(vdofs, vals);
+        }
+        to_pfespace.GetFE(i)->ProjectFromNodes(elem_dof_vals,
+                                            *to_pfespace.GetElementTransformation(i),
+                                            vals);
+        to_gf.SetSubVector(vdofs, vals);
       }
     }
     to_gf.SetFromTrueVector();    
