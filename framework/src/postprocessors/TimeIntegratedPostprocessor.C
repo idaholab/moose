@@ -49,15 +49,13 @@ TimeIntegratedPostprocessor::TimeIntegratedPostprocessor(const InputParameters &
     for (const auto & ti : time_integrators)
       if (_time_integration_scheme == TimeIntegration::implicit_midpoint &&
           !dynamic_cast<ImplicitMidpoint *>(ti))
-        mooseDoOnce(
-            mooseWarning("The time integration in this postprocessor uses the midpoint method. The "
-                         "variable time integration, notably with time integrator '" +
-                         ti->name() +
-                         "' is not using the mid point method. If the postprocessor uses variable "
-                         "values, even indirectly, we would recommend you code the same time "
-                         "integration method for the time-integrated postprocessor. Specify the "
-                         "'time_integration_scheme' parameter to any value to silence this "
-                         "warning."));
+        mooseInfo("The time integration in this postprocessor uses the midpoint method. The "
+                  "variable time integration, notably with time integrator '" +
+                  ti->name() +
+                  "' is not using the mid point method. If the postprocessor uses variable "
+                  "values, even indirectly, we would recommend you code the same time "
+                  "integration method for the time-integrated postprocessor. Specify the "
+                  "'time_integration_scheme' parameter to any value to silence this warning.");
   }
 }
 
