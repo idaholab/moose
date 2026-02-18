@@ -161,7 +161,7 @@ protected:
   ///@}
 
   /**
-   * Whether this property is constant over element or subdomain
+   * Whether the properties declared by this material are constant over element or subdomain
    */
   const PropertyConstantOption _constant_option;
 

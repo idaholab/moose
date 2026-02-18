@@ -24,8 +24,8 @@ MaterialBase::validParams()
       "constant_on",
       constant_option,
       "When ELEMENT or SUBDOMAIN, computeQpProperties() will be only called once for each "
-      "element/face or subdomain. Material properties will be only stored for each element/face or "
-      "subdomain accordingly. The 'qp' argument wlll be ignored.");
+      "element/face or subdomain, respectively. Material properties will be only stored for each "
+      "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
 
   params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");

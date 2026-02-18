@@ -112,17 +112,7 @@ public:
    * @returns The index
    */
   KOKKOS_FUNCTION dof_id_type propertyIdx(const PropertyConstantOption constant_option,
-                                          const unsigned int qp) const
-  {
-    dof_id_type idx = 0;
-
-    if (constant_option == PropertyConstantOption::NONE)
-      idx = _qp_offset + qp;
-    else if (constant_option == PropertyConstantOption::ELEMENT)
-      idx = _elem_property_idx;
-
-    return idx;
-  }
+                                          const unsigned int qp) const;
   /**
    * Get whether the current side has a neighbor
    * @returns Whether the current side has a neighbor
@@ -138,13 +128,7 @@ public:
    * @param var The variable
    * @returns Whether the variable is defined on the current node
    */
-  KOKKOS_FUNCTION bool isNodalDefined(const Variable & var) const
-  {
-    if (!isNodal() || !var.nodal())
-      return false;
-
-    return _systems[var.sys()].isNodalDefined(_node, var.var());
-  }
+  KOKKOS_FUNCTION bool isNodalDefined(const Variable & var) const;
 
   /**
    * Get the inverse of Jacobian matrix
@@ -154,43 +138,19 @@ public:
    * @param qp The local quadrature point index
    * @returns The Jacobian matrix
    */
-  KOKKOS_FUNCTION const Real33 & J(const unsigned int qp)
-  {
-    if (!isNodal())
-      reinitTransform(qp);
-    else
-      _J.identity(_assembly.getDimension());
-
-    return _J;
-  }
+  KOKKOS_FUNCTION const Real33 & J(const unsigned int qp);
   /**
    * Get the transformed Jacobian weight
    * @param qp The local quadrature point index
    * @returns The transformed Jacobian weights
    */
-  KOKKOS_FUNCTION Real JxW(const unsigned int qp)
-  {
-    if (!isNodal())
-      reinitTransform(qp);
-    else
-      _JxW = 1;
-
-    return _JxW;
-  }
+  KOKKOS_FUNCTION Real JxW(const unsigned int qp);
   /**
    * Get the physical quadrature point coordinate
    * @param qp The local quadrature point index
    * @returns The physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION Real3 q_point(const unsigned int qp)
-  {
-    if (!isNodal())
-      reinitTransform(qp);
-    else
-      _xyz = _assembly.kokkosMesh().getNodePoint(_node);
-
-    return _xyz;
-  }
+  KOKKOS_FUNCTION Real3 q_point(const unsigned int qp);
 
   /**
    * Reset the reinit flag
@@ -255,6 +215,61 @@ private:
   Real3 _xyz;
   ///@}
 };
+
+KOKKOS_FUNCTION inline dof_id_type
+Datum::propertyIdx(const PropertyConstantOption constant_option, const unsigned int qp) const
+{
+  dof_id_type idx = 0;
+
+  if (constant_option == PropertyConstantOption::NONE)
+    idx = _qp_offset + qp;
+  else if (constant_option == PropertyConstantOption::ELEMENT)
+    idx = _elem_property_idx;
+
+  return idx;
+}
+
+KOKKOS_FUNCTION inline bool
+Datum::isNodalDefined(const Variable & var) const
+{
+  if (!isNodal() || !var.nodal())
+    return false;
+
+  return _systems[var.sys()].isNodalDefined(_node, var.var());
+}
+
+KOKKOS_FUNCTION inline const Real33 &
+Datum::J(const unsigned int qp)
+{
+  if (!isNodal())
+    reinitTransform(qp);
+  else
+    _J.identity(_assembly.getDimension());
+
+  return _J;
+}
+
+KOKKOS_FUNCTION inline Real
+Datum::JxW(const unsigned int qp)
+{
+  if (!isNodal())
+    reinitTransform(qp);
+  else
+    _JxW = 1;
+
+  return _JxW;
+}
+
+KOKKOS_FUNCTION inline Real3
+Datum::q_point(const unsigned int qp)
+{
+  if (!isNodal())
+    reinitTransform(qp);
+  else
+    _xyz = _assembly.kokkosMesh().getNodePoint(_node);
+
+  return _xyz;
+}
 
 KOKKOS_FUNCTION inline void
 Datum::reinitTransform(const unsigned int qp)
