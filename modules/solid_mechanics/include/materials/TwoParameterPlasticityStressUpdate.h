@@ -332,4 +332,23 @@ protected:
    * @return d2(q)/d(stress)/d(stress)
    */
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
+
+private:
+  /**
+   * d(stress_param[:])/d(stress) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_scratch;
+
+  /**
+   * d(stress_param[:])/d(stress_trial) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_trial_scratch;
+
+  /**
+   * d2(stress_param[:])/d(stress)/d(stress)  used in d2stressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankFourTensor> _d2sp_scratch;
 };

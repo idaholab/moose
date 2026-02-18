@@ -32,7 +32,10 @@ TwoParameterPlasticityStressUpdate::TwoParameterPlasticityStressUpdate(
     _dp_dpt(0.0),
     _dq_dpt(0.0),
     _dp_dqt(0.0),
-    _dq_dqt(0.0)
+    _dq_dqt(0.0),
+    _dsp_scratch(_num_pq),
+    _dsp_trial_scratch(_num_pq),
+    _d2sp_scratch(_num_pq)
 {
 }
 
@@ -215,17 +218,15 @@ TwoParameterPlasticityStressUpdate::consistentTangentOperator(
   if (!compute_full_tangent_operator)
     return;
 
-  const RankTwoTensor dpdsig = dpdstress(stress);
-  const RankTwoTensor dpdsig_trial = dpdstress(stress_trial);
-  const RankTwoTensor dqdsig = dqdstress(stress);
-  const RankTwoTensor dqdsig_trial = dqdstress(stress_trial);
+  dstressparam_dstress(stress, _dsp_scratch);
+  dstressparam_dstress(stress_trial, _dsp_trial_scratch);
 
-  const RankTwoTensor s1 = elasticity_tensor * ((1.0 / _Epp) * (1.0 - _dp_dpt) * dpdsig +
-                                                (1.0 / _Eqq) * (-_dq_dpt) * dqdsig);
-  const RankTwoTensor s2 = elasticity_tensor * ((1.0 / _Epp) * (-_dp_dqt) * dpdsig +
-                                                (1.0 / _Eqq) * (1.0 - _dq_dqt) * dqdsig);
-  const RankTwoTensor t1 = elasticity_tensor * dpdsig_trial;
-  const RankTwoTensor t2 = elasticity_tensor * dqdsig_trial;
+  const RankTwoTensor s1 = elasticity_tensor * ((1.0 / _Epp) * (1.0 - _dp_dpt) * _dsp_scratch[0] +
+                                                (1.0 / _Eqq) * (-_dq_dpt) * _dsp_scratch[1]);
+  const RankTwoTensor s2 = elasticity_tensor * ((1.0 / _Epp) * (-_dp_dqt) * _dsp_scratch[0] +
+                                                (1.0 / _Eqq) * (1.0 - _dq_dqt) * _dsp_scratch[1]);
+  const RankTwoTensor t1 = elasticity_tensor * _dsp_trial_scratch[0];
+  const RankTwoTensor t2 = elasticity_tensor * _dsp_trial_scratch[1];
 
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)
@@ -233,11 +234,11 @@ TwoParameterPlasticityStressUpdate::consistentTangentOperator(
         for (unsigned l = 0; l < _tensor_dimensionality; ++l)
           cto(i, j, k, l) -= s1(i, j) * t1(k, l) + s2(i, j) * t2(k, l);
 
-  const RankFourTensor d2pdsig2 = d2pdstress2(stress);
-  const RankFourTensor d2qdsig2 = d2qdstress2(stress);
+  d2stressparam_dstress(stress, _d2sp_scratch);
 
-  const RankFourTensor Tijab = elasticity_tensor * (gaE / _Epp) *
-                               (smoothed_q.dg[0] * d2pdsig2 + smoothed_q.dg[1] * d2qdsig2);
+  const RankFourTensor Tijab =
+      elasticity_tensor * (gaE / _Epp) *
+      (smoothed_q.dg[0] * _d2sp_scratch[0] + smoothed_q.dg[1] * _d2sp_scratch[1]);
 
   RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
   try

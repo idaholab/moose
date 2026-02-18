@@ -63,6 +63,10 @@ void
 TensileStressUpdate::d2stressparam_dstress(const RankTwoTensor & stress,
                                            std::vector<RankFourTensor> & d2sp) const
 {
+  /*
+   * This function is not used but is included here in case a derived class needs it.
+   * The reason it is unused is because consistentTangentOperatorV is optimised
+   */
   mooseAssert(d2sp.size() == 3,
               "TensileStressUpdate: d2sp incorrectly sized in d2stressparam_dstress");
   stress.d2symmetricEigenvalues(d2sp);
