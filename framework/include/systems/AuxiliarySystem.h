@@ -170,7 +170,7 @@ protected:
   void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
   template <typename AuxKernelType>
-  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
+  void computeNodalVarsHelper(const TheWarehouse::Query & query);
 
   libMesh::System & _sys;
 
@@ -194,7 +194,6 @@ protected:
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
   // Storage for AuxKernel objects
-  ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _mortar_nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
@@ -225,12 +224,6 @@ protected:
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 };
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::nodalAuxWarehouse() const
-{
-  return _nodal_aux_storage;
-}
 
 inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
 AuxiliarySystem::nodalVectorAuxWarehouse() const
