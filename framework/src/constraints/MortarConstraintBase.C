@@ -73,10 +73,11 @@ MortarConstraintBase::validParams()
       "compute_primal_residuals", true, "Whether to compute residuals for the primal variable.");
   params.addParam<bool>(
       "compute_lm_residuals", true, "Whether to compute Lagrange Multiplier residuals");
-  params.addParam<MooseEnum>(
-      "polynomial_basis_order_for_integration",
+  params.addDeprecatedParam<MooseEnum>(
+      "quadrature",
       MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
-      "Polynomial basis order to assume when building quadrature rules to use on mortar segments. "
+      "Polynomial basis order (think Variable order) to assume when building quadrature rules to "
+      "use on mortar segments. "
       "For 2D mortar DEFAULT is recommended. "
       "For 3D mortar, QUAD meshes are integrated using triangular mortar segments. "
       "While DEFAULT order is typically sufficiently accurate, exact integration of "
@@ -84,7 +85,23 @@ MortarConstraintBase::validParams()
       "quadrature rule based off of a *quadratic* (SECOND) polynomial basis on triangles. "
       "Similarly, exact integration of QUAD mortar faces with second order polynomial bases "
       "(biquadratics) requires building a quadrature rule based off of a *quartic* (FOURTH) "
-      "polynomial basis on triangles.");
+      "polynomial basis on triangles. Note that the actual quadrature order will be double this "
+      "parameter plus one.",
+      "This parameter is deprecated in favor of "
+      "'segment_quadrature' which directly specifies the quadrature order.");
+  params.addParam<MooseEnum>(
+      "segment_quadrature",
+      MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH", "DEFAULT"),
+      "Mortar segment quadrature order. "
+      "For 2D mortar DEFAULT is recommended. "
+      "For 3D mortar, quad faces are integrated using triangular mortar segments. "
+      "A finite element family of order p based on a quadrilateral element actually has polynomial "
+      "order of 2*p because of the tensor-product nature of the element. Consequently, for exact "
+      "integraton of something like a mass matrix term, if one is using a first order Lagrange "
+      "variable (as an example), the 'segment_quadrature' should be set to 'fourth' because we "
+      "double the polynomial order on the triangle to match the tensor product order on the quad, "
+      "and then double again since we are multiplying the test and trial (shape) function "
+      "polynomials for the mass matrix term.");
   params.addParam<bool>(
       "use_petrov_galerkin",
       false,
@@ -156,13 +173,21 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     paramError("aux_lm",
                "Auxiliary LM variable needs to use standard shape function, i.e., set `use_dual = "
                "false`.");
+  if (isParamSetByUser("quadrature") && isParamSetByUser("segment_quadrature"))
+    paramError("quadrature", "Only one of 'quadrature' and 'segment_quadrature' should be set.");
 
   // Note parameter is discretization order, we then convert to quadrature order
-  const auto & p_order = getParam<MooseEnum>("polynomial_basis_order_for_integration");
+  const auto & p_order = getParam<MooseEnum>("quadrature");
   // If quadrature not DEFAULT, set mortar qrule
   if (p_order != "DEFAULT")
   {
-    Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
+    const Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
+    _assembly.setMortarQRule(q_order);
+  }
+  const auto & q_order_enum = getParam<MooseEnum>("segment_quadrature");
+  if (q_order_enum != "DEFAULT")
+  {
+    const Order q_order = Utility::string_to_enum<Order>(q_order_enum);
     _assembly.setMortarQRule(q_order);
   }
 
