@@ -41,8 +41,7 @@ CombinedVectorPostprocessor::CombinedVectorPostprocessor(const InputParameters &
   : GeneralVectorPostprocessor(parameters), _filler_value(getParam<Real>("vector_filler_value"))
 {
   // Get all the names of the vectors to combine them
-  std::vector<VectorPostprocessorName> vpps_names(
-      getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors"));
+  const auto & vpps_names = getParam<std::vector<VectorPostprocessorName>>("vectorpostprocessors");
   std::vector<std::vector<std::string>> vpp_vectors(vpps_names.size());
   bool vecs_from_param = isParamValid("vectors");
   if (!vecs_from_param)
@@ -53,7 +52,7 @@ CombinedVectorPostprocessor::CombinedVectorPostprocessor(const InputParameters &
       for (const auto & vec_name : vpp.getVectorNames())
         vpp_vectors[i].push_back(vec_name);
     }
-  if (vecs_from_param)
+  else
   {
     vpp_vectors = getParam<std::vector<std::vector<std::string>>>("vectors");
     if (vpp_vectors.size() != vpps_names.size())
@@ -85,7 +84,7 @@ CombinedVectorPostprocessor::initialize()
 void
 CombinedVectorPostprocessor::execute()
 {
-  unsigned long max_size = 0;
+  std::size_t max_size = 0;
   // The vectors are already ordered
   for (const auto i : index_range(_vectorpostprocessor_values))
   {
