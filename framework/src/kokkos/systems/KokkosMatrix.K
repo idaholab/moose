@@ -20,8 +20,9 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
 
   mooseAssert(petsc_matrix, "Kokkos matrix error: provided matrix is not a PetscMatrix.");
 
-  PetscBool is_host;
-  LibmeshPetscCallQ(MatBoundToCPU(petsc_matrix->mat(), &is_host));
+  PetscMemType mtype;
+  LibmeshPetscCallQ(MatGetCurrentMemType(petsc_matrix->mat(), &mtype));
+  const bool is_host = PetscMemTypeHost(mtype);
 
 #ifndef MOOSE_ENABLE_KOKKOS_GPU
   if (!is_host)
