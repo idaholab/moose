@@ -118,17 +118,9 @@ Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentP
 bool
 Capabilities::isInstallationType(const std::string & installation_type) const
 {
-  if (const auto capability_ptr = query("installation_type"))
-  {
-    if (const auto value_ptr = capability_ptr->queryStringValue())
-      return *value_ptr == installation_type;
-
-    throw CapabilityException(
-        "Capabilities::isInstallationType(): Capability 'installation_type' is not a string");
-  }
-
-  throw CapabilityException(
-      "Capabilities::isInstallationType(): Capability 'installation_type' is not registered");
+  const auto & capability = get("installation_type");
+  mooseAssert(capability.getEnumeration().count(installation_type), "Not a valid enumeration");
+  return capability.getStringValue() == installation_type;
 }
 
 void

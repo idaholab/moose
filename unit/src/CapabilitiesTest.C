@@ -382,25 +382,6 @@ TEST_F(CapabilitiesTest, augmentParseError)
   }
 }
 
-/// Test Capabilities::isRelocated with errors
-TEST_F(CapabilitiesTest, isInstallationTypeErrors)
-{
-  auto & capabilities = Capabilities::getCapabilities({});
-
-  // capability does not exist
-  EXPECT_THROW_MSG(
-      capabilities.isInstallationType("unused"),
-      Moose::CapabilityException,
-      "Capabilities::isInstallationType(): Capability 'installation_type' is not registered");
-
-  // capability is not a string
-  capabilities.add("installation_type", bool(false), "foo");
-  EXPECT_THROW_MSG(
-      capabilities.isInstallationType("unused"),
-      Moose::CapabilityException,
-      "Capabilities::isInstallationType(): Capability 'installation_type' is not a string");
-}
-
 /// Test Capabilities::[isInstallationType,isRelocated,isInTree]
 TEST_F(CapabilitiesTest, isInstallationType)
 {
@@ -412,7 +393,7 @@ TEST_F(CapabilitiesTest, isInstallationType)
   Capability & capability = capabilities.get("installation_type");
 
   // Should be false with installation_type=in_tree
-  EXPECT_FALSE(capabilities.isInstallationType("foo"));
+  EXPECT_FALSE(capabilities.isInstallationType("unknown"));
   EXPECT_FALSE(capabilities.isInstallationType("relocated"));
   EXPECT_TRUE(capabilities.isInstallationType("in_tree"));
   EXPECT_TRUE(capabilities.isInTree());
@@ -426,7 +407,7 @@ TEST_F(CapabilitiesTest, isInstallationType)
                    .setExplicit()
                    .setEnumeration(enumeration);
   ASSERT_EQ(capability.getStringValue(), "relocated");
-  EXPECT_FALSE(capabilities.isInstallationType("foo"));
+  EXPECT_FALSE(capabilities.isInstallationType("unknown"));
   EXPECT_TRUE(capabilities.isInstallationType("relocated"));
   EXPECT_FALSE(capabilities.isInstallationType("in_tree"));
   EXPECT_FALSE(capabilities.isInTree());

@@ -20,7 +20,6 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, check);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, dump);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationTypeErrors);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationType);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
@@ -65,7 +64,6 @@ public:
     FRIEND_TEST(::CapabilitiesTest, augmentParseError);
     FRIEND_TEST(::CapabilitiesTest, check);
     FRIEND_TEST(::CapabilitiesTest, dump);
-    FRIEND_TEST(::CapabilitiesTest, isInstallationTypeErrors);
     FRIEND_TEST(::CapabilitiesTest, isInstallationType);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
@@ -132,7 +130,6 @@ private:
   friend class ::CapabilitiesTest;
   friend class ::DataFileUtilsTest;
   friend class ::RegistryTest;
-  FRIEND_TEST(::CapabilitiesTest, isInstallationTypeErrors);
   FRIEND_TEST(::CapabilitiesTest, isInstallationType);
   FRIEND_TEST(::CapabilitiesTest, mooseAppIsRelocated);
   FRIEND_TEST(::CapabilitiesTest, mooseAppisInTree);
