@@ -465,11 +465,12 @@ class RunHPC(RunParallel):
             # Parse out the mpi command from the command if we're wrapping
             # things around the mpi command
             mpi_prefix = ""
-            if self.app_exec_prefix:
-                mpi_command = self.parseMPICommand(command)
-                if mpi_command:
-                    mpi_prefix = mpi_command
-                    command = command.replace(mpi_command, "")
+            if (
+                self.app_exec_prefix
+                and (mpi_command := self.parseMPICommand(command)) is not None
+            ):
+                mpi_prefix = mpi_command
+                command = command.replace(mpi_command, "")
 
             # Replace newlines, clean up spaces, and encode the command. We encode the
             # command here to be able to pass it to a python script to run later without
@@ -972,16 +973,12 @@ class RunHPC(RunParallel):
         return f"TESTHARNESS RUNHPC FILE TERMINATOR FOR {job_id}"
 
     @staticmethod
-    def parseMPICommand(command) -> str:
-        """
-        Helper that splits out the mpi command from a given command, if any
-        """
+    def parseMPICommand(command: str) -> Optional[str]:
+        """Split the MPI command from a given command, if any."""
         find_mpi = re.search(
-            r"^(\s+)?(mpiexec|mpirun)(\s+-(n|np)\s+\d+)?(\s+)?", command
+            r"^(\s+)?(mpiexec|mpirun|srun)(\s+-(n|np)\s+\d+)?(\s+)?", command
         )
-        if find_mpi is not None:
-            return find_mpi.group(0)
-        return None
+        return find_mpi.group(0) if find_mpi is not None else None
 
     @staticmethod
     def setHPCJobError(hpc_job, message, output=None):
