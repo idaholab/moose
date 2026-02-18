@@ -43,9 +43,16 @@ Capability::Capability(const std::string_view name,
 bool
 Capability::hasEnumeration(const std::string & value) const
 {
-  if (_enumeration)
-    return _enumeration->count(value);
-  return true;
+  return _enumeration ? _enumeration->count(value) : true;
+}
+
+const std::set<std::string> &
+Capability::getEnumeration() const
+{
+  if (!_enumeration)
+    throw CapabilityException("Capability::getEnumeration(): Capability '" + getName() +
+                              "' does not have an enumeration");
+  return *_enumeration;
 }
 
 Capability &

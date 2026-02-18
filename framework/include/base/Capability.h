@@ -67,6 +67,15 @@ public:
   const std::optional<std::set<std::string>> & queryEnumeration() const { return _enumeration; }
 
   /**
+   * @return The enumeration.
+   *
+   * Will error if the capability does not have an enumeration.
+   *
+   * Only string-valued capabilites can have an enumeration.
+   */
+  const std::set<std::string> & getEnumeration() const;
+
+  /**
    * @return Whether or not the capability has the given enumeration \p value.
    *
    * This is only valid for string-valued capabilities.

@@ -150,6 +150,7 @@ TEST(CapabilityTest, enumeration)
     cap.setEnumeration(enumeration);
     ASSERT_TRUE(cap.queryEnumeration().has_value());
     EXPECT_EQ(*cap.queryEnumeration(), enumeration);
+    EXPECT_EQ(cap.getEnumeration(), enumeration);
     EXPECT_TRUE(cap.hasEnumeration("foo"));
     EXPECT_TRUE(cap.hasEnumeration("bar"));
     EXPECT_FALSE(cap.hasEnumeration("baz"));
@@ -196,6 +197,10 @@ TEST(CapabilityTest, enumeration)
   CAP_EXPECT_THROW_MSG(
       Capability("name", std::string("foo"), "doc").enumerationToString(),
       "Capability::enumerationToString(): Capability 'name' does not have an enumeration");
+  // getEnumeration() without an enumeration
+  CAP_EXPECT_THROW_MSG(
+      Capability("name", std::string("foo"), "doc").getEnumeration(),
+      "Capability::getEnumeration(): Capability 'name' does not have an enumeration")
 }
 
 /// Test Capability::Capability explicit state
