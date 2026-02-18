@@ -381,11 +381,10 @@ class HTMLRenderer(Renderer):
         if 'title' in [child.name for child in head]:
             return
         h = find_heading(page)
-        page_name = page.name
         if h is not None:
             html.Tag(head, 'title', string=h.text())
         else:
-            html.Tag(head, 'title', string=str(page_name))
+            html.Tag(head, 'title', string=str(page.name))
 
 class MaterializeRenderer(HTMLRenderer):
     """
