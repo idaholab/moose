@@ -11,6 +11,7 @@
 """
 Report statistics regarding the SQA documentation in MOOSE.
 """
+
 import mooseutils
 
 if __name__ == "__main__":

@@ -22,7 +22,6 @@ from optparse import OptionParser
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from TestHarness import util
 
-
 # These kernels have guaranteed correct Jacobians
 whitelisted_kernels = ["Diffusion", "TimeDerivative"]
 
@@ -396,7 +395,7 @@ if __name__ == "__main__":
         help="Append the following list of arguments to the command line (Encapsulate the command in quotes)",
     )
 
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
 
     for arg in args:
         if arg[-2:] == ".i":

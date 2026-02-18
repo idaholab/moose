@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Module for defining tree structures for various MooseDocs operations."""
+
 from . import base
 from . import html
 from . import tokens

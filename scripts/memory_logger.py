@@ -210,7 +210,7 @@ class Server:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((socket.gethostname(), 0))
         self.server_socket.listen(5)
-        (self.host, self.port) = self.server_socket.getsockname()
+        self.host, self.port = self.server_socket.getsockname()
 
         # We will store all connections (sockets objects) made to the server in a list
         self.client_connections.append(self.server_socket)
@@ -1105,7 +1105,7 @@ class ReadLog:
         CYAN = "\033[36m"
         YELLOW = "\033[33m"
         last_memory = 0.0
-        (terminal_width, terminal_height) = self.getTerminalSize()
+        terminal_width, terminal_height = self.getTerminalSize()
         for timestamp in self.memory_list:
             to = GetTime(float(timestamp[0]))
             total_memory = int(timestamp[1])
@@ -1598,8 +1598,7 @@ def parseArguments(args=None):
 
 
 def lldbImportError():
-    print(
-        """
+    print("""
   Unable to import lldb
 
     The Python lldb API is now supplied by Xcode but not
@@ -1616,8 +1615,7 @@ def lldbImportError():
     It may also be necessary to unload the miniconda module.
     If you receive a fatal Python error about PyThreadState
     try using your system's version of Python instead.
-  """
-    )
+  """)
 
 
 if __name__ == "__main__":

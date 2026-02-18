@@ -11,7 +11,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 #
 # The similarity solution (r^2/t) is applicable even when dissolution is included
 #

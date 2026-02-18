@@ -26,16 +26,16 @@ def diff_files(gold_file, out_file, err_type="relative"):
     found_column = {}
 
     csv = CSVTools()
-    (table1, table2) = csv.convertToTable([open(gold_file, "r"), open(out_file, "r")])
+    table1, table2 = csv.convertToTable([open(gold_file, "r"), open(out_file, "r")])
 
     # Make sure header names are the same (also makes sure # cols is the same)
     # This way it reports what column is missing, not just # cols is different
     keys1 = table1.keys()
     keys2 = table2.keys()
-    (large, small) = (keys1, keys2)
+    large, small = (keys1, keys2)
 
     if len(keys1) < len(keys2):
-        (large, small) = (keys2, keys1)
+        large, small = (keys2, keys1)
         for key in large:
             if key not in small:
                 csv.addError(gold_file, "Header '" + key + "' is missing")
@@ -148,7 +148,7 @@ class CSVValidationTester(FileTester):
                     self.getTestDir(), self.specs["gold_dir"], file
                 )
                 out_file = os.path.join(self.getTestDir(), file)
-                (mean, std) = diff_files(gold_file, out_file, self.specs["err_type"])
+                mean, std = diff_files(gold_file, out_file, self.specs["err_type"])
 
                 computed = ""
                 if mean > self.specs["mean_limit"]:

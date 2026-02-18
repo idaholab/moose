@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Tool for loading MooseDocs config hit file."""
+
 import types
 import importlib
 import logging

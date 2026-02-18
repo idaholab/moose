@@ -197,7 +197,6 @@ def write_mesh(f, res):
 import os
 import sys
 
-
 sys.stdout.write(
     "Outputting injection borehole specification to " + injection_bh_filename + "\n"
 )

@@ -11,6 +11,7 @@
 Creates images for TiledMesh documentation.
 python pattern_mesh.py
 """
+
 import vtk
 import chigger
 

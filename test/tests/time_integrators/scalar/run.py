@@ -70,7 +70,7 @@ def run_moose(dt, time_integrator):
         # communicate() waits for the process to terminate, so there's no
         # need to wait() for it.  It also sets the returncode attribute on
         # child.
-        (stdoutdata, stderrdata) = child.communicate()
+        stdoutdata, stderrdata = child.communicate()
         if child.returncode != 0:
             print("Running MOOSE failed: program output is below:")
             print(stdoutdata)

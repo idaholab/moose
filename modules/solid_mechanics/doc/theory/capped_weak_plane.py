@@ -151,11 +151,11 @@ p.add_option(
 p.add_option(
     "-l", action="store_true", dest="labels", help="Include labels on the contours"
 )
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 if len(args) != 4:
     p.print_help()
     sys.exit(1)
-(coh, tanphi, tensile, compressive) = map(float, args)
+coh, tanphi, tensile, compressive = map(float, args)
 tip_s = opts.tip_smoother if opts.tip_smoother >= 0 else 0.1 * coh
 s_tol = opts.smoothing_tol if opts.smoothing_tol >= 0 else 0.1 * coh
 

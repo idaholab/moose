@@ -10,6 +10,7 @@
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
 """
+
 from types import ModuleType
 
 from ..common import mixins

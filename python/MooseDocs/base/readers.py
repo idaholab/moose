@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines Reader objects that convert raw text into an AST."""
+
 import os
 import logging
 

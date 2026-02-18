@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Testing for common.Storage class."""
+
 ####################################################################################################
 #                                    DO NOT MODIFY THIS HEADER                                     #
 #                   MOOSE - Multiphysics Object Oriented Simulation Environment                    #
