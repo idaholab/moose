@@ -1980,16 +1980,19 @@ class TestHarness:
     # Helper tuple for storing information about a cluster
     HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules"])
     # Define INL HPC clusters
-    sawtooth_config = HPCCluster(
-        scheduler="slurm",
-        apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
-    )
     br_wr_config = HPCCluster(
         scheduler="slurm", apptainer_modules=["container-openmpi/5.0.5-gcc13.2.0"]
     )
     hpc_configs = {
-        "sawtooth": sawtooth_config,
         "bitterroot": br_wr_config,
+        "sawtooth": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
+        ),
+        "teton": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-mpich/4.3.2-gcc13.4.0-nopmix"],
+        ),
         "windriver": br_wr_config,
     }
 
