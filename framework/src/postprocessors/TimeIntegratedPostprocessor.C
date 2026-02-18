@@ -47,7 +47,7 @@ TimeIntegratedPostprocessor::TimeIntegratedPostprocessor(const InputParameters &
   if (!isParamSetByUser("time_integration_scheme"))
   {
     for (const auto & ti : time_integrators)
-      if (_time_integration_scheme == TimeIntegration::implicit_midpoint &&
+      if (_time_integration_scheme == TimeIntegration::ImplicitMidpoint &&
           !dynamic_cast<ImplicitMidpoint *>(ti))
         mooseInfo("The time integration in this postprocessor uses the midpoint method. The "
                   "variable time integration, notably with time integrator '" +
@@ -67,7 +67,7 @@ TimeIntegratedPostprocessor::initialize()
 void
 TimeIntegratedPostprocessor::execute()
 {
-  if (_time_integration_scheme == TimeIntegration::implicit_euler)
+  if (_time_integration_scheme == TimeIntegration::ImplicitEuler)
     _value = _value_old + _pps_value * _dt;
   // 2nd order midpoint is a better default for other integrators
   else

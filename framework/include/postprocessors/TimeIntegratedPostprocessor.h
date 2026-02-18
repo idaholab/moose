@@ -39,12 +39,12 @@ protected:
   const PostprocessorValue & _pps_value_old;
 
   /// The time integration method
-  const MooseEnum _time_integration_scheme;
+  const MooseEnum & _time_integration_scheme;
 
   /// Enum of the time integration methods we support
   enum TimeIntegration
   {
-    implicit_euler,
-    implicit_midpoint
+    ImplicitEuler,
+    ImplicitMidpoint
   };
 };
