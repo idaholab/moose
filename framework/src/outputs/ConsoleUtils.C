@@ -448,6 +448,8 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   if (!mpc_desc.empty())
     oss << std::setw(console_field_width) << "  MOOSE Preconditioner: " << mpc_desc << '\n';
 
+  oss << "\n";
+
   return oss.str();
 }
 
