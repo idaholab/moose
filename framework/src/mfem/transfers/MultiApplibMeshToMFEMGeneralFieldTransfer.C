@@ -130,8 +130,16 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
   {  
     for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
     {    
-      const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp]});    
-      outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+      if (dim == 3)
+      {
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp], vxyz[i+2*NE*nsp]});
+        outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+      }
+      else
+      {
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp] });          
+        outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+      }
     }
   }
   // Evaluate source grid function at target points
