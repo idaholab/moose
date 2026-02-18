@@ -269,7 +269,7 @@ def getSharedOption(libmesh_dir):
     with open(libtool, "r") as f:
         for line in f:
             try:
-                (key, value) = line.rstrip().split("=", 2)
+                key, value = line.rstrip().split("=", 2)
             except Exception:
                 continue
 
@@ -352,7 +352,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
         for file in paths:
             path = os.path.dirname(file)
             while path != "":
-                (path, tail) = os.path.split(path)
+                path, tail = os.path.split(path)
                 try:
                     os.rmdir(os.path.join(test_dir, path, tail))
                 except:

@@ -179,5 +179,5 @@ if __name__ == "__main__":
     parser.add_option("--cxx-only", action="store_true", dest="cxx_only", default=False)
     parser.add_option("-f", "--force", action="store_true", dest="force", default=False)
 
-    (global_options, args) = parser.parse_args()
+    global_options, args = parser.parse_args()
     fixupHeader()

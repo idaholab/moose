@@ -10,6 +10,7 @@
 """
 The MooseDocs systems raises the following exceptions.
 """
+
 import logging
 
 LOG = logging.getLogger(__name__)

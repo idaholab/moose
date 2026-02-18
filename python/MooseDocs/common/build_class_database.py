@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Tools for extracting C++ class information."""
+
 import os
 import re
 import logging

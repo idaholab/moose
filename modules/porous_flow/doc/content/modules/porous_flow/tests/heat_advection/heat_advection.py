@@ -14,7 +14,6 @@ import numpy as np
 from scipy.special import expi
 import matplotlib.pyplot as plt
 
-
 a01 = np.genfromtxt(
     "../../../../../../test/tests/heat_advection/gold/heat_advection_1d_csv_T_0010.csv",
     delimiter=",",

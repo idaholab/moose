@@ -305,7 +305,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
             return self._paramValue(row)
 
     def _openFileDialog(self, param, text, use_extension):
-        (file_name, filter_name) = QtWidgets.QFileDialog.getOpenFileName(
+        file_name, filter_name = QtWidgets.QFileDialog.getOpenFileName(
             self, text, os.getcwd(), "File (*)"
         )
         if not file_name:

@@ -312,13 +312,13 @@ class CSVDiffer(CSVTools):
         # the order of the tests is most general to most specific, so if a general
         # one fails then the more specific ones will probably not only fail, but
         # crash the program because it's looking in a column that doesn't exist
-        (table1, table2) = self.convertToTable(self.files)
+        table1, table2 = self.convertToTable(self.files)
 
         # Make sure header names are the same (also makes sure # cols is the same)
         # This way it reports what column is missing, not just # cols is different
         keys1 = table1.keys()
         keys2 = table2.keys()
-        (large, small) = (keys1, keys2)
+        large, small = (keys1, keys2)
 
         # check if custom tolerances used, column name exists in one of
         # the CSV files
@@ -329,7 +329,7 @@ class CSVDiffer(CSVTools):
                 if key not in small or key not in large:
                     self.addError(self.files[0], "Header '" + key + "' is missing")
         elif len(keys1) < len(keys2):
-            (large, small) = (keys2, keys1)
+            large, small = (keys2, keys1)
             for key in large:
                 if key not in small and key not in self.ignore:
                     self.addError(self.files[0], "Header '" + key + "' is missing")

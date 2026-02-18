@@ -13,7 +13,6 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 l2errors = {}
 
 # benchmark results (no MultiApp)

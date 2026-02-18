@@ -15,7 +15,6 @@ import sys
 import math
 import matplotlib.pyplot as plt
 
-
 f = open(os.path.join("gold", "bio_sulfate_1_21_out.csv"), "r")
 data = [list(map(float, line.strip().split(","))) for line in f.readlines()[2:]]
 f.close()

@@ -11,6 +11,7 @@
 """
 Tests for Lexer and related objects.
 """
+
 import re
 import unittest
 

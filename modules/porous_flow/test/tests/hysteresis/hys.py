@@ -1237,21 +1237,21 @@ hys = Hys(
 )
 
 #### Testing of calculating order and the turning points
-(order, S_ldel) = hys.order_and_turning_points([1.0])
+order, S_ldel = hys.order_and_turning_points([1.0])
 assert order == 0 and len(S_ldel) == 0
-(order, S_ldel) = hys.order_and_turning_points([0.9, 0.8, 0.7, 0.6, 0.5])
+order, S_ldel = hys.order_and_turning_points([0.9, 0.8, 0.7, 0.6, 0.5])
 assert order == 0 and len(S_ldel) == 0
-(order, S_ldel) = hys.order_and_turning_points([0.6, 0.7])
+order, S_ldel = hys.order_and_turning_points([0.6, 0.7])
 assert order == 1 and len(S_ldel) == 1 and S_ldel[0] == 0.5
-(order, S_ldel) = hys.order_and_turning_points([0.7, 0.8, 0.9])
+order, S_ldel = hys.order_and_turning_points([0.7, 0.8, 0.9])
 assert order == 1 and len(S_ldel) == 1 and S_ldel[0] == 0.5
-(order, S_ldel) = hys.order_and_turning_points([0.8, 0.7, 0.6])
+order, S_ldel = hys.order_and_turning_points([0.8, 0.7, 0.6])
 assert order == 2 and len(S_ldel) == 2 and S_ldel[0] == 0.5 and S_ldel[1] == 0.9
-(order, S_ldel) = hys.order_and_turning_points([0.5])
+order, S_ldel = hys.order_and_turning_points([0.5])
 assert order == 0 and len(S_ldel) == 0
-(order, S_ldel) = hys.order_and_turning_points([0.4])
+order, S_ldel = hys.order_and_turning_points([0.4])
 assert order == 0 and len(S_ldel) == 0
-(order, S_ldel) = hys.order_and_turning_points([0.9, 0.6, 0.8, 0.7])
+order, S_ldel = hys.order_and_turning_points([0.9, 0.6, 0.8, 0.7])
 assert (
     order == 4
     and len(S_ldel) == 4
@@ -1260,7 +1260,7 @@ assert (
     and S_ldel[2] == 0.6
     and S_ldel[3] == 0.8
 )
-(order, S_ldel) = hys.order_and_turning_points([0.85])
+order, S_ldel = hys.order_and_turning_points([0.85])
 assert (
     order == 3
     and len(S_ldel) == 3
@@ -1268,7 +1268,7 @@ assert (
     and S_ldel[1] == 0.9
     and S_ldel[2] == 0.6
 )
-(order, S_ldel) = hys.order_and_turning_points([0.2])
+order, S_ldel = hys.order_and_turning_points([0.2])
 assert order == 0 and len(S_ldel) == 0
 
 eps = 1e-8

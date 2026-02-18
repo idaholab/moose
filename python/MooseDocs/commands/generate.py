@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Developer tools for MooseDocs."""
+
 import argparse
 import os
 import re

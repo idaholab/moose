@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 theta = np.arange(0, 2 * np.pi, 0.01 * np.pi)
 # Radiation intensity (directional component) for electrically small wire dipole antenna from Pozar (p. 644)
 # This is approximately the same directionally as that in the half-wave case in Silver (p. 98-99)

@@ -3,6 +3,7 @@
 Check if all jobs provided in PBS job file has finished.
   exit(0) if all jobs are finished, exit(1) if not.
 """
+
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
