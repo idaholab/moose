@@ -196,8 +196,8 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (const auto it : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
-        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
+        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
     }
   }
 }
@@ -262,13 +262,17 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                    mfem::BlockVector & trueRHS)
 {
   auto & test_var_name = _test_var_names.at(0);
-  auto blf = _blfs.Get(test_var_name);
-  auto lf = _lfs.Get(test_var_name);
   mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *_var_ess_constraints.at(0), *lf, aux_a, aux_x, aux_rhs, true);
+  auto blf = _blfs.Get(test_var_name);
+  blf->FormLinearSystem(_ess_tdof_lists.at(0),
+                        *_var_ess_constraints.at(0),
+                        *_lfs.Get(test_var_name),
+                        aux_a,
+                        aux_x,
+                        aux_rhs,
+                        /*copy_interior=*/true);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -314,7 +318,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               *aux_a,
                               aux_x,
                               aux_rhs,
-                              true);
+                              /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))

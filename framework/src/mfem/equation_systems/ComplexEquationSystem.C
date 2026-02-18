@@ -114,8 +114,8 @@ ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (const auto it : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
-        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
+        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
     }
   }
 }
@@ -204,13 +204,17 @@ ComplexEquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                           mfem::BlockVector & trueRHS)
 {
   auto & test_var_name = _test_var_names.at(0);
-  auto slf = _slfs.Get(test_var_name);
-  auto clf = _clfs.Get(test_var_name);
   mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  slf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *_cmplx_var_ess_constraints.at(0), *clf, aux_a, aux_x, aux_rhs, true);
+  auto slf = _slfs.Get(test_var_name);
+  slf->FormLinearSystem(_ess_tdof_lists.at(0),
+                        *_cmplx_var_ess_constraints.at(0),
+                        *_clfs.Get(test_var_name),
+                        aux_a,
+                        aux_x,
+                        aux_rhs,
+                        /*copy_interior=*/true);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -250,7 +254,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                           aux_a,
                           aux_x,
                           aux_rhs,
-                          true);
+                          /*copy_interior=*/true);
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
     _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
