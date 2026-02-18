@@ -1115,8 +1115,8 @@ class RunHPC(RunParallel):
 
         # --hpc-pre-source contents
         if self.options.hpc_pre_source:
-            submission_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
-            submission_env["PRE_SOURCE_CONTENTS"] = self.source_contents
+            submit_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
+            submit_env["PRE_SOURCE_CONTENTS"] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
         # option for the container mpi modules on INL HPC
