@@ -1119,9 +1119,9 @@ class RunHPC(RunParallel):
             submission_env["PRE_SOURCE_CONTENTS"] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
-        # option for the moose-dev-container module on INL HPC
+        # option for the container mpi modules on INL HPC
         if hpc_cluster is not None:
-            submit_env["PRE_MODULE_VARS"]["MOOSE_DEV_CONTAINER_MINIMAL_BINDPATH"] = "1"
+            submit_env["PRE_MODULE_VARS"]["CONTAINER_MINIMAL_BINDPATH"] = "1"
 
         # Pass apptainer options
         if self.options.hpc_apptainer_no_home:
