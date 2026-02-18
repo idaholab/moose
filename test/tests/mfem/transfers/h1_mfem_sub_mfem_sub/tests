@@ -47,7 +47,7 @@
                   OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
                   send
                   OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
-        prereq = test/run
+        prereq = MFEMCopyTransfer/test/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
