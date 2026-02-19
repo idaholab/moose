@@ -153,9 +153,12 @@ MultiAppMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, MFEMProblem
         {
           for (int d = 0; d < to_gf_ncomp; d++)
           {
-            // Arrange values byNodes
-            int idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
-                      i*nsp*dim + d + j*dim : d*nsp*NE + i*nsp + j;
+            int idx;
+            if (to_gf_ncomp>1)
+              idx = from_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
+                        d*nsp*NE + i*nsp + j : i*nsp*dim + d + j*dim;
+            else
+              idx = d*nsp*NE + i*nsp + j;
             elem_dof_vals(j + d*nsp) = interp_vals(idx);
           }
         }

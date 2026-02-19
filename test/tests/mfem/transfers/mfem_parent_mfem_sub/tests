@@ -26,6 +26,33 @@
         detail = 'checking the sub-application and parent application outputs against each other.'
       []
     []
+    [VectorTransfer]
+      requirement = 'The system shall be able to transfer MFEM vector variable data from a sub-application to the parent application via shape function interpolation, '
+      issues = '#31982'
+      [Hex]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex.csv'
+        detail = 'between hex meshes, '
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+      []
+      [Tetra]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
+        detail = 'and between tetrahedral meshes.'
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+        cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
+      []
+    []
   []  
   [MFEMCopyTransfer]
     design = MultiAppMFEMCopyTransfer.md
