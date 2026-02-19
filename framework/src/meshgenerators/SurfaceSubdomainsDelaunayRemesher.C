@@ -35,10 +35,13 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Mesh generator that re-meshes a 2D surface mesh given as one or more subdomains into "
       "a 2D surface mesh using Delaunay triangulation.");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<std::vector<std::vector<SubdomainName>>>("subdomain_names", "The surface mesh subdomains to be re-mesheed");
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
+      "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
+  params.addParam<std::vector<SubdomainName>>(
+      "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
   params.addParam<std::vector<std::vector<BoundaryName>>>(
       "hole_boundary_names",
-      std::vector<std::vector<BoundaryName>>(),
+      {},
       "The optional boundaries to be used as the holes in the mesh during triangulation. Note that "
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
@@ -78,12 +81,12 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
   return params;
 }
 
-SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(const InputParameters & parameters)
+SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
+    const InputParameters & parameters)
   : SurfaceDelaunayGeneratorBase(parameters),
     FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
-    _num_groups(_subdomain_names.size()),
     _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
     _max_level_set_correction_iterations(
         getParam<unsigned int>("max_level_set_correction_iterations")),
@@ -109,12 +112,38 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(const Input
 
     _func_params.resize(3);
   }
+  if (isParamSetByUser("subdomain_names") && isParamSetByUser("exclude_subdomain_names"))
+    paramError("exclude_subdomain_names",
+               "Excluding subdomain names is only to be set when 'subdomain_names' is not set");
 }
 
 std::unique_ptr<MeshBase>
 SurfaceSubdomainsDelaunayRemesher::generate()
 {
   std::unique_ptr<MeshBase> mesh_3d = std::move(_input);
+
+  // Select subdomain names if it has not been selected by the user
+  // We form 1 group per subdomain by default (easiest to mesh)
+  if (_subdomain_names.empty() || _subdomain_names[0].empty())
+  {
+    if (_subdomain_names.size())
+      _subdomain_names.erase(_subdomain_names.begin());
+
+    // Get all subdomains from the mesh
+    std::set<subdomain_id_type> sub_ids;
+    mesh_3d->subdomain_ids(sub_ids);
+
+    // Copy only the ones that are not excluded
+    const auto & excluded = getParam<std::vector<SubdomainName>>("exclude_subdomain_names");
+    for (const auto & sub_id : sub_ids)
+    {
+      const auto & sn = mesh_3d->subdomain_name(sub_id) == "" ? std::to_string(sub_id)
+                                                              : mesh_3d->subdomain_name(sub_id);
+      if (excluded.empty() || std::find(excluded.begin(), excluded.end(), sn) == excluded.end())
+        _subdomain_names.push_back({sn});
+    }
+  }
+  _num_groups = _subdomain_names.size();
 
   // If holes are provided, we need to create new blocks for them too
   std::vector<subdomain_id_type> hole_block_ids;
@@ -198,8 +227,6 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-      std::cout << hole_mesh << std::endl;
-      const auto rm = dynamic_cast<ReplicatedMesh *>(&hole_mesh);
       libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh};
 
       // We have to translate from MeshedHole points to mesh
