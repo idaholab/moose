@@ -888,11 +888,11 @@ TEST(CSGBaseTest, testApplyTranslation)
       std::make_unique<CSGCartesianLattice>("lat", 1.0, univs);
   const auto & lat = csg_obj->addLattice(std::move(lat_ptr));
 
-  // applie 2 multidirectional translations (so that order of applicaiton can be confirmed)
+  // apply multidirectional translations
   std::vector<Real> dists1 = {1.0, -2.0, 3.0};
   std::vector<Real> dists2 = {4.0, 5.0, -6.0};
 
-  // expected vector of translations to be applied in this order (x, y, z, dists):
+  // expected vector of translations to be applied in this order (dists1, dists2):
   std::vector<std::pair<TransformationType, std::vector<Real>>> expected_trans = {
       {TransformationType::TRANSLATION, dists1}, {TransformationType::TRANSLATION, dists2}};
 

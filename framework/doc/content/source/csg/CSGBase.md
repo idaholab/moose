@@ -346,6 +346,30 @@ If applying a transformation to a `CSGRegion` object, the `CSGRegion` object wil
 
 !alert-end!
 
+Below are several examples of applying transformations:
+
+*Surface rotation using a vector of Euler angles:*
+
+!listing CSGBaseTest.C start=euler rotation end=euler_angles include-end=true
+
+!listing CSGBaseTest.C start=applyRotation(surf end=applyRotation(surf include-end=true
+
+*Rotation of a cell around the z-axis:*
+
+!listing TestCSGAxialSurfaceMeshGenerator.C start=apply rotation end=applyAxisRotation include-end=true
+
+*Translation of a Universe:*
+
+!listing CSGBaseTest.C start=apply multidirectional end=dists2
+
+!listing CSGBaseTest.C start=>applyTranslation(univ end=>applyTranslation(univ include-end=true
+
+*Scaling of a cell in the x and z directions:*
+
+!listing CSGBaseTest.C start=scaling vector end=scales include-end=true
+
+!listing CSGBaseTest.C start=>applyScaling(cell end=>applyScaling(cell include-end=true
+
 Any transformation that is applied to an object must be done through the methods available from `CSGBase`, but information about the transformations applied can be retrieved directly from each object with `getTransformations()`.
 
 ## Updating Existing CSGBase Objects
@@ -439,6 +463,7 @@ The code snippets provided here correspond to the `.C` file.
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=InputParameters
 
 The next example mesh generator builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adds planes to create a finite rectangular prism.
+This will also optionally rotate the generated cell a specified angle around the z-axis.
 
 !listing TestCSGAxialSurfaceMeshGenerator.C start=InputParameters
 
