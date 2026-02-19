@@ -108,11 +108,14 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
       // Try to flood from each side with the same subdomain
       // Look for the neighbor subdomain id with the most neighbors
+      // NOTE: we could exceed max distance here
       for (const auto neighbor : make_range(elem->n_sides()))
         if (elem->neighbor_ptr(neighbor) &&
             _visited_once.find(elem->neighbor_ptr(neighbor)) != _visited_once.end() &&
-            elementSatisfiesRequirements(
-                elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), normal))
+            elementSatisfiesRequirements(elem,
+                                         get2DElemNormal(elem->neighbor_ptr(neighbor)),
+                                         *elem->neighbor_ptr(neighbor),
+                                         normal))
         {
           sub_id_found = true;
           sub_id_neighbors[elem->neighbor_ptr(neighbor)->subdomain_id()]++;
@@ -128,16 +131,17 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     }
 
     // Flood with the previously created subdomains and normals
+    // TODO: we need to store the starting element for that patch, in case it is not "elem"
     if (item)
-      flood(elem, item->second, item->first);
+      flood(elem, item->second, *elem, item->first);
     else if (sub_id_found)
-      flood(elem, normal, sub_id);
+      flood(elem, normal, *elem, sub_id);
     // Flood with a new subdomain and the element normal
     else
     {
       sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
       _subdomain_to_normal_map[sub_id] = normal;
-      flood(elem, normal, sub_id);
+      flood(elem, normal, *elem, sub_id);
     }
   }
 
@@ -164,8 +168,9 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
 
       // Try to flood from each side with the same subdomain
       // Look for the neighbor subdomain id with the most neighbors
+      // NOTE: we might exceeed the patch distance here
       for (const auto neighbor : neighbor_set)
-        if (elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), normal))
+        if (elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), *neighbor, normal))
         {
           sub_id_found = true;
           sub_id_neighbors[neighbor->subdomain_id()]++;

@@ -32,10 +32,13 @@ protected:
    * mesh to neighboring faces given a starting element and a normal to that element.
    * @param elem starting element
    * @param normal a normal used for comparing 2D surface elements outgoing normals
+   * @param starting_elem the starting element for the flooding
    * @param sub_id subdomain id to assign to elements being painted
    */
-  void
-  flood(Elem * const elem, const Point & normal, const subdomain_id_type & sub_id);
+  void flood(Elem * const elem,
+             const Point & normal,
+             const Elem & starting_elem,
+             const subdomain_id_type & sub_id);
 
   /**
    * Determines whether two normal vectors are within normal_tol of each other.
@@ -53,13 +56,16 @@ protected:
                                 const std::vector<subdomain_id_type> & subdomain_id_list) const;
 
   /**
-   * Determines whether the given element satisfies a set of criteria that are defined in this base class
+   * Determines whether the given element satisfies a set of criteria that are defined in this base
+   * class
    * @param elem element to consider
    * @param desired_normal for 2D elements, the desired outwards normal
+   * @param base_elem the reference element for the criterion (max distance for now)
    * @param elem_normal for 2D elements, the elem outwards normal
    */
   bool elementSatisfiesRequirements(const Elem * const elem,
                                     const Point & desired_normal,
+                                    const Elem & base_elem,
                                     const Point & face_normal) const;
 
   /**
@@ -94,6 +100,8 @@ protected:
   const Real _normal_tol;
   /// Whether to paint using a fixed normal or a moving normal
   const bool _fixed_normal;
+  /// Whether to paint beyond a certain radius
+  const Real _max_elem_distance;
 
   /// Map used for the flooding algorithm
   std::map<subdomain_id_type, std::set<Elem *>> _visited;

@@ -61,7 +61,10 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Maximum number of iterations to correct the nodes based on the level set function.");
 
   // Surface remeshing parameters
-  params.addRangeCheckedParam<Real>("max_edge_length", "max_edge_length>0", "Maximum length of an edge in the 1D meshes around each region");
+  params.addRangeCheckedParam<Real>(
+      "max_edge_length",
+      "max_edge_length>0",
+      "Maximum length of an edge in the 1D meshes around each region");
   params.addRangeCheckedParam<Real>(
       "max_angle_deviation",
       60.0,
@@ -289,7 +292,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
         }
       }
       if (_verbose)
-        _console << "Found " << found_hole_sides << " connecting sides on hole #" << hole_i << std::endl;
+        _console << "Found " << found_hole_sides << " connecting sides on hole #" << hole_i
+                 << std::endl;
 
       auto & mesh_boundary_info = full_mesh->get_boundary_info();
       for (auto elem : full_mesh->element_ptr_range())
@@ -487,12 +491,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       mesh_1d_points.push_back(*node);
 
     mesh_1d->clear();
-    MooseMeshUtils::buildPolyLineMesh(*mesh_1d,
-                                      mesh_1d_points,
-                                      true,
-                                      "",
-                                      "",
-                                      getParam<Real>("max_edge_length"));
+    MooseMeshUtils::buildPolyLineMesh(
+        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
   }
 
   // Keeps track of the real surface holes
