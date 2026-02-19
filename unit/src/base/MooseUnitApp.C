@@ -28,6 +28,12 @@ MooseUnitApp::registerAll(Factory & f, ActionFactory &, Syntax &)
   Registry::registerObjectsTo(f, {"MooseUnitApp"});
 }
 
+void
+MooseUnitApp::registerUnit()
+{
+  registerAppDataFilePath("moose_unit");
+}
+
 MooseUnitApp::~MooseUnitApp() {}
 
 InputParameters
