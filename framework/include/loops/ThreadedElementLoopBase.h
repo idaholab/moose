@@ -264,20 +264,18 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           continue;
         }
 
+        const auto elem_boundary_ids = _mesh.getBoundaryIDs(elem);
         for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
-          std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+          const auto & boundary_ids = elem_boundary_ids[side];
           const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
 
-          if (boundary_ids.size() > 0)
-            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
-                 it != boundary_ids.end();
-                 ++it)
-            {
-              preBoundary(elem, side, *it, lower_d_elem);
-              printBoundaryExecutionInformation(*it);
-              onBoundary(elem, side, *it, lower_d_elem);
-            }
+          for (const auto bnd_id : boundary_ids)
+          {
+            preBoundary(elem, side, bnd_id, lower_d_elem);
+            printBoundaryExecutionInformation(bnd_id);
+            onBoundary(elem, side, bnd_id, lower_d_elem);
+          }
 
           const Elem * neighbor = elem->neighbor_ptr(side);
           if (neighbor)
@@ -292,11 +290,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             if (shouldComputeInternalSide(*elem, *neighbor))
               onInternalSide(elem, side);
 
-            if (boundary_ids.size() > 0)
-              for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
-                   it != boundary_ids.end();
-                   ++it)
-                onInterface(elem, side, *it);
+            for (const auto bnd_id : boundary_ids)
+              onInterface(elem, side, bnd_id);
 
             postInternalSide(elem, side);
           }
