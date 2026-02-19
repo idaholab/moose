@@ -53,6 +53,9 @@ NEML2ModelExecutor::validParams()
       {},
       "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters");
 
+  params.addParam<bool>(
+      "boundary_restricted", false, "Whether the NEML2 model is restricted to boundary elements.");
+
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
@@ -69,7 +72,8 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
     ,
     _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
     _output_ready(false),
-    _error_message("")
+    _error_message(""),
+    _boundary_restricted(getParam<bool>("boundary_restricted"))
 #endif
 {
 #ifdef NEML2_ENABLED
@@ -179,7 +183,20 @@ NEML2ModelExecutor::initialSetup()
 std::size_t
 NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 {
+  if (_boundary_restricted)
+    mooseError("The NEML2 model is boundary restricted, so batch indices should be accessed with "
+               "element sides instead of element IDs.");
   return _batch_index_generator.getBatchIndex(elem_id);
+}
+
+std::size_t
+NEML2ModelExecutor::getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  if (!_boundary_restricted)
+    mooseError(
+        "The NEML2 model is not boundary restricted, so batch indices should be accessed with "
+        "element IDs instead of element sides.");
+  return _batch_index_generator.getSideBatchIndex(elem_side);
 }
 
 void
@@ -387,7 +404,31 @@ NEML2ModelExecutor::extractOutputs()
       {
         const auto & source = _dout_din[y][x];
         if (source.defined())
-          target = source.to(output_device()).dynamic_expand({neml2::Size(N)});
+        {
+          auto value = source.to(output_device());
+          if (value.dynamic_dim() == 0)
+            target = value.dynamic_unsqueeze(0).dynamic_expand({neml2::Size(N)});
+          else
+          {
+            const auto source_batch_size = value.dynamic_size(0).concrete();
+            if (source_batch_size == N)
+              target = value;
+            else if (source_batch_size == 1)
+              target = value.dynamic_expand({neml2::Size(N)});
+            else
+              mooseError("Inconsistent NEML2 derivative batch size for d(",
+                         y,
+                         ")/d(",
+                         x,
+                         "): got ",
+                         source_batch_size,
+                         ", but expected ",
+                         N,
+                         ". This usually means the NEML2 executor batch index generator and the "
+                         "gatherers/retrievers are restricted to different domains (e.g. mixing "
+                         "volume and boundary-restricted objects).");
+          }
+        }
       }
 
     // clear derivatives

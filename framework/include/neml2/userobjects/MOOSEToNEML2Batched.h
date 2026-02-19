@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MOOSEToNEML2.h"
-#include "ElementUserObject.h"
+#include "DomainUserObject.h"
 
 /**
  * @brief Generic gatherer for collecting "batched" MOOSE data for NEML2
@@ -26,7 +26,7 @@
  * @tparam T Type of the underlying MOOSE data, e.g., Real, SymmetricRankTwoTensor, etc.
  */
 template <typename T>
-class MOOSEToNEML2Batched : public MOOSEToNEML2, public ElementUserObject
+class MOOSEToNEML2Batched : public MOOSEToNEML2, public DomainUserObject
 {
 public:
   static InputParameters validParams();
@@ -35,12 +35,14 @@ public:
 
 #ifndef NEML2_ENABLED
   void initialize() override {}
-  void execute() override {}
+  void executeOnElement() override {}
+  void executeOnBoundary() override {}
   void finalize() override {}
   void threadJoin(const UserObject &) override {}
 #else
   void initialize() override;
-  void execute() override;
+  void executeOnElement() override;
+  void executeOnBoundary() override;
   void finalize() override {}
   void threadJoin(const UserObject &) override;
 
@@ -63,7 +65,7 @@ InputParameters
 MOOSEToNEML2Batched<T>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
-  params += ElementUserObject::validParams();
+  params += DomainUserObject::validParams();
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -77,7 +79,7 @@ MOOSEToNEML2Batched<T>::validParams()
 
 template <typename T>
 MOOSEToNEML2Batched<T>::MOOSEToNEML2Batched(const InputParameters & params)
-  : MOOSEToNEML2(params), ElementUserObject(params)
+  : MOOSEToNEML2(params), DomainUserObject(params)
 {
 }
 
@@ -91,7 +93,16 @@ MOOSEToNEML2Batched<T>::initialize()
 
 template <typename T>
 void
-MOOSEToNEML2Batched<T>::execute()
+MOOSEToNEML2Batched<T>::executeOnElement()
+{
+  const auto & elem_data = this->elemMOOSEData();
+  for (auto i : index_range(elem_data))
+    _buffer.push_back(elem_data[i]);
+}
+
+template <typename T>
+void
+MOOSEToNEML2Batched<T>::executeOnBoundary()
 {
   const auto & elem_data = this->elemMOOSEData();
   for (auto i : index_range(elem_data))

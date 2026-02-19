@@ -45,6 +45,9 @@ public:
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
+  /// Get the batch index for the given element side
+  std::size_t getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
+
   /// Get a reference(!) to the requested output view
   const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
 
@@ -58,6 +61,8 @@ public:
 
   /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
+
+  bool boundaryRestricted() const { return _boundary_restricted; }
 
 protected:
   /// Register a NEML2 input variable gathered by a gatherer
@@ -135,5 +140,7 @@ private:
   bool _error;
   /// Error message
   std::string _error_message;
+  /// Whether the NEML2 model is restricted to boundary elements
+  const bool _boundary_restricted;
 #endif
 };

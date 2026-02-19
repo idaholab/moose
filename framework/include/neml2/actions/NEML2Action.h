@@ -141,8 +141,17 @@ protected:
   /// Name of the NEML2BatchIndexGenerator user object
   const UserObjectName _idx_generator_name;
 
+  /// Name of the side NEML2Executor user object
+  const UserObjectName _executor_side_name;
+
+  /// Name of the side NEML2BatchIndexGenerator user object
+  const UserObjectName _side_idx_generator_name;
+
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
+
+  /// Side boundaries for side NEML2
+  const std::vector<BoundaryName> _boundary;
 
   /// Material property initial conditions
   std::map<MaterialPropertyName, MaterialPropertyName> _initialize_output_values;
@@ -151,6 +160,8 @@ protected:
   std::map<MaterialPropertyName, std::vector<OutputName>> _export_output_targets;
 
 private:
+  const bool _do_side;
+
 #ifdef NEML2_ENABLED
   /// Get parameter lists for mapping between MOOSE and NEML2 quantities
   template <typename EnumType, typename T1, typename T2>
