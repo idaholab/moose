@@ -67,6 +67,22 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       60.0,
       "max_angle_deviation>0 & max_angle_deviation<90",
       "Maximum angle deviation from the average normal vector in each group of subdomains.");
+  params.addParam<std::vector<unsigned int>>(
+      "interpolate_boundaries",
+      {1},
+      "Number of points to add to the boundaries. Can be set to a single value for all groups at "
+      "once, or specified individually");
+  params.addParam<std::vector<bool>>(
+      "refine_boundaries",
+      {false},
+      "Whether to refine the boundaries of each subdomain group. Can be set to a single value for "
+      "all groups at once, or specified individually");
+  params.addParam<std::vector<Real>>(
+      "desired_areas",
+      {0},
+      "Target element size when triangulating projection of the subdomain group. Can be set to a "
+      "single value for all groups at once, or specified individually. Default of 0 means no "
+      "constraint.");
 
   // When stitching each part together
   params.addParam<bool>("avoid_merging_subdomains",
@@ -96,6 +112,9 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     _max_level_set_correction_iterations(
         getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),
+    _interpolate_boundaries(getParam<std::vector<unsigned int>>("interpolate_boundaries")),
+    _refine_boundaries(getParam<std::vector<bool>>("refine_boundaries")),
+    _desired_areas(getParam<std::vector<Real>>("desired_areas")),
     _verbose(getParam<bool>("verbose"))
 {
   if (isParamValid("level_set"))
@@ -149,6 +168,19 @@ SurfaceSubdomainsDelaunayRemesher::generate()
     }
   }
   _num_groups = _subdomain_names.size();
+  if (_interpolate_boundaries.size() == 1)
+    _interpolate_boundaries.resize(_num_groups, _interpolate_boundaries[0]);
+  if (_refine_boundaries.size() == 1)
+    _refine_boundaries.resize(_num_groups, _refine_boundaries[0]);
+  if (_desired_areas.size() == 1)
+    _desired_areas.resize(_num_groups, _desired_areas[0]);
+  if (_interpolate_boundaries.size() != _num_groups)
+    paramError("interpolate_boundaries",
+               "Should be the same size as 'subdomain_names' or of size 1");
+  if (_refine_boundaries.size() != _num_groups)
+    paramError("refine_boundaries", "Should be the same size as 'subdomain_names' or of size 1");
+  if (_desired_areas.size() != _num_groups)
+    paramError("desired_areas", "Should be the same size as 'subdomain_names' or of size 1");
 
   // If holes are provided, we need to create new blocks for them too
   std::vector<subdomain_id_type> hole_block_ids;
@@ -187,7 +219,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
     }
 
     // Mesh the subdomains by groupsp
-    auto new_mesh = General2DDelaunay(mesh_2d, hole_meshes_2d);
+    auto new_mesh = General2DDelaunay(mesh_2d, hole_meshes_2d, i);
 
     // Add the newly meshed region to the holes
     hole_meshes_2d.push_back(std::move(new_mesh));
@@ -380,7 +412,8 @@ SurfaceSubdomainsDelaunayRemesher::levelSetCorrection(Node & node)
 std::unique_ptr<ReplicatedMesh>
 SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     std::unique_ptr<ReplicatedMesh> & mesh_2d,
-    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d)
+    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d,
+    unsigned int group_i)
 {
   if (_verbose)
   {
@@ -453,6 +486,7 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     for (const auto & node : mesh_1d->node_ptr_range())
       mesh_1d_points.push_back(*node);
 
+    mesh_1d->clear();
     MooseMeshUtils::buildPolyLineMesh(*mesh_1d,
                                       mesh_1d_points,
                                       true,
@@ -579,10 +613,10 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   Poly2TriTriangulator poly2tri(*mesh);
   poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
 
-  poly2tri.set_interpolate_boundary_points(0);
-  poly2tri.set_refine_boundary_allowed(false);
+  poly2tri.set_interpolate_boundary_points(_interpolate_boundaries[group_i]);
+  poly2tri.set_refine_boundary_allowed(_refine_boundaries[group_i]);
   poly2tri.set_verify_hole_boundaries(false);
-  poly2tri.desired_area() = 0;
+  poly2tri.desired_area() = _desired_areas[group_i];
   poly2tri.minimum_angle() = 0; // Not yet supported
   poly2tri.smooth_after_generating() = false;
   if (!triangulator_hole_ptrs.empty())
