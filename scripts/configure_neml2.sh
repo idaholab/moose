@@ -39,9 +39,6 @@ function configure_neml2()
   cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DNEML2_TESTS=OFF \
-    -DNEML2_RUNNER=OFF \
-    -DNEML2_PYBIND=OFF \
-    -DNEML2_DOC=OFF \
     -DNEML2_WORK_DISPATCHER=ON \
     -DNEML2_JSON=OFF \
     -DNEML2_CONTRIB_PREFIX="$2/contrib" \

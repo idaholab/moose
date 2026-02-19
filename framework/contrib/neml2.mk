@@ -3,13 +3,7 @@
 ################################################################################
 ifeq ($(ENABLE_NEML2),true)
 
-# Dynamic library suffix
-DYLIB_SUFFIX := so
-ifeq ($(shell uname -s),Darwin)
-DYLIB_SUFFIX := dylib
-endif
-
-# NEML2 libraries are suffixed with the CMake build type
+# NEML2 libraries and pkgconfig are suffixed with the CMake build type
 ifeq ($(METHOD),devel)
 NEML2_SUFFIX := _RelWithDebInfo
 else ifeq ($(METHOD),oprof)
@@ -18,36 +12,24 @@ else ifeq ($(METHOD),dbg)
 NEML2_SUFFIX := _Debug
 endif
 
-# NEML2 directories and libraries
-NEML2_INCLUDE    := $(NEML2_DIR)/include
-# If we can ever consistently get NEML2 to install its libs in
-# the same directory, we can get rid of this
-ifneq ($(wildcard $(NEML2_DIR)/lib/.),)
-NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib
-else
-$(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib)
+# NEML2 pkgconfig file
+NEML2_PC := $(NEML2_DIR)/share/pkgconfig/neml2$(NEML2_SUFFIX).pc
+ifeq ($(wildcard $(NEML2_PC)),)
+$(error NEML2 pkgconfig file not found: $(NEML2_PC))
 endif
-NEML2_LIBS       := neml2${NEML2_SUFFIX} \
-										neml2_base$(NEML2_SUFFIX) \
-									  neml2_dispatcher$(NEML2_SUFFIX) \
-										neml2_driver$(NEML2_SUFFIX) \
-										neml2_misc$(NEML2_SUFFIX) \
-										neml2_model$(NEML2_SUFFIX) \
-										neml2_solver$(NEML2_SUFFIX) \
-										neml2_tensor$(NEML2_SUFFIX) \
-										neml2_user_tensor$(NEML2_SUFFIX)
-NEML2_LIBS       := $(addprefix -l,$(NEML2_LIBS))
-NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
-# Compile flags for NEML2
-neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
-neml2_CPPFLAGS    += -DNEML2_ENABLED
-neml2_LDFLAGS     += -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR)
-neml2_LIBS        += $(NEML2_LIBS)
-libmesh_CXXFLAGS  += $(neml2_CPPFLAGS)
-libmesh_INCLUDE   += $(neml2_INCLUDES)
-libmesh_LDFLAGS   += $(neml2_LDFLAGS)
-libmesh_LIBS      += $(neml2_LIBS)
+# NEML2 flags
+comma := ,
+neml2_CPPFLAGS += -DNEML2_ENABLED
+neml2_INCLUDES += $(shell pkg-config --cflags $(NEML2_PC))
+neml2_LDFLAGS  += $(foreach libdir,$(shell pkg-config --libs-only-L $(NEML2_PC)),$(patsubst -L%,-Wl$(comma)-rpath$(comma)%,$(libdir)))
+neml2_LIBS     += $(shell pkg-config --libs $(NEML2_PC))
+
+# Append to libmesh flags
+libmesh_CXXFLAGS += $(neml2_CPPFLAGS) # I think MOOSE Makefiles tend to abuse libmesh_CXXFLAGS for preprocessor flags
+libmesh_INCLUDE  += $(neml2_INCLUDES)
+libmesh_LDFLAGS  += $(neml2_LDFLAGS)
+libmesh_LIBS     += $(neml2_LIBS)
 
 endif
 
