@@ -32,8 +32,6 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo
   echo "Influential environment variables:"
   echo "  MOOSE_DIR       The path to the MOOSE directory. Default to the parent directory of this script."
-  echo "  LIBMESH_SRC_DIR The path to the libMesh source directory. Default to <MOOSE_DIR>/libmesh."
-  echo "  LIBMESH_DIR     The path to the libMesh directory. Default to <LIBMESH_SRC_DIR>/installed."
   echo "  WASP_SRC_DIR    The path to the WASP source directory. Default to <MOOSE_DIR>/framework/contrib/wasp."
   echo "  WASP_DIR        The path to the WASP directory. Default to <WASP_SRC_DIR>/install."
   echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/libtorch."
