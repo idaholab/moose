@@ -164,7 +164,7 @@ class TestBuild(unittest.TestCase):
         body = renderer.getRoot()
         root = body.parent
         result = types.SimpleNamespace(root=root)
-        renderer.postRender({}, result)
+        renderer.postRender(mock.MagicMock(), result)
         script = moosetree.find(root, lambda n: n.name == "script")
         self.assertEqual(script.get("async"), True)
         self.assertEqual(script.get("type"), "text/javascript")
