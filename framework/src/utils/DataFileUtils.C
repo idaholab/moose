@@ -46,7 +46,7 @@ getPath(std::string path, const GetPathOptions & options)
   const auto if_data_name_error = [&explicit_data](const auto & message)
   {
     if (explicit_data)
-      mooseError("Cannot ",
+      mooseError("Cannot use ",
                  message,
                  " along with a data name to search (requested "
                  "to search in '",
@@ -77,9 +77,10 @@ getPath(std::string path, const GetPathOptions & options)
 
   // Because no explicit data name is set, we always want to prefer
   // checking relative paths first before searching the data
-  if (options.base && !explicit_data)
+  if (!explicit_data)
   {
-    const auto relative_to_base = MooseUtils::pathjoin(*options.base, path);
+    const std::string base = options.base ? *options.base : std::filesystem::current_path().c_str();
+    const auto relative_to_base = MooseUtils::pathjoin(base, path);
 
     // Relative path exists
     if (MooseUtils::checkFileReadable(relative_to_base, false, false, false))
@@ -92,7 +93,7 @@ getPath(std::string path, const GetPathOptions & options)
       return {MooseUtils::canonicalPath(relative_to_base), Context::RELATIVE_NOT_FOUND};
 
     // Mark that we searched the working directory
-    not_found.emplace("working directory", MooseUtils::canonicalPath(*options.base));
+    not_found.emplace("working directory", MooseUtils::canonicalPath(base));
   }
 
   // See if we should skip searching data
@@ -169,7 +170,7 @@ getPath(std::string path, const GetPathOptions & options)
   // Found none
   else
   {
-    oss << "Unable to find the data file '" << path << "' anywhere.\n";
+    oss << "Unable to find the data file '" << path << "'.\n";
     if (not_found.size())
     {
       oss << "\nPaths searched:\n";

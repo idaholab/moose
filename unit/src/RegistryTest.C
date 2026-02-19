@@ -87,27 +87,46 @@ TEST_F(RegistryTest, appNameFromAppPathFailed)
 
 TEST_F(RegistryTest, addDataFilePath)
 {
-  const std::string name = "name";
-  const std::string path = "files/data_file_tests/data0/data";
-  Registry::addDataFilePath(name, path);
+  // without info
+  {
+    const std::string name = "name";
+    const std::string path = "files/data_file_tests/data0/data";
+    Registry::addDataFilePath(name, path);
 
-  // should add as a true capability
-  const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
-  EXPECT_TRUE(capability.getBoolValue());
-  EXPECT_EQ(capability.getDoc(),
-            "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
-                "'.");
+    // should add as a true capability
+    const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+    EXPECT_TRUE(capability.getBoolValue());
+    EXPECT_EQ(capability.getDoc(),
+              "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
+                  "'.");
+  }
+
+  // with info
+  {
+    const std::string name = "name2";
+    const std::string path = "files/data_file_tests/data0/data";
+    const std::string info = "this is useful information";
+    Registry::addDataFilePath(name, path, true, info);
+
+    // should add as a true capability
+    const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+    EXPECT_TRUE(capability.getBoolValue());
+    EXPECT_EQ(capability.getDoc(),
+              "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
+                  "'; " + info + ".");
+  }
 }
 
 TEST_F(RegistryTest, addMissingDataFilePath)
 {
   const std::string name = "name";
-  Registry::addMissingDataFilePath(name);
+  const std::string info = "extra_info";
+  Registry::addMissingDataFilePath(name, info);
 
   // should add as a false capability
   const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
   EXPECT_FALSE(capability.getBoolValue());
-  EXPECT_EQ(capability.getDoc(), "Named data path '" + name + "' is not available.");
+  EXPECT_EQ(capability.getDoc(), "Named data path '" + name + "' is not available; " + info + ".");
 }
 
 TEST_F(RegistryTest, addDataFilePathNonDataFolder)
@@ -150,7 +169,7 @@ TEST_F(RegistryTest, addDataFilePathBadName)
 TEST_F(RegistryTest, addMissingDataFilePathBadName)
 {
   EXPECT_MOOSEERROR_MSG(
-      Registry::addMissingDataFilePath("!"),
+      Registry::addMissingDataFilePath("!", "unused"),
       "Unallowed characters in data file path name '!'; allowed characters = a-z, 0-9, _");
 }
 

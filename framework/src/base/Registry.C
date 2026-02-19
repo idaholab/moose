@@ -91,7 +91,8 @@ Registry::addKnownLabel(const std::string & label)
 void
 Registry::addDataFilePath(const std::string & name,
                           const std::string & in_tree_path,
-                          const bool is_app /* = true */)
+                          const bool is_app /* = true */,
+                          const std::optional<std::string> & info /* = {} */)
 {
   checkDataFilePathName(name);
 
@@ -119,7 +120,7 @@ Registry::addDataFilePath(const std::string & name,
   if (it == dfp.end())
   {
     dfp.emplace(name, path);
-    addDataFilePathCapability(name, path);
+    addDataFilePathCapability(name, path, info);
   }
   // Registered, but with a different value
   else if (it->second != path)
@@ -133,10 +134,10 @@ Registry::addDataFilePath(const std::string & name,
 }
 
 void
-Registry::addMissingDataFilePath(const std::string & name)
+Registry::addMissingDataFilePath(const std::string & name, const std::string & info)
 {
   checkDataFilePathName(name);
-  addDataFilePathCapability(name);
+  addDataFilePathCapability(name, {}, info);
 }
 
 void
@@ -253,13 +254,16 @@ Registry::checkDataFilePathName(const std::string & name)
 
 void
 Registry::addDataFilePathCapability(const std::string & name,
-                                    const std::optional<std::string> & path /* = {} */)
+                                    const std::optional<std::string> & path /* = {} */,
+                                    const std::optional<std::string> & extra_info /* = {}*/)
 {
   std::string doc = "Named data path '" + name + "' is ";
   if (path)
     doc += "available at '" + *path + "'";
   else
     doc += "not available";
+  if (extra_info)
+    doc += "; " + *extra_info;
   doc += ".";
 
   auto & capabilities = Moose::internal::Capabilities::getCapabilities({});
