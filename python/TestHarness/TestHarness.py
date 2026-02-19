@@ -397,11 +397,6 @@ class TestHarness:
         self.code = b"2d2d6769726c2d6d6f6465"
         self.error_code = 0x0
         self.keyboard_talk = True
-        # Assume libmesh is a peer directory to MOOSE if not defined
-        if "LIBMESH_DIR" in os.environ:
-            self.libmesh_dir = os.environ["LIBMESH_DIR"]
-        else:
-            self.libmesh_dir = os.path.join(self.moose_dir, "libmesh", "installed")
 
         # Failed Tests file object
         self.writeFailedTest = None
@@ -432,7 +427,6 @@ class TestHarness:
         ) = self.getCapabilities(
             self.options,
             self.executable,
-            self.libmesh_dir,
         )
 
         checks = {}
@@ -465,9 +459,7 @@ class TestHarness:
 
     @staticmethod
     def getCapabilities(
-        options: argparse.Namespace,
-        executable: Optional[str],
-        libmesh_dir: Optional[str],
+        options: argparse.Namespace, executable: Optional[str]
     ) -> Tuple["Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
@@ -478,8 +470,6 @@ class TestHarness:
             The TestHarness options.
         executable : Optional[str]
             Path to the executable; needed when not --minimal-capabilities.
-        libmesh_dir : Optional[str]
-            libMesh directory; needed when not --minimal-capabilities.
 
         Returns:
         -------
@@ -507,20 +497,18 @@ class TestHarness:
             )
 
         # NOTE: If you add to this list, it must be added to
-        # Moose::CapabilityUtils::reserved_augmented_capabilities in
-        # framework/src/utils/CapabilityUtils.C
+        # Moose::internal::CapabilityRegistry::augmented_capability_names in
+        # framework/src/base/CapabilityRegistry.C
         augment("hpc", options.hpc is not None, "TestHarness --hpc option")
-        augment("machine", util.getMachine(), "Machine type", ["x86_64", "arm64"], True)
+        augment(
+            "machine",
+            util.getMachine(),
+            "Machine type",
+            ["x86_64", "arm64", "unknown"],
+            True,
+        )
         if options.minimal_capabilities:
             augment("platform", util.getPlatform(), "Operating system", None, True)
-        else:
-            augment(
-                "library_mode",
-                util.getSharedOption(libmesh_dir),
-                "libMesh library mode",
-                ["dynamic", "static"],
-                True,
-            )
 
         # This is one of the few places where we actually
         # load the pycapabilities module and that is
