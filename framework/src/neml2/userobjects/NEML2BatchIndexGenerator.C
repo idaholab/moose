@@ -65,6 +65,10 @@ NEML2BatchIndexGenerator::executeOnElement()
   if (!_outdated)
     return;
 
+  // If interface boundaries are provided, this generator is intended for side execution only.
+  if (!_interface_bnd_ids.empty())
+    return;
+
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
   _batch_index += qPoints().size();
 }
@@ -76,6 +80,15 @@ NEML2BatchIndexGenerator::executeOnBoundary()
     return;
 
   if (!_outdated)
+    return;
+
+  // If interface boundaries are not provided, this generator is intended for element execution
+  // only.
+  if (_interface_bnd_ids.empty())
+    return;
+
+  // For interface-restricted use, only collect side quadrature points on the specified interfaces.
+  if (!shouldExecuteOnInterface())
     return;
 
   _elemside_to_batch_index[ElemSide(_current_elem->id(), _current_side)] = _batch_index;

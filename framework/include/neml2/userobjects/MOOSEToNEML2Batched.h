@@ -95,6 +95,10 @@ template <typename T>
 void
 MOOSEToNEML2Batched<T>::executeOnElement()
 {
+  // If interface boundaries are provided, this gatherer is intended for side execution only.
+  if (!_interface_bnd_ids.empty())
+    return;
+
   const auto & elem_data = this->elemMOOSEData();
   for (auto i : index_range(elem_data))
     _buffer.push_back(elem_data[i]);
@@ -104,7 +108,16 @@ template <typename T>
 void
 MOOSEToNEML2Batched<T>::executeOnBoundary()
 {
+  // If interface boundaries are not provided, this gatherer is intended for element execution only.
+  if (_interface_bnd_ids.empty())
+    return;
+
+  // For interface-restricted use, only gather side data on the specified interfaces.
+  if (!shouldExecuteOnInterface())
+    return;
+
   const auto & elem_data = this->elemMOOSEData();
+
   for (auto i : index_range(elem_data))
     _buffer.push_back(elem_data[i]);
 }

@@ -36,9 +36,22 @@ MOOSEMaterialPropertyToNEML2<T, state>::MOOSEMaterialPropertyToNEML2(const Input
   : MOOSEToNEML2Batched<T>(params)
 #ifdef NEML2_ENABLED
     ,
-    _mat_prop(this->template getGenericMaterialProperty<T, false>("from_moose", state))
+    _use_face_material(this->isParamValid("interface_boundaries")),
+    _volume_mat_prop(nullptr),
+    _face_mat_prop(nullptr)
 #endif
 {
+#ifdef NEML2_ENABLED
+  _volume_mat_prop = &this->template getGenericMaterialProperty<T, false>("from_moose", state);
+
+  if constexpr (state == 0)
+    _face_mat_prop = &this->template getFaceMaterialProperty<T>("from_moose");
+  else if constexpr (state == 1)
+    _face_mat_prop = &this->template getFaceMaterialPropertyOld<T>("from_moose");
+  else
+    mooseError("Unsupported material property state index for MOOSEMaterialPropertyToNEML2: ",
+               state);
+#endif
 }
 
 #define instantiateMOOSEMaterialPropertyToNEML2(T)                                                 \

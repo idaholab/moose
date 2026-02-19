@@ -151,6 +151,9 @@ NEML2Action::act()
 void
 NEML2Action::act()
 {
+  ExecFlagEnum side_execute_options = MooseUtils::getDefaultExecFlagEnum();
+  side_execute_options = {EXEC_LINEAR, EXEC_NONLINEAR};
+
   if (_current_task == "parse_neml2")
   {
     if (_app.parameters().have_parameter<bool>("parse_neml2_only"))
@@ -208,7 +211,9 @@ NEML2Action::act()
 
           obj_params.set<MaterialPropertyName>("from_moose") = input.moose.name;
           obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+          obj_params.set<std::vector<SubdomainName>>("block") = _block;
           obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _boundary;
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
 
           _problem->addUserObject(obj_type, obj_name, obj_params);
           gatherers_side.push_back(obj_name);
@@ -240,7 +245,9 @@ NEML2Action::act()
           auto obj_params = _factory.getValidParams(obj_type);
           obj_params.set<std::vector<VariableName>>("from_moose") = {input.moose.name};
           obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+          obj_params.set<std::vector<SubdomainName>>("block") = _block;
           obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _boundary;
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
           _problem->addUserObject(obj_type, obj_name, obj_params);
           gatherers_side.push_back(obj_name);
         }
@@ -270,6 +277,7 @@ NEML2Action::act()
           auto obj_params = _factory.getValidParams(obj_type);
           obj_params.set<PostprocessorName>("from_moose") = input.moose.name;
           obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(input.neml2.name);
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
           _problem->addUserObject(obj_type, obj_name, obj_params);
           gatherers_side.push_back(obj_name);
         }
@@ -319,7 +327,9 @@ NEML2Action::act()
           auto obj_params = _factory.getValidParams(obj_type);
           obj_params.set<MaterialPropertyName>("from_moose") = param.moose.name;
           obj_params.set<std::string>("to_neml2") = param.neml2.name;
+          obj_params.set<std::vector<SubdomainName>>("block") = _block;
           obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _boundary;
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
           _problem->addUserObject(obj_type, obj_name, obj_params);
           param_gatherers_side.push_back(obj_name);
         }
@@ -346,7 +356,9 @@ NEML2Action::act()
           auto obj_params = _factory.getValidParams(obj_type);
           obj_params.set<std::vector<VariableName>>("from_moose") = {param.moose.name};
           obj_params.set<std::string>("to_neml2") = neml2::utils::stringify(param.neml2.name);
+          obj_params.set<std::vector<SubdomainName>>("block") = _block;
           obj_params.set<std::vector<BoundaryName>>("interface_boundaries") = _boundary;
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
           _problem->addUserObject(obj_type, obj_name, obj_params);
           param_gatherers_side.push_back(obj_name);
         }
@@ -374,6 +386,7 @@ NEML2Action::act()
           auto obj_params = _factory.getValidParams(obj_type);
           obj_params.set<PostprocessorName>("from_moose") = param.moose.name;
           obj_params.set<std::string>("to_neml2") = param.neml2.name;
+          obj_params.set<ExecFlagEnum>("execute_on") = side_execute_options;
           _problem->addUserObject(obj_type, obj_name, obj_params);
           param_gatherers_side.push_back(obj_name);
         }
@@ -397,6 +410,7 @@ NEML2Action::act()
         auto params = _factory.getValidParams(type);
         params.applyParameters(parameters());
         params.set<std::vector<BoundaryName>>("interface_boundaries") = _boundary;
+        params.set<ExecFlagEnum>("execute_on") = side_execute_options;
         _problem->addUserObject(type, _side_idx_generator_name, params);
       }
     }
@@ -424,6 +438,7 @@ NEML2Action::act()
         params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers_side;
         // Let executor return the right batch index for side computations.
         params.set<bool>("boundary_restricted") = true;
+        params.set<ExecFlagEnum>("execute_on") = side_execute_options;
         _problem->addUserObject(type, _executor_side_name, params);
       }
     }

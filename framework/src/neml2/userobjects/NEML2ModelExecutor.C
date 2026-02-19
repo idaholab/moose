@@ -276,6 +276,24 @@ NEML2ModelExecutor::fillInputs()
     for (const auto & uo : _gatherers)
       uo->insertInto(_in, _model_params);
 
+    // Consistency check: batched inputs should match this executor's batch size (or be scalar-like
+    // with batch size 1 for broadcasting).
+    const auto expected_batch_size = _batch_index_generator.getBatchIndex();
+    for (const auto & [var, val] : _in)
+      if (val.dynamic_dim() > 0)
+      {
+        const auto actual_batch_size = val.dynamic_size(0).concrete();
+        if (actual_batch_size != expected_batch_size && actual_batch_size != 1)
+          mooseError("Inconsistent NEML2 input batch size for `",
+                     var,
+                     "`: got ",
+                     actual_batch_size,
+                     ", but expected ",
+                     expected_batch_size,
+                     " (or 1 for broadcasting). This usually means the NEML2 executor batch index "
+                     "generator and input gatherers are restricted to different domains.");
+      }
+
     // Send input variables and parameters to device
     for (auto & [var, val] : _in)
       val = val.to(device());

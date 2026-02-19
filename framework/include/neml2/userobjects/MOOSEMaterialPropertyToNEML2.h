@@ -27,10 +27,19 @@ public:
 
 #ifdef NEML2_ENABLED
 protected:
-  const MooseArray<T> & elemMOOSEData() const override { return _mat_prop.get(); }
+  const MooseArray<T> & elemMOOSEData() const override
+  {
+    return _use_face_material ? _face_mat_prop->get() : _volume_mat_prop->get();
+  }
 
-  /// MOOSE material property to read data from
-  const MaterialProperty<T> & _mat_prop;
+  /// Whether to gather material data from face (for interface-restricted side execution)
+  const bool _use_face_material;
+
+  /// MOOSE material property to read data from (volume)
+  const MaterialProperty<T> * _volume_mat_prop;
+
+  /// MOOSE material property to read data from (face)
+  const MaterialProperty<T> * _face_mat_prop;
 #endif
 };
 
