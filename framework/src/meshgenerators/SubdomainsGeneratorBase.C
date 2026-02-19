@@ -48,6 +48,11 @@ SubdomainsGeneratorBase::validParams()
                         false,
                         "Whether to move the normal vector as we paint the geometry, or keep it "
                         "fixed from the first element we started painting with");
+  params.addParam<Real>("max_subdomain_size_centroids",
+                        std::numeric_limits<Real>::max(),
+                        "Maximum distance between element centroids (vertex average approximation) "
+                        "in a given subdomain.");
+
   // Flood parameters
   // NOTE: this can 'cut' paths to re-grouping elements. It is a heuristic and won't always improve
   // things
@@ -73,6 +78,7 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
     _fixed_normal(getParam<bool>("fixed_normal")),
+    _max_elem_distance(getParam<Real>("max_subdomain_size_centroids")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
     _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
 {
@@ -103,6 +109,7 @@ SubdomainsGeneratorBase::setup(MeshBase & mesh)
 void
 SubdomainsGeneratorBase::flood(Elem * const elem,
                                const Point & base_normal,
+                               const Elem & starting_elem,
                                const subdomain_id_type & sub_id)
 {
   if (elem == nullptr || elem == remote_elem ||
@@ -119,16 +126,16 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   const auto elem_normal = get2DElemNormal(elem);
 
   bool criterion_met = false;
-  if (elementSatisfiesRequirements(elem, base_normal, elem_normal))
+  if (elementSatisfiesRequirements(elem, base_normal, starting_elem, elem_normal))
     criterion_met = true;
-  else if (_check_painted_neighor_normals && !criterion_met)
+  else if (_check_painted_neighor_normals)
   {
     // Try to flood from each side with the same subdomain
     for (const auto neighbor : make_range(elem->n_sides()))
       if (elem->neighbor_ptr(neighbor) &&
           (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
           elementSatisfiesRequirements(
-              elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
+              elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), starting_elem, elem_normal))
         criterion_met = true;
   }
 
@@ -144,7 +151,10 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   {
     // Flood to the neighboring elements using the current matching side normal from this
     // element.
-    flood(elem->neighbor_ptr(neighbor), _fixed_normal ? base_normal : elem_normal, sub_id);
+    flood(elem->neighbor_ptr(neighbor),
+          _fixed_normal ? base_normal : elem_normal,
+          starting_elem,
+          sub_id);
   }
 }
 
@@ -168,6 +178,7 @@ SubdomainsGeneratorBase::elementSubdomainIdInList(
 bool
 SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
                                                       const Point & desired_normal,
+                                                      const Elem & base_elem,
                                                       const Point & face_normal) const
 {
   // Skip if element is not in specified subdomains
@@ -176,6 +187,10 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
     return false;
 
   if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
+    return false;
+
+  if (_max_elem_distance < std::numeric_limits<Real>::max() &&
+      (elem->vertex_average() - base_elem.vertex_average()).norm_sq() > _max_elem_distance)
     return false;
 
   return true;

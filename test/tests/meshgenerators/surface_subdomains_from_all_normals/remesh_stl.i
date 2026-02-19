@@ -19,6 +19,7 @@
     check_painted_neighbor_normals = false
     flood_elements_once = true
     fixed_normal = true
+    max_subdomain_size_centroids = 5
 
     # only used for the plan STL
     # select_max_neighbor_element_subdomains = true
@@ -37,7 +38,10 @@
     exclude_subdomain_names = '2 12 15'
     # subdomain_names = '1;3;4;5;6;7;8;9;10;11;13;14;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47;48;49;50;51;52;53;54;55;56;57;58'
     # subdomain_names = '0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12'
-    max_edge_length = 0.1
+    # max_edge_length = 12
+    interpolate_boundaries = 4
+    refine_boundaries = false
+    desired_areas = 5
     verbose = true
   []
   [diag]
