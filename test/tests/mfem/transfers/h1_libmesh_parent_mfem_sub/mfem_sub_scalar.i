@@ -16,7 +16,7 @@
 []
 
 [Variables]
-  [temperature]
+  [mfem_scalar_var]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -25,7 +25,7 @@
 [BCs]
   [sides]
     type = MFEMScalarDirichletBC
-    variable = temperature
+    variable = mfem_scalar_var
     coefficient = 1.0
   []
 []
@@ -33,11 +33,11 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = temperature
+    variable = mfem_scalar_var
   []
   [source]
     type = MFEMDomainLFKernel
-    variable = temperature
+    variable = mfem_scalar_var
     coefficient = 2.0
   []  
 []
@@ -45,9 +45,6 @@
 [Preconditioner]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-  []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
   []
 []
 
