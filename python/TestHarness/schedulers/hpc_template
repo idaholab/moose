@@ -82,8 +82,7 @@ NUM_NODES=$(sort $PBS_NODEFILE | uniq -c | wc -l)
 NUM_NODES=${SLURM_JOB_NUM_NODES}
 {%- endif %}
 JOB_TMPDIR="$(mktemp -d -u --suffix _${{ JOB_ID_VARIABLE }})"
-# This ONLY works for openmpi right now; -N needs to be -ppn for mpich
-mpiexec -n ${NUM_NODES} -N 1 mkdir ${JOB_TMPDIR}
+mkdir -p ${JOB_TMPDIR}
 export TMPDIR="${JOB_TMPDIR}"
 
 # If we're using a run with APPTAINER_SHARENS, we really don't want to use /home
@@ -162,10 +161,6 @@ done
 # for this string when parsing the output so that we can be sure
 # that we have obtained all of the output
 printf "{{ ENDING_COMMENT }}"
-
-# Clean up the job tempdir
-set +e
-mpiexec -n ${NUM_NODES} -N 1 rm -rf ${JOB_TMPDIR}
 
 # Exit with the real return code from the job that we ran
 exit $return_code
