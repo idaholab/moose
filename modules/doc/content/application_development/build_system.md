@@ -66,10 +66,10 @@ as a suffix like: `something-$METHOD`. The valid options are:
 When developing your own application, it is generally advised to start from the `devel` build, as it
 offers a reasonable balance between speed and debugging checks. When an error cannot be easily addressed
 with the information provided by the `devel` build, a `dbg` executable can be built for use in debuggers.
-See [this page](application_development/debugging.md) for instructions on running the `dbg` executable
+See [this page](application_development/debugging.md optional=True) for instructions on running the `dbg` executable
 with a debugger. When performance issues are encountered, and the information provided by the [PerfGraph.md]
 system is insufficient, an `oprof` executable can be used together with profiling tools to gather more
-diagnostics. See [this page](application_development/profiling.md) for instructions on using gperftools
+diagnostics. See [this page](application_development/profiling.md optional=True) for instructions on using gperftools
 for CPU and heap profiling. Finally, build your application in `opt` mode when you are ready to release
 your application for production use.
 !alert-end!
