@@ -34,6 +34,8 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
   params.addClassDescription(
       "Mesh generator that re-meshes a 2D surface mesh given as one or more subdomains into "
       "a 2D surface mesh using Delaunay triangulation.");
+
+  // Definition of the region to re-mesh
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
       "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
@@ -47,9 +49,9 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "multiple boundaries.");
 
   // Note: if the Delaunay generator can handle random topology for the surface, mesh everything in
-  // a single step. If not, then mesh each part one by one
+  // a single step. If not, then mesh each part one by one, then stitch them together
 
-  // Mesh density and shape parameters
+  // Correcting the shape using a level_set
   params.addParam<std::string>(
       "level_set",
       "Level set used to achieve more accurate reverse projection compared to interpolation.");
@@ -57,13 +59,16 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "max_level_set_correction_iterations",
       3,
       "Maximum number of iterations to correct the nodes based on the level set function.");
+
+  // Surface remeshing parameters
+  params.addRangeCheckedParam<Real>("max_edge_length", "max_edge_length>0", "Maximum length of an edge in the 1D meshes around each region");
   params.addRangeCheckedParam<Real>(
       "max_angle_deviation",
       60.0,
       "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the global average normal vector in the input mesh.");
+      "Maximum angle deviation from the average normal vector in each group of subdomains.");
 
-  // When re-building
+  // When stitching each part together
   params.addParam<bool>("avoid_merging_subdomains",
                         false,
                         "Whether to prevent merging subdomains by offsetting ids. The first mesh "
@@ -206,14 +211,6 @@ SurfaceSubdomainsDelaunayRemesher::generate()
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
     {
       UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_meshes_2d[hole_i]);
-      // increase hole mesh order if the triangulation mesh has higher order
-      // if (!holes_with_midpoints[hole_i])
-      // {
-      //   if (_tri_elem_type == "TRI6")
-      //     hole_mesh.all_second_order();
-      //   else if (_tri_elem_type == "TRI7")
-      //     hole_mesh.all_complete_order();
-      // }
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid
@@ -261,12 +258,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       }
       if (_verbose)
         _console << "Found " << found_hole_sides << " connecting sides on hole #" << hole_i << std::endl;
-      // mooseAssert(found_hole_sides == np, "Failed to find full outer boundary of meshed hole");
 
       auto & mesh_boundary_info = full_mesh->get_boundary_info();
-#ifndef NDEBUG
-      // int found_inner_sides = 0;
-#endif
       for (auto elem : full_mesh->element_ptr_range())
       {
         auto ns = elem->n_sides();
@@ -277,21 +270,14 @@ SurfaceSubdomainsDelaunayRemesher::generate()
             if (it_s->second == elem->point(s))
             {
               mesh_boundary_info.add_side(elem, s, inner_bcid);
-#ifndef NDEBUG
-              // ++found_inner_sides;
-#endif
             }
         }
       }
-      // mooseAssert(found_inner_sides == np, "Failed to find full boundary around meshed hole");
 
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
-      std::cout << Moose::stringify(increment_subdomain_map) << std::endl;
-
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
-      std::cout << Moose::stringify(main_subdomain_map) << std::endl;
 
       full_mesh->stitch_meshes(hole_mesh,
                                inner_bcid,
@@ -432,7 +418,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   bool has_external_side = false;
   MeshTools::Modification::all_tri(*mesh_2d);
   const auto mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*mesh_2d);
-  std::cout << "new bdy " << mesh_2d_ext_bdry << std::endl;
   for (const auto & elem : mesh_2d->active_element_ptr_range())
     for (const auto & i_side : elem->side_index_range())
       if (elem->neighbor_ptr(i_side) == nullptr)
@@ -440,7 +425,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
         mesh_2d->get_boundary_info().add_side(elem, i_side, mesh_2d_ext_bdry);
         has_external_side = true;
       }
-  std::cout << "Found an external side " << has_external_side << std::endl;
 
   // Create a clone of the 2D mesh to be used for the 1D mesh generation
   auto mesh_2d_dummy = dynamic_pointer_cast<MeshBase>(mesh_2d->clone());
@@ -459,6 +443,23 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   if (has_external_side)
     MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
+
+  // Add more nodes in the 1D mesh
+  if (isParamValid("max_edge_length"))
+  {
+    // Sort the points the same way every time by using ID order
+    std::vector<Point> mesh_1d_points;
+    mesh_1d_points.reserve(mesh_1d->n_nodes());
+    for (const auto & node : mesh_1d->node_ptr_range())
+      mesh_1d_points.push_back(*node);
+
+    MooseMeshUtils::buildPolyLineMesh(*mesh_1d,
+                                      mesh_1d_points,
+                                      true,
+                                      "",
+                                      "",
+                                      getParam<Real>("max_edge_length"));
+  }
 
   // Keeps track of the real surface holes
   std::vector<bool> actually_a_hole(hole_meshes_2d.size(), false);
@@ -482,10 +483,9 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     if (false)
     {
       if (_verbose)
-        std::cout << "Remeshing hole " << *hole_mesh_2d << std::endl;
+        _console << "Remeshing hole " << *hole_mesh_2d << std::endl;
 
       const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
-      std::cout << has_external_bdy << " bdy id " << hole_mesh_2d_ext_bdry << " new block id " << new_hole_block_id_1d << std::endl;
       if (has_external_bdy)
         MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
                                                     {std::to_string(hole_mesh_2d_ext_bdry)},
@@ -595,7 +595,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
                                     _auto_area_func_default_size,
                                     _auto_area_func_default_size_dist);
   poly2tri.triangulate();
-  // std::cout << "Triangulated and got " << *mesh << std::endl;
 
   // Reverse the projection based on the original 2D mesh
   for (const auto & node : mesh->node_ptr_range())
