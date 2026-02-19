@@ -43,6 +43,15 @@ protected:
   /// Max angle deviation from the global average normal vector in the input mesh
   const Real _max_angle_deviation;
 
+  /// Number of points added to boundaries around each group of surface subdomains
+  std::vector<unsigned int> _interpolate_boundaries;
+
+  /// Whether to refine the boundaries around each group of surface subdomains
+  std::vector<bool> _refine_boundaries;
+
+  /// Target areas for the triangulation for each group of surface subdomains
+  std::vector<Real> _desired_areas;
+
   /// Whether the generator should be verbose
   const bool _verbose;
 
@@ -92,9 +101,11 @@ protected:
    * hole meshes
    * @param mesh_2d The input 2D boundary mesh
    * @param hole_meshes_2d The 2D hole meshes
+   * @param group_i the index of the group
    * @return a unique pointer to the generated 2D mesh
    */
   std::unique_ptr<ReplicatedMesh>
   General2DDelaunay(std::unique_ptr<ReplicatedMesh> & mesh_2d,
-                    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d);
+                    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d,
+                    unsigned int group_i);
 };
