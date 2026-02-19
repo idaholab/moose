@@ -92,6 +92,8 @@ protected:
    * where normal_hat = _normal/|_normal|
    */
   const Real _normal_tol;
+  /// Whether to paint using a fixed normal or a moving normal
+  const bool _fixed_normal;
 
   /// Map used for the flooding algorithm
   std::map<subdomain_id_type, std::set<Elem *>> _visited;

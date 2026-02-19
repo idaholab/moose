@@ -44,7 +44,10 @@ SubdomainsGeneratorBase::validParams()
                                     "only added if face_normal.normal_hat >= "
                                     "1 - normal_tol, where normal_hat = "
                                     "normal/|normal|");
-
+  params.addParam<bool>("fixed_normal",
+                        false,
+                        "Whether to move the normal vector as we paint the geometry, or keep it "
+                        "fixed from the first element we started painting with");
   // Flood parameters
   // NOTE: this can 'cut' paths to re-grouping elements. It is a heuristic and won't always improve
   // things
@@ -69,6 +72,7 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
                 ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
+    _fixed_normal(getParam<bool>("fixed_normal")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
     _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
 {
@@ -140,7 +144,7 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   {
     // Flood to the neighboring elements using the current matching side normal from this
     // element.
-    flood(elem->neighbor_ptr(neighbor), elem_normal, sub_id);
+    flood(elem->neighbor_ptr(neighbor), _fixed_normal ? base_normal : elem_normal, sub_id);
   }
 }
 
