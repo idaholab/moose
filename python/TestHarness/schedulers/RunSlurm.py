@@ -11,6 +11,7 @@ import re
 from datetime import datetime
 from RunHPC import CallHPCPoolType, RunHPC
 
+
 ## This Class is responsible for maintaining an interface to the slurm scheduling syntax
 class RunSlurm(RunHPC):
     """

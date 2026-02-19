@@ -15,6 +15,7 @@ from shlex import quote
 import json
 from typing import Optional, Tuple
 
+
 class RunApp(Tester):
 
     @staticmethod

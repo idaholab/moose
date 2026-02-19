@@ -13,6 +13,7 @@ from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
 
+
 class RunParallel(Scheduler):
     """
     RunParallel is a Scheduler plugin responsible for executing a tester
