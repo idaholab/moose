@@ -37,10 +37,3 @@
 [Executioner]
   type = Steady
 []
-
-[Outputs]
-  file_base = 'libmesh_sub_scalar_quads'
-  exodus = true
-  csv = true
-[]
-

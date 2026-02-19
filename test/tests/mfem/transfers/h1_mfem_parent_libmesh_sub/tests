@@ -6,44 +6,112 @@
     type = CSVDiff
     input = mfem_parent_scalar.i
     csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_quads.csv'
-    detail = ' scalar LAGRANGE variables defined on quads, '
+    detail = ' first order scalar LAGRANGE variables defined on quads, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
   []
+  [MFEMTransferFromlibMeshH1QuadSecondOrder]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_quads_order_2.csv'
+    detail = ' second order scalar LAGRANGE variables defined on quads, '
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
+               'libmesh_app0:Variables/libmesh_scalar_var/order=SECOND '
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_quads_order_2 '
+  []  
   [MFEMTransferFromlibMeshH1Tri]
     type = CSVDiff
     input = mfem_parent_scalar.i
     csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tris.csv'
-    requirement = 'and scalar LAGRANGE variables defined on tris, '
+    requirement = 'first order scalar LAGRANGE variables defined on tris, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
-    cli_args = 'Mesh/file=../../mesh/square_tri.e libmesh_app0:Mesh/file=../../mesh/square_tri.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tris '
+    cli_args = 'Mesh/file=../../mesh/square_tri.e ' 
+               'libmesh_app0:Mesh/file=../../mesh/square_tri.e ' 
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tris '
   []
+  [MFEMTransferFromlibMeshH1TriSecondOrder]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tris_order_2.csv'
+    detail = ' second order LAGRANGE variables defined on tris, '
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/square_tri.e '
+               'FESpaces/H1FESpace/fec_order=SECOND '
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tris_order_2 '               
+               'libmesh_app0:Mesh/file=../../mesh/square_tri.e '
+               'libmesh_app0:Variables/libmesh_scalar_var/order=SECOND '
+  []  
   [MFEMTransferFromlibMeshH1Hex]
     type = CSVDiff
     input = mfem_parent_scalar.i
     csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_hexes.csv'
-    requirement = 'scalar LAGRANGE variables defined on hexes, '
+    requirement = 'first order scalar LAGRANGE variables defined on hexes, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
-    cli_args = 'Mesh/file=../../mesh/cube.e libmesh_app0::BCs/sides/boundary=Sides libmesh_app0::Mesh/file=../../mesh/cube.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_hexes '
+    cli_args = 'Mesh/file=../../mesh/cube.e '
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_hexes '
+               'libmesh_app0::BCs/sides/boundary=Sides '
+               'libmesh_app0::Mesh/file=../../mesh/cube.e '
+  []  
+  [MFEMTransferFromlibMeshH1HexSecondOrder]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_hexes_order_2.csv'
+    requirement = 'second order scalar LAGRANGE variables defined on hexes, '
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube.e '
+               'FESpaces/H1FESpace/fec_order=SECOND '    
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_hexes_order_2 '
+               'libmesh_app0::BCs/sides/boundary=Sides '
+               'libmesh_app0::Mesh/file=../../mesh/cube.e '
+               'libmesh_app0:Variables/libmesh_scalar_var/order=SECOND '               
   []  
   [MFEMTransferFromlibMeshH1Tet]
     type = CSVDiff
     input = mfem_parent_scalar.i
     csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tets.csv'
-    requirement = 'and scalar LAGRANGE variables defined on tetrahedra.'
+    requirement = 'first order scalar LAGRANGE variables defined on tetrahedra, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
-    cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e libmesh_app0::BCs/sides/boundary=Sides libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tets '
-  []  
+    cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tets '
+               'libmesh_app0::BCs/sides/boundary=Sides '
+               'libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e '
+  []
+  [MFEMTransferFromlibMeshH1TetSecondOrder]
+    type = CSVDiff
+    input = mfem_parent_scalar.i
+    csvdiff = 'OutputData/mfem_parent_libmesh_sub_scalar_tets_order_2.csv'
+    requirement = 'and second order scalar LAGRANGE variables defined on tetrahedra.'
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+    cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+               'FESpaces/H1FESpace/fec_order=SECOND '    
+               'Outputs/file_base=OutputData/mfem_parent_libmesh_sub_scalar_tets_order_2 '
+               'libmesh_app0::BCs/sides/boundary=Sides '
+               'libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e '
+               'libmesh_app0:Variables/libmesh_scalar_var/order=SECOND '
+  []    
 []
 
