@@ -857,7 +857,7 @@ convertBlockToMesh(MeshBase & source_mesh,
           // Nodes' IDs are their indexes in the nodes' respective mesh
           // If we set them as invalid they are automatically assigned
           // Add to mesh, auto-assigning a new id.
-          Node * node = target_mesh.add_point(elem->point(i));
+          Node * node = target_mesh.add_point(elem->point(i), n.id());
 
           // Add to element copy (manually)
           copy->set_node(copy_n_index++, node);
