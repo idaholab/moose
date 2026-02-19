@@ -678,8 +678,11 @@ InputParameters::finalize(const std::string & parsing_syntax)
   checkParams(parsing_syntax);
 
   // Set parameters that represent file types
-  for (const auto & [param_name, param_value] : *this)
+  for (const auto & name_value : *this)
   {
+    const auto & param_name = name_value.first;
+    const auto & param_value = name_value.second;
+
     // Helper for setting a file typed parameter value
     const auto set_filename = [&](auto & value)
     {
