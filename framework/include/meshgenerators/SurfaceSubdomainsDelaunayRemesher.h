@@ -29,10 +29,10 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// The subdomains to be converted to a 2D mesh
-  const std::vector<std::vector<SubdomainName>> _subdomain_names;
+  std::vector<std::vector<SubdomainName>> _subdomain_names;
 
   /// Number of groups of subdomains, also number of times we will call the Delaunay generator
-  const unsigned int _num_groups;
+  unsigned int _num_groups;
 
   ///The edge boundaries delineating holes
   const std::vector<std::vector<BoundaryName>> _hole_boundary_names;
