@@ -70,7 +70,7 @@
 [Transfers]
   [transfer_from_mfem]
     type = MultiAppMFEMTolibMeshGeneralFieldTransfer
-    source_variable = temperature
+    source_variable = mfem_scalar_var
     variable = mfem_scalar_var
     from_multi_app = mfem_app
   []
