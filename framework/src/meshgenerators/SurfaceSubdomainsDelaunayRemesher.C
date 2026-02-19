@@ -20,6 +20,9 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
 
+#include "libmesh/mesh_base.h"
+#include "libmesh/replicated_mesh.h"
+
 registerMooseObject("MooseApp", SurfaceSubdomainsDelaunayRemesher);
 
 InputParameters
@@ -195,6 +198,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
+      std::cout << hole_mesh << std::endl;
+      const auto rm = dynamic_cast<ReplicatedMesh *>(&hole_mesh);
       libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh};
 
       // We have to translate from MeshedHole points to mesh
@@ -367,10 +372,16 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   if (_verbose)
   {
     _console << "Re-meshing mesh\n " << *mesh_2d << std::endl;
+    _console << "with subdomains " << Moose::stringify(mesh_2d->get_subdomain_name_map())
+             << std::endl;
     if (hole_meshes_2d.size())
       _console << "With " << hole_meshes_2d.size() << " holes:" << std::endl;
     for (const auto & hole_m : hole_meshes_2d)
+    {
+      _console << "Hole subdomains " << Moose::stringify(hole_m->get_subdomain_name_map())
+               << std::endl;
       _console << *hole_m << std::endl;
+    }
   }
   // If a level set is provided, we need to check if the nodes in the original 2D mesh match the
   // level set
@@ -422,42 +433,48 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
 
+  // Keeps track of the real surface holes
+  std::vector<bool> actually_a_hole(hole_meshes_2d.size(), false);
+
   // If we have holes, we need to create a 1D mesh for each hole
   std::vector<std::unique_ptr<MeshBase>> hole_meshes_1d;
   for (auto & hole_mesh_2d : hole_meshes_2d)
   {
-      // As we do not need these holes for reverse projection, we do not need to convert them to TRI3
-      // meshes, but we still need to create a 1D mesh for each hole
-      hole_mesh_2d->find_neighbors();
-      bool has_external_bdy = false;
-      const auto hole_mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*hole_mesh_2d);
-      MooseMeshUtils::addExternalBoundary(*hole_mesh_2d,
-                                          hole_mesh_2d_ext_bdry,
-                                          has_external_bdy);
+    // As we do not need these holes for reverse projection, we do not need to convert them to TRI3
+    // meshes, but we still need to create a 1D mesh for each hole
+    hole_mesh_2d->find_neighbors();
+    bool has_external_bdy = false;
+    const auto hole_mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*hole_mesh_2d);
+    MooseMeshUtils::addExternalBoundary(*hole_mesh_2d, hole_mesh_2d_ext_bdry, has_external_bdy);
 
-      // Only remesh if they are not already meshed
-      if (false)
-      {
-        if (_verbose)
-          std::cout << "Remeshing hole " << *hole_mesh_2d << std::endl;
+    // TODO
+    // Check if hole is even connected
+    // Check if hole is an actual hole
 
-        const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
-        std::cout << has_external_bdy << " bdy id " << hole_mesh_2d_ext_bdry << " new block id " << new_hole_block_id_1d << std::endl;
-        if (has_external_bdy)
-          MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
-                                                      {std::to_string(hole_mesh_2d_ext_bdry)},
-                                                      new_hole_block_id_1d,
-                                                      SubdomainName(),
-                                                      type());
-        // Create a 1D mesh form the 1D block
-        hole_meshes_1d.push_back(buildMeshBaseObject());
-        if (has_external_bdy)
-          MooseMeshUtils::convertBlockToMesh(
-              *hole_mesh_2d, *hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
-      }
-      else
-        // Extract the 1D edge elements boundary as a mesh
-        hole_meshes_1d.push_back(MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
+    // Only remesh if they are not already meshed
+    if (false)
+    {
+      if (_verbose)
+        std::cout << "Remeshing hole " << *hole_mesh_2d << std::endl;
+
+      const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
+      std::cout << has_external_bdy << " bdy id " << hole_mesh_2d_ext_bdry << " new block id " << new_hole_block_id_1d << std::endl;
+      if (has_external_bdy)
+        MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
+                                                    {std::to_string(hole_mesh_2d_ext_bdry)},
+                                                    new_hole_block_id_1d,
+                                                    SubdomainName(),
+                                                    type());
+      // Create a 1D mesh form the 1D block
+      hole_meshes_1d.push_back(buildMeshBaseObject());
+      if (has_external_bdy)
+        MooseMeshUtils::convertBlockToMesh(
+            *hole_mesh_2d, *hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
+    }
+    else
+      // Extract the 1D edge elements boundary as a mesh
+      hole_meshes_1d.push_back(
+          MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
 
     // Do not clear the 2D hole mesh, we may re-use it
   }
@@ -517,12 +534,17 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   meshed_holes.reserve(hole_meshes_1d.size());
   triangulator_hole_ptrs.reserve(hole_meshes_1d.size());
   for (auto hole_i : index_range(hole_meshes_1d))
-  {
-    hole_meshes_1d[hole_i]->prepare_for_use();
-    meshed_holes.emplace_back(*hole_meshes_1d[hole_i]);
-    // if (hole_connected[hole_i])
+    if (actually_a_hole[hole_i])
+    {
+      hole_meshes_1d[hole_i]->prepare_for_use();
+      meshed_holes.emplace_back(*hole_meshes_1d[hole_i]);
       triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
-  }
+    }
+
+  // TODO: Gather actual mesh holes
+  // TODO: Connect actual mesh holes with the full mesh
+  //       OR
+  //       Error if we expect the user to mesh things in sequence
 
   // Finally, triangulation
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(std::move(mesh_1d));
