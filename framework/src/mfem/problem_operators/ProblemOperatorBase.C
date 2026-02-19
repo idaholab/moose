@@ -60,11 +60,6 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
     _trial_variables[i]->MakeTRef(
         _trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
   _trial_true_vector = &X;
-
-  // This might seem silly but after making the tref the memory flags of the grid function and its
-  // true vector are in an empty state other than the aliasing. This operation syncs the flags and
-  // should be a no-op in terms of actual data transfer
-  SetTrialVariablesFromTrueVectors();
 }
 
 void
