@@ -8,7 +8,26 @@
     requirement = 'The system shall have the ability to solve a problem defined on a mesh with pre-defined periodic boundaries using MFEM.'
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
-    max_parallel = 2 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMPeriodicVector3D]
+    type = XMLDiff
+    input = periodic_cube_vector.i
+    xmldiff = 'OutputData/periodic_cube_vector/Run0/Run0.pvd
+                OutputData/periodic_cube_vector/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a problem with periodic boundaries specified by translation vector using MFEM.'
+    capabilities = 'mfem & platform=linux'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMPeriodicVector2D]
+    type = XMLDiff
+    input = periodic_square_vector.i
+    xmldiff = 'OutputData/periodic_square_vector/Run0/Run0.pvd
+                OutputData/periodic_square_vector/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a problem defined on a mesh with pre-defined periodic boundaries using MFEM.'
+    capabilities = 'mfem & platform=linux'
+    compute_devices = 'cpu cuda'
     recover = false
   []
 []
