@@ -227,6 +227,11 @@ public:
    * during parallel dispatch.
    */
   MaterialProperty(const MaterialProperty<T, dimension> & property);
+  /**
+   * Prevent initializing with properties of different rank
+   */
+  template <unsigned int D>
+  MaterialProperty(const MaterialProperty<T, D> & other) = delete;
 
   /**
    * Shallow copy another property
