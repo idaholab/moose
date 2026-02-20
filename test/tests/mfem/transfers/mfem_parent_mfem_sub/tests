@@ -66,7 +66,21 @@
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
       []      
     []
-  []  
+    [OutOfMesh]
+      requirement = 'The system shall be able to transfer MFEM variables between meshes of different geometric sizes, '
+      issues = '#31982'
+      [Hex]      
+        type = XMLDiff
+        input = mfem_parent_embedded_submesh.i
+        xmldiff = 'OutputData/EmbeddedSubmesh/Run0/Cycle000001/data.pvtu'
+        detail = 'from a smaller submesh to a larger mesh containing the smaller submes as a subdomain.'
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+      []
+    []    
+  []
   [MFEMCopyTransfer]
     design = MultiAppMFEMCopyTransfer.md
     [FromSubToParent]
