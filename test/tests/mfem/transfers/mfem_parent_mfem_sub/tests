@@ -43,7 +43,7 @@
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
-        detail = 'and between tetrahedral meshes.'
+        detail = 'between tetrahedral meshes, '
         abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
@@ -52,6 +52,19 @@
                   'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
       []
+      [TetToHex]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex.csv'
+        detail = 'and from tetrahedral meshes to hex meshes.'
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+        cli_args = 'Mesh/file=../../mesh/cube.e ' 
+                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
+      []      
     []
   []  
   [MFEMCopyTransfer]

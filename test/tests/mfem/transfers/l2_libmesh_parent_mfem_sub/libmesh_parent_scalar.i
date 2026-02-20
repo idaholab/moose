@@ -42,7 +42,6 @@
 
 [Outputs]
   file_base = 'libmesh_parent_scalar_mfem_sub_quads'
-  exodus = true
   csv = true
 []
 

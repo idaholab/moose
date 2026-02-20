@@ -77,6 +77,6 @@
 []
 
 [Outputs]
-  file_base = 'OutputData/mfem_parent_libmesh_sub_scalar_quads'
+  file_base = 'mfem_parent_libmesh_sub_scalar_quads'
   csv = true
 []
