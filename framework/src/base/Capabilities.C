@@ -446,6 +446,15 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
+    const auto doc = "libMesh performance logging";
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    have("libmesh_perflog", doc);
+#else
+    libmesh_missing("libmesh_perflog", doc, "--enable-perflog");
+#endif
+  }
+
+  {
     const auto doc = "Boost C++ library";
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
     have("boost", doc);
