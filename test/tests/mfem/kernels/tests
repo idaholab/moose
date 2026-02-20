@@ -2,16 +2,16 @@
   design = 'syntax/Problem/index.md'
   issues = '#29632'
   [MFEMCurlCurl]
-    type = XMLDiff
+    type = CSVDiff
     input = curlcurl.i
-    xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
-                OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurl_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
+    abs_zero = 1e-6
   []
   [MFEMDiffusion]
     type = CSVDiff

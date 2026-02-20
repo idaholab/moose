@@ -131,10 +131,20 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'e_field'
+    start_point = '-1 -1 1'
+    end_point = '1 1 -1'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
     file_base = OutputData/CurlCurl
-    vtk_format = ASCII
   []
 []
