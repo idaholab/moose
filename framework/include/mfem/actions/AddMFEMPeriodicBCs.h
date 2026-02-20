@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 class AddMFEMPeriodicBCs : public MooseObjectAction
 {
