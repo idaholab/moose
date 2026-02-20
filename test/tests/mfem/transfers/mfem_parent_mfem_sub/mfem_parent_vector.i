@@ -170,10 +170,5 @@
 
 [Outputs]
   file_base = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex'
-  csv = true  
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/TEST
-    vtk_format = ASCII
-  []
+  csv = true
 []
