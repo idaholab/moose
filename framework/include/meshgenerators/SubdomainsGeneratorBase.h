@@ -100,8 +100,10 @@ protected:
   const Real _normal_tol;
   /// Whether to paint using a fixed normal or a moving normal
   const bool _fixed_normal;
-  /// Whether to paint beyond a certain radius
-  const Real _max_elem_distance;
+  /// Whether to painting beyond a certain radius
+  const bool _has_max_distance_criterion;
+  /// Distance to use for max painting radius
+  std::unordered_map<subdomain_id_type, Real> _max_elem_distance;
 
   /// Map used for the flooding algorithm
   std::map<subdomain_id_type, std::set<Elem *>> _visited;
