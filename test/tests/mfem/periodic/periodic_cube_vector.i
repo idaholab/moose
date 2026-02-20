@@ -119,16 +119,7 @@
   active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/poisson_cube
+    file_base = OutputData/periodic_cube_vector
     vtk_format = ASCII
-  []
-  [VisItDataCollection]
-    type = MFEMVisItDataCollection
-    file_base = OutputData/VisItDataCollection
-  []
-  [ConduitDataCollection]
-    type = MFEMConduitDataCollection
-    file_base = OutputData/ConduitDataCollection/Run
-    protocol = conduit_bin
   []
 []
