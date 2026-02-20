@@ -48,10 +48,12 @@ SubdomainsGeneratorBase::validParams()
                         false,
                         "Whether to move the normal vector as we paint the geometry, or keep it "
                         "fixed from the first element we started painting with");
-  params.addParam<Real>("max_subdomain_size_centroids",
-                        std::numeric_limits<Real>::max(),
-                        "Maximum distance between element centroids (vertex average approximation) "
-                        "in a given subdomain.");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "max_subdomain_size_centroids",
+      "max_subdomain_size_centroids >= 0",
+      "Maximum distance between element centroids (vertex average approximation) "
+      "in each 'included_subdomain'. 0 means do not apply a distance, a single value in the vector "
+      "is applied to all subdomains");
 
   // Flood parameters
   // NOTE: this can 'cut' paths to re-grouping elements. It is a heuristic and won't always improve
@@ -78,7 +80,7 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
     _fixed_normal(getParam<bool>("fixed_normal")),
-    _max_elem_distance(getParam<Real>("max_subdomain_size_centroids")),
+    _has_max_distance_criterion(isParamSetByUser("max_subdomain_size_centroids")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
     _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
 {
@@ -103,6 +105,28 @@ SubdomainsGeneratorBase::setup(MeshBase & mesh)
         paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
 
     _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  }
+
+  // Set up the max elem-to-elem distance map
+  if (_has_max_distance_criterion)
+  {
+    const auto & max_dists = getParam<std::vector<Real>>("max_subdomain_size_centroids");
+    if (max_dists.size() != _included_subdomain_ids.size() && max_dists.size() != 1)
+      paramError("max_subdomain_size_centroids",
+                 "Maximum distance should be specified uniformly for all subdomains (1 value) or a "
+                 "value for each 'included_subdomains'");
+
+    if (_included_subdomain_ids.size())
+      for (const auto i : index_range(_included_subdomain_ids))
+        // Single value is applied for all subdomains
+        // 0 is translated to a very big number which therefore won't impose the criterion
+        _max_elem_distance[_included_subdomain_ids[i]] =
+            (max_dists.size() == 1)
+                ? max_dists[0]
+                : (max_dists[i] > 0 ? max_dists[i]
+                                    : std::pow(std::numeric_limits<Real>::max(), 0.3));
+    else
+      _max_elem_distance[static_cast<subdomain_id_type>(-1)] = max_dists[0];
   }
 }
 
@@ -189,9 +213,19 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
   if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
     return false;
 
-  if (_max_elem_distance < std::numeric_limits<Real>::max() &&
-      (elem->vertex_average() - base_elem.vertex_average()).norm_sq() > _max_elem_distance)
-    return false;
+  if (_has_max_distance_criterion)
+  {
+    // The subdomain from which the element to paint over comes from is used to find the limitation
+    // on the radius, which will effectively be applied onto the new subdomains (to which base_elem
+    // already belongs)
+    const auto max_dsq =
+        _check_subdomains
+            ? MathUtils::pow(libmesh_map_find(_max_elem_distance, elem->subdomain_id()), 2)
+            : MathUtils::pow(
+                  libmesh_map_find(_max_elem_distance, static_cast<subdomain_id_type>(-1)), 2);
+    if ((elem->vertex_average() - base_elem.vertex_average()).norm_sq() > max_dsq)
+      return false;
+  }
 
   return true;
 }

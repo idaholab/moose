@@ -41,7 +41,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
       "that holds the most neighbors of the element with a similar normal");
 
-  // There can be many of them
+  // There can be many of them, and we don't control the number in this generator
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
   // Using normals is the base principle of this mesh generator
   params.addPrivateParam<bool>("_using_normal", true);
@@ -87,6 +87,13 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       num_neighborless++;
       mooseWarning("Element '" + std::to_string(elem->id()) + "' has no neighbors");
     }
+
+    // Check if element should be used to paint from
+    if (_included_subdomain_ids.size() &&
+        std::find(_included_subdomain_ids.begin(),
+                  _included_subdomain_ids.end(),
+                  elem->subdomain_id()) == _included_subdomain_ids.end())
+      continue;
 
     // Compute the normal
     const auto normal = get2DElemNormal(elem);
