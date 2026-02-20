@@ -91,22 +91,22 @@ XYZDelaunayGenerator::validParams()
       "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
       "that are stitched to the generated Delaunay mesh.");
 
-  params.addParam<bool>(
-      "combined_stitching",
-      false,
-      "Whether to stitch all holes in one combined stitching step. This is efficient if a great "
-      "number of holes are to be stitched. But it is hard to debug if problems arise.");
-
   params.addRangeCheckedParam<Real>(
       "desired_volume",
       0,
       "desired_volume>=0",
       "Desired (maximum) tetrahedral volume, or 0 to skip uniform refinement");
 
+  params.addParam<bool>(
+      "combined_stitching",
+      false,
+      "Whether to stitch all holes in one combined stitching step. This is efficient if a great "
+      "number of holes are to be stitched. But it is hard to debug if problems arise.");
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.renameParam("algorithm", "stitching_algorithm", "12/10/2026");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh hole stitching should have verbose output.");
 
