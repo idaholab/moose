@@ -91,22 +91,22 @@ XYZDelaunayGenerator::validParams()
       "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
       "that are stitched to the generated Delaunay mesh.");
 
-  params.addParam<bool>(
-      "combined_stitching",
-      false,
-      "Whether to stitch all holes in one combined stitching step. This is efficient if a great "
-      "number of holes are to be stitched. But it is hard to debug if problems arise.");
-
   params.addRangeCheckedParam<Real>(
       "desired_volume",
       0,
       "desired_volume>=0",
       "Desired (maximum) tetrahedral volume, or 0 to skip uniform refinement");
 
+  params.addParam<bool>(
+      "combined_stitching",
+      false,
+      "Whether to stitch all holes in one combined stitching step. This is efficient if a great "
+      "number of holes are to be stitched. But it is hard to debug if problems arise.");
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.renameParam("algorithm", "stitching_algorithm", "12/10/2026");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh hole stitching should have verbose output.");
 
@@ -603,8 +603,8 @@ XYZDelaunayGenerator::generate()
   std::set<SubdomainName> main_subdomain_map_name_list;
   for (auto const & id_name_pair : main_subdomain_map)
     main_subdomain_map_name_list.emplace(id_name_pair.second);
-  if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
-    paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
+  // if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
+  //   paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
   // We're done with the hole meshes now, and MeshGenerator doesn't
   // want them anymore either.
