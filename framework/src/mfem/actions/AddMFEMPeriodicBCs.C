@@ -21,6 +21,7 @@ AddMFEMPeriodicBCs::validParams()
   InputParameters params = Action::validParams();
   params.registerBase("AddMFEMPeriodicBCs");
   params.addRequiredParam<std::string>("type", "Method to impose periodic BCs on the MFEM mesh");
+  params.addClassDescription("Specifiy translation vector for periodic BCs on an MFEM mesh.");
   return params;
 }
 
