@@ -837,5 +837,6 @@ bool _throw_on_warning = false;
 int interrupt_signal_number = 0;
 bool show_trace = true;
 bool show_multiple = false;
+std::mutex moose_console_mutex;
 
 } // namespace Moose

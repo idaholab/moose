@@ -22,29 +22,33 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _mem_limit(perf_graph._live_print_mem_limit),
     _stack_level(0),
     _current_execution_list_end(0),
-    _current_execution_list_last(0),
     _last_execution_list_end(0),
-    _last_printed_increment(NULL),
+    _last_printed_increment(nullptr),
+    _last_printed_increment_finished(false),
     _last_num_printed(0),
     _console_num_printed(0),
-    _stack_top_print_dots(true)
+    _stack_top_print_dots(true),
+    _console_lock(Moose::moose_console_mutex, std::defer_lock)
 {
 }
 
 void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
-  auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
+  mooseAssert(_console_lock, "Console not locked");
+
+  const auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
 
   // If we're not printing dots - we shouldn't be printing the message at all
   if (!section_info._print_dots || !_stack_top_print_dots)
   {
     section_increment._state = PerfGraph::IncrementState::PRINTED;
     _last_printed_increment = &section_increment;
+    _last_printed_increment_finished = true;
     return;
   }
 
-  // If the live_message is empty - just print the name
+  // Get the message for the section, if none just use the section name
   auto message =
       !section_info._live_message.empty() ? section_info._live_message : section_info._name;
 
@@ -56,46 +60,50 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       section_increment._state == PerfGraph::IncrementState::STARTED &&
       section_increment._beginning_num_printed != _console_num_printed)
   {
-    message = "Currently " + message;
-    // The 10 is for "Currently "
-    section_increment._num_dots = 10;
+    constexpr std::string_view prefix = "Currently ";
+    message = std::string(prefix) + message;
+    section_increment._num_dots = prefix.size();
   }
 
+  // Piece together the output
+  std::ostringstream out;
   // This line is different - need to finish the last line
-  if (_last_printed_increment && _last_printed_increment != &section_increment &&
+  if (_last_printed_increment && !_last_printed_increment_finished &&
+      _last_printed_increment != &section_increment &&
       _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
       section_info._print_dots)
-    _console << '\n';
-
+    out << "\n";
+  // Faint coloring
+  out << COLOR_FAINT;
   // Do we need to print dots?
   if (_last_printed_increment && _last_printed_increment == &section_increment &&
       section_increment._state == PerfGraph::IncrementState::PRINTED)
   {
     if (section_info._print_dots)
     {
-      _console << ".";
+      out << COLOR_FAINT << "." << COLOR_RESET;
       section_increment._num_dots++;
     }
   }
   // Printed before so print "Still"
   else if (section_increment._state == PerfGraph::IncrementState::PRINTED)
   {
-    _console << std::string(2 * section_increment._print_stack_level, ' ') << "Still " << message;
+    out << formatMessage(section_increment, "Still " + message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
-      _console << '\n';
+      out << "\n";
 
     // The 6 is for "Still "
     section_increment._num_dots = 6;
   }
   else // Just print the message
   {
-    _console << std::string(2 * section_increment._print_stack_level, ' ') << message;
+    out << formatMessage(section_increment, message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
-      _console << '\n';
+      out << "\n";
 
     // Reset the dots since we're printing, except in the "Currently" case
     if (section_increment._state != PerfGraph::IncrementState::STARTED ||
@@ -104,47 +112,52 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       section_increment._num_dots = 0;
   }
 
+  // Consider this second printed
   section_increment._state = PerfGraph::IncrementState::PRINTED;
 
-  // Get the message to the screen
-  _console << std::flush;
+  // Output, all together and now
+  outputNow(out);
 
   // Keep track of where we printed in the console
   _last_num_printed = section_increment._beginning_num_printed = _console.numPrinted();
 
   _last_printed_increment = &section_increment;
+  _last_printed_increment_finished = false;
 }
 
 void
-PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_start,
-                               PerfGraph::SectionIncrement & section_increment_finish)
+PerfGraphLivePrint::printStats(const PerfGraph::SectionIncrement & section_increment_start,
+                               const PerfGraph::SectionIncrement & section_increment_finish)
 {
+  mooseAssert(_console_lock, "Console not locked");
+
   if (_stack_level < 1)
     return;
 
   mooseAssert(_perf_graph_registry.sectionExists(section_increment_start._id),
               "Not found in map: " << section_increment_start._id);
 
-  auto & section_info_start = _perf_graph_registry.sectionInfo(section_increment_start._id);
+  const auto & section_info_start = _perf_graph_registry.sectionInfo(section_increment_start._id);
 
   // If the live_message is empty - just print the name
-  auto message = !section_info_start._live_message.empty() ? section_info_start._live_message
-                                                           : section_info_start._name;
-
-  auto time_increment =
+  const auto message = !section_info_start._live_message.empty() ? section_info_start._live_message
+                                                                 : section_info_start._name;
+  const auto time_increment =
       std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
           .count();
 
-  auto memory_total = section_increment_finish._memory;
+  const auto memory_total = section_increment_finish._memory;
 
-  auto num_horizontal_chars = message.size() + (2 * section_increment_start._print_stack_level);
+  auto num_horizontal_chars = message.size() + section_increment_start._print_stack_level;
 
   // Add multiapps prefix size
   if (!_app.isUltimateMaster())
     num_horizontal_chars += _app.name().size() + 2;
 
-  // Do we need to print "Finished"?
-  // This happens after something else printed in-between when this increment started and finished
+  // Form output
+  std::ostringstream out;
+  // Do we need to print "Finished"? This happens after something else printed
+  // in-between when this increment started and finished
   if (!section_info_start._print_dots ||
       (_last_printed_increment && _last_printed_increment != &section_increment_start) ||
       (section_increment_start._beginning_num_printed !=
@@ -153,47 +166,51 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
     // If we had printed some dots - we need to finish the line
     if (_last_printed_increment &&
         _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
+        _last_printed_increment->_id != 0 &&
         _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots)
-      _console << '\n';
+      out << "\n";
 
-    _console << std::string(2 * section_increment_start._print_stack_level, ' ') << "Finished "
-             << message;
-
-    // 9 is for "Finished "
-    num_horizontal_chars += 9;
+    constexpr std::string_view prefix = "Finished ";
+    out << formatMessage(section_increment_start, std::string(prefix) + message);
+    num_horizontal_chars += prefix.size();
   }
   else
     num_horizontal_chars += section_increment_start._num_dots;
+  // Force character wrapping
+  out << std::setw(WRAP_LENGTH - num_horizontal_chars);
+  // Faint coloring
+  out << COLOR_FAINT;
+  // Time
+  out << "[" << COLOR_YELLOW << std::setw(6) << std::fixed << std::setprecision(2) << time_increment
+      << " s" << COLOR_DEFAULT << ']';
+  // Memory
+  out << " [" << COLOR_YELLOW << std::setw(5) << std::fixed << memory_total << " MB"
+      << COLOR_DEFAULT << ']';
+  // Remove faint coloring
+  out << COLOR_RESET;
+  // New line
+  out << "\n";
 
-  // Actually do the printing
-  _console << std::setw(WRAP_LENGTH - num_horizontal_chars);
+  // Output, all together and now
+  outputNow(out);
 
-  _console << " [";
-  _console << COLOR_YELLOW;
-  _console << std::setw(6) << std::fixed << std::setprecision(2) << time_increment << " s";
-  _console << COLOR_DEFAULT;
-  _console << ']' << " [";
-  _console << COLOR_YELLOW << std::setw(5) << std::fixed;
-  _console << memory_total;
-  _console << " MB";
-  _console << COLOR_DEFAULT;
-  _console << ']';
-
-  // If we're not printing dots - just finish the line
-  _console << std::endl;
-
+  // Keep track of the last state when we printed so we know later on if
+  // someone else printed after us
   _last_num_printed = _console.numPrinted();
 
   _last_printed_increment = &section_increment_finish;
+  _last_printed_increment_finished = true;
 }
 
 void
 PerfGraphLivePrint::printStackUpToLast()
 {
+  mooseAssert(_console_lock, "Console not locked");
+
   if (_stack_level < 1)
     return;
 
-  // We need to print out everything on the stack before this that hasn't already been printed...
+  // Print out everything on the stack before this that hasn't already been printed
   for (unsigned int s = 0; s < _stack_level - 1; s++)
   {
     auto & section = _print_thread_stack[s];
@@ -209,14 +226,17 @@ PerfGraphLivePrint::printStackUpToLast()
 void
 PerfGraphLivePrint::inSamePlace()
 {
+  mooseAssert(_console_lock, "Console not locked");
+
   // If someone else printed since, then we need to start over, and set everything on the stack to
   // printed Everything is set to printed because if something printed and we're still in the same
   // place then we need to NOT print out the beginning message
   if (_last_num_printed != _console_num_printed)
   {
     _last_printed_increment = nullptr;
+    _last_printed_increment_finished = false;
 
-    for (unsigned int s = 0; s < _stack_level; s++)
+    for (const auto s : make_range(_stack_level))
       _print_thread_stack[s]._state = PerfGraph::IncrementState::PRINTED;
 
     return;
@@ -240,6 +260,8 @@ PerfGraphLivePrint::inSamePlace()
 void
 PerfGraphLivePrint::iterateThroughExecutionList()
 {
+  mooseAssert(_console_lock, "Console not locked");
+
   // Current position in the execution list
   auto p = _last_execution_list_end;
 
@@ -264,23 +286,26 @@ PerfGraphLivePrint::iterateThroughExecutionList()
     {
       mooseAssert(_stack_level, "Popping beyond the beginning of the stack!");
 
-      // Get the beginning information for this section... it is the thing currently on the top of
-      // the stack
-      auto & section_increment_start = _print_thread_stack[_stack_level - 1];
+      // Get the beginning information for this section... it is the thing
+      // currently on the top of the stack
+      const auto & section_increment_start = _print_thread_stack[_stack_level - 1];
 
-      auto time_increment =
+      const bool should_print =
+          // Printing everything
+          _perf_graph._live_print_all ||
+          // Just printed this
+          section_increment_start._state == PerfGraph::IncrementState::PRINTED ||
+          // Over time limit
           std::chrono::duration<double>(section_increment._time - section_increment_start._time)
-              .count();
-      auto memory_increment = section_increment._memory - section_increment_start._memory;
+                  .count() > _time_limit.load(std::memory_order_relaxed) ||
+          // Over memory limit
+          (section_increment._memory - section_increment_start._memory) >
+              _mem_limit.load(std::memory_order_relaxed);
 
       // If it has already been printed or meets our criteria then print it and finish it
-      if (_perf_graph._live_print_all ||
-          section_increment_start._state == PerfGraph::IncrementState::PRINTED ||
-          time_increment > _time_limit.load(std::memory_order_relaxed) ||
-          memory_increment > _mem_limit.load(std::memory_order_relaxed))
+      if (should_print)
       {
         printStackUpToLast();
-
         printStats(section_increment_start, section_increment);
       }
 
@@ -292,6 +317,29 @@ PerfGraphLivePrint::iterateThroughExecutionList()
 }
 
 void
+PerfGraphLivePrint::outputNow(const std::ostringstream & out)
+{
+  mooseAssert(_console_lock, "Should have the console lock");
+  mooseAssert(_out.str().empty(), "Should be empty");
+
+  const auto out_str = out.str();
+  mooseAssert(out_str.size(), "Should not output empty message");
+
+  _out << out_str;
+  _console_lock = _console.outputGuarded(_out, std::move(_console_lock));
+
+  mooseAssert(_out.str().empty(), "Should have output");
+}
+
+std::string
+PerfGraphLivePrint::formatMessage(const PerfGraph::SectionIncrement & section_increment,
+                                  const std::string & message)
+{
+  return COLOR_FAINT + std::string(section_increment._print_stack_level, ' ') + message +
+         COLOR_RESET;
+}
+
+void
 PerfGraphLivePrint::start()
 {
   // Keep going until we're signaled to end
@@ -300,7 +348,7 @@ PerfGraphLivePrint::start()
   // there was nothing to process or everything has been processed.
   while (!_currently_destructing)
   {
-    std::unique_lock<std::mutex> lock(_perf_graph._destructing_mutex);
+    std::unique_lock destructing_lock(_perf_graph._destructing_mutex);
 
     // Wait for five seconds (by default), or until notified that a section is finished
     // For a section to have finished the execution list has to have been appended to
@@ -316,7 +364,7 @@ PerfGraphLivePrint::start()
     // This will either wait until 5 seconds have passed, the signal is sent, _or_ a spurious
     // wakeup happens to find that there is work to do.
     _perf_graph._finished_section.wait_for(
-        lock,
+        destructing_lock,
         std::chrono::duration<Real>(_time_limit.load(std::memory_order_relaxed)),
         [this]
         {
@@ -330,9 +378,6 @@ PerfGraphLivePrint::start()
           this->_current_execution_list_end =
               _perf_graph._execution_list_end.load(std::memory_order_acquire);
 
-          // Save off the number of things currently printed to the console
-          this->_console_num_printed = _console.numPrinted();
-
           // If we are destructing or there is new work to do... allow moving on
           return this->_currently_destructing ||
                  this->_last_execution_list_end != this->_current_execution_list_end;
@@ -341,34 +386,32 @@ PerfGraphLivePrint::start()
     // If the PerfGraph is destructing and we don't have anything left to print - we need to quit
     // Otherwise, if there are still things to print - do it... afterwards, the loop above
     // will end because _done_future has been set in PerfGraph.
-    if (this->_currently_destructing &&
-        this->_last_execution_list_end == this->_current_execution_list_end)
+    if (_currently_destructing && _last_execution_list_end == _current_execution_list_end)
       return;
-
-    // The last entry in the current execution list for convenience
-    _current_execution_list_last = static_cast<long int>(_current_execution_list_end) - 1 >= 0
-                                       ? _current_execution_list_end - 1
-                                       : MAX_EXECUTION_LIST_SIZE;
 
     // Only happens if nothing has been added
     if (_current_execution_list_end == 0 && _last_execution_list_end == _current_execution_list_end)
       continue;
 
-    // Iterate from the last thing printed (begin) to the last thing in the list (end)
-    // If the time or memory of any section is above the threshold, print everything in between and
-    // update begin
+    // Lock the console so that nothing can write while we're writing
+    _console_lock.lock();
+    // Keep track of the print counter at the beginning
+    _console_num_printed = _console.numPrinted();
 
-    // Are we still sitting in the same place as the last iteration?  If so, we need to print
+    // Are we still sitting in the same place as the last iteration? If so, we need to print
     // progress and exit
     if (_last_execution_list_end == _current_execution_list_end)
       inSamePlace();
 
-    // This means that new stuff has been added to the execution list.  We need to iterate through
+    // New stuff has been added to the execution list. Iterate through
     // it, modifying the stack and printing anything that needs printing
     iterateThroughExecutionList();
 
+    // Store ending state
     _last_num_printed = _console.numPrinted();
-
     _last_execution_list_end = _current_execution_list_end;
+
+    // Release access to the console
+    _console_lock.unlock();
   }
 }
