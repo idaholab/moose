@@ -1797,6 +1797,11 @@ class TestHarness:
             help="The host(s) to use for submitting HPC jobs",
         )
         hpcgroup.add_argument(
+            "--hpc-srun",
+            action="store_true",
+            help="Set to run HPC MPI jobs with srun instead of mpiexec/mpirun",
+        )
+        hpcgroup.add_argument(
             "--hpc-no-hold",
             nargs=1,
             action="store",
@@ -1865,7 +1870,13 @@ class TestHarness:
             hpc_config = TestHarness.queryHPCCluster(hpc_host)
             if hpc_config is not None:
                 options.hpc = hpc_config.scheduler
-                print(f"INFO: Setting --hpc={options.hpc} for known host {hpc_host}")
+                options_set = [f"--hpc={options.hpc}"]
+                if hpc_config.srun:
+                    options_set.append("--hpc-srun")
+                    options.hpc_srun = True
+                print(
+                    f"INFO: Setting '{' '.join(options_set)}' for known host {hpc_host}"
+                )
 
         # Convert all list based options of length one to scalars
         for key, value in list(vars(options).items()):
@@ -1966,18 +1977,25 @@ class TestHarness:
         return self.options
 
     # Helper tuple for storing information about a cluster
-    HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules"])
+    HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules", "srun"])
     # Define INL HPC clusters
-    sawtooth_config = HPCCluster(
-        scheduler="slurm",
-        apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
-    )
     br_wr_config = HPCCluster(
-        scheduler="slurm", apptainer_modules=["container-openmpi/5.0.5-gcc13.2.0"]
+        scheduler="slurm",
+        apptainer_modules=["container-openmpi/5.0.5-gcc13.2.0"],
+        srun=False,
     )
     hpc_configs = {
-        "sawtooth": sawtooth_config,
         "bitterroot": br_wr_config,
+        "sawtooth": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
+            srun=False,
+        ),
+        "teton": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-mpich/4.3.2-gcc13.4.0-nopmix"],
+            srun=True,
+        ),
         "windriver": br_wr_config,
     }
 
