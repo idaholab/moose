@@ -41,7 +41,7 @@ private:
   /// The geometric cut userobject that provides the cut subdomain IDs
   const GeometricCutUserObject * _cut;
 
-  ///{@ map keys and values
+  ///@{ map keys and values
   const std::vector<CutSubdomainID> _keys;
   const std::vector<std::string> _vals;
   ///@}

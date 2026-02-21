@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosMaterials/index.md'
+
+  [constant_on]
+    requirement = 'The Kokkos system shall support declaring, computing, and retrieving material properties that are constant on'
+    [none]
+      type = 'Exodiff'
+      input = 'kokkos_constant_on_test.i'
+      exodiff = 'kokkos_constant_on_test_out.e'
+      detail = 'quadrature points;'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [element]
+      type = 'Exodiff'
+      input = 'kokkos_constant_on_test.i'
+      exodiff = 'kokkos_constant_on_test_out.e'
+      cli_args = 'Materials/mat/constant_on=ELEMENT'
+      detail = 'elements;'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [subdomain]
+      type = 'Exodiff'
+      input = 'kokkos_constant_on_test.i'
+      exodiff = 'kokkos_constant_on_test_out.e'
+      cli_args = 'Materials/mat/constant_on=SUBDOMAIN'
+      detail = 'subdomains.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

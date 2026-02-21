@@ -50,40 +50,18 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   associateVectorToTag(solution(), solution_tag);
 
-  for (auto block : _fe_problem.mesh().meshSubdomains())
-  {
-    _fe_problem.getKokkosMaterialsWarehouse().updateBlockVariableDependency(block,
-                                                                            needed_moose_vars);
-    _fe_problem.getKokkosMaterialsWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
-        block, needed_fe_var_vector_tags);
+  _fe_problem.getKokkosMaterialsWarehouse().updateVariableDependency(needed_moose_vars);
+  _fe_problem.getKokkosMaterialsWarehouse().updateFEVariableCoupledVectorTagDependency(
+      needed_fe_var_vector_tags);
 
-    _kokkos_elemental_aux_storage[type].updateBlockVariableDependency(block, needed_moose_vars);
-    _kokkos_elemental_aux_storage[type].updateBlockFEVariableCoupledVectorTagDependency(
-        block, needed_fe_var_vector_tags);
-    _kokkos_elemental_aux_storage[type].updateBlockMatPropDependency(block, needed_mat_props);
+  _kokkos_elemental_aux_storage[type].updateVariableDependency(needed_moose_vars);
+  _kokkos_elemental_aux_storage[type].updateFEVariableCoupledVectorTagDependency(
+      needed_fe_var_vector_tags);
+  _kokkos_elemental_aux_storage[type].updateMatPropDependency(needed_mat_props);
 
-    _kokkos_nodal_aux_storage[type].updateBlockVariableDependency(block, needed_moose_vars);
-    _kokkos_nodal_aux_storage[type].updateBlockFEVariableCoupledVectorTagDependency(
-        block, needed_fe_var_vector_tags);
-  }
-
-  for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
-  {
-    _fe_problem.getKokkosMaterialsWarehouse().updateBoundaryVariableDependency(boundary,
-                                                                               needed_moose_vars);
-    _fe_problem.getKokkosMaterialsWarehouse().updateBoundaryFEVariableCoupledVectorTagDependency(
-        boundary, needed_fe_var_vector_tags);
-
-    _kokkos_elemental_aux_storage[type].updateBoundaryVariableDependency(boundary,
-                                                                         needed_moose_vars);
-    _kokkos_elemental_aux_storage[type].updateBoundaryFEVariableCoupledVectorTagDependency(
-        boundary, needed_fe_var_vector_tags);
-    _kokkos_elemental_aux_storage[type].updateBoundaryMatPropDependency(boundary, needed_mat_props);
-
-    _kokkos_nodal_aux_storage[type].updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _kokkos_nodal_aux_storage[type].updateBoundaryFEVariableCoupledVectorTagDependency(
-        boundary, needed_fe_var_vector_tags);
-  }
+  _kokkos_nodal_aux_storage[type].updateVariableDependency(needed_moose_vars);
+  _kokkos_nodal_aux_storage[type].updateFEVariableCoupledVectorTagDependency(
+      needed_fe_var_vector_tags);
 
   // Copy data and cache variable values at element quadature points
 

@@ -12,7 +12,7 @@
 #include "KokkosArray.h"
 
 #define usingKokkosMaterialPropertyValueBaseMembers(T, dimension)                                  \
-  using MaterialPropertyValueBase<T, dimension>::_qp;                                              \
+  using MaterialPropertyValueBase<T, dimension>::_idx;                                             \
   using MaterialPropertyValueBase<T, dimension>::_data;                                            \
   using MaterialPropertyValueBase<T, dimension>::_value
 
@@ -53,9 +53,9 @@ public:
 
 protected:
   /**
-   * Global quadrature point index
+   * Index into the property data storage
    */
-  const dof_id_type _qp;
+  const dof_id_type _idx;
   /**
    * Pointer to the property data storage
    */
@@ -90,7 +90,7 @@ public:
    * Get the const reference of a property value
    * @returns The const reference of the property value
    */
-  KOKKOS_FUNCTION operator const T &() const { return _data ? (*_data)(_qp) : _value; }
+  KOKKOS_FUNCTION operator const T &() const { return _data ? (*_data)(_idx) : _value; }
   /**
    * Assign a value to the underlying property
    * @param value The value to assign
@@ -125,7 +125,7 @@ public:
    * @param i0 The first dimension index
    * @returns The writeable reference of the property value
    */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0) { return (*_data)(i0, _qp); }
+  KOKKOS_FUNCTION T & operator()(unsigned int i0) { return (*_data)(i0, _idx); }
   /**
    * Get the const reference of a property value
    * @param i0 The first dimension index
@@ -133,7 +133,7 @@ public:
    */
   KOKKOS_FUNCTION const T & operator()(unsigned int i0) const
   {
-    return _data ? (*_data)(i0, _qp) : _value;
+    return _data ? (*_data)(i0, _idx) : _value;
   }
 };
 
@@ -160,7 +160,10 @@ public:
    * @param i1 The second dimension index
    * @returns The writeable reference of the property value
    */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1) { return (*_data)(i0, i1, _qp); }
+  KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1)
+  {
+    return (*_data)(i0, i1, _idx);
+  }
   /**
    * Get the const reference of a property value
    * @param i0 The first dimension index
@@ -169,7 +172,7 @@ public:
    */
   KOKKOS_FUNCTION const T & operator()(unsigned int i0, unsigned int i1) const
   {
-    return _data ? (*_data)(i0, i1, _qp) : _value;
+    return _data ? (*_data)(i0, i1, _idx) : _value;
   }
 };
 
@@ -199,7 +202,7 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1, unsigned int i2)
   {
-    return (*_data)(i0, i1, i2, _qp);
+    return (*_data)(i0, i1, i2, _idx);
   }
   /**
    * Get the const reference of a property value
@@ -210,7 +213,7 @@ public:
    */
   KOKKOS_FUNCTION const T & operator()(unsigned int i0, unsigned int i1, unsigned int i2) const
   {
-    return _data ? (*_data)(i0, i1, i2, _qp) : _value;
+    return _data ? (*_data)(i0, i1, i2, _idx) : _value;
   }
 };
 
@@ -241,7 +244,7 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3)
   {
-    return (*_data)(i0, i1, i2, i3, _qp);
+    return (*_data)(i0, i1, i2, i3, _idx);
   }
   /**
    * Get the const reference of a property value
@@ -254,7 +257,7 @@ public:
   KOKKOS_FUNCTION const T &
   operator()(unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3) const
   {
-    return _data ? (*_data)(i0, i1, i2, i3, _qp) : _value;
+    return _data ? (*_data)(i0, i1, i2, i3, _idx) : _value;
   }
 };
 ///@}
