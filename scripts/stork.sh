@@ -126,9 +126,6 @@ if [[ "$kind" == "app" ]]; then
     cp $MOOSE_DIR/.clang-format $dir/
     cp $MOOSE_DIR/.gitignore $dir/
 
-    # add application-specific generated resource file to end of gitignore file
-    echo "$dstnamelow.yaml" >> $dir/.gitignore
-
     dir="$PWD/$dir"
     (cd $dir && git init && git add * .clang-format .gitignore && git commit -m "Initial files" && git branch -m main)
 

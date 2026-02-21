@@ -561,6 +561,20 @@ Capabilities::registerMooseCapabilities()
               "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.")
       .setExplicit();
 
+  {
+#ifdef LIBMESH_HAVE_STATIC_LIBS
+    const auto value = "static";
+#else
+    const auto value = "dynamic";
+#endif
+    add_string("library_mode",
+               value,
+               "The libMesh library mode. This is controlled by the --enable-static libMesh "
+               "configure option.")
+        .setExplicit()
+        .setEnumeration({"dynamic", "static"});
+  }
+
   // compiler
   {
     const auto doc = "Compiler used to build the MOOSE framework.";

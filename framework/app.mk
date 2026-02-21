@@ -360,11 +360,6 @@ $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 	        $(FRAMEWORK_DIR)/scripts/get_repo_revision.py)
 	@ln -sf $@ $(all_header_dir)
 
-#
-# .APPNAME resource file
-#
-app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
-
 # Kokkos for app
 
 ifeq ($(ENABLE_KOKKOS),true)
@@ -513,22 +508,6 @@ ifeq ($(libmesh_static),yes)
   endif
 endif
 
-# Write resource file
-$(app_resource): | prebuild
-	@echo "Creating Resource file $@"
-	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) \
-     $(libmesh_CXXFLAGS) \
-     compiler_type=$(compilertype) \
-     documentation=$(DOCUMENTATION) \
-     installation_type=in_tree)
-
-# Update and Copy resource file to prefix/bin
-install_$(APPLICATION_NAME)_resource:
-	@echo "Installing $(APPLICATION_NAME).yaml Resource file"
-	@$(shell $(FRAMEWORK_DIR)/scripts/write_appresource_file.py $(app_resource) $(APPLICATION_NAME) installation_type=relocated)
-	@mkdir -p $(bin_install_dir)
-	@cp $(app_resource) $(bin_install_dir)
-
 # Codesign command (OS X Only)
 codesign :=
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -538,7 +517,7 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(app_KOKKOS_LIB_COMBINED) $(ADDITIONAL_EXEC_OBJECTS)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_KOKKOS_LIB_COMBINED) $(ADDITIONAL_EXEC_OBJECTS)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(app_KOKKOS_LIB_COMBINED) ${SILENCE_SOME_WARNINGS}'
@@ -659,7 +638,7 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(installed_app_binary): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
+$(installed_app_binary): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing binary $@"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@

@@ -657,7 +657,7 @@ class RunApp(Tester):
             )
 
         # NOTE: If you add to this list, it must be added to
-        # CapabilityRegistry::augmented_capability_names in
+        # Moose::internal::CapabilityRegistry::augmented_capability_names in
         # framework/src/base/CapabilityRegistry.C
         augment_capability(
             "mpi_procs",
