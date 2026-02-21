@@ -73,6 +73,8 @@
     type = ArrayVarReductionAux
     variable = sum
     array_variable = parsed
+    # Needs to be executed after parsed_aux
+    execution_order_group = 2
   []
 []
 

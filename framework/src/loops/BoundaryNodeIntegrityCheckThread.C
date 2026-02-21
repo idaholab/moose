@@ -27,7 +27,6 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _nodal_aux(_aux_sys.nodalAuxWarehouse()),
     _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
     _nodal_array_aux(_aux_sys.nodalArrayAuxWarehouse()),
     _query(query),
@@ -40,7 +39,6 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     BoundaryNodeIntegrityCheckThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _nodal_aux(x._nodal_aux),
     _nodal_vec_aux(x._nodal_vec_aux),
     _nodal_array_aux(x._nodal_array_aux),
     _query(x._query),
@@ -94,7 +92,26 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
         boundaryIntegrityCheckError(*bnd_object, bnd_object->checkAllVariables(*node), bnd_name);
   };
 
-  check(_nodal_aux);
+  auto check_aux_from_the_warehouse = [node, boundary_id, &bnd_name, this](auto & system_type)
+  {
+    std::vector<AuxKernelBase *> auxkernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>(system_type)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribBoundaries>(boundary_id)
+        .queryInto(auxkernels);
+    if (auxkernels.empty())
+      return;
+
+    for (const auto & aux : auxkernels)
+      // Skip if this object uses geometric search because coupled variables may be defined on
+      // paired boundaries instead of the boundary this node is on
+      if (!aux->requiresGeometricSearch() && aux->checkVariableBoundaryIntegrity())
+        boundaryIntegrityCheckError(*aux, aux->checkAllVariables(*node), bnd_name);
+  };
+
+  check_aux_from_the_warehouse("AuxKernel");
   check(_nodal_vec_aux);
   check(_nodal_array_aux);
 }
