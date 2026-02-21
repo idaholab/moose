@@ -5064,13 +5064,6 @@ FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
   const auto old_exec_flag = _current_execute_on_flag;
   _current_execute_on_flag = type;
 
-  TheWarehouse::Query query = theWarehouse()
-                                  .query()
-                                  .condition<AttribSystem>("UserObject")
-                                  .condition<AttribExecOns>(type)
-                                  .condition<AttribName>(name);
-  computeUserObjectsInternal(type, group, query);
-
 #ifdef MOOSE_KOKKOS_ENABLED
   {
     TheWarehouse::Query query = theWarehouse()
@@ -5082,16 +5075,19 @@ FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
   }
 #endif
 
+  TheWarehouse::Query query = theWarehouse()
+                                  .query()
+                                  .condition<AttribSystem>("UserObject")
+                                  .condition<AttribExecOns>(type)
+                                  .condition<AttribName>(name);
+  computeUserObjectsInternal(type, group, query);
+
   _current_execute_on_flag = old_exec_flag;
 }
 
 void
 FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group)
 {
-  TheWarehouse::Query query =
-      theWarehouse().query().condition<AttribSystem>("UserObject").condition<AttribExecOns>(type);
-  computeUserObjectsInternal(type, group, query);
-
 #ifdef MOOSE_KOKKOS_ENABLED
   {
     TheWarehouse::Query query = theWarehouse()
@@ -5101,6 +5097,10 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     computeKokkosUserObjectsInternal(type, group, query);
   }
 #endif
+
+  TheWarehouse::Query query =
+      theWarehouse().query().condition<AttribSystem>("UserObject").condition<AttribExecOns>(type);
+  computeUserObjectsInternal(type, group, query);
 }
 
 void
