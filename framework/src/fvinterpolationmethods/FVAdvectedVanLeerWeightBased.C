@@ -104,10 +104,9 @@ FVAdvectedVanLeerWeightBased::advectedInterpolate(const DeviceData & data,
   const VectorValue<Real> grad_upwind =
       upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
 
-  const auto r_f = Moose::FV::rFBranchless(
-      phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
-  using std::abs;
-  const Real beta = (r_f + abs(r_f)) / (1.0 + abs(r_f));
+  const auto r_f =
+      Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
+  const Real beta = (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
 
   // Geometric weight associated with the upwind cell for this face.
   const Real w_f = upwind_mask * face.gC() + downwind_mask * (1.0 - face.gC());
