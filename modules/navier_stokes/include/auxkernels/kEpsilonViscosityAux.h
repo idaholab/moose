@@ -85,4 +85,15 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
+
+  /// Bool to include relaminarization
+  const bool _relaminarization;
+
+  /// Wall distance
+  const Moose::Functor<Real> * _wall_distance;
+
+  /// Closure numbers for production damping in relaminarization
+  static constexpr Real _Cd0 = 0.091;
+  static constexpr Real _Cd1 = 0.0042;
+  static constexpr Real _Cd2 = 0.00011;
 };

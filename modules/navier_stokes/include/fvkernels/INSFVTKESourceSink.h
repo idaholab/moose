@@ -69,6 +69,18 @@ protected:
   /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
   const bool _newton_solve;
 
+  /// Temperature field
+  const Moose::Functor<ADReal> * _temperature;
+
+  /// Thermal expansion coefficient
+  const Moose::Functor<ADReal> * _alpha;
+
+  /// Turbulent Prandtl number
+  const Moose::Functor<ADReal> * _Pr_t;
+
+  /// Gravity vector
+  const RealVectorValue * _gravity;
+
   ///@{
   /// Maps for wall treatement
   std::unordered_set<const Elem *> _wall_bounded;

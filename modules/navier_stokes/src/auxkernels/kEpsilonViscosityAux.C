@@ -46,6 +46,9 @@ kEpsilonViscosityAux::validParams()
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
 
+  params.addParam<bool>("relaminarization", false, "Boolean to activate relaminarization.");
+  params.addParam<MooseFunctorName>("wall_distance", "Distance to the wall.");
+
   return params;
 }
 
@@ -65,8 +68,14 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _scale_limiter(getParam<MooseEnum>("scale_limiter")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _newton_solve(getParam<bool>("newton_solve")),
+    _relaminarization(getParam<bool>("relaminarization")),
+    _wall_distance(params.isParamValid("wall_distance") ? &getFunctor<Real>("wall_distance")
+                                                        : nullptr)
 {
+  if (_relaminarization && !_wall_distance)
+    paramError("wall_distance",
+               "Wall distance shouold be provided when relaminarization is activated.");
 }
 
 void
@@ -205,6 +214,20 @@ kEpsilonViscosityAux::computeValue()
     if (_newton_solve)
       mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
+
+  if (_relaminarization)
+  {
+    const auto Re_d = std::sqrt(_k(elem_arg, state)) * (*_wall_distance)(elem_arg, state) / (nu);
+
+    const auto T1 = _Cd0 * std::sqrt(Re_d);
+    const auto T2 = _Cd1 * Re_d;
+    const auto T3 = _Cd2 * Utility::pow<2>(Re_d);
+
+    const auto f_mu = 1.0 - std::exp(-(T1 + T2 + T3));
+
+    mu_t *= MetaPhysicL::raw_value(f_mu);
+  }
+
   // Turbulent viscosity limiter
   return std::min(mu_t, _mu_t_ratio_max * mu);
 }

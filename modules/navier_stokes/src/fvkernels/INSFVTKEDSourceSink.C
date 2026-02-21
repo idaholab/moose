@@ -45,6 +45,16 @@ INSFVTKEDSourceSink::validParams()
   params.set<unsigned short>("ghost_layers") = 2;
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
+
+  params.addParam<MooseFunctorName>(NS::temperature, "The temperature.");
+  params.addParam<MooseFunctorName>("alpha_name", "Thermal expansion factor.");
+  params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+
+  params.addParam<bool>("relaminarization", false, "Boolean to activate relaminarization.");
+  params.addParam<Real>("C", 0.3, "Relaminarization coefficient.");
+  params.addParam<MooseFunctorName>("wall_distance", "Distance to the wall.");
+
   return params;
 }
 
@@ -65,13 +75,35 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _C2_eps(getFunctor<ADReal>("C2_eps")),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _newton_solve(getParam<bool>("newton_solve")),
+    _temperature(params.isParamValid(NS::temperature) ? &(getFunctor<ADReal>(NS::temperature))
+                                                      : nullptr),
+    _alpha(params.isParamValid("alpha_name") ? &(getFunctor<ADReal>("alpha_name")) : nullptr),
+    _Pr_t(params.isParamValid(NS::turbulent_Prandtl) ? &(getFunctor<ADReal>(NS::turbulent_Prandtl))
+                                                     : nullptr),
+    _gravity(params.isParamValid("gravity") ? &getParam<RealVectorValue>("gravity") : nullptr),
+    _relaminarization(getParam<bool>("relaminarization")),
+    _C(getParam<Real>("C")),
+    _wall_distance(params.isParamValid("wall_distance") ? &getFunctor<Real>("wall_distance")
+                                                        : nullptr)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
 
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
+
+  if (_temperature && !_alpha)
+    paramError("alpha",
+               "The thermal expansion coefficient should be >0.0 for thermal buoyancy production "
+               "correction.");
+
+  if (_temperature && !_gravity)
+    paramError("gravity", "Gravity should be provided when buoyancy correction is active.");
+
+  if (_relaminarization && !_wall_distance)
+    paramError("wall_distance",
+               "Wall distance shouold be provided when relaminarization is activated.");
 }
 
 void
@@ -170,7 +202,30 @@ INSFVTKEDSourceSink::computeQpResidual()
     const auto symmetric_strain_tensor_sq_norm = NS::computeShearStrainRateNormSquared<ADReal>(
         _u_var, _v_var, _w_var, elem_arg, state, coord_sys, rz_radial_coord);
 
-    ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+    auto base_strain = symmetric_strain_tensor_sq_norm;
+
+    // Buoyancy strain
+    if (_temperature)
+    {
+      ADRealVectorValue velocity(_u_var(elem_arg, state));
+      if (_dim >= 2)
+      {
+        velocity(1) = (*_v_var)(elem_arg, state);
+        if (_dim >= 3)
+          velocity(2) = (*_w_var)(elem_arg, state);
+      }
+
+      const auto g_direction = (*_gravity) / (*_gravity).norm();
+      const auto vel_parallel = velocity * g_direction;
+      const auto vel_perpendicular = (velocity - vel_parallel * g_direction).norm();
+      const auto C_eps_3 = std::tanh(std::abs(vel_parallel) / (vel_perpendicular + 1e-10));
+
+      base_strain += C_eps_3 * (*_alpha)(elem_arg, state) / (*_Pr_t)(elem_arg, state) *
+                     (_temperature->gradient(elem_arg, state) * (*_gravity));
+    }
+
+    ADReal production_k = _mu_t(elem_arg, state) * base_strain;
+
     // Compute production limiter (needed for flows with stagnation zones)
     const auto eps_old =
         _newton_solve ? max(_var(elem_arg, old_state), 1e-10) : _var(elem_arg, old_state);
@@ -181,6 +236,30 @@ INSFVTKEDSourceSink::computeQpResidual()
     const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
     production = _C1_eps(elem_arg, state) * production_k / time_scale;
     destruction = _C2_eps(elem_arg, state) * rho * _var(elem_arg, state) / time_scale;
+
+    if (_relaminarization)
+    {
+      // Useful definitions
+      const auto k = raw_value(TKE_old);
+      const auto eps = raw_value(eps_old);
+      const auto d = (*_wall_distance)(elem_arg, state);
+      const auto nu = mu / rho;
+
+      // Reynolds numbers
+      const auto Re_t = Utility::pow<2>(k) / eps / nu;
+      const auto Re_d = std::sqrt(k) * d / nu;
+
+      // Damping function
+      const auto f2 = 1.0 - _C * std::exp(-Utility::pow<2>(Re_t));
+
+      // Produnction increase
+      const auto prod_increase = _D * f2 * (production + 2 * mu * k / Utility::pow<2>(d)) *
+                                 std::exp(-_E * Utility::pow<2>(Re_d));
+
+      // Correct relaminarized production and destruction
+      production += prod_increase;
+      destruction *= f2;
+    }
 
     residual = destruction - production;
   }
