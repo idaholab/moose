@@ -272,27 +272,22 @@ System::checkNodalBCs()
   {
     auto nbc = static_cast<NodalBCBase *>(bc.get());
 
-    std::set<TagID> extra_vector_tags;
-    std::set<TagID> extra_matrix_tags;
+    auto vector_tags = nbc->getVectorTags({});
+    auto matrix_tags = nbc->getMatrixTags({});
 
-    if (nbc->isParamValid("extra_vector_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_vector_tags"))
-        extra_vector_tags.insert(_system.feProblem().getVectorTagID(tag));
+    if (_system.feProblem().vectorTagExists("time"))
+      vector_tags.insert(_system.feProblem().getVectorTagID("time"));
 
-    if (nbc->isParamValid("extra_matrix_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_matrix_tags"))
-        extra_matrix_tags.insert(_system.feProblem().getMatrixTagID(tag));
+    if (_system.feProblem().matrixTagExists("time"))
+      matrix_tags.insert(_system.feProblem().getMatrixTagID("time"));
 
-    getNodalBCDofs(nbc, _nbc_dof);
-
-    for (auto tag : extra_vector_tags)
+    for (auto tag : vector_tags)
       getNodalBCDofs(nbc, _nbc_residual_tag_dof[tag]);
 
-    for (auto tag : extra_matrix_tags)
+    for (auto tag : matrix_tags)
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
   }
 
-  _nbc_dof.copyToDevice();
   _nbc_residual_tag_dof.copyToDeviceNested();
   _nbc_matrix_tag_dof.copyToDeviceNested();
 }
