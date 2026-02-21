@@ -166,15 +166,6 @@ public:
    */
   KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
   /**
-   * Check whether a local DOF index is covered by a nodal BC
-   * @param dof The local DOF index
-   * @returns Whether the local DOF index is covered by a nodal BC
-   */
-  KOKKOS_FUNCTION bool hasNodalBC(dof_id_type dof) const
-  {
-    return _nbc_dof.isAlloc() && _nbc_dof[dof];
-  }
-  /**
    * Check whether a local DOF index is covered by a nodal BC for an extra residual tag
    * @param dof The local DOF index
    * @param tag The extra residual tag
@@ -513,11 +504,7 @@ private:
   Array<bool> _matrix_tag_active;
   ///@}
   /**
-   * Flag whether each DOF is covered by a nodal BC
-   */
-  Array<bool> _nbc_dof;
-  /**
-   * Flag whether each DOF is covered by a nodal BC for extra residual tags
+   * Flag whether each DOF is covered by a nodal BC for each tag
    */
   ///@{
   Array<Array<bool>> _nbc_residual_tag_dof;
