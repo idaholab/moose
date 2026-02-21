@@ -265,6 +265,10 @@ public:
    *       typically when switching subdomains.
    */
   void setActiveProperties(const std::unordered_set<unsigned int> & needed_props);
+  /**
+   * Whether this material has active properties
+   */
+  bool hasActiveProperties() { return _active_prop_ids.size() > 0; }
 
   /**
    * @return Whether or not this material should forcefully call

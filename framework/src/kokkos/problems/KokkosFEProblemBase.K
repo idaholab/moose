@@ -368,21 +368,21 @@ FEProblemBase::reinitKokkosMaterials()
   if (hasActiveMaterialProperties(0))
   {
     for (auto & material : _kokkos_materials.getActiveObjects())
-      if (!material->boundaryRestricted())
+      if (material->hasActiveProperties() && !material->boundaryRestricted())
         material->computeProperties();
 
     for (auto & material : _kokkos_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
-      material->computeProperties();
+      if (material->hasActiveProperties())
+        material->computeProperties();
 
     for (auto & material : _kokkos_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
-      material->computeProperties();
+      if (material->hasActiveProperties())
+        material->computeProperties();
 
     for (auto & material : _kokkos_materials.getActiveObjects())
-      if (material->boundaryRestricted())
+      if (material->hasActiveProperties() && material->boundaryRestricted())
         material->computeProperties();
   }
-
-  Kokkos::fence();
 }
 
 void
