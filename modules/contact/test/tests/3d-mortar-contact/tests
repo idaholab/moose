@@ -31,16 +31,32 @@
                   'container size of less than 50.'
   []
   [frictionless-mortar-3d-action]
-    type = 'CSVDiff'
-    input = 'frictionless-mortar-3d-action.i'
-    capabilities = 'ad_size>=150 & method!=dbg'
-    csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
-    mesh_mode = 'REPLICATED' # see issue 24255
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
-                  'constraint using the contact action.'
-    rel_err = 1.0e-5
-    abs_zero = 1.0e-5
-    valgrind = 'none'
+                  'constraints using the contact action with'
+    [first]
+      type = 'CSVDiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      detail = 'mortar quadrature designed to integrate linear polynomials on triangles'
+      rel_err = 1.0e-5
+      abs_zero = 1.0e-5
+      valgrind = 'none'
+    []
+    [second]
+      type = 'CSVDiff'
+      input = 'frictionless-mortar-3d-action.i'
+      capabilities = 'ad_size>=150 & method!=dbg'
+      csvdiff = 'frictionless-mortar-3d-action-second_contact-pressure_0002.csv'
+      mesh_mode = 'REPLICATED' # see issue 24255
+      cli_args = 'Contact/mortar/segment_quadrature="fifth" Outputs/file_base=frictionless-mortar-3d-action-second'
+      detail = 'mortar quadrature designed to integrate quadratic polynomials on triangles'
+      rel_err = 1.0e-5
+      abs_zero = 1.0e-5
+      valgrind = 'none'
+      prereq = 'frictionless-mortar-3d-action/first'
+    []
   []
   [frictionless-mortar-3d-pg-action]
     prereq = 'frictionless-mortar-3d_pg'
