@@ -476,7 +476,9 @@ The following objects are currently available in Kokkos-MOOSE:
 - [AuxKernels](syntax/KokkosAuxKernels/index.md)
 - [Functions](syntax/KokkosFunctions/index.md)
 - [UserObjects](syntax/KokkosUserObjects/index.md)
-- [Postprocessors](syntax/KokkosPostprocessors/index.md)
+- [Postprocessors](syntax/KokkosUserObjects/index.md#reducers)
+- [VectorPostprocessors](syntax/KokkosUserObjects/index.md#reducers)
+- [Reporters](syntax/KokkosUserObjects/index.md#reducers)
 
 !if-end!
 
