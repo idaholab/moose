@@ -18,6 +18,7 @@
 // forward declare unit tests
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(CapabilityTest, negateValue);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationType);
 #endif
 
 namespace Moose
@@ -64,6 +65,15 @@ public:
    * Only string-valued capabilites can have an enumeration.
    */
   const std::optional<std::set<std::string>> & queryEnumeration() const { return _enumeration; }
+
+  /**
+   * @return The enumeration.
+   *
+   * Will error if the capability does not have an enumeration.
+   *
+   * Only string-valued capabilites can have an enumeration.
+   */
+  const std::set<std::string> & getEnumeration() const;
 
   /**
    * @return Whether or not the capability has the given enumeration \p value.
@@ -130,6 +140,25 @@ public:
   bool hasStringValue() const { return std::holds_alternative<std::string>(_value); }
 
   /**
+   * @return The boolean capability value.
+   *
+   * Will error if the value is not a boolean.
+   */
+  bool getBoolValue() const;
+  /**
+   * @return The boolean capability value.
+   *
+   * Will error if the value is not an integer.
+   */
+  int getIntValue() const;
+  /**
+   * @return The string capability value.
+   *
+   * Will error if the value is not a string.
+   */
+  const std::string & getStringValue() const;
+
+  /**
    * @return The capability value as a string.
    */
   std::string valueToString() const;
@@ -149,6 +178,7 @@ public:
 private:
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::CapabilityTest, negateValue);
+  FRIEND_TEST(::CapabilitiesTest, isInstallationType);
 #endif
 
   /// The name of capability

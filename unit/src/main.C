@@ -27,6 +27,7 @@ main(int argc, char ** argv)
   MooseInit init(argc, argv);
   registerApp(MooseUnitApp);
   registerApp(OtherMooseUnitApp);
+  MooseUnitApp::registerUnit();
   Moose::_throw_on_error = true;
   Moose::_throw_on_warning = true;
 

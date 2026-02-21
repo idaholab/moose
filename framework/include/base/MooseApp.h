@@ -1130,6 +1130,16 @@ public:
   const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
 #endif
 
+  /**
+   * @return Whether or not the application is relocated
+   */
+  static bool isRelocated();
+
+  /**
+   * @return Whether or not the application is in-tree
+   */
+  static bool isInTree();
+
 protected:
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::CapabilitiesTest, mooseAppAddBoolCapability);
