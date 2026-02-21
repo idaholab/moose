@@ -14,6 +14,8 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "mfem.hpp"
+#include <memory>
 
 class MFEMProblem : public ExternalProblem
 {
@@ -254,6 +256,19 @@ public:
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
+  /** 
+   * Axisymmetric geometry API (public getters)
+  */
+  const mfem::Coefficient * getRadialCoefficient() const {return _r_coeff.get();}
+  const mfem::Coefficient * getInverseRadialCoefficient() const {return _inv_r_coeff.get();}
+  const mfem::Coefficient * getTwoPiRCoefficient() const {return _two_pi_r_coeff.get();}
+  const mfem::Coefficient * getMeasureWeightCoefficient() const {return _measure_weight.get();}
+
+  /** 
+  * Name-based axisymmetric accessor (used by materials via the CoefficientManager)
+  */
+  const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const;
+
   enum class NumericType
   {
     REAL,
@@ -261,6 +276,21 @@ public:
   };
 
   NumericType num_type;
+
+private:
+  enum class CoordinateSystem {Cartesian, Cylindrical};
+  CoordinateSystem _coord = CoordinateSystem::Cartesian;
+
+  Real _inv_r_eps = 1e-12;
+
+  std::unique_ptr<mfem::Coefficient> _r_coeff;
+  std::unique_ptr<mfem::Coefficient> _inv_r_coeff;
+  std::unique_ptr<mfem::Coefficient> _two_pi_r_coeff;
+  std::unique_ptr<mfem::Coefficient> _measure_weight;
+
+  //builder called during initialSetup() when cylindrical is passed
+  void _registerAxisymCoeffs(); 
+
 
 protected:
   MFEMProblemData _problem_data;
