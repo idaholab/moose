@@ -145,6 +145,8 @@ CompositionDT::computeDT()
 
   std::set<std::pair<Real, TimeStepper *>, CompareFirst> dts, bound_dt;
 
+  // Gather all the dts from time steppers that are not following a sequence
+  // Both regular time steppers and "lower-bound" time steppers
   for (auto & ts : time_steppers)
     if (!dynamic_cast<TimeSequenceStepperBase *>(ts))
     {
@@ -157,9 +159,12 @@ CompositionDT::computeDT()
         dts.emplace(dt, ts);
     }
 
+  // Keep track of which time stepper produced the dts we may use
   _current_time_stepper = dts.size() ? dts.begin()->second : nullptr;
   _largest_bound_time_stepper = bound_dt.size() ? (--bound_dt.end())->second : nullptr;
 
+  // Apply the lower-bound logic
+  // Also checks the sequence time steppers
   _dt = produceCompositionDT(dts, bound_dt);
 
   return _dt;
@@ -185,7 +190,9 @@ CompositionDT::getSequenceSteppersNextTime()
 
     if (ts_time_to_hit - _time <= _dt_min)
     {
-      tss->increaseCurrentStep();
+      // Note: if we are the end of the sequence, there is no need to keep increasing
+      if (!MooseUtils::relativeFuzzyEqual(ts_time_to_hit, std::numeric_limits<Real>::max() / 2))
+        tss->increaseCurrentStep();
       ts_time_to_hit = tss->getNextTimeInSequence();
     }
     if (next_time_to_hit > ts_time_to_hit)
@@ -194,6 +201,7 @@ CompositionDT::getSequenceSteppersNextTime()
       next_time_to_hit = ts_time_to_hit;
     }
   }
+
   return next_time_to_hit;
 }
 
@@ -202,6 +210,7 @@ CompositionDT::produceCompositionDT(
     std::set<std::pair<Real, TimeStepper *>, CompareFirst> & dts,
     std::set<std::pair<Real, TimeStepper *>, CompareFirst> & bound_dts)
 {
+  // Gather smaller (min) dt and largest bound dt
   Real minDT, lower_bound, dt;
   minDT = lower_bound = dt = 0.0;
   if (!dts.empty())
@@ -209,6 +218,7 @@ CompositionDT::produceCompositionDT(
   if (!bound_dts.empty())
     lower_bound = bound_dts.rbegin()->first;
 
+  // Bound applies if the min dt from the time steppers is smaller than the minimum bound
   if (minDT > lower_bound)
     dt = minDT;
   else
@@ -219,10 +229,14 @@ CompositionDT::produceCompositionDT(
 
   auto ts = getSequenceSteppersNextTime();
 
-  if (ts != 0 && (ts - _time) < dt)
+  // Adjust the dt to hit the sequence time, only if:
+  // - the current dt would have "stepped over" the sequence time
+  // - we are not exactly on that sequence time already
+  // - we already passed that sequence time (could happen with a dynamic sequence)
+  if (ts - _time < dt && !MooseUtils::absoluteFuzzyEqual(ts - _time, 0) && ts - _time > 0)
   {
     _current_time_stepper = _closest_time_sequence_stepper;
-    return std::min((ts - _time), dt);
+    return ts - _time;
   }
   else
     return dt;
@@ -259,6 +273,7 @@ CompositionDT::step()
 void
 CompositionDT::acceptStep()
 {
+  // NOTE: this also takes care of updating the time step sequences
   actOnTimeSteppers([](auto & ts) { ts.acceptStep(); });
 }
 

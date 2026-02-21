@@ -15,18 +15,36 @@ InputParameters
 TimeSequenceStepper::validParams()
 {
   InputParameters params = TimeSequenceStepperBase::validParams();
-  params.addRequiredParam<std::vector<Real>>("time_sequence", "The values of t");
+  params.addRequiredParam<TimesName>("time_sequence", "The values of t");
   params.addClassDescription("Solves the Transient problem at a sequence of given time points.");
   return params;
 }
 
 TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters)
-  : TimeSequenceStepperBase(parameters)
+  : TimeSequenceStepperBase(parameters), _times(getTimes("time_sequence"))
 {
 }
 
 void
 TimeSequenceStepper::init()
 {
-  setupSequence(getParam<std::vector<Real>>("time_sequence"));
+  setupSequence(_times.getTimes());
+}
+
+void
+TimeSequenceStepper::step()
+{
+  TimeSequenceStepperBase::step();
+
+  updateSequence();
+}
+
+void
+TimeSequenceStepper::updateSequence()
+{
+  // Get the times again in case there are new ones
+  const auto & times = _times.getTimes();
+  if (_times.isDynamicTimeSequence())
+    if (!std::includes(_time_sequence.begin(), _time_sequence.end(), times.begin(), times.end()))
+      setupSequence(times);
 }

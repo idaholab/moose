@@ -19,8 +19,7 @@ TimeSequenceStepperFailTest::validParams()
 }
 
 TimeSequenceStepperFailTest::TimeSequenceStepperFailTest(const InputParameters & parameters)
-  : TimeSequenceStepper(parameters),
-    _original_time_sequence(getParam<std::vector<Real>>("time_sequence"))
+  : TimeSequenceStepper(parameters), _original_time_sequence(_times.getTimes())
 {
 }
 
