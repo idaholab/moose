@@ -31,6 +31,7 @@ class Assembly;
 namespace Moose::Kokkos
 {
 class ResidualObject;
+class System;
 }
 #endif
 
@@ -81,6 +82,7 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
+    friend class Moose::Kokkos::System;
 #endif
 
     VectorTagsKey() {}
@@ -100,6 +102,7 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
+    friend class Moose::Kokkos::System;
 #endif
 
     MatrixTagsKey() {}
