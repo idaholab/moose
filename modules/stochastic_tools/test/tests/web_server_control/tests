@@ -64,4 +64,28 @@
       detail = 'in "batch-restore" mode with multiple outputs.'
     []
   []
+  [vector_config]
+    type = RunApp
+    input = vpp_test_runner.i
+    issues = '#32196'
+    command_proxy = 'test_stochastic_controls_vpp.py 0'
+    required_python_packages = 'numpy requests'
+    requirement = "Python utilities for driving stochastic simulations shall support cache tolerances supplied on a per-parameter basis"
+  []
+  [list_format]
+    type = RunApp
+    input = vpp_test_runner.i
+    issues = '#32196'
+    command_proxy = 'test_stochastic_controls_vpp.py 1'
+    required_python_packages = 'numpy requests'
+    requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching"
+  []
+  [nested_list_format]
+    type = RunApp
+    input = vpp_test_runner.i
+    issues = '#32196'
+    command_proxy = 'test_stochastic_controls_vpp.py 3'
+    required_python_packages = 'numpy requests'
+    requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two) with caching, including nested lists"
+  []
 []
