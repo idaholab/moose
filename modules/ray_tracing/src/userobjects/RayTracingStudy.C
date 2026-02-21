@@ -1457,9 +1457,11 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
     // Mapping on rank 0 from ID -> processor ID
     std::map<RayID, processor_id_type> global_map;
 
+    std::string error_string = "";
+
     // Verify another processor's IDs against the global map on rank 0
-    const auto check_ids =
-        [this, &global_map, &error_suffix](processor_id_type pid, const std::vector<RayID> & ids)
+    const auto check_ids = [&global_map, &error_suffix, &error_string](
+                               processor_id_type pid, const std::vector<RayID> & ids)
     {
       for (const RayID id : ids)
       {
@@ -1467,18 +1469,18 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
 
         // Means that this ID already exists in the map
         if (!emplace_pair.second)
-          mooseError("Ray with ID ",
-                     id,
-                     " exists on ranks ",
-                     emplace_pair.first->second,
-                     " and ",
-                     pid,
-                     "\n",
-                     error_suffix);
+          error_string += "Ray with ID " + std::to_string(id) + " exists on ranks " +
+                          std::to_string(emplace_pair.first->second) + " and " +
+                          std::to_string(pid) + "\n" + error_suffix;
       }
     };
 
     Parallel::push_parallel_vector_data(_communicator, send_ids, check_ids);
+
+    bool found_error = (error_string != "");
+    _communicator.max(found_error);
+    if (found_error)
+      mooseError(error_string);
   }
 }
 
