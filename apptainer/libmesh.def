@@ -109,8 +109,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${ROOT_BUILD_DIR}
     mkdir -p ${LIBMESH_DIR}/logs
     METHODS="{{ METHODS or "opt dbg oprof devel" }}"
+    IFS=' ' read -r -a LIBMESH_ARR_OPTIONS <<< "{{ LIBMESH_OPTIONS }}"
+    if [ -n "$CUDA_DIR" ]; then
+        LIBMESH_ARR_OPTIONS+=("--with-nvtx=${CUDA_DIR}" "--enable-perflog")
+    fi
+
     LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR} LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
-        {{ LIBMESH_OPTIONS }} --skip-submodule-update 2>&1 | tee ${LIBMESH_DIR}/logs/build.log
+        "${LIBMESH_ARR_OPTIONS[@]}" --skip-submodule-update 2>&1 | tee ${LIBMESH_DIR}/logs/build.log
     cp ${LIBMESH_SRC_DIR}/build/config.log ${LIBMESH_DIR}/logs/
 
     # Fix possibly bad permissions
