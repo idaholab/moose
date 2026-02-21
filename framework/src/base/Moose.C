@@ -703,10 +703,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // UserObject and some derived classes
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
-  registerSyntax("AddFVInterpolationMethodAction", "InterpolationMethods/*");
-  syntax.registerSyntaxType("InterpolationMethods/*", "InterpolationMethodName");
-  registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
-  syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
 
@@ -714,6 +710,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("MeshModifiers/*", "UserObjectName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
+
+  // FVInterpolationMethods
+  registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
+  syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
 
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");

@@ -34,7 +34,6 @@ class MooseLinearVariableFV;
  * The logic is a little twisted here to enable SIMD and later Kokkos vectorization (efficient
  * loops). We need this to be as lightweight as possible and we have to make sure it is trivially
  * copyable.
- *
  * Another reason why this is a little complicated is that we would like to make sure
  * the derived classes can use their own member variables (like a power variable for inverse
  * distance weighting, or a limiter variable etc).
@@ -44,9 +43,10 @@ class FVInterpolationMethod : public MooseObject
 public:
   static InputParameters validParams();
 
+  /// Constructor using parameters
   FVInterpolationMethod(const InputParameters & params);
 
-  /// Storage reserved for trivially-copyable handle payloads.
+  /// Storage reserved for trivially-copyable data objects (custom parameters for the interpolation).
   static constexpr std::size_t handle_storage_bytes = 64;
 
   /**
@@ -61,6 +61,10 @@ public:
     /// Used for checking if the interpolator exists before we evaluate it
     bool valid() const { return eval; }
 
+    /// Set the actual evaluation function and raw interpolation data storage
+    /// @param data Generic data member, templated to make it flexible
+    /// @param eval_in The function which will be evaluated by this method. This gets assigned
+    ///                from the static functions of derived classes to prevent virtual calls
     template <typename Data>
     void set(const Data & data, Eval eval_in)
     {
@@ -98,6 +102,9 @@ public:
     /// and placing data with stricter alignment (e.g., double or VectorValue) would be
     /// undefined behavior. This storage lets us pass interpolation parameters without a host
     /// pointer while staying safely aligned for any trivially-copyable data.
+    /// The logic here is that this raw storage will be passed through a void pointer
+    /// To a templated wrapper function which will reinterpret to a the type specific to the
+    /// interpolation method.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
 
     /// Function pointer that performs the interpolation
@@ -115,20 +122,34 @@ public:
                           const VectorValue<Real> *,
                           Real);
 
+    /// Used for checking if the interpolator exists before we evaluate it
     bool valid() const { return eval; }
+
+    /// Returns if this interpolation needs gradients or not
     bool needsGradients() const { return _needs_gradients; }
+
+    /// Returns if this interpolation needs limited gradients
     bool needsLimitedGradients() const
     {
       return _gradient_limiter != Moose::FV::GradientLimiterType::None;
     }
+
+    /// Returns the type of the limiter this interpolation needs
     Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
 
+    /// Setter for the gradient computation flag
     void setNeedsGradients(const bool needs_gradients) { _needs_gradients = needs_gradients; }
+
+    /// Setter for the required gradient limiter
     void setGradientLimiter(const Moose::FV::GradientLimiterType limiter)
     {
       _gradient_limiter = limiter;
     }
 
+    /// Set the actual evaluation function and raw interpolation data storage
+    /// @param data Generic data member, templated to make it flexible
+    /// @param eval_in The function which will be evaluated by this method. This gets assigned
+    ///                from the static functions of derived classes to prevent virtual calls
     template <typename Data>
     void set(const Data & data, Eval eval_in)
     {
@@ -144,6 +165,7 @@ public:
       eval = eval_in;
     }
 
+    /// Operator for convenient evaluation, just calls eval with forwarded arguments
     Real operator()(const FaceInfo & face,
                     Real elem_value,
                     Real neighbor_value,
@@ -154,6 +176,8 @@ public:
       mooseAssert(valid(), "Attempting to call an empty advected value interpolation handle");
       mooseAssert(!needsGradients() || elem_grad,
                   "Gradient required by advected value interpolation but elem_grad is null");
+      mooseAssert(!needsGradients() || neighbor_grad,
+                  "Gradient required by advected value interpolation but neighbor_grad is null");
       return eval(_storage, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
     }
 
@@ -176,9 +200,19 @@ public:
     /// and placing data with stricter alignment (e.g., double or VectorValue) would be
     /// undefined behavior. This storage lets us pass interpolation parameters without a host
     /// pointer while staying safely aligned for any trivially-copyable data.
+    /// The logic here is that this raw storage will be passed through a void pointer
+    /// To a templated wrapper function which will reinterpret to a the type specific to the
+    /// interpolation method.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
+
+    /// Function pointer that performs the interpolation
     Eval eval = nullptr;
+
+    /// Flag indicating if this object needs gradients (can be checked through the
+    /// kernels to request gradient computations for the variables)
     bool _needs_gradients = false;
+
+    /// The type of gradient limiting this scheme requests
     Moose::FV::GradientLimiterType _gradient_limiter = Moose::FV::GradientLimiterType::None;
   };
 
@@ -200,20 +234,34 @@ public:
                                                 const VectorValue<Real> *,
                                                 Real);
 
+    /// Used for checking if the interpolator exists before we evaluate it
     bool valid() const { return eval; }
+
+    /// Returns if this interpolation needs gradients or not
     bool needsGradients() const { return _needs_gradients; }
+
+    /// Returns if this interpolation needs limited gradients
     bool needsLimitedGradients() const
     {
       return _gradient_limiter != Moose::FV::GradientLimiterType::None;
     }
+
+    /// Returns the type of the limiter this interpolation needs
     Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
 
+    /// Setter for the gradient computation flag
     void setNeedsGradients(const bool needs_gradients) { _needs_gradients = needs_gradients; }
+
+    /// Setter for the required gradient limiter
     void setGradientLimiter(const Moose::FV::GradientLimiterType limiter)
     {
       _gradient_limiter = limiter;
     }
 
+    /// Set the actual evaluation function and raw interpolation data storage
+    /// @param data Generic data member, templated to make it flexible
+    /// @param eval_in The function which will be evaluated by this method. This gets assigned
+    ///                from the static functions of derived classes to prevent virtual calls
     template <typename Data>
     void set(const Data & data, Eval eval_in)
     {
@@ -229,6 +277,7 @@ public:
       eval = eval_in;
     }
 
+    /// Operator for convenient evaluation, just calls eval with forwarded arguments
     AdvectedSystemContribution operator()(const FaceInfo & face,
                                           Real elem_value,
                                           Real neighbor_value,
@@ -239,6 +288,8 @@ public:
       mooseAssert(valid(), "Attempting to call an empty advected interpolation handle");
       mooseAssert(!needsGradients() || elem_grad,
                   "Gradient required by advected interpolation but elem_grad is null");
+      mooseAssert(!needsGradients() || neighbor_grad,
+                  "Gradient required by advected interpolation but neighbor_grad is null");
       return eval(_storage, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
     }
 
@@ -261,22 +312,38 @@ public:
     /// and placing data with stricter alignment (e.g., double or VectorValue) would be
     /// undefined behavior. This storage lets us pass interpolation parameters without a host
     /// pointer while staying safely aligned for any trivially-copyable data.
+    /// The logic here is that this raw storage will be passed through a void pointer
+    /// To a templated wrapper function which will reinterpret to a the type specific to the
+    /// interpolation method.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
+
+    /// Function pointer that performs the interpolation
     Eval eval = nullptr;
+
+    /// Flag indicating if this object needs gradients (can be checked through the
+    /// kernels to request gradient computations for the variables)
     bool _needs_gradients = false;
+
+    /// The type of gradient limiting this scheme requests
     Moose::FV::GradientLimiterType _gradient_limiter = Moose::FV::GradientLimiterType::None;
   };
 
   /**
-   * @return The face interpolation callable associated with this user object.
+   * Return the face interpolation callable associated with this object.
    */
   FaceInterpolator faceInterpolator() const { return _face_interpolator; }
 
+  /**
+   * Return the advected face interpolation callable associated with thisobject.
+   */
   AdvectedValueInterpolator advectedFaceValueInterpolator() const
   {
     return _advected_face_value_interpolator;
   }
 
+  /**
+   * Return the advected system contribution callable associated with this object.
+   */
   AdvectedSystemContributionCalculator advectedSystemContributionCalculator() const
   {
     return _advected_system_contribution_calculator;
@@ -374,7 +441,9 @@ protected:
   }
 
 private:
-  /// Wrapper for face interpolation calls (kept adjacent to other call wrappers)
+  /// Wrapper for face interpolation calls, we have this to make sure we call the derived
+  /// object's static function and cast the raw data stored on the generic interpolation method
+  /// into the actual data needed by the interpolator (defined on the derived class usually).
   template <typename Derived, typename Data>
   static Real callInterpolate(const void * data,
                               const FaceInfo & face,
@@ -385,7 +454,9 @@ private:
   }
 
   /**
-   * Wrapper for advected value interpolation calls.
+   * Wrapper for advected value interpolation calls. We have this to make sure we call the derived
+   * object's static function and cast the raw data stored on the generic interpolation method
+   * into the actual data needed by the interpolator (defined on the derived class usually).
    */
   template <typename Derived, typename Data>
   static Real callAdvectedInterpolateValue(const void * data,
@@ -407,7 +478,9 @@ private:
 
   /**
    * Wrapper for advected interpolation calls to allow member access while staying trivially
-   * copyable.
+   * copyable. We have this to make sure we call the derived
+   * object's static function and cast the raw data stored on the generic interpolation method
+   * into the actual data needed by the interpolator (defined on the derived class usually).
    */
   template <typename Derived, typename Data>
   static AdvectedSystemContribution
@@ -428,7 +501,14 @@ private:
                                         mass_flux);
   }
 
+  // Members that can be retrieved depending on what functionality this interpolation object can
+  // serve.
+
+  /// Interpolator for getting face values based on cell values
   FaceInterpolator _face_interpolator;
+  /// Interpolator for getting face value based on cell values and advective field information
   AdvectedValueInterpolator _advected_face_value_interpolator;
+  /// Interpolator for getting face value contributions to a linear system and corresponding right
+  /// hand side based on cell values and advecting field information
   AdvectedSystemContributionCalculator _advected_system_contribution_calculator;
 };
