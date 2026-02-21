@@ -54,18 +54,20 @@ ComponentMeshTransformHelper::addMeshGenerators()
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _mg_names.back();
-    params.set<MooseEnum>("transform") = "ROTATE";
+
     if (_rotation)
+    {
+      params.set<MooseEnum>("transform") = "ROTATE";
       params.set<RealVectorValue>("vector_value") = *_rotation;
+    }
     else
     {
-      const auto rotation_matrix =
-          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), *_direction);
+      params.set<MooseEnum>("transform") = "ROTATE_WITH_MATRIX";
+
       RealVectorValue angles;
-      angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-      angles(1) = std::asin(-rotation_matrix(2, 0));
-      angles(2) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-      params.set<RealVectorValue>("vector_value") = angles / M_PI_2 * 90;
+      const auto rotation_matrix =
+          RotationMatrix::rodriguesRotationMatrix<false>(RealVectorValue(1, 0, 0), *_direction);
+      params.set<RealTensorValue>("rotation_matrix") = rotation_matrix;
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_rotated", params);
