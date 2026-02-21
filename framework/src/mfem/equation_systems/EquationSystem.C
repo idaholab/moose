@@ -30,8 +30,7 @@ bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
 {
-  auto iter = std::find(the_vector.begin(), the_vector.end(), name);
-  return (iter != the_vector.end());
+  return std::find(the_vector.begin(), the_vector.end(), name) != the_vector.end();
 }
 
 void
@@ -39,6 +38,13 @@ EquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_
 {
   if (!VectorContainsName(_coupled_var_names, coupled_var_name))
     _coupled_var_names.push_back(coupled_var_name);
+}
+
+void
+EquationSystem::AddEliminatedVariableNameIfMissing(const std::string & eliminated_var_name)
+{
+  if (!VectorContainsName(_eliminated_var_names, eliminated_var_name))
+    _eliminated_var_names.push_back(eliminated_var_name);
 }
 
 void
@@ -66,18 +72,18 @@ EquationSystem::SetTrialVariableNames()
 void
 EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  AddTestVariableNameIfMissing(kernel->getTestVariableName());
-  AddCoupledVariableNameIfMissing(kernel->getTrialVariableName());
-  auto trial_var_name = kernel->getTrialVariableName();
-  auto test_var_name = kernel->getTestVariableName();
+  const auto & trial_var_name = kernel->getTrialVariableName();
+  const auto & test_var_name = kernel->getTestVariableName();
+  AddCoupledVariableNameIfMissing(trial_var_name);
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new kernels map if not present for the test variable
   if (!_kernels_map.Has(test_var_name))
   {
     auto kernel_field_map =
         std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
     _kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
-  // Register new kernels map if not present for the test/trial variable
-  // pair
+  // Register new kernels map if not present for the test/trial variable pair
   if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
@@ -89,18 +95,18 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 void
 EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
-  AddTestVariableNameIfMissing(bc->getTestVariableName());
-  AddCoupledVariableNameIfMissing(bc->getTrialVariableName());
-  auto trial_var_name = bc->getTrialVariableName();
-  auto test_var_name = bc->getTestVariableName();
+  const auto & trial_var_name = bc->getTrialVariableName();
+  const auto & test_var_name = bc->getTestVariableName();
+  AddCoupledVariableNameIfMissing(trial_var_name);
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new integrated bc map if not present for the test variable
   if (!_integrated_bc_map.Has(test_var_name))
   {
     auto integrated_bc_field_map = std::make_shared<
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
     _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
   }
-  // Register new integrated bc map if not present for the test/trial variable
-  // pair
+  // Register new integrated bc map if not present for the test/trial variable pair
   if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
@@ -112,7 +118,9 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 void
 EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  auto test_var_name = bc->getTestVariableName();
+  const auto & test_var_name = bc->getTestVariableName();
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new essential bc map if not present for the test variable
   if (!_essential_bc_map.Has(test_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialBC>>>();
@@ -188,8 +196,8 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
-        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      for (const auto i : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
+        global_ess_markers[i] = std::max(global_ess_markers[i], ess_bdrs[i]);
     }
   }
 }
@@ -201,7 +209,8 @@ EquationSystem::ApplyEssentialBCs()
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
-    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    mfem::ParGridFunction & trial_gf = *_var_ess_constraints.at(i);
+    trial_gf = 0;
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
@@ -215,21 +224,13 @@ void
 EquationSystem::EliminateCoupledVariables()
 {
   for (const auto & test_var_name : _test_var_names)
-  {
-    auto lf = _lfs.Get(test_var_name);
     for (const auto & eliminated_var_name : _eliminated_var_names)
-    {
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name) &&
           !VectorContainsName(_test_var_names, eliminated_var_name))
       {
-        auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
-        // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-        mfem::Vector lf_prev(lf->Size());
-        mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
-        *lf -= lf_prev;
+        auto & mblf = *_mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        mblf.AddMult(*_eliminated_variables.Get(eliminated_var_name), *_lfs.Get(test_var_name), -1);
       }
-    }
-  }
 }
 
 void
@@ -261,13 +262,17 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                    mfem::BlockVector & trueRHS)
 {
   auto & test_var_name = _test_var_names.at(0);
-  auto blf = _blfs.Get(test_var_name);
-  auto lf = _lfs.Get(test_var_name);
-  mfem::BlockVector aux_x, aux_rhs;
+  mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  auto blf = _blfs.Get(test_var_name);
+  blf->FormLinearSystem(_ess_tdof_lists.at(0),
+                        *_var_ess_constraints.at(0),
+                        *_lfs.Get(test_var_name),
+                        aux_a,
+                        aux_x,
+                        aux_rhs,
+                        /*copy_interior=*/true);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -287,8 +292,9 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
-  trueRHS.SyncFromBlocks();
+  // Zero out RHS and sync memory
   trueRHS = 0.0;
+  trueRHS.SyncToBlocks();
 
   for (const auto i : index_range(_test_var_names))
   {
@@ -305,20 +311,23 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
-        aux_lf = *_lfs.Get(test_var_name);
         auto blf = _blfs.Get(test_var_name);
-        blf->FormLinearSystem(
-            _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs);
+        blf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *_var_ess_constraints.at(j),
+                              *_lfs.Get(test_var_name),
+                              *aux_a,
+                              aux_x,
+                              aux_rhs,
+                              /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
-        aux_lf = 0.0;
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
-                                          *(_var_ess_constraints.at(j)),
-                                          aux_lf,
+                                          *_var_ess_constraints.at(j),
+                                          aux_lf = 0,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
@@ -366,11 +375,7 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
-  }
+    gridfunctions.Get(_trial_var_names.at(i))->Distribute(&(trueX.GetBlock(i)));
 }
 
 void
@@ -439,8 +444,7 @@ EquationSystem::BuildMixedBilinearForms()
       const auto & coupled_var_name = _coupled_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
-      // Register MixedBilinearForm if kernels exist for it, and assemble
-      // kernels
+      // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (_kernels_map.Has(test_var_name) &&
           _kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
           test_var_name != coupled_var_name)
@@ -456,8 +460,7 @@ EquationSystem::BuildMixedBilinearForms()
         test_mblfs->Register(coupled_var_name, mblf);
       }
     }
-    // Register all mixed bilinear form sets associated with a single test
-    // variable
+    // Register all mixed bilinear form sets associated with a single test variable
     _mblfs.Register(test_var_name, test_mblfs);
   }
 }

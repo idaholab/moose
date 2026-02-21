@@ -150,10 +150,7 @@ MFEMValueSamplerBase::execute()
 void
 MFEMValueSamplerBase::finalize()
 {
-  if (_interp_vals.UseDevice())
-  {
-    _interp_vals.HostReadWrite();
-  }
+  _interp_vals.HostReadWrite();
   _points.HostReadWrite();
 
   const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();

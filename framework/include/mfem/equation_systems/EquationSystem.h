@@ -63,10 +63,12 @@ public:
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
 protected:
-  /// Add test variable to EquationSystem.
-  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
+  /// Add eliminated variable to EquationSystem.
+  virtual void AddEliminatedVariableNameIfMissing(const std::string & eliminated_var_name);
+  /// Add test variable to EquationSystem.
+  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
@@ -78,9 +80,9 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & test_var_name,
+  virtual void ApplyEssentialBC(const std::string & var_name,
                                 mfem::ParGridFunction & trial_gf,
                                 mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
