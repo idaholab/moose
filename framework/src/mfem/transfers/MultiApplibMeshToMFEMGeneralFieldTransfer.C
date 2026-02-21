@@ -1,0 +1,343 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#include "MultiApplibMeshToMFEMGeneralFieldTransfer.h"
+#include "FEProblemBase.h"
+#include "MultiApp.h"
+#include "SystemBase.h"
+#include "MFEMProblem.h"
+#include "MFEMMesh.h"
+#include "MFEMVectorFromlibMeshPoint.h"
+
+#include "libmesh/mesh_function.h"
+#include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
+
+registerMooseObject("MooseApp", MultiApplibMeshToMFEMGeneralFieldTransfer);
+
+InputParameters
+MultiApplibMeshToMFEMGeneralFieldTransfer::validParams()
+{
+  InputParameters params = MultiAppTransfer::validParams();
+  params.addRequiredParam<std::vector<AuxVariableName>>(
+      "variable", "AuxVariable to store transferred value in.");
+  params.addRequiredParam<std::vector<VariableName>>("source_variable",
+                                                     "Variable to transfer from");
+  params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
+  return params;
+}
+
+MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTransfer(InputParameters const & params)
+  : MultiAppTransfer(params),
+    _mfem_interpolator(this->comm().get()),
+    _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
+    _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
+{
+  auto bad_problem = [this]()
+  {
+    mooseError(type(),
+               " only works with MFEMProblem based applications. Check that all your inputs "
+               "involved in this transfer are MFEMProblem based");
+  };
+
+  if (hasToMultiApp())
+  {
+    if (!dynamic_cast<FEProblemBase *>(&getToMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getToMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<MFEMProblem *>(&getToMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
+  if (hasFromMultiApp())
+  {
+    if (!dynamic_cast<MFEMProblem *>(&getFromMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<FEProblemBase *>(&getFromMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
+}
+
+void
+MultiApplibMeshToMFEMGeneralFieldTransfer::extractOutgoingPoints(mfem::ParFiniteElementSpace & to_pfespace, mfem::Vector & vxyz, mfem::Ordering::Type & point_ordering)
+{
+  const int NE = to_pfespace.GetParMesh()->GetNE();
+  const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
+  const int dim = to_pfespace.GetParMesh()->Dimension();
+
+  vxyz.SetSize(nsp*NE*dim);
+  for (int i = 0; i < NE; i++)
+  {
+      const mfem::FiniteElement *fe = to_pfespace.GetFE(i);
+      const mfem::IntegrationRule ir = fe->GetNodes();
+      mfem::ElementTransformation *et = to_pfespace.GetElementTransformation(i);
+
+      mfem::DenseMatrix pos;
+      et->Transform(ir, pos);
+      mfem::Vector rowx(vxyz.GetData() + i*nsp, nsp),
+            rowy(vxyz.GetData() + i*nsp + NE*nsp, nsp),
+            rowz;
+      if (dim == 3)
+      {
+        rowz.SetDataAndSize(vxyz.GetData() + i*nsp + 2*NE*nsp, nsp);
+      }
+      pos.GetRow(0, rowx);
+      pos.GetRow(1, rowy);
+      if (dim == 3) { pos.GetRow(2, rowz); }
+  }
+  point_ordering = mfem::Ordering::Type::byNODES;
+}
+
+void
+MultiApplibMeshToMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, FEProblemBase & from_problem)
+{
+  if (numToVar() != numFromVar())
+    mooseError("Number of variables transferred must be same in both systems.");
+
+  for (unsigned v = 0; v < numToVar(); ++v)
+    setMFEMGridFunctionValuesFromlibMesh(v, to_problem);
+}
+
+void
+MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem)
+{
+  // Generate list of points where the grid function will be evaluated
+  mfem::ParGridFunction & to_gf = *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
+  mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
+  mfem::Vector vxyz;
+  mfem::Ordering::Type point_ordering;    
+  extractOutgoingPoints(to_pfespace, vxyz, point_ordering);  
+  const int NE = to_pfespace.GetParMesh()->GetNE();
+  const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
+  const int dim = to_pfespace.GetParMesh()->Dimension();
+  const int nodes_cnt = vxyz.Size() / dim;
+  const int to_gf_ncomp = to_gf.VectorDim();
+
+  // Point locations needed to send to from-domain
+  // processor to points
+  std::map<processor_id_type, std::vector<Point>> outgoing_points;
+
+  for (int i = 0; i < nodes_cnt*to_gf_ncomp; i++)
+  {  
+    for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
+    {    
+      if (dim == 3)
+      {
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp], vxyz[i+2*NE*nsp]});
+        outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+      }
+      else
+      {
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp] });          
+        outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
+      }
+    }
+  }
+  // Evaluate source grid function at target points
+  mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
+  std::vector<libMesh::MeshFunction> local_meshfuns;
+  local_meshfuns.clear();
+  local_meshfuns.reserve(_from_problems.size());
+  // Construct a local mesh function for each origin problem
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    FEProblemBase & from_problem = *_from_problems[i_from];
+    MooseVariableFieldBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[var_index],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_ANY);
+    System & from_sys = from_var.sys().system();
+    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
+    local_meshfuns.emplace_back(from_problem.es(),
+                                *from_sys.current_local_solution,
+                                from_sys.get_dof_map(),
+                                from_var_num);
+    local_meshfuns.back().init();
+    local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
+  }
+
+  // Get the local bounding boxes for current processor.
+  // There could be more than one box because of the number of local apps
+  // can be larger than one
+  std::vector<BoundingBox> local_bboxes(1);
+
+  /**
+   * Gather all of the evaluations, pick out the best ones for each point, and
+   * apply them to the solution vector.  When we are transferring from
+   * multiapps, there may be multiple overlapping apps for a particular point.
+   * In that case, we'll try to use the value from the app with the lowest id.
+   */
+
+  // Fill values and app ids for incoming points
+  // We are responsible to compute values for these incoming points
+  auto gather_functor =
+      [this, &local_meshfuns, &local_bboxes](
+          processor_id_type /*pid*/,
+          const std::vector<Point> & incoming_points,
+          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
+  {
+    vals_ids_for_incoming_points.resize(incoming_points.size(), std::make_pair(OutOfMeshValue, 0));
+    for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
+    {
+      Point pt = incoming_points[i_pt];
+
+      // Loop until we've found the lowest-ranked app that actually contains
+      // the quadrature point.
+      for (MooseIndex(_from_problems.size()) i_from = 0;
+           i_from < _from_problems.size() &&
+           vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
+           ++i_from)
+      {
+        // if (local_bboxes[i_from].contains_point(pt))
+        // {
+          const auto from_global_num =
+              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+          // Use mesh function to compute interpolation values
+          vals_ids_for_incoming_points[i_pt].first =
+              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+          // Record problem ID as well
+          switch (_current_direction)
+          {
+            case FROM_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+              break;
+            case TO_MULTIAPP:
+              vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+              break;
+            default:
+              mooseError("Unsupported direction");
+          }
+        // }
+      }
+    }
+  };
+
+  // Incoming values and APP ids for outgoing points
+  std::map<processor_id_type, std::vector<std::pair<Real, unsigned int>>> incoming_vals_ids;
+  // Copy data out to incoming_vals_ids
+  auto action_functor =
+      [&incoming_vals_ids](
+          processor_id_type pid,
+          const std::vector<Point> & /*my_outgoing_points*/,
+          const std::vector<std::pair<Real, unsigned int>> & vals_ids_for_outgoing_points)
+  {
+    // This lambda function might be called multiple times
+    incoming_vals_ids[pid].reserve(vals_ids_for_outgoing_points.size());
+    // Copy data for processor 'pid'
+    std::copy(vals_ids_for_outgoing_points.begin(),
+              vals_ids_for_outgoing_points.end(),
+              std::back_inserter(incoming_vals_ids[pid]));
+  };
+
+  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
+  // Hopefully, pull_parallel_vector_data will not mess up this
+  const std::pair<Real, unsigned int> * ex = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(
+      comm(), outgoing_points, gather_functor, action_functor, ex);
+
+  for (int i = 0; i < interp_vals.Size(); i++)
+  {
+    for (auto & group : incoming_vals_ids)
+    {
+      double val = group.second[i].first;
+      if (val == std::numeric_limits<Real>::infinity())
+        continue;
+      interp_vals[i] = val;
+    }
+  }
+  // Project DoFs to MFEM GridFunction
+  mfem::Array<int> vdofs;
+  mfem::Vector vals;
+  mfem::Vector elem_dof_vals(nsp*to_gf_ncomp);
+  for (int i = 0; i < NE; i++)
+  {
+    to_pfespace.GetElementVDofs(i, vdofs);
+    vals.SetSize(vdofs.Size());
+    for (int j = 0; j < nsp; j++)
+    {
+      for (int d = 0; d < to_gf_ncomp; d++)
+      {
+        // Arrange values byNodes
+        int idx = to_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
+                  i*nsp*dim + d + j*dim : d*nsp*NE + i*nsp + j;
+        elem_dof_vals(j + d*nsp) = interp_vals(idx);
+      }
+    }
+    to_gf.SetSubVector(vdofs, elem_dof_vals);
+  }  
+}
+
+void
+MultiApplibMeshToMFEMGeneralFieldTransfer::execute()
+{
+  TIME_SECTION("MultiApplibMeshToMFEMGeneralFieldTransfer::execute", 5, "Copies variables");
+  if (_current_direction == TO_MULTIAPP)
+  {
+    for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+    {
+      if (getToMultiApp()->hasLocalApp(i))
+      {
+        transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
+                 getToMultiApp()->problemBase());
+      }
+    }
+  }
+  else if (_current_direction == FROM_MULTIAPP)
+  {
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+    {
+      if (getFromMultiApp()->hasLocalApp(i))
+      {
+        transfer(static_cast<MFEMProblem &>(getFromMultiApp()->problemBase()),
+                 getFromMultiApp()->appProblemBase(i));
+      }
+    }
+  }
+  else if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    int transfers_done = 0;
+    for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+    {
+      if (getFromMultiApp()->hasLocalApp(i))
+      {
+        if (getToMultiApp()->hasLocalApp(i))
+        {
+          transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
+                   getFromMultiApp()->appProblemBase(i));
+          transfers_done++;
+        }
+      }
+    }
+    if (!transfers_done)
+      mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
+                 "per multiapp involved on each rank");
+  }
+}
+
+void
+MultiApplibMeshToMFEMGeneralFieldTransfer::checkSiblingsTransferSupported() const
+{
+  // Check that we are in the supported configuration: same number of source and target apps
+  // The allocation of the child apps on the processors must be the same
+  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
+  {
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
+        mooseError("Child application allocation on parallel processes must be the same to support "
+                   "siblings variable field copy transfer");
+  }
+  else
+    mooseError("Number of source and target child apps must match for siblings transfer");
+}
+
+#endif
