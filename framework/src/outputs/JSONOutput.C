@@ -232,16 +232,22 @@ JSONOutput::output()
   }
 }
 
-template <>
+template <typename Context>
 void
-dataStore(std::ostream & stream, nlohmann::json & json, void * /*context*/)
+dataStore(std::ostream & stream, nlohmann::json & json, Context /*context*/)
 {
   stream << json;
 }
 
-template <>
+template void dataStore(std::ostream & stream, nlohmann::json & json, void * context);
+template void dataStore(std::ostream & stream, nlohmann::json & json, std::nullptr_t context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, nlohmann::json & json, void * /*context*/)
+dataLoad(std::istream & stream, nlohmann::json & json, Context /*context*/)
 {
   stream >> json;
 }
+
+template void dataLoad(std::istream & stream, nlohmann::json & json, void * context);
+template void dataLoad(std::istream & stream, nlohmann::json & json, std::nullptr_t context);

@@ -146,27 +146,27 @@ GeometricCutUserObject::threadJoin(const UserObject & y)
 }
 
 // custom data load and data store methods for structs with std::vector members
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, Xfem::CutFace & cf, void * context)
+dataStore(std::ostream & stream, Xfem::CutFace & cf, Context context)
 {
   dataStore(stream, cf._face_id, context);
   dataStore(stream, cf._face_edge, context);
   dataStore(stream, cf._position, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, Xfem::CutFace & cf, void * context)
+dataLoad(std::istream & stream, Xfem::CutFace & cf, Context context)
 {
   dataLoad(stream, cf._face_id, context);
   dataLoad(stream, cf._face_edge, context);
   dataLoad(stream, cf._position, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * context)
+dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, Context context)
 {
   dataStore(stream, gmei._elem_cut_edges, context);
   dataStore(stream, gmei._elem_cut_nodes, context);
@@ -174,9 +174,9 @@ dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * conte
   dataStore(stream, gmei._frag_edges, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * context)
+dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, Context context)
 {
   dataLoad(stream, gmei._elem_cut_edges, context);
   dataLoad(stream, gmei._elem_cut_nodes, context);
@@ -184,18 +184,18 @@ dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * contex
   dataLoad(stream, gmei._frag_edges, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, void * context)
+dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, Context context)
 {
   dataStore(stream, gmei._elem_cut_faces, context);
   dataStore(stream, gmei._frag_cut_faces, context);
   dataStore(stream, gmei._frag_faces, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo3D & gmei, void * context)
+dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo3D & gmei, Context context)
 {
   dataLoad(stream, gmei._elem_cut_faces, context);
   dataLoad(stream, gmei._frag_cut_faces, context);

@@ -54,8 +54,9 @@ PerfNode::childrenMemory() const
   return children_memory;
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void *)
+dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Context /*context*/)
 {
   // We store the name instead of the ID because the ID could change in recover
   std::string name = moose::internal::getPerfGraphRegistry().sectionInfo(node->id())._name;
@@ -75,9 +76,15 @@ dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void *)
   }
 }
 
+template void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, void *);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, void * perf_graph)
+dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Context perf_graph)
 {
+  static_assert(std::is_convertible_v<Context, PerfGraph *>,
+                "dataLoad for PerfNode requires a PerfGraph* context");
+
   std::string name;
   // When we recursively add children, we grab the name before recursing into
   // dataLoad(), so only load the name if we're on the root
@@ -112,3 +119,5 @@ dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, void * p
     dataLoad(stream, child, perf_graph);
   }
 }
+
+template void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, PerfGraph *);

@@ -32,8 +32,10 @@ class Elem;
 
 class MaterialPropertyStorage;
 
-void dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context);
-void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, MaterialPropertyStorage & storage, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, Context context);
 
 /**
  * Stores the stateful material properties computed by materials.
@@ -466,8 +468,10 @@ private:
   friend class RedistributeProperties;
 
   // Need non-const props from here
-  friend void dataLoad(std::istream &, MaterialPropertyStorage &, void *);
-  friend void dataStore(std::ostream &, MaterialPropertyStorage &, void *);
+  template <typename Context>
+  friend void dataLoad(std::istream &, MaterialPropertyStorage &, Context);
+  template <typename Context>
+  friend void dataStore(std::ostream &, MaterialPropertyStorage &, Context);
 };
 
 inline const MaterialPropertyStorage::PropsType &
@@ -507,5 +511,8 @@ MaterialPropertyStorage::setProps(const unsigned int state)
   return const_cast<MaterialPropertyStorage::PropsType &>(std::as_const(*this).props(state));
 }
 
-void dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void * context);
-void dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void * context);
+template <typename Context>
+void
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, Context context);

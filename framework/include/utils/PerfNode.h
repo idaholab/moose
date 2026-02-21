@@ -18,6 +18,7 @@
 
 #include "MooseTypes.h"
 #include "MemoryUtils.h"
+#include "AnyPointer.h"
 
 #include <chrono>
 #include <map>
@@ -183,9 +184,13 @@ private:
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
 
-  friend void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, void *);
-  friend void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, void *);
+  template <typename Context>
+  friend void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, Context);
 };
 
-void dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void * context);
-void dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Context context);

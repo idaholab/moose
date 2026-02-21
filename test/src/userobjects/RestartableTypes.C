@@ -30,7 +30,7 @@ RestartableTypes::RestartableTypes(const InputParameters & params)
     _pointer_data(declareRestartableData<Dummy *>("pointer_data")),
     _custom_data(declareRestartableData<Dummy>("custom_data")),
     _custom_with_context(declareRestartableDataWithContext<DummyNeedingContext>(
-        "custom_with_context", &_context_int)),
+        "custom_with_context", _context_int)),
     _set_data(declareRestartableData<std::set<Real>>("set_data")),
     _map_data(declareRestartableData<std::map<unsigned int, Real>>("map_data")),
     _dense_vector_data(declareRestartableData<DenseVector<Real>>("dense_vector_data")),

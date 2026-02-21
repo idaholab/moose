@@ -34,9 +34,8 @@ public:
   /**
    * Constructor
    * @param name The full (unique) name for this piece of data.
-   * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableDataValue(const std::string & name, void * const context);
+  RestartableDataValue(const std::string & name);
 
   /**
    * Destructor.
@@ -60,14 +59,9 @@ public:
   const std::string & name() const { return _name; }
 
   /**
-   * A context pointer for helping with load / store.
-   */
-  void * context() { return _context; }
-
-  /**
    * @return Whether or not the data has context set.
    */
-  bool hasContext() const { return _context != nullptr; }
+  virtual bool hasContext() const = 0;
 
   /**
    * Helper that protects access to setDeclared() to only MooseApp
@@ -193,9 +187,6 @@ protected:
   /// The full (unique) name of this particular piece of data.
   const std::string _name;
 
-  /// A context pointer for helping with load and store
-  void * const _context;
-
 private:
   /// Whether or not this data has been declared (true) or only retreived (false)
   bool _declared;
@@ -210,8 +201,11 @@ private:
 /**
  * Concrete definition of a parameter value
  * for a specified type.
+ *
+ * @tparam T The type of data being stored
+ * @tparam Context The type of context for load/store operations (defaults to std::nullptr_t)
  */
-template <typename T>
+template <typename T, typename Context = std::nullptr_t>
 class RestartableData : public RestartableDataValue
 {
 public:
@@ -221,12 +215,13 @@ public:
   /**
    * Constructor
    * @param name The full (unique) name for this piece of data.
-   * @param context 'typeless' pointer to user-specific data.
-   * @param arg Forwarded arguments that are passed to the constructor of the data.
+   * @param context Typed context pointer for load/store operations.
+   * @param args Forwarded arguments that are passed to the constructor of the data.
    */
   template <typename... Params>
-  RestartableData(const std::string & name, void * const context, Params &&... args)
-    : RestartableDataValue(name, context),
+  RestartableData(const std::string & name, Context context, Params &&... args)
+    : RestartableDataValue(name),
+      _context(context),
       _value(std::make_unique<T>(std::forward<Params>(args)...))
   {
   }
@@ -255,6 +250,22 @@ public:
 
   virtual bool hasStoreJSON() const override final { return has_store_json; }
 
+  /**
+   * @return Whether or not the data has context set.
+   */
+  virtual bool hasContext() const override final
+  {
+    if constexpr (std::is_same_v<Context, std::nullptr_t>)
+      return false;
+    else
+      return _context != nullptr;
+  }
+
+  /**
+   * @return The context pointer for this data.
+   */
+  Context context() const { return _context; }
+
 protected:
   /**
    * Store the RestartableData into a binary stream
@@ -269,62 +280,65 @@ protected:
   virtual void storeJSONValue(nlohmann::json & json) const override final;
 
 private:
+  /// Context pointer for load/store operations
+  Context _context;
+
   /// Stored value.
   std::unique_ptr<T> _value;
 };
 
 // ------------------------------------------------------------
 // RestartableData<> class inline methods
-template <typename T>
+template <typename T, typename Context>
 inline const T &
-RestartableData<T>::get() const
+RestartableData<T, Context>::get() const
 {
   mooseAssert(_value, "Not valid");
   return *_value;
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline T &
-RestartableData<T>::set()
+RestartableData<T, Context>::set()
 {
   mooseAssert(_value, "Not valid");
   return *_value;
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline void
-RestartableData<T>::reset()
+RestartableData<T, Context>::reset()
 {
   mooseAssert(_value, "Not valid"); // shouldn't really call this twice
   _value.reset();
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline std::string
-RestartableData<T>::type() const
+RestartableData<T, Context>::type() const
 {
   return MooseUtils::prettyCppType<T>();
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline void
-RestartableData<T>::storeInternal(std::ostream & stream)
+RestartableData<T, Context>::storeInternal(std::ostream & stream)
 {
   storeHelper(stream, set(), _context);
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline void
-RestartableData<T>::loadInternal(std::istream & stream)
+RestartableData<T, Context>::loadInternal(std::istream & stream)
 {
   loadHelper(stream, set(), _context);
 }
 
-template <typename T>
+template <typename T, typename Context>
 inline void
-RestartableData<T>::storeJSONValue(nlohmann::json & json) const
+RestartableData<T, Context>::storeJSONValue(nlohmann::json & json) const
 {
-  if constexpr (RestartableData<T>::has_store_json)
+  if constexpr (RestartableData<T, Context>::has_store_json)
     nlohmann::to_json(json, get());
   else
     mooseAssert(false, "Should not be called");

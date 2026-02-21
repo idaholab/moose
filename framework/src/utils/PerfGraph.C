@@ -507,12 +507,13 @@ PerfGraph::updateMaxMemory(const std::size_t current_memory)
     _max_memory = current_memory;
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
+dataStore(std::ostream & stream, PerfGraph & perf_graph, Context /*context*/)
 {
   // We need to store the registry id -> section info map so that we can add
   // registered sections that may not be added yet during recover
-  dataStore(stream, perf_graph._perf_graph_registry._id_to_item, nullptr);
+  dataStore(stream, perf_graph._perf_graph_registry.sectionItems(), nullptr);
 
   // Update before serializing the nodes so that the time/memory/calls are correct
   perf_graph.update();
@@ -521,8 +522,12 @@ dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
   dataStore(stream, perf_graph._root_node, nullptr);
 }
 
+template void dataStore(std::ostream &, PerfGraph &, void *);
+template void dataStore(std::ostream &, PerfGraph &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
+dataLoad(std::istream & stream, PerfGraph & perf_graph, Context /*context*/)
 {
   // Load in all of the recovered sections and register those that do not exist yet
   std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
@@ -544,3 +549,10 @@ dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
   // and will create new nodes for section paths that do not exist
   dataLoad(stream, perf_graph._root_node, &perf_graph);
 }
+
+template void dataLoad(std::istream &, PerfGraph &, void *);
+template void dataLoad(std::istream &, PerfGraph &, std::nullptr_t);
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, PerfGraph &, MooseApp *);
+template void dataLoad(std::istream &, PerfGraph &, MooseApp *);

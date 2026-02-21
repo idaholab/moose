@@ -109,6 +109,6 @@ public:
 
 // Used for Restart
 template <>
-void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context);
+void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, libMesh::MeshBase * context);
 template <>
-void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context);
+void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, libMesh::MeshBase * context);

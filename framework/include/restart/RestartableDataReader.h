@@ -88,10 +88,10 @@ public:
    * @param args Arguments to forward to the constructor of the object
    * @return The restored data
    */
-  template <typename T, typename... Args>
+  template <typename T, typename Context = std::nullptr_t, typename... Args>
   T & restoreData(const std::string & data_name,
                   const THREAD_ID tid = 0,
-                  void * const context = nullptr,
+                  Context context = nullptr,
                   Args &&... args);
 
   ///@{
@@ -215,17 +215,17 @@ private:
   const bool _force;
 };
 
-template <typename T, typename... Args>
+template <typename T, typename Context, typename... Args>
 T &
 RestartableDataReader::restoreData(const std::string & data_name,
                                    const THREAD_ID tid /* = 0 */,
-                                   void * const context /* = nullptr */,
+                                   Context context /* = nullptr */,
                                    Args &&... args)
 {
-  std::unique_ptr<RestartableDataValue> T_data =
-      std::make_unique<RestartableData<T>>(data_name, context, std::forward<Args>(args)...);
+  std::unique_ptr<RestartableDataValue> T_data = std::make_unique<RestartableData<T, Context>>(
+      data_name, context, std::forward<Args>(args)...);
   auto & value = restoreData(data_name, std::move(T_data), tid);
-  auto T_value = dynamic_cast<RestartableData<T> *>(&value);
+  auto T_value = dynamic_cast<RestartableData<T, Context> *>(&value);
   mooseAssert(T_value, "Bad cast");
   return T_value->set();
 }

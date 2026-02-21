@@ -48,7 +48,7 @@ makePolynomial(const Distribution * dist)
 }
 
 void
-Polynomial::store(std::ostream & /*stream*/, void * /*context*/) const
+Polynomial::store(std::ostream & /*stream*/, Moose::AnyPointer /*context*/) const
 {
   // Cannot be pure virtual because for dataLoad operations the base class must be constructed
   ::mooseError("Polynomial child class must override this method.");
@@ -120,7 +120,7 @@ Legendre::Legendre(const Real lower_bound, const Real upper_bound)
 }
 
 void
-Legendre::store(std::ostream & stream, void * context) const
+Legendre::store(std::ostream & stream, Context context) const
 {
   std::string type = "Legendre";
   dataStore(stream, type, context);
@@ -246,7 +246,7 @@ Hermite::innerProduct(const unsigned int order) const
 }
 
 void
-Hermite::store(std::ostream & stream, void * context) const
+Hermite::store(std::ostream & stream, Context context) const
 {
   std::string type = "Hermite";
   dataStore(stream, type, context);
@@ -568,7 +568,7 @@ template <>
 void
 dataStore(std::ostream & stream,
           std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-          void * context)
+          Context context)
 {
   ptr->store(stream, context);
 }
@@ -577,7 +577,7 @@ template <>
 void
 dataLoad(std::istream & stream,
          std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-         void * context)
+         Context context)
 {
   std::string poly_type;
   dataLoad(stream, poly_type, context);
