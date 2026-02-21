@@ -45,6 +45,7 @@
 #include "SolverSystem.h"
 #include "Distribution.h"
 #include "Sampler.h"
+#include "FVInterpolationMethod.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -4632,6 +4633,28 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   return uos;
 }
 
+std::vector<std::shared_ptr<FVInterpolationMethod>>
+FEProblemBase::addFVInterpolationMethod(const std::string & method_type,
+                                        const std::string & name,
+                                        InputParameters & parameters)
+{
+  parallel_object_only();
+
+  std::vector<std::shared_ptr<FVInterpolationMethod>> methods;
+
+  addObjectParamsHelper(parameters, name);
+
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    auto method = _factory.create<FVInterpolationMethod>(method_type, name, parameters, tid);
+    logAdd("FVInterpolationMethod", name, method_type, parameters);
+    methods.push_back(method);
+    theWarehouse().add(method);
+  }
+
+  return methods;
+}
+
 const UserObject &
 FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /* = 0 */) const
 {
@@ -4674,6 +4697,38 @@ FEProblemBase::hasUserObject(const std::string & name) const
       .condition<AttribName>(name)
       .queryInto(objs);
   return !objs.empty();
+}
+
+const FVInterpolationMethod &
+FEProblemBase::getFVInterpolationMethod(const InterpolationMethodName & name,
+                                        const THREAD_ID tid) const
+{
+  std::vector<FVInterpolationMethod *> methods;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("FVInterpolationMethod")
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(name)
+      .queryInto(methods);
+
+  if (methods.empty())
+    mooseError("Unable to find FVInterpolationMethod with name '", name, "'");
+
+  mooseAssert(methods.size() == 1, "Expected a single FVInterpolationMethod per thread");
+  return *(methods[0]);
+}
+
+bool
+FEProblemBase::hasFVInterpolationMethod(const InterpolationMethodName & name) const
+{
+  std::vector<FVInterpolationMethod *> methods;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("FVInterpolationMethod")
+      .condition<AttribThread>(0)
+      .condition<AttribName>(name)
+      .queryInto(methods);
+  return !methods.empty();
 }
 
 bool

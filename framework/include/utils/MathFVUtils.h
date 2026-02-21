@@ -14,8 +14,11 @@
 #include "Limiter.h"
 #include "MathUtils.h"
 #include "MooseFunctor.h"
+#include "metaphysicl/raw_type.h"
 #include "libmesh/compare_types.h"
 #include "libmesh/elem.h"
+#include <cmath>
+#include <limits>
 #include <tuple>
 
 template <typename>
@@ -347,10 +350,8 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face, const 
 template <typename T1,
           typename T2,
           typename T3,
-          template <typename>
-          class Vector1,
-          template <typename>
-          class Vector2>
+          template <typename> class Vector1,
+          template <typename> class Vector2>
 void
 interpolate(InterpMethod m,
             Vector1<T1> & result,
@@ -438,22 +439,26 @@ ADReal gradUDotNormal(const FaceInfo & face_info,
  *
  * This equation is clearly asymmetric considering the face between C and D because of the
  * subscript on grad(phi). Hence this method can be thought of as constructing an r associated with
- * the C side of the face
+ * the C side of the face.
+ *
+ * This is a branchless version, avoiding if-else statements to enable vectorization.
  */
 template <typename Scalar, typename Vector>
 Scalar
 rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVectorValue & dCD)
 {
-  static const auto zero_vec = RealVectorValue(0);
-  if ((phiD - phiC) == 0)
-    // Handle zero denominator case. Note that MathUtils::sign returns 1 for sign(0) so we can omit
-    // that operation here (e.g. sign(phiD - phiC) = sign(0) = 1). The second term preserves the
-    // same sparsity pattern as the else branch; we want to add this so that we don't risk PETSc
-    // shrinking the matrix now and then potentially reallocating nonzeros later (which is very
-    // slow)
-    return 1e6 * MathUtils::sign(gradC * dCD) + zero_vec * gradC;
+  const Scalar denom = phiD - phiC;
+  const Scalar grad_dot = gradC * dCD;
 
-  return 2. * gradC * dCD / (phiD - phiC) - 1.;
+  // This is an erbitrary number here, when we start seeing convergence issues we
+  // can tune this but so far this has shown okay results.
+  constexpr Real eps = 1e-10;
+  const Real denom_sign =
+      std::copysign(1.0,
+                    MetaPhysicL::raw_value(denom) +
+                        std::numeric_limits<Real>::min() * MetaPhysicL::raw_value(grad_dot));
+  const Scalar safe = denom + denom_sign * eps;
+  return 2.0 * grad_dot / safe - 1.0;
 }
 
 /**

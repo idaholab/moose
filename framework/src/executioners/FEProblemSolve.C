@@ -15,6 +15,7 @@
 #include "Convergence.h"
 #include "Executioner.h"
 #include "ConvergenceIterationTypes.h"
+#include "MooseUtils.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -179,6 +180,13 @@ FEProblemSolve::validParams()
       "multi_system_fixed_point",
       false,
       "Whether to perform fixed point (Picard) iterations between the nonlinear systems.");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "multi_system_fixed_point_relaxation_factor",
+      {1.0},
+      "multi_system_fixed_point_relaxation_factor>0 & multi_system_fixed_point_relaxation_factor<2",
+      "Relaxation factor(s) applied to system solution updates during multi-system fixed point "
+      "iterations; 1 disables relaxation. If one value is provided it is applied to every system; "
+      "otherwise the vector must match the number/order of systems being solved.");
   params.addParam<ConvergenceName>(
       "multi_system_fixed_point_convergence",
       "Convergence object to determine the convergence of the multi-system fixed point iteration. "
@@ -199,7 +207,8 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
-  params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence",
+  params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence "
+                              "multi_system_fixed_point_relaxation_factor",
                               "Multiple solver system");
   params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
@@ -212,6 +221,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     _using_multi_sys_fp_iterations(getParam<bool>("multi_system_fixed_point")),
     _multi_sys_fp_convergence(nullptr) // has not been created yet
 {
+  setupMultiSystemFixedPointRelaxationFactors();
+
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
       _moose_line_searches.end())
     _problem.addLineSearch(_pars);
@@ -435,6 +446,21 @@ FEProblemSolve::convergenceSetup()
     _multi_sys_fp_convergence->checkIterationType(
         ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT);
   }
+
+  setupMultiSystemFixedPointRelaxationFactors();
+}
+
+void
+FEProblemSolve::setupMultiSystemFixedPointRelaxationFactors()
+{
+  _multi_sys_fp_relax_factors =
+      getParam<std::vector<Real>>("multi_system_fixed_point_relaxation_factor");
+  if (_multi_sys_fp_relax_factors.size() == 1)
+    _multi_sys_fp_relax_factors.resize(_systems.size(), _multi_sys_fp_relax_factors[0]);
+  else if (_multi_sys_fp_relax_factors.size() != _systems.size())
+    paramError("multi_system_fixed_point_relaxation_factor",
+               "Must provide either 1 value or " + Moose::stringify(_systems.size()) +
+                   " values (one per system in the solve order).");
 }
 
 bool
@@ -443,6 +469,7 @@ FEProblemSolve::solve()
   // Outer loop for multi-grid convergence
   bool converged = false;
   unsigned int num_fp_multisys_iters = 0;
+
   for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
   {
     // Multi-system fixed point loop
@@ -453,9 +480,19 @@ FEProblemSolve::solve()
     while (!converged)
     {
       // Loop over each system
-      for (const auto sys : _systems)
+      for (const auto sys_i : index_range(_systems))
       {
+        auto * const sys = _systems[sys_i];
         const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
+        const Real fp_relax =
+            _using_multi_sys_fp_iterations ? _multi_sys_fp_relax_factors[sys_i] : 1.0;
+        const bool apply_fp_relax =
+            _using_multi_sys_fp_iterations && !MooseUtils::absoluteFuzzyEqual(fp_relax, 1.0);
+        if (apply_fp_relax)
+        {
+          sys->setFixedPointRelaxationFactor(fp_relax);
+          sys->saveOldSolutionForFixedPointRelaxation();
+        }
 
         // Call solve on the problem for that system
         if (is_nonlinear)
@@ -465,12 +502,6 @@ FEProblemSolve::solve()
           const auto linear_sys_number =
               cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
           _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
-
-          // This is for postprocessing purposes in case none of the objects
-          // request the gradients.
-          // TODO: Somehow collect information if the postprocessors
-          // need gradients and if nothing needs this, just skip it
-          _problem.getLinearSystem(linear_sys_number).computeGradients();
         }
 
         // Check convergence
@@ -479,16 +510,37 @@ FEProblemSolve::solve()
         if (_problem.shouldSolve())
         {
           if (_problem.converged(sys->number()))
+          {
+            if (apply_fp_relax)
+              sys->applyFixedPointRelaxation();
             _console << COLOR_GREEN << solve_name << " Converged!" << COLOR_DEFAULT << std::endl;
+          }
           else
           {
             _console << COLOR_RED << solve_name << " Did NOT Converge!" << COLOR_DEFAULT
                      << std::endl;
+            if (apply_fp_relax)
+              sys->clearFixedPointRelaxation();
             return false;
           }
         }
         else
           _console << COLOR_GREEN << solve_name << " Skipped!" << COLOR_DEFAULT << std::endl;
+
+        if (!is_nonlinear)
+        {
+          const auto linear_sys_number =
+              cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
+          auto & linear_sys = _problem.getLinearSystem(linear_sys_number);
+
+          // This is for postprocessing purposes in case none of the objects request the gradients.
+          // TODO: Somehow collect information if the postprocessors need gradients and if nothing
+          // needs this, just skip it
+          linear_sys.computeGradients();
+        }
+
+        if (apply_fp_relax)
+          sys->clearFixedPointRelaxation();
       }
 
       // Assess convergence of the multi-system fixed point iteration

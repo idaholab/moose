@@ -92,6 +92,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class UserObjectBase;
+class FVInterpolationMethod;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;
@@ -1410,6 +1411,28 @@ public:
    * @return Const reference to the Positions object
    */
   const Positions & getPositionsObject(const std::string & name) const;
+
+  /**
+   * Add an FV interpolation method
+   * @param method_type The type of the method.
+   * @param name The name of the method.
+   * @param parameters The input parameters of the method.
+   */
+  virtual std::vector<std::shared_ptr<FVInterpolationMethod>> addFVInterpolationMethod(
+      const std::string & method_type, const std::string & name, InputParameters & parameters);
+
+  /**
+   * Retrieve an FV interpolation method
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVInterpolationMethod & getFVInterpolationMethod(const InterpolationMethodName & name,
+                                                         const THREAD_ID tid = 0) const;
+
+  /**
+   * Check if an FV interpolation method with a given name exists
+   */
+  bool hasFVInterpolationMethod(const InterpolationMethodName & name) const;
 
   /**
    * Whether or not a Postprocessor value exists by a given name.
