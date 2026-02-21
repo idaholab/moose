@@ -97,8 +97,23 @@ SUPPORTED_METHODS="oprof devel dbg opt"
 : ${METHODS:=${METHOD:-$SUPPORTED_METHODS}}
 
 # Map from the supported libMesh-like methods to CMake's build types
-typeset -A METHOD_TO_CMAKE_BUILD_TYPE_MAP
-METHOD_TO_CMAKE_BUILD_TYPE_MAP=([oprof]=PROFILE [devel]=RELWITHDEBINFO [dbg]=DEBUG [opt]=RELEASE)
+build_type_pairs=(
+  "oprof=PROFILE"
+  "devel=RELWITHDEBINFO"
+  "dbg=DEBUG"
+  "opt=RELEASE"
+)
+
+get_build_type() {
+  local key="$1"
+  local pair
+  for pair in "${build_type_pairs[@]}"; do
+    case "$pair" in
+      "$key="*) echo "${pair#*=}"; return 0 ;;
+    esac
+  done
+  return 1
+}
 
 # The order here, i.e. in METHODS, _is_ important: the libraries for the last
 # of the requested methods will be available for external use (see below)
@@ -107,7 +122,8 @@ do
   [[ $SUPPORTED_METHODS =~ $METHOD ]] ||
   { echo "Error: Build method $METHOD is not recognised, choose from $SUPPORTED_METHODS."; exit 1; }
 
-  CMAKE_BUILD_TYPE=${METHOD_TO_CMAKE_BUILD_TYPE_MAP[$METHOD]}
+
+  CMAKE_BUILD_TYPE="$(get_build_type "$METHOD")"
 
   # If we're not going fast, remove the build directory and reconfigure
   if [ -z "$go_fast" ]; then
