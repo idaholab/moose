@@ -40,11 +40,17 @@ public:
 protected:
   virtual void setupMesh() override;
   virtual void check() const override;
+  virtual Convergence * getNonlinearConvergence() const override;
 
   /**
    * Builds user object for computing and storing the fluxes
    */
   virtual void buildVolumeJunctionUserObject();
+
+  /// Adds volume junction functor material
+  void addVolumeJunction1PhaseFunctorMaterial();
+  /// Adds residual norm post-processor for a variable
+  void addResidualNormPostprocessor(const VariableName & variable, const std::string & equation);
 
   /**
    * Returns the name of junction variable, depending on whether scalar
