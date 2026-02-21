@@ -298,19 +298,8 @@ FEProblemBase::initKokkosStatefulProps()
   std::set<MooseVariableFieldBase *> needed_moose_vars;
   std::set<TagID> needed_fe_var_vector_tags;
 
-  for (auto block : _mesh.meshSubdomains())
-  {
-    _kokkos_materials.updateBlockVariableDependency(block, needed_moose_vars);
-    _kokkos_materials.updateBlockFEVariableCoupledVectorTagDependency(block,
-                                                                      needed_fe_var_vector_tags);
-  }
-
-  for (auto boundary : _mesh.meshBoundaryIds())
-  {
-    _kokkos_materials.updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _kokkos_materials.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
-                                                                         needed_fe_var_vector_tags);
-  }
+  _kokkos_materials.updateVariableDependency(needed_moose_vars);
+  _kokkos_materials.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
   // Copy data and preallocate quadature point solution vectors
 
@@ -366,11 +355,7 @@ FEProblemBase::prepareKokkosMaterials(
 {
   std::unordered_set<unsigned int> needed_mat_props;
 
-  for (auto block : mesh().meshSubdomains())
-    _kokkos_materials.updateBlockMatPropDependency(block, needed_mat_props);
-
-  for (auto boundary : mesh().meshBoundaryIds())
-    _kokkos_materials.updateBoundaryMatPropDependency(boundary, needed_mat_props);
+  _kokkos_materials.updateMatPropDependency(needed_mat_props);
 
   needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
 

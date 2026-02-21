@@ -160,6 +160,8 @@ public:
   /**
    * Update FE variable coupleable vector tag vector
    */
+  void updateFEVariableCoupledVectorTagDependency(std::set<TagID> & needed_fe_var_vector_tags,
+                                                  THREAD_ID tid = 0) const;
   void updateBlockFEVariableCoupledVectorTagDependency(SubdomainID id,
                                                        std::set<TagID> & needed_fe_var_vector_tags,
                                                        THREAD_ID tid = 0) const;
@@ -675,7 +677,7 @@ MooseObjectWarehouseBase<T>::updateVariableDependency(
     std::set<MooseVariableFieldBase *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
-    updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
+    updateVariableDependencyHelper(needed_moose_vars, _active_objects[tid]);
 }
 
 template <typename T>
@@ -732,6 +734,16 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
 
 template <typename T>
 void
+MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependency(
+    std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveObjects(tid))
+    updateFEVariableCoupledVectorTagDependencyHelper(needed_fe_var_vector_tags,
+                                                     _active_objects[tid]);
+}
+
+template <typename T>
+void
 MooseObjectWarehouseBase<T>::updateBlockFEVariableCoupledVectorTagDependency(
     SubdomainID id, std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
 {
@@ -772,7 +784,7 @@ MooseObjectWarehouseBase<T>::updateMatPropDependency(
     std::unordered_set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
-    updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
+    updateMatPropDependencyHelper(needed_mat_props, _active_objects[tid]);
 }
 
 template <typename T>
