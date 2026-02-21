@@ -43,4 +43,10 @@ public:
 protected:
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
+
+  /// For Dirichlet conditions for a vector variable like velocity, the entire vector is probably
+  /// unknown for an arbitrarily oriented surface. It's more common in this case to know only the
+  /// magnitude of the velocity and whether it's pointed into or out of the domain. This data member
+  /// can be leveraged then to project the provided Dirichlet value onto the given component
+  const enum NormalComponent : int { X = 0, Y, Z, NONE } _normal_component;
 };
