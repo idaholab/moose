@@ -186,4 +186,14 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMEigensolver]
+    type = XMLDiff
+    input = eigensolver.i
+    xmldiff = 'OutputData/Eigensolver/Run0/Run0.pvd
+                OutputData/Eigensolver/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a scalar eigenproblem with Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []

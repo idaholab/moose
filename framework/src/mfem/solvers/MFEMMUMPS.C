@@ -39,10 +39,20 @@ MFEMMUMPS::constructSolver(const InputParameters &)
 }
 
 void
-MFEMMUMPS::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+MFEMMUMPS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
 {
   if (_lor)
+  {
     mooseError("MUMPS solver does not support LOR solve");
+  }
+  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
+  {
+    auto solver = new mfem::MUMPSSolver(*a.ParallelAssemble());
+    solver->SetPrintLevel(getParam<int>("print_level"));
+
+    _solver.reset(solver);
+  }
+
 }
 
 #endif

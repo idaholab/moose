@@ -16,6 +16,7 @@
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
+#include "MFEMEigensolverBase.h"
 #include <fstream>
 #include <iostream>
 
