@@ -3,8 +3,8 @@ mpi:
   - openmpi
 
 moose_libmesh:
-  - moose-libmesh 2026.02.13_6232e98 mpich_0
-  - moose-libmesh 2026.02.13_6232e98 openmpi_0
+  - moose-libmesh 2026.02.18_f8a1758 mpich_0
+  - moose-libmesh 2026.02.18_f8a1758 openmpi_0
 
 moose_wasp:
   - moose-wasp 2025.09.19_02960f1

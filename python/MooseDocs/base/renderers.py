@@ -365,7 +365,6 @@ class HTMLRenderer(Renderer):
                     kwargs["src"] = rel(kwargs["src"])
                 html.Tag(js_node, "script", type="text/javascript", **kwargs)
 
-
         self._addTitle(head, root, page)
 
     def _addTitle(self, head, root, page):
@@ -379,13 +378,14 @@ class HTMLRenderer(Renderer):
         """
 
         # Locate h1 heading and, if it is found, extract the rendered text
-        if 'title' in [child.name for child in head]:
+        if "title" in [child.name for child in head]:
             return
         h = find_heading(page)
         if h is not None:
-            html.Tag(head, 'title', string=h.text())
+            html.Tag(head, "title", string=h.text())
         else:
-            html.Tag(head, 'title', string=str(page.name))
+            html.Tag(head, "title", string=str(page.name))
+
 
 class MaterializeRenderer(HTMLRenderer):
     """
