@@ -71,19 +71,14 @@ if ! which time &> /dev/null; then
     exit 1
 fi
 
-# Make a temp file to store the time
-time_output=$(mktemp)
-
 # Make a temporary directory that's shared for this job. Because slurm doesn't
 # make a tmpdir by default, this gets us a consistent tmpdir across all schedulers
-{%- if SCHEDULER_NAME == "pbs" %}
-NUM_NODES=$(sort $PBS_NODEFILE | uniq -c | wc -l)
-{%- else %}
-NUM_NODES=${SLURM_JOB_NUM_NODES}
-{%- endif %}
-JOB_TMPDIR="$(mktemp -d -u --suffix _${{ JOB_ID_VARIABLE }})"
+JOB_TMPDIR="${TMPDIR}/testharness_${{ JOB_ID_VARIABLE }})"
 mkdir -p ${JOB_TMPDIR}
 export TMPDIR="${JOB_TMPDIR}"
+
+# Make a temp file to store the time
+time_output=$(mktemp)
 
 # If we're using a run with APPTAINER_SHARENS, we really don't want to use /home
 # as a location for storing instance state as it can be very fickle. So, use a
