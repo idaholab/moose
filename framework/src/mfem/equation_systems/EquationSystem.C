@@ -289,7 +289,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   _h_blocks = nullptr;
   trueRHS.SyncFromBlocks();
   trueRHS = 0.0;
-
+  
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
