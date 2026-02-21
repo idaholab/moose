@@ -30,7 +30,7 @@ KOKKOS_FUNCTION void execute(Datum & datum) const;
 For other CPU APIs, Kokkos-MOOSE user objects share the same interface with the original MOOSE objects except `threadJoin()`, which is undefined in Kokkos-MOOSE user objects as they have separate parallel loops dispatched by Kokkos.
 
 !alert note
-Kokkos-MOOSE user objects are always executed after the original MOOSE user objects, so the original MOOSE user objects cannot depend on the Kokkos-MOOSE user objects.
+Kokkos-MOOSE user objects are always executed before the original MOOSE user objects, so the Kokkos-MOOSE user objects cannot depend on the original MOOSE user objects.
 
 !alert note
 Different types of Kokkos-MOOSE user objects are executed without any predefined order (dependencies are still respected).
