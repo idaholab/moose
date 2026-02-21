@@ -358,24 +358,26 @@ CrackFrontDefinition::initialSetup()
 }
 
 void
+CrackFrontDefinition::updateCrackFrontPoints()
+{
+  mooseAssert(_crack_front_points_provider, "_crack_front_points_provider is NULL");
+  _crack_front_points =
+      _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
+  updateCrackFrontGeometry();
+  std::size_t num_crack_front_points = getNumCrackFrontPoints();
+  if (_q_function_type == "GEOMETRY")
+    for (std::size_t i = 0; i < num_crack_front_points; ++i)
+    {
+      bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
+      _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
+    }
+}
+
+void
 CrackFrontDefinition::initialize()
 {
-  // Update the crack front for fracture integral calculations
-  // This is only useful for growing cracks which are currently described by the mesh
-  // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
-  {
-    _crack_front_points =
-        _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
-    updateCrackFrontGeometry();
-    std::size_t num_crack_front_points = getNumCrackFrontPoints();
-    if (_q_function_type == "GEOMETRY")
-      for (std::size_t i = 0; i < num_crack_front_points; ++i)
-      {
-        bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
-        _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
-      }
-  }
+    updateCrackFrontPoints();
 }
 
 void

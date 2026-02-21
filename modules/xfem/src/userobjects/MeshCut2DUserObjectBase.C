@@ -278,12 +278,59 @@ MeshCut2DUserObjectBase::findOriginalCrackFrontNodes()
     mooseAssert(this_node, "Node is NULL");
     Point & this_point = *this_node;
 
+    bool is_on_bc = isPointOnEdgeBoundary(this_point);
+
     const Elem * elem = (*pl)(this_point);
-    if (elem != NULL)
+    if (elem != NULL && !is_on_bc)
+    {
       _original_and_current_front_node_ids.push_back(std::make_pair(node, node));
+    }
   }
   std::sort(_original_and_current_front_node_ids.begin(),
             _original_and_current_front_node_ids.end());
+}
+
+bool
+MeshCut2DUserObjectBase::isPointOnEdgeBoundary(const Point & point, Real tolerance)
+{
+  for (const auto & bnd_elem : as_range(_mesh.bndElemsBegin(), _mesh.bndElemsEnd()))
+  {
+    // if (bnd_elem->_elem->processor_id() == processor_id())
+    {
+      auto side = bnd_elem->_elem->side_ptr(bnd_elem->_side);
+
+      if (side->n_nodes() == 2)
+      {
+        // Create vectors for the endpoints of the edge
+        Point p1 = side->point(0);
+        Point p2 = side->point(1);
+
+        // Compute the vector from p1 to p2 (edge vector) and from p1 to the point
+        Point edge_vector = p2 - p1;
+        Point point_vector = point - p1;
+
+        // Compute the cross product magnitude to find if the point is collinear with the edge
+        Real cross_product_magnitude = std::sqrt(
+            std::pow(edge_vector(1) * point_vector(2) - edge_vector(2) * point_vector(1), 2) +
+            std::pow(edge_vector(2) * point_vector(0) - edge_vector(0) * point_vector(2), 2) +
+            std::pow(edge_vector(0) * point_vector(1) - edge_vector(1) * point_vector(0), 2));
+
+        // Check if the point lies on the edge within a tolerance
+        if (cross_product_magnitude < tolerance)
+        {
+          // Check if the point lies within the edge segment bounds
+          Real dot_product = point_vector * edge_vector;
+          Real edge_length_squared = edge_vector * edge_vector;
+
+          if (dot_product >= 0 && dot_product <= edge_length_squared)
+            return true;
+        }
+      }
+      else
+        mooseError("MeshCut2DUserObjectBase currently only supports linear elements.\n");
+    }
+  }
+  return false;
 }
 
 void

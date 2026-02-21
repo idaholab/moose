@@ -183,6 +183,19 @@ XFEM::clearGeomMarkedElems()
   _geom_marked_elems_3d.clear();
 }
 
+bool
+XFEM::didNearTipEnrichmentChange()
+{
+  bool cutter_mesh_changed = false;
+  for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
+  {
+    cutter_mesh_changed = _geometric_cuts[i]->isCutterMeshChanged();
+    if (cutter_mesh_changed)
+      break;
+  }
+  return cutter_mesh_changed;
+}
+
 void
 XFEM::storeCrackTipOriginAndDirection()
 {
@@ -614,7 +627,6 @@ XFEM::markCutEdgesByState(Real time)
     // crack tip origin coordinates and direction
     Point crack_tip_origin(0, 0, 0);
     Point crack_tip_direction(0, 0, 0);
-
     if (isElemAtCrackTip(elem)) // crack tip element's crack intiation
     {
       orig_cut_side_id = CEMElem->getTipEdgeID();

@@ -195,6 +195,8 @@ public:
    */
   CutSubdomainID getCutSubdomainID(const Elem * elem) const;
 
+  virtual bool isCutterMeshChanged() const;
+
 protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;

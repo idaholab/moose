@@ -49,6 +49,8 @@ public:
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
 
+  bool isPointOnEdgeBoundary(const Point & point, Real tolerance = 1e-10);
+
 protected:
   /// The FE solution mesh
   MooseMesh & _mesh;
