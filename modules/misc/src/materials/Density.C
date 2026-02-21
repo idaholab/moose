@@ -23,7 +23,8 @@ DensityTempl<is_ad>::validParams()
       "is replaced by StrainAdjustedDensity for cases when the density should be adjusted"
       "to account for material deformation. If it is not desired to adjust the density for"
       "deformation, a variety of general-purpose Materials, such as GenericConstantMaterial"
-      "or ParsedMaterial can be used to define the density.");
+      "or ParsedMaterial can be used to define the density. A StrainAdjustedDensity can also "
+      "be used with '0 0 0' for the displacements.");
 
   params.addCoupledVar(
       "displacements",

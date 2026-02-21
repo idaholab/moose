@@ -60,6 +60,7 @@ restep_step = 1e12
   [diff_total]
     type = TimeIntegratedPostprocessor
     value = diff
+    time_integration_scheme = 'trapezoidal-rule'
   []
 []
 
