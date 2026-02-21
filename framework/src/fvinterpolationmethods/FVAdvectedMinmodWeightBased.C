@@ -102,8 +102,8 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const DeviceData & data,
   const VectorValue<Real> grad_upwind =
       upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
 
-  const auto r_f = Moose::FV::rFBranchless(
-      phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
+  const auto r_f =
+      Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
   const Real beta = std::max(Real(0.0), std::min(Real(1.0), r_f));
 
   // Geometric weight associated with the upwind cell for this face.

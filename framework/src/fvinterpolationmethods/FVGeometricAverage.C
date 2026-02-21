@@ -73,7 +73,7 @@ FVGeometricAverage::interpolate(const DeviceData &,
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
-FVGeometricAverage::advectedInterpolate(const DeviceData &,
+FVGeometricAverage::advectedInterpolate(const DeviceData & /*data*/,
                                         const FaceInfo & face,
                                         Real /*elem_value*/,
                                         Real /*neighbor_value*/,
