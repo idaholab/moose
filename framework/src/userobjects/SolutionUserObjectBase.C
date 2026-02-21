@@ -28,6 +28,8 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/exodusII_io_helper.h"
+#include "libmesh/nemesis_io.h"
+#include "libmesh/nemesis_io_helper.h"
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/string_to_enum.h"
 
@@ -39,11 +41,20 @@ SolutionUserObjectBase::validParams()
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>(
-      "mesh", "The name of the mesh file (must be xda/xdr or exodusII file).");
+      "mesh", "The name of the mesh file (must be xda/xdr, exodusII or nemesis file).");
   params.addParam<std::vector<std::string>>(
       "system_variables",
       std::vector<std::string>(),
       "The name of the nodal and elemental variables from the file you want to use for values");
+  params.addParam<bool>("nemesis",
+                        false,
+                        "Whether the file is Nemesis file, which cannot be differentiated from "
+                        "exodusII solely by the extension extension");
+  params.addParam<bool>(
+      "force_replicated_source_mesh",
+      false,
+      "Whether to force the serialization of the source mesh. This can be useful for discontinuous "
+      "variables or if the partitioning of the source mesh and the current mesh are different");
 
   // When using XDA/XDR files the following must be defined
   params.addParam<FileName>(
@@ -116,7 +127,7 @@ Threads::spin_mutex SolutionUserObjectBase::_solution_user_object_mutex;
 
 SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
+    _file_type(MooseEnum("xda=0 exodusII=1 xdr=2 nemesis=3")),
     _mesh_file(getParam<MeshFileName>("mesh")),
     _es_file(getParam<FileName>("es")),
     _system_name(getParam<std::string>("system")),
@@ -141,6 +152,8 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
     _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
+    _nemesis(getParam<bool>("nemesis")),
+    _force_replicated_source(getParam<bool>("force_replicated_source_mesh")),
     _initialized(false)
 {
   // form rotation matrices with the specified angles
@@ -225,16 +238,27 @@ SolutionUserObjectBase::readExodusII()
   if (_system_name == "")
     _system_name = "SolutionUserObjectSystem";
 
-  // Read the Exodus file
-  _exodusII_io = std::make_unique<libMesh::ExodusII_IO>(*_mesh);
-  _exodusII_io->read(_mesh_file);
+  // Read the Exodus or Nemesis file
+  if (_file_type == "exodusII")
+  {
+    _exodusII_io = std::make_unique<libMesh::ExodusII_IO>(*_mesh);
+    _exodusII_io->read(_mesh_file);
+    _exodus_times = &_exodusII_io->get_time_steps();
+  }
+  else
+  {
+    _nemesis_io = std::make_unique<libMesh::Nemesis_IO>(*_mesh);
+    _nemesis_io->read(MooseUtils::stripExtension(_mesh_file) + ".e");
+    _exodus_times = &_nemesis_io->get_time_steps();
+  }
+  // Same routine for Nemesis
   readBlockIdMapFromExodusII();
-  _exodus_times = &_exodusII_io->get_time_steps();
 
   if (isParamValid("timestep"))
   {
     std::string s_timestep = getParam<std::string>("timestep");
-    int n_steps = _exodusII_io->get_num_time_steps();
+    int n_steps = (_file_type == "exodusII") ? _exodusII_io->get_num_time_steps()
+                                             : _nemesis_io->get_num_time_steps();
     if (s_timestep == "LATEST")
       _exodus_time_index = n_steps;
     else
@@ -258,7 +282,7 @@ SolutionUserObjectBase::readExodusII()
     mooseError("In SolutionUserObjectBase, exodus file contains no timesteps.");
 
   // Account for parallel mesh
-  if (dynamic_cast<DistributedMesh *>(_mesh.get()))
+  if (_fe_problem.mesh().isDistributedMesh() && (_file_type != 1) && !_force_replicated_source)
   {
     _mesh->allow_renumbering(true);
     _mesh->prepare_for_use();
@@ -275,9 +299,15 @@ SolutionUserObjectBase::readExodusII()
   _system = &_es->get_system(_system_name);
 
   // Get the variable name lists as set; these need to be sets to perform set_intersection
-  const std::vector<std::string> & all_nodal(_exodusII_io->get_nodal_var_names());
-  const std::vector<std::string> & all_elemental(_exodusII_io->get_elem_var_names());
-  const std::vector<std::string> & all_scalar(_exodusII_io->get_global_var_names());
+  const std::vector<std::string> & all_nodal((_file_type == "exodusII")
+                                                 ? _exodusII_io->get_nodal_var_names()
+                                                 : _nemesis_io->get_nodal_var_names());
+  const std::vector<std::string> & all_elemental((_file_type == "exodusII")
+                                                     ? _exodusII_io->get_elem_var_names()
+                                                     : _nemesis_io->get_elem_var_names());
+  const std::vector<std::string> & all_scalar((_file_type == "exodusII")
+                                                  ? _exodusII_io->get_global_var_names()
+                                                  : _nemesis_io->get_global_var_names());
 
   // Build nodal/elemental variable lists, limit to variables listed in 'system_variables', if
   // provided
@@ -356,24 +386,49 @@ SolutionUserObjectBase::readExodusII()
     updateExodusBracketingTimeIndices();
 
     // Copy the solutions from the first system
-    for (const auto & var_name : _nodal_variables)
+    if (_file_type == 1)
     {
-      _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-      _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-    }
+      for (const auto & var_name : _nodal_variables)
+      {
+        _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+        _exodusII_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      }
 
-    for (const auto & var_name : _elemental_variables)
-    {
-      _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
-      _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
-    }
+      for (const auto & var_name : _elemental_variables)
+      {
+        _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+        _exodusII_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      }
 
-    if (_scalar_variables.size() > 0)
+      if (_scalar_variables.size() > 0)
+      {
+        _exodusII_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
+        _exodusII_io->copy_scalar_solution(
+            *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
+      }
+    }
+    else
     {
-      _exodusII_io->copy_scalar_solution(
-          *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
-      _exodusII_io->copy_scalar_solution(
-          *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
+      for (const auto & var_name : _nodal_variables)
+      {
+        _nemesis_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+        _nemesis_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      }
+
+      for (const auto & var_name : _elemental_variables)
+      {
+        _nemesis_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+        _nemesis_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      }
+
+      if (_scalar_variables.size() > 0)
+      {
+        _nemesis_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
+        _nemesis_io->copy_scalar_solution(
+            *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
+      }
     }
 
     // Update the systems
@@ -393,16 +448,32 @@ SolutionUserObjectBase::readExodusII()
                  num_exo_times,
                  " time steps.");
 
-    // Copy the values from the ExodusII file
-    for (const auto & var_name : _nodal_variables)
-      _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_time_index);
+    if (_file_type == 1)
+    {
+      // Copy the values from the ExodusII file
+      for (const auto & var_name : _nodal_variables)
+        _exodusII_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    for (const auto & var_name : _elemental_variables)
-      _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
+      for (const auto & var_name : _elemental_variables)
+        _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    if (!_scalar_variables.empty())
-      _exodusII_io->copy_scalar_solution(
-          *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
+      if (!_scalar_variables.empty())
+        _exodusII_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
+    }
+    else
+    {
+      // Copy the values from the Nemesis file
+      for (const auto & var_name : _nodal_variables)
+        _nemesis_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_time_index);
+
+      for (const auto & var_name : _elemental_variables)
+        _nemesis_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
+
+      if (!_scalar_variables.empty())
+        _nemesis_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
+    }
 
     // Update the equations systems
     _system->update();
@@ -462,6 +533,8 @@ SolutionUserObjectBase::timestepSetup()
   // Update time interpolation for ExodusII solution
   if (_file_type == 1 && _interpolate_times)
     updateExodusTimeInterpolation();
+  if (_file_type == 3 && _interpolate_times)
+    updateNemesisTimeInterpolation();
 
   // Clear the caches
   _cached_p(0) = std::numeric_limits<Real>::max();
@@ -481,21 +554,27 @@ SolutionUserObjectBase::initialSetup()
   if (_initialized)
     return;
 
+  // We need to detect exodus files early
+  const bool has_exodus_extension =
+      MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
+      MooseUtils::hasExtension(_mesh_file, "exo", true);
+  if (has_exodus_extension)
+  {
+    if (_nemesis)
+      _file_type = "nemesis";
+    else
+      _file_type = "exodusII";
+  }
+
   // Create a libmesh::Mesh object for storing the loaded data.
-  // Several aspects of SolutionUserObjectBase won't work with a DistributedMesh:
-  // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
-  // .) We don't know if directValue will be used, which may request
-  //    a value on a Node we don't have.
-  // We force the Mesh used here to be a ReplicatedMesh.
-  _mesh = std::make_unique<ReplicatedMesh>(_communicator);
+  if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == 1) || _force_replicated_source)
+    _mesh = std::make_unique<ReplicatedMesh>(_communicator);
+  else
+    _mesh = std::make_unique<DistributedMesh>(_communicator);
 
   // ExodusII mesh file supplied
-  if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
-      MooseUtils::hasExtension(_mesh_file, "exo", true))
-  {
-    _file_type = "exodusII";
+  if (has_exodus_extension)
     readExodusII();
-  }
 
   // XDA mesh file supplied
   else if (MooseUtils::hasExtension(_mesh_file, "xda"))
@@ -578,6 +657,8 @@ SolutionUserObjectBase::initialSetup()
   // If the start time is not the same as in the exodus file, we may need this on INITIAL
   if (_file_type == 1 && _interpolate_times)
     updateExodusTimeInterpolation();
+  if (_file_type == 3 && _interpolate_times)
+    updateNemesisTimeInterpolation();
 
   // Set initialization flag
   _initialized = true;
@@ -625,12 +706,47 @@ SolutionUserObjectBase::updateExodusTimeInterpolation()
   }
 }
 
+void
+SolutionUserObjectBase::updateNemesisTimeInterpolation()
+{
+  if (_t != _interpolation_time)
+  {
+    if (updateExodusBracketingTimeIndices())
+    {
+
+      for (const auto & var_name : _nodal_variables)
+        _nemesis_io->copy_nodal_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _nemesis_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_index1 + 1);
+      if (_scalar_variables.size() > 0)
+        _nemesis_io->copy_scalar_solution(
+            *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
+
+      _system->update();
+      _es->update();
+      _system->solution->localize(*_serialized_solution);
+
+      for (const auto & var_name : _nodal_variables)
+        _nemesis_io->copy_nodal_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      for (const auto & var_name : _elemental_variables)
+        _nemesis_io->copy_elemental_solution(*_system2, var_name, var_name, _exodus_index2 + 1);
+      if (_scalar_variables.size() > 0)
+        _nemesis_io->copy_scalar_solution(
+            *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
+
+      _system2->update();
+      _es2->update();
+      _system2->solution->localize(*_serialized_solution2);
+    }
+    _interpolation_time = _t;
+  }
+}
+
 bool
 SolutionUserObjectBase::updateExodusBracketingTimeIndices()
 {
-  if (_file_type != 1)
-    mooseError("In SolutionUserObjectBase, getTimeInterpolationData only applicable for exodusII "
-               "file type");
+  if (_file_type != 1 && _file_type != 3)
+    mooseError("getTimeInterpolationData only applicable for exodusII or Nemesis file type");
 
   int old_index1 = _exodus_index1;
   int old_index2 = _exodus_index2;
@@ -796,7 +912,7 @@ SolutionUserObjectBase::pointValue(Real libmesh_dbg_var(t),
   Real val = evalMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -848,7 +964,7 @@ SolutionUserObjectBase::discontinuousPointValue(
       evalMultiValuedMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -966,7 +1082,7 @@ SolutionUserObjectBase::pointValueGradient(Real libmesh_dbg_var(t),
   RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -1018,7 +1134,7 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
       evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -1048,7 +1164,7 @@ Real
 SolutionUserObjectBase::directValue(dof_id_type dof_index) const
 {
   Real val = (*_serialized_solution)(dof_index);
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     Real val2 = (*_serialized_solution2)(dof_index);
     val = val + (val2 - val) * _interpolation_factor;
@@ -1295,8 +1411,9 @@ void
 SolutionUserObjectBase::readBlockIdMapFromExodusII()
 {
 #ifdef LIBMESH_HAVE_EXODUS_API
-  libMesh::ExodusII_IO_Helper & exio_helper = _exodusII_io->get_exio_helper();
-  const auto & id_to_block = exio_helper.id_to_block_names;
+  const auto * exio_helper =
+      (_file_type == 1) ? &_exodusII_io->get_exio_helper() : &_nemesis_io->get_nemio_helper();
+  const auto & id_to_block = exio_helper->id_to_block_names;
   _block_name_to_id.clear();
   _block_id_to_name.clear();
   for (const auto & it : id_to_block)
