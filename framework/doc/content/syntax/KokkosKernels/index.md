@@ -140,6 +140,7 @@ See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffus
 
 [Like the original MOOSE](syntax/Kernels/index.md#time-derivative), you can create a time-derivative kernel by subclassing `Moose::Kokkos::TimeKernel`.
 In Kokkos-MOOSE, the dummy `_qp` indexing of the `du_dot_du` term was lifted.
+Instead, the current variable component index `datum.comp()` should be passed as an argument.
 The following shows the conversion of the example presented in the original page into the Kokkos version:
 
 - For `computeQpResidual()` whose original code is:
@@ -163,7 +164,7 @@ return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 the Kokkos version will look like:
 
 ```cpp
-return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
+return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du[datum.comp()];
 ```
 
 See the following source codes of `KokkosCoupledTimeDerivative` for an example of a time-derivative kernel:

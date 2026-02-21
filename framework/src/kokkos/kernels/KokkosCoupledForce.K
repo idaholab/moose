@@ -31,7 +31,8 @@ KokkosCoupledForce::KokkosCoupledForce(const InputParameters & parameters)
     _v(kokkosCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == _v_var)
-    paramError(
-        "v", "Coupled variable 'v' needs to be different from 'variable' with KokkosCoupledForce.");
+  for (const auto var : variables())
+    if (var->number() == _v_var)
+      paramError(
+          "v", "Coupled variable 'v' needs to be different from variable with KokkosCoupledForce.");
 }

@@ -279,7 +279,8 @@ public:
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
       _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar)),
       _n_idofs(assembly.getNumDofs(_elem.type, _ife)),
-      _n_jdofs(assembly.getNumDofs(_elem.type, _jfe))
+      _n_jdofs(assembly.getNumDofs(_elem.type, _jfe)),
+      _comp(comp)
   {
   }
   /**
@@ -303,7 +304,8 @@ public:
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
-      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar))
+      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar)),
+      _comp(comp)
   {
   }
 
@@ -352,6 +354,11 @@ public:
    * @returns The variable FE type ID
    */
   KOKKOS_FUNCTION unsigned int jfe() const { return _jfe; }
+  /**
+   * Get the variable component
+   * @returns The variable component
+   */
+  KOKKOS_FUNCTION unsigned int comp() const { return _comp; }
 
 protected:
   /**
@@ -370,6 +377,10 @@ protected:
    * Number of local DOFs
    */
   const unsigned int _n_idofs = 1, _n_jdofs = 1;
+  /**
+   * Variable component
+   */
+  const unsigned int _comp;
 };
 
 } // namespace Moose::Kokkos

@@ -61,8 +61,9 @@ template <typename Derived>
 KokkosBoundNodalKernel<Derived>::KokkosBoundNodalKernel(const InputParameters & parameters)
   : NodalKernel(parameters), _v_var(coupled("v")), _v(kokkosCoupledNodalValue("v"))
 {
-  if (_var.number() == _v_var)
-    paramError("v", "Coupled variable needs to be different from 'variable'");
+  for (const auto var : variables())
+    if (var->number() == _v_var)
+      paramError("v", "Coupled variable needs to be different from variable");
 }
 
 template <typename Derived>
