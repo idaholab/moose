@@ -16,8 +16,8 @@ from argparse import Namespace
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Tuple
 from shlex import quote
+from typing import Any, Optional, Tuple
 
 from TestHarnessTestCase import TestHarnessTestCase
 
@@ -139,7 +139,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 setattr(options, key, value)
 
             capabilities, augmented_capabilities, required_capabilities = (
-                TestHarness.getCapabilities(options, None, None)
+                TestHarness.getCapabilities(options, None)
             )
             self.assertIsInstance(capabilities.values, dict)
             self.assertIsInstance(augmented_capabilities, dict)
@@ -356,14 +356,14 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             # we used if we did this right
             self.assertTrue(len(capabilities), 2)
             self.assertIn("mpi_procs", capabilities)
-            self.assertIn("library_mode", capabilities)
+            self.assertIn("machine", capabilities)
 
             # And should have ran the app with the given capabilities
             # and the augmented capabilities file
             cmd_ran = job.getTester().getCommandRan()
             self.assertIn(
                 (
-                    "--required-capabilities='moosetestapp & library_mode=dynamic "
+                    "--required-capabilities='moosetestapp & machine!=unknown "
                     "& mpi_procs=1'"
                 ),
                 cmd_ran,
@@ -382,7 +382,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 tmp_dir=False,
                 test_name="has_augmented",
                 has_augmented=True,
-                capabilities="moosetestapp & library_mode=dynamic & mpi_procs=1",
+                capabilities="moosetestapp & machine!=unknown & mpi_procs=1",
                 result=result,
             ),
             tmp_output=False,
@@ -401,7 +401,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 tmp_dir=True,
                 test_name="has_augmented",
                 has_augmented=True,
-                capabilities="moosetestapp & library_mode=dynamic & mpi_procs=1",
+                capabilities="moosetestapp & machine!=unknown & mpi_procs=1",
                 result=result,
             ),
         )

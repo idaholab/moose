@@ -262,28 +262,6 @@ def outputHeader(header, ending=True):
     return f"{begin_sep}\n{header}\n{end_sep}"
 
 
-def getSharedOption(libmesh_dir):
-    # Some tests may only run properly with shared libraries on/off
-    # We need to detect this condition
-    libtool = os.path.join(libmesh_dir, "contrib", "bin", "libtool")
-    with open(libtool, "r") as f:
-        for line in f:
-            try:
-                key, value = line.rstrip().split("=", 2)
-            except Exception:
-                continue
-
-            if key == "build_libtool_libs":
-                if value == "yes":
-                    return "dynamic"
-                if value == "no":
-                    return "static"
-
-    # Neither no nor yes?  Not possible!
-    print("Error! Could not determine whether shared libraries were built.")
-    exit(1)
-
-
 def getInitializedSubmodules(root_dir):
     """
     Gets a list of initialized submodules.

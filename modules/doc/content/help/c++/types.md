@@ -1,6 +1,6 @@
 # Types, Templates and Standard Template Library (STL)
 
-[](---)
+
 
 ## Static vs Dynamic Type systems
 
@@ -8,7 +8,7 @@
 - This means that "type-checking" is performed during compile-time as opposed to run-time
 - Python and MATLAB are examples or "dynamically-typed" languages
 
-[](---)
+
 
 ## Static Typing Pros and Cons
 
@@ -23,7 +23,7 @@
   - More explicit code is needed to convert ("cast") between types
   - Abstracting or creating generic algorithms is more difficult
 
-[](---)
+
 
 ## Using Templates
 
@@ -55,7 +55,7 @@ z = getMax(x, y);       // uses float version
 k = getMax<int>(i, j);  // explicitly calls int version
 ```
 
-[](---)
+
 
 ## Template Specialization
 
@@ -86,7 +86,7 @@ int main()
 }
 ```
 
-[](---)
+
 
 ## MOOSE `validParams()` Specialization
 
@@ -120,7 +120,7 @@ YourObject::validParams()
 - This function is used by the Factory and Parser for getting, setting and converting parameters from the input file for use inside of your Kernel.
 - You need to specialize `validParams()` for *every* MooseObject you create!
 
-[](---)
+
 
 ## C++ Standard Template Library (STL) Data Structures
 
@@ -135,7 +135,7 @@ YourObject::validParams()
 - [unordered_map](https://cplusplus.com/reference/unordered_map/unordered_map/) (C++11)
 - [unordered_set](https://cplusplus.com/reference/unordered_set/unordered_set/) (C++11)
 
-[](---)
+
 
 ## Using the C+ Vector Container
 
@@ -173,7 +173,7 @@ int main()
 }
 ```
 
-[](---)
+
 
 ## More Features
 

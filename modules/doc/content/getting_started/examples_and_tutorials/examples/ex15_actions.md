@@ -1,6 +1,6 @@
 # Example 15 : Custom Actions
 
-[](---)
+
 
 ## Complete Source Files
 

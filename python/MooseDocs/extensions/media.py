@@ -347,7 +347,14 @@ class RenderImage(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
         tag = self.createHTML(parent, token, page)
         if not token["href"]:
-            tag.addClass("materialboxed", "moose-image")
+            tag.addClass("materialboxed moose-image")
+            # Add these to make materialboxed work better with
+            # accessibility tools. Not ideal to force these onto a
+            # <picture> element rather than use something clickable
+            # like <a>, but Materialize doesn't seem to want to work
+            # correctly with anything else.
+            tag["role"] = "button"
+            tag["tabindex"] = "0"
         return tag
 
     def createLatex(self, parent, token, page):

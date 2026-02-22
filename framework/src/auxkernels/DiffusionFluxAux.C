@@ -36,7 +36,8 @@ DiffusionFluxAux::DiffusionFluxAux(const InputParameters & parameters)
                         ? &getMaterialProperty<Real>("diffusivity")
                         : nullptr),
     _ad_diffusion_coef(!_diffusion_coef ? &getADMaterialProperty<Real>("diffusivity") : nullptr),
-    _normals(_assembly.normals())
+    _normals(_assembly.normals()),
+    _fv_var(dynamic_cast<const MooseVariableFVReal *>(&_var))
 {
   if (_use_normal && !isParamValid("boundary"))
     paramError("boundary", "A boundary must be provided if using the normal component!");
@@ -45,7 +46,19 @@ DiffusionFluxAux::DiffusionFluxAux(const InputParameters & parameters)
 Real
 DiffusionFluxAux::computeValue()
 {
-  const Real gradient = _use_normal ? _grad_u[_qp] * _normals[_qp] : _grad_u[_qp](_component);
+  Real gradient;
+  // FE relies on coupleable
+  if (!_fv_var)
+    gradient = _use_normal ? _grad_u[_qp] * _normals[_qp] : _grad_u[_qp](_component);
+  else
+  {
+    // Use the boundary gradient when kernel is boundary restricted
+    const auto _vec_grad =
+        _bnd ? raw_value(_fv_var->adGradSln(*_mesh.faceInfo(_current_elem, _current_side),
+                                            determineState()))
+             : raw_value(_fv_var->adGradSln(_current_elem, determineState()));
+    gradient = _use_normal ? _vec_grad * _normals[_qp] : _vec_grad(_component);
+  }
   const Real diffusion_coef = _diffusion_coef ? (*_diffusion_coef)[_qp]
                                               : MetaPhysicL::raw_value((*_ad_diffusion_coef)[_qp]);
   return -diffusion_coef * gradient;

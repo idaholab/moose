@@ -26,3 +26,4 @@ from .report_error import report_error
 from .exceptions import MooseDocsException
 from .get_content import get_content, get_files, create_file_page, get_items
 from .has_tokens import has_tokens
+from .find_heading import find_heading

@@ -1330,14 +1330,6 @@ public:
   virtual std::vector<std::shared_ptr<UserObject>> addUserObject(
       const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
-  // TODO: delete this function after apps have been updated to not call it
-  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
-  {
-    mooseDeprecated(
-        "This function is deprecated, use theWarehouse().query() to construct a query instead");
-    return _all_user_objects;
-  }
-
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
@@ -2353,6 +2345,37 @@ public:
    */
   bool needsPreviousNewtonIteration() const;
 
+  /**
+   * Set a flag that indicated that user required values for the previous multiapp fixed point
+   * iterate for the solver systems (not auxiliary)
+   * @param needed the value that should be set to the flag
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   */
+  void needsPreviousMultiAppFixedPointIterationSolution(bool needed,
+                                                        const unsigned int solver_sys_num);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multiapp fixed
+   * point iteration for the solver systems (not auxiliary)
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
+   * @return true if the user required values of the previous multiapp fixed point iteration
+   */
+  bool needsPreviousMultiAppFixedPointIterationSolution(const unsigned int solver_sys_num) const;
+
+  /**
+   * Set a flag that indicated that user required values for the previous multiapp fixed point
+   * iterate for the auxiliary system
+   */
+  void needsPreviousMultiAppFixedPointIterationAuxiliary(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous multiapp fixed
+   * point iteration for the auxiliary system
+   * @return true if the user required values of the previous multiapp fixed point iteration from
+   * the auxiliary system
+   */
+  bool needsPreviousMultiAppFixedPointIterationAuxiliary() const;
+
   ///@{
   /**
    * Convenience zeros
@@ -3072,9 +3095,6 @@ protected:
   // Helper class to access Reporter object values
   ReporterData _reporter_data;
 
-  // TODO: delete this after apps have been updated to not call getUserObjects
-  ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
-
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
 
@@ -3213,6 +3233,10 @@ protected:
 
   /// Indicates we need to save the previous NL iteration variable values
   bool _previous_nl_solution_required;
+  /// Indicates we need to save the previous multiapp fixed-point iteration solver variable values
+  std::vector<bool> _previous_multiapp_fp_nl_solution_required;
+  /// Indicates we need to save the previous multiapp fixed-point iteration auxiliary variable values
+  bool _previous_multiapp_fp_aux_solution_required;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;

@@ -448,8 +448,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
 #endif
     _reporter_data(_app),
-    // TODO: delete the following line after apps have been updated to not call getUserObjects
-    _all_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
     _transient_multi_apps(_app.getExecuteOnEnum()),
     _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -477,6 +475,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_jacobian(false),
     _needs_old_newton_iter(false),
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
+    _previous_multiapp_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
+    _previous_multiapp_fp_aux_solution_required(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
@@ -4577,9 +4577,6 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
 
     if (tid != 0)
       user_object->setPrimaryThreadCopy(uos[0].get());
-
-    // TODO: delete this line after apps have been updated to not call getUserObjects
-    _all_user_objects.addObject(user_object, tid);
 
     theWarehouse().add(user_object);
 
@@ -9173,6 +9170,32 @@ FEProblemBase::needsPreviousNewtonIteration(bool state)
   if (state && !vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
     mooseError("Previous nonlinear solution is required but not added through "
                "Problem/previous_nl_solution_required=true");
+}
+
+void
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(bool needed,
+                                                                const unsigned int solver_sys_num)
+{
+  _previous_multiapp_fp_nl_solution_required[solver_sys_num] = needed;
+}
+
+bool
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(
+    const unsigned int solver_sys_num) const
+{
+  return _previous_multiapp_fp_nl_solution_required[solver_sys_num];
+}
+
+void
+FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary(bool state)
+{
+  _previous_multiapp_fp_aux_solution_required = state;
+}
+
+bool
+FEProblemBase::needsPreviousMultiAppFixedPointIterationAuxiliary() const
+{
+  return _previous_multiapp_fp_aux_solution_required;
 }
 
 bool

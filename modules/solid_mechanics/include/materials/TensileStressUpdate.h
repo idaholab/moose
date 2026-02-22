@@ -47,9 +47,11 @@ protected:
   void computeStressParams(const RankTwoTensor & stress,
                            std::vector<Real> & stress_params) const override;
 
-  std::vector<RankTwoTensor> dstress_param_dstress(const RankTwoTensor & stress) const override;
+  void dstressparam_dstress(const RankTwoTensor & stress,
+                            std::vector<RankTwoTensor> & dsp) const override;
 
-  std::vector<RankFourTensor> d2stress_param_dstress(const RankTwoTensor & stress) const override;
+  void d2stressparam_dstress(const RankTwoTensor & stress,
+                             std::vector<RankFourTensor> & d2sp) const override;
 
   virtual void setStressAfterReturnV(const RankTwoTensor & stress_trial,
                                      const std::vector<Real> & stress_params,
@@ -101,4 +103,17 @@ protected:
                                           bool compute_full_tangent_operator,
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
+
+private:
+  /**
+   * this is d(stress_param[:])/d(stress) which is calculated by dstressparam_dstress.  Using this
+   * mutable means repeated allocation/deallocation is unnecessary.
+   */
+  mutable std::vector<RankTwoTensor> _dsp_trial_scratch;
+
+  /**
+   * eigenvalues of the stress, used in dstressparam_dstress and preReturnMapV.  Using this mutable
+   * means repeated allocation/deallocation is unnecessary.
+   */
+  mutable std::vector<Real> _eigvals_scratch;
 };

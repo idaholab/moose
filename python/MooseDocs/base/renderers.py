@@ -19,7 +19,7 @@ import moosetree
 import copy
 
 import MooseDocs
-from ..common import exceptions, mixins, report_error, Storage
+from ..common import exceptions, mixins, report_error, Storage, find_heading
 from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
@@ -364,6 +364,27 @@ class HTMLRenderer(Renderer):
                     kwargs = copy.copy(kwargs)
                     kwargs["src"] = rel(kwargs["src"])
                 html.Tag(js_node, "script", type="text/javascript", **kwargs)
+
+        self._addTitle(head, root, page)
+
+    def _addTitle(self, head, root, page):
+        """
+        Add content to <title> tag, if not already done by the navigation extension.
+
+        Inputs:
+            head[html.Tag]: The <head> tag for the page being generated.
+            root[tokens.Token]: The root node for the AST.
+            page[page.PageNodeBase]: The current page being converted.
+        """
+
+        # Locate h1 heading and, if it is found, extract the rendered text
+        if "title" in [child.name for child in head]:
+            return
+        h = find_heading(page)
+        if h is not None:
+            html.Tag(head, "title", string=h.text())
+        else:
+            html.Tag(head, "title", string=str(page.name))
 
 
 class MaterializeRenderer(HTMLRenderer):

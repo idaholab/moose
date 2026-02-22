@@ -67,11 +67,6 @@ class PetscJacobianTester(RunApp):
             ),
         )
 
-        if os.environ.get("LIBMESH_DIR"):
-            self.libmesh_dir = os.environ["LIBMESH_DIR"]
-        else:
-            self.libmesh_dir = os.path.join(self.moose_dir, "libmesh", "installed")
-
         if self.specs["turn_off_exodus_output"]:
             self.specs["cli_args"][:0] = ["Outputs/exodus=false"]
 

@@ -437,6 +437,24 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
+    const auto doc = "NVIDIA Tools Extension Library API";
+#ifdef LIBMESH_HAVE_NVTX_API
+    have("nvtx_api", doc);
+#else
+    libmesh_missing("nvtx_api", doc, "--with-nvtx");
+#endif
+  }
+
+  {
+    const auto doc = "libMesh performance logging";
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    have("libmesh_perflog", doc);
+#else
+    libmesh_missing("libmesh_perflog", doc, "--enable-perflog");
+#endif
+  }
+
+  {
     const auto doc = "Boost C++ library";
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
     have("boost", doc);
@@ -560,6 +578,20 @@ Capabilities::registerMooseCapabilities()
               " bytes for storage. This is controlled by the "
               "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.")
       .setExplicit();
+
+  {
+#ifdef LIBMESH_HAVE_STATIC_LIBS
+    const auto value = "static";
+#else
+    const auto value = "dynamic";
+#endif
+    add_string("library_mode",
+               value,
+               "The libMesh library mode. This is controlled by the --enable-static libMesh "
+               "configure option.")
+        .setExplicit()
+        .setEnumeration({"dynamic", "static"});
+  }
 
   // compiler
   {
