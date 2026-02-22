@@ -17,10 +17,6 @@ Currently, the following types of user objects (and their derivatives such as po
 - `Moose::Kokkos::SideUserObject`
 - `Moose::Kokkos::NodalUserObject`
 
-There is no replacement for `GeneralUserObject`, because it is not executed in any predefined loop.
-A general user object that performs Kokkos-related operations can be simply derived from the original MOOSE class.
-The only caveat is to use the `.K` extension for the source file of the object, so that it will be compiled with Kokkos.
-
 The hook method `execute()` is now defined as an +*inlined public*+ method with the following signature:
 
 ```cpp
@@ -30,7 +26,9 @@ KOKKOS_FUNCTION void execute(Datum & datum) const;
 For other CPU APIs, Kokkos-MOOSE user objects share the same interface with the original MOOSE objects except `threadJoin()`, which is undefined in Kokkos-MOOSE user objects as they have separate parallel loops dispatched by Kokkos.
 
 !alert note
-Kokkos-MOOSE user objects are always executed after the original MOOSE user objects, so the original MOOSE user objects cannot depend on the Kokkos-MOOSE user objects.
+Kokkos-MOOSE user objects are always executed before the original MOOSE user objects, so the Kokkos-MOOSE user objects cannot depend on the original MOOSE user objects.
+For this reason, the Kokkos version of general user object (`Moose::Kokkos::GeneralUserObject`) is still provided in case there is an object having dependencies with other Kokkos-MOOSE user objects, although it does not execute any parallel loop.
+A Kokkos-MOOSE general user object should be registered with the standard `registerMooseObject()` macro.
 
 !alert note
 Different types of Kokkos-MOOSE user objects are executed without any predefined order (dependencies are still respected).
