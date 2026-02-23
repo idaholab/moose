@@ -103,6 +103,9 @@ protected:
   /// Switch to enable/disable deviatoric parts in the stress term
   const bool _use_deviatoric_terms;
 
+  /// Whether to include porosity outside the divergence in the advection term
+  const bool _porosity_outside_divergence;
+
   /// Container for the current advected interpolation coefficients on the face to make sure
   /// we don't compute it multiple times for different terms.
   std::pair<Real, Real> _advected_interp_coeffs;

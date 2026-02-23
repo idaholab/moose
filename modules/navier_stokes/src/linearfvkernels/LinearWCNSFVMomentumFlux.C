@@ -41,6 +41,11 @@ LinearWCNSFVMomentumFlux::validParams()
       "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addParam<bool>(
       "use_deviatoric_terms", false, "If deviatoric terms in the stress terms need to be used.");
+  params.addParam<bool>(
+      "porosity_outside_divergence",
+      false,
+      "Multiply the advection term by porosity outside the divergence operator "
+      "(i.e. do not scale the advected interpolation by 1/eps).");
 
   params += Moose::FV::advectedInterpolationParameter();
   return params;
@@ -53,6 +58,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
+    _porosity_outside_divergence(getParam<bool>("porosity_outside_divergence")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
@@ -376,7 +382,12 @@ LinearWCNSFVMomentumFlux::computeAdvectionBoundaryMatrixContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_matrix_contrib = bc->computeBoundaryValueMatrixContribution();
-  return boundary_value_matrix_contrib * _face_mass_flux;
+  const bool elem_side = (_current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR);
+  const Real eps = _mass_flux_provider.getFaceSidePorosity(*_current_face_info,
+                                                           elem_side,
+                                                           determineState());
+  const Real scale = _porosity_outside_divergence ? 1.0 : 1.0 / eps;
+  return boundary_value_matrix_contrib * _face_mass_flux * scale;
 }
 
 Real
@@ -384,7 +395,12 @@ LinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * _face_mass_flux;
+  const bool elem_side = (_current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR);
+  const Real eps = _mass_flux_provider.getFaceSidePorosity(*_current_face_info,
+                                                           elem_side,
+                                                           determineState());
+  const Real scale = _porosity_outside_divergence ? 1.0 : 1.0 / eps;
+  return -boundary_value_rhs_contrib * _face_mass_flux * scale;
 }
 
 void
@@ -402,8 +418,11 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  _advected_interp_coeffs = _mass_flux_provider.getAdvectedInterpolationCoeffs(
+      *_current_face_info,
+      _advected_interp_method,
+      _face_mass_flux,
+      /*apply_porosity_scaling=*/!_porosity_outside_divergence);
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
