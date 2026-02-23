@@ -185,6 +185,21 @@ protected:
   /// Compute the cell volumes on the mesh
   void setupMeshInformation();
 
+  /// Update baffle jump values based on current face mass fluxes
+  void updateBaffleJumps();
+
+  /// Compute corrected pressure gradient values (Gauss) with baffle jumps
+  void computeCorrectedPressureGradient();
+
+  /// Check whether a face is a pressure baffle face
+  bool isBaffleFace(const FaceInfo & fi) const;
+
+  /// Determine whether the FaceInfo elem side is the baffle owner side
+  bool elemIsBaffleOwner(const FaceInfo & fi) const;
+
+  /// Check whether a face should be limited for pressure gradient construction
+  bool isPressureGradientLimited(const FaceInfo & fi) const;
+
   /// Populate the face values of the H/A and 1/A fields
   void
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
@@ -237,6 +252,10 @@ protected:
    */
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
+  /// Face superficial velocity reconstructed from the superficial mass flux
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _face_velocity;
+
   /**
    * We hold on to the cell-based 1/A vectors so that we can easily reconstruct the
    * cell velocities as well.
@@ -253,6 +272,7 @@ protected:
   /// Coupling pressure gradient captured before the current momentum predictor is assembled.
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
 
+
   /**
    * Producer counter for the conservative face mass flux: incremented every time
    * computeFaceMassFlux() runs. Exposed read-only through faceMassFluxGeneration() so the
@@ -265,6 +285,35 @@ protected:
    * Functor describing the density of the fluid
    */
   const Moose::Functor<Real> & _rho;
+
+  /**
+   * Functor describing the porosity of the porous medium (defaults to 1 for non-porous)
+   */
+  const Moose::Functor<Real> & _eps;
+
+  /// The pressure baffle boundary IDs
+  std::unordered_set<BoundaryID> _pressure_baffle_boundary_ids;
+
+  /// Boundary IDs on which to limit the pressure gradient construction
+  std::unordered_set<BoundaryID> _pressure_gradient_limiter_ids;
+
+  /// Under-relaxation factor for baffle jump updates
+  const Real _pressure_baffle_relaxation;
+
+  /// Debug flag for baffle output
+  const bool _debug_baffle;
+
+  /// Use oscillation-free reconstruction for the cell velocity based on face fluxes
+  const bool _use_flux_velocity_reconstruction;
+
+  /// Under-relaxation for flux-based velocity reconstruction
+  const Real _flux_velocity_reconstruction_relaxation;
+
+  /// Whether to use the corrected (baffle-adjusted) pressure gradient in HbyA
+  const bool _use_corrected_pressure_gradient;
+
+  /// Whether to use harmonic interpolation for pressure-coupling coefficients
+  const bool _use_harmonic_Ainv_interp;
 
   /// Pointers to the linear system(s) in moose corresponding to the momentum equation(s)
   std::vector<LinearSystem *> _momentum_systems;
@@ -293,6 +342,18 @@ protected:
   /// We will hold a vector of cell volumes to make sure we can do volume corrections rapidly
   std::unique_ptr<NumericVector<Number>> _cell_volumes;
 
+  /// We will hold a vector of cell porosity values for fast access
+  std::unique_ptr<NumericVector<Number>> _cell_porosity;
+
+  /// The corrected pressure gradient field (with baffle jumps accounted for)
+  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_corrected;
+
+  /// Stored gradients of the superficial velocity from the previous corrector iteration
+  std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> _grad_w_prev;
+
+  /// Baffle jump storage (neighbor minus owner)
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;
+
   /// Enumerator for the method used for pressure projection
   const MooseEnum _pressure_projection_method;
 
@@ -303,6 +364,13 @@ private:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;
+
+  /// Update face superficial velocities from the current superficial mass flux
+  void updateFaceVelocityFromMassFlux();
+
+  /// Update stored superficial velocity gradients from current face velocities
+  void updateGradPrevFromFaceVelocity();
+
 };
 
 template <typename VarType>
