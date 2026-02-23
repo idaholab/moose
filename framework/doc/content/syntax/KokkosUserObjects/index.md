@@ -98,9 +98,6 @@ See the following source codes of `KokkosIntegralPostprocessor` for an example o
          caption=The `KokkosIntegralPostprocessor` source file.
 
 !alert note
-Kokkos-MOOSE vector postprocessors and reporters are comming soon.
-
-!alert note
 The reporter values defined by Kokkos-MOOSE postprocessors, vector postprocessors, and reporters are stored in the same database with the original MOOSE objects, so they can be retrieved through ordinary interfaces and their names cannot overlap.
 
 ### Performance Considerations

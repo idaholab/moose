@@ -1308,6 +1308,12 @@ public:
   virtual void addKokkosPostprocessor(const std::string & pp_name,
                                       const std::string & name,
                                       InputParameters & parameters);
+  virtual void addKokkosVectorPostprocessor(const std::string & pp_name,
+                                            const std::string & name,
+                                            InputParameters & parameters);
+  virtual void addKokkosReporter(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters);
 #endif
 
   /**
