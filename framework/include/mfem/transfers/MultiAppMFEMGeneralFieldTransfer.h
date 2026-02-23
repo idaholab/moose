@@ -26,7 +26,7 @@ class MooseMesh;
 // and destination apps.
 // */
 
-class MultiAppMFEMGeneralFieldTransfer : public MultiAppTransfer
+class MultiAppMFEMGeneralFieldTransfer : public MultiAppTransfer, public MFEMTransferProjector
 {
 public:
   static InputParameters validParams();
@@ -42,7 +42,6 @@ protected:
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
 
-  void extractOutgoingPoints(mfem::ParFiniteElementSpace & to_fespace, mfem::Vector & vxyz, mfem::Ordering::Type & point_ordering);  
   void transfer(MFEMProblem & to_problem, MFEMProblem & from_problem);
 
   void checkSiblingsTransferSupported() const override;
