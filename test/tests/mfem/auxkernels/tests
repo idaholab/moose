@@ -13,14 +13,16 @@
     recover = false
   []
   [MFEMScalarTimeAverageAux]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/heattransfer.i
     cli_args = 'AuxVariables/inactive="" '
                'AuxKernels/inactive="" '
                'AuxKernels/average_field/time_skip=2 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferTimeAverage'
-    xmldiff = 'OutputData/HeatTransferTimeAverage/Run0/Run0.pvd
-                OutputData/HeatTransferTimeAverage/Run0/Cycle000003/proc000000.vtu'
+               'VectorPostprocessors/line_sample/variable=average_temperature '
+               'Outputs/CSV/file_base=OutputData/HeatTransferTimeAverage/ht_time_average'
+    csvdiff = 'OutputData/HeatTransferTimeAverage/ht_time_average_line_sample_0001.csv
+                OutputData/HeatTransferTimeAverage/ht_time_average_line_sample_0002.csv
+                OutputData/HeatTransferTimeAverage/ht_time_average_line_sample_0003.csv'
     design = 'MFEMScalarTimeAverageAux.md'
     issues = '#31163'
     requirement = 'The system shall have the ability to take a running time average of an MFEM variable.'
