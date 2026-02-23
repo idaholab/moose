@@ -115,6 +115,9 @@ protected:
   VectorValue<Real> _elem_grad_storage;
   VectorValue<Real> _neighbor_grad_storage;
 
+  /// Whether to include porosity outside the divergence in the advection term
+  const bool _porosity_outside_divergence;
+
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _face_mass_flux;
