@@ -115,30 +115,12 @@
 []
 
 [Transfers]
-  [h1_transfer_from_subapp]
+  [transfer_from_subapp]
     type = MultiAppMFEMGeneralFieldTransfer
-    source_variable = mfem_sub_h1_vector_var
-    variable = mfem_sub_h1_vector_var
+    source_variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
+    variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
     from_multi_app = mfem_app
   []
-  [hcurl_transfer_from_subapp]
-    type = MultiAppMFEMGeneralFieldTransfer
-    source_variable = mfem_sub_hcurl_vector_var
-    variable = mfem_sub_hcurl_vector_var
-    from_multi_app = mfem_app
-  []
-  [hdiv_transfer_from_subapp]
-    type = MultiAppMFEMGeneralFieldTransfer
-    source_variable = mfem_sub_hdiv_vector_var
-    variable = mfem_sub_hdiv_vector_var
-    from_multi_app = mfem_app
-  []
-  [l2_transfer_from_subapp]
-    type = MultiAppMFEMGeneralFieldTransfer
-    source_variable = mfem_sub_l2_vector_var
-    variable = mfem_sub_l2_vector_var
-    from_multi_app = mfem_app
-  []  
 []
 
 [Postprocessors]
