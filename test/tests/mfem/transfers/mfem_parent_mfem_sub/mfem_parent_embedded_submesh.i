@@ -38,7 +38,7 @@
 
 [Transfers]
   [h1_transfer_from_subapp]
-    type = MultiAppMFEMGeneralFieldTransfer
+    type = MultiAppMFEMShapeEvaluationTransfer
     source_variable = submesh_potential
     variable = potential
     from_multi_app = mfem_app

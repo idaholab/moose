@@ -43,7 +43,7 @@
     type = MFEMDomainLFKernel
     variable = mfem_scalar_var
     coefficient = 2.0
-  []  
+  []
 []
 
 [Preconditioner]
@@ -77,7 +77,7 @@
 
 [Transfers]
   [transfer_from_libmesh]
-    type = MultiApplibMeshToMFEMGeneralFieldTransfer
+    type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     source_variable = libmesh_scalar_var
     variable = libmesh_scalar_var
     from_multi_app = libmesh_app
@@ -95,5 +95,5 @@
 
 [Outputs]
   file_base = 'mfem_parent_libmesh_sub_scalar_quads'
-  csv = true  
+  csv = true
 []

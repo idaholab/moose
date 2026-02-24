@@ -39,7 +39,7 @@
     type = MFEMDomainLFKernel
     variable = mfem_scalar_var
     coefficient = 2.0
-  []  
+  []
 []
 
 [Preconditioner]

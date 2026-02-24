@@ -9,43 +9,46 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MultiAppMFEMGeneralFieldTransfer.h"
+#include "MultiAppMFEMShapeEvaluationTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
 
-registerMooseObject("MooseApp", MultiAppMFEMGeneralFieldTransfer);
+registerMooseObject("MooseApp", MultiAppMFEMShapeEvaluationTransfer);
 
 InputParameters
-MultiAppMFEMGeneralFieldTransfer::validParams()
+MultiAppMFEMShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from one MFEM application to another");
   return params;
 }
 
-MultiAppMFEMGeneralFieldTransfer::MultiAppMFEMGeneralFieldTransfer(InputParameters const & params)
+MultiAppMFEMShapeEvaluationTransfer::MultiAppMFEMShapeEvaluationTransfer(
+    InputParameters const & params)
   : MFEMMultiAppTransfer(params)
 {
   checkValidTransferProblemTypes<MFEMProblem, MFEMProblem>();
 }
 
 void
-MultiAppMFEMGeneralFieldTransfer::transferVariables()
+MultiAppMFEMShapeEvaluationTransfer::transferVariables()
 {
   for (const auto v : make_range(numToVar()))
   {
-    mfem::ParGridFunction & from_gf = *getActiveFromProblem().getProblemData().gridfunctions.Get(getFromVarName(v));
-    mfem::ParGridFunction & to_gf = *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(v));
+    mfem::ParGridFunction & from_gf =
+        *getActiveFromProblem().getProblemData().gridfunctions.Get(getFromVarName(v));
+    mfem::ParGridFunction & to_gf =
+        *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(v));
 
     mfem::ParFiniteElementSpace & from_pfespace = *from_gf.ParFESpace();
     mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
 
     from_pfespace.GetParMesh()->EnsureNodes();
     to_pfespace.GetParMesh()->EnsureNodes();
-    
+
     // Generate list of points where the grid function will be evaluated
     mfem::Vector vxyz;
     mfem::Ordering::Type point_ordering;
@@ -55,9 +58,10 @@ MultiAppMFEMGeneralFieldTransfer::transferVariables()
     const int dim = to_pfespace.GetParMesh()->Dimension();
     const int nodes_cnt = vxyz.Size() / dim;
     const int to_gf_ncomp = to_gf.VectorDim();
-    mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
+    mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
     _mfem_interpolator.SetDefaultInterpolationValue(std::numeric_limits<mfem::real_t>::infinity());
-    _mfem_interpolator.Interpolate(*from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
+    _mfem_interpolator.Interpolate(
+        *from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
 
     _mfem_projector.projectValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
   }

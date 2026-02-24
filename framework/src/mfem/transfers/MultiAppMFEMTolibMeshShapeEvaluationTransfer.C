@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MultiAppMFEMTolibMeshGeneralFieldTransfer.h"
+#include "MultiAppMFEMTolibMeshShapeEvaluationTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
@@ -19,19 +19,17 @@
 
 #include "libmesh/mesh_function.h"
 
-registerMooseObject("MooseApp", MultiAppMFEMTolibMeshGeneralFieldTransfer);
-
-
+registerMooseObject("MooseApp", MultiAppMFEMTolibMeshShapeEvaluationTransfer);
 
 InputParameters
-MultiAppMFEMTolibMeshGeneralFieldTransfer::validParams()
+MultiAppMFEMTolibMeshShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
   return params;
 }
 
-MultiAppMFEMTolibMeshGeneralFieldTransfer::MultiAppMFEMTolibMeshGeneralFieldTransfer(
+MultiAppMFEMTolibMeshShapeEvaluationTransfer::MultiAppMFEMTolibMeshShapeEvaluationTransfer(
     InputParameters const & params)
   : MFEMMultiAppTransfer(params), _mfem_interpolator(this->comm().get())
 {
@@ -39,7 +37,7 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::MultiAppMFEMTolibMeshGeneralFieldTran
 }
 
 void
-MultiAppMFEMTolibMeshGeneralFieldTransfer::transferVariables()
+MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
 {
   // Send from MFEM problem to libMesh problem
   auto & mfem_mesh = getActiveFromProblem().mesh().getMFEMParMesh();
@@ -50,10 +48,11 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::transferVariables()
 }
 
 void
-MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem)
+MultiAppMFEMTolibMeshShapeEvaluationTransfer::setlibMeshSolutionValuesFromMFEM(
+    const unsigned int var_index, MFEMProblem & from_problem)
 {
   /// The target variables
-  std::vector<MooseVariableFieldBase *> _to_variables;  
+  std::vector<MooseVariableFieldBase *> _to_variables;
   if (_to_problems.size())
   {
     _to_variables.resize(_to_var_names.size());
@@ -63,7 +62,7 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(cons
   }
 
   // get libMesh and MFEM variables
-  const auto & var_name = getToVarName(var_index);  
+  const auto & var_name = getToVarName(var_index);
   auto & from_var = from_problem.getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
   for (const auto problem_id : index_range(_to_problems))
   {
@@ -81,13 +80,14 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(cons
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
     auto & fe_type = _to_variables[var_index]->feType();
-    bool is_nodal = _to_variables[var_index]->isNodal();   
+    bool is_nodal = _to_variables[var_index]->isNodal();
 
-    // Populate set of points 
+    // Populate set of points
     std::vector<Point> outgoing_libmesh_points;
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than CONSTANT are not supported.");
+      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than "
+                 "CONSTANT are not supported.");
     }
     else if (is_nodal)
     {
@@ -95,7 +95,7 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(cons
       {
         // Skip this node if the variable has no dofs at it.
         if (node->n_dofs(sys_num, var_num) < 1)
-          continue;      
+          continue;
         outgoing_libmesh_points.push_back(*node);
       }
     }
@@ -107,24 +107,24 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(cons
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
-        outgoing_libmesh_points.push_back(elem->vertex_average());      
+        outgoing_libmesh_points.push_back(elem->vertex_average());
       }
     }
-    
+
     // Perform interpolation
     const mfem::Ordering::Type ordering = mfem::Ordering::byVDIM;
-    mfem::Vector outgoing_mfem_points = Moose::MFEM::pointsToMFEMVector(outgoing_libmesh_points,
-                  to_mesh.mesh_dimension(),
-                  ordering);
+    mfem::Vector outgoing_mfem_points = Moose::MFEM::pointsToMFEMVector(
+        outgoing_libmesh_points, to_mesh.mesh_dimension(), ordering);
     _mfem_interpolator.FindPoints(outgoing_mfem_points, ordering);
     mfem::Vector interp_vals;
     _mfem_interpolator.Interpolate(from_var, interp_vals);
-    
+
     // Update libMesh solution DoFs with interpolated MFEM values
     unsigned int mfem_point_index = 0;
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than CONSTANT are not supported.");
+      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than "
+                 "CONSTANT are not supported.");
     }
     else if (is_nodal)
     {
@@ -154,8 +154,8 @@ MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(cons
         const auto dof = dof_object->dof_number(sys_num, var_num, 0);
         const auto val = interp_vals[mfem_point_index];
         to_sys->solution->set(dof, val);
-        mfem_point_index++;     
-      }      
+        mfem_point_index++;
+      }
     }
     to_sys->solution->close();
     // Sync local solutions
