@@ -38,7 +38,8 @@ protected:
   void flood(Elem * const elem,
              const Point & normal,
              const Elem & starting_elem,
-             const subdomain_id_type & sub_id);
+             const subdomain_id_type & sub_id,
+             MeshBase & mesh);
 
   /**
    * Determines whether two normal vectors are within normal_tol of each other.
@@ -98,8 +99,11 @@ protected:
    * where normal_hat = _normal/|_normal|
    */
   const Real _normal_tol;
+  const Real _flipped_normal_tol;
   /// Whether to paint using a fixed normal or a moving normal
   const bool _fixed_normal;
+  /// Whether to allow normal flips
+  const bool _allow_normal_flips;
   /// Whether to painting beyond a certain radius
   const bool _has_max_distance_criterion;
   /// Distance to use for max painting radius
