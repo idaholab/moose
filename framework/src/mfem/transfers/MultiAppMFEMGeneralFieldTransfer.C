@@ -21,13 +21,13 @@ registerMooseObject("MooseApp", MultiAppMFEMGeneralFieldTransfer);
 InputParameters
 MultiAppMFEMGeneralFieldTransfer::validParams()
 {
-  InputParameters params = MultiAppMFEMGeneralFieldTransferBase::validParams();
+  InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from one MFEM application to another");
   return params;
 }
 
 MultiAppMFEMGeneralFieldTransfer::MultiAppMFEMGeneralFieldTransfer(InputParameters const & params)
-  : MultiAppMFEMGeneralFieldTransferBase(params)
+  : MFEMMultiAppTransfer(params)
 {
   checkValidTransferProblemTypes<MFEMProblem, MFEMProblem>();
 }
@@ -48,8 +48,8 @@ MultiAppMFEMGeneralFieldTransfer::transferVariables()
     
     // Generate list of points where the grid function will be evaluated
     mfem::Vector vxyz;
-    mfem::Ordering::Type point_ordering;    
-    extractProjectionPoints(to_pfespace, vxyz, point_ordering);
+    mfem::Ordering::Type point_ordering;
+    _mfem_projector.extractProjectionPoints(to_pfespace, vxyz, point_ordering);
 
     // Evaluate source grid function at target points
     const int dim = to_pfespace.GetParMesh()->Dimension();
@@ -58,8 +58,8 @@ MultiAppMFEMGeneralFieldTransfer::transferVariables()
     mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
     _mfem_interpolator.SetDefaultInterpolationValue(std::numeric_limits<mfem::real_t>::infinity());
     _mfem_interpolator.Interpolate(*from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
-    
-    projectValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
+
+    _mfem_projector.projectValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
   }
 }
 

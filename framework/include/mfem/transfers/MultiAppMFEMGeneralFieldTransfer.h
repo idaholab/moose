@@ -11,7 +11,8 @@
 
 #pragma once
 
-#include "MultiAppMFEMGeneralFieldTransferBase.h"
+#include "MFEMTransferProjector.h"
+#include "MFEMMultiAppTransfer.h"
 
 class MooseMesh;
 
@@ -21,13 +22,14 @@ class MooseMesh;
 // and destination apps.
 // */
 
-class MultiAppMFEMGeneralFieldTransfer : public MultiAppMFEMGeneralFieldTransferBase, public MFEMTransferProjector
+class MultiAppMFEMGeneralFieldTransfer : public MFEMMultiAppTransfer, public MFEMTransferProjector
 {
 public:
   static InputParameters validParams();
   MultiAppMFEMGeneralFieldTransfer(InputParameters const & params);
 
 protected:
+  MFEMTransferProjector _mfem_projector;
   mfem::FindPointsGSLIB _mfem_interpolator;
 
   virtual MFEMProblem & getActiveToProblem() override {return static_cast<MFEMProblem &>(*_active_to_problem);};

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MultiAppMFEMGeneralFieldTransferBase.h"
+#include "MFEMMultiAppTransfer.h"
 
 class MooseMesh;
 
@@ -21,7 +21,7 @@ class MooseMesh;
 // but MFEMMesh may differ in each subapp
 // */
 
-class MultiAppMFEMTolibMeshGeneralFieldTransfer : public MultiAppMFEMGeneralFieldTransferBase
+class MultiAppMFEMTolibMeshGeneralFieldTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
