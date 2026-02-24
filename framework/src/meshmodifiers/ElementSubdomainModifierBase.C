@@ -211,6 +211,15 @@ ElementSubdomainModifierBase::initialSetup()
     mooseError("The 'nearby_distance_threshold' parameter must be set when using the "
                "POLYNOMIAL_NEARBY reinitialization strategy.");
 
+  if (std::all_of(reinit_strategy_in.begin(),
+                  reinit_strategy_in.end(),
+                  [](const MooseEnum & val) { return val != "POLYNOMIAL_NEARBY"; }) &&
+      (isParamSetByUser("nearby_distance_threshold") ||
+       isParamSetByUser("nearby_kd_tree_leaf_max_size")))
+    mooseWarning("The 'nearby_distance_threshold' and 'nearby_kd_tree_leaf_max_size' parameters "
+                 "will be ignored because no 'reinitialization_strategy' is set to "
+                 "POLYNOMIAL_NEARBY.");
+
   if (reinit_strategy_in.size() == 1)
     _reinit_strategy.resize(_reinit_vars.size(), reinit_strategy_in[0].getEnum<ReinitStrategy>());
   else if (reinit_strategy_in.size() == _reinit_vars.size())

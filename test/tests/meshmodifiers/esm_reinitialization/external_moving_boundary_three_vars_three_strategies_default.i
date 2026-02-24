@@ -66,7 +66,6 @@
 
     reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE IC"
     reinitialize_variables = "diff diff2 diff3"
-    nearby_distance_threshold = 0.375
     polynomial_fitters = 'extrapolation_patch extrapolation_patch2'
     restore_overridden_dofs = "true"
   []

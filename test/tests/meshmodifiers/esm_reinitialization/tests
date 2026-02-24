@@ -163,5 +163,13 @@
                    "extrapolation and polynomial fitters"
       detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
     []
+
+    [no_polynomial_nearby_but_threshold]
+      type = RunException
+      input = 'external_moving_boundary_three_vars_three_strategies.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEIGHBOR"'
+      expect_err = "The 'nearby_distance_threshold"
+      detail = "when 'nearby_distance_threshold' or 'nearby_kd_tree_leaf_max_size' is specified while the 'POLYNOMIAL_NEARBY' strategy is inactive."
+    []
   []
 []
