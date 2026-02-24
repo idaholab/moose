@@ -19,6 +19,9 @@
 #include <fstream>
 #include <iostream>
 
+// forward declaration
+class MFEMRefinementMarker;
+
 /// Base problem data struct.
 struct MFEMProblemData
 {
@@ -44,9 +47,14 @@ public:
   Moose::MFEM::TimeDerivativeMap time_derivative_map;
   Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
 
+  std::shared_ptr<MFEMRefinementMarker> _refiner;
+  bool _use_amr{false};
+
   MPI_Comm comm;
   int myid;
   int num_procs;
+
+  bool _mesh_changed{false};
 };
 
 #endif

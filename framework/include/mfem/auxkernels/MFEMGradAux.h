@@ -31,6 +31,9 @@ public:
   /// Computes the auxvariable.
   virtual void execute() override;
 
+  // Updates grad operator.
+  virtual void update() override;
+
 protected:
   /// Name of source MFEMVariable to take the gradient of.
   const VariableName _source_var_name;

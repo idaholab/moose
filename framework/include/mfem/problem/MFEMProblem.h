@@ -14,6 +14,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "MFEMRefinementMarker.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -107,6 +108,15 @@ public:
                       InputParameters & parameters) override;
 
   /**
+   * Override of FEProblemBase::addElementalFieldVariable to be a no-op because we do not use the
+   * Marker/Indicator objects designed to work with libMesh infrastructure
+   */
+  void
+  addElementalFieldVariable(const std::string &, const std::string &, InputParameters &) override
+  {
+  }
+
+  /**
    * Override of ExternalProblem::addKernel. Uses ExternalProblem::addKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -180,6 +190,24 @@ public:
   void addMFEMPreconditioner(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
+  /**
+   * Override of ExternalProblem::addIndicator. Uses ExternalProblem::addIndicator to create an
+   * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
+   * MFEMIndicator to be used when setting up adaptive mesh refinement later.
+   */
+  void addIndicator(const std::string & type,
+                    const std::string & name,
+                    InputParameters & parameters) override;
+
+  /**
+   * Override of ExternalProblem::addMarker. Uses ExternalProblem::addMarker to create an
+   * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
+   * MFEMRefinementMarker to be used for adaptive mesh refinement. If the pointer conversion
+   * is successful, this method sets the MFEMProblemData::_use_amr to true.
+   */
+  void addMarker(const std::string & type,
+                 const std::string & name,
+                 InputParameters & parameters) override;
 
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
@@ -248,6 +276,21 @@ public:
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
+  bool getMeshChanged() const { return _problem_data._mesh_changed; }
+  void setMeshChanged(bool ch) { _problem_data._mesh_changed = ch; }
+
+  void updateAfterRefinement();
+  void updateFESpaces();
+
+  void setUpAMR();
+
+  void hRefine();
+  void pRefine();
+
+  bool useHRefinement() const { return (_problem_data._refiner->useHRefinement()); }
+  bool usePRefinement() const { return (_problem_data._refiner->usePRefinement()); }
+
+  bool useAMR() const { return _problem_data._use_amr; }
 
   /**
    * @returns a shared pointer to an MFEM parallel grid function

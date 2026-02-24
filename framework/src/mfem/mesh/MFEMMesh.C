@@ -29,6 +29,14 @@ MFEMMesh::validParams()
   params.addParam<unsigned int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
+  params.addParam<bool>(
+      "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
+  params.addParam<bool>(
+      "nonconforming", false, "Determines whether ensure the mesh is non-conforming.");
+  params.addParam<bool>("reorder_mesh",
+                        false,
+                        "Determines whether we reorder the mesh to improve dynamic partitioning. "
+                        "Only Hilbert is supported at present.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -58,6 +66,26 @@ MFEMMesh::buildMesh()
   uniformRefinement(mfem_ser_mesh,
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
+
+  // MFEM supports load balancing of parallel non-conforming meshes
+  // with a space-filling curve partitioning, and we can improve it
+  // by re-ordering the mesh. For now, we only support the Hilbert
+  // ordering, although there is one other option.
+  if (getParam<bool>("reorder_mesh"))
+  {
+    mfem::Array<int> ordering;
+    mfem_ser_mesh.GetHilbertElementOrdering(ordering);
+    mfem_ser_mesh.ReorderElements(ordering);
+  }
+
+  // Make sure mesh is in non-conforming mode to enable local refinement
+  // of quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument
+  // (true/false) determines whether a simplex mesh is considered to be
+  // non-conforming.
+  if (getParam<bool>("nonconforming"))
+  {
+    mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
+  }
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = this->comm().get();

@@ -466,6 +466,44 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
+EquationSystem::UpdateEquationSystem()
+{
+  // update these grid functions too
+  for (const auto i : index_range(_test_var_names))
+  {
+    _var_ess_constraints.at(i)->Update();
+  }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
+
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+
+    // Assemble linear and bilinear forms for this test variable
+    auto lf = _lfs.Get(test_var_name);
+    auto blf = _blfs.Get(test_var_name);
+    lf->Update();
+    lf->Assemble();
+    blf->Update();
+    blf->Assemble();
+
+    // Loop through and assemble mixed bilinear forms for this test variable
+    for (const auto j : index_range(_test_var_names))
+    {
+      auto trial_var_name = _test_var_names.at(j);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->Update();
+        mblf->Assemble();
+      }
+    }
+  }
+}
+
+void
 EquationSystem::BuildEquationSystem()
 {
   BuildBilinearForms();
