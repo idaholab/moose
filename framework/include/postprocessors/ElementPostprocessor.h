@@ -22,8 +22,10 @@ public:
   /**
    * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to
    * do MPI communication!
-   * Finalize is not required for Postprocessor implementations since work may be done in
-   * getValue().
+   * We provide default finalize() as getValue() has been abused to perform the final aggregation
+   * for a long time and we allowed not implementing finalize(). However, it is desired to do all
+   * the finalization work such as communication in finalize() and let getValue() simply return the
+   * final aggregated value, as getValue() is designed to be a const method.
    */
   virtual void finalize() override {}
 };

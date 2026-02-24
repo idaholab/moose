@@ -2924,6 +2924,11 @@ private:
    */
   static SolverParams makeLinearSolverParams();
 
+  TheWarehouse::Query getUOQuery(const std::string & system,
+                                 const ExecFlagType & type,
+                                 const Moose::AuxGroup & group,
+                                 std::set<int> & execution_groups) const;
+
 protected:
   bool _initialized;
 
@@ -3137,14 +3142,10 @@ protected:
                               bool is_aux,
                               const std::set<SubdomainID> * const active_subdomains);
 
-  void computeUserObjectsInternal(const ExecFlagType & type,
-                                  const Moose::AuxGroup & group,
-                                  TheWarehouse::Query & query);
+  void computeUserObjectsInternal(const ExecFlagType & type, TheWarehouse::Query & query);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void computeKokkosUserObjectsInternal(const ExecFlagType & type,
-                                        const Moose::AuxGroup & group,
-                                        TheWarehouse::Query & query);
+  void computeKokkosUserObjectsInternal(const ExecFlagType & type, TheWarehouse::Query & query);
 #endif
 
   /// Verify that SECOND order mesh uses SECOND order displacements.
