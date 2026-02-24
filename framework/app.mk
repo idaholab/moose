@@ -401,8 +401,8 @@ $(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib
+	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 else
