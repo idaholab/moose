@@ -21,13 +21,13 @@ registerMooseObject("MooseApp", MultiAppMFEMCopyTransfer);
 InputParameters
 MultiAppMFEMCopyTransfer::validParams()
 {
-  InputParameters params = MultiAppMFEMGeneralFieldTransferBase::validParams();
+  InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from one MFEM application to another");
   return params;
 }
 
 MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & params)
-  : MultiAppMFEMGeneralFieldTransferBase(params)
+  : MFEMMultiAppTransfer(params)
 {
   checkValidTransferProblemTypes<FEProblemBase, MFEMProblem>();
 }

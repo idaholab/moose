@@ -18,22 +18,17 @@
 #include "MooseAppCoordTransform.h"
 #include "MFEMProblem.h"
 
-class MooseMesh;
-
-//*
-// Transfer MFEMVariables between multiapps.
-// The variables and mesh may be of different types in the source 
-// and destination apps.
-// */
-
-class MultiAppMFEMGeneralFieldTransferBase : public MultiAppTransfer
+/**
+ * Virtual base class for MultiApp transfers to and/or from MFEMProblems.
+ */
+class MFEMMultiAppTransfer : public MultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMGeneralFieldTransferBase(InputParameters const & params);
+  MFEMMultiAppTransfer(InputParameters const & params);
   void execute() override;
   void checkSiblingsTransferSupported() const override;
-  
+
   auto const & getFromVarName(int i) { return _from_var_names.at(i); };
   auto const & getToVarName(int i) { return _to_var_names.at(i); };
   auto numFromVar() { return _from_var_names.size(); }
@@ -42,24 +37,25 @@ public:
 protected:
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
-  FEProblemBase * _active_to_problem {nullptr};
-  FEProblemBase * _active_from_problem {nullptr};
+  FEProblemBase * _active_to_problem{nullptr};
+  FEProblemBase * _active_from_problem{nullptr};
 
-  void setActiveToProblem(FEProblemBase & to_problem) {_active_to_problem = &to_problem;};
-  void setActiveFromProblem(FEProblemBase & from_problem) {_active_from_problem = &from_problem;};  
-  virtual FEProblemBase & getActiveToProblem() {return *_active_to_problem;};
-  virtual FEProblemBase & getActiveFromProblem() {return *_active_from_problem;};
+  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; };
+  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; };
+  virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; };
+  virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; };
 
   virtual void transferVariables() = 0;
 
-  template <typename TO_PROBLEM, typename FROM_PROBLEM>  
+  template <typename TO_PROBLEM, typename FROM_PROBLEM>
   void checkValidTransferProblemTypes()
   {
     auto bad_problem = [this]()
     {
-      mooseError(type(),
-                " only works with MFEMProblem based applications. Check that all your inputs "
-                "involved in this transfer are MFEMProblem based");
+      mooseError(
+          type(),
+          " is not compatible with the provided source and/or destination Problem types of the "
+          "provided variables.");
     };
 
     if (hasToMultiApp())
@@ -81,6 +77,5 @@ protected:
           bad_problem();
     }
   };
-  
 };
 #endif
