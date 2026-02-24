@@ -26,14 +26,14 @@ registerMooseObject("MooseApp", MultiAppMFEMTolibMeshGeneralFieldTransfer);
 InputParameters
 MultiAppMFEMTolibMeshGeneralFieldTransfer::validParams()
 {
-  InputParameters params = MultiAppMFEMGeneralFieldTransferBase::validParams();
+  InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
   return params;
 }
 
-MultiAppMFEMTolibMeshGeneralFieldTransfer::MultiAppMFEMTolibMeshGeneralFieldTransfer(InputParameters const & params)
-  : MultiAppMFEMGeneralFieldTransferBase(params),
-    _mfem_interpolator(this->comm().get())
+MultiAppMFEMTolibMeshGeneralFieldTransfer::MultiAppMFEMTolibMeshGeneralFieldTransfer(
+    InputParameters const & params)
+  : MFEMMultiAppTransfer(params), _mfem_interpolator(this->comm().get())
 {
   checkValidTransferProblemTypes<FEProblemBase, MFEMProblem>();
 }

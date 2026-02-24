@@ -25,13 +25,14 @@ registerMooseObject("MooseApp", MultiApplibMeshToMFEMGeneralFieldTransfer);
 InputParameters
 MultiApplibMeshToMFEMGeneralFieldTransfer::validParams()
 {
-  InputParameters params = MultiAppMFEMGeneralFieldTransferBase::validParams();
+  InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
   return params;
 }
 
-MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTransfer(InputParameters const & params)
-  : MultiAppMFEMGeneralFieldTransferBase(params)
+MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTransfer(
+    InputParameters const & params)
+  : MFEMMultiAppTransfer(params)
 {
   checkValidTransferProblemTypes<MFEMProblem, FEProblemBase>();
 }
@@ -50,8 +51,8 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
   mfem::ParGridFunction & to_gf = *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
   mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
   mfem::Vector vxyz;
-  mfem::Ordering::Type point_ordering;    
-  extractProjectionPoints(to_pfespace, vxyz, point_ordering);  
+  mfem::Ordering::Type point_ordering;
+  _mfem_projector.extractProjectionPoints(to_pfespace, vxyz, point_ordering);
   const int NE = to_pfespace.GetParMesh()->GetNE();
   const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
   const int dim = to_pfespace.GetParMesh()->Dimension();
@@ -194,7 +195,7 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
 
   // Project DoFs to MFEM GridFunction
   mfem::Ordering::Type libmesh_interp_ordering(mfem::Ordering::Type::byNODES);
-  projectValues(interp_vals, libmesh_interp_ordering, to_gf);
+  _mfem_projector.projectValues(interp_vals, libmesh_interp_ordering, to_gf);
 }
 
 #endif

@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MultiAppMFEMGeneralFieldTransferBase.h"
+#include "MFEMMultiAppTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
@@ -17,7 +17,7 @@
 #include "MFEMMesh.h"
 
 InputParameters
-MultiAppMFEMGeneralFieldTransferBase::validParams()
+MFEMMultiAppTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>(
@@ -27,7 +27,7 @@ MultiAppMFEMGeneralFieldTransferBase::validParams()
   return params;
 }
 
-MultiAppMFEMGeneralFieldTransferBase::MultiAppMFEMGeneralFieldTransferBase(InputParameters const & params)
+MFEMMultiAppTransfer::MFEMMultiAppTransfer(InputParameters const & params)
   : MultiAppTransfer(params),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
@@ -36,9 +36,11 @@ MultiAppMFEMGeneralFieldTransferBase::MultiAppMFEMGeneralFieldTransferBase(Input
     mooseError("Number of variables transferred must be same in both systems.");
 }
 
-void MultiAppMFEMGeneralFieldTransferBase::execute()
+void
+MFEMMultiAppTransfer::execute()
 {
-  TIME_SECTION("MultiAppMFEMTolibMeshGeneralFieldTransfer::execute", 5, "Copies variables");
+  TIME_SECTION(
+      "MFEMMultiAppTransfer::execute", 5, "Perform transfer to and/or from an MFEMProblem.");
   if (_current_direction == TO_MULTIAPP)
   {
     for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
@@ -69,17 +71,18 @@ void MultiAppMFEMGeneralFieldTransferBase::execute()
         {
           setActiveToProblem(getToMultiApp()->appProblemBase(i));
           setActiveFromProblem(getFromMultiApp()->appProblemBase(i));
-          transferVariables();            
+          transferVariables();
           transfers_done++;
         }
       }
     if (!transfers_done)
       mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
-                "per multiapp involved on each rank");
+                 "per multiapp involved on each rank");
   }
 }
 
-void MultiAppMFEMGeneralFieldTransferBase::checkSiblingsTransferSupported() const
+void
+MFEMMultiAppTransfer::checkSiblingsTransferSupported() const
 {
   // Check that we are in the supported configuration: same number of source and target apps
   // The allocation of the child apps on the processors must be the same
@@ -88,9 +91,10 @@ void MultiAppMFEMGeneralFieldTransferBase::checkSiblingsTransferSupported() cons
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
         mooseError("Child application allocation on parallel processes must be the same to support "
-                  "siblings variable field copy transfer");
+                   "siblings variable field copy transfer");
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");
 };
+
 #endif
