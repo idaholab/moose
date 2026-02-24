@@ -77,7 +77,8 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
       prop_name = _pars.get<MooseFunctorName>(name);
   }
 
-  _supplied_functor_props.insert(name + (_declare_suffix.empty() ? "" : ("_" + _declare_suffix)));
+  _supplied_functor_props.insert(prop_name +
+                                 (_declare_suffix.empty() ? "" : ("_" + _declare_suffix)));
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
       prop_name + (_declare_suffix.empty() ? "" : ("_" + _declare_suffix)),
       my_lammy,
