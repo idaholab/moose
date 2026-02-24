@@ -105,7 +105,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     if (!_flood_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
         if (normalsWithinTol(id_pair.second, normal, _normal_tol) ||
-           (_allow_normal_flips && normalsWithinTol(id_pair.second, normal, _normal_tol)))
+            (_allow_normal_flips && normalsWithinTol(id_pair.second, normal, _normal_tol)))
         {
           sub_id_found = true;
           item = &id_pair;
