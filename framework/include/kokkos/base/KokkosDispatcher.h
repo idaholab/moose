@@ -507,3 +507,18 @@ private:
 #define registerKokkosPostprocessor(app, classname) registerKokkosReducer(app, classname)
 #define registerKokkosPostprocessorAliased(app, classname, alias)                                  \
   registerKokkosReducerAliased(app, classname, alias)
+
+// User-defined parallel operation registry
+
+#define registerKokkosAdditionalOperation(classname, operation)                                    \
+  static char registerKokkos##classname##operation()                                               \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::operation, classname>(#classname);                \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_##classname##_##operation, __COUNTER__) =                        \
+      registerKokkos##classname##operation()
