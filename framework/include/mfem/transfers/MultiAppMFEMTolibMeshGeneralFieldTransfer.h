@@ -11,12 +11,7 @@
 
 #pragma once
 
-#include <vector>
-
-#include "MultiAppTransfer.h"
-#include "MultiApp.h"
-#include "MooseAppCoordTransform.h"
-#include "MFEMProblem.h"
+#include "MultiAppMFEMGeneralFieldTransferBase.h"
 
 class MooseMesh;
 
@@ -26,25 +21,19 @@ class MooseMesh;
 // but MFEMMesh may differ in each subapp
 // */
 
-class MultiAppMFEMTolibMeshGeneralFieldTransfer : public MultiAppTransfer
+class MultiAppMFEMTolibMeshGeneralFieldTransfer : public MultiAppMFEMGeneralFieldTransferBase
 {
 public:
   static InputParameters validParams();
   MultiAppMFEMTolibMeshGeneralFieldTransfer(InputParameters const & params);
-  void execute() override;
-  auto const & getFromVarName(int i) { return _from_var_names.at(i); };
-  auto const & getToVarName(int i) { return _to_var_names.at(i); };
-  auto numFromVar() { return _from_var_names.size(); }
-  auto numToVar() { return _to_var_names.size(); }
 
 protected:
   mfem::FindPointsGSLIB _mfem_interpolator;
-  std::vector<VariableName> _from_var_names;
-  std::vector<AuxVariableName> _to_var_names;
 
-  void transfer(FEProblemBase & to_problem, MFEMProblem & from_problem);
+  virtual MFEMProblem & getActiveFromProblem() override {return static_cast<MFEMProblem &>(*_active_from_problem);};
+
+  void transferVariables() override;
   void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
-  void checkSiblingsTransferSupported() const override;
 };
 
 #endif
