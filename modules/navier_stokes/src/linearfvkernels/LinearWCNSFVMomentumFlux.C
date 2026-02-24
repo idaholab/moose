@@ -59,13 +59,9 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
-<<<<<<< HEAD
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
-=======
     _porosity_outside_divergence(getParam<bool>("porosity_outside_divergence")),
-    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
->>>>>>> e5f4ed58469 (Add necessary changes to the momentum flux kernels. (#31995))
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),

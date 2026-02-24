@@ -83,12 +83,12 @@ protected:
   /// Computes the matrix contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// Computes the right hand side contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// The dimension of the mesh
   const unsigned int _dim;
