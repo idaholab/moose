@@ -60,7 +60,6 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
-<<<<<<< HEAD
     _adv_interp_method(getFVAdvectedInterpolationMethod(
         getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _advected_gradient_field(
