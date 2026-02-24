@@ -12,7 +12,8 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Imposes Darcy and/or Forchheimer porous resistance on the momentum equation.
+ * Imposes Darcy and/or Forchheimer porous resistance on the momentum equation
+ * using interstitial velocity (u = u_superficial / epsilon).
  */
 class LinearFVMomentumPorousFriction : public LinearFVElementalKernel
 {
@@ -40,6 +41,9 @@ protected:
 
   /// Forchheimer coefficient, vector by component
   const Moose::Functor<RealVectorValue> * const _forchheimer;
+
+  /// Porosity
+  const Moose::Functor<Real> & _eps;
 
   /// Dynamic viscosity (for Darcy)
   const Moose::Functor<Real> * const _mu;

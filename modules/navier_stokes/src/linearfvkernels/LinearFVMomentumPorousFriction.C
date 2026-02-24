@@ -19,11 +19,13 @@ LinearFVMomentumPorousFriction::validParams()
   InputParameters params = LinearFVElementalKernel::validParams();
   params.addClassDescription(
       "Computes Darcy and/or Forchheimer porous resistance on the Navier Stokes i-th momentum "
-      "equation.");
+      "equation using interstitial velocity.");
 
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
   params.addParam<MooseFunctorName>("Forchheimer_name",
                                     "Name of the Forchheimer coefficients property.");
+  params.addParam<MooseFunctorName>(
+      NS::porosity, "1", "Porosity functor (defaults to 1 for non-porous).");
   params.addParam<MooseFunctorName>(NS::mu, "The dynamic viscosity (required for Darcy).");
   params.addParam<MooseFunctorName>(NS::density, "The density (required for Forchheimer).");
 
@@ -47,6 +49,7 @@ LinearFVMomentumPorousFriction::LinearFVMomentumPorousFriction(const InputParame
     _darcy(isParamValid("Darcy_name") ? &getFunctor<RealVectorValue>("Darcy_name") : nullptr),
     _forchheimer(isParamValid("Forchheimer_name") ? &getFunctor<RealVectorValue>("Forchheimer_name")
                                                   : nullptr),
+    _eps(getFunctor<Real>(NS::porosity)),
     _mu(isParamValid(NS::mu) ? &getFunctor<Real>(NS::mu) : nullptr),
     _rho(isParamValid(NS::density) ? &getFunctor<Real>(NS::density) : nullptr),
     _u(isParamValid("u") ? &getFunctor<Real>("u") : nullptr),
@@ -97,7 +100,10 @@ LinearFVMomentumPorousFriction::computeDarcyCoefficient(const Moose::ElemArg & e
   if (!_darcy)
     return 0.0;
 
-  return (*_mu)(elem_arg, state) * (*_darcy)(elem_arg, state)(_index);
+  const Real eps = _eps(elem_arg, state);
+  mooseAssert(eps > 0.0, "Epsilon must be greater than 0!");
+
+  return (*_mu)(elem_arg, state) * (*_darcy)(elem_arg, state)(_index) / eps;
 }
 
 Real
@@ -107,10 +113,13 @@ LinearFVMomentumPorousFriction::computeForchheimerCoefficient(const Moose::ElemA
   if (!_forchheimer)
     return 0.0;
 
+  const Real eps = _eps(elem_arg, state);
+  mooseAssert(eps > 0.0, "Epsilon must be greater than 0!");
+
   const Real u = (*_u)(elem_arg, state);
   const Real v = _v ? (*_v)(elem_arg, state) : 0.0;
   const Real w = _w ? (*_w)(elem_arg, state) : 0.0;
-  const Real speed = NS::computeSpeed(RealVectorValue(u, v, w));
+  const Real speed = NS::computeSpeed(RealVectorValue(u, v, w)) / eps;
 
-  return (*_rho)(elem_arg, state) * (*_forchheimer)(elem_arg, state)(_index)*speed;
+  return (*_rho)(elem_arg, state) * (*_forchheimer)(elem_arg, state)(_index)*speed / eps;
 }
