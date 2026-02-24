@@ -47,7 +47,7 @@
   [mfem_parent_l2_vector_var]
     type = MFEMVariable
     fespace = L2FESpace
-  []      
+  []
 []
 
 [AuxVariables]
@@ -116,7 +116,7 @@
 
 [Transfers]
   [transfer_from_subapp]
-    type = MultiAppMFEMGeneralFieldTransfer
+    type = MultiAppMFEMShapeEvaluationTransfer
     source_variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
     variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
     from_multi_app = mfem_app
@@ -135,7 +135,7 @@
     variable = mfem_parent_hcurl_vector_var
     function = mfem_sub_hcurl_vector_var
     execute_on = TIMESTEP_END
-  []  
+  []
   [HDiv_Var_L2_Error]
     type = MFEMVectorL2Error
     variable = mfem_parent_hdiv_vector_var

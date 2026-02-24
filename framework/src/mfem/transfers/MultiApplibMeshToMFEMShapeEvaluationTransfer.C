@@ -9,7 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MultiApplibMeshToMFEMGeneralFieldTransfer.h"
+#include "MultiApplibMeshToMFEMShapeEvaluationTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
@@ -20,17 +20,17 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
-registerMooseObject("MooseApp", MultiApplibMeshToMFEMGeneralFieldTransfer);
+registerMooseObject("MooseApp", MultiApplibMeshToMFEMShapeEvaluationTransfer);
 
 InputParameters
-MultiApplibMeshToMFEMGeneralFieldTransfer::validParams()
+MultiApplibMeshToMFEMShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MFEMMultiAppTransfer::validParams();
   params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
   return params;
 }
 
-MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTransfer(
+MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluationTransfer(
     InputParameters const & params)
   : MFEMMultiAppTransfer(params)
 {
@@ -38,17 +38,19 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTran
 }
 
 void
-MultiApplibMeshToMFEMGeneralFieldTransfer::transferVariables()
+MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
 {
   for (unsigned v = 0; v < numToVar(); ++v)
     setMFEMGridFunctionValuesFromlibMesh(v, getActiveToProblem());
 }
 
 void
-MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem)
+MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMesh(
+    const unsigned int var_index, MFEMProblem & to_problem)
 {
   // Generate list of points where the grid function will be evaluated
-  mfem::ParGridFunction & to_gf = *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
+  mfem::ParGridFunction & to_gf =
+      *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
   mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
   mfem::Vector vxyz;
   mfem::Ordering::Type point_ordering;
@@ -63,24 +65,24 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
   // processor to points
   std::map<processor_id_type, std::vector<Point>> outgoing_points;
 
-  for (int i = 0; i < nodes_cnt*to_gf_ncomp; i++)
-  {  
+  for (int i = 0; i < nodes_cnt * to_gf_ncomp; i++)
+  {
     for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-    {    
+    {
       if (dim == 3)
       {
-        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp], vxyz[i+2*NE*nsp]});
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp], vxyz[i + 2 * NE * nsp]});
         outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
       }
       else
       {
-        const mfem::Vector transformed_node({vxyz[i], vxyz[i+NE*nsp] });          
+        const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp]});
         outgoing_points[i_proc].push_back(std::move(pointFromMFEMVector(transformed_node)));
       }
     }
   }
   // Evaluate source grid function at target points
-  mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
+  mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
   std::vector<libMesh::MeshFunction> local_meshfuns;
   local_meshfuns.clear();
   local_meshfuns.reserve(_from_problems.size());
@@ -95,10 +97,8 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
                                  Moose::VarFieldType::VAR_FIELD_ANY);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-    local_meshfuns.emplace_back(from_problem.es(),
-                                *from_sys.current_local_solution,
-                                from_sys.get_dof_map(),
-                                from_var_num);
+    local_meshfuns.emplace_back(
+        from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
     local_meshfuns.back().init();
     local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
   }
@@ -137,23 +137,23 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
       {
         // if (local_bboxes[i_from].contains_point(pt))
         // {
-          const auto from_global_num =
-              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
-          // Use mesh function to compute interpolation values
-          vals_ids_for_incoming_points[i_pt].first =
-              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
-          // Record problem ID as well
-          switch (_current_direction)
-          {
-            case FROM_MULTIAPP:
-              vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
-              break;
-            case TO_MULTIAPP:
-              vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
-              break;
-            default:
-              mooseError("Unsupported direction");
-          }
+        const auto from_global_num =
+            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+        // Use mesh function to compute interpolation values
+        vals_ids_for_incoming_points[i_pt].first =
+            (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+        // Record problem ID as well
+        switch (_current_direction)
+        {
+          case FROM_MULTIAPP:
+            vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+            break;
+          case TO_MULTIAPP:
+            vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+            break;
+          default:
+            mooseError("Unsupported direction");
+        }
         // }
       }
     }

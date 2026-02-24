@@ -60,7 +60,7 @@
 
 [Transfers]
   [transfer_from_libmesh]
-    type = MultiApplibMeshToMFEMGeneralFieldTransfer
+    type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     source_variable = libmesh_scalar_var
     variable = libmesh_scalar_var
     from_multi_app = libmesh_app

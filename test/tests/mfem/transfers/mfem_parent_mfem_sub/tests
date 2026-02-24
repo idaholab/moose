@@ -1,6 +1,6 @@
 [Tests]
-  [MFEMGeneralFieldTransfer]
-    design = MultiAppMFEMGeneralFieldTransfer.md
+  [MFEMShapeEvaluationTransfer]
+    design = MultiAppMFEMShapeEvaluationTransfer.md
     [FromSubToParent]
       requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation, verified through '
       issues = '#31982'
@@ -20,7 +20,7 @@
                   OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
                   u
                   OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
-        prereq = MFEMGeneralFieldTransfer/FromSubToParent/run
+        prereq = MFEMShapeEvaluationTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'

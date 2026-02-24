@@ -38,7 +38,7 @@
     type = BodyForce
     variable = libmesh_scalar_var
     value = 2.0
-  []  
+  []
 []
 
 [Executioner]
@@ -69,7 +69,7 @@
 
 [Transfers]
   [transfer_from_mfem]
-    type = MultiAppMFEMTolibMeshGeneralFieldTransfer
+    type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     source_variable = mfem_scalar_var
     variable = mfem_scalar_var
     from_multi_app = mfem_app
