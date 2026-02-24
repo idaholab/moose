@@ -104,7 +104,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     SubdomainID sub_id;
     if (!_flood_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
-        if (normalsWithinTol(id_pair.second, normal, _normal_tol))
+        if (normalsWithinTol(id_pair.second, normal, _normal_tol) ||
+           (_allow_normal_flips && normalsWithinTol(id_pair.second, normal, _normal_tol)))
         {
           sub_id_found = true;
           item = &id_pair;
@@ -140,15 +141,15 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     // Flood with the previously created subdomains and normals
     // TODO: we need to store the starting element for that patch, in case it is not "elem"
     if (item)
-      flood(elem, item->second, *elem, item->first);
+      flood(elem, item->second, *elem, item->first, *mesh);
     else if (sub_id_found)
-      flood(elem, normal, *elem, sub_id);
+      flood(elem, normal, *elem, sub_id, *mesh);
     // Flood with a new subdomain and the element normal
     else
     {
       sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
       _subdomain_to_normal_map[sub_id] = normal;
-      flood(elem, normal, *elem, sub_id);
+      flood(elem, normal, *elem, sub_id, *mesh);
     }
   }
 
