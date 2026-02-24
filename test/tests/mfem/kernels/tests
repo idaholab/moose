@@ -107,14 +107,15 @@
     restep = false
   []
   [MFEMHeatConductionElement]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionElement/heatconductionelement_line_sample_0001.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0002.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0003.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
+               'Outputs/CSV/file_base=OutputData/HeatConductionElement/heatconductionelement '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
