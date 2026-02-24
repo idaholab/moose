@@ -6,9 +6,9 @@ advected_interp_method = 'upwind'
   [mesh]
     type = CartesianMeshGenerator
     dim = 1
-    dx = '0.5 0.5'
-    ix = '10 10'
-    subdomain_id = '1 2'
+    dx = '0.5 0.5 0.5'
+    ix = '10 10 10'
+    subdomain_id = '1 2 3'
   []
   [baffle]
     type = SideSetsBetweenSubdomainsGenerator
@@ -17,13 +17,13 @@ advected_interp_method = 'upwind'
     paired_block = '2'
     new_boundary = 'baffle'
   []
-  # [baffle2]
-  #   type = SideSetsBetweenSubdomainsGenerator
-  #   input = baffle
-  #   primary_block = '2'
-  #   paired_block = '3'
-  #   new_boundary = 'baffle2'
-  # []
+  [baffle2]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = baffle
+    primary_block = '2'
+    paired_block = '3'
+    new_boundary = 'baffle2'
+  []
 []
 
 [Problem]
@@ -33,13 +33,13 @@ advected_interp_method = 'upwind'
 
 [UserObjects]
   [rc]
-    type = RhieChowMassFlux
+    type = PorousRhieChowMassFlux
     u = superficial_u
     pressure = pressure
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
-    pressure_baffle_sidesets = 'baffle'
+    pressure_baffle_sidesets = 'baffle baffle2'
     pressure_baffle_relaxation = 0.5
     debug_baffle = true
     use_flux_velocity_reconstruction = false
@@ -63,7 +63,7 @@ advected_interp_method = 'upwind'
 
 [LinearFVKernels]
   [u_advection]
-    type = LinearWCNSFVMomentumFlux
+    type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method = ${advected_interp_method}
     mu = ${mu}
@@ -122,7 +122,7 @@ advected_interp_method = 'upwind'
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
-    subdomain_to_prop_value = '1 0.5 2 1.0'
+    subdomain_to_prop_value = '1 0.5 2 1.0 3 0.5'
   []
 []
 
