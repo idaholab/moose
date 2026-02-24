@@ -202,8 +202,7 @@ public:
   /**
    * Override of ExternalProblem::addMarker. Uses ExternalProblem::addMarker to create an
    * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
-   * MFEMRefinementMarker to be used for adaptive mesh refinement. If the pointer conversion
-   * is successful, this method sets the MFEMProblemData::_use_amr to true.
+   * MFEMRefinementMarker to be used for adaptive mesh refinement.
    */
   void addMarker(const std::string & type,
                  const std::string & name,
@@ -276,21 +275,19 @@ public:
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
-  bool getMeshChanged() const { return _problem_data._mesh_changed; }
-  void setMeshChanged(bool ch) { _problem_data._mesh_changed = ch; }
+  bool getMeshChanged() const { return _problem_data.mesh_changed; }
+  void setMeshChanged(bool ch) { _problem_data.mesh_changed = ch; }
 
   void updateAfterRefinement();
   void updateFESpaces();
 
-  void setUpAMR();
+  void hRefine() { _problem_data.refiner->hRefine(); }
+  void pRefine() { _problem_data.refiner->pRefine(); }
 
-  void hRefine();
-  void pRefine();
-
-  bool useHRefinement() const { return (_problem_data._refiner->useHRefinement()); }
-  bool usePRefinement() const { return (_problem_data._refiner->usePRefinement()); }
-
-  bool useAMR() const { return _problem_data._use_amr; }
+  /**
+   * Returns a bool to indicate whether we refined the mesh
+   */
+  bool applyRefinements();
 
   /**
    * @returns a shared pointer to an MFEM parallel grid function
@@ -307,6 +304,11 @@ public:
 
 protected:
   MFEMProblemData _problem_data;
+
+private:
+  bool useAMR() const { return _problem_data.refiner != nullptr; }
+  bool useHRefinement() const { return useAMR() && _problem_data.refiner->useHRefinement(); }
+  bool usePRefinement() const { return useAMR() && _problem_data.refiner->usePRefinement(); }
 };
 
 #endif

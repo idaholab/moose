@@ -51,7 +51,11 @@ MFEMProblem::initialSetup()
   FEProblemBase::initialSetup();
   addMFEMNonlinearSolver();
   if (useAMR())
-    setUpAMR();
+  {
+    mooseAssert(_problem_data.refiner, "Found no refiner during setUpAMR()");
+    _problem_data.refiner->setUp();
+    mooseAssert(_problem_data.pmesh->Nonconforming(), "Mesh must be non-conforming to use amr");
+  }
 }
 
 void
@@ -78,10 +82,6 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
                           InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-
-  mooseAssert(dynamic_cast<const MFEMIndicator *>(&(getUserObjectBase(name))),
-              "Cannot add estimator with name '" + name + "'");
-
   auto object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
   auto estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
 
@@ -100,10 +100,8 @@ MFEMProblem::addMarker(const std::string & user_object_name,
               "Cannot add estimator with refiner '" + name + "'");
 
   auto object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
-  auto refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 
-  _problem_data._refiner = refiner;
-  _problem_data._use_amr = true;
+  getProblemData().refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 }
 
 void
@@ -656,7 +654,7 @@ MFEMProblem::updateFESpaces()
   {
     gridfunction_pair.second->Update();
   }
-  _problem_data.eqn_system->UpdateEquationSystem();
+  _problem_data.eqn_system->BuildEquationSystem();
 }
 
 std::vector<VariableName>
@@ -724,44 +722,18 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
   return MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
 }
 
-void
-MFEMProblem::setUpAMR()
+bool
+MFEMProblem::applyRefinements()
 {
-  mooseAssert(_problem_data._refiner, "Found no refiner during setUpAMR()");
-  _problem_data._refiner->setUp();
+  bool refined = usePRefinement() || useHRefinement();
 
-  mooseAssert(_problem_data.pmesh->Nonconforming(), "Mesh must be non-conforming to use amr");
-}
+  if (usePRefinement())
+    pRefine();
 
-void
-MFEMProblem::hRefine()
-{
-  if (useAMR())
-    _problem_data._refiner->hRefine();
-  else
-    mooseError(
-        "Called EquationSystemProblemOperator::hRefine(), even though _use_amr is set to false.");
-}
+  if (useHRefinement())
+    hRefine();
 
-void
-MFEMProblem::pRefine()
-{
-  if (useAMR())
-  {
-    mfem::Array<mfem::Refinement> refinements;
-    _problem_data._refiner->pRefineMarker(refinements);
-    mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
-    for (const auto i : make_range(refinements.Size()))
-      prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
-
-    _problem_data._refiner->getFESpace().PRefineAndUpdate(prefinements);
-  }
-
-  else
-  {
-    mooseError(
-        "Called EquationSystemProblemOperator::pRefine(), even though _use_amr is set to false.");
-  }
+  return refined;
 }
 
 #endif

@@ -19,13 +19,6 @@ MFEMRefinementMarker::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
 
-  MooseEnum refinement_type("h p hp", "hp");
-  params.addRequiredParam<MooseEnum>(
-      "refinement_type",
-      refinement_type,
-      "Specifies whether to use h-refinement, p-refinement or both.");
-
-  params.addRequiredParam<Real>("refine", "Error fraction for the refiner");
   params.addRangeCheckedParam<Real>("refine",
                                     0,
                                     "refine>=0 & refine<=1",
@@ -46,9 +39,8 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
     _error_threshold(getParam<Real>("refine")),
     _max_h_level(getParam<unsigned>("max_h_level")),
     _max_p_level(getParam<unsigned>("max_p_level")),
-    _refinement_type(getParam<MooseEnum>("refinement_type")),
-    _use_h_refinement(_refinement_type == "h" || _refinement_type == "hp"),
-    _use_p_refinement(_refinement_type == "p" || _refinement_type == "hp")
+    _use_h_refinement(_max_h_level),
+    _use_p_refinement(_max_p_level)
 {
 }
 
@@ -64,7 +56,7 @@ MFEMRefinementMarker::setUp()
   if (_use_p_refinement and !fespace.PRefinementSupported())
   {
     mooseWarning("Specified p-refinement on an unsupported FESpace or geometry. Only H1 and L2 are "
-                 "supported by mfem");
+                 "spaces on quadrilateral/hexahedral meshes are supported by mfem");
     _use_p_refinement = false;
   }
 
@@ -76,21 +68,26 @@ void
 MFEMRefinementMarker::pRefineMarker(mfem::Array<mfem::Refinement> & refinements)
 {
   mfem::ParMesh & mesh = _estimator->getParMesh();
-
-  // Hand over to the underlying mfem object to find all the
-  // places we should increase the polynomial order
   _threshold_refiner->MarkWithoutRefining(mesh, refinements);
+}
 
-  // We are doing p-refinement. Increase the counter
-  // and check if we have exceeded the max number of
-  // p-refinement steps
+void
+MFEMRefinementMarker::pRefine()
+{
+  mfem::Array<mfem::Refinement> refinements;
+  pRefineMarker(refinements);
+  mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
+  for (const auto i : make_range(refinements.Size()))
+    prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
+
+  _estimator->getFESpace().PRefineAndUpdate(prefinements);
+
+  // Check if we have exceeded the pre-determined number of
+  // refinement steps
   _stop_p_ref = (++_p_ref_counter >= _max_p_level);
 
-  // The stopping condition is essentially that the refinements
-  // array is empty, i.e. the refiner didn't find anywhere on the mesh
-  // that needed its polynomial order increasing. We do essentially
-  // an allreduce to check this on all the ranks. Do |= so that we
-  // stop if either one of the conditions is met.
+  mfem::ParMesh & mesh = _estimator->getParMesh();
+  // Check if there was nothing to refine
   _stop_p_ref |= (mesh.ReduceInt(refinements.Size()) == 0LL);
 }
 
