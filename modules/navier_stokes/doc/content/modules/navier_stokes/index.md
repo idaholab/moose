@@ -14,6 +14,7 @@ please refer to the below pages:
 - [Weakly Compressible Finite Volume](wcnsfv.md)
 - [Weakly compressible finite volume using a linear discretization and a segregated solvealgorithm (SIMPLE/PIMPLE)](linear_wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
+- [Porous Rhie-Chow / baffle jump design summary](porous_rhie_chow_baffle.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Discontinuous Galerkin Finite Element](navier_stokes/dgfe.md)
 - [Hybridized Discontinuous Galerkin (HDG) Finite Element](inshdg.md)
