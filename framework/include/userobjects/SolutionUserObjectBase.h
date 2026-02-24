@@ -310,10 +310,10 @@ protected:
   void readXda();
 
   /**
-   * Method for reading an ExodusII file, which is called when
-   * 'file_type = exodusII is set in the input file.
+   * Method for reading an ExodusII or Nemesis file, which is called when
+   * a mesh file with a .e, .exo, .n or .nem extension is provided in the input file.
    */
-  void readExodusII();
+  void readExodusIIOrNemesis();
 
   /**
    * Method for extracting value of solution based on the DOF,
@@ -330,7 +330,7 @@ protected:
   void updateTimeInterpolationFromFile();
 
   /**
-   * Updates the time indices to interpolate between for ExodusII data
+   * Updates the time indices to interpolate between for ExodusII or Nemesis data
    */
   bool updateInterpolationBracketingTimeIndices();
 
@@ -396,13 +396,13 @@ protected:
   /// File type to read (0 = xda; 1 = ExodusII, 2 = xdr, 3 = Nemesis)
   MooseEnum _file_type;
 
-  /// The XDA or ExodusII file that is being read
+  /// The XDA/ExodusII/XDR/Nemesis file that is being read
   std::string _mesh_file;
 
-  /// The XDA file that contians the EquationSystems data (xda only)
+  /// The XDA/XDR file that contians the EquationSystems data (xda/xdr only)
   std::string _es_file;
 
-  /// The system name to extract from the XDA file (xda only)
+  /// The system name to extract from the XDA/XDR file (xda/xdr only)
   std::string _system_name;
 
   /// A list of variables to extract from the read system
@@ -506,9 +506,6 @@ protected:
 
   /// transformations (rotations, translation, scales) are performed in this order
   MultiMooseEnum _transformation_order;
-
-  /// Whether the solution file is a nemesis file
-  const bool _nemesis;
 
   /// Whether to force the source mesh to be replicated
   const bool _force_replicated_source;

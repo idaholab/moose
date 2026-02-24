@@ -46,10 +46,6 @@ SolutionUserObjectBase::validParams()
       "system_variables",
       std::vector<std::string>(),
       "The name of the nodal and elemental variables from the file you want to use for values");
-  params.addParam<bool>("nemesis",
-                        false,
-                        "Whether the file is Nemesis file, which cannot be differentiated from "
-                        "exodusII solely by the extension extension");
   params.addParam<bool>(
       "force_replicated_source_mesh",
       false,
@@ -152,7 +148,6 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
     _rotation1_angle(getParam<Real>("rotation1_angle")),
     _r1(RealTensorValue()),
     _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
-    _nemesis(getParam<bool>("nemesis")),
     _force_replicated_source(getParam<bool>("force_replicated_source_mesh")),
     _initialized(false)
 {
@@ -232,7 +227,7 @@ SolutionUserObjectBase::readXda()
 }
 
 void
-SolutionUserObjectBase::readExodusII()
+SolutionUserObjectBase::readExodusIIOrNemesis()
 {
   // Define a default system name
   if (_system_name == "")
@@ -248,8 +243,7 @@ SolutionUserObjectBase::readExodusII()
   else
   {
     _nemesis_io = std::make_unique<libMesh::Nemesis_IO>(*_mesh);
-    // User might try to add the suffixes to the extension
-    _nemesis_io->read(MooseUtils::stripExtension(_mesh_file) + ".e");
+    _nemesis_io->read(_mesh_file);
     _exodus_times = &_nemesis_io->get_time_steps();
   }
   // Same routine for Nemesis
@@ -516,13 +510,13 @@ SolutionUserObjectBase::initialSetup()
   const bool has_exodus_extension =
       MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
       MooseUtils::hasExtension(_mesh_file, "exo", true);
+  const bool has_nemesis_extension =
+      MooseUtils::hasExtension(_mesh_file, "n", /*strip_exodus_ext =*/true) ||
+      MooseUtils::hasExtension(_mesh_file, "nem", true);
   if (has_exodus_extension)
-  {
-    if (_nemesis)
-      _file_type = "nemesis";
-    else
-      _file_type = "exodusII";
-  }
+    _file_type = "exodusII";
+  else if (has_nemesis_extension)
+    _file_type = "nemesis";
 
   // Create a libmesh::Mesh object for storing the loaded data.
   if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == "exodusII") ||
@@ -531,9 +525,9 @@ SolutionUserObjectBase::initialSetup()
   else
     _mesh = std::make_unique<DistributedMesh>(_communicator);
 
-  // ExodusII mesh file supplied
-  if (has_exodus_extension)
-    readExodusII();
+  // ExodusII or Nemesis mesh file supplied
+  if (has_exodus_extension || has_nemesis_extension)
+    readExodusIIOrNemesis();
 
   // XDA mesh file supplied
   else if (MooseUtils::hasExtension(_mesh_file, "xda"))
