@@ -90,14 +90,15 @@
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
   [MFEMHeatConduction]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
