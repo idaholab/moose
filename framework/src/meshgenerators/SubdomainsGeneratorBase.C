@@ -44,19 +44,27 @@ SubdomainsGeneratorBase::validParams()
                                     "only added if face_normal.normal_hat >= "
                                     "1 - normal_tol, where normal_hat = "
                                     "normal/|normal|");
+  params.addRangeCheckedParam<Real>("flipped_normal_tol",
+                                    0.1,
+                                    "flipped_normal_tol>=0 & flipped_normal_tol<=2",
+                                    "If normal is supplied then faces are "
+                                    "only added if -face_normal.normal_hat >= "
+                                    "1 - normal_tol, where normal_hat = "
+                                    "normal/|normal|");
   params.addParam<bool>("fixed_normal",
                         false,
                         "Whether to move the normal vector as we paint the geometry, or keep it "
                         "fixed from the first element we started painting with");
+  params.addParam<bool>("allow_normal_flips",
+                        false,
+                        "Whether to allow for elements to be added, then flipped, to a subdomain "
+                        "when their normal is flipped with regard to their neighbor's");
   params.addRangeCheckedParam<std::vector<Real>>(
       "max_subdomain_size_centroids",
       "max_subdomain_size_centroids >= 0",
       "Maximum distance between element centroids (vertex average approximation) "
       "in each 'included_subdomain'. 0 means do not apply a distance, a single value in the vector "
       "is applied to all subdomains");
-
-  // Flood parameters
-  // NOTE: this can 'cut' paths to re-grouping elements. It is a heuristic and won't always improve
   // things
   params.addParam<bool>("flood_elements_once", false, "Whether to consider elements only once");
   params.addParam<bool>("check_painted_neighbor_normals",
@@ -79,7 +87,9 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
                 ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
+    _flipped_normal_tol(getParam<Real>("flipped_normal_tol")),
     _fixed_normal(getParam<bool>("fixed_normal")),
+    _allow_normal_flips(getParam<bool>("allow_normal_flips")),
     _has_max_distance_criterion(isParamSetByUser("max_subdomain_size_centroids")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
     _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
@@ -134,7 +144,8 @@ void
 SubdomainsGeneratorBase::flood(Elem * const elem,
                                const Point & base_normal,
                                const Elem & starting_elem,
-                               const subdomain_id_type & sub_id)
+                               const subdomain_id_type & sub_id,
+                               MeshBase & mesh)
 {
   if (elem == nullptr || elem == remote_elem ||
       (_visited[sub_id].find(elem) != _visited[sub_id].end()))
@@ -147,7 +158,7 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
     return;
 
   _visited[sub_id].insert(elem);
-  const auto elem_normal = get2DElemNormal(elem);
+  auto elem_normal = get2DElemNormal(elem);
 
   bool criterion_met = false;
   if (elementSatisfiesRequirements(elem, base_normal, starting_elem, elem_normal))
@@ -171,6 +182,15 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   // We don't want to remove the element from consideration too early
   _visited_once.insert(elem);
 
+  // Flip the element if needed
+  if (_allow_normal_flips && base_normal * elem_normal < 0)
+  {
+    elem_normal *= -1;
+    BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+    elem->flip(&boundary_info);
+  }
+
   for (const auto neighbor : make_range(elem->n_sides()))
   {
     // Flood to the neighboring elements using the current matching side normal from this
@@ -178,7 +198,8 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
     flood(elem->neighbor_ptr(neighbor),
           _fixed_normal ? base_normal : elem_normal,
           starting_elem,
-          sub_id);
+          sub_id,
+          mesh);
   }
 }
 
@@ -210,7 +231,9 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
   if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
     return false;
 
-  if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
+  if (_using_normal && (!normalsWithinTol(desired_normal, face_normal, _normal_tol) &&
+                        (!_allow_normal_flips ||
+                         !normalsWithinTol(desired_normal, -face_normal, _flipped_normal_tol))))
     return false;
 
   if (_has_max_distance_criterion)
