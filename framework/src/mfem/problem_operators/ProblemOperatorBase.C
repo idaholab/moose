@@ -51,7 +51,7 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
   X.Update(_block_true_offsets_trial);
   for (const auto i : index_range(_trial_variables))
     X.GetBlock(i) = _trial_variables[i]->GetTrueVector();
-  // Sync the flags from sub-block vectors to global vector
+  // Sync the flags from the global vector with the sub-vectors (copies to global vector location)
   X.SyncFromBlocks();
 
   // After initial assignment of X from the grid function, which may contain initial conditions,
@@ -60,23 +60,15 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
     _trial_variables[i]->MakeTRef(
         _trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
   _trial_true_vector = &X;
-
-  // This might seem silly but after making the tref the memory flags of the grid function and its
-  // true vector are in an empty state other than the aliasing. This operation syncs the flags and
-  // should be a no-op in terms of actual data transfer
-  SetTrialVariablesFromTrueVectors();
 }
 
 void
 ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
 {
-  for (const auto ind : index_range(_trial_variables))
+  mooseAssert(_trial_true_vector, "The true vector should already have been set");
+  for (const auto trial_var : _trial_variables)
   {
-    auto * const trial_var = _trial_variables.at(ind);
-
-    // We must sync the memory flags from the true true vector to the grid function copy of the true
-    // vector
-    mooseAssert(_trial_true_vector, "The true vector should already have been set");
+    // Sync the memory flags from the global true vector to the gridfunction aliases
     trial_var->GetTrueVector().SyncMemory(*_trial_true_vector);
     trial_var->SetFromTrueVector();
   }

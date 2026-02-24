@@ -53,23 +53,17 @@ MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPos
     _sum_coef(_real_inner_product_coef, _imag_inner_product_coef, 0.5, 0.5),
     _subdomain_integrator(&_scalar_test_fespace)
 {
-
-  _scalar_var.ProjectCoefficient(_scalar_coef);
-
   if (isSubdomainRestricted())
-  {
     _subdomain_integrator.AddDomainIntegrator(new mfem::DomainLFIntegrator(_sum_coef),
                                               getSubdomainMarkers());
-  }
   else
-  {
     _subdomain_integrator.AddDomainIntegrator(new mfem::DomainLFIntegrator(_sum_coef));
-  }
 }
 
 void
 MFEMComplexVectorPeriodAveragedPostprocessor::execute()
 {
+  _scalar_var.ProjectCoefficient(_scalar_coef);
   _subdomain_integrator.Assemble();
   _integral = _subdomain_integrator(_scalar_var);
 }
