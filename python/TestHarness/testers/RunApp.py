@@ -684,9 +684,12 @@ class RunApp(Tester):
         if self.specs["capabilities"]:
             # Capabilities from this Tester's specs in addition
             # to capabilities from the global options
-            capabilities = (
-                self._augmented_capabilities | options._augmented_capabilities
-            )
+            if self._augmented_capabilities is not None:
+                capabilities = (
+                    self._augmented_capabilities | options._augmented_capabilities
+                )
+            else:
+                capabilities = options._augmented_capabilities
 
             # Capture the capabilities that we need to dump, if any.
             # For now, we'll lazily just see if each of the
