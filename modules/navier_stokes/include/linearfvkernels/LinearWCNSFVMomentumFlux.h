@@ -99,6 +99,9 @@ protected:
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
 
+  /// Interpolation method for the viscosity on faces
+  const Moose::FV::InterpMethod _mu_interp_method;
+
   /// Switch to enable/disable nonorthogonal correction in the stress term
   const bool _use_nonorthogonal_correction;
 
@@ -117,6 +120,8 @@ protected:
 
   /// Whether to include porosity outside the divergence in the advection term
   const bool _porosity_outside_divergence;
+  /// Use two-point transmissibility for stress fluxes (jump-safe)
+  const bool _use_two_point_stress_transmissibility;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -144,6 +149,15 @@ protected:
 
   /// Axisymmetric radial coordinate index (only used when in RZ)
   const unsigned int _rz_radial_coord;
+
+  /// Compute face viscosity on internal faces using the selected interpolation method
+  Real faceMu(const Moose::StateArg & state) const;
+
+  /// Compute two-point transmissibility for the stress flux
+  Real stressTransmissibility(const Moose::StateArg & state) const;
+
+  /// Compute face viscosity on boundary faces
+  Real boundaryMu(const Moose::StateArg & state) const;
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
