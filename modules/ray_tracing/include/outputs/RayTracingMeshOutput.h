@@ -47,6 +47,9 @@ protected:
    */
   virtual void outputMesh() = 0;
 
+  /// Return the file extension
+  virtual std::string fileExtension() const = 0;
+
   /// The RayTracingStudy
   const RayTracingStudy & _study;
 

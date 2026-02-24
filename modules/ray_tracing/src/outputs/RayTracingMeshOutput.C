@@ -101,9 +101,9 @@ RayTracingMeshOutput::RayTracingMeshOutput(const InputParameters & params)
 std::string
 RayTracingMeshOutput::filename()
 {
-  // Append the .e extension on the base file name
+  // Append the file extension on the base file name
   std::ostringstream output;
-  output << _file_base << ".e";
+  output << _file_base << fileExtension();
 
   // Add the _000x extension to the file
   if (_file_num > 0)

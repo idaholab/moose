@@ -3,7 +3,7 @@
     # Tests the for existence of Nemesis files
     type = 'CheckFiles'
     input = 'nemesis.i'
-    check_files = 'nemesis_out.e.1.0'
+    check_files = 'nemesis_out.n.1.0'
     max_parallel = 1
 
     requirement = "The Nemesis Output object shall output separate files per process for visualization purposes."
@@ -13,7 +13,7 @@
   [./nemesis_elemental_replicated]
     type = 'Exodiff'
     input = nemesis_elemental.i
-    exodiff = 'nemesis_elemental_replicated.e.4.0 nemesis_elemental_replicated.e.4.1 nemesis_elemental_replicated.e.4.2 nemesis_elemental_replicated.e.4.3'
+    exodiff = 'nemesis_elemental_replicated.n.4.0 nemesis_elemental_replicated.n.4.1 nemesis_elemental_replicated.n.4.2 nemesis_elemental_replicated.n.4.3'
     # We want to make sure elemental variable writing works for
     # ReplicatedMesh too, and the node numbering/partitioning will be
     # different in the DistributedMesh case, so we can't reuse the
@@ -31,7 +31,7 @@
   [./nemesis_elemental_distributed]
     type = 'Exodiff'
     input = nemesis_elemental.i
-    exodiff = 'nemesis_elemental_distributed.e.4.0 nemesis_elemental_distributed.e.4.1 nemesis_elemental_distributed.e.4.2 nemesis_elemental_distributed.e.4.3'
+    exodiff = 'nemesis_elemental_distributed.n.4.0 nemesis_elemental_distributed.n.4.1 nemesis_elemental_distributed.n.4.2 nemesis_elemental_distributed.n.4.3'
     mesh_mode = distributed
     cli_args = 'Outputs/file_base=nemesis_elemental_distributed'
     min_parallel = 4
@@ -45,7 +45,7 @@
   [./nemesis_scalar_replicated]
     type = 'Exodiff'
     input = nemesis_scalar.i
-    exodiff = 'nemesis_scalar_replicated.e.4.0 nemesis_scalar_replicated.e.4.1 nemesis_scalar_replicated.e.4.2 nemesis_scalar_replicated.e.4.3'
+    exodiff = 'nemesis_scalar_replicated.n.4.0 nemesis_scalar_replicated.n.4.1 nemesis_scalar_replicated.n.4.2 nemesis_scalar_replicated.n.4.3'
     # We want to make sure scalar variable writing works for
     # ReplicatedMesh too, and the node numbering/partitioning will be
     # different in the DistributedMesh case, so we can't reuse the
@@ -64,7 +64,7 @@
   [./nemesis_scalar_distributed]
     type = 'Exodiff'
     input = nemesis_scalar.i
-    exodiff = 'nemesis_scalar_distributed.e.4.0 nemesis_scalar_distributed.e.4.1 nemesis_scalar_distributed.e.4.2 nemesis_scalar_distributed.e.4.3'
+    exodiff = 'nemesis_scalar_distributed.n.4.0 nemesis_scalar_distributed.n.4.1 nemesis_scalar_distributed.n.4.2 nemesis_scalar_distributed.n.4.3'
     mesh_mode = distributed
     cli_args = 'Outputs/file_base=nemesis_scalar_distributed'
     min_parallel = 4

@@ -19,4 +19,7 @@ public:
   static InputParameters validParams();
 
   virtual void outputMesh() override;
+
+protected:
+  virtual std::string fileExtension() const override { return ".e"; }
 };
