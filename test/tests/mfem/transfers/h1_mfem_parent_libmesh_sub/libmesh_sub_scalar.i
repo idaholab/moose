@@ -31,7 +31,7 @@
     type = BodyForce
     variable = libmesh_scalar_var
     value = 2.0
-  []  
+  []
 []
 
 [Executioner]

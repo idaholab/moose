@@ -44,11 +44,11 @@
     from_multi_app = subapp
   []
   [general_transfer_from_sub]
-    type = MultiAppMFEMGeneralFieldTransfer
+    type = MultiAppMFEMShapeEvaluationTransfer
     source_variable = u
     variable = u
     from_multi_app = subapp
-  []  
+  []
 []
 
 [Outputs]
