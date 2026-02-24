@@ -381,6 +381,9 @@ SurfaceSubdomainsDelaunayRemesher::meshNormalDeviation2D(const MeshBase & mesh,
   {
     const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
     max_deviation = std::max(max_deviation, elem_deviation);
+    if (_verbose && elem_deviation > _max_angle_deviation)
+      _console << "Element " << elem->id() << " from subdomain ID " << elem->subdomain_id()
+               << " has normal deviation: " << elem_deviation << std::endl;
   }
   mesh.comm().max(max_deviation);
   return max_deviation;
