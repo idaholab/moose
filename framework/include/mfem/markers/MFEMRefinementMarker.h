@@ -34,8 +34,10 @@ public:
   /// Modifies the input array with all the locations in the mesh where we should increase
   /// the polynomial order
   void pRefineMarker(mfem::Array<mfem::Refinement> & refinements);
+  /// Applies p-refinement wherever the refiner sees fit.
+  void pRefine();
 
-  /// Refines the mesh wherever the refiner sees fit.
+  /// Applies h-refinement wherever the refiner sees fit.
   void hRefine();
 
   /// Checks if H refinement is enabled, and if we should continue.
@@ -43,9 +45,6 @@ public:
 
   /// Checks if P refinement is enabled, and if we should continue.
   bool usePRefinement() const { return _use_p_refinement and !_stop_p_ref; }
-
-  const unsigned & maxHLevel() const { return _max_h_level; }
-  const unsigned & maxPLevel() const { return _max_p_level; }
 
 protected:
   /// Shared pointer to underlying mfem object
@@ -58,15 +57,11 @@ protected:
   unsigned _h_ref_counter{0};
   unsigned _p_ref_counter{0};
 
-  /// Bool to indicate we have reached stopping condition
-  /// for h-refinement.
+  /// Bool to indicate we have reached stopping condition for h-refinement.
   bool _stop_h_ref{false};
 
-  /// Bool to indicate we have reached stopping condition
-  /// for p-refinement.
+  /// Bool to indicate we have reached stopping condition for p-refinement.
   bool _stop_p_ref{false};
-
-  std::string _refinement_type;
 
   bool _use_h_refinement{false};
   bool _use_p_refinement{false};

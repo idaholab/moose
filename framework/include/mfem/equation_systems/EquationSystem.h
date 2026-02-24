@@ -62,9 +62,6 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
-  // Update all forms after changing the mesh
-  virtual void UpdateEquationSystem();
-
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -196,6 +193,7 @@ protected:
 
 private:
   friend class EquationSystemProblemOperator;
+  friend class ::MFEMProblem;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
