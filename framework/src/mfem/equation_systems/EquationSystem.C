@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html */
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -17,8 +17,6 @@ namespace Moose::MFEM
 
 EquationSystem::~EquationSystem()
 {
-  if (_gfuncs != NULL)
-    delete _gfuncs;
   if (_block_true_offsets != NULL)
     delete _block_true_offsets;
   DeleteAllBlocks();
@@ -188,19 +186,18 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                                    gridfunctions.GetShared(eliminated_var_name));
 
   // Get a reference to the GridFunctions
-  _gfuncs = new Moose::MFEM::GridFunctions(gridfunctions);
+  _gfuncs = &gridfunctions;
 
   // Build the temporary BlockVectors
   _block_true_offsets = new mfem::Array<int>(_trial_var_names.size() + 1);
   (*_block_true_offsets)[0] = 0;
 
-  for (unsigned I = 0; I < _trial_var_names.size(); I++)
+  for (unsigned i = 0; i < _trial_var_names.size(); i++)
   {
-    (*_block_true_offsets)[I + 1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
+    (*_block_true_offsets)[i + 1] = _gfuncs->Get(_trial_var_names.at(i))->ParFESpace()->TrueVSize();
   }
   _block_true_offsets->PartialSum();
   _trueBlockSol.Update(*_block_true_offsets);
-  _blockForces.Update(*_block_true_offsets);
   _blockResidual.Update(*_block_true_offsets);
 }
 
@@ -434,12 +431,6 @@ EquationSystem::UpdateJacobian() const
       }
     }
   }
-}
-
-void
-CopyVec(const mfem::Vector & x, mfem::Vector & y)
-{
-  y = x;
 }
 
 void
