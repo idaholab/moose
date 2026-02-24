@@ -19,6 +19,7 @@ PorousLinearWCNSFVMomentumFlux::validParams()
   InputParameters params = LinearWCNSFVMomentumFlux::validParams();
   params.addClassDescription(
       "Momentum flux kernel with porous-specific advection handling.");
+  params.set<bool>("use_two_point_stress_transmissibility") = true;
   params.addParam<bool>(
       "porosity_outside_divergence",
       false,
