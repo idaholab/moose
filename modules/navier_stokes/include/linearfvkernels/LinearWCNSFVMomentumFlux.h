@@ -81,12 +81,12 @@ protected:
   /// Computes the matrix contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// Computes the right hand side contributions of the boundary conditions resulting
   /// from the advection term
   /// @param bc The boundary condition whose contributions should be used
-  Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
+  virtual Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc);
 
   /// The dimension of the mesh
   const unsigned int _dim;
@@ -102,9 +102,6 @@ protected:
 
   /// Switch to enable/disable deviatoric parts in the stress term
   const bool _use_deviatoric_terms;
-
-  /// Whether to include porosity outside the divergence in the advection term
-  const bool _porosity_outside_divergence;
 
   /// Container for the current advected interpolation coefficients on the face to make sure
   /// we don't compute it multiple times for different terms.
