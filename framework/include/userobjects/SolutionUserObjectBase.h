@@ -325,15 +325,14 @@ protected:
   virtual Real directValue(dof_id_type dof_index) const;
 
   /**
-   * Updates the times for interpolating ExodusII data
+   * Updates the times for interpolating ExodusII or Nemesis data
    */
-  void updateExodusTimeInterpolation();
-  void updateNemesisTimeInterpolation();
+  void updateTimeInterpolationFromFile();
 
   /**
    * Updates the time indices to interpolate between for ExodusII data
    */
-  bool updateExodusBracketingTimeIndices();
+  bool updateInterpolationBracketingTimeIndices();
 
   /**
    * A wrapper method for calling the various MeshFunctions used for reading the data
