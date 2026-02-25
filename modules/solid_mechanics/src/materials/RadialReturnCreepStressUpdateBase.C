@@ -111,14 +111,9 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::updateState(
                                                 : 0.0;
   GenericReal<is_ad> initial_guess =
       (effective_trial_stress - old_effective_stress) / this->_three_shear_modulus;
+
   if (initial_guess < GenericReal<is_ad>(0.0) || old_effective_stress < 1.0e-10)
     initial_guess = GenericReal<is_ad>(0.0);
-  // std::cout << "initial_guess: " << MetaPhysicL::raw_value(initial_guess) << std::endl;
-  // std::cout << "old_effective_stress: " << MetaPhysicL::raw_value(old_effective_stress)
-  //           << std::endl;
-  // std::cout << "effective_trial_stress: " << MetaPhysicL::raw_value(effective_trial_stress)
-  //           << std::endl;
-  // initial_guess = GenericReal<is_ad>(0.0);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   this->_effective_inelastic_strain_increment = 0.0;
