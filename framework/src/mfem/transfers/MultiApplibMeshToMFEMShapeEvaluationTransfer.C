@@ -26,7 +26,8 @@ InputParameters
 MultiApplibMeshToMFEMShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MFEMMultiAppTransfer::validParams();
-  params.addClassDescription("Copies variable values from MFEM subapp to libMesh.");
+  params.addClassDescription("Transfers variable values from a libMesh based application to an "
+                             "MFEM application, using shape function evaluations.");
   return params;
 }
 
