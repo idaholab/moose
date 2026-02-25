@@ -202,6 +202,7 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   _acted_upon_once.insert(elem);
 
   // Flip the element if needed
+  // NOTE: we have already passed "elementSatisfiesRequirements" here
   if (_allow_normal_flips && base_normal * elem_normal < 0)
   {
     elem_normal *= -1;

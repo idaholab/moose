@@ -25,6 +25,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 {
   InputParameters params = SubdomainsGeneratorBase::validParams();
 
+  params.renameParam("max_paint_size_centroids", "max_subdomain_size_centroids", "");
   params.addParam<bool>(
       "contiguous_assignments_only",
       false,
@@ -110,7 +111,6 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
       // Try to flood from each side with the same subdomain
       // Look for the neighbor subdomain id with the most neighbors
-      // NOTE: we could exceed max distance here
       for (const auto neighbor : make_range(elem->n_sides()))
         if (elem->neighbor_ptr(neighbor) &&
             _acted_upon_once.find(elem->neighbor_ptr(neighbor)) != _acted_upon_once.end() &&
@@ -130,19 +130,22 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
           max_of_subid = item;
           sub_id = key;
         }
+
+      // Note: the max distance from starting element of the subdomain flooding to this
+      // element should be checked in the call to flood()
     }
 
     // Flood with the previously created subdomains and normals
-    // TODO: we need to store the starting element for that patch, in case it is not "elem"
     if (item)
-      flood(elem, item->second, *elem, item->first, *mesh);
+      flood(elem, item->second, *_subdomain_to_starting_elem[item->first], item->first, *mesh);
     else if (sub_id_found)
-      flood(elem, normal, *elem, sub_id, *mesh);
+      flood(elem, normal, *_subdomain_to_starting_elem[sub_id], sub_id, *mesh);
     // Flood with a new subdomain and the element normal
     else
     {
       sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
       _subdomain_to_normal_map[sub_id] = normal;
+      _subdomain_to_starting_elem[sub_id] = elem;
       flood(elem, normal, *elem, sub_id, *mesh);
     }
   }
