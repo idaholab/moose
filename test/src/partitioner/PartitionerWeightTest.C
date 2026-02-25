@@ -51,7 +51,7 @@ PartitionerWeightTest::computeSideWeight(Elem & elem, unsigned int side)
 {
   auto side_elem = elem.build_side_ptr(side);
   auto centroid = side_elem->vertex_average();
-  if (centroid(0) == 0.5)
+  if (MooseUtils::absoluteFuzzyEqual(centroid(0), 0.5))
     return 20;
   else
     return 1;

@@ -18,6 +18,8 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/petsc_solver_exception.h"
 
+#include "petsc/private/mpiadj.h"
+
 using namespace libMesh;
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
@@ -234,7 +236,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   // Fill up adjacency
   i = 0;
   for (auto & row : graph)
-    for (auto elem : row)
+    for (const auto elem : row)
       adjncy[i++] = elem;
 
   // If there are no neighbors at all, no side weights should be proivded
@@ -260,6 +262,35 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       comm.get(),
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
+  PetscViewer viewer_read;
+  Mat aij, dual2;
+  LibmeshPetscCallA(comm.get(),
+                    PetscViewerBinaryOpen(comm.get(), "adj_mat", FILE_MODE_READ, &viewer_read));
+
+  LibmeshPetscCallA(comm.get(), MatCreate(comm.get(), &aij));
+  LibmeshPetscCallA(comm.get(), MatLoad(aij, viewer_read));
+  // LibmeshPetscCallA(comm.get(), MatGetSize(aij, &global_m, &global_n));
+  // LibmeshPetscCallA(comm.get(), MatGetLocalSize(aij, &local_m, &local_n));
+  // PetscCallMPI(MPI_Comm_rank(PETSC_COMM_WORLD, &rank));
+  // if (rank == 0) printf("Global size is %ld\n", global_m);
+  // printf("Local size on rank %d is %ld\n", rank, local_m);
+  Mat_MPIAdj *adj, *adj2;
+  LibmeshPetscCallA(comm.get(), MatConvert(aij, MATMPIADJ, MAT_INITIAL_MATRIX, &dual2));
+  adj2 = (Mat_MPIAdj *)dual2->data;
+  adj2->useedgeweights = PETSC_FALSE;
+  LibmeshPetscCallA(comm.get(), PetscFree(adj2->values));
+  adj2->values = NULL;
+  adj = (Mat_MPIAdj *)dual->data;
+
+  PetscInt global_m, local_m;
+  // PetscMPIInt rank;
+  LibmeshPetscCallA(comm.get(), MatGetSize(dual, &global_m, NULL));
+  LibmeshPetscCallA(comm.get(), MatGetLocalSize(dual, &local_m, NULL));
+  // MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
+  // if (rank == 0)
+  //   printf("Global size is %ld\n", global_m);
+  // printf("Local size on rank %d is %ld\n", rank, local_m);
+
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
   if (values)
     // This should only be set to true if the adjacency matrix has valid edge weights (which
@@ -283,6 +314,7 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     for (auto weight : elem_weights)
       petsc_elem_weights[i++] = weight;
 
+    std::cout << "Making an additional PETSc API call" << std::endl;
     LibmeshPetscCallA(comm.get(), MatPartitioningSetVertexWeights(part, petsc_elem_weights));
   }
 
@@ -295,6 +327,11 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                       MatPartitioningHierarchicalSetNfineparts(part, num_parts_per_compute_node));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningSetFromOptions(part));
+  for (PetscInt i = 0; i < local_m + 1; ++i)
+    libmesh_assert(adj->i[i] == adj2->i[i]);
+  libmesh_assert(adj->nz == adj2->nz);
+  for (PetscInt j = 0; j < adj->nz; ++j)
+    libmesh_assert(adj->j[j] == adj2->j[j]);
   LibmeshPetscCallA(comm.get(), MatPartitioningApply(part, &is));
 
   LibmeshPetscCallA(comm.get(), ISGetIndices(is, &parts));
