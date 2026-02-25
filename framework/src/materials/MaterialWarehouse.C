@@ -133,3 +133,32 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/, bool sort_all_objects /*=false*/)
 
   updateActive(tid);
 }
+
+void
+MaterialWarehouse::updateMatPropDependencyHelper(
+    std::unordered_set<unsigned int> & needed_mat_props,
+    const std::vector<std::shared_ptr<MaterialBase>> & materials,
+    const bool producer_only) const
+{
+  if (producer_only)
+  {
+    std::unordered_set<unsigned int> consumer_needed_mat_props;
+
+    do
+    {
+      consumer_needed_mat_props = needed_mat_props;
+
+      for (auto & material : materials)
+        for (const auto prop : consumer_needed_mat_props)
+          if (material->getSuppliedPropIDs().count(prop))
+          {
+            auto & mp_deps = material->getMatPropDependencies();
+            needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+          }
+
+    } while (consumer_needed_mat_props.size() != needed_mat_props.size());
+  }
+  else
+    MooseObjectWarehouseBase<MaterialBase>::updateMatPropDependencyHelper(
+        needed_mat_props, materials, producer_only);
+}

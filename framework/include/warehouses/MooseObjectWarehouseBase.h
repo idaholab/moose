@@ -17,7 +17,6 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
-#include "MaterialBase.h"
 #include "SubProblem.h"
 #include "MooseApp.h"
 
@@ -264,9 +263,9 @@ protected:
   /**
    * Helper method for updating material property dependency vector
    */
-  static void updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
-                                            const std::vector<std::shared_ptr<T>> & objects,
-                                            const bool producer_only);
+  virtual void updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
+                                             const std::vector<std::shared_ptr<T>> & objects,
+                                             const bool producer_only) const;
 
   /**
    * Calls assert on thread id.
@@ -839,41 +838,15 @@ void
 MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(
     std::unordered_set<unsigned int> & needed_mat_props,
     const std::vector<std::shared_ptr<T>> & objects,
-    const bool producer_only)
+    const bool /* producer_only */) const
 {
-  if (producer_only)
+  for (auto & object : objects)
   {
-    std::unordered_set<unsigned int> consumer_needed_mat_props;
-
-    do
+    auto c = dynamic_cast<const MaterialPropertyInterface *>(object.get());
+    if (c)
     {
-      consumer_needed_mat_props = needed_mat_props;
-
-      for (auto & object : objects)
-      {
-        auto m = dynamic_cast<const MaterialBase *>(object.get());
-        if (m)
-        {
-          for (const auto prop : consumer_needed_mat_props)
-            if (m->getSuppliedPropIDs().count(prop))
-            {
-              auto & mp_deps = m->getMatPropDependencies();
-              needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-            }
-        }
-      }
-    } while (consumer_needed_mat_props != needed_mat_props);
-  }
-  else
-  {
-    for (auto & object : objects)
-    {
-      auto c = dynamic_cast<const MaterialPropertyInterface *>(object.get());
-      if (c)
-      {
-        auto & mp_deps = c->getMatPropDependencies();
-        needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-      }
+      auto & mp_deps = c->getMatPropDependencies();
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
     }
   }
 }
