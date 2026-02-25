@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMTransferProjector.h"
+#include "MFEMNodalProjector.h"
 #include "MFEMMultiAppTransfer.h"
 
 class MooseMesh;
@@ -29,7 +29,7 @@ public:
   MultiAppMFEMShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
-  MFEMTransferProjector _mfem_projector;
+  MFEMNodalProjector _mfem_projector;
   mfem::FindPointsGSLIB _mfem_interpolator;
 
   virtual MFEMProblem & getActiveToProblem() override
