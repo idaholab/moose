@@ -11,7 +11,9 @@
 
 #pragma once
 
+#include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 
 /**
  * Auxiliary class to extract locations of nodes in MFEM GridFunctions
