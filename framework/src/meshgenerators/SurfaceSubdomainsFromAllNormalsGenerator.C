@@ -119,7 +119,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       // NOTE: we could exceed max distance here
       for (const auto neighbor : make_range(elem->n_sides()))
         if (elem->neighbor_ptr(neighbor) &&
-            _visited_once.find(elem->neighbor_ptr(neighbor)) != _visited_once.end() &&
+            _acted_upon_once.find(elem->neighbor_ptr(neighbor)) != _acted_upon_once.end() &&
             elementSatisfiesRequirements(elem,
                                          get2DElemNormal(elem->neighbor_ptr(neighbor)),
                                          *elem->neighbor_ptr(neighbor),

@@ -12,7 +12,9 @@
 #include "MeshGenerator.h"
 
 /*
- * Base class for mesh generators that add subdomains to the mesh
+ * Base class for mesh generators that loop over elements in subdomains on a mesh
+ * - defines some common parameters
+ * - defines a useful flooding/painting algorithm to apply an operation on elements
  */
 class SubdomainsGeneratorBase : public MeshGenerator
 {
@@ -22,14 +24,13 @@ public:
   SubdomainsGeneratorBase(const InputParameters & parameters);
 
 protected:
-  /**
-   * This method is used to construct the FE objects that may be required
-   */
+  /// Sets up various data structures
   void setup(MeshBase & mesh);
 
   /**
-   * This method implements a recursive flood routine to paint a surface subdomain of
-   * mesh to neighboring faces given a starting element and a normal to that element.
+   * This method implements a recursive flood routine to paint (applying an operation)
+   * to elements on mesh, going from elements to neighbors.
+   * The flood/painting starts at a given element with a given normal (if using normals to paint).
    * @param elem starting element
    * @param normal a normal used for comparing 2D surface elements outgoing normals
    * @param starting_elem the starting element for the flooding
@@ -48,10 +49,12 @@ protected:
    * @param tol The comparison tolerance.
    * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
    */
-  bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real & tol) const;
+  bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real tol) const;
 
   /**
    * Determines whether the given element's subdomain id is in the given subdomain_id_list.
+   * @param elem the element to consider
+   * @param subdomain_id_list a vector of all the subdomains to consider
    */
   bool elementSubdomainIdInList(const Elem * const elem,
                                 const std::vector<subdomain_id_type> & subdomain_id_list) const;
@@ -78,44 +81,46 @@ protected:
   /// the mesh to add the subdomains to
   std::unique_ptr<MeshBase> & _input;
 
-  /// The list of new subdomain names
+  /// The list of new subdomain names (useful for adding subdomains)
   std::vector<SubdomainName> _subdomain_names;
 
   /// whether to check the prior subdomain id of the element when choosing whether to change its subdomain id
   const bool _check_subdomains;
 
-  /// A list of included subdomain ids that the element has to be priorly a part of, extracted from the included_subdomains parameter
+  /// A list of included subdomain ids that the element has to be priorly a part of, extracted from the 'included_subdomains' parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;
 
-  /// true if only faces close to "normal" will be added
+  /// true if only elements are only considered when their normal is close to either the "_normal" or a moving "normal" vector
   bool _using_normal;
 
-  /// if specified, then faces are only added if their normal is close to this
+  /// if specified, then surface elements are only considered if their normal is close to this
   Point _normal;
   /**
    * Tolerance to group elements with normals such that
-   * Useful to paint over 2D surface elements
    * face_normal.normal_hat <= 1 - normal_tol
    * where normal_hat = _normal/|_normal|
+   * Only useful to paint over 2D surface elements
    */
   const Real _normal_tol;
+  /// Tolerance but when using the flipped normal
   const Real _flipped_normal_tol;
-  /// Whether to paint using a fixed normal or a moving normal
+  /// Whether to paint/flood using a fixed normal or a moving normal
   const bool _fixed_normal;
   /// Whether to allow normal flips
   const bool _allow_normal_flips;
   /// Whether to painting beyond a certain radius
   const bool _has_max_distance_criterion;
-  /// Distance to use for max painting radius
+  /// Distance to use for max painting radius. This distance can be specified per subdomain
   std::unordered_map<subdomain_id_type, Real> _max_elem_distance;
 
-  /// Map used for the flooding algorithm
+  /// Map used for the flooding algorithm to keep track of which elements have been visited for which subdomain
   std::map<subdomain_id_type, std::set<Elem *>> _visited;
   /// Only visit each element once
   const bool _flood_only_once;
-  /// Map used when flooding each element once
-  std::set<Elem *> _visited_once;
+  /// Set used when flooding each element once. If the element pointer is in the set, it has been visited and acted upon
+  std::set<Elem *> _acted_upon_once;
   /// Additional heuristic: check the element neighbors and if they have already been painted with the subdomain,
-  /// check if their normal is close to the element currently being considered
+  /// check if their normal is close to the current element's normal. If it is close, then accept the element
+  /// as long as it also meets the other criteria (in included_subdomains, centroid within distance, etc)
   const bool _check_painted_neighor_normals;
 };
