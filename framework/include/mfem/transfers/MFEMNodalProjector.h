@@ -11,22 +11,20 @@
 
 #pragma once
 
-#include <vector>
-
 #include "mfem.hpp"
 
 /**
  * Auxiliary class to extract locations of nodes in MFEM GridFunctions
  * and project values defined at them to set DoFs
  */
-class MFEMTransferProjector
+class MFEMNodalProjector
 {
 public:
-  MFEMTransferProjector() = default;
-  /// Extract points from MFEM FESpace at which projection will take place
-  void extractProjectionPoints(const mfem::ParFiniteElementSpace & to_fespace, mfem::Vector & vxyz, mfem::Ordering::Type & point_ordering);
+  MFEMNodalProjector() = default;
+  /// Extract node positions from MFEM FESpace at which projection will take place
+  void extractNodePositions(const mfem::ParFiniteElementSpace & fespace, mfem::Vector & node_positions, mfem::Ordering::Type & node_ordering);
   /// Project a vector of values provided at projection points (nodes) to set GridFunction DoFs
-  void projectValues(const mfem::Vector & interp_vals, const mfem::Ordering::Type & interp_value_ordering, mfem::ParGridFunction & to_gf);
+  void projectNodalValues(const mfem::Vector & nodal_vals, const mfem::Ordering::Type & nodal_val_ordering, mfem::ParGridFunction & gridfunction);
 };
 
 #endif

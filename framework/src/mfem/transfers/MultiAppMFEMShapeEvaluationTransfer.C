@@ -52,7 +52,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
     // Generate list of points where the grid function will be evaluated
     mfem::Vector vxyz;
     mfem::Ordering::Type point_ordering;
-    _mfem_projector.extractProjectionPoints(to_pfespace, vxyz, point_ordering);
+    _mfem_projector.extractNodePositions(to_pfespace, vxyz, point_ordering);
 
     // Evaluate source grid function at target points
     const int dim = to_pfespace.GetParMesh()->Dimension();
@@ -63,7 +63,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
     _mfem_interpolator.Interpolate(
         *from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
 
-    _mfem_projector.projectValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
+    _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
   }
 }
 
