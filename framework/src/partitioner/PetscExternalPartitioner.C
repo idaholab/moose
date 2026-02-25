@@ -121,6 +121,9 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
   // Call libmesh to build the dual graph of mesh
   build_graph(mesh);
   num_local_elems = _dual_graph.size();
+  // PETSc requires that each row be sorted
+  for (auto & row : _dual_graph)
+    std::sort(row.begin(), row.end());
 
   elem_weights.clear();
   if (_apply_element_weight)
