@@ -15,7 +15,6 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/mesh_triangle_holes.h"
 #include "libmesh/mesh_modification.h"
-#include "libmesh/mesh_serializer.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
@@ -42,7 +41,8 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
   params.addParam<std::vector<SubdomainName>>(
       "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
-  // Not currently supported, though the machinery from Boundary2DDelaunayGenerator is still there
+  // Not currently supported, though the machinery from Boundary2DDelaunayGenerator was kept in the
+  // right locations so it should be a manageable lift when needed
   // params.addParam<std::vector<std::vector<BoundaryName>>>(
   //     "hole_boundary_names",
   //     {},
@@ -233,69 +233,23 @@ SurfaceSubdomainsDelaunayRemesher::generate()
     else
     {
       UnstructuredMesh & remeshed = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
-      auto & hole_boundary_info = remeshed.get_boundary_info();
 
-      // Our algorithm here requires a serialized Mesh.  To avoid
-      // redundant serialization and deserialization (libMesh
-      // MeshedHole and stitch_meshes still also require
-      // serialization) we'll do the serialization up front.
-      libMesh::MeshSerializer serial_mesh(remeshed);
+      // NOTE: we cannot use MeshedHole because the meshes are no longer in the XY plane
+      // Potential optimization: instead of using the full mesh outer boundary for stitching
+      // use what is done in the XYDelaunayGenerator and re-build only the boundary near the
+      // mesh that we are stitching (in XYDelaunay, these are the holes being stitched)
+      // Potential optimization: we could keep the external boundaries from the triangulation phase
 
-      // It would have been nicer for MeshedHole to add the BCID
-      // itself, but we want MeshedHole to work with a const mesh.
-      // We'll still use MeshedHole, for its code distinguishing
-      // outer boundaries from inner boundaries on a
-      // hole-with-holes.
-      libMesh::TriangulatorInterface::MeshedHole mh{remeshed};
+      // Create the boundary outside the remeshed mesh
+      bool rem_has_external_bdy = false;
+      MooseMeshUtils::addExternalBoundary(remeshed, paired_bcid, rem_has_external_bdy);
+      mooseAssert(rem_has_external_bdy, "Subdomain mesh should have an external boundary");
 
-      // We have to translate from MeshedHole points to mesh
-      // sides.
-      std::unordered_map<Point, Point> next_hole_boundary_point;
-      const int np = mh.n_points();
-      for (auto pi : make_range(1, np))
-        next_hole_boundary_point[mh.point(pi - 1)] = mh.point(pi);
-      next_hole_boundary_point[mh.point(np - 1)] = mh.point(0);
-
-#ifndef NDEBUG
-      int found_hole_sides = 0;
-#endif
-      for (auto elem : remeshed.element_ptr_range())
-      {
-        if (elem->dim() != 2)
-          mooseError("Non 2-D element found in hole; stitching is not supported.");
-
-        auto ns = elem->n_sides();
-        for (auto s : make_range(ns))
-        {
-          auto it_s = next_hole_boundary_point.find(elem->point(s));
-          if (it_s != next_hole_boundary_point.end())
-            if (it_s->second == elem->point((s + 1) % ns))
-            {
-              hole_boundary_info.add_side(elem, s, paired_bcid);
-#ifndef NDEBUG
-              ++found_hole_sides;
-#endif
-            }
-        }
-      }
-      if (_verbose)
-        _console << "Found " << found_hole_sides << " connecting sides on hole #" << remesh_i
-                 << std::endl;
-
-      auto & mesh_boundary_info = full_mesh->get_boundary_info();
-      for (auto elem : full_mesh->element_ptr_range())
-      {
-        auto ns = elem->n_sides();
-        for (auto s : make_range(ns))
-        {
-          auto it_s = next_hole_boundary_point.find(elem->point((s + 1) % ns));
-          if (it_s != next_hole_boundary_point.end())
-            if (it_s->second == elem->point(s))
-            {
-              mesh_boundary_info.add_side(elem, s, primary_bcid);
-            }
-        }
-      }
+      // We need to re-create the boundary outside the parent mesh because we are clearing
+      // it on every stitch
+      bool base_has_external_bdy = false;
+      MooseMeshUtils::addExternalBoundary(*full_mesh, primary_bcid, base_has_external_bdy);
+      mooseAssert(base_has_external_bdy, "Full mesh should have an external boundary");
 
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
@@ -312,6 +266,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
                                /*enforce_all_nodes_match_on_boundaries*/ false,
                                /*merge_boundary_nodes_all_or_nothing*/ false,
                                /*remap_subdomain_ids*/ getParam<bool>("avoid_merging_subdomains"));
+
+      // TODO: when implementing hole meshes, we might want to also stitch the hole meshes
     }
   }
 
