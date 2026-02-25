@@ -185,11 +185,6 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::internalSolve(
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
   Real reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
 
-  // std::cout << "Initial residual: " << MetaPhysicL::raw_value(_initial_residual) << std::endl;
-  // std::cout << "initial_guess: " << MetaPhysicL::raw_value(initial_guess) << std::endl;
-  // std::cout << "reference_residual: " << reference_residual << std::endl;
-  // std::cout << "residual " << MetaPhysicL::raw_value(_residual) << std::endl;
-
   if (converged(_residual, reference_residual))
   {
     iterationFinalize(scalar);
