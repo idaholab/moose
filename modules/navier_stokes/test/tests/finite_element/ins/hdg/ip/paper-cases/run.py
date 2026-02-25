@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc):
+def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc, profile):
     input_base = input_file[:-2]
     tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre-{disc}"
     print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
@@ -34,7 +34,8 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, dis
 
     # Prepare environment (set MOOSE_PROFILE_BASE per run)
     env = os.environ.copy()
-    env["MOOSE_PROFILE_BASE"] = tag
+    if profile:
+        env["MOOSE_PROFILE_BASE"] = tag
 
     log_path = Path(f"{tag}.log")
 
@@ -72,8 +73,8 @@ def main():
         description="Run Navier-Stokes cases with scaling refine/procs and logging."
     )
     parser.add_argument(
-        "--exec", default="/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-oprof",
-        help="Path to the MOOSE executable (default: %(default)s)"
+        "--exec", required=True,
+        help="Path to the MOOSE executable (required)."
     )
     parser.add_argument(
         "--input", required=True, type=require_i_suffix,
@@ -109,6 +110,10 @@ def main():
         required=True,
         help="Discretization type (choose 'edghdg' or 'hdg')"
     )
+    parser.add_argument(
+        "--profile", type=bool, default=False,
+        help="Whether to profile (default: %(default)s)"
+    )
 
     args = parser.parse_args()
 
@@ -127,7 +132,8 @@ def main():
                  refine,
                  args.set_schur_pre,
                  args.num_steps,
-                 args.disc)
+                 args.disc,
+                 args.profile)
 
         if _case < args.num_cases:
             procs *= args.proc_multiplier
