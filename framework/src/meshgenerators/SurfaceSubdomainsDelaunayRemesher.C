@@ -232,21 +232,21 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       continue;
     else
     {
-      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
-      auto & hole_boundary_info = hole_mesh.get_boundary_info();
+      UnstructuredMesh & remeshed = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
+      auto & hole_boundary_info = remeshed.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid
       // redundant serialization and deserialization (libMesh
       // MeshedHole and stitch_meshes still also require
       // serialization) we'll do the serialization up front.
-      libMesh::MeshSerializer serial_hole(hole_mesh);
+      libMesh::MeshSerializer serial_mesh(remeshed);
 
       // It would have been nicer for MeshedHole to add the BCID
       // itself, but we want MeshedHole to work with a const mesh.
       // We'll still use MeshedHole, for its code distinguishing
       // outer boundaries from inner boundaries on a
       // hole-with-holes.
-      libMesh::TriangulatorInterface::MeshedHole mh{hole_mesh};
+      libMesh::TriangulatorInterface::MeshedHole mh{remeshed};
 
       // We have to translate from MeshedHole points to mesh
       // sides.
@@ -259,7 +259,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
 #ifndef NDEBUG
       int found_hole_sides = 0;
 #endif
-      for (auto elem : hole_mesh.element_ptr_range())
+      for (auto elem : remeshed.element_ptr_range())
       {
         if (elem->dim() != 2)
           mooseError("Non 2-D element found in hole; stitching is not supported.");
@@ -299,10 +299,10 @@ SurfaceSubdomainsDelaunayRemesher::generate()
 
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
-      const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
+      const auto & increment_subdomain_map = remeshed.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
-      full_mesh->stitch_meshes(hole_mesh,
+      full_mesh->stitch_meshes(remeshed,
                                primary_bcid,
                                paired_bcid,
                                TOLERANCE,
