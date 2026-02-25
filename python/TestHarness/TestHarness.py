@@ -1250,6 +1250,7 @@ class TestHarness:
             os.getcwd(),
             self._rootdir,
             os.path.join(testharness_dir, "../../../../bin"),
+            os.path.join(self.moose_dir, "test"),
         ]
         dirs = list(dict.fromkeys(dirs))  # remove duplicates
         matches = []
