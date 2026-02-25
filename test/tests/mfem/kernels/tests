@@ -142,7 +142,6 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
-    abs_zero = 1e-8
   []
   [MFEMLinearElasticity]
     type = XMLDiff

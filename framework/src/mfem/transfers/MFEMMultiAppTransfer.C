@@ -95,6 +95,6 @@ MFEMMultiAppTransfer::checkSiblingsTransferSupported() const
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");
-};
+}
 
 #endif
