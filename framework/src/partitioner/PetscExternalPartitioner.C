@@ -265,16 +265,11 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
-#if !PETSC_VERSION_LESS_THAN(3, 12, 3)
   LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
-#endif
   LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
-  if (!num_local_elems)
-  {
-    mooseAssert(!elem_weights.size(),
-                "No element weights should be provided since there are no elements at all");
-  }
+  mooseAssert(!elem_weights.size(),
+              "No element weights should be provided since there are no elements at all");
 
   // Handle element weights
   if (elem_weights.size())
@@ -293,12 +288,8 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   }
 
   LibmeshPetscCallA(comm.get(), MatPartitioningSetNParts(part, num_parts));
-#if PETSC_VERSION_LESS_THAN(3, 9, 2)
   mooseAssert(part_package != "party", "PETSc-3.9.3 or higher is required for using party");
-#endif
-#if PETSC_VERSION_LESS_THAN(3, 9, 0)
   mooseAssert(part_package != "chaco", "PETSc-3.9.0 or higher is required for using chaco");
-#endif
   LibmeshPetscCallA(comm.get(), MatPartitioningSetType(part, part_package.c_str()));
   if (part_package == "hierarch")
     LibmeshPetscCallA(comm.get(),
