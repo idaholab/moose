@@ -28,8 +28,14 @@ public:
   MultiAppMFEMCopyTransfer(InputParameters const & params);
 
 protected:
-  virtual MFEMProblem & getActiveToProblem() override {return static_cast<MFEMProblem &>(*_active_to_problem);};
-  virtual MFEMProblem & getActiveFromProblem() override {return static_cast<MFEMProblem &>(*_active_from_problem);};
+  virtual MFEMProblem & getActiveToProblem() override
+  {
+    return static_cast<MFEMProblem &>(*_active_to_problem);
+  };
+  virtual MFEMProblem & getActiveFromProblem() override
+  {
+    return static_cast<MFEMProblem &>(*_active_from_problem);
+  };
   void transferVariables() override;
 };
 

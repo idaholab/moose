@@ -22,7 +22,8 @@ InputParameters
 MultiAppMFEMShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MFEMMultiAppTransfer::validParams();
-  params.addClassDescription("Copies variable values from one MFEM application to another");
+  params.addClassDescription("Transfers variable values from one MFEM application to another using "
+                             "shape function evaluations.");
   return params;
 }
 
