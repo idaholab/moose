@@ -15,7 +15,8 @@
 
 #include "mfem/fem/fespace.hpp"
 
-namespace {
+namespace
+{
 void
 MFEMVectorToPostprocessorPoints(
     const mfem::Vector & mfem_points,
@@ -125,7 +126,8 @@ MFEMValueSamplerBase::finalize()
   {
     for (size_t i_point = 0; i_point < num_points; i_point++)
     {
-      const auto mfem_idx = Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
+      const auto mfem_idx =
+          Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
       _declared_vals[i_dim].get()[i_point] = _interp_vals[mfem_idx];
     }
   }
