@@ -231,15 +231,8 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
   // Fill up adjacency
   i = 0;
   for (auto & row : graph)
-  {
-    // The PETSc API requires the adjacency list to be sorted in each row. We've seen practical
-    // consequences if we don't abide by this rule, such as parallel hangs with certain process
-    // counts when using ptscotch
-    std::vector<dof_id_type> sorted_row = row;
-    std::sort(sorted_row.begin(), sorted_row.end());
-    for (auto elem : sorted_row)
+    for (auto elem : row)
       adjncy[i++] = elem;
-  }
 
   // If there are no neighbors at all, no side weights should be proivded
   if (!i)
