@@ -34,7 +34,7 @@ protected:
   virtual MFEMProblem & getActiveToProblem() override
   {
     return static_cast<MFEMProblem &>(*_active_to_problem);
-  };
+  }
   void transferVariables() override;
   void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
 };

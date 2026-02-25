@@ -33,7 +33,7 @@ protected:
   virtual MFEMProblem & getActiveFromProblem() override
   {
     return static_cast<MFEMProblem &>(*_active_from_problem);
-  };
+  }
 
   void transferVariables() override;
   void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);

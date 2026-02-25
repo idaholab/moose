@@ -29,8 +29,8 @@ public:
   void execute() override;
   void checkSiblingsTransferSupported() const override;
 
-  auto const & getFromVarName(int i) { return _from_var_names.at(i); };
-  auto const & getToVarName(int i) { return _to_var_names.at(i); };
+  auto const & getFromVarName(int i) { return _from_var_names.at(i); }
+  auto const & getToVarName(int i) { return _to_var_names.at(i); }
   auto numFromVar() { return _from_var_names.size(); }
   auto numToVar() { return _to_var_names.size(); }
 
@@ -40,10 +40,10 @@ protected:
   FEProblemBase * _active_to_problem{nullptr};
   FEProblemBase * _active_from_problem{nullptr};
 
-  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; };
-  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; };
-  virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; };
-  virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; };
+  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; }
+  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; }
+  virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
+  virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; }
 
   virtual void transferVariables() = 0;
 
@@ -76,6 +76,6 @@ protected:
             !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
           bad_problem();
     }
-  };
+  }
 };
 #endif

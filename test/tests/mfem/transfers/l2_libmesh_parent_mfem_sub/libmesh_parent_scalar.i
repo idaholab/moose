@@ -1,5 +1,5 @@
 [Mesh]
-  file = ../../mesh/square.e
+  file = ../../mesh/square_quad.e
 []
 
 [Problem]
