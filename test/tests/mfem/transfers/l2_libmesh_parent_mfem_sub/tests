@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MultiAppMFEMlibMeshGeneralFieldTransfer.md'
+  design = 'MultiAppMFEMTolibMeshShapeEvaluationTransfer.md'
   issues = '#31982'
   requirement = 'The system shall have the ability to transfer MFEM solutions to libMesh for '
   [MFEMTransferTolibMeshL2Quad]
@@ -34,7 +34,7 @@
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
-    cli_args = 'Mesh/file=../../mesh/square.e '
+    cli_args = 'Mesh/file=../../mesh/square_quad.e '
                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
   []

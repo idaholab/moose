@@ -75,6 +75,7 @@
         xmldiff = 'OutputData/EmbeddedSubmesh/Run0/Cycle000001/data.pvtu'
         detail = 'from a smaller submesh to a larger mesh containing the smaller submes as a subdomain.'
         abs_zero = 1e-8
+        max_parallel = 1 # XMLDiff on ParaViewDataCollection schemadiffs with multiple ranks
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
