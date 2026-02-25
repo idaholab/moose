@@ -14,7 +14,7 @@
 /**
  * This class will add subdomains to the entire mesh based on unique normals.
  * Note: The user will have to turn the tolerance on the normal angle to be able to
- * "paint" curved subdomains. Tight tolerances will create one subdomain per element
+ * "paint" curved subdomains. Tight tolerances can create as many as a subdomain for each element
  */
 class SurfaceSubdomainsFromAllNormalsGenerator : public SubdomainsGeneratorBase
 {
@@ -28,6 +28,9 @@ public:
 protected:
   /// Map from subdomain IDs to the normals of the corresponding boundaries
   std::map<SubdomainID, RealVectorValue> _subdomain_to_normal_map;
-  /// Whether to only use the flood algorithm to group elements, no checks in "previous normals"
+  /// Map from subdomain IDs to a pointer to the element where the subdomain-paiting started
+  std::map<SubdomainID, Elem *> _subdomain_to_starting_elem;
+  /// Whether to only use the flood algorithm to group elements, without looking for the
+  /// previously created normals. This prevents discontiguous subdomains
   const bool _flood_only;
 };
