@@ -1,6 +1,6 @@
-# PorousFlowElementNormal
+# ElementNormalAux
 
-This `AuxKernel` calculates the element normal, and returns the *x*, *y*, or *z* component.  This is mostly designed for 2D elements living in 3D space, however, the 1D and 3D cases are handled as special cases using the [!param](/AuxKernels/PorousFlowElementNormal/1D_perp) and [!param](/AuxKernels/PorousFlowElementNormal/3D_default) inputs.
+This `AuxKernel` calculates the element normal, and returns the *x*, *y*, or *z* component.  This is mostly designed for 2D elements living in 3D space, however, the 1D and 3D cases are handled as special cases using the [!param](/AuxKernels/ElementNormalAux/1D_perp) and [!param](/AuxKernels/ElementNormalAux/3D_default) inputs.
 
 For 2D elements, the normal is calculated by:
 
@@ -12,20 +12,19 @@ For 2D elements, the normal is calculated by:
 
 For 1D elements, the normal is calculated by:
 
-1. Construct the vector $v\times (n_{1} - n_{0})$, where $v$ is the [!param](/AuxKernels/PorousFlowElementNormal/1D_perp) vector supplied by the user
+1. Construct the vector $v\times (n_{1} - n_{0})$, where $v$ is the [!param](/AuxKernels/ElementNormalAux/1D_perp) vector supplied by the user
 2. Construct the vector $v\times (n_{2} - n_{1})$
 3. $\ldots$
 3. Construct the vector $v\times (n_{N-1} - n_{N-2})$, where $N$ is the number of nodes in the element.  Hence, for bar linear Lagrange elements ($N=2$) only 1 vector is constructed
 4. Sum these vectors, normalise, and return the result
 
-For 3D elements, the [!param](/AuxKernels/PorousFlowElementNormal/3D_default) is returned.
-
+For 3D elements, the [!param](/AuxKernels/ElementNormalAux/3D_default) is returned.
 
 !alert note
-Only elemental (`Monomial`) `AuxVariables` can be used with this `AuxKernel`
+Only single-component elemental (`Monomial`) `AuxVariables` can be used with this `AuxKernel`
 
-!syntax parameters /AuxKernels/PorousFlowElementNormal
+!syntax parameters /AuxKernels/ElementNormalAux
 
-!syntax inputs /AuxKernels/PorousFlowElementNormal
+!syntax inputs /AuxKernels/ElementNormalAux
 
-!syntax children /AuxKernels/PorousFlowElementNormal
+!syntax children /AuxKernels/ElementNormalAux
