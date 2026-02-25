@@ -8,17 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurfaceSubdomainsFromAllNormalsGenerator.h"
-#include "Parser.h"
 #include "InputParameters.h"
 #include "CastUniquePointer.h"
 
-#include "libmesh/fe_base.h"
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/quadrature_gauss.h"
-#include "libmesh/point_locator_base.h"
-#include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
 
 #include <typeinfo>
@@ -66,7 +61,6 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
         "SurfaceSubdomainsFromAllNormalsGenerator is not implemented for distributed meshes");
   setup(*mesh);
 
-  _visited.clear();
   unsigned int num_neighborless = 0;
 
   // We'll need to loop over all of the elements to find ones that match this normal.
@@ -76,7 +70,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   for (auto & elem : mesh->element_ptr_range())
   {
     // Nothing to do with edges
-    if (elem->n_nodes() < 3)
+    if (elem->dim() < 2)
       continue;
     // Nothing to do with 3D elements
     if (elem->dim() > 2)
@@ -158,7 +152,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     for (auto & elem : mesh->element_ptr_range())
     {
       // Nothing to do with edges
-      if (elem->n_nodes() < 3)
+      if (elem->dim() < 2)
         continue;
       // Nothing to do with 3D elements
       if (elem->dim() > 2)

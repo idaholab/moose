@@ -77,7 +77,7 @@ OrientSurfaceMeshGenerator::generate()
   for (auto & elem : mesh->element_ptr_range())
   {
     // Nothing to do with edges
-    if (elem->n_nodes() < 3)
+    if (elem->dim() < 2)
       continue;
     // Nothing to do with 3D elements
     if (elem->dim() > 2)
