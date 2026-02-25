@@ -10,7 +10,7 @@
 #include "PostprocessorFunction.h"
 #include "MooseTypes.h"
 
-registerMooseObject("MooseTestApp", PostprocessorFunction);
+registerMooseObject("MooseApp", PostprocessorFunction);
 
 InputParameters
 PostprocessorFunction::validParams()
