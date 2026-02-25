@@ -1,6 +1,13 @@
 mu = 1e-2
 rho = 2.0
 advected_interp_method = 'upwind'
+velocity_interp_method = 'rc'
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = ${advected_interp_method}
+  velocity_interp_method = ${velocity_interp_method}
+[]
 
 [Mesh]
   [mesh]
@@ -26,121 +33,100 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Problem]
-  linear_sys_names = 'u_system pressure_system'
-  previous_nl_solution_required = true
-[]
-
 [UserObjects]
   [rc]
-    type = PorousRhieChowMassFlux
+    type = PINSFVRhieChowInterpolator
     u = superficial_u
     pressure = pressure
-    rho = ${rho}
     porosity = porosity
-    p_diffusion_kernel = p_diffusion
-    pressure_baffle_sidesets = 'baffle baffle2'
-    pressure_baffle_relaxation = 0.5
-    debug_baffle = true
-    use_flux_velocity_reconstruction = true
-    flux_velocity_reconstruction_relaxation = 1.0
-    use_corrected_pressure_gradient = true
   []
 []
 
 [Variables]
   [superficial_u]
-    type = MooseLinearVariableFVReal
-    solver_sys = u_system
+    type = PINSFVSuperficialVelocityVariable
     initial_condition = 0.1
   []
   [pressure]
-    type = MooseLinearVariableFVReal
-    solver_sys = pressure_system
+    type = BernoulliPressureVariable
     initial_condition = 0.0
-  []
-[]
-
-[LinearFVKernels]
-  [u_advection]
-    type = PorousLinearWCNSFVMomentumFlux
-    variable = superficial_u
-    advected_interp_method = ${advected_interp_method}
-    mu = ${mu}
-    u = superficial_u
-    momentum_component = 'x'
-    rhie_chow_user_object = rc
-    use_nonorthogonal_correction = false
-    porosity_outside_divergence = true # keep global default
-  []
-  [u_pressure]
-    type = LinearFVMomentumPressureUO
-    variable = superficial_u
-    momentum_component = 'x'
-    rhie_chow_user_object = rc
-    porosity = porosity
-    use_corrected_gradient = true
-  []
-  [u_friction]
-    type = LinearFVMomentumPorousFriction
-    variable = superficial_u
-    Forchheimer_name = forch
     porosity = porosity
     rho = ${rho}
     u = superficial_u
+    allow_two_term_expansion_on_bernoulli_faces = false
+  []
+[]
+
+[FVKernels]
+  [mass]
+    type = PINSFVMassAdvection
+    variable = pressure
+    rho = ${rho}
+  []
+  [u_advection]
+    type = PINSFVMomentumAdvection
+    variable = superficial_u
+    rho = ${rho}
+    porosity = porosity
     momentum_component = 'x'
+  []
+  [u_viscosity]
+    type = PINSFVMomentumDiffusion
+    variable = superficial_u
+    mu = ${mu}
+    porosity = porosity
+    momentum_component = 'x'
+  []
+  [u_pressure]
+    type = PINSFVMomentumPressure
+    variable = superficial_u
+    momentum_component = 'x'
+    pressure = pressure
+    porosity = porosity
+  []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    variable = superficial_u
+    Forchheimer_name = forch
+    momentum_component = 'x'
+    rho = ${rho}
+    porosity = porosity
+    speed = speed
+    standard_friction_formulation = true
     block = 2
   []
-  [p_diffusion]
-    type = LinearFVAnisotropicDiffusionJump
-    variable = pressure
-    diffusion_tensor = Ainv
-    rhie_chow_user_object = rc
-    use_nonorthogonal_correction = false
-    debug_baffle_jump = true
+[]
+
+[FVBCs]
+  [inlet_u]
+    type = INSFVInletVelocityBC
+    boundary = left
+    variable = superficial_u
+    functor = 0.1
   []
-  [HbyA_divergence]
-    type = LinearFVDivergence
+  [outlet_p]
+    type = INSFVOutletPressureBC
+    boundary = right
     variable = pressure
-    face_flux = HbyA
-    force_boundary_execution = true
+    function = 0.0
   []
 []
 
 [FunctorMaterials]
   [forch]
-    type = GenericVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '5 5 5'
+    prop_values = '10 10 10'
   []
-[]
-
-[LinearFVBCs]
-  [inlet_u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = left
-    variable = superficial_u
-    functor = 0.1
-  []
-  [outlet_u]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = right
-    variable = superficial_u
-    use_two_term_expansion = false
-  []
-  [outlet_p]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = right
-    variable = pressure
-    functor = 0.0
-  []
-[]
-
-[FunctorMaterials]
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
     subdomain_to_prop_value = '1 0.5 2 1.0 3 0.5'
+  []
+  [speed_material]
+    type = PINSFVSpeedFunctorMaterial
+    porosity = porosity
+    superficial_vel_x = superficial_u
   []
 []
 
@@ -213,7 +199,7 @@ advected_interp_method = 'upwind'
 
 [AuxVariables]
   [porosity_aux]
-    type = MooseLinearVariableFVReal
+    type = MooseVariableFVReal
   []
 []
 
@@ -227,29 +213,15 @@ advected_interp_method = 'upwind'
 []
 
 [Executioner]
-  type = SIMPLE
-  momentum_l_abs_tol = 1e-12
-  pressure_l_abs_tol = 1e-12
-  momentum_l_tol = 0
-  pressure_l_tol = 0
-  rhie_chow_user_object = rc
-  momentum_systems = 'u_system'
-  pressure_system = pressure_system
-  momentum_equation_relaxation = 0.3
-  pressure_variable_relaxation = 0.1
-  num_iterations = 500
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
-  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg'
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
-  pressure_petsc_options_value = 'hypre boomeramg'
+  type = Steady
+  solve_type = NEWTON
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
+  l_tol = 1e-10
   # print_fields = true
-  continue_on_max_its = true
 []
 
 [Outputs]
   exodus = true
   csv = true
-  execute_on = 'timestep_end'
 []
