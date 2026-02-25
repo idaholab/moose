@@ -1,4 +1,4 @@
-mu = 0.0
+mu = 1e-2
 rho = 2.0
 advected_interp_method = 'upwind'
 
@@ -42,7 +42,7 @@ advected_interp_method = 'upwind'
     pressure_baffle_sidesets = 'baffle baffle2'
     pressure_baffle_relaxation = 0.5
     debug_baffle = true
-    use_flux_velocity_reconstruction = false
+    use_flux_velocity_reconstruction = true
     flux_velocity_reconstruction_relaxation = 1.0
     use_corrected_pressure_gradient = true
   []
@@ -81,6 +81,16 @@ advected_interp_method = 'upwind'
     porosity = porosity
     use_corrected_gradient = true
   []
+  [u_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_u
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = ${rho}
+    u = superficial_u
+    momentum_component = 'x'
+    block = 2
+  []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump
     variable = pressure
@@ -94,6 +104,14 @@ advected_interp_method = 'upwind'
     variable = pressure
     face_flux = HbyA
     force_boundary_execution = true
+  []
+[]
+
+[FunctorMaterials]
+  [forch]
+    type = GenericVectorFunctorMaterial
+    prop_names = forch
+    prop_values = '5 5 5'
   []
 []
 
