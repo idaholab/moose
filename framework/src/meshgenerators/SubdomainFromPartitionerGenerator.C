@@ -8,12 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubdomainFromPartitionerGenerator.h"
-#include "Conversion.h"
 #include "CastUniquePointer.h"
-#include "MooseUtils.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
+#include "libmesh/partitioner.h"
 
 registerMooseObject("MooseApp", SubdomainFromPartitionerGenerator);
 
@@ -29,7 +28,7 @@ SubdomainFromPartitionerGenerator::validParams()
   params.addParam<subdomain_id_type>("offset",
                                      0,
                                      "Offset to apply to the subdomain IDs. Default type is a "
-                                     "short integer, don't use a large value");
+                                     "short integer, do not use a large value!");
   params.addRequiredParam<unsigned int>("num_partitions",
                                         "Number of partitioners to get from the partitioner");
   return params;
@@ -49,14 +48,16 @@ SubdomainFromPartitionerGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   if (getParam<unsigned int>("num_partitions") != n_processors())
-    mooseWarning("Partitioner may not like num_partitioners != number of MPI processors");
+    paramWarning("num_partitions",
+                 "Partitioner may error with num_partitions != number of MPI processors");
 
+  // Process the block restriction, if any
   std::set<SubdomainID> restricted_ids;
   bool has_restriction = getParam<std::vector<SubdomainName>>("included_subdomains").size();
   if (has_restriction)
   {
-    auto names = getParam<std::vector<SubdomainName>>("included_subdomains");
-    for (auto & name : names)
+    const auto & names = getParam<std::vector<SubdomainName>>("included_subdomains");
+    for (const auto & name : names)
     {
       // check that the subdomain exists in the mesh
       if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
@@ -67,9 +68,12 @@ SubdomainFromPartitionerGenerator::generate()
   }
 
   // Extract the mesh
-  auto block_mesh = buildReplicatedMesh();
-  MooseMeshUtils::convertBlockToMesh(
-      *mesh, *block_mesh, getParam<std::vector<SubdomainName>>("included_subdomains"));
+  auto block_mesh = buildMeshBaseObject();
+  if (has_restriction)
+    MooseMeshUtils::convertBlockToMesh(
+        *mesh, *block_mesh, getParam<std::vector<SubdomainName>>("included_subdomains"));
+  else
+    block_mesh = mesh->clone();
 
   // Get the partitioner
   const auto & partitioner = mesh->partitioner();
@@ -85,9 +89,9 @@ SubdomainFromPartitionerGenerator::generate()
       continue;
 
     // Get the element from point locator
-    const Elem * block_mesh_elem = (*pl)(elem->vertex_average());
+    const Elem * const block_mesh_elem = (*pl)(elem->vertex_average());
 
-    // Get id from the partition
+    // Get a new subdomain id from the partition of the block mesh
     elem->subdomain_id() = _offset + block_mesh_elem->processor_id();
   }
 
