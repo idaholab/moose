@@ -30,6 +30,7 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
   params += FunctionParserUtils<false>::validParams();
+  params.renameParameterGroup("Parsed expression advanced", "Level set shape parsed expression");
 
   params.addClassDescription(
       "Mesh generator that re-meshes a 2D surface mesh given as one or more subdomains into "
@@ -48,10 +49,12 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
 
-  // Note: if the Delaunay generator can handle random topology for the surface, mesh everything in
-  // a single step. If not, then mesh each part one by one, then stitch them together
-
-  // Correcting the shape using a level_set
+  // Shape parameters
+  params.addRangeCheckedParam<Real>(
+      "max_angle_deviation",
+      60.0,
+      "max_angle_deviation>0 & max_angle_deviation<90",
+      "Maximum angle deviation from the average normal vector in each group of subdomains.");
   params.addParam<std::string>(
       "level_set",
       "Level set used to achieve more accurate reverse projection compared to interpolation.");
@@ -59,22 +62,21 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "max_level_set_correction_iterations",
       3,
       "Maximum number of iterations to correct the nodes based on the level set function.");
+  params.addParamNamesToGroup("level_set max_level_set_correction_iterations",
+                              "Level set shape correction");
 
   // Surface remeshing parameters
   params.addRangeCheckedParam<Real>(
       "max_edge_length",
       "max_edge_length>0",
-      "Maximum length of an edge in the 1D meshes around each region");
-  params.addRangeCheckedParam<Real>(
-      "max_angle_deviation",
-      60.0,
-      "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the average normal vector in each group of subdomains.");
+      "Maximum length of an edge in the 1D meshes around each subdomain. Only a single value is "
+      "currently allowed as the boundary refinement must be consistent between all subdomains.");
   params.addParam<std::vector<unsigned int>>(
       "interpolate_boundaries",
       {1},
-      "Number of points to add to the boundaries. Can be set to a single value for all groups at "
-      "once, or specified individually");
+      "Ratio of points to add to the boundaries. Can be set to a single value for all groups at "
+      "once, or specified individually. A single value is recommended as the boundary refinement "
+      "must be consistent between all subdomains.");
   params.addParam<std::vector<bool>>(
       "refine_boundaries",
       {false},
@@ -86,18 +88,25 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Target element size when triangulating projection of the subdomain group. Can be set to a "
       "single value for all groups at once, or specified individually. Default of 0 means no "
       "constraint.");
+  params.addParamNamesToGroup(
+      "max_edge_length interpolate_boundaries refine_boundaries desired_areas",
+      "Delaunay triangulation");
 
-  // When stitching each part together
+  // Parameters for stitching meshes at the end
   params.addParam<bool>("avoid_merging_subdomains",
                         false,
                         "Whether to prevent merging subdomains by offsetting ids. The first mesh "
                         "in the input will keep the same subdomains ids, the others will have "
                         "offsets. All subdomain names will remain valid");
-  params.addParam<bool>("avoid_merging_boundaries",
-                        false,
-                        "Whether to prevent merging sidesets by offsetting ids. The first mesh "
-                        "in the input will keep the same boundary ids, the others will have "
-                        "offsets. All boundary names will remain valid");
+  MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
+  params.addParam<MooseEnum>(
+      "stitching_algorithm",
+      algorithm,
+      "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<bool>(
+      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
+  params.addParamNamesToGroup("avoid_merging_subdomains stitching_algorithm verbose_stitching",
+                              "Stitching triangularized meshes");
 
   params.addParam<bool>(
       "verbose", false, "Whether the generator should output additional information");
@@ -231,8 +240,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   // These should become parameters
   const auto inner_bcid = 1;
   const auto new_hole_bcid = 1;
-  const auto _verbose_stitching = true;
-  const auto use_binary_search = true;
+  const auto _verbose_stitching = getParam<bool>("verbose_stitching");
+  const auto use_binary_search = getParam<MooseEnum>("stitching_algorithm") == "BINARY";
   std::vector<bool> _stitch_holes(hole_meshes_2d.size(), true);
 
   // Stitch all the parts
@@ -320,11 +329,11 @@ SurfaceSubdomainsDelaunayRemesher::generate()
                                new_hole_bcid,
                                TOLERANCE,
                                /*clear_stitched_bcids*/ true,
-                               _verbose_stitching,
+                               verbose_stitching,
                                use_binary_search,
                                /*enforce_all_nodes_match_on_boundaries*/ false,
                                /*merge_boundary_nodes_all_or_nothing*/ false,
-                               /*remap_subdomain_ids*/ true);
+                               /*remap_subdomain_ids*/ getParam<bool>("avoid_merging_subdomains"));
     }
   }
 
