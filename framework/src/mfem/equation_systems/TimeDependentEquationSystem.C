@@ -20,48 +20,33 @@ TimeDependentEquationSystem::TimeDependentEquationSystem(
 }
 
 void
-TimeDependentEquationSystem::SetTrialVariableNames()
-{
-  EquationSystem::SetTrialVariableNames();
-  // Add old state of trial variable as an eliminated variable
-  for (const auto & test_var_name : _test_var_names)
-  {
-    if (!VectorContainsName(_eliminated_var_names, test_var_name))
-      _eliminated_var_names.push_back(test_var_name);
-  }
-}
-
-void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  const auto & coupled_var_name = kernel->getTrialVariableName();
-  const auto & test_var_name = kernel->getTestVariableName();
-
-  if (_time_derivative_map.isTimeDerivative(coupled_var_name))
+  if (!_time_derivative_map.isTimeDerivative(kernel->getTrialVariableName()))
   {
-    AddTestVariableNameIfMissing(test_var_name);
-    AddCoupledVariableNameIfMissing(coupled_var_name);
-    const auto & coupled_var_time_integral_name =
-        _time_derivative_map.getTimeIntegralName(coupled_var_name);
-    // Register new kernels map if not present for the test variable
-    if (!_td_kernels_map.Has(test_var_name))
-    {
-      auto kernel_field_map =
-          std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
-      _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
-    }
-    if (!_td_kernels_map.Get(test_var_name)->Has(coupled_var_time_integral_name))
-    {
-      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-      _td_kernels_map.Get(test_var_name)
-          ->Register(coupled_var_time_integral_name, std::move(kernels));
-    }
-    _td_kernels_map.GetRef(test_var_name)
-        .Get(coupled_var_time_integral_name)
-        ->push_back(std::move(kernel));
-  }
-  else
     EquationSystem::AddKernel(kernel);
+    return;
+  }
+
+  const auto & trial_var_name =
+      _time_derivative_map.getTimeIntegralName(kernel->getTrialVariableName());
+  const auto & test_var_name = kernel->getTestVariableName();
+  AddEliminatedVariableNameIfMissing(trial_var_name);
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new td kernels map if not present for the test variable
+  if (!_td_kernels_map.Has(test_var_name))
+  {
+    auto kernel_field_map =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+    _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
+  }
+  // Register new td kernels map if not present for the test/trial variable pair
+  if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+    _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+  }
+  _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
 }
 
 void
@@ -116,8 +101,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       const auto & coupled_var_name = _coupled_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
-      // Register MixedBilinearForm if kernels exist for it, and assemble
-      // kernels
+      // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (test_var_name != coupled_var_name)
       {
         // Apply all mixed kernels with this test/trial pair
@@ -139,8 +123,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
         }
       }
     }
-    // Register all mixed bilinear form sets associated with a single test
-    // variable
+    // Register all mixed bilinear form sets associated with a single test variable
     _mblfs.Register(test_var_name, test_mblfs);
   }
 
@@ -158,8 +141,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       const auto & trial_var_name = _trial_var_names.at(j);
       auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                   _test_pfespaces.at(i));
-      // Register MixedBilinearForm if kernels exist for it, and assemble
-      // kernels
+      // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (test_var_name != trial_var_name)
       {
         // Apply all mixed kernels with this test/trial pair
@@ -186,25 +168,23 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
 {
   for (const auto & test_var_name : _test_var_names)
   {
-    auto td_blf = _td_blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    *lf *= _dt;
-    // if implicit, add contribution to linear form from terms involving state
-    // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-    mfem::Vector lf_prev(lf->Size());
-    td_blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
-    *lf += lf_prev;
+    auto & lf = *_lfs.Get(test_var_name) *= _dt;
     for (const auto & eliminated_var_name : _eliminated_var_names)
-    {
-      if (_td_mblfs.Has(test_var_name) && _td_mblfs.Get(test_var_name)->Has(eliminated_var_name))
+      if (eliminated_var_name == test_var_name)
       {
-        auto td_mblf = _td_mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        // if implicit, add contribution to linear form from terms involving state
         // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-        mfem::Vector lf_prev(lf->Size());
-        td_mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
-        *lf += lf_prev;
+        mfem::Vector lf_prev(lf.Size());
+        auto & td_blf = *_td_blfs.Get(test_var_name);
+        td_blf.Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
+        lf += lf_prev;
       }
-    }
+      else if (_td_mblfs.Has(test_var_name) &&
+               _td_mblfs.Get(test_var_name)->Has(eliminated_var_name))
+      {
+        auto & td_mblf = *_td_mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        td_mblf.AddMult(*_eliminated_variables.Get(eliminated_var_name), lf);
+      }
   }
   // Eliminate contributions from other coupled variables.
   EquationSystem::EliminateCoupledVariables();
