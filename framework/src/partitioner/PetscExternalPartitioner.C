@@ -265,7 +265,10 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
-  LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
+  if (values)
+    // This should only be set to true if the adjacency matrix has valid edge weights (which
+    // correspond to \p values)
+    LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
   LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
   mooseAssert(!elem_weights.size(),
