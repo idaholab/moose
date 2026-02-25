@@ -23,7 +23,8 @@ ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _target_vars(x._target_vars)
 {
 }
 
