@@ -42,12 +42,13 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
   params.addParam<std::vector<SubdomainName>>(
       "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
-  params.addParam<std::vector<std::vector<BoundaryName>>>(
-      "hole_boundary_names",
-      {},
-      "The optional boundaries to be used as the holes in the mesh during triangulation. Note that "
-      "this is a vector of vectors, which allows each hole to be defined as a combination of "
-      "multiple boundaries.");
+  // Not currently supported, though the machinery from Boundary2DDelaunayGenerator is still there
+  // params.addParam<std::vector<std::vector<BoundaryName>>>(
+  //     "hole_boundary_names",
+  //     {},
+  //     "The optional boundaries to be used as the holes in the mesh during triangulation. Note
+  //     that " "this is a vector of vectors, which allows each hole to be defined as a combination
+  //     of " "multiple boundaries.");
 
   // Shape parameters
   params.addRangeCheckedParam<Real>(
@@ -120,7 +121,8 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
-    _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
+    // _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
+    _hole_boundary_names(std::vector<std::vector<BoundaryName>>()),
     _max_level_set_correction_iterations(
         getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),
@@ -194,67 +196,43 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   if (_desired_areas.size() != _num_groups)
     paramError("desired_areas", "Should be the same size as 'subdomain_names' or of size 1");
 
-  // If holes are provided, we need to create new blocks for them too
-  std::vector<subdomain_id_type> hole_block_ids;
-  // for (const auto & hole : _hole_boundary_names)
-  // {
-  //   hole_block_ids.push_back(MooseMeshUtils::getNextFreeSubdomainID(*mesh_3d));
-  //   try
-  //   {
-  //     MooseMeshUtils::createSubdomainFromSidesets(
-  //         *mesh_3d, hole, hole_block_ids.back(), SubdomainName(), type());
-  //   }
-  //   catch (MooseException & e)
-  //   {
-  //     if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
-  //       paramError("hole_boundary_names", e.what());
-  //     else
-  //       mooseError(e.what());
-  //   }
-  // }
-
   // Re-create surface meshes from each of the subdomains
-  std::unique_ptr<ReplicatedMesh> full_mesh;
-  std::vector<std::unique_ptr<ReplicatedMesh>> hole_meshes_2d;
+  std::vector<std::unique_ptr<ReplicatedMesh>> remeshed_2d;
 
   for (const auto i : make_range(_num_groups))
   {
     auto mesh_2d = buildReplicatedMesh();
     MooseMeshUtils::convertBlockToMesh(*mesh_3d, *mesh_2d, _subdomain_names[i]);
 
-    // If holes are provided, we need to create a 2D mesh for each hole
-    for (const auto & hole_block_id : hole_block_ids)
-    {
-      hole_meshes_2d.push_back(buildReplicatedMesh());
-      MooseMeshUtils::convertBlockToMesh(
-          *mesh_3d, *hole_meshes_2d.back(), {std::to_string(hole_block_id)});
-    }
+    // Mesh the subdomains by groups
+    // TODO: holes for each subdomain are not currently supported
+    std::vector<std::unique_ptr<ReplicatedMesh>> no_holes = {};
+    auto new_mesh = General2DDelaunay(mesh_2d, /*holes*/ no_holes, i);
 
-    // Mesh the subdomains by groupsp
-    auto new_mesh = General2DDelaunay(mesh_2d, hole_meshes_2d, i);
-
-    // Add the newly meshed region to the holes
-    hole_meshes_2d.push_back(std::move(new_mesh));
+    // Keep the remeshed subdomains 2D meshes
+    remeshed_2d.push_back(std::move(new_mesh));
   }
 
-  // These should become parameters
-  const auto inner_bcid = 1;
-  const auto new_hole_bcid = 1;
-  const auto _verbose_stitching = getParam<bool>("verbose_stitching");
+  // TODO: can we gain efficiency by using different boundary ids for each stitch?
+  const auto primary_bcid = 1;
+  const auto paired_bcid = 1;
+  const auto verbose_stitching = getParam<bool>("verbose_stitching");
   const auto use_binary_search = getParam<MooseEnum>("stitching_algorithm") == "BINARY";
-  std::vector<bool> _stitch_holes(hole_meshes_2d.size(), true);
 
-  // Stitch all the parts
-  // Define a reference map variable for subdomain map
-  full_mesh = std::move(hole_meshes_2d[0]);
+  // Stitch all the parts to the first one
+  std::unique_ptr<ReplicatedMesh> full_mesh;
+  full_mesh = std::move(remeshed_2d[0]);
+
+  // Build a subdomain map
   auto & main_subdomain_map = full_mesh->set_subdomain_name_map();
-  for (auto hole_i : index_range(hole_meshes_2d))
+
+  for (auto remesh_i : index_range(remeshed_2d))
   {
-    if (hole_i == 0)
+    if (remesh_i == 0)
       continue;
-    if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+    else
     {
-      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_meshes_2d[hole_i]);
+      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid
@@ -293,7 +271,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
           if (it_s != next_hole_boundary_point.end())
             if (it_s->second == elem->point((s + 1) % ns))
             {
-              hole_boundary_info.add_side(elem, s, new_hole_bcid);
+              hole_boundary_info.add_side(elem, s, paired_bcid);
 #ifndef NDEBUG
               ++found_hole_sides;
 #endif
@@ -301,7 +279,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
         }
       }
       if (_verbose)
-        _console << "Found " << found_hole_sides << " connecting sides on hole #" << hole_i
+        _console << "Found " << found_hole_sides << " connecting sides on hole #" << remesh_i
                  << std::endl;
 
       auto & mesh_boundary_info = full_mesh->get_boundary_info();
@@ -314,7 +292,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
           if (it_s != next_hole_boundary_point.end())
             if (it_s->second == elem->point(s))
             {
-              mesh_boundary_info.add_side(elem, s, inner_bcid);
+              mesh_boundary_info.add_side(elem, s, primary_bcid);
             }
         }
       }
@@ -325,8 +303,8 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
       full_mesh->stitch_meshes(hole_mesh,
-                               inner_bcid,
-                               new_hole_bcid,
+                               primary_bcid,
+                               paired_bcid,
                                TOLERANCE,
                                /*clear_stitched_bcids*/ true,
                                verbose_stitching,
@@ -507,9 +485,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
         *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
   }
 
-  // Keeps track of the real surface holes
-  std::vector<bool> actually_a_hole(hole_meshes_2d.size(), false);
-
   // If we have holes, we need to create a 1D mesh for each hole
   std::vector<std::unique_ptr<MeshBase>> hole_meshes_1d;
   for (auto & hole_mesh_2d : hole_meshes_2d)
@@ -521,33 +496,9 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     const auto hole_mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*hole_mesh_2d);
     MooseMeshUtils::addExternalBoundary(*hole_mesh_2d, hole_mesh_2d_ext_bdry, has_external_bdy);
 
-    // TODO
-    // Check if hole is even connected
-    // Check if hole is an actual hole
-
-    // Only remesh if they are not already meshed
-    if (false)
-    {
-      if (_verbose)
-        _console << "Remeshing hole " << *hole_mesh_2d << std::endl;
-
-      const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
-      if (has_external_bdy)
-        MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
-                                                    {std::to_string(hole_mesh_2d_ext_bdry)},
-                                                    new_hole_block_id_1d,
-                                                    SubdomainName(),
-                                                    type());
-      // Create a 1D mesh form the 1D block
-      hole_meshes_1d.push_back(buildMeshBaseObject());
-      if (has_external_bdy)
-        MooseMeshUtils::convertBlockToMesh(
-            *hole_mesh_2d, *hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
-    }
-    else
-      // Extract the 1D edge elements boundary as a mesh
-      hole_meshes_1d.push_back(
-          MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
+    // Extract the 1D edge elements boundary as a mesh
+    hole_meshes_1d.push_back(
+        MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
 
     // Do not clear the 2D hole mesh, we may re-use it
   }
@@ -606,18 +557,12 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs;
   meshed_holes.reserve(hole_meshes_1d.size());
   triangulator_hole_ptrs.reserve(hole_meshes_1d.size());
-  for (auto hole_i : index_range(hole_meshes_1d))
-    if (actually_a_hole[hole_i])
-    {
-      hole_meshes_1d[hole_i]->prepare_for_use();
-      meshed_holes.emplace_back(*hole_meshes_1d[hole_i]);
-      triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
-    }
-
-  // TODO: Gather actual mesh holes
-  // TODO: Connect actual mesh holes with the full mesh
-  //       OR
-  //       Error if we expect the user to mesh things in sequence
+  for (auto remesh_i : index_range(hole_meshes_1d))
+  {
+    hole_meshes_1d[remesh_i]->prepare_for_use();
+    meshed_holes.emplace_back(*hole_meshes_1d[remesh_i]);
+    triangulator_hole_ptrs[remesh_i] = &meshed_holes.back();
+  }
 
   // Finally, triangulation
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(std::move(mesh_1d));
