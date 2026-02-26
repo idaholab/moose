@@ -333,7 +333,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
     mesh->get_boundary_info().sideset_name(output_boundary_id[0]) = _output_external_boundary_name;
   }
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_boundary_id_sets();
 
   return mesh;
 }

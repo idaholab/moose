@@ -477,9 +477,8 @@ XYDelaunayGenerator::generate()
         libMesh::MeshTools::Modification::change_boundary_id(*result, sentinel_id, user_id);
       result->get_boundary_info().sideset_name(user_id) = user_output_boundary;
     }
-
-    result->unset_is_prepared();
   }
 
+  result->unset_has_boundary_id_sets();
   return result;
 }
