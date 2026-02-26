@@ -1,9 +1,9 @@
 [Tests]
   [MFEMShapeEvaluationTransfer]
     design = MultiAppMFEMShapeEvaluationTransfer.md
+    issues = '#31982'
     [FromSubToParent]
       requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation, verified through '
-      issues = '#31982'
       [run]
         type = RunApp
         input = parent.i
@@ -28,7 +28,6 @@
     []
     [VectorTransfer]
       requirement = 'The system shall be able to transfer MFEM vector variable data from a sub-application to the parent application via shape function interpolation, '
-      issues = '#31982'
       [Hex]      
         type = CSVDiff
         input = mfem_parent_vector.i
@@ -145,7 +144,7 @@
         recover = false
         detail = 'running the inputs, and '
         max_parallel = 1 # idaholab/moose#32250
-    []
+      []
       [verify]
         type = RunCommand
         command = '../check.sh
@@ -172,7 +171,7 @@
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
         detail = 'running the inputs, and '
         max_parallel = 1 # idaholab/moose#32250
-    []
+      []
       [verify]
         type = RunCommand
         command = '../check.sh
