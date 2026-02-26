@@ -35,7 +35,7 @@ public:
   /**
    * Virtual shims that calls the corresponding methods of the actual stored function
    */
-  ///{@
+  ///@{
   KOKKOS_FUNCTION virtual Real value(Real t, Real3 p) const = 0;
   KOKKOS_FUNCTION virtual Real3 vectorValue(Real t, Real3 p) const = 0;
   KOKKOS_FUNCTION virtual Real3 gradient(Real t, Real3 p) const = 0;

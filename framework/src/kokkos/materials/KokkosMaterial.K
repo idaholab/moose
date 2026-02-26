@@ -48,7 +48,7 @@ Material::Material(const Material & object)
 void
 Material::initStatefulProperties(unsigned int)
 {
-  if (!_bnd && !_neighbor)
+  if ((!_bnd && !_neighbor) || _constant_option == PropertyConstantOption::SUBDOMAIN)
   {
     if (!DispatcherRegistry::hasUserMethod<ElementInit>(type()))
       return;
@@ -89,7 +89,7 @@ Material::initStatefulProperties(unsigned int)
 void
 Material::computeProperties()
 {
-  if (!_bnd && !_neighbor)
+  if ((!_bnd && !_neighbor) || _constant_option == PropertyConstantOption::SUBDOMAIN)
   {
     Policy policy(0, numKokkosElements());
 

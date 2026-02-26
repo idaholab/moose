@@ -30,7 +30,7 @@ class QBase;
 /**
  * Base class for deriving element dampers
  */
-class ElementDamper : public Damper, protected MaterialPropertyInterface
+class ElementDamper : public Damper, public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();

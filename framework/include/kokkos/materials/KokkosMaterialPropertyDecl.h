@@ -35,6 +35,16 @@ class Datum;
 class Assembly;
 
 /**
+ * Property constant options
+ */
+enum class PropertyConstantOption
+{
+  NONE,
+  ELEMENT,
+  SUBDOMAIN
+};
+
+/**
  * A structure storing the metadata of Kokkos material properties
  */
 struct PropRecord
@@ -67,6 +77,10 @@ struct PropRecord
    * Flag whether this property is an on-demand property
    */
   bool on_demand = false;
+  /**
+   * Whether this property is constant over element or subdomain
+   */
+  PropertyConstantOption constant_option = PropertyConstantOption::NONE;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -174,6 +188,10 @@ protected:
    * Flag whether this property has a default value
    */
   bool _default = false;
+  /**
+   * Whether this property is constant over element or subdomain
+   */
+  PropertyConstantOption _constant_option = PropertyConstantOption::NONE;
 };
 
 template <typename T, unsigned int dimension>
@@ -209,6 +227,11 @@ public:
    * during parallel dispatch.
    */
   MaterialProperty(const MaterialProperty<T, dimension> & property);
+  /**
+   * Prevent initializing with properties of different rank
+   */
+  template <unsigned int D>
+  MaterialProperty(const MaterialProperty<T, D> & other) = delete;
 
   /**
    * Shallow copy another property

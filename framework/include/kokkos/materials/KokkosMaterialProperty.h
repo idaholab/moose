@@ -27,6 +27,7 @@ MaterialPropertyBase::init(const PropRecord & record, const StorageKey &)
 {
   _record = &record;
   _id = record.id;
+  _constant_option = record.constant_option;
 }
 
 template <typename T, unsigned int dimension>
@@ -100,6 +101,7 @@ MaterialProperty<T, dimension>::shallowCopy(const MaterialProperty<T, dimension>
   _record = property._record;
   _id = property._id;
   _default = property._default;
+  _constant_option = property._constant_option;
 
   _reference = property._reference;
   _data = property._data;
@@ -115,7 +117,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
                                          StorageKey)
 {
   if (!_data.isAlloc())
-    _data.create(mesh.meshSubdomains().size());
+    _data.create(mesh.nSubdomains());
 
   for (const auto subdomain : subdomains)
   {
@@ -126,7 +128,13 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
     for (unsigned int i = 0; i < dimension; ++i)
       n.push_back(_record->dims[i]);
 
-    n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
+    if (_constant_option == PropertyConstantOption::NONE)
+      n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
+    else if (_constant_option == PropertyConstantOption::ELEMENT)
+      n.push_back(bnd ? assembly.getElemFacePropertySize(sid)
+                      : mesh.getKokkosMesh()->getNumSubdomainLocalElements(subdomain));
+    else
+      n.push_back(1);
 
     if (!_data[sid].isAlloc())
       _data[sid].createDevice(n);

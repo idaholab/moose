@@ -19,6 +19,14 @@ MaterialBase::validParams()
 {
   InputParameters params = ::MaterialBase::validParams();
 
+  MooseEnum constant_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "NONE");
+  params.addParam<MooseEnum>(
+      "constant_on",
+      constant_option,
+      "When ELEMENT or SUBDOMAIN, computeQpProperties() will be only called once for each "
+      "element/face or subdomain, respectively. Material properties will be only stored for each "
+      "element/face or subdomain accordingly. The 'qp' argument wlll be ignored.");
+
   params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");
   params.suppressParameter<std::vector<OutputName>>("outputs");
@@ -35,6 +43,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
     AssemblyHolder(_fe_problem.kokkosAssembly()),
     SystemHolder(_fe_problem.getKokkosSystems()),
+    _constant_option(getParam<MooseEnum>("constant_on").getEnum<PropertyConstantOption>()),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
@@ -48,6 +57,7 @@ MaterialBase::MaterialBase(const MaterialBase & object)
     MeshHolder(object),
     AssemblyHolder(object),
     SystemHolder(object),
+    _constant_option(object._constant_option),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
@@ -61,13 +71,28 @@ MaterialBase::MaterialBase(const MaterialBase & object)
 void
 MaterialBase::initialSetup()
 {
-  if (materialDataType() == Moose::BLOCK_MATERIAL_DATA)
+  if (_constant_option == PropertyConstantOption::SUBDOMAIN)
+  {
+    auto & restricted_blocks = boundaryRestricted() ? meshBlockIDs() : blockIDs();
+
+    std::set<ContiguousElementID> element_ids;
+
+    for (auto block : restricted_blocks)
+    {
+      auto first_elem = *_mesh.getKokkosMesh()->getSubdomainContiguousElementIDRange(block).begin();
+      if (first_elem != libMesh::DofObject::invalid_id)
+        element_ids.insert(first_elem);
+    }
+
+    _element_ids = element_ids;
+  }
+  else if (materialDataType() == Moose::BLOCK_MATERIAL_DATA)
   {
     std::set<ContiguousElementID> element_ids;
 
     for (auto block : blockIDs())
-      element_ids.insert(_mesh.getKokkosMesh()->getSubdomainContiguousElementIDs(block).begin(),
-                         _mesh.getKokkosMesh()->getSubdomainContiguousElementIDs(block).end());
+      element_ids.insert(_mesh.getKokkosMesh()->getSubdomainContiguousElementIDRange(block).begin(),
+                         _mesh.getKokkosMesh()->getSubdomainContiguousElementIDRange(block).end());
 
     _element_ids = element_ids;
   }

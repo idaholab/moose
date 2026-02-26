@@ -56,7 +56,7 @@ protected:
   /// Whether an out-of-plane strain variable is coupled
   bool _has_out_of_plane_strain;
 
-  ///{@ Current and old values of the out-of-plane strain variable
+  ///@{ Current and old values of the out-of-plane strain variable
   const VariableValue & _out_of_plane_strain;
   const VariableValue & _out_of_plane_strain_old;
   ///@}
@@ -64,7 +64,7 @@ protected:
   /// Whether an out-of-plane strain scalar variable is coupled
   bool _has_scalar_out_of_plane_strain;
 
-  ///{@ Current and old values of the out-of-plane strain scalar variable
+  ///@{ Current and old values of the out-of-plane strain scalar variable
   std::vector<const VariableValue *> _scalar_out_of_plane_strain;
   std::vector<const VariableValue *> _scalar_out_of_plane_strain_old;
   ///@}

@@ -75,7 +75,7 @@ public:
   /**
    * Shims for hook methods that can be leveraged to implement static polymorphism
    */
-  ///{@
+  ///@{
   template <typename Derived>
   KOKKOS_FUNCTION Real3 computeQpResidualShim(const Derived & kernel,
                                               const unsigned int qp,

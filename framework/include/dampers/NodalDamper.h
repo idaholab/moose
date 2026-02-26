@@ -24,7 +24,7 @@ class Assembly;
 /**
  * Base class for deriving nodal dampers
  */
-class NodalDamper : public Damper, protected MaterialPropertyInterface
+class NodalDamper : public Damper, public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();

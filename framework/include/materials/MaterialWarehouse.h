@@ -33,15 +33,15 @@ public:
    * Convenience methods for calling object setup methods that handle the extra neighbor and face
    * objects.
    */
-  virtual void initialSetup(THREAD_ID tid = 0) const;
-  virtual void timestepSetup(THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(THREAD_ID tid = 0) const;
-  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  virtual void initialSetup(THREAD_ID tid = 0) const override;
+  virtual void timestepSetup(THREAD_ID tid = 0) const override;
+  virtual void subdomainSetup(THREAD_ID tid = 0) const override;
+  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const override;
   virtual void neighborSubdomainSetup(THREAD_ID tid = 0) const;
   virtual void neighborSubdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
-  virtual void jacobianSetup(THREAD_ID tid = 0) const;
-  virtual void residualSetup(THREAD_ID tid = 0) const;
-  virtual void updateActive(THREAD_ID tid = 0);
+  virtual void jacobianSetup(THREAD_ID tid = 0) const override;
+  virtual void residualSetup(THREAD_ID tid = 0) const override;
+  virtual void updateActive(THREAD_ID tid = 0) override;
   /**
    * By default, this method only sorts block and boundary-wise object storages that are used by the
    * MOOSE threaded element loops. Kokkos, however, computes all elements and faces at once
@@ -65,4 +65,12 @@ protected:
 
   /// Storage for face material objects (Block are stored in the base class)
   MooseObjectWarehouse<MaterialBase> _face_materials;
+
+  /**
+   * Helper method for updating material property dependency vector
+   */
+  virtual void
+  updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
+                                const std::vector<std::shared_ptr<MaterialBase>> & objects,
+                                const bool producer_only) const override;
 };

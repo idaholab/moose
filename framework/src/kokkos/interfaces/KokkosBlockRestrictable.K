@@ -41,8 +41,8 @@ BlockRestrictable::initializeKokkosBlockRestrictable()
 
   for (auto block : blocks)
   {
-    element_ids.insert(kokkos_mesh->getSubdomainContiguousElementIDs(block).begin(),
-                       kokkos_mesh->getSubdomainContiguousElementIDs(block).end());
+    element_ids.insert(kokkos_mesh->getSubdomainContiguousElementIDRange(block).begin(),
+                       kokkos_mesh->getSubdomainContiguousElementIDRange(block).end());
     node_ids.insert(node_ids.end(),
                     kokkos_mesh->getSubdomainContiguousNodeIDs(block).begin(),
                     kokkos_mesh->getSubdomainContiguousNodeIDs(block).end());

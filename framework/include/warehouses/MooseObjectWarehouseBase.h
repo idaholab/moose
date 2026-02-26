@@ -158,8 +158,11 @@ public:
 
   ///@{
   /**
-   * Update FE variable coupleable vector tag vector
+   * Update FE variable coupleable vector tag vector for all objects, block-restricted objects, and
+   * boundary-restricted objects
    */
+  void updateFEVariableCoupledVectorTagDependency(std::set<TagID> & needed_fe_var_vector_tags,
+                                                  THREAD_ID tid = 0) const;
   void updateBlockFEVariableCoupledVectorTagDependency(SubdomainID id,
                                                        std::set<TagID> & needed_fe_var_vector_tags,
                                                        THREAD_ID tid = 0) const;
@@ -170,17 +173,22 @@ public:
   ///@{
   /**
    * Update material property dependency vector.
+   * @param producer_only Only append dependencies of materials producing the \p needed_mat_props
    */
   void updateMatPropDependency(std::unordered_set<unsigned int> & needed_mat_props,
-                               THREAD_ID tid = 0) const;
+                               THREAD_ID tid = 0,
+                               const bool producer_only = false) const;
   void updateBlockMatPropDependency(SubdomainID id,
                                     std::unordered_set<unsigned int> & needed_mat_props,
-                                    THREAD_ID tid = 0) const;
+                                    THREAD_ID tid = 0,
+                                    const bool producer_only = false) const;
   void updateBoundaryMatPropDependency(std::unordered_set<unsigned int> & needed_mat_props,
-                                       THREAD_ID tid = 0) const;
+                                       THREAD_ID tid = 0,
+                                       const bool producer_only = false) const;
   void updateBoundaryMatPropDependency(BoundaryID id,
                                        std::unordered_set<unsigned int> & needed_mat_props,
-                                       THREAD_ID tid = 0) const;
+                                       THREAD_ID tid = 0,
+                                       const bool producer_only = false) const;
   ///@}
 
   /**
@@ -255,8 +263,9 @@ protected:
   /**
    * Helper method for updating material property dependency vector
    */
-  static void updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
-                                            const std::vector<std::shared_ptr<T>> & objects);
+  virtual void updateMatPropDependencyHelper(std::unordered_set<unsigned int> & needed_mat_props,
+                                             const std::vector<std::shared_ptr<T>> & objects,
+                                             const bool producer_only) const;
 
   /**
    * Calls assert on thread id.
@@ -675,7 +684,7 @@ MooseObjectWarehouseBase<T>::updateVariableDependency(
     std::set<MooseVariableFieldBase *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
-    updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
+    updateVariableDependencyHelper(needed_moose_vars, _active_objects[tid]);
 }
 
 template <typename T>
@@ -732,6 +741,16 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
 
 template <typename T>
 void
+MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependency(
+    std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveObjects(tid))
+    updateFEVariableCoupledVectorTagDependencyHelper(needed_fe_var_vector_tags,
+                                                     _active_objects[tid]);
+}
+
+template <typename T>
+void
 MooseObjectWarehouseBase<T>::updateBlockFEVariableCoupledVectorTagDependency(
     SubdomainID id, std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
 {
@@ -769,10 +788,12 @@ MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependencyHelper(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateMatPropDependency(
-    std::unordered_set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+    std::unordered_set<unsigned int> & needed_mat_props,
+    THREAD_ID tid /* = 0*/,
+    const bool producer_only /* = false*/) const
 {
   if (hasActiveObjects(tid))
-    updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
+    updateMatPropDependencyHelper(needed_mat_props, _active_objects[tid], producer_only);
 }
 
 template <typename T>
@@ -780,20 +801,23 @@ void
 MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(
     SubdomainID id,
     std::unordered_set<unsigned int> & needed_mat_props,
-    THREAD_ID tid /* = 0*/) const
+    THREAD_ID tid /* = 0*/,
+    const bool producer_only /* = false*/) const
 {
   if (hasActiveBlockObjects(id, tid))
-    updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
+    updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid), producer_only);
 }
 
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
-    std::unordered_set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+    std::unordered_set<unsigned int> & needed_mat_props,
+    THREAD_ID tid /* = 0*/,
+    const bool producer_only /* = false*/) const
 {
   if (hasActiveBoundaryObjects(tid))
     for (auto & active_bnd_object : _active_boundary_objects[tid])
-      updateMatPropDependencyHelper(needed_mat_props, active_bnd_object.second);
+      updateMatPropDependencyHelper(needed_mat_props, active_bnd_object.second, producer_only);
 }
 
 template <typename T>
@@ -801,17 +825,20 @@ void
 MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
     BoundaryID id,
     std::unordered_set<unsigned int> & needed_mat_props,
-    THREAD_ID tid /* = 0*/) const
+    THREAD_ID tid /* = 0*/,
+    const bool producer_only /* = false*/) const
 {
   if (hasActiveBoundaryObjects(id, tid))
-    updateMatPropDependencyHelper(needed_mat_props, getActiveBoundaryObjects(id, tid));
+    updateMatPropDependencyHelper(
+        needed_mat_props, getActiveBoundaryObjects(id, tid), producer_only);
 }
 
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(
     std::unordered_set<unsigned int> & needed_mat_props,
-    const std::vector<std::shared_ptr<T>> & objects)
+    const std::vector<std::shared_ptr<T>> & objects,
+    const bool /* producer_only */) const
 {
   for (auto & object : objects)
   {
