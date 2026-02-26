@@ -5,8 +5,6 @@
     ny = 2
     dim = 2
   [../]
-  # This test uses SolutionUserObject which doesn't work with DistributedMesh.
-  parallel_type = replicated
 []
 
 [Variables]
