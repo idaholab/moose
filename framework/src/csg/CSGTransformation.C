@@ -36,8 +36,8 @@ isValidTransformationValue(TransformationType type, const std::vector<Real> & va
       return true;
 
     case TransformationType::SCALE:
-      // Scaling factors should be positive and non-zero
-      if (value[0] <= 0.0 || value[1] <= 0.0 || value[2] <= 0.0)
+      // Scaling factors should be non-zero
+      if (value[0] == 0.0 || value[1] == 0.0 || value[2] == 0.0)
         return false;
       return true;
 

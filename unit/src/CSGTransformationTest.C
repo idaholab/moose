@@ -31,7 +31,7 @@ TEST(CSGTransformationTest, testInvalidValues)
   // test invalid values for scale transformation
   {
     std::vector<Real> invalid_scale_values = {
-        1.0, -2.0, 3.0}; // negative value is invalid for scale
+        1.0, -2.0, 0.0}; // negative value is invalid for scale
     ASSERT_FALSE(isValidTransformationValue(TransformationType::SCALE, invalid_scale_values));
   }
 }
@@ -42,11 +42,11 @@ TEST(CSGTransformationTest, testConvertToString)
   std::vector<std::pair<TransformationType, std::vector<Real>>> transformations = {
       {TransformationType::TRANSLATION, {1.0, 2.0, 3.0}},
       {TransformationType::ROTATION, {45.0, 30.0, 60.0}},
-      {TransformationType::SCALE, {2.0, 2.0, 2.0}}};
+      {TransformationType::SCALE, {-2.0, 2.0, 2.0}}};
   std::vector<std::pair<std::string, std::vector<Real>>> exp_strings = {
       {"TRANSLATION", {1.0, 2.0, 3.0}},
       {"ROTATION", {45.0, 30.0, 60.0}},
-      {"SCALE", {2.0, 2.0, 2.0}}};
+      {"SCALE", {-2.0, 2.0, 2.0}}};
   auto out_strings = convertTransformationsToString(transformations);
   ASSERT_EQ(out_strings, exp_strings);
 }
