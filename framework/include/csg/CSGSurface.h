@@ -100,14 +100,15 @@ public:
    * @param type type of transformation to apply
    * @param values values for the transformation (3 values for any transformation type)
    */
-  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /**
    * @brief Get the list of transformations applied to this surface
    *
    * @return const reference to the list of transformations
    */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
   {
     return _transformations;
   }
@@ -138,7 +139,7 @@ protected:
   const std::string _surface_type;
 
   /// list of transformations applied to the surface (type, value) in the order they are applied
-  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

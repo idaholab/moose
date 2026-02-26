@@ -123,7 +123,8 @@ public:
    *
    * @return const reference to the list of transformations
    */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
   {
     return _transformations;
   }
@@ -144,7 +145,7 @@ protected:
   void updateRegion(const CSGRegion & region) { _region = region; }
 
   /// Apply a transformation to the cell (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of surface
   std::string _name;
@@ -165,7 +166,7 @@ protected:
   const CSGLattice * _fill_lattice;
 
   /// list of transformations applied to the cell (type, value) in the order they are applied
-  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access

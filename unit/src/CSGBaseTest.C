@@ -807,10 +807,10 @@ TEST(CSGBaseTest, testApplyRotation)
   // simple axis rotation around each axis (x, y, z)
   Real angle = 45.0;
   // euler rotation
-  std::vector<Real> euler_angles = {30.0, 45.0, 60.0};
+  std::tuple<Real, Real, Real> euler_angles = {30.0, 45.0, 60.0};
 
   // expected vector of rotations to be applied in this order (x, y, z, euler):
-  std::vector<std::pair<TransformationType, std::vector<Real>>> expected_rotations = {
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_rotations = {
       {TransformationType::ROTATION, {0.0, angle, 0.0}},    // around x-axis
       {TransformationType::ROTATION, {90.0, angle, -90.0}}, // around y-axis
       {TransformationType::ROTATION, {angle, 0.0, 0.0}},    // around z-axis
@@ -889,11 +889,11 @@ TEST(CSGBaseTest, testApplyTranslation)
   const auto & lat = csg_obj->addLattice(std::move(lat_ptr));
 
   // apply multidirectional translations
-  std::vector<Real> dists1 = {1.0, -2.0, 3.0};
-  std::vector<Real> dists2 = {4.0, 5.0, -6.0};
+  std::tuple<Real, Real, Real> dists1 = {1.0, -2.0, 3.0};
+  std::tuple<Real, Real, Real> dists2 = {4.0, 5.0, -6.0};
 
   // expected vector of translations to be applied in this order (dists1, dists2):
-  std::vector<std::pair<TransformationType, std::vector<Real>>> expected_trans = {
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_trans = {
       {TransformationType::TRANSLATION, dists1}, {TransformationType::TRANSLATION, dists2}};
 
   // apply to surface
@@ -951,10 +951,10 @@ TEST(CSGBaseTest, testApplyScaling)
   const auto & lat = csg_obj->addLattice(std::move(lat_ptr));
 
   // scaling vector
-  std::vector<Real> scales = {2.0, 1.0, 4.0};
+  std::tuple<Real, Real, Real> scales = {-2.0, 1.0, 4.0};
 
   // expected vector of scalings to be applied (only one scaling transformation):
-  std::vector<std::pair<TransformationType, std::vector<Real>>> expected_scaling = {
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_scaling = {
       {TransformationType::SCALE, scales}};
 
   // apply to surface
@@ -1043,7 +1043,10 @@ TEST(CSGBaseTest, testApplyTransformationErrors)
   {
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &surf]()
-        { csg_obj->applyTransformation(surf, TransformationType::SCALE, {0.0, 0.0, 0.0}); },
+        {
+          csg_obj->applyTransformation(
+              surf, TransformationType::SCALE, std::make_tuple(0.0, 0.0, 0.0));
+        },
         "Invalid transformation values provided for transformation type ");
   }
 }

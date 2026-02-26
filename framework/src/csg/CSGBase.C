@@ -367,7 +367,7 @@ CSGBase::setLatticeUniverses(
 void
 CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
                              TransformationType type,
-                             const std::vector<Real> & values)
+                             const std::tuple<Real, Real, Real> & values)
 {
   // Validate the transformation values
   if (!isValidTransformationValue(type, values))
@@ -477,7 +477,7 @@ CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis
   else
     mooseError("Invalid axis '", axis, "' provided for axis rotation. Must be 'x', 'y', or 'z'.");
 
-  applyTransformation(csg_object, TransformationType::ROTATION, {phi, theta, psi});
+  applyTransformation(csg_object, TransformationType::ROTATION, std::make_tuple(phi, theta, psi));
 }
 
 void

@@ -176,7 +176,8 @@ public:
    *
    * @return const reference to the list of transformations
    */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
   {
     return _transformations;
   }
@@ -226,7 +227,7 @@ protected:
   void updateOuter(const CSGUniverse & outer_universe);
 
   /// Apply a transformation to the lattice (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of lattice
   std::string _name;
@@ -247,7 +248,7 @@ protected:
   const CSGUniverse * _outer_universe;
 
   /// list of transformations applied to the lattice (type, value) in the order they are applied
-  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   // CSGLatticeList needs to be friend to access setName()
   friend class CSGLatticeList;

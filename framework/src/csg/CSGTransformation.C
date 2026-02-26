@@ -14,12 +14,8 @@ namespace CSG
 {
 
 bool
-isValidTransformationValue(TransformationType type, const std::vector<Real> & value)
+isValidTransformationValue(TransformationType type, const std::tuple<Real, Real, Real> & value)
 {
-  // All transformation types require exactly 3 values
-  if (value.size() != 3)
-    mooseError("Transformation values must be a vector of size 3, but got size ", value.size());
-
   // Additional validation specific to each transformation type could be added here
   switch (type)
   {
@@ -37,7 +33,7 @@ isValidTransformationValue(TransformationType type, const std::vector<Real> & va
 
     case TransformationType::SCALE:
       // Scaling factors should be non-zero
-      if (value[0] == 0.0 || value[1] == 0.0 || value[2] == 0.0)
+      if (std::get<0>(value) == 0.0 || std::get<1>(value) == 0.0 || std::get<2>(value) == 0.0)
         return false;
       return true;
 
@@ -55,18 +51,15 @@ getTransformationTypeString(TransformationType type)
   return std::string(enum_copy);
 }
 
-std::vector<std::pair<std::string, std::vector<Real>>>
+std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>>
 convertTransformationsToString(
-    const std::vector<std::pair<TransformationType, std::vector<Real>>> & transformations)
+    const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+        transformations)
 {
-  std::vector<std::pair<std::string, std::vector<Real>>> result;
+  std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> result;
   result.reserve(transformations.size());
-
   for (const auto & transform_pair : transformations)
-  {
     result.emplace_back(getTransformationTypeString(transform_pair.first), transform_pair.second);
-  }
-
   return result;
 }
 

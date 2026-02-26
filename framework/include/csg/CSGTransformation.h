@@ -36,7 +36,8 @@ static const MooseEnum transformation_type_enum{"TRANSLATION=0 ROTATION=1 SCALE=
  * @return True if the values are valid for the transformation type
  * @throws If the values vector is not exactly size 3
  */
-bool isValidTransformationValue(TransformationType type, const std::vector<Real> & value);
+bool isValidTransformationValue(TransformationType type,
+                                const std::tuple<Real, Real, Real> & value);
 
 /**
  * Get the string representation of the transformation type.
@@ -50,7 +51,8 @@ const std::string getTransformationTypeString(TransformationType type);
  * @param transformations Vector of transformation pairs with enum types
  * @return Vector of transformation pairs with string representations for types
  */
-std::vector<std::pair<std::string, std::vector<Real>>> convertTransformationsToString(
-    const std::vector<std::pair<TransformationType, std::vector<Real>>> & transformations);
+std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> convertTransformationsToString(
+    const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+        transformations);
 
 } // namespace CSG

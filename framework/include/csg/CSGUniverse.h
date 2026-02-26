@@ -91,7 +91,8 @@ public:
    *
    * @return const reference to the list of transformations
    */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
   {
     return _transformations;
   }
@@ -127,7 +128,7 @@ protected:
   void setName(const std::string & name) { _name = name; }
 
   /// Apply a transformation to the universe (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of universe
   std::string _name;
@@ -139,7 +140,7 @@ protected:
   bool _is_root;
 
   /// list of transformations applied to the universe (type, value) in the order they are applied
-  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;

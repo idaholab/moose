@@ -479,19 +479,20 @@ public:
    *
    * @param csg_object The CSG object to transform (Surface, Cell, Universe, Region, or Lattice)
    * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
-   * @param values vector of transformation values (3 values for any transformation type)
+   * @param values tuple of transformation values (3 values for any transformation type)
    */
   void applyTransformation(const CSGObjectVariant & csg_object,
                            TransformationType type,
-                           const std::vector<Real> & values);
+                           const std::tuple<Real, Real, Real> & values);
 
   /**
    * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
    *
    * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
-   * @param distances size 3 vector with translation distances in x, y, and z directions {x, y, z}
+   * @param distances size 3 tuple with translation distances in x, y, and z directions {x, y, z}
    */
-  void applyTranslation(const CSGObjectVariant & csg_object, const std::vector<Real> & distances)
+  void applyTranslation(const CSGObjectVariant & csg_object,
+                        const std::tuple<Real, Real, Real> & distances)
   {
     applyTransformation(csg_object, TransformationType::TRANSLATION, distances);
   }
@@ -500,9 +501,10 @@ public:
    * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
    *
    * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
-   * @param angles size 3 vector {phi, theta, psi} with rotation angles in degrees
+   * @param angles size 3 tuple {phi, theta, psi} with rotation angles in degrees
    */
-  void applyRotation(const CSGObjectVariant & csg_object, const std::vector<Real> & angles)
+  void applyRotation(const CSGObjectVariant & csg_object,
+                     const std::tuple<Real, Real, Real> & angles)
   {
     applyTransformation(csg_object, TransformationType::ROTATION, angles);
   }
@@ -520,9 +522,10 @@ public:
    * @brief Scale a CSG object in the specified x, y, and z directions.
    *
    * @param csg_object The CSG object to scale (Surface, Cell, Universe, Region, or Lattice)
-   * @param values size 3 vector with scaling values in x, y, and z directions {x, y, z}
+   * @param values size 3 tuple with scaling values in x, y, and z directions {x, y, z}
    */
-  void applyScaling(const CSGObjectVariant & csg_object, const std::vector<Real> & values)
+  void applyScaling(const CSGObjectVariant & csg_object,
+                    const std::tuple<Real, Real, Real> & values)
   {
     applyTransformation(csg_object, TransformationType::SCALE, values);
   }

@@ -51,7 +51,8 @@ CSGSurface::operator!=(const CSGSurface & other) const
 }
 
 void
-CSGSurface::applyTransformation(TransformationType type, const std::vector<Real> & values)
+CSGSurface::applyTransformation(TransformationType type,
+                                const std::tuple<Real, Real, Real> & values)
 {
   // Assert valid input as a safety measure
   // Main validation is done in CSGBase::applyTransformation

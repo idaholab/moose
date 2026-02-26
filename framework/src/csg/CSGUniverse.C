@@ -99,7 +99,8 @@ CSGUniverse::operator!=(const CSGUniverse & other) const
 }
 
 void
-CSGUniverse::applyTransformation(TransformationType type, const std::vector<Real> & values)
+CSGUniverse::applyTransformation(TransformationType type,
+                                 const std::tuple<Real, Real, Real> & values)
 {
   // Assert valid input as a safety measure
   // Main validation is done in CSGBase::applyTransformation
