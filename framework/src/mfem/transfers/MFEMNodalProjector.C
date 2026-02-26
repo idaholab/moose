@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMNodalProjector.h"
+#include "MooseError.h"
 
 void
 MFEMNodalProjector::extractNodePositions(const mfem::ParFiniteElementSpace & fespace,
