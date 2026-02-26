@@ -104,30 +104,6 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
     local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
   }
 
-  // Get the local bounding boxes for current processor.
-  // There could be more than one box because of the number of local apps
-  // can be larger than one
-  // Get the bounding boxes for the "from" domains.
-  std::vector<BoundingBox> bboxes = getFromBoundingBoxes();
-  // Figure out how many "from" domains each processor owns.
-  std::vector<unsigned int> froms_per_proc = getFromsPerProc();
-  std::vector<BoundingBox> local_bboxes(froms_per_proc[processor_id()]);
-  {
-    // Find the index to the first of this processor's local bounding boxes.
-    unsigned int local_start = 0;
-    for (processor_id_type i_proc = 0; i_proc < n_processors() && i_proc != processor_id();
-         ++i_proc)
-    {
-      local_start += froms_per_proc[i_proc];
-    }
-
-    // Extract the local bounding boxes.
-    for (unsigned int i_from = 0; i_from < froms_per_proc[processor_id()]; ++i_from)
-    {
-      local_bboxes[i_from] = bboxes[local_start + i_from];
-    }
-  }
-
   /**
    * Gather all of the evaluations, pick out the best ones for each point, and
    * apply them to the solution vector.  When we are transferring from
@@ -138,10 +114,10 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
   auto gather_functor =
-      [this, &local_meshfuns, &local_bboxes](
-          processor_id_type /*pid*/,
-          const std::vector<Point> & incoming_points,
-          std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
+      [this,
+       &local_meshfuns](processor_id_type /*pid*/,
+                        const std::vector<Point> & incoming_points,
+                        std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
   {
     vals_ids_for_incoming_points.resize(incoming_points.size(), std::make_pair(OutOfMeshValue, 0));
     for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
@@ -155,25 +131,22 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
            vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
            ++i_from)
       {
-        if (local_bboxes[i_from].contains_point(pt))
+        const auto from_global_num =
+            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+        // Use mesh function to compute interpolation values
+        vals_ids_for_incoming_points[i_pt].first =
+            (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+        // Record problem ID as well
+        switch (_current_direction)
         {
-          const auto from_global_num =
-              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
-          // Use mesh function to compute interpolation values
-          vals_ids_for_incoming_points[i_pt].first =
-              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
-          // Record problem ID as well
-          switch (_current_direction)
-          {
-            case FROM_MULTIAPP:
-              vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
-              break;
-            case TO_MULTIAPP:
-              vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
-              break;
-            default:
-              mooseError("Unsupported direction");
-          }
+          case FROM_MULTIAPP:
+            vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+            break;
+          case TO_MULTIAPP:
+            vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+            break;
+          default:
+            mooseError("Unsupported direction");
         }
       }
     }

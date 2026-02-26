@@ -1,9 +1,9 @@
 [Tests]
   [MFEMShapeEvaluationTransfer]
     design = MultiAppMFEMShapeEvaluationTransfer.md
+    requirement = 'The system shall be able to transfer MFEM variable data between sub-applications via shape function evaluations, verified through '
+    issues = '#31982'
     [test]
-      requirement = 'The system shall be able to transfer MFEM variable data between sub-applications via shape function evaluations, verified through '
-      issues = '#31982'
       [run]
         type = RunApp
         input = parent.i
@@ -30,15 +30,15 @@
   [MFEMCopyTransfer]   
     issues = '#29632'
     design = MultiAppMFEMCopyTransfer.md
+    requirement = 'The system shall be able to copy MFEM variable data between sub-applications, '
     [test]
-      requirement = 'The system shall be able to copy MFEM variable data between sub-applications, verified through '
       [run]
         type = RunApp
         input = parent.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        detail = 'running the inputs, and '
+        detail = 'verified through running the inputs, and '
       []
       [verify]
         type = RunCommand
@@ -54,7 +54,7 @@
       []
     []
     [error]
-      requirement = 'The system shall error if different applications request different devices.'
+      detail = 'and shall error if different applications request different devices.'
       input = parent.i
       type = RunException
       expect_err = "Attempted to configure with MFEM devices 'cpu', but we have already configured the MFEM device object with the devices 'cuda'"

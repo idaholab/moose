@@ -30,7 +30,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
-    requirement = 'first order scalar LAGRANGE variables from tris to quads, '
+    detail = 'first order scalar LAGRANGE variables from tris to quads, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -59,7 +59,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad.csv'
-    requirement = 'first order scalar LAGRANGE variables from tris to quads, '
+    detail = 'first order scalar LAGRANGE variables from tris to quads, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -88,7 +88,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes.csv'
-    requirement = 'first order scalar LAGRANGE variables defined on hexes, '
+    detail = 'first order scalar LAGRANGE variables defined on hexes, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -102,7 +102,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes_order_2.csv'
-    requirement = 'second order scalar LAGRANGE variables defined on hexes, '
+    detail = 'second order scalar LAGRANGE variables defined on hexes, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -119,7 +119,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tets.csv'
-    requirement = 'first order scalar LAGRANGE variables defined on tetrahedra, '
+    detail = 'first order scalar LAGRANGE variables defined on tetrahedra, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -133,7 +133,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tets_order_2.csv'
-    requirement = 'second order scalar LAGRANGE variables defined on tetrahedra, '
+    detail = 'second order scalar LAGRANGE variables defined on tetrahedra, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -150,7 +150,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex.csv'
-    requirement = 'first order scalar LAGRANGE variables from tets to hexes, '
+    detail = 'first order scalar LAGRANGE variables from tets to hexes, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
@@ -164,7 +164,7 @@
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex_order_2.csv'
-    requirement = 'and second order scalar LAGRANGE variables from tets to hexes.'
+    detail = 'and second order scalar LAGRANGE variables from tets to hexes.'
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
