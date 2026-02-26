@@ -62,8 +62,10 @@ ComplexEquationSystem::BuildLinearForms()
 
   for (auto & test_var_name : _test_var_names)
   {
-    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
-        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    if ((_cmplx_kernels_map.Has(test_var_name) &&
+         _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) &&
+         _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
     {
       // Apply kernels
       auto clf = _clfs.GetShared(test_var_name);
@@ -81,8 +83,10 @@ ComplexEquationSystem::BuildBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
-        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    if ((_cmplx_kernels_map.Has(test_var_name) &&
+         _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) &&
+         _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
     {
       _slfs.Register(test_var_name,
                      std::make_shared<mfem::ParSesquilinearForm>(_test_pfespaces.at(i)));
@@ -100,6 +104,7 @@ ComplexEquationSystem::BuildBilinearForms()
   }
 }
 
+void
 ComplexEquationSystem::BuildMixedBilinearForms()
 {
   // Register mixed sesquilinear forms. Note that not all combinations may
@@ -116,7 +121,7 @@ ComplexEquationSystem::BuildMixedBilinearForms()
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
       auto mslf = std::make_shared<ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
-                                                               _test_pfespaces.at(i));
+                                                             _test_pfespaces.at(i));
       // Register MixedSesquilinearForm if kernels exist for it, and assemble
       // kernels
       if (_cmplx_kernels_map.Has(test_var_name) &&
@@ -296,8 +301,12 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
         auto slf = _slfs.Get(test_var_name);
         auto clf = _clfs.Get(test_var_name);
-        slf->FormLinearSystem(
-            _ess_tdof_lists.at(j), *(_cmplx_var_ess_constraints.at(j)), *clf, *aux_a, aux_x, aux_rhs);
+        slf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *(_cmplx_var_ess_constraints.at(j)),
+                              *clf,
+                              *aux_a,
+                              aux_x,
+                              aux_rhs);
         trueX.GetBlock(i) = aux_x;
       }
       else if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
@@ -318,7 +327,6 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
     }
   }
-
 
   // Sync memory
   trueX.SyncFromBlocks();

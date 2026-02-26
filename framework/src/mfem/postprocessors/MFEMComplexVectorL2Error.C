@@ -21,10 +21,10 @@ MFEMComplexVectorL2Error::validParams()
   params.addClassDescription(
       "Computes L2 error $\\left\\Vert \\vec u_{ex} - \\vec u_{h}\\right\\Vert_{\\rm L2}$ for "
       "complex vector gridfunctions.");
-  params.addParam<MFEMVectorCoefficientName>("function_real",
-                                             "The analytic real part of the solution to compare against.");
-  params.addParam<MFEMVectorCoefficientName>("function_imag",
-                                             "The analytic imaginary part of the solution to compare against.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "function_real", "The analytic real part of the solution to compare against.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "function_imag", "The analytic imaginary part of the solution to compare against.");
   params.addParam<VariableName>(
       "variable", "Name of the vector variable of which to find the norm of the error.");
   return params;
@@ -34,7 +34,8 @@ MFEMComplexVectorL2Error::MFEMComplexVectorL2Error(const InputParameters & param
   : MFEMPostprocessor(parameters),
     _vec_coeff_real(getVectorCoefficient("function_real")),
     _vec_coeff_imag(getVectorCoefficient("function_imag")),
-    _var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(getParam<VariableName>("variable")))
+    _var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
+        getParam<VariableName>("variable")))
 {
 }
 
