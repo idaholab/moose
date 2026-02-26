@@ -478,9 +478,8 @@ public:
    * @brief Apply a transformation to a CSG object
    *
    * @param csg_object The CSG object to transform (Surface, Cell, Universe, Region, or Lattice)
-   * @param type The type of transformation to apply
-   * @param values The transformation values (3 values for any transformation type)
-   * @return CSGObjectVariant The transformed object
+   * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
+   * @param values vector of transformation values (3 values for any transformation type)
    */
   void applyTransformation(const CSGObjectVariant & csg_object,
                            TransformationType type,

@@ -336,7 +336,7 @@ These transformations do not alter other information about the object because it
 
 !alert! note title=Rotation Angles
 
-Rotation angle is stored in Euler notation ($\phi$, $\theta$, $\psi$) using degrees, which is consistent with the [source/meshgenerators/TransformGenerator.md]. A convenience method is provided in `CSGBase` to specify a simple axis rotation (`applyAxisRotation()`) which will automatically convert the single angle of rotation into the correct Euler notation.
+Rotation angle is stored in Euler notation ($\phi$, $\theta$, $\psi$) using degrees, which is consistent with the [source/meshgenerators/TransformGenerator.md]. A convenience method is provided in `CSGBase` to specify a simple axis rotation (`applyAxisRotation()`) which will automatically convert the single angle rotation around a specified axis into the correct Euler notation.
 
 !alert-end!
 
