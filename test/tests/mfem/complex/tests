@@ -41,4 +41,17 @@
     recover = false
     max_parallel = 1 # idaholab/moose#32250
   []
+  [MFEMMixedSesquilinear]
+    type = XMLDiff
+    input = mixed_sesquilinear.i
+    xmldiff = 'OutputData/MixedSesquilinear/Run0/Run0.pvd
+                OutputData/MixedSesquilinear/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with mixed sesquilinear form kernels.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    max_parallel = 1 # idaholab/moose#32250
+  []
+
 []
