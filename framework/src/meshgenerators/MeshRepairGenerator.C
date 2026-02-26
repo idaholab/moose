@@ -97,7 +97,6 @@ MeshRepairGenerator::generate()
     mesh->allow_renumbering(prev_status);
   }
 
-  mesh->unset_is_prepared();
   return mesh;
 }
 
@@ -174,14 +173,17 @@ MeshRepairGenerator::fixOverlappingNodes(std::unique_ptr<MeshBase> & mesh) const
       }
     }
   }
+
+  // We've orphaned the nodes we just disconnected
+  mesh->unset_has_removed_orphaned_nodes();
+
+  // Merging nodes means we may have newly-adjacent neighbors
+  mesh->unset_has_neighbor_ptrs();
+
+  // We've probably invalidated our id counts
+  mesh->unset_has_synched_id_counts();
+
   _console << "Number of overlapping nodes which got merged: " << num_fixed_nodes << std::endl;
-  if (mesh->allow_renumbering())
-    mesh->renumber_nodes_and_elements();
-  else
-  {
-    mesh->remove_orphaned_nodes();
-    mesh->update_parallel_id_counts();
-  }
 }
 
 void
@@ -218,4 +220,6 @@ MeshRepairGenerator::separateSubdomainsByElementType(std::unique_ptr<MeshBase> &
       }
     }
   }
+
+  mesh->unset_has_cached_elem_data();
 }

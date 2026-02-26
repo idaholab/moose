@@ -477,7 +477,7 @@ BreakMeshByBlockGenerator::generate()
     mesh->remove_orphaned_nodes();
   Partitioner::set_node_processor_ids(*mesh);
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_boundary_id_sets();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

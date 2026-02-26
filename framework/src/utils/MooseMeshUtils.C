@@ -56,6 +56,8 @@ mergeBoundaryIDsWithSameName(MeshBase & mesh)
 
   for (const auto & [id1, id2] : same_name_ids)
     mesh.get_boundary_info().renumber_id(id2, id1);
+
+  mesh.unset_has_boundary_id_sets();
 }
 
 void
@@ -99,7 +101,7 @@ changeBoundaryId(MeshBase & mesh,
     boundary_info.remove_id(old_id);
 
   // global information may now be out of sync
-  mesh.unset_is_prepared();
+  mesh.unset_has_boundary_id_sets();
 }
 
 std::vector<boundary_id_type>
@@ -270,7 +272,7 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
       elem->subdomain_id() = new_id;
 
   // global cached information may now be out of sync
-  mesh.unset_is_prepared();
+  mesh.unset_has_cached_elem_data();
 }
 
 Point

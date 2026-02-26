@@ -117,7 +117,7 @@ ParsedSubdomainGeneratorBase::generate()
   // Assign block name, if applicable
   setBlockName(mesh);
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
