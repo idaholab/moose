@@ -637,6 +637,12 @@ MFEMProblem::getGridFunction(const std::string & name)
   return getUserObject<MFEMVariable>(name).getGridFunction();
 }
 
+std::shared_ptr<mfem::ParComplexGridFunction>
+MFEMProblem::getComplexGridFunction(const std::string & name)
+{
+  return getUserObject<MFEMComplexVariable>(name).getComplexGridFunction();
+}
+
 void
 MFEMProblem::addInitialCondition(const std::string & ic_name,
                                  const std::string & name,
