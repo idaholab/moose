@@ -92,7 +92,7 @@ protected:
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// Advance state on device (rather than via MOSOE material properties)
-  const bool _advance_step_on_device;
+  const bool _keep_tensors_on_device;
 
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;

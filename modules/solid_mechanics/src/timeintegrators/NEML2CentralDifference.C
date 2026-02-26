@@ -36,8 +36,13 @@ NEML2CentralDifference::NEML2CentralDifference(const InputParameters & parameter
 }
 
 void
-NEML2CentralDifference::initialSetup()
+NEML2CentralDifference::rebuildBoundaryElementList()
 {
+  if (!_nl)
+    return;
+
+  _boundary_elems.clear();
+
   // build boundary element list by iterating over all integrated BCs
   const auto & ibcs = _nl->getIntegratedBCWarehouse();
   std::unordered_set<BoundaryID> bnds;
@@ -59,9 +64,23 @@ NEML2CentralDifference::initialSetup()
     mooseInfo("Adding ", _boundary_elems.size(), " elements to the algebraic range.");
   }
 
+  _boundary_elems_dirty = false;
+}
+
+void
+NEML2CentralDifference::initialSetup()
+{
   ExplicitMixedOrder::initialSetup();
   _neml2_assembly = &_fe_problem.getUserObject<NEML2Assembly>("assembly", /*tid=*/0);
   _fe = &_fe_problem.getUserObject<NEML2FEInterpolation>("fe", /*tid=*/0);
+  rebuildBoundaryElementList();
+}
+
+void
+NEML2CentralDifference::meshChanged()
+{
+  ExplicitMixedOrder::meshChanged();
+  _boundary_elems_dirty = true;
 }
 
 void
@@ -74,6 +93,9 @@ NEML2CentralDifference::postSolve()
 void
 NEML2CentralDifference::evaluateRHSResidual()
 {
+  if (_boundary_elems_dirty)
+    rebuildBoundaryElementList();
+
   if (_fe->contextUpToDate() && _neml2_assembly->upToDate())
   {
     libMesh::ConstElemRange boundary_elem_range(&_boundary_elems);

@@ -35,7 +35,7 @@ NEML2ModelExecutor::actionParams()
       "input variable is skipped, its value will stay zero. If a required input variable is "
       "not skipped, an error will be raised.");
   params.addParam<bool>(
-      "advance_step_on_device",
+      "keep_tensors_on_device",
       false,
       "Keep state and forces on the device and advance it to old_state and old_forces without a "
       "roundtrip through MOOSE materials. This is only recommended for explicit time integration "
@@ -82,7 +82,7 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
 #ifdef NEML2_ENABLED
     ,
     _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
-    _advance_step_on_device(getParam<bool>("advance_step_on_device")),
+    _keep_tensors_on_device(getParam<bool>("keep_tensors_on_device")),
     _debug_inputs_on_failure(getParam<bool>("debug_inputs_on_failure")),
     _output_ready(false),
     _error_message("")
@@ -164,7 +164,7 @@ NEML2ModelExecutor::initialSetup()
       continue;
     // skip input state variables because they are "initial guesses" to the nonlinear system
     if (input.is_state() ||
-        (_advance_step_on_device && (input.is_old_state() || input.is_old_force())))
+        (_keep_tensors_on_device && (input.is_old_state() || input.is_old_force())))
       continue;
     if (!_gathered_variable_names.count(input))
       paramError("gatherers", "The required model input `", input, "` is not gathered");
@@ -174,7 +174,7 @@ NEML2ModelExecutor::initialSetup()
   // sufficient for stateful data management, but that's the best we can do here without being
   // overly restrictive.
   for (const auto & input : required_inputs)
-    if (!_advance_step_on_device && input.is_old_state() &&
+    if (!_keep_tensors_on_device && input.is_old_state() &&
         !_retrieved_outputs.count(input.current()))
       mooseError(
           "The NEML2 model requires a stateful input variable `",
@@ -197,7 +197,7 @@ NEML2ModelExecutor::initialSetup()
 void
 NEML2ModelExecutor::timestepSetup()
 {
-  if (_advance_step_on_device)
+  if (_keep_tensors_on_device)
     return;
 }
 
@@ -253,8 +253,8 @@ NEML2ModelExecutor::meshChanged()
     return;
 
   _output_ready = false;
-  if (_advance_step_on_device)
-    mooseError("The mesh changed while `advance_step_on_device = true` for NEML2 model executor '",
+  if (_keep_tensors_on_device)
+    mooseError("The mesh changed while `keep_tensors_on_device = true` for NEML2 model executor '",
                name(),
                "'. This mode requires a fixed mesh because state history is cached on the device.");
 }
@@ -267,7 +267,7 @@ NEML2ModelExecutor::execute()
 
   if (_current_execute_flag == EXEC_TIMESTEP_END)
   {
-    if (_advance_step_on_device && _fe_problem.solverSystemConverged(/*sys_num=*/0))
+    if (_keep_tensors_on_device && _fe_problem.solverSystemConverged(/*sys_num=*/0))
       advanceDeviceCaches();
     return;
   }
@@ -295,7 +295,7 @@ NEML2ModelExecutor::fillInputs()
     for (const auto & uo : _gatherers)
       uo->insertInto(_in, _model_params);
 
-    if (_advance_step_on_device && _t_step > 0)
+    if (_keep_tensors_on_device && _t_step > 0)
     {
       for (const auto & [name, val] : _device_state_cache)
         if (val.defined() && model().input_axis().has_variable(name.old()))
@@ -306,7 +306,7 @@ NEML2ModelExecutor::fillInputs()
     }
 
     // Initialize missing inputs that are allowed to be absent
-    if (_advance_step_on_device || !_skip_vars.empty())
+    if (_keep_tensors_on_device || !_skip_vars.empty())
     {
       std::vector<neml2::Tensor> defined;
       for (const auto & [key, value] : _in)
@@ -327,13 +327,10 @@ NEML2ModelExecutor::fillInputs()
           continue;
 
         if (!_skip_vars.count(var) && !var.is_state() &&
-            !(_advance_step_on_device && (var.is_old_state() || var.is_old_force())))
+            !(_keep_tensors_on_device && (var.is_old_state() || var.is_old_force())))
           continue;
 
-        const auto & v = model().input_variable(var);
-        const auto & intmd_shape = v.intmd_sizes();
-        const auto & base_shape = v.base_sizes();
-        _in[var] = neml2::Tensor::zeros(dynamic_shape, intmd_shape, base_shape, options);
+        model().input_variable(var).zeros(options);
       }
     }
 
@@ -408,7 +405,7 @@ NEML2ModelExecutor::expandInputs()
 void
 NEML2ModelExecutor::advanceDeviceCaches()
 {
-  if (!_advance_step_on_device || _t_step == 0)
+  if (!_keep_tensors_on_device || _t_step == 0)
     return;
 
   _device_state_cache.clear();
@@ -443,7 +440,7 @@ NEML2ModelExecutor::solve()
     }
     else
       std::tie(_out, _dout_din) = model().value_and_dvalue(_in);
-    if (!_advance_step_on_device)
+    if (!_keep_tensors_on_device)
       _in.clear();
 
     // Restore the default dtype
@@ -513,7 +510,7 @@ NEML2ModelExecutor::solve()
         }
       }
 
-      if (_advance_step_on_device && model().input_axis().has_subaxis(neml2::OLD_STATE) &&
+      if (_keep_tensors_on_device && model().input_axis().has_subaxis(neml2::OLD_STATE) &&
           model().output_axis().has_subaxis(neml2::STATE))
       {
         os << "NEML2 cached outputs (state for old_state inputs):\n";
@@ -582,7 +579,7 @@ NEML2ModelExecutor::extractOutputs()
                      .to(output_device());
 
     // clear output unless we need it for on-device state advance
-    if (!_advance_step_on_device)
+    if (!_keep_tensors_on_device)
       _out.clear();
 
     // retrieve derivatives

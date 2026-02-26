@@ -23,10 +23,12 @@ public:
   NEML2CentralDifference(const InputParameters & parameters);
 
   void initialSetup() override;
+  void meshChanged() override;
   void postSolve() override;
 
 protected:
   void evaluateRHSResidual() override;
+  void rebuildBoundaryElementList();
 
   /// The assembly object with cached assembly information
   NEML2Assembly * _neml2_assembly = nullptr;
@@ -40,6 +42,9 @@ private:
 
   /// Empty node vector to help zero out the algebraic range
   std::vector<const Node *> _no_node = {};
+
+  /// Whether the cached boundary element list needs rebuilding
+  bool _boundary_elems_dirty = true;
 };
 
 #endif // NEML2_ENABLED
