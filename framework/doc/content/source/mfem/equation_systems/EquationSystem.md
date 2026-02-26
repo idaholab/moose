@@ -34,7 +34,7 @@ contributions to $b_i(\varphi_i)$ when assembled.
 
 [MFEMKernels](source/mfem/kernels/MFEMKernel.md) can also contribute to domain integrators for 
 non-linear actions. This allows to form the residual $\mathcal{L}(u)$ for non-linear Newton's 
-methood as shown below
+method as shown below
 
 !equation
 {\mathbf{J}\left(\vec{u}_n\right) \delta \vec{u}_{n+1}=-\vec{R}\left(\vec{u}_n\right)}
