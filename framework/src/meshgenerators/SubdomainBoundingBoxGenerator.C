@@ -114,6 +114,6 @@ SubdomainBoundingBoxGenerator::generate()
       mesh->subdomain_name(_block_id) = getParam<SubdomainName>("block_name");
   }
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

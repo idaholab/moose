@@ -234,6 +234,8 @@ RenameBoundaryGenerator::generate()
     boundary_info.nodeset_name(pair.first) = pair.second;
   }
 
-  mesh->unset_is_prepared();
+  // This may become redundant once libMesh updates
+  // change_boundary_id()
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

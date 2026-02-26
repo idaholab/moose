@@ -181,6 +181,6 @@ ExtraNodesetGenerator::generate()
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
     boundary_info.nodeset_name(boundary_ids[i]) = boundary_names[i];
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

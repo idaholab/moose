@@ -41,6 +41,6 @@ SubdomainIDGenerator::generate()
   for (auto & elem : mesh->element_ptr_range())
     elem->subdomain_id() = _subdomain_id;
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

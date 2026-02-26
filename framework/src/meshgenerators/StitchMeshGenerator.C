@@ -188,6 +188,7 @@ StitchMeshGenerator::generate()
       MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
   }
 
-  mesh->unset_is_prepared();
+  // This may become redundant once stitch_meshes handles it
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
