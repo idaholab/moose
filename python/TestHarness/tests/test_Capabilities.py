@@ -249,6 +249,12 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
         )
         self.assertIn(message, jobs[0].getTester().getOutput())
 
+        # Test not filtering due to --ignore: don't skip and don't even check
+        _, jobs = self.runCapabilityTest(
+            ("compiler=unknown", False), cli_args=["--ignore"]
+        )
+        self.assertNotIn("Need compiler=unknown", jobs[0].getTester().getCaveats())
+
     def testAugmented(self):
         """Test filtering tests using augmented application capabilities."""
 
