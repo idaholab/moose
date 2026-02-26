@@ -22,12 +22,15 @@ MFEMComplexVectorIC::validParams()
                              "user-specified vector coefficient.");
   params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient_real",
                                                      "The real part of the vector coefficient");
-  params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient_imag",
-                                                     "The imaginary part of the vector coefficient");
+  params.addRequiredParam<MFEMVectorCoefficientName>(
+      "vector_coefficient_imag", "The imaginary part of the vector coefficient");
   return params;
 }
 
-MFEMComplexVectorIC::MFEMComplexVectorIC(const InputParameters & params) : MFEMInitialCondition(params) {}
+MFEMComplexVectorIC::MFEMComplexVectorIC(const InputParameters & params)
+  : MFEMInitialCondition(params)
+{
+}
 
 void
 MFEMComplexVectorIC::execute()

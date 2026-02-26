@@ -21,8 +21,10 @@ MFEMComplexScalarBoundaryIC::validParams()
   params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription("Sets the initial values of a complex MFEM scalar variable from a "
                              "pair of user-specified scalar coefficients.");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient_real", "The real part of the scalar coefficient");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient_imag", "The imaginary part of the scalar coefficient");
+  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient_real",
+                                                     "The real part of the scalar coefficient");
+  params.addRequiredParam<MFEMScalarCoefficientName>(
+      "coefficient_imag", "The imaginary part of the scalar coefficient");
   return params;
 }
 

@@ -24,7 +24,8 @@ MFEMMixedVectorWeakDivergenceKernel::validParams()
   return params;
 }
 
-MFEMMixedVectorWeakDivergenceKernel::MFEMMixedVectorWeakDivergenceKernel(const InputParameters & parameters)
+MFEMMixedVectorWeakDivergenceKernel::MFEMMixedVectorWeakDivergenceKernel(
+    const InputParameters & parameters)
   : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
