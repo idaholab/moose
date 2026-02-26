@@ -220,8 +220,9 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getExtraElementID(ContiguousElementID elem, unsigned int index) const
   {
-    return index >= _extra_elem_ids.n(1) ? libMesh::DofObject::invalid_id
-                                         : _extra_elem_ids(elem, index);
+    KOKKOS_ASSERT(index < _extra_elem_ids.n(1));
+
+    return _extra_elem_ids(elem, index);
   }
   /**
    * Get the starting contiguous element ID of a subdomain

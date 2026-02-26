@@ -37,7 +37,7 @@ System::System(SystemBase & system)
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
   {
     setupSparsity();
-    checkNodalBCs();
+    setupNodalBCDofs();
   }
 
   _qp_solutions.create(MAX_TAG);
@@ -261,7 +261,7 @@ System::setupSparsity()
 }
 
 void
-System::checkNodalBCs()
+System::setupNodalBCDofs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
 

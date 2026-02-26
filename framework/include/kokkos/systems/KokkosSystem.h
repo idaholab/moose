@@ -399,9 +399,9 @@ private:
    */
   void setupSparsity();
   /**
-   * Check if the DOFs are covered by nodal BCs
+   * Mark the DOFs covered by nodal BCs
    */
-  void checkNodalBCs();
+  void setupNodalBCDofs();
   /**
    * Get the list of DOFs covered by a nodal BC
    * @param nbc The Kokkos nodal BC object
