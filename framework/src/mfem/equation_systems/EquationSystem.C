@@ -371,16 +371,16 @@ void
 EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs)
 {
   // Reassemble all the Forms
-  for (const auto I : index_range(_test_var_names))
+  for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(I);
+    auto test_var_name = _test_var_names.at(i);
     _blfs.GetShared(test_var_name)->Update();
     _blfs.GetShared(test_var_name)->Assemble();
     if (_mblfs.Has(test_var_name))
     {
-      for (const auto J : index_range(_coupled_var_names))
+      for (const auto j : index_range(_coupled_var_names))
       {
-        auto coupled_var_name = _coupled_var_names.at(J);
+        auto coupled_var_name = _coupled_var_names.at(j);
         if (_mblfs.Get(test_var_name)->Has(coupled_var_name))
         {
           _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Update();
