@@ -39,6 +39,20 @@ MFEMIndex(const size_t i_dim,
   }
 }
 
+/**
+ * Convert an MFEM position vector to a libMesh::Point.
+ */
+libMesh::Point
+libMeshPointFromMFEMVector(const mfem::Vector & vec)
+{
+  return libMesh::Point(
+      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
+}
+
+/**
+ * Convert a vector of libMesh::Point objects to an mfem::Vector containing all points, given an
+ * ordering.
+ */
 mfem::Vector
 pointsToMFEMVector(const std::vector<Point> & points,
                    const unsigned int num_dims,
