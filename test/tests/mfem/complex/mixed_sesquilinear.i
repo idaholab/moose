@@ -1,7 +1,12 @@
+a=1.0
+b=1.0
+c=1.0
+omega=1.0
+
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/square.e
-  dim = 2
+  file = ../mesh/square.msh
+  dim = 3
 []
 
 [Problem]
@@ -20,144 +25,66 @@
     fec_type = ND
     fec_order = FIRST
   []
-
 []
 
 [Variables]
-  [p]
+  [V]
     type = MFEMComplexVariable
     fespace = H1FESpace
   []
-  [E]
+  [A]
     type = MFEMComplexVariable
     fespace = HCurlFESpace
   []
 []
 
 [Functions]
-  [f1_real]
+  [V_exact_real]
     type = ParsedFunction
-    expression = '-pi*cos(pi*x)*sin(pi*y)'
+    expression = '${a}*x+${b}*y+${c}*z'
   []
-  [f1_imag]
-    type = ParsedFunction
-    expression = '-sin(pi*x)*sin(pi*y)'
-  []
-  [f2_real]
+  [A_exact_imag]
     type = ParsedVectorFunction
-    expression_x = '-pi*sin(pi*x)*cos(pi*y)'
-    expression_y = 'pi*cos(pi*x)*sin(pi*y)'
+    expression_x = '${a}/${omega}'
+    expression_y = '${b}/${omega}'
+    expression_z = '${c}/${omega}'
   []
-  [f2_imag]
-    type = ParsedVectorFunction
-    expression_x = '0.0'
-    expression_y = '-sin(pi*x)*sin(pi*y)'
-  []
-  [p_exact]
-    type = ParsedFunction
-    expression = 'sin(pi*x)*sin(pi*y)'
-  []
-  [E_exact] type = ParsedVectorFunction 
-    expression_x = '0.0' 
-    expression_y = 'sin(pi*x)*sin(pi*y)' 
+[]
+
+[ICs]
+  [A_vector_ic]
+    type = MFEMComplexVectorIC
+    variable = A
+    vector_coefficient_real = '0 0 0'
+    vector_coefficient_imag = A_exact_imag
   []
 []
 
 [BCs]
-  [dbc_p]
+  [dbc_V]
     type = MFEMComplexScalarDirichletBC
-    variable = p
-    coefficient_real = 0.0
+    variable = V
+    coefficient_real = V_exact_real
     coefficient_imag = 0.0
   []
-  [dbc_E_tan]
-    type = MFEMComplexVectorTangentialDirichletBC
-    variable = E
-    vector_coefficient_real = '0.0 0.0'
-    vector_coefficient_imag = '0.0 0.0'
-  []
-  [dbc_E_norm]
-    type = MFEMComplexVectorNormalDirichletBC
-    variable = E
-    vector_coefficient_real = '0.0 0.0'
-    vector_coefficient_imag = '0.0 0.0'
-  []
-
 []
 
 [Kernels]
-  [mass_p]
+  [diff_V]
     type = MFEMComplexKernel
-    variable = p
+    variable = V
     [RealComponent]
-      type = MFEMMassKernel
-      coefficient = -1.0
-    []
-    [ImagComponent]
-      type = MFEMMassKernel
+      type = MFEMDiffusionKernel
       coefficient = 1.0
     []
   []
-  [mass_E]
-    type = MFEMComplexKernel
-    variable = E
-    [RealComponent]
-      type = MFEMVectorFEMassKernel
-      coefficient = 0.0
-    []
-    [ImagComponent]
-      type = MFEMVectorFEMassKernel
-      coefficient = 1.0
-    []
-  []
-  [scalarcurl_E]
+  [mass_A]
     type = MFEMMixedSesquilinearFormKernel
-    trial_variable = E
-    variable = p
-    [RealComponent]
-      type = MFEMMixedScalarCurlKernel
-      coefficient = 1.0
-    []
+    trial_variable = A
+    variable = V
     [ImagComponent]
-      type = MFEMMixedScalarCurlKernel
-      coefficient = 0.0
-    []
-  []
-  [scalarcurl_p]
-    type = MFEMMixedSesquilinearFormKernel
-    trial_variable = p
-    variable = E
-    [RealComponent]
-      type = MFEMMixedScalarWeakCurlKernel
-      coefficient = -1.0
-    []
-    [ImagComponent]
-      type = MFEMMixedScalarWeakCurlKernel
-      coefficient = 0.0
-    []
-  []
-  [scalar_forcing]
-    type = MFEMComplexKernel
-    variable = p
-    [RealComponent]
-      type = MFEMDomainLFKernel
-      coefficient = f1_real
-    []
-    [ImagComponent]
-      type = MFEMDomainLFKernel
-      coefficient = f1_imag
-    []
-  []
-  [vector_forcing]
-    type = MFEMComplexKernel
-    variable = E
-    [RealComponent]
-      type = MFEMVectorFEDomainLFKernel
-      vector_coefficient = f2_real
-    []
-    [ImagComponent]
-      type = MFEMVectorFEDomainLFKernel
-      vector_coefficient = f2_imag
+      type = MFEMMixedVectorWeakDivergenceKernel
+      coefficient = -${omega}
     []
   []
 []
