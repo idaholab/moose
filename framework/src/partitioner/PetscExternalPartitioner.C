@@ -18,8 +18,6 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/petsc_solver_exception.h"
 
-#include "petsc/private/mpiadj.h"
-
 using namespace libMesh;
 
 registerMooseObject("MooseApp", PetscExternalPartitioner);
@@ -154,11 +152,13 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
 
   local_elem_id = 0;
   nj = 0;
+  std::map<dof_id_type, dof_id_type> global_index_to_weight;
   for (auto & row : _dual_graph)
   {
     mooseAssert(local_elem_id < static_cast<dof_id_type>(_local_id_to_elem.size()),
                 "Local element id " << local_elem_id << " is not smaller than "
                                     << _local_id_to_elem.size());
+    global_index_to_weight.clear();
     auto elem = _local_id_to_elem[local_elem_id];
     unsigned int n_neighbors = 0;
 
@@ -170,9 +170,8 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
       if (neighbor != nullptr && neighbor->active())
       {
         if (_apply_side_weight)
-          side_weights[nj] = computeSideWeight(*elem, side);
-
-        nj++;
+          global_index_to_weight.emplace(libmesh_map_find(_global_index_by_pid_map, neighbor->id()),
+                                         computeSideWeight(*elem, side));
         n_neighbors++;
       }
 
@@ -181,6 +180,12 @@ PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_pa
     if (n_neighbors != row.size())
       mooseError(
           "Cannot construct dual graph correctly since the number of neighbors is inconsistent");
+    if (_apply_side_weight)
+    {
+      mooseAssert(global_index_to_weight.size() == row.size(), "These must match");
+      for (const auto [_, weight] : global_index_to_weight)
+        side_weights[nj++] = weight;
+    }
 
     local_elem_id++;
   }
@@ -262,35 +267,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
       comm.get(),
       MatCreateMPIAdj(comm.get(), num_local_elems, num_elems, xadj, adjncy, values, &dual));
 
-  PetscViewer viewer_read;
-  Mat aij, dual2;
-  LibmeshPetscCallA(comm.get(),
-                    PetscViewerBinaryOpen(comm.get(), "adj_mat", FILE_MODE_READ, &viewer_read));
-
-  LibmeshPetscCallA(comm.get(), MatCreate(comm.get(), &aij));
-  LibmeshPetscCallA(comm.get(), MatLoad(aij, viewer_read));
-  // LibmeshPetscCallA(comm.get(), MatGetSize(aij, &global_m, &global_n));
-  // LibmeshPetscCallA(comm.get(), MatGetLocalSize(aij, &local_m, &local_n));
-  // PetscCallMPI(MPI_Comm_rank(PETSC_COMM_WORLD, &rank));
-  // if (rank == 0) printf("Global size is %ld\n", global_m);
-  // printf("Local size on rank %d is %ld\n", rank, local_m);
-  Mat_MPIAdj *adj, *adj2;
-  LibmeshPetscCallA(comm.get(), MatConvert(aij, MATMPIADJ, MAT_INITIAL_MATRIX, &dual2));
-  adj2 = (Mat_MPIAdj *)dual2->data;
-  adj2->useedgeweights = PETSC_FALSE;
-  LibmeshPetscCallA(comm.get(), PetscFree(adj2->values));
-  adj2->values = NULL;
-  adj = (Mat_MPIAdj *)dual->data;
-
-  PetscInt global_m, local_m;
-  // PetscMPIInt rank;
-  LibmeshPetscCallA(comm.get(), MatGetSize(dual, &global_m, NULL));
-  LibmeshPetscCallA(comm.get(), MatGetLocalSize(dual, &local_m, NULL));
-  // MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
-  // if (rank == 0)
-  //   printf("Global size is %ld\n", global_m);
-  // printf("Local size on rank %d is %ld\n", rank, local_m);
-
   LibmeshPetscCallA(comm.get(), MatPartitioningCreate(comm.get(), &part));
   if (values)
     // This should only be set to true if the adjacency matrix has valid edge weights (which
@@ -298,8 +274,9 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     LibmeshPetscCallA(comm.get(), MatPartitioningSetUseEdgeWeights(part, PETSC_TRUE));
   LibmeshPetscCallA(comm.get(), MatPartitioningSetAdjacency(part, dual));
 
-  mooseAssert(!elem_weights.size(),
-              "No element weights should be provided since there are no elements at all");
+  if (!num_local_elems)
+    mooseAssert(!elem_weights.size(),
+                "No element weights should be provided since there are no elements at all");
 
   // Handle element weights
   if (elem_weights.size())
@@ -314,7 +291,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
     for (auto weight : elem_weights)
       petsc_elem_weights[i++] = weight;
 
-    std::cout << "Making an additional PETSc API call" << std::endl;
     LibmeshPetscCallA(comm.get(), MatPartitioningSetVertexWeights(part, petsc_elem_weights));
   }
 
@@ -327,11 +303,6 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
                       MatPartitioningHierarchicalSetNfineparts(part, num_parts_per_compute_node));
 
   LibmeshPetscCallA(comm.get(), MatPartitioningSetFromOptions(part));
-  for (PetscInt i = 0; i < local_m + 1; ++i)
-    libmesh_assert(adj->i[i] == adj2->i[i]);
-  libmesh_assert(adj->nz == adj2->nz);
-  for (PetscInt j = 0; j < adj->nz; ++j)
-    libmesh_assert(adj->j[j] == adj2->j[j]);
   LibmeshPetscCallA(comm.get(), MatPartitioningApply(part, &is));
 
   LibmeshPetscCallA(comm.get(), ISGetIndices(is, &parts));
