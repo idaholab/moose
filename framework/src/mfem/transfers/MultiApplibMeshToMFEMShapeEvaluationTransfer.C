@@ -73,12 +73,14 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
       if (dim == 3)
       {
         const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp], vxyz[i + 2 * NE * nsp]});
-        outgoing_points[i_proc].push_back(pointFromMFEMVector(transformed_node));
+        outgoing_points[i_proc].push_back(
+            Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
       }
       else
       {
         const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp]});
-        outgoing_points[i_proc].push_back(pointFromMFEMVector(transformed_node));
+        outgoing_points[i_proc].push_back(
+            Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
       }
     }
   }
