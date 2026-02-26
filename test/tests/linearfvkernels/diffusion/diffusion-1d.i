@@ -18,6 +18,15 @@
   []
 []
 
+[FVInterpolationMethods]
+  [geom]
+    type = FVGeometricAverage
+  []
+  [harm]
+    type = FVHarmonicAverage
+  []
+[]
+
 [LinearFVKernels]
   [diffusion]
     type = LinearFVDiffusion
@@ -44,6 +53,10 @@
   [coeff_func]
     type = ParsedFunction
     expression = '0.5*x'
+  []
+  [coeff_pos_func]
+    type = ParsedFunction
+    expression = '1+0.5*x'
   []
   [source_func]
     type = ParsedFunction

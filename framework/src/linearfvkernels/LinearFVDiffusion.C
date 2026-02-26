@@ -25,18 +25,70 @@ LinearFVDiffusion::validParams()
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The diffusion coefficient.");
+  params.addParam<InterpolationMethodName>(
+      "coeff_interp_method",
+      "Optional finite volume interpolation method used to compute a face-centered diffusion "
+      "coefficient. If omitted, the functor is evaluated directly on the face.");
   return params;
 }
 
 LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
   : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff")),
+    _coeff_interp_method(
+        isParamValid("coeff_interp_method")
+            ? &getFVInterpolationMethod(getParam<InterpolationMethodName>("coeff_interp_method"))
+            : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _flux_matrix_contribution(0.0),
-    _flux_rhs_contribution(0.0)
+    _flux_rhs_contribution(0.0),
+    _cached_face_diffusivity(false),
+    _face_diffusivity(0.0)
 {
+  if (_coeff_interp_method)
+    _coeff_interp_handle = _coeff_interp_method->faceInterpolator();
+
   if (_use_nonorthogonal_correction)
     _var.computeCellGradients();
+}
+
+Real
+LinearFVDiffusion::faceDiffusivity() const
+{
+  if (!_cached_face_diffusivity)
+  {
+    const auto state = determineState();
+
+    if (_coeff_interp_handle.valid())
+    {
+      const auto face_arg = makeCDFace(*_current_face_info);
+      const auto elem_arg = face_arg.makeElem();
+      const Real elem_value = _diffusion_coeff(elem_arg, state);
+      Real neighbor_value = elem_value;
+
+      if (_current_face_info->neighborPtr())
+      {
+        const auto neighbor_arg = face_arg.makeNeighbor();
+        neighbor_value = _diffusion_coeff(neighbor_arg, state);
+      }
+
+      _face_diffusivity = _coeff_interp_handle(*_current_face_info, elem_value, neighbor_value);
+    }
+    else
+      _face_diffusivity = _diffusion_coeff(makeCDFace(*_current_face_info), state);
+
+    _cached_face_diffusivity = true;
+  }
+
+  return _face_diffusivity;
+}
+
+void
+LinearFVDiffusion::setupFaceData(const FaceInfo * face_info)
+{
+  LinearFVFluxKernel::setupFaceData(face_info);
+  _cached_face_diffusivity = false;
 }
 
 void
@@ -78,8 +130,6 @@ LinearFVDiffusion::computeFluxMatrixContribution()
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
-
     // If we requested nonorthogonal correction, we use the normal component of the
     // cell to face vector.
     const auto d = _use_nonorthogonal_correction
@@ -87,8 +137,7 @@ LinearFVDiffusion::computeFluxMatrixContribution()
                        : _current_face_info->dCNMag();
 
     // Cache the matrix contribution
-    _flux_matrix_contribution =
-        _diffusion_coeff(face_arg, determineState()) / d * _current_face_area;
+    _flux_matrix_contribution = faceDiffusivity() / d * _current_face_area;
     _cached_matrix_contribution = true;
   }
 
@@ -102,9 +151,6 @@ LinearFVDiffusion::computeFluxRHSContribution()
   // if the nonorthogonal correction is enabled.
   if (_use_nonorthogonal_correction && !_cached_rhs_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
-    const auto state_arg = determineState();
-
     // Get the gradients from the adjacent cells
     const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
     const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
@@ -121,7 +167,7 @@ LinearFVDiffusion::computeFluxRHSContribution()
 
     // Cache the matrix contribution
     _flux_rhs_contribution =
-        _diffusion_coeff(face_arg, state_arg) *
+        faceDiffusivity() *
         (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
         correction_vector * _current_face_area;
     _cached_rhs_contribution = true;

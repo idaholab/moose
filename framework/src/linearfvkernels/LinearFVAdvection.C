@@ -11,6 +11,8 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "GradientLimiterType.h"
+#include <limits>
 
 registerMooseObject("MooseApp", LinearFVAdvection);
 
@@ -21,15 +23,44 @@ LinearFVAdvection::validParams()
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
                              "advection term in a partial differential equation.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
-  params += Moose::FV::advectedInterpolationParameter();
+  params.addRequiredParam<InterpolationMethodName>(
+      "advected_interp_method_name",
+      "Nae of the FVInterpolationMethod to use for the advected quantity.");
   return params;
 }
 
 LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
-  : LinearFVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity"))
+  : LinearFVFluxKernel(params),
+    FVInterpolationMethodInterface(this),
+    _velocity(getParam<RealVectorValue>("velocity")),
+    _adv_interp_method(
+        &getFVInterpolationMethod(getParam<InterpolationMethodName>("advected_interp_method_name")))
 
 {
-  Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
+  mooseAssert(_adv_interp_method,
+              "LinearFVAdvection now requires an explicit FVInterpolationMethod "
+              "via advected_interp_method_name.");
+
+  _adv_interp_handle = _adv_interp_method->advectedSystemContributionCalculator();
+  if (_adv_interp_handle.needsGradients())
+    _var.computeCellGradients(_adv_interp_handle.gradientLimiter());
+  if (!_adv_interp_handle.valid())
+    mooseError("Advected interpolation handle is invalid; check the interpolation method setup.");
+}
+
+void
+LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
+{
+  LinearFVFluxKernel::setupFaceData(face_info);
+  _adv_face_flux = _velocity * _current_face_info->normal();
+
+  // Only internal faces need advected interpolation results; boundary contributions are handled
+  // through the linear FV boundary conditions.
+  if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
+    return;
+
+  const auto state = determineState();
+  _adv_interp_result = _adv_interp_handle(_var, *_current_face_info, state, _adv_face_flux);
 }
 
 void
@@ -44,31 +75,27 @@ LinearFVAdvection::initialSetup()
 Real
 LinearFVAdvection::computeElemMatrixContribution()
 {
-  const Real face_flux = _velocity * _current_face_info->normal();
-  const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
-  return interp_coeffs.first * face_flux * _current_face_area;
+  const auto coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.first * _adv_face_flux * _current_face_area;
 }
 
 Real
 LinearFVAdvection::computeNeighborMatrixContribution()
 {
-  const Real face_flux = _velocity * _current_face_info->normal();
-  const auto interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, face_flux);
-  return interp_coeffs.second * face_flux * _current_face_area;
+  const auto coeffs = _adv_interp_result.weights_matrix;
+  return coeffs.second * _adv_face_flux * _current_face_area;
 }
 
 Real
 LinearFVAdvection::computeElemRightHandSideContribution()
 {
-  return 0.0;
+  return _adv_interp_result.rhs_face_value * _adv_face_flux * _current_face_area;
 }
 
 Real
 LinearFVAdvection::computeNeighborRightHandSideContribution()
 {
-  return 0.0;
+  return -_adv_interp_result.rhs_face_value * _adv_face_flux * _current_face_area;
 }
 
 Real

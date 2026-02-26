@@ -22,12 +22,21 @@
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
   [advection]
     type = LinearFVAdvection
     variable = u
     velocity = "0.0 0.5 0"
-    advected_interp_method = average
+    advected_interp_method_name = average
   []
   [source]
     type = LinearFVSource

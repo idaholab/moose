@@ -43,7 +43,7 @@
     input = dc.i
     exodiff = dc_out.e
     requirement = 'The system shall support the deferred correction algorithm for transitioning from low-order to high-order representations of the convective flux during a transient simulation.'
-    abs_zero = 1e-8
+    abs_zero = 1e-6 # Needed the change due to small change in the limiter logic in 31965, absolute errors were on 1e-12 scale. This is a storage-heavy test
     valgrind = HEAVY
     design = 'PCNSFVKTDC.md'
   []

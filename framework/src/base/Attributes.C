@@ -29,6 +29,7 @@
 #include "SystemBase.h"
 #include "DomainUserObject.h"
 #include "MortarUserObject.h"
+#include "FVInterpolationMethod.h"
 #include "ExecFlagRegistry.h"
 
 #include <algorithm>
@@ -69,6 +70,8 @@ operator<<(std::ostream & os, Interfaces & iface)
     os << "|DomainUserObject";
   if (static_cast<bool>(iface & Interfaces::MortarUserObject))
     os << "|MortarUserObject";
+  if (static_cast<bool>(iface & Interfaces::FVInterpolationMethod))
+    os << "|FVInterpolationMethod";
   os << ")";
   return os;
 }
@@ -492,6 +495,7 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::Reporter                  * (dynamic_cast<const Reporter *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::DomainUserObject          * (dynamic_cast<const DomainUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::MortarUserObject          * (dynamic_cast<const MortarUserObject *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVInterpolationMethod     * (dynamic_cast<const FVInterpolationMethod *>(obj) != nullptr);
   // clang-format on
 }
 
