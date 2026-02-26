@@ -98,10 +98,16 @@ omega=1.0
   assembly_level = legacy
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/MixedSesquilinear
-    vtk_format = ASCII
+[Postprocessors]
+  [error]
+    type = MFEMComplexL2Error
+    variable = V
+    function_real = V_exact_real
+    function_imag = 0.0
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/MixedSesquilinear
 []
