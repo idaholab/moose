@@ -742,7 +742,7 @@ CSGBase::generateOutput() const
     csg_json["cells"][cell_name]["fill"] = fill_name;
     // include any information about transformations if present
     const auto & transformations = c.getTransformations();
-    if (transformations.size() > 0)
+    if (transformations.size())
       csg_json["cells"][cell_name]["transformations"] =
           convertTransformationsToString(transformations);
   }
@@ -760,14 +760,14 @@ CSGBase::generateOutput() const
       csg_json["universes"][univ_name]["root"] = u.isRoot();
     // include any information about transformations if present
     const auto & transformations = u.getTransformations();
-    if (transformations.size() > 0)
+    if (transformations.size())
       csg_json["universes"][univ_name]["transformations"] =
           convertTransformationsToString(transformations);
   }
 
   // print out lattice information if lattices exist
   auto all_lats = getAllLattices();
-  if (all_lats.size() > 0)
+  if (all_lats.size())
   {
     csg_json["lattices"] = {};
     for (const CSGLattice & lat : all_lats)
@@ -790,7 +790,7 @@ CSGBase::generateOutput() const
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
       // include any information about transformations if present
       const auto & transformations = lat.getTransformations();
-      if (transformations.size() > 0)
+      if (transformations.size())
         csg_json["lattices"][lat_name]["transformations"] =
             convertTransformationsToString(transformations);
     }
