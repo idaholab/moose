@@ -12,7 +12,6 @@
 #include "ParMixedSesquilinearForm.h"
 #include "MFEMMixedBilinearFormKernel.h"
 
-
 namespace Moose::MFEM
 {
 /*
@@ -43,11 +42,6 @@ public:
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
-  virtual void ApplyComplexEssentialBC(const std::string & var_name,
-                                       mfem::ParComplexGridFunction & trial_gf,
-                                       mfem::Array<int> & global_ess_markers);
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms() override;
 
@@ -56,8 +50,8 @@ public:
 
   /// Applies complex BCs to a single trial variable
   virtual void ApplyComplexEssentialBC(const std::string & var_name,
-                                               mfem::ParComplexGridFunction & trial_gf,
-                                               mfem::Array<int> & global_ess_markers);
+                                       mfem::ParComplexGridFunction & trial_gf,
+                                       mfem::Array<int> & global_ess_markers);
 
   /// Add complex kernels
   void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);

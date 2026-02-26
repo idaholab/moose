@@ -21,10 +21,10 @@ MFEMComplexL2Error::validParams()
   params.addClassDescription(
       "Computes L2 error $\\left\\Vert u_{ex} - u_{h}\\right\\Vert_{\\rm L2}$ for "
       "complex gridfunctions using H1 or L2 elements.");
-  params.addParam<MFEMScalarCoefficientName>("function_real",
-                                             "The analytic real part of the solution to compare against.");
-  params.addParam<MFEMScalarCoefficientName>("function_imag",
-                                             "The analytic imaginary part of the solution to compare against.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "function_real", "The analytic real part of the solution to compare against.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "function_imag", "The analytic imaginary part of the solution to compare against.");
   params.addParam<VariableName>("variable",
                                 "Name of the variable of which to find the norm of the error.");
   return params;
@@ -34,7 +34,8 @@ MFEMComplexL2Error::MFEMComplexL2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _coeff_real(getScalarCoefficient("function_real")),
     _coeff_imag(getScalarCoefficient("function_imag")),
-    _var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(getParam<VariableName>("variable")))
+    _var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
+        getParam<VariableName>("variable")))
 {
 }
 

@@ -17,8 +17,8 @@ InputParameters
 MFEMMixedSesquilinearFormKernel::validParams()
 {
   InputParameters params = MFEMComplexKernel::validParams();
-  params.addClassDescription(
-      "Base class for mixed sesquilinear form kernels, allowing different trial and test variables.");
+  params.addClassDescription("Base class for mixed sesquilinear form kernels, allowing different "
+                             "trial and test variables.");
   params.addParam<VariableName>(
       "trial_variable",
       "The trial variable this kernel is acting on and which will be solved for. If empty "
