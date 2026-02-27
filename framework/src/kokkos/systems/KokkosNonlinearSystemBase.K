@@ -53,8 +53,8 @@ NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 
   // Active BoundaryIDs for the object
   const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
-  auto bc_var = dynamic_cast<const MooseVariableFieldBase *>(&bc->variable());
-  _vars[0].addBoundaryVar(boundary_ids, bc_var);
+  for (const auto var : bc->variables())
+    _vars[0].addBoundaryVar(boundary_ids, dynamic_cast<const MooseVariableFieldBase *>(var));
 
   // Cast to the various types of BCs
   std::shared_ptr<Moose::Kokkos::NodalBCBase> nbc =
@@ -65,12 +65,13 @@ NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
   // NodalBCBase
   if (nbc)
   {
-    if (!nbc->variable().isNodal())
-      mooseError("Trying to use nodal boundary condition '",
-                 nbc->name(),
-                 "' on a non-nodal variable '",
-                 nbc->variable().name(),
-                 "'.");
+    for (const auto var : nbc->variables())
+      if (!var->isNodal())
+        mooseError("Trying to use nodal boundary condition '",
+                   nbc->name(),
+                   "' on a non-nodal variable '",
+                   var->name(),
+                   "'.");
 
     _kokkos_nodal_bcs.addObject(nbc);
     _vars[0].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
