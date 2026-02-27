@@ -50,6 +50,10 @@ BlockDeletionGenerator::BlockDeletionGenerator(const InputParameters & parameter
 std::unique_ptr<MeshBase>
 BlockDeletionGenerator::generate()
 {
+  // We're querying subdomain id caches from our input mesh
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
+
   if (isParamValid("block"))
     // Get the list of block ids from the block names
     _block_ids =
