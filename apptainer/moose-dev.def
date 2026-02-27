@@ -241,9 +241,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
         export TORCH_CUDA_ARCH_LIST="7.0;8.0;8.6;8.9"
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
+        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
     else
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
+        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=OFF")
     fi
     # Build and install pytorch
     mkdir -p $LIBTORCH_DIR/logs
