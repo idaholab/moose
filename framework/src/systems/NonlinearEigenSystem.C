@@ -170,11 +170,14 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
   {
     // Note: the object may be on the displaced system
     auto sys = object.parameters().get<SystemBase *>("_sys");
-    auto vname = object.variable().name();
-    if (hasScalarVariable(vname))
-      sys->getScalarVariable(0, vname).eigen(true);
-    else
-      sys->getVariable(0, vname).eigen(true);
+    for (const auto var : object.variables())
+    {
+      const auto & vname = var->name();
+      if (hasScalarVariable(vname))
+        sys->getScalarVariable(0, vname).eigen(true);
+      else
+        sys->getVariable(0, vname).eigen(true);
+    }
 
     // Associate the eigen matrix tag and the vector tag
     // if this is a eigen kernel

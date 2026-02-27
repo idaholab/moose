@@ -66,7 +66,7 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
 
       for (unsigned int i = ib; i < ie; ++i)
         accumulateTaggedElementalMatrix(
-            local_ke[i - ib], datum.elem().id, i, _lumping ? i : j, datum.jvar());
+            local_ke[i - ib], datum.elem().id, i, _lumping ? i : j, datum.jvar(), datum.comp());
     }
   }
 }
@@ -84,5 +84,5 @@ KokkosTimeDerivative::precomputeQpJacobian(const unsigned int j,
                                            const unsigned int qp,
                                            AssemblyDatum & datum) const
 {
-  return _phi(datum, j, qp) * _du_dot_du;
+  return _phi(datum, j, qp) * _du_dot_du[datum.comp()];
 }

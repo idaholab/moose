@@ -142,56 +142,66 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto comp = _thread(tid, 0);
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
+                                   : kokkosBlockNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   Real local_re = kernel.template computeQpResidual<Derived>(0, datum);
 
   accumulateTaggedNodalResidual(
-      true, local_re * sys.getVariableScalingFactor(_kokkos_var.var()), node);
+      true, local_re * sys.getVariableScalingFactor(_kokkos_var.var(comp)), node, comp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto comp = _thread(tid, 0);
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
+                                   : kokkosBlockNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   Real local_ke = kernel.template computeQpJacobian<Derived>(0, datum);
 
-  accumulateTaggedNodalMatrix(
-      true, local_ke * sys.getVariableScalingFactor(_kokkos_var.var()), node, _kokkos_var.var());
+  accumulateTaggedNodalMatrix(true,
+                              local_ke * sys.getVariableScalingFactor(_kokkos_var.var(comp)),
+                              node,
+                              _kokkos_var.var(comp),
+                              comp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
-                                   : kokkosBlockNodeID(_thread(tid, 1));
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getFieldCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto comp = _thread(tid, 0);
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 2))
+                                   : kokkosBlockNodeID(_thread(tid, 2));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto jvar = sys.getFieldCoupling(_kokkos_var.var(comp))[_thread(tid, 1)];
 
-  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+  if (!sys.isNodalDefined(node, _kokkos_var.var(comp)))
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, comp);
 
   Real local_ke = kernel.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
   accumulateTaggedNodalMatrix(
-      true, local_ke * sys.getVariableScalingFactor(_kokkos_var.var()), node, jvar);
+      true, local_ke * sys.getVariableScalingFactor(_kokkos_var.var(comp)), node, jvar, comp);
 }
 
 } // namespace Moose::Kokkos

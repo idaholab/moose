@@ -1780,6 +1780,28 @@ InputParameters::varName(const std::string & var_param_name,
   return variable_name;
 }
 
+std::string
+InputParameters::varParamName() const
+{
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Only Kokkos objects can operate on multiple variables through 'variables'
+  if (isKokkosObject())
+  {
+    const bool has_variable = isParamValid("variable");
+    const bool has_variables = isParamValid("variables");
+
+    if (has_variable && has_variables)
+      mooseError("Cannot specify both 'variable' and 'variables' at the same time.");
+    else if (!has_variable && !has_variables)
+      mooseError("Either 'variable' or 'variables' should be specified.");
+
+    return has_variable ? "variable" : "variables";
+  }
+#endif
+
+  return "variable";
+}
+
 void
 InputParameters::renameParamInternal(const std::string & old_name,
                                      const std::string & new_name,

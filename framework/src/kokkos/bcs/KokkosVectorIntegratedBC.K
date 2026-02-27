@@ -25,10 +25,13 @@ VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
     _grad_test(),
     _phi(),
     _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+    _u(*_vars[0]),
+    _grad_u(*_vars[0])
 {
-  addMooseVariableDependency(&_var);
+  if (_vars.size() > 1)
+    paramError("variables", "Multiple variables are not supported by Kokkos VectorIntegratedBC.");
+
+  addMooseVariableDependency(_vars);
 }
 
 void
