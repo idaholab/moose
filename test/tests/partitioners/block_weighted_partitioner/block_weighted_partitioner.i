@@ -43,30 +43,37 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Postprocessors]
+  [sum_sides]
+    type = StatVector
+    stat = sum
+    object = nl_wb_element
+    vector = num_partition_sides
+  []
+  [min_elems]
+    type = StatVector
+    stat = min
+    object = nl_wb_element
+    vector = num_elems
+  []
+  [max_elems]
+    type = StatVector
+    stat = max
+    object = nl_wb_element
+    vector = num_elems
+  []
+[]
+
+[VectorPostprocessors]
+  [nl_wb_element]
+    type = WorkBalance
+    execute_on = initial
+    system = nl
+    balances = 'num_elems num_partition_sides'
+    outputs = none
+  []
+[]
+
 [Outputs]
-  exodus = true
-[]
-
-[AuxVariables]
-  [pid]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [npid]
-    family = Lagrange
-    order = first
-  []
-[]
-
-[AuxKernels]
-  [pid_aux]
-    type = ProcessorIDAux
-    variable = pid
-    execute_on = 'INITIAL'
-  []
-  [npid_aux]
-    type = ProcessorIDAux
-    variable = npid
-    execute_on = 'INITIAL'
-  []
+  csv = true
 []
