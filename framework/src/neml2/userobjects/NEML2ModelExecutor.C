@@ -194,13 +194,6 @@ NEML2ModelExecutor::initialSetup()
   }
 }
 
-void
-NEML2ModelExecutor::timestepSetup()
-{
-  if (_keep_tensors_on_device)
-    return;
-}
-
 std::size_t
 NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 {

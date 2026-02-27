@@ -41,7 +41,6 @@ public:
   void finalize() override;
 
   void initialSetup() override;
-  void timestepSetup() override;
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
