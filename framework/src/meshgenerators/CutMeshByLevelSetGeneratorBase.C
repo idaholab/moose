@@ -346,15 +346,18 @@ const Node *
 CutMeshByLevelSetGeneratorBase::nonDuplicateNodeCreator(
     ReplicatedMesh & mesh,
     std::vector<const Node *> & new_on_plane_nodes,
-    const Point & new_point) const
+    const Point & new_point,
+    processor_id_type new_pid) const
 {
   for (const auto & new_on_plane_node : new_on_plane_nodes)
   {
     if (MooseUtils::absoluteFuzzyEqual((*new_on_plane_node - new_point).norm(), 0.0))
       return new_on_plane_node;
   }
-  new_on_plane_nodes.push_back(mesh.add_point(new_point));
-  return new_on_plane_nodes.back();
+  Node * node = mesh.add_point(new_point);
+  node->processor_id() = new_pid;
+  new_on_plane_nodes.push_back(node);
+  return node;
 }
 
 void
@@ -437,7 +440,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(tet4_nodes_inside_plane[0]));
@@ -461,7 +465,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
           new_plane_nodes.push_back(nonDuplicateNodeCreator(
               mesh,
               new_on_plane_nodes,
-              pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_node_inside_plane)));
+              pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_node_inside_plane),
+              mesh.elem_ptr(elem_id)->processor_id()));
         }
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[1],
@@ -498,7 +503,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
                                                    tet4_nodes_inside_plane[1],
@@ -530,7 +536,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       auto new_plane_node = nonDuplicateNodeCreator(
           mesh,
           new_on_plane_nodes,
-          pointPairLevelSetInterception(*tet4_nodes_inside_plane[0], *tet4_nodes_outside_plane[0]));
+          pointPairLevelSetInterception(*tet4_nodes_inside_plane[0], *tet4_nodes_outside_plane[0]),
+          mesh.elem_ptr(elem_id)->processor_id());
       // A smaller Tet4 is created, this solution is unique
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_node));
@@ -552,7 +559,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_outside_plane, *tet4_nodes_inside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       auto new_elem_tet4 = std::make_unique<Tet4>();
       new_elem_tet4->set_node(0, const_cast<Node *>(new_plane_nodes[0]));
@@ -574,7 +582,8 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_plane_nodes.push_back(nonDuplicateNodeCreator(
             mesh,
             new_on_plane_nodes,
-            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0])));
+            pointPairLevelSetInterception(*tet4_node_inside_plane, *tet4_nodes_outside_plane[0]),
+            mesh.elem_ptr(elem_id)->processor_id()));
       }
       std::vector<const Node *> new_elems_nodes = {tet4_nodes_inside_plane[0],
                                                    tet4_nodes_inside_plane[1],
