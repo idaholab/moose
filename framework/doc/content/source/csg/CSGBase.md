@@ -332,7 +332,7 @@ These transformations do not alter other information about the object because it
 |---------------------|----------------------------------------------|--------------------|
 | `TRANSLATION`       | $\{$ x-distance, y-distance, z-distance $\}$ | none               |
 | `ROTATION`          | $\{ \phi, \theta, \psi \}$                   | none               |
-| `SCALE`             | $\{$ x-scale, y-scale, z-scale $\}$          | $> 0$              |
+| `SCALE`             | $\{$ x-scale, y-scale, z-scale $\}$          | non-zero           |
 
 !alert! note title=Rotation Angles
 
