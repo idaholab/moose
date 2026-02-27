@@ -13,8 +13,7 @@
 
 #include "MFEMNodalProjector.h"
 #include "MFEMMultiAppTransfer.h"
-
-class MooseMesh;
+#include "MFEMProblem.h"
 
 //*
 // Transfer MFEMVariables between multiapps.

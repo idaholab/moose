@@ -9,19 +9,10 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
-#include <vector>
-
-#include "libmesh/utility.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
+#include "MFEMVectorUtils.h"
 
 namespace Moose::MFEM
 {
-/**
- * Utilities for converting between vector(s) of libMesh Points and MFEM Vector(s).
- */
 size_t
 MFEMIndex(const size_t i_dim,
           const size_t i_point,
@@ -39,9 +30,6 @@ MFEMIndex(const size_t i_dim,
   }
 }
 
-/**
- * Convert an MFEM position vector to a libMesh::Point.
- */
 libMesh::Point
 libMeshPointFromMFEMVector(const mfem::Vector & vec)
 {
@@ -49,14 +37,10 @@ libMeshPointFromMFEMVector(const mfem::Vector & vec)
       vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
 }
 
-/**
- * Convert a vector of libMesh::Point objects to an mfem::Vector containing all points, given an
- * ordering.
- */
 mfem::Vector
-pointsToMFEMVector(const std::vector<Point> & points,
-                   const unsigned int num_dims,
-                   const mfem::Ordering::Type ordering)
+libMeshPointsToMFEMVector(const std::vector<libMesh::Point> & points,
+                          const unsigned int num_dims,
+                          const mfem::Ordering::Type ordering)
 {
   const unsigned int num_points = points.size();
   mfem::Vector mfem_points(num_points * num_dims);
@@ -72,7 +56,6 @@ pointsToMFEMVector(const std::vector<Point> & points,
 
   return mfem_points;
 }
-
 }
 
 #endif

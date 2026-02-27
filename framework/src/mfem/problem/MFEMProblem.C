@@ -19,7 +19,7 @@
 #include "MFEMExecutedObject.h"
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
-#include "MFEMVectorFromlibMeshPoint.h"
+#include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
