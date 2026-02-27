@@ -318,13 +318,13 @@ PetscExternalPartitioner::partitionGraph(const Parallel::Communicator & comm,
 }
 
 dof_id_type
-PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/)
+PetscExternalPartitioner::computeElementWeight(Elem & /*elem*/) const
 {
   return 1;
 }
 
 dof_id_type
-PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, unsigned int /*side*/)
+PetscExternalPartitioner::computeSideWeight(Elem & /*elem*/, unsigned int /*side*/) const
 {
   return 1;
 }
