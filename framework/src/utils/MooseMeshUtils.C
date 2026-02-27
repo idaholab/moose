@@ -501,7 +501,8 @@ SubdomainID
 getNextFreeSubdomainID(MeshBase & input_mesh)
 {
   // Call this to get most up to date block id information
-  input_mesh.cache_elem_data();
+  if (!input_mesh.preparation().has_cached_elem_data)
+    input_mesh.cache_elem_data();
 
   std::set<SubdomainID> preexisting_subdomain_ids;
   input_mesh.subdomain_ids(preexisting_subdomain_ids);
