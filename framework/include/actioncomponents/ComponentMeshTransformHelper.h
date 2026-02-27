@@ -25,6 +25,11 @@ public:
 
   ComponentMeshTransformHelper(const InputParameters & params);
 
+  /// getter functions
+  RealVectorValue direction() const { return *_direction; }
+  RealVectorValue rotation() const { return *_rotation; }
+  Point translation() const { return _translation; }
+
 protected:
   virtual void addMeshGenerators() override;
 
