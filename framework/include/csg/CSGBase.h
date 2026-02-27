@@ -16,7 +16,6 @@
 #include "CSGLatticeList.h"
 #include "CSGTransformation.h"
 #include "nlohmann/json.h"
-#include <variant>
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"

@@ -9,7 +9,6 @@
 
 #include "CSGSurface.h"
 #include "CSGUtils.h"
-#include "MooseError.h"
 
 namespace CSG
 {
