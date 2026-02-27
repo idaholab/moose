@@ -95,14 +95,6 @@ public:
   const std::string & getName() const { return _name; }
 
   /**
-   * @brief apply a transformation to a surface
-   *
-   * @param type type of transformation to apply
-   * @param values values for the transformation (3 values for any transformation type)
-   */
-  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
-
-  /**
    * @brief Get the list of transformations applied to this surface
    *
    * @return const reference to the list of transformations
@@ -131,6 +123,14 @@ protected:
   // name needs to be managed at the CSGSurfaceList level
   void setName(const std::string & name) { _name = name; }
 
+  /**
+   * @brief apply a transformation to a surface
+   *
+   * @param type type of transformation to apply
+   * @param values values for the transformation (3 values for any transformation type)
+   */
+  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+
   /// Name of surface
   std::string _name;
 
@@ -143,6 +143,7 @@ protected:
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;
+  friend class CSGBase; // needed for applyTransformation() access
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
