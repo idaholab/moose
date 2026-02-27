@@ -444,7 +444,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[0]));
       new_elem_tet4->set_node(2, const_cast<Node *>(new_plane_nodes[1]));
       new_elem_tet4->set_node(3, const_cast<Node *>(new_plane_nodes[2]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+      // Copy subdomain id, processor_id, mapping, etc.
+      new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 2)
@@ -479,7 +482,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+        // Copy subdomain id, processor_id, mapping, etc.
+        new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
@@ -512,7 +518,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+        // Copy subdomain id, processor_id, mapping, etc.
+        new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
@@ -528,7 +537,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       new_elem_tet4->set_node(1, const_cast<Node *>(tet4_nodes_on_plane[0]));
       new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[1]));
       new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+      // Copy subdomain id, processor_id, mapping, etc.
+      new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 1 && tet4_nodes_outside_plane.size() == 2)
@@ -547,7 +559,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
       new_elem_tet4->set_node(1, const_cast<Node *>(new_plane_nodes[1]));
       new_elem_tet4->set_node(2, const_cast<Node *>(tet4_nodes_on_plane[0]));
       new_elem_tet4->set_node(3, const_cast<Node *>(tet4_nodes_inside_plane[0]));
-      new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+      // Copy subdomain id, processor_id, mapping, etc.
+      new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
       elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
     }
     else if (tet4_nodes_inside_plane.size() == 2 && tet4_nodes_outside_plane.size() == 1)
@@ -578,7 +593,10 @@ CutMeshByLevelSetGeneratorBase::tet4ElemCutter(
         new_elem_tet4->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
         new_elem_tet4->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
         new_elem_tet4->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-        new_elem_tet4->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+        // Copy subdomain id, processor_id, mapping, etc.
+        new_elem_tet4->inherit_data_from(mesh.elem_ptr(elem_id));
+
         elems_tet4.push_back(mesh.add_elem(std::move(new_elem_tet4)));
       }
     }
