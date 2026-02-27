@@ -308,29 +308,20 @@ NEML2ModelExecutor::fillInputs()
     // Initialize missing inputs that are allowed to be absent
     if (_keep_tensors_on_device || !_skip_vars.empty())
     {
-      std::vector<neml2::Tensor> defined;
-      for (const auto & [key, value] : _in)
-        if (value.defined())
-          defined.push_back(value);
-
-      neml2::TraceableTensorShape dynamic_shape =
-          defined.empty()
-              ? neml2::TraceableTensorShape(neml2::Size(_batch_index_generator.getBatchIndex()))
-              : neml2::utils::broadcast_dynamic_sizes(defined);
-
       const auto options = neml2::default_tensor_options().dtype(neml2::kFloat64).device(device());
+      const auto shape = neml2::TensorShape{neml2::Size(_batch_index_generator.getBatchIndex())};
 
-      for (const auto & var : model().input_axis().variable_names())
+      for (const auto & [vname, var] : model().input_variables())
       {
-        const auto it = _in.find(var);
+        const auto it = _in.find(vname);
         if (it != _in.end() && it->second.defined())
           continue;
 
-        if (!_skip_vars.count(var) && !var.is_state() &&
-            !(_keep_tensors_on_device && (var.is_old_state() || var.is_old_force())))
+        if (!_skip_vars.count(vname) && !vname.is_state() &&
+            !(_keep_tensors_on_device && (vname.is_old_state() || vname.is_old_force())))
           continue;
 
-        model().input_variable(var).zeros(options);
+        _in[vname] = var->zeros(options).dynamic_expand({shape});
       }
     }
 
