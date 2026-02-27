@@ -173,7 +173,7 @@ CutMeshByLevelSetGeneratorBase::generate()
   std::vector<std::vector<unsigned int>> transition_elems_sides_list;
   if (_generate_transition_layer)
   {
-    if (!mesh.is_prepared())
+    if (!mesh.preparation().has_neighbor_ptrs)
       mesh.find_neighbors();
     // First, we need to identify the retained elements that share the boundary with the crossed
     // elements.
