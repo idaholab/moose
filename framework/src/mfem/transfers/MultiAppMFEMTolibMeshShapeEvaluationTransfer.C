@@ -10,13 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MultiAppMFEMTolibMeshShapeEvaluationTransfer.h"
-#include "FEProblemBase.h"
-#include "MultiApp.h"
-#include "SystemBase.h"
-#include "MFEMProblem.h"
-#include "MFEMMesh.h"
-#include "MFEMVectorFromlibMeshPoint.h"
-
+#include "MFEMVectorUtils.h"
 #include "libmesh/mesh_function.h"
 
 registerMooseObject("MooseApp", MultiAppMFEMTolibMeshShapeEvaluationTransfer);
@@ -114,7 +108,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::setlibMeshSolutionValuesFromMFEM(
 
     // Perform interpolation
     const mfem::Ordering::Type ordering = mfem::Ordering::byVDIM;
-    mfem::Vector outgoing_mfem_points = Moose::MFEM::pointsToMFEMVector(
+    mfem::Vector outgoing_mfem_points = Moose::MFEM::libMeshPointsToMFEMVector(
         outgoing_libmesh_points, to_mesh.mesh_dimension(), ordering);
     _mfem_interpolator.FindPoints(outgoing_mfem_points, ordering);
     mfem::Vector interp_vals;

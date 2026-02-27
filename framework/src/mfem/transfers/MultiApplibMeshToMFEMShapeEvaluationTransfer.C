@@ -10,13 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MultiApplibMeshToMFEMShapeEvaluationTransfer.h"
-#include "FEProblemBase.h"
-#include "MultiApp.h"
-#include "SystemBase.h"
-#include "MFEMProblem.h"
-#include "MFEMMesh.h"
-#include "MFEMVectorFromlibMeshPoint.h"
-
+#include "MFEMVectorUtils.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 

@@ -12,8 +12,7 @@
 #pragma once
 
 #include "MFEMMultiAppTransfer.h"
-
-class MooseMesh;
+#include "MFEMProblem.h"
 
 //*
 // Copy MFEMVariables between multiapps

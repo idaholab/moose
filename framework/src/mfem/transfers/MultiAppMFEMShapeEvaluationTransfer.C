@@ -10,11 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MultiAppMFEMShapeEvaluationTransfer.h"
-#include "FEProblemBase.h"
-#include "MultiApp.h"
-#include "SystemBase.h"
-#include "MFEMProblem.h"
-#include "MFEMMesh.h"
 
 registerMooseObject("MooseApp", MultiAppMFEMShapeEvaluationTransfer);
 
