@@ -37,18 +37,18 @@ public:
         const Array<System> & systems)
     : _assembly(assembly),
       _systems(systems),
-      _elem(assembly.kokkosMesh().getElementInfo(elem)),
+      _mesh(assembly.kokkosMesh()),
+      _elem(_mesh.getElementInfo(elem)),
       _side(side),
       _neighbor(_side == libMesh::invalid_uint ? libMesh::DofObject::invalid_id
-                                               : assembly.kokkosMesh().getNeighbor(_elem.id, side)),
+                                               : _mesh.getNeighbor(_elem.id, side)),
       _n_qps(side == libMesh::invalid_uint ? assembly.getNumQps(_elem)
                                            : assembly.getNumFaceQps(_elem, side)),
       _qp_offset(side == libMesh::invalid_uint ? assembly.getQpOffset(_elem)
                                                : assembly.getQpFaceOffset(_elem, side)),
-      _elem_property_idx(
-          _side == libMesh::invalid_uint
-              ? _elem.id - assembly.kokkosMesh().getStartingContiguousElementID(_elem.subdomain)
-              : assembly.getElemFacePropertyIndex(_elem, _side))
+      _elem_property_idx(_side == libMesh::invalid_uint
+                             ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
+                             : assembly.getElemFacePropertyIndex(_elem, _side))
   {
   }
   /**
@@ -59,7 +59,7 @@ public:
    */
   KOKKOS_FUNCTION
   Datum(const ContiguousNodeID node, const Assembly & assembly, const Array<System> & systems)
-    : _assembly(assembly), _systems(systems), _node(node)
+    : _assembly(assembly), _systems(systems), _mesh(assembly.kokkosMesh()), _node(node)
   {
   }
 
@@ -74,12 +74,31 @@ public:
    * @returns The Kokkos system
    */
   KOKKOS_FUNCTION const System & system(unsigned int sys) const { return _systems[sys]; }
+  /**
+   * Get the Kokkos mesh
+   * @returns The Kokkos mesh
+   */
+  KOKKOS_FUNCTION const Mesh & mesh() const { return _mesh; }
 
   /**
    * Get the element information object
    * @returns The element information object
    */
   KOKKOS_FUNCTION const ElementInfo & elem() const { return _elem; }
+  /**
+   * Get the contiguous element ID
+   * @returns The contiguous element ID
+   */
+  KOKKOS_FUNCTION ContiguousElementID elemID() const { return _elem.id; }
+  /**
+   * Get the extra element ID
+   * @param index The extra element ID index
+   * @returns The extra element ID
+   */
+  KOKKOS_FUNCTION dof_id_type extraElemID(unsigned int index) const
+  {
+    return isNodal() ? libMesh::DofObject::invalid_id : _mesh.getExtraElementID(_elem.id, index);
+  }
   /**
    * Get the contiguous subdomain ID
    * @returns The contiguous subdomain ID
@@ -166,6 +185,10 @@ protected:
    * Reference of the Kokkos systems
    */
   const Array<System> & _systems;
+  /**
+   * Reference of the Kokkos mesh
+   */
+  const Mesh & _mesh;
   /**
    * Current element information object
    */

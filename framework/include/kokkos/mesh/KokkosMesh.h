@@ -213,6 +213,18 @@ public:
     return _num_side_nodes[elem_type][side];
   }
   /**
+   * Get the extra element ID of an element
+   * @param elem The contiguous element ID
+   * @param index The extra element ID index
+   * @returns The extra element ID
+   */
+  KOKKOS_FUNCTION dof_id_type getExtraElementID(ContiguousElementID elem, unsigned int index) const
+  {
+    KOKKOS_ASSERT(index < _extra_elem_ids.n(1));
+
+    return _extra_elem_ids(elem, index);
+  }
+  /**
    * Get the starting contiguous element ID of a subdomain
    * @param subdomain The contiguous subdomain ID
    * @returns The starting contiguous element ID
@@ -333,6 +345,10 @@ private:
    * Starting contiguous element ID of each subdomain
    */
   Array<ContiguousElementID> _starting_elem_id;
+  /**
+   * Extra element IDs
+   */
+  Array2D<dof_id_type> _extra_elem_ids;
   /**
    * Number of sides of each element type
    */

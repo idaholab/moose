@@ -37,7 +37,7 @@ System::System(SystemBase & system)
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
   {
     setupSparsity();
-    checkNodalBCs();
+    setupNodalBCDofs();
   }
 
   _qp_solutions.create(MAX_TAG);
@@ -261,39 +261,22 @@ System::setupSparsity()
 }
 
 void
-System::checkNodalBCs()
+System::setupNodalBCDofs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
 
-  _nbc_residual_tag_dof.create(MAX_TAG);
   _nbc_matrix_tag_dof.create(MAX_TAG);
 
   for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
     auto nbc = static_cast<NodalBCBase *>(bc.get());
 
-    std::set<TagID> extra_vector_tags;
-    std::set<TagID> extra_matrix_tags;
+    auto matrix_tags = nbc->getMatrixTags({});
 
-    if (nbc->isParamValid("extra_vector_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_vector_tags"))
-        extra_vector_tags.insert(_system.feProblem().getVectorTagID(tag));
-
-    if (nbc->isParamValid("extra_matrix_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_matrix_tags"))
-        extra_matrix_tags.insert(_system.feProblem().getMatrixTagID(tag));
-
-    getNodalBCDofs(nbc, _nbc_dof);
-
-    for (auto tag : extra_vector_tags)
-      getNodalBCDofs(nbc, _nbc_residual_tag_dof[tag]);
-
-    for (auto tag : extra_matrix_tags)
+    for (auto tag : matrix_tags)
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
   }
 
-  _nbc_dof.copyToDevice();
-  _nbc_residual_tag_dof.copyToDeviceNested();
   _nbc_matrix_tag_dof.copyToDeviceNested();
 }
 
@@ -348,7 +331,7 @@ System::sync(const MemcpyType dir)
       auto & vector = _system.getVector(tag);
 
       _vectors[tag].create(vector, *this, true);
-      _vectors[tag] = 0;
+      _vectors[tag].copyToDevice();
     }
 
     for (auto tag : _active_matrix_tags)

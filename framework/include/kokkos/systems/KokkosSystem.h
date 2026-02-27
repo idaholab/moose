@@ -166,25 +166,6 @@ public:
    */
   KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
   /**
-   * Check whether a local DOF index is covered by a nodal BC
-   * @param dof The local DOF index
-   * @returns Whether the local DOF index is covered by a nodal BC
-   */
-  KOKKOS_FUNCTION bool hasNodalBC(dof_id_type dof) const
-  {
-    return _nbc_dof.isAlloc() && _nbc_dof[dof];
-  }
-  /**
-   * Check whether a local DOF index is covered by a nodal BC for an extra residual tag
-   * @param dof The local DOF index
-   * @param tag The extra residual tag
-   * @returns Whether the local DOF index is covered by a nodal BC
-   */
-  KOKKOS_FUNCTION bool hasNodalBCResidualTag(dof_id_type dof, TagID tag) const
-  {
-    return _nbc_residual_tag_dof[tag].isAlloc() && _nbc_residual_tag_dof[tag][dof];
-  }
-  /**
    * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
    * @param dof The local DOF index
    * @param tag The extra matrix tag
@@ -408,9 +389,9 @@ private:
    */
   void setupSparsity();
   /**
-   * Check if the DOFs are covered by nodal BCs
+   * Mark the DOFs covered by nodal BCs
    */
-  void checkNodalBCs();
+  void setupNodalBCDofs();
   /**
    * Get the list of DOFs covered by a nodal BC
    * @param nbc The Kokkos nodal BC object
@@ -513,16 +494,9 @@ private:
   Array<bool> _matrix_tag_active;
   ///@}
   /**
-   * Flag whether each DOF is covered by a nodal BC
+   * Flag whether each DOF is covered by a nodal BC for each matrix tag
    */
-  Array<bool> _nbc_dof;
-  /**
-   * Flag whether each DOF is covered by a nodal BC for extra residual tags
-   */
-  ///@{
-  Array<Array<bool>> _nbc_residual_tag_dof;
   Array<Array<bool>> _nbc_matrix_tag_dof;
-  ///@}
   /**
    * List of DOFs to send and receive
    */

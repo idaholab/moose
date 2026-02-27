@@ -115,19 +115,26 @@ Mesh::initElement()
 
   _elem_info.create(num_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
-  _elem_neighbor = libMesh::DofObject::invalid_id;
+  _extra_elem_ids.create(num_elems, _mesh.getMesh().n_elem_integers());
 
-  for (auto & [elem, eid] : getContiguousElementMap())
+  _elem_neighbor = libMesh::DofObject::invalid_id;
+  _extra_elem_ids = libMesh::DofObject::invalid_id;
+
+  for (const auto & [elem, eid] : getContiguousElementMap())
   {
     auto elem_type = getElementTypeID(elem);
 
     _elem_info[eid].type = elem_type;
     _elem_info[eid].id = eid;
     _elem_info[eid].subdomain = getContiguousSubdomainID(elem->subdomain_id());
+
+    for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
+      _extra_elem_ids(eid, i) = elem->get_extra_integer(i);
   }
 
   _elem_info.copyToDevice();
   _elem_neighbor.copyToDevice();
+  _extra_elem_ids.copyToDevice();
 
   _starting_elem_id.create(num_subdomains);
 

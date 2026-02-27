@@ -2112,6 +2112,11 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual, const std
 void
 NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosNodalBCs(tags);
+#endif
+
   // We need to close the diag_save_in variables on the aux system before NodalBCBases clear the
   // dofs on boundary nodes
   if (_has_save_in)

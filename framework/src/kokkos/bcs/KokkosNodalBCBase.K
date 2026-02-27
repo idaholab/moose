@@ -17,6 +17,9 @@ NodalBCBase::validParams()
 {
   auto params = BoundaryCondition::validParams();
 
+  params.set<MultiMooseEnum>("vector_tags") = "residual";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
+
   return params;
 }
 
