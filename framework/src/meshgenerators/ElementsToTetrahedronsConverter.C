@@ -48,6 +48,10 @@ ElementsToTetrahedronsConverter::ElementsToTetrahedronsConverter(const InputPara
 std::unique_ptr<MeshBase>
 ElementsToTetrahedronsConverter::generate()
 {
+  // We're querying elem dim caches from our input mesh
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
+
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)
     paramError("input", "Input is not a replicated mesh, which is required");
