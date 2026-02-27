@@ -11,12 +11,7 @@
 
 #pragma once
 
-#include <vector>
-
 #include "MultiAppTransfer.h"
-#include "MultiApp.h"
-#include "MooseAppCoordTransform.h"
-#include "MFEMProblem.h"
 
 /**
  * Virtual base class for MultiApp transfers to and/or from MFEMProblems.

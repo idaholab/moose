@@ -11,7 +11,7 @@
 
 #include "MFEMValueSamplerBase.h"
 #include "MFEMProblem.h"
-#include "MFEMVectorFromlibMeshPoint.h"
+#include "MFEMVectorUtils.h"
 
 #include "mfem/fem/fespace.hpp"
 
