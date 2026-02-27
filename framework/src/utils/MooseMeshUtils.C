@@ -501,6 +501,9 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
 BoundaryID
 getNextFreeBoundaryID(MeshBase & input_mesh)
 {
+  if (!input_mesh.preparation().has_boundary_id_sets)
+    input_mesh.get_boundary_info().regenerate_id_sets();
+
   auto boundary_ids = input_mesh.get_boundary_info().get_boundary_ids();
   if (boundary_ids.empty())
     return 0;
