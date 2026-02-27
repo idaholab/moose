@@ -352,7 +352,7 @@ Below are several examples of applying transformations:
 
 !listing CSGBaseTest.C start=euler rotation end=euler_angles include-end=true
 
-!listing CSGBaseTest.C start=applyRotation(surf end=applyRotation(surf include-end=true
+!listing CSGBaseTest.C start=applyRotation(*surf end=applyRotation(*surf include-end=true
 
 *Rotation of a cell around the z-axis:*
 
@@ -362,13 +362,13 @@ Below are several examples of applying transformations:
 
 !listing CSGBaseTest.C start=apply multidirectional end=dists2
 
-!listing CSGBaseTest.C start=>applyTranslation(univ end=>applyTranslation(univ include-end=true
+!listing CSGBaseTest.C start=>applyTranslation(*univ end=>applyTranslation(*univ include-end=true
 
 *Scaling of a cell in the x and z directions:*
 
 !listing CSGBaseTest.C start=scaling vector end=scales include-end=true
 
-!listing CSGBaseTest.C start=>applyScaling(cell end=>applyScaling(cell include-end=true
+!listing CSGBaseTest.C start=>applyScaling(*cell end=>applyScaling(*cell include-end=true
 
 Any transformation that is applied to an object must be done through the methods available from `CSGBase`, but information about the transformations applied can be retrieved directly from each object with `getTransformations()`.
 
