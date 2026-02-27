@@ -15,7 +15,7 @@
 #include "MFEMComplexVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
-#include "MFEMVectorFromlibMeshPoint.h"
+#include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>

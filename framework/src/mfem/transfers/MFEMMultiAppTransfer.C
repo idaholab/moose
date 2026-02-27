@@ -10,11 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMultiAppTransfer.h"
-#include "FEProblemBase.h"
-#include "MultiApp.h"
-#include "SystemBase.h"
 #include "MFEMProblem.h"
-#include "MFEMMesh.h"
 
 InputParameters
 MFEMMultiAppTransfer::validParams()

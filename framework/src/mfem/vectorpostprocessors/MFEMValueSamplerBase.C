@@ -11,7 +11,7 @@
 
 #include "MFEMValueSamplerBase.h"
 #include "MFEMProblem.h"
-#include "MFEMVectorFromlibMeshPoint.h"
+#include "MFEMVectorUtils.h"
 
 #include "mfem/fem/fespace.hpp"
 
@@ -57,7 +57,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _finder(this->comm().get()),
     _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
                                                                       : mfem::Ordering::byVDIM),
-    _points(Moose::MFEM::pointsToMFEMVector(
+    _points(Moose::MFEM::libMeshPointsToMFEMVector(
         points, this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension(), _points_ordering)),
     _interp_vals(points.size()),
     _var_name(getParam<VariableName>("variable")),
