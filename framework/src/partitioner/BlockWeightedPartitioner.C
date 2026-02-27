@@ -67,13 +67,14 @@ BlockWeightedPartitioner::initialize(MeshBase & mesh)
 
   // Setup the block -> weight map for use in computeElementWeight
   _blocks_to_weights.reserve(_weights.size());
-  for (MooseIndex(block_ids.size()) i = 0; i < block_ids.size(); i++)
+  for (const auto i : index_range(block_ids))
     _blocks_to_weights[block_ids[i]] = _weights[i];
 }
 
 dof_id_type
-BlockWeightedPartitioner::computeElementWeight(Elem & elem)
+BlockWeightedPartitioner::computeElementWeight(Elem & elem) const
 {
-  mooseAssert(_blocks_to_weights.count(elem.subdomain_id()), "Missing weight for block");
-  return _blocks_to_weights[elem.subdomain_id()];
+  auto it = _blocks_to_weights.find(elem.subdomain_id());
+  mooseAssert(it != _blocks_to_weights.end(), "Missing weight for block");
+  return it->second;
 }
