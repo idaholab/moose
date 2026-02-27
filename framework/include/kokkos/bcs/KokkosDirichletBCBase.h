@@ -84,10 +84,12 @@ template <typename Derived>
 void
 DirichletBCBase<Derived>::presetSolution(TagID tag)
 {
+  _thread.resize({variables().size(), numKokkosBoundaryNodes()});
+
   _solution_tag = tag;
 
   ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>>(0, numKokkosBoundaryNodes()),
+      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>>(0, _thread.size()),
       *static_cast<Derived *>(this));
 }
 
@@ -96,14 +98,17 @@ KOKKOS_FUNCTION void
 DirichletBCBase<Derived>::operator()(const ThreadID tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto node = kokkosBoundaryNodeID(tid);
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
+
+  auto comp = _thread(tid, 0);
+  auto node = kokkosBoundaryNodeID(_thread(tid, 1));
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
 
   if (dof == libMesh::DofObject::invalid_id)
     return;
 
-  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(
+      node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(0, datum);
 }

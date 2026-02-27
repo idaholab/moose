@@ -27,6 +27,11 @@ public:
    */
   TimeNodalKernel(const InputParameters & parameters);
 
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  TimeNodalKernel(const TimeNodalKernel & object);
+
 protected:
   /**
    * Time derivative of the current solution at nodes
@@ -35,7 +40,7 @@ protected:
   /**
    * Derivative of u_dot with respect to u
    */
-  const Scalar<const Real> _du_dot_du;
+  Array<Real> _du_dot_du;
 };
 
 } // namespace Moose::Kokkos

@@ -29,8 +29,9 @@ KokkosCoupledForceNodalKernel::KokkosCoupledForceNodalKernel(const InputParamete
     _v(kokkosCoupledNodalValue("v")),
     _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == _v_var)
-    mooseError(
-        "Coupled variable 'v' needs to be different from 'variable' with CoupledForceNodalKernel, "
-        "consider using Reaction or somethig similar");
+  for (const auto var : variables())
+    if (var->number() == _v_var)
+      mooseError(
+          "Coupled variable 'v' needs to be different from variable with CoupledForceNodalKernel, "
+          "consider using Reaction or somethig similar");
 }

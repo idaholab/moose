@@ -20,16 +20,17 @@ NodalBC::validParams()
 }
 
 NodalBC::NodalBC(const InputParameters & parameters)
-  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(_var, Moose::SOLUTION_TAG, true)
+  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_kokkos_var, true)
 {
-  addMooseVariableDependency(&_var);
+  addMooseVariableDependency(variables());
 }
 
 void
 NodalBC::computeResidual()
 {
-  Policy policy(0, numKokkosBoundaryNodes());
+  _thread.resize({variables().size(), numKokkosBoundaryNodes()});
+
+  Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
@@ -40,7 +41,9 @@ NodalBC::computeResidual()
 void
 NodalBC::computeJacobian()
 {
-  Policy policy(0, numKokkosBoundaryNodes());
+  _thread.resize({variables().size(), numKokkosBoundaryNodes()});
+
+  Policy policy(0, _thread.size());
 
   if (!_jacobian_dispatcher)
     _jacobian_dispatcher = DispatcherRegistry::build<JacobianLoop>(this, type());
@@ -51,7 +54,15 @@ NodalBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes()});
+    if (variables().size() > 1)
+      for (unsigned int i = 1; i < variables().size(); ++i)
+        if (sys.getCoupling(_kokkos_var.var(0)).size() !=
+            sys.getCoupling(_kokkos_var.var(i)).size())
+          mooseError("For multi-variable kernels/BCs, all variables should have the same number of "
+                     "off-diagonal coupling variables.");
+
+    _thread.resize(
+        {variables().size(), sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes()});
 
     Policy policy(0, _thread.size());
 

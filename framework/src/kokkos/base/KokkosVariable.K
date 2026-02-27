@@ -16,13 +16,13 @@ namespace Moose::Kokkos
 {
 
 void
-Variable::init(const MooseVariableBase & variable, const TagName & tag_name)
+Variable::init(const MooseVariableFieldBase & variable, const TagName & tag_name)
 {
   init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
 }
 
 void
-Variable::init(const MooseVariableBase & variable, const TagID tag)
+Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
 {
   _initialized = true;
   _coupled = true;
@@ -44,9 +44,27 @@ Variable::init(const MooseVariableBase & variable, const TagID tag)
 }
 
 void
-Variable::init(const std::vector<const MooseVariableBase *> & variables,
-               const TagID tag,
-               CoupleableKey)
+Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagName & tag_name)
+{
+  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()),
+       variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<const MooseVariableFieldBase *> & variables,
+               const TagName & tag_name)
+{
+  init(variables, variables[0]->sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
+{
+  init(std::vector<const MooseVariableFieldBase *>(variables.begin(), variables.end()), tag);
+}
+
+void
+Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
 {
   _initialized = true;
   _coupled = true;

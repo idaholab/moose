@@ -31,7 +31,7 @@ KokkosTimeDerivativeNodalKernel::computeQpResidual(const unsigned int qp,
 
 KOKKOS_FUNCTION inline Real
 KokkosTimeDerivativeNodalKernel::computeQpJacobian(const unsigned int /* qp */,
-                                                   AssemblyDatum & /* datum */) const
+                                                   AssemblyDatum & datum) const
 {
-  return _du_dot_du;
+  return _du_dot_du[datum.comp()];
 }
