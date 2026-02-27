@@ -69,7 +69,10 @@ hexElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -131,7 +134,10 @@ prismElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -191,7 +197,10 @@ pyramidElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -760,7 +769,13 @@ createUnitPyramid5FromHex8(MeshBase & mesh,
   new_elem->set_node(2, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(1));
   new_elem->set_node(3, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(0));
   new_elem->set_node(4, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base * 2;
+
   auto new_elem_ptr = mesh.add_elem(std::move(new_elem));
   retainEEID(mesh, elem_id, new_elem_ptr);
   for (const auto & bid : side_info)
@@ -799,7 +814,13 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -817,7 +838,13 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
@@ -888,7 +915,13 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -909,7 +942,13 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                              ->side_ptr(side_index)
                              ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
     new_elem_1->set_node(3, const_cast<Node *>(new_node));
+
+    // Copy processor_id, mapping, etc.
+    new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+    // But override subdomain_id to get a new block
     new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
     new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
     retainEEID(mesh, elem_id, new_elem_ptr_1);
   }
@@ -960,7 +999,13 @@ convertPyramid5Elem(MeshBase & mesh,
       2,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -975,7 +1020,13 @@ convertPyramid5Elem(MeshBase & mesh,
       2,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
