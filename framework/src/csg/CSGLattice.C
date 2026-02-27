@@ -197,7 +197,7 @@ CSGLattice::applyTransformation(TransformationType type,
   // Main validation is done in CSGBase::applyTransformation
   mooseAssert(isValidTransformationValue(type, values),
               "Invalid transformation values for transformation type " +
-                  getTransofrmationTypeString(type) + " on lattice " + getName());
+                  getTransformationTypeString(type) + " on lattice " + getName());
   _transformations.emplace_back(type, values);
 }
 

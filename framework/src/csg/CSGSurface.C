@@ -57,7 +57,7 @@ CSGSurface::applyTransformation(TransformationType type,
   // Main validation is done in CSGBase::applyTransformation
   mooseAssert(isValidTransformationValue(type, values),
               "Invalid transformation values for transformation type " +
-                  getTransofrmationTypeString(type) + " on surface " + getName());
+                  getTransformationTypeString(type) + " on surface " + getName());
   _transformations.emplace_back(type, values);
 }
 

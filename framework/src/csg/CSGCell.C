@@ -88,7 +88,7 @@ CSGCell::applyTransformation(TransformationType type, const std::tuple<Real, Rea
   // Main validation is done in CSGBase::applyTransformation
   mooseAssert(isValidTransformationValue(type, values),
               "Invalid transformation values for transformation type " +
-                  getTransofrmationTypeString(type) + " on cell " + getName());
+                  getTransformationTypeString(type) + " on cell " + getName());
   _transformations.emplace_back(type, values);
 }
 

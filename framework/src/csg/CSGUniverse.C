@@ -106,7 +106,7 @@ CSGUniverse::applyTransformation(TransformationType type,
   // Main validation is done in CSGBase::applyTransformation
   mooseAssert(isValidTransformationValue(type, values),
               "Invalid transformation values for transformation type " +
-                  getTransofrmationTypeString(type) + " on universe " + getName());
+                  getTransformationTypeString(type) + " on universe " + getName());
   _transformations.emplace_back(type, values);
 }
 
