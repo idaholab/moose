@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", ExodusFileTimes);
 InputParameters
 ExodusFileTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addClassDescription("Import times from one or more Exodus files.");
   params.addRequiredParam<std::vector<FileName>>("files", "Exodus file(s) with the times");
   // File is loaded only on zeroth process
@@ -28,7 +28,7 @@ ExodusFileTimes::validParams()
   return params;
 }
 
-ExodusFileTimes::ExodusFileTimes(const InputParameters & parameters) : Times(parameters)
+ExodusFileTimes::ExodusFileTimes(const InputParameters & parameters) : TimesReporter(parameters)
 {
   // Reading exodus files on all ranks could be expensive
   const auto & times_files = getParam<std::vector<FileName>>("files");

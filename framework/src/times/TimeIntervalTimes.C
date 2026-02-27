@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", TimeIntervalTimes);
 InputParameters
 TimeIntervalTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addClassDescription("Times between a start time and end time with a fixed time interval.");
   params.addRequiredRangeCheckedParam<Real>(
       "time_interval", "time_interval > 0", "Time interval between times");
@@ -34,7 +34,7 @@ TimeIntervalTimes::validParams()
   return params;
 }
 
-TimeIntervalTimes::TimeIntervalTimes(const InputParameters & parameters) : Times(parameters)
+TimeIntervalTimes::TimeIntervalTimes(const InputParameters & parameters) : TimesReporter(parameters)
 {
   // Get start time
   Real start_time;

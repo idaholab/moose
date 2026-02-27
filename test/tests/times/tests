@@ -81,7 +81,28 @@
       cli_args = '
         Executioner/type=Steady'
       expect_err = "If the parameter 'start_time' is not provided, the executioner type must be 'Transient'"
-      detail = 'times are gathered with a fixed time interval with no start and end times provided, while using a steady executioner.'
+      detail = 'times are gathered with a fixed time interval with no start and end times provided, while using a steady executioner, '
+    []
+    [default_times_unsorted]
+      type = RunException
+      input = simulation_times.i
+      cli_args = 'Executioner/TimeStepper/time_sequence="0.2 0.9 0.4"'
+      expect_err = 'Times are not sorted:\n\s*\{0.2, 0.9, 0.4\}'
+      detail = 'a input-defined sequence of times is unsorted, '
+    []
+    [no_object]
+      type = RunException
+      input = simulation_times.i
+      cli_args = 'Executioner/TimeStepper/time_sequence=foo'
+      expect_err = 'Could not find times object foo.'
+      detail = 'the specified time-defining object does not exist, '
+    []
+    [not_times]
+      type = RunException
+      input = simulation_times.i
+      cli_args = 'UserObjects/foo/type=UserObjectInterfaceTest Executioner/TimeStepper/time_sequence=foo'
+      expect_err = 'foo is not a Times object.'
+      detail = 'or the specified time-defining object is not the proper object type.'
     []
   []
 
@@ -97,8 +118,7 @@
       [with_input_times]
         type = 'JSONDiff'
         input = 'external_times.i'
-        cli_args = "
-        Times/external_input/times='0.2 0.3' Outputs/file_base=external_times_inputtimes "
+        cli_args = "Times/external_input/times='0.2 0.3' Outputs/file_base=external_times_inputtimes "
         jsondiff = 'external_times_inputtimes.json'
         detail = 'with input times array'
       []

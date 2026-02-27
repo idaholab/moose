@@ -54,11 +54,9 @@ Output::validParams()
       std::numeric_limits<Real>::max(),
       "wall_time_interval > 0",
       "The target wall time interval (in seconds) at which to output");
-  params.addParam<std::vector<Real>>(
-      "sync_times", {}, "Times at which the output and solution is forced to occur");
-  params.addParam<TimesName>(
-      "sync_times_object",
-      "Times object providing the times at which the output and solution is forced to occur");
+  params.addParam<TimesName>("sync_times_object",
+                             "Times at which the output and solution is forced to occur");
+  params.deprecateParam("sync_times_object", "sync_times", "12/12/26");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
@@ -83,7 +81,7 @@ Output::validParams()
   params.addParamNamesToGroup("execute_on additional_execute_on", "Execution scheduling");
 
   // 'Timing' group
-  params.addParamNamesToGroup("time_tolerance time_step_interval sync_times sync_times_object "
+  params.addParamNamesToGroup("time_tolerance time_step_interval sync_times "
                               "sync_only start_time end_time "
                               "start_step end_step min_simulation_time_interval "
                               "wall_time_interval",
@@ -117,6 +115,7 @@ Output::Output(const InputParameters & parameters)
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
     PerfGraphInterface(this),
+    TimesInterface(this),
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
@@ -140,12 +139,8 @@ Output::Output(const InputParameters & parameters)
             : getParam<unsigned int>("time_step_interval")),
     _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
     _wall_time_interval(getParam<Real>("wall_time_interval")),
-    _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
-                               getParam<std::vector<Real>>("sync_times").end())),
-    _sync_times_object(isParamValid("sync_times_object")
-                           ? static_cast<Times *>(&_problem_ptr->getUserObject<Times>(
-                                 getParam<TimesName>("sync_times_object")))
-                           : nullptr),
+    _sync_times_object(getOptionalTimes("sync_times", true)),
+    _sync_times(_sync_times_object ? _sync_times_object->getUniqueTimes() : std::set<Real>()),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
                                            : std::numeric_limits<Real>::lowest()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time")
@@ -203,19 +198,6 @@ Output::Output(const InputParameters & parameters)
 
     for (auto i = 0; i < pwb_olf->functionSize(); i++)
       _sync_times.insert(pwb_olf->domain(i));
-  }
-
-  // Get sync times from Times object if using
-  if (_sync_times_object)
-  {
-    if (isParamValid("output_limiting_function") || isParamSetByUser("sync_times"))
-      paramError("sync_times_object",
-                 "Only one method of specifying sync times is supported at a time");
-    else
-      // Sync times for the time steppers are taken from the output warehouse. The output warehouse
-      // takes sync times from the output objects immediately after the object is constructed. Hence
-      // we must ensure that we set the `_sync_times` in the constructor
-      _sync_times = _sync_times_object->getUniqueTimes();
   }
 }
 
@@ -289,9 +271,11 @@ Output::onInterval()
 
   if (_sync_times_object)
   {
-    const auto & sync_times = _sync_times_object->getUniqueTimes();
-    if (sync_times != _sync_times)
-      mooseError("The provided sync times object has changing time values. Only static time "
+    const auto sync_times = _sync_times_object->getUniqueTimes();
+    if (!std::includes(
+            _sync_times.begin(), _sync_times.end(), sync_times.begin(), sync_times.end()))
+      paramError("sync_times",
+                 "The provided sync times object has changing time values. Only static time "
                  "values are supported since time steppers take sync times from the output "
                  "warehouse which determines its sync times at output construction time.");
   }

@@ -9,18 +9,24 @@
 
 #pragma once
 
-// Moose includes
-#include "GeneralReporter.h"
+#include <vector>
+#include <set>
+
+#include "libmesh/libmesh_common.h"
+
+using libMesh::Real;
 
 /**
- * Times objects are under the hood Reporters, but limited to a vector of Real
+ * Base Times object that implements public interfaces. Derived objects are
+ * meant to pass in a vector of times. See TimesReporter for the user-facing
+ * instantiation of this class. The purpose of this abstraction is to allow a
+ * "default" Times object that can be constructed without going through the
+ * Moose factory.
  */
-class Times : public GeneralReporter
+class Times
 {
 public:
-  static InputParameters validParams();
-  Times(const InputParameters & parameters);
-  virtual ~Times() = default;
+  Times(std::vector<Real> & times, const Real & current_time, bool is_dynamic);
 
   /// Getter for the full times vector
   const std::vector<Real> & getTimes() const;
@@ -32,7 +38,7 @@ public:
   };
 
   /// Get the current time
-  Real getCurrentTime() const { return _fe_problem.time(); }
+  Real getCurrentTime() const { return _current_time; }
 
   /// Getter for a single time at a known index
   Real getTimeAtIndex(unsigned int index) const;
@@ -40,7 +46,7 @@ public:
   /// Find the previous time in the times vector for a given time
   /// If current_time is also in the times vector within numerical precision, will return the previous value
   /// If the times are not sorted or unique, this will return the time right before the first time found above the current_time
-  Real getPreviousTime(const Real current_time) const;
+  Real getPreviousTime(const Real current_time, bool error_if_no_previous = true) const;
 
   /// Find the next time in the times vector for a given time
   /// If current_time is also in the times vector within numerical precision, will return the next value
@@ -49,38 +55,19 @@ public:
   ///                         or return instead the largest Real number (from std::numeric_limits)
   Real getNextTime(const Real current_time, const bool error_if_no_next) const;
 
+  /// Whether the sequence of times might change during the simulation
   bool isDynamicTimeSequence() const { return _dynamic_time_sequence; };
 
 protected:
-  /// In charge of computing / loading the times, unless all that could be done there is done
-  /// in the constructor
-  virtual void initialize() override = 0;
-
-  /// By default, we wont execute often but "executing" will mean loading the times
-  virtual void execute() override { initialize(); }
-
-  /// In charge of reduction across all ranks
-  virtual void finalize() override;
-
-  /// By default, Times will not be modified very regularly
-  virtual void timestepSetup() override {}
-  virtual void residualSetup() override {}
-  virtual void jacobianSetup() override {}
-
   /// Clear the times vector
   void clearTimes();
 
-  /// The vector holding the times
+  /// A reference to the passed in vector of times
   std::vector<Real> & _times;
 
-  /// Whether generation of times is distributed or not (and therefore needs a broadcast)
-  const bool _need_broadcast;
-  /// Whether times should be sorted, because they come from different sources for example
-  const bool _need_sort;
-  /// Whether duplicate times should be removed
-  const bool _need_unique;
-  /// Absolute tolerance for performing duplication checks to make the times vector unique
-  const Real _unique_tol;
+private:
+  /// A reference to current time, used by getCurrentTime()
+  const Real & _current_time;
 
   /// whether the time sequence is set dynamically
   const bool _dynamic_time_sequence;

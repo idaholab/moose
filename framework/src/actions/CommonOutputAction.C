@@ -88,9 +88,8 @@ CommonOutputAction::validParams()
                                             "of outputs when using MultiApps.");
   params.addParam<unsigned int>(
       "time_step_interval", 1, "The interval (number of time steps) at which output occurs");
-  params.addParam<std::vector<Real>>("sync_times",
-                                     std::vector<Real>(),
-                                     "Times at which the output and solution is forced to occur");
+  params.addParam<TimesName>("sync_times",
+                             "Times at which the output and solution is forced to occur");
   params.addParam<Real>(
       "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
   params.addParam<bool>(

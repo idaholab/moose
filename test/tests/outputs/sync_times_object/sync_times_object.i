@@ -36,7 +36,7 @@
   [out]
     type = CSV
     sync_only = true
-    sync_times_object = input_times
+    sync_times = input_times
     execute_reporters_on = 'NONE'
   []
 []

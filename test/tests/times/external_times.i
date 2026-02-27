@@ -21,19 +21,17 @@
 [Executioner]
   type = Transient
   num_steps = 5
- [TimeSteppers]
+  [TimeSteppers]
     [external_time]
-      type = TimeSequenceFromTimes
-      times = external_input
+      type = TimeSequenceStepper
+      time_sequence = external_input
     []
 
     [ConstDT1]
       type = ConstantDT
       dt = 10
     []
-
- []
-
+  []
 []
 
 [Functions]

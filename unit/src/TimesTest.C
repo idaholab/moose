@@ -9,15 +9,13 @@
 
 #include "gtest/gtest.h"
 
-#include "TimesTest.h"
 #include "Times.h"
 
-TEST_F(TimesTest, getUninitialized)
+TEST(TimesTest, getUninitialized)
 {
-  // SimulationTimes is uninitialized at construction, any other Times with such
-  // behavior would do
-  InputParameters params = _factory.getValidParams("SimulationTimes");
-  auto & times = addObject<Times>("SimulationTimes", "times", params);
+  std::vector<Real> times_vec = {};
+  const Real current_time = 0;
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
 
   try
   {
@@ -31,11 +29,41 @@ TEST_F(TimesTest, getUninitialized)
   }
 }
 
-TEST_F(TimesTest, getters)
+#ifndef NDEBUG
+TEST(TimesTest, unsorted)
 {
-  InputParameters params = _factory.getValidParams("InputTimes");
-  params.set<std::vector<Real>>("times") = {0.2, 0.8, 1.2};
-  auto & times = addObject<Times>("InputTimes", "times", params);
+  std::vector<Real> times_vec = {3.0, 2.0, 1.0};
+  const Real current_time = 0;
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
+
+  try
+  {
+    times.getPreviousTime(2);
+    FAIL() << "Missing the expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(msg.find("Times vector must be sorted."), std::string::npos);
+  }
+  try
+  {
+    times.getNextTime(2, true);
+    FAIL() << "Missing the expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(msg.find("Times vector must be sorted."), std::string::npos);
+  }
+}
+#endif
+
+TEST(TimesTest, getters)
+{
+  std::vector<Real> times_vec = {0.2, 0.8, 1.2};
+  const Real current_time = 0;
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
 
   // Test getters
   EXPECT_EQ(times.getTimes()[0], 0.2);
@@ -43,5 +71,31 @@ TEST_F(TimesTest, getters)
   EXPECT_EQ(times.getTimeAtIndex(0), 0.2);
   EXPECT_EQ(times.getCurrentTime(), 0);
   EXPECT_EQ(times.getPreviousTime(1), 0.8);
+  EXPECT_EQ(times.getPreviousTime(0, false), -std::numeric_limits<Real>::max());
   EXPECT_EQ(times.getNextTime(1, true), 1.2);
+  EXPECT_EQ(times.getNextTime(2, false), std::numeric_limits<Real>::max());
+
+  try
+  {
+    times.getPreviousTime(0);
+    FAIL() << "Missing the expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(
+        msg.find("No previous time in Times vector for time 0. Minimum time in vector is 0.2"),
+        std::string::npos);
+  }
+  try
+  {
+    times.getNextTime(2, true);
+    FAIL() << "Missing the expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    EXPECT_NE(msg.find("No next time in Times vector for time 2. Maximum time in vector is 1.2"),
+              std::string::npos);
+  }
 }

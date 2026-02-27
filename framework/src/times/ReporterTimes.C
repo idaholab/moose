@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", ReporterTimes);
 InputParameters
 ReporterTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addRequiredParam<std::vector<ReporterName>>("reporters",
                                                      "Reporter(s) containing the times.");
 
@@ -25,7 +25,7 @@ ReporterTimes::validParams()
   return params;
 }
 
-ReporterTimes::ReporterTimes(const InputParameters & parameters) : Times(parameters)
+ReporterTimes::ReporterTimes(const InputParameters & parameters) : TimesReporter(parameters)
 {
   // Attempt to obtain the positions. Will only succeed for other Times at this point
   initialize();
