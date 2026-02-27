@@ -744,6 +744,10 @@ convertHex8Elem(MeshBase & mesh,
   // elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
+
+  // Don't force us to repartition later
+  new_node->processor_id() = mesh.elem_ptr(elem_id)->processor_id();
+
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))
   {
     if (std::find(side_indices.begin(), side_indices.end(), i_side) != side_indices.end())
@@ -867,6 +871,10 @@ convertPrism6Elem(MeshBase & mesh,
   // For the PYRAMID5 element, it can further be converted into 2 TET3 elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
+
+  // Don't force us to repartition later
+  new_node->processor_id() = mesh.elem_ptr(elem_id)->processor_id();
+
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))
   {
     if (i_side % 4 == 0 ||
