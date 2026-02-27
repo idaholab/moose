@@ -16,21 +16,15 @@
 #include "FEProblemBase.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
-registerMooseObjectRenamed("MooseApp", ADParsedFunction, "02/03/2024 00:00", MooseParsedFunction);
 
 InputParameters
 MooseParsedFunction::validParams()
 {
   InputParameters params = Function::validParams();
   params += MooseParsedFunctionBase::validParams();
-  params.addDeprecatedCustomTypeParam<std::string>(
-      "value", "FunctionExpression", "The user defined function.", "Use 'expression' instead.");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addCustomTypeParam<std::string>(
+  params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "The user defined function.");
-
   params.addClassDescription("Function created by parsing a string");
-
   return params;
 }
 
@@ -71,26 +65,17 @@ MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/) const
 void
 MooseParsedFunction::initialSetup()
 {
+  // Check for non-scalar variables.
   for (const auto i : index_range(_vars))
-  {
-    // Check for non-scalar variables.
-    // First, see if the var is actually assigned to a proper scalar value
-    if (_pfb_feproblem.hasVariable(_vars[i]) && _pfb_feproblem.hasVariable(_vals[i]))
-    {
-      // Then see if the var has the same name as a function or postprocessor
-      if (!_pfb_feproblem.hasFunction(_vars[i]) &&
-          !_pfb_feproblem.hasPostprocessorValueByName(_vars[i]))
-        mooseError(
-            "The only variables supported by ParsedFunction are scalar variables, and var '" +
-            _vars[i] + "' is not scalar.");
-    }
-  }
+    if (_pfb_feproblem.hasVariable(_vals[i]) && !_pfb_feproblem.hasScalarVariable(_vals[i]) &&
+        !_pfb_feproblem.hasFunction(_vals[i]) &&
+        !_pfb_feproblem.hasPostprocessorValueByName(_vals[i]))
+      mooseError("The only variables supported by ParsedFunction are scalar variables, and var '" +
+                 _vals[i] + "' is not scalar.");
 
   if (!_function_ptr)
   {
-    THREAD_ID tid = 0;
-    if (this->isParamValid("_tid"))
-      tid = this->template getParam<THREAD_ID>("_tid");
+    THREAD_ID tid = this->isParamValid("_tid") ? this->template getParam<THREAD_ID>("_tid") : 0;
 
     _function_ptr =
         std::make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _value, _vars, _vals, tid);
