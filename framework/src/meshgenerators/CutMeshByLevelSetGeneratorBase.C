@@ -285,7 +285,7 @@ CutMeshByLevelSetGeneratorBase::generate()
     mesh.delete_elem(*elem_it);
 
   mesh.contract();
-  mesh.unset_is_prepared();
+  mesh.unset_has_boundary_id_sets();
   return std::move(_input);
 }
 
