@@ -106,6 +106,12 @@ FillBetweenSidesetsGenerator::FillBetweenSidesetsGenerator(const InputParameters
 std::unique_ptr<MeshBase>
 FillBetweenSidesetsGenerator::generate()
 {
+  // We're querying subdomain id caches from our input meshes
+  if (!_input_1->preparation().has_cached_elem_data)
+    _input_1->cache_elem_data();
+  if (!_input_2->preparation().has_cached_elem_data)
+    _input_2->cache_elem_data();
+
   auto input_mesh_1 = std::move(_input_1);
   auto input_mesh_2 = std::move(_input_2);
 
