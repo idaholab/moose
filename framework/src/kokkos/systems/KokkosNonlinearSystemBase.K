@@ -128,11 +128,20 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeKokkosResidual", 1);
 
+  // Get warehouses
+
+  const auto & kernels = _kokkos_kernels.getVectorTagsObjectWarehouse(tags, 0);
+  const auto & nodal_kernels = _kokkos_nodal_kernels.getVectorTagsObjectWarehouse(tags, 0);
+  const auto & integrated_bcs = _kokkos_integrated_bcs.getVectorTagsObjectWarehouse(tags, 0);
+
+  if (!kernels.size() && !nodal_kernels.size() && !integrated_bcs.size())
+    return;
+
+  // Resolve dependencies
+
   auto & systems = _fe_problem.getKokkosSystems();
 
   systems[number()].setActiveResidualTags(tags);
-
-  // Resolve dependencies
 
   std::set<MooseVariableFieldBase *> needed_moose_vars;
   std::set<TagID> needed_fe_var_vector_tags;
@@ -141,16 +150,16 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
     needed_fe_var_vector_tags.insert(tag._id);
 
-  _kokkos_kernels.updateVariableDependency(needed_moose_vars);
-  _kokkos_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
-  _kokkos_kernels.updateMatPropDependency(needed_mat_props);
+  kernels.updateVariableDependency(needed_moose_vars);
+  kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  kernels.updateMatPropDependency(needed_mat_props);
 
-  _kokkos_integrated_bcs.updateVariableDependency(needed_moose_vars);
-  _kokkos_integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
-  _kokkos_integrated_bcs.updateMatPropDependency(needed_mat_props);
+  nodal_kernels.updateVariableDependency(needed_moose_vars);
+  nodal_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
-  _kokkos_nodal_bcs.updateVariableDependency(needed_moose_vars);
-  _kokkos_nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  integrated_bcs.updateVariableDependency(needed_moose_vars);
+  integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  integrated_bcs.updateMatPropDependency(needed_mat_props);
 
   if (needed_mat_props.size())
   {
@@ -159,7 +168,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
         needed_fe_var_vector_tags);
   }
 
-  // Copy data and cache variable values at element quadature points
+  // Copy vectors and cache variable values at element quadature points
 
   for (auto & system : systems)
   {
@@ -195,18 +204,14 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 
     // Compute kernels
 
-    for (auto kernel : _kokkos_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto kernel : kernels.getActiveObjects())
       kernel->computeResidual();
 
-    for (auto nodal_kernel :
-         _kokkos_nodal_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto nodal_kernel : nodal_kernels.getActiveObjects())
       nodal_kernel->computeResidual();
 
-    for (auto ibc : _kokkos_integrated_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto ibc : integrated_bcs.getActiveObjects())
       ibc->computeResidual();
-
-    for (auto nbc : _kokkos_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
-      nbc->computeResidual();
   }
 
   // Close and restore vectors
@@ -230,15 +235,90 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 }
 
 void
+NonlinearSystemBase::computeKokkosNodalBCs(const std::set<TagID> & tags)
+{
+  TIME_SECTION("computeKokkosNodalBC", 1);
+
+  // Get warehouses
+
+  const auto & nodal_bcs = _kokkos_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0);
+
+  if (!nodal_bcs.size())
+    return;
+
+  // Resolve dependencies
+
+  auto & systems = _fe_problem.getKokkosSystems();
+
+  systems[number()].setActiveResidualTags(tags);
+
+  std::set<TagID> needed_fe_var_vector_tags;
+
+  for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
+    needed_fe_var_vector_tags.insert(tag._id);
+
+  nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  // Copy vectors
+
+  for (auto & system : systems)
+  {
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    }
+  }
+
+  systems.copyToDevice();
+
+  {
+    TIME_SECTION("KokkosKernel", 1);
+
+    // Compute kernels
+
+    for (auto nbc : nodal_bcs.getActiveObjects())
+      nbc->computeResidual();
+  }
+
+  // Close and restore vectors
+
+  {
+    TIME_SECTION("KokkosCopy", 1);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  }
+
+  // Clear
+
+  systems[number()].clearActiveResidualTags();
+
+  for (auto & system : systems)
+    system.clearActiveSolutionTags();
+}
+
+void
 NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 {
   TIME_SECTION("computeKokkosJacobian", 1);
 
+  // Get warehouses
+
+  const auto & kernels = _kokkos_kernels.getMatrixTagsObjectWarehouse(tags, 0);
+  const auto & nodal_kernels = _kokkos_nodal_kernels.getMatrixTagsObjectWarehouse(tags, 0);
+  const auto & integrated_bcs = _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0);
+  const auto & nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0);
+
+  if (!kernels.size() && !nodal_kernels.size() && !integrated_bcs.size() && !nodal_bcs.size())
+    return;
+
+  // Resolve dependencies
+
   auto & systems = _fe_problem.getKokkosSystems();
 
   systems[number()].setActiveMatrixTags(tags);
-
-  // Resolve dependencies
 
   std::set<MooseVariableFieldBase *> needed_moose_vars;
   std::set<TagID> needed_fe_var_vector_tags;
@@ -247,16 +327,19 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
     needed_fe_var_vector_tags.insert(tag._id);
 
-  _kokkos_kernels.updateVariableDependency(needed_moose_vars);
-  _kokkos_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
-  _kokkos_kernels.updateMatPropDependency(needed_mat_props);
+  kernels.updateVariableDependency(needed_moose_vars);
+  kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  kernels.updateMatPropDependency(needed_mat_props);
 
-  _kokkos_integrated_bcs.updateVariableDependency(needed_moose_vars);
-  _kokkos_integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
-  _kokkos_integrated_bcs.updateMatPropDependency(needed_mat_props);
+  nodal_kernels.updateVariableDependency(needed_moose_vars);
+  nodal_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
-  _kokkos_nodal_bcs.updateVariableDependency(needed_moose_vars);
-  _kokkos_nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  integrated_bcs.updateVariableDependency(needed_moose_vars);
+  integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  integrated_bcs.updateMatPropDependency(needed_mat_props);
+
+  nodal_bcs.updateVariableDependency(needed_moose_vars);
+  nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
 
   if (needed_mat_props.size())
   {
@@ -265,7 +348,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
         needed_fe_var_vector_tags);
   }
 
-  // Copy data and cache variable values at element quadature points
+  // Copy vectors and cache variable values at element quadature points
 
   for (auto & system : systems)
   {
@@ -301,17 +384,16 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 
     // Compute kernels
 
-    for (auto kernel : _kokkos_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto kernel : kernels.getActiveObjects())
       kernel->computeJacobian();
 
-    for (auto nodal_kernel :
-         _kokkos_nodal_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto nodal_kernel : nodal_kernels.getActiveObjects())
       nodal_kernel->computeJacobian();
 
-    for (auto ibc : _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto ibc : integrated_bcs.getActiveObjects())
       ibc->computeJacobian();
 
-    for (auto nbc : _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto nbc : nodal_bcs.getActiveObjects())
       nbc->computeJacobian();
   }
 

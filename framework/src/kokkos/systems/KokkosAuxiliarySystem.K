@@ -66,7 +66,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
         needed_fe_var_vector_tags);
   }
 
-  // Copy data and cache variable values at element quadature points
+  // Copy vectors and cache variable values at element quadature points
 
   systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 

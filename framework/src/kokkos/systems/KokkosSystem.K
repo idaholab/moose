@@ -265,30 +265,18 @@ System::setupNodalBCDofs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
 
-  _nbc_residual_tag_dof.create(MAX_TAG);
   _nbc_matrix_tag_dof.create(MAX_TAG);
 
   for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
     auto nbc = static_cast<NodalBCBase *>(bc.get());
 
-    auto vector_tags = nbc->getVectorTags({});
     auto matrix_tags = nbc->getMatrixTags({});
-
-    if (_system.feProblem().vectorTagExists("time"))
-      vector_tags.insert(_system.feProblem().getVectorTagID("time"));
-
-    if (_system.feProblem().matrixTagExists("time"))
-      matrix_tags.insert(_system.feProblem().getMatrixTagID("time"));
-
-    for (auto tag : vector_tags)
-      getNodalBCDofs(nbc, _nbc_residual_tag_dof[tag]);
 
     for (auto tag : matrix_tags)
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
   }
 
-  _nbc_residual_tag_dof.copyToDeviceNested();
   _nbc_matrix_tag_dof.copyToDeviceNested();
 }
 
@@ -343,7 +331,7 @@ System::sync(const MemcpyType dir)
       auto & vector = _system.getVector(tag);
 
       _vectors[tag].create(vector, *this, true);
-      _vectors[tag] = 0;
+      _vectors[tag].copyToDevice();
     }
 
     for (auto tag : _active_matrix_tags)

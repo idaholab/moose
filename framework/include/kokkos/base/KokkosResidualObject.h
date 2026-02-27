@@ -210,7 +210,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
   {
     auto tag = _vector_tags[t];
 
-    if (sys.isResidualTagActive(tag) && !sys.hasNodalBCResidualTag(dof, tag))
+    if (sys.isResidualTagActive(tag))
       ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
   }
 }

@@ -449,7 +449,7 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
       _kokkos_materials.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
     }
 
-    // Copy data and cache variable values at element quadature points
+    // Copy vectors and cache variable values at element quadature points
 
     for (auto & system : _kokkos_systems)
     {
