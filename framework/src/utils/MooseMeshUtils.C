@@ -418,7 +418,8 @@ SubdomainID
 getNextFreeSubdomainID(MeshBase & input_mesh)
 {
   // Call this to get most up to date block id information
-  input_mesh.cache_elem_data();
+  if (!input_mesh.preparation().has_cached_elem_data)
+    input_mesh.cache_elem_data();
 
   std::set<SubdomainID> preexisting_subdomain_ids;
   input_mesh.subdomain_ids(preexisting_subdomain_ids);
@@ -437,6 +438,9 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
 BoundaryID
 getNextFreeBoundaryID(MeshBase & input_mesh)
 {
+  if (!input_mesh.preparation().has_boundary_id_sets)
+    input_mesh.get_boundary_info().regenerate_id_sets();
+
   auto boundary_ids = input_mesh.get_boundary_info().get_boundary_ids();
   if (boundary_ids.empty())
     return 0;
