@@ -20,14 +20,15 @@ ComputeUpdatedEulerAngle::validParams()
       "to be used together with the  ComputeMultipleCrystalPlasticityStress class, where the "
       "updated rotation material property is computed. ");
   params.addParam<bool>(
-      "radian_to_degree", true, "Whether to convert euler angles from radian to degree.");
+      "degree_to_radian", false, "Whether to convert euler angles from degree to radian.");
   return params;
 }
 
 ComputeUpdatedEulerAngle::ComputeUpdatedEulerAngle(const InputParameters & parameters)
   : Material(parameters),
     _updated_rotation(getMaterialProperty<RankTwoTensor>("updated_rotation")),
-    _updated_euler_angle(declareProperty<RealVectorValue>("updated_Euler_angle"))
+    _updated_euler_angle(declareProperty<RealVectorValue>("updated_Euler_angle")),
+    _degree_to_radian(getParam<bool>("degree_to_radian"))
 {
 }
 
@@ -61,6 +62,6 @@ ComputeUpdatedEulerAngle::computeEulerAngleFromRotationMatrix(const RankTwoTenso
   // convert EulerAngles to RealVectorValue
   euler_angle = (RealVectorValue)ea;
 
-  if (!getParam<bool>("radian_to_degree"))
+  if (_degree_to_radian)
     euler_angle *= libMesh::pi / 180.0;
 }

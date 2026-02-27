@@ -30,4 +30,7 @@ private:
   const MaterialProperty<RankTwoTensor> & _updated_rotation;
   // updated euler angle that is computed in thie class
   MaterialProperty<RealVectorValue> & _updated_euler_angle;
+
+  // flag to convert the Euler angles from degrees into radians
+  bool _degree_to_radian;
 };

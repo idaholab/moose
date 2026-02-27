@@ -22,10 +22,14 @@ EulerAngles::EulerAngles(const Eigen::Quaternion<Real> & q)
 {
   phi1 = std::atan2((q.x() * q.z() + q.w() * q.y()), -(-q.w() * q.x() + q.y() * q.z())) *
          (180.0 / libMesh::pi);
-  Phi = std::atan2(
-            std::sqrt(1 -
-                      std::pow(q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z(), 2.0)),
-            q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z()) *
+
+  // avoid NAN value from sqrt(val) while computing Phi
+  auto val = 1.0 - std::pow(q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z(), 2.0);
+  if (val < 0.0 && !MooseUtils::absoluteFuzzyEqual(val, 0.0))
+    mooseError("Euler angle conversion is not successful due to invalid quaternion value.");
+
+  Phi = std::atan2(std::sqrt(std::abs(val)),
+                   q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z()) *
         (180.0 / libMesh::pi);
   phi2 = std::atan2((q.x() * q.z() - q.w() * q.y()), (q.w() * q.x() + q.y() * q.z())) *
          (180.0 / libMesh::pi);
@@ -38,6 +42,13 @@ EulerAngles::EulerAngles(const Eigen::Quaternion<Real> & q)
     phi2 += 360.0;
   if (Phi < 0.0)
     mooseError("Euler angle out of range.");
+}
+
+EulerAngles::EulerAngles(const Real & v0, const Real & v1, const Real & v2)
+{
+  phi1 = v0;
+  Phi = v1;
+  phi2 = v2;
 }
 
 Eigen::Quaternion<Real>

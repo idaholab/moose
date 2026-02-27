@@ -97,6 +97,8 @@ ComputeMultipleCrystalPlasticityStress::ComputeMultipleCrystalPlasticityStress(
     _total_lagrangian_strain(
         declareProperty<RankTwoTensor>("total_lagrangian_strain")), // Lagrangian strain
     _updated_rotation(declareProperty<RankTwoTensor>("updated_rotation")),
+    _updated_rotation_old(getMaterialPropertyOld<RankTwoTensor>("updated_rotation")),
+    _misorientation(declareProperty<Real>("misorientation")),
     _crysrot(getMaterialProperty<RankTwoTensor>(
         _base_name + "crysrot")), // defined in the elasticity tensor classes for crystal plasticity
     _print_convergence_message(getParam<bool>("print_state_variable_convergence_error_messages"))
@@ -315,6 +317,23 @@ ComputeMultipleCrystalPlasticityStress::postSolveQp(RankTwoTensor & cauchy_stres
   RankTwoTensor rot;
   _elastic_deformation_gradient.getRUDecompositionRotation(rot);
   _updated_rotation[_qp] = rot * _crysrot[_qp];
+
+  // Calculate the misorientation
+  auto _delta_misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
+  auto cos_val = (_delta_misorientation_mat.trace() - 1.0) / 2.0;
+  // Mathematically, the values should lie in the range of [-1, 1]. However, there maybe numerical
+  // errors during calculation. Let's guard small numerical errors here and throw an error when the
+  // numerical error is too big, which indicates other issues.
+  if (cos_val > 1.0 || cos_val < -1.0)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(cos_val, -1.0))
+      cos_val = -1.0;
+    else if (MooseUtils::absoluteFuzzyEqual(cos_val, 1.0))
+      cos_val = 1.0;
+    else
+      mooseError("Misorientation value is undefined. This should not happen.");
+  }
+  _misorientation[_qp] = std::acos(cos_val);
 }
 
 void

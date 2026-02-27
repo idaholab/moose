@@ -25,8 +25,7 @@ RandomEulerAngleProvider::validParams()
 
 RandomEulerAngleProvider::RandomEulerAngleProvider(const InputParameters & params)
   : EulerAngleProvider(params),
-    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
-    _angles(declareRestartableData<std::vector<EulerAngles>>("random_angles", 0))
+    _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object"))
 {
   _random.seed(0, getParam<unsigned int>("seed"));
 }
@@ -41,17 +40,4 @@ RandomEulerAngleProvider::initialize()
     angle.random(_random);
     _angles.push_back(angle);
   }
-}
-
-unsigned int
-RandomEulerAngleProvider::getGrainNum() const
-{
-  return _angles.size();
-}
-
-const EulerAngles &
-RandomEulerAngleProvider::getEulerAngles(unsigned int i) const
-{
-  mooseAssert(i < getGrainNum(), "Requesting Euler angles for an invalid grain id");
-  return _angles[i];
 }

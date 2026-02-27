@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#29991'
+  design = 'ComputePolycrystalElasticityTensor.md'
+  [polycrystal_elasticity_tensor]
+    type = 'CSVDiff'
+    input = 'polycrystal_elasticity_tensor.i'
+    csvdiff = 'polycrystal_elasticity_tensor_out.csv'
+    requirement = 'The system shall correctly compute the rotation matrix and Euler angles of the grains.'
+  []
+[]

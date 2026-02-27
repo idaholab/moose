@@ -1,0 +1,33 @@
+[Tests]
+  issues = '#19497 #29991'
+  design = 'ComputeBlockOrientationByRotation.md ComputeBlockOrientationByMisorientation.md EulerAngleUpdateFromReporter.md'
+  [block_orient_rotation]
+    type = 'CSVDiff'
+    input = 'block_orientation_calculation.i'
+    cli_args = 'UserObjects/block_orientation/type=ComputeBlockOrientationByRotation Outputs/file_base=block_orientation_calculation_by_rotation_out'
+    csvdiff = 'block_orientation_calculation_by_rotation_out_block_ea_0005.csv'
+    requirement = 'The system should corretly calculate and output the orientations of every material block (grain) correctly by choosing the most oriented direction.'
+  []
+  [block_orient_misorient]
+    type = 'CSVDiff'
+    input = 'block_orientation_calculation.i'
+    cli_args = 'UserObjects/block_orientation/type=ComputeBlockOrientationByMisorientation Outputs/file_base=block_orientation_calculation_by_misorientation_out'
+    csvdiff = 'block_orientation_calculation_by_misorientation_out_block_ea_0005.csv'
+    requirement = 'The system should corretly calculate and output the orientations of every material block (grain) correctly by choosing the direction of the material point that rotates the most.'
+  []
+  [orient_from_reporter]
+    type = 'CSVDiff'
+    input = 'euler_angle_from_reporter.i'
+    csvdiff = 'euler_angle_from_reporter_out_block_orient_0003.csv'
+    allow_test_objects = true
+    requirement = 'The system should corretly set euler angles for each block using reporter values.'
+  []
+  [orient_from_reporter_err]
+    type = RunException
+    input = euler_angle_from_reporter.i
+    cli_args = "Reporters/updated_ea/real_vector_values='10; 11; 12; 0 1 2 3 4 5 6 7'"
+    expect_err = "Number of reporters' entries do not match"
+    requirement = 'The system shall throw an error if reporter size do not match.'
+    allow_test_objects = true
+  []
+[]
