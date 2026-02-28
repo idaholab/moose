@@ -1,0 +1,24 @@
+[Tests]
+  design = 'LinearFVFunctorRadiativeBC.md'
+  issues = '#XXXXX'
+  [hot_body_cooling]
+    type = CSVDiff
+    input = 'linear_fv_functor_radiative_bc.i'
+    csvdiff = 'linear_fv_functor_radiative_bc_hot_body_out.csv'
+    max_threads = 1
+    requirement = 'The system shall apply a Newton-linearized radiative heat flux boundary condition
+                   in the linear finite volume system, converging via pseudo-transient Picard
+                   iteration to a steady-state temperature distribution consistent with the
+                   nonlinear radiative flux q = sigma * eps * (T^4 - Tinf^4).'
+  []
+  [equilibrium]
+    type = CSVDiff
+    input = 'linear_fv_functor_radiative_bc.i'
+    csvdiff = 'linear_fv_functor_radiative_bc_eq_out.csv'
+    cli_args = 'T_L=500 T_inf=500 Outputs/file_base=linear_fv_functor_radiative_bc_eq_out'
+    max_threads = 1
+    requirement = 'The system shall produce zero net radiative flux and a uniform temperature
+                   field when the surface temperature equals the ambient temperature,
+                   verifying the correct limiting behavior of the boundary condition.'
+  []
+[]
