@@ -11,6 +11,15 @@
       capabilities = 'neml2'
       valgrind = heavy
     []
+    [perfect_keep_tensors_on_device]
+      detail = 'perfect plasticity with tensors kept on the compute device, '
+      type = Exodiff
+      input = 'perfect.i'
+      exodiff = 'perfect_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+      cli_args = "NEML2/all/keep_tensors_on_device=true NEML2/all/moose_input_types='MATERIAL POSTPROCESSOR' NEML2/all/moose_inputs='neml2_strain time' NEML2/all/neml2_inputs='forces/E forces/t'"
+    []
     [isoharden]
       detail = 'isotropic hardening, '
       type = Exodiff

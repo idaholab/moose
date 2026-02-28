@@ -84,8 +84,17 @@ protected:
   /// Expand tensor shapes if necessary to conformal sizes
   virtual void expandInputs();
 
+  /// Update cached inputs/outputs for on-device state advance
+  void advanceDeviceCaches();
+
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
+
+  /// Advance state on device (rather than via MOSOE material properties)
+  const bool _keep_tensors_on_device;
+
+  /// Dump input tensor info on failure to aid debugging
+  const bool _debug_inputs_on_failure;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
@@ -98,6 +107,12 @@ protected:
 
   /// The output variables of the material model
   neml2::ValueMap _out;
+
+  /// Cached state outputs from the last successful step (for on-device advance)
+  neml2::ValueMap _device_state_cache;
+
+  /// Cached force inputs from the last successful step (for on-device advance)
+  neml2::ValueMap _device_forces_cache;
 
   /// The derivative of the output variables w.r.t. the input variables
   neml2::DerivMap _dout_din;
