@@ -110,7 +110,12 @@ public:
    *
    * Will convert the capability name to lowercase.
    */
+  ///@{
   const Capability & get(const std::string & capability) const;
+#ifdef MOOSE_UNIT_TEST
+  inline Capability & get(const std::string & capability);
+#endif
+  ///@}
 
   /**
    * @return The size of the registry (number of capabilities registered).
@@ -163,4 +168,11 @@ CapabilityRegistry::query(std::string capability)
 }
 #endif
 
+#ifdef MOOSE_UNIT_TEST
+Capability &
+CapabilityRegistry::get(const std::string & capability)
+{
+  return const_cast<Capability &>(std::as_const(*this).get(capability));
+}
+#endif
 } // namespace Moose::internal

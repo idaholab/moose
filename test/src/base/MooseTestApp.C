@@ -121,6 +121,8 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
   {
     auto & syntax = s; // for resiterSyntax macros
 
+    registerAppDataFilePath("moose_test");
+
     addBoolCapability("test_false", false, "For testing: value false");
     addIntCapability("test_one", 1, "For testing: value 1");
     addIntCapability("test_two_explicit", 2, "For testing: value 2 explicit").setExplicit();

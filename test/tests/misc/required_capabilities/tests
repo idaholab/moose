@@ -125,4 +125,11 @@
     expect_out = 'Solve Skipped!'
     requirement = 'The system shall store as a capability the platform'
   []
+  [data]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities=\'data_moose_test\''
+    expect_out = 'Solve Skipped!'
+    requirement = 'The system shall store as a capability if application data is available'
+  []
 []

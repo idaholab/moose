@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RegistryTest.h"
+#include "gtest/gtest.h"
 
 #include "Registry.h"
 
@@ -15,8 +15,23 @@
 #include "MaterialRealAux.h"
 #include "CheckOutputAction.h"
 #include "MooseUtils.h"
+#include "MooseUnitUtils.h"
+#include "Capabilities.h"
 
 #include <filesystem>
+
+using Moose::internal::Capabilities;
+
+class RegistryTest : public ::testing::Test
+{
+public:
+  virtual void SetUp() override;
+  virtual void TearDown() override;
+
+  std::map<std::string, std::string> _old_data_file_paths;
+  std::map<std::string, std::string> _old_repos;
+  Moose::internal::Capabilities::RegistryType _old_capabilities_registry;
+};
 
 void
 RegistryTest::SetUp()
@@ -26,6 +41,8 @@ RegistryTest::SetUp()
 
   _old_repos = Registry::getRepos();
   Registry::setRepos({});
+
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
 }
 
 void
@@ -36,6 +53,9 @@ RegistryTest::TearDown()
 
   Registry::setRepos(_old_repos);
   _old_repos.clear();
+
+  std::swap(Capabilities::getCapabilities({})._registry, _old_capabilities_registry);
+  _old_capabilities_registry.clear();
 }
 
 TEST_F(RegistryTest, getClassName)
@@ -60,21 +80,53 @@ TEST_F(RegistryTest, appNameFromAppPath)
 TEST_F(RegistryTest, appNameFromAppPathFailed)
 {
   const std::string app_path = "/path/to/FooBarBazApp.h";
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::appNameFromAppPath(app_path);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "Registry::appNameFromAppPath(): Failed to parse application name from '" +
-                        app_path + "'");
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(Registry::appNameFromAppPath(app_path),
+                        "Registry::appNameFromAppPath(): Failed to parse application name from '" +
+                            app_path + "'");
+}
+
+TEST_F(RegistryTest, addDataFilePath)
+{
+  // without info
+  {
+    const std::string name = "name";
+    const std::string path = "files/data_file_tests/data0/data";
+    Registry::addDataFilePath(name, path);
+
+    // should add as a true capability
+    const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+    EXPECT_TRUE(capability.getBoolValue());
+    EXPECT_EQ(capability.getDoc(),
+              "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
+                  "'.");
+  }
+
+  // with info
+  {
+    const std::string name = "name2";
+    const std::string path = "files/data_file_tests/data0/data";
+    const std::string info = "this is useful information";
+    Registry::addDataFilePath(name, path, true, info);
+
+    // should add as a true capability
+    const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+    EXPECT_TRUE(capability.getBoolValue());
+    EXPECT_EQ(capability.getDoc(),
+              "Named data path '" + name + "' is available at '" + MooseUtils::canonicalPath(path) +
+                  "'; " + info + ".");
+  }
+}
+
+TEST_F(RegistryTest, addMissingDataFilePath)
+{
+  const std::string name = "name";
+  const std::string info = "extra_info";
+  Registry::addMissingDataFilePath(name, info);
+
+  // should add as a false capability
+  const auto & capability = Capabilities::getCapabilities({}).get("data_" + name);
+  EXPECT_FALSE(capability.getBoolValue());
+  EXPECT_EQ(capability.getDoc(), "Named data path '" + name + "' is not available; " + info + ".");
 }
 
 TEST_F(RegistryTest, addDataFilePathNonDataFolder)
@@ -83,21 +135,12 @@ TEST_F(RegistryTest, addDataFilePathNonDataFolder)
   const std::string path = "files/data_file_tests/data0";
   const std::string folder = std::filesystem::path(path).filename().c_str();
 
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::addDataFilePath(name, path);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "While registering data file path '" + path + "' for '" + name +
-                        "': The folder must be named 'data' and it is named '" + folder + "'");
-          throw;
-        }
-      },
-      std::exception);
+  // Not allowed by default
+  EXPECT_MOOSEERROR_MSG(Registry::addDataFilePath(name, path),
+                        "While registering data file path '" + path + "' for '" + name +
+                            "': The folder must be named 'data' and it is named '" + folder + "'");
+  // Can be allowed if not an app
+  Registry::addDataFilePath(name, path, false);
 }
 
 TEST_F(RegistryTest, addDataFilePathMismatch)
@@ -111,38 +154,23 @@ TEST_F(RegistryTest, addDataFilePathMismatch)
   const std::string other_path = "files/data_file_tests/data1/data";
   const std::string other_can_path = MooseUtils::canonicalPath(other_path);
 
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::addDataFilePath(name, other_path);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "While registering data file path '" + other_can_path + "' for '" + name +
-                        "': the path '" + can_path + "' is already registered");
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(Registry::addDataFilePath(name, other_path),
+                        "While registering data file path '" + other_can_path + "' for '" + name +
+                            "': the path '" + can_path + "' is already registered");
 }
 
-TEST_F(RegistryTest, addDataFilePathUnallowedName)
+TEST_F(RegistryTest, addDataFilePathBadName)
 {
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::addDataFilePath("!", "unused");
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()), "Unallowed characters in '!'");
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(
+      Registry::addDataFilePath("!", "unused"),
+      "Unallowed characters in data file path name '!'; allowed characters = a-z, 0-9, _");
+}
+
+TEST_F(RegistryTest, addMissingDataFilePathBadName)
+{
+  EXPECT_MOOSEERROR_MSG(
+      Registry::addMissingDataFilePath("!", "unused"),
+      "Unallowed characters in data file path name '!'; allowed characters = a-z, 0-9, _");
 }
 
 TEST_F(RegistryTest, getDataPath)
@@ -192,22 +220,10 @@ TEST_F(RegistryTest, determineFilePathFailed)
   const std::string installed_path =
       MooseUtils::pathjoin(Moose::getExecutablePath(), "../share/" + name + "/data");
 
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::determineDataFilePath(name, path);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "Failed to determine data file path for '" + name +
-                        "'. Paths searched:\n\n  installed: \"" + installed_path +
-                        "\"\n  in-tree: " + path);
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(Registry::determineDataFilePath(name, path),
+                        "Failed to determine data file path for '" + name +
+                            "'. Paths searched:\n\n  installed: \"" + installed_path +
+                            "\"\n  in-tree: " + path);
 }
 
 TEST_F(RegistryTest, addDeprecatedAppDataFilePath)
@@ -229,42 +245,18 @@ TEST_F(RegistryTest, repositoryURL)
   const std::string repo_url = "github.com/foo/bar";
 
   // not registered
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::getRepositoryURL(repo_name);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "Registry::getRepositoryURL(): The repository '" + repo_name +
-                        "' is not registered.");
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(Registry::getRepositoryURL(repo_name),
+                        "Registry::getRepositoryURL(): The repository '" + repo_name +
+                            "' is not registered.");
 
   // register it
   Registry::addRepository(repo_name, repo_url);
   EXPECT_EQ(Registry::getRepositoryURL(repo_name), repo_url);
 
   // re-register, different URL
-  EXPECT_THROW(
-      {
-        try
-        {
-          Registry::addRepository(repo_name, "badurl");
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "Registry::registerRepository(): The repository '" + repo_name +
-                        "' is already registered "
-                        "with a different URL '" +
-                        repo_url + "'.");
-          throw;
-        }
-      },
-      std::exception);
+  EXPECT_MOOSEERROR_MSG(Registry::addRepository(repo_name, "badurl"),
+                        "Registry::registerRepository(): The repository '" + repo_name +
+                            "' is already registered "
+                            "with a different URL '" +
+                            repo_url + "'.");
 }

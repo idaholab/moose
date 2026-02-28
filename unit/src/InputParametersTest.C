@@ -140,7 +140,8 @@ TEST(InputParametersTest, checkSetDocStringError)
 {
   InputParameters params = emptyInputParameters();
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() {
+      [&params]()
+      {
         params.setDocString("little_guy",
                             "That little guy, I wouldn't worry about that little_guy.");
       },
@@ -774,4 +775,82 @@ TEST(InputParametersTest, queryAndGetObjectType)
   ASSERT_NE(type_ptr, nullptr);
   ASSERT_EQ(*type_ptr, object_type);
   ASSERT_EQ(params.getObjectType(), *type_ptr);
+}
+
+TEST(InputParametersTest, dataFileParams)
+{
+  const std::string cwd = std::filesystem::current_path();
+  const std::string moose_unit_data = std::filesystem::weakly_canonical(
+      std::filesystem::path(__FILE__).parent_path() / std::filesystem::path("../data"));
+
+  const std::string name = "test_param";
+  const auto get_value = [&name](const auto value) -> std::string
+  {
+    using value_T = std::decay_t<decltype(value)>;
+    InputParameters params = emptyInputParameters();
+    params.addParam<value_T>(name, value, "doc");
+    params.finalize("unused");
+    return params.get<value_T>(name);
+  };
+
+  // relative path, becomes absolute with graceful despite not being found
+  EXPECT_EQ(get_value(FileName("foo")), cwd + "/foo");
+  // relative path, errors when not graceful
+  EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(DataFileName("foo")),
+                                 name + ": Unable to find the data file 'foo'.");
+  // absolute path, still absolute with graceful
+  EXPECT_EQ(get_value(FileName("/foo")), "/foo");
+  // absolute path, errors when not graceful
+  EXPECT_MOOSEERROR_MSG(get_value(DataFileName("/foo")),
+                        name + ": The absolute path '/foo' does not exist or is not readable.");
+  // invalid explicit data name, same error with or without graceful
+  {
+    const std::string value = "bad:foo";
+    const std::string message = name + ": Data from 'bad' is not registered to be searched";
+    EXPECT_MOOSEERROR_MSG(get_value(FileName(value)), message);
+    EXPECT_MOOSEERROR_MSG(get_value(DataFileName(value)), message);
+  }
+  // explicit data name, file doesn't exist, same error with or without graceful
+  {
+    const std::string value = "moose_unit:foo";
+    const std::string message = name + ": The path 'foo' was not found in data from 'moose_unit'";
+    EXPECT_MOOSEERROR_MSG(get_value(FileName(value)), message);
+    EXPECT_MOOSEERROR_MSG(get_value(DataFileName(value)), message);
+  }
+  // explicit data name, file does exist; make sure this works for all
+  // non-DataFileName types
+  {
+    const std::string value = "moose_unit:example_file";
+    const std::string path = moose_unit_data + "/example_file";
+    EXPECT_EQ(get_value(FileName(value)), path);
+    EXPECT_EQ(get_value(FileNameNoExtension(value)), path);
+    EXPECT_EQ(get_value(MeshFileName(value)), path);
+    EXPECT_EQ(get_value(MatrixFileName(value)), path);
+    EXPECT_EQ(get_value(DataFileName(value)), path);
+  }
+  // valid data name, not found when not searching data
+  EXPECT_EQ(get_value(FileName("example_file")), cwd + "/example_file");
+  // valid data name, found when searching with DataFileName
+  EXPECT_EQ(get_value(DataFileName("example_file")), moose_unit_data + "/example_file");
+  // can't use absolute paths when explicit with or without graceful
+  {
+    const std::string value = "moose_unit:/foo";
+    const std::string message = name + ": Cannot use an absolute path";
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(FileName(value)), message);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(DataFileName(value)), message);
+  }
+  // can't use ./ paths when explicit with or without graceful
+  {
+    const std::string value = "moose_unit:./foo";
+    const std::string message = name + ": Cannot use a path that starts with './'";
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(FileName(value)), message);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(DataFileName(value)), message);
+  }
+  // can't use out of dir paths when explicit with or without graceful
+  {
+    const std::string value = "moose_unit:../foo";
+    const std::string message = name + ": Cannot use a relative path";
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(FileName(value)), message);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(get_value(DataFileName(value)), message);
+  }
 }

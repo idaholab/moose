@@ -677,71 +677,76 @@ InputParameters::finalize(const std::string & parsing_syntax)
 
   checkParams(parsing_syntax);
 
-  // Helper for setting the absolute paths for each set file name parameter
-  const auto set_absolute_path = [this](const std::string & param_name, auto & value)
+  // Set parameters that represent file types
+  for (const auto & name_value : *this)
   {
-    // We don't need to set a path if nothing is there
-    if (value.empty())
-      return;
+    const auto & param_name = name_value.first;
+    const auto & param_value = name_value.second;
 
-    std::filesystem::path value_path = std::string(value);
-    // Is already absolute, nothing to do
-    if (value_path.is_absolute())
-      return;
+    // Helper for setting a file typed parameter value
+    const auto set_filename = [&](auto & value)
+    {
+      constexpr bool is_data_file_name =
+          std::is_same_v<std::decay_t<decltype(value)>, DataFileName>;
 
-    // The base by which to make things relative to
-    const auto file_base = getFileBase(param_name);
-    value = std::filesystem::absolute(file_base / value_path).c_str();
-  };
+      // We have behavior (which is gross) that requires that for
+      // everything but DataFileName, if the value is empty we
+      // don't bother looking for it
+      if constexpr (!is_data_file_name)
+      {
+        if (value.empty())
+          return;
+      }
 
-  // Set the absolute path for each file name typed parameter
-  for (const auto & [param_name, param_value] : *this)
-  {
+      // Setup options for searching for the path
+      Moose::DataFileUtils::GetPathOptions options;
+      // Associate relative path searches with the folder
+      // that input file that has this parameter is located
+      options.base = getFileBase(param_name);
+      // If we don't explicitly have a DataFileName parameter,
+      // we only want to augment cases where a data name is
+      // explicitly set (like moose:file). We don't want to
+      // search all other data. To presere previous behavior,
+      // we also don't want to error if nothing is found; for
+      // example if a relative or absolute path is not found.
+      // The only time we'll error is if the data name is
+      // explicitly set and the path doesn't exist in the data
+      // or if that data name isn't registered.
+      if constexpr (!is_data_file_name)
+      {
+        options.search_all_data = false;
+        options.graceful = true;
+      }
+
+      Moose::DataFileUtils::Path path;
+      try
+      {
+        Moose::ScopedThrowOnError scoped_throw_on_error;
+        path = Moose::DataFileUtils::getPath(value, options);
+      }
+      catch (std::exception & e)
+      {
+        paramError(param_name, e.what());
+      }
+
+      value = path.path;
+      at(param_name)._data_file_name_path = path;
+    };
+
 #define set_if_filename(type)                                                                      \
   else if (auto type_value = dynamic_cast<Parameters::Parameter<type> *>(param_value.get()))       \
-      set_absolute_path(param_name, type_value->set());                                            \
+      set_filename(type_value->set());                                                             \
   else if (auto type_values = dynamic_cast<Parameters::Parameter<std::vector<type>> *>(            \
-               param_value.get())) for (auto & value : type_values->set())                         \
-      set_absolute_path(param_name, value)
+               param_value.get())) for (auto & value : type_values->set()) set_filename(value)
 
     if (false)
       ;
-    // Note that we explicitly skip DataFileName here because we do not want absolute
-    // file paths for data files, as they're searched in the data directories
     set_if_filename(FileName);
     set_if_filename(FileNameNoExtension);
     set_if_filename(MeshFileName);
     set_if_filename(MatrixFileName);
+    set_if_filename(DataFileName);
 #undef set_if_filename
-    // Set paths for data files
-    else if (auto data_file_name =
-                 dynamic_cast<Parameters::Parameter<DataFileName> *>(param_value.get()))
-    {
-      Moose::DataFileUtils::Path found_path;
-      std::optional<std::string> error;
-
-      // Catch this so that we can add additional error context if it fails (the param path)
-      {
-        Moose::ScopedThrowOnError scoped_throw_on_error;
-        try
-        {
-          found_path =
-              Moose::DataFileUtils::getPath(data_file_name->get(), getFileBase(param_name));
-        }
-        catch (std::exception & e)
-        {
-          error = e.what();
-        }
-      }
-
-      if (error)
-        paramError(param_name, *error);
-
-      // Set the value to the absolute searched path
-      data_file_name->set() = found_path.path;
-      // And store the path in metadata so that we can dump it later
-      at(param_name)._data_file_name_path = found_path;
-    }
   }
 
   _finalized = true;

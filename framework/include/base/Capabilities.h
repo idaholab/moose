@@ -20,12 +20,20 @@ class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, check);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, dump);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, isInstallationType);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppIsRelocated);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppisInTree);
+class GTEST_TEST_CLASS_NAME_(RegistryTest, addDataFilePath);
+class GTEST_TEST_CLASS_NAME_(RegistryTest, addMissingDataFilePath);
 class CapabilitiesTest;
+class DataFileUtilsTest;
+class RegistryTest;
 #endif
 
 class AppFactory;
+class Registry;
 class MooseApp;
 
 namespace Moose::internal
@@ -43,21 +51,27 @@ class Capabilities : public CapabilityRegistry
 {
 public:
   /// Passkey for get()
-  class GetPassKey
+  class GetCapabilitiesPassKey
   {
     friend AppFactory;
     friend MooseApp;
+    friend Registry;
 #ifdef MOOSE_UNIT_TEST
     friend class ::CapabilitiesTest;
+    friend class ::DataFileUtilsTest;
+    friend class ::RegistryTest;
     FRIEND_TEST(::CapabilitiesTest, augment);
     FRIEND_TEST(::CapabilitiesTest, augmentParseError);
     FRIEND_TEST(::CapabilitiesTest, check);
     FRIEND_TEST(::CapabilitiesTest, dump);
+    FRIEND_TEST(::CapabilitiesTest, isInstallationType);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
     FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+    FRIEND_TEST(::RegistryTest, addDataFilePath);
+    FRIEND_TEST(::RegistryTest, addMissingDataFilePath);
 #endif
-    GetPassKey() {}
-    GetPassKey(const GetPassKey &) {}
+    GetCapabilitiesPassKey() {}
+    GetCapabilitiesPassKey(const GetCapabilitiesPassKey &) {}
   };
 
   /**
@@ -67,7 +81,7 @@ public:
    * of capabilities should be done through the
    * MooseApp::add[Bool,Int,String]capability() method.
    */
-  static Capabilities & get(const GetPassKey);
+  static Capabilities & getCapabilities(const GetCapabilitiesPassKey);
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
@@ -101,10 +115,30 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
+  /**
+   * @return Whether or not the application is relocated
+   */
+  bool isRelocated() const { return isInstallationType("relocated"); }
+
+  /**
+   * @return Whether or not the application is in-tree
+   */
+  bool isInTree() const { return isInstallationType("in_tree"); }
+
 private:
 #ifdef MOOSE_UNIT_TEST
   friend class ::CapabilitiesTest;
+  friend class ::DataFileUtilsTest;
+  friend class ::RegistryTest;
+  FRIEND_TEST(::CapabilitiesTest, isInstallationType);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppIsRelocated);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppisInTree);
 #endif
+
+  /**
+   * Helper for isRelocated() and isInTree()
+   */
+  bool isInstallationType(const std::string & installation_type) const;
 
   /**
    * Register the MOOSE capabilities.
