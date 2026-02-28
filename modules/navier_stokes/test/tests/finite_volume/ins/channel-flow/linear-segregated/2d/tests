@@ -48,4 +48,11 @@
     abs_zero = 5e-6
     rel_err = 1e-5
   []
+  [normal_velocity]
+    type = 'Exodiff'
+    input = rotated-channel.i
+    exodiff = rotated-channel_out.e
+    requirement = 'The system shall support a user to suppling a single normal velocity scalar and compute the corresponding velocity vector via the boundary face geometry.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
