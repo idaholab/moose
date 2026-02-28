@@ -21,4 +21,12 @@
                    field when the surface temperature equals the ambient temperature,
                    verifying the correct limiting behavior of the boundary condition.'
   []
+  [second_order_convergence]
+    type = PythonUnitTest
+    input = 'test_convergence.py'
+    max_threads = 1
+    requirement = 'The system shall achieve second-order spatial accuracy (O(h^2) convergence
+                   in the L2 norm) for the radiative boundary condition on a manufactured
+                   solution with a quadratic exact temperature profile and a constant body force.'
+  []
 []

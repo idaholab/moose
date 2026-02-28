@@ -9,34 +9,33 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionFunctorRobinBCBase.h"
 
 /**
  * Boundary condition for radiative heat flux in a linear finite volume system.
  * The radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is Newton-linearized
- * around the current solution (T_old) at each assembly:
- *   q ≈ [4*sigma*eps*T_old^3]*T - [sigma*eps*(3*T_old^4 + Tinf^4)]
- * yielding a matrix contribution and an explicit RHS contribution.
- * Outer Picard convergence is driven by transient stepping or a coupled nonlinear solve.
+ * around the extrapolated boundary face temperature T_b_old at each assembly step:
+ *   k * dT/dn + [4*sigma*eps*T_b_old^3]*T_b = [sigma*eps*(3*T_b_old^4 + Tinf^4)]
+ * This is a Robin BC with alpha=k, beta=4*sigma*eps*T_b_old^3, gamma=sigma*eps*(3*T_b_old^4+Tinf^4),
+ * yielding second-order spatial accuracy. Outer Picard convergence is driven by transient
+ * stepping or a coupled nonlinear solve.
  */
-class LinearFVFunctorRadiativeBC : public LinearFVAdvectionDiffusionBC
+class LinearFVFunctorRadiativeBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
 public:
   static InputParameters validParams();
 
   LinearFVFunctorRadiativeBC(const InputParameters & parameters);
 
-  virtual Real computeBoundaryValue() const override;
-  virtual Real computeBoundaryNormalGradient() const override;
-  virtual Real computeBoundaryValueMatrixContribution() const override;
-  virtual Real computeBoundaryValueRHSContribution() const override;
-  virtual Real computeBoundaryGradientMatrixContribution() const override;
-  virtual Real computeBoundaryGradientRHSContribution() const override;
-
-  /// The contributions already represent the total heat flux (no additional k multiplication).
-  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
-
 protected:
+  virtual Real getAlpha(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
+
+private:
+  /// Extrapolates the boundary face temperature from the previous Picard iteration.
+  Real extrapolateFaceTemperature(Moose::StateArg state) const;
+
   /// Emissivity functor (epsilon)
   const Moose::Functor<Real> & _emissivity;
 
@@ -46,6 +45,6 @@ protected:
   /// Stefan-Boltzmann constant (sigma)
   const Real _sigma;
 
-  /// Thermal conductivity functor, used for boundary gradient/value extrapolation
+  /// Thermal conductivity functor; must match the diffusion_coeff in LinearFVDiffusion
   const Moose::Functor<Real> & _diffusion_coeff;
 };
