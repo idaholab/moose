@@ -385,33 +385,19 @@ FEProblemBase::reinitKokkosMaterials()
 
 void
 FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
-                                                const Moose::AuxGroup & group,
-                                                TheWarehouse::Query & primary_query)
+                                                TheWarehouse::Query & query)
 {
   try
   {
     TIME_SECTION("computeKokkosUserObjects", 1, "Computing Kokkos User Objects");
 
-    // Add group to query
-
-    if (group == Moose::PRE_IC)
-      primary_query.condition<AttribPreIC>(true);
-    else if (group == Moose::PRE_AUX)
-      primary_query.condition<AttribPreAux>(type);
-    else if (group == Moose::POST_AUX)
-      primary_query.condition<AttribPostAux>(type);
-
     // Query everything first to obtain a list of execution groups
 
-    std::vector<UserObjectBase *> uos;
-    primary_query.clone().queryIntoUnsorted(uos);
+    std::vector<Moose::Kokkos::UserObject *> uos;
+    query.clone().queryIntoUnsorted(uos);
 
     if (!uos.size())
       return;
-
-    std::set<int> execution_groups;
-    for (const auto uo : uos)
-      execution_groups.insert(uo->getParam<int>("execution_order_group"));
 
     // Resolve dependencies
 
@@ -483,30 +469,22 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
     {
       TIME_SECTION("KokkosUserObject", 1);
 
-      // Iterate over execution order groups
+      // Compute user objects
 
-      for (const auto execution_group : execution_groups)
-      {
-        std::vector<Moose::Kokkos::UserObject *> userobjs;
-        primary_query.clone()
-            .condition<AttribExecutionOrderGroup>(execution_group)
-            .queryInto(userobjs);
+      if (type == EXEC_LINEAR)
+        for (auto obj : uos)
+          obj->residualSetup();
+      else if (type == EXEC_NONLINEAR)
+        for (auto obj : uos)
+          obj->jacobianSetup();
 
-        if (type == EXEC_LINEAR)
-          for (auto obj : userobjs)
-            obj->residualSetup();
-        else if (type == EXEC_NONLINEAR)
-          for (auto obj : userobjs)
-            obj->jacobianSetup();
+      for (auto obj : uos)
+        obj->initialize();
 
-        for (auto obj : userobjs)
-          obj->initialize();
+      for (auto obj : uos)
+        obj->compute();
 
-        for (auto obj : userobjs)
-          obj->compute();
-
-        kokkosJoinAndFinalize(userobjs);
-      }
+      kokkosJoinAndFinalize(uos);
     }
 
     // Close and restore vectors
