@@ -62,7 +62,7 @@ LowerDBlockFromSidesetGenerator::generate()
                                  : MooseMeshUtils::getNextFreeSubdomainID(*mesh);
   try
   {
-    MooseMeshUtils::createSubdomainFromSidesets(mesh,
+    MooseMeshUtils::createSubdomainFromSidesets(*mesh,
                                                 _sideset_names,
                                                 new_block_id,
                                                 isParamValid("new_block_name")
