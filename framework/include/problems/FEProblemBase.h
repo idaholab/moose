@@ -1082,16 +1082,11 @@ public:
   /**
    * Project a function onto a range of elements for a given variable
    *
-   * @warning The current implementation is not ideal. The projection takes place on all local
-   * active elements, ignoring the specified \p elem_range. After the projection, dof values on the
-   * specified \p elem_range are copied over to the current solution vector. This should be fixed
-   * once the project_vector or project_solution API is modified to take a custom element range.
-   *
    * \param elem_range          Element range to project on
    * \param func                Function to project
    * \param func_grad           Gradient of the function
    * \param params              Parameters to pass to the function
-   * \param target_var          variable name to project
+   * \param target_vars         variable names to project
    */
   void projectFunctionOnCustomRange(ConstElemRange & elem_range,
                                     Number (*func)(const Point &,
@@ -1103,7 +1098,7 @@ public:
                                                           const std::string &,
                                                           const std::string &),
                                     const libMesh::Parameters & params,
-                                    const VariableName & target_var);
+                                    const std::vector<VariableName> & target_vars);
 
   // Materials
   virtual void addMaterial(const std::string & material_name,
