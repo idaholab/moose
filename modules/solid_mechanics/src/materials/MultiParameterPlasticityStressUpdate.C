@@ -809,48 +809,6 @@ MultiParameterPlasticityStressUpdate::consistentTangentOperatorV(
   cto = (cto.transposeMajor() * inv).transposeMajor();
 }
 
-std::vector<RankTwoTensor>
-MultiParameterPlasticityStressUpdate::dstress_param_dstress(const RankTwoTensor & /*stress*/) const
-{
-  std::vector<RankTwoTensor> dummy(_num_sp);
-  return dummy;
-}
-
-void
-MultiParameterPlasticityStressUpdate::dstressparam_dstress(const RankTwoTensor & stress,
-                                                           std::vector<RankTwoTensor> & dsp) const
-{
-  /*
-    Maybe put this deprecated message in at some stage.  It causes CIVET to fail, however
-  mooseDeprecated(
-      "The function std::vector<RankTwoTensor> dstress_param_dstress(stress) is deprecated.  "
-      "You need to override the new function void dstressparam_dstress(stress, dsp)");
-  */
-  mooseAssert(dsp.size() == _num_sp, "dsp incorrectly sized in dstressparam_dstress");
-  dsp = dstress_param_dstress(stress);
-}
-
-std::vector<RankFourTensor>
-MultiParameterPlasticityStressUpdate::d2stress_param_dstress(const RankTwoTensor & /*stress*/) const
-{
-  std::vector<RankFourTensor> dummy(_num_sp);
-  return dummy;
-}
-
-void
-MultiParameterPlasticityStressUpdate::d2stressparam_dstress(
-    const RankTwoTensor & stress, std::vector<RankFourTensor> & d2sp) const
-{
-  /*
-    Maybe put this deprecated message in at some stage.  It causes CIVET to fail, however
-  mooseDeprecated(
-      "The function std::vector<RankFourTensor> d2stress_param_dstress(stress) is deprecated.  "
-      "You need to override the new function void d2stressparam_dstress(stress, d2sp)");
-  */
-  mooseAssert(d2sp.size() == _num_sp, "dsp incorrectly sized in d2stressparam_dstress");
-  d2sp = d2stress_param_dstress(stress);
-}
-
 void
 MultiParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
     const RankTwoTensor & /*stress_trial*/,
