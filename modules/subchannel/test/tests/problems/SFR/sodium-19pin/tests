@@ -16,7 +16,10 @@
     csvdiff = test19_implicit_out.csv
     valgrind = NONE
     recover = false
-    rel_err = 6e-04 #Tolerance added due to CIVET machine difference, PR: Qprime #31380
+    # Tolerance added due to CIVET machine difference
+    # See PR: Qprime #31380
+    # and PR: various mods #31283
+    rel_err = 8e-04
     allow_warnings = true
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
