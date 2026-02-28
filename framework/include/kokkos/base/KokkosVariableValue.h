@@ -11,7 +11,7 @@
 
 #include "KokkosDatum.h"
 
-#include "MooseVariableBase.h"
+#include "MooseVariableFieldBase.h"
 
 namespace Moose::Kokkos
 {
@@ -134,12 +134,32 @@ public:
    * @param tag The vector tag name
    * @param dof Whether to get DOF values
    */
-  VariableValue(const MooseVariableBase & var,
+  VariableValue(const MooseVariableFieldBase & var,
                 const TagName & tag = Moose::SOLUTION_TAG,
                 bool dof = false)
     : _var(var, tag), _dof(dof)
   {
   }
+  /**
+   * Constructor
+   * @param vars The MOOSE variables
+   * @param tag The vector tag name
+   * @param dof Whether to get DOF values
+   */
+  ///@{
+  VariableValue(const std::vector<const MooseVariableFieldBase *> & vars,
+                const TagName & tag = Moose::SOLUTION_TAG,
+                bool dof = false)
+    : _var(vars, tag), _dof(dof)
+  {
+  }
+  VariableValue(const std::vector<MooseVariableFieldBase *> & vars,
+                const TagName & tag = Moose::SOLUTION_TAG,
+                bool dof = false)
+    : _var(vars, tag), _dof(dof)
+  {
+  }
+  ///@}
 
   /**
    * Get whether the variable was coupled
@@ -150,11 +170,17 @@ public:
   /**
    * Get the current variable value
    * @param datum The Datum object of the current thread
-   * @param qp The local quadrature point index
+   * @param idx The local quadrature point index or DOF index
    * @param comp The variable component
    * @returns The variable value
    */
-  KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
+  ///@{
+  KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const;
+  KOKKOS_FUNCTION Real operator()(AssemblyDatum & datum, unsigned int idx) const
+  {
+    return this->operator()(datum, idx, datum.comp());
+  }
+  ///@}
 
   /**
    * Get the Kokkos variable
@@ -190,10 +216,27 @@ public:
    * @param var The MOOSE variable
    * @param tag The vector tag name
    */
-  VariableGradient(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+  VariableGradient(const MooseVariableFieldBase & var, const TagName & tag = Moose::SOLUTION_TAG)
     : _var(var, tag)
   {
   }
+  /**
+   * Constructor
+   * @param vars The MOOSE variables
+   * @param tag The vector tag name
+   */
+  ///@{
+  VariableGradient(const std::vector<const MooseVariableFieldBase *> & vars,
+                   const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(vars, tag)
+  {
+  }
+  VariableGradient(const std::vector<MooseVariableFieldBase *> vars,
+                   const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(vars, tag)
+  {
+  }
+  ///@}
 
   /**
    * Get whether the variable was coupled
@@ -204,12 +247,17 @@ public:
   /**
    * Get the current variable gradient
    * @param datum The Datum object of the current thread
-   * @param idx The local quadrature point or DOF index
+   * @param qp The local quadrature point index
    * @param comp The variable component
    * @returns The variable gradient
    */
-  KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const;
-
+  ///@{
+  KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int qp) const
+  {
+    return this->operator()(datum, qp, datum.comp());
+  }
+  ///@}
   /**
    * Get the Kokkos variable
    * @returns The Kokkos variable

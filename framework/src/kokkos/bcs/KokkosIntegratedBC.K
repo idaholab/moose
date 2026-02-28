@@ -25,16 +25,18 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
     _grad_test(),
     _phi(),
     _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
+    _u(_kokkos_var),
+    _grad_u(_kokkos_var)
 {
-  addMooseVariableDependency(&_var);
+  addMooseVariableDependency(variables());
 }
 
 void
 IntegratedBC::computeResidual()
 {
-  Policy policy(0, numKokkosBoundarySides());
+  _thread.resize({variables().size(), numKokkosBoundarySides()});
+
+  Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
@@ -47,7 +49,9 @@ IntegratedBC::computeJacobian()
 {
   if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
   {
-    Policy policy(0, numKokkosBoundarySides());
+    _thread.resize({variables().size(), numKokkosBoundarySides()});
+
+    Policy policy(0, _thread.size());
 
     if (!_jacobian_dispatcher)
       _jacobian_dispatcher = DispatcherRegistry::build<JacobianLoop>(this, type());
@@ -59,7 +63,15 @@ IntegratedBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides()});
+    if (variables().size() > 1)
+      for (unsigned int i = 1; i < variables().size(); ++i)
+        if (sys.getCoupling(_kokkos_var.var(0)).size() !=
+            sys.getCoupling(_kokkos_var.var(i)).size())
+          mooseError("For multi-variable kernels/BCs, all variables should have the same number of "
+                     "off-diagonal coupling variables.");
+
+    _thread.resize(
+        {variables().size(), sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides()});
 
     Policy policy(0, _thread.size());
 

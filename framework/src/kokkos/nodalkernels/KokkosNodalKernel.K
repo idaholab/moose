@@ -21,16 +21,19 @@ NodalKernel::validParams()
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
   : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(_var, Moose::SOLUTION_TAG, true),
+    _u(_kokkos_var, true),
     _boundary_restricted(boundaryRestricted())
 {
-  addMooseVariableDependency(&_var);
+  addMooseVariableDependency(variables());
 }
 
 void
 NodalKernel::computeResidual()
 {
-  Policy policy(0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
+  _thread.resize({variables().size(),
+                  _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes()});
+
+  Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
@@ -43,7 +46,10 @@ NodalKernel::computeJacobian()
 {
   if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
   {
-    Policy policy(0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
+    _thread.resize({variables().size(),
+                    _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes()});
+
+    Policy policy(0, _thread.size());
 
     if (!_jacobian_dispatcher)
       _jacobian_dispatcher = DispatcherRegistry::build<JacobianLoop>(this, type());
@@ -55,7 +61,15 @@ NodalKernel::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(),
+    if (variables().size() > 1)
+      for (unsigned int i = 1; i < variables().size(); ++i)
+        if (sys.getCoupling(_kokkos_var.var(0)).size() !=
+            sys.getCoupling(_kokkos_var.var(i)).size())
+          mooseError("For multi-variable kernels/BCs, all variables should have the same number of "
+                     "off-diagonal coupling variables.");
+
+    _thread.resize({variables().size(),
+                    sys.getCoupling(_kokkos_var.var()).size(),
                     _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes()});
 
     Policy policy(0, _thread.size());

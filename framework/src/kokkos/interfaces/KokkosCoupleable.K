@@ -13,6 +13,8 @@
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 
+using CoupleableKey = Moose::Kokkos::Variable::CoupleableKey;
+
 Moose::Kokkos::Variable
 Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
                                            const std::string & tag_name,
@@ -34,10 +36,10 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
-    variable.init({var}, tag, {});
+    variable.init(*var, tag);
   }
   else
-    variable.init({_c_parameters.defaultCoupledValue(var_name, comp)}, {});
+    variable.init({_c_parameters.defaultCoupledValue(var_name, comp)}, CoupleableKey{});
 
   return variable;
 }
@@ -52,7 +54,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
 
   if (isCoupled(var_name))
   {
-    std::vector<const MooseVariableBase *> vars;
+    std::vector<const MooseVariableFieldBase *> vars;
 
     for (unsigned int comp = 0; comp < components; ++comp)
     {
@@ -71,7 +73,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
 
     const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
-    variable.init({vars}, tag, {});
+    variable.init(vars, tag);
   }
   else
   {
@@ -80,7 +82,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
     for (unsigned int comp = 0; comp < components; ++comp)
       default_values[comp] = _c_parameters.defaultCoupledValue(var_name, comp);
 
-    variable.init(default_values, {});
+    variable.init(default_values, CoupleableKey{});
   }
 
   return variable;
@@ -91,7 +93,7 @@ Coupleable::kokkosZeroVariable() const
 {
   Moose::Kokkos::Variable variable;
 
-  variable.init({0}, {});
+  variable.init({0}, CoupleableKey{});
 
   return variable;
 }
