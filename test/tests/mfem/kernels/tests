@@ -186,4 +186,28 @@
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMNonLinearDiffusion]
+    type = XMLDiff
+    input = nldiffusion.i
+    xmldiff = 'OutputData/NLDiffusion/Run0/Run0.pvd
+                OutputData/NLDiffusion/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a non-linear diffusion problem using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []  
+  [MFEMNonLinearDiffusionNonZeroRHS]
+    type = XMLDiff
+    input = nldiffusion.i
+    cli_args = 'Kernels/active="nl force" '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/NLDiffusionNonZeroRHS '
+    xmldiff = 'OutputData/NLDiffusionNonZeroRHS/Run0/Run0.pvd
+                OutputData/NLDiffusionNonZeroRHS/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a non-linear diffusion with non-zero rhs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []  
 []

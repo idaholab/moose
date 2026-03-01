@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+//* https://www.gnu.org/licenses/lgpl-2.1.html*/
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -192,7 +192,10 @@ public:
    * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
    * similar to the linear solvers.
    */
-  void addMFEMNonlinearSolver();
+  void addMFEMNonlinearSolver(unsigned int nl_max_its,
+                              mfem::real_t nl_abs_tol,
+                              mfem::real_t nl_rel_tol,
+                              unsigned int print_level);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
