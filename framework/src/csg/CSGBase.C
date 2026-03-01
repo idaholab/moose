@@ -365,6 +365,126 @@ CSGBase::setLatticeUniverses(
 }
 
 void
+CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
+                             TransformationType type,
+                             const std::tuple<Real, Real, Real> & values)
+{
+  // Validate the transformation values
+  if (!isValidTransformationValue(type, values))
+    mooseError("Invalid transformation values provided for transformation type ",
+               getTransformationTypeString(type));
+
+  // Use std::visit to handle each type in the variant
+  std::visit(
+      [&](const auto & obj)
+      {
+        using T = std::decay_t<decltype(obj.get())>;
+
+        // Handle each CSG object type differently because each needs to check that it exists in
+        // this base instance
+        if constexpr (std::is_same_v<T, CSGCell>)
+        {
+          const CSGCell & cell = obj.get();
+          if (!checkCellInBase(cell))
+            mooseError("Cannot apply transformation to cell ",
+                       cell.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGCell & mutable_cell = _cell_list.getCell(cell.getName());
+          mooseAssert(mutable_cell == cell, "Mutable cell does not match const cell passed in.");
+          mutable_cell.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGSurface>)
+        {
+          const CSGSurface & surface = obj.get();
+          if (!checkSurfaceInBase(surface))
+            mooseError("Cannot apply transformation to surface ",
+                       surface.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGSurface & mutable_surface = _surface_list.getSurface(surface.getName());
+          mooseAssert(mutable_surface == surface,
+                      "Mutable surface does not match const surface passed in.");
+          mutable_surface.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGUniverse>)
+        {
+          const CSGUniverse & universe = obj.get();
+          if (!checkUniverseInBase(universe))
+            mooseError("Cannot apply transformation to universe ",
+                       universe.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGUniverse & mutable_universe = _universe_list.getUniverse(universe.getName());
+          mooseAssert(mutable_universe == universe,
+                      "Mutable universe does not match const universe passed in.");
+          mutable_universe.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGLattice>)
+        {
+          const CSGLattice & lattice = obj.get();
+          if (!checkLatticeInBase(lattice))
+            mooseError("Cannot apply transformation to lattice ",
+                       lattice.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGLattice & mutable_lattice = _lattice_list.getLattice(lattice.getName());
+          mooseAssert(mutable_lattice == lattice,
+                      "Mutable lattice does not match const lattice passed in.");
+          mutable_lattice.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGRegion>)
+        {
+          // iterate on the surfaces of the region and apply the transformation to those surfaces
+          const CSGRegion & region = obj.get();
+          const auto & surfaces = region.getSurfaces();
+          for (const CSGSurface & surface : surfaces)
+          {
+            if (!checkSurfaceInBase(surface))
+              mooseError("Cannot apply transformation to region with surface ",
+                         surface.getName(),
+                         " that is not in this CSGBase instance.");
+            applyTransformation(surface, type, values);
+          }
+        }
+        else
+          mooseError("Transformation not implemented for this object type: ", typeid(T).name());
+      },
+      csg_object);
+}
+
+void
+CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle)
+{
+  // convert axis string to lowercase:
+  std::transform(
+      axis.begin(), axis.end(), axis.begin(), [](unsigned char c) { return std::tolower(c); });
+
+  // convert to the Euler angles (phi, theta, psi) based on axis
+  Real phi = 0.0;
+  Real theta = 0.0;
+  Real psi = 0.0;
+  if (axis == "x")
+    theta = angle;
+  else if (axis == "y")
+  {
+    phi = 90.0;
+    theta = angle;
+    psi = -90.0;
+  }
+  else if (axis == "z")
+    phi = angle;
+  else
+    mooseError("Invalid axis '", axis, "' provided for axis rotation. Must be 'x', 'y', or 'z'.");
+
+  applyTransformation(csg_object, TransformationType::ROTATION, std::make_tuple(phi, theta, psi));
+}
+
+void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
   joinSurfaceList(base->getSurfaceList());
@@ -494,15 +614,20 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region) const
   auto & surfs = region.getSurfaces();
   for (const CSGSurface & s : surfs)
   {
-    auto sname = s.getName();
-    // if there is no surface by this name at all, there will be an error from getSurface
-    const auto & list_surf = _surface_list.getSurface(s.getName());
-    // if there is a surface by the same name, check that it is actually the surface being used
-    // (ie same surface points to same location in memory)
-    if (&s != &list_surf)
-      mooseError("Region is being set with a surface named " + sname +
+    if (!checkSurfaceInBase(s))
+      mooseError("Region is being set with a surface named " + s.getName() +
                  " that is different from the surface of the same name in the CSGBase instance.");
   }
+}
+
+bool
+CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
+{
+  auto name = surface.getName();
+  // if no surface by this name exists, an error will be produced by getSurface
+  auto & list_surf = _surface_list.getSurface(name);
+  // return whether that the surface in the list is the same as the surface provided (in memory)
+  return &surface == &list_surf;
 }
 
 bool
@@ -599,6 +724,11 @@ CSGBase::generateOutput() const
     csg_json["surfaces"][surf_name] = {{"type", s.getSurfaceType()}, {"coefficients", {}}};
     for (const auto & c : coeffs)
       csg_json["surfaces"][surf_name]["coefficients"][c.first] = c.second;
+    // include any information about transformations if present
+    const auto & transformations = s.getTransformations();
+    if (transformations.size() > 0)
+      csg_json["surfaces"][surf_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // Print out cell information
@@ -614,6 +744,11 @@ CSGBase::generateOutput() const
     csg_json["cells"][cell_name]["region_infix"] = cell_region_infix;
     csg_json["cells"][cell_name]["region_postfix"] = cell_region_postfix;
     csg_json["cells"][cell_name]["fill"] = fill_name;
+    // include any information about transformations if present
+    const auto & transformations = c.getTransformations();
+    if (transformations.size())
+      csg_json["cells"][cell_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // Print out universe information
@@ -627,11 +762,16 @@ CSGBase::generateOutput() const
       csg_json["universes"][univ_name]["cells"].push_back(c.getName());
     if (u.isRoot())
       csg_json["universes"][univ_name]["root"] = u.isRoot();
+    // include any information about transformations if present
+    const auto & transformations = u.getTransformations();
+    if (transformations.size())
+      csg_json["universes"][univ_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // print out lattice information if lattices exist
   auto all_lats = getAllLattices();
-  if (all_lats.size() > 0)
+  if (all_lats.size())
   {
     csg_json["lattices"] = {};
     for (const CSGLattice & lat : all_lats)
@@ -652,6 +792,11 @@ CSGBase::generateOutput() const
         csg_json["lattices"][lat_name]["attributes"][attr.first] = attr.second;
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
+      // include any information about transformations if present
+      const auto & transformations = lat.getTransformations();
+      if (transformations.size())
+        csg_json["lattices"][lat_name]["transformations"] =
+            convertTransformationsToString(transformations);
     }
   }
 
@@ -678,5 +823,4 @@ CSGBase::operator!=(const CSGBase & other) const
 {
   return !(*this == other);
 }
-
 } // namespace CSG

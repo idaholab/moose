@@ -318,6 +318,60 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 
 !alert-end!
 
+### Transformations
+
+Three types of object transformations are supported in the `CSGBase` class: rotation, translation, and scaling.
+These transformations can be applied to any `CSGBase` object (`CSGSurface`, `CSGRegion`, `CSGCell`, `CSGUniverse`, and `CSGLattice`).
+When a transformation is applied, existing attributes for the object (such as surface coefficients) are not directly altered.
+Instead, information about the transformation applied is stored as vector of pairs on the object, where the first item in the pair is the type of transformation and the second item is the value of the transformation (stored as a size 3 vector).
+The order of the transformation vector is the order in which the transformations are applied.
+The types of transformations and the form of their values are shown in the table below.
+These transformations do not alter other information about the object because it is expected that the downstream connected code will process the transformations in a way that makes most sense for that code.
+
+| Transformation Type | Vector Values                                | Value Restrictions |
+|---------------------|----------------------------------------------|--------------------|
+| `TRANSLATION`       | $\{$ x-distance, y-distance, z-distance $\}$ | none               |
+| `ROTATION`          | $\{ \phi, \theta, \psi \}$                   | none               |
+| `SCALE`             | $\{$ x-scale, y-scale, z-scale $\}$          | non-zero           |
+
+!alert! note title=Rotation Angles
+
+Rotation angle is stored in Euler notation ($\phi$, $\theta$, $\psi$) using degrees, which is consistent with the [source/meshgenerators/TransformGenerator.md]. A convenience method is provided in `CSGBase` to specify a simple axis rotation (`applyAxisRotation()`) which will automatically convert the single angle rotation around a specified axis into the correct Euler notation.
+
+!alert-end!
+
+!alert! note title=CSGRegion Transformations
+
+If applying a transformation to a `CSGRegion` object, the `CSGRegion` object will not store the transformation information.Rather, the transformation will be applied to each `CSGSurface` associated with that `CSGRegion`. This means that if one `CSGSurface` object is used in multiple `CSGRegion` objects, all regions with that surface may be affected by the transformation. If the intention is to apply a transformation to just one use case of the shared `CSGSurface`, then a clone of that surface should be made prior to applying the transformation.
+
+!alert-end!
+
+Below are several examples of applying transformations:
+
+*Surface rotation using a vector of Euler angles:*
+
+!listing CSGBaseTest.C start=euler rotation end=euler_angles include-end=true
+
+!listing CSGBaseTest.C start=applyRotation(*surf end=applyRotation(*surf include-end=true
+
+*Rotation of a cell around the z-axis:*
+
+!listing TestCSGAxialSurfaceMeshGenerator.C start=apply rotation end=applyAxisRotation include-end=true
+
+*Translation of a Universe:*
+
+!listing CSGBaseTest.C start=apply multidirectional end=dists2
+
+!listing CSGBaseTest.C start=>applyTranslation(*univ end=>applyTranslation(*univ include-end=true
+
+*Scaling of a cell in the x and z directions:*
+
+!listing CSGBaseTest.C start=scaling vector end=scales include-end=true
+
+!listing CSGBaseTest.C start=>applyScaling(*cell end=>applyScaling(*cell include-end=true
+
+Any transformation that is applied to an object must be done through the methods available from `CSGBase`, but information about the transformations applied can be retrieved directly from each object with `getTransformations()`.
+
 ## Updating Existing CSGBase Objects
 
 An empty `CSGBase` object can be [initialized](#initialization) on its own in each `generateCSG` method for each mesh generator.
@@ -409,6 +463,7 @@ The code snippets provided here correspond to the `.C` file.
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=InputParameters
 
 The next example mesh generator builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adds planes to create a finite rectangular prism.
+This will also optionally rotate the generated cell a specified angle around the z-axis.
 
 !listing TestCSGAxialSurfaceMeshGenerator.C start=InputParameters
 

@@ -11,8 +11,10 @@
 
 #include "CSGBase.h"
 #include "CSGSphere.h"
+#include "CSGXCylinder.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
+#include "CSGTransformation.h"
 
 #include "MooseUnitUtils.h"
 
@@ -776,6 +778,270 @@ TEST(CSGBaseTest, testGetLatticeMethods)
     ASSERT_EQ(2, all_lats.size());
     ASSERT_TRUE(((all_lats[0].get() == lat) && (all_lats[1].get() == lat2)) ||
                 ((all_lats[0].get() == lat2) && (all_lats[1].get() == lat)));
+  }
+}
+
+/**
+ * CSGBase::applyTransformation methods
+ */
+
+/// Helper function to create a CSGBase object and various CSG objects for transformation tests
+void
+setupTransformationTestObjects(std::unique_ptr<CSGBase> & csg_obj,
+                               const CSGSurface *& surf,
+                               CSGRegion & reg,
+                               const CSGCell *& cell,
+                               const CSGUniverse *& univ,
+                               const CSGLattice *& lat)
+{
+  csg_obj = std::make_unique<CSGBase>();
+  // create various objects to apply transformations to
+  std::unique_ptr<CSGXCylinder> surf_ptr = std::make_unique<CSGXCylinder>("cyl", 0.0, 0.0, 1.0);
+  surf = &(csg_obj->addSurface(std::move(surf_ptr)));
+  reg = +(*surf);
+  cell = &(csg_obj->createCell("cell", reg));
+  std::vector<std::reference_wrapper<const CSGCell>> cells = {std::cref(*cell)};
+  univ = &(csg_obj->createUniverse("univ", cells));
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{std::cref(*univ)}};
+  std::unique_ptr<CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSGCartesianLattice>("lat", 1.0, univs);
+  lat = &(csg_obj->addLattice(std::move(lat_ptr)));
+}
+
+/// tests the various CSGBase::apply*Rotation convenience methods
+TEST(CSGBaseTest, testApplyRotation)
+{
+  // Setup objects for testing
+  std::unique_ptr<CSGBase> csg_obj;
+  const CSGSurface * surf;
+  CSGRegion reg = CSGRegion();
+  const CSGCell * cell;
+  const CSGUniverse * univ;
+  const CSGLattice * lat;
+  setupTransformationTestObjects(csg_obj, surf, reg, cell, univ, lat);
+
+  // rotation values to use for all tests
+  // simple axis rotation around each axis (x, y, z)
+  Real angle = 45.0;
+  // euler rotation
+  std::tuple<Real, Real, Real> euler_angles = {30.0, 45.0, 60.0};
+
+  // expected vector of rotations to be applied in this order (x, y, z, euler):
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_rotations = {
+      {TransformationType::ROTATION, {0.0, angle, 0.0}},    // around x-axis
+      {TransformationType::ROTATION, {90.0, angle, -90.0}}, // around y-axis
+      {TransformationType::ROTATION, {angle, 0.0, 0.0}},    // around z-axis
+      {TransformationType::ROTATION, euler_angles}};        // euler angless
+
+  // apply to surface
+  {
+    csg_obj->applyAxisRotation(*surf, "x", angle);
+    csg_obj->applyAxisRotation(*surf, "y", angle);
+    csg_obj->applyAxisRotation(*surf, "z", angle);
+    csg_obj->applyRotation(*surf, euler_angles);
+    ASSERT_EQ(surf->getTransformations(), expected_rotations);
+  }
+  // apply to cell
+  {
+    csg_obj->applyAxisRotation(*cell, "x", angle);
+    csg_obj->applyAxisRotation(*cell, "y", angle);
+    csg_obj->applyAxisRotation(*cell, "z", angle);
+    csg_obj->applyRotation(*cell, euler_angles);
+    ASSERT_EQ(cell->getTransformations(), expected_rotations);
+  }
+  // apply to universe
+  {
+    csg_obj->applyAxisRotation(*univ, "x", angle);
+    csg_obj->applyAxisRotation(*univ, "y", angle);
+    csg_obj->applyAxisRotation(*univ, "z", angle);
+    csg_obj->applyRotation(*univ, euler_angles);
+    ASSERT_EQ(univ->getTransformations(), expected_rotations);
+  }
+  // apply to lattice
+  {
+    csg_obj->applyAxisRotation(*lat, "x", angle);
+    csg_obj->applyAxisRotation(*lat, "y", angle);
+    csg_obj->applyAxisRotation(*lat, "z", angle);
+    csg_obj->applyRotation(*lat, euler_angles);
+    ASSERT_EQ(lat->getTransformations(), expected_rotations);
+  }
+  // apply to region (should apply to the surface)
+  {
+    csg_obj->applyAxisRotation(reg, "x", angle);
+    csg_obj->applyAxisRotation(reg, "y", angle);
+    csg_obj->applyAxisRotation(reg, "z", angle);
+    csg_obj->applyRotation(reg, euler_angles);
+    // surface should have the transformations applied x2 (from the above transformations applied
+    // directly to the surface and then from the region)
+    auto double_rotations = expected_rotations;
+    double_rotations.insert(
+        double_rotations.end(), expected_rotations.begin(), expected_rotations.end());
+    ASSERT_EQ(surf->getTransformations(), double_rotations);
+  }
+
+  // assert error is raised if invalid axis is provided
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &surf]() { csg_obj->applyAxisRotation(*surf, "Fake", 1.0); },
+        "Invalid axis 'fake' provided for axis rotation. Must be 'x', 'y', or 'z'.");
+  }
+}
+
+/// tests the various CSGBase::apply*Translation convenience methods
+TEST(CSGBaseTest, testApplyTranslation)
+{
+  // Setup objects for testing
+  std::unique_ptr<CSGBase> csg_obj;
+  const CSGSurface * surf;
+  CSGRegion reg = CSGRegion();
+  const CSGCell * cell;
+  const CSGUniverse * univ;
+  const CSGLattice * lat;
+  setupTransformationTestObjects(csg_obj, surf, reg, cell, univ, lat);
+
+  // apply multidirectional translations
+  std::tuple<Real, Real, Real> dists1 = {1.0, -2.0, 3.0};
+  std::tuple<Real, Real, Real> dists2 = {4.0, 5.0, -6.0};
+
+  // expected vector of translations to be applied in this order (dists1, dists2):
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_trans = {
+      {TransformationType::TRANSLATION, dists1}, {TransformationType::TRANSLATION, dists2}};
+
+  // apply to surface
+  {
+    csg_obj->applyTranslation(*surf, dists1);
+    csg_obj->applyTranslation(*surf, dists2);
+    ASSERT_EQ(surf->getTransformations(), expected_trans);
+  }
+  // apply to cell
+  {
+    csg_obj->applyTranslation(*cell, dists1);
+    csg_obj->applyTranslation(*cell, dists2);
+    ASSERT_EQ(cell->getTransformations(), expected_trans);
+  }
+  // apply to universe
+  {
+    csg_obj->applyTranslation(*univ, dists1);
+    csg_obj->applyTranslation(*univ, dists2);
+    ASSERT_EQ(univ->getTransformations(), expected_trans);
+  }
+  // apply to lattice
+  {
+    csg_obj->applyTranslation(*lat, dists1);
+    csg_obj->applyTranslation(*lat, dists2);
+    ASSERT_EQ(lat->getTransformations(), expected_trans);
+  }
+  // apply to region (should apply to the surface)
+  {
+    csg_obj->applyTranslation(reg, dists1);
+    csg_obj->applyTranslation(reg, dists2);
+    // surface should have the transformations applied x2 (from the above transformations applied
+    // directly to the surface and then from the region)
+    auto double_trans = expected_trans;
+    double_trans.insert(double_trans.end(), expected_trans.begin(), expected_trans.end());
+    ASSERT_EQ(surf->getTransformations(), double_trans);
+  }
+}
+
+/// tests the CSGBase::applyScaling method
+TEST(CSGBaseTest, testApplyScaling)
+{
+  // Setup objects for testing
+  std::unique_ptr<CSGBase> csg_obj;
+  const CSGSurface * surf;
+  CSGRegion reg = CSGRegion();
+  const CSGCell * cell;
+  const CSGUniverse * univ;
+  const CSGLattice * lat;
+  setupTransformationTestObjects(csg_obj, surf, reg, cell, univ, lat);
+
+  // scaling vector
+  std::tuple<Real, Real, Real> scales = {-2.0, 1.0, 4.0};
+
+  // expected vector of scalings to be applied (only one scaling transformation):
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> expected_scaling = {
+      {TransformationType::SCALE, scales}};
+
+  // apply to surface
+  {
+    csg_obj->applyScaling(*surf, scales);
+    ASSERT_EQ(surf->getTransformations(), expected_scaling);
+  }
+  // apply to cell
+  {
+    csg_obj->applyScaling(*cell, scales);
+    ASSERT_EQ(cell->getTransformations(), expected_scaling);
+  }
+  // apply to universe
+  {
+    csg_obj->applyScaling(*univ, scales);
+    ASSERT_EQ(univ->getTransformations(), expected_scaling);
+  }
+  // apply to lattice
+  {
+    csg_obj->applyScaling(*lat, scales);
+    ASSERT_EQ(lat->getTransformations(), expected_scaling);
+  }
+  // apply to region (should apply to the surface)
+  {
+    csg_obj->applyScaling(reg, scales);
+    // surface should have the scaling transformation applied twice (from the above transformations
+    // applied directly to the surface and then from the region)
+    auto double_scaling = expected_scaling;
+    double_scaling.insert(double_scaling.end(), expected_scaling.begin(), expected_scaling.end());
+    ASSERT_EQ(surf->getTransformations(), double_scaling);
+  }
+}
+
+/// tests errors are properly raised in CSGBase::ApplyTransromation methods
+TEST(CSGBaseTest, testApplyTransformationErrors)
+{
+  // Setup objects for testing
+  std::unique_ptr<CSGBase> csg_obj;
+  const CSGSurface * surf;
+  CSGRegion reg = CSGRegion();
+  const CSGCell * cell;
+  const CSGUniverse * univ;
+  const CSGLattice * lat;
+  setupTransformationTestObjects(csg_obj, surf, reg, cell, univ, lat);
+
+  // second set of objects in different CSGBase instance
+  std::unique_ptr<CSGBase> csg_obj2;
+  const CSGSurface * surf2;
+  CSGRegion reg2 = CSGRegion();
+  const CSGCell * cell2;
+  const CSGUniverse * univ2;
+  const CSGLattice * lat2;
+  setupTransformationTestObjects(csg_obj2, surf2, reg2, cell2, univ2, lat2);
+
+  // try to apply transformations to each object via the first base, should raise errors
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &surf2]() { csg_obj->applyAxisRotation(*surf2, "x", 90); },
+        "Cannot apply transformation to surface cyl that is not in this CSGBase instance.");
+    Moose::UnitUtils::assertThrows([&csg_obj, &reg2]()
+                                   { csg_obj->applyAxisRotation(reg2, "x", 90); },
+                                   "Cannot apply transformation to region with surface cyl that is "
+                                   "not in this CSGBase instance.");
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &cell2]() { csg_obj->applyAxisRotation(*cell2, "x", 90); },
+        "Cannot apply transformation to cell cell that is not in this CSGBase instance.");
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &univ2]() { csg_obj->applyAxisRotation(*univ2, "x", 90); },
+        "Cannot apply transformation to universe univ that is not in this CSGBase instance.");
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lat2]() { csg_obj->applyAxisRotation(*lat2, "x", 90); },
+        "Cannot apply transformation to lattice lat that is not in this CSGBase instance.");
+  }
+  // try to apply an invalid value for a transformation
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &surf]()
+        {
+          csg_obj->applyTransformation(
+              *surf, TransformationType::SCALE, std::make_tuple(0.0, 0.0, 0.0));
+        },
+        "Invalid transformation values provided for transformation type ");
   }
 }
 

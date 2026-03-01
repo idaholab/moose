@@ -189,4 +189,16 @@ CSGLattice::operator!=(const CSGLattice & other) const
   return !(*this == other);
 }
 
+void
+CSGLattice::applyTransformation(TransformationType type,
+                                const std::tuple<Real, Real, Real> & values)
+{
+  // Assert valid input as a safety measure
+  // Main validation is done in CSGBase::applyTransformation
+  mooseAssert(isValidTransformationValue(type, values),
+              "Invalid transformation values for transformation type " +
+                  getTransformationTypeString(type) + " on lattice " + getName());
+  _transformations.emplace_back(type, values);
+}
+
 } // namespace CSG

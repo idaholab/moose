@@ -14,6 +14,7 @@
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
 #include "CSGLatticeList.h"
+#include "CSGTransformation.h"
 #include "nlohmann/json.h"
 
 #ifdef MOOSE_UNIT_TEST
@@ -22,6 +23,16 @@
 
 namespace CSG
 {
+
+/**
+ * Define a variant type that can hold references to different CSG object types
+ */
+typedef std::variant<std::reference_wrapper<const CSGSurface>,
+                     std::reference_wrapper<const CSGCell>,
+                     std::reference_wrapper<const CSGUniverse>,
+                     std::reference_wrapper<const CSGRegion>,
+                     std::reference_wrapper<const CSGLattice>>
+    CSGObjectVariant;
 
 /**
  * CSGBase creates an internal representation of a Constructive Solid Geometry (CSG)
@@ -462,6 +473,62 @@ public:
   /// Operator overload for checking if two CSGBase objects are not equal
   bool operator!=(const CSGBase & other) const;
 
+  /**
+   * @brief Apply a transformation to a CSG object
+   *
+   * @param csg_object The CSG object to transform (Surface, Cell, Universe, Region, or Lattice)
+   * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
+   * @param values tuple of transformation values (3 values for any transformation type)
+   */
+  void applyTransformation(const CSGObjectVariant & csg_object,
+                           TransformationType type,
+                           const std::tuple<Real, Real, Real> & values);
+
+  /**
+   * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
+   * @param distances size 3 tuple with translation distances in x, y, and z directions {x, y, z}
+   */
+  void applyTranslation(const CSGObjectVariant & csg_object,
+                        const std::tuple<Real, Real, Real> & distances)
+  {
+    applyTransformation(csg_object, TransformationType::TRANSLATION, distances);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param angles size 3 tuple {phi, theta, psi} with rotation angles in degrees
+   */
+  void applyRotation(const CSGObjectVariant & csg_object,
+                     const std::tuple<Real, Real, Real> & angles)
+  {
+    applyTransformation(csg_object, TransformationType::ROTATION, angles);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object about a specified axis (x, y, z).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param axis x, y, or z axis about which to rotate
+   * @param angle angle in degrees to rotate about the specified axis
+   */
+  void applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle);
+
+  /**
+   * @brief Scale a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to scale (Surface, Cell, Universe, Region, or Lattice)
+   * @param values size 3 tuple with scaling values in x, y, and z directions {x, y, z}
+   */
+  void applyScaling(const CSGObjectVariant & csg_object,
+                    const std::tuple<Real, Real, Real> & values)
+  {
+    applyTransformation(csg_object, TransformationType::SCALE, values);
+  }
+
 private:
   /**
    * @brief Get a Surface object by name.
@@ -599,6 +666,9 @@ private:
 
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
+
+  // check that surface being accessed is a part of this CSGBase instance
+  bool checkSurfaceInBase(const CSGSurface & surface) const;
 
   // check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;

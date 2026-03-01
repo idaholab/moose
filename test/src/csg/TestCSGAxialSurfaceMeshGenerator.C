@@ -21,6 +21,8 @@ TestCSGAxialSurfaceMeshGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
   // additional params for this specific mesh generator
   params.addRequiredParam<Real>("axial_height", "Axial height of the model.");
+  params.addParam<Real>("z_rotation",
+                        "optional rotation around the z axis to apply to the generated cell.");
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;
@@ -29,7 +31,8 @@ TestCSGAxialSurfaceMeshGenerator::validParams()
 TestCSGAxialSurfaceMeshGenerator::TestCSGAxialSurfaceMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _mesh_ptr(getMesh("input")),
-    _axial_height(getParam<Real>("axial_height"))
+    _axial_height(getParam<Real>("axial_height")),
+    _rotation(isParamValid("z_rotation") ? getParam<Real>("z_rotation") : 0.0)
 {
   _build_csg = &getCSGBase("input");
 }
@@ -95,6 +98,10 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
 
   // Rename cell as it now defines a box region instead of an infinite square region
   csg_obj->renameCell(csg_cell, mg_name + "_box_cell");
+
+  // apply rotation around z-axis if specified
+  if (_rotation != 0.0)
+    csg_obj->applyAxisRotation(csg_cell, "z", _rotation);
 
   return csg_obj;
 }
