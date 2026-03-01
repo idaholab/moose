@@ -318,18 +318,18 @@ DisplacedProblem::updateMesh(bool mesh_changing)
     else
       _geometric_search_data.update();
   }
-  catch (MooseException & e)
+  catch (...)
   {
-    _mproblem.setException(e.what());
+    _mproblem.handleException("updateMesh");
   }
-
-  if (udmt.hasDisplacement())
-    _mproblem.meshDisplaced();
 
   // The below call will throw an exception on all processes if any of our processes had an
   // exception above. This exception will be caught higher up the call stack and the error message
   // will be printed there
   _mproblem.checkExceptionAndStopSolve(/*print_message=*/false);
+
+  if (udmt.hasDisplacement())
+    _mproblem.meshDisplaced();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);

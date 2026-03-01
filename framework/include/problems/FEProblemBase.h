@@ -510,6 +510,21 @@ public:
   virtual void setException(const std::string & message);
 
   /**
+   * Handle a currently-throwing exception. This method is to be
+   * called from the catch (...) block following a try block, when
+   * trying code that may throw an exception on one rank but not
+   * necessarily on all ranks in parallel.
+   *
+   * This must be followed up with by a call to
+   * checkExceptionAndStopSolve() after the catch blocks, so that
+   * non-exception-throwing ranks can be informed of the exception.
+   * Non-fatal exceptions will be recreated there as a MooseException
+   * to allow higher-level code to handle them; terminating exceptions
+   * will be thrown to allow higher-level code to unwind in sync.
+   */
+  void handleException(const std::string & calling_method);
+
+  /**
    * Whether or not an exception has occurred.
    */
   virtual bool hasException() { return _has_exception; }
@@ -3286,6 +3301,10 @@ protected:
   /// Whether or not an exception has occurred
   bool _has_exception;
 
+  /// Whether or not the program is terminating with an unrecoverable
+  /// exception
+  bool _termination_exception;
+
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
 
@@ -3338,12 +3357,6 @@ protected:
   const bool _use_hash_table_matrix_assembly;
 
 private:
-  /**
-   * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
-   * caller of this method must determine how to handle the thrown exception
-   */
-  void handleException(const std::string & calling_method);
-
   /**
    * Helper for getting mortar objects corresponding to primary boundary ID, secondary boundary ID,
    * and displaced parameters, given some initial set

@@ -496,6 +496,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
+    _termination_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _verbose_setup(getParam<MooseEnum>("verbose_setup")),
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
@@ -6761,9 +6762,19 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
   TIME_SECTION("checkExceptionAndStopSolve", 5);
 
+  // Our ranks need to all be here in sync
+  parallel_object_only();
+
   // See if any processor had an exception.  If it did, get back the
   // processor that the exception occurred on.
   unsigned int processor_id;
+
+  _communicator.maxloc(_termination_exception, processor_id);
+
+  if (_termination_exception)
+  {
+    libmesh_terminate(); // Just continue terminating, but in sync
+  }
 
   _communicator.maxloc(_has_exception, processor_id);
 
@@ -7364,6 +7375,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
+  }
   catch (...)
   {
     mooseError("Unexpected exception type");
@@ -7503,6 +7518,21 @@ FEProblemBase::handleException(const std::string & calling_method)
     // produce a non-zero exit code
     mooseError(create_exception_message("libMesh::PetscSolverException", e));
   }
+  catch (const libMesh::TerminationException & e)
+  {
+    // If we're terminating, from a mooseError or from anything else
+    // that ought to be nearly unhandleable, then we need to keep
+    // terminating, not just set a different sort of exception that
+    // higher-level code might erroneously think it can just relax a
+    // timestep or something and try again.
+    //
+    // But we might need to terminate via exception on all
+    // processors, because if we're doing stack unwinding on one rank
+    // (whether we're going to be caught or if we're in a compiler
+    // that does stack unwinding regardless) we should be doing it on
+    // all ranks to ensure that we're in sync in parallel.
+    _termination_exception = true;
+  }
   catch (const std::exception & e)
   {
     // This might be libMesh detecting a degenerate Jacobian or matrix
@@ -7597,6 +7627,10 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     // The buck stops here, we have already handled the exception by
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
+  }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
   }
   catch (...)
   {
@@ -7759,6 +7793,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
+  }
   catch (...)
   {
     mooseError("Unexpected exception type");
@@ -7836,6 +7874,10 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   catch (MooseException & e)
   {
     mooseError("Irrecoverable exception: " + std::string(e.what()));
+  }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
   }
   catch (...)
   {
