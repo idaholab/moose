@@ -34,6 +34,7 @@
   [explicit_dynamics_validation_adaptivity]
     type = Exodiff
     requirement = 'The NEML2 based explicit dynamics simulation results shall match those of an equivalent MOOSE simulation when using mesh adaptivity.'
+    capabilities = 'neml2'
     input = 'moose_adaptivity.i'
     exodiff = 'moose_adaptivity_exodus.e moose_adaptivity_exodus.e-s002'
     valgrind = heavy
