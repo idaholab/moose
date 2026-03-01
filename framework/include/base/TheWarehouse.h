@@ -310,7 +310,7 @@ public:
     template <typename T, typename... Args>
     std::vector<T *> & queryInto(std::vector<T *> & results, Args &&... args)
     {
-      return queryIntoHelper(results, true, args...);
+      return queryIntoHelper(results, true, std::forward<Args>(args)...);
     }
 
     /// queryInto executes the query and stores the results in the given
@@ -323,7 +323,7 @@ public:
     template <typename T, typename... Args>
     std::vector<T *> & queryIntoUnsorted(std::vector<T *> & results, Args &&... args)
     {
-      return queryIntoHelper(results, false, args...);
+      return queryIntoHelper(results, false, std::forward<Args>(args)...);
     }
 
     /// Gets the number of attributes associated with the cached query
@@ -342,13 +342,13 @@ public:
     std::vector<T *> & queryIntoHelper(std::vector<T *> & results, const bool sort, Args &&... args)
     {
       std::lock_guard<std::mutex> lock(_cache_mutex);
-      setKeysInner<0, KeyType<Attribs>...>(args...);
+      setKeysInner<0, KeyType<Attribs>...>(std::forward<Args>(args)...);
 
       std::size_t query_id;
       const auto entry = _cache.find(std::make_pair(sort, _key_tup));
       if (entry == _cache.end())
       {
-        setAttribsInner<0, KeyType<Attribs>...>(args...);
+        setAttribsInner<0, KeyType<Attribs>...>(std::forward<Args>(args)...);
         // add the sort attribute. No need (I think) to clear the cache because the base query is
         // not changing
         _attribs.emplace_back(new AttribSorted(*_w, sort));
@@ -376,7 +376,7 @@ public:
     }
 
     template <int Index, typename K, typename... Args>
-    void setKeysInner(K & k, Args &... args)
+    void setKeysInner(const K & k, const Args &... args)
     {
       std::get<Index>(_key_tup) = k;
       setKeysInner<Index + 1, Args...>(args...);
@@ -387,7 +387,7 @@ public:
     }
 
     template <int Index, typename K, typename... Args>
-    void setAttribsInner(K k, Args &... args)
+    void setAttribsInner(K k, const Args &... args)
     {
       std::get<Index>(_attrib_tup)->setFrom(k);
       setAttribsInner<Index + 1, Args...>(args...);

@@ -158,19 +158,19 @@ public:
 
 protected:
   void computeScalarVars(ExecFlagType type);
-  void computeNodalVars(ExecFlagType type);
-  void computeMortarNodalVars(ExecFlagType type);
-  void computeNodalVecVars(ExecFlagType type);
-  void computeNodalArrayVars(ExecFlagType type);
-  void computeElementalVars(ExecFlagType type);
-  void computeElementalVecVars(ExecFlagType type);
-  void computeElementalArrayVars(ExecFlagType type);
+  void computeNodalVars(ExecFlagType type, int group);
+  void computeMortarNodalVars(ExecFlagType type, int group);
+  void computeNodalVecVars(ExecFlagType type, int group);
+  void computeNodalArrayVars(ExecFlagType type, int group);
+  void computeElementalVars(ExecFlagType type, int group);
+  void computeElementalVecVars(ExecFlagType type, int group);
+  void computeElementalArrayVars(ExecFlagType type, int group);
 
   template <typename AuxKernelType>
   void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
   template <typename AuxKernelType>
-  void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
+  void computeNodalVarsHelper(const TheWarehouse::Query & query);
 
   libMesh::System & _sys;
 
@@ -194,7 +194,6 @@ protected:
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
 
   // Storage for AuxKernel objects
-  ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _mortar_nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
@@ -212,6 +211,9 @@ protected:
   ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_elemental_aux_storage;
 #endif
 
+  /// Execution order groups present within the simulation
+  std::set<int> _execution_order_groups;
+
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
@@ -222,12 +224,6 @@ protected:
 
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 };
-
-inline const ExecuteMooseObjectWarehouse<AuxKernel> &
-AuxiliarySystem::nodalAuxWarehouse() const
-{
-  return _nodal_aux_storage;
-}
 
 inline const ExecuteMooseObjectWarehouse<VectorAuxKernel> &
 AuxiliarySystem::nodalVectorAuxWarehouse() const
