@@ -14,6 +14,7 @@
     elem_type = QUAD4
     partition = linear
   []
+  skip_partitioning = true
 []
 
 [GlobalParams]
