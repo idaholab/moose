@@ -116,7 +116,7 @@ protected:
   std::vector<std::string> _variable_names;
 
   /// What to sort by
-  const unsigned int _sort_by;
+  const std::string _sort_by;
 
   /// x coordinate of the points
   VectorPostprocessorValue & _x;
