@@ -1,0 +1,12 @@
+[Tests]
+  [wilke_chang]
+    type = 'CSVDiff'
+    input = 'wilke_chang.i'
+    csvdiff = 'wilke_chang_csv.csv'
+  []
+  [stokes_einstein]
+    type = 'CSVDiff'
+    input = 'stokes_einstein.i'
+    csvdiff = 'stokes_einstein_csv.csv'
+  []
+[]
