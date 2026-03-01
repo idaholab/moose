@@ -34,7 +34,16 @@
       exodiff = 'eg2_in.e'
       recover = false
 
-      detail = 'resulting in a mesh with multiple disconnected elements.'
+      detail = 'resulting in a mesh with multiple disconnected elements, or'
+    []
+    [node_elem]
+      type = Exodiff
+      input = 'node_elem.i'
+      cli_args = '--mesh-only'
+      exodiff = 'node_elem_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'resulting in a mesh containing node elements.'
     []
   []
 []
