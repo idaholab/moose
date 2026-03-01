@@ -1,6 +1,6 @@
 [Tests]
   design = 'LinearFVFunctorRadiativeBC.md'
-  issues = '#XXXXX'
+  issues = '#32406'
   [hot_body_cooling]
     type = CSVDiff
     input = 'linear_fv_functor_radiative_bc.i'

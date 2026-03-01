@@ -8,7 +8,7 @@
 T_L   = 1000.0   # Left boundary temperature [K]
 T_inf = 300.0    # Far-field radiation temperature [K]
 eps   = 1.0      # Emissivity
-k     = 1.0      # Thermal conductivity [W/(m·K)]
+k     = 1.0      # Thermal conductivity [W/(m-K)]
 
 [Mesh]
   [gen]
