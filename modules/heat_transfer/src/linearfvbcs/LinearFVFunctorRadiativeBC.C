@@ -24,7 +24,8 @@ LinearFVFunctorRadiativeBC::validParams()
       "Convergence to the nonlinear solution is achieved through Picard iteration driven "
       "by transient stepping or a coupled nonlinear solve.");
   params.addRequiredParam<MooseFunctorName>(
-      "emissivity", "Functor describing the surface emissivity for the radiative boundary condition");
+      "emissivity",
+      "Functor describing the surface emissivity for the radiative boundary condition");
   params.addRequiredParam<MooseFunctorName>(
       "Tinfinity", "Functor for the far-field temperature of the body in radiative heat transfer");
   params.addParam<Real>(

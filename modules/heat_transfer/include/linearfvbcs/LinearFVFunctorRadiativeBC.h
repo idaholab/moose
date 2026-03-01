@@ -16,9 +16,9 @@
  * The radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is Newton-linearized
  * around the extrapolated boundary face temperature T_b_old at each assembly step:
  *   k * dT/dn + [4*sigma*eps*T_b_old^3]*T_b = [sigma*eps*(3*T_b_old^4 + Tinf^4)]
- * This is a Robin BC with alpha=k, beta=4*sigma*eps*T_b_old^3, gamma=sigma*eps*(3*T_b_old^4+Tinf^4),
- * yielding second-order spatial accuracy. Outer Picard convergence is driven by transient
- * stepping or a coupled nonlinear solve.
+ * This is a Robin BC with alpha=k, beta=4*sigma*eps*T_b_old^3,
+ * gamma=sigma*eps*(3*T_b_old^4+Tinf^4), yielding second-order spatial accuracy. Outer Picard
+ * convergence is driven by transient stepping or a coupled nonlinear solve.
  */
 class LinearFVFunctorRadiativeBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {

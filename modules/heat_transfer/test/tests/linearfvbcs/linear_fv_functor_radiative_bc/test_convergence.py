@@ -31,8 +31,10 @@ class TestLinearFVRadiativeBCConvergence(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.test_dir = os.path.dirname(os.path.abspath(__file__))
-        cls.app = os.path.join(cls.test_dir, '..', '..', '..', '..', 'heat_transfer-opt')
-        cls.input = os.path.join(cls.test_dir, 'linear_fv_functor_radiative_bc_mms.i')
+        cls.app = os.path.join(
+            cls.test_dir, "..", "..", "..", "..", "heat_transfer-opt"
+        )
+        cls.input = os.path.join(cls.test_dir, "linear_fv_functor_radiative_bc_mms.i")
         cls.T_R_mms = cls._compute_T_R_mms()
 
     @staticmethod
@@ -58,25 +60,31 @@ class TestLinearFVRadiativeBCConvergence(unittest.TestCase):
 
     def _run_moose(self, nx):
         """Run MOOSE for given nx; return L2 error from CSV."""
-        outbase = f'mms_conv_nx{nx}'
+        outbase = f"mms_conv_nx{nx}"
         proc = subprocess.run(
-            [self.app, '-i', self.input,
-             f'Mesh/gen/nx={nx}',
-             f'T_R_mms={self.T_R_mms}',
-             f'Outputs/file_base={outbase}',
-             '--no-color'],
-            capture_output=True, text=True, cwd=self.test_dir
+            [
+                self.app,
+                "-i",
+                self.input,
+                f"Mesh/gen/nx={nx}",
+                f"T_R_mms={self.T_R_mms}",
+                f"Outputs/file_base={outbase}",
+                "--no-color",
+            ],
+            capture_output=True,
+            text=True,
+            cwd=self.test_dir,
         )
         if proc.returncode != 0:
             self.fail(
-                f'MOOSE failed for nx={nx}:\n'
-                f'--- stdout ---\n{proc.stdout[-3000:]}\n'
-                f'--- stderr ---\n{proc.stderr[-1000:]}'
+                f"MOOSE failed for nx={nx}:\n"
+                f"--- stdout ---\n{proc.stdout[-3000:]}\n"
+                f"--- stderr ---\n{proc.stderr[-1000:]}"
             )
-        csvfile = os.path.join(self.test_dir, f'{outbase}.csv')
+        csvfile = os.path.join(self.test_dir, f"{outbase}.csv")
         with open(csvfile) as f:
             rows = list(csv.DictReader(f))
-        return float(rows[-1]['l2_error'])
+        return float(rows[-1]["l2_error"])
 
     def test_second_order_convergence(self):
         nxs = [10, 20, 40, 80]
@@ -89,21 +97,20 @@ class TestLinearFVRadiativeBCConvergence(unittest.TestCase):
         ]
         avg_rate = sum(rates) / len(rates)
 
-        print(f'\nMMS convergence study for LinearFVFunctorRadiativeBC')
-        print(f'T_R_mms = {self.T_R_mms:.8f} K')
-        print(f'Source  = {2.0 * self.k * (self.T_L - self.T_R_mms):.4f} W/m^3')
+        print(f"\nMMS convergence study for LinearFVFunctorRadiativeBC")
+        print(f"T_R_mms = {self.T_R_mms:.8f} K")
+        print(f"Source  = {2.0 * self.k * (self.T_L - self.T_R_mms):.4f} W/m^3")
         print(f'{"nx":>6}  {"L2 error":>12}  {"rate":>7}')
-        print('-' * 32)
+        print("-" * 32)
         for i, (nx, e) in enumerate(zip(nxs, errors)):
-            rate_str = f'{rates[i - 1]:7.3f}' if i > 0 else '      -'
-            print(f'{nx:6d}  {e:12.6e}  {rate_str}')
-        print(f'\nAverage convergence rate: {avg_rate:.3f}')
+            rate_str = f"{rates[i - 1]:7.3f}" if i > 0 else "      -"
+            print(f"{nx:6d}  {e:12.6e}  {rate_str}")
+        print(f"\nAverage convergence rate: {avg_rate:.3f}")
 
         self.assertGreater(
-            avg_rate, 1.8,
-            f'Expected ~2nd order convergence, got rate = {avg_rate:.3f}'
+            avg_rate, 1.8, f"Expected ~2nd order convergence, got rate = {avg_rate:.3f}"
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)
