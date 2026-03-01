@@ -35,7 +35,9 @@ public:
   static InputParameters validParams();
 
   /// Link energy systems
-  void linkEnergySystems(SystemBase * solid_energy_system, SystemBase * fluid_energy_system);
+  void linkEnergySystems(SystemBase * solid_energy_system,
+                         SystemBase * fluid_energy_system,
+                         std::vector<SystemBase *> pm_radiation_systems);
 
   /// Set up the boundary condition pairs, functor maps, and every other necessary
   /// structure for the conjugate heat transfer routines
@@ -84,6 +86,9 @@ protected:
   /// The solid energy system
   SystemBase * _solid_energy_system;
 
+  /// The solid energy system
+  std::vector<SystemBase *> _pm_radiation_systems;
+
   /// The names of the CHT boundaries
   std::vector<BoundaryName> _cht_boundary_names;
 
@@ -107,14 +112,23 @@ protected:
   /// The solid (0) and fluid (1) system numbers.
   std::vector<unsigned int> _cht_system_numbers;
 
+  /// The participating media radiation system numbers.
+  std::vector<unsigned int> _cht_pm_radiation_system_numbers;
+
   /// The subset of the FaceInfo objects that belong to the given boundaries.
   std::vector<std::vector<const FaceInfo *>> _cht_face_info;
 
   /// The conduction kernels from the solid/fluid domains. Can't be const, considering we are updating the inner structures for every face.
   std::vector<LinearFVFluxKernel *> _cht_conduction_kernels;
 
+  /// The conduction radiation kernels from the fluid domains.
+  std::vector<LinearFVFluxKernel *> _cht_pm_radiation_kernels;
+
   /// Vector of boundary conditions that describe the conjugate heat transfer from each side.
   std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_boundary_conditions;
+
+  /// Vector of boundary conditions that describe the radiation pm bcs from each side.
+  std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_pm_radiation_boundary_conditions;
 
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.

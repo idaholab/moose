@@ -89,6 +89,9 @@ LinearAssemblySegregatedSolve::validParams()
       "should_solve_passive_scalars", true, "Whether we should solve passive scalar equations.");
   params.addParam<bool>(
       "should_solve_active_scalars", true, "Whether we should solve active scalar equations.");
+  params.addParam<bool>("should_solve_pm_radiation",
+                        true,
+                        "Whether we should solve participating media radiation equations.");
   params.addParamNamesToGroup("should_solve_momentum should_solve_pressure should_solve_energy "
                               "should_solve_solid_energy should_solve_turbulence "
                               "should_solve_passive_scalars should_solve_active_scalars",
@@ -123,6 +126,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _should_solve_turbulence(getParam<bool>("should_solve_turbulence")),
     _should_solve_passive_scalars(getParam<bool>("should_solve_passive_scalars")),
     _should_solve_active_scalars(getParam<bool>("should_solve_active_scalars")),
+    _should_solve_pm_radiation(getParam<bool>("should_solve_pm_radiation")),
     _active_scalar_system_names(getParam<std::vector<SolverSystemName>>("active_scalar_systems")),
     _has_active_scalar_systems(!_active_scalar_system_names.empty()),
     _active_scalar_equation_relaxation(
@@ -181,6 +185,17 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
         _systems_to_solve.push_back(_passive_scalar_systems.back());
     }
 
+  // and for the participating media radiation equations
+  if (_has_pm_radiation_systems && _should_solve_pm_radiation)
+    for (auto system_i : index_range(_pm_radiation_system_names))
+    {
+      _pm_radiation_system_numbers.push_back(
+          _problem.linearSysNum(_pm_radiation_system_names[system_i]));
+      _pm_radiation_systems.push_back(
+          &_problem.getLinearSystem(_pm_radiation_system_numbers[system_i]));
+      _systems_to_solve.push_back(_pm_radiation_systems.back());
+    }
+
   // and for the active scalar equations
   if (_has_active_scalar_systems && _should_solve_active_scalars)
     for (auto system_i : index_range(_active_scalar_system_names))
@@ -221,6 +236,8 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     system->system().prefix_with_name(false);
 
   // Link CHT objects, this will also do some error checking
+  // Make a copy for compatibility. These could change in the future
+  // Convert _pm_radiation_systems to std::vector<SystemBase *>
   if (_cht.enabled())
   {
     if (!_should_solve_energy)
@@ -229,7 +246,11 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     if (_has_solid_energy_system && !_should_solve_solid_energy)
       paramError("should_solve_solid_energy",
                  "Conjugate heat transfer requires solving the solid energy equation.");
-    _cht.linkEnergySystems(_solid_energy_system, _energy_system);
+
+    std::vector<SystemBase *> pm_radiation_systems_base(_pm_radiation_systems.begin(),
+                                                        _pm_radiation_systems.end());
+
+    _cht.linkEnergySystems(_solid_energy_system, _energy_system, pm_radiation_systems_base);
   }
 }
 
@@ -635,8 +656,10 @@ LinearAssemblySegregatedSolve::solve()
   const auto solid_energy_index = residual_storage.solid_energy_index;
   const auto & active_scalar_indices = residual_storage.active_scalar_indices;
   const auto & turbulence_indices = residual_storage.turbulence_indices;
+  const auto & pm_radiation_indices = residual_storage.pm_radiation_indices;
 
   bool converged = residual_storage.converged;
+
   // Loop until converged or hit the maximum allowed iteration number
   if (_cht.enabled() && _should_solve_energy)
     _cht.initializeCHTCouplingFields();
@@ -691,6 +714,22 @@ LinearAssemblySegregatedSolve::solve()
                                                          _energy_equation_relaxation,
                                                          _energy_linear_control,
                                                          _energy_l_abs_tol);
+
+        if (_has_pm_radiation_systems && _should_solve_pm_radiation)
+        {
+          // We set the preconditioner/controllable parameters through petsc options. Linear
+          // tolerances will be overridden within the solver.
+          Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
+          for (const auto i : index_range(_pm_radiation_system_names))
+          {
+            ns_residuals[pm_radiation_indices[i]] =
+                solveAdvectedSystem(_pm_radiation_system_numbers[i],
+                                    *_pm_radiation_systems[i],
+                                    _pm_radiation_equation_relaxation[i],
+                                    _pm_radiation_linear_control,
+                                    _pm_radiation_l_abs_tol);
+          }
+        }
 
         if (_has_solid_energy_system && _should_solve_solid_energy)
         {
@@ -862,6 +901,14 @@ LinearAssemblySegregatedSolve::setupResidualStorage() const
       storage.turbulence_indices.push_back(storage.ns_residuals.size());
       storage.ns_residuals.push_back(std::make_pair(0, 1.0));
       storage.ns_abs_tols.push_back(_turbulence_absolute_tolerance[i]);
+    }
+
+  if (_has_pm_radiation_systems && _should_solve_pm_radiation)
+    for (const auto i : index_range(_pm_radiation_system_names))
+    {
+      storage.pm_radiation_indices.push_back(storage.ns_residuals.size());
+      storage.ns_residuals.push_back(std::make_pair(0, 1.0));
+      storage.ns_abs_tols.push_back(_pm_radiation_absolute_tolerance[i]);
     }
 
   storage.converged = storage.ns_residuals.empty();

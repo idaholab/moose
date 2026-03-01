@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVP1RadiationSourceSink.md LinearFVP1RadiationMarshakBC.md'
+  design = 'LinearFVP1RadiationSourceSink.md LinearFVP1RadiationMarshakBC.md LinearFVP1TemperatureSourceSink.md'
   issues = '#31839'
   [1d_rad_adiabatic]
     type = 'CSVDiff'
@@ -24,5 +24,26 @@
     cli_args = 'wall_temperature=80.0 Outputs/file_base=rad_isothermal_medium_1d_ambcooling'
     max_threads = 1
     requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient cooling conditions.'
+  []
+  [1d_rad_energy_coupling_mapp]
+    type = 'Exodiff'
+    input = 'rad_T_coupled_medium_1d_T.i'
+    exodiff = 'rad_T_coupled_medium_1d_T_out.e'
+    max_threads = 1
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system and obtain the tests spatial distribution.'
+  []
+  [1d_rad_energy_coupling_mapp_csv]
+    type = 'CSVDiff'
+    input = 'rad_T_coupled_medium_1d_T.i'
+    csvdiff = 'rad_T_coupled_medium_1d_T_out.csv'
+    max_threads = 1
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system  and obtain the tests maximum and mean values.'
+  []
+  [1d_rad_energy_coupling]
+    type = 'Exodiff'
+    input = 'rad_T_coupled_medium_1d.i'
+    exodiff = 'rad_T_coupled_medium_1d_out.e'
+    max_threads = 1
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver.'
   []
 []

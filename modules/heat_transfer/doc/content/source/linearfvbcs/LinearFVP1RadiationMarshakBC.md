@@ -7,7 +7,7 @@ the radiative heat flux in the LinearFV system.
 
 The Marshak boundary condition implemented reads as follows [!citep](modest2021):
 \begin{equation}
-(-\Gamma \nabla G) \cdot \vec{n_b}   = (G - 4 \sigma T_{b, rad}^4) \frac{\epsilon_b}{2 \Gamma (2 - \epsilon_b)}
+(-\Gamma \nabla G) \cdot \vec{n_b}   = (G - 4 \sigma T_{b, rad}^4) \frac{\epsilon_b}{2 (2 - \epsilon_b)}
 \end{equation}
 
 where:
@@ -22,8 +22,7 @@ where:
 
 ## Example Input File Syntax
 
- !listing modules/heat_transfer/test/tests/radiation_participating_media/rad_isothermal_medium_1d.i
- block=LinearFVBCs
+!listing test/tests/radiation_participating_media/rad_isothermal_medium_1d.i block=LinearFVBCs
 
 !syntax parameters /LinearFVBCs/LinearFVP1RadiationMarshakBC
 
