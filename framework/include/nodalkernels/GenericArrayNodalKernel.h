@@ -35,4 +35,5 @@ public:
   using GenericArrayNodalKernel<is_ad>::_count;                                                    \
   using GenericArrayNodalKernel<is_ad>::_u;                                                        \
   using GenericArrayNodalKernel<is_ad>::_qp;                                                       \
+  using GenericArrayNodalKernel<is_ad>::setJacobian;                                               \
   using GenericArrayNodalKernel<is_ad>::paramError

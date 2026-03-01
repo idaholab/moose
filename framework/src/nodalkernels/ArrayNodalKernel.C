@@ -29,7 +29,8 @@ ArrayNodalKernel::ArrayNodalKernel(const InputParameters & parameters)
     _var(*mooseVariable()),
     _u(_var.dofValues()),
     _count(_var.count()),
-    _work_vector(_count)
+    _work_vector(_count),
+    _scaling(_var.arrayScalingFactor())
 {
   addMooseVariableDependency(mooseVariable());
 }
@@ -41,7 +42,7 @@ ArrayNodalKernel::computeResidual()
     return;
   _qp = 0;
   computeQpResidual(_work_vector);
-  addResiduals(_assembly, _work_vector, _var.dofIndices(), _var.arrayScalingFactor());
+  addResiduals(_assembly, _work_vector, _var.dofIndices(), _scaling);
 }
 
 void
@@ -50,12 +51,12 @@ ArrayNodalKernel::computeJacobian()
   if (!_var.isNodalDefined())
     return;
   _qp = 0;
-  const auto jacobian = computeQpJacobian();
-  const auto & dof_indices = _var.dofIndices();
-  mooseAssert(dof_indices.size() == _count, "The number of dofs should be equal to count");
-  for (const auto i : make_range(_count))
-    addJacobianElement(
-        _assembly, jacobian(i), dof_indices[i], dof_indices[i], _var.arrayScalingFactor()[i]);
+
+  _ivar_indices = &_var.dofIndices();
+  _jvar_indices = &_var.dofIndices();
+  mooseAssert(_ivar_indices->size() == _count, "The number of dofs should be equal to count");
+
+  computeQpJacobian();
 }
 
 void
@@ -69,31 +70,18 @@ ArrayNodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   else
   {
     const auto & jvar = getVariable(jvar_num);
-    const auto jacobian = computeQpOffDiagJacobian(jvar);
-    const auto & ivar_indices = _var.dofIndices();
-    const auto & jvar_indices = jvar.dofIndices();
+    _ivar_indices = &_var.dofIndices();
+    _jvar_indices = &jvar.dofIndices();
+    mooseAssert(_ivar_indices->size() == _count, "The number of dofs should be equal to count");
+    mooseAssert(_jvar_indices->size() == jvar.count(),
+                "The number of dofs should be equal to count");
 
-    mooseAssert(ivar_indices.size() == _count, "The number of dofs should be equal to count");
-    mooseAssert(jvar_indices.size() == jvar.count(), "The number of dofs should be equal to count");
-
-    for (const auto i : make_range(_var.count()))
-      for (const auto j : make_range(jvar.count()))
-        addJacobianElement(_assembly,
-                           jacobian(i, j),
-                           ivar_indices[i],
-                           jvar_indices[j],
-                           _var.arrayScalingFactor()[i]);
+    computeQpOffDiagJacobian(jvar_num);
   }
 }
 
-RealEigenVector
-ArrayNodalKernel::computeQpJacobian()
+void
+ArrayNodalKernel::setJacobian(unsigned int i, unsigned int j, Real value)
 {
-  return RealEigenVector::Zero(_count);
-}
-
-RealEigenMatrix
-ArrayNodalKernel::computeQpOffDiagJacobian(const MooseVariableFieldBase & jvar)
-{
-  return RealEigenMatrix::Zero(_count, jvar.count());
+  addJacobianElement(_assembly, value, (*_ivar_indices)[i], (*_jvar_indices)[j], _scaling[i]);
 }

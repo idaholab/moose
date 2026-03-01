@@ -65,20 +65,21 @@ protected:
   virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
-   * The user can override this function to compute the "on-diagonal"
-   * Jacobian contribution.  If not overriden,
-   * returns an array of 1s.
-   * @return On-diagonal Jacobian contribution
+   * The user can override this function to compute the intra-variable
+   * off-diagonal Jacobian contribution (the coupling between array
+   * components of the variable itself). Use setJacobian in this function.
    */
-  virtual RealEigenVector computeQpJacobian();
+  virtual void computeQpJacobian() {}
 
   /**
-   * This is the virtual that derived classes should override for
-   * computing an off-diagonal jacobian component.
-   * @param Coupled variable for the off-diagonal Jacobian contribution
-   * @return Off-diagonal Jacobian contribution
+   * The user can override this function to compute the inter-variable
+   * off-diagonal Jacobian contribution (the coupling between array
+   * components of of the kernel variable and the coupled variable jvar).
+   * Use setJacobian in this function.
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFieldBase & jvar);
+  virtual void computeQpOffDiagJacobian(unsigned int /*jvar*/) {}
+
+  void setJacobian(unsigned int i, unsigned int j, Real value);
 
   /// variable this works on
   MooseVariableFE<RealEigenVector> & _var;
@@ -92,4 +93,11 @@ protected:
 private:
   /// Work vector for residual
   RealEigenVector _work_vector;
+
+  /// DOF indices
+  const std::vector<dof_id_type> * _ivar_indices;
+  const std::vector<dof_id_type> * _jvar_indices;
+
+  /// scaling factors
+  const std::vector<Real> & _scaling;
 };

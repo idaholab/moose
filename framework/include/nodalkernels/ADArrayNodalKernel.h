@@ -66,9 +66,14 @@ protected:
 
   /**
    * Dummy method so we can make derived generic classes that template on <bool is_ad> */
-  virtual RealEigenVector computeQpJacobian()
+  virtual void computeQpJacobian()
   {
     mooseError("I'm an AD object, so computeQpJacobian should never be called");
+  }
+
+  void setJacobian(unsigned int, unsigned int, Real)
+  {
+    mooseError("I'm an AD object, so setJacobian should never be called");
   }
 
   /// variable this works on
