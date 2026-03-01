@@ -85,11 +85,11 @@ FlagElementsThread::onElement(const Elem * elem)
       dof_value = current_local_solution(dof_number);
     }
 
-    // round() is a C99 function, it is not located in the std:: namespace.
-    marker_value = static_cast<Marker::MarkerValue>(round(dof_value));
+    const auto int_value = std::lround(dof_value);
+    marker_value = static_cast<Marker::MarkerValue>(int_value);
 
     // Make sure we aren't masking an issue in the Marker system by rounding its values.
-    if (std::abs(marker_value - dof_value) > TOLERANCE * TOLERANCE)
+    if (std::abs(int_value - dof_value) > TOLERANCE * TOLERANCE)
       mooseError("Invalid Marker value detected: ", dof_value);
   }
 
