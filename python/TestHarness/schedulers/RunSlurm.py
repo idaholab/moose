@@ -9,7 +9,7 @@
 
 import re
 from datetime import datetime
-from RunHPC import RunHPC
+from RunHPC import CallHPCPoolType, RunHPC
 
 
 ## This Class is responsible for maintaining an interface to the slurm scheduling syntax
@@ -37,7 +37,7 @@ class RunSlurm(RunHPC):
             "-o",
             "jobid,exitcode,state,reason,start,end",
         ]
-        exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, " ".join(cmd))
+        exit_code, result, _ = self.callHPC(CallHPCPoolType.status, " ".join(cmd))
         if exit_code != 0:
             return False
 

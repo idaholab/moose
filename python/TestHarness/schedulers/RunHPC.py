@@ -7,14 +7,25 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import urllib.parse
-from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib, contextlib, copy
-from enum import Enum
+import contextlib
+import copy
+import datetime
+import os
+import re
+import shlex
+import socket
 import statistics
-from collections import namedtuple
-
+import sys
+import threading
+import time
+import urllib
+import urllib.parse
+from enum import Enum
 from multiprocessing.pool import ThreadPool
+from typing import Optional
+
+from RunParallel import RunParallel
+
 from TestHarness import util
 
 
@@ -79,10 +90,11 @@ class HPCJob:
         self.exit_code = None
 
 
-class RunHPC(RunParallel):
-    # The types for the pools for calling HPC commands
-    CallHPCPoolType = Enum("CallHPCPoolType", ["submit", "queue", "status", "kill"])
+CallHPCPoolType = Enum("CallHPCPoolType", ["submit", "queue", "status", "kill"])
+"""The types for the pools for calling HPC commands."""
 
+
+class RunHPC(RunParallel):
     """
     Base scheduler for jobs that are ran on HPC.
     """
@@ -120,11 +132,11 @@ class RunHPC(RunParallel):
         # with commands, and have a pool for each interaction type
         # so that those commands only compete with commands of the
         # other type
-        self.call_hpc_pool = {}
-        self.call_hpc_pool[self.CallHPCPoolType.submit] = ThreadPool(processes=5)
+        self.call_hpc_pool: dict[CallHPCPoolType, ThreadPool] = {}
+        self.call_hpc_pool[CallHPCPoolType.submit] = ThreadPool(processes=5)
         if not self.options.hpc_no_hold:  # only used with holding jobs
-            self.call_hpc_pool[self.CallHPCPoolType.queue] = ThreadPool(processes=5)
-        for val in [self.CallHPCPoolType.status, self.CallHPCPoolType.kill]:
+            self.call_hpc_pool[CallHPCPoolType.queue] = ThreadPool(processes=5)
+        for val in [CallHPCPoolType.status, CallHPCPoolType.kill]:
             self.call_hpc_pool[val] = ThreadPool(processes=1)
 
         # The jump hostname for running commands, if any
@@ -161,14 +173,14 @@ class RunHPC(RunParallel):
 
         # Make sure that we can call commands up front, only if we're not re-running
         if not self.options.show_last_run:
-            for val in self.CallHPCPoolType:
-                if self.options.hpc_no_hold and val == self.CallHPCPoolType.queue:
+            for val in CallHPCPoolType:
+                if self.options.hpc_no_hold and val == CallHPCPoolType.queue:
                     continue
                 self.callHPC(val, "hostname")
 
         # Pool for submitJob(), so that we can submit jobs to be
         # held in the background without blocking
-        self.submit_job_pool = (
+        self.submit_job_pool: Optional[ThreadPool] = (
             None if self.options.hpc_no_hold else ThreadPool(processes=10)
         )
 
@@ -453,11 +465,12 @@ class RunHPC(RunParallel):
             # Parse out the mpi command from the command if we're wrapping
             # things around the mpi command
             mpi_prefix = ""
-            if self.app_exec_prefix:
-                mpi_command = self.parseMPICommand(command)
-                if mpi_command:
-                    mpi_prefix = mpi_command
-                    command = command.replace(mpi_command, "")
+            if (
+                self.app_exec_prefix
+                and (mpi_command := self.parseMPICommand(command)) is not None
+            ):
+                mpi_prefix = mpi_command
+                command = command.replace(mpi_command, "")
 
             # Replace newlines, clean up spaces, and encode the command. We encode the
             # command here to be able to pass it to a python script to run later without
@@ -561,7 +574,7 @@ class RunHPC(RunParallel):
 
             # Do the submission; this is thread safe
             exit_code, result, full_cmd = self.callHPC(
-                self.CallHPCPoolType.submit, cmd, num_retries=5
+                CallHPCPoolType.submit, cmd, num_retries=5
             )
 
             # Start the queued timer if needed
@@ -629,7 +642,7 @@ class RunHPC(RunParallel):
 
                 cmd = f"{self.getHPCQueueCommand()} {hpc_job.id}"
                 exit_code, result, full_cmd = self.callHPC(
-                    self.CallHPCPoolType.queue, cmd, num_retries=5
+                    CallHPCPoolType.queue, cmd, num_retries=5
                 )
                 if exit_code != 0:
                     try:
@@ -842,9 +855,7 @@ class RunHPC(RunParallel):
             hpc_job.state = hpc_job.State.killed
 
         # Don't care about whether or not this failed
-        self.callHPC(
-            self.CallHPCPoolType.kill, f"{self.getHPCCancelCommand()} {job_id}"
-        )
+        self.callHPC(CallHPCPoolType.kill, f"{self.getHPCCancelCommand()} {job_id}")
 
     def killHPCJobs(self, functor):
         """
@@ -862,7 +873,7 @@ class RunHPC(RunParallel):
 
         if job_ids:
             self.callHPC(
-                self.CallHPCPoolType.kill,
+                CallHPCPoolType.kill,
                 f'{self.getHPCCancelCommand()} {" ".join(job_ids)}',
             )
 
@@ -962,16 +973,12 @@ class RunHPC(RunParallel):
         return f"TESTHARNESS RUNHPC FILE TERMINATOR FOR {job_id}"
 
     @staticmethod
-    def parseMPICommand(command) -> str:
-        """
-        Helper that splits out the mpi command from a given command, if any
-        """
+    def parseMPICommand(command: str) -> Optional[str]:
+        """Split the MPI command from a given command, if any."""
         find_mpi = re.search(
-            r"^(\s+)?(mpiexec|mpirun)(\s+-(n|np)\s+\d+)?(\s+)?", command
+            r"^(\s+)?(mpiexec|mpirun|srun)(\s+-(n|np)\s+\d+)?(\s+)?", command
         )
-        if find_mpi is not None:
-            return find_mpi.group(0)
-        return None
+        return find_mpi.group(0) if find_mpi is not None else None
 
     @staticmethod
     def setHPCJobError(hpc_job, message, output=None):
@@ -993,6 +1000,14 @@ class RunHPC(RunParallel):
         # dependency above them
         functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
         self.killHPCJobs(functor)
+
+        # Close and join all pools
+        for pool in self.call_hpc_pool.values():
+            pool.close()
+            pool.join()
+        if self.submit_job_pool is not None:
+            self.submit_job_pool.close()
+            self.submit_job_pool.join()
 
     def appendStats(self):
         timer_keys = ["hpc_queued", "hpc_wait_output"]
@@ -1097,13 +1112,13 @@ class RunHPC(RunParallel):
 
         # --hpc-pre-source contents
         if self.options.hpc_pre_source:
-            submission_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
-            submission_env["PRE_SOURCE_CONTENTS"] = self.source_contents
+            submit_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
+            submit_env["PRE_SOURCE_CONTENTS"] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
-        # option for the moose-dev-container module on INL HPC
+        # option for the container mpi modules on INL HPC
         if hpc_cluster is not None:
-            submit_env["PRE_MODULE_VARS"]["MOOSE_DEV_CONTAINER_MINIMAL_BINDPATH"] = "1"
+            submit_env["PRE_MODULE_VARS"]["CONTAINER_MINIMAL_BINDPATH"] = "1"
 
         # Pass apptainer options
         if self.options.hpc_apptainer_no_home:

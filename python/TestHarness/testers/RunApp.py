@@ -13,7 +13,7 @@ from TestHarness import util, TestHarness
 from TestHarness.capability_util import addAugmentedCapability
 from shlex import quote
 import json
-from typing import Optional
+from typing import Optional, Tuple
 
 
 class RunApp(Tester):
@@ -149,12 +149,6 @@ class RunApp(Tester):
 
     def __init__(self, name, params):
         Tester.__init__(self, name, params)
-        if os.environ.get("MOOSE_MPI_COMMAND"):
-            self.mpi_command = os.environ["MOOSE_MPI_COMMAND"]
-            self.force_mpi = True
-        else:
-            self.mpi_command = "mpiexec"
-            self.force_mpi = False
 
         # Make sure that either input or command is supplied
         if not (
@@ -329,6 +323,14 @@ class RunApp(Tester):
 
         return ncpus
 
+    @staticmethod
+    def getMPICommand(options) -> Tuple[str, bool]:
+        """Get the command to use for MPI (if any) and whether or not to force MPI."""
+        if mpi_command := os.environ.get("MOOSE_MPI_COMMAND"):
+            return mpi_command, True
+        else:
+            return "srun" if options.hpc_srun else "mpiexec", False
+
     def getCommand(self, options):
         specs = self.specs
 
@@ -475,8 +477,9 @@ class RunApp(Tester):
             command = command + " --n-threads=" + str(nthreads)
 
         # Force mpi, more than 1 core, or containerized openmpi (requires mpiexec serial)
-        if self.force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
-            command = f"{self.mpi_command} -n {ncpus} {command}"
+        mpi_command, force_mpi = self.getMPICommand(options)
+        if force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
+            command = f"{mpi_command} -n {ncpus} {command}"
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
         if specs.isValid("command_proxy"):
