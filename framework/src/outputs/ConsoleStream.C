@@ -34,6 +34,13 @@ ConsoleStream::operator<<(const StandardEndLine & manip) const
   return *this;
 }
 
+std::unique_lock<std::mutex>
+ConsoleStream::outputGuarded(std::ostringstream & buffer,
+                             std::unique_lock<std::mutex> console_lock) const
+{
+  return _output_warehouse.mooseConsole(buffer, std::move(console_lock));
+}
+
 void
 ConsoleStream::unsetf(std::ios_base::fmtflags mask) const
 {

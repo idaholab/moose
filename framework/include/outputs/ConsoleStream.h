@@ -56,6 +56,21 @@ public:
   const ConsoleStream & operator<<(const StandardEndLine & manip) const;
 
   /**
+   * Force output from the given buffer, while locking the console.
+   *
+   * The lock must be a lock to the Moose::moose_console_mutex
+   * (this is checked).
+   *
+   * This enables the locking of console output while preparing the
+   * content to be output.
+   *
+   * @param buffer The buffer to output from
+   * @param console_lock The lock to Moose::moose_console_mutex
+   */
+  std::unique_lock<std::mutex> outputGuarded(std::ostringstream & buffer,
+                                             std::unique_lock<std::mutex> console_lock) const;
+
+  /**
    * Unset format flags
    */
   void unsetf(std::ios_base::fmtflags mask) const;
