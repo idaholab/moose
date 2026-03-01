@@ -14,6 +14,8 @@
 
 #include "libmesh/vector_value.h"
 
+#include <utility>
+
 TEST(NestedSolve, FixedSize)
 {
   auto compute = [&](const NestedSolve::Value<2> & guess,
@@ -198,6 +200,50 @@ TEST(NestedSolve, ScalarPowellTight)
   solver.nonlinearTight(solution, computeResidual, computeJacobian);
 
   EXPECT_NEAR(solution, 2, 1e-6);
+}
+
+TEST(NestedSolve, ScalarBounded)
+{
+  auto computeResidual = [&](const Real & guess, Real & residual) { residual = guess - 2.0; };
+  auto computeJacobian = [&](const Real & /*guess*/, Real & jacobian) { jacobian = 1.0; };
+
+  bool bounds_checked = false;
+  auto computeBounds = [&]()
+  {
+    bounds_checked = true;
+    return std::make_pair(1.0, 3.0);
+  };
+
+  NestedSolve solver;
+  Real solution = 1.5;
+  solver.nonlinearBounded(solution, computeResidual, computeJacobian, computeBounds);
+
+  EXPECT_TRUE(bounds_checked);
+  EXPECT_NEAR(solution, 2.0, 1e-10);
+  EXPECT_GE(solution, 1.0);
+  EXPECT_LE(solution, 3.0);
+}
+
+TEST(NestedSolve, ScalarBoundedAD)
+{
+  auto computeResidual = [&](const ADReal & guess, ADReal & residual) { residual = guess - 2.0; };
+  auto computeJacobian = [&](const ADReal & /*guess*/, ADReal & jacobian) { jacobian = 1.0; };
+
+  bool bounds_checked = false;
+  auto computeBounds = [&]()
+  {
+    bounds_checked = true;
+    return std::make_pair(1.0, 3.0);
+  };
+
+  ADNestedSolve solver;
+  ADReal solution = 1.5;
+  solver.nonlinearBounded(solution, computeResidual, computeJacobian, computeBounds);
+
+  EXPECT_TRUE(bounds_checked);
+  EXPECT_NEAR(MetaPhysicL::raw_value(solution), 2.0, 1e-10);
+  EXPECT_GE(MetaPhysicL::raw_value(solution), 1.0);
+  EXPECT_LE(MetaPhysicL::raw_value(solution), 3.0);
 }
 
 TEST(NestedSolve, PlacementNew)
