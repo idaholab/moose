@@ -11,6 +11,7 @@
 
 #include "MFEMMesh.h"
 #include "libmesh/mesh_generation.h"
+#include "MFEMPeriodicBCs.h"
 
 registerMooseObject("MooseApp", MFEMMesh);
 
@@ -50,6 +51,11 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
+  if (_periodic)
+  {
+    mfem_ser_mesh = applyPeriodicBoundaryByTranslation(mfem_ser_mesh);
+  }
+
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
     paramError(
         "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
@@ -70,6 +76,41 @@ MFEMMesh::buildMesh()
   {
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
   }
+}
+
+void
+MFEMMesh::registerPeriodicBCs(MFEMPeriodicByVector & bc)
+{
+  _periodic = true;
+  _translation_x = bc.GetPeriodicBc(0);
+  _translation_y = bc.GetPeriodicBc(1);
+  if (bc.Use3D())
+  {
+    _translation_z = bc.GetPeriodicBc(2);
+  }
+}
+
+mfem::Mesh
+MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh & input)
+{
+  std::vector<mfem::Vector> translations(input.SpaceDimension());
+
+  // // error checking. Demand that the z array is set by the user
+  mooseAssert((_translation_x.Size() == input.SpaceDimension()) and
+                  (_translation_y.Size() == input.SpaceDimension()),
+              "The translation vectors must be all set by user if using periodic BCs");
+  mooseAssert((input.SpaceDimension() == _translation_z.Size()) or (_translation_z.Size() == 0),
+              "Asked for 3D but didn't set the z vector");
+
+  translations[0] = _translation_x;
+  translations[1] = _translation_y;
+
+  if (input.SpaceDimension() == 3)
+  {
+    translations[2] = _translation_z;
+  }
+
+  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
 }
 
 void
