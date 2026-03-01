@@ -48,7 +48,7 @@ with StochasticControl(executable, physics_input, parameters, qois,
         [1.1, 0.1, 0.25],
         [0.9, 0.12, 0.2],
     ])
-    y = runner(x)   # -> shape (N, Q) if multiple QoIs, vector if one QoI
+    y = runner(x)   # -> shape (N, Q, ...) if multiple QoIs, vector if one QoI
     print(y)
 ```
 
@@ -68,7 +68,8 @@ What happens under the hood:
 
 - float if you pass a single row and have a single QoI,
 - 1-D array if one of {samples, QoIs} is singular,
-- 2-D array (N×Q) otherwise.
+- 2-D array (N×Q) for reporters that return scalar QoIs.
+- N-D array (N×Qx?x...) otherwise.
 
 ### CLI Arguments
 
