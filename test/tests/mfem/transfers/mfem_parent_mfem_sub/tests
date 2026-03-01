@@ -1,0 +1,187 @@
+[Tests]
+  [MFEMShapeEvaluationTransfer]
+    design = MultiAppMFEMShapeEvaluationTransfer.md
+    issues = '#31982'
+    requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation, '
+    [FromSubToParent]
+      detail = 'for scalar variables, verified by '
+      [run]
+        type = RunApp
+        input = parent.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        cli_args = 'Transfers/active=general_transfer_from_sub '        
+        detail = 'running the inputs, and '
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMShapeEvaluationTransfer/FromSubToParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
+    []
+    [VectorTransfer]
+      detail = 'for vector variables '
+      [Hex]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex.csv'
+        detail = 'between hex meshes, '
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+      []
+      [Tetra]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
+        detail = 'between tetrahedral meshes, '
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+        cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
+      []
+      [TetToHex]      
+        type = CSVDiff
+        input = mfem_parent_vector.i
+        csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex.csv'
+        detail = 'and from tetrahedral meshes to hex meshes.'
+        abs_zero = 1e-8
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+        cli_args = 'Mesh/file=../../mesh/cube.e ' 
+                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+                  'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
+      []      
+    []
+    [OutOfMesh]
+      detail = 'for scalar variables between meshes of different geometric sizes, '
+      [Hex]
+        type = XMLDiff
+        input = mfem_parent_embedded_submesh.i
+        xmldiff = 'OutputData/EmbeddedSubmesh/Run0/Cycle000001/data.pvtu'
+        detail = 'from a smaller submesh to a larger mesh containing the smaller submes as a subdomain.'
+        abs_zero = 1e-8
+        max_parallel = 1 # XMLDiff on ParaViewDataCollection schemadiffs with multiple ranks
+        capabilities = 'mfem'
+        recover = false
+        compute_devices = 'cpu cuda'
+      []
+    []    
+  []
+  [MFEMCopyTransfer]
+    design = MultiAppMFEMCopyTransfer.md
+    requirement = 'The system shall be able to copy MFEM variables '
+    issues = '#29632 #32008'
+    [FromSubToParent]
+      detail = 'representing real variables from a sub-application to the parent application, verified by '
+      [run]
+        type = RunApp
+        input = parent.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        detail = 'running the inputs, and '
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMCopyTransfer/FromSubToParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
+    []
+    [ToSubFromParent]
+      detail = 'from a parent application to a sub-application, verified by '
+      [run]
+        type = RunApp
+        input = sub.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
+                  'subapp:MultiApps/active="" subapp:Transfers/active=""'
+        detail = 'running the inputs, and '
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMCopyTransfer/ToSubFromParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
+    []
+    [ComplexFromSubToParent]
+      detail = 'representing complex variables from a sub-application to the parent application, verified by '
+      [run]
+        type = RunApp
+        input = parent_complex.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        detail = 'running the inputs, and '
+        max_parallel = 1 # idaholab/moose#32250
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/DiffusionComplex/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSubComplex/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMCopyTransfer/ComplexFromSubToParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the complex sub-application and complex parent application outputs against each other.'
+      []
+    []
+    [ComplexToSubFromParent]
+      detail = 'representing complex variables from a parent application to a sub-application, verified by '      
+      [run]
+        type = RunApp
+        input = sub_complex.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
+                  'subapp:MultiApps/active="" subapp:Transfers/active=""'
+        detail = 'running the inputs, and '
+        max_parallel = 1 # idaholab/moose#32250
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/DiffusionComplex/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSubComplex/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMCopyTransfer/ComplexToSubFromParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the complex sub-application and complex parent application outputs against each other.'
+      []
+    []
+  []
+[]

@@ -17,25 +17,25 @@
 //*
 // Copy MFEMVariables between multiapps
 // The variables must be of the same type and dimension
-// and the MFEMMesh must be identical in both multiapps
+// but MFEMMesh may differ in each subapp
 // */
 
-class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
+class MultiAppMFEMTolibMeshShapeEvaluationTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMCopyTransfer(InputParameters const & params);
+  MultiAppMFEMTolibMeshShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
-  virtual MFEMProblem & getActiveToProblem() override
-  {
-    return static_cast<MFEMProblem &>(*_active_to_problem);
-  };
+  mfem::FindPointsGSLIB _mfem_interpolator;
+
   virtual MFEMProblem & getActiveFromProblem() override
   {
     return static_cast<MFEMProblem &>(*_active_from_problem);
-  };
+  }
+
   void transferVariables() override;
+  void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
 };
 
 #endif

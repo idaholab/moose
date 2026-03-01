@@ -11,31 +11,31 @@
 
 #pragma once
 
+#include "MFEMNodalProjector.h"
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
 //*
 // Copy MFEMVariables between multiapps
 // The variables must be of the same type and dimension
-// and the MFEMMesh must be identical in both multiapps
+// but MFEMMesh may differ in each subapp
 // */
 
-class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
+class MultiApplibMeshToMFEMShapeEvaluationTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMCopyTransfer(InputParameters const & params);
+  MultiApplibMeshToMFEMShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
+  MFEMNodalProjector _mfem_projector;
+  mfem::FindPointsGSLIB _mfem_interpolator;
   virtual MFEMProblem & getActiveToProblem() override
   {
     return static_cast<MFEMProblem &>(*_active_to_problem);
-  };
-  virtual MFEMProblem & getActiveFromProblem() override
-  {
-    return static_cast<MFEMProblem &>(*_active_from_problem);
-  };
+  }
   void transferVariables() override;
+  void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
 };
 
 #endif

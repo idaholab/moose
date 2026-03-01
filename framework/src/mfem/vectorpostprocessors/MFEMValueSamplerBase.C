@@ -11,48 +11,12 @@
 
 #include "MFEMValueSamplerBase.h"
 #include "MFEMProblem.h"
+#include "MFEMVectorUtils.h"
 
 #include "mfem/fem/fespace.hpp"
 
 namespace
 {
-size_t
-MFEMIndex(const size_t i_dim,
-          const size_t i_point,
-          const size_t num_dims,
-          const size_t num_points,
-          const mfem::Ordering::Type ordering)
-{
-  if (ordering == mfem::Ordering::byNODES)
-  {
-    return i_dim * num_points + i_point;
-  }
-  else // ordering == mfem::Ordering::byVDIM
-  {
-    return i_point * num_dims + i_dim;
-  }
-}
-
-mfem::Vector
-pointsToMFEMVector(const std::vector<Point> & points,
-                   const unsigned int num_dims,
-                   const mfem::Ordering::Type ordering)
-{
-  const unsigned int num_points = points.size();
-  mfem::Vector mfem_points(num_points * num_dims);
-  for (unsigned int i_point = 0; i_point < num_points; i_point++)
-  {
-    for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
-    {
-      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
-
-      mfem_points(idx) = points[i_point](i_dim);
-    }
-  }
-
-  return mfem_points;
-}
-
 void
 MFEMVectorToPostprocessorPoints(
     const mfem::Vector & mfem_points,
@@ -65,7 +29,7 @@ MFEMVectorToPostprocessorPoints(
   {
     for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
     {
-      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
+      const size_t idx = Moose::MFEM::MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
 
       points[i_dim].get()[i_point] = mfem_points(idx);
     }
@@ -93,7 +57,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _finder(this->comm().get()),
     _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
                                                                       : mfem::Ordering::byVDIM),
-    _points(pointsToMFEMVector(
+    _points(Moose::MFEM::libMeshPointsToMFEMVector(
         points, this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension(), _points_ordering)),
     _interp_vals(points.size()),
     _var_name(getParam<VariableName>("variable")),
@@ -162,7 +126,8 @@ MFEMValueSamplerBase::finalize()
   {
     for (size_t i_point = 0; i_point < num_points; i_point++)
     {
-      const auto mfem_idx = MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
+      const auto mfem_idx =
+          Moose::MFEM::MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
       _declared_vals[i_dim].get()[i_point] = _interp_vals[mfem_idx];
     }
   }
