@@ -11,7 +11,6 @@
 
 #include "MultiAppGeneralFieldTransfer.h"
 #include "KDTree.h"
-#include "SolutionInvalidInterface.h"
 
 /**
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
@@ -26,9 +25,6 @@ public:
   MultiAppGeneralFieldNearestLocationTransfer(const InputParameters & parameters);
 
   void initialSetup() override;
-
-  // Use solution invalid output for these warnings
-  usingCombinedWarningSolutionWarnings;
 
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
