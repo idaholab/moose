@@ -93,12 +93,20 @@ to_json(nlohmann::json & json, const PerfGraphReporter::PerfGraphJSON & perf_gra
   json = perf_graph_json.value;
 }
 
+template <typename Context>
 void
-dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, void *)
+dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, Context)
 {
 }
 
+template void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, void *);
+template void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, void *)
+dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, Context)
 {
 }
+
+template void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, void *);
+template void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, std::nullptr_t);

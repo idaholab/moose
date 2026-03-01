@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ElementUserObject.h"
+#include "AnyPointer.h"
 
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
@@ -59,10 +60,12 @@ protected:
 
 // Used for Restart
 template <>
+template <typename Context>
 void dataStore(std::ostream & stream,
                DiscreteNucleationInserterBase::NucleusLocation & nl,
-               void * context);
+               Context context);
 template <>
+template <typename Context>
 void dataLoad(std::istream & stream,
               DiscreteNucleationInserterBase::NucleusLocation & nl,
-              void * context);
+              Context context);

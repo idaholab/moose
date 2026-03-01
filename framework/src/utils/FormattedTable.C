@@ -22,9 +22,9 @@ const unsigned short FormattedTable::_min_pps_width = 40;
 const unsigned short DEFAULT_CSV_PRECISION = 14;
 const std::string DEFAULT_CSV_DELIMITER = ",";
 
-template <>
+template <typename Context>
 void
-dataStore(std::ostream & stream, FormattedTable & table, void * context)
+dataStore(std::ostream & stream, FormattedTable & table, Context context)
 {
   table.fillEmptyValues();
   storeHelper(stream, table._data, context);
@@ -34,9 +34,12 @@ dataStore(std::ostream & stream, FormattedTable & table, void * context)
   storeHelper(stream, table._headers_output, context);
 }
 
-template <>
+template void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+template void dataStore(std::ostream & stream, FormattedTable & table, std::nullptr_t context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, FormattedTable & table, void * context)
+dataLoad(std::istream & stream, FormattedTable & table, Context context)
 {
   loadHelper(stream, table._data, context);
   loadHelper(stream, table._align_widths, context);
@@ -45,16 +48,25 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
   loadHelper(stream, table._headers_output, context);
 }
 
-template <>
+template void dataLoad(std::istream & stream, FormattedTable & table, void * context);
+template void dataLoad(std::istream & stream, FormattedTable & table, std::nullptr_t context);
+
+template <typename Context>
 void
-dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
+dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, Context context)
 {
   value_base->store(stream, context);
 }
 
-template <>
+template void
+dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+template void dataStore(std::ostream & stream,
+                        std::shared_ptr<TableValueBase> & value_base,
+                        std::nullptr_t context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
+dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, Context context)
 {
   std::string type;
   dataLoad(stream, type, context);
@@ -97,15 +109,18 @@ dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, vo
   else if (type == typeid(char).name())
     TableValue<char>::load(stream, value_base, context);
 
-  else if (type == typeid(char *).name())
-    TableValue<char *>::load(stream, value_base, context);
-
   else if (type == typeid(std::string).name())
     TableValue<std::string>::load(stream, value_base, context);
 
   else
     mooseError("Unsupported table value type ", demangle(type.c_str()));
 }
+
+template void
+dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+template void dataLoad(std::istream & stream,
+                       std::shared_ptr<TableValueBase> & value_base,
+                       std::nullptr_t context);
 
 void
 FormattedTable::close()

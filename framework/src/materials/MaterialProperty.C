@@ -9,20 +9,27 @@
 
 #include "MaterialProperty.h"
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, PropertyValue & p, void *)
+dataStore(std::ostream & stream, PropertyValue & p, Context)
 {
   p.store(stream);
 }
 
+template void dataStore(std::ostream & stream, PropertyValue & p, void * context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, PropertyValue & p, void *)
+dataLoad(std::istream & stream, PropertyValue & p, Context)
 {
   p.load(stream);
 }
 
+template void dataLoad(std::istream & stream, PropertyValue & p, void * context);
+
+template <typename Context>
 void
-dataStore(std::ostream & stream, MaterialProperties & v, void * context)
+dataStore(std::ostream & stream, MaterialProperties & v, Context context)
 {
   std::size_t prop_size = v.size();
   dataStore(stream, prop_size, context);
@@ -31,8 +38,11 @@ dataStore(std::ostream & stream, MaterialProperties & v, void * context)
     dataStore(stream, v[i], context);
 }
 
+template void dataStore(std::ostream & stream, MaterialProperties & v, void * context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, MaterialProperties & v, void * context)
+dataLoad(std::istream & stream, MaterialProperties & v, Context context)
 {
   std::size_t prop_size;
   dataLoad(stream, prop_size, context);
@@ -41,3 +51,5 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
   for (const auto i : make_range(prop_size))
     dataLoad(stream, v[i], context);
 }
+
+template void dataLoad(std::istream & stream, MaterialProperties & v, void * context);

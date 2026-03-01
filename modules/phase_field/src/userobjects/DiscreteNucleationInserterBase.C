@@ -32,7 +32,7 @@ template <>
 void
 dataStore(std::ostream & stream,
           DiscreteNucleationInserterBase::NucleusLocation & nl,
-          void * context)
+          Context context)
 {
   storeHelper(stream, nl.time, context);
   storeHelper(stream, nl.center, context);
@@ -43,7 +43,7 @@ template <>
 void
 dataLoad(std::istream & stream,
          DiscreteNucleationInserterBase::NucleusLocation & nl,
-         void * context)
+         Context context)
 {
   loadHelper(stream, nl.time, context);
   loadHelper(stream, nl.center, context);

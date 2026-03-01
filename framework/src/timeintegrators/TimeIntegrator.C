@@ -39,9 +39,9 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _solution(_sys.currentSolution()),
     _solution_old(_sys.solutionState(1)),
     _solution_sub(declareRestartableDataWithContext<std::unique_ptr<NumericVector<Number>>>(
-        "solution_sub", &const_cast<libMesh::Parallel::Communicator &>(this->comm()))),
+        "solution_sub", _sys.comm())),
     _solution_old_sub(declareRestartableDataWithContext<std::unique_ptr<NumericVector<Number>>>(
-        "solution_old_sub", &const_cast<libMesh::Parallel::Communicator &>(this->comm()))),
+        "solution_old_sub", _sys.comm())),
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),

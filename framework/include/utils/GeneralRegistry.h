@@ -63,6 +63,12 @@ protected:
   template <typename CreateItem>
   std::size_t registerItem(const Key & key, CreateItem & create_item);
 
+protected:
+  /// Access to items for serialization (used by derived classes)
+  std::deque<Item> & items() { return _id_to_item; }
+  const std::deque<Item> & items() const { return _id_to_item; }
+
+private:
   /// The name of this registry; used in error handling
   const std::string _name;
 

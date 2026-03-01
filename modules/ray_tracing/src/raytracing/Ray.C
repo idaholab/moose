@@ -695,12 +695,14 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
 
 } // namespace libMesh
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Context context)
 {
   mooseAssert(ray, "Null ray");
   mooseAssert(context, "Missing RayTracingStudy context");
-  mooseAssert(static_cast<RayTracingStudy *>(context) == &ray->study(), "Different study");
+  if constexpr (std::is_convertible_v<Context, RayTracingStudy *>)
+    mooseAssert(static_cast<RayTracingStudy *>(context) == &ray->study(), "Different study");
 
   storeHelper(stream, ray->_id, context);
   storeHelper(stream, ray->_current_point, context);
@@ -720,11 +722,16 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
   storeHelper(stream, ray->_aux_data, context);
 }
 
+template <typename Context>
 void
-dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Context context)
 {
   mooseAssert(context, "Missing RayTracingStudy context");
-  RayTracingStudy * study = static_cast<RayTracingStudy *>(context);
+  RayTracingStudy * study = nullptr;
+  if constexpr (std::is_convertible_v<Context, RayTracingStudy *>)
+    study = context;
+  else
+    mooseError("Ray dataLoad requires RayTracingStudy* context");
 
   RayID id;
   loadHelper(stream, id, context);
@@ -756,3 +763,7 @@ dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
                 "Cannot not load a Ray that has already traced during generation or propagation; "
                 "reset the Ray first");
 }
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, std::shared_ptr<Ray> &, RayTracingStudy *);
+template void dataLoad(std::istream &, std::shared_ptr<Ray> &, RayTracingStudy *);

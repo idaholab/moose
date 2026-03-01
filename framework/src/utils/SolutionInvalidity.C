@@ -332,27 +332,34 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
 }
 
 // Define data store structure for TimestepCounts
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           SolutionInvalidity::TimestepCounts & timestep_counts,
-          void * context)
+          Context context)
 {
   dataStore(stream, timestep_counts.timestep_index, context);
   dataStore(stream, timestep_counts.counts, context);
 }
 
+template void dataStore(std::ostream &, SolutionInvalidity::TimestepCounts &, void *);
+
 // Define data load structure for TimestepCounts
+template <typename Context>
 void
 dataLoad(std::istream & stream,
          SolutionInvalidity::TimestepCounts & timestep_counts,
-         void * context)
+         Context context)
 {
   dataLoad(stream, timestep_counts.timestep_index, context);
   dataLoad(stream, timestep_counts.counts, context);
 }
 
+template void dataLoad(std::istream &, SolutionInvalidity::TimestepCounts &, void *);
+
+template <typename Context>
 void
-dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
+dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, Context context)
 {
   solution_invalidity.syncIteration();
 
@@ -380,8 +387,11 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
   }
 }
 
+template void dataStore(std::ostream &, SolutionInvalidity &, void *);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context)
+dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, Context context)
 {
   if (solution_invalidity.processor_id() != 0)
     return;
@@ -418,3 +428,11 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void *
     dataLoad(stream, entry.total_counts, context);
   }
 }
+
+template void dataLoad(std::istream &, SolutionInvalidity &, void *);
+
+// Explicit instantiations for std::nullptr_t context
+template void dataStore(std::ostream &, SolutionInvalidity &, std::nullptr_t);
+template void dataLoad(std::istream &, SolutionInvalidity &, std::nullptr_t);
+template void dataStore(std::ostream &, SolutionInvalidity::TimestepCounts &, std::nullptr_t);
+template void dataLoad(std::istream &, SolutionInvalidity::TimestepCounts &, std::nullptr_t);

@@ -110,9 +110,10 @@ protected:
  * We have to have a specialization for this map because the PenetrationInfo
  * objects MUST get deleted before the ones are loaded from a file or it's a memory leak.
  */
-template <>
 inline void
-dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, void * context)
+dataLoad(std::istream & stream,
+         std::map<dof_id_type, PenetrationInfo *> & m,
+         libMesh::MeshBase * context)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator it = m.begin();
   std::map<dof_id_type, PenetrationInfo *>::iterator end = m.end();
@@ -129,7 +130,7 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
   for (unsigned int i = 0; i < size; i++)
   {
     dof_id_type key;
-    loadHelper(stream, key, context);
+    loadHelper(stream, key, nullptr);
     loadHelper(stream, m[key], context);
   }
 }

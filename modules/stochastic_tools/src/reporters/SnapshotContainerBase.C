@@ -24,7 +24,7 @@ SnapshotContainerBase::validParams()
 SnapshotContainerBase::SnapshotContainerBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _accumulated_data(
-        declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", (void *)&comm())),
+        declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", comm())),
     _nonlinear_system_number(
         _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {
@@ -53,14 +53,24 @@ SnapshotContainerBase::execute()
   _accumulated_data.addPointer(collectSnapshot());
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, Context context)
 {
   storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
 
+template <typename Context>
 void
-dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, Context context)
 {
   loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
+
+// Explicit instantiations for common context types
+template void dataStore(std::ostream &,
+                        SnapshotContainerBase::Snapshots &,
+                        const libMesh::Parallel::Communicator *);
+template void dataLoad(std::istream &,
+                       SnapshotContainerBase::Snapshots &,
+                       const libMesh::Parallel::Communicator *);

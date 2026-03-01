@@ -238,21 +238,29 @@ to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo>
   }
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, Context context)
 {
   storeHelper(stream, sideset_info.id, context);
   storeHelper(stream, sideset_info.name, context);
   storeHelper(stream, sideset_info.sides, context);
 }
 
+template void dataStore(std::ostream &, MeshInfo::SidesetInfo &, void *);
+template void dataStore(std::ostream &, MeshInfo::SidesetInfo &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, Context context)
 {
   loadHelper(stream, sideset_info.id, context);
   loadHelper(stream, sideset_info.name, context);
   loadHelper(stream, sideset_info.sides, context);
 }
+
+template void dataLoad(std::istream &, MeshInfo::SidesetInfo &, void *);
+template void dataLoad(std::istream &, MeshInfo::SidesetInfo &, std::nullptr_t);
 
 void
 MeshInfo::possiblyAddSubdomainInfo()
@@ -384,18 +392,26 @@ to_json(nlohmann::json & json, const std::map<SubdomainID, MeshInfo::SubdomainIn
   }
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, Context context)
 {
   storeHelper(stream, subdomain_info.id, context);
   storeHelper(stream, subdomain_info.name, context);
   storeHelper(stream, subdomain_info.elems, context);
 }
 
+template void dataStore(std::ostream &, MeshInfo::SubdomainInfo &, void *);
+template void dataStore(std::ostream &, MeshInfo::SubdomainInfo &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, Context context)
 {
   loadHelper(stream, subdomain_info.id, context);
   loadHelper(stream, subdomain_info.name, context);
   loadHelper(stream, subdomain_info.elems, context);
 }
+
+template void dataLoad(std::istream &, MeshInfo::SubdomainInfo &, void *);
+template void dataLoad(std::istream &, MeshInfo::SubdomainInfo &, std::nullptr_t);

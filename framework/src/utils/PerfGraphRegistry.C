@@ -65,8 +65,9 @@ PerfGraphRegistry::actuallyRegisterSection(const std::string & section_name,
 }
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context)
+dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, Context context)
 {
   dataStore(stream, info._id, context);
   dataStore(stream, info._name, context);
@@ -75,8 +76,11 @@ dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, v
   dataStore(stream, info._print_dots, context);
 }
 
+template void dataStore(std::ostream &, moose::internal::PerfGraphSectionInfo &, void *);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context)
+dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, Context context)
 {
   dataLoad(stream, info._id, context);
   dataLoad(stream, info._name, context);
@@ -84,3 +88,5 @@ dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, vo
   dataLoad(stream, info._live_message, context);
   dataLoad(stream, info._print_dots, context);
 }
+
+template void dataLoad(std::istream &, moose::internal::PerfGraphSectionInfo &, void *);

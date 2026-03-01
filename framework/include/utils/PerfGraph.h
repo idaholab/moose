@@ -420,8 +420,10 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
   friend class PerfGraphLivePrint;
-  friend void dataStore(std::ostream &, PerfGraph &, void *);
-  friend void dataLoad(std::istream &, PerfGraph &, void *);
+  template <typename Context>
+  friend void dataStore(std::ostream &, PerfGraph &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, PerfGraph &, Context);
 
 private:
   /**
@@ -493,5 +495,7 @@ PerfGraph::treeRecurse(const Functor & act,
   treeRecurseInternal(*_root_node, act, level, heaviest, 0);
 }
 
-void dataStore(std::ostream & stream, PerfGraph & perf_graph, void * context);
-void dataLoad(std::istream & stream, PerfGraph & perf_graph, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, PerfGraph & perf_graph, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, PerfGraph & perf_graph, Context context);

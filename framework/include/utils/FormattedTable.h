@@ -26,14 +26,14 @@ namespace libMesh
 class ExodusII_IO;
 }
 
-template <>
-void dataStore(std::ostream & stream, FormattedTable & table, void * context);
-template <>
-void dataLoad(std::istream & stream, FormattedTable & v, void * context);
-template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
-template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, FormattedTable & v, Context context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value, Context context);
 
 class TableValueBase
 {
@@ -322,9 +322,10 @@ private:
   /// Flag indicating that sorting is necessary (used by sortColumns method).
   bool _column_names_unsorted = true;
 
-  friend void
-  dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, void * context);
-  friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
+  template <typename Context>
+  friend void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+  template <typename Context>
+  friend void dataLoad(std::istream & stream, FormattedTable & v, Context context);
 };
 
 template <typename T>
@@ -414,11 +415,11 @@ FormattedTable::getLastData(const std::string & name) const
   return value->set();
 }
 
-template <>
-void dataStore(std::ostream & stream, FormattedTable & table, void * context);
-template <>
-void dataLoad(std::istream & stream, FormattedTable & v, void * context);
-template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
-template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, FormattedTable & v, Context context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value, Context context);

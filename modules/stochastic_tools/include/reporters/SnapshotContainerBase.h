@@ -13,6 +13,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "NonlinearSystemBase.h"
+#include "AnyPointer.h"
 
 /**
  * Base class for storing and managing numerical data like solutions, residuals, and Jacobians.
@@ -71,5 +72,5 @@ protected:
   const unsigned int _nonlinear_system_number;
 };
 
-void dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context);
-void dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context);
+void dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, Context context);
+void dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, Context context);

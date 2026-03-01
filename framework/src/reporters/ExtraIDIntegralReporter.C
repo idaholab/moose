@@ -89,12 +89,20 @@ to_json(nlohmann::json & json, const ExtraIDIntegralReporter::ExtraIDData & extr
     integrals[name] = (*extra_id_data.integrals[i]);
   }
 }
+template <typename Context>
 void
-dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, void *)
+dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, Context)
 {
 }
 
+template void dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, void *);
+template void dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, void *)
+dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, Context)
 {
 }
+
+template void dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, void *);
+template void dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, std::nullptr_t);

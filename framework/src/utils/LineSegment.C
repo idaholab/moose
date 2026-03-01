@@ -235,15 +235,20 @@ LineSegment::set(const Point & p0, const Point & p1)
   setEnd(p1);
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, LineSegment & l, void * context)
+dataStore(std::ostream & stream, LineSegment & l, Context context)
 {
   dataStore(stream, l.start(), context);
   dataStore(stream, l.end(), context);
 }
 
+template void dataStore(std::ostream &, LineSegment &, void *);
+template void dataStore(std::ostream &, LineSegment &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, LineSegment & l, void * context)
+dataLoad(std::istream & stream, LineSegment & l, Context context)
 {
   Point p0;
   dataLoad(stream, p0, context);
@@ -251,6 +256,9 @@ dataLoad(std::istream & stream, LineSegment & l, void * context)
   dataLoad(stream, p1, context);
   l.set(p0, p1);
 }
+
+template void dataLoad(std::istream &, LineSegment &, void *);
+template void dataLoad(std::istream &, LineSegment &, std::nullptr_t);
 
 void
 to_json(nlohmann::json & json, const LineSegment & l)

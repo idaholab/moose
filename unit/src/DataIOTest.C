@@ -22,38 +22,38 @@ struct DataStorage : public UniqueStorage<DataType>
 };
 
 void
-dataStore(std::ostream & stream, DataType & v, void * context)
+dataStore(std::ostream & stream, DataType & v, Moose::AnyPointer context)
 {
   dataStore(stream, v.data, context);
 }
 
 void
-dataLoad(std::istream & stream, DataType & v, void * context)
+dataLoad(std::istream & stream, DataType & v, Moose::AnyPointer context)
 {
   dataLoad(stream, v.data, context);
 }
 
 void
-dataStore(std::ostream & stream, std::unique_ptr<DataType> & v, void * context)
+dataStore(std::ostream & stream, std::unique_ptr<DataType> & v, Moose::AnyPointer context)
 {
   dataStore(stream, *v, context);
 }
 
 void
-dataLoad(std::istream & stream, std::unique_ptr<DataType> & v, void * context)
+dataLoad(std::istream & stream, std::unique_ptr<DataType> & v, Moose::AnyPointer context)
 {
   v = std::make_unique<DataType>();
   dataLoad(stream, *v, context);
 }
 
 void
-dataStore(std::ostream & stream, DataStorage & v, void * context)
+dataStore(std::ostream & stream, DataStorage & v, Moose::AnyPointer context)
 {
   storeHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
 }
 
 void
-dataLoad(std::istream & stream, DataStorage & v, void * context)
+dataLoad(std::istream & stream, DataStorage & v, Moose::AnyPointer context)
 {
   loadHelper(stream, static_cast<UniqueStorage<DataType> &>(v), context);
 }

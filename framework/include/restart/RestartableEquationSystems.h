@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "AnyPointer.h"
+
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -186,22 +188,43 @@ private:
   std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 
-void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems & res, void *);
+template <typename Context>
+void dataStore(std::ostream & stream, RestartableEquationSystems & res, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, RestartableEquationSystems & res, Context context);
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::EquationSystemsHeader & header,
-               void *);
+               Context context);
+template <typename Context>
+void dataLoad(std::istream & stream,
+              RestartableEquationSystems::EquationSystemsHeader & header,
+              Context context);
+
+template <typename Context>
+void dataStore(std::ostream & stream,
+               RestartableEquationSystems::SystemHeader & header,
+               Context context);
+template <typename Context>
 void
-dataLoad(std::istream & stream, RestartableEquationSystems::EquationSystemsHeader & header, void *);
+dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, Context context);
 
-void dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, void *);
+template <typename Context>
+void dataStore(std::ostream & stream,
+               RestartableEquationSystems::VariableHeader & header,
+               Context context);
+template <typename Context>
+void dataLoad(std::istream & stream,
+              RestartableEquationSystems::VariableHeader & header,
+              Context context);
 
-void dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, void *);
-
-void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *);
+template <typename Context>
+void dataStore(std::ostream & stream,
+               RestartableEquationSystems::VectorHeader & header,
+               Context context);
+template <typename Context>
+void
+dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, Context context);
 
 void to_json(nlohmann::json & json, const RestartableEquationSystems & res);

@@ -41,7 +41,7 @@ TestPICRayStudy::TestPICRayStudy(const InputParameters & parameters)
     _velocity_function(getFunction("velocity_function")),
     _has_generated(declareRestartableData<bool>("has_generated", false)),
     _banked_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", this))
+        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("_banked_rays", *this))
 {
   if (_start_points.size() != _start_directions.size())
     paramError("start_directions", "Must be the same size as 'start_points'");

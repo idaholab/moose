@@ -13,10 +13,12 @@
 
 class FEProblemBase;
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context);
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context);
+template <typename Context>
 void
-dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context);
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context);
 
 namespace Moose::Kokkos
 {
@@ -26,8 +28,10 @@ namespace Moose::Kokkos
  */
 class MaterialPropertyStorage : protected ::MaterialPropertyStorage
 {
-  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, void *);
-  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, void *);
+  template <typename Context>
+  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, Context);
+  template <typename Context>
+  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, Context);
 
 public:
   /**

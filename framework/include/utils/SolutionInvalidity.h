@@ -12,6 +12,7 @@
 // MOOSE Includes
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "AnyPointer.h"
 #include "SolutionInvalidityRegistry.h"
 #include "ConsoleStream.h"
 #include "ConsoleStreamInterface.h"
@@ -138,8 +139,10 @@ public:
   /// Whether the solution invalidity has synchronized iteration counts across MPI processes
   bool hasSynced() const { return _has_synced; }
 
-  friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
-  friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
+  template <typename Context>
+  friend void dataStore(std::ostream &, SolutionInvalidity &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, SolutionInvalidity &, Context);
 
 private:
   /// Mutex for locking access to the invalid counts
@@ -178,11 +181,16 @@ private:
 };
 
 // datastore and dataload for recover
+template <typename Context>
 void dataStore(std::ostream & stream,
                SolutionInvalidity::TimestepCounts & timestep_counts,
-               void * context);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               SolutionInvalidity::TimestepCounts & timestep_counts,
-              void * context);
-void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
-void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);
+              Context context);
+
+template <typename Context>
+void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, Context context);
