@@ -133,6 +133,16 @@
     design = 'AdvancedExtruderGenerator.md'
     issues = '#25486'
   []
+  [polygons]
+    type = CSVDiff
+    input = 'polygons.i'
+    csvdiff = 'polygons_div_out.csv'
+    cli_args = '--mesh-only'
+    recover = false
+    requirement = 'The system shall be able to extrude a 2D polygon mesh'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#32159'
+  []
 
   [errors]
     requirement = 'The system shall error'

@@ -19,6 +19,7 @@
 #include "libmesh/cell_hex8.h"
 #include "libmesh/cell_hex20.h"
 #include "libmesh/cell_hex27.h"
+#include "libmesh/cell_c0polyhedron.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
@@ -28,6 +29,7 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/face_tri6.h"
 #include "libmesh/face_tri7.h"
+#include "libmesh/face_c0polygon.h"
 #include "libmesh/libmesh_logging.h"
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_modification.h"
@@ -991,6 +993,58 @@ AdvancedExtruderGenerator::generate()
               MooseMeshUtils::swapNodesInElem(*new_elem, 20, 25);
               is_flipped = true;
             }
+
+            break;
+          }
+          case libMesh::C0POLYGON:
+          {
+            const auto num_sides = elem->n_sides();
+            std::vector<std::shared_ptr<libMesh::Polygon>> sides;
+            sides.reserve(2 + num_sides);
+            if (2 + num_sides > 27)
+              mooseError("Too many sides in polygons to extrude it. Max number of the prism "
+                         "polyhedral sides: 27");
+            // Make a copy of the original element to use as a side
+            auto new_ptr = std::make_shared<libMesh::C0Polygon>(num_sides);
+            for (const auto node_i : make_range(elem->n_nodes()))
+            {
+              // This one will be oriented outwards, it should be OK though, polyhedron code does
+              // not mind
+              new_ptr->set_node(
+                  node_i,
+                  mesh->node_ptr(elem->node_ptr(node_i)->id() + (current_layer * orig_nodes)));
+            }
+            sides.push_back(new_ptr);
+            // Form the next horizontal side
+            auto translated_side = std::make_shared<libMesh::C0Polygon>(num_sides);
+            for (const auto node_i : make_range(elem->n_nodes()))
+              translated_side->set_node(node_i,
+                                        mesh->node_ptr(elem->node_ptr(node_i)->id() +
+                                                       ((current_layer + 1) * orig_nodes)));
+            sides.push_back(translated_side);
+
+            // Form the vertical sides
+            for (const auto side_i : make_range(num_sides))
+            {
+              // They are all quads, but constructor expects polygons
+              auto vert_side = std::make_shared<libMesh::C0Polygon>(4);
+              vert_side->set_node(
+                  0, mesh->node_ptr(elem->node_ptr(side_i)->id() + (current_layer * orig_nodes)));
+              vert_side->set_node(1,
+                                  mesh->node_ptr(elem->node_ptr((side_i + 1) % num_sides)->id() +
+                                                 (current_layer * orig_nodes)));
+              vert_side->set_node(2,
+                                  mesh->node_ptr(elem->node_ptr((side_i + 1) % num_sides)->id() +
+                                                 ((current_layer + 1) * orig_nodes)));
+              vert_side->set_node(3,
+                                  mesh->node_ptr(elem->node_ptr(side_i)->id() +
+                                                 ((current_layer + 1) * orig_nodes)));
+              sides.push_back(vert_side);
+            }
+            mooseAssert(sides.size() == 2 + num_sides, "Unexpected size of side vector");
+
+            // Create the element from the sides, let libMesh figure out the orientation
+            new_elem = std::make_unique<libMesh::C0Polyhedron>(sides);
 
             break;
           }
