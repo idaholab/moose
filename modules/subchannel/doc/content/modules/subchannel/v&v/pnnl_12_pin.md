@@ -27,6 +27,8 @@ Velocity data were recorded at selected points along the central subchannel axia
 
 ### Steady State
 
+!! Intentional comment to provide extra spacing
+
 The input file for the steady case 9 is:
 
 !listing /validation/PNNL_12_pin/steady_state/2X6_ss.i language=moose
@@ -38,6 +40,8 @@ The input file decribing the radial pin power profile is:
 For case 13 the input file and power profile file, need to be adapted according to the respective operational parameters.
 
 ### Transient
+
+!! Intentional comment to provide extra spacing
 
 The input file for the steady case 5 is:
 

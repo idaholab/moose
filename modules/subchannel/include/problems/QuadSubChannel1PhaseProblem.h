@@ -24,14 +24,8 @@ protected:
   virtual void initializeSolution() override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const override;
   virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) const override;
-  virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool /*enthalpy*/) override;
   virtual void computeh(int iblock) override;
   QuadSubChannelMesh & _subchannel_mesh;
-
-  /// Thermal diffusion coefficient used in turbulent crossflow
-  const Real & _beta;
-  /// Flag that activates the use of constant beta
-  const bool _constant_beta;
 
 public:
   static InputParameters validParams();

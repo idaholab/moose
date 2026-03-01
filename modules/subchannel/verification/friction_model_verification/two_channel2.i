@@ -34,19 +34,22 @@ P_out = 155e+5 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 0.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  # friction model
   friction_closure = 'cheng'
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 0.0
   []
 []
 

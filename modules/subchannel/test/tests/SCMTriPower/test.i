@@ -45,7 +45,6 @@ num_cells = 40
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -53,10 +52,9 @@ num_cells = 40
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
-  # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -65,6 +63,10 @@ num_cells = 40
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

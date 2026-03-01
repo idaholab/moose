@@ -68,8 +68,6 @@ P_out = 101325 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.06
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = false
@@ -78,6 +76,19 @@ P_out = 101325 # Pa
   segregated = false
   staggered_pressure = false
   interpolation_scheme = 'upwind'
+  friction_closure = 'MATRA'
+  mixing_closure ='constant_beta'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.6
+  []
 []
 
 [ICs]

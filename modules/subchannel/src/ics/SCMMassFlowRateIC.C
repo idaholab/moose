@@ -10,7 +10,6 @@
 #include "SCMMassFlowRateIC.h"
 
 registerMooseObject("SubChannelApp", SCMMassFlowRateIC);
-registerMooseObjectRenamed("SubChannelApp", MassFlowRateIC, "06/30/2025 24:00", SCMMassFlowRateIC);
 
 InputParameters
 SCMMassFlowRateIC::validParams()

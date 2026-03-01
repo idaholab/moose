@@ -18,7 +18,7 @@ SCMHTCClosureBase::validParams()
 }
 
 SCMHTCClosureBase::SCMHTCClosureBase(const InputParameters & parameters)
-  : SCMClosureBase(parameters)
+  : SCMClosureBase(parameters), _Dpin_soln(_subproblem.getVariable(0, "Dpin"))
 {
 }
 
@@ -34,10 +34,9 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
   const bool is_duct = (nusselt_args.i_pin == std::numeric_limits<unsigned int>::max());
   if (!is_duct)
   {
-    auto Dpin_soln = SolutionHandle(_subproblem.getVariable(0, "Dpin"));
     const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-    if (Dpin_soln(pin_node) > 0)
-      D = Dpin_soln(pin_node);
+    if (_Dpin_soln(pin_node) > 0)
+      D = _Dpin_soln(pin_node);
     else
       mooseError(name(),
                  "The diameter of the pin is equal or smaller than zero, "

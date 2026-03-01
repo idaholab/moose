@@ -12,10 +12,6 @@
 #include "libmesh/cell_prism6.h"
 
 registerMooseObject("SubChannelApp", SCMDetailedTriPinMeshGenerator);
-registerMooseObjectRenamed("SubChannelApp",
-                           DetailedTriPinMeshGenerator,
-                           "06/30/2025 24:00",
-                           SCMDetailedTriPinMeshGenerator);
 
 InputParameters
 SCMDetailedTriPinMeshGenerator::validParams()

@@ -39,8 +39,6 @@ pin_diameter = 0.00950
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -49,6 +47,7 @@ pin_diameter = 0.00950
   staggered_pressure = true
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
@@ -57,6 +56,11 @@ pin_diameter = 0.00950
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.6
   []
 []
 
