@@ -136,7 +136,7 @@
     type = 'RunException'
     input = 'bad_second_order_test.i'
     expect_err = 'ERROR: Finite element LAGRANGE on geometric element QUAD4\nonly supports FEInterface::max_order = 1, not fe_type.order = 2'
-    capabilities = 'dbg'
+    capabilities = 'method=dbg'
 
     requirement = 'The system shall report an error when a first order element is used with a second order discretization.'
     issues = '#1405'
@@ -825,7 +825,7 @@
     type = 'RunException'
     input = 'nodal_value_off_block.i'
     expect_err = 'Node 0 does not contain any dofs for the v variable'
-    capabilities = 'dbg'
+    capabilities = 'method=dbg'
 
     requirement = 'The system shall report an error when a coupled variable is not defined in the same region as the variable performing the coupling.'
     issues = '#2849'
