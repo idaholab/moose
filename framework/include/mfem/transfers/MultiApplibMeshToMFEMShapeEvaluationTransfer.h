@@ -15,12 +15,10 @@
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
-//*
-// Copy MFEMVariables between multiapps
-// The variables must be of the same type and dimension
-// but MFEMMesh may differ in each subapp
-// */
-
+/**
+ * MultiApp transfer from libMesh to MFEM variables, performed via evaluation of
+ * shape functions. Meshes can differ between source and destination variables.
+ */
 class MultiApplibMeshToMFEMShapeEvaluationTransfer : public MFEMMultiAppTransfer
 {
 public:
@@ -28,14 +26,20 @@ public:
   MultiApplibMeshToMFEMShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
+  /// Object to extract node positions and perform projections on MFEM GridFunctions.
   MFEMNodalProjector _mfem_projector;
-  mfem::FindPointsGSLIB _mfem_interpolator;
+
+  /// Transfer all variables from active source problem to active destination problem.
+  void transferVariables() override;
+
+  /// Set MFEM GridFunction values from the libMesh variable corresponding to var_index
+  void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
+
+  /// Set current problem to fetch destination variables from
   virtual MFEMProblem & getActiveToProblem() override
   {
-    return static_cast<MFEMProblem &>(*_active_to_problem);
+    return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
   }
-  void transferVariables() override;
-  void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
 };
 
 #endif
