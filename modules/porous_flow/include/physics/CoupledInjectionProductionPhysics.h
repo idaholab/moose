@@ -40,6 +40,9 @@ protected:
   /// Production points
   const std::vector<Point> & _production_points;
 
+  /// Mass fraction variable names, if any
+  const std::vector<VariableName> & _mass_fraction_vars;
+
   /// Injection and production points
   std::vector<Point> _points;
   /// Label for each point

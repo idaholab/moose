@@ -21,6 +21,8 @@ CoupledInjectionProductionPhysics::validParams()
 
   params.addRequiredParam<std::vector<Point>>("injection_points", "List of injection points [m]");
   params.addRequiredParam<std::vector<Point>>("production_points", "List of production points [m]");
+  params.addRequiredParam<std::vector<VariableName>>("mass_fraction_vars",
+                                                     "List of mass fraction variables");
   params.addParam<MultiAppName>("multi_app", "MultiApp to transfer to and from");
 
   params.addClassDescription(
@@ -33,7 +35,8 @@ CoupledInjectionProductionPhysics::CoupledInjectionProductionPhysics(
     const InputParameters & parameters)
   : PhysicsBase(parameters),
     _injection_points(getParam<std::vector<Point>>("injection_points")),
-    _production_points(getParam<std::vector<Point>>("production_points"))
+    _production_points(getParam<std::vector<Point>>("production_points")),
+    _mass_fraction_vars(getParam<std::vector<VariableName>>("mass_fraction_vars"))
 {
   _points = _injection_points;
   _points.insert(_points.end(), _production_points.begin(), _production_points.end());
@@ -51,6 +54,8 @@ CoupledInjectionProductionPhysics::addDiracKernels()
   {
     addPPSourceDiracKernel(_points[i], "porepressure", "mass_rate_" + _labels[i]);
     addPPSourceDiracKernel(_points[i], "temperature", "energy_rate_" + _labels[i]);
+    for (const auto & var : _mass_fraction_vars)
+      addPPSourceDiracKernel(_points[i], var, var + "_rate_" + _labels[i]);
   }
 }
 
@@ -63,6 +68,11 @@ CoupledInjectionProductionPhysics::addPostprocessors()
     addPointValuePostprocessor("temperature", _points[i], "T_" + _labels[i]);
     addReceiverPostprocessor("mass_rate_" + _labels[i]);
     addReceiverPostprocessor("energy_rate_" + _labels[i]);
+    for (const auto & var : _mass_fraction_vars)
+    {
+      addPointValuePostprocessor(var, _points[i], var + "_" + _labels[i]);
+      addReceiverPostprocessor(var + "_rate_" + _labels[i]);
+    }
   }
 }
 
@@ -76,6 +86,11 @@ CoupledInjectionProductionPhysics::addTransfers()
       addPostprocessorTransfer("T_" + _labels[i], false);
       addPostprocessorTransfer("mass_rate_" + _labels[i], true);
       addPostprocessorTransfer("energy_rate_" + _labels[i], true);
+      for (const auto & var : _mass_fraction_vars)
+      {
+        addPostprocessorTransfer(var + "_" + _labels[i], false);
+        addPostprocessorTransfer(var + "_rate_" + _labels[i], true);
+      }
     }
 }
 
