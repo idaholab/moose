@@ -424,10 +424,7 @@ class TestHarness:
             self.options._capabilities,
             self.options._augmented_capabilities,
             self.options._required_capabilities,
-        ) = self.getCapabilities(
-            self.options,
-            self.executable,
-        )
+        ) = self.getCapabilities(self.options, self.executable, self.root_params)
 
         checks = {}
         checks["submodules"] = util.getInitializedSubmodules(self.run_tests_dir)
@@ -459,7 +456,9 @@ class TestHarness:
 
     @staticmethod
     def getCapabilities(
-        options: argparse.Namespace, executable: Optional[str]
+        options: argparse.Namespace,
+        executable: Optional[str],
+        test_root_params: Optional[pyhit.Node],
     ) -> Tuple["Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
@@ -470,6 +469,8 @@ class TestHarness:
             The TestHarness options.
         executable : Optional[str]
             Path to the executable; needed when not --minimal-capabilities.
+        test_root_params : Optional[pyhit.Node]
+            The parsed test_root, if any.
 
         Returns:
         -------
@@ -479,6 +480,7 @@ class TestHarness:
             The augmented capabilities.
         list[Tuple[str, bool]]]:
             The capabilities when --only-tests-that-require.
+
         """
         required = []
         app_capabilities: dict = {}
@@ -509,6 +511,25 @@ class TestHarness:
         )
         if options.minimal_capabilities:
             augment("platform", util.getPlatform(), "Operating system", None, True)
+
+        # Add extra capabilities that are known even though they might not
+        # exist (if they are not set by the app). This is needed in specific
+        # when testing against known applications. For example, in the
+        # fluid_properties module, we check against "airapp". We don't want
+        # to error when "airapp" doesn't exist in the app because we know
+        # that it could actually be false.
+        if test_root_params is not None and (
+            known_capabilities := test_root_params.get("known_capabilities")
+        ):
+            known_capabilities = known_capabilities.split()
+            for v in known_capabilities:
+                if v not in app_capabilities:
+                    augment(
+                        v,
+                        False,
+                        "TestHarness known capability",
+                        registered_augmented_capability=False,
+                    )
 
         # This is one of the few places where we actually
         # load the pycapabilities module and that is

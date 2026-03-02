@@ -93,6 +93,7 @@ def addAugmentedCapability(
     doc: str,
     enumeration: Optional[list[str]] = None,
     explicit: Optional[bool] = None,
+    registered_augmented_capability: bool = True,
 ):
     """
     Append a runtime augmented capability.
@@ -109,6 +110,8 @@ def addAugmentedCapability(
         The capability value; None will become False.
     doc : str
         The documentation string for the capability.
+    registered_augmented_capability : bool
+        Whether or not to check the capability against known augmented capabilities.
 
     Optional arguments:
     ------------------
@@ -150,7 +153,7 @@ def addAugmentedCapability(
         enumeration = [v.lower() for v in enumeration]
         assert value in enumeration, "Value is not in enumeration"
 
-    if name not in AUGMENTED_CAPABILITY_NAMES:
+    if name not in AUGMENTED_CAPABILITY_NAMES and registered_augmented_capability:
         raise ValueError(
             f"Capability {name} is not a registered augmented capability name"
         )

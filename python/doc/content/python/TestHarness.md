@@ -88,6 +88,7 @@ read by the `run_tests` script.  It should be placed in the root of your applica
   _errors_ instead.
 - `allow_override` and `allow_unused`: `true` by default if set to `false` then syntax errors in your
   test input files will be treated as errors.
+- `known_capabilities`: Extra capabilities to register as false if they aren't registered by the application.
 
 The one thing we do +not+ recommend is enforcing that the use of deprecated code should be treated
 like an error.  That is entirely too rigid of a requirement and impedes the normal flow of
