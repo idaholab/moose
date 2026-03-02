@@ -20,6 +20,11 @@ InjectionWell::validParams()
   params.addRequiredParam<FunctionName>("inlet_mass_flow_rate",
                                         "Inlet mass flow rate function [kg/s]");
   params.addRequiredParam<FunctionName>("inlet_temperature", "Inlet temperature function [K]");
+  params.addParam<std::vector<FunctionName>>(
+      "inlet_passives",
+      {},
+      "Inlet passive transport variables, if any (units are [amount/m^3], where 'amount' may be "
+      "mass (kg) or a number (molecules, moles, etc.))");
 
   params.addClassDescription("Adds the components and controls for an injection well.");
 
@@ -83,6 +88,8 @@ InjectionWell::addInlet()
   params.set<BoundaryName>("input") = flowChannelName(0) + ":in";
   params.set<Real>("m_dot") = 0.0; // arbitrary placeholder value; this gets controlled
   params.set<Real>("T") = 300.0;   // arbitrary placeholder value; this gets controlled
+  params.set<std::vector<FunctionName>>("passives") =
+      getParam<std::vector<FunctionName>>("inlet_passives");
   addTHMComponent(class_name, inletName(), params);
 }
 
