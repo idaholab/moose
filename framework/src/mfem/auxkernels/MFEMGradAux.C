@@ -34,8 +34,7 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _grad(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  _grad.Assemble();
-  _grad.Finalize();
+  update();
 }
 
 // Computes the auxvariable.

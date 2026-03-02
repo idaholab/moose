@@ -27,13 +27,8 @@ public:
 
   virtual ~MFEMRefinementMarker() = default;
 
-  void setUp();
+  void initialSetup();
 
-  mfem::ParFiniteElementSpace & getFESpace();
-
-  /// Modifies the input array with all the locations in the mesh where we should increase
-  /// the polynomial order
-  void pRefineMarker(mfem::Array<mfem::Refinement> & refinements);
   /// Applies p-refinement wherever the refiner sees fit.
   void pRefine();
 
@@ -47,7 +42,7 @@ public:
   bool usePRefinement() const { return _use_p_refinement and !_stop_p_ref; }
 
 protected:
-  /// Shared pointer to underlying mfem object
+  /// Unique pointer to underlying mfem object
   std::unique_ptr<mfem::ThresholdRefiner> _threshold_refiner;
   const std::string & _estimator_name;
 

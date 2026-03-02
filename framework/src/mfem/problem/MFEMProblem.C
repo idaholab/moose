@@ -51,11 +51,7 @@ MFEMProblem::initialSetup()
   FEProblemBase::initialSetup();
   addMFEMNonlinearSolver();
   if (useAMR())
-  {
-    mooseAssert(_problem_data.refiner, "Found no refiner during setUpAMR()");
-    _problem_data.refiner->setUp();
-    mooseAssert(_problem_data.pmesh->Nonconforming(), "Mesh must be non-conforming to use amr");
-  }
+    getProblemData().refiner->initialSetup();
 }
 
 void
@@ -95,10 +91,6 @@ MFEMProblem::addMarker(const std::string & user_object_name,
                        InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-
-  mooseAssert(dynamic_cast<const MFEMRefinementMarker *>(&(getUserObjectBase(name))),
-              "Cannot add estimator with refiner '" + name + "'");
-
   auto object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
 
   getProblemData().refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
@@ -626,26 +618,22 @@ MFEMProblem::updateAfterRefinement()
   if (_problem_data.pmesh->Nonconforming())
   {
     _problem_data.pmesh->Rebalance();
-
-    // Update FESpaces again to account for rebalancing
     updateFESpaces();
   }
 
-  // finally, reset the solver. Ultimately this reconstructs it.
-  _problem_data.jacobian_solver->resetSolver();
+  // Reconstruct the solver due to possible mfem/hypre bug
+  _problem_data.jacobian_solver->constructSolver(emptyInputParameters());
 }
 
 void
 MFEMProblem::updateFESpaces()
 {
   for (const auto & fe_space_pair : _problem_data.fespaces)
-  {
     fe_space_pair.second->Update();
-  }
+
   for (const auto & gridfunction_pair : _problem_data.gridfunctions)
-  {
     gridfunction_pair.second->Update();
-  }
+
   _problem_data.eqn_system->BuildEquationSystem();
 }
 
@@ -717,7 +705,7 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
 bool
 MFEMProblem::applyRefinements()
 {
-  bool refined = usePRefinement() || useHRefinement();
+  const bool refined = usePRefinement() || useHRefinement();
 
   if (usePRefinement())
     pRefine();

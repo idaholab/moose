@@ -34,8 +34,7 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  _div.Assemble();
-  _div.Finalize();
+  update();
 }
 
 // Computes the auxvariable.

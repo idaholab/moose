@@ -45,18 +45,16 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
 }
 
 void
-MFEMRefinementMarker::setUp()
+MFEMRefinementMarker::initialSetup()
 {
   // fetch const ref to the estimator
   _estimator = &getUserObjectByName<MFEMIndicator>(_estimator_name);
 
   // Check if p-refinement is supported by the fespace supplied with the variable
-  auto & fespace = _estimator->getFESpace();
-
-  if (_use_p_refinement and !fespace.PRefinementSupported())
+  if (usePRefinement() and !_estimator->getFESpace().PRefinementSupported())
   {
-    mooseWarning("Specified p-refinement on an unsupported FESpace or geometry. Only H1 and L2 are "
-                 "spaces on quadrilateral/hexahedral meshes are supported by mfem");
+    mooseWarning("Specified p-refinement on an unsupported FESpace or geometry. Only H1 and L2 "
+                 "spaces on quad/hex meshes are supported by mfem. Disabling p-refinement.");
     _use_p_refinement = false;
   }
 
@@ -65,33 +63,27 @@ MFEMRefinementMarker::setUp()
 }
 
 void
-MFEMRefinementMarker::pRefineMarker(mfem::Array<mfem::Refinement> & refinements)
-{
-  mfem::ParMesh & mesh = _estimator->getParMesh();
-  _threshold_refiner->MarkWithoutRefining(mesh, refinements);
-}
-
-void
 MFEMRefinementMarker::pRefine()
 {
+  mfem::ParMesh & mesh = _estimator->getParMesh();
+
   mfem::Array<mfem::Refinement> refinements;
-  pRefineMarker(refinements);
+  _threshold_refiner->MarkWithoutRefining(mesh, refinements);
+
   mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
   for (const auto i : make_range(refinements.Size()))
     prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
 
+  // Perform p-refinement
   _estimator->getFESpace().PRefineAndUpdate(prefinements);
 
-  // Check if we have exceeded the pre-determined number of
-  // refinement steps
+  // Increase the counter and check if we have exceeded the max number of refinement steps
   _stop_p_ref = (++_p_ref_counter >= _max_p_level);
 
-  mfem::ParMesh & mesh = _estimator->getParMesh();
   // Check if there was nothing to refine
   _stop_p_ref |= (mesh.ReduceInt(refinements.Size()) == 0LL);
 }
 
-// We poll the refiner to ask if we need to stop h-refinement
 void
 MFEMRefinementMarker::hRefine()
 {
@@ -100,19 +92,11 @@ MFEMRefinementMarker::hRefine()
   // Perform h-refinement
   _threshold_refiner->Apply(mesh);
 
-  // Increase the counter and check if we have exceeded
-  // the max number of refinement steps
+  // Increase the counter and check if we have exceeded the max number of refinement steps
   _stop_h_ref = (++_h_ref_counter >= _max_h_level);
 
   // Ask the refiner if we need to stop H-refinement
   _stop_h_ref |= _threshold_refiner->Stop();
-}
-
-mfem::ParFiniteElementSpace &
-MFEMRefinementMarker::getFESpace()
-{
-  mooseAssert(_estimator, "Indicator is null");
-  return _estimator->getFESpace();
 }
 
 #endif

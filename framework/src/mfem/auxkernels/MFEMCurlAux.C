@@ -34,8 +34,7 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  _curl.Assemble();
-  _curl.Finalize();
+  update();
 }
 
 // Computes the auxvariable.

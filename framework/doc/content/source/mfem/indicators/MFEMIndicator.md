@@ -13,7 +13,7 @@ The error estimator is then passed on to an [MFEMRefinementMarker.md] object.
 
 Broadly speaking, the `mfem::ErrorEstimator` object looks, after a solve step, at one variable and one of its kernels as chosen by the user
 and determines which, if any, regions of the mesh need to be refined further. These recommendations are then
-passed on to the `MFEMRefinementMarker`, which does the actual refinement.
+passed on to the `MFEMRefinementMarker`, which marks any elements for refinement and does the actual refinement.
 
 This class serves as an abstract base class, and does no actual implementation. 
 

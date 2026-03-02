@@ -83,9 +83,7 @@ MFEMMesh::buildMesh()
   // (true/false) determines whether a simplex mesh is considered to be
   // non-conforming.
   if (getParam<bool>("nonconforming"))
-  {
     mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
-  }
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = this->comm().get();
@@ -95,9 +93,7 @@ MFEMMesh::buildMesh()
   uniformRefinement(*_mfem_par_mesh, getParam<unsigned int>("parallel_refine"));
 
   if (isParamSetByUser("displacement"))
-  {
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
-  }
 }
 
 void

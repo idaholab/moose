@@ -191,8 +191,8 @@ public:
                              const std::string & name,
                              InputParameters & parameters);
   /**
-   * Override of ExternalProblem::addIndicator. Uses ExternalProblem::addIndicator to create an
-   * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
+   * Override of FEProblemBase::addIndicator. Uses FEProblemBase::addIndicator to create an
+   * MFEMGeneralUserObject representing the error estimator in MOOSE, i.e. an
    * MFEMIndicator to be used when setting up adaptive mesh refinement later.
    */
   void addIndicator(const std::string & type,
@@ -200,8 +200,8 @@ public:
                     InputParameters & parameters) override;
 
   /**
-   * Override of ExternalProblem::addMarker. Uses ExternalProblem::addMarker to create an
-   * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
+   * Override of FEProblemBase::addMarker. Uses FEProblemBase::addMarker to create an
+   * MFEMGeneralUserObject representing the refinement marker in MOOSE, i.e. an
    * MFEMRefinementMarker to be used for adaptive mesh refinement.
    */
   void addMarker(const std::string & type,

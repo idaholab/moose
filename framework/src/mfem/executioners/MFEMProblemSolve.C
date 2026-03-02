@@ -118,8 +118,6 @@ MFEMProblemSolve::updateAfterRefinement()
   _mfem_problem.updateAfterRefinement();
 
   for (const auto & problem_operator : _problem_operators)
-  {
     problem_operator->SetGridFunctions();
-  }
 }
 #endif

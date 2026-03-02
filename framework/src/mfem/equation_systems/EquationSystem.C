@@ -210,9 +210,11 @@ EquationSystem::ApplyEssentialBCs()
   {
     const auto & trial_var_name = _trial_var_names.at(i);
     mfem::ParGridFunction & trial_gf = *_var_ess_constraints.at(i);
-    
-    // Make sure we fix the size, if this mesh has changed recently for instance.
+
+    // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
+
+    // For now, we zero out the gridfunction before populating it with the essential dofs
     trial_gf = 0;
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());

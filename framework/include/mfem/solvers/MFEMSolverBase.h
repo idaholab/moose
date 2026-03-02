@@ -35,17 +35,13 @@ public:
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
-  /// Reconstruct the solver by calling constructSolver, so that we reuse the stored
-  /// parameters. Intended for use after we have refined the mesh.
-  void resetSolver();
-
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
-protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver(const InputParameters & parameters) = 0;
 
+protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 

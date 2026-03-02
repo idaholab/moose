@@ -56,34 +56,30 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
               "and MFEMLinearElasticityKernel");
 
   int order = getFESpace().GetMaxElementOrder();
-
-  int dim = problem.pmesh->Dimension();
-  int sdim = problem.pmesh->SpaceDimension();
+  int dim = getParMesh().Dimension();
+  int sdim = getParMesh().SpaceDimension();
 
   // If we are using a Curl-curl integrator, we use a different space for the (smoothed) fluxes
   if (dynamic_cast<mfem::CurlCurlIntegrator *>(integ) != nullptr)
   {
-    _flux_fec = std::make_unique<mfem::RT_FECollection>(order - 1, sdim);
-    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(problem.pmesh.get(), _flux_fec.get());
+    _flux_fec = std::make_unique<mfem::RT_FECollection>(order - 1, dim);
+    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get());
 
     _smooth_flux_fec = std::make_unique<mfem::ND_FECollection>(order, dim);
     _smooth_flux_fes =
-        std::make_unique<mfem::ParFiniteElementSpace>(problem.pmesh.get(), _smooth_flux_fec.get());
+        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get());
   }
 
-  /*
-  Set up error estimator. As per example 6p, we supply a space for the discontinuous
-  flux (L2) and a space for the smoothed flux. This branch should be the default option
-  */
+  // Set up error estimator. As per example 6p, we supply a space for the discontinuous
+  // flux (L2) and a space for the smoothed flux. This branch should be the default option
   else
   {
-    _flux_fec = std::make_unique<mfem::L2_FECollection>(order, sdim);
-    _flux_fes =
-        std::make_unique<mfem::ParFiniteElementSpace>(problem.pmesh.get(), _flux_fec.get(), sdim);
+    _flux_fec = std::make_unique<mfem::L2_FECollection>(order, dim);
+    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), sdim);
 
     _smooth_flux_fec = std::make_unique<mfem::H1_FECollection>(order, dim);
-    _smooth_flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(
-        problem.pmesh.get(), _smooth_flux_fec.get(), dim);
+    _smooth_flux_fes =
+        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get(), sdim);
   }
 
   // fetch the grid function we need
