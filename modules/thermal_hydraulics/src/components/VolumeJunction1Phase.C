@@ -409,3 +409,10 @@ VolumeJunction1Phase::addPassiveTransportIC(const VariableName & var,
   params.set<Real>("scaling_factor") = _volume;
   getTHMProblem().addSimInitialCondition(class_name, genName(name(), var + "_ic"), params);
 }
+
+const std::vector<VariableName> &
+VolumeJunction1Phase::passiveJunctionVariableNames() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+  return _passives_times_V;
+}

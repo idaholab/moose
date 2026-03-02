@@ -115,6 +115,8 @@ ADRDG3EqnMaterial::computeQpProperties()
     _rhoA[_qp] = U[THMVACE1D::RHOA];
     _rhouA[_qp] = U[THMVACE1D::RHOUA];
     _rhoEA[_qp] = U[THMVACE1D::RHOEA];
+
+    _passives_times_area[_qp].resize(_n_passives);
     for (const auto i : make_range(_n_passives))
       _passives_times_area[_qp][i] = U[THMVACE1D::N_FLUX_INPUTS + i];
   }

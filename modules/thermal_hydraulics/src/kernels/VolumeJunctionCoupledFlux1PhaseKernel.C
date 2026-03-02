@@ -23,6 +23,8 @@ VolumeJunctionCoupledFlux1PhaseKernel::validParams()
   params.addRequiredParam<unsigned int>("equation_index", "Equation index");
   params.addRequiredParam<PostprocessorName>("pressure", "Pressure post-processor");
   params.addRequiredParam<PostprocessorName>("temperature", "Temperature post-processor");
+  params.addRequiredParam<std::vector<PostprocessorName>>(
+      "passives", "Passive transport post-processors, if any");
   params.addRequiredParam<Real>("A_coupled", "Area of the flux coupling");
   params.addRequiredParam<RealVectorValue>("normal_from_junction",
                                            "Unit normal vector from the junction");
@@ -49,6 +51,9 @@ VolumeJunctionCoupledFlux1PhaseKernel::VolumeJunctionCoupledFlux1PhaseKernel(
     _numerical_flux_uo(getUserObject<ADNumericalFlux3EqnBase>("numerical_flux_uo")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
+  const auto & passive_names = getParam<std::vector<PostprocessorName>>("passives");
+  for (const auto & passive : passive_names)
+    _passives.push_back(&getPostprocessorValueByName(passive));
 }
 
 ADReal
@@ -57,10 +62,12 @@ VolumeJunctionCoupledFlux1PhaseKernel::computeQpResidual()
   const auto rho = _fp.rho_from_p_T(_p, _T);
   const auto E = _fp.e_from_p_T(_p, _T);
 
-  std::vector<ADReal> U(THMVACE3D::N_FLUX_INPUTS, 0.0);
+  std::vector<ADReal> U(THMVACE3D::N_FLUX_INPUTS + _passives.size(), 0.0);
   U[THMVACE3D::RHOA] = rho * _A_coupled;
   U[THMVACE3D::RHOEA] = rho * E * _A_coupled;
   U[THMVACE3D::AREA] = _A_coupled;
+  for (const auto i : make_range(_passives.size()))
+    U[THMVACE3D::N_FLUX_INPUTS + i] = *(_passives[i]) * _A_coupled;
 
   const auto flux_3d =
       _volume_junction_uo.compute3DFlux(_numerical_flux_uo, U, _normal_to_junction);

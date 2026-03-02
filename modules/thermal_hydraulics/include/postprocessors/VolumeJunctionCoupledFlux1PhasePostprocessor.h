@@ -16,7 +16,7 @@ class ADNumericalFlux3EqnBase;
 class SinglePhaseFluidProperties;
 
 /**
- * Computes a mass or energy flux for VolumeJunctionCoupledFlux1Phase.
+ * Computes a flux for VolumeJunctionCoupledFlux1Phase.
  */
 class VolumeJunctionCoupledFlux1PhasePostprocessor : public GeneralPostprocessor
 {
@@ -31,13 +31,16 @@ public:
   virtual PostprocessorValue getValue() const override;
 
 protected:
-  /// Equation for which to get flux
-  const MooseEnum _equation;
+  /// Index within local system of the equation upon which this object acts
+  const unsigned int _equation_index;
 
   /// Pressure
   const PostprocessorValue & _p;
   /// Temperature
   const PostprocessorValue & _T;
+
+  /// Passives
+  std::vector<const PostprocessorValue *> _passives;
 
   /// Coupled area between junction and other application
   const Real _A_coupled;

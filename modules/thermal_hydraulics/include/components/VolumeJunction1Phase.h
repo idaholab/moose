@@ -37,6 +37,9 @@ public:
   UserObjectName getVolumeJunctionUserObjectName() const { return _junction_uo_name; }
   UserObjectName getNumericalFluxName(unsigned int i) const { return _numerical_flux_names[i]; }
 
+  /// Returns the names of the passive variables on the junction
+  const std::vector<VariableName> & passiveJunctionVariableNames() const;
+
 protected:
   virtual void setupMesh() override;
   virtual void init() override;
