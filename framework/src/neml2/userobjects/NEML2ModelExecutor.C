@@ -341,7 +341,9 @@ NEML2ModelExecutor::fillInputs()
     if (_keep_tensors_on_device || !_skip_vars.empty())
     {
       const auto options = neml2::default_tensor_options().dtype(neml2::kFloat64).device(device());
-      const auto shape = neml2::TensorShape{neml2::Size(_batch_index_generator.getBatchIndex())};
+      const auto N = _batch_index_generator ? _batch_index_generator->getBatchIndex()
+                                            : _bnd_batch_index_generator->getBatchIndex();
+      const auto shape = neml2::TensorShape{neml2::Size(N)};
 
       for (const auto & [vname, var] : model().input_variables())
       {
