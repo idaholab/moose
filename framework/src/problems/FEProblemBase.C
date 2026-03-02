@@ -5059,8 +5059,7 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
 TheWarehouse::Query
 FEProblemBase::getUOQuery(const std::string & system,
                           const ExecFlagType & type,
-                          const Moose::AuxGroup & group,
-                          std::set<int> & execution_groups) const
+                          const Moose::AuxGroup & group) const
 {
   TheWarehouse::Query query =
       theWarehouse().query().condition<AttribSystem>(system).condition<AttribExecOns>(type);
@@ -5072,12 +5071,17 @@ FEProblemBase::getUOQuery(const std::string & system,
   else if (group == Moose::POST_AUX)
     query.condition<AttribPostAux>(type);
 
+  return query;
+}
+
+void
+FEProblemBase::getUOExecutionGroups(TheWarehouse::Query & query,
+                                    std::set<int> & execution_groups) const
+{
   std::vector<UserObjectBase *> uos;
   query.queryIntoUnsorted(uos);
   for (const auto & uo : uos)
     execution_groups.insert(uo->getParam<int>("execution_order_group"));
-
-  return query;
 }
 
 void
@@ -5092,11 +5096,12 @@ FEProblemBase::computeUserObjectByName(const ExecFlagType & type,
 
 #ifdef MOOSE_KOKKOS_ENABLED
   TheWarehouse::Query kokkos_query =
-      getUOQuery("KokkosUserObject", type, group, execution_groups).condition<AttribName>(name);
+      getUOQuery("KokkosUserObject", type, group).condition<AttribName>(name);
+  getUOExecutionGroups(kokkos_query, execution_groups);
 #endif
 
-  TheWarehouse::Query query =
-      getUOQuery("UserObject", type, group, execution_groups).condition<AttribName>(name);
+  TheWarehouse::Query query = getUOQuery("UserObject", type, group).condition<AttribName>(name);
+  getUOExecutionGroups(query, execution_groups);
 
   for (const auto execution_group : execution_groups)
   {
@@ -5118,10 +5123,12 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   std::set<int> execution_groups;
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  TheWarehouse::Query kokkos_query = getUOQuery("KokkosUserObject", type, group, execution_groups);
+  TheWarehouse::Query kokkos_query = getUOQuery("KokkosUserObject", type, group);
+  getUOExecutionGroups(kokkos_query, execution_groups);
 #endif
 
-  TheWarehouse::Query query = getUOQuery("UserObject", type, group, execution_groups);
+  TheWarehouse::Query query = getUOQuery("UserObject", type, group);
+  getUOExecutionGroups(query, execution_groups);
 
   for (const auto execution_group : execution_groups)
   {
@@ -5219,7 +5226,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
     }
 
-    // if any userobject may have written to variables we need to close the aux solution
+    // if any elemental user object may have written to variables we need to close the aux solution
     for (const auto & uo : userobjs)
       if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
           euo && euo->hasWritableCoupledVariables())
@@ -5229,10 +5236,10 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
         break;
       }
 
-      // Execute NodalUserObjects
-      // BISON has an axial reloc elemental user object that has a finalize func that depends on a
-      // nodal user object's prev value. So we can't initialize this until after elemental objects
-      // have been finalized :-(
+    // Execute NodalUserObjects
+    // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+    // nodal user object's prev value. So we can't initialize this until after elemental objects
+    // have been finalized :-(
     for (auto obj : nodal)
       obj->initialize();
     if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
@@ -5242,7 +5249,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
     }
 
-    // if any userobject may have written to variables we need to close the aux solution
+    // if any nodal user object may have written to variables we need to close the aux solution
     for (const auto & uo : nodal)
       if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
           nuo && nuo->hasWritableCoupledVariables())
@@ -8850,7 +8857,7 @@ FEProblemBase::checkUserObjects()
   // and the blocks that they are defined on
   std::set<std::string> names;
 
-  std::vector<UserObject *> objects;
+  std::vector<UserObjectBase *> objects;
   theWarehouse().query().condition<AttribInterfaces>(Interfaces::UserObject).queryInto(objects);
 
   for (const auto & obj : objects)

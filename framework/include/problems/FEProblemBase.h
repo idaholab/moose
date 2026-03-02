@@ -2926,8 +2926,9 @@ private:
 
   TheWarehouse::Query getUOQuery(const std::string & system,
                                  const ExecFlagType & type,
-                                 const Moose::AuxGroup & group,
-                                 std::set<int> & execution_groups) const;
+                                 const Moose::AuxGroup & group) const;
+
+  void getUOExecutionGroups(TheWarehouse::Query & query, std::set<int> & execution_groups) const;
 
 protected:
   bool _initialized;
