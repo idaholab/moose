@@ -11,11 +11,13 @@
 #include "NEML2Utils.h"
 
 registerMooseObject("MooseApp", NEML2BatchIndexGenerator);
+registerMooseObject("MooseApp", NEML2BoundaryBatchIndexGenerator);
 
+template <class Base>
 InputParameters
-NEML2BatchIndexGenerator::validParams()
+NEML2BatchIndexGeneratorTmpl<Base>::validParams()
 {
-  auto params = ElementUserObject::validParams();
+  auto params = Base::validParams();
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
@@ -24,24 +26,27 @@ NEML2BatchIndexGenerator::validParams()
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-  params.set<ExecFlagEnum>("execute_on") = execute_options;
+  params.template set<ExecFlagEnum>("execute_on") = execute_options;
 
   return params;
 }
 
-NEML2BatchIndexGenerator::NEML2BatchIndexGenerator(const InputParameters & params)
-  : ElementUserObject(params), _outdated(true)
+template <class Base>
+NEML2BatchIndexGeneratorTmpl<Base>::NEML2BatchIndexGeneratorTmpl(const InputParameters & params)
+  : Base(params), _outdated(true), _nside(0)
 {
 }
 
+template <class Base>
 void
-NEML2BatchIndexGenerator::meshChanged()
+NEML2BatchIndexGeneratorTmpl<Base>::meshChanged()
 {
   _outdated = true;
 }
 
+template <class Base>
 void
-NEML2BatchIndexGenerator::initialize()
+NEML2BatchIndexGeneratorTmpl<Base>::initialize()
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
@@ -54,8 +59,9 @@ NEML2BatchIndexGenerator::initialize()
   _batch_index = 0;
 }
 
+template <class Base>
 void
-NEML2BatchIndexGenerator::execute()
+NEML2BatchIndexGeneratorTmpl<Base>::execute()
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
@@ -63,12 +69,13 @@ NEML2BatchIndexGenerator::execute()
   if (!_outdated)
     return;
 
-  _elem_to_batch_index[_current_elem->id()] = _batch_index;
+  _elem_to_batch_index[currentIndex()] = _batch_index;
   _batch_index += _qrule->n_points();
 }
 
+template <class Base>
 void
-NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
+NEML2BatchIndexGeneratorTmpl<Base>::threadJoin(const UserObject & uo)
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
@@ -76,7 +83,7 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
   if (!_outdated)
     return;
 
-  const auto & m2n = static_cast<const NEML2BatchIndexGenerator &>(uo);
+  const auto & m2n = static_cast<const NEML2BatchIndexGeneratorTmpl<Base> &>(uo);
 
   // append and renumber maps
   for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
@@ -85,23 +92,63 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
   _batch_index += m2n._batch_index;
 }
 
+template <class Base>
 void
-NEML2BatchIndexGenerator::finalize()
+NEML2BatchIndexGeneratorTmpl<Base>::finalize()
 {
   _outdated = false;
 }
 
+template <>
+dof_id_type
+NEML2BatchIndexGeneratorTmpl<ElementUserObject>::currentIndex()
+{
+  return _current_elem->id();
+}
+
+template <>
+dof_id_type
+NEML2BatchIndexGeneratorTmpl<SideUserObject>::currentIndex()
+{
+  if (_nside == 0)
+    _nside = _current_elem->n_sides();
+  else if (_current_elem->n_sides() != _nside)
+    mooseError("Number of sides per element must be the same for all elements");
+
+  return _current_elem->id() * _nside + _current_side;
+}
+
+template <class Base>
+template <typename B>
+std::enable_if_t<std::is_same_v<B, ElementUserObject>, std::size_t>
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id) const
+{
+  return getBatchIndexImpl(elem_id);
+}
+
+template <class Base>
+template <typename B>
+std::enable_if_t<std::is_same_v<B, SideUserObject>, std::size_t>
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id, unsigned int side) const
+{
+  return getBatchIndexImpl(elem_id * _nside + side);
+}
+
+template <class Base>
 std::size_t
-NEML2BatchIndexGenerator::getBatchIndex(dof_id_type elem_id) const
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndexImpl(dof_id_type idx) const
 {
   // return cached map lookup if applicable
-  if (_elem_to_batch_index_cache.first == elem_id)
+  if (_elem_to_batch_index_cache.first == idx)
     return _elem_to_batch_index_cache.second;
 
   // else, search the map
-  const auto it = _elem_to_batch_index.find(elem_id);
+  const auto it = _elem_to_batch_index.find(idx);
   if (it == _elem_to_batch_index.end())
-    mooseError("No batch index found for element id ", elem_id);
+    mooseError("No batch index found for element id ", idx);
   _elem_to_batch_index_cache = *it;
   return it->second;
 }
+
+template class NEML2BatchIndexGeneratorTmpl<ElementUserObject>;
+template class NEML2BatchIndexGeneratorTmpl<SideUserObject>;

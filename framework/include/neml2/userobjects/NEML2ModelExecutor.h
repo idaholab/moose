@@ -42,8 +42,15 @@ public:
 
   void initialSetup() override;
 
+  /// Whether this executor operates on elements or element sides
+  bool onElems() const;
+  bool onElemSides() const;
+
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
+
+  /// Get the batch index for the given element ID and side ID
+  std::size_t getBatchIndex(dof_id_type elem_id, unsigned int side_id) const;
 
   /// Get a reference(!) to the requested output view
   const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
@@ -88,7 +95,10 @@ protected:
   void advanceDeviceCaches();
 
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
-  const NEML2BatchIndexGenerator & _batch_index_generator;
+  const NEML2BatchIndexGenerator * _batch_index_generator;
+
+  /// The NEML2BoundaryBatchIndexGenerator used to generate the element-to-batch-index map
+  const NEML2BoundaryBatchIndexGenerator * _bnd_batch_index_generator;
 
   /// Advance state on device (rather than via MOSOE material properties)
   const bool _keep_tensors_on_device;

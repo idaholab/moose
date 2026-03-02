@@ -14,13 +14,13 @@
 /**
  * Gather a MOOSE variable for insertion into the NEML2 model.
  */
-template <unsigned int state>
-class MOOSEVariableToNEML2Templ : public MOOSEToNEML2Batched<Real>
+template <typename UOBase, unsigned int state>
+class MOOSEVariableToNEML2Tmpl : public MOOSEToNEML2Batched<Real, UOBase>
 {
 public:
   static InputParameters validParams();
 
-  MOOSEVariableToNEML2Templ(const InputParameters & params);
+  MOOSEVariableToNEML2Tmpl(const InputParameters & params);
 
 #ifdef NEML2_ENABLED
 protected:
@@ -31,5 +31,7 @@ protected:
 #endif
 };
 
-using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Templ<0>;
-using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Templ<1>;
+using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Tmpl<ElementUserObject, 0>;
+using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<ElementUserObject, 1>;
+using MOOSEBoundaryVariableToNEML2 = MOOSEVariableToNEML2Tmpl<SideUserObject, 0>;
+using MOOSEBoundaryOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<SideUserObject, 1>;

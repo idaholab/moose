@@ -17,8 +17,8 @@
 /**
  * Gather a MOOSE material property for insertion into the NEML2 model.
  */
-template <typename T, unsigned int state>
-class MOOSEMaterialPropertyToNEML2 : public MOOSEToNEML2Batched<T>
+template <typename T, typename UOBase, unsigned int state>
+class MOOSEMaterialPropertyToNEML2 : public MOOSEToNEML2Batched<T, UOBase>
 {
 public:
   static InputParameters validParams();
@@ -34,11 +34,18 @@ protected:
 #endif
 };
 
-#define DefineMOOSEMaterialPropertyToNEML2Alias(T, alias)                                          \
-  using MOOSE##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 0>;                \
-  using MOOSEOld##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 1>
+#define DefineMOOSEMaterialPropertyToNEML2Alias(T)                                                 \
+  using MOOSE##T##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, ElementUserObject, 0>; \
+  using MOOSEOld##T##MaterialPropertyToNEML2 =                                                     \
+      MOOSEMaterialPropertyToNEML2<T, ElementUserObject, 1>;                                       \
+  using MOOSEBoundary##T##MaterialPropertyToNEML2 =                                                \
+      MOOSEMaterialPropertyToNEML2<T, SideUserObject, 0>;                                          \
+  using MOOSEBoundaryOld##T##MaterialPropertyToNEML2 =                                             \
+      MOOSEMaterialPropertyToNEML2<T, SideUserObject, 1>;
 
-DefineMOOSEMaterialPropertyToNEML2Alias(Real, Real);
-DefineMOOSEMaterialPropertyToNEML2Alias(RankTwoTensor, RankTwoTensor);
-DefineMOOSEMaterialPropertyToNEML2Alias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
-DefineMOOSEMaterialPropertyToNEML2Alias(RealVectorValue, RealVectorValue);
+DefineMOOSEMaterialPropertyToNEML2Alias(Real);
+DefineMOOSEMaterialPropertyToNEML2Alias(RankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(SymmetricRankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(RealVectorValue);
+
+#undef DefineMOOSEMaterialPropertyToNEML2Alias

@@ -11,6 +11,7 @@
 
 #include "MOOSEToNEML2.h"
 #include "ElementUserObject.h"
+#include "SideUserObject.h"
 
 /**
  * @brief Generic gatherer for collecting "batched" MOOSE data for NEML2
@@ -24,9 +25,10 @@
  * element.
  *
  * @tparam T Type of the underlying MOOSE data, e.g., Real, SymmetricRankTwoTensor, etc.
+ * @tparam UOBase Type of the underlying UserObject, e.g., ElementUserObject, SideUserObject, etc.
  */
-template <typename T>
-class MOOSEToNEML2Batched : public MOOSEToNEML2, public ElementUserObject
+template <typename T, typename UOBase>
+class MOOSEToNEML2Batched : public MOOSEToNEML2, public UOBase
 {
 public:
   static InputParameters validParams();
@@ -58,12 +60,12 @@ protected:
 #endif
 };
 
-template <typename T>
+template <typename T, typename UOBase>
 InputParameters
-MOOSEToNEML2Batched<T>::validParams()
+MOOSEToNEML2Batched<T, UOBase>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
-  params += ElementUserObject::validParams();
+  params += UOBase::validParams();
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -75,41 +77,41 @@ MOOSEToNEML2Batched<T>::validParams()
   return params;
 }
 
-template <typename T>
-MOOSEToNEML2Batched<T>::MOOSEToNEML2Batched(const InputParameters & params)
-  : MOOSEToNEML2(params), ElementUserObject(params)
+template <typename T, typename UOBase>
+MOOSEToNEML2Batched<T, UOBase>::MOOSEToNEML2Batched(const InputParameters & params)
+  : MOOSEToNEML2(params), UOBase(params)
 {
 }
 
 #ifdef NEML2_ENABLED
-template <typename T>
+template <typename T, typename UOBase>
 void
-MOOSEToNEML2Batched<T>::initialize()
+MOOSEToNEML2Batched<T, UOBase>::initialize()
 {
   _buffer.clear();
 }
 
-template <typename T>
+template <typename T, typename UOBase>
 void
-MOOSEToNEML2Batched<T>::execute()
+MOOSEToNEML2Batched<T, UOBase>::execute()
 {
   const auto & elem_data = this->elemMOOSEData();
   for (auto i : index_range(elem_data))
     _buffer.push_back(elem_data[i]);
 }
 
-template <typename T>
+template <typename T, typename UOBase>
 void
-MOOSEToNEML2Batched<T>::threadJoin(const UserObject & uo)
+MOOSEToNEML2Batched<T, UOBase>::threadJoin(const UserObject & uo)
 {
   // append vectors
-  const auto & m2n = static_cast<const MOOSEToNEML2Batched<T> &>(uo);
+  const auto & m2n = static_cast<const MOOSEToNEML2Batched<T, UOBase> &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
 }
 
-template <typename T>
+template <typename T, typename UOBase>
 neml2::Tensor
-MOOSEToNEML2Batched<T>::gatheredData() const
+MOOSEToNEML2Batched<T, UOBase>::gatheredData() const
 {
   return NEML2Utils::fromBlob(_buffer);
 }
