@@ -21,27 +21,34 @@ class MFEMMultiAppTransfer : public MultiAppTransfer
 public:
   static InputParameters validParams();
   MFEMMultiAppTransfer(InputParameters const & params);
+  /// Set active source and destination problems, and execute variable transfer
   void execute() override;
+  /// Check number of source and target child apps match for sibling transfer
   void checkSiblingsTransferSupported() const override;
 
+  /// Getter for source variable name
   auto const & getFromVarName(int i) { return _from_var_names.at(i); }
+  /// Getter for destination variable name
   auto const & getToVarName(int i) { return _to_var_names.at(i); }
-  auto numFromVar() { return _from_var_names.size(); }
-  auto numToVar() { return _to_var_names.size(); }
+  /// Return the number of source variables
+  auto const numFromVar() { return _from_var_names.size(); }
+  /// Return for the number of destination variables
+  auto const numToVar() { return _to_var_names.size(); }
 
 protected:
-  std::vector<VariableName> _from_var_names;
-  std::vector<AuxVariableName> _to_var_names;
-  FEProblemBase * _active_to_problem{nullptr};
-  FEProblemBase * _active_from_problem{nullptr};
-
-  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; }
-  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; }
-  virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
-  virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; }
-
+  /// Transfer all variables from active source problem to active destination problem.
   virtual void transferVariables() = 0;
 
+  /// Set current problem to fetch source variables from
+  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; }
+  /// Set current problem to fetch destination variables from
+  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; }
+  /// Getter for current problem containing source variables
+  virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; }
+  /// Getter for current problem containing destination variables
+  virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
+
+  /// Templated method to check source and destination problems are of the expected types
   template <typename TO_PROBLEM, typename FROM_PROBLEM>
   void checkValidTransferProblemTypes()
   {
@@ -72,5 +79,16 @@ protected:
           bad_problem();
     }
   }
+
+private:
+  /// Vector of source variable names to be transferred
+  std::vector<VariableName> _from_var_names;
+  /// Vector of destination variable names to transfer to
+  std::vector<AuxVariableName> _to_var_names;
+  /// Pointer to active source problem variable is being transferred from
+  FEProblemBase * _active_to_problem{nullptr};
+  /// Pointer to active destination problem variable is being transferred to
+  FEProblemBase * _active_from_problem{nullptr};
 };
+
 #endif

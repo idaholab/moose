@@ -89,7 +89,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
     FEProblemBase & from_problem = *_from_problems[i_from];
     MooseVariableFieldBase & from_var =
         from_problem.getVariable(0,
-                                 _from_var_names[var_index],
+                                 getFromVarName(var_index),
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_ANY);
     System & from_sys = from_var.sys().system();

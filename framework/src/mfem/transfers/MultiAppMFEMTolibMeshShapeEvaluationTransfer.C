@@ -47,13 +47,13 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::setlibMeshSolutionValuesFromMFEM(
     const unsigned int var_index, MFEMProblem & from_problem)
 {
   /// The target variables
-  std::vector<MooseVariableFieldBase *> _to_variables;
+  std::vector<MooseVariableFieldBase *> to_variables;
   if (_to_problems.size())
   {
-    _to_variables.resize(_to_var_names.size());
-    for (const auto i_var : index_range(_to_var_names))
-      _to_variables[i_var] = &_to_problems[0]->getVariable(
-          0, _to_var_names[i_var], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+    to_variables.resize(numToVar());
+    for (const auto i_var : index_range(to_variables))
+      to_variables[i_var] = &_to_problems[0]->getVariable(
+          0, getToVarName(i_var), Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
   }
 
   // get libMesh and MFEM variables
@@ -74,8 +74,8 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::setlibMeshSolutionValuesFromMFEM(
     const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
-    auto & fe_type = _to_variables[var_index]->feType();
-    bool is_nodal = _to_variables[var_index]->isNodal();
+    auto & fe_type = to_variables[var_index]->feType();
+    bool is_nodal = to_variables[var_index]->isNodal();
 
     // Populate set of points
     std::vector<Point> outgoing_libmesh_points;

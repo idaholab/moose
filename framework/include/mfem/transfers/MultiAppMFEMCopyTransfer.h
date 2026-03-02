@@ -14,12 +14,11 @@
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
-//*
-// Copy MFEMVariables between multiapps
-// The variables must be of the same type and dimension
-// and the MFEMMesh must be identical in both multiapps
-// */
-
+/**
+ * Transfer to copy MFEMVariables between multiapps.
+ * The variables must be of the same type and dimension
+ * and the MFEMMesh must be identical in both multiapps
+ */
 class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
 {
 public:
@@ -27,15 +26,19 @@ public:
   MultiAppMFEMCopyTransfer(InputParameters const & params);
 
 protected:
-  virtual MFEMProblem & getActiveToProblem() override
-  {
-    return static_cast<MFEMProblem &>(*_active_to_problem);
-  };
+  /// Transfer all variables from active source problem to active destination problem.
+  void transferVariables() override;
+
+  /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override
   {
-    return static_cast<MFEMProblem &>(*_active_from_problem);
-  };
-  void transferVariables() override;
+    return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
+  }
+  /// Set current MFEM problem to fetch destination variables from
+  virtual MFEMProblem & getActiveToProblem() override
+  {
+    return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
+  }
 };
 
 #endif
