@@ -3,8 +3,8 @@
     issues = '#29237'
     [ORNL-19]
         type = CSVDiff
-        input = ORNL_19.i
-        csvdiff = ORNL_19_out.csv
+        input = test_ORNL_19.i
+        csvdiff = test_ORNL_19_out.csv
         capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
