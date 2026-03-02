@@ -1,0 +1,13 @@
+[Tests]
+  design = 'EigenProblem.md'
+  issues = '#30655'
+
+  [test]
+    type = 'CSVDiff'
+    input = 'kokkos_eigenvalue_test.i'
+    csvdiff = 'kokkos_eigenvalue_test_out_eigenvalues_0001.csv'
+    requirement = 'The Kokkos system shall support eigenvalue calculations.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

@@ -41,6 +41,13 @@ FileMesh::validParams()
                         "If clear_spline_nodes=true, IsoGeometric Analyis spline nodes "
                         "and constraints are removed from an IGA mesh, after which only "
                         "C^0 Rational-Bernstein-Bezier elements will remain.");
+  params.addDeprecatedParam<bool>("nemesis",
+                                  false,
+                                  "If nemesis=true and file=foo.n, actually reads "
+                                  "foo.n.N.0, foo.n.N.1, ... foo.n.N.N-1, "
+                                  "where N = # CPUs, with NemesisIO.",
+                                  "This parameter should no longer be necessary if you use the "
+                                  "'.n' or '.nem' file extension for Nemesis files");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -48,6 +55,15 @@ FileMesh::validParams()
 FileMesh::FileMesh(const InputParameters & parameters)
   : MooseMesh(parameters), _file_name(getParam<MeshFileName>("file"))
 {
+  // Detect nemesis files from the extension or the parameter (deprecated)
+  if (isParamSetByUser("nemesis"))
+    _is_nemesis = getParam<bool>("nemesis");
+  else
+    _is_nemesis = (MooseUtils::hasExtension(_file_name, "n", /*strip_exodus_ext =*/true) ||
+                   MooseUtils::hasExtension(_file_name, "nem", true));
+
+  // We may have determined this is a nemesis file from the extension, which MooseMesh cannot do
+  MooseMesh::determineUseDistributedMesh();
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh)

@@ -59,7 +59,7 @@
                 Outputs/rays/type=RayTracingNemesis
                 Outputs/rays/output_properties="ray_id intersections pid processor_crossings trajectory_changes"
                 Outputs/rays/file_base=nemesis_rays'
-    exodiff = 'nemesis_rays.e.4.0 nemesis_rays.e.4.1 nemesis_rays.e.4.2 nemesis_rays.e.4.3'
+    exodiff = 'nemesis_rays.n.4.0 nemesis_rays.n.4.1 nemesis_rays.n.4.2 nemesis_rays.n.4.3'
     min_parallel = 4
     max_parallel = 4
     recover = false
@@ -78,17 +78,17 @@
                 Outputs/rays/file_base=ray_mesh_output_transient_nemesis_rays'
     # Missing some files here beacuse exodiff doesn't like diffing empty output,
     # which is the case for the early transient when not all procs are hit
-    exodiff = 'ray_mesh_output_transient_nemesis_rays.e.4.0
-               ray_mesh_output_transient_nemesis_rays.e.4.1
-               ray_mesh_output_transient_nemesis_rays.e-s0001.4.0
-               ray_mesh_output_transient_nemesis_rays.e-s0001.4.1
-               ray_mesh_output_transient_nemesis_rays.e-s0002.4.0
-               ray_mesh_output_transient_nemesis_rays.e-s0002.4.1
-               ray_mesh_output_transient_nemesis_rays.e-s0002.4.3
-               ray_mesh_output_transient_nemesis_rays.e-s0003.4.0
-               ray_mesh_output_transient_nemesis_rays.e-s0003.4.1
-               ray_mesh_output_transient_nemesis_rays.e-s0003.4.2
-               ray_mesh_output_transient_nemesis_rays.e-s0003.4.3'
+    exodiff = 'ray_mesh_output_transient_nemesis_rays.n.4.0
+               ray_mesh_output_transient_nemesis_rays.n.4.1
+               ray_mesh_output_transient_nemesis_rays.n-s0001.4.0
+               ray_mesh_output_transient_nemesis_rays.n-s0001.4.1
+               ray_mesh_output_transient_nemesis_rays.n-s0002.4.0
+               ray_mesh_output_transient_nemesis_rays.n-s0002.4.1
+               ray_mesh_output_transient_nemesis_rays.n-s0002.4.3
+               ray_mesh_output_transient_nemesis_rays.n-s0003.4.0
+               ray_mesh_output_transient_nemesis_rays.n-s0003.4.1
+               ray_mesh_output_transient_nemesis_rays.n-s0003.4.2
+               ray_mesh_output_transient_nemesis_rays.n-s0003.4.3'
     allow_test_objects = true
     min_parallel = 4
     max_parallel = 4
@@ -124,7 +124,7 @@
                   UserObjects/study/segments_on_cache_traces=false
                   Outputs/rays/output_properties="ray_id intersections pid processor_crossings trajectory_changes"
                   Outputs/rays/file_base=no_segments_nemesis_rays'
-      exodiff = 'no_segments_nemesis_rays.e.2.0 no_segments_nemesis_rays.e.2.1'
+      exodiff = 'no_segments_nemesis_rays.n.2.0 no_segments_nemesis_rays.n.2.1'
       min_parallel = 2
       max_parallel = 2
       recover = false
@@ -148,7 +148,7 @@
                   Mesh/Partitioner/nx=2
                   Outputs/rays/type=RayTracingNemesis
                   Outputs/rays_nodal/type=RayTracingNemesis'
-      exodiff = 'ray_mesh_output_data_rays.e.2.0 ray_mesh_output_data_rays.e.2.1 ray_mesh_output_data_rays_nodal.e.2.0 ray_mesh_output_data_rays_nodal.e.2.1'
+      exodiff = 'ray_mesh_output_data_rays.n.2.0 ray_mesh_output_data_rays.n.2.1 ray_mesh_output_data_rays_nodal.n.2.0 ray_mesh_output_data_rays_nodal.n.2.1'
       min_parallel = 2
       max_parallel = 2
       recover = false

@@ -4,9 +4,9 @@
   [nemesis_out_test]
     type = 'CheckFiles'
     input = 'output_test_nemesis.i'
-    check_files = 'out.e.1.0'
+    check_files = 'out.n.1.0'
     # If you run on more processors, it changes the output filename to
-    # e.g. out.e.2.0 and out.e.2.1, so this test will only pass if you
+    # e.g. out.n.2.0 and out.n.2.1, so this test will only pass if you
     # run it on one processor.
     max_parallel = 1
     issues = '#920'

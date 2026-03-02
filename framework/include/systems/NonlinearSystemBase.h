@@ -780,6 +780,7 @@ protected:
    */
 #ifdef MOOSE_KOKKOS_ENABLED
   void computeKokkosResidual(const std::set<TagID> & tags);
+  void computeKokkosNodalBCs(const std::set<TagID> & tags);
 #endif
 
   /**

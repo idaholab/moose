@@ -11,6 +11,7 @@
 
 #include "libmesh/mesh_function.h"
 #include "libmesh/exodusII_io.h"
+#include "libmesh/nemesis_io.h"
 
 #include <sys/stat.h>
 

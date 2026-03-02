@@ -97,13 +97,6 @@ MooseMesh::validParams()
       true,
       "If allow_renumbering=false, node and element numbers are kept fixed until deletion");
 
-  // TODO: this parameter does not belong here, it's only for FileMesh
-  params.addParam<bool>("nemesis",
-                        false,
-                        "If nemesis=true and file=foo.e, actually reads "
-                        "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
-                        "where N = # CPUs, with NemesisIO.");
-
   params.addParam<MooseEnum>(
       "partitioner",
       partitioning(),
@@ -218,7 +211,6 @@ MooseMesh::validParams()
 
   // groups
   params.addParamNamesToGroup("patch_update_strategy patch_size max_leaf_size", "Geometric search");
-  params.addParamNamesToGroup("nemesis", "Advanced");
   params.addParamNamesToGroup("add_subdomain_ids add_subdomain_names add_sideset_ids "
                               "add_sideset_names add_nodeset_ids add_nodeset_names",
                               "Pre-declaration of future mesh sub-entities");
@@ -245,7 +237,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _uniform_refine_level(0),
     _skip_refine_when_use_split(getParam<bool>("skip_refine_when_use_split")),
     _skip_deletion_repartition_after_refine(false),
-    _is_nemesis(getParam<bool>("nemesis")),
+    _is_nemesis(false),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(getParam<unsigned int>("patch_size")),
@@ -314,7 +306,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
-    _is_nemesis(false),
+    _is_nemesis(other_mesh._is_nemesis),
     _node_to_elem_map_built(false),
     _node_to_active_semilocal_elem_map_built(false),
     _patch_size(other_mesh._patch_size),

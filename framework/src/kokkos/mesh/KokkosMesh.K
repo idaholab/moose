@@ -36,24 +36,26 @@ Mesh::initMap()
   _maps->_elem_type_id_mapping.clear();
   _maps->_local_elem_id_mapping.clear();
   _maps->_local_node_id_mapping.clear();
-  _maps->_subdomain_elem_ids.clear();
   _maps->_subdomain_node_ids.clear();
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
     _maps->_subdomain_id_mapping[subdomain] = _maps->_subdomain_id_mapping.size();
-    _maps->_subdomain_elem_ids[subdomain];
     _maps->_subdomain_node_ids[subdomain];
+
+    dof_id_type begin = libMesh::DofObject::invalid_id;
+    dof_id_type eid = libMesh::DofObject::invalid_id;
 
     for (const auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(subdomain))
     {
       if (!_maps->_elem_type_id_mapping.count(elem->type()))
         _maps->_elem_type_id_mapping[elem->type()] = _maps->_elem_type_id_mapping.size();
 
-      auto eid = _maps->_local_elem_id_mapping.size();
-
+      eid = _maps->_local_elem_id_mapping.size();
       _maps->_local_elem_id_mapping[elem] = eid;
-      _maps->_subdomain_elem_ids[subdomain].insert(eid);
+
+      if (begin == libMesh::DofObject::invalid_id)
+        begin = eid;
 
       for (const auto & node : elem->node_ref_range())
       {
@@ -68,6 +70,10 @@ Mesh::initMap()
             _maps->_subdomain_node_ids[subdomain].insert(it->second);
       }
     }
+
+    _maps->_subdomain_elem_id_ranges[subdomain] = eid != libMesh::DofObject::invalid_id
+                                                      ? std::make_pair(begin, eid + 1)
+                                                      : std::make_pair(begin, eid);
   }
 
   for (auto boundary : _mesh.meshBoundaryIds())
@@ -79,7 +85,7 @@ Mesh::initElement()
 {
   // Cache reference element data
 
-  auto num_elem_types = getElementTypeMap().size();
+  const auto num_elem_types = getNumLocalElementTypes();
 
   _num_sides.create(num_elem_types);
   _num_nodes.create(num_elem_types);
@@ -104,27 +110,43 @@ Mesh::initElement()
 
   // Cache element data
 
-  auto num_elems = getContiguousElementMap().size();
+  const auto num_elems = getNumLocalElements();
+  const auto num_subdomains = getNumSubdomains();
 
   _elem_info.create(num_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
-  _elem_neighbor = libMesh::DofObject::invalid_id;
+  _extra_elem_ids.create(num_elems, _mesh.getMesh().n_elem_integers());
 
-  for (auto & [elem, eid] : getContiguousElementMap())
+  _elem_neighbor = libMesh::DofObject::invalid_id;
+  _extra_elem_ids = libMesh::DofObject::invalid_id;
+
+  for (const auto & [elem, eid] : getContiguousElementMap())
   {
     auto elem_type = getElementTypeID(elem);
 
     _elem_info[eid].type = elem_type;
     _elem_info[eid].id = eid;
     _elem_info[eid].subdomain = getContiguousSubdomainID(elem->subdomain_id());
+
+    for (const auto i : make_range(_mesh.getMesh().n_elem_integers()))
+      _extra_elem_ids(eid, i) = elem->get_extra_integer(i);
   }
 
   _elem_info.copyToDevice();
   _elem_neighbor.copyToDevice();
+  _extra_elem_ids.copyToDevice();
+
+  _starting_elem_id.create(num_subdomains);
+
+  for (auto subdomain : _mesh.meshSubdomains())
+    _starting_elem_id[getContiguousSubdomainID(subdomain)] =
+        *getSubdomainContiguousElementIDRange(subdomain).begin();
+
+  _starting_elem_id.copyToDevice();
 
   // Cache node data
 
-  auto num_nodes = getContiguousNodeMap().size();
+  const auto num_nodes = getContiguousNodeMap().size();
 
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);

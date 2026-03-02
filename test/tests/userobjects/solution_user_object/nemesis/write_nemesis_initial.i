@@ -1,0 +1,1 @@
+../write_exodus_initial.i

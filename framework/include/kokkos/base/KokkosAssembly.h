@@ -72,8 +72,8 @@ public:
   KOKKOS_FUNCTION unsigned int getNumQps(ElementInfo info) const { return _n_qps[info.id]; }
   /**
    * Get the total number of facial quadrature points in a subdomain
-   * Note: this number does not represent the real number of facial quadrature points but only
-   * counts the facial quadrature points that need global caching, such as face material properties
+   * NOTE: This number does not represent the real number of facial quadrature points but only
+   * the facial quadrature points that need global caching, such as face material properties
    * @param subdomain The contiguous subdomain ID
    * @returns The number of quadrature points
    */
@@ -108,6 +108,25 @@ public:
   KOKKOS_FUNCTION dof_id_type getQpFaceOffset(ElementInfo info, unsigned int side) const
   {
     return _qp_offset_face(side, info.id);
+  }
+  /**
+   * Get the index of a side of an element into the element-constant face material property data
+   * @param info The element information object
+   * @param side The side index
+   * @returns The index
+   */
+  KOKKOS_FUNCTION dof_id_type getElemFacePropertyIndex(ElementInfo info, unsigned int side) const
+  {
+    return _elem_face_property_idx(side, info.id);
+  }
+  /**
+   * Get the size of element-constant face material property data storage of a subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @returns The storage size
+   */
+  KOKKOS_FUNCTION dof_id_type getElemFacePropertySize(ContiguousSubdomainID subdomain) const
+  {
+    return _n_elem_face_properties[subdomain];
   }
   /**
    * Get the number of DOFs of a FE type for an element type
@@ -294,6 +313,7 @@ private:
 
   /**
    * Starting offset into the global quadrature point index
+   * NOTE: The global quadrature point index is subdomain-wise
    */
   ///@{
   Array<dof_id_type> _qp_offset;
@@ -310,6 +330,13 @@ private:
 
   Array<dof_id_type> _n_subdomain_qps;
   Array<dof_id_type> _n_subdomain_qps_face;
+  ///@}
+  /**
+   * Index into the element-constant face material property data
+   */
+  ///@{
+  Array2D<dof_id_type> _elem_face_property_idx;
+  Array<dof_id_type> _n_elem_face_properties;
   ///@}
   /**
    * Quadrature points and weights for reference elements

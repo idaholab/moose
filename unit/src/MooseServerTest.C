@@ -1147,7 +1147,6 @@ label: inactive                               text: inactive =                  
 label: include_local_in_ghosting              text: include_local_in_ghosting = ${1:false}              desc: Boolean used to t... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: length_unit                            text: length_unit =                                       desc: How much distance... pos: [6.0]-[6.0] kind: 14 format: regular
 label: max_leaf_size                          text: max_leaf_size = ${1:10}                             desc: The maximum numbe... pos: [6.0]-[6.0] kind: 14 format: snippet
-label: nemesis                                text: nemesis = ${1:false}                                desc: If nemesis=true a... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: output_ghosting                        text: output_ghosting = ${1:false}                        desc: Boolean to turn o... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: partitioner                            text: partitioner = ${1:default}                          desc: Specifies a mesh ... pos: [6.0]-[6.0] kind: 13 format: snippet
 label: patch_size                             text: patch_size = ${1:40}                                desc: The number of nod... pos: [6.0]-[6.0] kind: 14 format: snippet

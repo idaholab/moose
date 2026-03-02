@@ -56,7 +56,7 @@
     input = 'recover_nemesis.i'
     min_parallel = 2
     max_parallel = 2
-    check_files = 'recover_nemesis_out.e.2.0 recover_nemesis_out.e.2.1 '
+    check_files = 'recover_nemesis_out.n.2.0 recover_nemesis_out.n.2.1 '
                   'test_nemesis_recover_dir_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/data '
                   'test_nemesis_recover_dir_cp/0010-mesh.cpa.gz/meta_data_mesh.rd/header '
                   'test_nemesis_recover_dir_cp/0010-restart-0.rd/data '
@@ -71,7 +71,7 @@
   [nemesis_part2]
     type = 'Exodiff'
     input = 'recover_nemesis.i'
-    exodiff = 'recover_nemesis_out.e.2.0 recover_nemesis_out.e.2.1'
+    exodiff = 'recover_nemesis_out.n.2.0 recover_nemesis_out.n.2.1'
     min_parallel = 2
     max_parallel = 2
     delete_output_before_running = false

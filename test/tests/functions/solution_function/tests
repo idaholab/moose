@@ -1,71 +1,82 @@
 [Tests]
-  issues = 'fc620eb2a4580a2320e03e6e89ad092dd2f4123b'
+  issues = '#3347'
   design = 'source/functions/SolutionFunction.md'
-  [./test]
-    # The XDA/XDR files for this test are created with test/tests/auxkernels/solution_aux/build.i
+
+  # Generate an XDA file every time
+  # If parallel XDA is ever implemented, this will make sure the partitioning the same
+  [generate_solution_file]
+    type = RunApp
+    input = 'create_solution_file.i'
+    cli_args = 'Outputs/file_base=build_out'
+    requirement = 'The system shall be able to create a solution file to test a function that gets values from a solution file.'
+  []
+  [test]
     type = 'Exodiff'
     input = 'solution_function_test.i'
     exodiff = 'out.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from XDA mesh and solution files."
-  [../]
+    prereq = 'generate_solution_file'
+  []
 
-  [./exodus_interp_test]
+  [exodus_interp_test]
     type = 'Exodiff'
     input = 'solution_function_exodus_interp_test.i'
     exodiff = 'solution_function_exodus_interp_test_out.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file with temporal interpolation."
-  [../]
+  []
 
-  [./exodus_test]
+  [exodus_test]
     type = 'Exodiff'
     input = 'solution_function_exodus_test.i'
     exodiff = 'solution_function_exodus_test_out.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file."
-  [../]
+  []
 
-  [./rot1]
+  [rot1]
     type = 'Exodiff'
     input = 'solution_function_rot1.i'
     exodiff = 'solution_function_rot1.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the z-axis."
-  [../]
-  [./rot2]
+  []
+  [rot2]
     type = 'Exodiff'
     input = 'solution_function_rot2.i'
     exodiff = 'solution_function_rot2.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the y-axis."
-  [../]
-  [./rot3]
+  []
+  [rot3]
     type = 'Exodiff'
     input = 'solution_function_rot3.i'
     exodiff = 'solution_function_rot3.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 90 degrees about the z-axis and 45 degress about the x-axis."
-  [../]
-  [./rot4]
+    prereq = 'generate_solution_file'
+  []
+  [rot4]
     type = 'Exodiff'
     input = 'solution_function_rot4.i'
     exodiff = 'solution_function_rot4.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and rotated 45 degrees about the z-axis for a 2D domain."
-  [../]
-  [./scale_transl]
+    prereq = 'generate_solution_file'
+  []
+  [scale_transl]
     type = 'Exodiff'
     input = 'solution_function_scale_transl.i'
     exodiff = 'solution_function_scale_transl.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and scaled by a factor in the x and y directions as well as translated in the x-direction."
-  [../]
-  [./scale_mult]
+  []
+  [scale_mult]
     type = 'Exodiff'
     input = 'solution_function_scale_mult.i'
     exodiff = 'solution_function_scale_mult.e'
     requirement = "The SolutionFunction object shall be capable of evaluating a solution read from an Exodus file and scaled by a factor of two in the x and y directions."
-  [../]
-  [./nonexistent_var_err]
+  []
+  [nonexistent_var_err]
     type = 'RunException'
     input = 'solution_function_rot1.i'
     cli_args = 'Functions/solution_fcn/from_variable=nonexistent_var'
     expect_err = "Value requested for nonexistent variable 'nonexistent_var' in the 'solution_uo' SolutionUserObject"
     requirement = "The SolutionFunction object shall error if a variable that does not exist is requested."
-  [../]
+  []
   [solution_function]
     requirement = "The system shall be capable of evaluating the gradient of a solution"
 

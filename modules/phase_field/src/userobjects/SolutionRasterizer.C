@@ -12,6 +12,7 @@
 #include <fstream>
 #include "libmesh/mesh_function.h"
 #include "libmesh/exodusII_io.h"
+#include "libmesh/nemesis_io.h"
 
 registerMooseObject("PhaseFieldApp", SolutionRasterizer);
 
