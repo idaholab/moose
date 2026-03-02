@@ -31,8 +31,9 @@ class TestLinearFVRadiativeBCConvergence(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.test_dir = os.path.dirname(os.path.abspath(__file__))
-        cls.app = os.path.join(
-            cls.test_dir, "..", "..", "..", "..", "heat_transfer-opt"
+        cls.app = os.environ.get(
+            "MOOSE_PYTHONUNITTEST_EXECUTABLE",
+            os.path.join(cls.test_dir, "..", "..", "..", "..", "heat_transfer-opt"),
         )
         cls.input = os.path.join(cls.test_dir, "linear_fv_functor_radiative_bc_mms.i")
         cls.T_R_mms = cls._compute_T_R_mms()
