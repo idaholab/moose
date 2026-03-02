@@ -30,16 +30,10 @@ public:
   void initialSetup();
 
   /// Applies p-refinement wherever the refiner sees fit.
-  void pRefine();
+  bool pRefine();
 
   /// Applies h-refinement wherever the refiner sees fit.
-  void hRefine();
-
-  /// Checks if H refinement is enabled, and if we should continue.
-  bool useHRefinement() const { return _use_h_refinement and !_stop_h_ref; }
-
-  /// Checks if P refinement is enabled, and if we should continue.
-  bool usePRefinement() const { return _use_p_refinement and !_stop_p_ref; }
+  bool hRefine();
 
 protected:
   /// Unique pointer to underlying mfem object
@@ -51,15 +45,6 @@ protected:
   const unsigned _max_p_level;
   unsigned _h_ref_counter{0};
   unsigned _p_ref_counter{0};
-
-  /// Bool to indicate we have reached stopping condition for h-refinement.
-  bool _stop_h_ref{false};
-
-  /// Bool to indicate we have reached stopping condition for p-refinement.
-  bool _stop_p_ref{false};
-
-  bool _use_h_refinement{false};
-  bool _use_p_refinement{false};
 
   const MFEMIndicator * _estimator{nullptr};
 };

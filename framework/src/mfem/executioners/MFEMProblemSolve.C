@@ -76,9 +76,16 @@ MFEMProblemSolve::solve()
     for (const auto & problem_operator : _problem_operators)
       problem_operator->Solve();
 
-    while (_mfem_problem.applyRefinements())
+    // Short-circuit evaluation guarantees we only do one of p- or h-refinement between solves
+    while (_mfem_problem.pRefine() || _mfem_problem.hRefine())
     {
-      updateAfterRefinement();
+      // Update the mfem problem
+      _mfem_problem.updateAfterRefinement();
+
+      // Reset gridfunctions
+      for (const auto & problem_operator : _problem_operators)
+        problem_operator->SetGridFunctions();
+
       // Solve again
       for (const auto & problem_operator : _problem_operators)
         problem_operator->Solve();
@@ -111,13 +118,4 @@ MFEMProblemSolve::solve()
   return converged;
 }
 
-void
-MFEMProblemSolve::updateAfterRefinement()
-{
-  // Update in the mfem problem
-  _mfem_problem.updateAfterRefinement();
-
-  for (const auto & problem_operator : _problem_operators)
-    problem_operator->SetGridFunctions();
-}
 #endif

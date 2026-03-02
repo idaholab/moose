@@ -281,13 +281,9 @@ public:
   void updateAfterRefinement();
   void updateFESpaces();
 
-  void hRefine() { _problem_data.refiner->hRefine(); }
-  void pRefine() { _problem_data.refiner->pRefine(); }
-
-  /**
-   * Returns a bool to indicate whether we refined the mesh
-   */
-  bool applyRefinements();
+  bool useAMR() const { return _problem_data.refiner != nullptr; }
+  bool hRefine() { return useAMR() && _problem_data.refiner->hRefine(); }
+  bool pRefine() { return useAMR() && _problem_data.refiner->pRefine(); }
 
   /**
    * @returns a shared pointer to an MFEM parallel grid function
@@ -304,11 +300,6 @@ public:
 
 protected:
   MFEMProblemData _problem_data;
-
-private:
-  bool useAMR() const { return _problem_data.refiner != nullptr; }
-  bool useHRefinement() const { return useAMR() && _problem_data.refiner->useHRefinement(); }
-  bool usePRefinement() const { return useAMR() && _problem_data.refiner->usePRefinement(); }
 };
 
 #endif

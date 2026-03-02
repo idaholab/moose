@@ -702,18 +702,4 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
   return MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
 }
 
-bool
-MFEMProblem::applyRefinements()
-{
-  const bool refined = usePRefinement() || useHRefinement();
-
-  if (usePRefinement())
-    pRefine();
-
-  if (useHRefinement())
-    hRefine();
-
-  return refined;
-}
-
 #endif
