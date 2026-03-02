@@ -39,8 +39,6 @@ TEST(CapabilityRegistryTest, checkBool)
   CAP_CHECK_EXPECT_EQ("!bool", CheckState::CERTAIN_FAIL);
   CAP_CHECK_EXPECT_EQ("!bool2", CheckState::CERTAIN_PASS);
   CAP_CHECK_EXPECT_EQ("bool2", CheckState::CERTAIN_FAIL);
-  CAP_CHECK_EXPECT_EQ("noexist", CheckState::POSSIBLE_FAIL);
-  CAP_CHECK_EXPECT_EQ("!noexist", CheckState::POSSIBLE_PASS);
 
   CAP_CHECK_EXPECT_ERROR("bool2=>1.0.0", "Capability statement '=>': unknown operator.");
   CAP_CHECK_EXPECT_ERROR("bool=", "Unable to parse requested capabilities 'bool='.");
@@ -243,14 +241,19 @@ TEST(CapabilityRegistryTest, checkMultiple)
       .setEnumeration({"clang", "gcc"});
   registry.add("version", std::string("3.2.1"), "Multiple capability test version number");
 
-  CAP_CHECK_EXPECT_EQ("!doesnotexist & version<4.2.2 &"
-                      "int<100 & int>50 & string!=Popel ",
-                      CheckState::POSSIBLE_PASS);
-  CAP_CHECK_EXPECT_EQ("!doesnotexist & version<4.2.2 &"
-                      "int<100 & unittest2_int>50 & string!=Popel ",
-                      CheckState::UNKNOWN);
-  CAP_CHECK_EXPECT_EQ("doesnotexist & doesnotexist>2.0.1", CheckState::POSSIBLE_FAIL);
-  CAP_CHECK_EXPECT_EQ("!doesnotexist | doesnotexist<=2.0.1", CheckState::POSSIBLE_PASS);
+  EXPECT_EQ(
+      registry.check("!doesnotexist & version<4.2.2 & int<100 & int>50 & string!=Popel", false)
+          .state,
+      CheckState::POSSIBLE_PASS);
+  EXPECT_EQ(registry
+                .check("!doesnotexist & version<4.2.2 & int<100 & unittest2_int>50 & string!=Popel",
+                       false)
+                .state,
+            CheckState::UNKNOWN);
+  EXPECT_EQ(registry.check("doesnotexist & doesnotexist>2.0.1", false).state,
+            CheckState::POSSIBLE_FAIL);
+  EXPECT_EQ(registry.check("!doesnotexist | doesnotexist<=2.0.1", false).state,
+            CheckState::POSSIBLE_PASS);
   CAP_CHECK_EXPECT_EQ("bool & int!=78", CheckState::CERTAIN_FAIL);
   CAP_CHECK_EXPECT_EQ("bool | int!=78", CheckState::CERTAIN_PASS);
   CAP_CHECK_EXPECT_EQ(" !bool | (string=gcc | version<1.0)", CheckState::CERTAIN_FAIL);
@@ -279,6 +282,49 @@ TEST(CapabilityRegistryTest, checkParseFail)
 
 #undef CAP_CHECK_EXPECT_EQ
 #undef CAP_CHECK_EXPECT_ERROR
+
+/// Test CapabilityRegistry::check with certain capabilities
+TEST(CapabilityRegistryTest, checkCertain)
+{
+  CapabilityRegistry registry;
+
+  // Unknown bool capabilities
+  // No error with default certain=true
+  try
+  {
+    registry.check("noexist1 & !noexist2");
+    FAIL() << "UnknownCapabilitiesException not thrown";
+  }
+  catch (const Moose::UnknownCapabilitiesException & e)
+  {
+    EXPECT_EQ(std::string(e.what()), "The following capabilities are unknown: noexist1, noexist2");
+    const std::vector<std::string> unknown_capabilities{"noexist1", "noexist2"};
+    EXPECT_EQ(e.unknown_capabilities, unknown_capabilities);
+  }
+  // Possible state with certain=false
+  EXPECT_EQ(registry.check("noexist", false).state, CheckState::POSSIBLE_FAIL);
+  EXPECT_EQ(registry.check("!noexist", false).state, CheckState::POSSIBLE_PASS);
+
+  // Default certain = true, unknown comparison capabilities
+  try
+  {
+    registry.check("noexist1=1 & noexist2=foo & noexist3<1 & noexist4>1");
+    FAIL() << "UnknownCapabilitiesException not thrown";
+  }
+  catch (const Moose::UnknownCapabilitiesException & e)
+  {
+    EXPECT_EQ(std::string(e.what()),
+              "The following capabilities are unknown: noexist1, noexist2, noexist3, noexist4");
+    const std::vector<std::string> unknown_capabilities{
+        "noexist1", "noexist2", "noexist3", "noexist4"};
+    EXPECT_EQ(e.unknown_capabilities, unknown_capabilities);
+  }
+  // Unknown state with certain=false
+  EXPECT_EQ(registry.check("noexist=1", false).state, CheckState::UNKNOWN);
+  EXPECT_EQ(registry.check("noexist=foo", false).state, CheckState::UNKNOWN);
+  EXPECT_EQ(registry.check("noexist<1", false).state, CheckState::UNKNOWN);
+  EXPECT_EQ(registry.check("noexist>1", false).state, CheckState::UNKNOWN);
+}
 
 /// Test CapabilityRegistry::query
 TEST(CapabilityRegistryTest, query)

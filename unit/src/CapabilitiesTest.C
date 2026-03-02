@@ -180,10 +180,11 @@ TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
         app->run(), "--required-capablities: Capability statement '!': unknown operator.");
   }
 
-  // Unknown state
+  // Unknown capabilities
   {
-    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo>1'"});
-    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(), "are not specific enough");
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--required-capablities: The following capabilities are unknown: foo");
   }
 }
 
@@ -220,8 +221,8 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
   // Check fails without augmenting via --testharness-capabilities
   {
     auto app = AppFactory::create("MooseUnitApp", {check_capabilities});
-    app->run();
-    EXPECT_EQ(app->exitCode(), 77);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
+                                   "--check-capablities: The following capabilities are unknown:");
   }
 
   // Success once adding --testharness-capabilities to augment

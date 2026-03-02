@@ -430,6 +430,22 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             ),
         )
 
+        # Has capabilities that are missing
+        result = self.runTests(
+            "-i", "missing_capabilities", minimal_capabilities=True, exit_code=132
+        )
+        assert result.harness is not None
+        test = self.getJobWithName(result.harness, "test")
+        self.assertEqual(test.getTester().getStatusMessage(), "UNKNOWN CAPABILITIES")
+        self.assertEqual(test.getTester().getStatus(), test.error)
+        self.assertIn(
+            (
+                "Tests/test/capabilities:\n"
+                "The following capabilities are unknown: bar, foo"
+            ),
+            test.getTester().getOutput(),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

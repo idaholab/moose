@@ -23,7 +23,7 @@ from FactorySystem.InputParameters import InputParameters
 from FactorySystem.MooseObject import MooseObject
 
 from TestHarness import OutputInterface
-from TestHarness.capability_util import CapabilityException, checkAppCapabilities
+from TestHarness.capability_util import checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
 
@@ -824,15 +824,29 @@ class Tester(MooseObject, OutputInterface):
         # capabilities string is bad or if the registry is bad
         try:
             present = checkAppCapabilities(
-                options._capabilities,
-                self.specs["capabilities"],
-                bool(self.specs["dynamic_capabilities"]),
+                capabilities=options._capabilities,
+                required=self.specs["capabilities"],
+                certain=not bool(self.specs["dynamic_capabilities"]),
                 add_capabilities=self._augmented_capabilities,
             )
-        # Check failed, so add an error message to the Tester
-        # that has a file:line link to the "capabilities" param
-        except CapabilityException as e:
-            self.setStatus(self.error, "INVALID CAPABILITIES")
+        except Exception as e:
+            from pycapabilities.exceptions import (
+                CapabilityException,
+                UnknownCapabilitiesException,
+            )
+
+            # Only catch CapabilityException here
+            if not isinstance(e, CapabilityException):
+                raise
+
+            # Capability check failed, so add an error message to the Tester
+            # that has a file:line link to the "capabilities" param
+            status_message = (
+                "UNKNOWN"
+                if issubclass(type(e), UnknownCapabilitiesException)
+                else "INVALID"
+            ) + " CAPABILITIES"
+            self.setStatus(self.error, status_message)
             node = self.specs["_node"]
             output = ""
             if (filename := node.filename("capabilities")) or (

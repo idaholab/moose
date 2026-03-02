@@ -1,3 +1,12 @@
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
+
 from enum import IntEnum
 from typing import Iterable, Optional, Set, Tuple
 
@@ -27,11 +36,6 @@ class CheckState(IntEnum):
     CERTAIN_PASS = 4
     """A certain pass."""
 
-class CapabilityException(Exception):
-    """Exception for a capability initialization or evaluation error."""
-
-    ...
-
 class Capabilities:
     """Python representation of the MOOSE::Capabilities system."""
 
@@ -59,9 +63,10 @@ class Capabilities:
     def check(
         self,
         requirement: str,
+        certain: bool = True,
         add_capabilities: Optional[dict] = None,
         negate_capabilities: Optional[Iterable[str]] = None,
-    ) -> Tuple[CheckState, str, str]:
+    ) -> Tuple[CheckState]:
         """
         Check capabilities against the registry.
 
@@ -78,6 +83,8 @@ class Capabilities:
 
         Optional Parameters
         -------------------
+        certain : bool
+            Whether or not the check must be certain (don't allow unknown capabilities).
         add_capabilities : Optional[dict]
             Additional capabilities to temporarily add to the registry.
         negate_capabilities : Optional[Iterable[str]]

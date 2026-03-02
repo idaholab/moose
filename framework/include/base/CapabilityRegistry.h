@@ -74,10 +74,6 @@ public:
   {
     /// State of the check
     CheckState state;
-    /// Reason associated with the check (currently unused)
-    std::string reason;
-    /// Documentation associated with the check (currently unused)
-    std::string doc;
   };
 
   /**
@@ -125,8 +121,9 @@ public:
   /**
    * Checks if a set of requirements is satisified by the capabilities
    *
-   * @param capabilities The registry that contains the capabilities
    * @param requirements The requirement string
+   * @param certain Whether or not the capabilites must be certain, that is,
+   * all capabilities must be known
    *
    * This method is exposed to Python within pycapabilities.Capabilities.check in
    * python/pycapabilities/_pycapabilities.C. This external method is used
@@ -149,7 +146,7 @@ public:
    * See the description for CheckState for more information on why a
    * certain state would be returned.
    */
-  CheckResult check(std::string requirements) const;
+  CheckResult check(std::string requirements, const bool certain = true) const;
 
 protected:
 #ifdef MOOSE_UNIT_TEST

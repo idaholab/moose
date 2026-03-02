@@ -12,7 +12,7 @@
 import re
 import subprocess
 import sys
-from typing import TYPE_CHECKING, Iterable, Optional, Set, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Union
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
@@ -36,17 +36,13 @@ def getAppCapabilities(executable: str) -> dict:
     return parseMOOSEJSON(output, "--show-capabilities")
 
 
-class CapabilityException(Exception):
-    """Exception for a capability initialization or evaluation error."""
-
-
 def checkAppCapabilities(
     capabilities: "Capabilities",
     required: str,
     certain: bool,
     add_capabilities: Optional[dict] = None,
     negate_capabilities: Optional[Iterable[str]] = None,
-):
+) -> bool:
     """
     Check a capability requirement against known capabilities.
 
@@ -66,25 +62,26 @@ def checkAppCapabilities(
     negate_capabilities : Optional[Iterable[str]]
         Capabilities to negate in the registry during the check.
 
+
+    Returns:
+    -------
+    bool:
+        Whether or not the check passed.
+
     """
     # This is one of the few places where we actually
     # load the pycapabilities module and that is
     # intentional as it can trigger a build
-    import pycapabilities
+    from pycapabilities import CheckState
 
-    try:
-        status, _, _ = capabilities.check(
-            required,
-            add_capabilities=add_capabilities,
-            negate_capabilities=negate_capabilities,
-        )
-    # Re-cast this exception as one that doesn't
-    # need the pycapabilities module to use
-    except pycapabilities.CapabilityException as e:
-        raise CapabilityException(e)
+    status = capabilities.check(
+        required,
+        add_capabilities=add_capabilities,
+        negate_capabilities=negate_capabilities,
+    )[0]
 
-    return status == pycapabilities.CheckState.CERTAIN_PASS or (
-        status == pycapabilities.CheckState.POSSIBLE_PASS and not certain
+    return status == CheckState.CERTAIN_PASS or (
+        status == CheckState.POSSIBLE_PASS and not certain
     )
 
 

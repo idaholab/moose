@@ -13,6 +13,7 @@
 import unittest
 
 import pycapabilities
+from pycapabilities.exceptions import CapabilityException, UnknownCapabilitiesException
 
 CERTAIN_FAIL = pycapabilities.CheckState.CERTAIN_FAIL
 POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
@@ -77,7 +78,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Catching CapabilityUtil errors
         with self.assertRaisesRegex(
-            pycapabilities.CapabilityException,
+            CapabilityException,
             r"Capability::setExplicit\(\): Capability 'name' is "
             "bool-valued and cannot be set as explicit",
         ):
@@ -85,7 +86,7 @@ class TestCapabilities(unittest.TestCase):
                 {"name": {"doc": "foo", "value": True, "explicit": True}}
             )
         with self.assertRaisesRegex(
-            pycapabilities.CapabilityException,
+            CapabilityException,
             r"Capability::setExplicit\(\): Capability 'name' is "
             "bool-valued and cannot be set as explicit",
         ):
@@ -123,15 +124,26 @@ class TestCapabilities(unittest.TestCase):
 
         capabilities = pycapabilities.Capabilities(cap)
 
-        def check(req: str, expect_status: pycapabilities.CheckState):
-            status, reason, doc = capabilities.check(req)
+        # Pass check as non-bool
+        with self.assertRaisesRegex(TypeError, "certain must be a bool"):
+            capabilities.check("unused", None)
+
+        def check(
+            req: str, expect_status: pycapabilities.CheckState, certain: bool = True
+        ):
+            status = capabilities.check(req, certain=certain)[0]
             self.assertIsInstance(status, pycapabilities.CheckState)
-            self.assertIsInstance(reason, str)
-            self.assertIsInstance(doc, str)
             self.assertEqual(expect_status, status)
 
-        # unknown
-        check("!unknown", POSSIBLE_PASS)
+        # unknown, not allowed with default check=True
+        with self.assertRaisesRegex(
+            UnknownCapabilitiesException,
+            "The following capabilities are unknown: unknown",
+        ) as e:
+            capabilities.check("!unknown")
+        self.assertEqual(e.exception.unknown_capabilities, ["unknown"])
+        # unknown, allowed
+        check("!unknown", POSSIBLE_PASS, certain=False)
 
         # booleans
         check("!bool_true", CERTAIN_FAIL)
@@ -152,13 +164,13 @@ class TestCapabilities(unittest.TestCase):
         # Explicit capabilities raise
         for name in ["int_explicit", "string_explicit", "string_enumerated_explicit"]:
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}': capability '{name}' requires a value "
                 "and cannot be used in a boolean expression",
             ):
                 capabilities.check(name)
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}': capability '{name}' requires a value "
                 "and cannot be used in a boolean expression",
             ):
@@ -167,7 +179,7 @@ class TestCapabilities(unittest.TestCase):
         # Enumerated capabilities raise
         for name in ["string_enumerated", "string_enumerated_explicit"]:
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}=bar': 'bar' invalid for "
                 f"capability '{name}'; valid values: foo, string",
             ):
@@ -175,7 +187,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Combined requirements
         check("bool_true & !bool_true", CERTAIN_FAIL)
-        check("int>0 & (foo | string=string)", CERTAIN_PASS)
+        check("int>0 & (foo | string=string)", CERTAIN_PASS, certain=False)
 
     def testCapabilitiesCheckAdd(self):
         """Test pycapabilities.Capabilities.check with add_capabilities."""
@@ -183,7 +195,7 @@ class TestCapabilities(unittest.TestCase):
         capabilities = pycapabilities.Capabilities(caps)
 
         # Normal behavior, capability is added
-        self.assertEqual(capabilities.check("added")[0], POSSIBLE_FAIL)
+        self.assertEqual(capabilities.check("added", certain=False)[0], POSSIBLE_FAIL)
         add = {"added": {"doc": "doc", "value": "added"}}
         self.assertEqual(
             capabilities.check("orig & added", add_capabilities=add)[0],
@@ -196,7 +208,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Adding a capability fails (same name)
         add = {"orig": {"doc": "doc", "value": "added"}}
-        with self.assertRaises(pycapabilities.CapabilityException):
+        with self.assertRaises(CapabilityException):
             capabilities.check("unused", add_capabilities=add)
 
     def testCapabilitiesCheckNegate(self):
