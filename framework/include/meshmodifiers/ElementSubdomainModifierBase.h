@@ -35,7 +35,8 @@ enum class ReinitStrategy
   IC,
   POLYNOMIAL_NEIGHBOR,
   POLYNOMIAL_WHOLE,
-  POLYNOMIAL_NEARBY
+  POLYNOMIAL_NEARBY,
+  NONE
 };
 
 /**

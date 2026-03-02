@@ -20,7 +20,7 @@ ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _target_vars(x._target_vars)
 {
 }
 

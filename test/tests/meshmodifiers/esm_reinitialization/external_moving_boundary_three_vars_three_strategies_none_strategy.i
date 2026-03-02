@@ -39,12 +39,6 @@
     variable = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [extrapolation_patch2]
-    type = NodalPatchRecoveryVariable
-    patch_polynomial_order = FIRST
-    variable = 'diff2'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
 []
 
 [MeshModifiers]
@@ -64,9 +58,9 @@
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
 
-    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE IC"
-    reinitialize_variables = "diff diff2 diff3"
-    polynomial_fitters = 'extrapolation_patch extrapolation_patch2'
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR NONE IC"
+    reinitialize_variables = 'diff diff2 diff3'
+    polynomial_fitters = 'extrapolation_patch'
     restore_overridden_dofs = "true"
   []
 []
@@ -100,9 +94,11 @@
   []
   [diff2]
     order = FIRST
+    initial_condition = 10
   []
   [diff3]
     order = FIRST
+    initial_condition = 10
   []
 []
 
