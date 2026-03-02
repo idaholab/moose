@@ -8,6 +8,7 @@
     requirement = 'The system shall have the ability to solve a problem defined on a 3D rectangular mesh with pre-defined periodic boundaries using MFEM.'
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMPeriodicVector3D]
@@ -18,6 +19,7 @@
     requirement = 'The system shall have the ability to solve a problem with periodic boundaries specified by translation vector using MFEM.'
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMPeriodicVector2D]
@@ -28,6 +30,7 @@
     requirement = 'The system shall have the ability to solve a problem defined on a 2D square mesh with pre-defined periodic boundaries using MFEM.'
     capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
 []
