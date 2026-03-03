@@ -45,7 +45,6 @@ POROUS_FLOW                 := no
 RAY_TRACING                 := no
 REACTOR                     := no
 RDG                         := no
-RICHARDS                    := no
 SOLID_MECHANICS             := no
 STOCHASTIC_TOOLS            := no
 THERMAL_HYDRAULICS          := no

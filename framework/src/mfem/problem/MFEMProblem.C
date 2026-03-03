@@ -437,7 +437,6 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "MultiControlDrumFunction",
                                                "Grad2ParsedFunction",
                                                "GradParsedFunction",
-                                               "RichardsExcavGeom",
                                                "ScaledAbsDifferenceDRLRewardFunction",
                                                "CircularAreaHydraulicDiameterFunction",
                                                "CosineHumpFunction",

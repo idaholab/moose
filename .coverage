@@ -74,9 +74,6 @@ require_total = 93
 [rdg]
 require_total = 63
 
-[richards]
-require_total = 93
-
 [scalar_transport]
 require_total = 81
 
