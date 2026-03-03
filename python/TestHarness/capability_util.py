@@ -43,7 +43,7 @@ def checkAppCapabilities(
     certain: bool,
     add_capabilities: Optional[dict] = None,
     negate_capabilities: Optional[Iterable[str]] = None,
-) -> Tuple[bool, CheckResult]:
+) -> Tuple[bool, "CheckResult"]:
     """
     Check a capability requirement against known capabilities.
 
