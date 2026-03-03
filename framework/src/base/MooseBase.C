@@ -13,7 +13,7 @@
 #include "Moose.h"
 #include "Factory.h"
 #include "InputParameterWarehouse.h"
-#include "AppFactory.h"
+#include "MooseVerbosityHelper.h"
 
 const std::string MooseBase::type_param = "_type";
 const std::string MooseBase::name_param = "_object_name";
@@ -36,6 +36,7 @@ MooseBase::validParams()
 
 MooseBase::MooseBase(MooseApp & app, const InputParameters & params)
   : ConsoleStreamInterface(app),
+    MooseVerbosityHelper(this, params),
     _app(app),
     _type(params.getObjectType()),
     _name(params.getObjectName()),
@@ -101,71 +102,8 @@ MooseBase::connectControllableParams(const std::string & parameter,
   }
 }
 
-[[noreturn]] void
-MooseBase::callMooseError(std::string msg,
-                          const bool with_prefix,
-                          const hit::Node * node /* = nullptr */) const
-{
-  callMooseError(&_app, _pars, msg, with_prefix, node);
-}
-
-[[noreturn]] void
-MooseBase::callMooseError(MooseApp * const app,
-                          const InputParameters & params,
-                          std::string msg,
-                          const bool with_prefix,
-                          const hit::Node * node)
-{
-  if (!node)
-    node = MooseBase::getHitNode(params);
-
-  std::string multiapp_prefix = "";
-  if (app)
-  {
-    if (!app->isUltimateMaster())
-      multiapp_prefix = app->name();
-    app->getOutputWarehouse().mooseConsole();
-  }
-
-  if (with_prefix)
-    // False here because the hit context will get processed by the node
-    msg = messagePrefix(params, false) + msg;
-
-  moose::internal::mooseErrorRaw(msg, multiapp_prefix, node);
-}
-
 std::string
-MooseBase::messagePrefix(const InputParameters & params, const bool hit_prefix)
+MooseVerbosityHelper::messagePrefix(const bool hit_prefix) const
 {
-  std::string prefix = "";
-
-  if (hit_prefix)
-    if (const auto node = MooseBase::getHitNode(params))
-      prefix += Moose::hitMessagePrefix(*node);
-
-  // Don't have context without type and name
-  if (!params.isMooseBaseObject())
-    return prefix;
-
-  const auto & name = params.getObjectName();
-  const std::string base = params.hasBase() ? params.getBase() : "object";
-  const bool is_main_app = base == "Application" && name == AppFactory::main_app_name;
-  prefix += "The following occurred in the ";
-  if (is_main_app)
-    prefix += "main " + base;
-  else
-    prefix += base;
-  if (base != params.getObjectName() && name.size() && !is_main_app)
-    prefix += " '" + name + "'";
-  prefix += " of type " + params.getObjectType() + ".";
-  return prefix + "\n\n";
-}
-
-const hit::Node *
-MooseBase::getHitNode(const InputParameters & params)
-{
-  if (const auto hit_node = params.getHitNode())
-    if (!hit_node->isRoot())
-      return hit_node;
-  return nullptr;
+  return messagePrefix(_moose_base.parameters(), hit_prefix);
 }
