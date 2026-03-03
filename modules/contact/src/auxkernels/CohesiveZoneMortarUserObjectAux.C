@@ -15,7 +15,9 @@
 registerMooseObject("ContactApp", CohesiveZoneMortarUserObjectAux);
 
 const MooseEnum CohesiveZoneMortarUserObjectAux::_cohesive_zone_quantities(
-    "mode_mixity_ratio cohesive_damage local_normal_jump local_tangential_jump");
+    "mode_mixity_ratio cohesive_damage local_normal_jump local_tangential_jump "
+    "cohesive_traction_normal cohesive_traction_tangential_magnitude "
+    "cohesive_traction_tangential_1 cohesive_traction_tangential_2 cohesive_traction_effective");
 
 InputParameters
 CohesiveZoneMortarUserObjectAux::validParams()
@@ -57,7 +59,28 @@ CohesiveZoneMortarUserObjectAux::CohesiveZoneMortarUserObjectAux(const InputPara
               {CohesiveQuantityEnum::LOCAL_TANGENTIAL_JUMP,
                {"BilinearMixedModeCohesiveZoneModel", _cohesive_zone_uo, [&]() {
                   return _cohesive_zone_uo->getLocalDisplacementTangential(_current_node);
-                }}}})
+                }}},
+              {CohesiveQuantityEnum::COHESIVE_TRACTION_NORMAL,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getCohesiveTractionNormal(_current_node); }}},
+              {CohesiveQuantityEnum::COHESIVE_TRACTION_TANGENTIAL_MAGNITUDE,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]()
+                { return _cohesive_zone_uo->getCohesiveTractionTangentialMagnitude(_current_node); }}},
+              {CohesiveQuantityEnum::COHESIVE_TRACTION_TANGENTIAL_ONE,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getCohesiveTractionTangentialOne(_current_node); }}},
+              {CohesiveQuantityEnum::COHESIVE_TRACTION_TANGENTIAL_TWO,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getCohesiveTractionTangentialTwo(_current_node); }}},
+              {CohesiveQuantityEnum::COHESIVE_TRACTION_EFFECTIVE,
+               {"BilinearMixedModeCohesiveZoneModel",
+                _cohesive_zone_uo,
+                [&]() { return _cohesive_zone_uo->getCohesiveTractionEffective(_current_node); }}}})
 {
   if (!isNodal())
     mooseError("This auxiliary kernel requires nodal variables to obtain contact pressure values");
