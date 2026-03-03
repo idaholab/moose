@@ -64,7 +64,3 @@ computer scientists and engineers and is supported by various funding agencies,
 including the [United States Department of Energy](http://energy.gov).  Development
 of these codes is ongoing at [INL](https://www.inl.gov) and by collaborators
 throughout the world.
-
-## Tutorial style=clear:both
-
-Tutorial can be found [here](/modules/subchannel/tutorial/index.md optional=True)

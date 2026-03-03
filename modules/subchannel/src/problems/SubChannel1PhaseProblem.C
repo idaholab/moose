@@ -19,6 +19,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "SCMFrictionClosureBase.h"
 #include "SCMHTCClosureBase.h"
+#include "SCMMixingClosureBase.h"
 
 struct Ctx
 {
@@ -67,7 +68,6 @@ SubChannel1PhaseProblem::validParams()
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
-  params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
   params.addParam<int>("T_maxit", 100, "Maximum number of iterations for inner temperature loop");
@@ -104,11 +104,20 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   params.addRequiredParam<UserObjectName>("friction_closure",
                                           "Closure computing the friction factor");
-  // Make these OPTIONAL here; enforce them conditionally
+  params.addRequiredParam<UserObjectName>("mixing_closure",
+                                          "Closure computing the turbulent mixing parameter");
   params.addParam<UserObjectName>(
       "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
   params.addParam<UserObjectName>("duct_HTC_closure",
                                   "Closure computing HTC on duct (required if duct mesh exists).");
+  params.addDeprecatedParam<Real>("beta",
+                                  "Thermal diffusion coefficient used in turbulent crossflow.",
+                                  "Use closure system instead.");
+  params.addDeprecatedParam<bool>(
+      "constant_beta",
+      true,
+      "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
+      "Use closure system instead.");
   return params;
 }
 
@@ -118,6 +127,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _friction_args(/*i_ch=*/0, /*Re=*/1.0, /*S=*/0.0, /*w_perim=*/0.0),
     _nusselt_args(
         /*Re=*/1.0, /*Pr=*/1.0, std::numeric_limits<unsigned int>::max(), /*iz=*/0, /*i_ch=*/0),
+    _P_out(getPostprocessorValue("P_out")),
+    _fp(nullptr),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -129,8 +140,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
-    _P_out(getPostprocessorValue("P_out")),
-    _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
     _T_maxit(getParam<int>("T_maxit")),
@@ -146,11 +155,13 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _segregated_bool(getParam<bool>("segregated")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _deformation(getParam<bool>("deformation")),
-    _fp(nullptr),
     _Tpin_soln(nullptr),
     _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
 {
+  if (params.isParamSetByUser("beta") || params.isParamSetByUser("constant_beta"))
+    paramError("turbulent mixing modeling:",
+               "You are using a deprecated parameter. Please use the mixing_closure system.");
   if (_pin_mesh_exist && !isParamValid("pin_HTC_closure"))
     paramError("pin_HTC_closure", "required when a pin mesh exists.");
   if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))
@@ -259,6 +270,11 @@ SubChannel1PhaseProblem::initialSetup()
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   _friction_closure =
       &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
+  _mixing_closure =
+      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
+
+  /// Set value for turbulent momentum modeling parameter CT
+  _CT = _mixing_closure->getCT();
 
   // Create variables for output and storage
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
@@ -1731,7 +1747,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-      auto beta = computeBeta(i_gap, iz, /*enthalpy=*/false);
+      auto beta = _mixing_closure->computeMixingParameter(i_gap, iz);
 
       if (!_implicit_bool)
       {
