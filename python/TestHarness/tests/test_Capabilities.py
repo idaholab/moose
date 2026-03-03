@@ -139,7 +139,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 setattr(options, key, value)
 
             capabilities, augmented_capabilities, required_capabilities = (
-                TestHarness.getCapabilities(options, None)
+                TestHarness.getCapabilities(options, None, None)
             )
             self.assertIsInstance(capabilities.values, dict)
             self.assertIsInstance(augmented_capabilities, dict)
