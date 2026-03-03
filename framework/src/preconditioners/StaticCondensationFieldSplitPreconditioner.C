@@ -67,7 +67,7 @@ StaticCondensationFieldSplitPreconditioner::setupDM()
   // Create and set up the DM that will consume the split options and deal with block matrices.
   auto & petsc_solver = cast_ref<PetscLinearSolver<Number> &>(scSysMat().reduced_system_solver());
   auto ksp = petsc_solver.ksp();
-  // if there exists a DMMoose object, not to recreate a new one
+  // if there exists a DMMoose object, then we do not need to recreate one
   LibmeshPetscCall(KSPGetDM(ksp, &dm));
   if (dm)
   {
@@ -77,8 +77,12 @@ StaticCondensationFieldSplitPreconditioner::setupDM()
   }
   createMooseDM(&dm);
   LibmeshPetscCall(KSPSetDM(ksp, dm));
-  // We set the operators ourselves. We do not want the DM to generate the operators
+// We set the operators ourselves. We do not want the DM to generate the operators
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
   LibmeshPetscCall(KSPSetDMActive(ksp, PETSC_FALSE));
+#else
+  LibmeshPetscCall(KSPSetDMActive(ksp, KSP_DMACTIVE_OPERATOR, PETSC_FALSE));
+#endif
   LibmeshPetscCall(DMDestroy(&dm));
 }
 
