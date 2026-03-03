@@ -63,8 +63,8 @@ class Scheduler(MooseObject):
     # This is what will be checked for when we look for valid schedulers
     IS_SCHEDULER = True
 
-    MONITOR_PROCESSES = True
-    """Whether or not this Scheduler should monitor process usage."""
+    MONITOR_JOB_PROCESSES = True
+    """Whether or not this Scheduler should monitor Job process usage."""
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -142,7 +142,7 @@ class Scheduler(MooseObject):
         """The MonitorProcess instance for monitoring process CPU usage, if enabled."""
 
         # Setup MonitorProcesses if enabled and psutil is available
-        if self.MONITOR_PROCESSES:
+        if self.MONITOR_JOB_PROCESSES:
             from importlib.util import find_spec
 
             if find_spec("psutil") is not None:
@@ -258,7 +258,7 @@ class Scheduler(MooseObject):
                 return False
         return True
 
-    def monitorProcesses(self):
+    def monitorJobProcesses(self):
         """Monitor the running job processes, if enabled."""
         # Process monitoring is disabled
         if self.monitor_processes is None:
@@ -293,7 +293,7 @@ class Scheduler(MooseObject):
                 if not self.isRunning():
                     break
                 sleep(0.1)
-                self.monitorProcesses()
+                self.monitorJobProcesses()
 
             error_state = self.getErrorState()
 

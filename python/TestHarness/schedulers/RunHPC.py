@@ -99,7 +99,7 @@ class RunHPC(RunParallel):
     Base scheduler for jobs that are ran on HPC.
     """
 
-    MONITOR_PROCESSES = False
+    MONITOR_JOB_PROCESSES = False
 
     def __init__(self, harness, params):
         import paramiko
