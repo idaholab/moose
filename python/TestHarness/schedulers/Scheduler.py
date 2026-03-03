@@ -320,7 +320,7 @@ class Scheduler(MooseObject):
             while True:
                 if not self.isRunning():
                     break
-                sleep(0.1)
+                sleep(0.2)
                 self.monitorJobProcesses()
 
             error_state = self.getErrorState()
@@ -427,7 +427,7 @@ class Scheduler(MooseObject):
     def satisfyLoad(self):
         """Method for controlling load average"""
         while self.slots_in_use > 1 and self.getLoad() >= self.average_load:
-            sleep(1.0)
+            sleep(0.1)
 
     def getJobSlots(self, job):
         """
@@ -661,7 +661,6 @@ class Scheduler(MooseObject):
                 if not job.isFinished():
                     with job.getLock():
                         job.setStatus(job.hold)
-                    sleep(0.1)
 
             # Job is done (or needs to re-enter the queue)
             self.queueJobs(jobs)
