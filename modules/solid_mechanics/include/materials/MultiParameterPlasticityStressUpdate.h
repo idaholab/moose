@@ -619,40 +619,22 @@ protected:
                                           RankFourTensor & cto);
 
   /**
-   * d(stress_param[i])/d(stress) at given stress
-   * TODO: remove this function when Blackbear and others have implemented the void version
-   * @param stress stress tensor
-   * @return d(stress_param[:])/d(stress)
-   */
-  virtual std::vector<RankTwoTensor> dstress_param_dstress(const RankTwoTensor & stress) const;
-
-  /**
    * d(stress_param[i])/d(stress) at given stress.  When overriding, ensure to assert that dsp has
    * size _num_sp
-   * TODO: when Blackbear and others have this implemented, make this pure virtual
    * @param stress[in] stress tensor
    * @param dsp[out] d(stress_param[:])/d(stress)
    */
   virtual void dstressparam_dstress(const RankTwoTensor & stress,
-                                    std::vector<RankTwoTensor> & dsp) const;
-
-  /**
-   * d2(stress_param[i])/d(stress)/d(stress) at given stress
-   * TODO: remove this function when Blackbear and others have implemented the void version
-   * @param stress stress tensor
-   * @return d2(stress_param[:])/d(stress)/d(stress)
-   */
-  virtual std::vector<RankFourTensor> d2stress_param_dstress(const RankTwoTensor & stress) const;
+                                    std::vector<RankTwoTensor> & dsp) const = 0;
 
   /**
    * d2(stress_param[i])/d(stress)/d(stress) at given stress.  When overriding, ensure to assert
    * that d2sp has size _num_sp
-   * TODO: when Blackbear and others have this implemented, make this pure virtual
    * @param stress[in] stress tensor
    * @param d2sp[out] d2(stress_param[:])/d(stress)/d(stress)
    */
   virtual void d2stressparam_dstress(const RankTwoTensor & stress,
-                                     std::vector<RankFourTensor> & d2sp) const;
+                                     std::vector<RankFourTensor> & d2sp) const = 0;
 
   /// Sets _Eij and _En and _Cij
   virtual void setEffectiveElasticity(const RankFourTensor & Eijkl) = 0;

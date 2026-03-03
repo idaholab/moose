@@ -67,7 +67,7 @@ ElementSubdomainModifierBase::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "reinitialize_variables", {}, "Which variables to reinitialize when subdomain changes.");
-  MooseEnum reinit_strategy("IC POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEARBY", "IC");
+  MooseEnum reinit_strategy("IC POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEARBY NONE", "IC");
   params.addParam<std::vector<MooseEnum>>(
       "reinitialization_strategy",
       {reinit_strategy},
@@ -210,6 +210,15 @@ ElementSubdomainModifierBase::initialSetup()
       !isParamSetByUser("nearby_distance_threshold"))
     mooseError("The 'nearby_distance_threshold' parameter must be set when using the "
                "POLYNOMIAL_NEARBY reinitialization strategy.");
+
+  if (std::all_of(reinit_strategy_in.begin(),
+                  reinit_strategy_in.end(),
+                  [](const MooseEnum & val) { return val != "POLYNOMIAL_NEARBY"; }) &&
+      (isParamSetByUser("nearby_distance_threshold") ||
+       isParamSetByUser("nearby_kd_tree_leaf_max_size")))
+    mooseWarning("The 'nearby_distance_threshold' and 'nearby_kd_tree_leaf_max_size' parameters "
+                 "will be ignored because no 'reinitialization_strategy' is set to "
+                 "POLYNOMIAL_NEARBY.");
 
   if (reinit_strategy_in.size() == 1)
     _reinit_strategy.resize(_reinit_vars.size(), reinit_strategy_in[0].getEnum<ReinitStrategy>());
@@ -592,8 +601,9 @@ ElementSubdomainModifierBase::prepareVariableForReinitialization(const VariableN
 {
   switch (reinit_strategy)
   {
+    case ReinitStrategy::NONE:
     case ReinitStrategy::IC:
-      // No additional preparation needed for IC
+      // No additional preparation needed for IC and NONE strategies
       break;
     case ReinitStrategy::POLYNOMIAL_NEIGHBOR:
     case ReinitStrategy::POLYNOMIAL_WHOLE:
@@ -1108,6 +1118,9 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       }
       break;
     }
+    case ReinitStrategy::NONE:
+      // do nothing
+      break;
     default:
       mooseError("Unknown reinitialization strategy");
       break;
@@ -1221,6 +1234,7 @@ ElementSubdomainModifierBase::extrapolatePolynomial(const VariableName & var_nam
     return grad;
   };
 
+  std::vector<VariableName> var_names = {var_name};
   _fe_problem.projectFunctionOnCustomRange(
-      reinitializedElemRange(), poly_func, poly_func_grad, function_parameters, var_name);
+      reinitializedElemRange(), poly_func, poly_func_grad, function_parameters, var_names);
 }
