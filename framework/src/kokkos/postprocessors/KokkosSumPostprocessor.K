@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SumPostprocessor.h"
+#include "KokkosSumPostprocessor.h"
 
-registerMooseObject("ThermalHydraulicsApp", SumPostprocessor);
+registerMooseObject("MooseApp", KokkosSumPostprocessor);
 
 InputParameters
-SumPostprocessor::validParams()
+KokkosSumPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Sums the values of several postprocessors");
@@ -21,7 +21,7 @@ SumPostprocessor::validParams()
   return params;
 }
 
-SumPostprocessor::SumPostprocessor(const InputParameters & parameters)
+KokkosSumPostprocessor::KokkosSumPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters)
 {
   const std::vector<PostprocessorName> & pps_names =
@@ -31,20 +31,9 @@ SumPostprocessor::SumPostprocessor(const InputParameters & parameters)
 }
 
 void
-SumPostprocessor::initialize()
+KokkosSumPostprocessor::finalize()
 {
-}
-
-void
-SumPostprocessor::execute()
-{
-}
-
-PostprocessorValue
-SumPostprocessor::getValue() const
-{
-  Real sum = 0;
-  for (auto & v : _values)
-    sum += *v;
-  return sum;
+  _sum = 0;
+  for (const auto v : _values)
+    _sum += *v;
 }

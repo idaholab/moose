@@ -283,7 +283,7 @@ AttribThread::isEqual(const Attribute & other) const
 void
 AttribExecutionOrderGroup::initFrom(const MooseObject * obj)
 {
-  const auto * uo = dynamic_cast<const UserObject *>(obj);
+  const auto * uo = dynamic_cast<const UserObjectBase *>(obj);
   _val = uo ? uo->getParam<int>("execution_order_group") : 0;
 }
 bool
@@ -475,7 +475,7 @@ AttribInterfaces::initFrom(const MooseObject * obj)
 {
   _val = 0;
   // clang-format off
-  _val |= (unsigned int)Interfaces::UserObject                * (dynamic_cast<const UserObject *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::UserObject                * (dynamic_cast<const UserObjectBase *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::ElementUserObject         * (dynamic_cast<const ElementUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::SideUserObject            * (dynamic_cast<const SideUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::InternalSideUserObject    * (dynamic_cast<const InternalSideUserObject *>(obj) != nullptr);
