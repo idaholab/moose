@@ -43,9 +43,16 @@ Capability::Capability(const std::string_view name,
 bool
 Capability::hasEnumeration(const std::string & value) const
 {
-  if (_enumeration)
-    return _enumeration->count(value);
-  return true;
+  return _enumeration ? _enumeration->count(value) : true;
+}
+
+const std::set<std::string> &
+Capability::getEnumeration() const
+{
+  if (!_enumeration)
+    throw CapabilityException("Capability::getEnumeration(): Capability '" + getName() +
+                              "' does not have an enumeration");
+  return *_enumeration;
 }
 
 Capability &
@@ -92,6 +99,33 @@ Capability::setEnumeration(const std::set<std::string> & enumeration)
                               " value not within enumeration");
 
   return *this;
+}
+
+bool
+Capability::getBoolValue() const
+{
+  if (const auto bool_ptr = queryBoolValue())
+    return *bool_ptr;
+  throw CapabilityException("Capability::getBoolValue(): Capability " + toString() +
+                            " is not a bool");
+}
+
+int
+Capability::getIntValue() const
+{
+  if (const auto int_ptr = queryIntValue())
+    return *int_ptr;
+  throw CapabilityException("Capability::getIntValue(): Capability " + toString() +
+                            " is not an integer");
+}
+
+const std::string &
+Capability::getStringValue() const
+{
+  if (const auto string_ptr = queryStringValue())
+    return *string_ptr;
+  throw CapabilityException("Capability::getStringValue(): Capability " + toString() +
+                            " is not a string");
 }
 
 std::string
