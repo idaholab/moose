@@ -38,9 +38,6 @@ protected:
   /// The auxiliary system to whom we'll delegate the boundary variable dependency integrity check
   const AuxiliarySystem & _aux_sys;
 
-  /// Nodal auxiliary kernels acting on standard field variables
-  const ExecuteMooseObjectWarehouse<AuxKernel> & _nodal_aux;
-
   /// Nodal auxiliary kernels acting on vector field variables
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & _nodal_vec_aux;
 

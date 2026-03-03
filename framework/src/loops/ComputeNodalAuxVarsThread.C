@@ -22,10 +22,12 @@ Threads::spin_mutex ComputeNodalAuxVarsThread<AuxKernelType>::writable_variable_
 
 template <typename AuxKernelType>
 ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
-    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernelType> & storage)
+    FEProblemBase & fe_problem, const TheWarehouse::Query & query)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
-    _storage(storage)
+    // Note: the main query is only here to provide the cache. Maybe we should just pass a cache
+    _query(query),
+    _query_subdomain(_query)
 {
 }
 
@@ -35,7 +37,8 @@ ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(ComputeNodal
                                                                     Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
-    _storage(x._storage)
+    _query(x._query),
+    _query_subdomain(x._query_subdomain)
 {
 }
 
@@ -46,14 +49,13 @@ ComputeNodalAuxVarsThread<AuxKernelType>::subdomainChanged()
   std::set<TagID> needed_vector_tags;
   std::set<TagID> needed_matrix_tags;
 
-  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
-
   for (const auto & block : _block_ids)
   {
-    const auto iter = block_kernels.find(block);
+    std::vector<AuxKernelType *> block_kernels;
+    _query_subdomain.queryInto(block_kernels, _tid, block);
 
-    if (iter != block_kernels.end())
-      for (const auto & aux : iter->second)
+    if (block_kernels.size())
+      for (const auto & aux : block_kernels)
       {
         auto & matrix_tags = aux->getFEVariableCoupleableMatrixTags();
         needed_matrix_tags.insert(matrix_tags.begin(), matrix_tags.end());
@@ -83,17 +85,15 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
 
   _fe_problem.reinitNode(node, _tid);
 
-  // Get a map of all active block restricted AuxKernel objects
-  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
-
   // Loop over all SubdomainIDs for the current node, if an AuxKernel is active on this block then
   // compute it.
-  for (const auto & block : block_ids)
+  for (const auto & block : _block_ids)
   {
-    const auto iter = block_kernels.find(block);
+    std::vector<AuxKernelType *> block_kernels;
+    _query_subdomain.queryInto(block_kernels, _tid, block);
 
-    if (iter != block_kernels.end())
-      for (const auto & aux : iter->second)
+    if (block_kernels.size())
+      for (const auto & aux : block_kernels)
       {
         aux->compute();
         // This is the same conditional check that the aux kernel performs internally before calling
@@ -135,7 +135,14 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(_tid))
+    return;
+
+  std::vector<AuxKernelType *> all_kernels;
+  // clone the query until we have a const query, see #32362
+  // This is "general" execution ordering so we query for all subdomains
+  _query.clone().condition<AttribThread>(_tid).queryInto(all_kernels);
+  if (all_kernels.empty())
     return;
 
   const auto & console = _fe_problem.console();
@@ -144,7 +151,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() con
           << " on " << execute_on << std::endl;
   console << "[DBG] Ordering of the kernels on each block they are defined on:" << std::endl;
   // TODO Check that all objects are active at this point
-  console << _storage.activeObjectsToFormattedString() << std::endl;
+  printExecutionOrdering<AuxKernelType>(all_kernels, "auxiliary kernels");
 }
 
 template class ComputeNodalAuxVarsThread<AuxKernel>;

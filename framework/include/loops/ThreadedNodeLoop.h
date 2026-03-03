@@ -74,6 +74,22 @@ protected:
 
   /// Print information about the loop, mostly order of execution of objects
   virtual void printGeneralExecutionInformation() const {}
+
+  /**
+   * Routine to output the ordering of objects within a vector of pointers to these objects.
+   * These objects must implement the name() routine, and it must return a string or compatible
+   * type.
+   *
+   * @tparam T the object type
+   * @param objs the vector with all the objects (should be pointers)
+   * @param objects_type the name of the type of objects. Defaults to the CPP object name
+   * @param print_header whether to print a header about the timing of execution and the type of
+   * objects
+   */
+  template <typename T>
+  void printExecutionOrdering(const std::vector<T *> & objs,
+                              const bool print_header = true,
+                              const std::string & line_prefix = "[DBG]") const;
 };
 
 template <typename RangeType, typename IteratorType>
@@ -141,4 +157,28 @@ template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::postNode(IteratorType & /*node_it*/)
 {
+}
+
+template <typename RangeType, typename IteratorType>
+template <typename T>
+void
+ThreadedNodeLoop<RangeType, IteratorType>::printExecutionOrdering(
+    const std::vector<T *> & objs, const bool print_header, const std::string & line_prefix) const
+{
+  if (!objs.size())
+    return;
+
+  auto & console = _fe_problem.console();
+  const auto objects_type = MooseUtils::prettyCppType(objs[0]);
+  std::vector<MooseObject *> moose_objs;
+  for (auto obj_ptr : objs)
+    moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
+  const auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
+
+  // Print string with a DBG prefix and with sufficient line breaks
+  std::string message = print_header ? "Executing " + objects_type + " on " +
+                                           _fe_problem.getCurrentExecuteOnFlag().name() + "\n"
+                                     : "";
+  message += (print_header ? "Order of execution:\n" : "") + names;
+  console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
 }
