@@ -10,17 +10,17 @@
 #pragma once
 
 #include "KokkosPostprocessor.h"
-#include "KokkosSideReducer.h"
+#include "KokkosGeneralUserObject.h"
 
 namespace Moose::Kokkos
 {
 
-class SidePostprocessor : public SideReducer, public Postprocessor
+class GeneralPostprocessor : public GeneralUserObject, public Postprocessor
 {
 public:
   static InputParameters validParams();
 
-  SidePostprocessor(const InputParameters & parameters);
+  GeneralPostprocessor(const InputParameters & parameters);
 
   /**
    * We provide default finalize() as getValue() has been abused to perform the final aggregation
@@ -29,9 +29,6 @@ public:
    * final aggregated value, as getValue() is designed to be a const method.
    */
   virtual void finalize() override {}
-
-  // Disambiguation with FunctorBase::operator()
-  using SideReducer::operator();
 };
 
 } // namespace Moose::Kokkos

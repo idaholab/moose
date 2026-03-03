@@ -9,26 +9,25 @@
 
 #pragma once
 
-#include "GeneralPostprocessor.h"
+#include "KokkosGeneralPostprocessor.h"
 
 /**
  * Computes a sum of postprocessor values
- *
- * TOOD: Generalize to take a vector of PPS names and possibly mode to MOOSE
  */
-class SumPostprocessor : public GeneralPostprocessor
+class KokkosSumPostprocessor : public Moose::Kokkos::GeneralPostprocessor
 {
 public:
-  SumPostprocessor(const InputParameters & parameters);
+  static InputParameters validParams();
+  KokkosSumPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual PostprocessorValue getValue() const override;
+  virtual void initialize() override {}
+  virtual void compute() override {}
+  virtual void finalize() override;
+  virtual PostprocessorValue getValue() const override { return _sum; }
 
 protected:
   /// Postprocessors to add up
   std::vector<const PostprocessorValue *> _values;
-
-public:
-  static InputParameters validParams();
+  /// The sum value
+  Real _sum;
 };
