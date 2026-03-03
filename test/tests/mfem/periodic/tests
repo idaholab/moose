@@ -1,5 +1,5 @@
 [Tests]
-  design = 'syntax/Problem/index.md'
+  issues = '#32075'
   [MFEMPeriodicMesh]
     type = XMLDiff
     input = periodic_mesh.i
