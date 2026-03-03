@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, json
+import os
 from threading import Lock
 from typing import Optional
+
 from TestHarness import OutputInterface, util
 
 
@@ -41,6 +42,12 @@ class Runner(OutputInterface):
         # jobs always have a file output, so we want to store
         # their output separately
         self.run_output = OutputInterface()
+
+    @property
+    def pid(self) -> Optional[int]:
+        """Get the pid of the running local process, if any."""
+
+        return None
 
     @property
     def max_memory(self) -> Optional[int]:

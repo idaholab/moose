@@ -1008,18 +1008,22 @@ class TestHarness:
                         )
                     )
 
-            # Heaviest jobs by memory; disabled for now, see #32243
-            # heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
-            # if heaviest_jobs:
-            #     print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
-            #     for job in heaviest_jobs:
-            #         print(util.formatJobResult(
-            #             job,
-            #             self.options,
-            #             caveats=True,
-            #             timing=True,
-            #             memory_per_proc=True,
-            #         ))
+            # Heaviest jobs by memory
+            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
+            if heaviest_jobs:
+                print(
+                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/proc)")
+                )
+                for job in heaviest_jobs:
+                    print(
+                        util.formatJobResult(
+                            job,
+                            self.options,
+                            caveats=True,
+                            timing=True,
+                            memory_per_proc=True,
+                        )
+                    )
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:

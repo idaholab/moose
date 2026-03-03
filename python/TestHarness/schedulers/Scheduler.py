@@ -6,16 +6,23 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import sys
-from TestHarness.JobDAG import JobDAG
-from TestHarness.StatusSystem import StatusSystem
-from FactorySystem.MooseObject import MooseObject
-import os, traceback
+import threading
+import traceback
+from multiprocessing.pool import ThreadPool
 from time import sleep
 from timeit import default_timer as clock
-from multiprocessing.pool import ThreadPool
-import threading  # for thread locking and thread timers
+from typing import TYPE_CHECKING, Optional
+
 import pyhit
+from FactorySystem.MooseObject import MooseObject
+
+from TestHarness.JobDAG import JobDAG
+from TestHarness.StatusSystem import StatusSystem
+
+if TYPE_CHECKING:
+    from TestHarness.utils.monitor_processes import MonitorProcesses
 
 
 class SchedulerError(Exception):
@@ -55,6 +62,9 @@ class Scheduler(MooseObject):
 
     # This is what will be checked for when we look for valid schedulers
     IS_SCHEDULER = True
+
+    MONITOR_PROCESSES = True
+    """Whether or not this Scheduler should monitor process usage."""
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -124,6 +134,18 @@ class Scheduler(MooseObject):
         self.report_long_jobs = True
         # Whether or not to enforce the timeout of jobs
         self.enforce_timeout = True
+
+        self.monitor_processes: Optional[MonitorProcesses] = None
+        """The MonitorProcess instance for monitoring process CPU usage, if enabled."""
+
+        # Setup MonitorProcesses if enabled and psutil is available
+        if self.MONITOR_PROCESSES:
+            from importlib.util import find_spec
+
+            if find_spec("psutil") is not None:
+                from TestHarness.utils.monitor_processes import MonitorProcesses
+
+                self.monitor_processes = MonitorProcesses()
 
     def getErrorState(self):
         """
@@ -233,6 +255,35 @@ class Scheduler(MooseObject):
                 return False
         return True
 
+    def monitorProcesses(self):
+        """Monitor the running job processes, if enabled."""
+
+        # Process monitoring is disabled
+        if self.monitor_processes is None:
+            return
+
+        # Mapping of pid -> Job
+        pid_to_job: dict = {}
+
+        # Get the PIDs of the current running jobs so
+        # that they can be sampled
+        with self.__bank_lock:
+            # We're cleaning up
+            if not self.__job_bank:
+                return
+
+            for job in self.__job_bank:
+                if (runner := job.getRunner()) and (pid := runner.pid):
+                    pid_to_job[pid] = job
+
+        # Updated the running jobs
+        self.monitor_processes.update(pid_to_job.keys())
+
+        # Update max memory for each running job
+        for pid, job in pid_to_job.items():
+            if (monitored_process := self.monitor_processes.get(pid)) is not None:
+                job.getRunner().setMaxMemory(monitored_process.max_memory)
+
     def waitFinish(self):
         """
         Inform the Scheduler to begin running. Block until all jobs finish.
@@ -246,6 +297,7 @@ class Scheduler(MooseObject):
                 if not self.isRunning():
                     break
                 sleep(0.1)
+                self.monitorProcesses()
 
             error_state = self.getErrorState()
 
