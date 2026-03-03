@@ -344,11 +344,12 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
 
           result.capability_names.insert(capability.getName());
 
-          if (const auto bool_ptr = capability.queryBoolValue())
-            return *bool_ptr ? (negated ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS)
-                             : (negated ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL);
+          const auto bool_to_certain = [&negated](const bool val)
+          { return (val ^ negated) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL; };
 
-          return negated ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return bool_to_certain(*bool_ptr);
+          return bool_to_certain(true);
         }
 
         add_unknown_capability(identifier);
