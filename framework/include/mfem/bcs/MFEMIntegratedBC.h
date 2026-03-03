@@ -27,6 +27,12 @@ public:
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
+  /// Create MFEM DG integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() { return nullptr; }
+
+  /// Create MFEM DG integrator to apply to the LHS of the weak form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createFaceLFIntegrator() { return nullptr; }
+
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
