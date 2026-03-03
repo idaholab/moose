@@ -91,13 +91,13 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
   auto & record = _kokkos_prop_records[prop_name];
   auto & blocks = declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
-  for (const auto & it : record.dims)
-    if (it.second.size() != dims.size())
+  for (const auto & [_, record_dims] : record.dims)
+    if (record_dims.size() != dims.size())
     {
       std::stringstream ss;
 
       ss << "The declared " << dims.size() << "D Kokkos material property '" << prop_name << "'";
-      ss << " was already declared as a " << it.second.size() << "D property.";
+      ss << " was already declared as a " << record_dims.size() << "D property.";
 
       mooseError(ss.str());
     }

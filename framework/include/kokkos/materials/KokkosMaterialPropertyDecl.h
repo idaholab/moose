@@ -110,56 +110,24 @@ public:
    * Get the property name
    * @returns The property name
    */
-  std::string name() const
-  {
-    if (!_record)
-      mooseError("Cannot get the name of an uninitialized or default material property.");
-    else
-      return _record->name;
-  }
+  const std::string & name() const;
   /**
    * Get the data type
    * @returns The demangled data type name
    */
-  std::string type() const
-  {
-    if (!_record)
-      mooseError("Cannot get the type of an uninitialized or default material property.");
-    else
-      return _record->type;
-  }
+  const std::string & type() const;
   /**
    * Get the dimension
    * @returns The dimension
    */
-  unsigned int dim() const
-  {
-    if (!_record || !_record->dims.size())
-      mooseError("Cannot get the dimension of an uninitialized or default material property.");
-    else
-      return _record->dims.begin()->second.size();
-  }
+  unsigned int dim() const;
   /**
    * Get the size of a dimension
    * @param subdomain The MOOSE subdomain ID
    * @param i The dimension index
    * @returns The size of the dimension
    */
-  unsigned int dim(SubdomainID subdomain, unsigned int i) const
-  {
-    const unsigned int D = dim();
-
-    if (i >= D)
-      mooseError("Cannot get the size of ",
-                 i,
-                 "-th dimension for the ",
-                 D,
-                 "D material property '",
-                 name(),
-                 "'.");
-
-    return libmesh_map_find(_record->dims, subdomain)[i];
-  }
+  unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
 
   /**
    * Get the property type index for load/store functions
@@ -214,6 +182,50 @@ protected:
    */
   PropertyConstantOption _constant_option = PropertyConstantOption::NONE;
 };
+
+inline const std::string &
+MaterialPropertyBase::name() const
+{
+  if (!_record)
+    mooseError("Cannot get the name of an uninitialized or default material property.");
+  else
+    return _record->name;
+}
+
+inline const std::string &
+MaterialPropertyBase::type() const
+{
+  if (!_record)
+    mooseError("Cannot get the type of an uninitialized or default material property.");
+  else
+    return _record->type;
+}
+
+inline unsigned int
+MaterialPropertyBase::dim() const
+{
+  if (!_record || !_record->dims.size())
+    mooseError("Cannot get the dimension of an uninitialized or default material property.");
+  else
+    return _record->dims.begin()->second.size();
+}
+
+inline unsigned int
+MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
+{
+  const unsigned int D = dim();
+
+  if (i >= D)
+    mooseError("Cannot get the size of ",
+               i,
+               "-th dimension for the ",
+               D,
+               "D material property '",
+               name(),
+               "'.");
+
+  return libmesh_map_find(_record->dims, subdomain)[i];
+}
 
 template <typename T, unsigned int dimension>
 void propertyStore(std::ostream & stream, void * prop);
