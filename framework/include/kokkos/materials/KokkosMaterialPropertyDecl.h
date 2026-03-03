@@ -66,9 +66,9 @@ struct PropRecord
    */
   unsigned int id = libMesh::invalid_uint;
   /**
-   * Size of each dimension
+   * Size of each dimension of each subdomain
    */
-  std::vector<unsigned int> dims;
+  std::unordered_map<SubdomainID, std::vector<unsigned int>> dims;
   /**
    * Flag whether this property is a face property
    */
@@ -110,34 +110,55 @@ public:
    * Get the property name
    * @returns The property name
    */
-  std::string name() const { return _record->name; }
+  std::string name() const
+  {
+    if (!_record)
+      mooseError("Cannot get the name of an uninitialized or default material property.");
+    else
+      return _record->name;
+  }
   /**
    * Get the data type
    * @returns The demangled data type name
    */
-  std::string type() const { return _record->type; }
+  std::string type() const
+  {
+    if (!_record)
+      mooseError("Cannot get the type of an uninitialized or default material property.");
+    else
+      return _record->type;
+  }
   /**
    * Get the dimension
    * @returns The dimension
    */
-  unsigned int dim() const { return _record->dims.size(); }
+  unsigned int dim() const
+  {
+    if (!_record || !_record->dims.size())
+      mooseError("Cannot get the dimension of an uninitialized or default material property.");
+    else
+      return _record->dims.begin()->second.size();
+  }
   /**
    * Get the size of a dimension
+   * @param subdomain The MOOSE subdomain ID
    * @param i The dimension index
    * @returns The size of the dimension
    */
-  unsigned int dim(unsigned int i) const
+  unsigned int dim(SubdomainID subdomain, unsigned int i) const
   {
-    if (i >= dim())
-      mooseError("Cannot query the size of ",
+    const unsigned int D = dim();
+
+    if (i >= D)
+      mooseError("Cannot get the size of ",
                  i,
                  "-th dimension for the ",
-                 dim(),
+                 D,
                  "D material property '",
                  name(),
                  "'.");
 
-    return _record->dims.at(i);
+    return libmesh_map_find(_record->dims, subdomain)[i];
   }
 
   /**

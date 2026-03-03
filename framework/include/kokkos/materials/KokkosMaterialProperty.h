@@ -126,7 +126,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
     std::vector<dof_id_type> n;
 
     for (unsigned int i = 0; i < dimension; ++i)
-      n.push_back(_record->dims[i]);
+      n.push_back(libmesh_map_find(_record->dims, subdomain)[i]);
 
     if (_constant_option == PropertyConstantOption::NONE)
       n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
