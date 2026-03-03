@@ -35,51 +35,63 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
 void
 MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
 {
-  for (unsigned v = 0; v < numToVar(); ++v)
-    setMFEMGridFunctionValuesFromlibMesh(v, getActiveToProblem());
+  for (unsigned var_index = 0; var_index < numToVar(); ++var_index)
+  {
+    // Generate list of points where the grid function will be evaluated
+    mfem::ParGridFunction & to_gf =
+        *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(var_index));
+    mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
+    mfem::Vector vxyz;
+    mfem::Ordering::Type point_ordering;
+    _mfem_projector.extractNodePositions(to_pfespace, vxyz, point_ordering);
+
+    // Populate outgoing point locations map between processor and points vector for libMesh to use
+    // in interpolation
+    std::map<processor_id_type, std::vector<Point>> outgoing_points;
+    const int NE = to_pfespace.GetParMesh()->GetNE();
+    const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
+    const int dim = to_pfespace.GetParMesh()->Dimension();
+    const int nodes_cnt = vxyz.Size() / dim;
+    const int to_gf_ncomp = to_gf.VectorDim();
+    for (int i = 0; i < nodes_cnt * to_gf_ncomp; i++)
+    {
+      for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
+      {
+        if (dim == 3)
+        {
+          const mfem::Vector transformed_node(
+              {vxyz[i], vxyz[i + NE * nsp], vxyz[i + 2 * NE * nsp]});
+          outgoing_points[i_proc].push_back(
+              Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
+        }
+        else if (dim == 2)
+        {
+          const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp]});
+          outgoing_points[i_proc].push_back(
+              Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
+        }
+        else
+          mooseError("Target finite element space must be 2D or 3D.");
+      }
+    }
+
+    // Perform interpolation of libMesh variable at specified points
+    mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
+    interpolatelibMeshVariable(outgoing_points, var_index, interp_vals);
+
+    // Project DoFs to MFEM GridFunction
+    mfem::Ordering::Type libmesh_interp_ordering(mfem::Ordering::Type::byNODES);
+    _mfem_projector.projectNodalValues(interp_vals, libmesh_interp_ordering, to_gf);
+  }
 }
 
 void
-MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMesh(
-    const unsigned int var_index, MFEMProblem & to_problem)
+MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
+    std::map<processor_id_type, std::vector<Point>> & outgoing_points,
+    const unsigned int var_index,
+    mfem::Vector & interp_vals)
 {
-  // Generate list of points where the grid function will be evaluated
-  mfem::ParGridFunction & to_gf =
-      *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
-  mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
-  mfem::Vector vxyz;
-  mfem::Ordering::Type point_ordering;
-  _mfem_projector.extractNodePositions(to_pfespace, vxyz, point_ordering);
-
-  // Point locations needed to send to from-domain
-  // processor to points
-  const int NE = to_pfespace.GetParMesh()->GetNE();
-  const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
-  const int dim = to_pfespace.GetParMesh()->Dimension();
-  const int nodes_cnt = vxyz.Size() / dim;
-  const int to_gf_ncomp = to_gf.VectorDim();
-  std::map<processor_id_type, std::vector<Point>> outgoing_points;
-
-  for (int i = 0; i < nodes_cnt * to_gf_ncomp; i++)
-  {
-    for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
-    {
-      if (dim == 3)
-      {
-        const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp], vxyz[i + 2 * NE * nsp]});
-        outgoing_points[i_proc].push_back(
-            Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
-      }
-      else
-      {
-        const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp]});
-        outgoing_points[i_proc].push_back(
-            Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
-      }
-    }
-  }
   // Evaluate source grid function at target points
-  mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
   std::vector<libMesh::MeshFunction> local_meshfuns;
   local_meshfuns.clear();
   local_meshfuns.reserve(_from_problems.size());
@@ -100,15 +112,9 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
     local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
   }
 
-  /**
-   * Gather all of the evaluations, pick out the best ones for each point, and
-   * apply them to the solution vector.  When we are transferring from
-   * multiapps, there may be multiple overlapping apps for a particular point.
-   * In that case, we'll try to use the value from the app with the lowest id.
-   */
-
-  // Fill values and app ids for incoming points
-  // We are responsible to compute values for these incoming points
+  // Gather all of the evaluations, pick out the best ones for each point, and apply them to the
+  // solution vector. Fill values and app ids for incoming points We are responsible to compute
+  // values for these incoming points
   auto gather_functor =
       [this,
        &local_meshfuns](processor_id_type /*pid*/,
@@ -147,7 +153,6 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
       }
     }
   };
-
   // Incoming values and APP ids for outgoing points
   std::map<processor_id_type, std::vector<std::pair<Real, unsigned int>>> incoming_vals_ids;
   // Copy data out to incoming_vals_ids
@@ -166,11 +171,11 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
   };
 
   // We assume incoming_vals_ids is ordered in the same way as outgoing_points
-  // Hopefully, pull_parallel_vector_data will not mess up this
   const std::pair<Real, unsigned int> * ex = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
       comm(), outgoing_points, gather_functor, action_functor, ex);
 
+  // Set interpolated field values at points on local processor
   for (int i = 0; i < interp_vals.Size(); i++)
   {
     for (auto & group : incoming_vals_ids)
@@ -181,10 +186,6 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::setMFEMGridFunctionValuesFromlibMe
       interp_vals[i] = val;
     }
   }
-
-  // Project DoFs to MFEM GridFunction
-  mfem::Ordering::Type libmesh_interp_ordering(mfem::Ordering::Type::byNODES);
-  _mfem_projector.projectNodalValues(interp_vals, libmesh_interp_ordering, to_gf);
 }
 
 #endif

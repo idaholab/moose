@@ -27,13 +27,13 @@ public:
   void checkSiblingsTransferSupported() const override;
 
   /// Getter for source variable name
-  auto const & getFromVarName(int i) { return _from_var_names.at(i); }
+  auto const & getFromVarName(int i) const { return _from_var_names.at(i); }
   /// Getter for destination variable name
-  auto const & getToVarName(int i) { return _to_var_names.at(i); }
+  auto const & getToVarName(int i) const { return _to_var_names.at(i); }
   /// Return the number of source variables
-  auto const numFromVar() { return _from_var_names.size(); }
+  auto numFromVar() const { return _from_var_names.size(); }
   /// Return for the number of destination variables
-  auto const numToVar() { return _to_var_names.size(); }
+  auto numToVar() const { return _to_var_names.size(); }
 
 protected:
   /// Transfer all variables from active source problem to active destination problem.

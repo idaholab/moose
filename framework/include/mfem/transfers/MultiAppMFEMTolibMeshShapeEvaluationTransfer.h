@@ -28,11 +28,18 @@ protected:
   /// Object to perform pointwise interpolation of source MFEM GridFunctions.
   mfem::FindPointsGSLIB _mfem_interpolator;
 
-  /// Transfer all variables from active source problem to active destination problem.
-  void transferVariables() override;
+  /// Extract all target points of the destination libMesh variable, needed to set DoFs in transfer.
+  void extractlibMeshNodePositions(libMesh::System & to_sys,
+                                   const MooseVariableFieldBase & to_var,
+                                   std::vector<Point> & outgoing_libmesh_points);
 
-  /// Set libMesh variable corresponding to var_index from MFEM GridFunction
-  void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
+  /// Set DoFs of destination libMesh variable via projection, using a vector of interpolated values.
+  void projectlibMeshNodalValues(libMesh::System & to_sys,
+                                 const MooseVariableFieldBase & to_var,
+                                 mfem::Vector & interp_vals);
+
+  /// Transfer all variables from active MFEM source problem to active libMesh destination problem.
+  void transferVariables() override;
 
   /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override
