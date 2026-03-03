@@ -165,8 +165,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
       auto & from_var =
           getActiveFromProblem().getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
       from_var.ParFESpace()->GetParMesh()->EnsureNodes();
-      _mfem_interpolator.SetDefaultInterpolationValue(
-          std::numeric_limits<mfem::real_t>::infinity());
+      _mfem_interpolator.SetDefaultInterpolationValue(getMFEMOutOfMeshValue());
       _mfem_interpolator.Interpolate(*from_var.ParFESpace()->GetParMesh(),
                                      outgoing_mfem_points,
                                      from_var,

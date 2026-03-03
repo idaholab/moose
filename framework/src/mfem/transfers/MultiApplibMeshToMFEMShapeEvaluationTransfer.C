@@ -109,7 +109,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
     local_meshfuns.emplace_back(
         from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
     local_meshfuns.back().init();
-    local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
+    local_meshfuns.back().enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
   }
 
   // Gather all of the evaluations, pick out the best ones for each point, and apply them to the
@@ -121,7 +121,8 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
                         const std::vector<Point> & incoming_points,
                         std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
   {
-    vals_ids_for_incoming_points.resize(incoming_points.size(), std::make_pair(OutOfMeshValue, 0));
+    vals_ids_for_incoming_points.resize(incoming_points.size(),
+                                        std::make_pair(getMFEMOutOfMeshValue(), 0));
     for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
     {
       Point pt = incoming_points[i_pt];
@@ -130,7 +131,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
       // the quadrature point.
       for (MooseIndex(_from_problems.size()) i_from = 0;
            i_from < _from_problems.size() &&
-           vals_ids_for_incoming_points[i_pt].first == OutOfMeshValue;
+           vals_ids_for_incoming_points[i_pt].first == getMFEMOutOfMeshValue();
            ++i_from)
       {
         const auto from_global_num =
@@ -181,7 +182,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
     for (auto & group : incoming_vals_ids)
     {
       double val = group.second[i].first;
-      if (val == std::numeric_limits<Real>::infinity())
+      if (val == getMFEMOutOfMeshValue())
         continue;
       interp_vals[i] = val;
     }
