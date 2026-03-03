@@ -14,6 +14,12 @@
 
 #include <map>
 
+/// Type of the key for the batch index map, which depends on whether this is an ElementUserObject or a SideUserObject
+template <typename Base>
+using BatchIndexKey = std::conditional_t<std::is_same_v<Base, ElementUserObject>,
+                                         dof_id_type,
+                                         std::pair<dof_id_type, unsigned int>>;
+
 /**
  * NEML2BatchIndexGenerator iterates over the mesh and generates a map from element ID to batch
  * index which is used by NEML2ModelExecutor for transfer data between MOOSE and NEML2.
@@ -54,10 +60,10 @@ protected:
   using Base::_qrule;
 
   /// Get the index for the current element or side
-  dof_id_type currentIndex();
+  BatchIndexKey<Base> currentIndex();
 
   /// Get the batch index for the given index
-  std::size_t getBatchIndexImpl(dof_id_type idx) const;
+  std::size_t getBatchIndexImpl(const BatchIndexKey<Base> &) const;
 
   /// Whether the batch index map is outdated
   bool _outdated;
@@ -66,14 +72,10 @@ protected:
   std::size_t _batch_index;
 
   /// Map from element IDs to batch indices
-  std::map<dof_id_type, std::size_t> _elem_to_batch_index;
+  std::map<BatchIndexKey<Base>, std::size_t> _elem_to_batch_index;
 
   /// cache the index for the current element
-  mutable std::pair<dof_id_type, std::size_t> _elem_to_batch_index_cache;
-
-private:
-  /// Number of sides per element
-  unsigned int _nside;
+  mutable std::pair<BatchIndexKey<Base>, std::size_t> _elem_to_batch_index_cache;
 };
 
 using NEML2BatchIndexGenerator = NEML2BatchIndexGeneratorTmpl<ElementUserObject>;

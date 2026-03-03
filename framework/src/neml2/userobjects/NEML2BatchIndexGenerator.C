@@ -33,7 +33,7 @@ NEML2BatchIndexGeneratorTmpl<Base>::validParams()
 
 template <class Base>
 NEML2BatchIndexGeneratorTmpl<Base>::NEML2BatchIndexGeneratorTmpl(const InputParameters & params)
-  : Base(params), _outdated(true), _nside(0)
+  : Base(params), _outdated(true)
 {
 }
 
@@ -55,7 +55,12 @@ NEML2BatchIndexGeneratorTmpl<Base>::initialize()
     return;
 
   _elem_to_batch_index.clear();
-  _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
+
+  if constexpr (std::is_same_v<Base, ElementUserObject>)
+    _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
+  else
+    _elem_to_batch_index_cache = {{libMesh::invalid_uint, 0}, 0};
+
   _batch_index = 0;
 }
 
@@ -86,8 +91,8 @@ NEML2BatchIndexGeneratorTmpl<Base>::threadJoin(const UserObject & uo)
   const auto & m2n = static_cast<const NEML2BatchIndexGeneratorTmpl<Base> &>(uo);
 
   // append and renumber maps
-  for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
-    _elem_to_batch_index[elem_id] = _batch_index + batch_index;
+  for (const auto & [key, batch_index] : m2n._elem_to_batch_index)
+    _elem_to_batch_index[key] = _batch_index + batch_index;
 
   _batch_index += m2n._batch_index;
 }
@@ -100,22 +105,17 @@ NEML2BatchIndexGeneratorTmpl<Base>::finalize()
 }
 
 template <>
-dof_id_type
+BatchIndexKey<ElementUserObject>
 NEML2BatchIndexGeneratorTmpl<ElementUserObject>::currentIndex()
 {
   return _current_elem->id();
 }
 
 template <>
-dof_id_type
+BatchIndexKey<SideUserObject>
 NEML2BatchIndexGeneratorTmpl<SideUserObject>::currentIndex()
 {
-  if (_nside == 0)
-    _nside = _current_elem->n_sides();
-  else if (_current_elem->n_sides() != _nside)
-    mooseError("Number of sides per element must be the same for all elements");
-
-  return _current_elem->id() * _nside + _current_side;
+  return {_current_elem->id(), _current_side};
 }
 
 template <class Base>
@@ -131,12 +131,12 @@ template <typename B>
 std::enable_if_t<std::is_same_v<B, SideUserObject>, std::size_t>
 NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id, unsigned int side) const
 {
-  return getBatchIndexImpl(elem_id * _nside + side);
+  return getBatchIndexImpl({elem_id, side});
 }
 
 template <class Base>
 std::size_t
-NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndexImpl(dof_id_type idx) const
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndexImpl(const BatchIndexKey<Base> & idx) const
 {
   // return cached map lookup if applicable
   if (_elem_to_batch_index_cache.first == idx)
