@@ -38,7 +38,15 @@ StitchMeshGenerator::validParams()
       "subdomain_remapping",
       true,
       "Treat input subdomain names as primary, preserving them and remapping IDs as needed");
-
+  params.addParam<bool>(
+      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
+  params.addParam<bool>(
+      "enforce_all_nodes_match_on_boundaries",
+      false,
+      "Whether to have the stitcher be very picky about the nodes being stitched.");
+  params.addParam<bool>("merge_boundary_nodes_all_or_nothing",
+                        false,
+                        "Whether the stitcher is set to merge all nodes or none.");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
@@ -180,8 +188,10 @@ StitchMeshGenerator::generate()
                         _clear_stitched_boundary_ids,
                         getParam<bool>("verbose_stitching"),
                         use_binary_search,
-                        /*enforce_all_nodes_match_on_boundaries=*/false,
-                        /*merge_boundary_nodes_all_or_nothing=*/false,
+                        /*enforce_all_nodes_match_on_boundaries=*/
+                        getParam<bool>("enforce_all_nodes_match_on_boundaries"),
+                        /*merge_boundary_nodes_all_or_nothing=*/
+                        getParam<bool>("merge_boundary_nodes_all_or_nothing"),
                         getParam<bool>("subdomain_remapping"));
 
     if (_merge_boundaries_with_same_name)
