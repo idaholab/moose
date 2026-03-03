@@ -16,6 +16,10 @@
 #include "MFEMLinearElasticityKernel.h"
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
+#include "MFEMMixedGradGradKernel.h"
+#include "MFEMMixedScalarWeakCurlKernel.h"
+#include "MFEMMixedVectorMassKernel.h"
+#include "MFEMMixedVectorWeakDivergenceKernel.h"
 #include "MFEMVectorDomainLFKernel.h"
 #include "MFEMVectorFEDomainLFKernel.h"
 #include "MFEMVectorFEMassKernel.h"
@@ -226,6 +230,105 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::MixedScalarCurlIntegrator *>(kernel.createBFIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMMixedGradGradKernel creates an mfem::MixedGradGradIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMMixedGradGradKernel)
+{
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMMixedGradGradKernel");
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  MFEMMixedGradGradKernel & kernel =
+      addObject<MFEMMixedGradGradKernel>("MFEMMixedGradGradKernel", "kernel1", kernel_params);
+
+  // Test the trial variable name is different from the test variable name
+  const std::string trial_name = kernel.getTrialVariableName();
+  EXPECT_NE(trial_name, kernel.getTestVariableName());
+  EXPECT_EQ(trial_name, "trial_variable_name");
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::MixedGradGradIntegrator *>(kernel.createBFIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMMixedScalarWeakCurlKernel creates an mfem::MixedScalarWeakCurlIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMMixedScalarWeakCurlKernel)
+{
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarWeakCurlKernel");
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  MFEMMixedScalarWeakCurlKernel & kernel = addObject<MFEMMixedScalarWeakCurlKernel>(
+      "MFEMMixedScalarWeakCurlKernel", "kernel1", kernel_params);
+
+  // Test the trial variable name is different from the test variable name
+  const std::string trial_name = kernel.getTrialVariableName();
+  EXPECT_NE(trial_name, kernel.getTestVariableName());
+  EXPECT_EQ(trial_name, "trial_variable_name");
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator =
+      dynamic_cast<mfem::MixedScalarWeakCurlIntegrator *>(kernel.createBFIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMMixedVectorMassKernel creates an mfem::MixedVectorMassIntegrator successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMMixedVectorMassKernel)
+{
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorMassKernel");
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  MFEMMixedVectorMassKernel & kernel =
+      addObject<MFEMMixedVectorMassKernel>("MFEMMixedVectorMassKernel", "kernel1", kernel_params);
+
+  // Test the trial variable name is different from the test variable name
+  const std::string trial_name = kernel.getTrialVariableName();
+  EXPECT_NE(trial_name, kernel.getTestVariableName());
+  EXPECT_EQ(trial_name, "trial_variable_name");
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator = dynamic_cast<mfem::MixedVectorMassIntegrator *>(kernel.createBFIntegrator());
+  ASSERT_NE(integrator, nullptr);
+  delete integrator;
+}
+
+/**
+ * Test MFEMMixedVectorWeakDivergenceKernel creates an mfem::MixedVectorWeakDivergenceIntegrator
+ * successfully.
+ */
+TEST_F(MFEMKernelTest, MFEMMixedVectorWeakDivergenceKernel)
+{
+  // Construct kernel
+  InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorWeakDivergenceKernel");
+  kernel_params.set<VariableName>("variable") = "test_variable_name";
+  kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  MFEMMixedVectorWeakDivergenceKernel & kernel = addObject<MFEMMixedVectorWeakDivergenceKernel>(
+      "MFEMMixedVectorWeakDivergenceKernel", "kernel1", kernel_params);
+
+  // Test the trial variable name is different from the test variable name
+  const std::string trial_name = kernel.getTrialVariableName();
+  EXPECT_NE(trial_name, kernel.getTestVariableName());
+  EXPECT_EQ(trial_name, "trial_variable_name");
+
+  // Test MFEMKernel returns an integrator of the expected type
+  auto integrator =
+      dynamic_cast<mfem::MixedVectorWeakDivergenceIntegrator *>(kernel.createBFIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
 }
