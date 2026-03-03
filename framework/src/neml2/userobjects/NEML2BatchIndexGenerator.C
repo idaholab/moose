@@ -145,7 +145,12 @@ NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndexImpl(const BatchIndexKey<Base> 
   // else, search the map
   const auto it = _elem_to_batch_index.find(idx);
   if (it == _elem_to_batch_index.end())
-    mooseError("No batch index found for element id ", idx);
+  {
+    if constexpr (std::is_same_v<Base, ElementUserObject>)
+      mooseError("No batch index found for element id ", idx);
+    else
+      mooseError("No batch index found for element id ", idx.first, " and side ", idx.second);
+  }
   _elem_to_batch_index_cache = *it;
   return it->second;
 }
