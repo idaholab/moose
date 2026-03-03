@@ -81,17 +81,25 @@ In addition to `MPI_Abort`, some other useful breakpoints are
 
 It is oftentimes preferable to set these breakpoints in an "init" file once and for all. This is useful to avoid having to repeatedly setting the same breakpoints manually in every debugging session and is critical when starting debugging sessions in parallel with a large number of MPI processes (see for example [#actually-parallel-debugging]).
 
-The user-level init files are located at `$HOME/.gdbinit` for `gdb`, and at `$HOME/.lldbinit` for `lldb`. You can create an init file if one does not exist. A common init file incorporating the above breakpoints would look like:
+The user-level init files are located at `$HOME/.gdbinit` for `gdb`, and at `$HOME/.lldbinit` for `lldb`. You can create an init file if one does not exist.
+
+For `gdb`, the following settings are often useful:
 
 ```
 set breakpoint pending on
 set pagination off
 set debuginfod enabled off
+```
+
+Note that the above `set ...` commands are `gdb`-specific and will produce `invalid command` in `lldb`.
+
+The following breakpoint commands (specific to the MOOSE stack) can be used in both init files:
+
+```
 b MPI_Abort
 b PetscError
 b TIMPI::report_error
 b libMesh::MacroFunctions::report_error
-~
 ```
 
 For users using advanced tooling, such as UBSanitizer, AddressSanitizer, and ThreadSanitizer, the following breakpoints may come in handy:
