@@ -79,6 +79,12 @@ protected:
    */
   virtual void computeQpOffDiagJacobian(unsigned int /*jvar*/) {}
 
+  /**
+   * Add a Jacobian entry for the current nodal kernel contribution.
+   * @param i Component index for the kernel variable (row)
+   * @param j Component index for the coupled variable (column)
+   * @param value Jacobian entry value for this component pair
+   */
   void setJacobian(unsigned int i, unsigned int j, Real value);
 
   /// variable this works on
