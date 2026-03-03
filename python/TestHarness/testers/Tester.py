@@ -104,7 +104,9 @@ class Tester(MooseObject, OutputInterface):
             False,
             "Allow all tests in test spec file to run in parallel (adheres to prereq rules).",
         )
-
+        params.addParam(
+            "min_slots", 1, "The minimum number of slots this test must use."
+        )
         # Test Filters
         params.addParam(
             "mesh_mode",
@@ -667,7 +669,10 @@ class Tester(MooseObject, OutputInterface):
 
     def getSlots(self, options):
         """return number of slots to use for this tester"""
-        return self.getThreads(options) * self.getProcs(options)
+        return max(
+            self.getThreads(options) * self.getProcs(options),
+            int(self.specs["min_slots"]),
+        )
 
     def hasOpenMPI(self):
         """return whether we have openmpi for execution
