@@ -7,12 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PorousFlowElementNormal.h"
+#include "ElementNormalAux.h"
 
-registerMooseObject("PorousFlowApp", PorousFlowElementNormal);
+registerMooseObject("MooseApp", ElementNormalAux);
+registerMooseObjectRenamed("MooseApp",
+                           PorousFlowElementNormal,
+                           "06/30/2027 24:00",
+                           ElementNormalAux);
 
 InputParameters
-PorousFlowElementNormal::validParams()
+ElementNormalAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   MooseEnum component("x=0 y=1 z=2");
@@ -35,7 +39,7 @@ PorousFlowElementNormal::validParams()
   return params;
 }
 
-PorousFlowElementNormal::PorousFlowElementNormal(const InputParameters & parameters)
+ElementNormalAux::ElementNormalAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _component(getParam<MooseEnum>("component")),
     _1D_perp(getParam<RealVectorValue>("1D_perp")),
@@ -50,7 +54,7 @@ PorousFlowElementNormal::PorousFlowElementNormal(const InputParameters & paramet
 }
 
 Real
-PorousFlowElementNormal::computeValue()
+ElementNormalAux::computeValue()
 {
   RealVectorValue n;
   const auto num_nodes = _current_elem->n_nodes();

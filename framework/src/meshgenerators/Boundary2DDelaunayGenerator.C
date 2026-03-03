@@ -83,7 +83,7 @@ Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters &
     if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
       mooseError("Invalid function f(x,y,z)\n",
                  _func_level_set,
-                 "\nin CutMeshByLevelSetGenerator ",
+                 "\nin ",
                  name(),
                  ".\n",
                  _func_level_set->ErrorMsg());
@@ -102,7 +102,7 @@ Boundary2DDelaunayGenerator::generate()
   try
   {
     MooseMeshUtils::createSubdomainFromSidesets(
-        mesh_3d, _boundary_names, new_block_id, SubdomainName(), type());
+        *mesh_3d, _boundary_names, new_block_id, SubdomainName(), type());
   }
   catch (MooseException & e)
   {
@@ -120,7 +120,7 @@ Boundary2DDelaunayGenerator::generate()
     try
     {
       MooseMeshUtils::createSubdomainFromSidesets(
-          mesh_3d, hole, hole_block_ids.back(), SubdomainName(), type());
+          *mesh_3d, hole, hole_block_ids.back(), SubdomainName(), type());
     }
     catch (MooseException & e)
     {
@@ -133,14 +133,14 @@ Boundary2DDelaunayGenerator::generate()
 
   // Create a 2D mesh form the 2D block
   auto mesh_2d = buildMeshBaseObject();
-  MooseMeshUtils::convertBlockToMesh(mesh_3d, mesh_2d, {std::to_string(new_block_id)});
+  MooseMeshUtils::convertBlockToMesh(*mesh_3d, *mesh_2d, {std::to_string(new_block_id)});
   // If holes are provided, we need to create a 2D mesh for each hole
   std::vector<std::unique_ptr<MeshBase>> hole_meshes_2d;
   for (const auto & hole_block_id : hole_block_ids)
   {
     hole_meshes_2d.push_back(buildMeshBaseObject());
     MooseMeshUtils::convertBlockToMesh(
-        mesh_3d, hole_meshes_2d.back(), {std::to_string(hole_block_id)});
+        *mesh_3d, *hole_meshes_2d.back(), {std::to_string(hole_block_id)});
   }
 
   // We do not need the 3D mesh anymore
@@ -262,11 +262,11 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
   const auto new_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*mesh_2d_dummy);
 
   MooseMeshUtils::createSubdomainFromSidesets(
-      mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName(), type());
+      *mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName(), type());
 
   // Create a 1D mesh form the 1D block
   auto mesh_1d = buildMeshBaseObject();
-  MooseMeshUtils::convertBlockToMesh(mesh_2d_dummy, mesh_1d, {std::to_string(new_block_id_1d)});
+  MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
 
   // If we have holes, we need to create a 1D mesh for each hole
@@ -282,7 +282,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
         if (elem->neighbor_ptr(i_side) == nullptr)
           hole_mesh_2d->get_boundary_info().add_side(elem, i_side, hole_mesh_2d_ext_bdry);
     const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
-    MooseMeshUtils::createSubdomainFromSidesets(hole_mesh_2d,
+    MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
                                                 {std::to_string(hole_mesh_2d_ext_bdry)},
                                                 new_hole_block_id_1d,
                                                 SubdomainName(),
@@ -290,7 +290,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
     // Create a 1D mesh form the 1D block
     hole_meshes_1d.push_back(buildMeshBaseObject());
     MooseMeshUtils::convertBlockToMesh(
-        hole_mesh_2d, hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
+        *hole_mesh_2d, *hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
     hole_mesh_2d->clear();
   }
 

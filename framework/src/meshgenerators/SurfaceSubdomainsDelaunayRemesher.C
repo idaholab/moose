@@ -1,0 +1,615 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SurfaceSubdomainsDelaunayRemesher.h"
+
+#include "MooseMeshUtils.h"
+#include "CastUniquePointer.h"
+
+#include "libmesh/boundary_info.h"
+#include "libmesh/mesh_triangle_holes.h"
+#include "libmesh/mesh_modification.h"
+#include "libmesh/parallel_algebra.h"
+#include "libmesh/poly2tri_triangulator.h"
+#include "libmesh/unstructured_mesh.h"
+
+#include "libmesh/mesh_base.h"
+#include "libmesh/replicated_mesh.h"
+
+registerMooseObject("MooseApp", SurfaceSubdomainsDelaunayRemesher);
+
+InputParameters
+SurfaceSubdomainsDelaunayRemesher::validParams()
+{
+  InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
+  params += FunctionParserUtils<false>::validParams();
+  params.renameParameterGroup("Parsed expression advanced", "Level set shape parsed expression");
+
+  params.addClassDescription(
+      "Mesh generator that re-meshes a 2D surface mesh given as one or more subdomains into "
+      "a 2D surface mesh using Delaunay triangulation.");
+
+  // Definition of the region to re-mesh
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addParam<std::vector<std::vector<SubdomainName>>>(
+      "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
+  params.addParam<std::vector<SubdomainName>>(
+      "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
+  // Not currently supported, though the machinery from Boundary2DDelaunayGenerator was kept in the
+  // right locations so it should be a manageable lift when needed
+  // params.addParam<std::vector<std::vector<BoundaryName>>>(
+  //     "hole_boundary_names",
+  //     {},
+  //     "The optional boundaries to be used as the holes in the mesh during triangulation. Note
+  //     that " "this is a vector of vectors, which allows each hole to be defined as a combination
+  //     of " "multiple boundaries.");
+
+  // Shape parameters
+  params.addRangeCheckedParam<Real>(
+      "max_angle_deviation",
+      60.0,
+      "max_angle_deviation>0 & max_angle_deviation<90",
+      "Maximum angle deviation from the average normal vector in each group of subdomains.");
+  params.addParam<std::string>(
+      "level_set",
+      "Level set used to achieve more accurate reverse projection compared to interpolation.");
+  params.addParam<unsigned int>(
+      "max_level_set_correction_iterations",
+      3,
+      "Maximum number of iterations to correct the nodes based on the level set function.");
+  params.addParamNamesToGroup("level_set max_level_set_correction_iterations",
+                              "Level set shape correction");
+
+  // Surface remeshing parameters
+  params.addRangeCheckedParam<Real>(
+      "max_edge_length",
+      "max_edge_length>0",
+      "Maximum length of an edge in the 1D meshes around each subdomain. Only a single value is "
+      "currently allowed as the boundary refinement must be consistent between all subdomains.");
+  params.addParam<std::vector<unsigned int>>(
+      "interpolate_boundaries",
+      {1},
+      "Ratio of points to add to the boundaries. Can be set to a single value for all groups at "
+      "once, or specified individually. A single value is recommended as the boundary refinement "
+      "must be consistent between all subdomains.");
+  params.addParam<std::vector<bool>>(
+      "refine_boundaries",
+      {false},
+      "Whether to refine the boundaries of each subdomain group. Can be set to a single value for "
+      "all groups at once, or specified individually");
+  params.addParam<std::vector<Real>>(
+      "desired_areas",
+      {0},
+      "Target element size when triangulating projection of the subdomain group. Can be set to a "
+      "single value for all groups at once, or specified individually. Default of 0 means no "
+      "constraint.");
+  params.addParamNamesToGroup(
+      "max_edge_length interpolate_boundaries refine_boundaries desired_areas",
+      "Delaunay triangulation");
+
+  // Parameters for stitching meshes at the end
+  params.addParam<bool>("avoid_merging_subdomains",
+                        false,
+                        "Whether to prevent merging subdomains by offsetting ids. The first mesh "
+                        "in the input will keep the same subdomains ids, the others will have "
+                        "offsets. All subdomain names will remain valid");
+  MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
+  params.addParam<MooseEnum>(
+      "stitching_algorithm",
+      algorithm,
+      "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addParam<bool>(
+      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
+  params.addParamNamesToGroup("avoid_merging_subdomains stitching_algorithm verbose_stitching",
+                              "Stitching triangularized meshes");
+
+  params.addParam<bool>(
+      "verbose", false, "Whether the generator should output additional information");
+
+  return params;
+}
+
+SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
+    const InputParameters & parameters)
+  : SurfaceDelaunayGeneratorBase(parameters),
+    FunctionParserUtils<false>(parameters),
+    _input(getMesh("input")),
+    _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
+    // _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
+    _hole_boundary_names(std::vector<std::vector<BoundaryName>>()),
+    _max_level_set_correction_iterations(
+        getParam<unsigned int>("max_level_set_correction_iterations")),
+    _max_angle_deviation(getParam<Real>("max_angle_deviation")),
+    _interpolate_boundaries(getParam<std::vector<unsigned int>>("interpolate_boundaries")),
+    _refine_boundaries(getParam<std::vector<bool>>("refine_boundaries")),
+    _desired_areas(getParam<std::vector<Real>>("desired_areas")),
+    _verbose(getParam<bool>("verbose"))
+{
+  if (isParamValid("level_set"))
+  {
+    _func_level_set = std::make_shared<SymFunction>();
+    // set FParser internal feature flags
+    setParserFeatureFlags(_func_level_set);
+    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
+      addFParserConstants(_func_level_set,
+                          getParam<std::vector<std::string>>("constant_names"),
+                          getParam<std::vector<std::string>>("constant_expressions"));
+    if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
+      mooseError("Invalid function f(x,y,z)\n",
+                 _func_level_set,
+                 "\nin ",
+                 name(),
+                 ".\n",
+                 _func_level_set->ErrorMsg());
+
+    _func_params.resize(3);
+  }
+  if (isParamSetByUser("subdomain_names") && isParamSetByUser("exclude_subdomain_names"))
+    paramError("exclude_subdomain_names",
+               "Excluding subdomain names is only to be set when 'subdomain_names' is not set");
+}
+
+std::unique_ptr<MeshBase>
+SurfaceSubdomainsDelaunayRemesher::generate()
+{
+  std::unique_ptr<MeshBase> mesh_3d = std::move(_input);
+
+  // Select subdomain names if it has not been selected by the user
+  // We form 1 group per subdomain by default (easiest to mesh)
+  if (_subdomain_names.empty() || _subdomain_names[0].empty())
+  {
+    if (_subdomain_names.size())
+      _subdomain_names.erase(_subdomain_names.begin());
+
+    // Get all subdomains from the mesh
+    std::set<subdomain_id_type> sub_ids;
+    mesh_3d->subdomain_ids(sub_ids);
+
+    // Copy only the ones that are not excluded
+    const auto & excluded = getParam<std::vector<SubdomainName>>("exclude_subdomain_names");
+    for (const auto & sub_id : sub_ids)
+    {
+      const auto & sn = mesh_3d->subdomain_name(sub_id) == "" ? std::to_string(sub_id)
+                                                              : mesh_3d->subdomain_name(sub_id);
+      if (excluded.empty() || std::find(excluded.begin(), excluded.end(), sn) == excluded.end())
+        _subdomain_names.push_back({sn});
+    }
+  }
+  _num_groups = _subdomain_names.size();
+  if (_interpolate_boundaries.size() == 1)
+    _interpolate_boundaries.resize(_num_groups, _interpolate_boundaries[0]);
+  if (_refine_boundaries.size() == 1)
+    _refine_boundaries.resize(_num_groups, _refine_boundaries[0]);
+  if (_desired_areas.size() == 1)
+    _desired_areas.resize(_num_groups, _desired_areas[0]);
+  if (_interpolate_boundaries.size() != _num_groups)
+    paramError("interpolate_boundaries",
+               "Should be the same size as 'subdomain_names' or of size 1");
+  if (_refine_boundaries.size() != _num_groups)
+    paramError("refine_boundaries", "Should be the same size as 'subdomain_names' or of size 1");
+  if (_desired_areas.size() != _num_groups)
+    paramError("desired_areas", "Should be the same size as 'subdomain_names' or of size 1");
+
+  // Re-create surface meshes from each of the subdomains
+  std::vector<std::unique_ptr<ReplicatedMesh>> remeshed_2d;
+
+  for (const auto i : make_range(_num_groups))
+  {
+    auto mesh_2d = buildReplicatedMesh();
+    MooseMeshUtils::convertBlockToMesh(*mesh_3d, *mesh_2d, _subdomain_names[i]);
+
+    // Mesh the subdomains by groups
+    // TODO: holes for each subdomain are not currently supported
+    std::vector<std::unique_ptr<ReplicatedMesh>> no_holes = {};
+    auto new_mesh = General2DDelaunay(mesh_2d, /*holes*/ no_holes, i);
+
+    // Keep the remeshed subdomains 2D meshes
+    remeshed_2d.push_back(std::move(new_mesh));
+  }
+
+  // TODO: can we gain efficiency by using different boundary ids for each stitch?
+  const auto primary_bcid = 1;
+  const auto paired_bcid = 1;
+  const auto verbose_stitching = getParam<bool>("verbose_stitching");
+  const auto use_binary_search = getParam<MooseEnum>("stitching_algorithm") == "BINARY";
+
+  // Stitch all the parts to the first one
+  std::unique_ptr<ReplicatedMesh> full_mesh;
+  full_mesh = std::move(remeshed_2d[0]);
+
+  // Build a subdomain map
+  auto & main_subdomain_map = full_mesh->set_subdomain_name_map();
+
+  for (auto remesh_i : index_range(remeshed_2d))
+  {
+    if (remesh_i == 0)
+      continue;
+    else
+    {
+      UnstructuredMesh & remeshed = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
+
+      // NOTE: we cannot use MeshedHole because the meshes are no longer in the XY plane
+      // Potential optimization: instead of using the full mesh outer boundary for stitching
+      // use what is done in the XYDelaunayGenerator and re-build only the boundary near the
+      // mesh that we are stitching (in XYDelaunay, these are the holes being stitched)
+      // Potential optimization: we could keep the external boundaries from the triangulation phase
+
+      // Create the boundary outside the remeshed mesh
+      bool rem_has_external_bdy = false;
+      MooseMeshUtils::addExternalBoundary(remeshed, paired_bcid, rem_has_external_bdy);
+      mooseAssert(rem_has_external_bdy, "Subdomain mesh should have an external boundary");
+
+      // We need to re-create the boundary outside the parent mesh because we are clearing
+      // it on every stitch
+      bool base_has_external_bdy = false;
+      MooseMeshUtils::addExternalBoundary(*full_mesh, primary_bcid, base_has_external_bdy);
+      mooseAssert(base_has_external_bdy, "Full mesh should have an external boundary");
+
+      // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
+      // subdomain map
+      const auto & increment_subdomain_map = remeshed.get_subdomain_name_map();
+      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+      full_mesh->stitch_meshes(remeshed,
+                               primary_bcid,
+                               paired_bcid,
+                               TOLERANCE,
+                               /*clear_stitched_bcids*/ true,
+                               verbose_stitching,
+                               use_binary_search,
+                               /*enforce_all_nodes_match_on_boundaries*/ false,
+                               /*merge_boundary_nodes_all_or_nothing*/ false,
+                               /*remap_subdomain_ids*/ getParam<bool>("avoid_merging_subdomains"));
+
+      // TODO: when implementing hole meshes, we might want to also stitch the hole meshes
+    }
+  }
+
+  // We do not need the 3D mesh anymore
+  mesh_3d->clear();
+
+  return full_mesh;
+}
+
+Point
+SurfaceSubdomainsDelaunayRemesher::elemNormal(const Elem & elem)
+{
+  mooseAssert(elem.n_vertices() == 3 || elem.n_vertices() == 4, "unsupported element type.");
+  // Only the first three vertices are used to calculate the normal vector
+  const Point & p0 = *elem.node_ptr(0);
+  const Point & p1 = *elem.node_ptr(1);
+  const Point & p2 = *elem.node_ptr(2);
+
+  if (elem.n_vertices() == 4)
+  {
+    const Point & p3 = *elem.node_ptr(3);
+    return ((p2 - p0).cross(p3 - p1)).unit();
+  }
+
+  return ((p2 - p1).cross(p0 - p1)).unit();
+}
+
+Point
+SurfaceSubdomainsDelaunayRemesher::meshNormal2D(const MeshBase & mesh)
+{
+  Point mesh_norm = Point(0.0, 0.0, 0.0);
+  Real mesh_area = 0.0;
+
+  // Check all the elements' normal vectors
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+  {
+    const Real elem_area = elem->volume();
+    mesh_norm += elemNormal(*elem) * elem_area;
+    mesh_area += elem_area;
+  }
+  mesh.comm().sum(mesh_norm);
+  mesh.comm().sum(mesh_area);
+  mesh_norm /= mesh_area;
+  return mesh_norm.unit();
+}
+
+Real
+SurfaceSubdomainsDelaunayRemesher::meshNormalDeviation2D(const MeshBase & mesh,
+                                                         const Point & global_norm)
+{
+  Real max_deviation(0.0);
+  // Check all the elements' deviation from the global normal vector
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+  {
+    const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
+    max_deviation = std::max(max_deviation, elem_deviation);
+    if (_verbose && elem_deviation > _max_angle_deviation)
+      _console << "Element " << elem->id() << " from subdomain ID " << elem->subdomain_id()
+               << " has normal deviation: " << elem_deviation << std::endl;
+  }
+  mesh.comm().max(max_deviation);
+  return max_deviation;
+}
+
+Real
+SurfaceSubdomainsDelaunayRemesher::levelSetEvaluator(const Point & point)
+{
+  return evaluate(_func_level_set, std::vector<Real>({point(0), point(1), point(2), 0}));
+}
+
+void
+SurfaceSubdomainsDelaunayRemesher::levelSetCorrection(Node & node)
+{
+  // Based on the given level set, we try to move the node in its normal direction
+  const Real diff = libMesh::TOLERANCE * 10.0; // A small value to perturb the node
+  const Real original_eval = levelSetEvaluator(node);
+  const Real xp_eval = levelSetEvaluator(node + Point(diff, 0.0, 0.0));
+  const Real yp_eval = levelSetEvaluator(node + Point(0.0, diff, 0.0));
+  const Real zp_eval = levelSetEvaluator(node + Point(0.0, 0.0, diff));
+  const Real xm_eval = levelSetEvaluator(node - Point(diff, 0.0, 0.0));
+  const Real ym_eval = levelSetEvaluator(node - Point(0.0, diff, 0.0));
+  const Real zm_eval = levelSetEvaluator(node - Point(0.0, 0.0, diff));
+  const Point grad = Point((xp_eval - xm_eval) / (2.0 * diff),
+                           (yp_eval - ym_eval) / (2.0 * diff),
+                           (zp_eval - zm_eval) / (2.0 * diff));
+  const Real xyz_diff = -original_eval / grad.contract(grad);
+  node(0) += xyz_diff * grad(0);
+  node(1) += xyz_diff * grad(1);
+  node(2) += xyz_diff * grad(2);
+}
+
+std::unique_ptr<ReplicatedMesh>
+SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
+    std::unique_ptr<ReplicatedMesh> & mesh_2d,
+    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d,
+    unsigned int group_i)
+{
+  if (_verbose)
+  {
+    _console << "Re-meshing mesh\n " << *mesh_2d << std::endl;
+    _console << "with subdomains " << Moose::stringify(mesh_2d->get_subdomain_name_map())
+             << std::endl;
+    if (hole_meshes_2d.size())
+      _console << "With " << hole_meshes_2d.size() << " holes:" << std::endl;
+    for (const auto & hole_m : hole_meshes_2d)
+    {
+      _console << "Hole subdomains " << Moose::stringify(hole_m->get_subdomain_name_map())
+               << std::endl;
+      _console << *hole_m << std::endl;
+    }
+  }
+  // If a level set is provided, we need to check if the nodes in the original 2D mesh match the
+  // level set
+  if (_func_level_set)
+  {
+    for (const auto & node : mesh_2d->node_ptr_range())
+    {
+      if (std::abs(levelSetEvaluator(*node)) > libMesh::TOLERANCE)
+      {
+        paramError("level_set",
+                   "The level set function does not match the nodes in the given boundary of the "
+                   "input mesh.");
+      }
+    }
+  }
+
+  // Create the external boundary of the 2D mesh
+  // Easier to work with a TRI3 mesh
+  // all_tri() also prepares the mesh for use
+  mesh_2d->prepare_for_use();
+  bool has_external_side = false;
+  MeshTools::Modification::all_tri(*mesh_2d);
+  const auto mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*mesh_2d);
+  for (const auto & elem : mesh_2d->active_element_ptr_range())
+    for (const auto & i_side : elem->side_index_range())
+      if (elem->neighbor_ptr(i_side) == nullptr)
+      {
+        mesh_2d->get_boundary_info().add_side(elem, i_side, mesh_2d_ext_bdry);
+        has_external_side = true;
+      }
+
+  // Create a clone of the 2D mesh to be used for the 1D mesh generation
+  auto mesh_2d_dummy = dynamic_pointer_cast<MeshBase>(mesh_2d->clone());
+  // Generate a new 1D block based on the external boundary
+  const auto new_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*mesh_2d_dummy);
+
+  if (has_external_side)
+    MooseMeshUtils::createSubdomainFromSidesets(*mesh_2d_dummy,
+                                                {std::to_string(mesh_2d_ext_bdry)},
+                                                new_block_id_1d,
+                                                SubdomainName(),
+                                                type());
+
+  // Create a 1D mesh from the 1D block
+  auto mesh_1d = buildMeshBaseObject();
+  if (has_external_side)
+    MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
+  mesh_2d_dummy->clear();
+
+  // Add more nodes in the 1D mesh
+  if (isParamValid("max_edge_length"))
+  {
+    // Sort the points the same way every time by using ID order
+    std::vector<Point> mesh_1d_points;
+    mesh_1d_points.reserve(mesh_1d->n_nodes());
+    for (const auto & node : mesh_1d->node_ptr_range())
+      mesh_1d_points.push_back(*node);
+
+    mesh_1d->clear();
+    MooseMeshUtils::buildPolyLineMesh(
+        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
+  }
+
+  // If we have holes, we need to create a 1D mesh for each hole
+  std::vector<std::unique_ptr<MeshBase>> hole_meshes_1d;
+  for (auto & hole_mesh_2d : hole_meshes_2d)
+  {
+    // As we do not need these holes for reverse projection, we do not need to convert them to TRI3
+    // meshes, but we still need to create a 1D mesh for each hole
+    hole_mesh_2d->find_neighbors();
+    bool has_external_bdy = false;
+    const auto hole_mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*hole_mesh_2d);
+    MooseMeshUtils::addExternalBoundary(*hole_mesh_2d, hole_mesh_2d_ext_bdry, has_external_bdy);
+
+    // Extract the 1D edge elements boundary as a mesh
+    hole_meshes_1d.push_back(
+        MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
+
+    // Do not clear the 2D hole mesh, we may re-use it
+  }
+
+  // Find centroid of the 2D mesh
+  const Point centroid = MooseMeshUtils::meshCentroidCalculator(*mesh_2d);
+  // calculate an average normal vector of the 2D mesh
+  const Point mesh_norm = meshNormal2D(*mesh_2d);
+  // Check the deviation of the mesh normal vector from the global average normal vector
+  if (meshNormalDeviation2D(*mesh_2d, mesh_norm) > _max_angle_deviation)
+    paramError("subdomain_names",
+               "The normal vector of some elements in the 2D mesh deviates too much from the "
+               "global average normal vector. The maximum deviation found / allowed is " +
+                   std::to_string(meshNormalDeviation2D(*mesh_2d, mesh_norm)) + " / " +
+                   std::to_string(_max_angle_deviation) +
+                   ". Consider dividing the boundary into several parts to "
+                   "reduce the angle deviation.");
+
+  // Move both 2d and 1d meshes to the centroid of the 2D mesh
+  MeshTools::Modification::translate(*mesh_1d, -centroid(0), -centroid(1), -centroid(2));
+  MeshTools::Modification::translate(*mesh_2d, -centroid(0), -centroid(1), -centroid(2));
+  // Also need to translate the 1D hole meshes if applicable
+  for (auto & hole_mesh_1d : hole_meshes_1d)
+    MeshTools::Modification::translate(*hole_mesh_1d, -centroid(0), -centroid(1), -centroid(2));
+
+  // Calculate the Euler angles to rotate the meshes so that the 2D mesh is close to the XY plane
+  // (i.e., the normal vector of the 2D mesh is aligned with the Z axis)
+  const Real theta = std::acos(mesh_norm(2)) / M_PI * 180.0;
+  const Real phi =
+      (MooseUtils::absoluteFuzzyLessThan(mesh_norm(2), 1.0) ? std::atan2(mesh_norm(1), mesh_norm(0))
+                                                            : 0.0) /
+      M_PI * 180.0;
+  MeshTools::Modification::rotate(*mesh_1d, 90.0 - phi, theta, 0.0);
+  MeshTools::Modification::rotate(*mesh_2d, 90.0 - phi, theta, 0.0);
+  // Also rotate the 1D hole meshes if applicable
+  for (auto & hole_mesh_1d : hole_meshes_1d)
+    MeshTools::Modification::rotate(*hole_mesh_1d, 90.0 - phi, theta, 0.0);
+
+  // Clone the 2D mesh to be used for reverse projection later
+  auto mesh_2d_xyz = dynamic_pointer_cast<MeshBase>(mesh_2d->clone());
+
+  // Project the 2D mesh to the XY plane so that XYDelaunay can be used
+  for (const auto & node : mesh_2d->node_ptr_range())
+    (*node)(2) = 0;
+  // Project the 1D mesh to the XY plane as well
+  for (const auto & node : mesh_1d->node_ptr_range())
+    (*node)(2) = 0;
+  // Also project the 1D hole meshes to the XY plane if applicable
+  for (auto & hole_mesh_1d : hole_meshes_1d)
+  {
+    for (const auto & node : hole_mesh_1d->node_ptr_range())
+      (*node)(2) = 0;
+  }
+
+  std::vector<libMesh::TriangulatorInterface::MeshedHole> meshed_holes;
+  std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs;
+  meshed_holes.reserve(hole_meshes_1d.size());
+  triangulator_hole_ptrs.reserve(hole_meshes_1d.size());
+  for (auto remesh_i : index_range(hole_meshes_1d))
+  {
+    hole_meshes_1d[remesh_i]->prepare_for_use();
+    meshed_holes.emplace_back(*hole_meshes_1d[remesh_i]);
+    triangulator_hole_ptrs[remesh_i] = &meshed_holes.back();
+  }
+
+  // Finally, triangulation
+  std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(std::move(mesh_1d));
+
+  Poly2TriTriangulator poly2tri(*mesh);
+  poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
+
+  poly2tri.set_interpolate_boundary_points(_interpolate_boundaries[group_i]);
+  poly2tri.set_refine_boundary_allowed(_refine_boundaries[group_i]);
+  poly2tri.set_verify_hole_boundaries(false);
+  poly2tri.desired_area() = _desired_areas[group_i];
+  poly2tri.minimum_angle() = 0; // Not yet supported
+  poly2tri.smooth_after_generating() = false;
+  if (!triangulator_hole_ptrs.empty())
+    poly2tri.attach_hole_list(&triangulator_hole_ptrs);
+  // Future TODO: correct the area function based on the local normal vector
+  if (_use_auto_area_func)
+    poly2tri.set_auto_area_function(this->comm(),
+                                    _auto_area_function_num_points,
+                                    _auto_area_function_power,
+                                    _auto_area_func_default_size,
+                                    _auto_area_func_default_size_dist);
+  poly2tri.triangulate();
+
+  // Reverse the projection based on the original 2D mesh
+  for (const auto & node : mesh->node_ptr_range())
+  {
+    bool node_mod = false;
+    // Try to find the element in mesh_2d that contains the new node
+    for (const auto & elem : mesh_2d->active_element_ptr_range())
+    {
+      if (elem->contains_point(Point((*node)(0), (*node)(1), 0.0)))
+      {
+        // Element id
+        const auto elem_id = elem->id();
+        // element in xyz_in_xyz
+        const Elem & elem_xyz = *mesh_2d_xyz->elem_ptr(elem_id);
+
+        const Point elem_normal = elemNormal(elem_xyz);
+        const Point & elem_p = *mesh_2d_xyz->elem_ptr(elem_id)->node_ptr(0);
+
+        // if the x and y values of the node is the same as the elem_p's first node, we can just
+        // move it to that node's position
+        if (MooseUtils::absoluteFuzzyEqual((*node)(0), elem_p(0)) &&
+            MooseUtils::absoluteFuzzyEqual((*node)(1), elem_p(1)))
+        {
+          (*node)(2) = elem_p(2);
+          node_mod = true;
+          break;
+        }
+        // Otherwise, we need to find a position inside the 2D element
+        // It has the same x and y coordinates as the node in the projected mesh;
+        (*node)(2) = elem_p(2) - (((*node)(0) - elem_p(0)) * elem_normal(0) +
+                                  ((*node)(1) - elem_p(1)) * elem_normal(1)) /
+                                     elem_normal(2);
+        node_mod = true;
+        break;
+      }
+    }
+    if (!node_mod)
+      mooseError("Node not found in mesh_in_xy");
+  }
+
+  // Rotate the mesh back
+  MeshTools::Modification::rotate(*mesh, 0.0, -theta, phi - 90.0);
+  // Translate the mesh back
+  MeshTools::Modification::translate(*mesh, centroid(0), centroid(1), centroid(2));
+
+  // Correct the nodes based on the level set function
+  if (_func_level_set)
+  {
+    for (const auto & node : mesh->node_ptr_range())
+    {
+      unsigned int iter_ct = 0;
+      while (iter_ct < _max_level_set_correction_iterations &&
+             std::abs(levelSetEvaluator(*node)) > libMesh::TOLERANCE * libMesh::TOLERANCE)
+      {
+        levelSetCorrection(*node);
+        ++iter_ct;
+      }
+    }
+  }
+  // Give the old subdomain to all elements
+  const auto common_id = *mesh_2d->get_mesh_subdomains().begin();
+  for (auto & elem : mesh->active_element_ptr_range())
+    elem->subdomain_id() = common_id;
+
+  // Pass the subdomain names
+  mesh->set_subdomain_name_map() = mesh_2d->get_subdomain_name_map();
+
+  mesh->set_isnt_prepared();
+
+  return mesh;
+}

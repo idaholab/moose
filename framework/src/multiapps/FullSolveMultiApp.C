@@ -109,7 +109,7 @@ FullSolveMultiApp::initialSetup()
 
       ex->init();
 
-      if (!_update_old_state_when_keeping_solution_during_restore &&
+      if (_update_old_state_when_keeping_solution_during_restore &&
           (appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties()
 #ifdef KOKKOS_ENABLED
            || appProblemBase(_first_local_app + i)

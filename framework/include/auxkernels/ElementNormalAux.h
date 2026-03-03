@@ -15,12 +15,12 @@
  * Computes a component of the normal of elements.  This is mostly designed for 2D elements.  1D and
  * 3D elements are handled as special cases.
  */
-class PorousFlowElementNormal : public AuxKernel
+class ElementNormalAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowElementNormal(const InputParameters & parameters);
+  ElementNormalAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

@@ -437,7 +437,7 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
  * @param type_name The type of the mesh generator that is calling this method, used for error
  *                  messages and debugging purposes.
  */
-void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+void createSubdomainFromSidesets(MeshBase & mesh,
                                  std::vector<BoundaryName> boundary_names,
                                  const SubdomainID new_subdomain_id,
                                  const SubdomainName new_subdomain_name,
@@ -449,8 +449,8 @@ void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
  * @param target_mesh The target mesh to which the blocks will be converted
  * @param target_blocks The names of the blocks to be converted to the target mesh
  */
-void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
-                        std::unique_ptr<MeshBase> & target_mesh,
+void convertBlockToMesh(MeshBase & source_mesh,
+                        MeshBase & target_mesh,
                         const std::vector<SubdomainName> & target_blocks);
 
 /**
@@ -507,4 +507,13 @@ void buildPolyLineMesh(MeshBase & mesh,
                        const BoundaryName & start_boundary,
                        const BoundaryName & end_boundary,
                        const Real max_elem_size);
+
+/**
+ * Adds a sideset for the external boundary of the mesh (e.g. all element sides with no neighbors)
+ * @param mesh the mesh to modify
+ * @param extern_bid the ID to assign to the external boundary
+ * @param has_external_bid false if all elements of the mesh are internal (for example a sphere
+ * shell)
+ */
+void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
 }
