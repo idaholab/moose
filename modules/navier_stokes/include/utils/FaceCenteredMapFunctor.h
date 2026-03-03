@@ -12,6 +12,7 @@
 #include "MooseFunctor.h"
 #include "MooseMesh.h"
 #include "MooseError.h"
+#include "AnyPointer.h"
 
 #include <set>
 
@@ -121,17 +122,17 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) cons
   mooseError("not implemented");
 }
 
-template <typename T, typename Map>
+template <typename T, typename Map, typename Context>
 inline void
-dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, Context context)
 {
   Map & m_map = m;
   dataStore(stream, m_map, context);
 }
 
-template <typename T, typename Map>
+template <typename T, typename Map, typename Context>
 inline void
-dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, Context context)
 {
   Map & m_map = m;
   dataLoad(stream, m_map, context);

@@ -37,12 +37,15 @@ public:
    * When this wrapper is destructed, the underlying
    * restartable data is also destructed. This allows for
    * proper construction ordered destruction.
+   *
+   * @tparam T The type of data being stored
+   * @tparam Context The type of context for load/store operations (defaults to std::nullptr_t)
    */
-  template <typename T>
+  template <typename T, typename Context = std::nullptr_t>
   class ManagedValue
   {
   public:
-    ManagedValue(RestartableData<T> & value) : _value(value) {}
+    ManagedValue(RestartableData<T, Context> & value) : _value(value) {}
 
     /**
      * Destructor.
@@ -61,7 +64,7 @@ public:
 
   private:
     /// The underlying data
-    RestartableData<T> & _value;
+    RestartableData<T, Context> & _value;
   };
 
   /**
@@ -140,10 +143,30 @@ protected:
    *
    * See delcareRestartableData and declareRestartableDataWithContext for more information.
    */
-  template <typename T, typename... Args>
-  ManagedValue<T> declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                           void * context,
-                                                           Args &&... args);
+  template <typename T, typename Context, typename... Args>
+  ManagedValue<T, Context *> declareManagedRestartableDataWithContext(const std::string & data_name,
+                                                                      Context & context,
+                                                                      Args &&... args);
+
+  /**
+   * Declares a piece of "managed" restartable data and initialize it (pointer version -
+   * deprecated).
+   *
+   * Here, "managed" restartable data means that the caller can destruct this data
+   * upon destruction of the return value of this method. Therefore, this
+   * ManagedValue<T> wrapper should survive after the final calls to dataStore()
+   * for it. That is... at the very end.
+   *
+   * This is needed for objects whose destruction ordering is important, and
+   * enables natural c++ destruction in reverse construction order of the object
+   * that declares it.
+   *
+   * See delcareRestartableData and declareRestartableDataWithContext for more information.
+   */
+  template <typename T, typename Context, typename... Args>
+  ManagedValue<T, Context> declareManagedRestartableDataWithContext(const std::string & data_name,
+                                                                    Context * context,
+                                                                    Args &&... args);
 
   /**
    * Declare a piece of data as "restartable" and initialize it
@@ -166,12 +189,47 @@ protected:
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param context Context pointer that will be passed to the load and store functions
+   * @param context Context reference that will be passed to the load and store functions
+   * (preferred)
+   * @param args Arguments to forward to the constructor of the data
+   */
+  template <typename T, typename Context, typename... Args>
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        Context & context,
+                                        Args &&... args);
+
+  /**
+   * Declare a piece of data as "restartable" and initialize it.
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param context Context pointer that will be passed to the load and store functions (deprecated
+   * - use reference overload)
+   * @param args Arguments to forward to the constructor of the data
+   */
+  template <typename T, typename Context, typename... Args>
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        Context * context,
+                                        Args &&... args);
+
+  /**
+   * Declare a piece of data as "restartable" and initialize it (nullptr overload).
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param context nullptr (no context)
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename... Args>
-  T &
-  declareRestartableDataWithContext(const std::string & data_name, void * context, Args &&... args);
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        std::nullptr_t context,
+                                        Args &&... args);
 
   /**
    * Declare a piece of data as "recoverable" and initialize it.
@@ -213,13 +271,33 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
-   * @param context Context pointer that will be passed to the load and store functions
+   * @param context Context reference that will be passed to the load and store functions
+   * (preferred)
    * @param args Arguments to forward to the constructor of the data
    */
-  template <typename T, typename... Args>
+  template <typename T, typename Context, typename... Args>
   T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                       const std::string & object_name,
-                                                      void * context,
+                                                      Context & context,
+                                                      Args &&... args);
+
+  /**
+   * Declare a piece of data as "restartable".
+   * This means that in the event of a restart this piece of data
+   * will be restored back to its previous value.
+   *
+   * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
+   *
+   * @param data_name The name of the data (usually just use the same name as the member variable)
+   * @param object_name A supplied name for the object that is declaring this data.
+   * @param context Context pointer that will be passed to the load and store functions (deprecated
+   * - use reference overload)
+   * @param args Arguments to forward to the constructor of the data
+   */
+  template <typename T, typename Context, typename... Args>
+  T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
+                                                      const std::string & object_name,
+                                                      Context * context,
                                                       Args &&... args);
 
   /**
@@ -265,10 +343,10 @@ private:
    * @param context Context pointer that will be passed to the load and store functions
    * @param args Arguments to forward to the constructor of the data
    */
-  template <typename T, typename... Args>
-  RestartableData<T> & declareRestartableDataHelper(const std::string & data_name,
-                                                    void * context,
-                                                    Args &&... args) const;
+  template <typename T, typename Context, typename... Args>
+  RestartableData<T, Context> & declareRestartableDataHelper(const std::string & data_name,
+                                                             Context context,
+                                                             Args &&... args) const;
 };
 
 template <typename T, typename... Args>
@@ -278,15 +356,28 @@ Restartable::declareRestartableData(const std::string & data_name, Args &&... ar
   return declareRestartableDataWithContext<T>(data_name, nullptr, std::forward<Args>(args)...);
 }
 
-template <typename T, typename... Args>
-Restartable::ManagedValue<T>
+// Reference-based overload (preferred)
+template <typename T, typename Context, typename... Args>
+Restartable::ManagedValue<T, Context *>
 Restartable::declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                      void * context,
+                                                      Context & context,
+                                                      Args &&... args)
+{
+  auto & data_ptr =
+      declareRestartableDataHelper<T>(data_name, &context, std::forward<Args>(args)...);
+  return Restartable::ManagedValue<T, Context *>(data_ptr);
+}
+
+// Pointer-based overload (deprecated)
+template <typename T, typename Context, typename... Args>
+Restartable::ManagedValue<T, Context>
+Restartable::declareManagedRestartableDataWithContext(const std::string & data_name,
+                                                      Context * context,
                                                       Args &&... args)
 {
   auto & data_ptr =
       declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...);
-  return Restartable::ManagedValue<T>(data_ptr);
+  return Restartable::ManagedValue<T, Context>(data_ptr);
 }
 
 template <typename T, typename... Args>
@@ -296,19 +387,40 @@ Restartable::getRestartableData(const std::string & data_name) const
   return declareRestartableDataHelper<T>(data_name, nullptr).get();
 }
 
-template <typename T, typename... Args>
+// Reference-based overload (preferred)
+template <typename T, typename Context, typename... Args>
 T &
 Restartable::declareRestartableDataWithContext(const std::string & data_name,
-                                               void * context,
+                                               Context & context,
+                                               Args &&... args)
+{
+  return declareRestartableDataHelper<T>(data_name, &context, std::forward<Args>(args)...).set();
+}
+
+// Pointer-based overload (deprecated)
+template <typename T, typename Context, typename... Args>
+T &
+Restartable::declareRestartableDataWithContext(const std::string & data_name,
+                                               Context * context,
                                                Args &&... args)
 {
   return declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...).set();
 }
 
+// nullptr overload (for no context)
 template <typename T, typename... Args>
-RestartableData<T> &
+T &
+Restartable::declareRestartableDataWithContext(const std::string & data_name,
+                                               std::nullptr_t,
+                                               Args &&... args)
+{
+  return declareRestartableDataHelper<T>(data_name, nullptr, std::forward<Args>(args)...).set();
+}
+
+template <typename T, typename Context, typename... Args>
+RestartableData<T, Context> &
 Restartable::declareRestartableDataHelper(const std::string & data_name,
-                                          void * context,
+                                          Context context,
                                           Args &&... args) const
 {
   const auto full_name = restartableName(data_name);
@@ -317,9 +429,9 @@ Restartable::declareRestartableDataHelper(const std::string & data_name,
   // If it's already in use, the App will return a reference to the existing instance and we'll
   // return that one instead. We might refactor this to have the app create the RestartableData
   // at a later date.
-  auto data_ptr =
-      std::make_unique<RestartableData<T>>(full_name, context, std::forward<Args>(args)...);
-  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+  auto data_ptr = std::make_unique<RestartableData<T, Context>>(
+      full_name, context, std::forward<Args>(args)...);
+  auto & restartable_data_ref = static_cast<RestartableData<T, Context> &>(
       registerRestartableDataOnApp(std::move(data_ptr), _restartable_tid));
 
   return restartable_data_ref;
@@ -331,15 +443,42 @@ Restartable::declareRestartableDataWithObjectName(const std::string & data_name,
                                                   const std::string & object_name,
                                                   Args &&... args)
 {
-  return declareRestartableDataWithObjectNameWithContext<T>(
-      data_name, object_name, nullptr, std::forward<Args>(args)...);
+  std::string old_name = _restartable_name;
+
+  _restartable_name = object_name;
+
+  T & value = declareRestartableData<T>(data_name, std::forward<Args>(args)...);
+
+  _restartable_name = old_name;
+
+  return value;
 }
 
-template <typename T, typename... Args>
+// Reference-based overload (preferred)
+template <typename T, typename Context, typename... Args>
 T &
 Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                              const std::string & object_name,
-                                                             void * context,
+                                                             Context & context,
+                                                             Args &&... args)
+{
+  std::string old_name = _restartable_name;
+
+  _restartable_name = object_name;
+
+  T & value = declareRestartableDataWithContext<T>(data_name, context, std::forward<Args>(args)...);
+
+  _restartable_name = old_name;
+
+  return value;
+}
+
+// Pointer-based overload (deprecated)
+template <typename T, typename Context, typename... Args>
+T &
+Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
+                                                             const std::string & object_name,
+                                                             Context * context,
                                                              Args &&... args)
 {
   std::string old_name = _restartable_name;

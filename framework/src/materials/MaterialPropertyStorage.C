@@ -577,8 +577,9 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
   return mat_props;
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
+dataStore(std::ostream & stream, MaterialPropertyStorage & storage, Context context)
 {
   // Store the material property ID -> name map for mapping back
   const auto & registry = storage.getMaterialPropertyRegistry();
@@ -640,8 +641,11 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
   }
 }
 
+template void dataStore(std::ostream &, MaterialPropertyStorage &, libMesh::MeshBase *);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
+dataLoad(std::istream & stream, MaterialPropertyStorage & storage, Context context)
 {
   storage._restartable_map.clear();
 
@@ -815,7 +819,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 
     for (std::size_t i_elem = 0; i_elem < num_elems; ++i_elem)
     {
-      const Elem * elem;
+      Elem * elem;
       dataLoad(stream, elem, context);
       mooseAssert(elem, "Null element");
 
@@ -880,8 +884,11 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   }
 }
 
+template void dataLoad(std::istream &, MaterialPropertyStorage &, libMesh::MeshBase *);
+
+template <typename Context>
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, Context /*context*/)
 {
   dataStore(stream, record.declarers, nullptr);
   dataStore(stream, record.type, nullptr);
@@ -889,11 +896,24 @@ dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, v
   dataStore(stream, record.state, nullptr);
 }
 
+template void dataStore(std::ostream &, MaterialPropertyStorage::PropRecord &, void *);
+template void dataStore(std::ostream &, MaterialPropertyStorage::PropRecord &, std::nullptr_t);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, Context /*context*/)
 {
   dataLoad(stream, record.declarers, nullptr);
   dataLoad(stream, record.type, nullptr);
   dataLoad(stream, record.stateful_id, nullptr);
   dataLoad(stream, record.state, nullptr);
 }
+
+template void dataLoad(std::istream &, MaterialPropertyStorage::PropRecord &, void *);
+template void dataLoad(std::istream &, MaterialPropertyStorage::PropRecord &, std::nullptr_t);
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, MaterialPropertyStorage &, MooseMesh *);
+template void dataLoad(std::istream &, MaterialPropertyStorage &, MooseMesh *);
+template void dataStore(std::ostream &, MaterialProperties &, std::nullptr_t);
+template void dataLoad(std::istream &, MaterialProperties &, std::nullptr_t);

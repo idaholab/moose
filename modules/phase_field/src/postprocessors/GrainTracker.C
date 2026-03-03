@@ -25,7 +25,7 @@
 
 template <>
 void
-dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, void * context)
+dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, Context context)
 {
   storeHelper(stream, feature.boundary_intersection, context);
   storeHelper(stream, feature.id, context);
@@ -35,7 +35,7 @@ dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, voi
 
 template <>
 void
-dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void * context)
+dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, Context context)
 {
   loadHelper(stream, feature.boundary_intersection, context);
   loadHelper(stream, feature.id, context);
