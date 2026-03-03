@@ -174,17 +174,15 @@ TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
   }
 
   // Exceptions caught as mooseError
-  {
-    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo!?'"});
-    EXPECT_MOOSEERROR_MSG_CONTAINS(
-        app->run(), "--required-capablities: Capability statement '!': unknown operator.");
-  }
+  EXPECT_MOOSEERROR_MSG_CONTAINS(
+      AppFactory::create("MooseUnitApp", {"--required-capabilities='foo!?'"})->run(),
+      "--required-capablities: Capability statement '!': unknown operator.");
 
-  // Unknown capabilities
+  // Non-registered capabilities are allowed
   {
     auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo'"});
-    EXPECT_MOOSEERROR_MSG_CONTAINS(
-        app->run(), "--required-capablities: The following capabilities are unknown: foo");
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
   }
 }
 
