@@ -93,9 +93,6 @@ class Scheduler(MooseObject):
         # Slot lock when processing resource allocations and modifying slots_in_use
         self.slot_lock = threading.Lock()
 
-        # Job lock when modifying a jobs status
-        self.activity_lock = threading.Lock()
-
         # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
 
@@ -123,9 +120,15 @@ class Scheduler(MooseObject):
         # Private set of jobs currently running
         self.__active_jobs = set([])
 
+        # Lock for __active_jobs
+        self.__active_jobs_lock = threading.Lock()
+
         # Jobs that are taking longer to finish than the alloted time are reported back early to inform
         # the user 'stuff' is still running. Jobs entering this set will not be reported again.
         self.jobs_reported = set([])
+
+        # Lock for jobs_repoted
+        self.jobs_reported_lock = threading.Lock()
 
         # The last time the scheduler reported something
         self.last_reported_time = clock()
@@ -177,7 +180,7 @@ class Scheduler(MooseObject):
 
     def killRemaining(self, keyboard=False):
         """Method to kill running jobs"""
-        with self.activity_lock:
+        with self.__active_jobs_lock:
             for job in self.__active_jobs:
                 job.killProcess()
         self.triggerErrorState()
@@ -257,24 +260,17 @@ class Scheduler(MooseObject):
 
     def monitorProcesses(self):
         """Monitor the running job processes, if enabled."""
-
         # Process monitoring is disabled
         if self.monitor_processes is None:
             return
 
-        # Mapping of pid -> Job
-        pid_to_job: dict = {}
-
-        # Get the PIDs of the current running jobs so
-        # that they can be sampled
-        with self.__bank_lock:
-            # We're cleaning up
-            if not self.__job_bank:
-                return
-
-            for job in self.__job_bank:
-                if (runner := job.getRunner()) and (pid := runner.pid):
-                    pid_to_job[pid] = job
+        # Get the PIDs of the current running jobs so that they can be sampled
+        with self.__active_jobs_lock:
+            pid_to_job = {
+                pid: job
+                for job in self.__active_jobs
+                if ((runner := job.getRunner()) and (pid := runner.pid))
+            }
 
         # Updated the running jobs
         self.monitor_processes.update(pid_to_job.keys())
@@ -499,12 +495,13 @@ class Scheduler(MooseObject):
                 force_status = job.force_report_status
 
                 if force_status:
-                    with self.activity_lock:
+                    with self.jobs_reported_lock:
                         self.jobs_reported.add(job)
                     job.force_report_status = False
                 elif job.isRunning():
-                    if job in self.jobs_reported:
-                        return
+                    with self.jobs_reported_lock:
+                        if job in self.jobs_reported:
+                            return
 
                     # this job will be reported as 'RUNNING'
                     if clock() - self.last_reported_time >= self.min_report_time:
@@ -517,7 +514,7 @@ class Scheduler(MooseObject):
                         ):
                             job.addCaveats("FINISHED")
 
-                        with self.activity_lock:
+                        with self.jobs_reported_lock:
                             self.jobs_reported.add(job)
                     # TestHarness has not yet been inactive long enough to warrant a report
                     else:
@@ -586,7 +583,7 @@ class Scheduler(MooseObject):
                     else:
                         job.report_timer = None
 
-                with self.activity_lock:
+                with self.__active_jobs_lock:
                     self.__active_jobs.add(job)
 
                 if self.enforce_timeout:
@@ -627,14 +624,8 @@ class Scheduler(MooseObject):
                     # All done
                     job.setStatus(StatusSystem().finished)
 
-                with self.activity_lock:
-                    if job in self.__active_jobs:
-                        self.__active_jobs.remove(job)
-                    else:
-                        job.setStatus(StatusSystem().error, "SCHEDULER ERROR")
-                        job.appendOutput(
-                            f"Failed to remove job from active jobs in Scheduler; did not exist"
-                        )
+                with self.__active_jobs_lock:
+                    self.__active_jobs.remove(job)
 
             # Not enough slots to run the job...
             else:
