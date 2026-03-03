@@ -11,7 +11,7 @@ It parses the `MFEMPeriodic` block in the user input.
 
 !listing test/tests/mfem/periodic/periodic_cube_vector.i block=MFEMPeriodic
 
-!syntax parameters /AddMFEMPeriodicBCs
+!syntax parameters /MFEMPeriodic
 
 !if-end!
 
