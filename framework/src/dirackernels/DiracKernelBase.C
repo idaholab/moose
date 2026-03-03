@@ -10,6 +10,7 @@
 // Moose includes
 #include "DiracKernelBase.h"
 #include "Assembly.h"
+#include "FEProblemBase.h"
 #include "SystemBase.h"
 #include "Problem.h"
 #include "MooseMesh.h"
@@ -147,147 +148,158 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id)
   unsigned int we_found_it = i_found_it;
   comm().max(we_found_it);
 
-  // If nobody found it in their local caches, it means we need to
-  // do the PointLocator look-up and update the caches.  This is
-  // safe, because all processors have the same value of we_found_it.
-  if (!we_found_it)
-  {
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
-
-    // Only add the point to the cache on this processor if the Elem is local
-    if (elem && (elem->processor_id() == processor_id()))
-    {
-      // Add the point to the cache...
-      _point_cache[id] = std::make_pair(elem, p);
-
-      // ... and to the reverse cache.
-      std::vector<std::pair<Point, unsigned>> & points = _reverse_point_cache[elem];
-      points.push_back(std::make_pair(p, id));
-    }
-
-    // Call the other addPoint() method.  This method ignores non-local
-    // and NULL elements automatically.
-    addPoint(elem, p, id);
-    return_elem = elem;
-  }
-
-  // If the point was found in a cache, but not my cache, I'm not
-  // responsible for it.
-  //
-  // We can't return early here: then we aren't allowed to call any more
-  // parallel_only() functions in the remainder of this function!
-  if (we_found_it && !i_found_it)
-    return_elem = NULL;
-
   // This flag may be set by the processor that cached the Elem because it
   // needs to call findPoint() (due to moving mesh, etc.). If so, we will
   // call it at the end of the while loop below.
   bool i_need_find_point = false;
 
-  // Now that we only cache local data, some processors may enter
-  // this if statement and some may not.  Therefore we can't call
-  // any parallel_only() functions inside this if statement.
-  while (i_found_it)
+  try
   {
-    // We have something cached, now make sure it's actually the same Point.
-    // TODO: we should probably use this same comparison in the DiracKernelInfo code!
-    Point cached_point = (it->second).second;
-
-    if (cached_point.relative_fuzzy_equals(p))
+    // If nobody found it in their local caches, it means we need to
+    // do the PointLocator look-up and update the caches.  This is
+    // safe, because all processors have the same value of we_found_it.
+    if (!we_found_it)
     {
-      // Find the cached element associated to this point
-      cached_elem = (it->second).first;
+      const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
 
-      // If the cached element's processor ID doesn't match ours, we
-      // are no longer responsible for caching it.  This can happen
-      // due to adaptivity...
-      if (cached_elem->processor_id() != processor_id())
+      // Only add the point to the cache on this processor if the Elem is local
+      if (elem && (elem->processor_id() == processor_id()))
       {
-        // Update the caches, telling them to drop the cached Elem.
-        // Analogously to the rest of the DiracKernel system, we
-        // also return NULL because the Elem is non-local.
-        updateCaches(cached_elem, NULL, p, id);
-        return_elem = NULL;
-        break; // out of while loop
+        // Add the point to the cache...
+        _point_cache[id] = std::make_pair(elem, p);
+
+        // ... and to the reverse cache.
+        std::vector<std::pair<Point, unsigned>> & points = _reverse_point_cache[elem];
+        points.push_back(std::make_pair(p, id));
       }
 
-      bool active = cached_elem->active();
-      bool contains_point = cached_elem->contains_point(p);
+      // Call the other addPoint() method.  This method ignores non-local
+      // and NULL elements automatically.
+      addPoint(elem, p, id);
+      return_elem = elem;
+    }
 
-      // If the cached Elem is active and the point is still
-      // contained in it, call the other addPoint() method and
-      // return its result.
-      if (active && contains_point)
+    // If the point was found in a cache, but not my cache, I'm not
+    // responsible for it.
+    //
+    // We can't return early here: then we aren't allowed to call any more
+    // parallel_only() functions in the remainder of this function!
+    if (we_found_it && !i_found_it)
+      return_elem = NULL;
+
+    // Now that we only cache local data, some processors may enter
+    // this if statement and some may not.  Therefore we can't call
+    // any parallel_only() functions inside this if statement.
+    while (i_found_it)
+    {
+      // We have something cached, now make sure it's actually the same Point.
+      // TODO: we should probably use this same comparison in the DiracKernelInfo code!
+      Point cached_point = (it->second).second;
+
+      if (cached_point.relative_fuzzy_equals(p))
       {
-        addPoint(cached_elem, p, id);
-        return_elem = cached_elem;
-        break; // out of while loop
-      }
+        // Find the cached element associated to this point
+        cached_elem = (it->second).first;
 
-      // Is the Elem not active (been refined) but still contains the point?
-      // Then search in its active children and update the caches.
-      else if (!active && contains_point)
-      {
-        // Get the list of active children
-        std::vector<const Elem *> active_children;
-        cached_elem->active_family_tree(active_children);
+        // If the cached element's processor ID doesn't match ours, we
+        // are no longer responsible for caching it.  This can happen
+        // due to adaptivity...
+        if (cached_elem->processor_id() != processor_id())
+        {
+          // Update the caches, telling them to drop the cached Elem.
+          // Analogously to the rest of the DiracKernel system, we
+          // also return NULL because the Elem is non-local.
+          updateCaches(cached_elem, NULL, p, id);
+          return_elem = NULL;
+          break; // out of while loop
+        }
 
-        // Linear search through active children for the one that contains p
-        for (unsigned c = 0; c < active_children.size(); ++c)
-          if (active_children[c]->contains_point(p))
-          {
-            updateCaches(cached_elem, active_children[c], p, id);
-            addPoint(active_children[c], p, id);
-            return_elem = active_children[c];
-            break; // out of for loop
-          }
+        bool active = cached_elem->active();
+        bool contains_point = cached_elem->contains_point(p);
 
-        // If we got here without setting return_elem, it means the Point was
-        // found in the parent element, but not in any of the active
-        // children... this is not possible under normal
-        // circumstances, so something must have gone seriously
-        // wrong!
-        if (!return_elem)
-          mooseError("Error, Point not found in any of the active children!");
+        // If the cached Elem is active and the point is still
+        // contained in it, call the other addPoint() method and
+        // return its result.
+        if (active && contains_point)
+        {
+          addPoint(cached_elem, p, id);
+          return_elem = cached_elem;
+          break; // out of while loop
+        }
 
-        break; // out of while loop
-      }
+        // Is the Elem not active (been refined) but still contains the point?
+        // Then search in its active children and update the caches.
+        else if (!active && contains_point)
+        {
+          // Get the list of active children
+          std::vector<const Elem *> active_children;
+          cached_elem->active_family_tree(active_children);
 
-      else if (
-          // Is the Elem active but the point is not contained in it any
-          // longer?  (For example, did the Mesh move out from under
-          // it?)  Then we fall back to the expensive Point Locator
-          // lookup.  TODO: we could try and do something more optimized
-          // like checking if any of the active neighbors contains the
-          // point.  Update the caches.
-          (active && !contains_point) ||
+          // Linear search through active children for the one that contains p
+          for (unsigned c = 0; c < active_children.size(); ++c)
+            if (active_children[c]->contains_point(p))
+            {
+              updateCaches(cached_elem, active_children[c], p, id);
+              addPoint(active_children[c], p, id);
+              return_elem = active_children[c];
+              break; // out of for loop
+            }
 
-          // The Elem has been refined *and* the Mesh has moved out
-          // from under it, we fall back to doing the expensive Point
-          // Locator lookup.  TODO: We could try and look in the
-          // active children of this Elem's neighbors for the Point.
-          // Update the caches.
-          (!active && !contains_point))
-      {
-        i_need_find_point = true;
-        break; // out of while loop
-      }
+          // If we got here without setting return_elem, it means the Point was
+          // found in the parent element, but not in any of the active
+          // children... this is not possible under normal
+          // circumstances, so something must have gone seriously
+          // wrong!
+          if (!return_elem)
+            mooseError("Error, Point not found in any of the active children!");
 
+          break; // out of while loop
+        }
+
+        else if (
+            // Is the Elem active but the point is not contained in it any
+            // longer?  (For example, did the Mesh move out from under
+            // it?)  Then we fall back to the expensive Point Locator
+            // lookup.  TODO: we could try and do something more optimized
+            // like checking if any of the active neighbors contains the
+            // point.  Update the caches.
+            (active && !contains_point) ||
+
+            // The Elem has been refined *and* the Mesh has moved out
+            // from under it, we fall back to doing the expensive Point
+            // Locator lookup.  TODO: We could try and look in the
+            // active children of this Elem's neighbors for the Point.
+            // Update the caches.
+            (!active && !contains_point))
+        {
+          i_need_find_point = true;
+          break; // out of while loop
+        }
+
+        else
+          mooseError("We'll never get here!");
+      } // if (cached_point.relative_fuzzy_equals(p))
       else
-        mooseError("We'll never get here!");
-    } // if (cached_point.relative_fuzzy_equals(p))
-    else
-      mooseError("Cached Dirac point ",
-                 cached_point,
-                 " already exists with ID: ",
-                 id,
-                 " and does not match point ",
-                 p,
-                 "If Dirac sources are moving, please set 'allow_moving_sources' to true");
+        mooseError("Cached Dirac point ",
+                   cached_point,
+                   " already exists with ID: ",
+                   id,
+                   " and does not match point ",
+                   p,
+                   "If Dirac sources are moving, please set 'allow_moving_sources' to true");
 
-    // We only want one iteration of this while loop at maximum.
-    i_found_it = false;
-  } // while (i_found_it)
+      // We only want one iteration of this while loop at maximum.
+      i_found_it = false;
+    } // while (i_found_it)
+  }
+  catch (...)
+  {
+    _fe_problem.handleException("DiracKernelBase addPoint");
+  }
+
+  // If one processor had an error, all processors should unwind with
+  // that error
+  _fe_problem.checkExceptionAndStopSolve();
 
   // We are back to all processors here because we do not return
   // early in the code above...
