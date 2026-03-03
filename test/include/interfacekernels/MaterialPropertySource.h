@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADInterfaceKernel.h"
+#include "InterfaceKernel.h"
 
 class MaterialPropertySource : public InterfaceKernel
 {
