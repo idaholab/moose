@@ -434,6 +434,10 @@ class Tester(MooseObject, OutputInterface):
             raise RuntimeError(message)
 
         self._augmented_capabilities: Optional[dict] = None
+        """The capabilities that are augmented on the app from this test."""
+
+        self._capability_names: Optional[set[str]] = None
+        """The capability names from the checked "capabilities" param, if any."""
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -823,7 +827,7 @@ class Tester(MooseObject, OutputInterface):
         # Try to check the capabilities; this could fail if the
         # capabilities string is bad or if the registry is bad
         try:
-            present = checkAppCapabilities(
+            success, result = checkAppCapabilities(
                 capabilities=options._capabilities,
                 required=self.specs["capabilities"],
                 certain=not bool(self.specs["dynamic_capabilities"]),
@@ -862,21 +866,24 @@ class Tester(MooseObject, OutputInterface):
             return None
 
         # Capabilities are missing
-        if not present:
+        if not success:
             return f"Need {self.specs['capabilities']}"
+
+        # Store the capability names that were consumed
+        self._capability_names = result.capability_names
 
         # Check required capabilities
         if options._required_capabilities:
             missing = []
             for value in options._required_capabilities:
-                present = checkAppCapabilities(
+                success, _ = checkAppCapabilities(
                     options._capabilities,
                     self.specs["capabilities"],
-                    True,
+                    certain=True,
                     add_capabilities=self._augmented_capabilities,
                     negate_capabilities=[value],
                 )
-                if present:
+                if success:
                     missing.append(value)
 
             if missing:

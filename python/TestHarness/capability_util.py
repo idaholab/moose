@@ -12,10 +12,11 @@
 import re
 import subprocess
 import sys
-from typing import TYPE_CHECKING, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
+    from pycapabilities.dataclasses import CheckResult
 
 from TestHarness.util import outputHeader, parseMOOSEJSON, runCommand
 
@@ -42,7 +43,7 @@ def checkAppCapabilities(
     certain: bool,
     add_capabilities: Optional[dict] = None,
     negate_capabilities: Optional[Iterable[str]] = None,
-) -> bool:
+) -> Tuple[bool, CheckResult]:
     """
     Check a capability requirement against known capabilities.
 
@@ -67,6 +68,8 @@ def checkAppCapabilities(
     -------
     bool:
         Whether or not the check passed.
+    pycapabilities.dataclasses.CheckResult:
+        The CheckResult from calling Capabilities.check().
 
     """
     # This is one of the few places where we actually
@@ -74,15 +77,19 @@ def checkAppCapabilities(
     # intentional as it can trigger a build
     from pycapabilities import CheckState
 
-    status = capabilities.check(
+    result = capabilities.check(
         required,
         add_capabilities=add_capabilities,
         negate_capabilities=negate_capabilities,
-    )[0]
+        certain=certain,
+    )
 
-    return status == CheckState.CERTAIN_PASS or (
+    status = result.state
+    success = status == CheckState.CERTAIN_PASS or (
         status == CheckState.POSSIBLE_PASS and not certain
     )
+
+    return success, result
 
 
 def addAugmentedCapability(

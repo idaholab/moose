@@ -8,7 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from enum import IntEnum
-from typing import Iterable, Optional, Set, Tuple
+from typing import Iterable, Optional, Set
+
+from pycapabilities.dataclasses import CheckResult
 
 AUGMENTED_CAPABILITY_NAMES: Set[str]
 """
@@ -66,7 +68,7 @@ class Capabilities:
         certain: bool = True,
         add_capabilities: Optional[dict] = None,
         negate_capabilities: Optional[Iterable[str]] = None,
-    ) -> Tuple[CheckState]:
+    ) -> CheckResult:
         """
         Check capabilities against the registry.
 
@@ -92,12 +94,8 @@ class Capabilities:
 
         Returns
         -------
-        CheckState
-            The state of the check.
-        str
-            A reason associated with the check (currently unused).
-        str
-            Documentation associated with the check (currently unused).
+        pycapabilities.dataclasses.CheckResult
+            The result of the check.
 
         """
         ...

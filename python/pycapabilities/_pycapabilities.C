@@ -176,25 +176,24 @@ addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
   }
 }
 
-/// Get a python type from the exceptions module
 PyObject *
-getPythonExceptionType(const char * name)
+getPythonAttribute(const char * module_name, const char * attribute_name)
 {
-  // get exceptions module
-  PyObject * exceptions_module = PyImport_ImportModule("pycapabilities.exceptions");
-  if (!exceptions_module)
+  // get module
+  PyObject * module = PyImport_ImportModule(module_name);
+  if (!module)
     return nullptr;
 
-  // get exception type
-  PyObject * exception_type = PyObject_GetAttrString(exceptions_module, name);
-  if (!exception_type || !PyCallable_Check(exception_type))
+  // get attribute type
+  PyObject * attribute = PyObject_GetAttrString(module, attribute_name);
+  if (!attribute)
   {
-    Py_DECREF(exceptions_module);
+    Py_DECREF(module);
     return nullptr;
   }
 
-  Py_DECREF(exceptions_module);
-  return exception_type;
+  Py_DECREF(module);
+  return attribute;
 }
 
 /// Set the current error to a Python CapabilityException
@@ -202,8 +201,8 @@ void
 setPythonCapabilityException(const std::exception & e)
 {
   // get exception type
-  auto exception_type = getPythonExceptionType("CapabilityException");
-  if (!exception_type)
+  auto exception_type = getPythonAttribute("pycapabilities.exceptions", "CapabilityException");
+  if (!exception_type || !PyCallable_Check(exception_type))
     return;
 
   // build CapabilityException
@@ -224,8 +223,9 @@ void
 setPythonUnknownCapabilitiesException(const UnknownCapabilitiesException & e)
 {
   // get exception type
-  auto exception_type = getPythonExceptionType("UnknownCapabilitiesException");
-  if (!exception_type)
+  auto exception_type =
+      getPythonAttribute("pycapabilities.exceptions", "UnknownCapabilitiesException");
+  if (!exception_type || !PyCallable_Check(exception_type))
     return;
 
   // Form list[str] of unknown capabilities
@@ -252,6 +252,48 @@ setPythonUnknownCapabilitiesException(const UnknownCapabilitiesException & e)
   Py_DECREF(exception_instance);
 }
 
+/// Get a python type from the exceptions module
+PyObject *
+buildPythonCheckResult(const CapabilityRegistry::CheckResult & result)
+{
+  // get python CheckState
+  auto checkstate_type = getPythonAttribute("pycapabilities", "CheckState");
+  if (!checkstate_type || !PyCallable_Check(checkstate_type))
+    return nullptr;
+  // build python CheckState
+  PyObject * checkstate_obj = PyObject_CallFunction(checkstate_type, "l", result.state);
+  Py_DECREF(checkstate_type);
+  if (!checkstate_obj)
+    return nullptr;
+
+  // build python capability_names: set[str]
+  PyObject * capability_names_obj = PySet_New(0);
+  if (!capability_names_obj)
+  {
+    Py_DECREF(checkstate_obj);
+    return nullptr;
+  }
+  for (const auto & name : result.capability_names)
+    PySet_Add(capability_names_obj, PyUnicode_FromString(name.c_str()));
+
+  // get python CheckResult
+  auto checkresult_type = getPythonAttribute("pycapabilities.dataclasses", "CheckResult");
+  if (!checkresult_type || !PyCallable_Check(checkresult_type))
+  {
+    Py_DECREF(checkstate_obj);
+    Py_DECREF(capability_names_obj);
+    return nullptr;
+  }
+  // build python CheckResult
+  PyObject * checkresult_instance =
+      PyObject_CallFunctionObjArgs(checkresult_type, checkstate_obj, capability_names_obj, nullptr);
+  Py_DECREF(checkresult_type);
+  Py_DECREF(checkstate_obj);
+  Py_DECREF(capability_names_obj);
+
+  return checkresult_instance;
+}
+
 /*******************************************************************************/
 /* Python pycapabilities.CheckState: IntEnum                                   */
 /*******************************************************************************/
@@ -267,11 +309,7 @@ CheckState_enum(PyObject * module)
   PyObject * members = nullptr;
   PyObject * checkstate = nullptr;
 
-  enum_mod = PyImport_ImportModule("enum");
-  if (!enum_mod)
-    goto done;
-
-  IntEnum = PyObject_GetAttrString(enum_mod, "IntEnum");
+  IntEnum = getPythonAttribute("enum", "IntEnum");
   if (!IntEnum)
     goto done;
 
@@ -554,27 +592,11 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   // otherwise use the stored registry
   auto & registry = registry_copy ? *registry_copy : self->state->registry;
 
-  // Get a CheckState enum
-  PyObject * m = PyState_FindModule(&pycapabilitiesmodule);
-  if (!m)
-  {
-    PyErr_SetString(PyExc_RuntimeError, "module not initialized");
-    return nullptr;
-  }
-
   // Run the check
   try
   {
     const auto result = registry.check(requirement, certain == Py_True);
-
-    PyObject * checkstate = PyObject_GetAttrString(m, "CheckState");
-    if (!checkstate)
-      return nullptr;
-
-    PyObject * checkstate_obj = PyObject_CallFunction(checkstate, "l", result.state);
-    Py_DECREF(checkstate);
-
-    return Py_BuildValue("(N)", checkstate_obj);
+    return buildPythonCheckResult(result);
   }
   catch (const UnknownCapabilitiesException & e)
   {

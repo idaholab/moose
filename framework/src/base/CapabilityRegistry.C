@@ -197,7 +197,7 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [this, &add_unknown_capability](const SemanticValues & vs)
+  parser["Comparison"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
@@ -214,6 +214,9 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
 
     // capability is registered by the app
     const auto & capability = *capability_ptr;
+
+    // register capability as seen
+    result.capability_names.insert(capability.getName());
 
     // explicitly false causes any comparison to fail
     if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
@@ -298,21 +301,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
     checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [this, &add_unknown_capability](const SemanticValues & vs)
+  parser["Bool"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
   {
-    // Helper for erroring of a capability doesn't support a boolean
-    const auto check_explicit = [&vs](const Capability & capability)
-    {
-      if (capability.getExplicit())
-      {
-        std::string message = "capability '" + capability.getName() +
-                              "' requires a value and cannot be used in a boolean expression";
-        if (capability.queryEnumeration())
-          message += "; valid values: " + capability.enumerationToString();
-        checkException(vs, message);
-      }
-    };
-
     switch (vs.choice())
     {
       case 0: // Comparison
@@ -335,33 +325,34 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
         }
 
       case 2: // '!' Identifier
-      {
-        const auto identifier = std::any_cast<std::string>(vs[0]);
-        if (const auto capability_ptr = query(identifier))
-        {
-          const auto & capability = *capability_ptr;
-          if (const auto bool_ptr = capability.queryBoolValue())
-            return *bool_ptr ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
-          check_explicit(capability);
-          return CheckState::CERTAIN_FAIL;
-        }
-        add_unknown_capability(identifier);
-        return CheckState::POSSIBLE_PASS;
-      }
-
       case 3: // Identifier
       {
+        const bool negated = vs.choice() == 2;
         const auto identifier = std::any_cast<std::string>(vs[0]);
         if (const auto capability_ptr = query(identifier))
         {
           const auto & capability = *capability_ptr;
+
+          if (capability.getExplicit())
+          {
+            std::string message = "capability '" + capability.getName() +
+                                  "' requires a value and cannot be used in a boolean expression";
+            if (capability.queryEnumeration())
+              message += "; valid values: " + capability.enumerationToString();
+            checkException(vs, message);
+          }
+
+          result.capability_names.insert(capability.getName());
+
           if (const auto bool_ptr = capability.queryBoolValue())
-            return *bool_ptr ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
-          check_explicit(capability);
-          return CheckState::CERTAIN_PASS;
+            return *bool_ptr ? (negated ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS)
+                             : (negated ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL);
+
+          return negated ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
         }
+
         add_unknown_capability(identifier);
-        return CheckState::POSSIBLE_FAIL;
+        return negated ? CheckState::POSSIBLE_PASS : CheckState::POSSIBLE_FAIL;
       }
 
       default:

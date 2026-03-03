@@ -74,6 +74,8 @@ public:
   {
     /// State of the check
     CheckState state;
+    /// The capability names that existed in the check string
+    std::set<std::string> capability_names;
   };
 
   /**
