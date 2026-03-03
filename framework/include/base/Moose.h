@@ -18,6 +18,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <mutex>
 
 #define QUOTE(macro) stringifyName(macro)
 #define stringifyName(name) #name
@@ -151,6 +152,7 @@ extern const ExecFlagType EXEC_POST_ADAPTIVITY;
 namespace Moose
 {
 // MOOSE is not tested with LIBMESH_DIM != 3
+
 static_assert(LIBMESH_DIM == 3,
               "MOOSE must be built with a libmesh library compiled without --enable-1D-only "
               "or --enable-2D-only");
@@ -228,6 +230,11 @@ extern bool _throw_on_warning;
 extern ExecFlagEnum execute_flags;
 
 /**
+ * Global mutex for outputting to console from the OutputWarehouse
+ */
+extern std::mutex moose_console_mutex;
+
+/**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
 #define COLOR_BLACK (Moose::colorConsole() ? XTERM_BLACK : "")
@@ -239,6 +246,8 @@ extern ExecFlagEnum execute_flags;
 #define COLOR_CYAN (Moose::colorConsole() ? XTERM_CYAN : "")
 #define COLOR_WHITE (Moose::colorConsole() ? XTERM_WHITE : "")
 #define COLOR_DEFAULT (Moose::colorConsole() ? XTERM_DEFAULT : "")
+#define COLOR_FAINT (Moose::colorConsole() ? XTERM_FAINT : "")
+#define COLOR_RESET (Moose::colorConsole() ? XTERM_RESET : "")
 
 /// Returns whether Console coloring is turned on (default: true).
 bool colorConsole();
