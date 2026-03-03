@@ -119,22 +119,6 @@ NEML2BatchIndexGeneratorTmpl<SideUserObject>::currentIndex()
 }
 
 template <class Base>
-template <typename B>
-std::enable_if_t<std::is_same_v<B, ElementUserObject>, std::size_t>
-NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id) const
-{
-  return getBatchIndexImpl(elem_id);
-}
-
-template <class Base>
-template <typename B>
-std::enable_if_t<std::is_same_v<B, SideUserObject>, std::size_t>
-NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id, unsigned int side) const
-{
-  return getBatchIndexImpl({elem_id, side});
-}
-
-template <class Base>
 std::size_t
 NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndexImpl(const BatchIndexKey<Base> & idx) const
 {

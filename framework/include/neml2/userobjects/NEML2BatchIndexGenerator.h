@@ -80,3 +80,19 @@ protected:
 
 using NEML2BatchIndexGenerator = NEML2BatchIndexGeneratorTmpl<ElementUserObject>;
 using NEML2BoundaryBatchIndexGenerator = NEML2BatchIndexGeneratorTmpl<SideUserObject>;
+
+template <class Base>
+template <typename B>
+std::enable_if_t<std::is_same_v<B, ElementUserObject>, std::size_t>
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id) const
+{
+  return getBatchIndexImpl(elem_id);
+}
+
+template <class Base>
+template <typename B>
+std::enable_if_t<std::is_same_v<B, SideUserObject>, std::size_t>
+NEML2BatchIndexGeneratorTmpl<Base>::getBatchIndex(dof_id_type elem_id, unsigned int side) const
+{
+  return getBatchIndexImpl({elem_id, side});
+}
