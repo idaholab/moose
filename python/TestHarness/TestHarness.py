@@ -1783,9 +1783,12 @@ class TestHarness:
             default=5,
             help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
         )
-        # disabled for now; see #32243
-        # failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
-
+        failgroup.add_argument(
+            "--max-memory-per-slot",
+            nargs=1,
+            type=float,
+            help="The maximum memory to allow for a job in MB, per slot",
+        )
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
         hpcgroup.add_argument(
             "--hpc",
@@ -1977,15 +1980,21 @@ class TestHarness:
             )
             opts.minimal_capabilities = True
 
-        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set;
-        # disabled for now, see #32243
-        # if (
-        #     opts.max_memory is None
-        #     and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
-        # ):
-        #     value = float(MOOSE_MAX_MEMORY)
-        #     print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
-        #     opts.max_memory = value
+        # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
+        # if --max-memory-per-slot is not not set
+        if (
+            opts.max_memory_per_slot is None
+            and (
+                MOOSE_MAX_MEMORY_PER_SLOT := os.environ.get("MOOSE_MAX_MEMORY_PER_SLOT")
+            )
+            is not None
+        ):
+            value = float(MOOSE_MAX_MEMORY_PER_SLOT)
+            print(
+                f"INFO: Setting --max-memory-per-slot={value} MB from "
+                "MOOSE_MAX_MEMORY_PER_SLOT"
+            )
+            opts.max_memory_per_slot = value
 
     def preRun(self):
         if self.options.json:

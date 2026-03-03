@@ -275,10 +275,38 @@ class Scheduler(MooseObject):
         # Updated the running jobs
         self.monitor_processes.update(pid_to_job.keys())
 
-        # Update max memory for each running job
+        # Update jobs and kill jobs over resources
+        max_memory_per_slot = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
             if (monitored_process := self.monitor_processes.get(pid)) is not None:
-                job.getRunner().setMaxMemory(monitored_process.max_memory)
+                runner = job.getRunner()
+                slots = job.getSlots()
+
+                # Update max memory
+                max_memory = monitored_process.max_memory
+                runner.setMaxMemory(max_memory)
+
+                # Check max memory
+                if max_memory_per_slot:
+                    memory_per_slot_mb = max_memory / slots * 1.0e-6
+                    if memory_per_slot_mb > max_memory_per_slot:
+                        message = (
+                            "JOB KILLED (OVER MEMORY): "
+                            f"Memory/slot {memory_per_slot_mb:.2f} "
+                            f"MB > allowed {max_memory_per_slot:.2f} MB"
+                        )
+                        job.killProcess(job.error, "KILLED: OVER MEMORY", message)
+
+                # Check max CPU
+                cpu_per_slot = monitored_process.max_percent_cpu / slots
+                max_cpu_per_slot = 125.0 + 110.0 * (slots - 1)
+                if cpu_per_slot > max_cpu_per_slot:
+                    message = (
+                        "JOB KILLED (OVER CPU): "
+                        f"CPU/slot {cpu_per_slot:.2f}% "
+                        f"> allowed {max_cpu_per_slot:.2f}%"
+                    )
+                    job.killProcess(job.error, "KILLED: OVER CPU", message)
 
     def waitFinish(self):
         """

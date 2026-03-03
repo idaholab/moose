@@ -647,13 +647,23 @@ class Job(OutputInterface):
         if num_failed > 0:
             self.setStatus(self.job_status.error, "VALIDATION FAILED")
 
-    def killProcess(self):
+    def killProcess(
+        self,
+        status: Optional[StatusSystem] = None,
+        status_message: str = "",
+        output: Optional[str] = None,
+    ):
         """Kill remaining process that may be running"""
+        if status is not None:
+            self.setStatus(status, status_message)
+        if output:
+            self.appendOutput(output)
         if self._runner:
             try:
                 self._runner.kill()
             except:
                 pass
+
         self.cleanup()
 
     def getOutputObjects(self) -> dict:
