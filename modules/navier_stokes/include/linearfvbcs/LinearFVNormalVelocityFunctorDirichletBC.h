@@ -12,8 +12,9 @@
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 /**
- * Class implementing a Dirichlet boundary condition for linear finite
- * volume variables. This is only applicable for advection-diffusion problems.
+ * Adds a dirichlet BC for prescribing a velocity parallel to the boundary face normal direction;
+ * this boundary condition is meant for the velocity component variables for the Navier-Stokes
+ * momentum equation. A positive dirichlet value would denote outflow, while negative denotes inflow
  */
 class LinearFVNormalVelocityFunctorDirichletBC : public LinearFVAdvectionDiffusionFunctorDirichletBC
 {

@@ -34,7 +34,6 @@ Real
 LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryValue() const
 {
   return _functor(singleSidedFaceArg(_current_face_info), determineState());
-  ;
 }
 
 Real

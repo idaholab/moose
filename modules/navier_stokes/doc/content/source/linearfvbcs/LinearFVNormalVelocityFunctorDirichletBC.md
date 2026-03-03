@@ -2,7 +2,7 @@
 
 ## Description
 
-`LinearFVNormalVelocityFunctorDirichletBC` specifies the normal velocity. This boundary condition is a good choice if you can assume the velocity is entirely parallel to the normal direction at the boundary. A positive value for the normal velocity denotes outflow; a negative value denotes inflow. We anticipate that this boundary condition will primarily be used on inflows since that is primarily where Dirichlet conditions for velocity are imposed.
+`LinearFVNormalVelocityFunctorDirichletBC` specifies the normal velocity. This boundary condition is meant for the velocity variable(s) in the Navier-Stokes equations and is a good choice if you can assume the velocity is entirely parallel to the normal direction at the boundary. A positive value for the normal velocity denotes outflow; a negative value denotes inflow. We anticipate that this boundary condition will primarily be used on inflows since that is primarily where Dirichlet conditions for velocity are imposed.
 
 ## Example Syntax
 
