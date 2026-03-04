@@ -72,6 +72,9 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "max_edge_length>0",
       "Maximum length of an edge in the 1D meshes around each subdomain. Only a single value is "
       "currently allowed as the boundary refinement must be consistent between all subdomains.");
+  // NOTE: we could make this a per-included-subdomain parameter, we would just need to identify
+  // interfaces between each subdomain and use the minimum (or average or maximum, just needs to
+  // be consistent) edge length on those interfaces.
   params.addParam<std::vector<unsigned int>>(
       "interpolate_boundaries",
       {1},
@@ -427,20 +430,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
 
-  // Add more nodes in the 1D mesh
-  if (isParamValid("max_edge_length"))
-  {
-    // Sort the points the same way every time by using ID order
-    std::vector<Point> mesh_1d_points;
-    mesh_1d_points.reserve(mesh_1d->n_nodes());
-    for (const auto & node : mesh_1d->node_ptr_range())
-      mesh_1d_points.push_back(*node);
-
-    mesh_1d->clear();
-    MooseMeshUtils::buildPolyLineMesh(
-        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
-  }
-
   // If we have holes, we need to create a 1D mesh for each hole
   std::vector<std::unique_ptr<MeshBase>> hole_meshes_1d;
   for (auto & hole_mesh_2d : hole_meshes_2d)
@@ -509,6 +498,32 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       (*node)(2) = 0;
   }
 
+  // Add more nodes in the 1D mesh
+  // We do this once flatted to be able to use the MeshedHole ordering of points along the external boundary
+  if (isParamValid("max_edge_length"))
+  {
+    // We need to extract the points in the order of the boundary
+    libMesh::TriangulatorInterface::MeshedHole mesh_hole_1d(*mesh_2d);
+    std::vector<Point> mesh_1d_points;
+    mesh_1d_points.reserve(mesh_hole_1d.n_points());
+    for (const auto i_p : make_range(mesh_hole_1d.n_points()))
+      mesh_1d_points.push_back(mesh_hole_1d.point(i_p));
+
+    // Re-create the 1D mesh with a polyline
+    mesh_1d->clear();
+    MooseMeshUtils::buildPolyLineMesh(
+        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
+
+    // Check
+    std::cout << "Old points " << Moose::stringify(mesh_1d_points) << std::endl;
+    mesh_1d_points.clear();
+    mesh_1d_points.reserve(mesh_1d->n_nodes());
+    for (const auto & node : mesh_1d->node_ptr_range())
+      mesh_1d_points.push_back(*node);
+    std::cout << "New points " << Moose::stringify(mesh_1d_points) << std::endl;
+  }
+
+  // Create meshed holes for each hole mesh
   std::vector<libMesh::TriangulatorInterface::MeshedHole> meshed_holes;
   std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs;
   meshed_holes.reserve(hole_meshes_1d.size());
