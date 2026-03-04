@@ -165,41 +165,47 @@ class SubprocessRunner(Runner):
 
             self.getRunOutput().appendOutput(output)
 
-        # Determine CPU % from the time file
+        # Parse the time output if we have one
         if self._time_type != TimeType.NONE:
-            # Load the time utility output
-            try:
-                with open(self.timeFilePath(), "r") as f:
-                    contents = f.read().strip()
-            except FileNotFoundError:
-                if self.exit_code == 0:
-                    self.job.setStatus(self.job.error, "TIME FILE MISSING")
-                    self.appendOutput(
-                        f"\n\nFailed to find time file {self.timeFilePath()}"
-                    )
-            else:
-                # GNU time; should contain just the percentage
-                if self._time_type == TimeType.GNU:
-                    if match := re.fullmatch(r"(\d+)%", contents):
-                        self.setCPUPercent(float(match.group(1)))
-                # BSD time; has user and system times and need to
-                # divide by run time to get percentage
-                elif self._time_type == TimeType.BSD and (
-                    match := re.search(r"(\d+.\d+) user \s+ (\d+.\d+) sys", contents)
-                ):
-                    user_time = float(match.group(1))
-                    sys_time = float(match.group(2))
-                    wall_time = timer.totalTime("runner_run")
-                    self.setCPUPercent((user_time + sys_time) / wall_time * 100.0)
+            self.parseTimeFile(timer)
 
-                if self.cpu_percent is None:
-                    self.job.setStatus(self.job.error, "TIME FILE FAILURE")
-                    self.appendOutput(
-                        (
-                            f"\n\nFailed to parse time file {self.timeFilePath()}; "
-                            f"contents:\n\n{contents}"
-                        )
+    def parseTimeFile(self, timer):
+        """Parse the time file."""
+        assert self._time_type != TimeType.NONE
+
+        # Load the time utility output
+        try:
+            with open(self.timeFilePath(), "r") as f:
+                contents = f.read().strip()
+        # File didn't exist
+        except FileNotFoundError:
+            self.job.setStatus(self.job.error, "TIME FILE MISSING")
+            self.appendOutput(f"\n\nFailed to find time file {self.timeFilePath()}")
+        # Obtain the CPU percentage from the time output
+        else:
+            # GNU time; should contain just the percentage
+            if self._time_type == TimeType.GNU:
+                if match := re.fullmatch(r"(\d+)%", contents):
+                    self.setCPUPercent(float(match.group(1)))
+            # BSD time; has user and system times and need to
+            # divide by run time to get percentage
+            elif self._time_type == TimeType.BSD and (
+                match := re.search(r"(\d+.\d+) user \s+ (\d+.\d+) sys", contents)
+            ):
+                user_time = float(match.group(1))
+                sys_time = float(match.group(2))
+                wall_time = timer.totalTime("runner_run")
+                self.setCPUPercent((user_time + sys_time) / wall_time * 100.0)
+
+            # Didn't find it or the parse failed
+            if self.cpu_percent is None:
+                self.job.setStatus(self.job.error, "TIME FILE FAILURE")
+                self.appendOutput(
+                    (
+                        f"\n\nFailed to parse time file {self.timeFilePath()}; "
+                        f"contents:\n\n{contents}"
                     )
+                )
 
     def deleteTimeFile(self, graceful: bool):
         """Delete the time file."""
