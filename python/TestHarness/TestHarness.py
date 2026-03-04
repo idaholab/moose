@@ -937,7 +937,7 @@ class TestHarness:
         jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
         jobs = sorted(
             jobs,
-            key=lambda job: job.getMaxMemory() / job.getTester().getProcs(self.options),
+            key=lambda job: job.getMaxMemory() / job.getSlots(),
             reverse=True,
         )
         return jobs[0:num]
@@ -1012,7 +1012,7 @@ class TestHarness:
             heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
             if heaviest_jobs:
                 print(
-                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/proc)")
+                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
                 )
                 for job in heaviest_jobs:
                     print(
