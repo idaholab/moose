@@ -179,13 +179,12 @@ class RunApp(Tester):
                     params[max_param] = 1
                     self.addCaveats(f"implicit {max_param}=1")
 
-        if params.isValid("command_proxy"):
-            params["use_shell"] = True
-            # Not compatible with each other due to the return break in runCommand()
-            if params["no_additional_cli_args"]:
-                raise Exception(
-                    'The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together'
-                )
+        # Not compatible with each other due to the return break in runCommand()
+        if params.isValid("command_proxy") and params["no_additional_cli_args"]:
+            raise Exception(
+                "The parameters 'command_proxy' and 'no_additional_cli_args' "
+                "cannot be supplied together"
+            )
 
         for value in params["compute_devices"]:
             if value.lower() not in TestHarness.validComputeDevices():
