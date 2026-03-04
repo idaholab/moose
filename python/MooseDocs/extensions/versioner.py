@@ -47,7 +47,6 @@ class VersionerExtension(command.CommandExtension):
         """
         with cls.PACKAGES_LOCK:
             if cls.PACKAGES is None:
-                print("building packages")
                 cls.PACKAGES = Versioner().get_packages("HEAD")
             return cls.PACKAGES
 
