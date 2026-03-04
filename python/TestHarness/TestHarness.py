@@ -1023,7 +1023,7 @@ class TestHarness:
                             caveats=True,
                             timing=True,
                             memory=True,
-                            memory_per_proc=True,
+                            memory_per_slot=True,
                         )
                     )
 

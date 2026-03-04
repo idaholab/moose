@@ -197,7 +197,7 @@ def formatJobResult(
     status_message: bool = True,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
-    memory_per_proc: bool = False,
+    memory_per_slot: bool = False,
     caveats: bool = False,
 ) -> str:
     name = job.getTestName()
@@ -224,8 +224,8 @@ def formatJobResult(
         name = prefix + suffix
 
     max_memory = job.getMaxMemory()
-    if memory_per_proc and max_memory is not None:
-        max_memory = int(max_memory / job.getTester().getProcs(options))
+    if memory_per_slot and max_memory is not None:
+        max_memory = int(max_memory / job.getSlots())
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
