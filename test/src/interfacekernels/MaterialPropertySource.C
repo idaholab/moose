@@ -28,7 +28,10 @@ MaterialPropertySource::MaterialPropertySource(const InputParameters & parameter
   : InterfaceKernel(parameters),
     _source(getMaterialProperty<Real>("source")),
     _dsource_du(getMaterialProperty<Real>("dsource_du")),
-    _dsource_du_neigh(getMaterialProperty<Real>("dsource_du_neighbor"))
+    _dsource_du_neigh(getMaterialProperty<Real>("dsource_du_neighbor")),
+    _source_neigh(getNeighborMaterialProperty<Real>("source")),
+    _dsource_neigh_du(getNeighborMaterialProperty<Real>("dsource_du_neighbor")),
+    _dsource_neigh_du_neigh(getNeighborMaterialProperty<Real>("dsource_du"))
 {
 }
 
@@ -40,11 +43,11 @@ MaterialPropertySource::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      r = _test[_i][_qp] * _source[_qp];
+      r = -_test[_i][_qp] * (1.1 * _source[_qp] + 0.5 * _source_neigh[_qp]);
       break;
 
     case Moose::Neighbor:
-      r = -_test_neighbor[_i][_qp] * _source[_qp];
+      r = -_test_neighbor[_i][_qp] * (0.6 * _source[_qp] + 0.8 * _source_neigh[_qp]);
       break;
   }
 
@@ -59,19 +62,23 @@ MaterialPropertySource::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement:
-      J = _test[_i][_qp] * _dsource_du[_qp] * _phi[_j][_qp];
+      J = -_test[_i][_qp] * (1.1 * _dsource_du[_qp] + 0.5 * _dsource_neigh_du[_qp]) * _phi[_j][_qp];
       break;
 
     case Moose::ElementNeighbor:
-      J = _test[_i][_qp] * _dsource_du_neigh[_qp] * _phi_neighbor[_j][_qp];
+      J = -_test[_i][_qp] * (1.1 * _dsource_du_neigh[_qp] + 0.5 * _dsource_neigh_du_neigh[_qp]) *
+          _phi_neighbor[_j][_qp];
       break;
 
     case Moose::NeighborElement:
-      J = -_test_neighbor[_i][_qp] * _dsource_du[_qp] * _phi[_j][_qp];
+      J = -_test_neighbor[_i][_qp] * (0.6 * _dsource_du[_qp] + 0.8 * _dsource_neigh_du[_qp]) *
+          _phi[_j][_qp];
       break;
 
     case Moose::NeighborNeighbor:
-      J = -_test_neighbor[_i][_qp] * _dsource_du_neigh[_qp] * _phi_neighbor[_j][_qp];
+      J = -_test_neighbor[_i][_qp] *
+          (0.6 * _dsource_du_neigh[_qp] + 0.8 * _dsource_neigh_du_neigh[_qp]) *
+          _phi_neighbor[_j][_qp];
       break;
   }
 

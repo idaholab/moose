@@ -60,8 +60,8 @@
     requirement = 'The framework shall be capable of defining NEML2 models on material interfaces'
     type = Exodiff
     issues = '#32413'
-    input = 'interface_material_neml2.i'
-    exodiff = 'interface_material_neml2_out.e'
+    input = 'interface_material.i'
+    exodiff = 'interface_material_out.e'
     capabilities = 'neml2'
     valgrind = heavy
     collections = 'SYSTEM'

@@ -75,9 +75,6 @@
   [block]
     block = 'A B'
   []
-  [interface]
-    boundary = 'A_B'
-  []
 []
 
 [Executioner]

@@ -166,7 +166,9 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
-  if (userobjs.size() == 0 && _domain_objs.size() == 0)
+  std::vector<DomainUserObject *> bnd_domain_uos;
+  queryBoundary(Interfaces::DomainUserObject, bnd_id, bnd_domain_uos);
+  if (userobjs.size() == 0 && bnd_domain_uos.size() == 0)
     return;
 
   _fe_problem.reinitElemFace(elem, side, _tid);
@@ -184,7 +186,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   for (const auto & uo : userobjs)
     uo->execute();
 
-  for (auto & uo : _domain_objs)
+  for (auto & uo : bnd_domain_uos)
   {
     uo->preExecuteOnBoundary();
     uo->executeOnBoundary();

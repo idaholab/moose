@@ -25,4 +25,8 @@ protected:
   const MaterialProperty<Real> & _source;
   const MaterialProperty<Real> & _dsource_du;
   const MaterialProperty<Real> & _dsource_du_neigh;
+
+  const MaterialProperty<Real> & _source_neigh;
+  const MaterialProperty<Real> & _dsource_neigh_du;
+  const MaterialProperty<Real> & _dsource_neigh_du_neigh;
 };

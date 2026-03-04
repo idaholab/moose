@@ -14,8 +14,8 @@
 /**
  * Gather a MOOSE variable for insertion into the NEML2 model.
  */
-template <typename UOBase, unsigned int state>
-class MOOSEVariableToNEML2Tmpl : public MOOSEToNEML2Batched<Real, UOBase>
+template <unsigned int state>
+class MOOSEVariableToNEML2Tmpl : public MOOSEToNEML2Batched<Real>
 {
 public:
   static InputParameters validParams();
@@ -24,14 +24,12 @@ public:
 
 #ifdef NEML2_ENABLED
 protected:
-  const MooseArray<Real> & elemMOOSEData() const override { return _moose_variable; }
+  const MooseArray<Real> & currentMOOSEData() const override { return _moose_variable; }
 
   /// Coupled MOOSE variable to read data from
   const VariableValue & _moose_variable;
 #endif
 };
 
-using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Tmpl<ElementUserObject, 0>;
-using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<ElementUserObject, 1>;
-using MOOSEBoundaryVariableToNEML2 = MOOSEVariableToNEML2Tmpl<SideUserObject, 0>;
-using MOOSEBoundaryOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<SideUserObject, 1>;
+using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Tmpl<0>;
+using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<1>;

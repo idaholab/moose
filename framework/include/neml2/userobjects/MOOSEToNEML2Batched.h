@@ -10,8 +10,7 @@
 #pragma once
 
 #include "MOOSEToNEML2.h"
-#include "ElementUserObject.h"
-#include "SideUserObject.h"
+#include "DomainUserObject.h"
 
 /**
  * @brief Generic gatherer for collecting "batched" MOOSE data for NEML2
@@ -25,10 +24,9 @@
  * element.
  *
  * @tparam T Type of the underlying MOOSE data, e.g., Real, SymmetricRankTwoTensor, etc.
- * @tparam UOBase Type of the underlying UserObject, e.g., ElementUserObject, SideUserObject, etc.
  */
-template <typename T, typename UOBase>
-class MOOSEToNEML2Batched : public MOOSEToNEML2, public UOBase
+template <typename T>
+class MOOSEToNEML2Batched : public MOOSEToNEML2, public DomainUserObject
 {
 public:
   static InputParameters validParams();
@@ -37,12 +35,12 @@ public:
 
 #ifndef NEML2_ENABLED
   void initialize() override {}
-  void execute() override {}
   void finalize() override {}
   void threadJoin(const UserObject &) override {}
 #else
   void initialize() override;
-  void execute() override;
+  void executeOnElement() override;
+  void executeOnBoundary() override;
   void finalize() override {}
   void threadJoin(const UserObject &) override;
 
@@ -52,20 +50,23 @@ public:
   std::size_t size() const { return _buffer.size(); }
 
 protected:
-  /// MOOSE data for the current element
-  virtual const MooseArray<T> & elemMOOSEData() const = 0;
+  /// MOOSE data for the current element/face
+  virtual const MooseArray<T> & currentMOOSEData() const = 0;
 
   /// Intermediate data buffer, filled during the element loop
   std::vector<T> _buffer;
+
+private:
+  void executeImpl();
 #endif
 };
 
-template <typename T, typename UOBase>
+template <typename T>
 InputParameters
-MOOSEToNEML2Batched<T, UOBase>::validParams()
+MOOSEToNEML2Batched<T>::validParams()
 {
   auto params = MOOSEToNEML2::validParams();
-  params += UOBase::validParams();
+  params += DomainUserObject::validParams();
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
@@ -77,41 +78,55 @@ MOOSEToNEML2Batched<T, UOBase>::validParams()
   return params;
 }
 
-template <typename T, typename UOBase>
-MOOSEToNEML2Batched<T, UOBase>::MOOSEToNEML2Batched(const InputParameters & params)
-  : MOOSEToNEML2(params), UOBase(params)
+template <typename T>
+MOOSEToNEML2Batched<T>::MOOSEToNEML2Batched(const InputParameters & params)
+  : MOOSEToNEML2(params), DomainUserObject(params)
 {
 }
 
 #ifdef NEML2_ENABLED
-template <typename T, typename UOBase>
+template <typename T>
 void
-MOOSEToNEML2Batched<T, UOBase>::initialize()
+MOOSEToNEML2Batched<T>::initialize()
 {
   _buffer.clear();
 }
 
-template <typename T, typename UOBase>
+template <typename T>
 void
-MOOSEToNEML2Batched<T, UOBase>::execute()
+MOOSEToNEML2Batched<T>::executeOnElement()
 {
-  const auto & elem_data = this->elemMOOSEData();
-  for (auto i : index_range(elem_data))
+  executeImpl();
+}
+
+template <typename T>
+void
+MOOSEToNEML2Batched<T>::executeOnBoundary()
+{
+  executeImpl();
+}
+
+template <typename T>
+void
+MOOSEToNEML2Batched<T>::executeImpl()
+{
+  const auto & elem_data = this->currentMOOSEData();
+  for (auto i : make_range(qRule().n_points()))
     _buffer.push_back(elem_data[i]);
 }
 
-template <typename T, typename UOBase>
+template <typename T>
 void
-MOOSEToNEML2Batched<T, UOBase>::threadJoin(const UserObject & uo)
+MOOSEToNEML2Batched<T>::threadJoin(const UserObject & uo)
 {
   // append vectors
-  const auto & m2n = static_cast<const MOOSEToNEML2Batched<T, UOBase> &>(uo);
+  const auto & m2n = static_cast<const MOOSEToNEML2Batched<T> &>(uo);
   _buffer.insert(_buffer.end(), m2n._buffer.begin(), m2n._buffer.end());
 }
 
-template <typename T, typename UOBase>
+template <typename T>
 neml2::Tensor
-MOOSEToNEML2Batched<T, UOBase>::gatheredData() const
+MOOSEToNEML2Batched<T>::gatheredData() const
 {
   return NEML2Utils::fromBlob(_buffer);
 }
