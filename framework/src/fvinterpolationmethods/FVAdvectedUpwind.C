@@ -21,11 +21,6 @@ FVAdvectedUpwind::validParams()
 
 FVAdvectedUpwind::FVAdvectedUpwind(const InputParameters & params) : FVInterpolationMethod(params)
 {
-  const DeviceData data{};
-  setAdvectedSystemContributionCalculator(
-      buildAdvectedSystemContributionCalculator<FVAdvectedUpwind>(data, false));
-  setAdvectedFaceValueInterpolator(
-      buildAdvectedFaceValueInterpolator<FVAdvectedUpwind>(data, false));
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
@@ -36,19 +31,12 @@ FVAdvectedUpwind::advectedInterpolate(const FaceInfo & face,
                                       const VectorValue<Real> * neighbor_grad,
                                       Real mass_flux) const
 {
-  return advectedInterpolate(
-      DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-}
+  (void)face;
+  (void)elem_value;
+  (void)neighbor_value;
+  (void)elem_grad;
+  (void)neighbor_grad;
 
-FVInterpolationMethod::AdvectedSystemContribution
-FVAdvectedUpwind::advectedInterpolate(const DeviceData &,
-                                      const FaceInfo & /*face*/,
-                                      Real /*elem_value*/,
-                                      Real /*neighbor_value*/,
-                                      const VectorValue<Real> * /*elem_grad*/,
-                                      const VectorValue<Real> * /*neighbor_grad*/,
-                                      Real mass_flux)
-{
   AdvectedSystemContribution result;
   // Branchless upwind selection to keep interpolation SIMD/GPU friendly
   const Real neighbor_weight = mass_flux < 0.0;
@@ -64,21 +52,7 @@ FVAdvectedUpwind::advectedInterpolateValue(const FaceInfo & face,
                                            const VectorValue<Real> * neighbor_grad,
                                            Real mass_flux) const
 {
-  const auto result = advectedInterpolate(
-      DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
-}
-
-Real
-FVAdvectedUpwind::advectedInterpolateValue(const DeviceData & data,
-                                           const FaceInfo & face,
-                                           Real elem_value,
-                                           Real neighbor_value,
-                                           const VectorValue<Real> * elem_grad,
-                                           const VectorValue<Real> * neighbor_grad,
-                                           Real mass_flux)
-{
-  const auto result = advectedInterpolate(
-      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result =
+      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
