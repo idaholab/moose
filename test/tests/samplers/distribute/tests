@@ -9,12 +9,10 @@
       command = 'execute.py'
       min_parallel = 4
       max_parallel = 4
-      max_threads = 1
       check_files = 'distribute_none.csv distribute_on.csv distribute_off.csv'
       recover = false
       valgrind = NONE
       detail = "that distributes samples in parallel and"
-      python = 3
       required_python_packages = 'pandas matplotlib'
       capabilities = 'installation_type=in_tree & !hpc' # see #26480
       capture_perf_graph = false
@@ -22,13 +20,10 @@
     [plot]
       type = CheckFiles
       command = 'plot.py'
-      max_parallel = 1
-      max_threads = 1
       check_files = 'memory_total.pdf memory_per_proc.pdf'
       recover = false
       valgrind = NONE
       prereq = scale/execute
-      python = 3
       required_python_packages = 'pandas matplotlib'
       detail = "demonstrates efficient parallel scaling of memory use."
       capabilities = 'installation_type=in_tree & !hpc' # see #26480
