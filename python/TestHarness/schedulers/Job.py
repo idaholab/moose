@@ -1080,6 +1080,9 @@ class Job(OutputInterface):
             self.timer.start(name, time_now)
             self.timer.stop(name, time_now + total_time)
 
+        # Load the command ran
+        self.__tester.setCommandRan(test_entry["tester"]["command"])
+
         # Load the output
         output_files = test_entry.get("output_files")
         output = test_entry.get("output")

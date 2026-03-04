@@ -498,7 +498,11 @@ class Tester(MooseObject, OutputInterface):
         """Get the results dict for this Tester"""
         results = {
             "name": self.__class__.__name__,
-            "command": self.getCommand(options),
+            "command": (
+                command_ran
+                if (command_ran := self.getCommandRan())
+                else self.getCommand(options)
+            ),
             "input_file": self.getInputFile(),
         }
         json_metadata = {}
