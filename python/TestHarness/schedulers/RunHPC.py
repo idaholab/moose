@@ -1154,11 +1154,14 @@ class RunHPC(RunParallel):
             app_exec_suffix = [apptainer_container]
 
         if submit_env["LOAD_MODULES"]:
-            print(
-                f'INFO: Using modules "{" ".join(submit_env["LOAD_MODULES"])}" for HPC environment'
+            self.harness.printInfo(
+                f'Using modules "{" ".join(submit_env["LOAD_MODULES"])} '
+                "for HPC environment"
             )
         if app_exec_prefix:
             exec_combined = app_exec_prefix + app_exec_suffix
-            print(f'INFO: Using "{" ".join(exec_combined)}" as HPC execution wrapper')
+            self.harness.printInfo(
+                f'Using "{" ".join(exec_combined)}" as' " HPC execution wrapper"
+            )
 
         return submit_env, app_exec_prefix, app_exec_suffix

@@ -2063,3 +2063,8 @@ class TestHarness:
         """
         message = " ".join([f"{v}" for v in args])
         raise SystemExit(f"ERROR: {message}")
+
+
+def printInfo(self, *args):
+    """Print the given message as information."""
+    util.printInfo(*args, colored=self.options.colored)
