@@ -139,7 +139,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 setattr(options, key, value)
 
             capabilities, augmented_capabilities, required_capabilities = (
-                TestHarness.getCapabilities(options, None)
+                TestHarness.getCapabilities(options, None, None)
             )
             self.assertIsInstance(capabilities.values, dict)
             self.assertIsInstance(augmented_capabilities, dict)
@@ -428,6 +428,22 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 capabilities="moosetestapp",
                 result=result,
             ),
+        )
+
+        # Has capabilities that are missing
+        result = self.runTests(
+            "-i", "missing_capabilities", minimal_capabilities=True, exit_code=132
+        )
+        assert result.harness is not None
+        test = self.getJobWithName(result.harness, "test")
+        self.assertEqual(test.getTester().getStatusMessage(), "UNKNOWN CAPABILITIES")
+        self.assertEqual(test.getTester().getStatus(), test.error)
+        self.assertIn(
+            (
+                "Tests/test/capabilities:\n"
+                "The following capabilities are unknown: bar, foo"
+            ),
+            test.getTester().getOutput(),
         )
 
 

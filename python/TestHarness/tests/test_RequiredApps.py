@@ -33,18 +33,26 @@ class TestHarnessTester(TestHarnessTestCase):
         out = result.output
         self.assertRegex(out, r"test\.test[\s.]+OK")
 
+        assert result.harness is not None
         self.checkStatus(result.harness, passed=1)
 
     def testAppMissing(self):
         """Test a required application as a capability when it does not exist."""
         result = self.runTests(
-            "--no-color", tests=buildTestSpecs(capabilities="fooapp")
+            "--no-color", tests=buildTestSpecs(capabilities="fooapp"), exit_code=132
         )
 
-        out = result.output
-        self.assertRegex(out, r"test\.test[\s.]+\[NEED FOOAPP\]\s+SKIP")
-
-        self.checkStatus(result.harness, skipped=1)
+        assert result.harness is not None
+        test = self.getJobWithName(result.harness, "test")
+        self.assertEqual(test.getTester().getStatusMessage(), "UNKNOWN CAPABILITIES")
+        self.assertEqual(test.getTester().getStatus(), test.error)
+        self.assertIn(
+            (
+                "Tests/test/capabilities:\n"
+                "The following capabilities are unknown: fooapp"
+            ),
+            test.getTester().getOutput(),
+        )
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@
 #include "peglib.h"
 
 #include <regex>
+#include <set>
 #include <utility>
 
 namespace Moose::internal
@@ -82,7 +83,7 @@ checkException(const peg::SemanticValues & vs,
 }
 
 CapabilityRegistry::CheckResult
-CapabilityRegistry::check(std::string requirements) const
+CapabilityRegistry::check(std::string requirements, const bool certain /* = true */) const
 {
   using namespace peg;
 
@@ -96,8 +97,15 @@ CapabilityRegistry::check(std::string requirements) const
     else
       break;
   }
+
+  CheckResult result;
+  result.state = CheckState::CERTAIN_FAIL;
+
   if (requirements.length() == 0)
-    return {CheckState::CERTAIN_PASS, "Empty requirements", ""};
+  {
+    result.state = CheckState::CERTAIN_PASS;
+    return result;
+  }
 
   static parser parser(R"(
     Expression    <-  _ Bool _ LogicOperator _ Expression / Bool _
@@ -114,6 +122,12 @@ CapabilityRegistry::check(std::string requirements) const
 
   if (!static_cast<bool>(parser))
     throw CapabilityException("Capabilities parser build failure.");
+
+  // Keep track of unknown capabilities in the event that
+  // the check must be certain
+  std::set<std::string> unknown_capabilities;
+  const auto add_unknown_capability = [&unknown_capabilities](const auto & name)
+  { unknown_capabilities.insert(MooseUtils::toLower(name)); };
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
 
@@ -183,7 +197,7 @@ CapabilityRegistry::check(std::string requirements) const
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [this](const SemanticValues & vs)
+  parser["Comparison"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
@@ -191,12 +205,18 @@ CapabilityRegistry::check(std::string requirements) const
     // check existence
     const auto capability_ptr = query(left);
     if (!capability_ptr)
+    {
       // return an unknown if the capability does not exist, this is important as it
       // stays unknown upon negation
+      add_unknown_capability(left);
       return CheckState::UNKNOWN;
+    }
 
     // capability is registered by the app
     const auto & capability = *capability_ptr;
+
+    // register capability as seen
+    result.capability_names.insert(capability.getName());
 
     // explicitly false causes any comparison to fail
     if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
@@ -281,21 +301,8 @@ CapabilityRegistry::check(std::string requirements) const
     checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [this](const SemanticValues & vs)
+  parser["Bool"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
   {
-    // Helper for erroring of a capability doesn't support a boolean
-    const auto check_explicit = [&vs](const Capability & capability)
-    {
-      if (capability.getExplicit())
-      {
-        std::string message = "capability '" + capability.getName() +
-                              "' requires a value and cannot be used in a boolean expression";
-        if (capability.queryEnumeration())
-          message += "; valid values: " + capability.enumerationToString();
-        checkException(vs, message);
-      }
-    };
-
     switch (vs.choice())
     {
       case 0: // Comparison
@@ -318,29 +325,35 @@ CapabilityRegistry::check(std::string requirements) const
         }
 
       case 2: // '!' Identifier
-      {
-        if (const auto capability_ptr = query(std::any_cast<std::string>(vs[0])))
-        {
-          const auto & capability = *capability_ptr;
-          if (const auto bool_ptr = capability.queryBoolValue())
-            return *bool_ptr ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
-          check_explicit(capability);
-          return CheckState::CERTAIN_FAIL;
-        }
-        return CheckState::POSSIBLE_PASS;
-      }
-
       case 3: // Identifier
       {
-        if (const auto capability_ptr = query(std::any_cast<std::string>(vs[0])))
+        const bool negated = vs.choice() == 2;
+        const auto identifier = std::any_cast<std::string>(vs[0]);
+        if (const auto capability_ptr = query(identifier))
         {
           const auto & capability = *capability_ptr;
+
+          if (capability.getExplicit())
+          {
+            std::string message = "capability '" + capability.getName() +
+                                  "' requires a value and cannot be used in a boolean expression";
+            if (capability.queryEnumeration())
+              message += "; valid values: " + capability.enumerationToString();
+            checkException(vs, message);
+          }
+
+          result.capability_names.insert(capability.getName());
+
+          const auto bool_to_certain = [&negated](const bool val)
+          { return (val ^ negated) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL; };
+
           if (const auto bool_ptr = capability.queryBoolValue())
-            return *bool_ptr ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
-          check_explicit(capability);
-          return CheckState::CERTAIN_PASS;
+            return bool_to_certain(*bool_ptr);
+          return bool_to_certain(true);
         }
-        return CheckState::POSSIBLE_FAIL;
+
+        add_unknown_capability(identifier);
+        return negated ? CheckState::POSSIBLE_PASS : CheckState::POSSIBLE_FAIL;
       }
 
       default:
@@ -396,10 +409,12 @@ CapabilityRegistry::check(std::string requirements) const
   // (4) Parse
   parser.enable_packrat_parsing(); // Enable packrat parsing.
 
-  CheckResult result;
-  result.state = CheckState::CERTAIN_FAIL;
   if (!parser.parse(requirements, result.state))
     throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
+
+  // If certain and unknown capabilities were found, throw accordingly
+  if (certain && unknown_capabilities.size())
+    throw UnknownCapabilitiesException({unknown_capabilities.begin(), unknown_capabilities.end()});
 
   return result;
 }

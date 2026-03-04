@@ -680,8 +680,13 @@ class RunApp(Tester):
     def prepare(self, options):
         super().prepare(options)
 
-        # Dump the augmented capabilities, if any
-        if self.specs["capabilities"]:
+        # Capture any capabilities that we augmented when checking if
+        # this test could run so that we can pass them via
+        # --testharness-capabilities to the application. The application
+        # needs to add our augmented capabilities so that running
+        # --required-capabilities="..." is valid with the capabilities
+        # that were augmented.
+        if self._capability_names:
             # Capabilities from this Tester's specs in addition
             # to capabilities from the global options
             if self._augmented_capabilities is not None:
@@ -692,11 +697,9 @@ class RunApp(Tester):
                 capabilities = options._augmented_capabilities
 
             # Capture the capabilities that we need to dump, if any.
-            # For now, we'll lazily just see if each of the
-            # augmented capabilities exists in the whole string.
             store_capabilities = {}
             for capability, entry in capabilities.items():
-                if capability in self.specs["capabilities"]:
+                if capability in self._capability_names:
                     store_capabilities[capability] = entry
 
             # We have capabilities to store

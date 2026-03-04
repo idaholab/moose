@@ -954,7 +954,8 @@ MooseApp::setupOptions()
     CapabilityRegistry::CheckResult result;
     try
     {
-      result = Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities);
+      result =
+          Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities, false);
     }
     catch (const std::exception & e)
     {
