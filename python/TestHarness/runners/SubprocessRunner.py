@@ -66,15 +66,25 @@ class SubprocessRunner(Runner):
         use_shell = tester.specs["use_shell"]
         cmd = tester.getCommand(self.options)
 
+        # If the tester supports wrapping with a time utility
+        # and we're not using shell, wrap the command with
+        # a time utility if a timing utility is available
         if tester.SUPPORTS_TIME and not use_shell:
             time_command = None
+
+            # GNU time; output to file just the CPU % quietly
             if gnu_time := findGNUTime():
                 self._time_type = TimeType.GNU
                 time_command = f"{gnu_time} -o {self.timeFilePath()} -f '%P' -q"
+            # BSD time; doesn't have cpu % so just output the
+            # user+sys times to file
             elif bsd_time := findBSDTime():
                 self._time_type = TimeType.BSD
                 time_command = f"{bsd_time} -o {self.timeFilePath()}"
 
+            # Found a time utility, so wrap the command with
+            # the utility, update the command, and delete any
+            # older time files if they exist
             if time_command is not None:
                 cmd = f"{time_command} {cmd}"
                 self.deleteTimeFile(graceful=True)
