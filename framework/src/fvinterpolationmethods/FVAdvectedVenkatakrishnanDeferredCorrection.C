@@ -32,12 +32,6 @@ FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCo
   : FVInterpolationMethod(params),
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))
 {
-  const DeviceData data{_deferred_correction_factor};
-  setAdvectedSystemContributionCalculator(
-      buildAdvectedSystemContributionCalculatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>(
-          data));
-  setAdvectedFaceValueInterpolator(
-      buildAdvectedFaceValueInterpolatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>(data));
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
@@ -48,43 +42,6 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
     const VectorValue<Real> * const elem_grad,
     const VectorValue<Real> * const neighbor_grad,
     const Real mass_flux) const
-{
-  return advectedInterpolate(DeviceData{_deferred_correction_factor},
-                             face,
-                             elem_value,
-                             neighbor_value,
-                             elem_grad,
-                             neighbor_grad,
-                             mass_flux);
-}
-
-Real
-FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolateValue(
-    const FaceInfo & face,
-    const Real elem_value,
-    const Real neighbor_value,
-    const VectorValue<Real> * const elem_grad,
-    const VectorValue<Real> * const neighbor_grad,
-    const Real mass_flux) const
-{
-  return advectedInterpolateValue(DeviceData{_deferred_correction_factor},
-                                  face,
-                                  elem_value,
-                                  neighbor_value,
-                                  elem_grad,
-                                  neighbor_grad,
-                                  mass_flux);
-}
-
-FVInterpolationMethod::AdvectedSystemContribution
-FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
-    const DeviceData & data,
-    const FaceInfo & face,
-    const Real elem_value,
-    const Real neighbor_value,
-    const VectorValue<Real> * const elem_grad,
-    const VectorValue<Real> * const neighbor_grad,
-    const Real mass_flux)
 {
   mooseAssert(elem_grad && neighbor_grad,
               "Venkatakrishnan deferred correction requires both element and neighbor gradients.");
@@ -115,23 +72,22 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
       result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
   // Deferred correction: add the difference between low-order and high-order reconstructions
   // explicitly on the RHS (scaled for robustness).
-  result.rhs_face_value = data.deferred_correction_factor * (phi_matrix - phi_high);
+  result.rhs_face_value = _deferred_correction_factor * (phi_matrix - phi_high);
 
   return result;
 }
 
 Real
 FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolateValue(
-    const DeviceData & data,
     const FaceInfo & face,
     const Real elem_value,
     const Real neighbor_value,
     const VectorValue<Real> * const elem_grad,
     const VectorValue<Real> * const neighbor_grad,
-    const Real mass_flux)
+    const Real mass_flux) const
 {
   const auto result = advectedInterpolate(
-      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+      face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   const Real phi_matrix =
       result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
   return phi_matrix - result.rhs_face_value;
