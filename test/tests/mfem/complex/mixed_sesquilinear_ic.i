@@ -51,6 +51,15 @@ omega=10.0
   []
 []
 
+[ICs]
+  [A_vector_ic]
+    type = MFEMComplexVectorIC
+    variable = A
+    vector_coefficient_real = '0 0 0'
+    vector_coefficient_imag = A_exact_imag
+  []
+[]
+
 [BCs]
   [dbc_V]
     type = MFEMComplexScalarDirichletBC
@@ -58,40 +67,9 @@ omega=10.0
     coefficient_real = V_exact_real
     coefficient_imag = 0.0
   []
-  [dbc_A_tan]
-    type = MFEMComplexVectorTangentialDirichletBC
-    variable = A
-    vector_coefficient_real = '0 0 0'
-    vector_coefficient_imag = A_exact_imag
-  []
 []
 
 [Kernels]
-  [curlcurl_A]
-    type = MFEMComplexKernel
-    variable = A
-    [RealComponent]
-      type = MFEMCurlCurlKernel
-      coefficient = 1.0
-    []
-  []
-  [mixed_grad_V]
-    type = MFEMMixedSesquilinearFormKernel
-    trial_variable = V
-    variable = A
-    [RealComponent]
-      type = MFEMMixedVectorGradientKernel
-      coefficient = 1.0
-    []
-  []
-  [mass_A]
-    type = MFEMComplexKernel
-    variable = A
-    [ImagComponent]
-      type = MFEMVectorFEMassKernel
-      coefficient = ${omega}
-    []
-  []
   [diff_V]
     type = MFEMComplexKernel
     variable = V
@@ -100,7 +78,7 @@ omega=10.0
       coefficient = 1.0
     []
   []
-  [mixed_mass_A]
+  [mass_A]
     type = MFEMMixedSesquilinearFormKernel
     trial_variable = A
     variable = V
@@ -121,21 +99,15 @@ omega=10.0
 []
 
 [Postprocessors]
-  [error_V]
+  [error]
     type = MFEMComplexL2Error
     variable = V
     function_real = V_exact_real
     function_imag = 0.0
   []
-  [error_A]
-    type = MFEMComplexVectorL2Error
-    variable = A
-    function_real = '0 0 0'
-    function_imag = A_exact_imag
-  []
 []
 
 [Outputs]
   csv = true
-  file_base = OutputData/MixedSesquilinear
+  file_base = OutputData/MixedSesquilinearIC
 []
