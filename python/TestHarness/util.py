@@ -427,7 +427,9 @@ def hasGNUTime() -> bool:
                 ]
 
                 try:
-                    subprocess.check_output(command)
+                    subprocess.run(
+                        command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                    )
                 except subprocess.CalledProcessError:
                     _HAS_GNU_TIME = False
                     return _HAS_GNU_TIME
