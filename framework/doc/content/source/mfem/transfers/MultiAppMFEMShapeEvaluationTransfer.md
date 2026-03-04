@@ -28,6 +28,7 @@ All MFEM to MFEM transfers executed from this class should be able to support:
 
 - transfers of scalar and vector variables
 - transfers between variables belonging to different finite element spaces and orders
+- transfers between complex variables
 - transfers between variables defined on submeshes and parent meshes
 - arbitrary number of parallel processes for both the source and target application
 - transfers between parent and child applications
