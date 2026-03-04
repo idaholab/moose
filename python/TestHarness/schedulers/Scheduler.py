@@ -324,7 +324,7 @@ class Scheduler(MooseObject):
             while True:
                 if not self.isRunning():
                     break
-                sleep(0.2)
+                sleep(0.25)
                 self.monitorJobProcesses()
 
             error_state = self.getErrorState()
