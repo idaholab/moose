@@ -234,9 +234,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
-    # Need BLAS and LAPACK libs for torch in neml2
-    dnf install -y openblas-devel
-
     # Require CUDA if we have cuda available
     if [ -n "$CUDA_DIR" ]; then
         # 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
@@ -255,6 +252,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
         -DBUILD_PYTHON:BOOL=OFF \
+        -DCMAKE_INCLUDE_PATH:PATH=${PETSC_DIR}/include \
+        -DCMAKE_LIBRARY_PATH:PATH=${PETSC_DIR}/lib \
         -DUSE_BLAS:BOOL=ON \
         -DBLAS:STRING=OpenBLAS \
         -DUSE_LAPACK:BOOL=ON \
