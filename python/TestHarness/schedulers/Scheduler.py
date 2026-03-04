@@ -462,8 +462,7 @@ class Scheduler(MooseObject):
         """Handle jobs that have timed out"""
         with job.getLock():
             if job.isRunning():
-                job.setStatus(job.timeout, "TIMEOUT")
-                job.killProcess()
+                job.killProcess(job.timeout, "TIMEOUT")
 
     def handleJobStatus(self, job, caveats=None):
         """

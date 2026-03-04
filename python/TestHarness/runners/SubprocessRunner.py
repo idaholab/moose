@@ -210,8 +210,12 @@ class SubprocessRunner(Runner):
                 else:
                     self.setCPUPercent(0.0)
 
-            # Didn't find it or the parse failed
-            if self.cpu_percent is None:
+            # Didn't find it or the parse failed; error if we haven't
+            # already hit an error or a timeout
+            if self.cpu_percent is None and self.job.getStatus() not in [
+                self.job.error,
+                self.job.timeout,
+            ]:
                 self.job.setStatus(self.job.error, "TIME FILE FAILURE")
                 self.appendOutput(
                     (
