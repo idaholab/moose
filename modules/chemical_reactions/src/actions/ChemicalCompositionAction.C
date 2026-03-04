@@ -82,6 +82,11 @@ ChemicalCompositionAction::validParams()
       "List of elements whose molar amounts in specific phases are requested");
   params.addParam<std::string>(
       "uo_name", "Thermochimica", "Name of the ThermochimicaDataUserObject.");
+  params.addParam<std::string>(
+      "prefix",
+      "",
+      "Optional namespace token prepended to all generated variable names. If not empty and "
+      "missing a trailing underscore, one is appended automatically.");
   return params;
 }
 
@@ -95,6 +100,10 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
   auto action = _awh.getActions<CommonChemicalCompositionAction>();
   if (action.size() == 1)
     pars.applyParameters(action[0]->parameters());
+
+  _variable_prefix = getParam<std::string>("prefix");
+  if (!_variable_prefix.empty() && _variable_prefix.back() != '_')
+    _variable_prefix += "_";
 
   if (!isParamValid("tunit"))
     paramError(
@@ -435,29 +444,32 @@ ChemicalCompositionAction::act()
     auto params = _factory.getValidParams(aux_var_type);
 
     for (const auto i : index_range(_elements))
-      _problem->addAuxVariable(aux_var_type, _elements[i], params);
+      _problem->addAuxVariable(aux_var_type, prefixedName(_elements[i]), params);
 
     for (const auto i : index_range(_phases))
-      _problem->addAuxVariable(aux_var_type, _phases[i], params);
+      _problem->addAuxVariable(aux_var_type, prefixedName(_phases[i]), params);
 
     for (const auto i : index_range(_tokenized_species))
       _problem->addAuxVariable(
-          aux_var_type, Moose::stringify(_tokenized_species[i], /* delim = */ ":"), params);
+          aux_var_type,
+          prefixedName(Moose::stringify(_tokenized_species[i], /* delim = */ ":")),
+          params);
 
     for (const auto i : index_range(_tokenized_element_potentials))
-      _problem->addAuxVariable(aux_var_type, "mu:" + _tokenized_element_potentials[i], params);
+      _problem->addAuxVariable(
+          aux_var_type, prefixedName("mu:" + _tokenized_element_potentials[i]), params);
 
     for (const auto i : index_range(_tokenized_vapor_species))
-      _problem->addAuxVariable(aux_var_type,
-                               "vp:" +
-                                   Moose::stringify(_tokenized_vapor_species[i], /* delim = */ ":"),
-                               params);
-
-    for (const auto i : index_range(_tokenized_phase_elements))
       _problem->addAuxVariable(
           aux_var_type,
-          "ep:" + Moose::stringify(_tokenized_phase_elements[i], /* delim = */ ":"),
+          prefixedName("vp:" + Moose::stringify(_tokenized_vapor_species[i], /* delim = */ ":")),
           params);
+
+    for (const auto i : index_range(_tokenized_phase_elements))
+      _problem->addAuxVariable(aux_var_type,
+                               prefixedName("ep:" + Moose::stringify(_tokenized_phase_elements[i],
+                                                                      /* delim = */ ":")),
+                               params);
   }
 
   //
@@ -491,20 +503,22 @@ ChemicalCompositionAction::act()
 
     auto uo_params = _factory.getValidParams(uo_type);
 
-    std::copy(_elements.begin(),
-              _elements.end(),
-              std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")));
+    std::transform(_elements.begin(),
+                   _elements.end(),
+                   std::back_inserter(uo_params.set<std::vector<VariableName>>("elements")),
+                   [this](const auto & name) { return prefixedName(name); });
 
     if (isParamValid("output_phases"))
-      std::copy(_phases.begin(),
-                _phases.end(),
-                std::back_inserter(uo_params.set<std::vector<VariableName>>("output_phases")));
+      std::transform(_phases.begin(),
+                     _phases.end(),
+                     std::back_inserter(uo_params.set<std::vector<VariableName>>("output_phases")),
+                     [this](const auto & name) { return prefixedName(name); });
 
     if (isParamValid("output_species"))
     {
       std::vector<std::string> species;
-      for (auto token : _tokenized_species)
-        species.push_back(Moose::stringify(token, ":"));
+      for (const auto & token : _tokenized_species)
+        species.push_back(prefixedName(Moose::stringify(token, ":")));
       uo_params.set<std::vector<VariableName>>("output_species")
           .insert(uo_params.set<std::vector<VariableName>>("output_species").end(),
                   species.begin(),
@@ -514,8 +528,8 @@ ChemicalCompositionAction::act()
     if (isParamValid("output_element_potentials"))
     {
       std::vector<std::string> element_potentials;
-      for (auto token : _tokenized_element_potentials)
-        element_potentials.push_back("mu:" + token);
+      for (const auto & token : _tokenized_element_potentials)
+        element_potentials.push_back(prefixedName("mu:" + token));
       uo_params.set<std::vector<VariableName>>("output_element_potentials")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_potentials").end(),
                   element_potentials.begin(),
@@ -525,8 +539,8 @@ ChemicalCompositionAction::act()
     if (isParamValid("output_vapor_pressures"))
     {
       std::vector<std::string> vapor_pressures;
-      for (auto token : _tokenized_vapor_species)
-        vapor_pressures.push_back("vp:" + Moose::stringify(token, ":"));
+      for (const auto & token : _tokenized_vapor_species)
+        vapor_pressures.push_back(prefixedName("vp:" + Moose::stringify(token, ":")));
       uo_params.set<std::vector<VariableName>>("output_vapor_pressures")
           .insert(uo_params.set<std::vector<VariableName>>("output_vapor_pressures").end(),
                   vapor_pressures.begin(),
@@ -536,8 +550,8 @@ ChemicalCompositionAction::act()
     if (isParamValid("output_element_phases"))
     {
       std::vector<std::string> element_phases;
-      for (auto token : _tokenized_phase_elements)
-        element_phases.push_back("ep:" + Moose::stringify(token, ":"));
+      for (const auto & token : _tokenized_phase_elements)
+        element_phases.push_back(prefixedName("ep:" + Moose::stringify(token, ":")));
       uo_params.set<std::vector<VariableName>>("output_element_phases")
           .insert(uo_params.set<std::vector<VariableName>>("output_element_phases").end(),
                   element_phases.begin(),
@@ -560,6 +574,12 @@ ChemicalCompositionAction::act()
   }
 
 #endif
+}
+
+std::string
+ChemicalCompositionAction::prefixedName(const std::string & base_name) const
+{
+  return _variable_prefix + base_name;
 }
 
 void
