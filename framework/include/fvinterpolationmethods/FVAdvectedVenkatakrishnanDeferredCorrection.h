@@ -25,31 +25,12 @@ public:
 
   FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
 
-  struct DeviceData
-  {
-    Real deferred_correction_factor = 1.0;
-  };
-
-  static AdvectedSystemContribution advectedInterpolate(const DeviceData & data,
-                                                        const FaceInfo & face,
-                                                        Real elem_value,
-                                                        Real neighbor_value,
-                                                        const VectorValue<Real> * elem_grad,
-                                                        const VectorValue<Real> * neighbor_grad,
-                                                        Real mass_flux);
-
-  static Real advectedInterpolateValue(const DeviceData & data,
-                                       const FaceInfo & face,
-                                       Real elem_value,
-                                       Real neighbor_value,
-                                       const VectorValue<Real> * elem_grad,
-                                       const VectorValue<Real> * neighbor_grad,
-                                       Real mass_flux);
+  bool advectedInterpolationNeedsGradients() const override { return true; }
 
   /**
    * @return The cell-gradient limiter used by this interpolation method.
    */
-  Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
+  Moose::FV::GradientLimiterType gradientLimiter() const override { return _gradient_limiter; }
 
   /**
    * Compute the matrix weights and RHS deferred correction for the advected face value.
@@ -65,7 +46,7 @@ public:
                                                  Real neighbor_value,
                                                  const VectorValue<Real> * elem_grad,
                                                  const VectorValue<Real> * neighbor_grad,
-                                                 Real mass_flux) const;
+                                                 Real mass_flux) const override;
 
   /**
    * Convenience wrapper that returns the face value implied by matrix weights plus RHS correction.
@@ -81,7 +62,7 @@ public:
                                 Real neighbor_value,
                                 const VectorValue<Real> * elem_grad,
                                 const VectorValue<Real> * neighbor_grad,
-                                Real mass_flux) const;
+                                Real mass_flux) const override;
 
 private:
   Moose::FV::GradientLimiterType _gradient_limiter =

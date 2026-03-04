@@ -22,12 +22,6 @@ FVGeometricAverage::validParams()
 FVGeometricAverage::FVGeometricAverage(const InputParameters & params)
   : FVInterpolationMethod(params)
 {
-  const DeviceData data{};
-  setAdvectedSystemContributionCalculator(
-      buildAdvectedSystemContributionCalculator<FVGeometricAverage>(data, false));
-  setAdvectedFaceValueInterpolator(
-      buildAdvectedFaceValueInterpolator<FVGeometricAverage>(data, false));
-  setFaceInterpolator(buildFaceInterpolator<FVGeometricAverage>(data));
 }
 
 Real
@@ -35,51 +29,17 @@ FVGeometricAverage::interpolate(const FaceInfo & face,
                                 const Real elem_value,
                                 const Real neighbor_value) const
 {
-  return interpolate(DeviceData{}, face, elem_value, neighbor_value);
-}
-
-FVInterpolationMethod::AdvectedSystemContribution
-FVGeometricAverage::advectedInterpolate(const FaceInfo & face,
-                                        Real elem_value,
-                                        Real neighbor_value,
-                                        const VectorValue<Real> * elem_grad,
-                                        const VectorValue<Real> * neighbor_grad,
-                                        Real mass_flux) const
-{
-  return advectedInterpolate(
-      DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-}
-
-Real
-FVGeometricAverage::advectedInterpolateValue(const FaceInfo & face,
-                                             Real elem_value,
-                                             Real neighbor_value,
-                                             const VectorValue<Real> * elem_grad,
-                                             const VectorValue<Real> * neighbor_grad,
-                                             Real mass_flux) const
-{
-  return advectedInterpolateValue(
-      DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-}
-
-Real
-FVGeometricAverage::interpolate(const DeviceData &,
-                                const FaceInfo & face,
-                                const Real elem_value,
-                                const Real neighbor_value)
-{
   const Real gc = face.gC();
   return gc * elem_value + (1.0 - gc) * neighbor_value;
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
-FVGeometricAverage::advectedInterpolate(const DeviceData & /*data*/,
-                                        const FaceInfo & face,
+FVGeometricAverage::advectedInterpolate(const FaceInfo & face,
                                         Real /*elem_value*/,
                                         Real /*neighbor_value*/,
                                         const VectorValue<Real> * /*elem_grad*/,
                                         const VectorValue<Real> * /*neighbor_grad*/,
-                                        Real /*mass_flux*/)
+                                        Real /*mass_flux*/) const
 {
   AdvectedSystemContribution result;
   const Real gc = face.gC();
@@ -88,13 +48,12 @@ FVGeometricAverage::advectedInterpolate(const DeviceData & /*data*/,
 }
 
 Real
-FVGeometricAverage::advectedInterpolateValue(const DeviceData & data,
-                                             const FaceInfo & face,
+FVGeometricAverage::advectedInterpolateValue(const FaceInfo & face,
                                              Real elem_value,
                                              Real neighbor_value,
                                              const VectorValue<Real> *,
                                              const VectorValue<Real> *,
-                                             Real)
+                                             Real) const
 {
-  return interpolate(data, face, elem_value, neighbor_value);
+  return interpolate(face, elem_value, neighbor_value);
 }
