@@ -11,14 +11,14 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import threading
 import time
 import typing
 from collections import OrderedDict
 from dataclasses import dataclass
-from tempfile import NamedTemporaryFile
-from typing import Optional
+from typing import Callable, Optional
 
 from mooseutils import colorText
 
@@ -395,56 +395,120 @@ class ScopedTimer:
             print(f" {elapsed_time:.2f} seconds", flush=True)
 
 
-_HAS_GNU_TIME: Optional[bool] = None
-"""Global used in hasGNUTime() for seeing if GNU /usr/bin/time exists."""
-
-_HAS_GNU_TIME_LOCK = threading.Lock()
-"""Global thread lock for accessing _HAS_GNU_TIME in hasGNUTime()."""
-
-
-def hasGNUTime() -> bool:
+def _findTimeUtility(test_utility: Callable[[str], bool]) -> Optional[str]:
     """
-    If GNU /usr/bin/time exists and works as expected.
+    Find a time utility that passes the given test.
 
-    Here, 'works as expected' means that it can be used
-    to run a command, output the result to a file, only
-    output the CPU percentage, and quietly.
+    Arguments:
+    ---------
+    test_utility : Callable[[str], bool]
+        Function that tests if the utility at the given path is valid.
+
+    Returns:
+    -------
+    Optional[str]:
+        Path to the time utility if found.
+
     """
-    global _HAS_GNU_TIME
-    global _HAS_GNU_TIME_LOCK
+    # /usr/bin/time
+    usr_bin_path = "/usr/bin/time"
+    if os.path.exists(usr_bin_path) and test_utility(usr_bin_path):
+        return usr_bin_path
 
-    with _HAS_GNU_TIME_LOCK:
-        if _HAS_GNU_TIME is None:
-            _HAS_GNU_TIME = False
+    # In path
+    if (which_path := shutil.which("time")) and test_utility(which_path):
+        return which_path
 
-            with NamedTemporaryFile() as file:
-                command = [
-                    "/usr/bin/time",
-                    "-o",
-                    file.name,
-                    "-f",
-                    "%P",
-                    "-q",
-                    "true",
-                ]
+    # Not found
+    return None
 
-                try:
-                    subprocess.run(
-                        command,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                    )
-                except subprocess.CalledProcessError:
-                    pass
-                except FileNotFoundError:
-                    pass
-                else:
-                    with open(file.name, "r") as f:
-                        contents = f.read().strip()
-                        if re.fullmatch(r"\d+%", contents) is not None:
-                            _HAS_GNU_TIME = True
 
-        return _HAS_GNU_TIME
+_GNU_TIME_PATH: Optional[str] = None
+"""Global used in findGNUTime() for the path to GNU time."""
+
+_GNU_TIME_PATH_SET: bool = False
+"""Global used in findGNUTime() for if _GNU_TIME_PATH is set."""
+
+_GNU_TIME_LOCK = threading.Lock()
+"""Global thread lock for accessing _GNU_TIME_PATH and _GNU_TIME_PATH_SET."""
+
+
+def findGNUTime() -> Optional[str]:
+    """
+    Find the GNU time utility.
+
+    This is cached so that it only searches for the utility
+    once and then stores the result. The cache is thread safe.
+    """
+    global _GNU_TIME_PATH
+    global _GNU_TIME_PATH_SET
+    global _GNU_TIME_LOCK
+
+    # Helper for testing "time" to see if it is GNU time
+    def test_gnu_time(path: str) -> bool:
+        try:
+            out = subprocess.check_output(
+                [path, "--version"], text=True, stderr=subprocess.DEVNULL
+            )
+        except subprocess.CalledProcessError:
+            return False
+        else:
+            return "(GNU Time)" in out
+
+    # Obtain a lock so that this is thread safe
+    with _GNU_TIME_LOCK:
+        # First time; search for time
+        if not _GNU_TIME_PATH_SET:
+            _GNU_TIME_PATH = _findTimeUtility(test_gnu_time)
+            _GNU_TIME_PATH_SET = True
+
+        # Use value from cache
+        return _GNU_TIME_PATH
+
+
+_BSD_TIME_PATH: Optional[str] = None
+"""Global used in findBSDTime() for the path to BSD time."""
+
+_BSD_TIME_PATH_SET: bool = False
+"""Global used in findBSDTime() for if _BSD_TIME_PATH is set."""
+
+_BSD_TIME_LOCK = threading.Lock()
+"""Global thread lock for accessing _BSD_TIME_PATH and _BSD_TIME_PATH_SET."""
+
+
+def findBSDTime() -> Optional[str]:
+    """
+    Find the BSD time utility.
+
+    This is cached so that it only searches for the utility
+    once and then stores the result. The cache is thread safe.
+    """
+    global _BSD_TIME_PATH
+    global _BSD_TIME_PATH_SET
+    global _BSD_TIME_LOCK
+
+    # Helper for testing "time" to see if it is BSD time
+    def test_bsd_time(path: str) -> bool:
+        process = subprocess.run(
+            [path, "--version"],
+            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if process.returncode == 1:
+            return "illegal option -- -" in process.stderr
+        return False
+
+    # Obtain a lock so that this is thread safe
+    with _BSD_TIME_LOCK:
+        # First time; search for time
+        if not _BSD_TIME_PATH_SET:
+            _BSD_TIME_PATH = _findTimeUtility(test_bsd_time)
+            _BSD_TIME_PATH_SET = True
+
+        # Use value from cache
+        return _BSD_TIME_PATH
 
 
 def printPrefixed(prefix: str, *args, color: Optional[str] = None):

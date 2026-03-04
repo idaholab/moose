@@ -13,13 +13,22 @@ import re
 import shlex
 import subprocess
 import time
+from enum import Enum
 from signal import SIGTERM
 from tempfile import SpooledTemporaryFile
 from threading import Lock
 from typing import Optional
 
 from TestHarness.runners.Runner import Runner
-from TestHarness.util import hasGNUTime
+from TestHarness.util import findBSDTime, findGNUTime
+
+
+class TimeType(Enum):
+    """Type of the time utility found, if any."""
+
+    BSD = 0
+    GNU = 1
+    NONE = 2
 
 
 class SubprocessRunner(Runner):
@@ -38,8 +47,9 @@ class SubprocessRunner(Runner):
         self._pid: Optional[int] = None
         # The lock for self.process
         self._pid_lock = Lock()
-        self._time_file: Optional[str] = None
-        """The output from /usr/bin/time, if the process was wrapped with it."""
+
+        self._time_type: TimeType = TimeType.NONE
+        """The type of time utility used, if any."""
 
     @property
     def pid(self) -> Optional[int]:
@@ -47,16 +57,28 @@ class SubprocessRunner(Runner):
         with self._pid_lock:
             return self._pid
 
+    def timeFilePath(self):
+        """Get the path to the time file."""
+        return f"{self.job.getOutputPathPrefix()}.testharness_time"
+
     def spawn(self, timer):
         tester = self.job.getTester()
         use_shell = tester.specs["use_shell"]
         cmd = tester.getCommand(self.options)
 
-        if hasGNUTime() and tester.SUPPORTS_TIME and not use_shell:
-            self._time_file = f"{self.job.getOutputPathPrefix()}.testharness_time"
-            self.deleteTimeFile(graceful=True)
-            cmd = f"/usr/bin/time -o {self._time_file} -f '%P' -q {cmd}"
-        tester.setCommandRan(cmd)
+        if tester.SUPPORTS_TIME and not use_shell:
+            time_command = None
+            if gnu_time := findGNUTime():
+                self._time_type = TimeType.GNU
+                time_command = f"{gnu_time} -o {self.timeFilePath()} -f '%P' -q"
+            elif bsd_time := findBSDTime():
+                self._time_type = TimeType.BSD
+                time_command = f"{bsd_time} -o {self.timeFilePath()}"
+
+            if time_command is not None:
+                cmd = f"{time_command} {cmd}"
+                self.deleteTimeFile(graceful=True)
+                tester.setCommandRan(cmd)
 
         # Split command into list of args to be passed to Popen
         if not use_shell:
@@ -143,22 +165,47 @@ class SubprocessRunner(Runner):
 
             self.getRunOutput().appendOutput(output)
 
-        # Load the time file if it exists
-        if self._time_file is not None:
-            with open(self._time_file, "r") as f:
-                contents = f.read().strip()
-            self.deleteTimeFile(graceful=False)
-            match = re.fullmatch(r"(\d+)%", contents)
-            if match:
-                self.setCPUPercent(float(match.group(1)))
+        # Determine CPU % from the time file
+        if self._time_type != TimeType.NONE:
+            # Load the time utility output
+            try:
+                with open(self.timeFilePath(), "r") as f:
+                    contents = f.read().strip()
+            except FileNotFoundError:
+                if self.exit_code == 0:
+                    self.job.setStatus(self.job.error, "TIME FILE MISSING")
+                    self.appendOutput(
+                        f"\n\nFailed to find time file {self.timeFilePath()}"
+                    )
             else:
-                raise Exception(f"Failed to parse time file with contents '{contents}'")
+                # GNU time; should contain just the percentage
+                if self._time_type == TimeType.GNU:
+                    if match := re.fullmatch(r"(\d+)%", contents):
+                        self.setCPUPercent(float(match.group(1)))
+                # BSD time; has user and system times and need to
+                # divide by run time to get percentage
+                elif self._time_type == TimeType.BSD and (
+                    match := re.search(r"(\d+.\d+) user \s+ (\d+.\d+) sys", contents)
+                ):
+                    user_time = float(match.group(1))
+                    sys_time = float(match.group(2))
+                    wall_time = timer.totalTime("runner_run")
+                    self.setCPUPercent((user_time + sys_time) / wall_time * 100.0)
+
+                if self.cpu_percent is None:
+                    self.job.setStatus(self.job.error, "TIME FILE FAILURE")
+                    self.appendOutput(
+                        (
+                            f"\n\nFailed to parse time file {self.timeFilePath()}; "
+                            f"contents:\n\n{contents}"
+                        )
+                    )
 
     def deleteTimeFile(self, graceful: bool):
         """Delete the time file."""
-        assert self._time_file is not None
+        assert self._time_type != TimeType.NONE
         try:
-            os.remove(self._time_file)
+            os.remove(self.timeFilePath())
         except FileNotFoundError:
             if not graceful:
                 raise
@@ -167,7 +214,7 @@ class SubprocessRunner(Runner):
         super().cleanup()
 
         # Cleanup the time file if it exists
-        if self._time_file is not None:
+        if self._time_type != TimeType.NONE:
             self.deleteTimeFile(graceful=True)
 
     def kill(self):
