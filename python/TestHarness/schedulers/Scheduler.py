@@ -284,7 +284,7 @@ class Scheduler(MooseObject):
                 slots = job.getSlots()
 
                 max_memory = runner.max_memory
-                if max_memory is None or max_memory > memory:
+                if max_memory is None or memory > max_memory:
                     runner.setMaxMemory(memory)
 
                     if max_memory_per_slot:
