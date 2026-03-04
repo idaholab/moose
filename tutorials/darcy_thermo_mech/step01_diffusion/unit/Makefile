@@ -31,7 +31,6 @@ NAVIER_STOKES             := no
 # phase_field is required by Step 10.
 PHASE_FIELD               := yes
 POROUS_FLOW               := no
-RICHARDS                  := no
 # solid_mechanics is required by Steps 9-10.
 SOLID_MECHANICS          := yes
 XFEM                      := no

@@ -1,6 +1,0 @@
-Requirements:
-    richards:
-        directories:
-            - modules/richards
-        log_missing: NONE
-        log_testable: NONE

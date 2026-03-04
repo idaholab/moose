@@ -43,8 +43,6 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/ray_tracing/doc/content
     rdg:
         root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
-    richards:
-        root_dir: ${MOOSE_DIR}/modules/richards/doc/content
     reactor:
         root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
     scalar_transport:
@@ -132,7 +130,6 @@ Extensions:
         remove:
             framework: !include framework/doc/remove.yml
             fluid_properties: !include modules/fluid_properties/doc/remove.yml
-            richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
             subchannel: !include modules/subchannel/doc/remove.yml
     MooseDocs.extensions.common:
