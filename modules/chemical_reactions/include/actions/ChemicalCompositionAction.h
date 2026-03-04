@@ -48,6 +48,7 @@ public:
   virtual void act();
 
 protected:
+  std::string prefixedName(const std::string & base_name) const;
   void readCSV();
 
   /// Element names
@@ -67,4 +68,7 @@ protected:
   std::vector<std::string> _tokenized_element_potentials;
   std::vector<std::pair<std::string, std::string>> _tokenized_vapor_species;
   std::vector<std::pair<std::string, std::string>> _tokenized_phase_elements;
+
+  /// Optional prefix prepended to all generated variable names
+  std::string _variable_prefix;
 };
