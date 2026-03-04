@@ -6,8 +6,8 @@ A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = '${fparse A12 + A13 * T_in + A14 * T_in * T_in}'
-flow_area = 0.0004980799633447909 #m2
-vol_flow = 3.47E-03
+flow_area = 0.000467906 #m2
+vol_flow = 4.67E-05 #low flow case
 mass_flux_in = '${fparse rho *  vol_flow / flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
@@ -28,38 +28,13 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-  [mu]
-  []
-[]
-
 [FluidProperties]
   [sodium]
     type = PBSodiumFluidProperties
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
@@ -70,12 +45,13 @@ P_out = 2.0e5 # Pa
   compute_viscosity = true
   compute_power = true
   P_tol = 1.0e-5
-  T_tol = 1.0e-3
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
   staggered_pressure = false
   verbose_multiapps = true
-  verbose_subchannel = false
+  verbose_subchannel = true
+  interpolation_scheme = upwind
   # friction model
   friction_closure = 'cheng'
 []
@@ -100,8 +76,8 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 322482.972 #W
-    filename = "pin_power_profile_19.txt"
+    power = 4966 #W
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
@@ -172,10 +148,87 @@ P_out = 2.0e5 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Postprocessors]
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 37
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T2]
+    type = SubChannelPointValue
+    variable = T
+    index = 36
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 20
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 10
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 1
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T7]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T8]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  ####### Assembly pressure drop
+  [DP_SubchannelDelta]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'TIMESTEP_END'
+  []
+  #####
+  [Mean_Temp]
+    type = SCMPlanarMean
+    variable = T
+    height = 2
+  []
+
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
+  []
 []
 
 ################################################################################
