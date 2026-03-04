@@ -39,6 +39,11 @@ public:
   virtual Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const;
 
   /**
+   * Whether this method supports face interpolation.
+   */
+  virtual bool supportsFaceInterpolation() const { return false; }
+
+  /**
    * Advected interpolation operation for this method.
    */
   virtual AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
@@ -47,6 +52,11 @@ public:
                                                          const VectorValue<Real> * elem_grad,
                                                          const VectorValue<Real> * neighbor_grad,
                                                          Real mass_flux) const;
+
+  /**
+   * Whether this method supports advected interpolation.
+   */
+  virtual bool supportsAdvectedInterpolation() const { return false; }
 
   /**
    * Advected interpolation operation that returns only the face value.

@@ -24,6 +24,7 @@ public:
 
   FVAdvectedMinmodWeightBased(const InputParameters & params);
 
+  bool supportsAdvectedInterpolation() const override { return true; }
   bool advectedInterpolationNeedsGradients() const override { return true; }
 
   /**
