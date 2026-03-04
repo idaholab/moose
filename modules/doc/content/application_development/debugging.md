@@ -93,13 +93,14 @@ set debuginfod enabled off
 
 Note that the above `set ...` commands are `gdb`-specific and will produce `invalid command` in `lldb`.
 
-The following breakpoint commands (specific to the MOOSE stack) can be used in both init files:
+The following breakpoint commands can be used in both init files:
 
 ```
+b moose::internal::mooseErrorRaw
+b libMesh::MacroFunctions::report_error
 b MPI_Abort
 b PetscError
 b TIMPI::report_error
-b libMesh::MacroFunctions::report_error
 ```
 
 For users using advanced tooling, such as UBSanitizer, AddressSanitizer, and ThreadSanitizer, the following breakpoints may come in handy:
