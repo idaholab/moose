@@ -317,7 +317,7 @@ TEST(CapabilityRegistryTest, checkCertain)
   CapabilityRegistry registry;
 
   // Unknown bool capabilities
-  // No error with default certain=true
+  // Error with default certain=true
   try
   {
     registry.check("noexist1 & !noexist2");
