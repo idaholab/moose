@@ -72,13 +72,12 @@ class SubprocessRunner(Runner):
         if tester.SUPPORTS_TIME and not use_shell:
             time_command = None
 
-            # GNU time; output to file just the CPU % quietly
+            # GNU time; output to file just CPU %
             if gnu_time := findGNUTime():
                 self._time_type = TimeType.GNU
                 time_command = f"{gnu_time} -o {self.timeFilePath()} -f '%P' -q"
-            # BSD time; doesn't have cpu % so just output the
-            # user+sys times to file
-            elif bsd_time := findBSDTime():
+            # BSD time; output to file real, user, sys time
+            if bsd_time := findBSDTime():
                 self._time_type = TimeType.BSD
                 time_command = f"{bsd_time} -o {self.timeFilePath()}"
 
@@ -197,15 +196,19 @@ class SubprocessRunner(Runner):
             if self._time_type == TimeType.GNU:
                 if match := re.fullmatch(r"(\d+)%", contents):
                     self.setCPUPercent(float(match.group(1)))
-            # BSD time; has user and system times and need to
-            # divide by run time to get percentage
+            # BSD time; need to compute percentage from (user+sys)/real
             elif self._time_type == TimeType.BSD and (
-                match := re.search(r"(\d+.\d+) user \s+ (\d+.\d+) sys", contents)
+                match := re.fullmatch(
+                    r"(\d+.\d+) real \s+ (\d+.\d+) user \s+ (\d+.\d+) sys", contents
+                )
             ):
-                user_time = float(match.group(1))
-                sys_time = float(match.group(2))
-                wall_time = timer.totalTime("runner_run")
-                self.setCPUPercent((user_time + sys_time) / wall_time * 100.0)
+                real_time = float(match.group(1))
+                if real_time > 0:
+                    user_time = float(match.group(2))
+                    sys_time = float(match.group(3))
+                    self.setCPUPercent((user_time + sys_time) / real_time * 100.0)
+                else:
+                    self.setCPUPercent(0.0)
 
             # Didn't find it or the parse failed
             if self.cpu_percent is None:
