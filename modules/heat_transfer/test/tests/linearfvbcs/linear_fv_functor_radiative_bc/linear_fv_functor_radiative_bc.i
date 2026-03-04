@@ -2,8 +2,8 @@
 # The domain is [0,1] with:
 #   Left:  Dirichlet temperature T_L (fixed)
 #   Right: LinearFVFunctorRadiativeBC, q = sigma * eps * (T^4 - Tinf^4)
-# A pseudo-transient approach (large dt steps) drives the Picard iteration
-# so that the Newton linearization converges to the nonlinear solution.
+# A pseudo-transient approach (large dt steps) iteratively updates the
+# lagged linearization coefficients until convergence to the nonlinear solution.
 
 T_L   = 1000.0   # Left boundary temperature [K]
 T_inf = 300.0    # Far-field radiation temperature [K]

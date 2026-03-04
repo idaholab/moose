@@ -19,10 +19,10 @@ LinearFVFunctorRadiativeBC::validParams()
   params.addClassDescription(
       "Boundary condition for radiative heat flux in a linear finite volume system. "
       "The nonlinear radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is "
-      "Newton-linearized around the extrapolated boundary face temperature at each assembly "
-      "step, yielding a Robin-type condition with second-order spatial accuracy. "
-      "Convergence to the nonlinear solution is achieved through Picard iteration driven "
-      "by transient stepping or a coupled nonlinear solve.");
+      "linearized via first-order Taylor expansion around the extrapolated boundary face "
+      "temperature from the previous iteration, yielding a Robin-type condition with "
+      "second-order spatial accuracy. The lagged coefficients are updated each time step "
+      "or outer iteration until convergence to the nonlinear solution.");
   params.addRequiredParam<MooseFunctorName>(
       "emissivity",
       "Functor describing the surface emissivity for the radiative boundary condition");

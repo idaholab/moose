@@ -13,12 +13,14 @@
 
 /**
  * Boundary condition for radiative heat flux in a linear finite volume system.
- * The radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is Newton-linearized
- * around the extrapolated boundary face temperature T_b_old at each assembly step:
+ * The radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is linearized via
+ * first-order Taylor expansion around the extrapolated boundary face temperature T_b_old:
+ *   T_b^4 ~ 4*T_b_old^3*T_b - 3*T_b_old^4
+ * yielding a Robin BC:
  *   k * dT/dn + [4*sigma*eps*T_b_old^3]*T_b = [sigma*eps*(3*T_b_old^4 + Tinf^4)]
- * This is a Robin BC with alpha=k, beta=4*sigma*eps*T_b_old^3,
- * gamma=sigma*eps*(3*T_b_old^4+Tinf^4), yielding second-order spatial accuracy. Outer Picard
- * convergence is driven by transient stepping or a coupled nonlinear solve.
+ * with alpha=k, beta=4*sigma*eps*T_b_old^3, gamma=sigma*eps*(3*T_b_old^4+Tinf^4).
+ * Second-order spatial accuracy is achieved by extrapolating T_b_old to the face.
+ * The lagged coefficients are updated each time step or outer iteration.
  */
 class LinearFVFunctorRadiativeBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
@@ -33,7 +35,7 @@ protected:
   virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
 
 private:
-  /// Extrapolates the boundary face temperature from the previous Picard iteration.
+  /// Extrapolates the boundary face temperature from the previous iteration.
   Real extrapolateFaceTemperature(Moose::StateArg state) const;
 
   /// Emissivity functor (epsilon)

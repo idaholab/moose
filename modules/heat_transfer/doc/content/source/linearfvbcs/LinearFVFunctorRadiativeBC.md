@@ -15,32 +15,46 @@ $$
 where $\sigma$ is the Stefan-Boltzmann constant, $\varepsilon$ is the surface emissivity
 (supplied as a functor), and $T_\infty$ is the far-field radiation temperature.
 
-## Second-Order Linearization
+## Linearization
 
-Because the LinearFV framework assembles an explicit linear system, the nonlinear $T^4$
-term must be **Newton-linearized**. For second-order spatial accuracy, the linearization
-is performed around the **extrapolated boundary face temperature** $T_{b,\text{old}}$
-(rather than the cell-center value):
+The LinearFV framework solves a linear system at each time step.  The diffusion and
+time-derivative terms are treated implicitly, but the nonlinear $T^4$ radiative term
+cannot appear directly in the linear system.  It must be linearized by lagging the
+nonlinear coefficients to the previous iteration's solution.
+
+### First-order Taylor expansion
+
+The $T^4$ term is expanded around the **extrapolated boundary face temperature**
+$T_{b,\text{old}}$ from the previous iteration:
 
 $$
 T_{b,\text{old}} = T_{P,\text{old}} + \nabla T_\text{old} \cdot \mathbf{d}_{cf}
 $$
 
 where $\mathbf{d}_{cf}$ is the vector from the cell center to the face centroid.
-Linearizing $q_\text{out}$ around $T_{b,\text{old}}$ yields:
+A first-order Taylor expansion gives:
+
+$$
+T_b^4 \approx T_{b,\text{old}}^4 + 4\,T_{b,\text{old}}^3
+\left(T_b - T_{b,\text{old}}\right)
+= 4\,T_{b,\text{old}}^3\,T_b - 3\,T_{b,\text{old}}^4
+$$
+
+Substituting into the radiative flux $q = \sigma\varepsilon(T_b^4 - T_\infty^4)$ and
+rearranging as a Robin boundary condition
+$k\,\nabla T\cdot\mathbf{n} + \beta\,T_b = \gamma$ yields:
 
 $$
 k \frac{\partial T}{\partial n} +
-\underbrace{4 \sigma \varepsilon T_{b,\text{old}}^3}_{\beta} T_b
-= \underbrace{\sigma \varepsilon \left( 3 T_{b,\text{old}}^4 + T_\infty^4 \right)}_{\gamma}
+\underbrace{4 \sigma \varepsilon\, T_{b,\text{old}}^3}_{\beta}\, T_b
+= \underbrace{\sigma \varepsilon \left( 3\, T_{b,\text{old}}^4 + T_\infty^4 \right)}_{\gamma}
 $$
 
-This is a Robin boundary condition $k \nabla T \cdot \mathbf{n} + \beta T_b = \gamma$,
-implemented by inheriting from `LinearFVAdvectionDiffusionFunctorRobinBCBase` with:
+This is implemented by inheriting from `LinearFVAdvectionDiffusionFunctorRobinBCBase` with:
 
 - $\alpha = k$ (`diffusion_coeff`)
-- $\beta = 4 \sigma \varepsilon T_{b,\text{old}}^3$
-- $\gamma = \sigma \varepsilon (3 T_{b,\text{old}}^4 + T_\infty^4)$
+- $\beta = 4 \sigma \varepsilon\, T_{b,\text{old}}^3$
+- $\gamma = \sigma \varepsilon (3\, T_{b,\text{old}}^4 + T_\infty^4)$
 
 The Robin base class handles all matrix and RHS contributions, including non-orthogonal
 mesh corrections. Using $T_{b,\text{old}}$ (face) instead of $T_{P,\text{old}}$ (cell center)
@@ -50,16 +64,21 @@ eliminates the $O(h)$ truncation error in the flux, restoring **second-order spa
 The `diffusion_coeff` parameter must match the diffusion coefficient used in the
 `LinearFVDiffusion` kernel, as it is the $\alpha$ coefficient in the Robin formulation.
 
-## Picard Convergence
+## Iterative Convergence
 
 Because $\beta$ and $\gamma$ depend on $T_{b,\text{old}}$ from the previous iteration,
-the linear system must be reassembled each outer iteration with the updated solution.
-This is achieved by:
+the linear system must be reassembled with updated coefficients until the solution
+converges to the nonlinear radiative balance.  The diffusion and time-derivative terms
+are fully implicit; only the radiative coefficients are lagged.  This implicit-explicit
+split does not affect the steady-state solution, only the convergence path.
+
+Two strategies drive the outer iteration:
 
 - **Pseudo-transient stepping**: use `LinearFVTimeDerivative` + `Transient` executioner
-  with large time steps. The matrix is rebuilt at each step with the current $T_\text{old}$.
-- **Coupled nonlinear solve**: if the temperature variable is coupled to a nonlinear
-  system, the NL solver drives the Picard iteration automatically.
+  with large time steps. The matrix is rebuilt at each step with the updated solution,
+  and the time derivative vanishes at steady state.
+- **Iterative multi-system solve**: if the temperature variable is part of a multi-system
+  problem, the outer multi-system iteration updates the lagged coefficients between solves.
 
 !syntax parameters /LinearFVBCs/LinearFVFunctorRadiativeBC
 

@@ -1,15 +1,21 @@
 # MMS convergence test for LinearFVFunctorRadiativeBC.
 #
-# Exact solution: T_exact(x) = T_L + (T_R_mms - T_L) * x^2
-# which satisfies:
+# Exact solution: T_exact(x) = T_L + B * (exp(x) - 1)
+# where B = (T_R_mms - T_L) / (e - 1).
+#
+# This satisfies:
 #   Left BC:  T(0) = T_L                          (Dirichlet)
 #   Right BC: -k * T'(1) = sigma*eps*(T_R_mms^4 - T_inf^4)  (radiative)
-#             with T'(1) = 2*(T_R_mms - T_L)
-#             i.e. 2*k*(T_L - T_R_mms) = sigma*eps*(T_R_mms^4 - T_inf^4)
-#   Source:   f = -k * T_exact'' = 2*k*(T_L - T_R_mms)  (constant)
+#             with T'(1) = B*e = (T_R_mms - T_L)*e/(e-1)
+#             i.e. k*(T_L - T_R_mms)*e/(e-1) = sigma*eps*(T_R_mms^4 - T_inf^4)
+#   Source:   f(x) = -k * T_exact'' = -k * B * exp(x)  (spatially varying)
+#
+# The exponential profile produces non-trivial interior discretization error,
+# ensuring the convergence test exercises both the FV interior scheme and the
+# Robin boundary condition simultaneously.
 #
 # T_R_mms must be supplied via CLI args, as the root of:
-#   2*k*(T_L - T_R) = sigma*eps*(T_R^4 - T_inf^4)
+#   k*(T_L - T_R)*e/(e-1) = sigma*eps*(T_R^4 - T_inf^4)
 # (computed in the Python convergence script).
 
 T_L    = 1000.0
@@ -17,6 +23,7 @@ T_inf  = 300.0
 k      = 1.0
 eps    = 1.0
 T_R_mms = 0  # set via CLI: T_R_mms=<value>
+B_mms = '${fparse (T_R_mms - T_L) / (exp(1.0) - 1.0)}'
 
 [Mesh]
   [gen]
@@ -43,9 +50,15 @@ T_R_mms = 0  # set via CLI: T_R_mms=<value>
 [Functions]
   [exact_T]
     type = ParsedFunction
-    expression = 'T_L + (T_R_mms - T_L) * x * x'
-    symbol_names = 'T_L T_R_mms'
-    symbol_values = '${T_L} ${T_R_mms}'
+    expression = 'T_L + B_mms * (exp(x) - 1.0)'
+    symbol_names = 'T_L B_mms'
+    symbol_values = '${T_L} ${B_mms}'
+  []
+  [source_fn]
+    type = ParsedFunction
+    expression = '-k * B_mms * exp(x)'
+    symbol_names = 'k B_mms'
+    symbol_values = '${k} ${B_mms}'
   []
 []
 
@@ -62,7 +75,7 @@ T_R_mms = 0  # set via CLI: T_R_mms=<value>
   [source]
     type = LinearFVSource
     variable = T
-    source_density = '${fparse 2.0 * k * (T_L - T_R_mms)}'
+    source_density = source_fn
   []
 []
 
