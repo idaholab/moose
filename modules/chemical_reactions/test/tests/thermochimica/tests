@@ -337,6 +337,46 @@
     capabilities = 'thermochimica'
   []
 
+  [slash_separator]
+    type = RunApp
+    input = MoRu_slash.i
+    design = ChemicalCompositionAction.md
+    requirement = 'The system shall support slash-separated Thermochimica output variable naming'
+    capabilities = 'thermochimica'
+    issues = '#32434'
+  []
+
+  [underscore_separator]
+    type = RunApp
+    input = MoRu_underscore.i
+    design = ChemicalCompositionAction.md
+    requirement = 'The system shall support underscore-separated Thermochimica output variable naming'
+    capabilities = 'thermochimica'
+    issues = '#32434'
+  []
+
+  [slash_separator_strict]
+    type = RunException
+    input = MoRu.i
+    expect_err = "No '/' separator found in variable 'BCCN:Mo'"
+    cli_args = "ChemicalComposition/thermo/output_name_separator=slash"
+    design = ChemicalCompositionAction.md
+    requirement = 'The system shall reject colon-separated output names when slash separator is selected'
+    capabilities = 'thermochimica'
+    issues = '#32434'
+  []
+
+  [underscore_separator_strict]
+    type = RunException
+    input = MoRu.i
+    expect_err = "No '_' separator found in variable 'BCCN:Mo'"
+    cli_args = "ChemicalComposition/thermo/output_name_separator=underscore"
+    design = ChemicalCompositionAction.md
+    requirement = 'The system shall reject colon-separated output names when underscore separator is selected'
+    capabilities = 'thermochimica'
+    issues = '#32434'
+  []
+
   [prefix_subblock]
     type = Exodiff
     input = prefix_subblock.i
@@ -345,5 +385,6 @@
     requirement = 'The system shall support namespacing all ChemicalComposition-generated variables via a prefix so multiple subblocks can use overlapping element names'
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     capabilities = 'thermochimica'
+    issues = '#32434'
   []
 []

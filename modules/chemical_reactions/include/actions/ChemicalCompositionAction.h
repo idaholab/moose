@@ -49,6 +49,9 @@ public:
 
 protected:
   std::string prefixedName(const std::string & base_name) const;
+  std::string joinName(const std::string & first, const std::string & second) const;
+  std::string
+  joinName(const std::string & first, const std::string & second, const std::string & third) const;
   void readCSV();
 
   /// Element names
@@ -71,4 +74,7 @@ protected:
 
   /// Optional prefix prepended to all generated variable names
   std::string _variable_prefix;
+
+  /// Separator used in output variable names and parsing
+  std::string _output_name_separator;
 };
