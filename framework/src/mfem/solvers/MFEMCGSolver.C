@@ -32,11 +32,11 @@ MFEMCGSolver::validParams()
 
 MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMCGSolver::constructSolver(const InputParameters &)
+MFEMCGSolver::constructSolver()
 {
   auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));

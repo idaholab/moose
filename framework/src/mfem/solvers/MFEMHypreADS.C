@@ -28,11 +28,11 @@ MFEMHypreADS::validParams()
 MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
   : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreADS::constructSolver(const InputParameters &)
+MFEMHypreADS::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   solver->SetPrintLevel(getParam<int>("print_level"));

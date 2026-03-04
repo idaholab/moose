@@ -39,7 +39,7 @@ public:
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
   /// Override in derived classes to construct and set the solver options.
-  virtual void constructSolver(const InputParameters & parameters) = 0;
+  virtual void constructSolver() = 0;
 
 protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence

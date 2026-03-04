@@ -92,7 +92,7 @@ MFEMProblemSolve::solve()
       _mfem_problem.getProblemData().eqn_system->BuildEquationSystem();
 
       // Remove me: reconstruct the solver due to possible mfem/hypre bug
-      _mfem_problem.getProblemData().jacobian_solver->constructSolver(emptyInputParameters());
+      _mfem_problem.getProblemData().jacobian_solver->constructSolver();
 
       // Reset gridfunctions
       for (const auto & problem_operator : _problem_operators)
