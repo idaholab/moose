@@ -279,6 +279,10 @@ class Scheduler(MooseObject):
         max_memory_per_slot = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
             if (monitored_process := self.monitor_processes.get(pid)) is not None:
+                # If the job is already an error (we killed it), nothing to do:
+                if job.getStatus() == job.error:
+                    continue
+
                 runner = job.getRunner()
                 slots = job.getSlots()
 
