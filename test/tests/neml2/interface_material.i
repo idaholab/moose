@@ -74,12 +74,14 @@
   neml2_derivatives = 'state/s state/u'
   [block]
     block = 'A B'
+    interface = 'A_B'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  petsc_options = '-ksp_view_mat'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   nl_abs_tol = 1e-10

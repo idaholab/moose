@@ -166,9 +166,18 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
-  std::vector<DomainUserObject *> bnd_domain_uos;
-  queryBoundary(Interfaces::DomainUserObject, bnd_id, bnd_domain_uos);
-  if (userobjs.size() == 0 && bnd_domain_uos.size() == 0)
+
+  bool has_domain_objs = false;
+  // we need to check all domain user objects because if the boundary is included as an interface
+  // boundary, it will be handled by onInterface
+  for (const auto * const domain_uo : _domain_objs)
+    if (domain_uo->shouldExecuteOnBoundary())
+    {
+      has_domain_objs = true;
+      break;
+    }
+
+  if (userobjs.size() == 0 && !has_domain_objs)
     return;
 
   _fe_problem.reinitElemFace(elem, side, _tid);
@@ -186,11 +195,12 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   for (const auto & uo : userobjs)
     uo->execute();
 
-  for (auto & uo : bnd_domain_uos)
-  {
-    uo->preExecuteOnBoundary();
-    uo->executeOnBoundary();
-  }
+  for (auto & uo : _domain_objs)
+    if (uo->shouldExecuteOnBoundary())
+    {
+      uo->preExecuteOnBoundary();
+      uo->executeOnBoundary();
+    }
 
   // UserObject Jacobians
   std::vector<ShapeSideUserObject *> shapers;

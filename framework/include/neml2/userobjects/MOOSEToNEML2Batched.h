@@ -41,6 +41,7 @@ public:
   void initialize() override;
   void executeOnElement() override;
   void executeOnBoundary() override;
+  void executeOnInterface() override;
   void finalize() override {}
   void threadJoin(const UserObject &) override;
 
@@ -102,6 +103,13 @@ MOOSEToNEML2Batched<T>::executeOnElement()
 template <typename T>
 void
 MOOSEToNEML2Batched<T>::executeOnBoundary()
+{
+  executeImpl();
+}
+
+template <typename T>
+void
+MOOSEToNEML2Batched<T>::executeOnInterface()
 {
   executeImpl();
 }

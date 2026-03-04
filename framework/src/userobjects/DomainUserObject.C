@@ -17,7 +17,6 @@ DomainUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
   params += BlockRestrictable::validParams();
-  params += BoundaryRestrictable::validParams();
   params += ThreeMaterialPropertyInterface::validParams();
   params += TransientInterface::validParams();
   params += RandomInterface::validParams();
@@ -33,8 +32,7 @@ DomainUserObject::validParams()
 DomainUserObject::DomainUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
-    BoundaryRestrictable(this, blockIDs(), false), // false for being _not_ nodal
-    ThreeMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    ThreeMaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TransientInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),

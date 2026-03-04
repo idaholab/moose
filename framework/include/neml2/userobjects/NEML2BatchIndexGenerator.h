@@ -27,6 +27,7 @@ public:
   void initialize() override;
   void executeOnElement() override;
   void executeOnBoundary() override;
+  void executeOnInterface() override;
   void threadJoin(const UserObject &) override;
   void finalize() override;
   void meshChanged() override;

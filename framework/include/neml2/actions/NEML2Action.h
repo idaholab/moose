@@ -147,6 +147,9 @@ protected:
   /// Boundaries this sub-block action applies to
   const std::vector<BoundaryName> _bnd;
 
+  /// Interfaces this sub-block action applies to
+  const std::vector<BoundaryName> _interface;
+
   /// Material property initial conditions
   std::map<MaterialPropertyName, MaterialPropertyName> _initialize_output_values;
 

@@ -63,6 +63,8 @@ NEML2BatchIndexGenerator::executeOnElement()
 
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
   _batch_index += qRule().n_points();
+
+  std::cout << "executeOnElement: " << _current_elem->id() << " -> " << _batch_index << std::endl;
 }
 
 void
@@ -76,6 +78,31 @@ NEML2BatchIndexGenerator::executeOnBoundary()
 
   _face_to_batch_index[{_current_elem->id(), _current_side}] = _batch_index;
   _batch_index += qRule().n_points();
+
+  std::cout << "executeOnBoundary: " << _current_elem->id() << " side " << _current_side << " -> "
+            << _batch_index << std::endl;
+}
+
+void
+NEML2BatchIndexGenerator::executeOnInterface()
+{
+  if (!NEML2Utils::shouldCompute(_fe_problem))
+    return;
+
+  if (!_outdated)
+    return;
+
+  if (_face_to_batch_index.find({_current_elem->id(), _current_side}) != _face_to_batch_index.end())
+    mooseError("Batch index for element id ",
+               _current_elem->id(),
+               " and side ",
+               _current_side,
+               " already exists");
+  _face_to_batch_index[{_current_elem->id(), _current_side}] = _batch_index;
+  _batch_index += qRule().n_points();
+
+  std::cout << "executeOnInterface: " << _current_elem->id() << " side " << _current_side << " -> "
+            << _batch_index << std::endl;
 }
 
 void
