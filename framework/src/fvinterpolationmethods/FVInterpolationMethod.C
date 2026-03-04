@@ -9,11 +9,6 @@
 
 #include "FVInterpolationMethod.h"
 
-#include "MooseFunctor.h"
-#include "MooseFunctorArguments.h"
-#include "MooseLinearVariableFV.h"
-#include "GradientLimiterType.h"
-
 InputParameters
 FVInterpolationMethod::validParams()
 {
@@ -30,155 +25,37 @@ FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params) : M
 }
 
 Real
-FVInterpolationMethod::FaceInterpolator::operator()(const Moose::FunctorBase<Real> & functor,
-                                                    const FaceInfo & face,
-                                                    const Moose::StateArg & state) const
+FVInterpolationMethod::interpolate(const FaceInfo &, Real, Real) const
 {
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  const Moose::ElemArg elem_arg{&face.elem(), false};
-  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
-  const Real elem_value = functor(elem_arg, state);
-  const Real neighbor_value = functor(neighbor_arg, state);
-
-  return (*this)(face, elem_value, neighbor_value);
-}
-
-Real
-FVInterpolationMethod::FaceInterpolator::operator()(const MooseLinearVariableFV<Real> & var,
-                                                    const FaceInfo & face,
-                                                    const Moose::StateArg & state) const
-{
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
-  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
-
-  return (*this)(face, elem_value, neighbor_value);
-}
-
-Real
-FVInterpolationMethod::AdvectedValueInterpolator::operator()(
-    const Moose::FunctorBase<Real> & functor,
-    const FaceInfo & face,
-    const Moose::StateArg & state,
-    const Real mass_flux) const
-{
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  mooseAssert(!needsLimitedGradients(),
-              "Limited gradient reconstruction is not available for generic functors.");
-  const Moose::ElemArg elem_arg{&face.elem(), false};
-  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
-
-  const Real elem_value = functor(elem_arg, state);
-  const Real neighbor_value = functor(neighbor_arg, state);
-
-  VectorValue<Real> elem_grad_storage;
-  VectorValue<Real> neighbor_grad_storage;
-  const VectorValue<Real> * elem_grad = nullptr;
-  const VectorValue<Real> * neighbor_grad = nullptr;
-
-  if (needsGradients())
-  {
-    elem_grad_storage = functor.gradient(elem_arg, state);
-    elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = functor.gradient(neighbor_arg, state);
-    neighbor_grad = &neighbor_grad_storage;
-  }
-
-  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-}
-
-Real
-FVInterpolationMethod::AdvectedValueInterpolator::operator()(
-    const MooseLinearVariableFV<Real> & var,
-    const FaceInfo & face,
-    const Moose::StateArg & state,
-    const Real mass_flux) const
-{
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
-  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
-
-  VectorValue<Real> elem_grad_storage;
-  VectorValue<Real> neighbor_grad_storage;
-  const VectorValue<Real> * elem_grad = nullptr;
-  const VectorValue<Real> * neighbor_grad = nullptr;
-
-  if (needsGradients())
-  {
-    const auto limiter_type = gradientLimiter();
-
-    elem_grad_storage = var.gradSln(*face.elemInfo(), limiter_type);
-    elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = var.gradSln(*face.neighborInfo(), limiter_type);
-    neighbor_grad = &neighbor_grad_storage;
-  }
-
-  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  mooseError("Interpolation method '",
+             name(),
+             "' (",
+             type(),
+             ") does not define face interpolation.");
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
-FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
-    const Moose::FunctorBase<Real> & functor,
-    const FaceInfo & face,
-    const Moose::StateArg & state,
-    const Real mass_flux) const
+FVInterpolationMethod::advectedInterpolate(
+    const FaceInfo &, Real, Real, const VectorValue<Real> *, const VectorValue<Real> *, Real) const
 {
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  mooseAssert(!needsLimitedGradients(),
-              "Limited gradient reconstruction is not available for generic functors.");
-  const Moose::ElemArg elem_arg{&face.elem(), false};
-  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
-
-  const Real elem_value = functor(elem_arg, state);
-  const Real neighbor_value = functor(neighbor_arg, state);
-
-  VectorValue<Real> elem_grad_storage;
-  VectorValue<Real> neighbor_grad_storage;
-  const VectorValue<Real> * elem_grad = nullptr;
-  const VectorValue<Real> * neighbor_grad = nullptr;
-
-  if (needsGradients())
-  {
-    elem_grad_storage = functor.gradient(elem_arg, state);
-    elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = functor.gradient(neighbor_arg, state);
-    neighbor_grad = &neighbor_grad_storage;
-  }
-
-  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  mooseError("Interpolation method '",
+             name(),
+             "' (",
+             type(),
+             ") does not define advected interpolation.");
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
-FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
-    const MooseLinearVariableFV<Real> & var,
-    const FaceInfo & face,
-    const Moose::StateArg & state,
-    const Real mass_flux) const
+Real
+FVInterpolationMethod::advectedInterpolateValue(const FaceInfo & face,
+                                                const Real elem_value,
+                                                const Real neighbor_value,
+                                                const VectorValue<Real> * elem_grad,
+                                                const VectorValue<Real> * neighbor_grad,
+                                                const Real mass_flux) const
 {
-  mooseAssert(face.neighborPtr(),
-              "This convenience overload assumes internal faces (neighbor exists)");
-  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
-  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
-
-  VectorValue<Real> elem_grad_storage;
-  VectorValue<Real> neighbor_grad_storage;
-  const VectorValue<Real> * elem_grad = nullptr;
-  const VectorValue<Real> * neighbor_grad = nullptr;
-
-  if (needsGradients())
-  {
-    const auto limiter_type = gradientLimiter();
-
-    elem_grad_storage = var.gradSln(*face.elemInfo(), limiter_type);
-    elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = var.gradSln(*face.neighborInfo(), limiter_type);
-    neighbor_grad = &neighbor_grad_storage;
-  }
-
-  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result = advectedInterpolate(
+      face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const Real phi_matrix =
+      result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
+  return phi_matrix - result.rhs_face_value;
 }
