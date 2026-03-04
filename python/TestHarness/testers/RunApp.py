@@ -161,23 +161,24 @@ class RunApp(Tester):
                 'One of "input", "command", "command_proxy", or "no_additional_cli_args" must be supplied for a RunApp test'
             )
 
-        # If command is specified, we can no longer allow variable
-        # ranges in parallel/threads because the underlying command
-        # doesn't know what -p and --n-threads are set to
-        if params.isValid("command"):
-            for suffix in ["parallel", "threads"]:
-                min_param = f"min_{suffix}"
-                max_param = f"max_{suffix}"
+        # If command or command_proxy is specified, we cannot allow variable
+        # ranges in parallel/threads because the underlying command doesn't
+        # know what -p and --n-threads are set to
+        for param in ["command", "no_additional_cli_args"]:
+            if params.isValid(param) and params[param]:
+                for suffix in ["parallel", "threads"]:
+                    min_param = f"min_{suffix}"
+                    max_param = f"max_{suffix}"
 
-                if params.isParamSetByUser(max_param):
-                    if params[min_param] != params[max_param]:
-                        raise Exception(
-                            f"'{min_param}' and '{max_param}' must be equal "
-                            "when 'command' is set"
-                        )
-                else:
-                    params[max_param] = 1
-                    self.addCaveats(f"implicit {max_param}=1")
+                    if params.isParamSetByUser(max_param):
+                        if params[min_param] != params[max_param]:
+                            raise Exception(
+                                f"'{min_param}' and '{max_param}' must be equal "
+                                f"when '{param}' is set"
+                            )
+                    else:
+                        params[max_param] = 1
+                        self.addCaveats(f"implicit {max_param}=1")
 
         # Not compatible with each other due to the return break in runCommand()
         if params.isValid("command_proxy") and params["no_additional_cli_args"]:
