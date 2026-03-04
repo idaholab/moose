@@ -6,18 +6,21 @@
   [long_running]
     type = PythonUnitTest
     input = test_LongRunning.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a non-failing status after a predetermined time of no activity"
     issues = '#9280'
   []
   [longest_jobs]
     type = PythonUnitTest
     input = test_LongestJobs.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall support the output of the longest running jobs"
     issues = '#16752'
   []
   [csvdiffs]
     type = PythonUnitTest
     input = test_CSVDiffs.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure when encountering a CSV differential result"
     issues = '#11250 #11251'
     collections = 'FAILURE_ANALYSIS'
@@ -25,6 +28,7 @@
   [diff]
     type = PythonUnitTest
     input = test_Diff.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure when encountering differential result"
     issues = '#8373'
     collections = 'FAILURE_ANALYSIS'
@@ -32,6 +36,7 @@
   [diff_gold]
     type = PythonUnitTest
     input = test_DiffGold.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure when encountering differential result with a custom gold directory."
     issues = '#10647'
     collections = 'FAILURE_ANALYSIS'
@@ -45,28 +50,33 @@
   [ad_size]
     type = PythonUnitTest
     input = test_ADSize.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall restrict tests based on the available dual number derivative vector size"
   []
   [cyclic]
     type = PythonUnitTest
     input = test_Cyclic.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure during a cyclic dependency event"
     collections = 'FAILURE_ANALYSIS'
   []
   [dependency_skip]
     type = PythonUnitTest
+    min_slots = 2 # calls TestHarness, which could use threads
     input = test_DependencySkip.py
     requirement = "The system shall not perform a test if said test has a skipped dependency"
   []
   [missing_gold]
     type = PythonUnitTest
     input = test_MissingGold.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure if a test is missing its gold file"
     collections = 'FAILURE_ANALYSIS'
   []
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure if expected output is not reported"
     issues = "#9933"
     collections = 'FAILURE_ANALYSIS'
@@ -81,41 +91,48 @@
   [deleted]
     type = PythonUnitTest
     input = test_Deleted.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report deleted tests as failures when specified with additional --extra-info options"
                   "In all other cases, deleted tests will be treated as skipped tests"
   []
   [dry_run]
     type = PythonUnitTest
     input = test_DryRun.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall perform all operations required of the TestHarness except executing a test"
     issues = "#8637"
   []
   [display_required]
     type = PythonUnitTest
     input = test_DisplayRequired.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall run only tests designated with display_required."
     issues = '#8700 #8701'
   []
   [ignore]
     type = PythonUnitTest
     input = test_Ignore.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall allow users to ignore and override specified prerequisites"
   []
   [timeout]
     type = PythonUnitTest
     input = test_Timeout.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure if a test exceeds a predetermined walltime"
     collections = 'FAILURE_ANALYSIS'
   []
   [unknown_prereq]
     type = PythonUnitTest
     input = test_UnknownPrereq.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure if a test depends on another non-existent test"
     collections = 'FAILURE_ANALYSIS'
   []
   [syntax]
     type = PythonUnitTest
     input = test_Syntax.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure due to issues with input files"
     issues = "#9249"
     collections = 'FAILURE_ANALYSIS'
@@ -123,36 +140,42 @@
   [required_apps]
     type = PythonUnitTest
     input = test_RequiredApps.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall skip a test if required application is unavailable"
     issues = '#11095'
   []
   [should_execute]
     type = PythonUnitTest
     input = test_ShouldExecute.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall only perform the validation of test results without executing the test itself"
     issues = '#9932'
   []
   [report_skipped]
     type = PythonUnitTest
     input = test_ReportSkipped.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall skip syntax only tests if instructed to do so"
     issues = '#9359'
   []
   [distributed_mesh]
     type = PythonUnitTest
     input = test_DistributedMesh.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall properly run tests using distributed mesh options"
     issues = '#9181'
   []
   [allocations]
     type = PythonUnitTest
     input = test_Allocations.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall supply the necessary resources a test requires, and report when these resources are insufficient to run said test"
     issues = '#10272'
   []
   [parser_errors]
     type = PythonUnitTest
     input = test_ParserErrors.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report a failure if a test file is not constructed properly or does not contain valid parameters"
     issues = '#10400'
     collections = 'FAILURE_ANALYSIS'
@@ -160,6 +183,7 @@
   [arbitrary_tests]
     type = PythonUnitTest
     input = test_ArbitrarySpecFile.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall perform normal operating procedures on a single provided test spec file"
     issues = '#11076'
   []
@@ -173,54 +197,63 @@
   [recover_tests]
     type = PythonUnitTest
     input = test_Recover.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall be able to perform recovery of a test"
     issues = '#11492'
   []
   [trim_output]
     type = PythonUnitTest
     input = test_TrimOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall trim output once threshold has exceeded"
     issues = '#12167'
   []
   [race_conditions]
     type = PythonUnitTest
     input = test_RaceConditions.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall detect and report race conditions that exist in the supplied tests"
     issues = '#13186'
   []
   [unreadable_output]
     type = PythonUnitTest
     input = test_UnreadableOutput.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall detect and report unreadable output in executed commands"
     issues = '#14370'
   []
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall run only tests which previously have failed"
     issues = '#14512'
   []
   [python_version]
     type = PythonUnitTest
     input = test_PythonVersion.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall support restrictions based on the python version available."
     issues = '#13903'
   []
   [csvvalidationtester]
     type = PythonUnitTest
     input = test_CSVValidationTester.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall be able to compare computed values against measured data using mean value and standard deviation"
     issues = '#14511'
   []
   [working_directory]
     type = PythonUnitTest
     input = test_WorkingDirectory.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall be able to run tests in relative path directories supplied by the spec file"
     issues = '#14962'
   []
   [unknown_param]
     type = PythonUnitTest
     input = test_UnknownParam.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall produce a descriptive error with the file and line number when a test specification parameter is unknown."
     issues = '#14803'
     collections = 'FAILURE_ANALYSIS'
@@ -228,12 +261,14 @@
   [do_last]
     type = PythonUnitTest
     input = test_DoLast.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall perform a test after all other tests have passed if specified to do so"
     issues = '#15230'
   []
   [schema_expect_err]
     type = PythonUnitTest
     input = test_SchemaDiff.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall report multiple failures resulting from SchemaDiff operations."
     required_python_packages = 'deepdiff xmltodict'
     collections = 'FAILURE_ANALYSIS'
@@ -241,30 +276,35 @@
   [test_show_last_results]
     type = PythonUnitTest
     input = test_Replay.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall be able to replay last results"
     issues = '#22545'
   []
   [custom_eval]
     type = PythonUnitTest
     input = test_CustomEval.py
+    min_slots = 2 # calls TestHarness, which could use threads
     issues = '#22946'
     requirement = "The system shall be able to evaluate a given test with a user-supplied evaluation function."
   []
   [test_install_type]
     type = PythonUnitTest
     input = test_InstallType.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall skip tests not capable of being run depending on binary installation type"
     issues = '#24195'
   []
   [test_machine_type]
     type = PythonUnitTest
     input = test_MachineType.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall skip tests not capable of being run depending on micro architecture"
     issues = '#25317'
   []
   [test_soft_heavy]
     type = PythonUnitTest
     input = test_SoftHeavyDependency.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall not skip non-heavy tests for which heavy tests depend on"
     issues = '#26215'
   []
@@ -277,12 +317,14 @@
   [test_method]
     type = PythonUnitTest
     input = test_GetExecutable.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall test the functionality of the TestHarness.getExecutable method."
     issues = '#30200'
   []
   [test_capture_perf_graph]
     type = PythonUnitTest
     input = test_CapturePerfGraph.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = "The system shall support systematically capturing performance statistics from the execution of MOOSE application tests."
     issues = '#30569'
   []
@@ -295,18 +337,21 @@
   [validation]
     type = PythonUnitTest
     input = test_Validation.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
     issues = '#30517'
   []
   [capabilities]
     type = PythonUnitTest
     input = test_Capabilities.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite and the application.'
     issues = '#31135'
   []
   [only_tests_that_require]
     type = PythonUnitTest
     input = test_OnlyTestsThatRequire.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = 'The system shall provide the ability to filter tests based on whether or not they are dependent on certain capabilities.'
     issues = '#31310'
   []
