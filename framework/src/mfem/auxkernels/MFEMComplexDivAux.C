@@ -39,6 +39,7 @@ MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
                   getParam<mfem::real_t>("scale_factor_imag")),
     _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
   _div.Assemble();
   _div.Finalize();
 }
@@ -47,10 +48,23 @@ MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
 void
 MFEMComplexDivAux::execute()
 {
+  update();
   _div.AddMult(_source_var.real(), _result_var.real() = 0);
   _div.AddMult(_source_var.imag(), _result_var.imag() = 0);
 
   complexScale(_result_var, _scale_factor);
+}
+
+void
+MFEMComplexDivAux::update()
+{
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _div.Update();
+    _div.Assemble();
+    _div.Finalize();
+  }
 }
 
 #endif

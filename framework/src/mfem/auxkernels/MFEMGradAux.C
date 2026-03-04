@@ -34,26 +34,29 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _grad(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  update();
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
+  _grad.Assemble();
+  _grad.Finalize();
 }
 
 // Computes the auxvariable.
 void
 MFEMGradAux::execute()
 {
-  // ask MFEMProblem if the mesh has changed recently
-  if (getMFEMProblem().getMeshChanged())
-    update();
-
+  update();
   _grad.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 void
 MFEMGradAux::update()
 {
-  _grad.Update();
-  _grad.Assemble();
-  _grad.Finalize();
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _grad.Update();
+    _grad.Assemble();
+    _grad.Finalize();
+  }
 }
 
 #endif

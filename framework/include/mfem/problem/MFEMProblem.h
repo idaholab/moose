@@ -275,8 +275,6 @@ public:
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
-  bool getMeshChanged() const { return _problem_data.mesh_changed; }
-  void setMeshChanged(bool ch) { _problem_data.mesh_changed = ch; }
 
   void updateAfterRefinement();
   void updateFESpaces();

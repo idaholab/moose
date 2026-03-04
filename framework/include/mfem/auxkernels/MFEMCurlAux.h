@@ -31,7 +31,7 @@ public:
   /// Computes the auxvariable.
   virtual void execute() override;
 
-  // Updates Curl operator.
+  // Updates curl operator.
   virtual void update() override;
 
 protected:

@@ -611,8 +611,6 @@ MFEMProblem::getMeshDisplacementGridFunction()
 void
 MFEMProblem::updateAfterRefinement()
 {
-  setMeshChanged(true);
-
   updateFESpaces();
 
   if (_problem_data.pmesh->Nonconforming())

@@ -34,26 +34,29 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  update();
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
+  _curl.Assemble();
+  _curl.Finalize();
 }
 
 // Computes the auxvariable.
 void
 MFEMCurlAux::execute()
 {
-  // ask MFEMProblem if the mesh has changed recently
-  if (getMFEMProblem().getMeshChanged())
-    update();
-
+  update();
   _curl.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 void
 MFEMCurlAux::update()
 {
-  _curl.Update();
-  _curl.Assemble();
-  _curl.Finalize();
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _curl.Update();
+    _curl.Assemble();
+    _curl.Finalize();
+  }
 }
 
 #endif

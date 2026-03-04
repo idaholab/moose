@@ -34,26 +34,29 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
-  update();
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
+  _div.Assemble();
+  _div.Finalize();
 }
 
 // Computes the auxvariable.
 void
 MFEMDivAux::execute()
 {
-  // ask MFEMProblem if the mesh has changed recently
-  if (getMFEMProblem().getMeshChanged())
-    update();
-
+  update();
   _div.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 void
 MFEMDivAux::update()
 {
-  _div.Update();
-  _div.Assemble();
-  _div.Finalize();
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _div.Update();
+    _div.Assemble();
+    _div.Finalize();
+  }
 }
 
 #endif

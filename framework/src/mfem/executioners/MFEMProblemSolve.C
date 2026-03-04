@@ -97,10 +97,6 @@ MFEMProblemSolve::solve()
   _mfem_problem.onTimestepEnd();
   _mfem_problem.execute(EXEC_TIMESTEP_END);
 
-  // Inform objects (e.g aux kernels) that they don't need to update after this point.
-  // H/P-refinement sets this to true
-  _mfem_problem.setMeshChanged(false);
-
   _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _executioner.postSolve();
