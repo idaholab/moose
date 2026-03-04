@@ -21,7 +21,11 @@ public:
 
   PorousLinearWCNSFVMomentumFlux(const InputParameters & params);
 
+  void addMatrixContribution() override;
+
   void setupFaceData(const FaceInfo * face_info) override;
+  Real computeElemMatrixContribution() override;
+  Real computeNeighborMatrixContribution() override;
 
 protected:
   Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc) override;
