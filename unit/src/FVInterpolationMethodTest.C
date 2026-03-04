@@ -52,7 +52,7 @@ TEST_F(FVInterpolationMethodTest, geometricAverageMatchesGC)
       _internal_face->gC() * elem_value + (1.0 - _internal_face->gC()) * neighbor_value;
 
   EXPECT_NEAR(
-      method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+      method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, harmonicAverage)
@@ -67,7 +67,7 @@ TEST_F(FVInterpolationMethodTest, harmonicAverage)
   const Real expected = 1.0 / (gc / elem_value + (1.0 - gc) / neighbor_value);
 
   EXPECT_NEAR(
-      method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+      method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, advectedUpwind)
@@ -80,24 +80,24 @@ TEST_F(FVInterpolationMethodTest, advectedUpwind)
 
   {
     const Real mass_flux = 1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         *_internal_face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 1.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 0.0);
     EXPECT_DOUBLE_EQ(contrib.rhs_face_value, 0.0);
-    EXPECT_DOUBLE_EQ(method.advectedFaceValueInterpolator()(
+    EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(
                          *_internal_face, elem_value, neighbor_value, nullptr, nullptr, mass_flux),
                      elem_value);
   }
 
   {
     const Real mass_flux = -1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         *_internal_face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 0.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 1.0);
     EXPECT_DOUBLE_EQ(contrib.rhs_face_value, 0.0);
-    EXPECT_DOUBLE_EQ(method.advectedFaceValueInterpolator()(
+    EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(
                          *_internal_face, elem_value, neighbor_value, nullptr, nullptr, mass_flux),
                      neighbor_value);
   }
@@ -117,7 +117,7 @@ TEST_F(FVInterpolationMethodTest, advectedMinmodWeightBasedBlendingFactorZeroIsU
 
   {
     const Real mass_flux = 1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         *_internal_face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 1.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 0.0);
@@ -125,7 +125,7 @@ TEST_F(FVInterpolationMethodTest, advectedMinmodWeightBasedBlendingFactorZeroIsU
 
   {
     const Real mass_flux = -1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         *_internal_face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 0.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 1.0);
@@ -154,7 +154,7 @@ TEST_F(FVInterpolationMethodTest, advectedMinmodWeightBasedFullBlendYieldsLinear
 
   {
     const Real mass_flux = 1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     EXPECT_NEAR(contrib.weights_matrix.first, expected_w_elem, 1e-12);
     EXPECT_NEAR(contrib.weights_matrix.second, expected_w_neighbor, 1e-12);
@@ -162,7 +162,7 @@ TEST_F(FVInterpolationMethodTest, advectedMinmodWeightBasedFullBlendYieldsLinear
 
   {
     const Real mass_flux = -1.0;
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     EXPECT_NEAR(contrib.weights_matrix.first, expected_w_elem, 1e-12);
     EXPECT_NEAR(contrib.weights_matrix.second, expected_w_neighbor, 1e-12);
@@ -219,12 +219,12 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
 
   for (const Real mass_flux : {1.0, -1.0})
   {
-    const auto contrib_clamped = method_clamped.advectedSystemContributionCalculator()(
+    const auto contrib_clamped = method_clamped.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     EXPECT_NEAR(contrib_clamped.weights_matrix.first, expected_w_elem_linear, 1e-12);
     EXPECT_NEAR(contrib_clamped.weights_matrix.second, expected_w_neighbor_linear, 1e-12);
 
-    const auto contrib_unclamped = method_unclamped.advectedSystemContributionCalculator()(
+    const auto contrib_unclamped = method_unclamped.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
     const auto expected = expected_unclamped(mass_flux);
     EXPECT_NEAR(contrib_unclamped.weights_matrix.first, expected.first, 1e-12);
@@ -248,13 +248,13 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
     auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
         "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_method_upwind", params);
 
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
 
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 1.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 0.0);
     EXPECT_DOUBLE_EQ(contrib.rhs_face_value, 0.0);
-    EXPECT_DOUBLE_EQ(method.advectedFaceValueInterpolator()(
+    EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(
                          face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux),
                      elem_value);
   }
@@ -265,7 +265,7 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
     auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
         "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_method_full", params);
 
-    const auto contrib = method.advectedSystemContributionCalculator()(
+    const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
 
     const Point face_on_cn_line = face.faceCentroid() - face.skewnessCorrectionVector();
@@ -275,7 +275,7 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 1.0);
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.second, 0.0);
     EXPECT_NEAR(contrib.rhs_face_value, elem_value - expected_phi_high, 1e-12);
-    EXPECT_NEAR(method.advectedFaceValueInterpolator()(
+    EXPECT_NEAR(method.advectedInterpolateValue(
                     face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux),
                 expected_phi_high,
                 1e-12);
