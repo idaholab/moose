@@ -371,7 +371,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point fixed_pt)
+isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec, const Point fixed_pt)
 {
   for (const auto & pt : vec_pts)
     if (!MooseUtils::absoluteFuzzyEqual((pt - fixed_pt) * plane_nvec, 0.0))
@@ -380,13 +380,13 @@ isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec)
+isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec)
 {
   return isCoPlanar(vec_pts, plane_nvec, vec_pts.front());
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts)
+isCoPlanar(const std::vector<Point> & vec_pts)
 {
   // Assuming that overlapped Points are allowed, the Points that are overlapped with vec_pts[0] are
   // removed before further calculation.
