@@ -72,9 +72,6 @@ protected:
   /// Optional interpolation method for the diffusion coefficient
   const FVInterpolationMethod * _coeff_interp_method;
 
-  /// Cached handle used to evaluate the interpolation method without virtual dispatch
-  FVInterpolationMethod::FaceInterpolator _coeff_interp_handle;
-
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
