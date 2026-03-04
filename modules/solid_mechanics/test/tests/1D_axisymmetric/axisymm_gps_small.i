@@ -2,7 +2,6 @@
 
 [GlobalParams]
   displacements = disp_x
-  scalar_out_of_plane_strain = scalar_strain_yy
 []
 
 [Mesh]
@@ -11,8 +10,6 @@
 []
 
 [Variables]
-  [./disp_x]
-  [../]
   [./scalar_strain_yy]
     order = FIRST
     family = SCALAR
@@ -62,17 +59,14 @@
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-  [../]
-[]
-
-[Physics]
-  [SolidMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-      [../]
-    [../]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = false
+    strain = small
+    planar_formulation = GENERALIZED_PLANE_STRAIN
+    scalar_out_of_plane_strain = scalar_strain_yy
+    eigenstrain_names = eigenstrain
   [../]
 []
 
@@ -151,13 +145,6 @@
     youngs_modulus = 3600
     poissons_ratio = 0.2
   [../]
-
-  [./strain]
-    type = ComputeAxisymmetric1DSmallStrain
-    eigenstrain_names = eigenstrain
-    scalar_out_of_plane_strain = scalar_strain_yy
-  [../]
-
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-8

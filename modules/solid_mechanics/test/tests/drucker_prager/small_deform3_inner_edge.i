@@ -4,6 +4,10 @@
 # The allows yield surface in meridional plane to be mapped out
 
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -19,20 +23,14 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = small
+    incremental = true
   [../]
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
 
 
 [BCs]
@@ -224,11 +222,6 @@
     block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
-  [../]
-  [./strain]
-    type = ComputeIncrementalStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
