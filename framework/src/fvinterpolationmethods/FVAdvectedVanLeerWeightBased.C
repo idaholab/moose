@@ -98,7 +98,7 @@ FVAdvectedVanLeerWeightBased::advectedInterpolateValue(const FaceInfo & face,
                                                        const VectorValue<Real> * neighbor_grad,
                                                        Real mass_flux) const
 {
-  const auto result = advectedInterpolate(
-      face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result =
+      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }

@@ -450,7 +450,7 @@ rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVec
   const Scalar denom = phiD - phiC;
   const Scalar grad_dot = gradC * dCD;
 
-  // This is an erbitrary number here, when we start seeing convergence issues we
+  // This is an arbitrary number here, when we start seeing convergence issues we
   // can tune this but so far this has shown okay results.
   constexpr Real eps = 1e-10;
   const Real denom_sign =

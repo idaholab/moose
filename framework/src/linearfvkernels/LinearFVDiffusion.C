@@ -79,8 +79,8 @@ LinearFVDiffusion::faceDiffusivity() const
         neighbor_value = _diffusion_coeff(neighbor_arg, state);
       }
 
-      _face_diffusivity = _coeff_interp_method->interpolate(
-          *_current_face_info, elem_value, neighbor_value);
+      _face_diffusivity =
+          _coeff_interp_method->interpolate(*_current_face_info, elem_value, neighbor_value);
     }
     else
       _face_diffusivity = _diffusion_coeff(makeCDFace(*_current_face_info), state);

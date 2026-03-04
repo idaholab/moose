@@ -16,8 +16,7 @@ InputParameters
 AddFVInterpolationMethodAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription(
-      "Add an FVInterpolationMethod object to the simulation for later reuse.");
+  params.addClassDescription("Add an FVInterpolationMethod object to the simulation.");
   return params;
 }
 

@@ -4,7 +4,8 @@
 
 This object provides first-order upwind interpolation for an advected quantity on a
 finite-volume face. The upwind state is selected using the sign of the face mass flux
-($m_f$), yielding a monotone, TVD discretization that is robust near discontinuities at the cost
+($m_f$), yielding a monotone, Total Variation Diminishing (TVD) discretization that is robust
+near discontinuities at the cost
 of increased numerical diffusion ([!cite](moukalled2016finite), [!cite](harten1997)).
 
 Let $\phi_C$ and $\phi_N$ denote the cell-centered values on the element and neighbor sides of a

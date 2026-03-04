@@ -6,33 +6,31 @@ kernels that support them.
 
 These methods are commonly used by linear FV kernels. For example:
 
-- [LinearFVDiffusion](syntax/LinearFVKernels/index.md) can use a face interpolation method for
-  coefficients via [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method).
-- [LinearFVAdvection](syntax/LinearFVKernels/index.md) requires an advected interpolation method
-  name via [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name).
+- [LinearFVDiffusion.md] can use a face interpolation method for coefficients via
+  [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method).
+- [LinearFVAdvection.md] requires an advected interpolation method name via
+  [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name).
 
-For a general overview of FV interpolation and design choices, see [/fv_design.md] and
+For a general overview of FV interpolation and design choices, see
 [/linear_fv_design.md].
 
 ## Design
 
-FVInterpolationMethods build small, trivially-copyable callable handles
-for face interpolation. Kernels cache these handles and invoke them inside face loops
-This system is designed to enable vectorization. Each handle carries a small `DeviceData` object
-(in a fixed-size buffer) plus interpolation-specific information such as the blending ratios,
-limiting options, etc. This design keeps evaluation fast while still allowing interpolation
-methods to be tunable from the input file.
+`FVInterpolationMethod` derived classes override the operations they support:
 
-When adding a new method, implement the structures and functions you intend to expose:
+- `interpolate(...)` for coefficient/face interpolation
+- `advectedInterpolate(...)` for advected interpolation (matrix weights + right-hand-side face term)
+- optionally `advectedInterpolationNeedsGradients()` and `gradientLimiter()` when the method needs
+  adjacent-cell gradients
 
-- A `DeviceData` struct that is trivially copyable and fits within the handle storage. This structure
-  will be responsible to inform the interpolation method of the specific parameters needed. Essentially, it hands over the user-specified parameter in the input file.
-- `interpolate(...)`
-  if you want a coefficient/face interpolation policy. This method will not incorporate
-  advection-related information.
-- `advectedInterpolate`
-  if you want advected interpolation weights and right hand side contributions from a face value.
-- `advectedInterpolateValue` if the user also wants a direct face-value from an advected interpolation.
+We enable guard rails to ensure that advected interpolation methods are not used out of context
+and interpolation methods not supporting advection schemes are not used in that context either.
+For examples on how to enforce this, see:
+
+- `LinearFVDiffusion` only accepts methods with `supportsFaceInterpolation() == true`.
+- `LinearFVAdvection` only accepts methods with `supportsAdvectedInterpolation() == true`.
+
+Selecting an incompatible interpolation method causes a runtime error during kernel setup.
 
 ## FVInterpolationMethods block
 
@@ -42,12 +40,12 @@ interpolate diffusion coefficients:
 !listing test/tests/linearfvkernels/diffusion/diffusion-1d.i
          block=geom
 
-Use it in a kernel via a method name parameter:
+Use it in a kernel via the interpolation method name in a dedicated parameter:
 
 !listing test/tests/linearfvkernels/diffusion/diffusion-1d.i
          block=diffusion
 
-For advection, declare an advected interpolation method (e.g., upwind):
+For advection, declare an advected interpolation method (for example, upwind):
 
 !listing test/tests/linearfvkernels/advection/advection-1d.i
          block=upwind
@@ -57,15 +55,6 @@ Use it in a linear FV advection kernel:
 !listing test/tests/linearfvkernels/advection/advection-1d.i
          block=advection
 
-## Available methods
-
-See the individual method pages for details:
-
-- [FVGeometricAverage.md]
-- [FVHarmonicAverage.md]
-- [FVAdvectedUpwind.md]
-- [FVAdvectedMinmodWeightBased.md]
-- [FVAdvectedVanLeerWeightBased.md]
-- [FVAdvectedVenkatakrishnanDeferredCorrection.md]
+See the individual method pages listed below for details.
 
 !syntax list /FVInterpolationMethods objects=True actions=False subsystems=False

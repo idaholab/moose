@@ -2,11 +2,11 @@
 
 ## Overview
 
-This object provides a second-order, TVD-style scheme for interpolating a cell-centered
+This object provides a second-order, Total Variation Diminishing (TVD)-style scheme for
+interpolating a cell-centered
 advected quantity to a finite-volume face on unstructured grids. It is implemented as a *limited
 blending weight* between upwind and linear (geometric) interpolation, allowing the face value to be
-assembled using only two-cell (elem/neighbor) matrix weights (no MUSCL reconstruction, no deferred
-correction) ([!cite](moukalled2016finite), [!cite](jasak1996error), [!cite](greenshieldsweller2022), [!cite](harten1997)).
+assembled using only two-cell (elem/neighbor) matrix weights ([!cite](moukalled2016finite), [!cite](jasak1996error), [!cite](greenshieldsweller2022), [!cite](harten1997)).
 
 Let $\phi_U$ and $\phi_D$ denote the upwind and downwind cell-centered values on a face (as
 determined by the sign of the face mass flux). The face value is written as
@@ -55,7 +55,7 @@ Declare the interpolation method in `[FVInterpolationMethods]`:
 
 !listing test/tests/linearfvkernels/advection/diagonal-step-2d.i block=nvd_vanleer
 
-Use it in an advection kernel via
+Use it in a linear FV advection kernel via
 [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name):
 
 !listing test/tests/linearfvkernels/advection/diagonal-step-2d.i block=advection replace=['advected_interp_method_name = nvd_minmod','advected_interp_method_name = nvd_vanleer']
