@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVP1TemperatureSourceSink.h"
-#include "Assembly.h"
-#include "SubProblem.h"
 #include "HeatConductionNames.h"
 #include "MathUtils.h"
 
@@ -41,7 +39,7 @@ LinearFVP1TemperatureSourceSink::computeMatrixContribution()
   const auto state_arg = determineState();
 
   return 4.0 * HeatConduction::Constants::sigma *
-         std::pow(_var.getElemValue(*_current_elem_info, state_arg), 3) *
+         MathUtils::pow(_var.getElemValue(*_current_elem_info, state_arg), 3) *
          _sigma_a(elem_arg, state_arg) * _current_elem_volume;
 }
 

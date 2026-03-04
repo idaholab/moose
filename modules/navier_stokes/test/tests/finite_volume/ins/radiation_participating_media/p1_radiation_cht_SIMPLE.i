@@ -1,9 +1,9 @@
-# Coupled conduction and radiative heat transfer test in the linear FV system using SIMPLE solver.
+# Coupled conduction and radiative heat transfer test in the linear FV system using the SIMPLE executioner.
 # A 1D P1 radiation model is solved in the fluid region. Energy is solved in the
 # fluid and solid region using two different variables. The radiative and conductive flux
-# is maintained at the fluid-solid interface using conjugate heat transfer, RobinCHT for
-# the solid side and Dirichlet CHT for the fluid side. Temperatures are set at the solid and
-# fluid boundaries.
+# is maintained at the fluid-solid interface using conjugate heat transfer, Robin BCs for
+# the solid side and Dirichlet BCs for the fluid side. Fixed temperatures are set at the solid and
+# fluid external boundaries.
 ### Benchmark sources:
 ### https://hal.science/hal-02070285/document
 

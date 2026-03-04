@@ -1,4 +1,4 @@
-# The test gurantees that the P1 radiation model in the Linear FV system matches the analytical solution
+# The test guarantees that the P1 radiation model in the Linear FV system matches the analytical solution
 # for the incident radiation G under adiabatic and radiative interaction with the environment.
 # This simulation is a 1D test with adiabatic Neumann BC on the left of the domain and a Marshak BC on
 # the right of the domain, with varying wall temperatures.

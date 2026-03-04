@@ -1,8 +1,8 @@
-# The test gurantees that the P1 participating media radiation model in the Linear FV
-# system can couple with the energy equation of a semitransparent fluid with fixed
+# The test guarantees that the P1 participating media radiation model in the LinearFV
+# system can couple with the energy equation of a semi-transparent fluid with fixed
 # temperatures at the left and right walls.
-# The Newton solver approach is used. Due to the strong coupling between T and G
-# fixed point iterations need to be set.
+# A simple multi-linear system solver approach is used. Due to the strong coupling between T and G
+# multi-system fixed point iterations need to be set.
 
 k = 1e-2
 sigma_a = 1.

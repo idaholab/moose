@@ -1,5 +1,5 @@
-# The test gurantees that the P1 radiation model in the Linear FV system using the Newton solver
-# can be used with MultiApps to relax the solution update via relaxation to improve convergence
+# The test guarantees that the P1 radiation model in the Linear FV system using the linear system solver
+# can be used with MultiApps. The solution update of the energy system is relaxed to improve convergence
 # of the coupled energy and radiative systems.
 # This simulation is a 1D test with Dirichlet BCs on the left and right of the domain. Marshak BCs are
 # applied at the boundaries for G.
@@ -96,6 +96,8 @@ l_wall_temp = 300.0
   l_abs_tol = 1e-14
   l_tol = 1e-14
   nl_abs_tol = 1e-14
+
+  # MultiApp fixed point iteration parameters
   fixed_point_min_its = 2
   fixed_point_max_its = 500
   relaxation_factor = 0.9
@@ -114,7 +116,6 @@ l_wall_temp = 300.0
   [sub_app]
     type = FullSolveMultiApp
     input_files = 'rad_T_coupled_medium_1d_G.i'
-    relaxation_factor = 0.9
   []
 []
 
