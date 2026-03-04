@@ -1022,6 +1022,7 @@ class TestHarness:
                             self.options,
                             caveats=True,
                             timing=True,
+                            memory=True,
                             memory_per_proc=True,
                         )
                     )

@@ -142,8 +142,7 @@ def formatResult(
         elif (
             key_lower == "m"
             and entry.timing is not None
-            and options.timing
-            and memory is not False
+            and (options.timing or memory is True)
         ):
             if entry.memory is not None or entry.timing == 0:
                 value = int(entry.memory * 1e-6) if entry.memory else 0
@@ -223,13 +222,13 @@ def formatJobResult(
         suffix = name.replace(first_directory, "", 1)
         name = prefix + suffix
 
-    memory = job.getMaxMemory()
-    if memory_per_proc and memory is not None:
-        memory = int(memory / job.getTester().getProcs(options))
+    max_memory = job.getMaxMemory()
+    if memory_per_proc and max_memory is not None:
+        max_memory = int(max_memory / job.getTester().getProcs(options))
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
-        memory=memory,
+        memory=max_memory,
         joint_status=job.getJointStatus(),
         status_message=status_message,
         caveats=job.getCaveats() if caveats else [],
