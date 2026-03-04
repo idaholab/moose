@@ -38,6 +38,7 @@
     type = PythonUnitTest
     input = test_versioner.py
     issues = '#20336'
+    min_slots = 2 # spawns a process
     design = 'python/index.md'
     requirement = "The system shall include a utility for generating a unique hash for moose dependencies and moose applications"
   []
@@ -45,6 +46,7 @@
     type = PythonUnitTest
     input = test_premake.py
     issues = '#27066'
+    min_slots = 2 # spawns a process
     design = 'python/index.md'
     requirement = "The system shall include a utility for providing useful information when building an application with dependencies that are out of date"
   []
