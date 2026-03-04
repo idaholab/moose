@@ -57,4 +57,11 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on nonorthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [face-method-guardrail]
+    type = RunException
+    input = diffusion-1d.i
+    cli_args = "LinearFVKernels/diffusion/coeff_interp_method=geom FVInterpolationMethods/geom/type=FVAdvectedUpwind"
+    expect_err = "does not support face interpolation and cannot be used by LinearFVDiffusion"
+    requirement = "The system shall reject using an advected-only FVInterpolationMethod with LinearFVDiffusion."
+  []
 []
