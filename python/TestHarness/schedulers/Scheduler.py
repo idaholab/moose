@@ -10,10 +10,11 @@ import os
 import sys
 import threading
 import traceback
+from importlib.util import find_spec
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from timeit import default_timer as clock
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pyhit
 from FactorySystem.MooseObject import MooseObject
@@ -21,8 +22,16 @@ from FactorySystem.MooseObject import MooseObject
 from TestHarness.JobDAG import JobDAG
 from TestHarness.StatusSystem import StatusSystem
 
-if TYPE_CHECKING:
-    from TestHarness.utils.monitor_processes import MonitorProcesses
+_HAS_GET_PROCESSES_MEMORY = False
+"""
+Whether or not get_process_memory() is available.
+
+Will be false if psutil is not available."""
+
+if find_spec("psutil") is not None or TYPE_CHECKING:
+    from TestHarness.utils.monitor_processes import get_processes_memory
+
+    _HAS_GET_PROCESSES_MEMORY = True
 
 
 class SchedulerError(Exception):
@@ -63,8 +72,8 @@ class Scheduler(MooseObject):
     # This is what will be checked for when we look for valid schedulers
     IS_SCHEDULER = True
 
-    MONITOR_JOB_PROCESSES = True
-    """Whether or not this Scheduler should monitor Job process usage."""
+    MONITOR_JOB_MEMORY = _HAS_GET_PROCESSES_MEMORY
+    """Whether or not this Scheduler should monitor Job process memory usage."""
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -137,18 +146,6 @@ class Scheduler(MooseObject):
         self.report_long_jobs = True
         # Whether or not to enforce the timeout of jobs
         self.enforce_timeout = True
-
-        self.monitor_processes: Optional[MonitorProcesses] = None
-        """The instance for monitoring process memory usage, if enabled."""
-
-        # Setup MonitorProcesses if enabled and psutil is available
-        if self.MONITOR_JOB_PROCESSES:
-            from importlib.util import find_spec
-
-            if find_spec("psutil") is not None:
-                from TestHarness.utils.monitor_processes import MonitorProcesses
-
-                self.monitor_processes = MonitorProcesses()
 
     def getErrorState(self):
         """
@@ -260,8 +257,8 @@ class Scheduler(MooseObject):
 
     def monitorJobProcesses(self):
         """Monitor the running job processes, if enabled."""
-        # Process monitoring is disabled
-        if self.monitor_processes is None:
+        # Process memory monitoring is disabled
+        if not self.MONITOR_JOB_MEMORY:
             return
 
         # Get the PIDs of the current running jobs so that they can be sampled
@@ -272,13 +269,13 @@ class Scheduler(MooseObject):
                 if ((runner := job.getRunner()) and (pid := runner.pid))
             }
 
-        # Updated the running jobs
-        self.monitor_processes.update(pid_to_job.keys())
+        # Get memory for running jobs
+        processes_memory = get_processes_memory(pid_to_job.keys())
 
-        # Update jobs and kill jobs over resources
+        # Update job memory and kill jobs over memory
         max_memory_per_slot = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
-            if (monitored_process := self.monitor_processes.get(pid)) is not None:
+            if (memory := processes_memory.get(pid)) is not None:
                 # If the job is already an error (we killed it), nothing to do:
                 if job.getStatus() == job.error:
                     continue
@@ -286,20 +283,19 @@ class Scheduler(MooseObject):
                 runner = job.getRunner()
                 slots = job.getSlots()
 
-                # Update max memory
-                max_memory = monitored_process.max_memory
-                runner.setMaxMemory(max_memory)
+                max_memory = runner.max_memory
+                if max_memory is None or max_memory > memory:
+                    runner.setMaxMemory(memory)
 
-                # Check max memory
-                if max_memory_per_slot:
-                    memory_per_slot_mb = max_memory / slots * 1.0e-6
-                    if memory_per_slot_mb > max_memory_per_slot:
-                        message = (
-                            "JOB KILLED (OVER MEMORY): "
-                            f"Memory/slot {memory_per_slot_mb:.2f} "
-                            f"MB > allowed {max_memory_per_slot:.2f} MB"
-                        )
-                        job.killProcess(job.error, "KILLED: OVER MEMORY", message)
+                    if max_memory_per_slot:
+                        memory_per_slot_mb = memory / slots * 1.0e-6
+                        if memory_per_slot_mb > max_memory_per_slot:
+                            message = (
+                                "JOB KILLED (OVER MEMORY): "
+                                f"Memory/slot {memory_per_slot_mb:.2f} "
+                                f"MB > allowed {max_memory_per_slot:.2f} MB"
+                            )
+                            job.killProcess(job.error, "KILLED: OVER MEMORY", message)
 
     def waitFinish(self):
         """
