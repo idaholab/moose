@@ -56,38 +56,33 @@ FVAdvectedVanLeerWeightBased::advectedInterpolate(const FaceInfo & face,
   mooseAssert(elem_grad && neighbor_grad,
               "Van Leer advected interpolation requires both element and neighbor gradients.");
 
-  // Use a branchless selection for upwind/downwind quantities (SIMD/GPU friendly when we get
-  // there).
-  const Real upwind_mask = mass_flux >= 0.0;
-  const Real downwind_mask = 1.0 - upwind_mask;
+  const bool upwind_is_elem = mass_flux >= 0.0;
 
-  const Real phi_upwind = upwind_mask * elem_value + downwind_mask * neighbor_value;
-  const Real phi_downwind = upwind_mask * neighbor_value + downwind_mask * elem_value;
+  const Real phi_upwind = upwind_is_elem ? elem_value : neighbor_value;
+  const Real phi_downwind = upwind_is_elem ? neighbor_value : elem_value;
 
-  const VectorValue<Real> grad_upwind =
-      upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
+  const VectorValue<Real> grad_upwind = upwind_is_elem ? *elem_grad : *neighbor_grad;
+  const auto upwind_to_downwind = upwind_is_elem ? face.dCN() : -face.dCN();
 
-  const auto r_f =
-      Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
+  const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, upwind_to_downwind);
   const Real beta = (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
 
   // Geometric weight associated with the upwind cell for this face.
-  const Real w_f = upwind_mask * face.gC() + downwind_mask * (1.0 - face.gC());
+  const Real w_f = upwind_is_elem ? face.gC() : (1.0 - face.gC());
 
   // Following the Greenshields blending form:
   //   phi_f = (1-g)*phi_upwind + g*phi_downwind, with g = beta*(1-w_f)
   const Real g_unclamped = _blending_factor * beta * (1.0 - w_f);
   const Real g_clamped = std::min(std::max(g_unclamped, 0.0), 1.0 - w_f);
-  const Real clamp_mask = static_cast<Real>(_limit_to_linear);
   // Clamp to [0, 1-w_f] so the weights do not become more downwind-biased than linear.
-  const Real g = clamp_mask * g_clamped + (1.0 - clamp_mask) * g_unclamped;
+  const Real g = _limit_to_linear ? g_clamped : g_unclamped;
 
   const Real w_upwind = 1.0 - g;
   const Real w_downwind = g;
 
-  // Map (upwind, downwind) weights back to (elem, neighbor) ordering without branches.
-  const Real w_elem = upwind_mask * w_upwind + downwind_mask * w_downwind;
-  const Real w_neighbor = upwind_mask * w_downwind + downwind_mask * w_upwind;
+  // Map (upwind, downwind) weights back to (elem, neighbor) ordering.
+  const Real w_elem = upwind_is_elem ? w_upwind : w_downwind;
+  const Real w_neighbor = upwind_is_elem ? w_downwind : w_upwind;
 
   AdvectedSystemContribution result;
   result.weights_matrix = std::make_pair(w_elem, w_neighbor);
