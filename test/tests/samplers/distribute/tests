@@ -7,6 +7,9 @@
     [execute]
       type = CheckFiles
       command = 'execute.py'
+      min_parallel = 4
+      max_parallel = 4
+      max_threads = 1
       check_files = 'distribute_none.csv distribute_on.csv distribute_off.csv'
       recover = false
       valgrind = NONE
@@ -19,6 +22,8 @@
     [plot]
       type = CheckFiles
       command = 'plot.py'
+      max_parallel = 1
+      max_threads = 1
       check_files = 'memory_total.pdf memory_per_proc.pdf'
       recover = false
       valgrind = NONE
