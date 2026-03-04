@@ -36,6 +36,7 @@ public:
 
   void initFaceMassFlux() override;
   void initCouplingField() override;
+  void computeFaceMassFlux() override;
   void computeCellVelocity() override;
 
   void meshChanged() override;
@@ -44,15 +45,18 @@ public:
 protected:
   const std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure) override;
+  void storePressureGradientFlux(const FaceInfo & fi, Real p_grad_flux) override;
   void setupMeshInformation() override;
   void updateBaffleJumps() override;
   void computeCorrectedPressureGradient() override;
   bool isBaffleFace(const FaceInfo & fi) const override;
   bool elemIsBaffleOwner(const FaceInfo & fi) const override;
   bool isPressureGradientLimited(const FaceInfo & fi) const override;
+  bool isReconstructionZeroFluxFace(const FaceInfo & fi) const;
   void applyCellPorosityScaling(NumericVector<Number> & vec) const override;
   bool useHarmonicAinvInterp() const override { return _use_harmonic_Ainv_interp; }
   bool debugBaffle() const override { return _debug_baffle; }
+  bool useFluxVelocityReconstruction() const override { return _use_flux_velocity_reconstruction; }
 
 private:
   void updateGradPrevFromFaceVelocity();
@@ -61,6 +65,7 @@ private:
 
   std::unordered_set<BoundaryID> _pressure_baffle_boundary_ids;
   std::unordered_set<BoundaryID> _pressure_gradient_limiter_ids;
+  std::unordered_set<BoundaryID> _reconstruction_zero_flux_boundary_ids;
 
   const Real _pressure_baffle_relaxation;
   const bool _debug_baffle;
@@ -71,7 +76,9 @@ private:
 
   std::unique_ptr<NumericVector<Number>> _cell_porosity;
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_corrected;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_reconstructed;
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> _grad_w_prev;
 
+  FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _p_grad_flux;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> & _baffle_jump;
 };
