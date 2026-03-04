@@ -190,7 +190,7 @@ SamplerBase::finalize()
     // Find in 'variable_names'
     const auto & it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
     if (it != _variable_names.end())
-      sort_by_i = it - _variable_names.begin();
+      sort_by_i = 4 + it - _variable_names.begin();
     else
       mooseError("Sorting index '" + _sort_by +
                  "' was not found in x/y/z/id or sampled variable names: " +
