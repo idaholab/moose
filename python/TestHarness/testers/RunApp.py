@@ -180,6 +180,9 @@ class RunApp(Tester):
         # augmented capabilities
         self._augmented_capabilities_file: Optional[str] = None
 
+        self._runapp_environment: dict = {}
+        """Environment variables that need to be augmented for this RunApp test."""
+
     def getInputFile(self):
         if self.specs.isValid("input"):
             return os.path.join(self.getTestDir(), self.specs["input"].strip())
@@ -481,10 +484,11 @@ class RunApp(Tester):
         if force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
             command = f"{mpi_command} -n {ncpus} {command}"
 
-        # Arbitrary proxy command, but keep track of the command so that someone could use it later
+        # Arbitrary proxy command; set RUNAPP_COMMAND to the actual command
+        # and use the command proxy path as the command
         if specs.isValid("command_proxy"):
-            command = command.replace('"', r"\"")
-            return f'RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
+            self._runapp_environment["RUNAPP_COMMAND"] = command
+            return str(os.path.join(specs["test_dir"], specs["command_proxy"]))
 
         return command
 
@@ -712,3 +716,6 @@ class RunApp(Tester):
                 )
                 with open(self._augmented_capabilities_file, "w") as f:
                     json.dump(store_capabilities, f)
+
+    def augmentEnvironment(self, options) -> dict:
+        return super().augmentEnvironment(options) | self._runapp_environment

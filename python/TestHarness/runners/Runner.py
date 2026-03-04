@@ -34,8 +34,10 @@ class Runner(OutputInterface):
         self.exit_code = None
         # The job's estimated max memory in bytes, if any
         self._max_memory: Optional[int] = None
-        # Thread lock for max_memory
+        # Thread lock for _max_memory
         self._max_memory_lock = Lock()
+        # The job's average CPU % usage, if known
+        self._cpu_percent: Optional[float] = None
 
         # The output for the actual run of the job. We keep this
         # separate from self.output in this Runner because HPC
@@ -71,6 +73,27 @@ class Runner(OutputInterface):
         """
         with self._max_memory_lock:
             self._max_memory = value
+
+    @property
+    def cpu_percent(self) -> Optional[float]:
+        """
+        Get the average CPU % usage for the process, if tracked.
+
+        This is only available after the process has completed
+        and is only thread safe _after_ the process is done.
+        """
+        return self._cpu_percent
+
+    def setCPUPercent(self, value: float):
+        """
+        Set the average CPU % usage for the process.
+
+        Should only be called by derived runner classes and
+        should only be set once.
+        """
+        assert self._cpu_percent is None, "Should not be set"
+        assert isinstance(value, float)
+        self._cpu_percent = value
 
     def getRunOutput(self):
         """Get the OutputInterface object for the actual run"""

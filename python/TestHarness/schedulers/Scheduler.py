@@ -139,7 +139,7 @@ class Scheduler(MooseObject):
         self.enforce_timeout = True
 
         self.monitor_processes: Optional[MonitorProcesses] = None
-        """The MonitorProcess instance for monitoring process CPU usage, if enabled."""
+        """The instance for monitoring process memory usage, if enabled."""
 
         # Setup MonitorProcesses if enabled and psutil is available
         if self.MONITOR_JOB_PROCESSES:
@@ -300,17 +300,6 @@ class Scheduler(MooseObject):
                             f"MB > allowed {max_memory_per_slot:.2f} MB"
                         )
                         job.killProcess(job.error, "KILLED: OVER MEMORY", message)
-
-                # Check max CPU
-                cpu_per_slot = monitored_process.max_percent_cpu / slots
-                max_cpu_per_slot = 125.0 + 110.0 * (slots - 1)
-                if cpu_per_slot > max_cpu_per_slot:
-                    message = (
-                        "JOB KILLED (OVER CPU): "
-                        f"CPU/slot {cpu_per_slot:.2f}% "
-                        f"> allowed {max_cpu_per_slot:.2f}%"
-                    )
-                    job.killProcess(job.error, "KILLED: OVER CPU", message)
 
     def waitFinish(self):
         """

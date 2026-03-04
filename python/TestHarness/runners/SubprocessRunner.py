@@ -9,6 +9,7 @@
 
 import os
 import platform
+import re
 import shlex
 import subprocess
 import time
@@ -18,6 +19,7 @@ from threading import Lock
 from typing import Optional
 
 from TestHarness.runners.Runner import Runner
+from TestHarness.util import hasGNUTime
 
 
 class SubprocessRunner(Runner):
@@ -36,6 +38,8 @@ class SubprocessRunner(Runner):
         self._pid: Optional[int] = None
         # The lock for self.process
         self._pid_lock = Lock()
+        self._time_file: Optional[str] = None
+        """The output from /usr/bin/time, if the process was wrapped with it."""
 
     @property
     def pid(self) -> Optional[int]:
@@ -47,6 +51,11 @@ class SubprocessRunner(Runner):
         tester = self.job.getTester()
         use_shell = tester.specs["use_shell"]
         cmd = tester.getCommand(self.options)
+
+        if hasGNUTime() and tester.SUPPORTS_TIME and not use_shell:
+            self._time_file = f"{self.job.getOutputPathPrefix()}.testharness_time"
+            self.deleteTimeFile(graceful=True)
+            cmd = f"/usr/bin/time -o {self._time_file} -f '%P' -q {cmd}"
         tester.setCommandRan(cmd)
 
         # Split command into list of args to be passed to Popen
@@ -133,6 +142,33 @@ class SubprocessRunner(Runner):
                 output = output[:-3]
 
             self.getRunOutput().appendOutput(output)
+
+        # Load the time file if it exists
+        if self._time_file is not None:
+            with open(self._time_file, "r") as f:
+                contents = f.read().strip()
+            self.deleteTimeFile(graceful=False)
+            match = re.fullmatch(r"(\d+)%", contents)
+            if match:
+                self.setCPUPercent(float(match.group(1)))
+            else:
+                raise Exception(f"Failed to parse time file with contents '{contents}'")
+
+    def deleteTimeFile(self, graceful: bool):
+        """Delete the time file."""
+        assert self._time_file is not None
+        try:
+            os.remove(self._time_file)
+        except FileNotFoundError:
+            if not graceful:
+                raise
+
+    def cleanup(self):
+        super().cleanup()
+
+        # Cleanup the time file if it exists
+        if self._time_file is not None:
+            self.deleteTimeFile(graceful=True)
 
     def kill(self):
         if self.process is not None:

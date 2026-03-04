@@ -7,14 +7,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Implement MonitorProcesses for monitoring a process cpu and memory usage."""
+"""Implement MonitorProcesses for monitoring a process' memory usage."""
 
 import asyncio
 import os
 import sys
 from contextlib import suppress
 from dataclasses import dataclass, field
-from time import perf_counter
 from typing import TYPE_CHECKING, Iterable, Optional
 
 if TYPE_CHECKING:
@@ -35,14 +34,8 @@ MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
 
 @dataclass
 class ProcessSample:
-    """Single sample for a process' cpu and memory usage."""
+    """Single sample for a process' resource usage."""
 
-    pid: int
-    """The process ID."""
-    wall_time: float
-    """Wall time at which the cpu sample was made in seconds."""
-    cpu_time: float
-    """Total CPU time (user + system) of the process in seconds."""
     memory: int
     """Memory usage of the process in bytes, if sampled (otherwise 0)."""
 
@@ -52,9 +45,7 @@ class MonitoredProcess:
     """Result for a process monitored with monitor_process()."""
 
     max_memory: int = 0
-    """The estimated maximum memory of the process and children in bytes."""
-    max_percent_cpu: float = 0
-    """The maximum percent CPU of the process and children."""
+    """The maximum memory used by the process in bytes."""
     last_samples: dict[int, ProcessSample] = field(default_factory=dict)
     """The last samples for the process, if any."""
 
@@ -131,29 +122,7 @@ class MonitorProcesses:
         return processes
 
     @staticmethod
-    def _get_process_cpu_time(process: psutil.Process) -> Optional[float]:
-        """
-        Get the cpu time of a process (user + system), if running.
-
-        Arguments:
-        ---------
-        process : psutil.Process
-            The process.
-
-        Returns:
-        -------
-        Optional[float]:
-            The user + system time, if running.
-
-        """
-        if process.is_running():
-            with suppress(psutil.NoSuchProcess):
-                times = process.cpu_times()
-                return times.user + times.system
-        return None
-
-    @staticmethod
-    def _get_process_memory(process: psutil.Process) -> Optional[int]:
+    def _get_process_memory(process: psutil.Process) -> int:
         """
         Get the memory of a process, if running.
 
@@ -167,7 +136,7 @@ class MonitorProcesses:
 
         Returns:
         -------
-        Optional[int]:
+        int:
             The process memory in kB, if available.
 
         """
@@ -194,7 +163,7 @@ class MonitorProcesses:
             with suppress(psutil.NoSuchProcess):
                 return process.memory_info().rss
 
-        return None
+        return 0
 
     @classmethod
     async def _sample_processes(
@@ -229,23 +198,11 @@ class MonitorProcesses:
             # Process + all of its recursive children
             all_processes = cls._get_process_and_children(process)
 
-            # Sample all processes
-            samples: dict[int, ProcessSample] = {}
-            wall_time = perf_counter()
-            for p in all_processes:
-                # Get cpu time, or continue if not running
-                if (cpu_time := cls._get_process_cpu_time(process)) is None:
-                    continue
-                # Sample memory
-                memory = cls._get_process_memory(p)
-
-                # Add sample
-                samples[p.pid] = ProcessSample(
-                    pid=p.pid,
-                    wall_time=wall_time,
-                    cpu_time=cpu_time,
-                    memory=memory if memory is not None else 0,
-                )
+            # Sample memory for all processes
+            samples = {
+                p.pid: ProcessSample(memory=cls._get_process_memory(p))
+                for p in all_processes
+            }
 
             return samples if samples else None
 
@@ -293,23 +250,7 @@ class MonitorProcesses:
         memory = sum([sample.memory for sample in samples.values()], 0)
 
         # Get previous MonitoredProcess if we've sampled it before
-        process = self._processes.get(pid)
-
-        # Haven't seen this process before; initialize it
-        if process is None:
-            process = MonitoredProcess()
-        # Have previously seen the process so we can get a
-        # CPU percentage (requires a previous sample)
-        else:
-            cpu = 0.0
-            for pid, sample in samples.items():
-                last_sample = process.last_samples.get(pid)
-                if last_sample is not None:
-                    cpu_time_diff = sample.cpu_time - last_sample.cpu_time
-                    wall_time_diff = sample.wall_time - last_sample.wall_time
-                    cpu += cpu_time_diff / wall_time_diff
-            process.max_percent_cpu = max(process.max_percent_cpu, 100.0 * cpu)
-
+        process = self._processes.get(pid, MonitoredProcess())
         # Update max memory
         process.max_memory = max(process.max_memory, memory)
         # Update samples

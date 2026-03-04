@@ -424,6 +424,20 @@ class Job(OutputInterface):
             # Use the variable from the outer scope
             nonlocal runner_spawned
 
+            # Fail the job if is used too much CPU
+            if (cpu_percent := runner.cpu_percent) is not None:
+                slots = self.getSlots()
+                cpu_per_slot = cpu_percent / slots
+                max_cpu_per_slot = 125.0 + 110.0 * (slots - 1)
+                if cpu_per_slot > max_cpu_per_slot:
+                    message = (
+                        "\n\nJOB OVER CPU: "
+                        f"CPU/slot {cpu_per_slot:.2f}% "
+                        f"> allowed {max_cpu_per_slot:.2f}%"
+                    )
+                    self.setStatus(self.error, "OVER CPU")
+                    self.appendOutput(message)
+
             # Run cleanup
             if runner_spawned:
                 with self.timer.time("runner_cleanup"):

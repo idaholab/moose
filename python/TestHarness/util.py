@@ -7,16 +7,20 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, os, re
+import json
+import os
+import platform
+import re
 import subprocess
-from mooseutils import colorText
+import threading
+import time
+import typing
 from collections import OrderedDict
 from dataclasses import dataclass
-import json
-import threading
-import typing
+from tempfile import NamedTemporaryFile
 from typing import Optional
-import time
+
+from mooseutils import colorText
 
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
@@ -389,3 +393,47 @@ class ScopedTimer:
         if self._printed:
             elapsed_time = time.time() - self.start_time
             print(f" {elapsed_time:.2f} seconds", flush=True)
+
+
+_HAS_GNU_TIME: Optional[bool] = None
+"""Global used in hasGNUTime() for seeing if GNU /usr/bin/time exists."""
+
+_HAS_GNU_TIME_LOCK = threading.Lock()
+"""Global thread lock for accessing _HAS_GNU_TIME in hasGNUTime()."""
+
+
+def hasGNUTime() -> bool:
+    """
+    If GNU /usr/bin/time exists and works as expected.
+
+    Here, 'works as expected' means that it can be used
+    to run a command, output the result to a file, only
+    output the CPU percentage, and quietly.
+    """
+    global _HAS_GNU_TIME
+    global _HAS_GNU_TIME_LOCK
+
+    with _HAS_GNU_TIME_LOCK:
+        if _HAS_GNU_TIME is None:
+            with NamedTemporaryFile() as file:
+                command = [
+                    "/usr/bin/time",
+                    "-o",
+                    file.name,
+                    "-f",
+                    "%P",
+                    "-q",
+                    "true",
+                ]
+
+                try:
+                    subprocess.check_output(command)
+                except subprocess.CalledProcessError:
+                    _HAS_GNU_TIME = False
+                    return _HAS_GNU_TIME
+
+                with open(file.name, "r") as f:
+                    contents = f.read().strip()
+                    _HAS_GNU_TIME = re.fullmatch(r"\d+%", contents) is not None
+
+        return _HAS_GNU_TIME

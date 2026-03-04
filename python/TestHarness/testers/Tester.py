@@ -33,6 +33,10 @@ class Tester(MooseObject, OutputInterface):
     Base class from which all tester objects are instanced.
     """
 
+    SUPPORTS_TIME: bool = True
+    """Whether or not this Tester supports having /usr/bin/time wrapped around
+    the command that it runs."""
+
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
