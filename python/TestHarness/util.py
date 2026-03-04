@@ -143,6 +143,7 @@ def formatResult(
             key_lower == "m"
             and entry.timing is not None
             and (options.timing or memory is True)
+            and memory is not False
         ):
             if entry.memory is not None or entry.timing == 0:
                 value = int(entry.memory * 1e-6) if entry.memory else 0
