@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <set>
 
+class PetscVectorReader;
+
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
@@ -95,6 +97,9 @@ public:
    */
   dof_id_type faceMassFluxGeneration() const { return _face_mass_flux_generation; }
 
+  /// Whether flux-based velocity reconstruction is enabled
+  virtual bool useFluxVelocityReconstruction() const { return false; }
+
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
                                      const Moose::StateArg & time,
@@ -141,6 +146,9 @@ public:
   virtual void finalize() override {}
   virtual void initialSetup() override;
 
+  /// Recompute corrected pressure gradients (dispatches to derived implementation)
+  void recomputeCorrectedPressureGradient();
+
   /**
    * Prepare reconstructed-gradient state once per attempted time step. Accepted coupling feedback
    * is retained for the next time step and restored when an attempt is retried, while candidate
@@ -181,6 +189,12 @@ protected:
 
   /// Check the single-variable system layout assumed by reconstructed pressure-gradient vector ops.
   void checkReconstructedPressureGradientCompatibility() const;
+
+  /// Store pressure-gradient face flux values (no-op in base class)
+  virtual void storePressureGradientFlux(const FaceInfo & fi, Real p_grad_flux);
+
+  /// Compute the pressure-gradient flux contribution for a single face
+  Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
 
   /// Compute the cell volumes on the mesh
   virtual void setupMeshInformation();
