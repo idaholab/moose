@@ -41,11 +41,6 @@ FVAdvectedMinmodWeightBased::FVAdvectedMinmodWeightBased(const InputParameters &
     _limit_to_linear(getParam<bool>("limit_to_linear")),
     _blending_factor(getParam<Real>("blending_factor"))
 {
-  const DeviceData data{_limit_to_linear, _blending_factor};
-  setAdvectedSystemContributionCalculator(
-      buildAdvectedSystemContributionCalculator<FVAdvectedMinmodWeightBased>(data, true));
-  setAdvectedFaceValueInterpolator(
-      buildAdvectedFaceValueInterpolator<FVAdvectedMinmodWeightBased>(data, true));
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
@@ -55,38 +50,6 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const FaceInfo & face,
                                                  const VectorValue<Real> * elem_grad,
                                                  const VectorValue<Real> * neighbor_grad,
                                                  Real mass_flux) const
-{
-  const DeviceData data{_limit_to_linear, _blending_factor};
-  return advectedInterpolate(
-      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-}
-
-Real
-FVAdvectedMinmodWeightBased::advectedInterpolateValue(const FaceInfo & face,
-                                                      Real elem_value,
-                                                      Real neighbor_value,
-                                                      const VectorValue<Real> * elem_grad,
-                                                      const VectorValue<Real> * neighbor_grad,
-                                                      Real mass_flux) const
-{
-  const auto result = advectedInterpolate(DeviceData{_limit_to_linear, _blending_factor},
-                                          face,
-                                          elem_value,
-                                          neighbor_value,
-                                          elem_grad,
-                                          neighbor_grad,
-                                          mass_flux);
-  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
-}
-
-FVInterpolationMethod::AdvectedSystemContribution
-FVAdvectedMinmodWeightBased::advectedInterpolate(const DeviceData & data,
-                                                 const FaceInfo & face,
-                                                 Real elem_value,
-                                                 Real neighbor_value,
-                                                 const VectorValue<Real> * elem_grad,
-                                                 const VectorValue<Real> * neighbor_grad,
-                                                 Real mass_flux)
 {
   mooseAssert(elem_grad && neighbor_grad,
               "Minmod advected interpolation requires both element and neighbor gradients.");
@@ -111,9 +74,9 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const DeviceData & data,
 
   // Use a Greenshields-style blending:
   //   phi_f = (1-g)*phi_upwind + g*phi_downwind, where g = beta*(1-w_f)
-  const Real g_unclamped = data.blending_factor * beta * (1.0 - w_f);
+  const Real g_unclamped = _blending_factor * beta * (1.0 - w_f);
   const Real g_clamped = std::min(std::max(g_unclamped, 0.0), 1.0 - w_f);
-  const Real clamp_mask = static_cast<Real>(data.limit_to_linear);
+  const Real clamp_mask = static_cast<Real>(_limit_to_linear);
   // Clamp to [0, 1-w_f] so the weights do not become more downwind-biased than linear.
   const Real g = clamp_mask * g_clamped + (1.0 - clamp_mask) * g_unclamped;
 
@@ -131,15 +94,14 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const DeviceData & data,
 }
 
 Real
-FVAdvectedMinmodWeightBased::advectedInterpolateValue(const DeviceData & data,
-                                                      const FaceInfo & face,
+FVAdvectedMinmodWeightBased::advectedInterpolateValue(const FaceInfo & face,
                                                       Real elem_value,
                                                       Real neighbor_value,
                                                       const VectorValue<Real> * elem_grad,
                                                       const VectorValue<Real> * neighbor_grad,
-                                                      Real mass_flux)
+                                                      Real mass_flux) const
 {
   const auto result = advectedInterpolate(
-      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+      face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
