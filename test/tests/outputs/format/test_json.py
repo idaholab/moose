@@ -96,6 +96,16 @@ class TestJSONBase(unittest.TestCase):
         self.assertEqual(params["type"]["cpp_type"], "std::string")
         self.assertEqual(params["type"]["basic_type"], "String")
 
+        exe = data["Materials"]["star"]
+        params = exe["subblock_types"]["PiecewiseConstantByBlockMaterial"]["parameters"]
+        self.assertEqual(
+            params["subdomain_to_prop_value"]["cpp_type"],
+            "std::map<std::string, double>",
+        )
+        self.assertEqual(
+            params["subdomain_to_prop_value"]["basic_type"], "Map:std::string->double"
+        )
+
         # Preconditioning has a Preconditioning/*/* syntax which is unusual
         self.assertIn("Preconditioning", data)
         p = data["Preconditioning"]
