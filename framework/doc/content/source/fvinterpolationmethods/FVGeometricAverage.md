@@ -17,9 +17,10 @@ The interpolated face value is
 !equation
 \phi_f = g_C\,\phi_C + (1-g_C)\,\phi_N.
 
-This method also provides an advected interpolation handle with the same weights (independent of
-flow direction). For advection, this corresponds to a centered/linear scheme and is not TVD in
-general; use a limiter-based method when boundedness near sharp gradients is required (see
+This method can also be used for advected interpolation with the same weights (independent of flow
+direction). For advection, this corresponds to a centered/linear scheme and is not Total
+Variation Diminishing (TVD) in general; use a limiter-based method when boundedness near sharp
+gradients is required (see
 [Limiters](syntax/Limiters/index.md)).
 
 ## Example Syntax

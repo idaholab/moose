@@ -51,8 +51,7 @@ TEST_F(FVInterpolationMethodTest, geometricAverageMatchesGC)
   const Real expected =
       _internal_face->gC() * elem_value + (1.0 - _internal_face->gC()) * neighbor_value;
 
-  EXPECT_NEAR(
-      method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+  EXPECT_NEAR(method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, harmonicAverage)
@@ -66,8 +65,7 @@ TEST_F(FVInterpolationMethodTest, harmonicAverage)
   const Real gc = _internal_face->gC();
   const Real expected = 1.0 / (gc / elem_value + (1.0 - gc) / neighbor_value);
 
-  EXPECT_NEAR(
-      method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+  EXPECT_NEAR(method.interpolate(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, advectedUpwind)

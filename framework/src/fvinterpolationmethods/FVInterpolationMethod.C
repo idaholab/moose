@@ -27,22 +27,16 @@ FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params) : M
 Real
 FVInterpolationMethod::interpolate(const FaceInfo &, Real, Real) const
 {
-  mooseError("Interpolation method '",
-             name(),
-             "' (",
-             type(),
-             ") does not define face interpolation.");
+  mooseError(
+      "Interpolation method '", name(), "' (", type(), ") does not define face interpolation.");
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
 FVInterpolationMethod::advectedInterpolate(
     const FaceInfo &, Real, Real, const VectorValue<Real> *, const VectorValue<Real> *, Real) const
 {
-  mooseError("Interpolation method '",
-             name(),
-             "' (",
-             type(),
-             ") does not define advected interpolation.");
+  mooseError(
+      "Interpolation method '", name(), "' (", type(), ") does not define advected interpolation.");
 }
 
 Real
@@ -53,8 +47,8 @@ FVInterpolationMethod::advectedInterpolateValue(const FaceInfo & face,
                                                 const VectorValue<Real> * neighbor_grad,
                                                 const Real mass_flux) const
 {
-  const auto result = advectedInterpolate(
-      face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result =
+      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   const Real phi_matrix =
       result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
   return phi_matrix - result.rhs_face_value;

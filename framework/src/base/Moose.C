@@ -703,6 +703,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // UserObject and some derived classes
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
+
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
 

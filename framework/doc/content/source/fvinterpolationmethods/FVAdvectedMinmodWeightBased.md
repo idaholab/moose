@@ -2,15 +2,16 @@
 
 ## Overview
 
-This object provides a second-order, TVD-style scheme for interpolating a cell-centered
+This object provides a second-order, Total Variation Diminishing (TVD)-style scheme for
+interpolating a cell-centered
 advected quantity to a finite-volume face on unstructured grids. It is formulated as a *limited
 blending weight* between upwind and linear (geometric) interpolation, so it can be assembled using
-only two-cell (elem/neighbor) matrix weights rather than MUSCL reconstruction with deferred
-correction ([!cite](moukalled2016finite), [!cite](jasak1996error), [!cite](greenshieldsweller2022), [!cite](harten1997)).
+only two-cell (elem/neighbor) matrix weights ([!cite](moukalled2016finite), [!cite](jasak1996error), [!cite](greenshieldsweller2022), [!cite](harten1997)).
 
 Let $\phi_U$ and $\phi_D$ denote the upwind and downwind cell-centered values on a face (as
-determined by the sign of the face mass flux). The face value is written in a normalized-variable
-diagram (NVD) / Greenshields-type blending form ([!cite](greenshieldsweller2022)):
+determined by the sign of the face mass flux). The face value is written in a Normalized Variable
+Diagram (NVD) / Greenshields-type blending form
+([!cite](greenshieldsweller2022)):
 
 !equation
 \phi_f = (1-g)\,\phi_U + g\,\phi_D,
@@ -58,7 +59,7 @@ Declare the interpolation method in `[FVInterpolationMethods]`:
 
 !listing test/tests/linearfvkernels/advection/diagonal-step-2d.i start=[nvd_minmod] end=[] include-end=true
 
-Use it in an advection kernel via
+Use it in a linear FV advection kernel via
 [!param](/LinearFVKernels/LinearFVAdvection/advected_interp_method_name):
 
 !listing test/tests/linearfvkernels/advection/diagonal-step-2d.i start=[advection] end=[] include-end=true
