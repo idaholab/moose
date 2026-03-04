@@ -415,6 +415,8 @@ def hasGNUTime() -> bool:
 
     with _HAS_GNU_TIME_LOCK:
         if _HAS_GNU_TIME is None:
+            _HAS_GNU_TIME = False
+
             with NamedTemporaryFile() as file:
                 command = [
                     "/usr/bin/time",
@@ -428,14 +430,18 @@ def hasGNUTime() -> bool:
 
                 try:
                     subprocess.run(
-                        command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                        command,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
                     )
                 except subprocess.CalledProcessError:
-                    _HAS_GNU_TIME = False
-                    return _HAS_GNU_TIME
-
-                with open(file.name, "r") as f:
-                    contents = f.read().strip()
-                    _HAS_GNU_TIME = re.fullmatch(r"\d+%", contents) is not None
+                    pass
+                except FileNotFoundError:
+                    pass
+                else:
+                    with open(file.name, "r") as f:
+                        contents = f.read().strip()
+                        if re.fullmatch(r"\d+%", contents) is not None:
+                            _HAS_GNU_TIME = True
 
         return _HAS_GNU_TIME
