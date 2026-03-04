@@ -4,7 +4,7 @@
     issues = '#31982'
     requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation, '
     [FromSubToParent]
-      detail = 'for scalar variables, verified by '
+      detail = 'for real scalar variables, verified by '
       [run]
         type = RunApp
         input = parent.i
@@ -22,6 +22,31 @@
                   u
                   OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
         prereq = MFEMShapeEvaluationTransfer/FromSubToParent/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
+    []
+    [ComplexFromSubToParent]
+      detail = 'for complex scalar variables, verified by '
+      [run]
+        type = RunApp
+        input = parent_complex.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        cli_args = 'Transfers/active=general_transfer_from_sub '        
+        detail = 'running the inputs, and '
+        max_parallel = 1 # idaholab/moose#32250
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  u
+                  OutputData/DiffusionComplex/Run0/Cycle000001/proc000000.vtu
+                  u
+                  OutputData/DiffusionSubComplex/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMShapeEvaluationTransfer/ComplexFromSubToParent/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'

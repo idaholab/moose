@@ -32,12 +32,32 @@ MultiAppMFEMShapeEvaluationTransfer::MultiAppMFEMShapeEvaluationTransfer(
 void
 MultiAppMFEMShapeEvaluationTransfer::transferVariables()
 {
+  // Get GridFunction from problem by name. For complex variables, return the real component.
+  auto getGridFunction = [&](MFEMProblem & problem,
+                             const std::string & name,
+                             bool & is_complex) -> mfem::ParGridFunction &
+  {
+    if (problem.getProblemData().gridfunctions.Has(name))
+    {
+      is_complex = false;
+      return *problem.getProblemData().gridfunctions.Get(name);
+    }
+    if (problem.getProblemData().cmplx_gridfunctions.Has(name))
+    {
+      is_complex = true;
+      return problem.getProblemData().cmplx_gridfunctions.Get(name)->real();
+    }
+    mooseError("No real or complex variable named '", name, "' found.");
+  };
+
   for (const auto v : make_range(numToVar()))
   {
+    bool is_from_complex;
+    bool is_to_complex;
     mfem::ParGridFunction & from_gf =
-        *getActiveFromProblem().getProblemData().gridfunctions.Get(getFromVarName(v));
+        getGridFunction(getActiveFromProblem(), getFromVarName(v), is_from_complex);
     mfem::ParGridFunction & to_gf =
-        *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(v));
+        getGridFunction(getActiveToProblem(), getToVarName(v), is_to_complex);
 
     mfem::ParFiniteElementSpace & from_pfespace = *from_gf.ParFESpace();
     mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
@@ -56,10 +76,29 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
     const int to_gf_ncomp = to_gf.VectorDim();
     mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
     _mfem_interpolator.SetDefaultInterpolationValue(getMFEMOutOfMeshValue());
+
     _mfem_interpolator.Interpolate(
         *from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
-
     _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
+
+    if (is_to_complex)
+    {
+      // Get remaining imaginary component of destination GridFunction
+      mfem::ParGridFunction & to_gf_im =
+          getActiveToProblem().getProblemData().cmplx_gridfunctions.Get(getToVarName(v))->imag();
+      if (is_from_complex)
+      {
+        mfem::ParGridFunction & from_gf_im = getActiveFromProblem()
+                                                 .getProblemData()
+                                                 .cmplx_gridfunctions.Get(getFromVarName(v))
+                                                 ->imag();
+        _mfem_interpolator.Interpolate(
+            *from_gf_im.ParFESpace()->GetParMesh(), vxyz, from_gf_im, interp_vals, point_ordering);
+        _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf_im);
+      }
+      else // Transfer from real variable to complex variable, so imag component zero
+        to_gf_im = 0.0;
+    }
   }
 }
 
