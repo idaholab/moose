@@ -17,6 +17,8 @@
 #include <set>
 #include <utility>
 
+class PetscVectorReader;
+
 #include "libmesh/petsc_vector.h"
 
 class MooseMesh;
@@ -45,6 +47,9 @@ public:
   /// Get the volumetric face flux (used in advection terms)
   Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
+  /// Recompute the pressure-gradient face flux from the current pressure solution
+  virtual void computePressureGradientFlux();
+
   /// Get interpolation coefficients for the advected quantity
   virtual std::pair<Real, Real>
   getAdvectedInterpolationCoeffs(const FaceInfo & fi,
@@ -63,6 +68,9 @@ public:
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center
   virtual Real rawPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
+
+  /// Whether flux-based velocity reconstruction is enabled
+  virtual bool useFluxVelocityReconstruction() const { return false; }
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -85,6 +93,9 @@ public:
   virtual void finalize() override {}
   virtual void initialSetup() override;
 
+  /// Recompute corrected pressure gradients (dispatches to derived implementation)
+  void recomputeCorrectedPressureGradient();
+
   /**
    * Update the momentum system-related information
    * @param momentum_systems Pointers to the momentum systems which are solved for the momentum
@@ -106,6 +117,12 @@ protected:
   /// Select the right pressure gradient field and return a reference to the container
   virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
   selectPressureGradient(const bool updated_pressure);
+
+  /// Store pressure-gradient face flux values (no-op in base class)
+  virtual void storePressureGradientFlux(const FaceInfo & fi, Real p_grad_flux);
+
+  /// Compute the pressure-gradient flux contribution for a single face
+  Real computeFacePressureGradientFlux(const FaceInfo & fi, PetscVectorReader & p_reader);
 
   /// Compute the cell volumes on the mesh
   virtual void setupMeshInformation();
