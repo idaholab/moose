@@ -21,6 +21,8 @@ public:
 
   FVAdvectedUpwind(const InputParameters & params);
 
+  bool supportsAdvectedInterpolation() const override { return true; }
+
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.
    * @param face The face being interpolated.

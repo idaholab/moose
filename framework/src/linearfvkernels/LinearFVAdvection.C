@@ -39,6 +39,15 @@ LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
               "LinearFVAdvection now requires an explicit FVInterpolationMethod "
               "via advected_interp_method_name.");
 
+  if (!_adv_interp_method->supportsAdvectedInterpolation())
+    mooseError("FVInterpolationMethod '",
+               _adv_interp_method->name(),
+               "' (",
+               _adv_interp_method->type(),
+               ") does not support advected interpolation and cannot be used by ",
+               type(),
+               ".");
+
   if (_adv_interp_method->advectedInterpolationNeedsGradients())
     _var.computeCellGradients(_adv_interp_method->gradientLimiter());
 }

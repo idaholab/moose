@@ -21,6 +21,8 @@ public:
 
   FVHarmonicAverage(const InputParameters & params);
 
+  bool supportsFaceInterpolation() const override { return true; }
+
   /**
    * Harmonic-mean interpolation using FaceInfo's geometric weight.
    * @param face The face being interpolated.

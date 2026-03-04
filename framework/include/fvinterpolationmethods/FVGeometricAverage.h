@@ -22,6 +22,9 @@ public:
 
   FVGeometricAverage(const InputParameters & params);
 
+  bool supportsFaceInterpolation() const override { return true; }
+  bool supportsAdvectedInterpolation() const override { return true; }
+
   /**
    * Interpolate using FaceInfo's geometric weight.
    * @param face The face being interpolated.

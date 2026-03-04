@@ -46,6 +46,15 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
     _cached_face_diffusivity(false),
     _face_diffusivity(0.0)
 {
+  if (_coeff_interp_method && !_coeff_interp_method->supportsFaceInterpolation())
+    mooseError("FVInterpolationMethod '",
+               _coeff_interp_method->name(),
+               "' (",
+               _coeff_interp_method->type(),
+               ") does not support face interpolation and cannot be used by ",
+               type(),
+               ".");
+
   if (_use_nonorthogonal_correction)
     _var.computeCellGradients();
 }
