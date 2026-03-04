@@ -196,24 +196,23 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
 
   auto expected_unclamped = [&](const Real mass_flux)
   {
-    const Real upwind_mask = mass_flux >= 0.0;
-    const Real downwind_mask = 1.0 - upwind_mask;
+    const bool upwind_is_elem = mass_flux >= 0.0;
 
-    const Real phi_upwind = upwind_mask * elem_value + downwind_mask * neighbor_value;
-    const Real phi_downwind = upwind_mask * neighbor_value + downwind_mask * elem_value;
-    const VectorValue<Real> grad_upwind = upwind_mask * elem_grad + downwind_mask * neighbor_grad;
+    const Real phi_upwind = upwind_is_elem ? elem_value : neighbor_value;
+    const Real phi_downwind = upwind_is_elem ? neighbor_value : elem_value;
+    const VectorValue<Real> grad_upwind = upwind_is_elem ? elem_grad : neighbor_grad;
+    const auto upwind_to_downwind = upwind_is_elem ? face.dCN() : -face.dCN();
 
-    const auto r_f = Moose::FV::rF(
-        phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
+    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, upwind_to_downwind);
     const Real beta = (r_f + abs(r_f)) / (1.0 + std::abs(r_f));
 
-    const Real w_f = upwind_mask * gc + downwind_mask * (1.0 - gc);
+    const Real w_f = upwind_is_elem ? gc : (1.0 - gc);
     const Real g = beta * (1.0 - w_f);
 
     const Real w_upwind = 1.0 - g;
     const Real w_downwind = g;
-    const Real w_elem = upwind_mask * w_upwind + downwind_mask * w_downwind;
-    const Real w_neighbor = upwind_mask * w_downwind + downwind_mask * w_upwind;
+    const Real w_elem = upwind_is_elem ? w_upwind : w_downwind;
+    const Real w_neighbor = upwind_is_elem ? w_downwind : w_upwind;
     return std::make_pair(w_elem, w_neighbor);
   };
 
