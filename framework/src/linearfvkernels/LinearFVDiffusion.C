@@ -46,9 +46,6 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
     _cached_face_diffusivity(false),
     _face_diffusivity(0.0)
 {
-  if (_coeff_interp_method)
-    _coeff_interp_handle = _coeff_interp_method->faceInterpolator();
-
   if (_use_nonorthogonal_correction)
     _var.computeCellGradients();
 }
@@ -60,7 +57,7 @@ LinearFVDiffusion::faceDiffusivity() const
   {
     const auto state = determineState();
 
-    if (_coeff_interp_handle.valid())
+    if (_coeff_interp_method)
     {
       const auto face_arg = makeCDFace(*_current_face_info);
       const auto elem_arg = face_arg.makeElem();
@@ -73,7 +70,8 @@ LinearFVDiffusion::faceDiffusivity() const
         neighbor_value = _diffusion_coeff(neighbor_arg, state);
       }
 
-      _face_diffusivity = _coeff_interp_handle(*_current_face_info, elem_value, neighbor_value);
+      _face_diffusivity = _coeff_interp_method->interpolate(
+          *_current_face_info, elem_value, neighbor_value);
     }
     else
       _face_diffusivity = _diffusion_coeff(makeCDFace(*_current_face_info), state);

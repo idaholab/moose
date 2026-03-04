@@ -11,8 +11,6 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
-#include "GradientLimiterType.h"
-#include <limits>
 
 registerMooseObject("MooseApp", LinearFVAdvection);
 
@@ -41,11 +39,8 @@ LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
               "LinearFVAdvection now requires an explicit FVInterpolationMethod "
               "via advected_interp_method_name.");
 
-  _adv_interp_handle = _adv_interp_method->advectedSystemContributionCalculator();
-  if (_adv_interp_handle.needsGradients())
-    _var.computeCellGradients(_adv_interp_handle.gradientLimiter());
-  if (!_adv_interp_handle.valid())
-    mooseError("Advected interpolation handle is invalid; check the interpolation method setup.");
+  if (_adv_interp_method->advectedInterpolationNeedsGradients())
+    _var.computeCellGradients(_adv_interp_method->gradientLimiter());
 }
 
 void
@@ -60,7 +55,25 @@ LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
     return;
 
   const auto state = determineState();
-  _adv_interp_result = _adv_interp_handle(_var, *_current_face_info, state, _adv_face_flux);
+  const Real elem_value = _var.getElemValue(*_current_face_info->elemInfo(), state);
+  const Real neighbor_value = _var.getElemValue(*_current_face_info->neighborInfo(), state);
+
+  VectorValue<Real> elem_grad_storage;
+  VectorValue<Real> neighbor_grad_storage;
+  const VectorValue<Real> * elem_grad = nullptr;
+  const VectorValue<Real> * neighbor_grad = nullptr;
+
+  if (_adv_interp_method->advectedInterpolationNeedsGradients())
+  {
+    const auto limiter_type = _adv_interp_method->gradientLimiter();
+    elem_grad_storage = _var.gradSln(*_current_face_info->elemInfo(), limiter_type);
+    elem_grad = &elem_grad_storage;
+    neighbor_grad_storage = _var.gradSln(*_current_face_info->neighborInfo(), limiter_type);
+    neighbor_grad = &neighbor_grad_storage;
+  }
+
+  _adv_interp_result = _adv_interp_method->advectedInterpolate(
+      *_current_face_info, elem_value, neighbor_value, elem_grad, neighbor_grad, _adv_face_flux);
 }
 
 void

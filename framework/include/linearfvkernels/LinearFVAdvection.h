@@ -12,8 +12,6 @@
 #include "LinearFVFluxKernel.h"
 #include "FVInterpolationMethodInterface.h"
 #include "FVInterpolationMethod.h"
-#include <unordered_map>
-
 /**
  * Kernel that adds contributions from an advection term discretized using the finite volume method
  * to a linear system.
@@ -50,9 +48,6 @@ protected:
 
   /// The interpolation method to use for the advected quantity
   const FVInterpolationMethod * _adv_interp_method;
-
-  /// Cached handle used to evaluate the advected interpolation method without virtual dispatch
-  FVInterpolationMethod::AdvectedSystemContributionCalculator _adv_interp_handle;
 
   /// Cached weights/correction for the current face (refreshed in setupFaceData)
   mutable FVInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
