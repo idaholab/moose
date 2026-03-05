@@ -609,18 +609,14 @@ MFEMProblem::getMeshDisplacementGridFunction()
 }
 
 void
-MFEMProblem::updateAfterRefinement()
+MFEMProblem::rebalanceMesh(mfem::ParMesh & pmesh)
 {
-  updateFESpaces();
-
-  if (_problem_data.pmesh->Nonconforming())
+  if (pmesh.Nonconforming())
   {
-    _problem_data.pmesh->Rebalance();
+    pmesh.Rebalance();
     updateFESpaces();
+    updateGridFunctions();
   }
-
-  // Reconstruct the solver due to possible mfem/hypre bug
-  _problem_data.jacobian_solver->constructSolver(emptyInputParameters());
 }
 
 void
@@ -628,11 +624,13 @@ MFEMProblem::updateFESpaces()
 {
   for (const auto & fe_space_pair : _problem_data.fespaces)
     fe_space_pair.second->Update();
+}
 
+void
+MFEMProblem::updateGridFunctions()
+{
   for (const auto & gridfunction_pair : _problem_data.gridfunctions)
     gridfunction_pair.second->Update();
-
-  _problem_data.eqn_system->BuildEquationSystem();
 }
 
 std::vector<VariableName>

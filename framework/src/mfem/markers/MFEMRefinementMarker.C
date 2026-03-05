@@ -19,24 +19,25 @@ MFEMRefinementMarker::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
 
-  params.addRangeCheckedParam<Real>("refine",
+  params.addRequiredParam<std::string>("indicator", "Estimator to use");
+  params.addRangeCheckedParam<Real>("threshold",
                                     0,
-                                    "refine>=0 & refine<=1",
-                                    "Elements within this percentage of the max error will "
-                                    "be refined.  Must be between 0 and 1!");
+                                    "threshold>=0 & threshold<=1",
+                                    "Elements above this percentage of the max error will "
+                                    "be refined. Must be between 0 and 1!");
+  params.addParam<bool>("rebalance", false, "Whether to rebalance the mesh after h-refinement");
   params.addRangeCheckedParam<unsigned>(
       "max_h_level", 0, "max_h_level>=0 & max_h_level<=10", "Max number of h-refinement steps");
   params.addRangeCheckedParam<unsigned>(
       "max_p_level", 0, "max_p_level>=0 & max_p_level<=10", "Max number of p-refinement steps");
-
-  params.addRequiredParam<std::string>("indicator", "Estimator to use");
   return params;
 }
 
 MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _estimator_name(getParam<std::string>("indicator")),
-    _error_threshold(getParam<Real>("refine")),
+    _error_threshold(getParam<Real>("threshold")),
+    _rebalance(getParam<bool>("rebalance")),
     _max_h_level(getParam<unsigned>("max_h_level")),
     _max_p_level(getParam<unsigned>("max_p_level"))
 {
@@ -70,15 +71,22 @@ MFEMRefinementMarker::pRefine()
   mfem::Array<mfem::Refinement> refinements;
   _threshold_refiner->MarkWithoutRefining(_estimator->getParMesh(), refinements);
 
-  mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
-  for (const auto i : make_range(refinements.Size()))
-    prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
+  bool refined = _estimator->getParMesh().ReduceInt(refinements.Size()) != 0LL;
 
-  // Perform p-refinement
-  _estimator->getFESpace().PRefineAndUpdate(prefinements);
+  if (refined)
+  {
+    mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
+    for (const auto i : make_range(refinements.Size()))
+      prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
+
+    // Perform p-refinement
+    _estimator->getFESpace().PRefineAndUpdate(prefinements);
+    // Update all gridfunctions since the same fespace can be shared by multiple gridfunctions
+    getMFEMProblem().updateGridFunctions();
+  }
 
   // Return whether we actually refined and increase the counter if we did
-  return _estimator->getParMesh().ReduceInt(refinements.Size()) != 0LL && ++_p_ref_counter;
+  return refined && ++_p_ref_counter;
 }
 
 bool
@@ -91,8 +99,20 @@ MFEMRefinementMarker::hRefine()
   // Perform h-refinement
   _threshold_refiner->Apply(_estimator->getParMesh());
 
+  bool refined = !_threshold_refiner->Stop();
+
+  if (refined)
+  {
+    // Update all fespaces since the same mesh can be shared by multiple fespaces
+    getMFEMProblem().updateFESpaces();
+    // Update all gridfunctions now we have updated all fespaces
+    getMFEMProblem().updateGridFunctions();
+    if (_rebalance)
+      getMFEMProblem().rebalanceMesh(_estimator->getParMesh());
+  }
+
   // Return whether we actually refined and increase the counter if we did
-  return !_threshold_refiner->Stop() && ++_h_ref_counter;
+  return refined && ++_h_ref_counter;
 }
 
 #endif

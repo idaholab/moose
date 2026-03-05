@@ -267,6 +267,11 @@ public:
   void displaceMesh();
 
   /**
+   * Rebalance the (necessarily nonconforming) mesh.
+   */
+  void rebalanceMesh(mfem::ParMesh & pmesh);
+
+  /**
    * Returns optional reference to the displacement GridFunction to apply to nodes.
    */
   std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
@@ -276,8 +281,15 @@ public:
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
 
-  void updateAfterRefinement();
+  /**
+   * Calls Update() on all fespaces
+   */
   void updateFESpaces();
+
+  /**
+   * Calls Update() on all gridfunctions
+   */
+  void updateGridFunctions();
 
   bool useAMR() const { return _problem_data.refiner != nullptr; }
   bool hRefine() { return useAMR() && _problem_data.refiner->hRefine(); }
