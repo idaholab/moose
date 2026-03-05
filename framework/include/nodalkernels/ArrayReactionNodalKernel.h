@@ -24,7 +24,7 @@ public:
 
 protected:
   virtual void computeQpResidual(GenericRealEigenVector<is_ad> & residual) override;
-  virtual RealEigenVector computeQpJacobian() override;
+  virtual void computeQpJacobian() override;
 
   /// rate coefficient
   const RealEigenVector & _coeff;
