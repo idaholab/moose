@@ -19,6 +19,10 @@ ResidualObject::validParams()
 {
   auto params = ::ResidualObject::validParams();
 
+  params.makeParamNotRequired<NonlinearVariableName>("variable");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "variables", "The names of the variables that this residual object operates on");
+
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -42,17 +46,41 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
     MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
     AssemblyHolder(_fe_problem.kokkosAssembly()),
     SystemHolder(_fe_problem.getKokkosSystems()),
-    _var(_subproblem.getVariable(_tid,
-                                 getParam<NonlinearVariableName>("variable"),
-                                 Moose::VarKindType::VAR_SOLVER,
-                                 field_type)),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  _kokkos_var.init(_var);
+  if (isParamValid("variable") && isParamValid("variables"))
+    mooseError("Cannot specify both 'variable' and 'variables' at the same time.");
+  else if (!isParamValid("variable") && !isParamValid("variables"))
+    mooseError("Either 'variable' or 'variables' should be specified.");
+
+  std::vector<NonlinearVariableName> variables;
+
+  if (isParamValid("variable"))
+    variables.push_back(getParam<NonlinearVariableName>("variable"));
+  else
+    variables = getParam<std::vector<NonlinearVariableName>>("variables");
+
+  for (const auto & variable : variables)
+    _vars.push_back(
+        &_subproblem.getVariable(_tid, variable, Moose::VarKindType::VAR_SOLVER, field_type));
+
+  if (_vars.size() > 1)
+    for (unsigned int i = 1; i < _vars.size(); ++i)
+    {
+      if (_vars[0]->sys().number() != _vars[i]->sys().number())
+        mooseError(
+            "For multi-variable kernels/BCs, all variables should reside in the same system.");
+
+      if (_vars[0]->feType() != _vars[i]->feType())
+        mooseError("For multi-variable kernels/BCs, all variables should have the same FE family "
+                   "and order.");
+    }
+
+  _kokkos_var.init(_vars);
 }
 
 ResidualObject::ResidualObject(const ResidualObject & object)
@@ -60,14 +88,14 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     MeshHolder(object),
     AssemblyHolder(object),
     SystemHolder(object),
-    _var(object._var),
     _kokkos_var(object._kokkos_var),
     _thread(object._thread),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
-    _dt_old(object._dt_old)
+    _dt_old(object._dt_old),
+    _vars(object._vars)
 {
   _vector_tags = object.getVectorTags({});
   _matrix_tags = object.getMatrixTags({});

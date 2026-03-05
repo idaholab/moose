@@ -28,6 +28,11 @@ public:
   TimeKernel(const InputParameters & parameters);
 
   /**
+   * Copy constructor for parallel dispatch
+   */
+  TimeKernel(const TimeKernel & object);
+
+  /**
    * Hook for additional computation for residual after the standard calls
    * @param ib The beginning element-local DOF index
    * @param ie The end element-local DOF index
@@ -56,7 +61,7 @@ protected:
   /**
    * Derivative of u_dot with respect to u
    */
-  const Scalar<const Real> _du_dot_du;
+  Array<Real> _du_dot_du;
 };
 
 template <typename Derived>

@@ -209,10 +209,11 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  auto comp = _thread(tid, 0);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   bc.computeResidualInternal(bc, datum);
 }
@@ -221,10 +222,11 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  auto comp = _thread(tid, 0);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   AssemblyDatum datum(
-      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var(comp), comp);
 
   bc.computeJacobianInternal(bc, datum);
 }
@@ -233,15 +235,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto comp = _thread(tid, 0);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto jvar = sys.getCoupling(_kokkos_var.var(comp))[_thread(tid, 1)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar, comp);
 
   bc.computeOffDiagJacobianInternal(bc, datum);
 }
