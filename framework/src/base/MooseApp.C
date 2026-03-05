@@ -270,7 +270,6 @@ MooseApp::validParams()
       "--recover <optional file base>",
       "",
       "Continue the calculation. Without <file base>, the most recent recovery file will be used");
-  params.setGlobalCommandLineParam("recover");
   params.addCommandLineParam<bool>(
       "force_restart",
       "--force-restart",

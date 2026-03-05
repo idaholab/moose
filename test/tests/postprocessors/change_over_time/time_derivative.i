@@ -52,8 +52,8 @@ function_values = '2 5 6 3'
 [Executioner]
   type = Transient
   [TimeStepper]
-    type = TimeSequenceFromTimes
-    times = sim_times
+    type = TimeSequenceStepper
+    time_sequence = sim_times
   []
   num_steps = 3
 []
