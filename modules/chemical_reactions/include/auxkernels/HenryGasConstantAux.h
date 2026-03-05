@@ -1,6 +1,19 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "AuxKernel.h"
+
+// This AuxKernel performs a calculation of the Henry coefficient for noble gases using the model
+// by K. Lee, et al., "Semi-empirical model for Henry's law constant of noble gases in molten salt",
+// Scientific Reports (2024) 14:12847, https://doi.org/10.1038/s41598-024-60006-9.
 
 class HenryGasConstantAux : public AuxKernel
 {

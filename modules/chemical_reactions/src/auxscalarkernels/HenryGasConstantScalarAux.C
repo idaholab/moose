@@ -2,9 +2,6 @@
 #include "HenryGasConstantAux.h"
 #include "MathUtils.h"
 
-// This AuxKernel performs a calculation of the Henry coefficient for noble gases using the model
-// by K. Lee, et al., "Semi-empirical model for Henry's law constant of noble gases in molten salt",
-// Scientific Reports (2024) 14:12847, https://doi.org/10.1038/s41598-024-60006-9.
 
 registerMooseObject("MooseApp", HenryGasConstantScalarAux);
 
