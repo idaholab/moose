@@ -56,7 +56,19 @@ PorousRhieChowMassFlux::validParams()
       "Boundary sidesets where reconstruction enforces zero normal flux (symmetry/slip).");
   params.addParam<bool>("use_corrected_pressure_gradient",
                         true,
-                        "Whether to use the baffle-corrected pressure gradient when forming HbyA.");
+                        "Whether to use the baffle-corrected pressure gradient when forming HbyA "
+                        "if reconstructed gradients are not used (reconstruction off or "
+                        "use_reconstructed_pressure_gradient=false).");
+  params.addParam<bool>(
+      "use_reconstructed_pressure_gradient",
+      true,
+      "Whether to feed the reconstructed pressure gradient back into the momentum predictor.");
+  params.addRangeCheckedParam<Real>(
+      "pressure_gradient_limiter_blend",
+      0.0,
+      "0.0<=pressure_gradient_limiter_blend<=1.0",
+      "Blend factor for limited pressure gradient reconstruction on specified sidesets. "
+      "0 uses one-term expansion (most diffusive), 1 uses full two-term interpolation.");
   params.addParam<std::vector<BoundaryName>>(
       "pressure_gradient_limiter",
       {},
@@ -74,6 +86,8 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
     _flux_velocity_reconstruction_relaxation(
         getParam<Real>("flux_velocity_reconstruction_relaxation")),
     _use_corrected_pressure_gradient(getParam<bool>("use_corrected_pressure_gradient")),
+    _use_reconstructed_pressure_gradient(getParam<bool>("use_reconstructed_pressure_gradient")),
+    _pressure_gradient_limiter_blend(getParam<Real>("pressure_gradient_limiter_blend")),
     _use_harmonic_Ainv_interp(isParamSetByUser(NS::porosity)),
     _p_grad_flux(_moose_mesh, blockIDs(), "p_grad_flux"),
     _baffle_jump(
@@ -90,6 +104,13 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
   _pressure_gradient_limiter_ids.insert(limiter_ids.begin(), limiter_ids.end());
   const auto zero_flux_ids = _moose_mesh.getBoundaryIDs(zero_flux_names);
   _reconstruction_zero_flux_boundary_ids.insert(zero_flux_ids.begin(), zero_flux_ids.end());
+
+  if (_use_flux_velocity_reconstruction && _use_reconstructed_pressure_gradient &&
+      _use_corrected_pressure_gradient)
+    mooseWarning(name(),
+                 ": use_corrected_pressure_gradient will not override the reconstructed momentum "
+                 "gradient when flux-velocity reconstruction is enabled. It is only used when "
+                 "reconstruction is off or use_reconstructed_pressure_gradient=false.");
 }
 
 void
@@ -227,8 +248,9 @@ PorousRhieChowMassFlux::computeFaceMassFlux()
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
 PorousRhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
-  const bool use_reconstructed =
-      _use_flux_velocity_reconstruction && !_grad_p_reconstructed.empty();
+  const bool use_reconstructed = _use_flux_velocity_reconstruction &&
+                                 _use_reconstructed_pressure_gradient &&
+                                 !_grad_p_reconstructed.empty();
   const bool use_corrected = _use_corrected_pressure_gradient && !_grad_p_corrected.empty();
   const auto & grad_container = _pressure_system->gradientContainer();
   const auto & source = use_reconstructed ? _grad_p_reconstructed
@@ -315,7 +337,8 @@ PorousRhieChowMassFlux::pressureGradient(const ElemInfo & elem_info, unsigned in
     return 0.0;
 
   const auto dof = elem_info.dofIndices()[_global_pressure_system_number][0];
-  if (_use_flux_velocity_reconstruction && !_grad_p_reconstructed.empty())
+  if (_use_flux_velocity_reconstruction && _use_reconstructed_pressure_gradient &&
+      !_grad_p_reconstructed.empty())
     return (*_grad_p_reconstructed[component])(dof);
   if (!_grad_p_corrected.empty())
     return (*_grad_p_corrected[component])(dof);
@@ -373,8 +396,7 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     const Real u_elem = U_n / eps_elem;
     const Real u_neighbor = U_n / eps_neighbor;
 
-    const Real J_new =
-        0.5 * (elem_rho * u_elem * u_elem - neighbor_rho * u_neighbor * u_neighbor);
+    const Real J_new = 0.5 * (elem_rho * u_elem * u_elem - neighbor_rho * u_neighbor * u_neighbor);
     const Real J_old = _baffle_jump[fi->id()];
 
     _baffle_jump[fi->id()] =
@@ -384,14 +406,13 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     {
       const auto elem_bnds = _moose_mesh.getBoundaryIDs(fi->elemPtr(), fi->elemSideID());
       const auto neigh_bnds = _moose_mesh.getBoundaryIDs(fi->neighborPtr(), fi->neighborSideID());
-      _console << "Baffle jump face " << fi->id()
-               << " elem_block=" << fi->elem().subdomain_id()
+      _console << "Baffle jump face " << fi->id() << " elem_block=" << fi->elem().subdomain_id()
                << " neigh_block=" << fi->neighbor().subdomain_id()
                << " elem_bnds=" << stringify_bnds(elem_bnds)
                << " neigh_bnds=" << stringify_bnds(neigh_bnds) << " phi=" << phi << " U_n=" << U_n
-               << " rho_f=" << face_rho << " eps_elem=" << eps_elem
-               << " eps_neigh=" << eps_neighbor << " J_new=" << J_new << " J_old=" << J_old
-               << " J=" << _baffle_jump[fi->id()] << std::endl;
+               << " rho_f=" << face_rho << " eps_elem=" << eps_elem << " eps_neigh=" << eps_neighbor
+               << " J_new=" << J_new << " J_old=" << J_old << " J=" << _baffle_jump[fi->id()]
+               << std::endl;
     }
   }
 }
@@ -456,7 +477,8 @@ PorousRhieChowMassFlux::computeCorrectedPressureGradient()
       const bool neighbor_active =
           neighbor && neighbor_info_face && hasBlocks(neighbor_info_face->subdomain_id());
 
-      if (neighbor_active && !isPressureGradientLimited(*fi))
+      const bool limited = isPressureGradientLimited(*fi);
+      if (neighbor_active && (!limited || _pressure_gradient_limiter_blend > 0.0))
       {
         const auto neighbor_dof =
             neighbor_info_face->dofIndices()[_global_pressure_system_number][0];
@@ -464,7 +486,15 @@ PorousRhieChowMassFlux::computeCorrectedPressureGradient()
         const auto coeffs =
             Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *fi, elem_has_info);
         const Real jump_side = getSignedBaffleJump(*fi, elem_has_info);
-        p_face = coeffs.first * p_elem + coeffs.second * (p_neighbor + jump_side);
+        const Real p_face_unlimited =
+            coeffs.first * p_elem + coeffs.second * (p_neighbor + jump_side);
+
+        if (limited)
+          p_face = (1.0 - _pressure_gradient_limiter_blend) * p_elem +
+                   _pressure_gradient_limiter_blend * p_face_unlimited;
+        else
+          p_face = p_face_unlimited;
+
         if (_debug_baffle && isBaffleFace(*fi))
           _console << "Baffle grad face " << fi->id() << " elem_has_info=" << elem_has_info
                    << " p_elem=" << p_elem << " p_neigh=" << p_neighbor
@@ -665,9 +695,6 @@ PorousRhieChowMassFlux::computeCellVelocity()
       if (!_vel[0]->isInternalFace(*fi) && isReconstructionZeroFluxFace(*fi))
         _face_velocity[fi->id()] = RealVectorValue();
 
-  if (!_pressure_baffle_boundary_ids.empty() || !_pressure_gradient_limiter_ids.empty())
-    computeCorrectedPressureGradient();
-
   if (_grad_w_prev.empty())
   {
     _grad_w_prev.resize(_dim);
@@ -686,6 +713,13 @@ PorousRhieChowMassFlux::computeCellVelocity()
     for (const auto comp_index : make_range(_dim))
       _grad_p_reconstructed[comp_index] =
           _momentum_implicit_systems[comp_index]->current_local_solution->zero_clone();
+  }
+  std::vector<std::unique_ptr<NumericVector<Number>>> grad_p_old;
+  if (!_grad_p_reconstructed.empty())
+  {
+    grad_p_old.reserve(_dim);
+    for (const auto & grad_vec : _grad_p_reconstructed)
+      grad_p_old.push_back(grad_vec->clone());
   }
   for (auto & grad_vec : _grad_p_reconstructed)
     grad_vec->zero();
@@ -710,10 +744,8 @@ PorousRhieChowMassFlux::computeCellVelocity()
     M.zero();
     b_h.zero();
     b_p.zero();
-    bool force_corrected_grad = false;
 
     const Elem & elem = *elem_info->elem();
-    const auto p_dof = elem_info->dofIndices()[_global_pressure_system_number][0];
 
     auto act = [&](const Elem &,
                    const Elem * const neighbor,
@@ -722,9 +754,6 @@ PorousRhieChowMassFlux::computeCellVelocity()
                    const Real /*coord*/,
                    const bool elem_has_info)
     {
-      if (!force_corrected_grad && (isBaffleFace(*fi) || isPressureGradientLimited(*fi)))
-        force_corrected_grad = true;
-
       const Real magS = surface_vector.norm();
       if (magS == 0.0)
         return;
@@ -792,8 +821,12 @@ PorousRhieChowMassFlux::computeCellVelocity()
 
       for (const auto i : make_range(_dim))
       {
-        b_h(i) += ((H) / magS) * surface_vector(i);
-        b_p(i) += ((P - corr) / magS) * surface_vector(i);
+        // H and P are face-normal velocity components (flux density / rho). Convert to
+        // integrated face flux by multiplying with |S| via surface_vector.
+        b_h(i) += H * surface_vector(i);
+        // corr is built from grad(U) * dPf and dotted with surface_vector, so normalize by |S|
+        // before combining with P.
+        b_p(i) += (P - corr / magS) * surface_vector(i);
         for (const auto j : make_range(_dim))
           M(i, j) += surface_vector(i) * surface_vector(j) / magS;
       }
@@ -830,9 +863,9 @@ PorousRhieChowMassFlux::computeCellVelocity()
       const Real Ainv = (*_Ainv_raw[comp_index])(index);
       Real grad_tilde =
           Ainv != 0.0 ? (result_h(comp_index) - result_p(comp_index) - HbyA) / Ainv : 0.0;
-      if (force_corrected_grad && _use_corrected_pressure_gradient && !_grad_p_corrected.empty())
-        grad_tilde = (*_grad_p_corrected[comp_index])(p_dof);
-      _grad_p_reconstructed[comp_index]->set(index, grad_tilde);
+      const Real old_grad = grad_p_old.empty() ? grad_tilde : (*grad_p_old[comp_index])(index);
+      const Real new_grad = (1.0 - alpha) * old_grad + alpha * grad_tilde;
+      _grad_p_reconstructed[comp_index]->set(index, new_grad);
     }
   }
 

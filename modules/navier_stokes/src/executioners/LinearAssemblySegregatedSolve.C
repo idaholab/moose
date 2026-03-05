@@ -520,11 +520,11 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // current pressure field (important for porous/baffle cases).
   _rc_uo->recomputeCorrectedPressureGradient();
 
-  if (_rc_uo->useFluxVelocityReconstruction())
-    _rc_uo->computePressureGradientFlux();
-
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
+
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
 
   return residuals;
 }
