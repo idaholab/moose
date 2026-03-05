@@ -633,6 +633,9 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool recompute_face_mass_fl
   // the next momentum predictor. Ordinary methods retain their existing cell-velocity update.
   _rc_uo->finalizePressureCorrector();
 
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
+
   return residuals;
 }
 
