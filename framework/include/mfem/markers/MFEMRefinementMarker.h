@@ -39,8 +39,8 @@ protected:
   /// Unique pointer to underlying mfem object
   std::unique_ptr<mfem::ThresholdRefiner> _threshold_refiner;
   const std::string & _estimator_name;
-
   const mfem::real_t _error_threshold;
+  const bool _rebalance;
   const unsigned _max_h_level;
   const unsigned _max_p_level;
   unsigned _h_ref_counter{0};

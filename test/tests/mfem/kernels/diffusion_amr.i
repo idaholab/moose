@@ -16,7 +16,7 @@
   [Markers]
     [ref]
       type = MFEMRefinementMarker
-      refine = 0.7 # error
+      threshold = 0.7
       indicator = l2zz
       max_h_level = 1
       max_p_level = 1

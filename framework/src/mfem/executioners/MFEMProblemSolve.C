@@ -79,8 +79,11 @@ MFEMProblemSolve::solve()
     // Short-circuit evaluation guarantees we only do one of p- or h-refinement between solves
     while (_mfem_problem.pRefine() || _mfem_problem.hRefine())
     {
-      // Update the mfem problem
-      _mfem_problem.updateAfterRefinement();
+      // Fix me: rebuild equation system (should probably be called per operator)
+      _mfem_problem.getProblemData().eqn_system->BuildEquationSystem();
+
+      // Remove me: reconstruct the solver due to possible mfem/hypre bug
+      _mfem_problem.getProblemData().jacobian_solver->constructSolver(emptyInputParameters());
 
       // Reset gridfunctions
       for (const auto & problem_operator : _problem_operators)
