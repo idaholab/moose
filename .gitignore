@@ -110,6 +110,36 @@ build
 framework/contrib/libtorch
 test.cache
 vgcore*
+test/moose_test.yaml
+modules/chemical_reactions/chemical_reactions.yaml
+modules/combined/combined.yaml
+modules/contact/contact.yaml
+modules/electromagnetics/electromagnetics.yaml
+modules/external_petsc_solver/external_petsc_solver.yaml
+modules/fluid_properties/fluid_properties.yaml
+modules/fsi/fsi.yaml
+modules/functional_expansion_tools/functional_expansion_tools.yaml
+modules/geochemistry/geochemistry.yaml
+modules/heat_transfer/heat_transfer.yaml
+modules/level_set/level_set.yaml
+modules/misc/misc.yaml
+modules/module_loader/module_loader.yaml
+modules/navier_stokes/navier_stokes.yaml
+modules/optimization/optimization.yaml
+modules/peridynamics/peridynamics.yaml
+modules/phase_field/phase_field.yaml
+modules/porous_flow/porous_flow.yaml
+modules/ray_tracing/ray_tracing.yaml
+modules/rdg/rdg.yaml
+modules/reactor/reactor.yaml
+modules/richards/richards.yaml
+modules/scalar_transport/scalar_transport.yaml
+modules/solid_mechanics/solid_mechanics.yaml
+modules/solid_properties/solid_properties.yaml
+modules/stochastic_tools/stochastic_tools.yaml
+modules/subchannel/subchannel.yaml
+modules/thermal_hydraulics/thermal_hydraulics.yaml
+modules/xfem/xfem.yaml
 
 # Allow certain files in gold directories
 !**/gold/**/*.e
