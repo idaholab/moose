@@ -80,9 +80,9 @@ HenryGasConstantAux::computeValue()
 
   // Equations result in units of mol/cm^3/atm, so convert to mol/m^3/atm
   Real value =
-      _alpha * 4 * libMesh::pi * std::pow(_radius * m_to_ang, 2) *
+      _alpha * 4 * libMesh::pi * Utility::pow<2>(_radius * m_to_ang) *
           (_gamma_0 + _dgamma_dT * (_temperature[_qp] - 273.15)) +
-      _beta * 4 / 3 * libMesh::pi * std::pow(_radius * m_to_ang, 3) * _Rgas * _temperature[_qp];
+      _beta * 4. / 3. * libMesh::pi * std::pow(_radius * m_to_ang, 3) * _Rgas * _temperature[_qp];
   value = exp(value / (_Rgas * _temperature[_qp])) * _KH0;
   return value;
 }

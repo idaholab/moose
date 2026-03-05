@@ -60,7 +60,7 @@ HenryGasConstantScalarAux::HenryGasConstantScalarAux(const InputParameters & par
     case Saltlist::CUSTOM:
       // Ensure that all parameters were set by user
       if (!isParamSetByUser("alpha"))
-        mooseError("Must include alpha parameter when using custom salt Henry gas model");
+        paramError("alpha", "Must include alpha parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("beta"))
         mooseError("Must include beta parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("gamma_0"))
