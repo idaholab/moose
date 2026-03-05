@@ -643,9 +643,186 @@ buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boun
   poly_mesh->skip_partitioning(true);
   poly_mesh->prepare_for_use();
   if (poly_mesh->n_elem() == 0)
-    mooseError("The input mesh does not have a boundary with id ", boundary_id);
+    mooseError("The input mesh to extract the boundary from does not have a boundary with id ",
+               boundary_id,
+               ".\n",
+               input_mesh);
 
   return poly_mesh;
+}
+
+std::unique_ptr<ReplicatedMesh>
+buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+{
+  auto edge_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
+  auto side_list = input_mesh.get_boundary_info().build_side_list();
+  std::set<BoundaryInfo::BCTuple> visited;
+  BoundaryInfo::BCTuple side_to_flood_with = {libMesh::invalid_uint, 0, 0};
+
+  // Helps move elem to elem at a given node
+  const auto node_to_elem_map = buildBoundaryNodeToElemMap(input_mesh, boundary_id);
+  // Helps check if a node is part of a boundary
+  const auto & node_to_bids = input_mesh.get_boundary_info().get_nodeset_map();
+
+  // Should only be two elems connected
+  for (const auto & [nid, eid_set] : node_to_elem_map)
+    if (eid_set.size() != 2)
+      mooseError("More than two elements connected to node '",
+                 std::to_string(nid),
+                 "' found when looking for the loop boundary of 2D mesh ",
+                 input_mesh);
+
+  // Traverse from the first side (edge) in the side_list that matches the boundary_id
+  for (const auto & bside : side_list)
+  {
+    if (std::get<2>(bside) != boundary_id)
+      continue;
+
+    // Check that we are not starting 'another' loop
+    if (bside != side_to_flood_with)
+    {
+      if (visited.size() && !visited.count(bside))
+        mooseWarning("Boundary " + std::to_string(boundary_id) + " is not a (contiguous) loop");
+      else if (visited.empty())
+        side_to_flood_with = bside;
+      else
+        continue;
+    }
+
+    // Form the element to be able to find the side
+    // These three variables will be updated while traversing the loop boundary
+    const Elem * elem = input_mesh.elem_ptr(std::get<0>(bside));
+    auto current_side = std::get<1>(bside);
+    auto side_elem = elem->build_side_ptr(current_side);
+
+    // 3D elements should not be part of this boundary
+    if (elem->dim() > 2)
+      mooseError("Finding the loop boundary of a 2D mesh cannot be done with 3D elements such as ",
+                 *elem);
+
+    // Start from a node of the side element, go to the next element
+    bool looped_back = false;
+    unsigned int num_visited_from_this_side = 0;
+    const Node * starting_node = side_elem->node_ptr(0);
+    Node * current_node = edge_mesh->add_point(side_elem->point(0));
+    auto opposite_node_index = 1;
+    while (!looped_back && num_visited_from_this_side < 1e7)
+    {
+      // Get opposite node and add to mesh
+      Node * opposite_node = edge_mesh->add_point(input_mesh.point(opposite_node_index));
+
+      // Add a copy of the edge side element to the mesh
+      auto copy = side_elem->build(side_elem->type());
+      copy->set_node(0, current_node);
+      copy->set_node(1, opposite_node);
+      edge_mesh->add_elem(copy.release());
+
+      // Make this side as 'visited'
+      std::tuple<dof_id_type, unsigned short int, boundary_id_type> bc_tuple = {
+          elem->id(), current_side, boundary_id};
+      visited.insert(bc_tuple);
+
+      // Set current node to opposite node of new element
+      current_node = opposite_node;
+
+      // Find the next element and side_elem
+      auto & connected_elems = libmesh_map_find(node_to_elem_map, opposite_node->id());
+      bool found_match = false;
+      for (const auto eid : connected_elems)
+        if (eid != elem->id())
+        {
+          elem = input_mesh.elem_ptr(eid);
+          const auto node_index = elem->get_node_index(opposite_node);
+          // Find the side and the opposite node index in that side
+          for (const auto si : elem->side_index_range())
+          {
+            // 2 sides should match this
+            if (elem->is_node_on_side(node_index, si))
+            {
+              // Only one side should be on the same boundary
+              // We can check using the 'other' node on that side
+              for (const auto side_node_id : elem->nodes_on_side(si))
+              {
+                if (side_node_id == node_index)
+                  continue;
+
+                const auto & bids = libmesh_map_find(node_to_bids, side_node_id);
+                for (const auto & iter : bids)
+                  if (iter->second == boundary_id)
+                  {
+                    current_side = si;
+                    opposite_node_index = side_node_id;
+                    found_match = true;
+                  }
+              }
+            }
+          }
+
+          break;
+        }
+
+      // Handle loop ending criterion
+      num_visited_from_this_side++;
+      if (current_node == starting_node)
+        looped_back = true;
+
+      if (!found_match)
+      {
+        mooseWarning("Search for next element in loop boundary failed. Is boundary '" +
+                         std::to_string(boundary_id) + "' of mesh ",
+                     input_mesh,
+                     " a loop boundary?");
+        break;
+      }
+
+      side_elem = elem->build_side_ptr(current_side);
+    }
+  }
+
+  edge_mesh->skip_partitioning(true);
+  edge_mesh->prepare_for_use();
+  if (edge_mesh->n_elem() == 0)
+    mooseError("The input mesh to extract the boundary from does not have a boundary with id ",
+               boundary_id,
+               "\n",
+               input_mesh);
+
+  return edge_mesh;
+}
+
+std::map<dof_id_type, std::set<dof_id_type>>
+buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+{
+  // Get all nodes on boundaries
+  const BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
+  auto bc_nodes = boundary_info.build_node_list();
+
+  // Get all nodes on that particular boundary
+  std::set<dof_id_type> particular_node_ids;
+  for (const auto & bc_n : bc_nodes)
+  {
+    auto nd_id = std::get<0>(bc_n);
+    auto bc_id = std::get<1>(bc_n);
+    if (bc_id == boundary_id)
+      particular_node_ids.insert(nd_id);
+  }
+
+  std::map<dof_id_type, std::set<dof_id_type>> nid_to_eids_map;
+  // Fill the map from looping over elements
+  for (const auto & elem :
+       as_range(input_mesh.active_elements_begin(), input_mesh.active_elements_end()))
+  {
+    for (const auto & nd : elem->node_ref_range())
+    {
+      // Only add the element id if the node is on the boundary
+      if (!particular_node_ids.count(nd.id()))
+        continue;
+
+      std::set<dof_id_type> & elem_ids = nid_to_eids_map[nd.id()];
+      elem_ids.insert(elem->id());
+    }
+  }
+  return nid_to_eids_map;
 }
 
 void

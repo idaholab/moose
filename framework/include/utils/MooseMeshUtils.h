@@ -429,6 +429,25 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
                                                   const boundary_id_type boundary_id);
 
 /**
+ * Build a loop mesh of edges from the contiguous 2D boundary of 2D input mesh
+ * Note: The lower-dimensional mesh will only have one subdomain.
+ *       An error will be thrown if the mesh does not have the boundary.
+ * @param input_mesh  The input mesh
+ * @param boundary_id The boundary id
+ */
+std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh,
+                                                          const boundary_id_type boundary_id);
+
+/**
+ * Build a map from the node ids to all element ids they are part of for the nodes on a particular
+ * nodeset
+ * @param input_mesh  The input mesh to get the map for
+ * @param boundary_id The boundary id of interest
+ */
+std::map<dof_id_type, std::set<dof_id_type>>
+buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id);
+
+/**
  * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
  * @param mesh The mesh to work on
  * @param boundary_names The names of the sidesets to be used to create the new subdomain
