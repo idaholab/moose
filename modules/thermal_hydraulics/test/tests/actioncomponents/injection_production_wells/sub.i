@@ -1,5 +1,7 @@
 p_value = 1e5
 T_value = 300
+C1_value = 2e-3
+C2_value = 0.3
 
 [Mesh]
   type = GeneratedMesh
@@ -17,10 +19,24 @@ T_value = 300
     type = ConstantPostprocessor
     value = ${T_value}
   []
-  [mass_rate_inj2]
+  [C1_inj1]
+    type = ConstantPostprocessor
+    value = ${C1_value}
+  []
+  [C2_inj1]
+    type = ConstantPostprocessor
+    value = ${C2_value}
+  []
+  [mass_rate_inj1]
     type = Receiver
   []
-  [energy_rate_inj2]
+  [energy_rate_inj1]
+    type = Receiver
+  []
+  [C1_rate_inj1]
+    type = Receiver
+  []
+  [C2_rate_inj1]
     type = Receiver
   []
 
@@ -33,10 +49,24 @@ T_value = 300
     type = ConstantPostprocessor
     value = ${T_value}
   []
-  [mass_rate_inj1]
+  [C1_inj2]
+    type = ConstantPostprocessor
+    value = ${C1_value}
+  []
+  [C2_inj2]
+    type = ConstantPostprocessor
+    value = ${C2_value}
+  []
+  [mass_rate_inj2]
     type = Receiver
   []
-  [energy_rate_inj1]
+  [energy_rate_inj2]
+    type = Receiver
+  []
+  [C1_rate_inj2]
+    type = Receiver
+  []
+  [C2_rate_inj2]
     type = Receiver
   []
 
@@ -49,10 +79,24 @@ T_value = 300
     type = ConstantPostprocessor
     value = ${T_value}
   []
-  [mass_rate_pro2]
+  [C1_pro1]
+    type = ConstantPostprocessor
+    value = ${C1_value}
+  []
+  [C2_pro1]
+    type = ConstantPostprocessor
+    value = ${C2_value}
+  []
+  [mass_rate_pro1]
     type = Receiver
   []
-  [energy_rate_pro2]
+  [energy_rate_pro1]
+    type = Receiver
+  []
+  [C1_rate_pro1]
+    type = Receiver
+  []
+  [C2_rate_pro1]
     type = Receiver
   []
 
@@ -65,10 +109,24 @@ T_value = 300
     type = ConstantPostprocessor
     value = ${T_value}
   []
-  [mass_rate_pro1]
+  [C1_pro2]
+    type = ConstantPostprocessor
+    value = ${C1_value}
+  []
+  [C2_pro2]
+    type = ConstantPostprocessor
+    value = ${C2_value}
+  []
+  [mass_rate_pro2]
     type = Receiver
   []
-  [energy_rate_pro1]
+  [energy_rate_pro2]
+    type = Receiver
+  []
+  [C1_rate_pro2]
+    type = Receiver
+  []
+  [C2_rate_pro2]
     type = Receiver
   []
 []

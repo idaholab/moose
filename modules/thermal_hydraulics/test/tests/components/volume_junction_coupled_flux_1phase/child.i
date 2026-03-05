@@ -7,11 +7,11 @@
 [Postprocessors]
   [p_test]
     type = ConstantPostprocessor
-    value = 0.9e5
+    value = 1.001e5
   []
   [T_test]
     type = ConstantPostprocessor
-    value = 300
+    value = 400
   []
   [mass_rate_test]
     type = Receiver
@@ -27,7 +27,7 @@
 
 [Executioner]
   type = Transient
-  end_time = 0.5
+  # end_time = 0.5
   dt = 0.1
 []
 

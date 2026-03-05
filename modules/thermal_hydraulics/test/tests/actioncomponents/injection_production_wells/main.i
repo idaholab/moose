@@ -8,6 +8,8 @@ T_inlet = 300
 p_outlet = 1e5
 rhou_inlet = 1.0
 mdot_inlet = ${fparse A_pipe * rhou_inlet}
+C1_inlet = 1e-3
+C2_inlet = 0.2
 
 inj_surface = '0 0 0'
 inj_point1 = '0 0 -2'
@@ -37,8 +39,11 @@ n_elems = 2
     junction_volume = ${V_junc}
     inlet_mass_flow_rate = ${mdot_inlet}
     inlet_temperature = ${T_inlet}
+    inlet_passives = '${C1_inlet} ${C2_inlet}'
     initial_pressure = ${p_outlet}
     initial_temperature = ${T_inlet}
+    passives_names = 'C1 C2'
+    initial_passives = '${C1_inlet} ${C2_inlet}'
     fluid_properties = fp
     multi_app = sub
   []
@@ -54,6 +59,8 @@ n_elems = 2
     outlet_pressure = ${p_outlet}
     initial_pressure = ${p_outlet}
     initial_temperature = ${T_inlet}
+    passives_names = 'C1 C2'
+    initial_passives = '${C1_inlet} ${C2_inlet}'
     fluid_properties = fp
     multi_app = sub
   []
@@ -93,4 +100,5 @@ n_elems = 2
 
 [Outputs]
   exodus = true
+  show = 'p T vel C1_times_area C2_times_area'
 []

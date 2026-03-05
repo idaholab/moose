@@ -9,6 +9,7 @@
 
 #include "VolumeJunctionCoupledFlux1Phase.h"
 #include "VolumeJunction1Phase.h"
+#include "THMIndicesVACE.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunctionCoupledFlux1Phase);
 
@@ -53,19 +54,33 @@ VolumeJunctionCoupledFlux1Phase::check() const
 void
 VolumeJunctionCoupledFlux1Phase::addMooseObjects()
 {
-  const std::vector<NonlinearVariableName> vars = {"rhoV", "rhouV", "rhovV", "rhowV", "rhoEV"};
+  const auto & volume_junction =
+      getTHMProblem().getComponentByName<VolumeJunction1Phase>(_volume_junction_name);
+  const auto & passives_times_V = volume_junction.passiveJunctionVariableNames();
+  const auto & passives = volume_junction.passiveNames();
+
+  // add the junction kernels
+  std::vector<NonlinearVariableName> vars = {"rhoV", "rhouV", "rhovV", "rhowV", "rhoEV"};
+  vars.insert(vars.end(), passives_times_V.begin(), passives_times_V.end());
   for (const auto i : index_range(vars))
     addVolumeJunctionKernel(vars[i], i);
 
-  const std::vector<std::string> equations = {"mass", "energy"};
+  // create the flux post-processors and their transfers
+  std::vector<std::string> equations = {"mass", "energy"};
+  equations.insert(equations.end(), passives.begin(), passives.end());
+  std::vector<unsigned int> equation_indices = {THMVACE3D::MASS, THMVACE3D::ENERGY};
+  for (const auto i : index_range(passives))
+    equation_indices.push_back(THMVACE3D::N_FLUX_OUTPUTS + i);
   for (const auto i : index_range(equations))
   {
-    addFluxPostprocessor(equations[i]);
+    addFluxPostprocessor(equations[i], equation_indices[i]);
     if (isParamValid("multi_app"))
       addFluxTransfer(equations[i]);
   }
 
-  const std::vector<std::string> properties = {"p", "T"};
+  // create the external properties post-processors and their transfers
+  std::vector<std::string> properties = {"p", "T"};
+  properties.insert(properties.end(), passives.begin(), passives.end());
   for (const auto i : index_range(properties))
   {
     addPropertyPostprocessor(properties[i]);
@@ -87,6 +102,10 @@ VolumeJunctionCoupledFlux1Phase::addVolumeJunctionKernel(const std::string & var
   params.set<unsigned int>("equation_index") = i;
   params.set<PostprocessorName>("pressure") = addPostprocessorSuffix("p");
   params.set<PostprocessorName>("temperature") = addPostprocessorSuffix("T");
+  std::vector<PostprocessorName> passive_pps;
+  for (const auto & passive_name : volume_junction.passiveNames())
+    passive_pps.push_back(addPostprocessorSuffix(passive_name));
+  params.set<std::vector<PostprocessorName>>("passives") = passive_pps;
   params.set<Real>("A_coupled") = getParam<Real>("A_coupled");
   params.set<RealVectorValue>("normal_from_junction") = _normal_from_junction;
   params.set<UserObjectName>("volume_junction_uo") =
@@ -98,7 +117,7 @@ VolumeJunctionCoupledFlux1Phase::addVolumeJunctionKernel(const std::string & var
 }
 
 void
-VolumeJunctionCoupledFlux1Phase::addFluxPostprocessor(const std::string & equation)
+VolumeJunctionCoupledFlux1Phase::addFluxPostprocessor(const std::string & equation, unsigned int i)
 {
   const auto & volume_junction =
       getTHMProblem().getComponentByName<VolumeJunction1Phase>(_volume_junction_name);
@@ -106,9 +125,13 @@ VolumeJunctionCoupledFlux1Phase::addFluxPostprocessor(const std::string & equati
   const std::string quantity = equation + "_rate";
   const std::string class_name = "VolumeJunctionCoupledFlux1PhasePostprocessor";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<MooseEnum>("equation") = equation;
+  params.set<unsigned int>("equation_index") = i;
   params.set<PostprocessorName>("pressure") = addPostprocessorSuffix("p");
   params.set<PostprocessorName>("temperature") = addPostprocessorSuffix("T");
+  std::vector<PostprocessorName> passive_pps;
+  for (const auto & passive_name : volume_junction.passiveNames())
+    passive_pps.push_back(addPostprocessorSuffix(passive_name));
+  params.set<std::vector<PostprocessorName>>("passives") = passive_pps;
   params.set<Real>("A_coupled") = getParam<Real>("A_coupled");
   params.set<RealVectorValue>("normal_from_junction") = _normal_from_junction;
   params.set<UserObjectName>("volume_junction_uo") =

@@ -124,6 +124,14 @@
     restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall conserve mass and energy when a VolumJunction1Phase component is used'
   []
+
+  [passive_transport]
+    type = CSVDiff
+    input = 'passive_transport.i'
+    csvdiff = 'passive_transport_out.csv'
+    requirement = 'The system shall be able to simulate the transport of passive concentrations through a volume junction.'
+  []
+
   # error checking
   [err.missing_ics]
     type = 'RunException'

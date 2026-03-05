@@ -149,6 +149,8 @@ FlowChannel1Phase::addNumericalFluxVectorPostprocessor()
   params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
   params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
   params.set<std::vector<VariableName>>("A_linear") = {THM::AREA_LINEAR};
+  params.set<std::vector<VariableName>>("passives_names") =
+      getParam<std::vector<VariableName>>("passives_names");
   params.set<MooseEnum>("sort_by") = sortBy();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   getTHMProblem().addVectorPostprocessor(class_name, name() + "_flux_vpp", params);

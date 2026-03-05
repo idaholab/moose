@@ -37,14 +37,15 @@ protected:
   /**
    * Adds a VolumeJunctionCoupledFlux1PhasePostprocessor
    *
-   * @param[in] equation  Equation for which to get flux: "mass" or "energy"
+   * @param[in] equation  Equation for which to get flux
+   * @param[in] i  Equation index within volume junction equations
    */
-  void addFluxPostprocessor(const std::string & equation);
+  void addFluxPostprocessor(const std::string & equation, unsigned int i);
 
   /**
    * Adds a MultiAppPostprocessorTransfer for a flux PP
    *
-   * @param[in] equation  Equation for which to get flux: "mass" or "energy"
+   * @param[in] equation  Equation for which to get flux
    */
   void addFluxTransfer(const std::string & equation);
 

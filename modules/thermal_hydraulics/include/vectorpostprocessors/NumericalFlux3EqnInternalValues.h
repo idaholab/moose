@@ -44,6 +44,8 @@ protected:
   const ADMaterialProperty<Real> & _rhouA1;
   /// Reconstructed rho*E*A values in current element
   const ADMaterialProperty<Real> & _rhoEA1;
+  /// Reconstructed passive*A values in current element
+  const ADMaterialProperty<std::vector<Real>> & _passives_times_area1;
 
   /// Reconstructed rho*A values in neighbor element
   const ADMaterialProperty<Real> & _rhoA2;
@@ -51,6 +53,13 @@ protected:
   const ADMaterialProperty<Real> & _rhouA2;
   /// Reconstructed rho*E*A values in neighbor element
   const ADMaterialProperty<Real> & _rhoEA2;
+  /// Reconstructed passive*A values in neighbor element
+  const ADMaterialProperty<std::vector<Real>> & _passives_times_area2;
+
+  /// Passive transport variable names
+  const std::vector<VariableName> _passives_names;
+  /// Number of passive transport variables
+  const unsigned int _n_passives;
 
   /// Numerical flux user object
   const ADNumericalFlux3EqnBase & _numerical_flux;

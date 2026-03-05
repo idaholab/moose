@@ -19,9 +19,10 @@ to [VolumeJunctionCoupledFlux1Phase.md] (see its documentation for more informat
 The flow channels use [Closures1PhaseSimple.md] with the friction factor provided by
 [!param](/ActionComponents/InjectionWell/friction_factor).
 
-The inlet mass flow rate and temperature are specified by
-[!param](/ActionComponents/InjectionWell/inlet_mass_flow_rate) and
-[!param](/ActionComponents/InjectionWell/inlet_temperature), respectively.
+The inlet mass flow rate, temperature, and passives concentrations (if any) are specified by
+[!param](/ActionComponents/InjectionWell/inlet_mass_flow_rate),
+[!param](/ActionComponents/InjectionWell/inlet_temperature),
+[!param](/ActionComponents/InjectionWell/inlet_passives), respectively.
 
 !syntax parameters /ActionComponents/InjectionWell
 

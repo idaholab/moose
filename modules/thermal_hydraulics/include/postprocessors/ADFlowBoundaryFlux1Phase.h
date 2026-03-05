@@ -24,10 +24,18 @@ public:
   virtual Real computeQpIntegral() override;
 
 protected:
-  /// Number of components in the solution vector used to compute the flux
-  const unsigned int _n_components;
-  /// Variables to pass to boundary flux user object, in the correct order
-  std::vector<const ADVariableValue *> _U;
+  /// Gets the flux index corresponding to the requested equation
+  unsigned int getEquationIndex() const;
+
+  /// Cross-sectional area, linear
+  const ADVariableValue & _A_linear;
+
+  // solution variables
+  const ADMaterialProperty<Real> & _rhoA;
+  const ADMaterialProperty<Real> & _rhouA;
+  const ADMaterialProperty<Real> & _rhoEA;
+  const ADMaterialProperty<std::vector<Real>> & _passives_times_area;
+
   /// Boundary component name
   const std::string & _boundary_name;
   /// Boundary user object name
