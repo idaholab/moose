@@ -448,6 +448,15 @@ std::map<dof_id_type, std::set<dof_id_type>>
 buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id);
 
 /**
+ * Get all the nodes on that particular boundary, whether a nodeset or a sideset.
+ * Note: if the mesh has both a nodeset and a sideset with the same ID, they will both be considered
+ *       If this is undesirable, renumber one of them prior to calling this routine
+ * @param input_mesh  The input mesh to get the map for
+ * @param boundary_id The boundary id of interest
+ */
+std::set<dof_id_type> getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id);
+
+/**
  * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
  * @param mesh The mesh to work on
  * @param boundary_names The names of the sidesets to be used to create the new subdomain

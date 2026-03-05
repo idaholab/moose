@@ -743,11 +743,12 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
               // We can check using the 'other' node on that side
               for (const auto side_node_id : elem->nodes_on_side(si))
               {
+                // Skip current node
                 if (side_node_id == node_index)
                   continue;
-
-                const auto & bids = libmesh_map_find(node_to_bids, side_node_id);
-                for (const auto & iter : bids)
+                // Check all the boundaries the other node (on the edge side) is part of
+                const auto bids_range = node_to_bids.equal_range(input_mesh.node_ptr(side_node_id));
+                for (auto iter = bids_range.first; iter != bids_range.second; iter++)
                   if (iter->second == boundary_id)
                   {
                     current_side = si;
@@ -793,19 +794,9 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
 std::map<dof_id_type, std::set<dof_id_type>>
 buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
 {
-  // Get all nodes on boundaries
-  const BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
-  auto bc_nodes = boundary_info.build_node_list();
-
-  // Get all nodes on that particular boundary
-  std::set<dof_id_type> particular_node_ids;
-  for (const auto & bc_n : bc_nodes)
-  {
-    auto nd_id = std::get<0>(bc_n);
-    auto bc_id = std::get<1>(bc_n);
-    if (bc_id == boundary_id)
-      particular_node_ids.insert(nd_id);
-  }
+  // Get all nodes on that boundary
+  // Boundary ID might be a sideset or a nodeset, get nodes regardless
+  const auto particular_node_ids = getBoundaryNodes(input_mesh, boundary_id);
 
   std::map<dof_id_type, std::set<dof_id_type>> nid_to_eids_map;
   // Fill the map from looping over elements
@@ -823,6 +814,40 @@ buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_
     }
   }
   return nid_to_eids_map;
+}
+
+std::set<dof_id_type>
+getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id)
+{
+  std::set<dof_id_type> boundary_node_ids;
+  const BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+  // Get all nodes from the sideset with ID of boundary_id
+  const auto & bc_sides =
+      boundary_info.build_side_list(libMesh::BoundaryInfo::BCTupleSortBy::BOUNDARY_ID);
+  for (const auto & bc_s : bc_sides)
+  {
+    auto bc_id = std::get<2>(bc_s);
+    if (bc_id == boundary_id)
+    {
+      auto elem_id = std::get<0>(bc_s);
+      const auto elem = mesh.elem_ptr(elem_id);
+      auto side = std::get<1>(bc_s);
+      for (const auto ni : elem->nodes_on_side(side))
+        boundary_node_ids.insert(elem->node_id(ni));
+    }
+  }
+
+  // Get all nodes from nodeset with ID of boundary_id
+  const auto & bc_nodes = boundary_info.build_node_list();
+  for (const auto & bc_n : bc_nodes)
+  {
+    auto bc_id = std::get<1>(bc_n);
+    if (bc_id == boundary_id)
+      boundary_node_ids.insert(std::get<0>(bc_n));
+  }
+
+  return boundary_node_ids;
 }
 
 void
