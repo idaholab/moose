@@ -12,6 +12,7 @@
 #include "RhieChowMassFlux.h"
 #include "FaceCenteredMapFunctor.h"
 #include <unordered_set>
+#include <unordered_map>
 
 /**
  * Rhie-Chow mass flux object specialized for porous flow/baffle cases.
@@ -68,6 +69,8 @@ private:
   std::unordered_set<BoundaryID> _reconstruction_zero_flux_boundary_ids;
 
   const Real _pressure_baffle_relaxation;
+  std::unordered_map<BoundaryID, Real> _pressure_baffle_form_loss_by_id;
+  std::unordered_map<BoundaryID, bool> _pressure_baffle_form_loss_use_higher_eps_by_id;
   const bool _debug_baffle;
   const bool _use_flux_velocity_reconstruction;
   const Real _flux_velocity_reconstruction_relaxation;
