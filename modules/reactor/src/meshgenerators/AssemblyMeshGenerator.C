@@ -650,13 +650,17 @@ AssemblyMeshGenerator::generateCSG()
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
   // Combine all bases from PinMG inputs into this base. Root universes from
-  // inputs are renamed to a new universe name
+  // inputs are renamed to a new universe name. Apply a 30 degree rotation
+  // to each of the constituent pins before they are placed into a lattice
   std::unordered_map<unsigned int, std::string> univ_id_names;
   for (const auto i : index_range(_inputs))
   {
     const auto input_univ_name = _inputs[i] + "_univ";
     csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), input_univ_name);
     univ_id_names[i] = input_univ_name;
+
+    const auto & csg_univ = csg_obj->getUniverseByName(input_univ_name);
+    csg_obj->applyAxisRotation(csg_univ, "z", 30.);
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
