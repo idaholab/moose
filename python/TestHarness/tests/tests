@@ -358,6 +358,7 @@
   [append_pythonpath]
     type = PythonUnitTest
     input = test_append_pythonpath.py
+    min_slots = 2 # calls TestHarness, which could use threads
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
   []
