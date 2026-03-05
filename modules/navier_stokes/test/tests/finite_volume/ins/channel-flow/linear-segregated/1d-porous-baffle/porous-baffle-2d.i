@@ -44,8 +44,10 @@ advected_interp_method = 'average'
     p_diffusion_kernel = p_diffusion
     pressure_baffle_sidesets = 'baffle baffle2'
     pressure_gradient_limiter = 'baffle baffle2'
+    baffle_form_loss = '0 0'
+    velocity_form_loss = 'lower_epsilon lower_epsilon'
     pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.2
+    pressure_baffle_relaxation = 0.1
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
@@ -236,12 +238,12 @@ advected_interp_method = 'average'
   [forch]
     type = GenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '50 50 50'
+    prop_values = '3 3 3'
   []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
-    subdomain_to_prop_value = '1 0.5 2 1.0 3 0.5'
+    subdomain_to_prop_value = '1 1.0 2 0.5 3 1.0'
   []
 []
 

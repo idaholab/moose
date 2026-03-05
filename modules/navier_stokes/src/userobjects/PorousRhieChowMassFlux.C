@@ -10,6 +10,7 @@
 #include "PorousRhieChowMassFlux.h"
 
 #include "MooseMesh.h"
+#include "MooseEnum.h"
 #include "NS.h"
 #include "MathFVUtils.h"
 #include "FVUtils.h"
@@ -40,6 +41,16 @@ PorousRhieChowMassFlux::validParams()
                                     1.0,
                                     "0.0<pressure_baffle_relaxation<=1.0",
                                     "Under-relaxation factor for pressure baffle jump updates.");
+  params.addParam<std::vector<Real>>(
+      "baffle_form_loss",
+      std::vector<Real>(),
+      "Per-baffle form-loss coefficient K values aligned with pressure_baffle_sidesets.");
+  MultiMooseEnum velocity_form_loss("higher_epsilon lower_epsilon");
+  params.addParam<MultiMooseEnum>(
+      "velocity_form_loss",
+      velocity_form_loss,
+      "Per-baffle velocity-side selection aligned with pressure_baffle_sidesets. "
+      "Allowed values: higher_epsilon, lower_epsilon.");
   params.addParam<bool>("debug_baffle", false, "Enable debug output for baffle jumps.");
   params.addParam<bool>("use_flux_velocity_reconstruction",
                         false,
@@ -98,12 +109,46 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
   const auto & limiter_names = getParam<std::vector<BoundaryName>>("pressure_gradient_limiter");
   const auto & zero_flux_names =
       getParam<std::vector<BoundaryName>>("flux_velocity_reconstruction_zero_flux_sidesets");
+  const auto & baffle_form_loss = getParam<std::vector<Real>>("baffle_form_loss");
+  const auto & velocity_form_loss = getParam<MultiMooseEnum>("velocity_form_loss");
+
+  if (!baffle_form_loss.empty() && baffle_form_loss.size() != baffle_names.size())
+    paramError("baffle_form_loss", "Must have the same length as pressure_baffle_sidesets.");
+  if (params.isParamSetByUser("velocity_form_loss") &&
+      velocity_form_loss.size() != baffle_names.size())
+    paramError("velocity_form_loss", "Must have the same length as pressure_baffle_sidesets.");
   const auto baffle_ids = _moose_mesh.getBoundaryIDs(baffle_names);
   _pressure_baffle_boundary_ids.insert(baffle_ids.begin(), baffle_ids.end());
   const auto limiter_ids = _moose_mesh.getBoundaryIDs(limiter_names);
   _pressure_gradient_limiter_ids.insert(limiter_ids.begin(), limiter_ids.end());
   const auto zero_flux_ids = _moose_mesh.getBoundaryIDs(zero_flux_names);
   _reconstruction_zero_flux_boundary_ids.insert(zero_flux_ids.begin(), zero_flux_ids.end());
+
+  if (params.isParamSetByUser("velocity_form_loss") && baffle_form_loss.empty())
+    paramError("velocity_form_loss", "Requires baffle_form_loss to be provided.");
+
+  if (!baffle_form_loss.empty())
+  {
+    if (baffle_names.empty())
+      paramError("pressure_baffle_sidesets",
+                 "Must be provided when baffle_form_loss is set.");
+
+    for (const auto & val : baffle_form_loss)
+      if (val < 0.0)
+        paramError("baffle_form_loss", "All entries must be >= 0.");
+
+    for (const auto i : index_range(baffle_names))
+    {
+      const auto bnd_id = _moose_mesh.getBoundaryID(baffle_names[i]);
+
+      _pressure_baffle_form_loss_by_id[bnd_id] = baffle_form_loss[i];
+
+      _pressure_baffle_form_loss_use_higher_eps_by_id[bnd_id] =
+          params.isParamSetByUser("velocity_form_loss")
+              ? (velocity_form_loss[i] == "higher_epsilon")
+              : false;
+    }
+  }
 
   if (_use_flux_velocity_reconstruction && _use_reconstructed_pressure_gradient &&
       _use_corrected_pressure_gradient)
@@ -396,7 +441,40 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     const Real u_elem = U_n / eps_elem;
     const Real u_neighbor = U_n / eps_neighbor;
 
-    const Real J_new = 0.5 * (elem_rho * u_elem * u_elem - neighbor_rho * u_neighbor * u_neighbor);
+    Real J_new = 0.5 * (elem_rho * u_elem * u_elem - neighbor_rho * u_neighbor * u_neighbor);
+
+    Real J_loss = 0.0;
+    Real form_loss = 0.0;
+    bool use_higher_eps = false;
+
+    BoundaryID baffle_id = Moose::INVALID_BOUNDARY_ID;
+    for (const auto & bnd_id : fi->boundaryIDs())
+      if (_pressure_baffle_boundary_ids.count(bnd_id))
+      {
+        baffle_id = bnd_id;
+        break;
+      }
+
+    if (baffle_id != Moose::INVALID_BOUNDARY_ID)
+    {
+      auto it_k = _pressure_baffle_form_loss_by_id.find(baffle_id);
+      if (it_k != _pressure_baffle_form_loss_by_id.end())
+        form_loss = it_k->second;
+
+      auto it_side = _pressure_baffle_form_loss_use_higher_eps_by_id.find(baffle_id);
+      if (it_side != _pressure_baffle_form_loss_use_higher_eps_by_id.end())
+        use_higher_eps = it_side->second;
+    }
+
+    if (form_loss > 0.0 && U_n != 0.0)
+    {
+      const bool pick_elem = use_higher_eps ? (eps_elem >= eps_neighbor) : (eps_elem <= eps_neighbor);
+      const Real u_ref = pick_elem ? u_elem : u_neighbor;
+      const Real flow_sign = U_n > 0.0 ? 1.0 : -1.0;
+      J_loss = -flow_sign * 0.5 * form_loss * face_rho * u_ref * u_ref;
+      J_new += J_loss;
+    }
+
     const Real J_old = _baffle_jump[fi->id()];
 
     _baffle_jump[fi->id()] =
@@ -411,8 +489,9 @@ PorousRhieChowMassFlux::updateBaffleJumps()
                << " elem_bnds=" << stringify_bnds(elem_bnds)
                << " neigh_bnds=" << stringify_bnds(neigh_bnds) << " phi=" << phi << " U_n=" << U_n
                << " rho_f=" << face_rho << " eps_elem=" << eps_elem << " eps_neigh=" << eps_neighbor
-               << " J_new=" << J_new << " J_old=" << J_old << " J=" << _baffle_jump[fi->id()]
-               << std::endl;
+               << " K=" << form_loss << " J_new=" << J_new << " J_loss=" << J_loss
+               << " J_old=" << J_old
+               << " J=" << _baffle_jump[fi->id()] << std::endl;
     }
   }
 }
