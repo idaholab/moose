@@ -195,7 +195,7 @@ class SubprocessRunner(Runner):
             # GNU time; should contain just the percentage
             if self._time_type == TimeType.GNU:
                 if match := re.fullmatch(r"(\d+)%", contents):
-                    self.setCPUPercent(float(match.group(1)))
+                    self.cpu_percent = float(match.group(1))
             # BSD time; need to compute percentage from (user+sys)/real
             elif self._time_type == TimeType.BSD and (
                 match := re.fullmatch(
@@ -206,9 +206,9 @@ class SubprocessRunner(Runner):
                 if real_time > 0:
                     user_time = float(match.group(2))
                     sys_time = float(match.group(3))
-                    self.setCPUPercent((user_time + sys_time) / real_time * 100.0)
+                    self.cpu_percent = (user_time + sys_time) / real_time * 100.0
                 else:
-                    self.setCPUPercent(0.0)
+                    self.cpu_percent = 0.0
 
             # Didn't find it or the parse failed; error if we haven't
             # already hit an error or a timeout

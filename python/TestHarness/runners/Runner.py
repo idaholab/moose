@@ -84,7 +84,8 @@ class Runner(OutputInterface):
         """
         return self._cpu_percent
 
-    def setCPUPercent(self, value: float):
+    @cpu_percent.setter
+    def cpu_percent(self, value: float):
         """
         Set the average CPU % usage for the process.
 
