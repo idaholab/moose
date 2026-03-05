@@ -7,10 +7,9 @@
 [Adaptivity]
   [Indicators]
     [l2zz]
-      type     = MFEMZienkiewiczZhuIndicator
+      type = MFEMZienkiewiczZhuIndicator
       variable = concentration
-      kernel   = diff
-      outputs  = none
+      kernel = diff
     []
   []
   [Markers]
@@ -75,7 +74,6 @@
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = '2'
-    coefficient = 0.0
   []
 []
 
@@ -83,7 +81,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-    coefficient = 1.0
   []
 []
 
@@ -97,13 +94,11 @@
   type = MFEMHypreGMRES
   preconditioner = boomeramg
   l_tol = 1e-16
-  l_abs_tol = 1e-16
-  l_max_its = 1000
 []
 
 [Executioner]
-  type       = MFEMSteady
-  device     = cpu
+  type = MFEMSteady
+  device = cpu
 []
 
 [Outputs]

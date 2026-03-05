@@ -32,16 +32,16 @@ public:
 
 protected:
   /// Finite element collection for the smoothed flux
-  std::unique_ptr<mfem::FiniteElementCollection> _smooth_flux_fec;
+  std::shared_ptr<mfem::FiniteElementCollection> _smooth_flux_fec;
 
   /// Finite element collection for the discontinuous flux
-  std::unique_ptr<mfem::FiniteElementCollection> _flux_fec;
+  std::shared_ptr<mfem::FiniteElementCollection> _flux_fec;
 
   /// Finite element space for the smoothed flux
-  std::unique_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
+  // std::shared_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
 
   /// Finite element space for the discontinuous flux
-  std::unique_ptr<mfem::ParFiniteElementSpace> _flux_fes;
+  // std::shared_ptr<mfem::ParFiniteElementSpace> _flux_fes;
 };
 
 #endif

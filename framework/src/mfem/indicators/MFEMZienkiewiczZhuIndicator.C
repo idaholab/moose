@@ -59,24 +59,16 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
   int dim = getParMesh().Dimension();
   int sdim = getParMesh().SpaceDimension();
 
-  // If we are using a Curl-curl integrator, we use a different space for the (smoothed) fluxes
-  if (dynamic_cast<mfem::CurlCurlIntegrator *>(integ) != nullptr)
+  if (!_flux_fes)
   {
-    _flux_fec = std::make_unique<mfem::RT_FECollection>(order - 1, dim);
-    _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get());
-
-    _smooth_flux_fec = std::make_unique<mfem::ND_FECollection>(order, dim);
-    _smooth_flux_fes =
-        std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get());
-  }
-
-  // Set up error estimator. As per example 6p, we supply a space for the discontinuous
-  // flux (L2) and a space for the smoothed flux. This branch should be the default option
-  else
-  {
+    // not supplied by the user - default to L2
     _flux_fec = std::make_unique<mfem::L2_FECollection>(order, dim);
     _flux_fes = std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _flux_fec.get(), sdim);
+  }
 
+  if (!_smooth_flux_fes)
+  {
+    // not supplied by the user - default to H1
     _smooth_flux_fec = std::make_unique<mfem::H1_FECollection>(order, dim);
     _smooth_flux_fes =
         std::make_unique<mfem::ParFiniteElementSpace>(&getParMesh(), _smooth_flux_fec.get(), sdim);
