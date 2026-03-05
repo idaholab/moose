@@ -11,17 +11,13 @@
 #include "MooseVariableFieldBase.h"
 #include "NonlinearSystemBase.h"
 
-#include "libmesh/dof_map.h"
-
 registerMooseObject("MooseApp", DiscreteVariableResidualNorm);
 
 InputParameters
 DiscreteVariableResidualNorm::validParams()
 {
-  InputParameters params = ElementPostprocessor::validParams();
+  InputParameters params = VariableResidualNormBase::validParams();
 
-  params.addRequiredParam<VariableName>("variable",
-                                        "The name of the variable to compute the residual for");
   MooseEnum norm_type("l_1=0 l_2=1 l_inf=2");
   norm_type.addDocumentation("l_1", "l-1 norm");
   norm_type.addDocumentation("l_2", "l-2 norm");
@@ -33,10 +29,6 @@ DiscreteVariableResidualNorm::validParams()
       "If set to true, correct the mesh size bias associated with the selected norm. For l-1, "
       "divide by N, the number of block-restricted DoFs for the variable. For l-2, divide by "
       "sqrt(N). For l-infinity, no correction needs to be made.");
-  params.addParam<bool>("include_scaling_factor",
-                        false,
-                        "If set to true, include the residual scaling factor in the norm; "
-                        "otherwise, divide by the scaling factor");
 
   params.addClassDescription("Computes a discrete norm for a block-restricted variable residual.");
 
@@ -44,58 +36,21 @@ DiscreteVariableResidualNorm::validParams()
 }
 
 DiscreteVariableResidualNorm::DiscreteVariableResidualNorm(const InputParameters & parameters)
-  : ElementPostprocessor(parameters),
-    _var(_fe_problem.getVariable(_tid,
-                                 getParam<VariableName>("variable"),
-                                 Moose::VarKindType::VAR_SOLVER,
-                                 Moose::VarFieldType::VAR_FIELD_STANDARD)),
+  : VariableResidualNormBase(parameters),
     _norm_type(getParam<MooseEnum>("norm_type").getEnum<NormType>()),
-    _correct_mesh_bias(getParam<bool>("correct_mesh_bias")),
-    _include_scaling_factor(getParam<bool>("include_scaling_factor")),
-    _nl_residual_vector(_fe_problem.getNonlinearSystemBase(_sys.number()).RHS())
+    _correct_mesh_bias(getParam<bool>("correct_mesh_bias"))
 {
 }
 
-void
-DiscreteVariableResidualNorm::initialize()
+std::vector<dof_id_type>
+DiscreteVariableResidualNorm::getCurrentElemDofIndices() const
 {
-  _norm = 0;
-  _local_dof_indices.clear();
-  _nonlocal_dof_indices_map.clear();
+  return _var.dofIndices();
 }
 
 void
-DiscreteVariableResidualNorm::execute()
+DiscreteVariableResidualNorm::computeNorm()
 {
-  for (const auto dof_index : _var.dofIndices())
-  {
-    // Dof indices may not be owned by the same processor as the current element
-    if (_var.dofMap().local_index(dof_index))
-      _local_dof_indices.insert(dof_index);
-    else
-    {
-      // if a Dof is non-local add it to a map, to be communicated to the owner in finalize()
-      const auto dof_owner = _var.dofMap().dof_owner(dof_index);
-      _nonlocal_dof_indices_map[dof_owner].push_back(dof_index);
-    }
-  }
-}
-
-void
-DiscreteVariableResidualNorm::threadJoin(const UserObject & y)
-{
-  const auto & pps = static_cast<const DiscreteVariableResidualNorm &>(y);
-  _local_dof_indices.insert(pps._local_dof_indices.begin(), pps._local_dof_indices.end());
-}
-
-void
-DiscreteVariableResidualNorm::finalize()
-{
-  // communicate the non-local Dofs to their processors
-  auto receive_functor = [&](processor_id_type /*pid*/, const std::vector<dof_id_type> & indices)
-  { _local_dof_indices.insert(indices.begin(), indices.end()); };
-  Parallel::push_parallel_vector_data(_communicator, _nonlocal_dof_indices_map, receive_functor);
-
   // compute the total number of Dofs for the variable on the subdomain
   auto n_dofs = _local_dof_indices.size();
   gatherSum(n_dofs);
@@ -123,10 +78,4 @@ DiscreteVariableResidualNorm::finalize()
 
   if (!_include_scaling_factor)
     _norm /= _var.scalingFactor();
-}
-
-PostprocessorValue
-DiscreteVariableResidualNorm::getValue() const
-{
-  return _norm;
 }
