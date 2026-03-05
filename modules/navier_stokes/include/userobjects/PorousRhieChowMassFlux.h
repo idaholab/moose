@@ -72,6 +72,8 @@ private:
   const bool _use_flux_velocity_reconstruction;
   const Real _flux_velocity_reconstruction_relaxation;
   const bool _use_corrected_pressure_gradient;
+  const bool _use_reconstructed_pressure_gradient;
+  const Real _pressure_gradient_limiter_blend;
   const bool _use_harmonic_Ainv_interp;
 
   std::unique_ptr<NumericVector<Number>> _cell_porosity;
