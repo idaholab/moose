@@ -46,7 +46,11 @@ protected:
   const std::string & _kernel_name;
   std::shared_ptr<mfem::ErrorEstimator> _error_estimator;
 
+  // FESpace that the variable lives in
   mfem::ParFiniteElementSpace & _fespace;
+
+  std::shared_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
+  std::shared_ptr<mfem::ParFiniteElementSpace> _flux_fes;
 };
 
 inline std::shared_ptr<mfem::ErrorEstimator>

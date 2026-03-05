@@ -11,6 +11,7 @@
       variable = concentration
       kernel   = diff
       outputs  = none
+      flux_fespace = l2fespace
     []
   []
   [Markers]
@@ -33,6 +34,12 @@
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
+  []
+  [l2fespace]
+    type = MFEMVectorFESpace
+    fec_type = L2
+    fec_order = FIRST
+    vdim = 3
   []
   [HCurlFESpace]
     type = MFEMVectorFESpace
