@@ -9,7 +9,7 @@
 
 ## Example Input File Syntax
 
-!listing mfem/complex/mixed_sesquilinear.i block=ICs
+!listing mfem/complex/mixed_sesquilinear_ic.i block=ICs
 
 !syntax parameters /ICs/MFEMComplexScalarIC
 
