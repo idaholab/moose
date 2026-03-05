@@ -1,6 +1,6 @@
-mu = 1e-2
+mu = 1e-2 # 1e-2
 rho = 2.0
-advected_interp_method = 'upwind'
+advected_interp_method = 'average'
 
 [Mesh]
   [mesh]
@@ -8,8 +8,8 @@ advected_interp_method = 'upwind'
     dim = 2
     dx = '0.5 0.5 0.5'
     dy = '0.5'
-    ix = '50 50 50'
-    iy = '50'
+    ix = '31 31 31'
+    iy = '31'
     subdomain_id = '1 2 3'
   []
   [baffle]
@@ -42,14 +42,17 @@ advected_interp_method = 'upwind'
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
-    # pressure_baffle_sidesets = 'baffle baffle2'
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_sidesets = 'baffle baffle2'
+    pressure_gradient_limiter = 'baffle baffle2'
+    pressure_gradient_limiter_blend = 0.5
+    pressure_baffle_relaxation = 0.2
     debug_baffle = false
-    # use_flux_velocity_reconstruction = true
+    use_flux_velocity_reconstruction = true
+    use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    # flux_velocity_reconstruction_zero_flux_sidesets = 'top bottom'
-    use_corrected_pressure_gradient = true
-    # body_force_kernel_names = "u_friction; v_friction"
+    flux_velocity_reconstruction_zero_flux_sidesets = 'top bottom'
+    use_corrected_pressure_gradient = false
+    body_force_kernel_names = "u_friction; v_friction"
   []
 []
 
@@ -114,28 +117,28 @@ advected_interp_method = 'upwind'
     porosity = porosity
     use_corrected_gradient = true
   []
-  # [u_friction]
-  #   type = LinearFVMomentumPorousFriction
-  #   variable = superficial_u
-  #   Forchheimer_name = forch
-  #   porosity = porosity
-  #   rho = ${rho}
-  #   u = superficial_u
-  #   v = superficial_v
-  #   momentum_component = 'x'
-  #   block = 2
-  # []
-  # [v_friction]
-  #   type = LinearFVMomentumPorousFriction
-  #   variable = superficial_v
-  #   Forchheimer_name = forch
-  #   porosity = porosity
-  #   rho = ${rho}
-  #   u = superficial_u
-  #   v = superficial_v
-  #   momentum_component = 'y'
-  #   block = 2
-  # []
+  [u_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_u
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
+    momentum_component = 'x'
+    block = 2
+  []
+  [v_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_v
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
+    momentum_component = 'y'
+    block = 2
+  []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump
     variable = pressure
@@ -165,12 +168,6 @@ advected_interp_method = 'upwind'
     variable = superficial_u
     use_two_term_expansion = false
   []
-  [noslip_u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
-    variable = superficial_u
-    functor = 0.0
-  []
 
   [left_v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -188,6 +185,12 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'top bottom'
     variable = superficial_v
+    functor = 0.0
+  []
+  [noslip_u]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top bottom'
+    variable = superficial_u
     functor = 0.0
   []
 
@@ -214,13 +217,13 @@ advected_interp_method = 'upwind'
     variable = pressure
     functor = 0.0
   []
-  # [pressure-extrapolation]
-  #   type = LinearFVPressureFluxBC
-  #   boundary = 'bottom top'
-  #   variable = pressure
-  #   HbyA_flux = HbyA
-  #   Ainv = Ainv
-  # []
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'bottom top'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+  []
   # [pressure-symmetry]
   #   type = LinearFVPressureSymmetryBC
   #   boundary = 'top bottom'
@@ -288,6 +291,20 @@ advected_interp_method = 'upwind'
     expression = 'u_block_1 - u_block_2'
     pp_names = 'u_block_1 u_block_2'
   []
+  [v_top_int]
+    type = SideIntegralVariablePostprocessor
+    variable = superficial_v
+    boundary = 'top'
+  []
+  [top_area]
+    type = AreaPostprocessor
+    boundary = 'top'
+  []
+  [v_top_avg]
+    type = ParsedPostprocessor
+    pp_names = 'v_top_int top_area'
+    expression = 'v_top_int/top_area'
+  []
 []
 
 [VectorPostprocessors]
@@ -335,7 +352,7 @@ advected_interp_method = 'upwind'
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.5
   pressure_variable_relaxation = 0.2
-  num_iterations = 500
+  num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
