@@ -42,7 +42,8 @@ Using a class with dynamic allocations will [incur a significant performance hit
 Instead, the material properties in Kokkos-MOOSE can be multi-dimensional to partially support the needs for dynamically-sized material properties.
 The dimension is provided as the second template argument `dimension`, which has the default value of 0 (scalar) and can be up to 4.
 The size of each dimension is provied as a vector as the function argument `dims`.
-It requires a material property to have the same dimension and size at every quadrature point.
+When a material property is declared by multiple materials, it should have the same dimension over the entire domain, while the size of each dimension can be different between non-overlapping subdomains.
+However, a material property declared by boundary-restricted materials should have identical dimension sizes over the entire domain, even though the materials do not have overlapping boundaries.
 
 The material properties are stored as an object of type `Moose::Kokkos::MaterialProperty<type, dimension>`.
 Note that any material property object [should be stored as a concrete instance](syntax/Kokkos/index.md#kokkos_value_binding).
