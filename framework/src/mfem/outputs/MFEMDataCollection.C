@@ -68,7 +68,7 @@ MFEMDataCollection::output()
   dc.SetCycle(getFileNumber());
   dc.SetTime(time());
   dc.Save();
-  _file_num++;
+  ++_file_num;
 }
 
 #endif

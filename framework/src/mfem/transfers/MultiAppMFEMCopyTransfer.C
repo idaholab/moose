@@ -119,14 +119,11 @@ MultiAppMFEMCopyTransfer::execute()
     int transfers_done = 0;
     for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
     {
-      if (getFromMultiApp()->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i) && getToMultiApp()->hasLocalApp(i))
       {
-        if (getToMultiApp()->hasLocalApp(i))
-        {
-          transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
-                   static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
-          transfers_done++;
-        }
+        transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
+                 static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
+        ++transfers_done;
       }
     }
     if (!transfers_done)
