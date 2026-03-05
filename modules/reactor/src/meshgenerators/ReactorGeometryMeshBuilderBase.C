@@ -270,3 +270,35 @@ ReactorGeometryMeshBuilderBase::getOuterRadialSurfaces(unsigned int radial_index
 
   return duct_surfaces;
 }
+
+std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+ReactorGeometryMeshBuilderBase::getAxialPlaneSurfaces(CSG::CSGBase & csg_obj)
+{
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
+  const auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+  Real axial_level = 0.;
+
+  // Check if axial planes have been defined in CSGBase based on a surface name we expect
+  // to find
+  auto axial_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + "0";
+  const auto has_axial_surfaces = csg_obj.hasSurface(axial_surf_name);
+
+  for (const auto i : make_range(axial_boundaries.size() + 1))
+  {
+    axial_surf_name = RGMB::CSG_AXIAL_PLANE_PREFIX + std::to_string(i);
+    if (has_axial_surfaces)
+      // Surface should exist in CSGBase, retrieve from object
+      surfaces_by_axial_region.push_back(csg_obj.getSurfaceByName(axial_surf_name));
+    else
+    {
+      // Surface has not been defined, create it and add to CSGBase
+      axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
+      std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
+          std::make_unique<CSG::CSGPlane>(axial_surf_name, 0, 0, 1, axial_level);
+      const auto & plane_surf = csg_obj.addSurface(std::move(plane_surf_ptr));
+      surfaces_by_axial_region.push_back(plane_surf);
+    }
+  }
+
+  return surfaces_by_axial_region;
+}

@@ -761,23 +761,14 @@ PinMeshGenerator::generateCSG()
   const auto extruded_pin = _mesh_dimensions == 3;
   if (extruded_pin)
   {
-    const auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
-    Real axial_level = 0.;
-    for (const auto i : make_range(axial_boundaries.size() + 1))
-    {
-      axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
-      const auto surf_name = name() + "_axial_plane_" + std::to_string(i);
-      std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
-          std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
-      const auto & plane_surf = csg_obj->addSurface(std::move(plane_surf_ptr));
-      surfaces_by_axial_region.push_back(plane_surf);
+    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    for (const auto i : make_range(surfaces_by_axial_region.size()))
       if (i != 0)
       {
         const auto & lower_surf = surfaces_by_axial_region[i - 1].get();
         const auto & upper_surf = surfaces_by_axial_region[i].get();
         axial_regions.push_back((+lower_surf & -upper_surf));
       }
-    }
   }
 
   // Define all cells within pin domain

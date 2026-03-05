@@ -87,10 +87,13 @@ protected:
    * to surface list object that calls this function
    *
    * @param surf CSGSurface to add
+   * @param ignore_identical_surface skip adding surface if a identical surface exists in surface
+   *                                 list
    *
    * @return reference to CSGSurface
    */
-  CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf);
+  CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf,
+                          const bool ignore_identical_surface = false);
 
   /**
    * @brief rename the specified surface

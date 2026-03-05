@@ -660,18 +660,28 @@ CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object,
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identical_surfaces)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList());
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const std::string & new_root_name_join)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
+                       const bool ignore_identical_surfaces,
+                       const std::string & new_root_name_join)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_join);
@@ -679,24 +689,45 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const std::string & new_ro
 
 void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
+                       const bool ignore_identical_surfaces,
                        const std::string & new_root_name_base,
                        const std::string & new_root_name_join)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
 }
 
 void
-CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
+CSGBase::updateIncomingCellRegions(CSGSurfaceList & surf_list, CSGCellList & cell_list)
 {
-  // TODO: check if surface is a duplicate (by definition) and skip
-  // adding if duplicate; must update references to the surface in cell
-  // region definitions.
+  // Iterate through all incoming surfaces and track which ones have names already
+  // defined within this CSGSurfaceList object
+  std::map<std::string, std::reference_wrapper<const CSGSurface>> identical_surface_refs;
+  auto & surf_list_map = surf_list.getSurfaceListMap();
+  for (const auto & s : surf_list_map)
+    if (hasSurface(s.first))
+      identical_surface_refs.insert({s.first, getSurfaceByName(s.first)});
+
+  if (!identical_surface_refs.empty())
+  {
+    auto & cell_list_map = cell_list.getCellListMap();
+    for (auto & c : cell_list_map)
+      c.second->updateCellRegionReferences(identical_surface_refs);
+  }
+}
+
+void
+CSGBase::joinSurfaceList(CSGSurfaceList & surf_list, const bool ignore_identical_surfaces)
+{
   auto & surf_list_map = surf_list.getSurfaceListMap();
   for (auto & s : surf_list_map)
-    _surface_list.addSurface(std::move(s.second));
+    _surface_list.addSurface(std::move(s.second), ignore_identical_surfaces);
 }
 
 void

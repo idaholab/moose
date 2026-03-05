@@ -16,9 +16,9 @@
         "&",
         "+pin1_radial_duct_0_surf_5",
         "&",
-        "+pin1_axial_plane_0",
+        "+rgmb_axial_plane_0",
         "&",
-        "-pin1_axial_plane_1"
+        "-rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_duct_0_surf_0",
@@ -38,9 +38,9 @@
         "pin1_radial_duct_0_surf_5",
         "+",
         "&",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
         "&"
@@ -66,14 +66,14 @@
             "+pin1_radial_duct_0_surf_5"
           ],
           "&",
-          "+pin1_axial_plane_0",
+          "+rgmb_axial_plane_0",
           "&",
-          "-pin1_axial_plane_1"
+          "-rgmb_axial_plane_1"
         ],
         "|",
-        "-pin1_axial_plane_0",
+        "-rgmb_axial_plane_0",
         "|",
-        "+pin1_axial_plane_1"
+        "+rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_duct_0_surf_0",
@@ -94,40 +94,22 @@
         "+",
         "&",
         "~",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
         "&",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "-",
         "|",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "+",
         "|"
       ]
     }
   },
   "surfaces": {
-    "pin1_axial_plane_0": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": 0.0
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "pin1_axial_plane_1": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": 1.0
-      },
-      "type": "CSG::CSGPlane"
-    },
     "pin1_radial_duct_0_surf_0": {
       "coefficients": {
         "a": -0.5,
@@ -179,6 +161,24 @@
         "b": 6.7679926736151015e-16,
         "c": 1.850371707708595e-18,
         "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "rgmb_axial_plane_0": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 0.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "rgmb_axial_plane_1": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 1.0
       },
       "type": "CSG::CSGPlane"
     }

@@ -6,16 +6,16 @@
       "region_infix": [
         "-pin1_radial_ring_0",
         "&",
-        "+pin1_axial_plane_0",
+        "+rgmb_axial_plane_0",
         "&",
-        "-pin1_axial_plane_1"
+        "-rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_ring_0",
         "-",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
         "&"
@@ -44,9 +44,9 @@
           "-pin1_radial_ring_0"
         ],
         "&",
-        "+pin1_axial_plane_0",
+        "+rgmb_axial_plane_0",
         "&",
-        "-pin1_axial_plane_1"
+        "-rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_duct_1_surf_0",
@@ -70,9 +70,9 @@
         "-",
         "~",
         "&",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
         "&"
@@ -109,9 +109,9 @@
           "+pin1_radial_duct_1_surf_5"
         ],
         "&",
-        "+pin1_axial_plane_0",
+        "+rgmb_axial_plane_0",
         "&",
-        "-pin1_axial_plane_1"
+        "-rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_duct_2_surf_0",
@@ -150,9 +150,9 @@
         "&",
         "~",
         "&",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
         "&"
@@ -178,14 +178,14 @@
             "+pin1_radial_duct_2_surf_5"
           ],
           "&",
-          "+pin1_axial_plane_0",
+          "+rgmb_axial_plane_0",
           "&",
-          "-pin1_axial_plane_1"
+          "-rgmb_axial_plane_1"
         ],
         "|",
-        "-pin1_axial_plane_0",
+        "-rgmb_axial_plane_0",
         "|",
-        "+pin1_axial_plane_1"
+        "+rgmb_axial_plane_1"
       ],
       "region_postfix": [
         "pin1_radial_duct_2_surf_0",
@@ -206,40 +206,22 @@
         "+",
         "&",
         "~",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "+",
         "&",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "-",
         "&",
-        "pin1_axial_plane_0",
+        "rgmb_axial_plane_0",
         "-",
         "|",
-        "pin1_axial_plane_1",
+        "rgmb_axial_plane_1",
         "+",
         "|"
       ]
     }
   },
   "surfaces": {
-    "pin1_axial_plane_0": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": 0.0
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "pin1_axial_plane_1": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": 1.0
-      },
-      "type": "CSG::CSGPlane"
-    },
     "pin1_radial_duct_1_surf_0": {
       "coefficients": {
         "a": -0.5,
@@ -355,6 +337,24 @@
         "y0": 0.0
       },
       "type": "CSG::CSGZCylinder"
+    },
+    "rgmb_axial_plane_0": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 0.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "rgmb_axial_plane_1": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 1.0
+      },
+      "type": "CSG::CSGPlane"
     }
   },
   "universes": {
