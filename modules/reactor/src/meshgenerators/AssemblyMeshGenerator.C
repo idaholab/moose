@@ -656,11 +656,11 @@ AssemblyMeshGenerator::generateCSG()
   for (const auto i : index_range(_inputs))
   {
     const auto input_univ_name = _inputs[i] + "_univ";
-    csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), input_univ_name);
+    csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name);
     univ_id_names[i] = input_univ_name;
 
     const auto & csg_univ = csg_obj->getUniverseByName(input_univ_name);
-    csg_obj->applyAxisRotation(csg_univ, "z", 30.);
+    csg_obj->applyAxisRotation(csg_univ, CSG::RotationAxisType::Z, 30.);
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
@@ -681,17 +681,7 @@ AssemblyMeshGenerator::generateCSG()
   CSG::CSGRegion axial_extent;
   if (_mesh_dimensions == 3)
   {
-    const auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
-    Real axial_level = 0.;
-    for (const auto i : make_range(axial_boundaries.size() + 1))
-    {
-      axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
-      const auto surf_name = name() + "_axial_plane_" + std::to_string(i);
-      std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
-          std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
-      const auto & plane_surf = csg_obj->addSurface(std::move(plane_surf_ptr));
-      surfaces_by_axial_region.push_back(plane_surf);
-    }
+    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
     axial_extent = +lowest_axial_surf & -highest_axial_surf;

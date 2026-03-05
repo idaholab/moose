@@ -221,6 +221,20 @@ CSGRegion::nextRegionOpIsIdentical(const RegionType region,
   return false;
 }
 
+void
+CSGRegion::updateSurfaceReferences(
+    std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs)
+{
+  for (auto & token : _postfix_tokens)
+    if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(token))
+    {
+      const auto & surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(token);
+      const auto & surf_name = surf_ref.get().getName();
+      if (identical_surface_refs.find(surf_name) != identical_surface_refs.end())
+        token = identical_surface_refs.at(surf_name);
+    }
+}
+
 CSGRegion &
 CSGRegion::operator&=(const CSGRegion & other_region)
 {

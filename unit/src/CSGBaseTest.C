@@ -1290,7 +1290,7 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   // base1 ROOT_UNIVERSE will gain all cells from base2 ROOT_UNIVERSE
   // base2 ROOT_UNIVERSE will not exist as a separate universe
   // the "extra_univ" from base2 and "univ_in_lat" from base1 will remain separate universes
-  base1->joinOtherBase(std::move(base2));
+  base1->joinOtherBase(std::move(base2), false);
 
   // expect 3 universes: root, extra, lattice universe
   // 3 cells: 2 owned by root, 1 owned by extra
@@ -1338,7 +1338,7 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
   // all cells from ROOT_UNIVERSE in base2 create new universe called "new_univ"
   // the "extra_univ" from base2 and "univ_in_lat" from base1 will remain separate universes
   std::string new_root_name = "new_univ";
-  base1->joinOtherBase(std::move(base2), new_root_name);
+  base1->joinOtherBase(std::move(base2), false, new_root_name);
 
   // expect 4 universes: root, extra, new, and lat
   // 3 cells: 1 owned by root, 1 owned by new, 1 owned by extra
@@ -1393,7 +1393,7 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   // the "extra_univ" from base2 and "univ_in_lat" from base1 will remain separate universes
   std::string new_name1 = "new_univ1";
   std::string new_name2 = "new_univ2";
-  base1->joinOtherBase(std::move(base2), new_name1, new_name2);
+  base1->joinOtherBase(std::move(base2), false, new_name1, new_name2);
 
   // expect 5 universes: root, extra, lat, new1 and new2
   // 3 cells: 0 owned by root, 1 owned by new1, 1 owned by new2, 1 owned by extra

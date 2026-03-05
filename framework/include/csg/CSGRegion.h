@@ -133,6 +133,15 @@ public:
     return _surfaces;
   }
 
+  /**
+   * @brief Update surface references of region based on map of input surface references
+   *
+   * @param identical_surface_refs map of surface name to surface references that region should be
+   *                               defined with
+   */
+  void updateSurfaceReferences(
+      std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs);
+
   /// Operator overload for &= which creates an intersection between the current region and the other_region
   CSGRegion & operator&=(const CSGRegion & other_region);
 

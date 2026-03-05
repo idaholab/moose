@@ -152,6 +152,15 @@ public:
   bool operator!=(const CSGCell & other) const;
 
 protected:
+  /**
+   * @brief Update surface references of cell region based on map of input surface references
+   *
+   * @param identical_surface_refs map of surface name to surface references that region should be
+   *                               defined with
+   */
+  void updateCellRegionReferences(
+      std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs);
+
   // set the name of the cell - intentionally not public because
   // name needs to be managed at the CSGCellList level
   void setName(const std::string & name) { _name = name; }

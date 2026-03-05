@@ -45,12 +45,28 @@ CSGSurfaceList::getAllSurfaces() const
 }
 
 CSGSurface &
-CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
+CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf, const bool ignore_identical_surface)
 {
   auto surf_name = surf->getName();
+  if (ignore_identical_surface)
+    // Check that surface already defined in _surfaces and if so, confirm it matches with input surf
+    if (auto it = _surfaces.find(surf_name); it != _surfaces.end())
+    {
+      if (*surf == *it->second)
+        return *it->second;
+      else
+        mooseError("Surface with name ",
+                   surf_name,
+                   " cannot be discarded as it is not identical to surface that exists in CSGBase "
+                   "instance.");
+    }
+
+  // Otherwise, add the surface to the surface list. At this point, we don't expect the surface
+  // to already be defined in the surface list
   auto [it, inserted] = _surfaces.emplace(surf_name, std::move(surf));
   if (!inserted)
     mooseError("Surface with name " + surf_name + " already exists in geometry.");
+
   return *it->second;
 }
 
