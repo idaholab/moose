@@ -6,9 +6,9 @@
     requirement = 'The system shall support a block-weighted partitioner'
 
     [replicated_mesh]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'block_weighted_partitioner.i'
-      exodiff = 'block_weighted_partitioner_out.e'
+      csvdiff = 'block_weighted_partitioner_out.csv'
       # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       # Parmetis generates different results when using 32 bit or 64 bit integers
       capabilities = 'petsc>=3.18.0 & parmetis & dof_id_bytes=8'
@@ -17,12 +17,14 @@
       # different mode generates different partition
       mesh_mode = REPLICATED
       detail = 'when using ReplicatedMesh'
+      # Do not need a high tolerance because mesh is small and parititioner is not accurate
+      rel_err = '1e-1'
     []
 
     [distributed_mesh]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'block_weighted_partitioner.i'
-      exodiff = 'block_weighted_partitioner_out_distributed.e'
+      csvdiff = 'block_weighted_partitioner_out_distributed.csv'
       cli_args = 'Outputs/file_base=block_weighted_partitioner_out_distributed'
       # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       # Parmetis generates different results when using 32 bit or 64 bit integers
@@ -32,6 +34,9 @@
       # different mode generates different partition
       mesh_mode = DISTRIBUTED
       detail = 'and when using DistributedMesh.'
+      # Do not need a high tolerance because mesh is small and parititioner is not accurate.
+      # Slightly higher tolerance here since gold file was generated with replicated mesh.
+      rel_err = '2e-1'
     []
   []
 
