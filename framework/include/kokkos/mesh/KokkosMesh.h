@@ -56,7 +56,7 @@ public:
    * Constructor
    * @param mesh The MOOSE mesh
    */
-  Mesh(const MooseMesh & mesh) : _mesh(mesh) {}
+  Mesh(MooseMesh & mesh) : _mesh(mesh) {}
   /**
    * Get the underyling MOOSE mesh
    * @returns The MOOSE mesh
@@ -75,17 +75,22 @@ public:
    * Get the number of subdomains
    * @returns The number of subdomains
    */
-  auto getNumSubdomains() const { return _maps->_subdomain_id_mapping.size(); }
+  auto getNumSubdomains() const { return _maps->subdomain_id_mapping.size(); }
   /**
    * Get the number of local elements types
    * @returns The number of local element types
    */
-  auto getNumLocalElementTypes() const { return _maps->_elem_type_id_mapping.size(); }
+  auto getNumLocalElementTypes() const { return _maps->elem_type_id_mapping.size(); }
+  /**
+   * Get the element type ID map
+   * @returns The element type ID map
+   */
+  const auto & getElementTypeMap() const { return _maps->elem_type_id_mapping; }
   /**
    * Get the number of local elements
    * @returns The number of local elements
    */
-  auto getNumLocalElements() const { return _maps->_local_elem_id_mapping.size(); }
+  auto getNumLocalElements() const { return _num_local_elems; }
   /**
    * Get the number of local elements in a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -93,9 +98,19 @@ public:
    */
   auto getNumSubdomainLocalElements(const SubdomainID subdomain) const
   {
-    auto range = _maps->_subdomain_elem_id_ranges.at(subdomain);
+    auto range = libmesh_map_find(_maps->subdomain_elem_id_ranges, subdomain);
     return range.second - range.first;
   }
+  /**
+   * Get the number of local nodes including semi-local nodes
+   * @returns The number of local nodes including semi-local nodes
+   */
+  auto getNumLocalNodes() const { return _num_local_nodes; }
+  /**
+   * Get the list of local nodes including semi-local nodes
+   * @returns The list of local nodes including semi-local nodes
+   */
+  const auto & getLocalNodes() const { return _maps->local_nodes; }
   /**
    * Get the contiguous subdomain ID of a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
@@ -121,23 +136,13 @@ public:
    */
   ContiguousElementID getContiguousElementID(const Elem * elem) const;
   /**
-   * Get the element type ID map
-   * @returns The element type ID map
-   */
-  const auto & getElementTypeMap() const { return _maps->_elem_type_id_mapping; }
-  /**
-   * Get the contiguous element ID map
-   * @returns The contiguous element ID map
-   */
-  const auto & getContiguousElementMap() const { return _maps->_local_elem_id_mapping; }
-  /**
    * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The range of contiguous element IDs in the subdomain
    */
   auto getSubdomainContiguousElementIDRange(const SubdomainID subdomain) const
   {
-    const auto & range = libmesh_map_find(_maps->_subdomain_elem_id_ranges, subdomain);
+    const auto & range = libmesh_map_find(_maps->subdomain_elem_id_ranges, subdomain);
     return libMesh::make_range(range.first, range.second);
   }
   /**
@@ -147,23 +152,25 @@ public:
    */
   ContiguousNodeID getContiguousNodeID(const Node * node) const;
   /**
-   * Get the contiguous node ID map
-   * NOTE: This list contains the nodes of local elements, so some nodes may belong to other
-   * processes
-   * @returns The contiguous node ID map
-   */
-  const auto & getContiguousNodeMap() const { return _maps->_local_node_id_mapping; }
-  /**
-   * Get the list of contiguous node IDs for a subdomain
-   * NOTE: This list strictly contains the nodes local to the current process
+   * Get the list of local contiguous node IDs for a subdomain
+   * NOTE: This list excludes semi-local nodes
    * @param subdomain The MOOSE subdomain ID
-   * @returns The list of contiguous node IDs in the subdomain
+   * @returns The list of local contiguous node IDs in the subdomain
    */
   const auto & getSubdomainContiguousNodeIDs(const SubdomainID subdomain) const
   {
-    return _maps->_subdomain_node_ids.at(subdomain);
+    return libmesh_map_find(_maps->subdomain_node_ids, subdomain);
   }
-
+  /**
+   * Get the list of local contiguous node IDs for a boundary
+   * NOTE: This list excludes semi-local nodes
+   * @param boundary The MOOSE boundary ID
+   * @returns The list of local contiguous node IDs on the boundary
+   */
+  const auto & getBoundaryContiguousNodeIDs(const BoundaryID boundary) const
+  {
+    return libmesh_map_find(_maps->boundary_node_ids, boundary);
+  }
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the element information object
@@ -251,11 +258,11 @@ public:
    * @param node The node index
    * @returns The contiguous node ID
    */
-  KOKKOS_FUNCTION ContiguousNodeID getContiguousNodeID(ContiguousElementID elem,
+  KOKKOS_FUNCTION ContiguousNodeID getContiguousNodeID(ElementInfo info,
                                                        unsigned int side,
                                                        unsigned int node) const
   {
-    return _nodes_face(node, side, elem);
+    return _nodes(_local_side_node[info.type](node, side), info.id);
   }
   /**
    * Get the coordinate of a node
@@ -285,7 +292,7 @@ private:
   /**
    * Reference of the MOOSE mesh
    */
-  const MooseMesh & _mesh;
+  MooseMesh & _mesh;
   /**
    * Flag whether the mesh was initialized
    */
@@ -299,40 +306,60 @@ private:
     /**
      * Map from the MOOSE subdomain ID to the contiguous subdomain ID
      */
-    std::unordered_map<SubdomainID, ContiguousSubdomainID> _subdomain_id_mapping;
+    std::unordered_map<SubdomainID, ContiguousSubdomainID> subdomain_id_mapping;
     /**
      * Map from the MOOSE boundary ID to the contiguous boundary ID
      */
-    std::unordered_map<BoundaryID, ContiguousBoundaryID> _boundary_id_mapping;
+    std::unordered_map<BoundaryID, ContiguousBoundaryID> boundary_id_mapping;
     /**
      * Map from the MOOSE element type to the element type ID
      */
-    std::unordered_map<ElemType, unsigned int> _elem_type_id_mapping;
+    std::unordered_map<ElemType, unsigned int> elem_type_id_mapping;
     /**
-     * Map from the libMesh element to the contiguous element ID
+     * List of local nodes including semi-local nodes
      */
-    std::unordered_map<const Elem *, ContiguousElementID> _local_elem_id_mapping;
+    std::vector<Node *> local_nodes;
     /**
-     * Map from the libMesh node to the contiguous node ID
-     * This list contains the nodes of local elements, so some nodes may belong to other processes
+     * Map from the libMesh semi-local node to the contiguous node ID
      */
-    std::unordered_map<const Node *, ContiguousNodeID> _local_node_id_mapping;
+    std::unordered_map<const Node *, ContiguousNodeID> semi_local_node_id_mapping;
     /**
      * Range of the contiguous element IDs in each subdomain
      */
     std::unordered_map<SubdomainID, std::pair<ContiguousElementID, ContiguousElementID>>
-        _subdomain_elem_id_ranges;
+        subdomain_elem_id_ranges;
     /**
      * List of the contiguous node IDs in each subdomain
-     * This list strictly contains the nodes local to the current process
+     * NOTE: This list excludes semi-local nodes
      */
-    std::unordered_map<SubdomainID, std::unordered_set<ContiguousNodeID>> _subdomain_node_ids;
+    std::unordered_map<SubdomainID, std::vector<ContiguousNodeID>> subdomain_node_ids;
+    /**
+     * List of the contiguous node IDs on each boundary
+     * NOTE: This list excludes semi-local nodes
+     */
+    std::unordered_map<BoundaryID, std::set<ContiguousNodeID>> boundary_node_ids;
   };
   /**
    * A shared pointer holding all the host maps to avoid deep copy
    */
   std::shared_ptr<MeshMap> _maps;
 
+  /**
+   * Element integer for Kokkos contiguous element ID
+   */
+  unsigned int _elem_id_integer = libMesh::invalid_uint;
+  /**
+   * Node integer for Kokkos contiguous node ID
+   */
+  unsigned int _node_id_integer = libMesh::invalid_uint;
+  /**
+   * Number of local elements
+   */
+  dof_id_type _num_local_elems = 0;
+  /**
+   * Number of local nodes including semi-local nodes
+   */
+  dof_id_type _num_local_nodes = 0;
   /**
    * Element information
    */
@@ -358,20 +385,21 @@ private:
    */
   Array<unsigned int> _num_nodes;
   /**
-   * number of nodes per side of each element side
+   * Number of nodes per side of each element side
    */
   Array<Array<unsigned int>> _num_side_nodes;
+  /**
+   * Map from local side node index to local element node index
+   */
+  Array<Array2D<unsigned int>> _local_side_node;
   /**
    * Node coordinates
    */
   Array<Real3> _points;
   /**
-   * Contiguous node IDs of each element and side
+   * Contiguous node IDs of each element
    */
-  ///@{
   Array2D<ContiguousNodeID> _nodes;
-  Array3D<ContiguousNodeID> _nodes_face;
-  ///@}
   /**
    * Contiguous node IDs on each boundary
    */

@@ -40,13 +40,12 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable()
 
   if (_bnd_nodal)
   {
-    std::set<ContiguousNodeID> node_ids;
+    std::vector<ContiguousNodeID> node_ids;
 
-    for (auto boundary : boundaries)
-      for (const auto node : as_range(_bnd_mesh->getMesh().bid_nodes_begin(boundary),
-                                      _bnd_mesh->getMesh().bid_nodes_end(boundary)))
-        if (node->processor_id() == _moose_object.processor_id())
-          node_ids.insert(kokkos_mesh->getContiguousNodeID(node));
+    for (const auto boundary : boundaries)
+      node_ids.insert(node_ids.end(),
+                      kokkos_mesh->getBoundaryContiguousNodeIDs(boundary).begin(),
+                      kokkos_mesh->getBoundaryContiguousNodeIDs(boundary).end());
 
     _kokkos_node_ids = node_ids;
   }

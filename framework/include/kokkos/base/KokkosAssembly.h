@@ -485,7 +485,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     for (unsigned int node = 0; node < num_side_nodes; ++node)
     {
-      auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, side, node));
+      auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(info, side, node));
 
       J += grad_psi(node, qp).cartesian_product(points);
     }
