@@ -27,7 +27,6 @@ SideSetsAroundSubdomainGenerator::validParams()
   InputParameters params = SideSetsGeneratorBase::validParams();
 
   params.renameParam("included_subdomains", "block", "The blocks around which to create sidesets");
-  params.makeParamRequired<std::vector<SubdomainName>>("block");
 
   // Not implemented, but could be implemented
   params.suppressParameter<std::vector<BoundaryName>>("included_boundaries");
@@ -72,6 +71,12 @@ SideSetsAroundSubdomainGenerator::generate()
   // Request to compute normal vectors
   const std::vector<Point> & face_normals = _fe_face->get_normals();
 
+  if (_included_subdomain_ids.empty())
+  {
+    std::set<subdomain_id_type> all_subdomains;
+    mesh->subdomain_ids(all_subdomains);
+    _included_subdomain_ids.assign(all_subdomains.begin(), all_subdomains.end());
+  }
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {

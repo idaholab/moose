@@ -1,0 +1,97 @@
+[Tests]
+  design = 'meshgenerators/Conformal2DCoatingGenerator.md'
+  issues = '#32515'
+  [test]
+    requirement = "The system shall be able to "
+    [outward]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_outward.csv'
+      recover = false
+      detail ='Create an outward coating mesh.'
+    []
+    [quadratic]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_quadratic.csv'
+      cli_args = '/Mesh/coating/tri_elem_type=TRI6
+                  /Mesh/outer_bdy/edge_element_type=EDGE3
+                  /Outputs/file_base=coating_quadratic'
+      recover = false
+      detail ='Create an outward coating mesh with quadratic elements.'
+    []
+    [bdry_names]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_outward_bcnm.csv'
+      cli_args = '/Mesh/coating/interface_name=interface
+                 /Mesh/coating/surface_name=surface
+                 /Postprocessors/int_unity/type=SideIntegralVariablePostprocessor
+                 /Postprocessors/int_unity/boundary="interface surface"
+                 /Outputs/file_base=coating_outward_bcnm'
+      recover = false
+      detail ='Create an outward coating mesh with specified boundary names.'
+    []
+    [inward]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_inward.csv'
+      cli_args = '/Mesh/coating/coating_direction=INWARD
+                  /Outputs/file_base=coating_inward'
+      recover = false
+      detail ='Create an inward coating mesh.'
+    []
+    [outward_bias_1]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_outward_bias_1.csv'
+      cli_args = '/Mesh/coating/layer_bias=2.0
+                  /Outputs/file_base=coating_outward_bias_1'
+      recover = false
+      detail ='Create an outward coating mesh with >1 bias.'
+    []
+    [outward_bias_2]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_outward_bias_2.csv'
+      cli_args = '/Mesh/coating/layer_bias=0.5
+                  /Outputs/file_base=coating_outward_bias_2'
+      recover = false
+      detail ='Create an outward coating mesh with <1 bias.'
+    []
+    [inward_bias_1]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_inward_bias_1.csv'
+      cli_args = '/Mesh/coating/layer_bias=2.0
+                  /Mesh/coating/coating_direction=INWARD
+                  /Outputs/file_base=coating_inward_bias_1'
+      recover = false
+      detail ='Create an inward coating mesh with >1 bias.'
+    []
+    [inward_bias_2]
+      type = 'CSVDiff'
+      input = 'coating.i'
+      csvdiff = 'coating_inward_bias_2.csv'
+      cli_args = '/Mesh/coating/layer_bias=0.5
+                  /Mesh/coating/coating_direction=INWARD
+                  /Outputs/file_base=coating_inward_bias_2'
+      recover = false
+      detail ='Create an inward coating mesh with <1 bias.'
+    []
+    [keep_input_outward]
+      type = 'CSVDiff'
+      input = 'coating_stitch_outward.i'
+      csvdiff = 'coating_stitch_outward.csv'
+      recover = false
+      detail ='Create an outward coating mesh while keeping the input mesh.'
+    []
+    [keep_input_inward]
+      type = 'CSVDiff'
+      input = 'coating_stitch_inward.i'
+      csvdiff = 'coating_stitch_inward.csv'
+      recover = false
+      detail ='Create an inward coating mesh while keeping the input mesh.'
+    []
+  []
+[]

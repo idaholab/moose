@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "MooseMeshUtils.h"
+#include "GeometryUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
@@ -23,6 +24,13 @@
 #include "libmesh/parallel_node.h"
 #include "libmesh/compare_elems_by_level.h"
 #include "libmesh/mesh_communication.h"
+#include "libmesh/mesh_serializer.h"
+#include "libmesh/mesh_triangle_holes.h"
+#include "libmesh/poly2tri_triangulator.h"
+#include "libmesh/fe_base.h"
+
+#include "libmesh/edge_edge2.h"
+#include "libmesh/edge_edge3.h"
 
 #include "timpi/parallel_sync.h"
 
@@ -1313,6 +1321,7 @@ copyIntoMesh(MeshGenerator & mg,
 void
 buildPolyLineMesh(MeshBase & mesh,
                   const std::vector<Point> & points,
+                  const std::vector<Point> & mid_points,
                   const bool loop,
                   const BoundaryName & start_boundary,
                   const BoundaryName & end_boundary,
@@ -1322,6 +1331,17 @@ buildPolyLineMesh(MeshBase & mesh,
                   nums_edges_between_points.size() == points.size() - 1 + loop,
               "nums_edges_between_points must be either a single value or have the same number of "
               "entries as segments defined by the points.");
+  mooseAssert(
+      mid_points.size() == 0 || mid_points.size() == points.size() - (loop ? 0 : 1),
+      "mid_points must be either empty or have the consistent number of entries as points.");
+  mooseAssert(
+      mid_points.size() == 0 ||
+          (nums_edges_between_points.size() == 1 && nums_edges_between_points.front() == 1) ||
+          (nums_edges_between_points.size() == points.size() - 1 + loop &&
+           std::all_of(nums_edges_between_points.begin(),
+                       nums_edges_between_points.end(),
+                       [](unsigned int n) { return n == 1; })),
+      "mid_points can only be provided if each segment has exactly one edge.");
 
   const auto n_points = points.size();
   for (auto i : make_range(n_points))
@@ -1358,6 +1378,10 @@ buildPolyLineMesh(MeshBase & mesh,
       }
     }
   }
+  // Add mid points if applicable. Note that when mid points are provided, the number of edges
+  // between points must be unity.
+  for (const auto & i : make_range(mid_points.size()))
+    mesh.add_point(mid_points[i], n_points + i);
 
   const auto n_segments = loop ? n_points : (n_points - 1);
   const auto n_elem =
@@ -1372,8 +1396,14 @@ buildPolyLineMesh(MeshBase & mesh,
       (loop ? 0 : 1);
   for (auto i : make_range(n_elem))
   {
+    std::unique_ptr<Elem> elem;
+    elem = std::make_unique<Edge2>();
+    if (mid_points.size())
+    {
+      elem = std::make_unique<Edge3>();
+      elem->set_node(2, mesh.node_ptr(n_points + i));
+    }
     const auto ip1 = (i + 1) % max_nodes;
-    auto elem = Elem::build(EDGE2);
     elem->set_node(0, mesh.node_ptr(i));
     elem->set_node(1, mesh.node_ptr(ip1));
     elem->set_id() = i;
@@ -1398,6 +1428,7 @@ buildPolyLineMesh(MeshBase & mesh,
 void
 buildPolyLineMesh(MeshBase & mesh,
                   const std::vector<Point> & points,
+                  const std::vector<Point> & mid_points,
                   const bool loop,
                   const BoundaryName & start_boundary,
                   const BoundaryName & end_boundary,
@@ -1417,7 +1448,165 @@ buildPolyLineMesh(MeshBase & mesh,
     nums_edges_between_points.push_back(n_elems);
   }
 
-  buildPolyLineMesh(mesh, points, loop, start_boundary, end_boundary, nums_edges_between_points);
+  buildPolyLineMesh(
+      mesh, points, mid_points, loop, start_boundary, end_boundary, nums_edges_between_points);
+}
+
+std::vector<Point>
+generateLayerPoints(MeshGenerator * mg,
+                    std::unique_ptr<UnstructuredMesh> & ply_mesh_u,
+                    const std::vector<Point> & points,
+                    const std::vector<Point> & mid_points,
+                    const bool outward_direction,
+                    const Real thickness)
+{
+  // Generate a very simple triangulation mesh so that we can get the outward normal vectors
+  libMesh::Poly2TriTriangulator poly2tri(*ply_mesh_u);
+  poly2tri.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
+
+  poly2tri.set_interpolate_boundary_points(0);
+  poly2tri.set_refine_boundary_allowed(false);
+  poly2tri.set_verify_hole_boundaries(false);
+  poly2tri.desired_area() = 0;
+  poly2tri.minimum_angle() = 0; // Not yet supported
+  poly2tri.smooth_after_generating() = false;
+  if (mid_points.size())
+    poly2tri.elem_type() = libMesh::ElemType::TRI6;
+  poly2tri.triangulate();
+
+  // We need to serialize the mesh for next steps
+  libMesh::MeshSerializer serial(*ply_mesh_u);
+  // The mesh now only contains one side set that corresponds to the outer boundary with an ID of 0
+  auto bdry_list(ply_mesh_u->get_boundary_info().build_side_list());
+
+  // For each vertex, the shifting direction to form the gap is defined by the normal vectors of the
+  // two sides that contain the vertex
+  // We gather the normals for each node on the boundary here, which are all vertices because of the
+  // pre-selection of nodes
+  std::map<dof_id_type, std::vector<Point>> node_normal_map;
+  std::map<dof_id_type, Point> mid_node_normal_map;
+  for (const auto & bside : bdry_list)
+  {
+    const auto & side = ply_mesh_u->elem_ptr(std::get<0>(bside))->side_ptr(std::get<1>(bside));
+    // For linear elements, the side normal is constant and can be obtained straightforwardly;
+    // For quadratic elements, we need the normal at the shared vertices
+    const Point side_normal_0 =
+        mid_points.size()
+            ? get_key_normal(ply_mesh_u->elem_ptr(std::get<0>(bside)), std::get<1>(bside), 0)
+            : ply_mesh_u->elem_ptr(std::get<0>(bside))
+                  ->side_vertex_average_normal(std::get<1>(bside));
+    const Point side_normal_1 =
+        mid_points.size()
+            ? get_key_normal(ply_mesh_u->elem_ptr(std::get<0>(bside)), std::get<1>(bside), 1)
+            : side_normal_0;
+
+    if (node_normal_map.count(side->node_ptr(0)->id()))
+      node_normal_map[side->node_ptr(0)->id()].push_back(side_normal_0);
+    else
+      node_normal_map[side->node_ptr(0)->id()] = {side_normal_0};
+    if (node_normal_map.count(side->node_ptr(1)->id()))
+      node_normal_map[side->node_ptr(1)->id()].push_back(side_normal_1);
+    else
+      node_normal_map[side->node_ptr(1)->id()] = {side_normal_1};
+
+    if (mid_points.size())
+    {
+      const Point mid_node_normal =
+          get_key_normal(ply_mesh_u->elem_ptr(std::get<0>(bside)), std::get<1>(bside), 2);
+      mid_node_normal_map
+          [ply_mesh_u->elem_ptr(std::get<0>(bside))->node_ptr(std::get<1>(bside) + 3)->id()] =
+              mid_node_normal;
+    }
+  }
+
+  std::vector<Point> mod_reduced_pts_list(points);
+  for (const auto & [node_id, normal_vecs] : node_normal_map)
+  {
+    mooseAssert(normal_vecs.size() == 2,
+                "Each vertex should be connected to exactly two sides in a polygon.");
+
+    const Point original_pt = *(ply_mesh_u->node_ptr(node_id));
+    // Form an average normal at the vertex from the two connected sides' normals
+    const Point move_dir =
+        (normal_vecs.front() + normal_vecs.back()).unit() * (outward_direction ? 1.0 : -1.0);
+    // Consider four points of interest to determine the moving distance
+    // 1. the vertex point
+    // 2. point along normal_vecs.front() from the vertex with a distance thickness
+    // 3. point along normal_vecs.back() from the vertex with a distance thickness
+    // 4. point along move_dir from the vertex with a distance mov_dist
+    // The four points form a kite shape with its symmetry axis along 1-4 direction
+    // Angle 1-2-4 and angle 1-3-4 are right angles
+    // Angle 2-1-3 (i.e., theta) can be calculated using the interior product of
+    // v1 = normal_vecs.front() and v2 = normal_vecs.back():
+    // cos(theta) = (v1 . v2) / (|v1| * |v2|)
+    // Because of the right angles, the distance between 1 and 4 can be calculated as:
+    // mov_dist = thickness / cos(theta/2)
+    // and cos(theta/2) = sqrt((1 + cos(theta)) / 2)
+    const Real mov_dist =
+        thickness / std::sqrt((1.0 + (normal_vecs.front() * normal_vecs.back()) /
+                                         (normal_vecs.front().norm() * normal_vecs.back().norm())) /
+                              2.0);
+    mooseAssert(std::count(points.begin(), points.end(), original_pt) == 1,
+                "The original point should be found exactly once in the reduced points list.");
+    mod_reduced_pts_list[std::distance(points.begin(),
+                                       std::find(points.begin(), points.end(), original_pt))] =
+        original_pt + move_dir * mov_dist;
+  }
+
+  // To ensure no overlapping, we need to check set of four points
+  // p1 and p2 should be a pair of points before and after shifting
+  // p3 and p4 should be a pair of adjacent shifted points that are neither not p2
+  for (const auto & i_node_1 : make_range(mod_reduced_pts_list.size()))
+  {
+    const Point & p1 = points[i_node_1];
+    const Point & p2 = mod_reduced_pts_list[i_node_1];
+    for (const auto & i_node_2 : make_range(mod_reduced_pts_list.size()))
+    {
+      if (i_node_2 == i_node_1 || (i_node_2 + 1) % mod_reduced_pts_list.size() == i_node_1)
+        continue;
+      const Point & p3 = mod_reduced_pts_list[i_node_2];
+      const Point & p4 = mod_reduced_pts_list[(i_node_2 + 1) % mod_reduced_pts_list.size()];
+      if (thickness > 0)
+        if (geom_utils::segmentsIntersect(p1, p2, p3, p4))
+          mg->paramError(
+              "thickness",
+              "The thickness is so large that the mesh is tangled because the offset nodes "
+              "are no longer in the same order when following the original boundary. Please "
+              "reduce the thickness value.");
+    }
+  }
+
+  std::vector<Point> mid_mod_reduced_pts_list(mid_points.size());
+  for (const auto & [node_id, normal_vec] : mid_node_normal_map)
+  {
+    const Point original_pt = *(ply_mesh_u->node_ptr(node_id));
+    const Point move_dir = normal_vec.unit() * (outward_direction ? 1.0 : -1.0);
+    mid_mod_reduced_pts_list[std::distance(
+        mid_points.begin(), std::find(mid_points.begin(), mid_points.end(), original_pt))] =
+        original_pt + move_dir * thickness;
+  }
+
+  // combine mod_reduced_pts_list and mid_mod_reduced_pts_list to get the final list of points for
+  // the layer mesh
+  std::vector<Point> layer_pts_list(mod_reduced_pts_list);
+  layer_pts_list.insert(
+      layer_pts_list.end(), mid_mod_reduced_pts_list.begin(), mid_mod_reduced_pts_list.end());
+
+  return layer_pts_list;
+}
+
+Point
+get_key_normal(const Elem * elem, const unsigned int s, const unsigned int key_node_index)
+{
+  const std::unique_ptr<const Elem> face = elem->build_side_ptr(s);
+  mooseAssert(face->type() == ElemType::EDGE3,
+              "Only elements with EDGE3 sides are supported in this function.");
+  std::unique_ptr<libMesh::FEBase> fe(
+      libMesh::FEBase::build(2, libMesh::FEType(elem->default_order())));
+  const std::vector<Point> & normals = fe->get_normals();
+  std::vector<Point> ref_pts = {face->reference_elem()->point(key_node_index)};
+  fe->reinit(elem, s, TOLERANCE, &ref_pts);
+  return normals[0];
 }
 
 void

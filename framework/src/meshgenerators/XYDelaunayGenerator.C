@@ -101,6 +101,32 @@ XYDelaunayGenerator::validParams()
       "interior_point_files", {}, "Text file(s) with the interior points, one per line");
   params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
 
+  params.addRangeCheckedParam<Real>("outer_boundary_layer_thickness",
+                                    0,
+                                    "outer_boundary_layer_thickness>=0",
+                                    "Thickness of the outer boundary layer to be added.");
+  params.addParam<unsigned int>(
+      "outer_boundary_layer_num", 0, "Number of layers for the outer boundary layer.");
+  params.addRangeCheckedParam<Real>(
+      "outer_boundary_layer_bias",
+      1.0,
+      "outer_boundary_layer_bias>0",
+      "Bias factor for the thickness of each layer in the outer boundary layer.");
+
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "holes_boundary_layer_thickness",
+      "holes_boundary_layer_thickness>=0",
+      "Thickness of the hole boundary layers to be added.");
+  params.addParam<std::vector<unsigned int>>("holes_boundary_layer_num",
+                                             "Numbers of layers for the hole boundary layers.");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "holes_boundary_layer_bias",
+      "holes_boundary_layer_bias>0",
+      "Bias factors for the thickness of each layer in the hole boundary layers.");
+
+  params.addParamNamesToGroup(
+      "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
+      "Automatic triangle meshing area control");
   params.addParamNamesToGroup("interior_points interior_point_files",
                               "Mandatory mesh interior nodes");
 
@@ -109,13 +135,13 @@ XYDelaunayGenerator::validParams()
 
 XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
   : SurfaceDelaunayGeneratorBase(parameters),
-    _bdy_ptr(getMesh("boundary")),
+    _bdy_name(getParam<MeshGeneratorName>("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
     _output_subdomain_id(0),
     _smooth_tri(getParam<bool>("smooth_triangulation")),
     _verify_holes(getParam<bool>("verify_holes")),
-    _hole_ptrs(getMeshes("holes")),
+    _hole_names(getParam<std::vector<MeshGeneratorName>>("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
@@ -123,7 +149,23 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching")),
-    _interior_points(getParam<std::vector<Point>>("interior_points"))
+    _interior_points(getParam<std::vector<Point>>("interior_points")),
+    _outer_boundary_layer_thickness(getParam<Real>("outer_boundary_layer_thickness")),
+    _outer_boundary_layer_num(getParam<unsigned int>("outer_boundary_layer_num")),
+    _outer_boundary_layer_bias(getParam<Real>("outer_boundary_layer_bias")),
+    _holes_boundary_layer_thickness(
+        isParamValid("holes_boundary_layer_thickness")
+            ? getParam<std::vector<Real>>("holes_boundary_layer_thickness")
+            : std::vector<Real>()),
+    _holes_boundary_layer_num(isParamValid("holes_boundary_layer_num")
+                                  ? getParam<std::vector<unsigned int>>("holes_boundary_layer_num")
+                                  : std::vector<unsigned int>()),
+    _holes_boundary_layer_bias(isParamValid("holes_boundary_layer_bias")
+                                   ? getParam<std::vector<Real>>("holes_boundary_layer_bias")
+                                   : std::vector<Real>()),
+    _input_boundary_names(isParamValid("input_boundary_names")
+                              ? getParam<std::vector<BoundaryName>>("input_boundary_names")
+                              : std::vector<BoundaryName>())
 {
   if ((_desired_area > 0.0 && !_desired_area_func.empty()) ||
       (_desired_area > 0.0 && _use_auto_area_func) ||
@@ -142,7 +184,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
                  "'auto_area_func_default_size', 'auto_area_func_default_size_dist', "
                  "'auto_area_function_num_points', 'auto_area_function_power'.");
 
-  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_ptrs.size())
+  if (!_stitch_holes.empty() && _stitch_holes.size() != _hole_names.size())
     paramError("stitch_holes", "Need one stitch_holes entry per hole, if specified.");
 
   for (auto hole_i : index_range(_stitch_holes))
@@ -152,7 +194,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
   if (isParamValid("hole_boundaries"))
   {
     auto & hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
-    if (hole_boundaries.size() != _hole_ptrs.size())
+    if (hole_boundaries.size() != _hole_names.size())
       paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
   }
   // Copied from MultiApp.C
@@ -175,6 +217,105 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
                   { return std::count(_interior_points.begin(), _interior_points.end(), p) > 1; });
   if (has_duplicates)
     paramError("interior_points", "Duplicate points were found in the provided interior points.");
+
+  if ((_outer_boundary_layer_thickness > 0 && _outer_boundary_layer_num == 0) ||
+      (_outer_boundary_layer_thickness == 0 && _outer_boundary_layer_num > 0))
+    paramError(
+        "outer_boundary_layer_thickness",
+        "this parameter must be set as non-zero along with a non-zero outer_boundary_layer_num.");
+
+  if (_outer_boundary_layer_num > 0)
+  {
+    // We do not allow boundary refinement for this case
+    if (_add_nodes_per_boundary_segment)
+      paramError("add_nodes_per_boundary_segment",
+                 "Cannot add nodes per boundary segment when using an outer boundary layer.");
+    if (_refine_bdy)
+      paramError("refine_boundary", "Cannot refine boundary when using an outer boundary layer.");
+
+    declareMeshForSubByName(_bdy_name);
+    _bdy_ptr = &getMeshByName(create_conformal_coating_mesh(
+        _outer_boundary_layer_num,
+        _outer_boundary_layer_thickness,
+        _outer_boundary_layer_bias,
+        false,
+        false,
+        _bdy_name,
+        _input_boundary_names,
+        _tri_elem_type,
+        isParamValid("output_subdomain_id") ? getParam<SubdomainID>("output_subdomain_id") : 0,
+        isParamValid("output_subdomain_name") ? getParam<SubdomainName>("output_subdomain_name")
+                                              : SubdomainName(),
+        1,
+        10000));
+
+    _input_boundary_names = {BoundaryName(std::to_string(1))};
+  }
+  else
+  {
+    _bdy_ptr = &getMeshByName(_bdy_name);
+  }
+
+  // Check the hole boundary layer parameters.
+  if ((_holes_boundary_layer_thickness.size() && _holes_boundary_layer_num.size() &&
+       _holes_boundary_layer_bias.size()) !=
+      (_holes_boundary_layer_thickness.size() || _holes_boundary_layer_num.size() ||
+       _holes_boundary_layer_bias.size()))
+    paramError(
+        "holes_boundary_layer_thickness, holes_boundary_layer_num, and holes_boundary_layer_bias",
+        "All three parameters must be specified or not specified together.");
+  if (_holes_boundary_layer_thickness.size() &&
+      _holes_boundary_layer_thickness.size() != _hole_names.size())
+    paramError("holes_boundary_layer_thickness",
+               "If specified, this parameter must have the same length as 'holes'.");
+  if (_holes_boundary_layer_num.size() && _holes_boundary_layer_num.size() != _hole_names.size())
+    paramError("holes_boundary_layer_num",
+               "If specified, this parameter must have the same length as 'holes'.");
+  if (_holes_boundary_layer_bias.size() && _holes_boundary_layer_bias.size() != _hole_names.size())
+    paramError("holes_boundary_layer_bias",
+               "If specified, this parameter must have the same length as 'holes'.");
+  for (const auto & i : index_range(_holes_boundary_layer_thickness))
+  {
+    if (_stitch_holes.size() <= i)
+      _stitch_holes.push_back(false);
+    if ((_holes_boundary_layer_thickness[i] > 0 && _holes_boundary_layer_num[i] == 0) ||
+        (_holes_boundary_layer_thickness[i] == 0 && _holes_boundary_layer_num[i] > 0))
+      paramError(
+          "holes_boundary_layer_thickness[" + std::to_string(i) + "]",
+          "this parameter must be set as non-zero along with a non-zero holes_boundary_layer_num[" +
+              std::to_string(i) + "].");
+    if (_holes_boundary_layer_thickness[i] > 0)
+    {
+      // We do not allow hole boundary refinement for this case
+      if ((_refine_holes.size() > i && _refine_holes[i]) || _refine_holes.empty())
+        paramError("refine_holes", "Cannot refine hole boundary when using a hole boundary layer.");
+      declareMeshForSubByName(_hole_names[i]);
+      _hole_ptrs.push_back(&getMeshByName(create_conformal_coating_mesh(
+          _holes_boundary_layer_num[i],
+          _holes_boundary_layer_thickness[i],
+          _holes_boundary_layer_bias[i],
+          true,
+          _stitch_holes[i],
+          _hole_names[i],
+          std::vector<BoundaryName>(),
+          _tri_elem_type,
+          isParamValid("output_subdomain_id") ? getParam<SubdomainID>("output_subdomain_id") : 0,
+          isParamValid("output_subdomain_name") ? getParam<SubdomainName>("output_subdomain_name")
+                                                : SubdomainName(),
+          0,
+          libMesh::BoundaryInfo::invalid_id,
+          _hole_names[i])));
+      // We need to stitch to the boundary layer mesh
+      _stitch_holes[i] = true;
+    }
+    else
+    {
+      _hole_ptrs.push_back(&getMeshByName(_hole_names[i]));
+    }
+  }
+  if (_hole_ptrs.empty())
+    for (const auto & hole_name : _hole_names)
+      _hole_ptrs.push_back(&getMeshByName(hole_name));
 }
 
 std::unique_ptr<MeshBase>
@@ -182,7 +323,11 @@ XYDelaunayGenerator::generate()
 {
   // Put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh =
-      dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
+      dynamic_pointer_cast<UnstructuredMesh>(std::move(*_bdy_ptr));
+  // We need to clone the mesh if it is a boundary layer mesh for final stitching
+  auto bdry_mesh = _outer_boundary_layer_num > 0
+                       ? dynamic_pointer_cast<UnstructuredMesh>(mesh->clone())
+                       : nullptr;
 
   // Get ready to triangulate the line segments we extract from it
   libMesh::Poly2TriTriangulator poly2tri(*mesh);
@@ -192,15 +337,14 @@ XYDelaunayGenerator::generate()
   // mesh, get their ids.
   std::set<std::size_t> bdy_ids;
 
-  if (isParamValid("input_boundary_names"))
+  if (_input_boundary_names.size())
   {
     if (isParamValid("input_subdomain_names"))
       paramError(
           "input_subdomain_names",
           "input_boundary_names and input_subdomain_names cannot both specify an outer boundary.");
 
-    const auto & boundary_names = getParam<std::vector<BoundaryName>>("input_boundary_names");
-    for (const auto & name : boundary_names)
+    for (const auto & name : _input_boundary_names)
     {
       auto bcid = MooseMeshUtils::getBoundaryID(name, *mesh);
       if (bcid == BoundaryInfo::invalid_id)
@@ -390,6 +534,10 @@ XYDelaunayGenerator::generate()
   // won't be able to safely clear it afterwards.
   const boundary_id_type end_bcid = hole_ptrs.size() + 1;
 
+  // Record the hole bdry ids for later use.
+  std::vector<boundary_id_type> hole_boundary_ids;
+  for (auto h : index_range(hole_ptrs))
+    hole_boundary_ids.push_back(h + 1);
   // For the hole meshes that need to be stitched, we would like to make sure the hole boundary ids
   // and output boundary id are not conflicting with the existing boundary ids of the hole meshes to
   // be stitched.
@@ -402,11 +550,20 @@ XYDelaunayGenerator::generate()
       {
         free_boundary_id =
             std::max(free_boundary_id, MooseMeshUtils::getNextFreeBoundaryID(*hole_ptrs[hole_i]));
+        // if the "hole" mesh contains the boundary layer mesh, it contains a id=0 boundary that
+        // makes the actual hole boundary. In this case, we do not want to use free_boundary_id = 1
+        // as we will rename that id=0 boundary later.
+        if (_holes_boundary_layer_num.size() > hole_i && _holes_boundary_layer_num[hole_i] > 0 &&
+            free_boundary_id == 1)
+          free_boundary_id = 0;
         hole_ptrs[hole_i]->comm().max(free_boundary_id);
       }
     }
     for (auto h : index_range(hole_ptrs))
+    {
       libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + free_boundary_id);
+      hole_boundary_ids[h] += free_boundary_id;
+    }
   }
   boundary_id_type new_hole_bcid = end_bcid + free_boundary_id;
 
@@ -414,13 +571,29 @@ XYDelaunayGenerator::generate()
   // careful about how we renumber, though.  We pick unused temporary
   // numbers because e.g. "0->2, 2->0" is impossible to do
   // sequentially, but "0->N, 2->N+2, N->2, N+2->0" works.
-  libMesh::MeshTools::Modification::change_boundary_id(
-      *mesh, 0, (isParamValid("output_boundary") ? end_bcid : 0) + free_boundary_id);
+  boundary_id_type tmp_outer_bcid =
+      (isParamValid("output_boundary") ? end_bcid : 0) + free_boundary_id;
+  libMesh::MeshTools::Modification::change_boundary_id(*mesh, 0, tmp_outer_bcid);
+
+  // stitch to the outer boundary layers
+  if (_outer_boundary_layer_num > 0)
+  {
+    libMesh::MeshSerializer serial_bdry(*bdry_mesh);
+    mesh->stitch_meshes(*bdry_mesh,
+                        tmp_outer_bcid,
+                        1,
+                        TOLERANCE,
+                        /*clear_stitched_bcids*/ true,
+                        _verbose_stitching,
+                        use_binary_search);
+    libMesh::MeshTools::Modification::change_boundary_id(*mesh, 10000, tmp_outer_bcid);
+  }
 
   if (isParamValid("hole_boundaries"))
   {
     auto hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
-    auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
+    // refresh the hole boundary ids if specified by the user.
+    hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
 
     for (auto h : index_range(hole_ptrs))
       libMesh::MeshTools::Modification::change_boundary_id(
@@ -442,7 +615,7 @@ XYDelaunayGenerator::generate()
         MooseMeshUtils::getBoundaryIDs(*mesh, {output_boundary}, true);
 
     libMesh::MeshTools::Modification::change_boundary_id(
-        *mesh, end_bcid + free_boundary_id, output_boundary_id[0]);
+        *mesh, tmp_outer_bcid, output_boundary_id[0]);
     mesh->get_boundary_info().sideset_name(output_boundary_id[0]) = output_boundary;
 
     new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(output_boundary_id[0] + 1));
@@ -558,6 +731,14 @@ XYDelaunayGenerator::generate()
       // subdomain map
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+      if (_holes_boundary_layer_num.size() > hole_i && _holes_boundary_layer_num[hole_i] > 0)
+      {
+        // before stitching, let's move the hole boundary from the main mesh to the actual hole
+        // boundary in the boundary layer mesh.
+        libMesh::MeshTools::Modification::change_boundary_id(
+            hole_mesh, 0, hole_boundary_ids[hole_i]);
+        mesh->get_boundary_info().remove_id(hole_boundary_ids[hole_i]);
+      }
 
       mesh->stitch_meshes(hole_mesh,
                           inner_bcid,

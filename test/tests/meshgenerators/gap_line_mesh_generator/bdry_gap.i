@@ -35,7 +35,7 @@
     type = GapLineMeshGenerator
     input = 'xyd'
     thickness = 0.1
-    boundary_ids = '1'
+    boundary_names = '1'
     gap_direction = INWARD
   []
 []

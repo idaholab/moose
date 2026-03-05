@@ -27,8 +27,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// boundary input mesh name
+  const MeshGeneratorName _bdy_name;
+
   /// Input mesh defining the boundary to triangulate within
-  std::unique_ptr<MeshBase> & _bdy_ptr;
+  std::unique_ptr<MeshBase> * _bdy_ptr;
 
   /// How many more nodes to add in each outer boundary segment
   const unsigned int _add_nodes_per_boundary_segment;
@@ -45,11 +48,14 @@ protected:
   /// Whether to verify holes do not intersect boundary or each other
   const bool _verify_holes;
 
+  /// Hole meshes names
+  const std::vector<MeshGeneratorName> _hole_names;
+
   /// Holds pointers to the pointers to input meshes defining holes
-  const std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
+  std::vector<std::unique_ptr<MeshBase> *> _hole_ptrs;
 
   /// Whether to stitch to the mesh defining each hole
-  const std::vector<bool> _stitch_holes;
+  std::vector<bool> _stitch_holes;
 
   /// Whether to allow automatically refining each hole boundary
   const std::vector<bool> _refine_holes;
@@ -71,4 +77,25 @@ protected:
 
   /// Desired interior node locations
   std::vector<Point> _interior_points;
+
+  /// Thickness of the outer boundary layer to be added
+  const Real _outer_boundary_layer_thickness;
+
+  /// Number of layers for the outer boundary layer
+  const unsigned int _outer_boundary_layer_num;
+
+  /// Bias factor for the thickness of each layer in the outer boundary layer
+  const Real _outer_boundary_layer_bias;
+
+  /// Thickness of the hole boundary layers to be added
+  const std::vector<Real> _holes_boundary_layer_thickness;
+
+  /// Number of layers for the hole boundary layers
+  const std::vector<unsigned int> _holes_boundary_layer_num;
+
+  /// Bias factor for the thickness of each layer in the hole boundary layers
+  const std::vector<Real> _holes_boundary_layer_bias;
+
+  /// Input boundary names
+  std::vector<BoundaryName> _input_boundary_names;
 };

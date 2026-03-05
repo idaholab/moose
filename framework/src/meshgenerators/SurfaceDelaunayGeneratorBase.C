@@ -14,7 +14,7 @@
 InputParameters
 SurfaceDelaunayGeneratorBase::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = LayerDelaunayBase::validParams();
 
   params.addParam<bool>("use_auto_area_func",
                         false,
@@ -56,7 +56,7 @@ SurfaceDelaunayGeneratorBase::validParams()
 }
 
 SurfaceDelaunayGeneratorBase::SurfaceDelaunayGeneratorBase(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+  : LayerDelaunayBase(parameters),
     _use_auto_area_func(getParam<bool>("use_auto_area_func")),
     _auto_area_func_default_size(getParam<Real>("auto_area_func_default_size")),
     _auto_area_func_default_size_dist(getParam<Real>("auto_area_func_default_size_dist")),
