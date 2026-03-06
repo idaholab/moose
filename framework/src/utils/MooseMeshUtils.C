@@ -705,8 +705,6 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
     Node * new_first_node = new_mesh_starting_node;
     dof_id_type first_node_index = starting_node->id();
     dof_id_type second_node_index = input_mesh.node_ptr(side_elem->node_id(1))->id();
-    std::cout << "Very start nodes " << first_node_index << " and " << second_node_index
-              << std::endl;
 
     while (!looped_back && num_visited_from_this_side < 1e7)
     {
@@ -739,10 +737,7 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
       auto & connected_elems = libmesh_map_find(node_to_elem_map, second_node_index);
       bool found_match = false;
       const auto current_eid = elem->id();
-      std::cout << "\nCurrent element " << elem->id() << " and side " << current_side << std::endl;
-      std::cout << "Starting node " << second_node_index << " (local) "
-                << elem->get_node_index(input_mesh.node_ptr(second_node_index)) << std::endl;
-      std::cout << "Connected elems " << Moose::stringify(connected_elems) << std::endl;
+
       for (const auto eid : connected_elems)
       {
         mooseAssert(!found_match,
@@ -751,36 +746,29 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
         {
           // Update the element (on the input mesh)
           elem = input_mesh.elem_ptr(eid);
-          std::cout << "Considering element " << eid << std::endl;
 
           // Find the side and the opposite node index in that side
           for (const auto si : elem->side_index_range())
           {
-            std::cout << "Considering side " << si << std::endl;
             // Check that second node is on the side
             const auto local_second_node_index =
                 elem->get_node_index(input_mesh.node_ptr(second_node_index));
             // 2 sides should match this
             if (elem->is_node_on_side(local_second_node_index, si))
             {
-              std::cout << "Local node " << local_second_node_index << " is on side " << si
-                        << std::endl;
               // Only one side should be on the same boundary (node is connected to two elements)
               // Form a bc_tuple and check the list of boundary sides
               std::tuple<dof_id_type, unsigned short int, boundary_id_type> side_bc_tuple = {
                   elem->id(), si, boundary_id};
-              std::cout << "Checking bc tuple " << side_bc_tuple << std::endl;
+
               if (std::find(side_list.begin(), side_list.end(), side_bc_tuple) == side_list.end())
                 continue;
 
-              std::cout << "Found right tuple" << std::endl;
               // We are on the right boundary, just need to get the other node
               for (const auto local_side_node_id : elem->nodes_on_side(si))
               {
-                std::cout << "Local node index " << local_side_node_id << std::endl;
                 const auto side_node_id = elem->node_id(local_side_node_id);
-                std::cout << "Checking node " << side_node_id << " different from node "
-                          << second_node_index << std::endl;
+
                 // Skip current node (use global index to compare)
                 if (side_node_id == second_node_index)
                   continue;
@@ -805,20 +793,14 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
         // next node could be on the same element, just moving on to the next side
         else if (connected_elems.size() == 1)
         {
-          std::cout << "On single element, currently on side " << current_side << std::endl;
-
           elem = input_mesh.elem_ptr(eid);
           const auto local_second_node_index =
               elem->get_node_index(input_mesh.node_ptr(second_node_index));
-          std::cout << "Current node " << second_node_index << " (local) "
-                    << local_second_node_index << std::endl;
 
           // Move on to the next side
           for (const auto si : elem->side_index_range())
             if (si != current_side && elem->is_node_on_side(local_second_node_index, si))
             {
-              std::cout << "Looking at side " << si << " which also has node "
-                        << local_second_node_index << std::endl;
               // Check all nodes on that next side
               for (const auto local_side_node_id : elem->nodes_on_side(si))
               {
@@ -826,8 +808,6 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
                 // Skip current node
                 if (side_node_id == second_node_index)
                   continue;
-                std::cout << "Considering next node " << side_node_id << " (local) "
-                          << local_side_node_id << std::endl;
                 mooseAssert((side_node_id != first_node_index) ||
                                 (side_list.size() == elem->n_sides()),
                             "Somehow looped back in a single element");
@@ -838,7 +818,6 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
                 for (auto iter = bids_range.first; iter != bids_range.second; iter++)
                   if (iter->second == boundary_id)
                   {
-                    std::cout << "Found! Next node index " << side_node_id << std::endl;
                     current_side = si;
                     second_node_index = side_node_id;
                     found_match = true;
