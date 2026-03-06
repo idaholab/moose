@@ -1153,6 +1153,19 @@ prettyCppType(const std::string & cpp_type)
   r.GlobalReplace("std::vector<\\1>", &s);
   // Do it again for nested vectors
   r.GlobalReplace("std::vector<\\1>", &s);
+  // It would be nice if std::map and unordered map looked normal
+  pcrecpp::RE r_map(
+      "std::map<\\s*((?:[^,<]|<[^>]*>)+)\\s*,\\s*((?:[^,<]|<[^>]*>)+)\\s*,\\s*"
+      "std::less<\\s*\\1\\s*>\\s*,\\s*"
+      "std::allocator<\\s*std::pair<\\s*(?:const\\s*\\1|\\1\\s*const)\\s*,\\s*\\2\\s*>\\s*>\\s*>");
+  r_map.GlobalReplace("std::map<\\1, \\2>", &s);
+  pcrecpp::RE r_umap(
+      "std::unordered_map<\\s*([^,]+)\\s*,\\s*([^,]+)\\s*,\\s*"
+      "std::hash<\\s*\\1\\s*>\\s*,\\s*"
+      "std::equal_to<\\s*\\1\\s*>\\s*,\\s*"
+      "std::allocator<\\s*std::pair<\\s*(?:const\\s*\\1|\\1\\s*const)\\s*,\\s*\\2\\s*>\\s*>\\s*>");
+  r_umap.GlobalReplace("std::unordered_map<\\1, \\2>", &s);
+
   return s;
 }
 
