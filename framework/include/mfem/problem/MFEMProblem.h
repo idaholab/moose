@@ -254,6 +254,11 @@ public:
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
+  /**
+   * @returns a shared pointer to an MFEM parallel complex grid function
+   */
+  std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction(const std::string & name);
+
   enum class NumericType
   {
     REAL,
