@@ -1,6 +1,11 @@
 # Definite Maxwell problem solved with Nedelec elements of the first kind
 # based on MFEM Example 3.
 
+wire_domain = 1
+high_terminal_bdr = 1
+low_terminal_bdr = 2
+exterior_bdr = '1 2 3'
+
 [Mesh]
   type = MFEMMesh
   file = ../mesh/cylinder-hex-q2.gen
@@ -13,7 +18,7 @@
 [SubMeshes]
   [wire]
     type = MFEMDomainSubMesh
-    block = interior
+    block = ${wire_domain}
   []
 []
 
@@ -63,30 +68,24 @@
     execute_on = TIMESTEP_END
   []
 []
-[Functions]
-  [height]
-    type = ParsedFunction
-    expression = 'z'
-  []
-[]
 
 [BCs]
   [tangential_a_bdr]
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
-    boundary = '1 2 3'
+    boundary = ${exterior_bdr}
   []
 
   [top]
     type = MFEMScalarDirichletBC
     variable = electric_potential
-    boundary = 1
+    boundary = ${high_terminal_bdr}
     coefficient = 1.0
   []
   [bottom]
     type = MFEMScalarDirichletBC
     variable = electric_potential
-    boundary = 2
+    boundary = ${low_terminal_bdr}
   []
 []
 
