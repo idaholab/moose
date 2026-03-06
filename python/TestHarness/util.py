@@ -445,3 +445,16 @@ def hasGNUTime() -> bool:
                             _HAS_GNU_TIME = True
 
         return _HAS_GNU_TIME
+
+
+def printPrefixed(prefix: str, *args, color: Optional[str] = None):
+    """Print the given message with a prefix and an optional color for the prefix."""
+    prefix = f"{prefix}:"
+    if color is not None:
+        prefix = colorText(prefix, color)
+    print(prefix, *args, flush=True)
+
+
+def printInfo(*args, colored: bool):
+    """Print the given message as information."""
+    printPrefixed("INFO", *args, color="CYAN" if colored else None)

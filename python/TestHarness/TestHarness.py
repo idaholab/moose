@@ -30,6 +30,7 @@ import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
+from mooseutils import colorText
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
@@ -1892,6 +1893,9 @@ class TestHarness:
         options = parser.parse_args(argv[1:])
         options.code = code
 
+        def print_info(*args):
+            util.printInfo(*args, colored=options.colored)
+
         # Try to guess the --hpc option if --hpc-host is set
         if options.hpc_host and not options.hpc:
             hpc_host = options.hpc_host[0]
@@ -1902,8 +1906,8 @@ class TestHarness:
                 if hpc_config.srun:
                     options_set.append("--hpc-srun")
                     options.hpc_srun = True
-                print(
-                    f"INFO: Setting '{' '.join(options_set)}' for known host {hpc_host}"
+                print_info(
+                    f"Setting --hpc={options.hpc} for known host {hpc_host}",
                 )
 
         # Convert all list based options of length one to scalars
@@ -1918,6 +1922,10 @@ class TestHarness:
     ## Called after options are parsed from the command line
     # Exit if options don't make any sense, print warnings if they are merely weird
     def checkAndUpdateCLArgs(self, opts: argparse.Namespace):
+
+        def print_info(*args):
+            util.printInfo(*args, colored=opts.colored)
+
         if opts.group == opts.not_group:
             self.errorExit(
                 "The group and not_group options cannot specify the same group"
@@ -1975,8 +1983,8 @@ class TestHarness:
             opts.input_file_name = "tests"
 
         if self.app_name is None:
-            print(
-                "INFO: Setting --minimal-capabilities because there is not an application"
+            print_info(
+                "Setting --minimal-capabilities because there is not an application",
             )
             opts.minimal_capabilities = True
 
@@ -1990,9 +1998,9 @@ class TestHarness:
             is not None
         ):
             value = float(MOOSE_MAX_MEMORY_PER_SLOT)
-            print(
-                f"INFO: Setting --max-memory-per-slot={value} MB from "
-                "MOOSE_MAX_MEMORY_PER_SLOT"
+            print_info(
+                f"Setting --max-memory-per-slot={value} MB from "
+                "MOOSE_MAX_MEMORY_PER_SLOT",
             )
             opts.max_memory_per_slot = value
 
