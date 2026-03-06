@@ -30,11 +30,9 @@ static const MooseEnum transformation_type_enum{"TRANSLATION=0 ROTATION=1 SCALE=
 
 /**
  * Check if the transformation values are valid for the given transformation type.
- * All transformation types require exactly 3 values.
  * @param type The transformation type
- * @param values Vector of transformation values (must be size 3)
+ * @param values tuple of transformation values (size 3)
  * @return True if the values are valid for the transformation type
- * @throws If the values vector is not exactly size 3
  */
 bool isValidTransformationValue(TransformationType type,
                                 const std::tuple<Real, Real, Real> & value);

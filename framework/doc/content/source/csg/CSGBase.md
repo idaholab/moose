@@ -323,7 +323,7 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 Three types of object transformations are supported in the `CSGBase` class: rotation, translation, and scaling.
 These transformations can be applied to any `CSGBase` object (`CSGSurface`, `CSGRegion`, `CSGCell`, `CSGUniverse`, and `CSGLattice`).
 When a transformation is applied, existing attributes for the object (such as surface coefficients) are not directly altered.
-Instead, information about the transformation applied is stored as vector of pairs on the object, where the first item in the pair is the type of transformation and the second item is the value of the transformation (stored as a size 3 vector).
+Instead, information about the transformation applied is stored as vector of pairs on the object, where the first item in the pair is the type of transformation and the second item is the value of the transformation (stored as a size 3 tuple).
 The order of the transformation vector is the order in which the transformations are applied.
 The types of transformations and the form of their values are shown in the table below.
 These transformations do not alter other information about the object because it is expected that the downstream connected code will process the transformations in a way that makes most sense for that code.
