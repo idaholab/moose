@@ -34,6 +34,16 @@
         "cube_surf_minus_z",
         "+",
         "&"
+      ],
+      "transformations": [
+        [
+          "ROTATION",
+          [
+            45.0,
+            0.0,
+            0.0
+          ]
+        ]
       ]
     }
   },

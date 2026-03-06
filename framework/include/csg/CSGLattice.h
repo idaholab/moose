@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGUniverse.h"
+#include "CSGTransformation.h"
 #include "JsonIO.h"
 #include <variant>
 #include <optional>
@@ -170,6 +171,17 @@ public:
    */
   const std::vector<std::reference_wrapper<const CSGUniverse>> getUniqueUniverses();
 
+  /**
+   * @brief Get the list of transformations applied to this lattice
+   *
+   * @return const reference to the list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
+  {
+    return _transformations;
+  }
+
   /// Operator overload for checking if two CSGLattice objects are equal
   bool operator==(const CSGLattice & other) const;
 
@@ -214,6 +226,9 @@ protected:
    */
   void updateOuter(const CSGUniverse & outer_universe);
 
+  /// Apply a transformation to the lattice (accessed through CSGBase)
+  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+
   /// Name of lattice
   std::string _name;
 
@@ -232,6 +247,9 @@ protected:
   /// outer object if fill is CSGUniverse
   const CSGUniverse * _outer_universe;
 
+  /// list of transformations applied to the lattice (type, value) in the order they are applied
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
+
   // CSGLatticeList needs to be friend to access setName()
   friend class CSGLatticeList;
   // CSGBase needed for access updateAttributes()
@@ -243,6 +261,7 @@ protected:
   FRIEND_TEST(CSGLatticeTest, testSetName);
   FRIEND_TEST(CSGLatticeTest, testUpdateOuter);
   FRIEND_TEST(CSGBaseTest, testAddLattice);
+  FRIEND_TEST(CSGLatticeTest, testCartLatticeEquality);
   ///@}
 #endif
 };

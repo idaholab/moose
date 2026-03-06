@@ -81,6 +81,17 @@ CSGCell::getFillLattice() const
     return *_fill_lattice;
 }
 
+void
+CSGCell::addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values)
+{
+  // Assert valid input as a safety measure
+  // Main validation is done in CSGBase::addTransformation
+  mooseAssert(isValidTransformationValue(type, values),
+              "Invalid transformation values for transformation type " +
+                  getTransformationTypeString(type) + " on cell " + getName());
+  _transformations.emplace_back(type, values);
+}
+
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {
@@ -88,7 +99,8 @@ CSGCell::operator==(const CSG::CSGCell & other) const
   const auto region_eq = this->getRegion() == other.getRegion();
   const auto fill_type_eq =
       (this->getFillType() == other.getFillType()) && (this->getFillName() == other.getFillName());
-  if (name_eq && region_eq && fill_type_eq)
+  const auto transformations_eq = this->getTransformations() == other.getTransformations();
+  if (name_eq && region_eq && fill_type_eq && transformations_eq)
   {
     if (this->getFillType() == "CSG_MATERIAL")
       return this->getFillMaterial() == other.getFillMaterial();
