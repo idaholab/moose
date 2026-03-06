@@ -1,6 +1,9 @@
-mu = 1e-2 # 1e-2
-rho = 2.0
-advected_interp_method = 'average'
+mu = 2e-3 # 1e-2
+rho = 1000
+advected_interp_method = 'upwind'
+u_in = 2
+forcheimer = 0
+bf = '0 0'
 
 [Mesh]
   [mesh]
@@ -8,8 +11,8 @@ advected_interp_method = 'average'
     dim = 2
     dx = '0.5 0.5 0.5'
     dy = '0.5'
-    ix = '31 31 31'
-    iy = '31'
+    ix = '21 21 21'
+    iy = '21'
     subdomain_id = '1 2 3'
   []
   [baffle]
@@ -25,6 +28,16 @@ advected_interp_method = 'average'
     primary_block = '2'
     paired_block = '3'
     new_boundary = 'baffle2'
+  []
+  [split_top_bottom]
+    type = BreakBoundaryOnSubdomainGenerator
+    input = baffle2
+    boundaries = 'top bottom'
+  []
+  [delete]
+    type = BoundaryDeletionGenerator
+    boundary_names = 'top bottom'
+    input = split_top_bottom
   []
 []
 
@@ -44,17 +57,17 @@ advected_interp_method = 'average'
     p_diffusion_kernel = p_diffusion
     pressure_baffle_sidesets = 'baffle baffle2'
     pressure_gradient_limiter = 'baffle baffle2'
-    baffle_form_loss = '0 0'
-    velocity_form_loss = 'lower_epsilon lower_epsilon'
+    baffle_form_loss = ${bf}
+    velocity_form_loss = 'lower_epsilon higher_epsilon'
     pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.5
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    flux_velocity_reconstruction_zero_flux_sidesets = 'top bottom'
+    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     use_corrected_pressure_gradient = false
-    body_force_kernel_names = "u_friction; v_friction"
+    # body_force_kernel_names = "u_friction; v_friction"
   []
 []
 
@@ -62,7 +75,7 @@ advected_interp_method = 'average'
   [superficial_u]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    initial_condition = 0.1
+    initial_condition = ${u_in}
   []
   [superficial_v]
     type = MooseLinearVariableFVReal
@@ -162,7 +175,7 @@ advected_interp_method = 'average'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
     variable = superficial_u
-    functor = 0.1
+    functor = ${u_in}
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -183,22 +196,22 @@ advected_interp_method = 'average'
     variable = superficial_v
     use_two_term_expansion = false
   []
-  [noslip_v]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
-    variable = superficial_v
-    functor = 0.0
-  []
-  [noslip_u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
-    variable = superficial_u
-    functor = 0.0
-  []
+  # [noslip_v]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  #   variable = superficial_v
+  #   functor = 0.0
+  # []
+  # [noslip_u]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  #   variable = superficial_u
+  #   functor = 0.0
+  # []
 
   [symmetry-u]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top bottom'
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     variable = superficial_u
     u = superficial_u
     v = superficial_v
@@ -206,7 +219,7 @@ advected_interp_method = 'average'
   []
   [symmetry-v]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top bottom'
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     variable = superficial_v
     u = superficial_u
     v = superficial_v
@@ -219,26 +232,28 @@ advected_interp_method = 'average'
     variable = pressure
     functor = 0.0
   []
-  [pressure-extrapolation]
-    type = LinearFVPressureFluxBC
-    boundary = 'bottom top'
-    variable = pressure
-    HbyA_flux = HbyA
-    Ainv = Ainv
-  []
-  # [pressure-symmetry]
-  #   type = LinearFVPressureSymmetryBC
-  #   boundary = 'top bottom'
+
+  # [pressure-extrapolation]
+  #   type = LinearFVPressureFluxBC
+  #   boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
   #   variable = pressure
-  #   HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  #   HbyA_flux = HbyA
+  #   Ainv = Ainv
   # []
+
+  [pressure-symmetry]
+    type = LinearFVPressureSymmetryBC
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    variable = pressure
+    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  []
 []
 
 [FunctorMaterials]
   [forch]
     type = GenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '3 3 3'
+    prop_values = '${forcheimer} ${forcheimer} ${forcheimer}'
   []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
@@ -296,11 +311,11 @@ advected_interp_method = 'average'
   [v_top_int]
     type = SideIntegralVariablePostprocessor
     variable = superficial_v
-    boundary = 'top'
+    boundary = 'top_to_1 top_to_2 top_to_3'
   []
   [top_area]
     type = AreaPostprocessor
-    boundary = 'top'
+    boundary = 'top_to_1 top_to_2 top_to_3'
   []
   [v_top_avg]
     type = ParsedPostprocessor
@@ -313,17 +328,17 @@ advected_interp_method = 'average'
   [u_line]
     type = LineValueSampler
     variable = superficial_u
-    start_point = '0 0.5 0'
-    end_point = '1.5 0.5 0'
-    num_points = 61
+    start_point = '0 0.25 0'
+    end_point = '1.5 0.25 0'
+    num_points = 401
     sort_by = id
   []
   [p_line]
     type = LineValueSampler
     variable = pressure
-    start_point = '0 0.5 0'
-    end_point = '1.5 0.5 0'
-    num_points = 61
+    start_point = '0 0.25 0'
+    end_point = '1.5 0.25 0'
+    num_points = 401
     sort_by = id
   []
 []
@@ -345,15 +360,15 @@ advected_interp_method = 'average'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-12
-  pressure_l_abs_tol = 1e-12
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.5
-  pressure_variable_relaxation = 0.2
+  momentum_equation_relaxation = 0.4
+  pressure_variable_relaxation = 0.1
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
