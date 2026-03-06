@@ -144,9 +144,6 @@ protected:
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
-  /// Boundaries this sub-block action applies to
-  const std::vector<BoundaryName> _bnd;
-
   /// Interfaces this sub-block action applies to
   const std::vector<BoundaryName> _interface;
 

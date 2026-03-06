@@ -27,20 +27,29 @@ public:
 
 #ifdef NEML2_ENABLED
 protected:
-  const MooseArray<T> & currentMOOSEData() const override;
+  const MooseArray<T> & elemMOOSEData() const override { return _volume_mat_prop.get(); }
+  const MooseArray<T> & elemSideMOOSEData() const override { return _face_mat_prop.get(); }
+  const MooseArray<T> & elemNeighborSideMOOSEData() const override
+  {
+    return _neighbor_face_mat_prop.get();
+  }
 
   /// MOOSE material property to read data from
-  const MaterialProperty<T> & _mat_prop;
+  const MaterialProperty<T> & _volume_mat_prop;
+
+  /// MOOSE material property to read data from (face)
+  const MaterialProperty<T> & _face_mat_prop;
+
+  /// MOOSE material property to read data from (neighbor face)
+  const MaterialProperty<T> & _neighbor_face_mat_prop;
 #endif
 };
 
-#define DefineMOOSEMaterialPropertyToNEML2Alias(T)                                                 \
-  using MOOSE##T##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 0>;                    \
-  using MOOSEOld##T##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 1>
+#define DefineMOOSEMaterialPropertyToNEML2Alias(T, alias)                                          \
+  using MOOSE##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 0>;                \
+  using MOOSEOld##alias##MaterialPropertyToNEML2 = MOOSEMaterialPropertyToNEML2<T, 1>
 
-DefineMOOSEMaterialPropertyToNEML2Alias(Real);
-DefineMOOSEMaterialPropertyToNEML2Alias(RankTwoTensor);
-DefineMOOSEMaterialPropertyToNEML2Alias(SymmetricRankTwoTensor);
-DefineMOOSEMaterialPropertyToNEML2Alias(RealVectorValue);
-
-#undef DefineMOOSEMaterialPropertyToNEML2Alias
+DefineMOOSEMaterialPropertyToNEML2Alias(Real, Real);
+DefineMOOSEMaterialPropertyToNEML2Alias(RankTwoTensor, RankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
+DefineMOOSEMaterialPropertyToNEML2Alias(RealVectorValue, RealVectorValue);

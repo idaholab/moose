@@ -9,9 +9,9 @@
 
 #include "MOOSEMaterialPropertyToNEML2.h"
 
-#define registerMOOSEMaterialPropertyToNEML2(T)                                                    \
-  registerMooseObject("MooseApp", MOOSE##T##MaterialPropertyToNEML2);                              \
-  registerMooseObject("MooseApp", MOOSEOld##T##MaterialPropertyToNEML2)
+#define registerMOOSEMaterialPropertyToNEML2(alias)                                                \
+  registerMooseObject("MooseApp", MOOSE##alias##MaterialPropertyToNEML2);                          \
+  registerMooseObject("MooseApp", MOOSEOld##alias##MaterialPropertyToNEML2)
 
 registerMOOSEMaterialPropertyToNEML2(Real);
 registerMOOSEMaterialPropertyToNEML2(RankTwoTensor);
@@ -36,16 +36,24 @@ MOOSEMaterialPropertyToNEML2<T, state>::MOOSEMaterialPropertyToNEML2(const Input
   : MOOSEToNEML2Batched<T>(params)
 #ifdef NEML2_ENABLED
     ,
-    _mat_prop(this->template getGenericMaterialProperty<T, false>("from_moose", state))
+    _volume_mat_prop(this->template getGenericMaterialProperty<T, false>("from_moose", state)),
+    _face_mat_prop(
+        [this]() -> const MaterialProperty<T> &
+        {
+          if constexpr (state == 0)
+            return this->template getFaceMaterialProperty<T>("from_moose");
+          else if constexpr (state == 1)
+            return this->template getFaceMaterialPropertyOld<T>("from_moose");
+          else
+          {
+            static_assert(state == 2, "Unsupported face material property state");
+            return this->template getFaceMaterialPropertyOlder<T>("from_moose");
+          }
+        }()),
+    _neighbor_face_mat_prop(
+        this->template getGenericNeighborMaterialProperty<T, false>("from_moose", state))
 #endif
 {
-}
-
-template <typename T, unsigned int state>
-const MooseArray<T> &
-MOOSEMaterialPropertyToNEML2<T, state>::currentMOOSEData() const
-{
-  return _mat_prop.get();
 }
 
 #define instantiateMOOSEMaterialPropertyToNEML2(T)                                                 \

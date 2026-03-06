@@ -30,7 +30,10 @@ public:
   void executeOnInterface() override;
   void threadJoin(const UserObject &) override;
   void finalize() override;
+
   void meshChanged() override;
+
+  using ElemSide = std::tuple<dof_id_type, unsigned int>;
 
   /// Get the current batch index (in almost all cases this is the total batch size)
   std::size_t getBatchIndex() const { return _batch_index; }
@@ -38,14 +41,11 @@ public:
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
 
-  /// Get the batch index for the given element ID and side
-  std::size_t getBatchIndex(dof_id_type elem_id, unsigned int side) const;
+  /// Get the batch index for the given element side
+  std::size_t getSideBatchIndex(const ElemSide & elem_side) const;
 
-  /// Check if the batch index for the given element ID exists
-  bool hasBatchIndex(dof_id_type elem_id) const;
-
-  /// Check if the batch index for the given element ID and side exists
-  bool hasBatchIndex(dof_id_type elem_id, unsigned int side) const;
+  /// Check if a batch index exists for the given element side
+  bool isSideBatchIndexExist(const ElemSide & elem_side) const;
 
   /// Whether the batch is empty
   bool isEmpty() const { return _batch_index == 0; }
@@ -57,16 +57,15 @@ protected:
   /// Highest current batch index
   std::size_t _batch_index;
 
-  ///@{
   /// Map from element IDs to batch indices
   std::map<dof_id_type, std::size_t> _elem_to_batch_index;
-  /// Map from element IDs and side to batch indices
-  std::map<std::pair<dof_id_type, unsigned int>, std::size_t> _face_to_batch_index;
-  ///@}
 
-  ///@{
-  /// caches for the last queried batch index
+  /// Map from element sides to batch indices
+  std::map<ElemSide, std::size_t> _elemside_to_batch_index;
+
+  /// cache the index for the current element
   mutable std::pair<dof_id_type, std::size_t> _elem_to_batch_index_cache;
-  mutable std::pair<std::pair<dof_id_type, unsigned int>, std::size_t> _face_to_batch_index_cache;
-  ///@}
+
+  /// cache the index for the current element side
+  mutable std::pair<ElemSide, std::size_t> _elemside_to_batch_index_cache;
 };

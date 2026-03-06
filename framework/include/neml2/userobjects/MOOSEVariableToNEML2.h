@@ -15,21 +15,29 @@
  * Gather a MOOSE variable for insertion into the NEML2 model.
  */
 template <unsigned int state>
-class MOOSEVariableToNEML2Tmpl : public MOOSEToNEML2Batched<Real>
+class MOOSEVariableToNEML2Templ : public MOOSEToNEML2Batched<Real>
 {
 public:
   static InputParameters validParams();
 
-  MOOSEVariableToNEML2Tmpl(const InputParameters & params);
+  MOOSEVariableToNEML2Templ(const InputParameters & params);
 
 #ifdef NEML2_ENABLED
 protected:
-  const MooseArray<Real> & currentMOOSEData() const override { return _moose_variable; }
+  const MooseArray<Real> & elemMOOSEData() const override { return _moose_variable; }
+  const MooseArray<Real> & elemSideMOOSEData() const override { return _moose_variable; }
+  const MooseArray<Real> & elemNeighborSideMOOSEData() const override
+  {
+    return _moose_variable_neighbor;
+  }
 
   /// Coupled MOOSE variable to read data from
   const VariableValue & _moose_variable;
+
+  /// Coupled neighboring MOOSE variable to read data from
+  const VariableValue & _moose_variable_neighbor;
 #endif
 };
 
-using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Tmpl<0>;
-using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Tmpl<1>;
+using MOOSEVariableToNEML2 = MOOSEVariableToNEML2Templ<0>;
+using MOOSEOldVariableToNEML2 = MOOSEVariableToNEML2Templ<1>;

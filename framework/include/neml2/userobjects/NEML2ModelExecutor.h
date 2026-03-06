@@ -43,7 +43,13 @@ public:
   void initialSetup() override;
 
   /// Get the batch index for the given element ID
-  const NEML2BatchIndexGenerator & getBatchIndexGenerator() const;
+  std::size_t getBatchIndex(dof_id_type elem_id) const;
+
+  /// Get the batch index for the given element side
+  std::size_t getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
+
+  /// Check if a batch index exists for the given element side
+  bool isSideBatchIndexExist(const NEML2BatchIndexGenerator::ElemSide & elem_side) const;
 
   /// Get a reference(!) to the requested output view
   const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
@@ -61,40 +67,40 @@ public:
 
 protected:
   /// Register a NEML2 input variable gathered by a gatherer
-  void addGatheredVariable(const UserObjectName &, const neml2::VariableName &);
+  virtual void addGatheredVariable(const UserObjectName &, const neml2::VariableName &);
 
   /// Register a NEML2 model parameter gathered by a gatherer
-  void addGatheredParameter(const UserObjectName &, const std::string &);
+  virtual void addGatheredParameter(const UserObjectName &, const std::string &);
 
   /// Prevent output and derivative retrieval after construction
-  void checkExecutionStage() const;
+  virtual void checkExecutionStage() const final;
 
   /// Fill input variables and model parameters using the gatherers
-  void fillInputs();
+  virtual void fillInputs();
 
   /// Apply the predictor to set current trial state
-  void applyPredictor();
+  virtual void applyPredictor();
 
   /// Perform the material update
-  bool solve();
+  virtual bool solve();
 
   /// Extract output derivatives with respect to input variables and model parameters
-  void extractOutputs();
+  virtual void extractOutputs();
 
   /// Expand tensor shapes if necessary to conformal sizes
-  void expandInputs();
+  virtual void expandInputs();
 
   /// Update cached inputs/outputs for on-device state advance
   void advanceDeviceCaches();
+
+  /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
+  const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// Advance state on device (rather than via MOSOE material properties)
   const bool _keep_tensors_on_device;
 
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;
-
-  /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
-  const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
