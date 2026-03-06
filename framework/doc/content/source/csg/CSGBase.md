@@ -435,7 +435,8 @@ See the `ExampleAxialSurfaceMeshGenerator` implementation [below](#example-imple
 ### Joining Bases
 
 When two or more existing `CSGBase` objects need to be combined to continue to use and update, the `joinOtherBase` method should be used.
-This method is called from another `CSGBase` and at a minimum takes a different existing `CSGBase` object as input.
+This method is called from another `CSGBase` and takes at least two input parameters as inputs. The first parameter is a different `CSGBase` object that is meant to be joined to the existing `CSGBase` object. The second argument controls what should happen when identical surfaces exist across the two `CSGBase` objects to be joined. Since two surfaces with identical names cannot be added into a single `CSGBase` instance, if the second argument is set to true, then the surface from the existing `CSGBase` object will be retained while the one from the input `CSGBase` object with the same name will be discarded (all region definitions that rely on this surface will point to the surface from the existing `CSGBase` instance). Therefore, the second parameter should be set to true if you expect identical surfaces to be defined across the two `CSGBase` objects in terms of member data (name, surface type, surface coefficients, etc.).
+
 There are 3 different behaviors for joining bases that are supported depending on the additional arguments that are passed:
 
 1. No additional arguments: All cells that are in the root universe of the incoming `CSGBase` object will be added to the existing root universe of the current base object, and the root universe from the incoming base will no longer exist.
