@@ -18,13 +18,31 @@ registerMooseObject("MooseApp", MFEMZienkiewiczZhuIndicator);
 InputParameters
 MFEMZienkiewiczZhuIndicator::validParams()
 {
-  return MFEMIndicator::validParams();
+  InputParameters params = MFEMIndicator::validParams();
+  params.addParam<UserObjectName>("flux_fespace", "fespace to write the flux into");
+  params.addParam<UserObjectName>("smooth_flux_fespace", "fespace to write the smooth flux into");
+  return params;
 }
 
 // Make sure we don't do this until all the grid functions etc are set up!
 MFEMZienkiewiczZhuIndicator::MFEMZienkiewiczZhuIndicator(const InputParameters & params)
   : MFEMIndicator(params)
 {
+  if (isParamSetByUser("flux_fespace"))
+  {
+    // fetch the flux_fespace from the object system
+    auto object_ptr = getUserObject<MFEMFESpace>("flux_fespace").getSharedPtr();
+    auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
+    _flux_fes = fespace_ptr->getFESpace();
+  }
+
+  if (isParamSetByUser("smooth_flux_fespace"))
+  {
+    // fetch the smooth_flux_fespace from the object system
+    auto object_ptr = getUserObject<MFEMFESpace>("smooth_flux_fespace").getSharedPtr();
+    auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
+    _smooth_flux_fes = fespace_ptr->getFESpace();
+  }
 }
 
 void
