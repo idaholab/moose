@@ -1,9 +1,9 @@
-mu = 2e-3 # 1e-2
+inlet_velocity = 0.2
+mu = 2e-3
+form_factor = 0.0
+forch_coeff = 30
 rho = 1000
-advected_interp_method = 'upwind'
-u_in = 2
-forcheimer = 0
-bf = '0 0'
+advected_interp_method = 'average'
 
 [Mesh]
   [mesh]
@@ -55,17 +55,19 @@ bf = '0 0'
     rho = ${rho}
     porosity = porosity
     p_diffusion_kernel = p_diffusion
-    pressure_baffle_sidesets = 'baffle baffle2'
-    pressure_gradient_limiter = 'baffle baffle2'
-    baffle_form_loss = ${bf}
-    velocity_form_loss = 'lower_epsilon higher_epsilon'
-    pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.5
+    # pressure_baffle_sidesets = 'baffle baffle2'
+    # pressure_gradient_limiter = 'baffle baffle2'
+    # baffle_form_loss = '${form_factor} ${form_factor}'
+    # velocity_form_loss = 'lower_epsilon lower_epsilon'
+    # pressure_gradient_limiter_blend = 0.5
+    # pressure_baffle_relaxation = 0.05
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    # flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_2 bottom_to_2'
+
     use_corrected_pressure_gradient = false
     # body_force_kernel_names = "u_friction; v_friction"
   []
@@ -75,7 +77,7 @@ bf = '0 0'
   [superficial_u]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    initial_condition = ${u_in}
+    initial_condition = ${inlet_velocity}
   []
   [superficial_v]
     type = MooseLinearVariableFVReal
@@ -100,8 +102,8 @@ bf = '0 0'
     momentum_component = 'x'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = true
-    use_two_point_stress_transmissibility = true
+    porosity_outside_divergence = false
+    use_two_point_stress_transmissibility = false
   []
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
@@ -113,8 +115,8 @@ bf = '0 0'
     momentum_component = 'y'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = true
-    use_two_point_stress_transmissibility = true
+    porosity_outside_divergence = false
+    use_two_point_stress_transmissibility = false
   []
   [u_pressure]
     type = LinearFVMomentumPressureUO
@@ -175,7 +177,7 @@ bf = '0 0'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
     variable = superficial_u
-    functor = ${u_in}
+    functor = ${inlet_velocity}
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -196,22 +198,22 @@ bf = '0 0'
     variable = superficial_v
     use_two_term_expansion = false
   []
-  # [noslip_v]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
-  #   variable = superficial_v
-  #   functor = 0.0
-  # []
-  # [noslip_u]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
-  #   variable = superficial_u
-  #   functor = 0.0
-  # []
+  [noslip_v]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
+    variable = superficial_v
+    functor = 0.0
+  []
+  [noslip_u]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
+    variable = superficial_u
+    functor = 0.0
+  []
 
   [symmetry-u]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    boundary = 'top_to_2 bottom_to_2'
     variable = superficial_u
     u = superficial_u
     v = superficial_v
@@ -219,7 +221,7 @@ bf = '0 0'
   []
   [symmetry-v]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    boundary = 'top_to_2 bottom_to_2'
     variable = superficial_v
     u = superficial_u
     v = superficial_v
@@ -232,18 +234,16 @@ bf = '0 0'
     variable = pressure
     functor = 0.0
   []
-
-  # [pressure-extrapolation]
-  #   type = LinearFVPressureFluxBC
-  #   boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
-  #   variable = pressure
-  #   HbyA_flux = HbyA
-  #   Ainv = Ainv
-  # []
-
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'top_to_1 top_to_3 bottom_to_1 bottom_to_3'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+  []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
-    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    boundary = 'top_to_2 bottom_to_2'
     variable = pressure
     HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
   []
@@ -253,7 +253,7 @@ bf = '0 0'
   [forch]
     type = GenericVectorFunctorMaterial
     prop_names = forch
-    prop_values = '${forcheimer} ${forcheimer} ${forcheimer}'
+    prop_values = '${forch_coeff} ${forch_coeff} ${forch_coeff}'
   []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
@@ -360,16 +360,16 @@ bf = '0 0'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-13
+  pressure_l_abs_tol = 1e-13
   momentum_l_tol = 0
   pressure_l_tol = 0
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.4
+  momentum_equation_relaxation = 0.3
   pressure_variable_relaxation = 0.1
-  num_iterations = 1000
+  num_iterations = 2000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
