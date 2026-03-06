@@ -268,6 +268,15 @@ class RunApp(Tester):
                 file = "metadata_perf_graph_" + self.getTestNameForFile() + ".json"
                 self.json_metadata["perf_graph"] = Tester.JSONMetadata(file)
 
+        # --min-parallel and --min-threads
+        for name in ["parallel", "threads"]:
+            if (option := getattr(options, f"min_{name}")) is not None and (
+                max_value := self.specs[f"max_{name}"]
+            ) < option:
+                self.addCaveats(f"--min-{name}: max={max_value}")
+                self.setStatus(self.skip)
+                return False
+
         return True
 
     def getThreads(self, options):
