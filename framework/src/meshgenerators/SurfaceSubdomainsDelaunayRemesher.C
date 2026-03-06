@@ -252,7 +252,10 @@ SurfaceSubdomainsDelaunayRemesher::generate()
       // it on every stitch
       bool base_has_external_bdy = false;
       MooseMeshUtils::addExternalBoundary(*full_mesh, primary_bcid, base_has_external_bdy);
-      mooseAssert(base_has_external_bdy, "Full mesh should have an external boundary");
+      if (!base_has_external_bdy)
+        mooseWarning(
+            "Full mesh should have an external boundary. This could occur if the surface mesh is "
+            "disconnected in several parts and a part's surface mesh has just been fully remeshed");
 
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
@@ -404,8 +407,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   bool has_external_side = false;
   MeshTools::Modification::all_tri(*mesh_2d);
   const auto mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*mesh_2d);
-  for (const auto & elem : mesh_2d->active_element_ptr_range())
-    for (const auto & i_side : elem->side_index_range())
+  for (const auto elem : mesh_2d->active_element_ptr_range())
+    for (const auto i_side : elem->side_index_range())
       if (elem->neighbor_ptr(i_side) == nullptr)
       {
         mesh_2d->get_boundary_info().add_side(elem, i_side, mesh_2d_ext_bdry);
@@ -446,6 +449,30 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
         MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
 
     // Do not clear the 2D hole mesh, we may re-use it
+  }
+
+  // Add more nodes in the 1D mesh
+  // We need to do this BEFORE the mesh is projected to avoid distortion in the node distances
+  // The distortion is not the same for each subdomain, so we would end up with a non-conformal mesh
+  if (isParamValid("max_edge_length"))
+  {
+    // We need to extract the points in the order of the boundary. This utility will build the
+    // boundary as a loop
+    // Add the nodeset from the sideset
+    // NOTE: this is redoing the 1D mesh from the boundary
+    mesh_2d->get_boundary_info().build_node_list_from_side_list({mesh_2d_ext_bdry});
+    const auto boundary_1d = MooseMeshUtils::buildLoopBoundaryOf2DMesh(*mesh_2d, mesh_2d_ext_bdry);
+    // Extract the points
+    std::vector<Point> mesh_1d_points;
+    mesh_1d_points.reserve(boundary_1d->n_nodes());
+    for (const auto & node : boundary_1d->node_ptr_range())
+      mesh_1d_points.push_back(*node);
+
+    // Re-create the 1D mesh with a polyline with a maximum edge length
+    mesh_1d->clear();
+    // we add a tiny offset to avoid roundoff differences
+    MooseMeshUtils::buildPolyLineMesh(
+        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length") + 1e-8);
   }
 
   // Find centroid of the 2D mesh
@@ -496,31 +523,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   {
     for (const auto & node : hole_mesh_1d->node_ptr_range())
       (*node)(2) = 0;
-  }
-
-  // Add more nodes in the 1D mesh
-  // We do this once flatted to be able to use the MeshedHole ordering of points along the external boundary
-  if (isParamValid("max_edge_length"))
-  {
-    // We need to extract the points in the order of the boundary
-    libMesh::TriangulatorInterface::MeshedHole mesh_hole_1d(*mesh_2d);
-    std::vector<Point> mesh_1d_points;
-    mesh_1d_points.reserve(mesh_hole_1d.n_points());
-    for (const auto i_p : make_range(mesh_hole_1d.n_points()))
-      mesh_1d_points.push_back(mesh_hole_1d.point(i_p));
-
-    // Re-create the 1D mesh with a polyline
-    mesh_1d->clear();
-    MooseMeshUtils::buildPolyLineMesh(
-        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length"));
-
-    // Check
-    std::cout << "Old points " << Moose::stringify(mesh_1d_points) << std::endl;
-    mesh_1d_points.clear();
-    mesh_1d_points.reserve(mesh_1d->n_nodes());
-    for (const auto & node : mesh_1d->node_ptr_range())
-      mesh_1d_points.push_back(*node);
-    std::cout << "New points " << Moose::stringify(mesh_1d_points) << std::endl;
   }
 
   // Create meshed holes for each hole mesh
