@@ -41,7 +41,7 @@
     recover = false
   []
   [hex_rid_as_block_name]
-    requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types, with separate block names assigned based on region IDs in the mesh'
+    requirement = 'The system shall generate a 3D hexagonal assembly mesh from 2 pin types, with separate block names assigned based on region IDs in the mesh'
     type = 'Exodiff'
     input = 'assembly_hex.i'
     cli_args = "Mesh/rmp/region_id_as_block_name=true
@@ -102,5 +102,76 @@
                 Outputs/out/extra_element_ids_to_output=depletion_id"
     exodiff = 'assembly_depl_id_pin_type.e'
     recover = false
+  []
+  [csg]
+    requirement = 'The system shall generate the Constructive Solid Geometry (CSG) representation of a '
+    [2d_hex]
+      detail = '2D hexagonal assembly'
+      type = JSONDiff
+      input = 'assembly_hex_2d.i'
+      cli_args = "--csg-only"
+      jsondiff = 'assembly_hex_2d_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_hex]
+      detail = '3D hexagonal assembly'
+      type = JSONDiff
+      input = 'assembly_hex.i'
+      cli_args = "--csg-only"
+      jsondiff = 'assembly_hex_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [2d_cartesian]
+      detail = '2D Cartesian assembly mesh with no background/duct region'
+      type = JSONDiff
+      input = 'assembly_square_2d.i'
+      cli_args = "--csg-only"
+      jsondiff = 'assembly_square_2d_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_cartesian]
+      detail = '3D Cartesian assembly mesh with no background/duct region'
+      type = JSONDiff
+      input = 'assembly_square.i'
+      cli_args = "Mesh/inactive=translate
+                  --csg-only"
+      jsondiff = 'assembly_square_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [2d_cartesian_with_background]
+      detail = '2D Cartesian assembly mesh with a background and duct region'
+      type = JSONDiff
+      input = 'assembly_square_2d.i'
+      cli_args = "Mesh/pin1/pitch=1.25
+                  Mesh/pin1/duct_halfpitch=0.58
+                  Mesh/pin2/pitch=1.25
+                  Mesh/amg/background_region_id='6'
+                  Mesh/amg/background_intervals=1
+                  Outputs/file_base=assembly_square_2d_background
+                  --csg-only"
+      jsondiff = 'assembly_square_2d_background_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_cartesian_with_background]
+      detail = '3D Cartesian assembly mesh with a background and duct region'
+      type = JSONDiff
+      input = 'assembly_square.i'
+      cli_args = "Mesh/pin1/pitch=1.25
+                  Mesh/pin1/duct_halfpitch=0.58
+                  Mesh/pin2/pitch=1.25
+                  Mesh/amg/background_region_id='6 16'
+                  Mesh/amg/background_intervals=1
+                  Mesh/inactive='translate'
+                  Outputs/file_base=assembly_square_background
+                  --csg-only"
+      jsondiff = 'assembly_square_background_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+    []
   []
 []

@@ -1,0 +1,463 @@
+{
+  "cells": {
+    "amg_lattice_cell": {
+      "fill": "amg_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [
+        "+amg_radial_duct_0_surf_0",
+        "&",
+        "+amg_radial_duct_0_surf_1",
+        "&",
+        "+amg_radial_duct_0_surf_2",
+        "&",
+        "+amg_radial_duct_0_surf_3"
+      ],
+      "region_postfix": [
+        "amg_radial_duct_0_surf_0",
+        "+",
+        "amg_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_3",
+        "+",
+        "&"
+      ]
+    },
+    "amg_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region_infix": [
+        "~",
+        [
+          "+amg_radial_duct_0_surf_0",
+          "&",
+          "+amg_radial_duct_0_surf_1",
+          "&",
+          "+amg_radial_duct_0_surf_2",
+          "&",
+          "+amg_radial_duct_0_surf_3"
+        ]
+      ],
+      "region_postfix": [
+        "amg_radial_duct_0_surf_0",
+        "+",
+        "amg_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_3",
+        "+",
+        "&",
+        "~"
+      ]
+    },
+    "pin1_cell_radial_0": {
+      "fill": "rgmb_region_1",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "-pin1_radial_ring_0"
+      ],
+      "region_postfix": [
+        "pin1_radial_ring_0",
+        "-"
+      ]
+    },
+    "pin1_cell_radial_1": {
+      "fill": "rgmb_region_2",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        [
+          "+pin1_radial_duct_1_surf_0",
+          "&",
+          "+pin1_radial_duct_1_surf_1",
+          "&",
+          "+pin1_radial_duct_1_surf_2",
+          "&",
+          "+pin1_radial_duct_1_surf_3"
+        ],
+        "&",
+        "~",
+        [
+          "-pin1_radial_ring_0"
+        ]
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_1_surf_0",
+        "+",
+        "pin1_radial_duct_1_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_3",
+        "+",
+        "&",
+        "pin1_radial_ring_0",
+        "-",
+        "~",
+        "&"
+      ]
+    },
+    "pin1_cell_radial_2": {
+      "fill": "rgmb_region_5",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "+pin1_radial_duct_2_surf_0",
+        "&",
+        "+pin1_radial_duct_2_surf_1",
+        "&",
+        "+pin1_radial_duct_2_surf_2",
+        "&",
+        "+pin1_radial_duct_2_surf_3",
+        "&",
+        "~",
+        [
+          "+pin1_radial_duct_1_surf_0",
+          "&",
+          "+pin1_radial_duct_1_surf_1",
+          "&",
+          "+pin1_radial_duct_1_surf_2",
+          "&",
+          "+pin1_radial_duct_1_surf_3"
+        ]
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_2_surf_0",
+        "+",
+        "pin1_radial_duct_2_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_2_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_2_surf_3",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_0",
+        "+",
+        "pin1_radial_duct_1_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_3",
+        "+",
+        "&",
+        "~",
+        "&"
+      ]
+    },
+    "pin1_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region_infix": [
+        "~",
+        [
+          "+pin1_radial_duct_2_surf_0",
+          "&",
+          "+pin1_radial_duct_2_surf_1",
+          "&",
+          "+pin1_radial_duct_2_surf_2",
+          "&",
+          "+pin1_radial_duct_2_surf_3"
+        ]
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_2_surf_0",
+        "+",
+        "pin1_radial_duct_2_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_2_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_2_surf_3",
+        "+",
+        "&",
+        "~"
+      ]
+    },
+    "pin2_cell_radial_0": {
+      "fill": "rgmb_region_3",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "+pin2_radial_duct_0_surf_0",
+        "&",
+        "+pin2_radial_duct_0_surf_1",
+        "&",
+        "+pin2_radial_duct_0_surf_2",
+        "&",
+        "+pin2_radial_duct_0_surf_3"
+      ],
+      "region_postfix": [
+        "pin2_radial_duct_0_surf_0",
+        "+",
+        "pin2_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "pin2_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "pin2_radial_duct_0_surf_3",
+        "+",
+        "&"
+      ]
+    },
+    "pin2_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region_infix": [
+        "~",
+        [
+          "+pin2_radial_duct_0_surf_0",
+          "&",
+          "+pin2_radial_duct_0_surf_1",
+          "&",
+          "+pin2_radial_duct_0_surf_2",
+          "&",
+          "+pin2_radial_duct_0_surf_3"
+        ]
+      ],
+      "region_postfix": [
+        "pin2_radial_duct_0_surf_0",
+        "+",
+        "pin2_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "pin2_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "pin2_radial_duct_0_surf_3",
+        "+",
+        "&",
+        "~"
+      ]
+    }
+  },
+  "lattices": {
+    "amg_lattice": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 1.25
+      },
+      "outer": "rgmb_region_6",
+      "outertype": "CSG_MATERIAL",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "pin1_univ",
+          "pin1_univ"
+        ],
+        [
+          "pin1_univ",
+          "pin2_univ"
+        ]
+      ]
+    }
+  },
+  "surfaces": {
+    "amg_radial_duct_0_surf_0": {
+      "coefficients": {
+        "a": -7.815004783970186e-17,
+        "b": -1.0,
+        "c": 2.4671622769447924e-18,
+        "d": -1.4206299999999998
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.5630009567940372e-16,
+        "c": 0.0,
+        "d": -1.42063
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_2": {
+      "coefficients": {
+        "a": 1.5630009567940372e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -1.42063
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.344501435191056e-16,
+        "c": 2.4671622769447924e-18,
+        "d": -1.42063
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_0": {
+      "coefficients": {
+        "a": -9.570888143320318e-17,
+        "b": -1.0,
+        "c": -1.2335811384723962e-18,
+        "d": -0.58
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.9141776286640636e-16,
+        "c": 0.0,
+        "d": -0.5800000000000001
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_2": {
+      "coefficients": {
+        "a": 1.9141776286640636e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -0.5800000000000001
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.8712664429960956e-16,
+        "c": -1.2335811384723962e-18,
+        "d": -0.58
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_0": {
+      "coefficients": {
+        "a": -8.881784197001253e-17,
+        "b": -1.0,
+        "c": 1.2335811384723962e-18,
+        "d": -0.6249999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.7763568394002506e-16,
+        "c": 0.0,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_2": {
+      "coefficients": {
+        "a": 1.7763568394002506e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.6645352591003756e-16,
+        "c": 1.2335811384723962e-18,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_ring_0": {
+      "coefficients": {
+        "r": 0.2,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    },
+    "pin2_radial_duct_0_surf_0": {
+      "coefficients": {
+        "a": -8.881784197001253e-17,
+        "b": -1.0,
+        "c": 1.2335811384723962e-18,
+        "d": -0.6249999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin2_radial_duct_0_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.7763568394002506e-16,
+        "c": 0.0,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin2_radial_duct_0_surf_2": {
+      "coefficients": {
+        "a": 1.7763568394002506e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin2_radial_duct_0_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.6645352591003756e-16,
+        "c": 1.2335811384723962e-18,
+        "d": -0.625
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "amg_lattice_cell",
+        "amg_void_cell"
+      ],
+      "root": true
+    },
+    "pin1_univ": {
+      "cells": [
+        "pin1_cell_radial_0",
+        "pin1_cell_radial_1",
+        "pin1_cell_radial_2",
+        "pin1_void_cell"
+      ],
+      "transformations": [
+        [
+          "ROTATION",
+          [
+            30.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    },
+    "pin2_univ": {
+      "cells": [
+        "pin2_cell_radial_0",
+        "pin2_void_cell"
+      ],
+      "transformations": [
+        [
+          "ROTATION",
+          [
+            30.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    }
+  }
+}
