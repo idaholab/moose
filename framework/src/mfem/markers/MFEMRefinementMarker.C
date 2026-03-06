@@ -58,6 +58,13 @@ MFEMRefinementMarker::initialSetup()
     _p_ref_counter = _max_p_level;
   }
 
+  // For now, we lock out p-refinement, since we are unsure of the implementation.
+  if (_max_p_level > 0)
+  {
+    mooseWarning("p-refinement is not supported at present.");
+    _p_ref_counter = _max_p_level;
+  }
+
   _threshold_refiner = std::make_unique<mfem::ThresholdRefiner>(*(_estimator->getEstimator()));
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }

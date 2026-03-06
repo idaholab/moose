@@ -9,9 +9,10 @@ an `mfem::L2ZienkiewiczZhuEstimator` to the [MFEMRefinementMarker.md].
 
 ## Overview
 
-This class implements `createEstimator()`. This creates and stores an L2 finite element collection
-(and an associated finite element space) for the discontinuous flux, as well as an H1 finite element
-collection for the smoothed flux.
+This class implements `createEstimator()`. If the user doesn't supply an FESpace for the smoothed flux,
+then the method creates and stores an L2 finite element collection. Similarly, if the user doesn't
+supply an FESpace for the discontinuous flux, then the method creates and stores an H1 finite element
+collection. Be aware that the vector dimensions for each of these should match the space dimension.
 
 We can then construct the `L2ZienkiewiczZhuEstimator` object using the bilinear form integrator
 associated with the chosen kernel, the grid function associated with the variable, and the two finite
