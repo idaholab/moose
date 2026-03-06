@@ -36,6 +36,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
+    abs_zero = 1e-8
     recover = false
   []
   [MFEMDiffusionMatFree]
