@@ -221,6 +221,11 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     _using_multi_sys_fp_iterations(getParam<bool>("multi_system_fixed_point")),
     _multi_sys_fp_convergence(nullptr) // has not been created yet
 {
+  if (_pars.isParamSetByUser("multi_system_fixed_point_relaxation_factor") &&
+      !_using_multi_sys_fp_iterations)
+    paramError("Can't use relaxation factors because multisystem fixed point iteration hasn't been "
+               "enbaled!");
+
   setupMultiSystemFixedPointRelaxationFactors();
 
   if (_moose_line_searches.find(getParam<MooseEnum>("line_search").operator std::string()) !=
@@ -300,7 +305,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
             : (getMooseApp().defaultAutomaticScaling() &&
                std::any_of(_systems.begin(),
                            _systems.end(),
-                           [this](const auto & solver_sys) {
+                           [this](const auto & solver_sys)
+                           {
                              return _problem.solverParams(solver_sys->number())._type !=
                                     Moose::ST_JFNK;
                            })));
@@ -446,8 +452,6 @@ FEProblemSolve::convergenceSetup()
     _multi_sys_fp_convergence->checkIterationType(
         ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT);
   }
-
-  setupMultiSystemFixedPointRelaxationFactors();
 }
 
 void

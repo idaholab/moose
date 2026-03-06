@@ -68,19 +68,20 @@ LinearFVDiffusion::faceDiffusivity() const
 
     if (_coeff_interp_method)
     {
-      const auto face_arg = makeCDFace(*_current_face_info);
-      const auto elem_arg = face_arg.makeElem();
-      const Real elem_value = _diffusion_coeff(elem_arg, state);
-      Real neighbor_value = elem_value;
+      const Elem * const side_elem = _current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR
+                                         ? _current_face_info->elemPtr()
+                                         : _current_face_info->neighborPtr();
+      const Real side_value = _diffusion_coeff(makeElemArg(side_elem), state);
 
-      if (_current_face_info->neighborPtr())
+      if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
       {
-        const auto neighbor_arg = face_arg.makeNeighbor();
-        neighbor_value = _diffusion_coeff(neighbor_arg, state);
+        const Real neighbor_value =
+            _diffusion_coeff(makeElemArg(_current_face_info->neighborPtr()), state);
+        _face_diffusivity =
+            _coeff_interp_method->interpolate(*_current_face_info, side_value, neighbor_value);
       }
-
-      _face_diffusivity =
-          _coeff_interp_method->interpolate(*_current_face_info, elem_value, neighbor_value);
+      else
+        _face_diffusivity = side_value;
     }
     else
       _face_diffusivity = _diffusion_coeff(makeCDFace(*_current_face_info), state);
