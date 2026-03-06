@@ -126,12 +126,9 @@ public:
   /**
    * @brief Get the list of surfaces associated with the region
    *
-   * @return list of pointers to surfaces that define the region
+   * @return list of references to surfaces that define the region
    */
-  const std::vector<std::reference_wrapper<const CSGSurface>> & getSurfaces() const
-  {
-    return _surfaces;
-  }
+  std::vector<std::reference_wrapper<const CSGSurface>> getSurfaces() const;
 
   /**
    * @brief Update surface references of region based on map of input surface references
@@ -174,14 +171,8 @@ protected:
   bool nextRegionOpIsIdentical(const RegionType region,
                                const std::size_t postfix_token_index) const;
 
-  /// String representation of region - defaults to empty string
-  std::string _region_str;
-
   /// An enum for type of type of operation that defines region
   MooseEnum _region_type{"EMPTY=0 HALFSPACE=1 COMPLEMENT=2 INTERSECTION=3 UNION=4"};
-
-  /// Surface list associated with the region
-  std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;
 
   /// List of tokens representing the region in postfix notation
   std::vector<PostfixTokenVariant> _postfix_tokens;
