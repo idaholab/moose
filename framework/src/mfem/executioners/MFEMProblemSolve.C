@@ -72,13 +72,34 @@ MFEMProblemSolve::solve()
   _mfem_problem.updateActiveObjects();
 
   if (_mfem_problem.shouldSolve())
+  {
     for (const auto & problem_operator : _problem_operators)
       problem_operator->Solve();
+
+    // Short-circuit evaluation guarantees we only do one of p- or h-refinement between solves
+    while (_mfem_problem.pRefine() || _mfem_problem.hRefine())
+    {
+      // Fix me: rebuild equation system (should probably be called per operator)
+      _mfem_problem.getProblemData().eqn_system->BuildEquationSystem();
+
+      // Remove me: reconstruct the solver due to possible mfem/hypre bug
+      _mfem_problem.getProblemData().jacobian_solver->constructSolver(emptyInputParameters());
+
+      // Reset gridfunctions
+      for (const auto & problem_operator : _problem_operators)
+        problem_operator->SetGridFunctions();
+
+      // Solve again
+      for (const auto & problem_operator : _problem_operators)
+        problem_operator->Solve();
+    }
+  }
   _mfem_problem.displaceMesh();
 
   // Execute user objects, transfers, and multiapps at timestep end
   _mfem_problem.onTimestepEnd();
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+
   _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _executioner.postSolve();
@@ -95,4 +116,5 @@ MFEMProblemSolve::solve()
 
   return converged;
 }
+
 #endif

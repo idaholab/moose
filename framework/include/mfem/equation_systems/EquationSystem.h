@@ -193,6 +193,7 @@ protected:
 
 private:
   friend class EquationSystemProblemOperator;
+  friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
