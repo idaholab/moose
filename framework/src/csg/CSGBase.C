@@ -613,7 +613,7 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
         {
           // iterate on the surfaces of the region and apply the transformation to those surfaces
           const CSGRegion & region = obj.get();
-          const auto & surfaces = region.getSurfaces();
+          const auto surfaces = region.getSurfaces();
           for (const CSGSurface & surface : surfaces)
           {
             if (!checkSurfaceInBase(surface))
@@ -817,7 +817,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
 void
 CSGBase::checkRegionSurfaces(const CSGRegion & region) const
 {
-  auto & surfs = region.getSurfaces();
+  const auto surfs = region.getSurfaces();
   for (const CSGSurface & s : surfs)
   {
     if (!checkSurfaceInBase(s))
