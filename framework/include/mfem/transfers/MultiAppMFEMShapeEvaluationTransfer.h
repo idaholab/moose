@@ -11,21 +11,26 @@
 
 #pragma once
 
+#include "MFEMNodalProjector.h"
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
 /**
- * Transfer to copy MFEMVariables between multiapps.
- * The variables must be of the same type and dimension
- * and the MFEMMesh must be identical in both multiapps
+ * MultiApp transfer between MFEM variables, via shape function evaluation. Supports transfers
+ * between dissimilar meshes and finite element spaces.
  */
-class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
+class MultiAppMFEMShapeEvaluationTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMCopyTransfer(InputParameters const & params);
+  MultiAppMFEMShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
+  /// Object to extract node positions and perform projections on destination MFEM GridFunctions.
+  MFEMNodalProjector _mfem_projector;
+  /// Object to perform pointwise interpolation of source MFEM GridFunctions.
+  mfem::FindPointsGSLIB _mfem_interpolator;
+
   /// Transfer all variables from active source problem to active destination problem.
   void transferVariables() override;
 

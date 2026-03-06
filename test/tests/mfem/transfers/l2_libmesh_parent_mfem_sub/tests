@@ -1,0 +1,82 @@
+[Tests]
+  design = 'MultiAppMFEMTolibMeshShapeEvaluationTransfer.md'
+  issues = '#31982'
+  [MFEMTransferTolibMesh]
+    requirement = 'The system shall have the ability to transfer MFEM solutions to libMesh for '
+    [L2Quad]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_quads.csv'
+      detail = ' constant MONOMIAL variables defined on quads, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+    []
+    [L2Tri]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
+      detail = 'constant MONOMIAL variables defined on tris, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../../mesh/square_tri.e '
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
+                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+    []
+    [L2TriToQuad]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad.csv'
+      detail = 'constant MONOMIAL variables from tris to quads, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../../mesh/square_quad.e '
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
+                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+    []
+    [L2Hex]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_hexes.csv'
+      detail = 'constant MONOMIAL variables defined on hexes, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../../mesh/cube.e '
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_hexes '
+                'mfem_app0:Mesh/file=../../mesh/cube.e '
+    []
+    [L2Tet]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_tets.csv'
+      detail = 'constant MONOMIAL variables defined on tetrahedra, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
+                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+    []
+    [L2TetToHex]
+      type = CSVDiff
+      input = libmesh_parent_scalar.i
+      csvdiff = 'libmesh_parent_scalar_mfem_sub_tet_to_hex.csv'
+      detail = 'and constant MONOMIAL variables from tets to hexes.'
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../../mesh/cube.e '
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex '
+                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+    []
+  []
+[]
