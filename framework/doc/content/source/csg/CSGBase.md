@@ -342,7 +342,7 @@ Rotation angle is stored in Euler notation ($\phi$, $\theta$, $\psi$) using degr
 
 !alert! note title=CSGRegion Transformations
 
-If applying a transformation to a `CSGRegion` object, the `CSGRegion` object will not store the transformation information.Rather, the transformation will be applied to each `CSGSurface` associated with that `CSGRegion`. This means that if one `CSGSurface` object is used in multiple `CSGRegion` objects, all regions with that surface may be affected by the transformation. If the intention is to apply a transformation to just one use case of the shared `CSGSurface`, then a clone of that surface should be made prior to applying the transformation.
+If applying a transformation to a `CSGRegion` object, the `CSGRegion` object will not store the transformation information. Rather, the transformation will be applied to each `CSGSurface` associated with that `CSGRegion`. This means that if one `CSGSurface` object is used in multiple `CSGRegion` objects, all regions with that surface may be affected by the transformation. If the intention is to apply a transformation to just one use case of the shared `CSGSurface`, then a clone of that surface should be made prior to applying the transformation.
 
 !alert-end!
 
