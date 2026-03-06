@@ -10,6 +10,7 @@
 #include "LinearWCNSFVMomentumFlux.h"
 #include "MooseLinearVariableFV.h"
 #include "NSFVUtils.h"
+#include "MathFVUtils.h"
 #include "NS.h"
 #include "RhieChowMassFlux.h"
 #include "LinearFVBoundaryCondition.h"
@@ -41,7 +42,16 @@ LinearWCNSFVMomentumFlux::validParams()
       "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addParam<bool>(
       "use_deviatoric_terms", false, "If deviatoric terms in the stress terms need to be used.");
-
+  params.addParam<bool>(
+      "use_two_point_stress_transmissibility",
+      false,
+      "Use two-point harmonic transmissibility for the stress term instead of a face-interpolated "
+      "gradient.");
+  MooseEnum coeff_interp_method("average harmonic", "average");
+  params.addParam<MooseEnum>(
+      "mu_interp_method",
+      coeff_interp_method,
+      "Switch that can select face interpolation method for the viscosity.");
   params += Moose::FV::advectedInterpolationParameter();
   return params;
 }
@@ -51,8 +61,12 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _dim(_subproblem.mesh().dimension()),
     _mass_flux_provider(getUserObject<RhieChowMassFlux>("rhie_chow_user_object")),
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
+    _mu_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
+    _use_two_point_stress_transmissibility(
+        getParam<bool>("use_two_point_stress_transmissibility")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
@@ -170,16 +184,19 @@ LinearWCNSFVMomentumFlux::computeInternalStressMatrixContribution()
   // If we don't have the value yet, we compute it
   if (!_cached_matrix_contribution)
   {
-    const auto face_arg = makeCDFace(*_current_face_info);
+    if (_use_two_point_stress_transmissibility)
+      _stress_matrix_contribution = stressTransmissibility(determineState());
+    else
+    {
+      // If we requested nonorthogonal correction, we use the normal component of the
+      // cell to face vector.
+      const auto d = _use_nonorthogonal_correction
+                         ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
+                         : _current_face_info->dCNMag();
 
-    // If we requested nonorthogonal correction, we use the normal component of the
-    // cell to face vector.
-    const auto d = _use_nonorthogonal_correction
-                       ? std::abs(_current_face_info->dCN() * _current_face_info->normal())
-                       : _current_face_info->dCNMag();
-
-    // Cache the matrix contribution
-    _stress_matrix_contribution = _mu(face_arg, determineState()) / d;
+      // Cache the matrix contribution
+      _stress_matrix_contribution = faceMu(determineState()) / d;
+    }
     _cached_matrix_contribution = true;
   }
 
@@ -195,12 +212,17 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
   // viscosities for example)
   if (!_cached_rhs_contribution)
   {
+    if (_use_two_point_stress_transmissibility)
+    {
+      _cached_rhs_contribution = true;
+      return _stress_rhs_contribution;
+    }
     // scenario (1), we need to add the nonorthogonal correction. In 1D, we don't have
     // any correction so we just skip this part
     if (_dim > 1 && _use_nonorthogonal_correction)
     {
-      const auto face_arg = makeCDFace(*_current_face_info);
       const auto state_arg = determineState();
+      const Real mu_face = faceMu(state_arg);
 
       // Get the gradients from the adjacent cells
       const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
@@ -217,7 +239,7 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
 
       // Cache the matrix contribution
       _stress_rhs_contribution +=
-          _mu(face_arg, state_arg) *
+          mu_face *
           (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
           correction_vector;
     }
@@ -244,8 +266,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
         trace_neighbor += grad_neighbor[dir](dir);
       }
 
-      const auto face_arg = makeCDFace(*_current_face_info);
       const auto state_arg = determineState();
+      const Real mu_face = faceMu(state_arg);
 
       if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
       {
@@ -271,7 +293,7 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
         deviatoric_vector_neighbor(dir) = grad_neighbor[dir](_index);
       }
 
-      _stress_rhs_contribution += _mu(face_arg, state_arg) *
+      _stress_rhs_contribution += mu_face *
                                   (interp_coeffs.first * deviatoric_vector_elem +
                                    interp_coeffs.second * deviatoric_vector_neighbor) *
                                   _current_face_info->normal();
@@ -291,8 +313,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryMatrixContribution(
   // add it here.
   if (!bc->includesMaterialPropertyMultiplier())
   {
-    const auto face_arg = singleSidedFaceArg(_current_face_info);
-    grad_contrib *= _mu(face_arg, determineState());
+    grad_contrib *= boundaryMu(determineState());
   }
 
   return grad_contrib;
@@ -302,12 +323,11 @@ Real
 LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
-  const auto face_arg = singleSidedFaceArg(_current_face_info);
   auto grad_contrib = bc->computeBoundaryGradientRHSContribution();
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!bc->includesMaterialPropertyMultiplier())
-    grad_contrib *= _mu(face_arg, determineState());
+    grad_contrib *= boundaryMu(determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
@@ -325,7 +345,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     const auto correction_vector =
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
-    grad_contrib += _mu(face_arg, determineState()) * _var.gradSln(*elem_info) *
+    grad_contrib += boundaryMu(determineState()) * _var.gradSln(*elem_info) *
                     _boundary_normal_factor * correction_vector;
   }
 
@@ -364,7 +384,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     }
 
     // We support internal boundaries too so we have to make sure the normal points always outward
-    grad_contrib += _mu(face_arg, state_arg) * deviatoric_vector_elem * _boundary_normal_factor *
+    grad_contrib += boundaryMu(state_arg) * deviatoric_vector_elem * _boundary_normal_factor *
                     _current_face_info->normal();
   }
 
@@ -402,12 +422,57 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  _advected_interp_coeffs = _mass_flux_provider.getAdvectedInterpolationCoeffs(
+      *_current_face_info,
+      _advected_interp_method,
+      _face_mass_flux,
+      /*apply_porosity_scaling=*/false);
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
   _stress_rhs_contribution = 0;
+}
+
+Real
+LinearWCNSFVMomentumFlux::faceMu(const Moose::StateArg & state) const
+{
+  const auto & fi = *_current_face_info;
+  const auto elem_arg = makeElemArg(fi.elemPtr());
+  const auto neighbor_arg = makeElemArg(fi.neighborPtr());
+
+  const Real mu_elem = _mu(elem_arg, state);
+  const Real mu_neighbor = _mu(neighbor_arg, state);
+
+  Real mu_face = 0.0;
+  Moose::FV::interpolate(_mu_interp_method, mu_face, mu_elem, mu_neighbor, fi, /*one_is_elem=*/true);
+  return mu_face;
+}
+
+Real
+LinearWCNSFVMomentumFlux::boundaryMu(const Moose::StateArg & state) const
+{
+  const auto face_arg = singleSidedFaceArg(_current_face_info);
+  return _mu(face_arg, state);
+}
+
+Real
+LinearWCNSFVMomentumFlux::stressTransmissibility(const Moose::StateArg & state) const
+{
+  const auto & fi = *_current_face_info;
+  const auto elem_arg = makeElemArg(fi.elemPtr());
+  const auto neighbor_arg = makeElemArg(fi.neighborPtr());
+
+  const Real k_elem = _mu(elem_arg, state);
+  const Real k_neighbor = _mu(neighbor_arg, state);
+  if (k_elem == 0.0 || k_neighbor == 0.0)
+    return 0.0;
+
+  const Real d_elem = (fi.faceCentroid() - fi.elemCentroid()).norm();
+  const Real d_neighbor = (fi.neighborCentroid() - fi.faceCentroid()).norm();
+  if (d_elem == 0.0 || d_neighbor == 0.0)
+    return 0.0;
+
+  return 1.0 / (d_elem / k_elem + d_neighbor / k_neighbor);
 }
 
 const MooseLinearVariableFVReal &
