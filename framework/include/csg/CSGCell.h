@@ -176,6 +176,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGCellTest, testSetName);
   FRIEND_TEST(CSGCellTest, testUpdateRegion);
+  FRIEND_TEST(CSGCellTest, testCellEquality);
   ///@}
 #endif
 };

@@ -156,6 +156,8 @@ CSGLattice::operator==(const CSGLattice & other) const
     return false;
   if (this->getType() != other.getType())
     return false;
+  if (this->getTransformations() != other.getTransformations())
+    return false;
   if (this->getOuterType() != other.getOuterType())
     return false;
   if ((this->getOuterType() == "CSG_MATERIAL") &&

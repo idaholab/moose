@@ -156,6 +156,7 @@ protected:
   FRIEND_TEST(CSGUniverseTest, testRemoveCell);
   FRIEND_TEST(CSGUniverseTest, testRemoveAllCells);
   FRIEND_TEST(CSGUniverseTest, testSetName);
+  FRIEND_TEST(CSGUniverseTest, testUniverseEquality);
   ///@}
 #endif
 };

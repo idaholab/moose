@@ -267,9 +267,13 @@ TEST(CSGSurfaceTest, testSurfaceEquality)
 
   // make spheres that differ from sphere1 by one characteristic and check
   // that each registers as not equal to sphere1
-  std::array<CSGSphere, 3> sphs{CSGSphere("new_name", radius),
+  std::array<CSGSphere, 4> sphs{CSGSphere("new_name", radius),
                                 CSGSphere("sphere_surf", 2.0),
-                                CSGSphere("sphere_surf", Point(1, 2, 3), radius)};
+                                CSGSphere("sphere_surf", Point(1, 2, 3), radius),
+                                CSGSphere("sphere_surf", radius)};
+  // add transformation to last sphere to differ by transformations as well
+  CSGSphere & sphere3 = sphs[3];
+  sphere3.addTransformation(TransformationType::TRANSLATION, {1.0, 0.0, 0.0});
   for (auto surf : sphs)
   {
     ASSERT_TRUE(sphere1 != surf);

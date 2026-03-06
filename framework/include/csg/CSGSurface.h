@@ -149,6 +149,7 @@ protected:
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testSetName);
+  FRIEND_TEST(CSGSurfaceTest, testSurfaceEquality);
   ///@}
 #endif
 };
