@@ -432,6 +432,7 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
  * Build a loop mesh of edges from the contiguous 2D boundary of 2D input mesh
  * Note: The lower-dimensional mesh will only have one subdomain.
  *       An error will be thrown if the mesh does not have the boundary.
+ * Note: currently, the boundary_id must be a nodeset!
  * @param input_mesh  The input mesh
  * @param boundary_id The boundary id
  */
