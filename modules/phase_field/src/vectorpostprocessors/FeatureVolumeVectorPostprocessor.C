@@ -38,7 +38,8 @@ FeatureVolumeVectorPostprocessor::validParams()
   params.addClassDescription("This object is designed to pull information from the data structures "
                              "of a \"FeatureFloodCount\" or derived object (e.g. individual "
                              "feature volumes)");
-
+  params.addRequiredCoupledVar("variable",
+                               "The name of the variable to integrate over each feature");
   params.suppressParameter<bool>("contains_complete_history");
 
   return params;
@@ -49,11 +50,13 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
   : GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(this),
     BoundaryRestrictable(this, false),
+    Coupleable(this, false),
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _output_centroids(getParam<bool>("output_centroids")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _var_num(declareVector("var_num")),
     _feature_volumes(declareVector("feature_volumes")),
+    _feature_variable_element_integral(declareVector("feature_variable_element_integral")),
     _intersects_bounds(declareVector("intersects_bounds")),
     _intersects_specified_bounds(declareVector("intersects_specified_bounds")),
     _percolated(declareVector("percolated")),
@@ -65,10 +68,10 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
     _qrule_face(_assembly.qRuleFace()),
-    _JxW_face(_assembly.JxWFace())
+    _JxW_face(_assembly.JxWFace()),
+    _variable_to_integrate(coupledValue("variable"))
 {
   addMooseVariableDependency(_vars);
-
   _is_boundary_restricted = boundaryRestricted();
 
   _coupled_sln.reserve(_vars.size());
@@ -126,6 +129,7 @@ FeatureVolumeVectorPostprocessor::execute()
 
   // Reset the volume vector
   _feature_volumes.assign(num_features, 0);
+  _feature_variable_element_integral.assign(num_features, 0);
 
   // Calculate coverage of a boundary if one has been supplied in the input file
   if (_is_boundary_restricted)
@@ -178,6 +182,7 @@ FeatureVolumeVectorPostprocessor::finalize()
 {
   // Do the parallel sum
   _communicator.sum(_feature_volumes);
+  _communicator.sum(_feature_variable_element_integral);
 }
 
 Real
@@ -203,7 +208,9 @@ FeatureVolumeVectorPostprocessor::accumulateVolumes(
     {
       auto feature_id = var_to_features[var_index];
       mooseAssert(feature_id < num_features, "Feature ID out of range");
-      auto integral_value = computeIntegral(var_index);
+
+      auto integral_value = computeIntegral(var_index, elem, nullptr);
+      auto variable_integral_value = computeIntegral(var_index, elem, &_variable_to_integrate);
 
       // Compute volumes in a simplistic but domain conservative fashion
       if (_single_feature_per_elem)
@@ -217,22 +224,61 @@ FeatureVolumeVectorPostprocessor::accumulateVolumes(
       }
       // Solution based volume calculation (integral value)
       else
+      {
         _feature_volumes[feature_id] += integral_value;
+        _feature_variable_element_integral[feature_id] += variable_integral_value;
+      }
     }
   }
 
   // Accumulate the entire element volume into the dominant feature. Do not use the integral value
   if (_single_feature_per_elem && dominant_feature_id != FeatureFloodCount::invalid_id)
-    _feature_volumes[dominant_feature_id] += _assembly.elementVolume(elem);
+  {
+    _feature_volumes[dominant_feature_id] += elem->volume();
+    _feature_variable_element_integral[dominant_feature_id] +=
+        elem->volume() * _variable_to_integrate[0];
+  }
 }
 
 Real
-FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t var_index) const
+FeatureVolumeVectorPostprocessor::computeIntegral(std::size_t var_index,
+                                                  const Elem * elem,
+                                                  const MooseArray<Real> * var_to_integrate) const
 {
-  Real sum = 0;
+  const auto & var_data = (*_coupled_sln[var_index]);
+  const Real threshold = _feature_counter.getThreshold(var_index);
 
-  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    sum += _JxW[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
+  // 1. Lower-Dimensional Fallback
+  if (elem->dim() < _mesh.dimension())
+  {
+    if (var_data.size() == 0)
+      return 0.0;
+
+    const bool is_selected = _feature_counter.compareValueWithThreshold(var_data[0], threshold);
+    if (!is_selected)
+      return 0.0;
+
+    // FALLBACK: if var_to_integrate is nullptr, multiplier defaults to 1.0 (returns pure volume)
+    Real multiplier =
+        (var_to_integrate && var_to_integrate->size() > 0) ? (*var_to_integrate)[0] : 1.0;
+    return elem->volume() * multiplier;
+  }
+
+  // 2. Standard 3D Integration
+  Real sum = 0.0;
+  const unsigned int n_qp = _qrule->n_points();
+
+  for (unsigned int qp = 0; qp < n_qp; ++qp)
+  {
+    const bool is_selected = _feature_counter.compareValueWithThreshold(var_data[qp], threshold);
+    if (is_selected)
+    {
+      // VOLUME MODE: If pointer is nullptr, value defaults to 1.0
+      Real value =
+          (var_to_integrate && qp < var_to_integrate->size()) ? (*var_to_integrate)[qp] : 1.0;
+      sum += _JxW[qp] * _coord[qp] * value;
+    }
+  }
 
   return sum;
 }
@@ -254,7 +300,8 @@ FeatureVolumeVectorPostprocessor::accumulateBoundaryFaces(
     {
       auto feature_id = var_to_features[var_index];
       mooseAssert(feature_id < num_features, "Feature ID out of range");
-      auto integral_value = computeFaceIntegral(var_index);
+      auto integral_value = computeFaceIntegral(var_index, nullptr);
+      auto variable_integral_value = computeFaceIntegral(var_index, &_variable_to_integrate);
 
       if (_single_feature_per_elem)
       {
@@ -267,7 +314,10 @@ FeatureVolumeVectorPostprocessor::accumulateBoundaryFaces(
       }
       // Solution based boundary area/length calculation (integral value)
       else
+      {
         _feature_volumes[feature_id] += integral_value;
+        _feature_variable_element_integral[feature_id] += variable_integral_value;
+      }
     }
   }
 
@@ -275,16 +325,33 @@ FeatureVolumeVectorPostprocessor::accumulateBoundaryFaces(
   if (_single_feature_per_elem && dominant_feature_id != FeatureFloodCount::invalid_id)
   {
     std::unique_ptr<const Elem> side_elem = elem->build_side_ptr(side);
-    _feature_volumes[dominant_feature_id] += _assembly.elementVolume(side_elem.get());
+    _feature_volumes[dominant_feature_id] += side_elem->volume();
+    _feature_variable_element_integral[dominant_feature_id] +=
+        side_elem->volume() * _variable_to_integrate[0];
   }
 }
 
 Real
-FeatureVolumeVectorPostprocessor::computeFaceIntegral(std::size_t var_index) const
+FeatureVolumeVectorPostprocessor::computeFaceIntegral(
+    std::size_t var_index, const MooseArray<Real> * var_to_integrate) const
 {
-  Real sum = 0;
-  for (unsigned int qp = 0; qp < _qrule_face->n_points(); ++qp)
-    sum += _JxW_face[qp] * _coord[qp] * (*_coupled_sln[var_index])[qp];
+  const auto & var_data = (*_coupled_sln[var_index]);
+  const Real threshold = _feature_counter.getThreshold(var_index);
+
+  Real sum = 0.0;
+  const unsigned int n_qp = _qrule_face->n_points();
+
+  for (unsigned int qp = 0; qp < n_qp; ++qp)
+  {
+    const bool is_selected = _feature_counter.compareValueWithThreshold(var_data[qp], threshold);
+    if (is_selected)
+    {
+      // If pointer is nullptr, multiplier is 1.0
+      Real val =
+          (var_to_integrate && qp < var_to_integrate->size()) ? (*var_to_integrate)[qp] : 1.0;
+      sum += _JxW_face[qp] * _coord[qp] * val;
+    }
+  }
 
   return sum;
 }
