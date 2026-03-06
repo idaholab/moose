@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", NEML2BatchIndexGenerator);
 InputParameters
 NEML2BatchIndexGenerator::validParams()
 {
-  auto params = ElementUserObject::validParams();
+  auto params = DomainUserObject::validParams();
   params.addClassDescription("Generates the element to batch index map for MOOSEToNEML2 gatherers, "
                              "NEML2ToMOOSE retrievers, and the NEML2 executor");
 
@@ -24,20 +24,14 @@ NEML2BatchIndexGenerator::validParams()
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-  params.set<ExecFlagEnum>("execute_on") = execute_options;
+  params.template set<ExecFlagEnum>("execute_on") = execute_options;
 
   return params;
 }
 
 NEML2BatchIndexGenerator::NEML2BatchIndexGenerator(const InputParameters & params)
-  : ElementUserObject(params), _outdated(true)
+  : DomainUserObject(params), _outdated(true)
 {
-}
-
-void
-NEML2BatchIndexGenerator::meshChanged()
-{
-  _outdated = true;
 }
 
 void
@@ -50,12 +44,16 @@ NEML2BatchIndexGenerator::initialize()
     return;
 
   _elem_to_batch_index.clear();
+  _face_to_batch_index.clear();
+
   _elem_to_batch_index_cache = {libMesh::invalid_uint, 0};
+  _face_to_batch_index_cache = {{libMesh::invalid_uint, 0}, 0};
+
   _batch_index = 0;
 }
 
 void
-NEML2BatchIndexGenerator::execute()
+NEML2BatchIndexGenerator::executeOnElement()
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
@@ -64,7 +62,47 @@ NEML2BatchIndexGenerator::execute()
     return;
 
   _elem_to_batch_index[_current_elem->id()] = _batch_index;
-  _batch_index += _qrule->n_points();
+  _batch_index += qRule().n_points();
+
+  std::cout << "executeOnElement: " << _current_elem->id() << " -> " << _batch_index << std::endl;
+}
+
+void
+NEML2BatchIndexGenerator::executeOnBoundary()
+{
+  if (!NEML2Utils::shouldCompute(_fe_problem))
+    return;
+
+  if (!_outdated)
+    return;
+
+  _face_to_batch_index[{_current_elem->id(), _current_side}] = _batch_index;
+  _batch_index += qRule().n_points();
+
+  std::cout << "executeOnBoundary: " << _current_elem->id() << " side " << _current_side << " -> "
+            << _batch_index << std::endl;
+}
+
+void
+NEML2BatchIndexGenerator::executeOnInterface()
+{
+  if (!NEML2Utils::shouldCompute(_fe_problem))
+    return;
+
+  if (!_outdated)
+    return;
+
+  if (_face_to_batch_index.find({_current_elem->id(), _current_side}) != _face_to_batch_index.end())
+    mooseError("Batch index for element id ",
+               _current_elem->id(),
+               " and side ",
+               _current_side,
+               " already exists");
+  _face_to_batch_index[{_current_elem->id(), _current_side}] = _batch_index;
+  _batch_index += qRule().n_points();
+
+  std::cout << "executeOnInterface: " << _current_elem->id() << " side " << _current_side << " -> "
+            << _batch_index << std::endl;
 }
 
 void
@@ -79,8 +117,11 @@ NEML2BatchIndexGenerator::threadJoin(const UserObject & uo)
   const auto & m2n = static_cast<const NEML2BatchIndexGenerator &>(uo);
 
   // append and renumber maps
-  for (const auto & [elem_id, batch_index] : m2n._elem_to_batch_index)
-    _elem_to_batch_index[elem_id] = _batch_index + batch_index;
+  for (const auto & [key, batch_index] : m2n._elem_to_batch_index)
+    _elem_to_batch_index[key] = _batch_index + batch_index;
+
+  for (const auto & [key, batch_index] : m2n._face_to_batch_index)
+    _face_to_batch_index[key] = _batch_index + batch_index;
 
   _batch_index += m2n._batch_index;
 }
@@ -91,17 +132,55 @@ NEML2BatchIndexGenerator::finalize()
   _outdated = false;
 }
 
+void
+NEML2BatchIndexGenerator::meshChanged()
+{
+  _outdated = true;
+}
+
+template <typename T>
+static std::size_t
+getBatchIndexImpl(const T & key,
+                  const std::map<T, std::size_t> & map,
+                  std::pair<T, std::size_t> & cache)
+{
+  // return cached map lookup if applicable
+  if (cache.first == key)
+    return cache.second;
+
+  // else, search the map
+  const auto it = map.find(key);
+  if (it == map.end())
+  {
+    if constexpr (std::is_same_v<T, dof_id_type>)
+      mooseError("No batch index found for element id ", key);
+    else
+      mooseError("No batch index found for element id ", key.first, " and side ", key.second);
+  }
+  cache = *it;
+  return it->second;
+}
+
 std::size_t
 NEML2BatchIndexGenerator::getBatchIndex(dof_id_type elem_id) const
 {
-  // return cached map lookup if applicable
-  if (_elem_to_batch_index_cache.first == elem_id)
-    return _elem_to_batch_index_cache.second;
+  return getBatchIndexImpl(elem_id, _elem_to_batch_index, _elem_to_batch_index_cache);
+}
 
-  // else, search the map
-  const auto it = _elem_to_batch_index.find(elem_id);
-  if (it == _elem_to_batch_index.end())
-    mooseError("No batch index found for element id ", elem_id);
-  _elem_to_batch_index_cache = *it;
-  return it->second;
+std::size_t
+NEML2BatchIndexGenerator::getBatchIndex(dof_id_type elem_id, unsigned int side) const
+{
+  return getBatchIndexImpl({elem_id, side}, _face_to_batch_index, _face_to_batch_index_cache);
+}
+
+bool
+NEML2BatchIndexGenerator::hasBatchIndex(dof_id_type elem_id) const
+{
+  return _elem_to_batch_index.find(elem_id) != _elem_to_batch_index.end();
+}
+
+bool
+NEML2BatchIndexGenerator::hasBatchIndex(dof_id_type elem_id, unsigned int side) const
+{
+  return _face_to_batch_index.find({elem_id, side}) != _face_to_batch_index.end();
 }

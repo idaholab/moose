@@ -10,8 +10,8 @@
 #include "NEML2ToMOOSEMaterialProperty.h"
 #include "NEML2ModelExecutor.h"
 
-#define registerNEML2ToMOOSEMaterialProperty(alias)                                                \
-  registerMooseObject("MooseApp", NEML2ToMOOSE##alias##MaterialProperty)
+#define registerNEML2ToMOOSEMaterialProperty(T)                                                    \
+  registerMooseObject("MooseApp", NEML2ToMOOSE##T##MaterialProperty)
 
 registerNEML2ToMOOSEMaterialProperty(Real);
 registerNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
@@ -37,7 +37,6 @@ NEML2ToMOOSEMaterialProperty<T>::validParams()
   params.addRequiredParam<std::string>("from_neml2", "NEML2 output variable to read from");
   params.addParam<std::string>(
       "neml2_input_derivative",
-
       "If supplied return the derivative of the NEML2 output variable with respect to this");
   params.addParam<std::string>(
       "neml2_parameter_derivative",
@@ -57,7 +56,7 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
 #ifdef NEML2_ENABLED
     ,
     _execute_neml2_model(getUserObject<NEML2ModelExecutor>("neml2_executor")),
-    _prop(declareProperty<T>(getParam<MaterialPropertyName>("to_moose"))),
+    _prop(declarePropertyByName<T>(getParam<MaterialPropertyName>("to_moose"))),
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")
                : nullptr),
@@ -93,10 +92,40 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   if (!_execute_neml2_model.outputReady())
     return;
 
-  // look up start index for current element
-  const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
+  const auto & idx_gen = _execute_neml2_model.getBatchIndexGenerator();
+
+  // Element qp offset
+  if (!isBoundaryMaterial())
+    _batch_idx = idx_gen.getBatchIndex(_current_elem->id());
+  // Face qp offset
+  else
+  {
+    // Face material loops over all sides, but we only generated batch indices for element sides on
+    // the restricted boundaries. So we need to check if the batch index exists before using it.
+    if (!idx_gen.hasBatchIndex(_current_elem->id(), _current_side))
+      return;
+    _batch_idx = idx_gen.getBatchIndex(_current_elem->id(), _current_side);
+  }
+
+  // Copy data for each qp
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
+  {
+    computeQpProperties();
+    _batch_idx++;
+  }
+}
+
+template <typename T>
+void
+NEML2ToMOOSEMaterialProperty<T>::computeQpProperties()
+{
+  NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(_batch_idx)}), _prop[_qp]);
+}
+#else
+template <typename T>
+void
+NEML2ToMOOSEMaterialProperty<T>::computeQpProperties()
+{
 }
 #endif
 

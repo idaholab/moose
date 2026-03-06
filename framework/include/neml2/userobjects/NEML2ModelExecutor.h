@@ -43,7 +43,7 @@ public:
   void initialSetup() override;
 
   /// Get the batch index for the given element ID
-  std::size_t getBatchIndex(dof_id_type elem_id) const;
+  const NEML2BatchIndexGenerator & getBatchIndexGenerator() const;
 
   /// Get a reference(!) to the requested output view
   const neml2::Tensor & getOutput(const neml2::VariableName & output_name) const;
@@ -61,40 +61,40 @@ public:
 
 protected:
   /// Register a NEML2 input variable gathered by a gatherer
-  virtual void addGatheredVariable(const UserObjectName &, const neml2::VariableName &);
+  void addGatheredVariable(const UserObjectName &, const neml2::VariableName &);
 
   /// Register a NEML2 model parameter gathered by a gatherer
-  virtual void addGatheredParameter(const UserObjectName &, const std::string &);
+  void addGatheredParameter(const UserObjectName &, const std::string &);
 
   /// Prevent output and derivative retrieval after construction
-  virtual void checkExecutionStage() const final;
+  void checkExecutionStage() const;
 
   /// Fill input variables and model parameters using the gatherers
-  virtual void fillInputs();
+  void fillInputs();
 
   /// Apply the predictor to set current trial state
-  virtual void applyPredictor();
+  void applyPredictor();
 
   /// Perform the material update
-  virtual bool solve();
+  bool solve();
 
   /// Extract output derivatives with respect to input variables and model parameters
-  virtual void extractOutputs();
+  void extractOutputs();
 
   /// Expand tensor shapes if necessary to conformal sizes
-  virtual void expandInputs();
+  void expandInputs();
 
   /// Update cached inputs/outputs for on-device state advance
   void advanceDeviceCaches();
-
-  /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
-  const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// Advance state on device (rather than via MOSOE material properties)
   const bool _keep_tensors_on_device;
 
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;
+
+  /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
+  const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;

@@ -9,9 +9,9 @@
 
 #include "MOOSEMaterialPropertyToNEML2.h"
 
-#define registerMOOSEMaterialPropertyToNEML2(alias)                                                \
-  registerMooseObject("MooseApp", MOOSE##alias##MaterialPropertyToNEML2);                          \
-  registerMooseObject("MooseApp", MOOSEOld##alias##MaterialPropertyToNEML2)
+#define registerMOOSEMaterialPropertyToNEML2(T)                                                    \
+  registerMooseObject("MooseApp", MOOSE##T##MaterialPropertyToNEML2);                              \
+  registerMooseObject("MooseApp", MOOSEOld##T##MaterialPropertyToNEML2)
 
 registerMOOSEMaterialPropertyToNEML2(Real);
 registerMOOSEMaterialPropertyToNEML2(RankTwoTensor);
@@ -39,6 +39,13 @@ MOOSEMaterialPropertyToNEML2<T, state>::MOOSEMaterialPropertyToNEML2(const Input
     _mat_prop(this->template getGenericMaterialProperty<T, false>("from_moose", state))
 #endif
 {
+}
+
+template <typename T, unsigned int state>
+const MooseArray<T> &
+MOOSEMaterialPropertyToNEML2<T, state>::currentMOOSEData() const
+{
+  return _mat_prop.get();
 }
 
 #define instantiateMOOSEMaterialPropertyToNEML2(T)                                                 \

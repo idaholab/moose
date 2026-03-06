@@ -33,6 +33,7 @@ public:
 
 protected:
   void initQpStatefulProperties() override {}
+  void computeQpProperties() override;
 
   /// User object managing the execution of the NEML2 model
   const NEML2ModelExecutor & _execute_neml2_model;
@@ -45,15 +46,20 @@ protected:
 
   /// Reference to the requested output (or its derivative) value
   const neml2::Tensor & _value;
+
+  /// Batch index offset
+  std::size_t _batch_idx;
 #endif
 };
 
-#define DefineNEML2ToMOOSEMaterialPropertyAlias(T, alias)                                          \
-  using NEML2ToMOOSE##alias##MaterialProperty = NEML2ToMOOSEMaterialProperty<T>
+#define DefineNEML2ToMOOSEMaterialProperty(T)                                                      \
+  using NEML2ToMOOSE##T##MaterialProperty = NEML2ToMOOSEMaterialProperty<T>
 
-DefineNEML2ToMOOSEMaterialPropertyAlias(Real, Real);
-DefineNEML2ToMOOSEMaterialPropertyAlias(SymmetricRankTwoTensor, SymmetricRankTwoTensor);
-DefineNEML2ToMOOSEMaterialPropertyAlias(SymmetricRankFourTensor, SymmetricRankFourTensor);
-DefineNEML2ToMOOSEMaterialPropertyAlias(RealVectorValue, RealVectorValue);
-DefineNEML2ToMOOSEMaterialPropertyAlias(RankTwoTensor, RankTwoTensor);
-DefineNEML2ToMOOSEMaterialPropertyAlias(RankFourTensor, RankFourTensor);
+DefineNEML2ToMOOSEMaterialProperty(Real);
+DefineNEML2ToMOOSEMaterialProperty(SymmetricRankTwoTensor);
+DefineNEML2ToMOOSEMaterialProperty(SymmetricRankFourTensor);
+DefineNEML2ToMOOSEMaterialProperty(RealVectorValue);
+DefineNEML2ToMOOSEMaterialProperty(RankTwoTensor);
+DefineNEML2ToMOOSEMaterialProperty(RankFourTensor);
+
+#undef DefineNEML2ToMOOSEMaterialProperty

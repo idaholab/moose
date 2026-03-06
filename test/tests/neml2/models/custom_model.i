@@ -33,6 +33,9 @@
     p2 = 5
     ad = false
   []
+  [interface_source]
+    type = NEML2TestModel2
+  []
 []
 
 [Schedulers]
