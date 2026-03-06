@@ -782,7 +782,7 @@ TEST(CSGBaseTest, testGetLatticeMethods)
 }
 
 /**
- * CSGBase::applyTransformation methods
+ * CSGBase::addTransformation methods
  */
 
 /// Helper function to create a CSGBase object and various CSG objects for transformation tests
@@ -994,7 +994,7 @@ TEST(CSGBaseTest, testApplyScaling)
 }
 
 /// tests errors are properly raised in CSGBase::ApplyTransromation methods
-TEST(CSGBaseTest, testApplyTransformationErrors)
+TEST(CSGBaseTest, testAddTransformationErrors)
 {
   // Setup objects for testing
   std::unique_ptr<CSGBase> csg_obj;
@@ -1038,7 +1038,7 @@ TEST(CSGBaseTest, testApplyTransformationErrors)
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &surf]()
         {
-          csg_obj->applyTransformation(
+          csg_obj->addTransformation(
               *surf, TransformationType::SCALE, std::make_tuple(0.0, 0.0, 0.0));
         },
         "Invalid transformation values provided for transformation type ");

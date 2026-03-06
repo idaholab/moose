@@ -480,9 +480,9 @@ public:
    * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
    * @param values tuple of transformation values (3 values for any transformation type)
    */
-  void applyTransformation(const CSGObjectVariant & csg_object,
-                           TransformationType type,
-                           const std::tuple<Real, Real, Real> & values);
+  void addTransformation(const CSGObjectVariant & csg_object,
+                         TransformationType type,
+                         const std::tuple<Real, Real, Real> & values);
 
   /**
    * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
@@ -493,7 +493,7 @@ public:
   void applyTranslation(const CSGObjectVariant & csg_object,
                         const std::tuple<Real, Real, Real> & distances)
   {
-    applyTransformation(csg_object, TransformationType::TRANSLATION, distances);
+    addTransformation(csg_object, TransformationType::TRANSLATION, distances);
   }
 
   /**
@@ -505,7 +505,7 @@ public:
   void applyRotation(const CSGObjectVariant & csg_object,
                      const std::tuple<Real, Real, Real> & angles)
   {
-    applyTransformation(csg_object, TransformationType::ROTATION, angles);
+    addTransformation(csg_object, TransformationType::ROTATION, angles);
   }
 
   /**
@@ -526,7 +526,7 @@ public:
   void applyScaling(const CSGObjectVariant & csg_object,
                     const std::tuple<Real, Real, Real> & values)
   {
-    applyTransformation(csg_object, TransformationType::SCALE, values);
+    addTransformation(csg_object, TransformationType::SCALE, values);
   }
 
 private:

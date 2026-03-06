@@ -144,8 +144,8 @@ protected:
   // it needs to be called from CSGBase so that the surfaces can be checked first.
   void updateRegion(const CSGRegion & region) { _region = region; }
 
-  /// Apply a transformation to the cell (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+  /// add a transformation to the cell (accessed through CSGBase)
+  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of surface
   std::string _name;

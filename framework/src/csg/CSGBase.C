@@ -365,9 +365,9 @@ CSGBase::setLatticeUniverses(
 }
 
 void
-CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
-                             TransformationType type,
-                             const std::tuple<Real, Real, Real> & values)
+CSGBase::addTransformation(const CSGObjectVariant & csg_object,
+                           TransformationType type,
+                           const std::tuple<Real, Real, Real> & values)
 {
   // Validate the transformation values
   if (!isValidTransformationValue(type, values))
@@ -393,7 +393,7 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
           // Get non-const reference and apply transformation
           CSGCell & mutable_cell = _cell_list.getCell(cell.getName());
           mooseAssert(mutable_cell == cell, "Mutable cell does not match const cell passed in.");
-          mutable_cell.applyTransformation(type, values);
+          mutable_cell.addTransformation(type, values);
         }
         else if constexpr (std::is_same_v<T, CSGSurface>)
         {
@@ -407,7 +407,7 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
           CSGSurface & mutable_surface = _surface_list.getSurface(surface.getName());
           mooseAssert(mutable_surface == surface,
                       "Mutable surface does not match const surface passed in.");
-          mutable_surface.applyTransformation(type, values);
+          mutable_surface.addTransformation(type, values);
         }
         else if constexpr (std::is_same_v<T, CSGUniverse>)
         {
@@ -421,7 +421,7 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
           CSGUniverse & mutable_universe = _universe_list.getUniverse(universe.getName());
           mooseAssert(mutable_universe == universe,
                       "Mutable universe does not match const universe passed in.");
-          mutable_universe.applyTransformation(type, values);
+          mutable_universe.addTransformation(type, values);
         }
         else if constexpr (std::is_same_v<T, CSGLattice>)
         {
@@ -435,7 +435,7 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
           CSGLattice & mutable_lattice = _lattice_list.getLattice(lattice.getName());
           mooseAssert(mutable_lattice == lattice,
                       "Mutable lattice does not match const lattice passed in.");
-          mutable_lattice.applyTransformation(type, values);
+          mutable_lattice.addTransformation(type, values);
         }
         else if constexpr (std::is_same_v<T, CSGRegion>)
         {
@@ -448,7 +448,7 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
               mooseError("Cannot apply transformation to region with surface ",
                          surface.getName(),
                          " that is not in this CSGBase instance.");
-            applyTransformation(surface, type, values);
+            addTransformation(surface, type, values);
           }
         }
         else
@@ -481,7 +481,7 @@ CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis
   else
     mooseError("Invalid axis '", axis, "' provided for axis rotation. Must be 'x', 'y', or 'z'.");
 
-  applyTransformation(csg_object, TransformationType::ROTATION, std::make_tuple(phi, theta, psi));
+  addTransformation(csg_object, TransformationType::ROTATION, std::make_tuple(phi, theta, psi));
 }
 
 void

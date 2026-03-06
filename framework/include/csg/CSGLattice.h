@@ -227,7 +227,7 @@ protected:
   void updateOuter(const CSGUniverse & outer_universe);
 
   /// Apply a transformation to the lattice (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of lattice
   std::string _name;

@@ -127,8 +127,8 @@ protected:
   // name needs to be managed at the CSGUniverseList level
   void setName(const std::string & name) { _name = name; }
 
-  /// Apply a transformation to the universe (accessed through CSGBase)
-  void applyTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+  /// Add a transformation to the universe (accessed through CSGBase)
+  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
   /// Name of universe
   std::string _name;
