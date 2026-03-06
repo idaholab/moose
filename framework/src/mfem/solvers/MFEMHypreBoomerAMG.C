@@ -74,6 +74,19 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
 
     _solver.reset(lor_solver);
   }
+  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
+  {
+    auto solver = new mfem::HypreBoomerAMG(*a.ParallelAssemble());
+    solver->SetTol(getParam<mfem::real_t>("l_tol"));
+    solver->SetMaxIter(getParam<int>("l_max_its"));
+    solver->SetPrintLevel(getParam<int>("print_level"));
+    solver->SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
+
+    if (_mfem_fespace && !mfem::HypreUsingGPU())
+      solver->SetElasticityOptions(_mfem_fespace.get());
+
+    _solver.reset(solver);
+  }
 }
 
 #endif

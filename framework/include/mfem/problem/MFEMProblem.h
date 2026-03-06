@@ -86,9 +86,9 @@ public:
    * Override of ExternalProblem::addVariable. Sets a
    * MFEM grid function (and time derivative, for transient problems) to be used in the MFEM solve.
    */
-  void addVariable(const std::string & var_type,
-                   const std::string & var_name,
-                   InputParameters & parameters) override;
+  virtual void addVariable(const std::string & var_type,
+                           const std::string & var_name,
+                           InputParameters & parameters) override;
 
   /**
    * Adds one MFEM GridFunction to be used in the MFEM solve.
@@ -184,9 +184,9 @@ public:
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
    */
-  void addMFEMSolver(const std::string & user_object_name,
-                     const std::string & name,
-                     InputParameters & parameters);
+  virtual void addMFEMSolver(const std::string & user_object_name,
+                             const std::string & name,
+                             InputParameters & parameters);
 
   /**
    * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
