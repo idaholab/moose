@@ -2,3 +2,4 @@ app_name = thermal_hydraulics
 allow_warnings = false
 allow_unused = false
 allow_override = false
+known_capabilities = "airapp"
