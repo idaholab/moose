@@ -35,7 +35,7 @@ Assembly::init()
 {
   // Cache mesh information
 
-  const auto num_subdomains = _mesh.nSubdomains();
+  const auto num_subdomains = kokkosMesh().getNumSubdomains();
 
   _coord_type.create(num_subdomains);
 
@@ -408,8 +408,8 @@ Assembly::initShape()
 void
 Assembly::cachePhysicalMap()
 {
-  const auto num_subdomains = _mesh.nSubdomains();
-  const auto num_elems = _mesh.nActiveLocalElem();
+  const auto num_subdomains = kokkosMesh().getNumSubdomains();
+  const auto num_elems = kokkosMesh().getNumLocalElements();
 
   _jacobian.create(num_subdomains);
   _jxw.create(num_subdomains);

@@ -50,7 +50,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
-  _var_subdomain_active.create(_num_vars, _mesh.nSubdomains());
+  _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
@@ -473,10 +473,10 @@ System::reinit()
   for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.nSubdomains(), _num_vars);
+      _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.nSubdomains(), _num_vars);
+      _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
