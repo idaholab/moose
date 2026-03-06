@@ -13,6 +13,7 @@
 #include "LinearSystem.h"
 #include "PetscVectorReader.h"
 #include "FEProblemBase.h"
+#include "FVUtils.h"
 
 #include "libmesh/dof_object.h"
 
@@ -85,6 +86,11 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
     grad_reader.reserve(raw_grad_container.size());
     for (const auto dim_index : index_range(raw_grad_container))
       grad_reader.emplace_back(*raw_grad_container[dim_index]);
+
+    mooseAssert(raw_grad_container.size() >= _dim,
+                "Raw gradient container has fewer components than mesh dimension.");
+    mooseAssert(_new_limited_gradient.size() >= _dim,
+                "Limited gradient container has fewer components than mesh dimension.");
 
     auto elem_iterator = range.begin();
     for (const auto elem_i : make_range(size))
@@ -159,11 +165,18 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
         if (neighbor_dof == libMesh::DofObject::invalid_id)
           continue;
 
-        Point face_point;
-        if (const auto * const fi = _fe_problem.mesh().faceInfo(elem, side))
-          face_point = fi->faceCentroid() - fi->skewnessCorrectionVector();
-        else
-          face_point = 0.5 * (elem_centroid + neighbor_info.centroid());
+        const bool elem_has_face_info = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+        const Elem * const fi_elem = elem_has_face_info ? elem : neighbor;
+        const unsigned int fi_side =
+            elem_has_face_info ? side : neighbor->which_neighbor_am_i(elem);
+        const auto * fi = _fe_problem.mesh().faceInfo(fi_elem, fi_side);
+        mooseAssert(fi,
+                    "Missing FaceInfo for neighboring elements with centroid " +
+                        Moose::stringify(elem->centroid()) + " and " +
+                        Moose::stringify(neighbor->centroid()) +
+                        " while computing limited gradients.");
+
+        const Point face_point = fi->faceCentroid() - fi->skewnessCorrectionVector();
 
         const Real delta_face = raw_grad * (face_point - elem_centroid);
 

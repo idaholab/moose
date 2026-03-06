@@ -24,19 +24,13 @@ FVAdvectedUpwind::FVAdvectedUpwind(const InputParameters & params) : FVInterpola
 }
 
 FVInterpolationMethod::AdvectedSystemContribution
-FVAdvectedUpwind::advectedInterpolate(const FaceInfo & face,
-                                      Real elem_value,
-                                      Real neighbor_value,
-                                      const VectorValue<Real> * elem_grad,
-                                      const VectorValue<Real> * neighbor_grad,
+FVAdvectedUpwind::advectedInterpolate(const FaceInfo & /*face*/,
+                                      Real /*elem_value*/,
+                                      Real /*neighbor_value*/,
+                                      const VectorValue<Real> * /*elem_grad*/,
+                                      const VectorValue<Real> * /*neighbor_grad*/,
                                       Real mass_flux) const
 {
-  (void)face;
-  (void)elem_value;
-  (void)neighbor_value;
-  (void)elem_grad;
-  (void)neighbor_grad;
-
   AdvectedSystemContribution result;
   // Branchless upwind selection to keep interpolation SIMD/GPU friendly
   const Real neighbor_weight = mass_flux < 0.0;
@@ -45,14 +39,12 @@ FVAdvectedUpwind::advectedInterpolate(const FaceInfo & face,
 }
 
 Real
-FVAdvectedUpwind::advectedInterpolateValue(const FaceInfo & face,
+FVAdvectedUpwind::advectedInterpolateValue(const FaceInfo & /*face*/,
                                            Real elem_value,
                                            Real neighbor_value,
-                                           const VectorValue<Real> * elem_grad,
-                                           const VectorValue<Real> * neighbor_grad,
+                                           const VectorValue<Real> * /*elem_grad*/,
+                                           const VectorValue<Real> * /*neighbor_grad*/,
                                            Real mass_flux) const
 {
-  const auto result =
-      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
+  return mass_flux < 0.0 ? neighbor_value : elem_value;
 }

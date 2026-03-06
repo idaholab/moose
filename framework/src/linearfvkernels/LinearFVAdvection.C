@@ -64,25 +64,24 @@ LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
     return;
 
   const auto state = determineState();
-  const Real elem_value = _var.getElemValue(*_current_face_info->elemInfo(), state);
-  const Real neighbor_value = _var.getElemValue(*_current_face_info->neighborInfo(), state);
+  const auto & elem_info = *_current_face_info->elemInfo();
+  const auto & neighbor_info = *_current_face_info->neighborInfo();
 
-  VectorValue<Real> elem_grad_storage;
-  VectorValue<Real> neighbor_grad_storage;
-  const VectorValue<Real> * elem_grad = nullptr;
-  const VectorValue<Real> * neighbor_grad = nullptr;
-
+  const Real elem_value = _var.getElemValue(elem_info, state);
+  const Real neighbor_value = _var.getElemValue(neighbor_info, state);
   if (_adv_interp_method->advectedInterpolationNeedsGradients())
   {
     const auto limiter_type = _adv_interp_method->gradientLimiter();
-    elem_grad_storage = _var.gradSln(*_current_face_info->elemInfo(), limiter_type);
-    elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = _var.gradSln(*_current_face_info->neighborInfo(), limiter_type);
-    neighbor_grad = &neighbor_grad_storage;
+    _elem_grad_storage = _var.gradSln(elem_info, limiter_type);
+    _neighbor_grad_storage = _var.gradSln(neighbor_info, limiter_type);
   }
 
-  _adv_interp_result = _adv_interp_method->advectedInterpolate(
-      *_current_face_info, elem_value, neighbor_value, elem_grad, neighbor_grad, _adv_face_flux);
+  _adv_interp_result = _adv_interp_method->advectedInterpolate(*_current_face_info,
+                                                               elem_value,
+                                                               neighbor_value,
+                                                               &_elem_grad_storage,
+                                                               &_neighbor_grad_storage,
+                                                               _adv_face_flux);
 }
 
 void
@@ -97,14 +96,14 @@ LinearFVAdvection::initialSetup()
 Real
 LinearFVAdvection::computeElemMatrixContribution()
 {
-  const auto coeffs = _adv_interp_result.weights_matrix;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
   return coeffs.first * _adv_face_flux * _current_face_area;
 }
 
 Real
 LinearFVAdvection::computeNeighborMatrixContribution()
 {
-  const auto coeffs = _adv_interp_result.weights_matrix;
+  const auto & coeffs = _adv_interp_result.weights_matrix;
   return coeffs.second * _adv_face_flux * _current_face_area;
 }
 
@@ -131,8 +130,7 @@ LinearFVAdvection::computeBoundaryMatrixContribution(const LinearFVBoundaryCondi
   // We support internal boundaries too so we have to make sure the normal points always outward
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return boundary_value_matrix_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_area;
+  return boundary_value_matrix_contrib * factor * _adv_face_flux * _current_face_area;
 }
 
 Real
@@ -145,6 +143,5 @@ LinearFVAdvection::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
   const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
 
   const auto boundary_value_rhs_contrib = adv_bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * factor * (_velocity * _current_face_info->normal()) *
-         _current_face_area;
+  return -boundary_value_rhs_contrib * factor * _adv_face_flux * _current_face_area;
 }

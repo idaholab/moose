@@ -14,10 +14,6 @@
 /**
  * Van Leer interpolation for advected quantities that blends between upwind and the
  * higher-order limited value using only (elem, neighbor) weights.
- *
- * This is implemented as a limited-scheme style blending weight rather than a
- * MUSCL face reconstruction with deferred correction. Instead, it returns matrix weights that
- * incorporate the limiter directly.
  */
 class FVAdvectedVanLeerWeightBased : public FVInterpolationMethod
 {

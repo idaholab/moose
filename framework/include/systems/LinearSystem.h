@@ -217,7 +217,8 @@ protected:
   /// move the nev vectors to the original containers.
   std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 
-  /// Vectors to store new limited gradients during computation (keyed by limiter type).
+  /// Vectors to store new limited gradients during computation:
+  /// The map has the following structure: <limiter type, vector of spatial component>.
   std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
       _new_limited_gradient;
 

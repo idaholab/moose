@@ -56,25 +56,11 @@ the boundary conditions may be applied multiple times. This warning applies to a
 By default the diffusion coefficient functor is evaluated directly on each face. You can instead
 select an interpolation method through the [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method)
 parameter and an object declared in the `[FVInterpolationMethods]` block described in
-[FVInterpolationMethod.md]. This is useful when you want the face value to depend on both adjacent
-cell-centered quantities without incurring the cost of virtual dispatch inside the kernel loop.
+[FVInterpolationMethod.md].
 
-```
-[FVInterpolationMethods]
-  [face_k]
-    type = FVHarmonicAverage
-  []
-[]
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=harm
 
-[LinearFVKernels]
-  [diff]
-    type = LinearFVDiffusion
-    variable = u
-    diffusion_coeff = k
-    coeff_interp_method = face_k
-  []
-[]
-```
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=diffusion replace=['diffusion_coeff = coeff_func','diffusion_coeff = coeff_pos_func\n    coeff_interp_method = harm']
 
 ## Example input syntax
 

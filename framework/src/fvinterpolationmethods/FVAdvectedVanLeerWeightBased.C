@@ -62,7 +62,7 @@ FVAdvectedVanLeerWeightBased::advectedInterpolate(const FaceInfo & face,
   const Real phi_downwind = upwind_is_elem ? neighbor_value : elem_value;
 
   const VectorValue<Real> grad_upwind = upwind_is_elem ? *elem_grad : *neighbor_grad;
-  const auto upwind_to_downwind = upwind_is_elem ? face.dCN() : -face.dCN();
+  const Point upwind_to_downwind = upwind_is_elem ? face.dCN() : Point(-face.dCN());
 
   const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, upwind_to_downwind);
   const Real beta = (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));

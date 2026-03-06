@@ -52,5 +52,10 @@ protected:
   /// Cached weights/correction for the current face (refreshed in setupFaceData)
   mutable FVInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
 
+  /// Reusable gradient storage used when advected interpolation requires gradients.
+  VectorValue<Real> _elem_grad_storage;
+  VectorValue<Real> _neighbor_grad_storage;
+
+  // Cache for the advected face flux
   Real _adv_face_flux = 0.0;
 };
