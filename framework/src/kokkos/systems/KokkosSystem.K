@@ -202,6 +202,9 @@ System::setupSparsity()
 {
   auto pattern = _dof_map.get_sparsity_pattern();
 
+  if (!pattern)
+    return;
+
   std::vector<PetscInt> col_idx;
   std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};

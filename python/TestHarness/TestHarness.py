@@ -424,10 +424,7 @@ class TestHarness:
             self.options._capabilities,
             self.options._augmented_capabilities,
             self.options._required_capabilities,
-        ) = self.getCapabilities(
-            self.options,
-            self.executable,
-        )
+        ) = self.getCapabilities(self.options, self.executable, self.root_params)
 
         checks = {}
         checks["submodules"] = util.getInitializedSubmodules(self.run_tests_dir)
@@ -459,7 +456,9 @@ class TestHarness:
 
     @staticmethod
     def getCapabilities(
-        options: argparse.Namespace, executable: Optional[str]
+        options: argparse.Namespace,
+        executable: Optional[str],
+        test_root_params: Optional[pyhit.Node],
     ) -> Tuple["Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
@@ -470,6 +469,8 @@ class TestHarness:
             The TestHarness options.
         executable : Optional[str]
             Path to the executable; needed when not --minimal-capabilities.
+        test_root_params : Optional[pyhit.Node]
+            The parsed test_root, if any.
 
         Returns:
         -------
@@ -479,6 +480,7 @@ class TestHarness:
             The augmented capabilities.
         list[Tuple[str, bool]]]:
             The capabilities when --only-tests-that-require.
+
         """
         required = []
         app_capabilities: dict = {}
@@ -509,6 +511,25 @@ class TestHarness:
         )
         if options.minimal_capabilities:
             augment("platform", util.getPlatform(), "Operating system", None, True)
+
+        # Add extra capabilities that are known even though they might not
+        # exist (if they are not set by the app). This is needed in specific
+        # when testing against known applications. For example, in the
+        # fluid_properties module, we check against "airapp". We don't want
+        # to error when "airapp" doesn't exist in the app because we know
+        # that it could actually be false.
+        if test_root_params is not None and (
+            known_capabilities := test_root_params.get("known_capabilities")
+        ):
+            known_capabilities = known_capabilities.split()
+            for v in known_capabilities:
+                if v not in app_capabilities:
+                    augment(
+                        v,
+                        False,
+                        "TestHarness known capability",
+                        registered_augmented_capability=False,
+                    )
 
         # This is one of the few places where we actually
         # load the pycapabilities module and that is
@@ -1797,6 +1818,11 @@ class TestHarness:
             help="The host(s) to use for submitting HPC jobs",
         )
         hpcgroup.add_argument(
+            "--hpc-srun",
+            action="store_true",
+            help="Set to run HPC MPI jobs with srun instead of mpiexec/mpirun",
+        )
+        hpcgroup.add_argument(
             "--hpc-no-hold",
             nargs=1,
             action="store",
@@ -1865,7 +1891,13 @@ class TestHarness:
             hpc_config = TestHarness.queryHPCCluster(hpc_host)
             if hpc_config is not None:
                 options.hpc = hpc_config.scheduler
-                print(f"INFO: Setting --hpc={options.hpc} for known host {hpc_host}")
+                options_set = [f"--hpc={options.hpc}"]
+                if hpc_config.srun:
+                    options_set.append("--hpc-srun")
+                    options.hpc_srun = True
+                print(
+                    f"INFO: Setting '{' '.join(options_set)}' for known host {hpc_host}"
+                )
 
         # Convert all list based options of length one to scalars
         for key, value in list(vars(options).items()):
@@ -1966,18 +1998,25 @@ class TestHarness:
         return self.options
 
     # Helper tuple for storing information about a cluster
-    HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules"])
+    HPCCluster = namedtuple("HPCCluster", ["scheduler", "apptainer_modules", "srun"])
     # Define INL HPC clusters
-    sawtooth_config = HPCCluster(
-        scheduler="slurm",
-        apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
-    )
     br_wr_config = HPCCluster(
-        scheduler="slurm", apptainer_modules=["container-openmpi/5.0.5-gcc13.2.0"]
+        scheduler="slurm",
+        apptainer_modules=["container-openmpi/5.0.5-gcc13.2.0"],
+        srun=False,
     )
     hpc_configs = {
-        "sawtooth": sawtooth_config,
         "bitterroot": br_wr_config,
+        "sawtooth": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0"],
+            srun=False,
+        ),
+        "teton": HPCCluster(
+            scheduler="slurm",
+            apptainer_modules=["container-mpich/4.3.2-gcc13.4.0-nopmix"],
+            srun=True,
+        ),
         "windriver": br_wr_config,
     }
 

@@ -13,6 +13,8 @@
 import unittest
 
 import pycapabilities
+from pycapabilities.dataclasses import CheckResult
+from pycapabilities.exceptions import CapabilityException, UnknownCapabilitiesException
 
 CERTAIN_FAIL = pycapabilities.CheckState.CERTAIN_FAIL
 POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
@@ -77,7 +79,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Catching CapabilityUtil errors
         with self.assertRaisesRegex(
-            pycapabilities.CapabilityException,
+            CapabilityException,
             r"Capability::setExplicit\(\): Capability 'name' is "
             "bool-valued and cannot be set as explicit",
         ):
@@ -85,7 +87,7 @@ class TestCapabilities(unittest.TestCase):
                 {"name": {"doc": "foo", "value": True, "explicit": True}}
             )
         with self.assertRaisesRegex(
-            pycapabilities.CapabilityException,
+            CapabilityException,
             r"Capability::setExplicit\(\): Capability 'name' is "
             "bool-valued and cannot be set as explicit",
         ):
@@ -123,42 +125,62 @@ class TestCapabilities(unittest.TestCase):
 
         capabilities = pycapabilities.Capabilities(cap)
 
-        def check(req: str, expect_status: pycapabilities.CheckState):
-            status, reason, doc = capabilities.check(req)
-            self.assertIsInstance(status, pycapabilities.CheckState)
-            self.assertIsInstance(reason, str)
-            self.assertIsInstance(doc, str)
-            self.assertEqual(expect_status, status)
+        # Pass check as non-bool
+        with self.assertRaisesRegex(TypeError, "certain must be a bool"):
+            capabilities.check("unused", None)
 
-        # unknown
-        check("!unknown", POSSIBLE_PASS)
+        def check(
+            req: str,
+            expect_status: pycapabilities.CheckState,
+            expect_capability_names: list[str],
+            certain: bool = True,
+        ):
+            result = capabilities.check(req, certain=certain)
+            self.assertIsInstance(result, CheckResult)
+            state = result.state
+            self.assertIsInstance(state, pycapabilities.CheckState)
+            self.assertEqual(expect_status, state)
+            capability_names = result.capability_names
+            self.assertIsInstance(capability_names, set)
+            self.assertTrue(all(isinstance(v, str) for v in capability_names))
+            self.assertEqual(set(expect_capability_names), capability_names)
+
+        # unknown, not allowed with default check=True
+        with self.assertRaisesRegex(
+            UnknownCapabilitiesException,
+            "The following capabilities are unknown: unknown",
+        ) as e:
+            capabilities.check("!unknown")
+        self.assertEqual(e.exception.unknown_capabilities, ["unknown"])
+        # unknown, allowed
+        check("!unknown", POSSIBLE_PASS, [], certain=False)
 
         # booleans
-        check("!bool_true", CERTAIN_FAIL)
-        check("!bool_false", CERTAIN_PASS)
+        check("!bool_true", CERTAIN_FAIL, ["bool_true"])
+        check("!bool_false", CERTAIN_PASS, ["bool_false"])
 
         # ints
-        check("int=1", CERTAIN_PASS)
-        check("int>0", CERTAIN_PASS)
-        check("int=2", CERTAIN_FAIL)
-        check("int<0", CERTAIN_FAIL)
-        check("int", CERTAIN_PASS)
+        check("int=1", CERTAIN_PASS, ["int"])
+        check("int>0", CERTAIN_PASS, ["int"])
+        check("int=2", CERTAIN_FAIL, ["int"])
+        check("int<0", CERTAIN_FAIL, ["int"])
+        check("int", CERTAIN_PASS, ["int"])
 
         # strings
-        check("string=string", CERTAIN_PASS)
-        check("string=foo", CERTAIN_FAIL)
-        check("string", CERTAIN_PASS)
+        check("string=string", CERTAIN_PASS, ["string"])
+        check("string=foo", CERTAIN_FAIL, ["string"])
+        check("string", CERTAIN_PASS, ["string"])
 
         # Explicit capabilities raise
         for name in ["int_explicit", "string_explicit", "string_enumerated_explicit"]:
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}': capability '{name}' requires a value "
                 "and cannot be used in a boolean expression",
             ):
                 capabilities.check(name)
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}': capability '{name}' requires a value "
                 "and cannot be used in a boolean expression",
             ):
@@ -167,15 +189,20 @@ class TestCapabilities(unittest.TestCase):
         # Enumerated capabilities raise
         for name in ["string_enumerated", "string_enumerated_explicit"]:
             with self.assertRaisesRegex(
-                pycapabilities.CapabilityException,
+                CapabilityException,
                 f"Capability statement '{name}=bar': 'bar' invalid for "
                 f"capability '{name}'; valid values: foo, string",
             ):
                 capabilities.check(f"{name}=bar")
 
         # Combined requirements
-        check("bool_true & !bool_true", CERTAIN_FAIL)
-        check("int>0 & (foo | string=string)", CERTAIN_PASS)
+        check("bool_true & !bool_true", CERTAIN_FAIL, ["bool_true"])
+        check(
+            "int>0 & (foo | string=string)",
+            CERTAIN_PASS,
+            ["int", "string"],
+            certain=False,
+        )
 
     def testCapabilitiesCheckAdd(self):
         """Test pycapabilities.Capabilities.check with add_capabilities."""
@@ -183,10 +210,12 @@ class TestCapabilities(unittest.TestCase):
         capabilities = pycapabilities.Capabilities(caps)
 
         # Normal behavior, capability is added
-        self.assertEqual(capabilities.check("added")[0], POSSIBLE_FAIL)
+        self.assertEqual(
+            capabilities.check("added", certain=False).state, POSSIBLE_FAIL
+        )
         add = {"added": {"doc": "doc", "value": "added"}}
         self.assertEqual(
-            capabilities.check("orig & added", add_capabilities=add)[0],
+            capabilities.check("orig & added", add_capabilities=add).state,
             CERTAIN_PASS,
         )
 
@@ -196,7 +225,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Adding a capability fails (same name)
         add = {"orig": {"doc": "doc", "value": "added"}}
-        with self.assertRaises(pycapabilities.CapabilityException):
+        with self.assertRaises(CapabilityException):
             capabilities.check("unused", add_capabilities=add)
 
     def testCapabilitiesCheckNegate(self):
@@ -209,28 +238,28 @@ class TestCapabilities(unittest.TestCase):
 
         # One capability is set false
         self.assertEqual(
-            capabilities.check("!cap1 & cap2=cap2", negate_capabilities=["cap1"])[0],
+            capabilities.check("!cap1 & cap2=cap2", negate_capabilities=["cap1"]).state,
             CERTAIN_PASS,
         )
         # Both capabilities are set false
         self.assertEqual(
-            capabilities.check("!cap1 & !cap2", negate_capabilities=["cap1", "cap2"])[
-                0
-            ],
+            capabilities.check(
+                "!cap1 & !cap2", negate_capabilities=["cap1", "cap2"]
+            ).state,
             CERTAIN_PASS,
         )
         # Capability is added
         self.assertEqual(
             capabilities.check(
                 "cap1=cap1 & cap2=cap2 & !cap3", negate_capabilities=["cap3"]
-            )[0],
+            ).state,
             CERTAIN_PASS,
         )
         # One capability is set false, one is added
         self.assertEqual(
             capabilities.check(
                 "cap1=cap1 & !cap2 & !cap3", negate_capabilities=["cap2", "cap3"]
-            )[0],
+            ).state,
             CERTAIN_PASS,
         )
 
@@ -259,7 +288,7 @@ class TestCapabilities(unittest.TestCase):
                 "!cap1 & cap2=cap2 & !cap3 & cap4=cap4 & !cap5",
                 add_capabilities=add,
                 negate_capabilities=negate,
-            )[0],
+            ).state,
             CERTAIN_PASS,
         )
 

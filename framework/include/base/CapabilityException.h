@@ -13,6 +13,7 @@
 
 #include <exception>
 #include <string>
+#include <vector>
 
 namespace Moose
 {
@@ -38,5 +39,17 @@ public:
   }
 
   ~CapabilityException() throw() {}
+};
+
+/**
+ * Exception thrown when capabilities are unknown.
+ */
+class UnknownCapabilitiesException : public CapabilityException
+{
+public:
+  UnknownCapabilitiesException(const std::vector<std::string> & unknown_capabilities);
+
+  /// The capabilities that are unknown
+  const std::vector<std::string> unknown_capabilities;
 };
 }

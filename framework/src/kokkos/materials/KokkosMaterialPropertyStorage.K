@@ -89,24 +89,49 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto & record = _kokkos_prop_records[prop_name];
+  auto & blocks = declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
-  if (record.declarers.size())
-  {
-    if (record.dims != dims)
+  for (const auto & [_, record_dims] : record.dims)
+    if (record_dims.size() != dims.size())
     {
       std::stringstream ss;
 
       ss << "The declared " << dims.size() << "D Kokkos material property '" << prop_name << "'";
-      if (dims.size())
-        ss << " with dimensions (" << Moose::stringify(dims) << ")";
-      ss << " was already declared as a " << record.dims.size() << "D property";
-      if (record.dims.size())
-        ss << " with dimensions (" << Moose::stringify(record.dims) << ")";
-      ss << ".";
+      ss << " was already declared as a " << record_dims.size() << "D property.";
 
       mooseError(ss.str());
     }
 
+  for (const auto block : blocks)
+  {
+    auto it = record.dims.find(block);
+    if (it != record.dims.end() && it->second != dims)
+    {
+      std::stringstream ss;
+
+      ss << "The declared Kokkos material property '" << prop_name << "'";
+      ss << " with dimensions (" << Moose::stringify(dims) << ")";
+      ss << " was already declared as a property";
+      ss << " with dimensions (" << Moose::stringify(it->second) << ")";
+      if (!declarer->boundaryRestricted())
+      {
+        std::string name = _problem.mesh().getSubdomainName(block);
+        if (name.empty())
+          name = std::to_string(block);
+
+        ss << " on subdomain '" << name << "'";
+      }
+      ss << ".";
+
+      mooseError(ss.str());
+    }
+  }
+
+  for (const auto block : blocks)
+    record.dims[block] = dims;
+
+  if (record.declarers.size())
+  {
     if (record.on_demand != on_demand)
       mooseError(
           "The Kokkos material property '",
@@ -122,7 +147,6 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
   }
   else
   {
-    record.dims = dims;
     record.bnd = bnd;
     record.on_demand = on_demand;
     record.constant_option = constant_option;

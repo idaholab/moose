@@ -3,3 +3,4 @@ run_tests_args = '--color-first-directory'
 allow_warnings = false
 allow_unused = false
 allow_override = false
+known_capabilities = "airapp carbondioxideapp heliumapp nitrogenapp potassiumapp sodiumapp"

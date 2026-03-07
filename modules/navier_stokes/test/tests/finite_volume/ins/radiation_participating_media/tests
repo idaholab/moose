@@ -1,0 +1,18 @@
+[Tests]
+  design = 'LinearFVP1RadiationMarshakBC.md LinearFVRobinCHTBC.md LinearFVDirichletCHTBC.md LinearFVP1TemperatureSourceSink.md'
+  issues = '#31927'
+  [p1_pm_cht_radiation]
+    type = 'Exodiff'
+    input = 'p1_radiation_cht_SIMPLE.i'
+    exodiff = 'p1_radiation_cht_SIMPLE_out.e'
+    max_threads = 1
+    requirement = 'The system shall be able to solve participating media P1 radiation using conjugate heat transfer BCs with the SIMPLE solver.'
+  []
+  [p1_pm_cht_radiation_csv]
+    type = 'CSVDiff'
+    input = 'p1_radiation_cht_SIMPLE.i'
+    csvdiff = 'p1_radiation_cht_SIMPLE_out.csv'
+    max_threads = 1
+    requirement = 'The system shall be able to maintain accuracy in participating media P1 radiation using conjugate heat transfer BCs with the SIMPLE solver.'
+  []
+[]

@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = RunApp
+    input = good.i
+    capabilities = 'foo & bar=1'
+  []
+[]
