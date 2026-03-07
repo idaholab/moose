@@ -131,6 +131,19 @@ do
     mkdir -p "$MFEM_BUILD_DIR_BASE-$METHOD"
     cd "$MFEM_BUILD_DIR_BASE-$METHOD"
 
+    # Determine shared library extension
+    case "$(uname)" in
+      Darwin) SHLIB_EXT=dylib ;;
+      *)      SHLIB_EXT=so ;;
+    esac
+
+    OPENBLAS_LIB="$PETSC_DIR/$PETSC_ARCH/lib/libopenblas.$SHLIB_EXT"
+
+    if [ ! -f "$OPENBLAS_LIB" ]; then
+      echo "Error: $OPENBLAS_LIB not found"
+      exit 1
+    fi
+
     cmake .. \
       -DBUILD_SHARED_LIBS=YES \
       -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE \
@@ -165,8 +178,8 @@ do
       -DScaLAPACK_ROOT="$PETSC_DIR/$PETSC_ARCH" \
       -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
       \
-      -DBLAS_LIBRARIES="$PETSC_DIR/$PETSC_ARCH/lib/libfblas.a" \
-      -DLAPACK_LIBRARIES="$PETSC_DIR/$PETSC_ARCH/lib/libflapack.a" \
+      -DBLAS_LIBRARIES="$OPENBLAS_LIB" \
+      -DLAPACK_LIBRARIES="$OPENBLAS_LIB" \
       \
       "$@"
   fi
