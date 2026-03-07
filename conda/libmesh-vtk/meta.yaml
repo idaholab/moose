@@ -3,7 +3,7 @@
 #   libmesh/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 0 %}
+{% set build = 1 %}
 {% set vtk_version = "9.6.0" %}
 {% set vtk_friendly_version = vtk_version.split('.')[:2] | join('.') %}
 {% set sha256 = "d77d180694faafdc816578b9a53651f6790e799615811bfbb91018661a3bb8f2" %}
