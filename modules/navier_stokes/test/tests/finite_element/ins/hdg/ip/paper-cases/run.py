@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc, profile):
+def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc, profile, base_n):
     input_base = input_file[:-2]
     tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre-{disc}"
     print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
@@ -31,6 +31,8 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, dis
     ]
     if num_steps is not None:
       cmd.append(f"Executioner/num_steps={num_steps}")
+    if base_n is not None:
+      cmd.append(f"n={base_n}")
 
     # Prepare environment (set MOOSE_PROFILE_BASE per run)
     env = os.environ.copy()
@@ -114,6 +116,10 @@ def main():
         "--profile", type=bool, default=False,
         help="Whether to profile (default: %(default)s)"
     )
+    parser.add_argument(
+        "--base-n", type=int,
+        help="Base mesh n value; passed as Mesh/n when provided."
+    )
 
     args = parser.parse_args()
 
@@ -133,7 +139,8 @@ def main():
                  args.set_schur_pre,
                  args.num_steps,
                  args.disc,
-                 args.profile)
+                 args.profile,
+                 args.base_n)
 
         if _case < args.num_cases:
             procs *= args.proc_multiplier
