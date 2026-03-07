@@ -103,8 +103,11 @@ def main():
         help="Value for Problem/set_schur_pre (required)."
     )
     parser.add_argument(
-        "--num-steps", type=int,
-        help="Number of executioner steps to run (default: %(default)s)"
+        "--num-steps", type=int, nargs="+",
+        help=(
+            "Executioner steps per case. Provide one value to use for all cases, "
+            "or one value per case."
+        )
     )
     parser.add_argument(
         "--disc",
@@ -125,6 +128,10 @@ def main():
 
     if args.num_cases > 1 and args.proc_multiplier is None:
         parser.error("--proc-multiplier is required when --num-cases > 1")
+    if args.num_steps is not None and len(args.num_steps) not in (1, args.num_cases):
+        parser.error(
+            "--num-steps must contain either one value or exactly --num-cases values"
+        )
 
     exec_path = args.exec
     input_file = args.input
@@ -132,12 +139,19 @@ def main():
     refine = args.start_refine
 
     for _case in range(1, args.num_cases + 1):
+        if args.num_steps is None:
+            case_num_steps = None
+        elif len(args.num_steps) == 1:
+            case_num_steps = args.num_steps[0]
+        else:
+            case_num_steps = args.num_steps[_case - 1]
+
         run_case(exec_path,
                  input_file,
                  procs,
                  refine,
                  args.set_schur_pre,
-                 args.num_steps,
+                 case_num_steps,
                  args.disc,
                  args.profile,
                  args.base_n)
