@@ -13,20 +13,24 @@
       [serial]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
+        min_slots = 4 # uses threads
       []
       [queue]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelQueue'
+        min_slots = 4 # uses threads
         prereq = verify/html/serial
       []
       [barrier]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
+        min_slots = 4 # uses threads
         prereq = verify/html/queue
       []
       [pipe]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
+        min_slots = 4 # uses threads
         prereq = verify/html/barrier
       []
     []
@@ -36,20 +40,24 @@
       [serial]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+        min_slots = 4 # uses threads
       []
       [queue]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelQueue'
+        min_slots = 4 # uses threads
         prereq = verify/materialize/serial
       []
       [barrier]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+        min_slots = 4 # uses threads
         prereq = verify/materialize/queue
       []
       [pipe]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+        min_slots = 4 # uses threads
         prereq = verify/materialize/barrier
       []
     []
@@ -59,20 +67,24 @@
       [serial]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+        min_slots = 4 # uses threads
       []
       [queue]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
+        min_slots = 4 # uses threads
         prereq = verify/latex/serial
       []
       [barrier]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
+        min_slots = 4 # uses threads
         prereq = verify/latex/queue
       []
       [pipe]
         type = RunCommand
         command = 'python3 moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
+        min_slots = 4 # uses threads
         prereq = verify/latex/barrier
       []
     []
@@ -86,11 +98,13 @@
     [site_subsite]
       type = RunCommand
       command = 'python3 moosedocs.py build --config config.yml subsite_config.yml'
+      min_slots = 4 # uses threads
       detail = "the build routines for the main test site precede those of the subsite, as well as"
     []
     [subsite_site]
       type = RunCommand
       command = 'python3 moosedocs.py build --fast --config subsite_config.yml config.yml'
+      min_slots = 4 # uses threads
       prereq = multiconfig_build/site_subsite
       detail = "in the reverse order but with the `--fast` option added for testing efficiency."
     []

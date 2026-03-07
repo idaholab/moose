@@ -184,6 +184,7 @@
     input = 'test_json.py'
     test_case = "TestLineInfo"
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall dump line information along with JSON formatted syntax.'
@@ -195,6 +196,7 @@
     input = 'test_json.py'
     test_case = "TestNoTemplate"
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#12960'
     design = 'JsonInputFileFormatter.md'
     requirement = 'The system shall not include RESIDUAL and JACOBIAN template arguments in the JSON syntax format.'
@@ -206,6 +208,7 @@
     input = 'test_hit_output.py'
     test_case = 'TestInputFileFormat'
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file (HIT) syntax.'
@@ -216,6 +219,7 @@
     input = 'test_hit_output.py'
     test_case = 'TestInputFileFormatSearch'
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'

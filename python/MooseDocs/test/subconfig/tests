@@ -7,5 +7,6 @@
     command = 'python moosedocs.py build'
     requirement = "The system shall be able to successfully translate the standalone form of the "
                   "subsite test configuration by using the default build command."
+    min_slots = 2 # uses threads
   []
 []

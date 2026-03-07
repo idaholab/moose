@@ -165,6 +165,9 @@ MooseRevision.h
 # Precompiled headers
 moose/include/base/Precompiled.h.gch
 
+# TestHarness output
+*.testharness_time
+
 # test garbagge
 *.FAILED.txt
 

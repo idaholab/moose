@@ -7,11 +7,12 @@
     [execute]
       type = CheckFiles
       command = 'execute.py'
+      min_parallel = 4
+      max_parallel = 4
       check_files = 'distribute_none.csv distribute_on.csv distribute_off.csv'
       recover = false
       valgrind = NONE
       detail = "that distributes samples in parallel and"
-      python = 3
       required_python_packages = 'pandas matplotlib'
       capabilities = 'installation_type=in_tree & !hpc' # see #26480
       capture_perf_graph = false
@@ -23,7 +24,6 @@
       recover = false
       valgrind = NONE
       prereq = scale/execute
-      python = 3
       required_python_packages = 'pandas matplotlib'
       detail = "demonstrates efficient parallel scaling of memory use."
       capabilities = 'installation_type=in_tree & !hpc' # see #26480

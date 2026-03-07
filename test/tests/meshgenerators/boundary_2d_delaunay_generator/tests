@@ -85,6 +85,7 @@
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_slots = 4 # netgen uses 4 threads; #32425
     []
   []
   [errors]

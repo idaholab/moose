@@ -161,13 +161,31 @@ class RunApp(Tester):
                 'One of "input", "command", "command_proxy", or "no_additional_cli_args" must be supplied for a RunApp test'
             )
 
-        if params.isValid("command_proxy"):
-            params["use_shell"] = True
-            # Not compatible with each other due to the return break in runCommand()
-            if params["no_additional_cli_args"]:
-                raise Exception(
-                    'The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together'
-                )
+        # If command or command_proxy is specified, we cannot allow variable
+        # ranges in parallel/threads because the underlying command doesn't
+        # know what -p and --n-threads are set to
+        for param in ["command", "no_additional_cli_args"]:
+            if params.isValid(param) and params[param]:
+                for suffix in ["parallel", "threads"]:
+                    min_param = f"min_{suffix}"
+                    max_param = f"max_{suffix}"
+
+                    if params.isParamSetByUser(max_param):
+                        if params[min_param] != params[max_param]:
+                            raise Exception(
+                                f"'{min_param}' and '{max_param}' must be equal "
+                                f"when '{param}' is set"
+                            )
+                    else:
+                        params[max_param] = 1
+                        self.addCaveats(f"implicit {max_param}=1")
+
+        # Not compatible with each other due to the return break in runCommand()
+        if params.isValid("command_proxy") and params["no_additional_cli_args"]:
+            raise Exception(
+                "The parameters 'command_proxy' and 'no_additional_cli_args' "
+                "cannot be supplied together"
+            )
 
         for value in params["compute_devices"]:
             if value.lower() not in TestHarness.validComputeDevices():
@@ -179,6 +197,9 @@ class RunApp(Tester):
         # and any of those capabilities depend on the
         # augmented capabilities
         self._augmented_capabilities_file: Optional[str] = None
+
+        self._runapp_environment: dict = {}
+        """Environment variables that need to be augmented for this RunApp test."""
 
     def getInputFile(self):
         if self.specs.isValid("input"):
@@ -481,10 +502,11 @@ class RunApp(Tester):
         if force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
             command = f"{mpi_command} -n {ncpus} {command}"
 
-        # Arbitrary proxy command, but keep track of the command so that someone could use it later
+        # Arbitrary proxy command; set RUNAPP_COMMAND to the actual command
+        # and use the command proxy path as the command
         if specs.isValid("command_proxy"):
-            command = command.replace('"', r"\"")
-            return f'RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
+            self._runapp_environment["RUNAPP_COMMAND"] = command
+            return str(os.path.join(specs["test_dir"], specs["command_proxy"]))
 
         return command
 
@@ -712,3 +734,6 @@ class RunApp(Tester):
                 )
                 with open(self._augmented_capabilities_file, "w") as f:
                     json.dump(store_capabilities, f)
+
+    def augmentEnvironment(self, options) -> dict:
+        return super().augmentEnvironment(options) | self._runapp_environment

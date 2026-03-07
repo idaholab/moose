@@ -7,14 +7,20 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+import signal
+
 from RunApp import RunApp
-import os, signal, time
 
 
 # Classes that derive from this class are expected to write
 # output files. The Tester::getOutputFiles() method should
 # be implemented for all derived classes.
 class SignalTester(RunApp):
+
+    # Not supported because sending the signal will kill
+    # any /usr/bin/time wrapper around the command
+    SUPPORTS_TIME: bool = False
+
     @staticmethod
     def validParams():
         params = RunApp.validParams()

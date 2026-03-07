@@ -30,6 +30,7 @@ import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
+from mooseutils import colorText
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
@@ -937,7 +938,7 @@ class TestHarness:
         jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getMaxMemory())]
         jobs = sorted(
             jobs,
-            key=lambda job: job.getMaxMemory() / job.getTester().getProcs(self.options),
+            key=lambda job: job.getMaxMemory() / job.getSlots(),
             reverse=True,
         )
         return jobs[0:num]
@@ -1008,18 +1009,23 @@ class TestHarness:
                         )
                     )
 
-            # Heaviest jobs by memory; disabled for now, see #32243
-            # heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
-            # if heaviest_jobs:
-            #     print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
-            #     for job in heaviest_jobs:
-            #         print(util.formatJobResult(
-            #             job,
-            #             self.options,
-            #             caveats=True,
-            #             timing=True,
-            #             memory_per_proc=True,
-            #         ))
+            # Heaviest jobs by memory
+            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
+            if heaviest_jobs:
+                print(
+                    header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
+                )
+                for job in heaviest_jobs:
+                    print(
+                        util.formatJobResult(
+                            job,
+                            self.options,
+                            caveats=True,
+                            timing=True,
+                            memory=True,
+                            memory_per_slot=True,
+                        )
+                    )
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:
@@ -1779,9 +1785,12 @@ class TestHarness:
             default=5,
             help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
         )
-        # disabled for now; see #32243
-        # failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
-
+        failgroup.add_argument(
+            "--max-memory-per-slot",
+            nargs=1,
+            type=float,
+            help="The maximum memory to allow for a job in MB, per slot",
+        )
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
         hpcgroup.add_argument(
             "--hpc",
@@ -1885,6 +1894,9 @@ class TestHarness:
         options = parser.parse_args(argv[1:])
         options.code = code
 
+        def print_info(*args):
+            util.printInfo(*args, colored=options.colored)
+
         # Try to guess the --hpc option if --hpc-host is set
         if options.hpc_host and not options.hpc:
             hpc_host = options.hpc_host[0]
@@ -1895,8 +1907,8 @@ class TestHarness:
                 if hpc_config.srun:
                     options_set.append("--hpc-srun")
                     options.hpc_srun = True
-                print(
-                    f"INFO: Setting '{' '.join(options_set)}' for known host {hpc_host}"
+                print_info(
+                    f"Setting --hpc={options.hpc} for known host {hpc_host}",
                 )
 
         # Convert all list based options of length one to scalars
@@ -1911,6 +1923,10 @@ class TestHarness:
     ## Called after options are parsed from the command line
     # Exit if options don't make any sense, print warnings if they are merely weird
     def checkAndUpdateCLArgs(self, opts: argparse.Namespace):
+
+        def print_info(*args):
+            util.printInfo(*args, colored=opts.colored)
+
         if opts.group == opts.not_group:
             self.errorExit(
                 "The group and not_group options cannot specify the same group"
@@ -1968,20 +1984,26 @@ class TestHarness:
             opts.input_file_name = "tests"
 
         if self.app_name is None:
-            print(
-                "INFO: Setting --minimal-capabilities because there is not an application"
+            print_info(
+                "Setting --minimal-capabilities because there is not an application",
             )
             opts.minimal_capabilities = True
 
-        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set;
-        # disabled for now, see #32243
-        # if (
-        #     opts.max_memory is None
-        #     and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
-        # ):
-        #     value = float(MOOSE_MAX_MEMORY)
-        #     print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
-        #     opts.max_memory = value
+        # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
+        # if --max-memory-per-slot is not not set
+        if (
+            opts.max_memory_per_slot is None
+            and (
+                MOOSE_MAX_MEMORY_PER_SLOT := os.environ.get("MOOSE_MAX_MEMORY_PER_SLOT")
+            )
+            is not None
+        ):
+            value = float(MOOSE_MAX_MEMORY_PER_SLOT)
+            print_info(
+                f"Setting --max-memory-per-slot={value} MB from "
+                "MOOSE_MAX_MEMORY_PER_SLOT",
+            )
+            opts.max_memory_per_slot = value
 
     def preRun(self):
         if self.options.json:
@@ -2042,3 +2064,7 @@ class TestHarness:
         """
         message = " ".join([f"{v}" for v in args])
         raise SystemExit(f"ERROR: {message}")
+
+    def printInfo(self, *args):
+        """Print the given message as information."""
+        util.printInfo(*args, colored=self.options.colored)
