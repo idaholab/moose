@@ -28,6 +28,9 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
+  ///Nonlinear Mult (Used by Newton-solver not necessarily nonlinear)
+  virtual void Mult(const mfem::Vector & x, mfem::Vector & y) const override;
+
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem() override;
 
