@@ -14,6 +14,8 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
+#include "GradientLimiterType.h"
+#include "SystemBase.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -96,6 +98,31 @@ public:
   void computeCellGradients() { _needs_cell_gradients = true; }
 
   /**
+   * Switch to request cell gradient computations with an optional gradient limiter.
+   *
+   * `GradientLimiterType::None` is equivalent to requesting the regular gradients only.
+   */
+  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type)
+  {
+    if (limiter_type == Moose::FV::GradientLimiterType::None)
+      computeCellGradients();
+    else
+      computeCellLimitedGradients(limiter_type);
+  }
+
+  /**
+   * Switch to request limited cell gradient computations.
+   *
+   * Limited gradients are stored in limiter-specific containers on the system and are computed
+   * using the raw cell gradients.
+   */
+  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
+  {
+    computeCellGradients();
+    this->_sys.requestLimitedGradients(limiter_type);
+  }
+
+  /**
    * Check if cell gradient computations were requested for this variable.
    */
   virtual bool needsGradientVectorStorage() const override { return _needs_cell_gradients; }
@@ -111,12 +138,40 @@ public:
   const VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
 
   /**
+   * Get either the raw or limited gradient at a cell center.
+   */
+  const VectorValue<Real> gradSln(const ElemInfo & elem_info,
+                                  const Moose::FV::GradientLimiterType limiter_type) const;
+
+  /**
+   * Get the limited gradient at a cell center.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param limiter_type The limiter type used to compute/store limited gradients
+   */
+  const VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
+                                         const Moose::FV::GradientLimiterType limiter_type) const;
+
+  /**
    * Compute interpolated gradient on the provided face.
    * @param face The face for which to retrieve the gradient.
    * @param state State argument which describes at what time / solution iteration state we want to
    * evaluate the variable
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
+
+  /**
+   * Compute interpolated raw/limited gradient on the provided face.
+   */
+  VectorValue<Real> gradSln(const FaceInfo & fi,
+                            const StateArg & state,
+                            const Moose::FV::GradientLimiterType limiter_type) const;
+
+  /**
+   * Compute interpolated limited gradient on the provided face.
+   */
+  VectorValue<Real> limitedGradSln(const FaceInfo & fi,
+                                   const StateArg & state,
+                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   virtual void initialSetup() override;
 

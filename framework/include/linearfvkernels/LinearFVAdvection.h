@@ -10,12 +10,13 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-
+#include "FVInterpolationMethodInterface.h"
+#include "FVInterpolationMethod.h"
 /**
  * Kernel that adds contributions from an advection term discretized using the finite volume method
  * to a linear system.
  */
-class LinearFVAdvection : public LinearFVFluxKernel
+class LinearFVAdvection : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();
@@ -26,6 +27,7 @@ public:
    */
   LinearFVAdvection(const InputParameters & params);
 
+  virtual void setupFaceData(const FaceInfo * face_info) override;
   virtual void initialSetup() override;
 
   virtual Real computeElemMatrixContribution() override;
@@ -45,5 +47,15 @@ protected:
   const RealVectorValue _velocity;
 
   /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _advected_interp_method;
+  const FVInterpolationMethod * _adv_interp_method;
+
+  /// Cached weights/correction for the current face (refreshed in setupFaceData)
+  mutable FVInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
+
+  /// Reusable gradient storage used when advected interpolation requires gradients.
+  VectorValue<Real> _elem_grad_storage;
+  VectorValue<Real> _neighbor_grad_storage;
+
+  // Cache for the advected face flux
+  Real _adv_face_flux = 0.0;
 };
