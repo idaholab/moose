@@ -200,7 +200,7 @@ protected:
   const bool _compute_power;
   /// Flag that informs if there is a pin mesh or not
   const bool _pin_mesh_exist;
-  /// Flag that informs if there is a pin mesh or not
+  /// Flag that informs if there is a duct mesh or not
   const bool _duct_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
@@ -212,7 +212,7 @@ protected:
   const Real & _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
-  /// Convergence tolerance for the temperature loop in external solve
+  /// Convergence tolerance for the temperature loop in internal solve
   const Real & _T_tol;
   /// Maximum iterations for the inner temperature loop
   const int & _T_maxit;
