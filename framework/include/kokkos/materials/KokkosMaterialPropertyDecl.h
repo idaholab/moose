@@ -15,7 +15,6 @@
 
 #include <typeindex>
 
-class MooseMesh;
 class MaterialBase;
 
 namespace Moose::Kokkos
@@ -33,6 +32,7 @@ class MaterialPropertyValue;
 
 class Datum;
 class Assembly;
+class Mesh;
 
 /**
  * Property constant options
@@ -143,12 +143,12 @@ public:
 
   /**
    * Allocate the data storage
-   * @param mesh The MOOSE mesh
+   * @param mesh The Kokkos mesh
    * @param assembly The Kokkos assembly
    * @param subdomains The MOOSE subdomain IDs
    * @param bnd Whether this property is a face property
    */
-  virtual void allocate(const MooseMesh & mesh,
+  virtual void allocate(const Mesh & mesh,
                         const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,
@@ -299,7 +299,7 @@ public:
   virtual void init(const PropRecord & record, const StorageKey & key) override;
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  virtual void allocate(const MooseMesh & mesh,
+  virtual void allocate(const Mesh & mesh,
                         const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,

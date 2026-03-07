@@ -40,8 +40,8 @@ KokkosNodalMaxValueId::finalize()
   gatherProxyValueMax(proxy, value);
 
   if (processor_id() == value.second)
-    for (auto & [node, id] : kokkosMesh().getContiguousNodeMap())
-      if (id == value.first)
+    for (const auto node : kokkosMesh().getLocalNodes())
+      if (kokkosMesh().getContiguousNodeID(node) == value.first)
       {
         _node_id = node->id();
         break;
