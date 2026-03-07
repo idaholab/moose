@@ -47,7 +47,8 @@ protected:
    * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual ADReal initialGuess(const ADReal & effective_trial_stress) override;
+  virtual ADReal initialGuess(const ADReal & effective_trial_stress,
+                              const ADReal & effective_strain_increment) override;
 
   /**
    * Perform any necessary steps to finalize state after return mapping iterations
