@@ -113,10 +113,14 @@ System::setupDofs()
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
-  std::vector<dof_id_type> dof_indices;
-
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  // Kokkos array thinks OpenMP clause is device code when using OpenMP backend
+#pragma omp parallel for
+#endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
+    std::vector<dof_id_type> dof_indices;
+
     for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       _dof_map.dof_indices(elem, dof_indices, var);
