@@ -30,7 +30,8 @@ import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-from mooseutils import colorText
+
+from .mpi_config import get_mpi_config
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
@@ -449,6 +450,9 @@ class TestHarness:
         self.options._checks = checks
         # So that testers can see if we have an application
         self.options._app_name = self.app_name
+
+        # Store the mpi configuration we have discovered
+        self.options._mpi_config = get_mpi_config()
 
         # Initialize the scheduler
         self.initialize()
@@ -1684,6 +1688,16 @@ class TestHarness:
             dest="method",
             const="oprof",
             help="Test the <app_name>-oprof binary",
+        )
+
+        envgroup = parser.add_argument_group(
+            "Environment Options", "Control the runtime environment"
+        )
+        envgroup.add_argument(
+            "--disable-mpi-options",
+            action="store_true",
+            dest="disable_mpi_options",
+            help="Disable automated MPI environment options",
         )
 
         screengroup = parser.add_argument_group(

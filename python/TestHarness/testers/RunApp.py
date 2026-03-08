@@ -7,13 +7,18 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, shutil
-from Tester import Tester
-from TestHarness import util, TestHarness
-from TestHarness.capability_util import addAugmentedCapability
-from shlex import quote
 import json
+import os
+import re
+import shutil
+from shlex import quote
 from typing import Optional, Tuple
+
+from Tester import Tester
+
+from TestHarness import TestHarness, util
+from TestHarness.capability_util import addAugmentedCapability
+from TestHarness.mpi_config import MPIConfig
 
 
 class RunApp(Tester):
@@ -387,7 +392,7 @@ class RunApp(Tester):
             )
 
             # Need to run mpiexec with containerized openmpi
-            if options.hpc and self.hasOpenMPI():
+            if options.hpc and options._mpi_config == MPIConfig.OPENMPI:
                 cmd = f"mpiexec -n 1 {cmd}"
 
             return cmd
@@ -508,7 +513,11 @@ class RunApp(Tester):
 
         # Force mpi, more than 1 core, or containerized openmpi (requires mpiexec serial)
         mpi_command, force_mpi = self.getMPICommand(options)
-        if force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
+        if (
+            force_mpi
+            or ncpus > 1
+            or (options.hpc and options._mpi_config == MPIConfig.OPENMPI)
+        ):
             command = f"{mpi_command} -n {ncpus} {command}"
 
         # Arbitrary proxy command; set RUNAPP_COMMAND to the actual command

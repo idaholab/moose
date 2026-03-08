@@ -1,11 +1,11 @@
-# * This file is part of the MOOSE framework
-# * https://mooseframework.inl.gov
-# *
-# * All rights reserved, see COPYRIGHT for full restrictions
-# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
-# *
-# * Licensed under LGPL 2.1, please see LICENSE for details
-# * https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import importlib.util
 import inspect
@@ -15,7 +15,6 @@ import re
 import shutil
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional, Tuple
 
 import mooseutils
@@ -684,29 +683,6 @@ class Tester(MooseObject, OutputInterface):
                 self.addCaveats(f"slots={min_slots}")
                 return min_slots
         return slots
-
-    def hasOpenMPI(self):
-        """return whether we have openmpi for execution
-
-        The hacky way to do this is look for "ompi_info" (which only comes
-        with openmpi), and then if it does exist make sure that "mpiexec" is
-        in the same directory.
-
-        We could probably move this somewhere so that it's not called multiple
-        times, but I don't think that's a concern because the PATH should be
-        very hot in cache and it's nice to keep this method local to where
-        it's actually used.
-        """
-        which_ompi_info = shutil.which("ompi_info")
-        if which_ompi_info is None:  # no ompi_info
-            return False
-        which_mpiexec = shutil.which("mpiexec")
-        if which_mpiexec is None:  # no mpiexec
-            return False
-        return (
-            Path(which_mpiexec).parent.absolute()
-            == Path(which_ompi_info).parent.absolute()
-        )
 
     def getCommand(self, options):
         """
