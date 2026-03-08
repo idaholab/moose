@@ -30,7 +30,7 @@ user object, component 0 is used.
 The following generalized plane strain test uses the scalar out-of-plane strain
 option with `ComputeAxisymmetric1DIncrementalStrain`.
 
-!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_incremental.i block=Materials/strain
+!listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_incremental.i block=Physics/SolidMechanics/QuasiStatic
 
 The coupled scalar variable is defined in the same input file.
 
