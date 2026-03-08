@@ -7,16 +7,20 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, os, re
+import json
+import os
+import platform
+import re
+import shutil
 import subprocess
-from mooseutils import colorText
+import threading
+import time
+import typing
 from collections import OrderedDict
 from dataclasses import dataclass
-import json
-import threading
-import typing
-from typing import Optional
-import time
+from typing import Callable, Optional
+
+from mooseutils import colorText
 
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
@@ -135,17 +139,17 @@ def formatResult(
             precision = min(3, max(0, (4 - int_len)))
             message = "[" + "{0: <6}".format("%0.*fs" % (precision, actual)) + "]"
         # Memory; skipped for now, see #32243
-        # elif (
-        #     key_lower == "m"
-        #     and entry.timing is not None
-        #     and options.timing
-        #     and memory is not False
-        # ):
-        #     if entry.memory is not None or entry.timing == 0:
-        #         value = int(entry.memory * 1e-6) if entry.memory else 0
-        #         message = f"[{value:>4}MB]"
-        #     else:
-        #         message = "[   ?MB]"
+        elif (
+            key_lower == "m"
+            and entry.timing is not None
+            and (options.timing or memory is True)
+            and memory is not False
+        ):
+            if entry.memory is not None or entry.timing == 0:
+                value = int(entry.memory * 1e-6) if entry.memory else 0
+                message = f"[{value:>4}MB]"
+            else:
+                message = "[   ?MB]"
 
         add(key, message, color)
 
@@ -193,7 +197,7 @@ def formatJobResult(
     status_message: bool = True,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
-    memory_per_proc: bool = False,
+    memory_per_slot: bool = False,
     caveats: bool = False,
 ) -> str:
     name = job.getTestName()
@@ -219,13 +223,13 @@ def formatJobResult(
         suffix = name.replace(first_directory, "", 1)
         name = prefix + suffix
 
-    memory = job.getMaxMemory()
-    if memory_per_proc and memory is not None:
-        memory = int(memory / job.getTester().getProcs(options))
+    max_memory = job.getMaxMemory()
+    if memory_per_slot and max_memory is not None:
+        max_memory = int(max_memory / job.getSlots())
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
-        memory=memory,
+        memory=max_memory,
         joint_status=job.getJointStatus(),
         status_message=status_message,
         caveats=job.getCaveats() if caveats else [],
@@ -389,3 +393,132 @@ class ScopedTimer:
         if self._printed:
             elapsed_time = time.time() - self.start_time
             print(f" {elapsed_time:.2f} seconds", flush=True)
+
+
+def _findTimeUtility(test_utility: Callable[[str], bool]) -> Optional[str]:
+    """
+    Find a time utility that passes the given test.
+
+    Arguments:
+    ---------
+    test_utility : Callable[[str], bool]
+        Function that tests if the utility at the given path is valid.
+
+    Returns:
+    -------
+    Optional[str]:
+        Path to the time utility if found.
+
+    """
+    # /usr/bin/time
+    usr_bin_path = "/usr/bin/time"
+    if os.path.exists(usr_bin_path) and test_utility(usr_bin_path):
+        return usr_bin_path
+
+    # In path
+    if (which_path := shutil.which("time")) and test_utility(which_path):
+        return which_path
+
+    # Not found
+    return None
+
+
+_GNU_TIME_PATH: Optional[str] = None
+"""Global used in findGNUTime() for the path to GNU time."""
+
+_GNU_TIME_PATH_SET: bool = False
+"""Global used in findGNUTime() for if _GNU_TIME_PATH is set."""
+
+_GNU_TIME_LOCK = threading.Lock()
+"""Global thread lock for accessing _GNU_TIME_PATH and _GNU_TIME_PATH_SET."""
+
+
+def findGNUTime() -> Optional[str]:
+    """
+    Find the GNU time utility.
+
+    This is cached so that it only searches for the utility
+    once and then stores the result. The cache is thread safe.
+    """
+    global _GNU_TIME_PATH
+    global _GNU_TIME_PATH_SET
+    global _GNU_TIME_LOCK
+
+    # Helper for testing "time" to see if it is GNU time
+    def test_gnu_time(path: str) -> bool:
+        try:
+            out = subprocess.check_output(
+                [path, "--version"], text=True, stderr=subprocess.DEVNULL
+            )
+        except subprocess.CalledProcessError:
+            return False
+        else:
+            return "(GNU Time)" in out
+
+    # Obtain a lock so that this is thread safe
+    with _GNU_TIME_LOCK:
+        # First time; search for time
+        if not _GNU_TIME_PATH_SET:
+            _GNU_TIME_PATH = _findTimeUtility(test_gnu_time)
+            _GNU_TIME_PATH_SET = True
+
+        # Use value from cache
+        return _GNU_TIME_PATH
+
+
+_BSD_TIME_PATH: Optional[str] = None
+"""Global used in findBSDTime() for the path to BSD time."""
+
+_BSD_TIME_PATH_SET: bool = False
+"""Global used in findBSDTime() for if _BSD_TIME_PATH is set."""
+
+_BSD_TIME_LOCK = threading.Lock()
+"""Global thread lock for accessing _BSD_TIME_PATH and _BSD_TIME_PATH_SET."""
+
+
+def findBSDTime() -> Optional[str]:
+    """
+    Find the BSD time utility.
+
+    This is cached so that it only searches for the utility
+    once and then stores the result. The cache is thread safe.
+    """
+    global _BSD_TIME_PATH
+    global _BSD_TIME_PATH_SET
+    global _BSD_TIME_LOCK
+
+    # Helper for testing "time" to see if it is BSD time
+    def test_bsd_time(path: str) -> bool:
+        process = subprocess.run(
+            [path, "--version"],
+            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if process.returncode == 1:
+            return "illegal option -- -" in process.stderr
+        return False
+
+    # Obtain a lock so that this is thread safe
+    with _BSD_TIME_LOCK:
+        # First time; search for time
+        if not _BSD_TIME_PATH_SET:
+            _BSD_TIME_PATH = _findTimeUtility(test_bsd_time)
+            _BSD_TIME_PATH_SET = True
+
+        # Use value from cache
+        return _BSD_TIME_PATH
+
+
+def printPrefixed(prefix: str, *args, color: Optional[str] = None):
+    """Print the given message with a prefix and an optional color for the prefix."""
+    prefix = f"{prefix}:"
+    if color is not None:
+        prefix = colorText(prefix, color)
+    print(prefix, *args, flush=True)
+
+
+def printInfo(*args, colored: bool):
+    """Print the given message as information."""
+    printPrefixed("INFO", *args, color="CYAN" if colored else None)

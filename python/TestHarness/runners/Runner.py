@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, json
+import os
 from threading import Lock
 from typing import Optional
+
 from TestHarness import OutputInterface, util
 
 
@@ -33,14 +34,22 @@ class Runner(OutputInterface):
         self.exit_code = None
         # The job's estimated max memory in bytes, if any
         self._max_memory: Optional[int] = None
-        # Thread lock for max_memory
+        # Thread lock for _max_memory
         self._max_memory_lock = Lock()
+        # The job's average CPU % usage, if known
+        self._cpu_percent: Optional[float] = None
 
         # The output for the actual run of the job. We keep this
         # separate from self.output in this Runner because HPC
         # jobs always have a file output, so we want to store
         # their output separately
         self.run_output = OutputInterface()
+
+    @property
+    def pid(self) -> Optional[int]:
+        """Get the pid of the running local process, if any."""
+
+        return None
 
     @property
     def max_memory(self) -> Optional[int]:
@@ -64,6 +73,28 @@ class Runner(OutputInterface):
         """
         with self._max_memory_lock:
             self._max_memory = value
+
+    @property
+    def cpu_percent(self) -> Optional[float]:
+        """
+        Get the average CPU % usage for the process, if tracked.
+
+        This is only available after the process has completed
+        and is only thread safe _after_ the process is done.
+        """
+        return self._cpu_percent
+
+    @cpu_percent.setter
+    def cpu_percent(self, value: float):
+        """
+        Set the average CPU % usage for the process.
+
+        Should only be called by derived runner classes and
+        should only be set once.
+        """
+        assert self._cpu_percent is None, "Should not be set"
+        assert isinstance(value, float)
+        self._cpu_percent = value
 
     def getRunOutput(self):
         """Get the OutputInterface object for the actual run"""

@@ -33,6 +33,10 @@ class Tester(MooseObject, OutputInterface):
     Base class from which all tester objects are instanced.
     """
 
+    SUPPORTS_TIME: bool = True
+    """Whether or not this Tester supports having /usr/bin/time wrapped around
+    the command that it runs."""
+
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
@@ -104,7 +108,9 @@ class Tester(MooseObject, OutputInterface):
             False,
             "Allow all tests in test spec file to run in parallel (adheres to prereq rules).",
         )
-
+        params.addParam(
+            "min_slots", None, "The minimum number of slots this test must use."
+        )
         # Test Filters
         params.addParam(
             "mesh_mode",
@@ -492,7 +498,11 @@ class Tester(MooseObject, OutputInterface):
         """Get the results dict for this Tester"""
         results = {
             "name": self.__class__.__name__,
-            "command": self.getCommand(options),
+            "command": (
+                command_ran
+                if (command_ran := self.getCommandRan())
+                else self.getCommand(options)
+            ),
             "input_file": self.getInputFile(),
         }
         json_metadata = {}
@@ -667,7 +677,13 @@ class Tester(MooseObject, OutputInterface):
 
     def getSlots(self, options):
         """return number of slots to use for this tester"""
-        return self.getThreads(options) * self.getProcs(options)
+        slots = self.getThreads(options) * self.getProcs(options)
+        if (min_slots := self.specs["min_slots"]) is not None:
+            min_slots = int(min_slots)
+            if min_slots > slots:
+                self.addCaveats(f"slots={min_slots}")
+                return min_slots
+        return slots
 
     def hasOpenMPI(self):
         """return whether we have openmpi for execution

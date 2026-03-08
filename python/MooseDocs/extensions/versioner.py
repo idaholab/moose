@@ -9,6 +9,7 @@
 
 import os
 import re
+import threading
 import sys
 
 import MooseDocs
@@ -30,10 +31,24 @@ class VersionerExtension(command.CommandExtension):
     Adds ability to link to MOOSE enviornment packages.
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    PACKAGES = None
+    """Shared Versioner packages across all class instances."""
 
-        self.packages = Versioner().get_packages("HEAD")
+    PACKAGES_LOCK = threading.Lock()
+    """Lock for PACKAGES across all class instances."""
+
+    @classmethod
+    def getPackages(cls):
+        """
+        Get the Versioner packages.
+
+        Is thread safe and will build the packages from the
+        Versioner on first call.
+        """
+        with cls.PACKAGES_LOCK:
+            if cls.PACKAGES is None:
+                cls.PACKAGES = Versioner().get_packages("HEAD")
+            return cls.PACKAGES
 
     def extend(self, reader, renderer):
         self.requires(core, command)
@@ -45,7 +60,7 @@ class VersionerExtension(command.CommandExtension):
         """
         Helper for getting a version in the commands
         """
-        package = self.packages.get(package_name)
+        package = self.getPackages().get(package_name)
         if package is None:
             if must_exist:
                 raise exceptions.MooseDocsException(f'Unknown package "{package_name}"')

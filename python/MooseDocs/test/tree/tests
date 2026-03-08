@@ -4,26 +4,31 @@
   [./base]
     type = PythonUnitTest
     input = test_base.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include a tree node object with arbitrary property creation."
   [../]
   [./tokens]
     type = PythonUnitTest
     input = test_tokens.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include tree object suitable for abstract syntax trees."
   [../]
   [./html]
     type = PythonUnitTest
     input = test_html.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include tree object suitable for HTML."
   [../]
   [./latex]
     type = PythonUnitTest
     input = test_latex.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include tree object suitable for latex."
   [../]
   [./page]
     type = PythonUnitTest
     input = test_page.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include tree object suitable for file structures."
   [../]
 []

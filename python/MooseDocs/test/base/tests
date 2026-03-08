@@ -4,22 +4,26 @@
   [components]
     type = PythonUnitTest
     input = test_components.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include a TokenComponent and RenderComponent objects for creating MooseDocs extensions."
     required_python_packages = 'mock'
   []
   [lexer]
     type = PythonUnitTest
     input = test_lexers.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include lexer object capable of recursively processing text."
   []
   [reader]
     type = PythonUnitTest
     input = test_readers.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include a reader object for reading files."
   []
   [translator]
     type = PythonUnitTest
     input = test_translator.py
+    min_slots = 2 # uses threads
     requirement = "The system shall include a translator for converting documentation formats."
   []
 []
