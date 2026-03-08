@@ -2837,6 +2837,8 @@ public:
 
   void createTagMatrices(CreateTaggedMatrixKey);
 
+  bool useHashTableMatrixAssembly() const { return _use_hash_table_matrix_assembly; }
+
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
    * @returns whether any Kokkos object was added in the problem
