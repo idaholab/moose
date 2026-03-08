@@ -1502,6 +1502,18 @@ class TestHarness:
             help="Ignore specified caveats when checking if a test should run; using --ignore without a conditional will ignore all caveats",
         )
         filtergroup.add_argument(
+            "--min-parallel",
+            dest="min_parallel",
+            type=int,
+            help="Skip tests that cannot run with at least this many MPI procs",
+        )
+        filtergroup.add_argument(
+            "--min-threads",
+            dest="min_threads",
+            type=int,
+            help="Skip tests that cannot run with at least this many threads",
+        )
+        filtergroup.add_argument(
             "--no-check-input",
             action="store_true",
             help="Do not run check_input (syntax) tests",
@@ -1513,18 +1525,18 @@ class TestHarness:
             help="Run only tests NOT in the named group",
         )
         filtergroup.add_argument(
-            "--re",
-            action="store",
-            type=str,
-            dest="reg_exp",
-            help="Run tests that match the given regular expression",
-        )
-        filtergroup.add_argument(
             "--only-tests-that-require",
             action="extend",
             nargs=1,
             type=str,
             help="Require that a test depend on this capability name",
+        )
+        filtergroup.add_argument(
+            "--re",
+            action="store",
+            type=str,
+            dest="reg_exp",
+            help="Run tests that match the given regular expression",
         )
         filtergroup.add_argument(
             "--valgrind",
