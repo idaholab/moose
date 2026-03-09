@@ -43,6 +43,17 @@ protected:
              MeshBase & mesh);
 
   /**
+   * Action to perform when flooding
+   * @param elem element to apply an action on
+   * @param normal a reference normal to be used to make decisions on which action to apply
+   * @param sub_id the current subdomain ID being considered
+   */
+  virtual void actOnElem(Elem * const elem,
+                         const Point & normal,
+                         const subdomain_id_type & sub_id,
+                         MeshBase & mesh) = 0;
+
+  /**
    * Determines whether two normal vectors are within normal_tol of each other.
    * @param normal_1 The first normal vector to compare to normal_2.
    * @param normal_2 The second normal vector to compare to normal_1.
@@ -119,6 +130,10 @@ protected:
   const bool _flood_only_once;
   /// Set used when flooding each element once. If the element pointer is in the set, it has been visited and acted upon
   std::set<Elem *> _acted_upon_once;
+  /// Maximum amount of calls to the flood routine at once
+  const unsigned int _flood_max_recursion;
+  /// Current tally for the number of flood routine calls active
+  unsigned int _flood_recursion_count = 0;
   /// Additional heuristic: check the element neighbors and if they have already been painted with the subdomain,
   /// check if their normal is close to the current element's normal. If it is close, then accept the element
   /// as long as it also meets the other criteria (in included_subdomains, centroid within distance, etc)

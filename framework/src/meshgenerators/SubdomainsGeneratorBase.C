@@ -79,6 +79,11 @@ SubdomainsGeneratorBase::validParams()
       "flood_elements_once",
       false,
       "Whether to consider elements only once when painting/flooding the geometry");
+  params.addParam<unsigned int>(
+      "flood_max_recursion",
+      1e5,
+      "Max number of recursions when flooding. Once this number is reached, the propagation is "
+      "stopped until enough calls have returned");
 
   params.addParamNamesToGroup("normal normal_tol allow_normal_flips flipped_normal_tol "
                               "fixed_normal check_painted_neighbor_normals",
@@ -105,6 +110,7 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
     _allow_normal_flips(getParam<bool>("allow_normal_flips")),
     _has_max_distance_criterion(isParamSetByUser("max_paint_size_centroids")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
+    _flood_max_recursion(getParam<unsigned int>("flood_max_recursion")),
     _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
 {
 }
@@ -195,8 +201,8 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
     return;
 
   // Modify the subdomain
-  // NOTE: if we want to perform a different action, we should have a callback here instead
-  elem->subdomain_id() = sub_id;
+  // TODO: consider working with base class attributes rather than arguments
+  actOnElem(elem, base_normal, sub_id, mesh);
 
   // We don't want to remove the element from consideration too early
   _acted_upon_once.insert(elem);
@@ -213,12 +219,15 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
 
   for (const auto neighbor : make_range(elem->n_sides()))
   {
+    _flood_recursion_count++;
     // Flood to the neighboring elements
-    flood(elem->neighbor_ptr(neighbor),
-          _fixed_normal ? base_normal : elem_normal,
-          starting_elem,
-          sub_id,
-          mesh);
+    if (_flood_recursion_count < _flood_max_recursion)
+      flood(elem->neighbor_ptr(neighbor),
+            _fixed_normal ? base_normal : elem_normal,
+            starting_elem,
+            sub_id,
+            mesh);
+    _flood_recursion_count--;
   }
 }
 

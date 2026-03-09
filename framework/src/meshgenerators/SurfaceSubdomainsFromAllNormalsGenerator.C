@@ -36,6 +36,11 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       false,
       "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
       "that holds the most neighbors of the element with a similar normal");
+  params.addParam<bool>(
+      "separate_elements_connected_by_a_single_node",
+      false,
+      "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
+      "that holds the most neighbors of the element with a similar normal");
 
   // There can be many of them, and we don't control the number in this generator
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
@@ -168,18 +173,22 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       SubdomainID sub_id;
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
       // Use point neighbors, it's easy for a surface tri3 to be sandwiched into the wrong subdomain
-      std::set<const Elem *> neighbor_set;
-      elem->find_point_neighbors(neighbor_set);
+      // std::set<const Elem *> neighbor_set;
+      // elem->find_point_neighbors(neighbor_set);
 
       // Try to flood from each side with the same subdomain
       // Look for the neighbor subdomain id with the most neighbors
       // NOTE: we might exceeed the patch distance here
-      for (const auto neighbor : neighbor_set)
-        if (elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), *neighbor, normal))
+      for (const auto neighbor_i : make_range(elem->n_sides()))
+      {
+        const auto neighbor = elem->neighbor_ptr(neighbor_i);
+        if (neighbor &&
+            elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), *neighbor, normal))
         {
           sub_id_found = true;
           sub_id_neighbors[neighbor->subdomain_id()]++;
         }
+      }
 
       unsigned int max_of_subid = 0;
       for (const auto & [key, item] : sub_id_neighbors)
@@ -192,10 +201,63 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
         elem->subdomain_id() = sub_id;
     }
 
+  if (getParam<bool>("separate_elements_connected_by_a_single_node"))
+    for (auto & elem : mesh->element_ptr_range())
+    {
+      // Nothing to do with edges
+      if (elem->dim() < 2)
+        continue;
+      // Nothing to do with 3D elements
+      if (elem->dim() > 2)
+        continue;
+
+      bool connected_to_a_neighbor = false;
+      for (const auto neighbor : make_range(elem->n_sides()))
+        if (elem->neighbor_ptr(neighbor) &&
+            elem->subdomain_id() == elem->neighbor_ptr(neighbor)->subdomain_id())
+          connected_to_a_neighbor = true;
+
+      if (!connected_to_a_neighbor)
+      {
+        bool same_subdomain = true;
+        subdomain_id_type common_sub = std::numeric_limits<subdomain_id_type>::max();
+
+        for (const auto neighbor : make_range(elem->n_sides()))
+          if (elem->neighbor_ptr(neighbor))
+          {
+            if (common_sub == std::numeric_limits<subdomain_id_type>::max())
+              common_sub = elem->neighbor_ptr(neighbor)->subdomain_id();
+            else if (common_sub != elem->neighbor_ptr(neighbor)->subdomain_id())
+              same_subdomain = false;
+          }
+
+        if (same_subdomain && (common_sub != std::numeric_limits<subdomain_id_type>::max()))
+          elem->subdomain_id() = common_sub;
+        else
+          elem->subdomain_id() = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+      }
+    }
+
+  // Remove single node connections by changing the element
+  // if (true)
+  // {
+  //   for (auto & elem : mesh->element_ptr_range())
+  //   {
+  // }
+
   if (_flood_only && num_neighborless)
     mooseWarning("Several subdomains were created for neighborless elements: " +
                  std::to_string(num_neighborless));
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+void
+SurfaceSubdomainsFromAllNormalsGenerator::actOnElem(Elem * const elem,
+                                                    const Point &,
+                                                    const subdomain_id_type & sub_id,
+                                                    MeshBase &)
+{
+  elem->subdomain_id() = sub_id;
 }

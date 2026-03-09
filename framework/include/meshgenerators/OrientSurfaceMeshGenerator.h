@@ -22,4 +22,10 @@ public:
   OrientSurfaceMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
+
+protected:
+  void actOnElem(Elem * const /*elem*/,
+                 const Point & /*normal*/,
+                 const subdomain_id_type & /*sub_id*/,
+                 MeshBase & /*mesh*/) override;
 };

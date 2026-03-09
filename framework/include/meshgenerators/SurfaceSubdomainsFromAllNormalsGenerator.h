@@ -26,6 +26,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  void actOnElem(Elem * const elem,
+                 const Point & normal,
+                 const subdomain_id_type & sub_id,
+                 MeshBase & mesh) override;
+
   /// Map from subdomain IDs to the normals of the corresponding boundaries
   std::map<SubdomainID, RealVectorValue> _subdomain_to_normal_map;
   /// Map from subdomain IDs to a pointer to the element where the subdomain-paiting started
