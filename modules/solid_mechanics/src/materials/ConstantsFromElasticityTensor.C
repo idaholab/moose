@@ -37,18 +37,17 @@ ConstantsFromElasticityTensorTempl<is_ad>::ConstantsFromElasticityTensorTempl(
   : Material(parameters),
     GuaranteeConsumer(this),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _youngs_modulus(this->template declareGenericProperty<Real, is_ad>(_base_name +
-                                                                       "youngs_modulus_from_tensor")),
-    _poissons_ratio(this->template declareGenericProperty<Real, is_ad>(_base_name +
-                                                                       "poissons_ratio_from_tensor")),
+    _youngs_modulus(this->template declareGenericProperty<Real, is_ad>(
+        _base_name + "youngs_modulus_from_tensor")),
+    _poissons_ratio(this->template declareGenericProperty<Real, is_ad>(
+        _base_name + "poissons_ratio_from_tensor")),
     _shear_modulus(this->template declareGenericProperty<Real, is_ad>(_base_name +
                                                                       "shear_modulus_from_tensor")),
     _bulk_modulus(this->template declareGenericProperty<Real, is_ad>(_base_name +
                                                                      "bulk_modulus_from_tensor")),
     _elasticity_tensor_name(getParam<MaterialPropertyName>("elasticity_tensor")),
-    _elasticity_tensor(
-        this->template getGenericMaterialPropertyByName<RankFourTensor, is_ad>(_base_name +
-                                                                                _elasticity_tensor_name))
+    _elasticity_tensor(this->template getGenericMaterialPropertyByName<RankFourTensor, is_ad>(
+        _base_name + _elasticity_tensor_name))
 {
 }
 

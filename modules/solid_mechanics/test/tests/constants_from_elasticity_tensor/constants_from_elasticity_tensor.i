@@ -8,47 +8,47 @@
 []
 
 [AuxVariables]
-  [youngs_modulus_aux]
+  [youngs_modulus_from_tensor]
     order = CONSTANT
     family = MONOMIAL
   []
-  [poissons_ratio_aux]
+  [poissons_ratio_from_tensor]
     order = CONSTANT
     family = MONOMIAL
   []
-  [shear_modulus_aux]
+  [shear_modulus_from_tensor]
     order = CONSTANT
     family = MONOMIAL
   []
-  [bulk_modulus_aux]
+  [bulk_modulus_from_tensor]
     order = CONSTANT
     family = MONOMIAL
   []
 []
 
 [AuxKernels]
-  [youngs_modulus_ak]
+  [youngs_modulus]
     type = MaterialRealAux
     property = youngs_modulus_from_tensor
-    variable = youngs_modulus_aux
+    variable = youngs_modulus_from_tensor
     execute_on = initial
   []
-  [poissons_ratio_ak]
+  [poissons_ratio]
     type = MaterialRealAux
     property = poissons_ratio_from_tensor
-    variable = poissons_ratio_aux
+    variable = poissons_ratio_from_tensor
     execute_on = initial
   []
-  [shear_modulus_ak]
+  [shear_modulus]
     type = MaterialRealAux
     property = shear_modulus_from_tensor
-    variable = shear_modulus_aux
+    variable = shear_modulus_from_tensor
     execute_on = initial
   []
-  [bulk_modulus_ak]
+  [bulk_modulus]
     type = MaterialRealAux
     property = bulk_modulus_from_tensor
-    variable = bulk_modulus_aux
+    variable = bulk_modulus_from_tensor
     execute_on = initial
   []
 []
@@ -76,22 +76,22 @@
 [Postprocessors]
   [youngs_modulus]
     type = ElementAverageValue
-    variable = youngs_modulus_aux
+    variable = youngs_modulus_from_tensor
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [poissons_ratio]
     type = ElementAverageValue
-    variable = poissons_ratio_aux
+    variable = poissons_ratio_from_tensor
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [shear_modulus]
     type = ElementAverageValue
-    variable = shear_modulus_aux
+    variable = shear_modulus_from_tensor
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [bulk_modulus]
     type = ElementAverageValue
-    variable = bulk_modulus_aux
+    variable = bulk_modulus_from_tensor
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
