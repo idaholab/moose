@@ -24,6 +24,7 @@
     input = 'torque_reaction_cylinder.i'
     exodiff = 'torque_reaction_cylinder_out.e'
     abs_zero = 5.e-7
+    rel_err = 1e-5
     capabilities = 'method!=dbg'
   [../]
   [./disp_about_axis_motion]

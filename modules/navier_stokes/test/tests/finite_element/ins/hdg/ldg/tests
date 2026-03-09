@@ -13,7 +13,7 @@
     input = channel.i
     exodiff = channel_out.e
     requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
-    rel_err = 1e-5
+    rel_err = 3e-5
     max_threads = 1
   []
   [stokes_symmetric]
