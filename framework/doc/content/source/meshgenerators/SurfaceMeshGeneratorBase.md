@@ -1,4 +1,4 @@
-# SubdomainsGeneratorBase
+# SurfaceMeshGeneratorBase
 
 This is a base class that can be used for mesh generators that use a flood algorithm
 on elements.

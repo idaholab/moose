@@ -28,7 +28,7 @@ registerMooseObject("MooseApp", OrientSurfaceMeshGenerator);
 InputParameters
 OrientSurfaceMeshGenerator::validParams()
 {
-  InputParameters params = SubdomainsGeneratorBase::validParams();
+  InputParameters params = SurfaceMeshGeneratorBase::validParams();
 
   // Which elements to apply the change on
   params.setDocString(
@@ -56,7 +56,7 @@ OrientSurfaceMeshGenerator::validParams()
 }
 
 OrientSurfaceMeshGenerator::OrientSurfaceMeshGenerator(const InputParameters & parameters)
-  : SubdomainsGeneratorBase(parameters)
+  : SurfaceMeshGeneratorBase(parameters)
 {
 }
 

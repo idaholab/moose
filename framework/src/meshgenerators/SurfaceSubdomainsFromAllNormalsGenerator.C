@@ -23,7 +23,7 @@ registerMooseObject("MooseApp", SurfaceSubdomainsFromAllNormalsGenerator);
 InputParameters
 SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 {
-  InputParameters params = SubdomainsGeneratorBase::validParams();
+  InputParameters params = SurfaceMeshGeneratorBase::validParams();
 
   params.renameParam("max_paint_size_centroids", "max_subdomain_size_centroids", "");
   params.addParam<bool>(
@@ -54,7 +54,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 
 SurfaceSubdomainsFromAllNormalsGenerator::SurfaceSubdomainsFromAllNormalsGenerator(
     const InputParameters & parameters)
-  : SubdomainsGeneratorBase(parameters), _flood_only(getParam<bool>("contiguous_assignments_only"))
+  : SurfaceMeshGeneratorBase(parameters), _flood_only(getParam<bool>("contiguous_assignments_only"))
 {
 }
 

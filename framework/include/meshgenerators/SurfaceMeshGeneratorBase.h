@@ -16,12 +16,12 @@
  * - defines some common parameters
  * - defines a useful flooding/painting algorithm to apply an operation on elements
  */
-class SubdomainsGeneratorBase : public MeshGenerator
+class SurfaceMeshGeneratorBase : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  SubdomainsGeneratorBase(const InputParameters & parameters);
+  SurfaceMeshGeneratorBase(const InputParameters & parameters);
 
 protected:
   /// Sets up various data structures

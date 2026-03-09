@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "SubdomainsGeneratorBase.h"
+#include "SurfaceMeshGeneratorBase.h"
 
 /**
  * This class will re-orient surface elements based on user-specified settings
  */
-class OrientSurfaceMeshGenerator : public SubdomainsGeneratorBase
+class OrientSurfaceMeshGenerator : public SurfaceMeshGeneratorBase
 {
 public:
   static InputParameters validParams();

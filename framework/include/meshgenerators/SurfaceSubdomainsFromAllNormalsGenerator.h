@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "SubdomainsGeneratorBase.h"
+#include "SurfaceMeshGeneratorBase.h"
 
 /**
  * This class will add subdomains to the entire mesh based on unique normals.
  * Note: The user will have to turn the tolerance on the normal angle to be able to
  * "paint" curved subdomains. Tight tolerances can create as many as a subdomain for each element
  */
-class SurfaceSubdomainsFromAllNormalsGenerator : public SubdomainsGeneratorBase
+class SurfaceSubdomainsFromAllNormalsGenerator : public SurfaceMeshGeneratorBase
 {
 public:
   static InputParameters validParams();

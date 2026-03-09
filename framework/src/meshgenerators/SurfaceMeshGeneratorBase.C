@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SubdomainsGeneratorBase.h"
+#include "SurfaceMeshGeneratorBase.h"
 #include "InputParameters.h"
 #include "MooseMeshUtils.h"
 
@@ -18,7 +18,7 @@
 #include "libmesh/string_to_enum.h"
 
 InputParameters
-SubdomainsGeneratorBase::validParams()
+SurfaceMeshGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
@@ -101,7 +101,7 @@ SubdomainsGeneratorBase::validParams()
   return params;
 }
 
-SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & parameters)
+SurfaceMeshGeneratorBase::SurfaceMeshGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _subdomain_names(isParamValid("new_subdomain")
@@ -126,7 +126,7 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
 }
 
 void
-SubdomainsGeneratorBase::setup(MeshBase & mesh)
+SurfaceMeshGeneratorBase::setup(MeshBase & mesh)
 {
   // To know the dimension of the mesh
   if (!mesh.is_prepared())
@@ -172,11 +172,11 @@ SubdomainsGeneratorBase::setup(MeshBase & mesh)
 }
 
 void
-SubdomainsGeneratorBase::flood(Elem * const elem,
-                               const Point & base_normal,
-                               const Elem & starting_elem,
-                               const subdomain_id_type & sub_id,
-                               MeshBase & mesh)
+SurfaceMeshGeneratorBase::flood(Elem * const elem,
+                                const Point & base_normal,
+                                const Elem & starting_elem,
+                                const subdomain_id_type & sub_id,
+                                MeshBase & mesh)
 {
   // Avoid re-considering the same elements
   if (elem == nullptr || elem == remote_elem ||
@@ -243,15 +243,15 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
 }
 
 bool
-SubdomainsGeneratorBase::normalsWithinTol(const Point & normal_1,
-                                          const Point & normal_2,
-                                          const Real tol) const
+SurfaceMeshGeneratorBase::normalsWithinTol(const Point & normal_1,
+                                           const Point & normal_2,
+                                           const Real tol) const
 {
   return (1.0 - normal_1 * normal_2) <= tol;
 }
 
 bool
-SubdomainsGeneratorBase::elementSubdomainIdInList(
+SurfaceMeshGeneratorBase::elementSubdomainIdInList(
     const Elem * const elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
 {
   subdomain_id_type curr_subdomain = elem->subdomain_id();
@@ -260,10 +260,10 @@ SubdomainsGeneratorBase::elementSubdomainIdInList(
 }
 
 bool
-SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
-                                                      const Point & desired_normal,
-                                                      const Elem & base_elem,
-                                                      const Point & face_normal) const
+SurfaceMeshGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
+                                                       const Point & desired_normal,
+                                                       const Elem & base_elem,
+                                                       const Point & face_normal) const
 {
   // False if element is not in specified subdomains
   if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
@@ -294,7 +294,7 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
 }
 
 Point
-SubdomainsGeneratorBase::get2DElemNormal(const Elem * const elem) const
+SurfaceMeshGeneratorBase::get2DElemNormal(const Elem * const elem) const
 {
   mooseAssert(elem->dim() == 2, "Should be a 2D element");
   mooseAssert(elem->default_order() == FIRST, "Should be a first order element");
