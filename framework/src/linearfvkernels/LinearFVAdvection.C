@@ -23,7 +23,7 @@ LinearFVAdvection::validParams()
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   params.addRequiredParam<InterpolationMethodName>(
       "advected_interp_method_name",
-      "Nae of the FVInterpolationMethod to use for the advected quantity.");
+      "Name of the FVInterpolationMethod to use for the advected quantity.");
   return params;
 }
 

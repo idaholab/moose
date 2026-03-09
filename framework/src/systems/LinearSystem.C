@@ -117,6 +117,35 @@ LinearSystem::initialSetup()
                  "which is assigned to the wrong system: ",
                  name);
 
+  // If we need raw gradients, initialize storage once for this system.
+  bool gradient_storage_initialized = false;
+  for (const auto & field_var : _vars[0].fieldVariables())
+    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
+    {
+      _raw_grad_container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        _raw_grad_container.push_back(currentSolution()->zero_clone());
+      }
+      gradient_storage_initialized = true;
+    }
+
+  // If we need limited gradients, initialize the requested limiter containers.
+  if (!_requested_limited_gradient_types.empty())
+    for (const auto limiter_type : _requested_limited_gradient_types)
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+      auto & container = _raw_limited_grad_containers[limiter_type];
+      container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        container.push_back(currentSolution()->zero_clone());
+      }
+    }
+
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -150,6 +179,29 @@ LinearSystem::initialSetup()
     for (auto * fv_bc : fv_bcs)
       fv_bc->initialSetup();
   }
+}
+
+void
+LinearSystem::requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return;
+  _requested_limited_gradient_types.insert(limiter_type);
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+LinearSystem::limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return _raw_grad_container;
+
+  const auto it = _raw_limited_grad_containers.find(limiter_type);
+  if (it == _raw_limited_grad_containers.end())
+    mooseError("Limited gradient container was requested but not initialized on system '",
+               name(),
+               "'.");
+
+  return it->second;
 }
 
 void

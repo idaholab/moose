@@ -70,18 +70,3 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
 
   return result;
 }
-
-Real
-FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolateValue(
-    const FaceInfo & face,
-    const Real elem_value,
-    const Real neighbor_value,
-    const VectorValue<Real> * const elem_grad,
-    const VectorValue<Real> * const neighbor_grad,
-    const Real mass_flux) const
-{
-  const auto result =
-      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value -
-         result.rhs_face_value;
-}

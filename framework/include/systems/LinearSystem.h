@@ -14,6 +14,7 @@
 #include "GradientLimiterType.h"
 
 #include <map>
+#include <set>
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
@@ -129,6 +130,23 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
+  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  gradientContainer() const override
+  {
+    return _raw_grad_container;
+  }
+
+  virtual void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type) override;
+
+  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const override;
+
+  virtual const std::set<Moose::FV::GradientLimiterType> &
+  requestedLimitedGradientTypes() const override
+  {
+    return _requested_limited_gradient_types;
+  }
+
   /**
    * Compute the Green-Gauss gradients
    */
@@ -217,8 +235,19 @@ protected:
   /// move the nev vectors to the original containers.
   std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 
+  /// Raw cell-centered gradient components. Vector index = spatial component, NumericVector index
+  /// = variable DoF.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
+
+  /// Set of requested limiter types for which limited gradients should be computed.
+  std::set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
+
+  /// Persisted limited gradient components keyed by limiter type.
+  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _raw_limited_grad_containers;
+
   /// Vectors to store new limited gradients during computation:
-  /// The map has the following structure: <limiter type, vector of spatial component>.
+  /// <limiter type, vector index = spatial component>.
   std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
       _new_limited_gradient;
 

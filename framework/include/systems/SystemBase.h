@@ -930,20 +930,14 @@ public:
    * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
    * Mainly used for finite volume systems.
    */
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const
-  {
-    return _raw_grad_container;
-  }
+  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const;
 
-  void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+  virtual void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
 
-  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
   limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
 
-  const std::set<Moose::FV::GradientLimiterType> & requestedLimitedGradientTypes() const
-  {
-    return _requested_limited_gradient_types;
-  }
+  virtual const std::set<Moose::FV::GradientLimiterType> & requestedLimitedGradientTypes() const;
 
   /**
    * Compute time derivatives, auxiliary variables, etc.
@@ -1085,15 +1079,6 @@ protected:
   /// Serialized version of the solution vector, or nullptr if a
   /// serialized solution is not needed
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
-
-  /// A cache for storing gradients at dof locations. We store it on the system
-  /// because we create copies of variables on each thread and that would
-  /// lead to increased data duplication when using threading-based parallelism.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
-
-  std::set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
-  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _raw_limited_grad_containers;
 
 private:
   /**
