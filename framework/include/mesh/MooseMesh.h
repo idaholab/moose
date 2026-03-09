@@ -325,6 +325,7 @@ public:
   virtual dof_id_type nLocalNodes() const { return _mesh->n_local_nodes(); }
   virtual dof_id_type nActiveElem() const { return _mesh->n_active_elem(); }
   virtual dof_id_type nActiveLocalElem() const { return _mesh->n_active_local_elem(); }
+  // NOTE: Expensive operation (iterates through all elements to gather subdomains)
   virtual SubdomainID nSubdomains() const { return _mesh->n_subdomains(); }
   virtual unsigned int nPartitions() const { return _mesh->n_partitions(); }
   virtual bool skipPartitioning() const { return _mesh->skip_partitioning(); }

@@ -164,7 +164,7 @@ MaterialPropertyStorage::getKokkosProperty(std::string prop_name, unsigned int s
 void
 MaterialPropertyStorage::allocateKokkosProperties()
 {
-  auto & mesh = _problem.mesh();
+  auto & mesh = *_problem.mesh().getKokkosMesh();
   auto & assembly = _problem.kokkosAssembly();
 
   for (unsigned int state = 0; state < numStates(); ++state)

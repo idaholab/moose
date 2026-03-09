@@ -50,7 +50,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
-  _var_subdomain_active.create(_num_vars, _mesh.nSubdomains());
+  _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
@@ -93,7 +93,7 @@ System::setupDofs()
   auto & sys = _system.system();
 
   auto num_elems = kokkosMesh().getNumLocalElements();
-  auto num_nodes = kokkosMesh().getContiguousNodeMap().size();
+  auto num_nodes = kokkosMesh().getNumLocalNodes();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -117,7 +117,7 @@ System::setupDofs()
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
-    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       _dof_map.dof_indices(elem, dof_indices, var);
 
@@ -131,8 +131,10 @@ System::setupDofs()
     _local_node_dof_index[var].create(num_nodes);
     _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
-    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
+      const auto id = kokkosMesh().getContiguousElementID(elem);
+
       _dof_map.dof_indices(elem, dof_indices, var);
 
       for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
@@ -142,9 +144,11 @@ System::setupDofs()
       }
     }
 
-    for (auto & [node, id] : kokkosMesh().getContiguousNodeMap())
+    for (const auto node : kokkosMesh().getLocalNodes())
       if (node->processor_id() == _comm.rank())
       {
+        const auto id = kokkosMesh().getContiguousNodeID(node);
+
         _dof_map.dof_indices(node, dof_indices, var);
 
         if (dof_indices.size())
@@ -469,10 +473,10 @@ System::reinit()
   for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.nSubdomains(), _num_vars);
+      _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.nSubdomains(), _num_vars);
+      _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     for (auto subdomain : _mesh.meshSubdomains())
     {

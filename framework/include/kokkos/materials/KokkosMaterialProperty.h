@@ -16,8 +16,7 @@
 #endif
 
 #include "KokkosAssembly.h"
-
-#include "MooseMesh.h"
+#include "KokkosMesh.h"
 
 namespace Moose::Kokkos
 {
@@ -110,18 +109,18 @@ MaterialProperty<T, dimension>::shallowCopy(const MaterialProperty<T, dimension>
 
 template <typename T, unsigned int dimension>
 void
-MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
+MaterialProperty<T, dimension>::allocate(const Mesh & mesh,
                                          const Assembly & assembly,
                                          const std::set<SubdomainID> & subdomains,
                                          const bool bnd,
                                          StorageKey)
 {
   if (!_data.isAlloc())
-    _data.create(mesh.nSubdomains());
+    _data.create(mesh.getNumSubdomains());
 
   for (const auto subdomain : subdomains)
   {
-    auto sid = mesh.getKokkosMesh()->getContiguousSubdomainID(subdomain);
+    auto sid = mesh.getContiguousSubdomainID(subdomain);
 
     std::vector<dof_id_type> n;
 
@@ -132,7 +131,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
       n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
     else if (_constant_option == PropertyConstantOption::ELEMENT)
       n.push_back(bnd ? assembly.getElemFacePropertySize(sid)
-                      : mesh.getKokkosMesh()->getNumSubdomainLocalElements(subdomain));
+                      : mesh.getNumSubdomainLocalElements(subdomain));
     else
       n.push_back(1);
 
