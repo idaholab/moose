@@ -182,7 +182,7 @@ LinearSystem::initialSetup()
 }
 
 void
-LinearSystem::requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
+LinearSystem::requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return;
@@ -190,16 +190,16 @@ LinearSystem::requestLimitedGradients(const Moose::FV::GradientLimiterType limit
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
-LinearSystem::limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const
+LinearSystem::linearFVLimitedGradientContainer(
+    const Moose::FV::GradientLimiterType limiter_type) const
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return _raw_grad_container;
 
   const auto it = _raw_limited_grad_containers.find(limiter_type);
   if (it == _raw_limited_grad_containers.end())
-    mooseError("Limited gradient container was requested but not initialized on system '",
-               name(),
-               "'.");
+    mooseError(
+        "Limited gradient container was requested but not initialized on system '", name(), "'.");
 
   return it->second;
 }
@@ -273,13 +273,13 @@ LinearSystem::computeGradients()
   }
 
   // Compute any requested limited gradients using the newly updated raw gradients.
-  if (!requestedLimitedGradientTypes().empty())
+  if (!requestedLinearFVLimitedGradientTypes().empty())
   {
     using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
     ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
                                   _fe_problem.mesh().ownedElemInfoEnd());
 
-    for (const auto limiter_type : requestedLimitedGradientTypes())
+    for (const auto limiter_type : requestedLinearFVLimitedGradientTypes())
     {
       if (limiter_type == Moose::FV::GradientLimiterType::None)
         continue;
@@ -309,7 +309,7 @@ LinearSystem::computeGradients()
 }
 
 std::vector<std::unique_ptr<NumericVector<Number>>> &
-LinearSystem::newLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
+LinearSystem::newlinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
 {
   return _new_limited_gradient[limiter_type];
 }

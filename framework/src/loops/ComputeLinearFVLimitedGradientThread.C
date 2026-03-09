@@ -33,7 +33,7 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     _system_number(_linear_system.number()),
     _limiter_type(limiter_type),
     _new_limited_gradient(_fe_problem.getLinearSystem(_linear_system_number)
-                              .newLimitedGradientContainer(_limiter_type))
+                              .newlinearFVLimitedGradientContainer(_limiter_type))
 {
 }
 
@@ -56,7 +56,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
   _tid = puid.id;
 
   auto & linear_system = _fe_problem.getLinearSystem(_linear_system_number);
-  const auto & raw_grad_container = linear_system.gradientContainer();
+  const auto & raw_grad_container = linear_system.linearFVGradientContainer();
 
   if (_limiter_type != Moose::FV::GradientLimiterType::Venkatakrishnan)
     mooseError("ComputeLinearFVLimitedGradientThread currently supports only the Venkatakrishnan "

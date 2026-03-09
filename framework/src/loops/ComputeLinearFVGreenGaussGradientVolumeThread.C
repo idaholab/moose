@@ -44,7 +44,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
 
   // This will be the vector we work on since the old gradient might still be needed
   // to compute extrapolated boundary conditions for example.
-  auto & grad_container = linear_system.newGradientContainer();
+  auto & grad_container = linear_system.newlinearFVGradientContainer();
 
   // Computing this size can be very expensive so we only want to do it once
   unsigned int size = 0;

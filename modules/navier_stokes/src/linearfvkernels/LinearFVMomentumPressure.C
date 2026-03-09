@@ -35,7 +35,7 @@ LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & param
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
     _pressure_var(getPressureVariable(NS::pressure)),
-    _pressure_gradient(_pressure_var.sys().gradientContainer()),
+    _pressure_gradient(_pressure_var.sys().linearFVGradientContainer()),
     _pressure_var_num(_pressure_var.number()),
     _pressure_sys_num(_pressure_var.sys().number())
 {
