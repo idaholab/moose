@@ -362,4 +362,16 @@
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
   []
+  [option_min_parallel]
+    type = PythonUnitTest
+    input = test_option_min_parallel.py
+    requirement = 'The system shall provide the ability to filter tests if they do not require at or above a certain number of MPI processes.'
+    issues = '#32442'
+  []
+  [option_min_threads]
+    type = PythonUnitTest
+    input = test_option_min_threads.py
+    requirement = 'The system shall provide the ability to filter tests if they do not require at or above a certain number of threads.'
+    issues = '#32442'
+  []
 []

@@ -384,10 +384,24 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
 
     s = "Array:" + basicCppType(t);
   }
+  else if (cpp_type.find("std::map") != std::string::npos ||
+           cpp_type.find("std::unordered_map") != std::string::npos)
+  {
+    // Get the template types
+    // Matches std::map< K , V [, ...] >
+    // and std::unordered_map< K , V [, ...] >
+    pcrecpp::RE r_map(
+        "^(?:std::)?(?:unordered_)?map\\s*<\\s*([^,>]+)\\s*,\\s*([^,>]+)(?:\\s*,.*)?\\s*>$");
+
+    // k and v hold the key and value types
+    std::string k, v;
+    r_map.FullMatch(cpp_type, &k, &v);
+
+    s = "Map:" + k + "->" + v;
+  }
   else if (cpp_type.find("MultiMooseEnum") != std::string::npos ||
            cpp_type.find("ExecFlagEnum") != std::string::npos ||
-           cpp_type.find("VectorPostprocessorName") != std::string::npos ||
-           cpp_type.find("std::map") != std::string::npos)
+           cpp_type.find("VectorPostprocessorName") != std::string::npos)
     s = "Array:String";
   else if (cpp_type.find("libMesh::Point") != std::string::npos)
     s = "Array:Real";

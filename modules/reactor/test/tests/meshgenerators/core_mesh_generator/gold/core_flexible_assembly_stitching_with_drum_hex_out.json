@@ -4,7 +4,7 @@
             "type": "MeshMetaDataReporter",
             "values": {
                 "values": {
-                    "type": "std::map<std::string, RestartableDataReporter::Value, std::less<std::string>, std::allocator<std::pair<std::stringconst, RestartableDataReporter::Value>>>"
+                    "type": "std::map<std::string, RestartableDataReporter::Value>"
                 }
             }
         }
@@ -219,7 +219,7 @@
                         "value": []
                     },
                     "MeshMetaData/het_pin/pin_region_ids": {
-                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, std::vector<std::vector<unsigned short>>>>>",
+                        "type": "std::map<unsigned short, std::vector<std::vector<unsigned short>>>",
                         "value": [
                             [
                                 1,
