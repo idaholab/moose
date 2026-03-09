@@ -15,12 +15,12 @@
 /**
  * MeshGenerator for defining subdomains from the output of the partitioner
  */
-class SubdomainFromPartitionerGenerator : public MeshGenerator
+class SubdomainsFromPartitionerGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  SubdomainFromPartitionerGenerator(const InputParameters & parameters);
+  SubdomainsFromPartitionerGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

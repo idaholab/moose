@@ -572,7 +572,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   // Pass the subdomain names
   mesh->set_subdomain_name_map() = mesh_2d->get_subdomain_name_map();
 
-  mesh->set_isnt_prepared();
+  // Elements have changed, neighbors, ids etc
+  mesh->unset_is_prepared();
 
   return mesh;
 }

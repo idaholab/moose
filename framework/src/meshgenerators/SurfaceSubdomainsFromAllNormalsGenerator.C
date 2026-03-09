@@ -249,7 +249,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     mooseWarning("Several subdomains were created for neighborless elements: " +
                  std::to_string(num_neighborless));
 
-  mesh->set_isnt_prepared();
+  // subdomain assignments have changed
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 

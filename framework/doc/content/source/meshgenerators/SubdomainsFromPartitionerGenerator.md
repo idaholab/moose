@@ -1,6 +1,6 @@
-# SubdomainFromPartitionerGenerator
+# SubdomainsFromPartitionerGenerator
 
-!syntax description /Mesh/SubdomainFromPartitionerGenerator
+!syntax description /Mesh/SubdomainsFromPartitionerGenerator
 
 Note that most partitioners do not guarantee a contiguous partition!
 See the [Partitioner syntax page](syntax/Mesh/Partitioner/index.md) for a list of partitioners available in MOOSE.
@@ -12,8 +12,8 @@ preceded by a [FileMeshGenerator.md] if needed to load a starting mesh previousl
 then its output may be loaded by other mesh generators, again using a [FileMeshGenerator.md]
 if these following mesh generators prefer working on a mesh in serial.
 
-!syntax parameters /Mesh/SubdomainFromPartitionerGenerator
+!syntax parameters /Mesh/SubdomainsFromPartitionerGenerator
 
-!syntax inputs /Mesh/SubdomainFromPartitionerGenerator
+!syntax inputs /Mesh/SubdomainsFromPartitionerGenerator
 
-!syntax children /Mesh/SubdomainFromPartitionerGenerator
+!syntax children /Mesh/SubdomainsFromPartitionerGenerator

@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SubdomainFromPartitionerGenerator.h"
+#include "SubdomainsFromPartitionerGenerator.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/partitioner.h"
 
-registerMooseObject("MooseApp", SubdomainFromPartitionerGenerator);
+registerMooseObject("MooseApp", SubdomainsFromPartitionerGenerator);
 
 InputParameters
-SubdomainFromPartitionerGenerator::validParams()
+SubdomainsFromPartitionerGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
@@ -34,7 +34,7 @@ SubdomainFromPartitionerGenerator::validParams()
   return params;
 }
 
-SubdomainFromPartitionerGenerator::SubdomainFromPartitionerGenerator(
+SubdomainsFromPartitionerGenerator::SubdomainsFromPartitionerGenerator(
     const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
@@ -43,7 +43,7 @@ SubdomainFromPartitionerGenerator::SubdomainFromPartitionerGenerator(
 }
 
 std::unique_ptr<MeshBase>
-SubdomainFromPartitionerGenerator::generate()
+SubdomainsFromPartitionerGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
@@ -95,6 +95,6 @@ SubdomainFromPartitionerGenerator::generate()
     elem->subdomain_id() = _offset + block_mesh_elem->processor_id();
   }
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
