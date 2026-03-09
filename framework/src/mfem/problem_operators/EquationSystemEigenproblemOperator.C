@@ -30,7 +30,11 @@ EquationSystemEigenproblemOperator::Solve()
   eigensolver->setOperator(*GetEquationSystem());
   eigensolver->setMassMatrix(*_mass_rhs);
   eigensolver->Solve();
-  GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.gridfunctions, eigensolver.get());
+  mfem::Array<mfem::real_t> eigenvalues;
+  eigensolver->getEigenvalues(eigenvalues);
+  for (int i = 0; i < 5; ++i)
+    std::cout << "Eigenvalue " << i << ": " << eigenvalues[i] << std::endl;
+  GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions, eigensolver.get());
 }
 
 } // namespace Moose::MFEM
