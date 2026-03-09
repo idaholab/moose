@@ -40,5 +40,6 @@
     compute_devices = 'cpu cuda'
     recover = false
     max_parallel = 1 # idaholab/moose#32250
+    min_slots = 2 # memory heavy
   []
 []
