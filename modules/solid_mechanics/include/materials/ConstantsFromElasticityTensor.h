@@ -10,19 +10,20 @@
 #pragma once
 
 #include "Material.h"
-#include "RankFourTensorForward.h"
+#include "RankFourTensor.h"
 #include "GuaranteeConsumer.h"
 
 /**
  * This material computes the elastic constants such as Young's modulus
  * from the elasticity tensor.
  */
-class ConstantsFromElasticityTensor : public Material, public GuaranteeConsumer
+template <bool is_ad>
+class ConstantsFromElasticityTensorTempl : public Material, public GuaranteeConsumer
 {
 public:
   static InputParameters validParams();
 
-  ConstantsFromElasticityTensor(const InputParameters & parameters);
+  ConstantsFromElasticityTensorTempl(const InputParameters & parameters);
   void initialSetup() override;
 
 protected:
@@ -33,15 +34,18 @@ private:
   const std::string _base_name;
 
   ///{@ Elastic constants computed from tensor
-  MaterialProperty<Real> & _youngs_modulus;
-  MaterialProperty<Real> & _poissons_ratio;
-  MaterialProperty<Real> & _shear_modulus;
-  MaterialProperty<Real> & _bulk_modulus;
+  GenericMaterialProperty<Real, is_ad> & _youngs_modulus;
+  GenericMaterialProperty<Real, is_ad> & _poissons_ratio;
+  GenericMaterialProperty<Real, is_ad> & _shear_modulus;
+  GenericMaterialProperty<Real, is_ad> & _bulk_modulus;
   ///@}
 
   /// Name of elasticity tensor
   const std::string _elasticity_tensor_name;
 
   /// The computed elastic constant
-  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const GenericMaterialProperty<RankFourTensor, is_ad> & _elasticity_tensor;
 };
+
+typedef ConstantsFromElasticityTensorTempl<false> ConstantsFromElasticityTensor;
+typedef ConstantsFromElasticityTensorTempl<true> ADConstantsFromElasticityTensor;
