@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMEigenproblem.h"
+#include "MFEMVariable.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblem);
 
@@ -49,7 +50,43 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
   addGridFunction(var_type, var_name, parameters);
 
   for (int i = 0; i < getParam<int>("num_modes"); ++i)
-    addGridFunction(var_type, var_name + "_" + std::to_string(i), parameters);
+    addEigenGridFunction(var_type, var_name + "_" + std::to_string(i), parameters);
 }
+
+void
+MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
+                                       const std::string & var_name,
+                                       InputParameters & parameters)
+{
+
+  if (var_type == "MFEMVariable" || var_type == "MFEMComplexVariable")
+  {
+    // Add MFEM variable directly.
+    FEProblemBase::addUserObject(var_type, var_name, parameters);
+  }
+  else
+  {
+    // Add MOOSE variable.
+    FEProblemBase::addVariable(var_type, var_name, parameters);
+
+    // Add MFEM variable indirectly ("gridfunction").
+    InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
+    FEProblemBase::addUserObject("MFEMVariable", var_name, mfem_variable_params);
+  }
+
+  // Register gridfunction.
+  
+  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+  getProblemData().eigen_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  if (mfem_variable.getFESpace().isScalar())
+    getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
+  else
+    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
+
+}
+  
+
 
 #endif

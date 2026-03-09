@@ -35,28 +35,43 @@ MFEMDataCollection::registerFields()
 {
   // Save real fields
   mfem::DataCollection & dc(getDataCollection());
-  for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
+  if (dynamic_cast<MFEMEigenproblem *>(_problem_ptr))
   {
-    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
-      dc.RegisterField(gf_name, gf_ptr.get());
-    else
-      mooseInfo("The variable ",
-                gf_name,
-                " is not defined on the same mesh as the output DataCollection.");
-  }
-
-  // Save complex fields
-  for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
-  {
-    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+    for (auto const & [gf_name, gf_ptr] : _problem_data.eigen_gridfunctions)
     {
-      dc.RegisterField(gf_name + "_real", &gf_ptr->real());
-      dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
+      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+        dc.RegisterField(gf_name, gf_ptr.get());
+      else
+        mooseInfo("The variable ",
+                  gf_name,
+                  " is not defined on the same mesh as the output DataCollection.");
     }
-    else
-      mooseInfo("The variable ",
-                gf_name,
-                " is not defined on the same mesh as the output DataCollection.");
+  }
+  else
+  {
+    for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
+    {
+      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+        dc.RegisterField(gf_name, gf_ptr.get());
+      else
+        mooseInfo("The variable ",
+                  gf_name,
+                  " is not defined on the same mesh as the output DataCollection.");
+    }
+
+    // Save complex fields
+    for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
+    {
+      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+      {
+        dc.RegisterField(gf_name + "_real", &gf_ptr->real());
+        dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
+      }
+      else
+        mooseInfo("The variable ",
+                  gf_name,
+                  " is not defined on the same mesh as the output DataCollection.");
+    }
   }
 }
 
