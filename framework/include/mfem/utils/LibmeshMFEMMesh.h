@@ -137,6 +137,7 @@ protected:
    * libmesh node id. Any left-over node ids will be detected.
    */
   void verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
+      const CubitBlockInfo & block_info,
       const std::vector<int> & unique_block_ids,
       const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
       const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
@@ -155,8 +156,6 @@ protected:
   {
     return _mfem_vertex_index_for_libmesh_corner_node_id.at(libmesh_corner_node_id);
   }
-
-  static const std::vector<int> & getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type);
 
 private:
   std::map<int, int> _mfem_element_id_for_libmesh_element_id;
