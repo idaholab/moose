@@ -1,8 +1,8 @@
 [Tests]
   [constants_from_elasticity_tensor]
-    type = 'Exodiff'
+    type = CSVDiff
     input = 'constants_from_elasticity_tensor.i'
-    exodiff = 'constants_from_elasticity_tensor_out.e'
+    csvdiff = 'constants_from_elasticity_tensor_out.csv'
     issues = '#32399'
     design = 'ConstantsFromElasticityTensor.md'
     requirement = 'The system shall allow for elastic constants to be computed from an isotropic elasticity tensor as scalar material properties'
