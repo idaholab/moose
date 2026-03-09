@@ -116,7 +116,7 @@ protected:
   /// Tolerance but when using the flipped normal
   const Real _flipped_normal_tol;
   /// Whether to paint/flood using a fixed normal or a moving normal
-  const bool _fixed_normal;
+  const bool _fixed_flooding_normal;
   /// Whether to also consider surface elements that have a flipped normal
   const bool _consider_flipped_normals;
   /// Whether to flip the normal of a surface element when they meet the criterion

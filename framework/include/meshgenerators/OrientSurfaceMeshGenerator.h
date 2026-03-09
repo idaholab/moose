@@ -24,8 +24,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  // Does not do anything, the flipping of normals is an option of the base class
   void actOnElem(Elem * const /*elem*/,
                  const Point & /*normal*/,
                  const subdomain_id_type & /*sub_id*/,
-                 MeshBase & /*mesh*/) override;
+                 MeshBase & /*mesh*/) override
+  {
+  }
 };

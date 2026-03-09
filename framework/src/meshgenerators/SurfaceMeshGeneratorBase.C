@@ -95,7 +95,7 @@ SurfaceMeshGeneratorBase::validParams()
 
   params.addParamNamesToGroup("normal normal_tol fixed_normal check_painted_neighbor_normals",
                               "Flooding using surface element normals");
-  params.addParamNamesToGroup("onsider_flipped_normalsflipped_normal_tol",
+  params.addParamNamesToGroup("consider_flipped_normals flipped_normal_tol",
                               "Flooding using surface element inverted normals");
   params.addParamNamesToGroup("max_paint_size_centroids flood_elements_once", "Other flooding");
   return params;
@@ -115,7 +115,7 @@ SurfaceMeshGeneratorBase::SurfaceMeshGeneratorBase(const InputParameters & param
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
     _flipped_normal_tol(getParam<Real>("flipped_normal_tol")),
-    _fixed_normal(getParam<bool>("fixed_normal")),
+    _fixed_flooding_normal(getParam<bool>("fixed_normal")),
     _consider_flipped_normals(getParam<bool>("consider_flipped_normals")),
     _flip_inverted_normals(getParam<bool>("flip_inverted_normals")),
     _has_max_distance_criterion(isParamSetByUser("max_paint_size_centroids")),
@@ -234,7 +234,7 @@ SurfaceMeshGeneratorBase::flood(Elem * const elem,
     // Flood to the neighboring elements
     if (_flood_recursion_count < _flood_max_recursion)
       flood(elem->neighbor_ptr(neighbor),
-            _fixed_normal ? base_normal : elem_normal,
+            _fixed_flooding_normal ? base_normal : elem_normal,
             starting_elem,
             sub_id,
             mesh);

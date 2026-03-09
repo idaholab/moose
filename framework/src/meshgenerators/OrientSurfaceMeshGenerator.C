@@ -30,6 +30,11 @@ OrientSurfaceMeshGenerator::validParams()
 {
   InputParameters params = SurfaceMeshGeneratorBase::validParams();
 
+  // NOTE: libmesh tetrahedralization code actually has a clever heuristic
+  // to re-orient elements starting from the known orientation of the "bottom-most"
+  // surface element. We could import that logic here, once we identify and separate connected
+  // (contiguous) components of the mesh.
+
   // Which elements to apply the change on
   params.setDocString(
       "included_subdomains",
@@ -47,9 +52,10 @@ OrientSurfaceMeshGenerator::validParams()
   // This mesh generator does not modify the subdomains
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
   // This mesh generator is specifically intended to flip normals
-  params.addParam<bool>(
-      "flip_inverted_normals", true, "Whether to flip the elements with inverted normals");
+  params.set<bool>("flip_inverted_normals") = true;
   params.suppressParameter<bool>("flip_inverted_normals");
+  params.set<bool>("consider_flipped_normals") = true;
+  params.set<bool>("_using_normal") = true;
 
   params.addClassDescription("Change the orientation of (part of) the surface mesh.");
   return params;
@@ -58,6 +64,10 @@ OrientSurfaceMeshGenerator::validParams()
 OrientSurfaceMeshGenerator::OrientSurfaceMeshGenerator(const InputParameters & parameters)
   : SurfaceMeshGeneratorBase(parameters)
 {
+  if (!isParamValid("element_ids_to_flood_from") && !isParamSetByUser("normal_to_align_with"))
+    paramError("normal_to_align_with",
+               "Either a 'normal_to_align_with' or 'element_ids_to_flood_from' must be specified "
+               "to select the behavior of this mesh generator.");
 }
 
 std::unique_ptr<MeshBase>
@@ -68,6 +78,7 @@ OrientSurfaceMeshGenerator::generate()
 
   unsigned int num_flipped = 0;
   auto & binfo = mesh->get_boundary_info();
+  bool normal_is_input = isParamSetByUser("normal_to_align_with");
 
   if (!isParamValid("element_ids_to_flood_from"))
     // We'll need to loop over all of the elements to adjust normals with the fixed normal option
@@ -97,11 +108,11 @@ OrientSurfaceMeshGenerator::generate()
       }
     }
   else
-    // We'll flood and re-adjust normals from a few given elements
+    // We'll flood and re-adjust orientations starting from a few given elements
+    // NOTE: user's responsibility to make sure these surface elements' orientations are consistent
     for (const auto eid : getParam<std::vector<dof_id_type>>("element_ids_to_flood_from"))
     {
       auto elem = mesh->elem_ptr(eid);
-      std::cout << "Painting from " << eid << std::endl;
 
       // Nothing to do with edges
       if (elem->dim() < 2)
@@ -111,7 +122,7 @@ OrientSurfaceMeshGenerator::generate()
         continue;
 
       // Compute the normal
-      const auto normal = get2DElemNormal(elem);
+      const auto normal = normal_is_input ? _normal : get2DElemNormal(elem);
 
       flood(elem, normal, *elem, elem->subdomain_id(), *mesh);
     }
@@ -120,13 +131,4 @@ OrientSurfaceMeshGenerator::generate()
     _console << "Flipped the orientation of " << num_flipped << " surface elements." << std::endl;
 
   return dynamic_pointer_cast<MeshBase>(mesh);
-}
-
-void
-OrientSurfaceMeshGenerator::actOnElem(Elem * const,
-                                      const Point &,
-                                      const subdomain_id_type &,
-                                      MeshBase &)
-{
-  // The flip is an option in the base class, nothing needed here
 }
