@@ -96,10 +96,8 @@ Array<T, 1, index_type, LayoutType::LEFT>::scal(const T a,
   if (this->size() != x.size())
     mooseError("Kokkos array error: all arrays for scal() should have the same size.");
 
-  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
-      this->deviceData(), this->size());
-  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(x.deviceData(),
-                                                                                   x.size());
+  auto self = this->deviceView();
+  auto other = x.deviceView();
 
   KokkosBlas::scal(self, a, other);
 }
@@ -121,10 +119,8 @@ Array<T, 1, index_type, LayoutType::LEFT>::dot(const Array<T, 1, index_type, Lay
   if (this->size() != x.size())
     mooseError("Kokkos array error: all arrays for dot() should have the same size.");
 
-  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
-      this->deviceData(), this->size());
-  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(x.deviceData(),
-                                                                                   x.size());
+  auto self = this->deviceView();
+  auto other = x.deviceView();
 
   return KokkosBlas::dot(self, other);
 }
@@ -136,8 +132,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::nrm2()
   if (!this->isDeviceAlloc())
     mooseError("Kokkos array error: array for nrm2() should be on device.");
 
-  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
-      this->deviceData(), this->size());
+  auto self = this->deviceView();
 
   return KokkosBlas::nrm2(self);
 }

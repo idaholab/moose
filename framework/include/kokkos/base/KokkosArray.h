@@ -256,6 +256,24 @@ public:
    */
   T * deviceData() const { return _device_data; }
   /**
+   * Get the host unmanaged view
+   * @returns The host unmanaged view
+   */
+  auto hostView() const
+  {
+    return ::Kokkos::View<T *, ::Kokkos::HostSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+        _host_data, _size);
+  }
+  /**
+   * Get the device unmanaged view
+   * @returns The device unmanaged view
+   */
+  auto deviceView() const
+  {
+    return ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(_device_data,
+                                                                                      _size);
+  }
+  /**
    * Allocate array on host and device
    * @param n The vector containing the size of each dimension
    */
@@ -1071,11 +1089,7 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
-  {
-    ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> data(_device_data,
-                                                                                    _size);
-    ::Kokkos::Experimental::fill_n(ExecSpace(), data, _size, scalar);
-  }
+    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
 
   return *this;
 }
