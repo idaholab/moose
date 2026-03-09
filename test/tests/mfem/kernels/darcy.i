@@ -78,7 +78,7 @@
 []
 
 [Solver]
-  type = MFEMSuperLU
+  type = MFEMMUMPS
 []
 
 [Executioner]
