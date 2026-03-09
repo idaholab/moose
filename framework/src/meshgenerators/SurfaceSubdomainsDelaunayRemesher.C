@@ -41,14 +41,6 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
   params.addParam<std::vector<SubdomainName>>(
       "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
-  // Not currently supported, though the machinery from Boundary2DDelaunayGenerator was kept in the
-  // right locations so it should be a manageable lift when needed
-  // params.addParam<std::vector<std::vector<BoundaryName>>>(
-  //     "hole_boundary_names",
-  //     {},
-  //     "The optional boundaries to be used as the holes in the mesh during triangulation. Note
-  //     that " "this is a vector of vectors, which allows each hole to be defined as a combination
-  //     of " "multiple boundaries.");
 
   // Shape parameters
   params.addRangeCheckedParam<Real>(
@@ -124,8 +116,6 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
-    // _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
-    _hole_boundary_names(std::vector<std::vector<BoundaryName>>()),
     _max_level_set_correction_iterations(
         getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),
@@ -433,24 +423,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
 
-  // If we have holes, we need to create a 1D mesh for each hole
-  std::vector<std::unique_ptr<MeshBase>> hole_meshes_1d;
-  for (auto & hole_mesh_2d : hole_meshes_2d)
-  {
-    // As we do not need these holes for reverse projection, we do not need to convert them to TRI3
-    // meshes, but we still need to create a 1D mesh for each hole
-    hole_mesh_2d->find_neighbors();
-    bool has_external_bdy = false;
-    const auto hole_mesh_2d_ext_bdry = MooseMeshUtils::getNextFreeBoundaryID(*hole_mesh_2d);
-    MooseMeshUtils::addExternalBoundary(*hole_mesh_2d, hole_mesh_2d_ext_bdry, has_external_bdy);
-
-    // Extract the 1D edge elements boundary as a mesh
-    hole_meshes_1d.push_back(
-        MooseMeshUtils::buildBoundaryMesh(*hole_mesh_2d, hole_mesh_2d_ext_bdry));
-
-    // Do not clear the 2D hole mesh, we may re-use it
-  }
-
   // Add more nodes in the 1D mesh
   // We need to do this BEFORE the mesh is projected to avoid distortion in the node distances
   // The distortion is not the same for each subdomain, so we would end up with a non-conformal mesh
@@ -492,9 +464,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   // Move both 2d and 1d meshes to the centroid of the 2D mesh
   MeshTools::Modification::translate(*mesh_1d, -centroid(0), -centroid(1), -centroid(2));
   MeshTools::Modification::translate(*mesh_2d, -centroid(0), -centroid(1), -centroid(2));
-  // Also need to translate the 1D hole meshes if applicable
-  for (auto & hole_mesh_1d : hole_meshes_1d)
-    MeshTools::Modification::translate(*hole_mesh_1d, -centroid(0), -centroid(1), -centroid(2));
 
   // Calculate the Euler angles to rotate the meshes so that the 2D mesh is close to the XY plane
   // (i.e., the normal vector of the 2D mesh is aligned with the Z axis)
@@ -505,9 +474,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       M_PI * 180.0;
   MeshTools::Modification::rotate(*mesh_1d, 90.0 - phi, theta, 0.0);
   MeshTools::Modification::rotate(*mesh_2d, 90.0 - phi, theta, 0.0);
-  // Also rotate the 1D hole meshes if applicable
-  for (auto & hole_mesh_1d : hole_meshes_1d)
-    MeshTools::Modification::rotate(*hole_mesh_1d, 90.0 - phi, theta, 0.0);
 
   // Clone the 2D mesh to be used for reverse projection later
   auto mesh_2d_xyz = dynamic_pointer_cast<MeshBase>(mesh_2d->clone());
@@ -518,24 +484,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   // Project the 1D mesh to the XY plane as well
   for (const auto & node : mesh_1d->node_ptr_range())
     (*node)(2) = 0;
-  // Also project the 1D hole meshes to the XY plane if applicable
-  for (auto & hole_mesh_1d : hole_meshes_1d)
-  {
-    for (const auto & node : hole_mesh_1d->node_ptr_range())
-      (*node)(2) = 0;
-  }
-
-  // Create meshed holes for each hole mesh
-  std::vector<libMesh::TriangulatorInterface::MeshedHole> meshed_holes;
-  std::vector<libMesh::TriangulatorInterface::Hole *> triangulator_hole_ptrs;
-  meshed_holes.reserve(hole_meshes_1d.size());
-  triangulator_hole_ptrs.reserve(hole_meshes_1d.size());
-  for (auto remesh_i : index_range(hole_meshes_1d))
-  {
-    hole_meshes_1d[remesh_i]->prepare_for_use();
-    meshed_holes.emplace_back(*hole_meshes_1d[remesh_i]);
-    triangulator_hole_ptrs[remesh_i] = &meshed_holes.back();
-  }
 
   // Finally, triangulation
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(std::move(mesh_1d));
@@ -549,8 +497,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   poly2tri.desired_area() = _desired_areas[group_i];
   poly2tri.minimum_angle() = 0; // Not yet supported
   poly2tri.smooth_after_generating() = false;
-  if (!triangulator_hole_ptrs.empty())
-    poly2tri.attach_hole_list(&triangulator_hole_ptrs);
   // Future TODO: correct the area function based on the local normal vector
   if (_use_auto_area_func)
     poly2tri.set_auto_area_function(this->comm(),
