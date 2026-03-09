@@ -172,8 +172,8 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
         const auto * fi = _fe_problem.mesh().faceInfo(fi_elem, fi_side);
         mooseAssert(fi,
                     "Missing FaceInfo for neighboring elements with centroid " +
-                        Moose::stringify(elem->centroid()) + " and " +
-                        Moose::stringify(neighbor->centroid()) +
+                        Moose::stringify(elem_info->centroid()) + " and " +
+                        Moose::stringify(neighbor->vertex_average()) +
                         " while computing limited gradients.");
 
         const Point face_point = fi->faceCentroid() - fi->skewnessCorrectionVector();
