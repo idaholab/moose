@@ -392,7 +392,7 @@ class RunApp(Tester):
             )
 
             # Need to run mpiexec with containerized openmpi
-            if options.hpc and options._mpi_config.mpi_type == MPIType.OPENMPI:
+            if options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI:
                 cmd = f"mpiexec -n 1 {cmd}"
 
             return cmd
@@ -516,7 +516,7 @@ class RunApp(Tester):
         if (
             force_mpi
             or ncpus > 1
-            or (options.hpc and options._mpi_config.mpi_type == MPIType.OPENMPI)
+            or (options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI)
         ):
             command = f"{mpi_command} -n {ncpus} {command}"
 

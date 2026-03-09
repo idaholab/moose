@@ -174,7 +174,7 @@ class HPCRunner(Runner):
         #
         # Where <NULL> is there the null character ends up. Thus, in cases
         # where we have a nonzero exit code and a MPI_ABORT, we'll try to remove these.
-        if self.exit_code != 0 and self.options._mpi_config.mpi_type == MPIType.OPENMPI:
+        if self.exit_code != 0 and self.options.mpi_config.mpi_type == MPIType.OPENMPI:
             output = self.getRunOutput().getOutput(sanitize=False)
             if "MPI_ABORT" in output:
                 output_changed = False

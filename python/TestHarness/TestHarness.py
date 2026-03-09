@@ -452,7 +452,7 @@ class TestHarness:
         self.options._app_name = self.app_name
 
         # Store the mpi configuration we have discovered
-        self.options._mpi_config = get_mpi_config()
+        self.options.mpi_config = get_mpi_config()
 
         # Initialize the scheduler
         self.initialize()

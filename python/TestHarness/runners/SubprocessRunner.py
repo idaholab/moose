@@ -118,7 +118,7 @@ class SubprocessRunner(Runner):
 
         # Special MPI environment options, if not disabled
         if not self.options.disable_mpi_options:
-            mpi_config: MPIConfig = self.options._mpi_config
+            mpi_config: MPIConfig = self.options.mpi_config
             # OpenMPI
             if mpi_config.mpi_type == MPIType.OPENMPI:
                 # Don't clobber state
@@ -177,7 +177,7 @@ class SubprocessRunner(Runner):
             if (
                 file == self.errfile
                 and self.exit_code != 0
-                and self.options._mpi_config.mpi_type == MPIType.OPENMPI
+                and self.options.mpi_config.mpi_type == MPIType.OPENMPI
                 and len(output) > 2
                 and output[-3:] in ["\n\0\n", "\n\x00\n"]
             ):
