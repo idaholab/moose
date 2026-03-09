@@ -9,6 +9,7 @@
 
 #include "SurfaceSubdomainsFromAllNormalsGenerator.h"
 #include "InputParameters.h"
+#include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
 #include "libmesh/mesh_generation.h"
@@ -31,16 +32,26 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       false,
       "Whether to only group elements in a subdomain using the 'flooding' algorithm. "
       "We strongly recommend pairing this with the 'flood_elements_once' parameter");
-  params.addParam<bool>(
-      "select_max_neighbor_element_subdomains",
-      false,
-      "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
-      "that holds the most neighbors of the element with a similar normal");
+  params.addParam<bool>("select_max_neighbor_element_subdomains",
+                        false,
+                        "Whether to perform a final subdomain assignment phase where each element "
+                        "is assigned to the subdomain "
+                        "that holds the most neighbors of the element with a similar normal.");
   params.addParam<bool>(
       "separate_elements_connected_by_a_single_node",
       false,
-      "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
-      "that holds the most neighbors of the element with a similar normal");
+      "Whether to perform a final subdomain assignment phase where any element that is not "
+      "connected to other elements from the same subdomain is re-assigned to either the subdomain "
+      "that all side neighbor elements belong to, or a new subdomain if there is no such subdomain "
+      "including all its side neighbors. Note that normals are not checked in this phase, and the "
+      "subdomain size criterion is assumed to be already met.");
+
+  params.addParamNamesToGroup("contiguous_assignments_only", "Other flooding");
+  // NOTE: these post-flooding / post-treatment operations could be moved to a base class.
+  // They could also become their own mesh generator!
+  params.addParamNamesToGroup(
+      "separate_elements_connected_by_a_single_node select_max_neighbor_element_subdomains",
+      "Post flooding subdomain re-assignments");
 
   // There can be many of them, and we don't control the number in this generator
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
@@ -54,7 +65,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 
 SurfaceSubdomainsFromAllNormalsGenerator::SurfaceSubdomainsFromAllNormalsGenerator(
     const InputParameters & parameters)
-  : SurfaceMeshGeneratorBase(parameters), _flood_only(getParam<bool>("contiguous_assignments_only"))
+  : SurfaceMeshGeneratorBase(parameters),
+    _contiguous_assignments_only(getParam<bool>("contiguous_assignments_only"))
 {
 }
 
@@ -82,7 +94,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     if (elem->dim() > 2)
       continue;
     // Likely an issue with the mesh
-    if (_flood_only && elem->n_neighbors() == 0)
+    if (_contiguous_assignments_only && elem->n_neighbors() == 0)
     {
       num_neighborless++;
       mooseWarning("Element '" + std::to_string(elem->id()) + "' has no neighbors");
@@ -98,11 +110,14 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     // Compute the normal
     const auto normal = get2DElemNormal(elem);
 
-    // See if we've seen this normal before (linear search)
+    // Three options for which subdomain to paint with:
+    // 1) See if we've seen this normal before (linear search), within some tolerance
+    // NOTE: these elements might not be neighbors of the current element,
+    // so the patch may not be contiguous
     const std::map<SubdomainID, RealVectorValue>::value_type * item = nullptr;
     bool sub_id_found = false;
     SubdomainID sub_id;
-    if (!_flood_only)
+    if (!_contiguous_assignments_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
         if (normalsWithinTol(id_pair.second, normal, _normal_tol) ||
             (_consider_flipped_normals && normalsWithinTol(id_pair.second, normal, _normal_tol)))
@@ -111,6 +126,10 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
           item = &id_pair;
           break;
         }
+    // 2) Look at the neighbors, if a majority of them have the same subdomain and a similar normal,
+    // use that subdomain to paint elements with
+    // NOTE: compatible with 'contiguous_assignments_only' option
+    // NOTE: this overrides the result of the previous search
     if (_check_painted_neighor_normals)
     {
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
@@ -139,6 +158,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       // Note: the max distance from starting element of the subdomain flooding to this
       // element should be checked in the call to flood()
     }
+    // 3) Flood with a new subdomain every time ('contiguous_assignments_only' option)
 
     // Flood with the previously created subdomains and normals
     if (item)
@@ -172,18 +192,24 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       bool sub_id_found = false;
       SubdomainID sub_id;
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
-      // Use point neighbors, it's easy for a surface tri3 to be sandwiched into the wrong subdomain
-      // std::set<const Elem *> neighbor_set;
-      // elem->find_point_neighbors(neighbor_set);
+
+      // NOTE: we use side neighbors instead of point neighbors as side neighbors
+      // are always connected by 2 nodes to the rest of the subdomains, and elements
+      // connected by a single node to a subdomain cause issues when triangulating
+      // that subdomain.
 
       // Try to flood from each side with the same subdomain
       // Look for the neighbor subdomain id with the most neighbors
-      // NOTE: we might exceeed the patch distance here
       for (const auto neighbor_i : make_range(elem->n_sides()))
       {
         const auto neighbor = elem->neighbor_ptr(neighbor_i);
+        // NOTE: to avoid exceeding the patch size, we pass the element that was used to start
+        // painting the patch to check the 'distance'/'patch size' criterion
         if (neighbor &&
-            elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), *neighbor, normal))
+            elementSatisfiesRequirements(elem,
+                                         get2DElemNormal(neighbor),
+                                         *_subdomain_to_starting_elem[neighbor->subdomain_id()],
+                                         normal))
         {
           sub_id_found = true;
           sub_id_neighbors[neighbor->subdomain_id()]++;
@@ -222,6 +248,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
         bool same_subdomain = true;
         subdomain_id_type common_sub = std::numeric_limits<subdomain_id_type>::max();
 
+        // If all side-neighbors have the same subdomain, use that subdomain instead
+        // NOTE: we don't check the normal criteria here
         for (const auto neighbor : make_range(elem->n_sides()))
           if (elem->neighbor_ptr(neighbor))
           {
@@ -238,14 +266,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       }
     }
 
-  // Remove single node connections by changing the element
-  // if (true)
-  // {
-  //   for (auto & elem : mesh->element_ptr_range())
-  //   {
-  // }
-
-  if (_flood_only && num_neighborless)
+  if (_contiguous_assignments_only && num_neighborless)
     mooseWarning("Several subdomains were created for neighborless elements: " +
                  std::to_string(num_neighborless));
 

@@ -37,5 +37,5 @@ protected:
   std::map<SubdomainID, Elem *> _subdomain_to_starting_elem;
   /// Whether to only use the flood algorithm to group elements, without looking for the
   /// previously created normals. This prevents discontiguous subdomains
-  const bool _flood_only;
+  const bool _contiguous_assignments_only;
 };
