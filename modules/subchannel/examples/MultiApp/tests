@@ -19,6 +19,7 @@
 
     # Runtime goes from 160 to ~300 depending on the civet machine
     heavy = true
+    min_slots = 3 # significant memory usage
     capabilities = 'method!=dbg'
     max_time = 400
   []
