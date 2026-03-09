@@ -352,11 +352,18 @@ public:
   class iterator
   {
   public:
-    KOKKOS_FUNCTION iterator(T * it) : it(it) {}
-    KOKKOS_FUNCTION bool operator==(const iterator & other) const { return it == other.it; }
-    KOKKOS_FUNCTION bool operator!=(const iterator & other) const { return it != other.it; }
-    KOKKOS_FUNCTION T & operator*() const { return *it; }
-    KOKKOS_FUNCTION T * operator&() const { return it; }
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
+
+    KOKKOS_FUNCTION iterator() : it(nullptr) {}
+    KOKKOS_FUNCTION explicit iterator(T * p) : it(p) {}
+
+    KOKKOS_FUNCTION reference operator*() const { return *it; }
+    KOKKOS_FUNCTION pointer operator->() const { return it; }
+    KOKKOS_FUNCTION pointer operator&() const { return it; }
     KOKKOS_FUNCTION iterator & operator++()
     {
       ++it;
@@ -368,9 +375,17 @@ public:
       ++it;
       return pre;
     }
+    KOKKOS_FUNCTION friend bool operator==(const iterator & a, const iterator & b)
+    {
+      return a.it == b.it;
+    }
+    KOKKOS_FUNCTION friend bool operator!=(const iterator & a, const iterator & b)
+    {
+      return a.it != b.it;
+    }
 
   private:
-    T * it;
+    pointer it;
   };
 
   /**
