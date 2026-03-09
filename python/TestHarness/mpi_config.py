@@ -51,8 +51,7 @@ def build_hwloc_topo() -> Optional[str]:
 
     try:
         store_dir = os.path.join(Path.home(), ".local", "share", "moose", "testharness")
-        if not os.path.exists(store_dir):
-            os.makedirs(store_dir, exist_ok=True)
+        os.makedirs(store_dir, exist_ok=True)
         store_file = os.path.join(store_dir, f"hwloc_topo_{gethostname()}.xml")
         cmd = [exe, "--of", "xml", "-f", store_file]
         run(cmd, check=True)
