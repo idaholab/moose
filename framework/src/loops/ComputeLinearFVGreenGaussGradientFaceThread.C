@@ -21,7 +21,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
         _fe_problem.getLinearSystem(_linear_system_number).system())),
     _system_number(_linear_system.number()),
-    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer())
+    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newlinearFVGradientContainer())
 {
 }
 

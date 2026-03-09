@@ -131,18 +131,20 @@ public:
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
   virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  gradientContainer() const override
+  linearFVGradientContainer() const override
   {
     return _raw_grad_container;
   }
 
-  virtual void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type) override;
+  virtual void
+  requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type) override;
 
   virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const override;
+  linearFVLimitedGradientContainer(
+      const Moose::FV::GradientLimiterType limiter_type) const override;
 
   virtual const std::set<Moose::FV::GradientLimiterType> &
-  requestedLimitedGradientTypes() const override
+  requestedLinearFVLimitedGradientTypes() const override
   {
     return _requested_limited_gradient_types;
   }
@@ -155,7 +157,7 @@ public:
   /**
    * Return a reference to the new (temporary) gradient container vectors
    */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & newGradientContainer()
+  std::vector<std::unique_ptr<NumericVector<Number>>> & newlinearFVGradientContainer()
   {
     return _new_gradient;
   }
@@ -165,7 +167,7 @@ public:
    * limiter type.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> &
-  newLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
+  newlinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
 
   virtual void compute(ExecFlagType type) override;
 

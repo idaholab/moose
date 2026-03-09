@@ -119,7 +119,7 @@ public:
   void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
   {
     computeCellGradients();
-    this->_sys.requestLimitedGradients(limiter_type);
+    this->_sys.requestLinearFVLimitedGradients(limiter_type);
   }
 
   /**

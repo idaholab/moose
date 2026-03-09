@@ -928,16 +928,28 @@ public:
 
   /**
    * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
-   * Mainly used for finite volume systems.
    */
-  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const;
-
-  virtual void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
   virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
+  linearFVGradientContainer() const;
 
-  virtual const std::set<Moose::FV::GradientLimiterType> & requestedLimitedGradientTypes() const;
+  /**
+   * Request limiting on the computed gradient for linear FV.
+   * @param limiter_type the type of limiting requested.
+   */
+  virtual void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+
+  /**
+   * Fetch the limited gradient container.
+   * @param limiter_type the type of limiting requested.
+   */
+  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
+
+  /**
+   * Get the set of limited gradient types.
+   */
+  virtual const std::set<Moose::FV::GradientLimiterType> &
+  requestedLinearFVLimitedGradientTypes() const;
 
   /**
    * Compute time derivatives, auxiliary variables, etc.

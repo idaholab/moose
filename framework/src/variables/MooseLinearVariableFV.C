@@ -49,7 +49,7 @@ template <typename OutputType>
 MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _needs_cell_gradients(false),
-    _grad_container(this->_sys.gradientContainer()),
+    _grad_container(this->_sys.linearFVGradientContainer()),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
@@ -143,7 +143,7 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
 {
   _cell_gradient.zero();
-  const auto & limited_grad_container = this->_sys.limitedGradientContainer(limiter_type);
+  const auto & limited_grad_container = this->_sys.linearFVLimitedGradientContainer(limiter_type);
   for (const auto i : make_range(this->_mesh.dimension()))
     _cell_gradient(i) =
         (*limited_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);

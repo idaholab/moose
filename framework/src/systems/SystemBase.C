@@ -1565,7 +1565,7 @@ SystemBase::initialSetup()
 }
 
 void
-SystemBase::requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
+SystemBase::requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type != Moose::FV::GradientLimiterType::None)
     mooseError("Requested limited gradients on system '",
@@ -1574,25 +1574,26 @@ SystemBase::requestLimitedGradients(const Moose::FV::GradientLimiterType limiter
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
-SystemBase::gradientContainer() const
+SystemBase::linearFVGradientContainer() const
 {
   static const std::vector<std::unique_ptr<NumericVector<Number>>> empty_gradient_container;
   return empty_gradient_container;
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
-SystemBase::limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const
+SystemBase::linearFVLimitedGradientContainer(
+    const Moose::FV::GradientLimiterType limiter_type) const
 {
   if (limiter_type != Moose::FV::GradientLimiterType::None)
     mooseError("Requested limited gradients on system '",
                name(),
                "' but only LinearSystem supports finite-volume gradient storage.");
 
-  return gradientContainer();
+  return linearFVGradientContainer();
 }
 
 const std::set<Moose::FV::GradientLimiterType> &
-SystemBase::requestedLimitedGradientTypes() const
+SystemBase::requestedLinearFVLimitedGradientTypes() const
 {
   static const std::set<Moose::FV::GradientLimiterType> empty_limiter_types;
   return empty_limiter_types;
