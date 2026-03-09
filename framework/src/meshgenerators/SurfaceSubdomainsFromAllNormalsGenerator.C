@@ -80,6 +80,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   setup(*mesh);
 
   unsigned int num_neighborless = 0;
+  const bool user_specified_normal = isParamSetByUser("normal");
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all in one go. We have to flood from multiple elements
@@ -108,19 +109,19 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       continue;
 
     // Compute the normal
-    const auto normal = get2DElemNormal(elem);
+    const auto elem_normal = get2DElemNormal(elem);
 
-    // Three options for which subdomain to paint with:
+    // Four options for which subdomain to paint with:
     // 1) See if we've seen this normal before (linear search), within some tolerance
     // NOTE: these elements might not be neighbors of the current element,
     // so the patch may not be contiguous
     const std::map<SubdomainID, RealVectorValue>::value_type * item = nullptr;
     bool sub_id_found = false;
-    SubdomainID sub_id;
     if (!_contiguous_assignments_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
-        if (normalsWithinTol(id_pair.second, normal, _normal_tol) ||
-            (_consider_flipped_normals && normalsWithinTol(id_pair.second, normal, _normal_tol)))
+        if (normalsWithinTol(id_pair.second, elem_normal, _normal_tol) ||
+            (_consider_flipped_normals &&
+             normalsWithinTol(id_pair.second, elem_normal, _normal_tol)))
         {
           sub_id_found = true;
           item = &id_pair;
@@ -130,6 +131,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     // use that subdomain to paint elements with
     // NOTE: compatible with 'contiguous_assignments_only' option
     // NOTE: this overrides the result of the previous search
+    SubdomainID neighbor_majority_sub_id;
     if (_check_painted_neighor_normals)
     {
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
@@ -141,7 +143,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
             elementSatisfiesRequirements(elem,
                                          get2DElemNormal(elem->neighbor_ptr(neighbor)),
                                          *elem->neighbor_ptr(neighbor),
-                                         normal))
+                                         elem_normal))
         {
           sub_id_found = true;
           sub_id_neighbors[elem->neighbor_ptr(neighbor)->subdomain_id()]++;
@@ -152,27 +154,49 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
         if (item >= max_of_subid)
         {
           max_of_subid = item;
-          sub_id = key;
+          neighbor_majority_sub_id = key;
         }
 
       // Note: the max distance from starting element of the subdomain flooding to this
       // element should be checked in the call to flood()
     }
-    // 3) Flood with a new subdomain every time ('contiguous_assignments_only' option)
+    // 3) Flood only with the selected fixed normal
+    // Note: this steers away from an "FromAllNormals" generator, it's more like a "FromNormal"
+    // generator capability.
+    if (user_specified_normal && !elementSatisfiesRequirements(elem, _normal, *elem, elem_normal))
+      continue;
+    // 4) Flood with a new subdomain every time ('contiguous_assignments_only' option)
 
-    // Flood with the previously created subdomains and normals
+    // Finalize flooding parameter selection
+    Elem * starting_element = elem;
+    subdomain_id_type flooding_sub_id;
+    Point flooding_normal = elem_normal;
     if (item)
-      flood(elem, item->second, *_subdomain_to_starting_elem[item->first], item->first, *mesh);
+    {
+      starting_element = _subdomain_to_starting_elem[item->first];
+      flooding_sub_id = item->first;
+      flooding_normal = item->second;
+    }
     else if (sub_id_found)
-      flood(elem, normal, *_subdomain_to_starting_elem[sub_id], sub_id, *mesh);
-    // Flood with a new subdomain and the element normal
+    {
+      starting_element = _subdomain_to_starting_elem[neighbor_majority_sub_id];
+      flooding_sub_id = neighbor_majority_sub_id;
+    }
     else
     {
-      sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-      _subdomain_to_normal_map[sub_id] = normal;
-      _subdomain_to_starting_elem[sub_id] = elem;
-      flood(elem, normal, *elem, sub_id, *mesh);
+      flooding_sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+      _subdomain_to_normal_map[flooding_sub_id] = elem_normal;
+      _subdomain_to_starting_elem[flooding_sub_id] = elem;
     }
+    // User input of a normal takes precedence
+    if (user_specified_normal)
+    {
+      flooding_normal = _normal;
+      _subdomain_to_normal_map[flooding_sub_id] = flooding_normal;
+    }
+
+    // Flood with the previously created subdomains and normals
+    flood(elem, flooding_normal, *starting_element, flooding_sub_id, *mesh);
   }
 
   // Check all elements once with only neighbor averaging
