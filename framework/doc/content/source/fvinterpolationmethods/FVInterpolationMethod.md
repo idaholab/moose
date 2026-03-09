@@ -2,7 +2,7 @@
 
 ## Description
 
-`FVInterpolationMethod` objects define interpolate cell-centered data to
+`FVInterpolationMethod` objects interpolate cell-centered data to
 finite-volume faces. They are regular `MooseObject`s stored in the application's warehouse so they
 can be declared once and shared by any kernel that needs them.
 

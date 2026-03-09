@@ -224,7 +224,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   if (_pars.isParamSetByUser("multi_system_fixed_point_relaxation_factor") &&
       !_using_multi_sys_fp_iterations)
     paramError("Can't use relaxation factors because multisystem fixed point iteration hasn't been "
-               "enbaled!");
+               "enabled!");
 
   setupMultiSystemFixedPointRelaxationFactors();
 

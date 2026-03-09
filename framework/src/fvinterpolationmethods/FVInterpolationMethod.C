@@ -49,7 +49,6 @@ FVInterpolationMethod::advectedInterpolateValue(const FaceInfo & face,
 {
   const auto result =
       advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  const Real phi_matrix =
-      result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
-  return phi_matrix - result.rhs_face_value;
+  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value -
+         result.rhs_face_value;
 }

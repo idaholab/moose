@@ -49,22 +49,6 @@ public:
                                                  const VectorValue<Real> * neighbor_grad,
                                                  Real mass_flux) const override;
 
-  /**
-   * Convenience wrapper that returns the face value implied by matrix weights plus RHS correction.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   * @param elem_grad Element-side cell gradient (required).
-   * @param neighbor_grad Neighbor-side cell gradient (required).
-   * @param mass_flux Face mass flux; sign determines upwind direction.
-   */
-  Real advectedInterpolateValue(const FaceInfo & face,
-                                Real elem_value,
-                                Real neighbor_value,
-                                const VectorValue<Real> * elem_grad,
-                                const VectorValue<Real> * neighbor_grad,
-                                Real mass_flux) const override;
-
 private:
   Moose::FV::GradientLimiterType _gradient_limiter =
       Moose::FV::GradientLimiterType::Venkatakrishnan;
