@@ -62,7 +62,7 @@ OrientSurfaceMeshGenerator::validParams()
 }
 
 OrientSurfaceMeshGenerator::OrientSurfaceMeshGenerator(const InputParameters & parameters)
-  : SurfaceMeshGeneratorBase(parameters)
+  : SurfaceMeshGeneratorBase(parameters), _num_flipped(0)
 {
   if (!isParamValid("element_ids_to_flood_from") && !isParamSetByUser("normal_to_align_with"))
     paramError("normal_to_align_with",
@@ -76,7 +76,6 @@ OrientSurfaceMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   setup(*mesh);
 
-  unsigned int num_flipped = 0;
   auto & binfo = mesh->get_boundary_info();
   bool normal_is_input = isParamSetByUser("normal_to_align_with");
 
@@ -104,7 +103,7 @@ OrientSurfaceMeshGenerator::generate()
       if (normal * _normal < 0)
       {
         elem->flip(&binfo);
-        num_flipped++;
+        _num_flipped++;
       }
     }
   else
@@ -127,8 +126,8 @@ OrientSurfaceMeshGenerator::generate()
       flood(elem, normal, *elem, elem->subdomain_id(), *mesh);
     }
 
-  if (num_flipped)
-    _console << "Flipped the orientation of " << num_flipped << " surface elements." << std::endl;
+  if (_num_flipped)
+    _console << "Flipped the orientation of " << _num_flipped << " surface elements." << std::endl;
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

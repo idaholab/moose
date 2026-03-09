@@ -24,11 +24,16 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  // Does not do anything, the flipping of normals is an option of the base class
+  // The flipping of normals is an option of the base class
   void actOnElem(Elem * const /*elem*/,
                  const Point & /*normal*/,
                  const subdomain_id_type & /*sub_id*/,
                  MeshBase & /*mesh*/) override
   {
+    _num_flipped++;
   }
+
+private:
+  /// Keeps track of the number of element orientation flips, for output purposes
+  unsigned int _num_flipped;
 };
