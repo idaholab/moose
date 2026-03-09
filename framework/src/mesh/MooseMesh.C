@@ -2906,6 +2906,9 @@ MooseMesh::changeBoundaryId(MeshBase & mesh,
   // from showing up when printing information, etc.
   if (delete_prev)
     boundary_info.remove_id(old_id);
+
+  // The cached boundary id sets will need re-preparation
+  mesh.unset_has_boundary_id_sets();
 }
 
 const RealVectorValue &
