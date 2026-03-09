@@ -116,6 +116,7 @@ function configure_petsc()
       --with-shared-libraries=1 \
       --with-sowing=0 \
       --download-openblas=1 \
+      --download-openblas-make-options='DYNAMIC_ARCH=1' \
       --download-hpddm=1 \
       --download-hypre=1 \
       --download-metis=1 \
