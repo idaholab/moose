@@ -315,11 +315,11 @@ buildElementAndNodeIDs(MeshBase & libmesh,
 
       const int element_id = element_ptr->id();
 
-      std::vector<int> element_node_ids(element_info.numNodes());
+      std::vector<int> element_node_ids(element_info.num_nodes);
 
       elements_in_block.push_back(element_id);
 
-      for (int node_counter = 0; node_counter < element_info.numNodes(); node_counter++)
+      for (int node_counter = 0; node_counter < element_info.num_nodes; node_counter++)
       {
         element_node_ids[node_counter] = element_ptr->node_id(node_counter);
       }
@@ -355,7 +355,7 @@ buildUniqueCornerNodeIDs(const CubitBlockInfo & block_info,
       auto & node_ids = node_ids_for_element_id.at(element_id);
 
       // Only use the nodes on the edge of the element!
-      for (int knode = 0; knode < block_element.numCornerNodes(); knode++)
+      for (int knode = 0; knode < block_element.num_corner_nodes; knode++)
       {
         unique_corner_node_ids.push_back(node_ids[knode]);
       }

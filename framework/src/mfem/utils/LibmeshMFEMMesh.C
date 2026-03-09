@@ -1,5 +1,6 @@
 #pragma once
 #include "LibmeshMFEMMesh.h"
+#include <mfem/mesh/element.hpp>
 
 // Function prototypes:
 static bool
@@ -206,7 +207,7 @@ LibmeshMFEMMesh::buildMFEMElements(const int num_elements_in_mesh,
     // Get the element type associated with the block.
     auto & block_element = block_info.blockElement(block_id);
 
-    std::vector<int> renumbered_vertex_ids(block_element.numCornerNodes());
+    std::vector<int> renumbered_vertex_ids(block_element.num_corner_nodes);
 
     auto & element_ids = element_ids_for_block_id.at(block_id);
 
@@ -215,7 +216,7 @@ LibmeshMFEMMesh::buildMFEMElements(const int num_elements_in_mesh,
       auto & libmesh_node_ids = node_ids_for_element_id.at(element_id);
 
       // Iterate over ONLY the corner nodes in the element.
-      for (int ivertex = 0; ivertex < block_element.numCornerNodes(); ivertex++)
+      for (int ivertex = 0; ivertex < block_element.num_corner_nodes; ivertex++)
       {
         const int libmesh_node_id = libmesh_node_ids[ivertex];
 
@@ -227,7 +228,7 @@ LibmeshMFEMMesh::buildMFEMElements(const int num_elements_in_mesh,
       _mfem_element_id_for_libmesh_element_id[element_id] = ielement;
 
       elements[ielement++] =
-          buildMFEMElement(block_element.elementType(), renumbered_vertex_ids.data(), block_id);
+          buildMFEMElement(block_element.mfem_elem_type, renumbered_vertex_ids.data(), block_id);
     }
   }
 }
@@ -273,13 +274,12 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
       auto boundary_block_id = all_boundary_block_ids[jelement];
 
       // Get the element type and face info.
-      auto & block_element = block_info.blockElement(boundary_block_id);
-      auto & boundary_face_info = block_element.face(boundary_face_id);
+      auto & boundary_face_info = block_info.blockFace(boundary_block_id, boundary_face_id);
 
       // Iterate only over the corner nodes and renumber.
-      std::vector<int> renumbered_vertex_ids(boundary_face_info.numFaceCornerNodes());
+      std::vector<int> renumbered_vertex_ids(boundary_face_info.num_corner_nodes);
 
-      for (int knode = 0; knode < boundary_face_info.numFaceCornerNodes(); knode++)
+      for (int knode = 0; knode < boundary_face_info.num_corner_nodes; knode++)
       {
         const int libmesh_node_id = boundary_node_ids[knode];
 
@@ -288,7 +288,7 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
       }
 
       boundary[iboundary++] = buildMFEMFaceElement(
-          boundary_face_info.faceType(), renumbered_vertex_ids.data(), boundary_block_id);
+          boundary_face_info.mfem_elem_type, renumbered_vertex_ids.data(), boundary_block_id);
     }
   }
 }
@@ -304,30 +304,22 @@ LibmeshMFEMMesh::buildMFEMElement(const int element_type,
 
   switch (element_type)
   {
-    case CubitElementInfo::ELEMENT_SEG2:
-    case CubitElementInfo::ELEMENT_SEG3:
-    case CubitElementInfo::ELEMENT_SEG4:
+    case mfem::Element::Type::SEGMENT:
     {
       new_element = new mfem::Segment(vertex_ids, block_id);
       break;
     }
-    case CubitElementInfo::ELEMENT_TRI3:
-    case CubitElementInfo::ELEMENT_TRI6:
-    case CubitElementInfo::ELEMENT_TRI7:
+    case mfem::Element::Type::TRIANGLE:
     {
       new_element = new mfem::Triangle(vertex_ids, block_id);
       break;
     }
-    case CubitElementInfo::ELEMENT_QUAD4:
-    case CubitElementInfo::ELEMENT_QUAD8:
-    case CubitElementInfo::ELEMENT_QUAD9:
+    case mfem::Element::Type::QUADRILATERAL:
     {
       new_element = new mfem::Quadrilateral(vertex_ids, block_id);
       break;
     }
-    case CubitElementInfo::ELEMENT_TET4:
-    case CubitElementInfo::ELEMENT_TET10:
-    case CubitElementInfo::ELEMENT_TET14:
+    case mfem::Element::Type::TETRAHEDRON:
     {
 #ifdef MFEM_USE_MEMALLOC
       new_element = TetMemory.Alloc();
@@ -338,23 +330,17 @@ LibmeshMFEMMesh::buildMFEMElement(const int element_type,
 #endif
       break;
     }
-    case CubitElementInfo::ELEMENT_HEX8:
-    case CubitElementInfo::ELEMENT_HEX20:
-    case CubitElementInfo::ELEMENT_HEX27:
+    case mfem::Element::Type::HEXAHEDRON:
     {
       new_element = new mfem::Hexahedron(vertex_ids, block_id);
       break;
     }
-    case CubitElementInfo::ELEMENT_WEDGE6:
-    case CubitElementInfo::ELEMENT_WEDGE15:
-    case CubitElementInfo::ELEMENT_WEDGE18:
+    case mfem::Element::Type::WEDGE:
     {
       new_element = new mfem::Wedge(vertex_ids, block_id);
       break;
     }
-    case CubitElementInfo::ELEMENT_PYRAMID5:
-    case CubitElementInfo::ELEMENT_PYRAMID13:
-    case CubitElementInfo::ELEMENT_PYRAMID14:
+    case mfem::Element::Type::PYRAMID:
     {
       new_element = new mfem::Pyramid(vertex_ids, block_id);
       break;
@@ -378,27 +364,22 @@ LibmeshMFEMMesh::buildMFEMFaceElement(const int face_type,
 
   switch (face_type)
   {
-    case CubitFaceInfo::FACE_POINT1:
+    case mfem::Element::Type::POINT:
     {
       new_face = new mfem::Point(vertex_ids, boundary_id);
       break;
     }
-    case CubitFaceInfo::FACE_EDGE2:
-    case CubitFaceInfo::FACE_EDGE3:
+    case mfem::Element::Type::SEGMENT:
     {
       new_face = new mfem::Segment(vertex_ids, boundary_id);
       break;
     }
-    case CubitFaceInfo::FACE_TRI3:
-    case CubitFaceInfo::FACE_TRI6:
-    case CubitFaceInfo::FACE_TRI7:
+    case mfem::Element::Type::TRIANGLE:
     {
       new_face = new mfem::Triangle(vertex_ids, boundary_id);
       break;
     }
-    case CubitFaceInfo::FACE_QUAD4:
-    case CubitFaceInfo::FACE_QUAD8:
-    case CubitFaceInfo::FACE_QUAD9:
+    case mfem::Element::Type::QUADRILATERAL:
     {
       new_face = new mfem::Quadrilateral(vertex_ids, boundary_id);
       break;
@@ -445,7 +426,7 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
 
   // Define higher-order FE space.
   mfem::FiniteElementCollection * finite_element_collection =
-      new mfem::H1_FECollection(block_info.order(), Dim, block_info.basisType());
+      new mfem::H1_FECollection(block_info.order(), Dim, block_info.basisType(), 0);
 
   // NB: the specified ordering is byVDIM.
   // byVDim: XYZ, XYZ, XYZ, XYZ,...
@@ -465,9 +446,6 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
     // Find the element type.
     auto & block_element = block_info.blockElement(block_id);
 
-    // Get the correct mapping.
-    const std::vector<int> & mfem_to_libmesh_map = getMFEMToLibmeshMap(block_element.elementType());
-
     // Iterate over elements in the block.
     for (auto libmesh_element_id : libmesh_element_ids)
     {
@@ -482,13 +460,13 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
       finite_element_space->GetElementDofs(mfem_element_id, dofs);
 
       // Iterate over dofs array.
-      for (int j = 0; j < dofs.Size(); j++)
+      for (int j = 0; j < block_element.num_nodes; j++)
       {
         const int mfem_node_id = dofs[j];
 
         // Find the libmesh node ID:
         // NB: the map is 1-based to we need to subtract 1.
-        const int libmesh_node_index = mfem_to_libmesh_map[j] - 1;
+        const int libmesh_node_index = block_element.mfem_to_libmesh[j] - 1;
         const int libmesh_node_id = libmesh_node_ids[libmesh_node_index];
 
         // Update two-way map:
@@ -500,6 +478,23 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
 
         SetNode(dofs[j], coordinates.data());
       }
+
+      // Set any nodes not present in the libMesh data by interpolating the
+      // nodes which are present.
+      for (unsigned int i = 0; i < block_element.additional_points.size(); i++)
+      {
+        const auto & weights = block_element.additional_points[i];
+        std::array<mfem::real_t, 3> coordinates{0., 0., 0.};
+        for (int j = 0; j < block_element.num_nodes; ++j)
+        {
+          const auto & c = coordinates_for_libmesh_node_id.at(j);
+          const mfem::real_t w = weights[j];
+          coordinates[0] += w * c[0];
+          coordinates[1] += w * c[1];
+          coordinates[2] += w * c[2];
+        }
+        SetNode(dofs[block_element.num_nodes + i], coordinates.data());
+      }
     }
   }
 
@@ -508,7 +503,8 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
    * All coordinates should match. If this does not occur then it suggests that
    * there is a problem with the higher-order transfer.
    */
-  verifyUniqueMappingBetweenLibmeshAndMFEMNodes(unique_block_ids,
+  verifyUniqueMappingBetweenLibmeshAndMFEMNodes(block_info,
+                                                unique_block_ids,
                                                 libmesh_element_ids_for_block_id,
                                                 libmesh_node_ids_for_element_id,
                                                 coordinates_for_libmesh_node_id,
@@ -517,6 +513,7 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
 
 void
 LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
+    const CubitBlockInfo & block_info,
     const std::vector<int> & unique_block_ids,
     const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
     const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
@@ -547,28 +544,33 @@ LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
   for (int ielement = 0; ielement < NumOfElements; ielement++)
   {
     mfem::Array<int> mfem_dofs;
+    const auto & element_info = block_info.blockElement(GetAttribute(ielement));
     finite_element_space->GetElementDofs(ielement, mfem_dofs);
 
-    for (int mfem_dof : mfem_dofs)
+    for (int j = 0; j < mfem_dofs.Size(); j++)
     {
+      int mfem_dof = mfem_dofs[j];
       GetNode(mfem_dof, mfem_coordinates);
 
-      const int libmesh_node_id = libmesh_node_id_for_mfem_node_id.at(mfem_dof);
-
-      // Remove from set.
-      libmesh_node_ids.erase(libmesh_node_id);
-
-      auto & libmesh_coordinates = coordinates_for_libmesh_node_id.at(libmesh_node_id);
-
-      if (!coordinatesMatch(libmesh_coordinates.data(), mfem_coordinates))
+      if (j < element_info.num_nodes)
       {
-        mooseError("Non-matching coordinates detected for libmesh node ",
-                   libmesh_node_id,
-                   " and MFEM node ",
-                   mfem_dof,
-                   " for MFEM element ",
-                   ielement,
-                   ".");
+        const int libmesh_node_id = libmesh_node_id_for_mfem_node_id.at(mfem_dof);
+
+        // Remove from set.
+        libmesh_node_ids.erase(libmesh_node_id);
+
+        auto & libmesh_coordinates = coordinates_for_libmesh_node_id.at(libmesh_node_id);
+
+        if (!coordinatesMatch(libmesh_coordinates.data(), mfem_coordinates))
+        {
+          mooseError("Non-matching coordinates detected for libmesh node ",
+                     libmesh_node_id,
+                     " and MFEM node ",
+                     mfem_dof,
+                     " for MFEM element ",
+                     ielement,
+                     ".");
+        }
       }
     }
   }
@@ -601,75 +603,4 @@ coordinatesMatch(const double * primary, const double * secondary, const double 
   }
 
   return true;
-}
-
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_seg3 = {1, 2, 3};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_seg4 = {1, 2, 3, 4};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tri6 = {1, 2, 3, 4, 5, 6};
-// const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tri7 = {};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_quad8 = {1, 2, 3, 4, 5, 6, 7, 8};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_quad9 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tet10 = {1, 2, 3, 4, 5, 7, 8, 6, 9, 10};
-// const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tet14 = {};
-// const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_pyramid13 = {};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_pyramid14 = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
-// const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_wedge15 = {};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_wedge18 = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15, 10, 11, 12, 16, 17, 18};
-// const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_hex20 = {};
-
-// NB: different map used for hex27 to ReadCubit. LibMesh uses a different node
-// ordering to the Exodus/Genesis format.
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_hex27 = {
-    1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 17, 18,
-    19, 20, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27};
-
-const std::vector<int> &
-LibmeshMFEMMesh::getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type)
-{
-  switch (type)
-  {
-    case CubitElementInfo::ELEMENT_SEG3:
-    {
-      return _mfem_to_libmesh_seg3;
-    }
-    case CubitElementInfo::ELEMENT_SEG4:
-    {
-      return _mfem_to_libmesh_seg4;
-    }
-    case CubitElementInfo::ELEMENT_TRI6:
-    {
-      return _mfem_to_libmesh_tri6;
-    }
-    case CubitElementInfo::ELEMENT_QUAD8:
-    {
-      return _mfem_to_libmesh_quad8;
-    }
-    case CubitElementInfo::ELEMENT_QUAD9:
-    {
-      return _mfem_to_libmesh_quad9;
-    }
-    case CubitElementInfo::ELEMENT_TET10:
-    {
-      return _mfem_to_libmesh_tet10;
-    }
-    case CubitElementInfo::ELEMENT_HEX27:
-    {
-      return _mfem_to_libmesh_hex27;
-    }
-    case CubitElementInfo::ELEMENT_WEDGE18:
-    {
-      return _mfem_to_libmesh_wedge18;
-    }
-    case CubitElementInfo::ELEMENT_PYRAMID14:
-    {
-      // return _mfem_to_libmesh_pyramid14;
-      mooseError("H1_FECollection does not currently support Pyramid14.");
-    }
-    default:
-    {
-      mooseError("No higher-order map available for element type ", type, ".");
-    }
-  }
 }
