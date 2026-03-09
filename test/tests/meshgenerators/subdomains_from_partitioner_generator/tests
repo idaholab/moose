@@ -1,0 +1,15 @@
+[Tests]
+  design = 'SubdomainsFromPartitionerGenerator.md'
+  issues = '#32456'
+  [split]
+    type = Exodiff
+    input = 'test.i'
+    cli_args = '--mesh-only'
+    min_parallel = 2
+    max_parallel = 2
+    exodiff = 'test_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = 'The system shall be able to use the partitioner to also assign subdomains to elements.'
+    recover = false
+  []
+[]
