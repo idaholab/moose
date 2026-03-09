@@ -31,7 +31,7 @@ SubdomainsGeneratorBase::validParams()
       "for modification.");
 
   // Painting/flooding parameters
-  // Using normals
+  // Using normals of the surface element
   params.addParam<Point>("normal",
                          Point(),
                          "If supplied, only surface (2D) elements with normal equal to this, up to "
@@ -44,29 +44,37 @@ SubdomainsGeneratorBase::validParams()
                                     "1 - normal_tol, where normal_hat = "
                                     "normal/|normal|. The normal can the normal specified by the "
                                     "parameter or by a specific mesh generator.");
-  params.addRangeCheckedParam<Real>("flipped_normal_tol",
-                                    0.1,
-                                    "flipped_normal_tol>=0 & flipped_normal_tol<=2",
-                                    "If 'allow_normal_flips', surface elements are "
-                                    "also added if -1 * face_normal.normal_hat >= "
-                                    "1 - normal_tol, where normal_hat = "
-                                    "normal/|normal|");
   params.addParam<bool>(
       "fixed_normal",
       false,
       "Whether to move the normal vector as we paint/flood the geometry, or keep it "
       "fixed from the first element we started painting with");
-  params.addParam<bool>(
-      "allow_normal_flips",
-      false,
-      "Whether to allow for elements to be considered "
-      "when their normal is flipped with regard to the neighbor element we are painting from. A "
-      "specific tolerance may be specified for these flipped normals.");
   params.addParam<bool>("check_painted_neighbor_normals",
                         false,
                         "When examining the normal of a 2D element and comparing to the 'painting' "
                         "normal, also check if the element neighbors in the 'painted' subdomain "
                         "have a closer normal and accept the element into the new subdomain if so");
+
+  // Parameters for handling surface elemets with flipped normals. These are unfortunately quite
+  // common in STL files, and if we do not account for them the flooding algorithm often floods
+  // elements all around the flipped normal element, creating a single-element patch 'hole' inside
+  // the larger patch!
+  params.addRangeCheckedParam<Real>("flipped_normal_tol",
+                                    0.1,
+                                    "flipped_normal_tol>=0 & flipped_normal_tol<=2",
+                                    "If 'consider_flipped_normals' is true, surface elements are "
+                                    "also added if -1 * face_normal.normal_hat >= "
+                                    "1 - normal_tol, where normal_hat = "
+                                    "normal/|normal|");
+  params.addParam<bool>(
+      "consider_flipped_normals",
+      false,
+      "Whether to allow for surface elements to be considered "
+      "when their normal is flipped with regard to the neighbor element we are painting from. A "
+      "specific tolerance may be specified for these flipped normals using the "
+      "'flipped_normal_tol'.");
+  params.addParam<bool>(
+      "flip_inverted_normals", false, "Whether to flip the elements with inverted normals");
 
   // Other painting / flooding parameters
   params.addParam<std::vector<Real>>(
@@ -85,9 +93,10 @@ SubdomainsGeneratorBase::validParams()
       "Max number of recursions when flooding. Once this number is reached, the propagation is "
       "stopped until enough calls have returned");
 
-  params.addParamNamesToGroup("normal normal_tol allow_normal_flips flipped_normal_tol "
-                              "fixed_normal check_painted_neighbor_normals",
+  params.addParamNamesToGroup("normal normal_tol fixed_normal check_painted_neighbor_normals",
                               "Flooding using surface element normals");
+  params.addParamNamesToGroup("onsider_flipped_normalsflipped_normal_tol",
+                              "Flooding using surface element inverted normals");
   params.addParamNamesToGroup("max_paint_size_centroids flood_elements_once", "Other flooding");
   return params;
 }
@@ -107,7 +116,8 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
     _normal_tol(getParam<Real>("normal_tol")),
     _flipped_normal_tol(getParam<Real>("flipped_normal_tol")),
     _fixed_normal(getParam<bool>("fixed_normal")),
-    _allow_normal_flips(getParam<bool>("allow_normal_flips")),
+    _consider_flipped_normals(getParam<bool>("consider_flipped_normals")),
+    _flip_inverted_normals(getParam<bool>("flip_inverted_normals")),
     _has_max_distance_criterion(isParamSetByUser("max_paint_size_centroids")),
     _flood_only_once(getParam<bool>("flood_elements_once")),
     _flood_max_recursion(getParam<unsigned int>("flood_max_recursion")),
@@ -209,12 +219,13 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
 
   // Flip the element if needed
   // NOTE: we have already passed "elementSatisfiesRequirements" here
-  if (_allow_normal_flips && base_normal * elem_normal < 0)
+  if (_consider_flipped_normals && base_normal * elem_normal < 0)
   {
     elem_normal *= -1;
     BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-    elem->flip(&boundary_info);
+    if (_flip_inverted_normals)
+      elem->flip(&boundary_info);
   }
 
   for (const auto neighbor : make_range(elem->n_sides()))
@@ -260,7 +271,7 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
 
   // False if normal does not meet criteria
   if (_using_normal && (!normalsWithinTol(desired_normal, face_normal, _normal_tol) &&
-                        (!_allow_normal_flips ||
+                        (!_consider_flipped_normals ||
                          !normalsWithinTol(desired_normal, -face_normal, _flipped_normal_tol))))
     return false;
 

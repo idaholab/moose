@@ -117,8 +117,10 @@ protected:
   const Real _flipped_normal_tol;
   /// Whether to paint/flood using a fixed normal or a moving normal
   const bool _fixed_normal;
-  /// Whether to allow normal flips
-  const bool _allow_normal_flips;
+  /// Whether to also consider surface elements that have a flipped normal
+  const bool _consider_flipped_normals;
+  /// Whether to flip the normal of a surface element when they meet the criterion
+  const bool _flip_inverted_normals;
   /// Whether to painting beyond a certain radius
   const bool _has_max_distance_criterion;
   /// Distance to use for max painting radius. This distance can be specified per subdomain
