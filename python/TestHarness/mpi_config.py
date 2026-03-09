@@ -63,7 +63,6 @@ def build_hwloc_topo() -> Optional[str]:
     return None
 
 
-@staticmethod
 def get_mpi_config() -> MPIConfig:
     """Get the MPI configuration for the implementations that we special case."""
     config = MPIConfig(mpi_type=MPIType.UNKNOWN, hwloc=False, hwloc_topo_file=None)
