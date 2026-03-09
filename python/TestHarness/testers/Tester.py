@@ -504,6 +504,8 @@ class Tester(MooseObject, OutputInterface):
             ),
             "input_file": self.getInputFile(),
         }
+        if env := self.getEnvironmentRan():
+            results["environment"] = env
         json_metadata = {}
         for key, value in self.json_metadata.items():
             if value.data:

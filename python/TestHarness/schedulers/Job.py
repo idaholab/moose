@@ -1080,8 +1080,10 @@ class Job(OutputInterface):
             self.timer.start(name, time_now)
             self.timer.stop(name, time_now + total_time)
 
-        # Load the command ran
+        # Load the command and environment ran
         self.__tester.setCommandRan(test_entry["tester"]["command"])
+        if env := test_entry["tester"]["environment"]:
+            self.__tester.setEnvironmentRan(env)
 
         # Load the output
         output_files = test_entry.get("output_files")
