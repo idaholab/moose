@@ -191,5 +191,6 @@
     cli_args = "FVInterpolationMethods/average/type=FVHarmonicAverage LinearFVKernels/advection/advected_interp_method_name=average"
     expect_err = "does not support advected interpolation and cannot be used by LinearFVAdvection"
     requirement = "The system shall reject using a face-only FVInterpolationMethod with LinearFVAdvection."
+    max_threads = 1 # see libmesh issue #3808
   []
 []
