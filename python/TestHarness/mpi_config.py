@@ -15,7 +15,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from socket import gethostname
-from subprocess import CalledProcessError, check_output, run
+from subprocess import CalledProcessError, check_output, run, PIPE, STDOUT
 from traceback import format_exc
 from typing import Optional
 
@@ -52,15 +52,18 @@ def build_hwloc_topo() -> Optional[str]:
     try:
         store_dir = os.path.join(Path.home(), ".local", "share", "moose", "testharness")
         os.makedirs(store_dir, exist_ok=True)
-        store_file = os.path.join(store_dir, f"hwloc_topo_{gethostname()}.xml")
-        cmd = [exe, "--of", "xml", "-f", store_file]
-        run(cmd, check=True)
-        return store_file
     except Exception:
-        print("WARNING: Failed to build hwloc topology file")
-        print(format_exc())
+        print(f"WARNING: Failed to setup .local directory:\n{format_exc()}\n")
+        return None
 
-    return None
+    store_file = os.path.join(store_dir, f"hwloc_topo_{gethostname()}.xml")
+    cmd = [exe, "--of", "xml", "-f", store_file]
+    process = run(cmd, stderr=STDOUT, stdout=PIPE, check=False, text=True)
+    if process.returncode != 0:
+        print(f"WARNING: Failed to build hwloc topology file:\n{process.stdout}\n")
+        return None
+
+    return store_file
 
 
 def get_mpi_config() -> MPIConfig:
