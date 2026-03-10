@@ -3,11 +3,11 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
-- MOOSE Modeling and Simulation User Training (2026 April 16th, Texas A&M) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+- MOOSE Modeling and Simulation User Training (2026 April 16, Texas A&M) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
-- [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin Italy)
+- [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
 
-- MOOSE Developer training (June 2-4, Idaho Falls)
+- MOOSE Developer Training (2026 June 2-4, Idaho Falls)
 
 !style-end!
 
@@ -21,9 +21,9 @@ refer to the [getting_started/examples_and_tutorials/index.md] page.
 
 # Conferences
 
-- [UK MOOSE Conference 2026](https://cfms.org.uk/article/2026-uk-moose-conference/) (May 11-13, CFMS Bristol UK)
+- [UK MOOSE Conference 2026](https://cfms.org.uk/article/2026-uk-moose-conference/) (2026 May 11-13, CFMS, Bristol, UK)
 
-- MOOSE International conference 2027 (February, Idaho Falls USA)
+- 2nd MOOSE International Conference (2027 February, Idaho Falls)
 
 
 #### Past Training:
