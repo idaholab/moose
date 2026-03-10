@@ -456,7 +456,7 @@ class TestHarness:
         if self.options.mpi_config.hwloc_topo_file:
             self.printInfo(
                 "Using hwloc topology in "
-                f'"{self.options.mpi_config.hwloc_topo_file}" for MPICH'
+                f'"{self.options.mpi_config.hwloc_topo_file}"'
             )
 
         # Initialize the scheduler
