@@ -265,7 +265,7 @@ public:
   const mfem::Coefficient * getMeasureWeightCoefficient() const {return _measure_weight.get();}
 
   /** 
-  * Name-based axisymmetric accessor (used by materials via the CoefficientManager)
+  * Return built-in axisymmetric coefficient by name (used by materials via the CoefficientManager)
   */
   const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const;
 
@@ -278,7 +278,11 @@ public:
   NumericType num_type;
 
 private:
-  enum class CoordinateSystem {Cartesian, Cylindrical};
+  enum class CoordinateSystem 
+  {
+    Cartesian, 
+    Cylindrical
+  };
   CoordinateSystem _coord = CoordinateSystem::Cartesian;
 
   Real _inv_r_eps = 1e-12;

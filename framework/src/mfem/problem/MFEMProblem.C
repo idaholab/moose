@@ -22,22 +22,25 @@
 
 registerMooseObject("MooseApp", MFEMProblem);
 
-//helper for inv/_r = 1/(base + eps)
-namespace {
-    class InShiftedCoefficient : public mfem:Coefficient
+//helper for the inv/_r = 1/(base + eps)
+namespace
+{
+class InvShiftedCoefficient : public mfem::Coefficient
+{
+public:
+  InvShiftedCoefficient(mfem::Coefficient & base, double eps) : _base(base), _eps(eps) {}
+
+  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override
   {
-  public:
-    InvShiftedCoefficient(mfem::Coefficient & base, double eps) : _base(base), _eps(eps){}
-    double Eval(mfem::ElementTransformation &T, const mfem::IntegrationPoint &ip) override
-    {
-      const double r = _base.Eval(T,ip);
-      return 1.0 / (r + _eps);
-    }
-  private:
-    mfem::Coefficient & _base;
-    const double _eps;
-  };
-} //namespace
+    const double r = _base.Eval(T, ip);
+    return 1.0 / (r + _eps);
+  }
+
+private:
+  mfem::Coefficient & _base;
+  const double _eps;
+};
+}
  
 
 InputParameters
@@ -49,11 +52,13 @@ MFEMProblem::validParams()
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem");
 
-  //Axisymmetric
+  //Axisymmetricvalid parameters
   params.addParam<MooseEnum>(
-    "coordinate", MooseEnum("cartesian cylindrical"),"Physical coordinate system. Use 'cylindrical' for 2D axisymmetric");
+    "coordinate", 
+    MooseEnum("cartesian=0 cylindrical"),"Physical coordinate system. Use 'cylindrical' for 2D axisymmetric");
   params.addParam<Real>(
-    "inv_r_eps", 1e-12, "Floor used in inv_r = 1/(r + eps) to avoid axis singularity in axisymmetric problems");
+    "inv_r_eps", 1e-12, 
+    "Floor used in inv_r = 1/(r + eps) to avoid axis singularity in axisymmetric problems");
 
   return params;
 }
@@ -68,7 +73,8 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 
   //Read axisymmetric params
   const MooseEnum cs = getParam<MooseEnum>("coordinate");
-  _coord = (cs == "cylindrical") ? CoordinateSystem::Cylindrical : CoordinateSystem::Cartesian;
+  _coord = (cs == "cylindrical") ? CoordinateSystem::Cylindrical 
+  : CoordinateSystem::Cartesian;
   _inv_r_eps = getParam<Real>("inv_r_eps");
 
   setMesh();
@@ -81,29 +87,46 @@ MFEMProblem::initialSetup()
   addMFEMNonlinearSolver();
 
   //build axisymmetric coefficients if requested
-  if(_coord == CoordinateSystem::Cylindrical)
+  if (_coord == CoordinateSystem::Cylindrical)
     _registerAxisymCoeffs();
-    getProblemData().coefficients.setBuiltinProvider(this);
+
+  getProblemData().coefficients.setBuiltinProvider(this);
 }
 
 void
 MFEMProblem::_registerAxisymCoeffs()
 {
-  _r_coef = std::unique_ptr<mfem::Coefficient>(new mfem::CylindricalRadialCoefficient());
-  _inv_r_coeff = std::unique_ptr<mfem::Coefficient>(new InvShiftedCoefficient(*_r_coeff, _inv_r_coeff));
-  _two_pi_r_coeff = std::unique_ptr<mfem::Coefficient>(new mfem::TransformedCoefficient(*_r_coeff, [](double a){return 2.0 * M_PI * a;}));
-  _measure_weight = std::unique_ptr<mfem::Coefficient>(new mfem::TransformedCoefficient(*_r_coeff,[](double a){return a;}));
+  _r_coeff = std::unique_ptr<mfem::Coefficient>(new mfem::CylindricalRadialCoefficient());
+
+  _inv_r_coeff = std::unique_ptr<mfem::Coefficient>(
+      new InvShiftedCoefficient(*_r_coeff, _inv_r_eps));
+
+  _two_pi_r_coeff = std::unique_ptr<mfem::Coefficient>(
+      new mfem::TransformedCoefficient(
+          _r_coeff.get(),
+          [](mfem::real_t a) -> mfem::real_t { return 2.0 * M_PI * a; }));
+
+  _measure_weight = std::unique_ptr<mfem::Coefficient>(
+      new mfem::TransformedCoefficient(
+          _r_coeff.get(),
+          [](mfem::real_t a) -> mfem::real_t { return a; }));
 }
 
-const mfem::Coefficient * MFEMProblem::getBuiltinCoefficient(const std::string & name) const 
+const mfem::Coefficient *
+MFEMProblem::getBuiltinCoefficient(const std::string & name) const
 {
-  if (_coord !=CoordinateSystem::Cylindrical)
+  if (_coord != CoordinateSystem::Cylindrical)
     return nullptr;
-  
-  if (name == "r") return _r_coef.get();
-  if (name == "inv_r") return _inv_r_coeff.get();
-  if (name == "_two_pi_r") return _two_pi_r_coeff.get();
-  if (name == "measure_weight") return _measure_weight.get();
+
+  if (name == "r")
+    return _r_coeff.get();
+  if (name == "inv_r")
+    return _inv_r_coeff.get();
+  if (name == "two_pi_r")
+    return _two_pi_r_coeff.get();
+  if (name == "measure_weight")
+    return _measure_weight.get();
+
   return nullptr;
 }
 
