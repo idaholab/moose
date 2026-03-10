@@ -1802,6 +1802,19 @@ class TestHarness:
         failgroup = parser.add_argument_group(
             "Failure Criteria", "Control the failure criteria"
         )
+        default_max_cpu_per_slot = (
+            110.0 if "microsoft" in platform.release().lower() else 105.0
+        )  # give more wiggle room in WSL; see #32464
+        failgroup.add_argument(
+            "--max-cpu-per-slot",
+            nargs=1,
+            type=float,
+            default=default_max_cpu_per_slot,
+            help=(
+                "The maximum percent CPU to allow for a job, per slot "
+                f"(default: {default_max_cpu_per_slot})"
+            ),
+        )
         failgroup.add_argument(
             "--max-fails",
             nargs=1,
@@ -1810,18 +1823,19 @@ class TestHarness:
             help="The number of tests allowed to fail before any additional tests will run",
         )
         failgroup.add_argument(
+            "--max-memory-per-slot",
+            nargs=1,
+            type=float,
+            help="The maximum memory to allow for a job in MB, per slot",
+        )
+        failgroup.add_argument(
             "--valgrind-max-fails",
             nargs=1,
             type=int,
             default=5,
             help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
         )
-        failgroup.add_argument(
-            "--max-memory-per-slot",
-            nargs=1,
-            type=float,
-            help="The maximum memory to allow for a job in MB, per slot",
-        )
+
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
         hpcgroup.add_argument(
             "--hpc",
