@@ -9,36 +9,33 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "GeneralUserObject.h"
 #include "Function.h"
 
 // Forward Declarations
 class SinglePhaseFluidProperties;
 
 /**
-  * Computes the ...
+  * Computes the mass transfer coefficient of a gas/liquid interface
   */
-class GasLiquidMassTransferAux : public AuxKernel
+class GasLiquidMassTransfer : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
+  GasLiquidMassTransfer(const InputParameters & parameters);
+  virtual ~GasLiquidMassTransfer() {}
 
-  GasLiquidMassTransferAux(const InputParameters & parameters);
+  virtual void initialSetup();
+  virtual void initialize();
+  virtual void finalize();
+  virtual void execute();
+  virtual Real mtc(Real pressure, Real temperature, Real fluid_velocity) const;
 
   /// Boltzman constant [J/K]
   static constexpr Real _kB = 1.38064852e-23;
 
 protected:
-  virtual Real computeValue();
 
-  /// Pressure [Pa]
-  const VariableValue & _pressure;
-
-  /// Fluid temperature [K]
-  const VariableValue & _temperature;
-
-  /// Liquid velocity [m/s]
-  const VariableValue & _fluid_velocity;
 
   /// Diameter of the flow channel [m]
   const Real _diameter;

@@ -7,20 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GasLiquidMassTransferAux.h"
+#include "GasLiquidMassTransfer.h"
 #include "MathUtils.h"
 #include "SinglePhaseFluidProperties.h"
 
-registerMooseObject("MooseApp", GasLiquidMassTransferAux);
+registerMooseObject("ScalarTransportApp", GasLiquidMassTransfer);
 
 InputParameters
-GasLiquidMassTransferAux::validParams()
+GasLiquidMassTransfer::validParams()
 {
-  InputParameters params = AuxKernel::validParams();
+  InputParameters params = GeneralUserObject::validParams();
   // Required params
-  params.addRequiredCoupledVar("p", "Pressure [Pa]");
-  params.addRequiredCoupledVar("T", "Temperature [K]");
-  params.addRequiredCoupledVar("fluid_velocity", "Velocity vector [m/s]");
   params.addRequiredParam<Real>("d", "Pipe diameter [m]");
   params.addRequiredParam<UserObjectName>(
       "fp", "The name of the user object for liquid side fluid properties");
@@ -40,11 +37,8 @@ GasLiquidMassTransferAux::validParams()
   return params;
 }
 
-GasLiquidMassTransferAux::GasLiquidMassTransferAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _pressure(coupledValue("p")),
-    _temperature(coupledValue("T")),
-    _fluid_velocity(coupledValue("fluid_velocity")),
+GasLiquidMassTransfer::GasLiquidMassTransfer(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     _diameter(getParam<Real>("d")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp")),
     _equation_list(getParam<MooseEnum>("equation").getEnum<Equationlist>()),
@@ -65,22 +59,42 @@ GasLiquidMassTransferAux::GasLiquidMassTransferAux(const InputParameters & param
     case Equationlist::STOKESEINSTEIN:
     {
       if (!isParamSetByUser("radius"))
-        mooseError("Must set particle radius when using StokesEinstein");
+        paramError("radius", "Must set particle radius when using StokesEinstein");
       break;
     }
   }
 }
 
-Real
-GasLiquidMassTransferAux::computeValue()
+void
+GasLiquidMassTransfer::initialSetup()
 {
-  Real mu = _fp.mu_from_p_T(_pressure[_qp], _temperature[_qp]);
-  Real rho = _fp.rho_from_p_T(_pressure[_qp], _temperature[_qp]);
+}
+
+void
+GasLiquidMassTransfer::initialize()
+{
+}
+
+void
+GasLiquidMassTransfer::finalize()
+{
+}
+
+void
+GasLiquidMassTransfer::execute()
+{
+}
+
+Real
+GasLiquidMassTransfer::mtc(Real pressure, Real temperature, Real fluid_velocity) const
+{
+  Real mu = _fp.mu_from_p_T(pressure, temperature);
+  Real rho = _fp.rho_from_p_T(pressure, temperature);
   Real Diffusivity = 0.0;
   switch (_equation_list)
   {
     case Equationlist::STOKESEINSTEIN:
-      Diffusivity = _kB * _temperature[_qp] / (6.0 * libMesh::pi * mu * _radius);
+      Diffusivity = _kB * temperature / (6.0 * libMesh::pi * mu * _radius);
       break;
 
     case Equationlist::WILKECHANG:
@@ -95,13 +109,13 @@ GasLiquidMassTransferAux::computeValue()
       mu_cgs = mu_cgs * poise_to_centipoise;           // cP
       Real molar_volume = _mw / rho * Utility::pow<3>(m_to_cm); // cm3/mol
       Real molar_weight = _mw * kg_to_g;               // g/mol
-      Diffusivity = _wc * _temperature[_qp] * std::sqrt(_phi * molar_weight) /
+      Diffusivity = _wc * temperature * std::sqrt(_phi * molar_weight) /
                     (mu_cgs * std::pow(molar_volume, 0.6));
       Diffusivity = Diffusivity * Utility::pow<2>(cm_to_m);
       break;
   }
 
-  Real re = rho * abs(_fluid_velocity[_qp]) * _diameter / mu;
+  Real re = rho * abs(fluid_velocity) * _diameter / mu;
   Real sc = mu / (rho * Diffusivity);
   Real mtc = _db * std::pow(re, 0.8) * std::pow(sc, 0.4) * Diffusivity / _diameter;
   return mtc;
