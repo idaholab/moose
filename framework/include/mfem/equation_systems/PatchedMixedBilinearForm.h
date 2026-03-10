@@ -28,7 +28,11 @@ public:
   {
   }
 
+  // Re-implementation of Assemble to maintain functionality when the trial variable is defined on a
+  // submesh of the test variable. Defaults to mfem::ParMixedBilinearForm::Assemble otherwise.
   void Assemble(int skip_zeros = 1);
+  // Custom implementation of Assemble for use when the trial variable is defined on a submesh of
+  // the test variable
   void SubMeshTolerantAssemble(int skip_zeros);
 };
 } // namespace Moose::MFEM
