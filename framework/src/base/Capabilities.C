@@ -383,6 +383,26 @@ Capabilities::registerMooseCapabilities()
   }
 
   {
+    const auto doc = "Optimized BLAS library";
+#ifdef PETSC_HAVE_OPENBLAS
+    const std::string version = QUOTE(PETSC_PKG_OPENBLAS_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_OPENBLAS_VERSION_MINOR) "." QUOTE(PETSC_PKG_OPENBLAS_VERSION_SUBMINOR);
+    add_string("openblas", version, doc);
+#else
+    petsc_missing("openblas", doc);
+#endif
+  }
+
+  {
+    const auto doc = "Umpire resource management library";
+#ifdef PETSC_HAVE_UMPIRE
+    have("umpire", doc);
+#else
+    petsc_missing("umpire", doc);
+#endif
+  }
+
+  {
     const auto doc = "Scalable Library for Eigenvalue Problem Computations (SLEPc)";
 #ifdef LIBMESH_HAVE_SLEPC
     const auto version = QUOTE(LIBMESH_DETECTED_SLEPC_VERSION_MAJOR) "." QUOTE(
