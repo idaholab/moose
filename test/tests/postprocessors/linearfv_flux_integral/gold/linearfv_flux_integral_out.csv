@@ -1,0 +1,2 @@
+time,analytic_flux_left_adv,analytic_flux_left_diff,analytic_flux_right_adv,analytic_flux_right_diff,flux_balance,flux_left_adv,flux_left_diff,flux_left_sum_error,flux_left_total,flux_right_adv,flux_right_diff,flux_right_sum_error,flux_right_total
+1,-0.5,-0.29098835343466,0,0.79098835343466,-1.8681722835368e-12,-0.5,-0.29326400660613,0,-0.79326400660613,0,0.79326400660426,0,0.79326400660426
