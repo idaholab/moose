@@ -10,19 +10,19 @@
 
 Bootstrap: docker
 {%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.0_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.0_2026.03.09
 {%- elif ALTERNATE_FROM == "clang_min" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.0_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.0_2026.03.09
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-cuda12.9.1-gcc13.3.1-mpich5.0.0-openmpi5.0.9
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-cuda12.9.1-gcc13.3.1-mpich5.0.0-openmpi5.0.10_2026.03.09
 {%- elif ALTERNATE_FROM == "gcc_min" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.0_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.0_2026.03.09
 {%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich4.3.2_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich4.3.2_2026.03.09
 {%- elif ALTERNATE_FROM == "rocky9" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.9_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10_2026.03.09
 {%- else %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.9_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.10_2026.03.09
 {%- endif %}
 
 %environment
