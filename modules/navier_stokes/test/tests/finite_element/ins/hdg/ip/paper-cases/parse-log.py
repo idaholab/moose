@@ -15,6 +15,7 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
       - max_ksp_outer_its (nl0_condensed_)
       - max_p_its (nl0_condensed_fieldsplit_p_)
       - max_u_its (nl0_condensed_fieldsplit_u_)
+      - min factor memory/nonzeros (% of multifrontal) across nonlinear its
     """
     text = text.replace('\r\n', '\n').replace('\r', '\n')
 
@@ -58,6 +59,15 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
         max_outer = _find_max_iterations(block, "nl0_condensed_")
         # max_p     = _find_max_iterations(block, "nl0_condensed_fieldsplit_p_ksp_")
         max_u     = _find_max_iterations(block, "nl0_condensed_fieldsplit_u_")
+        factor_mem_nnz_vals = [
+            float(x)
+            for x in re.findall(
+                r"factor memory/nonzeros =\s*([0-9]*\.?[0-9]+(?:[eE][+\-]?[0-9]+)?)\s*%",
+                block,
+                flags=re.IGNORECASE,
+            )
+        ]
+        min_factor_mem_nnz = min(factor_mem_nnz_vals) if factor_mem_nnz_vals else None
 
         rows.append({
             "Re": tval,
@@ -65,6 +75,7 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
             "o": max_outer,
             # "p": max_p,
             "u": max_u,
+            "fmn_min": min_factor_mem_nnz,
         })
 
     return pd.DataFrame(rows).sort_values("Re").reset_index(drop=True)
