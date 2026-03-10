@@ -250,7 +250,7 @@ SurfaceSubdomainsDelaunayRemesher::generate()
                                use_binary_search,
                                /*enforce_all_nodes_match_on_boundaries*/ false,
                                /*merge_boundary_nodes_all_or_nothing*/ false,
-                               /*remap_subdomain_ids*/ getParam<bool>("avoid_merging_subdomains"));
+                               /*remap_subdomain_ids*/ !getParam<bool>("avoid_merging_subdomains"));
 
       // TODO: when implementing hole meshes, we might want to also stitch the hole meshes
     }
@@ -258,6 +258,10 @@ SurfaceSubdomainsDelaunayRemesher::generate()
 
   // We do not need the 3D mesh anymore
   mesh_3d->clear();
+  // The stitching boundary is usually removed by stitching, but this does not hurt
+  full_mesh->get_boundary_info().remove_id(primary_bcid);
+  // Mesh is not prepared after stitching
+  full_mesh->unset_is_prepared();
 
   return full_mesh;
 }
@@ -559,7 +563,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
 
   // Pass the subdomain names
   mesh->set_subdomain_name_map() = mesh_2d->get_subdomain_name_map();
-
+  // Remove the boundaries, they get re-added (with a known ID) when stitching the pieces together
+  mesh->get_boundary_info().remove_id(mesh_2d_ext_bdry);
   // Elements have changed, neighbors, ids etc
   mesh->unset_is_prepared();
 
