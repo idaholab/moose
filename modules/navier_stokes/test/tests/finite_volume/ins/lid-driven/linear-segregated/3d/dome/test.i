@@ -27,12 +27,38 @@ Pr = '${fparse cp * mu / k}'
 
 # mixed laminar-turbulent forced convection flat plate correlation
 Re_crit = 5e5
-Nu = '${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}'
-h = '${fparse Nu * k / L}'
+Nu_in = '${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}'
+h_in = '${fparse Nu_in * k / L}'
 
-T_0 = 295.9
-T_hot = 373
-T_cold = ${T_0}
+T_0 = ${units 60 degF -> K}
+# mau stands for Makeup-Air-Unit, e.g. the thing that brings in air from outside the dome
+T_mau = ${units 68 degF -> K}
+reactor_load = 300e3 # W
+# Parameter range from 45F to 68F
+T_outside_air = ${units 45 degF -> K}
+
+# AHU heat mode trigger points
+# Reserved for the follow-on cooling simulation
+# T_heat_trigger_low = ${units 60 degF -> K}
+T_heat_trigger_high = ${units 68 degF -> K}
+# We're not currently interested in cooling, so stop it from happening by setting this trigger
+# temperature very high, e.g. the boiling temperature of water
+T_cooling_trigger = ${units 100 degC -> K}
+
+# Dome wall thermal resistance model
+h_out = 10 # W/m^2/K, outdoor convection coefficient. Could be larger if there's a lot of wind
+concrete_thickness = 0.305 # m
+concrete_k = 1.8 # W/m/K
+cellulose_joint_thickness = 0.013 # m
+cellulose_joint_k = 0.2 # W/m/K
+steel_thickness = 0.025 # m
+steel_k = 50 # W/m/K
+
+R_concrete = '${fparse concrete_thickness / concrete_k}'
+R_cellulose_joint = '${fparse cellulose_joint_thickness / cellulose_joint_k}'
+R_steel = '${fparse steel_thickness / steel_k}'
+R_dome_structure = '${fparse R_concrete + R_cellulose_joint + R_steel}'
+h_dome_structure = '${fparse 1 / (1/h_out + R_dome_structure + 1/h_in)}'
 initial_dt = .4
 
 # turbulence parameters
@@ -42,7 +68,7 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
-walls = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary'
+walls = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary ahu_intake_1 ahu_exhaust_1'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 Pr_t = 0.9
 
@@ -184,6 +210,14 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     p_diffusion_kernel = p_diffusion
     body_force_kernel_names = "; ; w_buoyancy w_fan"
     pressure_projection_method = consistent
+  []
+  [heating_complete]
+    type = Terminator
+    expression = 'heating_mode < 0.5'
+    fail_mode = HARD
+    error_level = INFO
+    message = 'Heating response complete: six-sensor average reached the 68 F set point.'
+    execute_on = TIMESTEP_END
   []
 []
 
@@ -485,25 +519,25 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
 
 [LinearFVBCs]
   [inlet_x]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    type = LinearFVNormalVelocityFunctorDirichletBC
     boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_x
-    normal_component = 'x'
+    component = 'x'
   []
   [inlet_y]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    type = LinearFVNormalVelocityFunctorDirichletBC
     boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_y
-    normal_component = 'y'
+    component = 'y'
   []
   [inlet_z]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    type = LinearFVNormalVelocityFunctorDirichletBC
     boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_z
-    normal_component = 'z'
+    component = 'z'
   []
   [inlet_TKE]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -520,7 +554,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   [inlet_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'inlet_1 inlet_2 inlet_3'
-    functor = ${T_cold}
+    functor = ${T_mau}
     variable = T_fluid
   []
 
@@ -601,7 +635,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
 
   [pressure-flux]
     type = LinearFVPressureFluxBC
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary inlet_1 inlet_2 inlet_3 ahu_intake ahu_exhaust'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary inlet_1 inlet_2 inlet_3 ahu_intake_1 ahu_exhaust_1 ahu_intake_2 ahu_exhaust_2'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
@@ -614,129 +648,127 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     variable = T_fluid
   []
   [T_hot]
-    type = LinearFVConvectiveHeatTransferBC
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
     boundary = 'air_box_boundary'
     variable = T_fluid
-    h = ${h}
-    T_fluid = T_fluid
-    T_solid = ${T_hot}
+    functor = reactor_heat_flux
   []
   [T_cold]
     type = LinearFVConvectiveHeatTransferBC
     boundary = 'air_wall_boundary'
-    T_solid = ${T_cold}
+    T_solid = ${T_outside_air}
     T_fluid = T_fluid
     variable = T_fluid
-    h = ${h}
+    h = ${h_dome_structure}
   []
 
   # ahu off
   [no_slip_x_ahu]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_x
-    boundary = 'ahu_intake ahu_exhaust'
+    boundary = 'ahu_intake_2 ahu_exhaust_2'
     functor = 0
     enable = true
   []
   [no_slip_y_ahu]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_y
-    boundary = 'ahu_intake ahu_exhaust'
+    boundary = 'ahu_intake_2 ahu_exhaust_2'
     functor = 0
     enable = true
   []
   [no_slip_z_ahu]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_z
-    boundary = 'ahu_intake ahu_exhaust'
+    boundary = 'ahu_intake_2 ahu_exhaust_2'
     functor = 0
     enable = true
   []
   # ahu on. Note that this is outflow from the simulation boundary so sign should be positive
   [ahu_inlet_x]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_intake'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_intake_2'
     functor = 'ahu_inlet_velocity'
     variable = vel_x
-    normal_component = 'x'
+    component = 'x'
     enable = false
   []
   [ahu_inlet_y]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_intake'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_intake_2'
     functor = 'ahu_inlet_velocity'
     variable = vel_y
-    normal_component = 'y'
+    component = 'y'
     enable = false
   []
   [ahu_inlet_z]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_intake'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_intake_2'
     functor = 'ahu_inlet_velocity'
     variable = vel_z
-    normal_component = 'z'
+    component = 'z'
     enable = false
   []
   [ahu_inlet_TKE]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = TKE
     use_two_term_expansion = true
-    boundary = 'ahu_intake'
+    boundary = 'ahu_intake_2'
     enable = false
   []
   [ahu_inlet_TKED]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = TKED
     use_two_term_expansion = true
-    boundary = 'ahu_intake'
+    boundary = 'ahu_intake_2'
     enable = false
   []
   [ahu_inlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = T_fluid
     use_two_term_expansion = true
-    boundary = 'ahu_intake'
+    boundary = 'ahu_intake_2'
     enable = false
   []
   [ahu_exhaust_x]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_exhaust_2'
     functor = 'ahu_exhaust_velocity'
     variable = vel_x
-    normal_component = 'x'
+    component = 'x'
     enable = false
   []
   [ahu_exhaust_y]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_exhaust_2'
     functor = 'ahu_exhaust_velocity'
     variable = vel_y
-    normal_component = 'y'
+    component = 'y'
     enable = false
   []
   [ahu_exhaust_z]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    type = LinearFVNormalVelocityFunctorDirichletBC
+    boundary = 'ahu_exhaust_2'
     functor = 'ahu_exhaust_velocity'
     variable = vel_z
-    normal_component = 'z'
+    component = 'z'
     enable = false
   []
   [ahu_exhaust_TKE]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    boundary = 'ahu_exhaust_2'
     functor = '${k_init}'
     variable = TKE
   []
   [ahu_exhaust_TKED]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    boundary = 'ahu_exhaust_2'
     functor = '${eps_init}'
     variable = TKED
   []
   [ahu_exhaust_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ahu_exhaust'
+    boundary = 'ahu_exhaust_2'
     functor = 'ahu_T_out'
     variable = T_fluid
   []
@@ -795,7 +827,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   []
   [console]
     type = Console
-    hide = 'floor_area floor_heat_density avg_elem_size cfl new_dt_for_unity_cfl rayleigh t_diff dt area_fan1 area_fan2 area_fan3'
+    hide = 'floor_area floor_heat_density avg_elem_size t_diff dt area_fan1 area_fan2 area_fan3'
   []
   csv = true
   checkpoint = true
@@ -805,19 +837,6 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
 []
 
 [Postprocessors]
-  [rayleigh]
-    type = RayleighNumber
-    cp_ave = ${cp}
-    gravity_magnitude = 9.8
-    k_ave = ${k}
-    l = ${L}
-    mu_ave = ${mu}
-    rho_ave = ${rho}
-    beta = ${beta}
-    T_cold = ${T_cold}
-    T_hot = ${T_hot}
-    execute_on = 'initial timestep_end'
-  []
   [vel_max]
     type = ElementExtremeValue
     variable = vel_mag
@@ -884,6 +903,20 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     pp_symbols = 'area'
     execute_on = 'initial'
   []
+  [reactor_boundary_area]
+    type = AreaPostprocessor
+    boundary = air_box_boundary
+    execute_on = 'initial'
+  []
+  [reactor_heat_flux]
+    type = ParsedPostprocessor
+    expression = 'power / area'
+    constant_names = 'power'
+    constant_expressions = ${reactor_load}
+    pp_names = 'reactor_boundary_area'
+    pp_symbols = 'area'
+    execute_on = 'initial'
+  []
   [sensor_one]
     type = PointValue
     variable = T_fluid
@@ -899,15 +932,35 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     variable = T_fluid
     point = '0 ${fparse sqrt(cylinder_inner_radius^2 - (25.60 - cylinder_height)^2) - boundary_layer_cell_size/2} 25.60'
   []
+  [sensor_four]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse -(cylinder_inner_radius - boundary_layer_cell_size/2)} 0.9144'
+  []
+  [sensor_five]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse -(cylinder_inner_radius - boundary_layer_cell_size/2)} 10.668'
+  []
+  [sensor_six]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse -(sqrt(cylinder_inner_radius^2 - (25.60 - cylinder_height)^2) - boundary_layer_cell_size/2)} 25.60'
+  []
+  [sensor_avg]
+    type = ParsedPostprocessor
+    expression = '(sensor_one + sensor_two + sensor_three + sensor_four + sensor_five + sensor_six)/6'
+    pp_names = 'sensor_one sensor_two sensor_three sensor_four sensor_five sensor_six'
+  []
   [heating_mode]
     type = ParsedPostprocessor
-    expression = 'if(((sensor_one + sensor_two + sensor_three)/3) < 293.15, 1, 0)'
-    pp_names = 'sensor_one sensor_two sensor_three'
+    expression = 'if(sensor_avg < ${T_heat_trigger_high}, 1, 0)'
+    pp_names = 'sensor_avg'
   []
   [cooling_mode]
     type = ParsedPostprocessor
-    expression = 'if(((sensor_one + sensor_two + sensor_three)/3) > 298.7, 1, 0)'
-    pp_names = 'sensor_one sensor_two sensor_three'
+    expression = 'if(((sensor_one + sensor_two + sensor_three + sensor_four + sensor_five + sensor_six)/6) > ${T_cooling_trigger}, 1, 0)'
+    pp_names = 'sensor_one sensor_two sensor_three sensor_four sensor_five sensor_six'
   []
   [ahu_on]
     type = ParsedPostprocessor
@@ -979,12 +1032,12 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   []
   [area_ahu_inlet]
     type = AreaPostprocessor
-    boundary = ahu_intake
+    boundary = ahu_intake_2
     execute_on = 'initial'
   []
   [area_ahu_exhaust]
     type = AreaPostprocessor
-    boundary = ahu_exhaust
+    boundary = ahu_exhaust_2
     execute_on = 'initial'
   []
   [ahu_inlet_velocity]
@@ -1001,7 +1054,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   []
   [ahu_heat_in]
     type = VolumetricFlowRate
-    boundary = ahu_intake
+    boundary = ahu_intake_2
     advected_quantity = h
     vel_x = vel_x
     vel_y = vel_y
@@ -1027,10 +1080,16 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     expression = 'ahu_heat_out_if_cooled / (${ahu_vfr} * ${rho} * ${cp})'
     pp_names = 'ahu_heat_out_if_cooled'
   []
+  # Add this postprocessor so that 'ahu_T_out' below isn't nonsense when the AHU is off
+  [ahu_T_out_measured]
+    type = SideAverageValue
+    boundary = 'ahu_exhaust_2'
+    variable = T_fluid
+  []
   [ahu_T_out]
     type = ParsedPostprocessor
-    expression = 'if(heating_mode, ahu_T_out_if_heated, if(cooling_mode, ahu_T_out_if_cooled, ${T_cold}))'
-    pp_names = 'heating_mode cooling_mode ahu_T_out_if_heated ahu_T_out_if_cooled'
+    expression = 'if(heating_mode, ahu_T_out_if_heated, if(cooling_mode, ahu_T_out_if_cooled, ahu_T_out_measured))'
+    pp_names = 'heating_mode cooling_mode ahu_T_out_if_heated ahu_T_out_if_cooled ahu_T_out_measured'
   []
 []
 
