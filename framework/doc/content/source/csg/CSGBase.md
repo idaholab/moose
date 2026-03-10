@@ -287,6 +287,12 @@ An example of the $(i, j)$ indices for a 3-ring hexagonal lattice is shown in [!
        id=fig:hex_lat_row
        caption=Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(i, j)$ form.
 
+!alert! note title=Y-Oriented Hexagonal Lattices
+
+The `CSGHexagonalLattice` class assumes an x-oriented lattice layout. To define a y-oriented lattice, the recommendation is to first define an x-oriented lattice and apply a [rotation transformation](#transformations). All indexing in this case will still remain consistent with the x-oriented indexing as described below.
+
+!alert-end!
+
 Convenience methods are provided for `CSGHexagonalLattice` objects to convert between the required $(i, j)$ indices and a ring-based $(r, p)$ indexing scheme.
 In the ring-based scheme, the outermost ring is the 0th ring, and the right-most element in the ring is the 0th position of the ring with indices increasing counter-clockwise around the ring.
 For the 3-ring lattice above in [!ref](fig:hex_lat_row), the corresponding $(r, p)$ indices would be as shown in [!ref](fig:hex_lat_ring).
