@@ -9,20 +9,24 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "GeneralUserObject.h"
 
 // This AuxKernel performs a calculation of the Henry coefficient for noble gases using the model
 // by K. Lee, et al., "Semi-empirical model for Henry's law constant of noble gases in molten salt",
 // Scientific Reports (2024) 14:12847, https://doi.org/10.1038/s41598-024-60006-9.
 
-class HenryGasConstantAux : public AuxKernel
+class HenryGasConstant : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
+  HenryGasConstant(const InputParameters & parameters);
+  virtual ~HenryGasConstant() {}
 
-  HenryGasConstantAux(const InputParameters & parameters);
-
-  virtual ~HenryGasConstantAux() {}
+  virtual void initialSetup() override;
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override;
+  virtual Real henry(Real temperature) const;
 
   /// multiplier to convert atm to Pa
   static constexpr Real _atm_to_Pa = 101325;
@@ -49,10 +53,7 @@ public:
   static constexpr Real _dgamma_dT_FLiNaK = -0.0788;
 
 protected:
-  virtual Real computeValue();
 
-  /// fluid temperature
-  const VariableValue & _temperature;
 
   /// van der Waals radius
   const Real _radius;
