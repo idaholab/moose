@@ -38,9 +38,9 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
   // Definition of the region to re-mesh
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<std::vector<std::vector<SubdomainName>>>(
-      "subdomain_names", {}, "The surface mesh subdomains to be re-mesheed");
+      "subdomain_names", {}, "The surface mesh subdomains to be re-meshed");
   params.addParam<std::vector<SubdomainName>>(
-      "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-mesheed");
+      "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-meshed");
 
   // Shape parameters
   params.addRangeCheckedParam<Real>(
@@ -58,7 +58,7 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
   params.addParamNamesToGroup("level_set max_level_set_correction_iterations",
                               "Level set shape correction");
 
-  // Surface remeshing parameters
+  // Surface re-meshing parameters
   params.addRangeCheckedParam<Real>(
       "max_edge_length",
       "max_edge_length>0",
@@ -73,20 +73,14 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Ratio of points to add to the boundaries. Can be set to a single value for all groups at "
       "once, or specified individually. A single value is recommended as the boundary refinement "
       "must be consistent between all subdomains.");
-  params.addParam<std::vector<bool>>(
-      "refine_boundaries",
-      {false},
-      "Whether to refine the boundaries of each subdomain group. Can be set to a single value for "
-      "all groups at once, or specified individually");
   params.addParam<std::vector<Real>>(
       "desired_areas",
       {0},
       "Target element size when triangulating projection of the subdomain group. Can be set to a "
       "single value for all groups at once, or specified individually. Default of 0 means no "
       "constraint.");
-  params.addParamNamesToGroup(
-      "max_edge_length interpolate_boundaries refine_boundaries desired_areas",
-      "Delaunay triangulation");
+  params.addParamNamesToGroup("max_edge_length interpolate_boundaries desired_areas",
+                              "Delaunay triangulation");
 
   // Parameters for stitching meshes at the end
   params.addParam<bool>("avoid_merging_subdomains",
@@ -120,7 +114,6 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
         getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),
     _interpolate_boundaries(getParam<std::vector<unsigned int>>("interpolate_boundaries")),
-    _refine_boundaries(getParam<std::vector<bool>>("refine_boundaries")),
     _desired_areas(getParam<std::vector<Real>>("desired_areas")),
     _verbose(getParam<bool>("verbose"))
 {
@@ -177,15 +170,11 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   _num_groups = _subdomain_names.size();
   if (_interpolate_boundaries.size() == 1)
     _interpolate_boundaries.resize(_num_groups, _interpolate_boundaries[0]);
-  if (_refine_boundaries.size() == 1)
-    _refine_boundaries.resize(_num_groups, _refine_boundaries[0]);
   if (_desired_areas.size() == 1)
     _desired_areas.resize(_num_groups, _desired_areas[0]);
   if (_interpolate_boundaries.size() != _num_groups)
     paramError("interpolate_boundaries",
                "Should be the same size as 'subdomain_names' or of size 1");
-  if (_refine_boundaries.size() != _num_groups)
-    paramError("refine_boundaries", "Should be the same size as 'subdomain_names' or of size 1");
   if (_desired_areas.size() != _num_groups)
     paramError("desired_areas", "Should be the same size as 'subdomain_names' or of size 1");
 
@@ -492,7 +481,6 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
   poly2tri.triangulation_type() = TriangulatorInterface::PSLG;
 
   poly2tri.set_interpolate_boundary_points(_interpolate_boundaries[group_i]);
-  poly2tri.set_refine_boundary_allowed(_refine_boundaries[group_i]);
   poly2tri.set_verify_hole_boundaries(false);
   poly2tri.desired_area() = _desired_areas[group_i];
   poly2tri.minimum_angle() = 0; // Not yet supported

@@ -46,9 +46,6 @@ protected:
   /// Number of points added to boundaries around each group of surface subdomains
   std::vector<unsigned int> _interpolate_boundaries;
 
-  /// Whether to refine the boundaries around each group of surface subdomains
-  std::vector<bool> _refine_boundaries;
-
   /// Target areas for the triangulation for each group of surface subdomains
   std::vector<Real> _desired_areas;
 
