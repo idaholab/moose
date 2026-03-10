@@ -47,10 +47,10 @@ ahu_width = '${fparse 5.25 + 0.5 + ahu_vent_height}'
 ahu_height = '${fparse 6.45 + 0.5 + ahu_vent_height}'
 ahu_depth = 1.6
 ahu_theta = 5.759586531581287
-ahu_intake_bottom = 3
-ahu_intake_height = '${fparse ahu_vent_width * 3 + 0.2 * 2}'
-ahu_exhaust_left = 0
-ahu_exhaust_width = '${fparse ahu_vent_width * 3 + 0.6 * 2}'
+ahu_exhaust_1_bottom = 3
+ahu_exhaust_1_height = '${fparse ahu_vent_width * 3 + 0.2 * 2}'
+ahu_exhaust_2_left = 0
+ahu_exhaust_2_width = '${fparse ahu_vent_width * 3 + 0.6 * 2}'
 
 boundary_layer_thickness = 0.5 # meters
 bl_box_width = '${fparse box_width + boundary_layer_thickness * 2}'
@@ -323,7 +323,9 @@ n_bl = '${fparse ceil(boundary_layer_thickness / boundary_layer_cell_size)}'
     combinatorial_geometry = 'r:=sqrt(x^2 + y^2);tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse  2 * pi} + tpi, tpi);
                               r >= ${fparse cylinder_inner_radius - ahu_depth} & r < ${cylinder_inner_radius} &
                               t >= (${ahu_theta} - th) & t < (${ahu_theta} + th) &
-                              z < ${ahu_height}'
+                              if(t >= (${ahu_theta} - th + ${fparse ahu_vent_height / cylinder_inner_radius}),
+                                 z < ${ahu_height},
+                                 z < ${fparse ahu_exhaust_1_bottom + ahu_exhaust_1_height})'
     constant_names = 'th'
     constant_expressions = '${fparse ahu_width / 2 / cylinder_inner_radius}'
   []
@@ -445,39 +447,79 @@ n_bl = '${fparse ceil(boundary_layer_thickness / boundary_layer_cell_size)}'
     primary_block = '1'
     paired_block = '20'
   []
-  [ahu_intake_boundary]
+  [ahu_exhaust1a_boundary]
     type = ParsedGenerateSideset
     input = air_ahu_boundary
-    new_sideset_name = ahu_intake
+    new_sideset_name = ahu_exhaust_1
     combinatorial_geometry = 'r:=sqrt(x^2 + y^2);tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse 2 * pi} + tpi, tpi);
                               r < ${fparse cylinder_inner_radius - ahu_depth + 0.1} &
                               t >= right & t < (right + ${fparse ahu_vent_height / cylinder_inner_radius}) &
-                              z >= ${ahu_intake_bottom} & z < ${fparse ahu_intake_bottom + ahu_intake_height}'
+                              z >= ${ahu_exhaust_1_bottom} & z < ${fparse ahu_exhaust_1_bottom + ahu_exhaust_1_height}'
     constant_names = 'right'
     constant_expressions = '${fparse ahu_theta - ahu_width / 2 / cylinder_inner_radius}'
     included_boundaries = air_ahu_boundary
     replace = true
   []
-  [ahu_exhaust_boundary]
+  [ahu_exhaust1b_boundary]
     type = ParsedGenerateSideset
-    input = ahu_intake_boundary
-    new_sideset_name = ahu_exhaust
+    input = ahu_exhaust1a_boundary
+    new_sideset_name = ahu_exhaust_1
+    combinatorial_geometry = 'r:=sqrt(x^2 + y^2);
+                              r < ${fparse cylinder_inner_radius - ahu_depth + ahu_vent_height} &
+                              z < (${ahu_height} - 0.1)'
+    normal = '0 0 -1'
+    included_boundaries = air_ahu_boundary
+    replace = true
+  []
+  [ahu_exhaust2a_boundary]
+    type = ParsedGenerateSideset
+    input = ahu_exhaust1b_boundary
+    new_sideset_name = ahu_exhaust_2
     combinatorial_geometry = 'r:=sqrt(x^2 + y^2);tpi:=atan2(y, x);dt:=left - tpi;
                               r < ${fparse cylinder_inner_radius - ahu_depth + 0.1} &
-                              dt >= 0 & dt < ${fparse ahu_exhaust_width / cylinder_inner_radius} &
+                              dt >= 0 & dt < ${fparse ahu_exhaust_2_width / cylinder_inner_radius} &
                               z >= ${fparse ahu_height - ahu_vent_height} & z < ${ahu_height}'
     constant_names = 'left'
-    constant_expressions = '${fparse ahu_theta + (ahu_width / 2 - ahu_exhaust_left) / cylinder_inner_radius - 2 * pi}'
+    constant_expressions = '${fparse ahu_theta + (ahu_width / 2 - ahu_exhaust_2_left) / cylinder_inner_radius - 2 * pi}'
     included_boundaries = air_ahu_boundary
+    replace = true
+  []
+  [ahu_exhaust2b_boundary]
+    type = ParsedGenerateSideset
+    input = ahu_exhaust2a_boundary
+    new_sideset_name = ahu_exhaust_2
+    combinatorial_geometry = 'r:=sqrt(x^2 + y^2);tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse 2 * pi} + tpi, tpi);
+                              r < ${fparse cylinder_inner_radius - ahu_depth + ahu_vent_height} &
+                              t > ${fparse ahu_theta + (ahu_width / 2 - ahu_exhaust_2_left - ahu_vent_width) / cylinder_inner_radius} &
+                              z > (${ahu_height} - 0.1)'
+    normal = '0 0 -1'
+    included_boundaries = air_ahu_boundary
+    replace = true
+  []
+  [ahu_intake1_boundary]
+    type = ParsedGenerateSideset
+    input = ahu_exhaust2b_boundary
+    new_sideset_name = 'ahu_intake_1'
+    combinatorial_geometry = '1'
+    included_boundaries = air_ahu_boundary
+    normal = '${fparse sin(ahu_theta + ahu_width / 2 / cylinder_inner_radius)} ${fparse -cos(ahu_theta + ahu_width / 2 / cylinder_inner_radius)} 0'
+    replace = true
+  []
+  [ahu_intake2_boundary]
+    type = ParsedGenerateSideset
+    input = ahu_intake1_boundary
+    new_sideset_name = 'ahu_intake_2'
+    combinatorial_geometry = 'z >= ${fparse ahu_height / 2}'
+    included_boundaries = ahu_intake_1
     replace = true
   []
   [remove_boundaries]
     type = BoundaryDeletionGenerator
-    input = ahu_exhaust_boundary
+    input = ahu_intake2_boundary
     boundary_names = 'air_floor_boundary air_wall_boundary air_box_boundary
                       wall_floor_boundary wall_air_boundary wall_outer_boundary
                       outlet_1 outlet_2 inlet_1 inlet_2 inlet_3
-                      air_ahu_boundary ahu_intake ahu_exhaust'
+                      air_ahu_boundary ahu_intake_1 ahu_intake_2 ahu_exhaust_1 ahu_exhaust_2'
     operation = keep
   []
 []
