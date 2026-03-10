@@ -7,12 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Reference for B-Spline: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
-
 #pragma once
 
 #include "libMeshReducedNamespace.h"
 
+/**
+ * Utilities useful for splines in general
+ * Reference for B-Spline implementation: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
+ */
 namespace SplineUtils
 {
 /**
@@ -51,16 +53,17 @@ std::vector<Point> bSplineControlPoints(const libMesh::Point & start_point,
  * @param direction_vector direction of the line
  * @param sharpness number in [0,1] that determines the sharpness of the future curve. In this
  * context, it will determine how close to the end point the control points are placed.
- * @param build_backwards boolean to build the second vector of control points in the correct order
+ * @param reverse_order boolean to return the vector of control points in the reverse order
  */
 std::vector<Point> controlPointsAlongLine(const libMesh::Point & start_point,
                                           const libMesh::Point & end_point,
                                           const libMesh::RealVectorValue & direction_vector,
                                           const libMesh::Real sharpness,
                                           const unsigned int num_cps,
-                                          const bool build_backwards = false);
+                                          const bool reverse_order = false);
+
 /**
- * Makes the control point. Subroutine of controlPointsAlongLine
+ * Creates a control point. Subroutine of controlPointsAlongLine
  * @param start_point start point for the line
  * @param end_point end point of the line
  * @param direction_vector direction of the line
@@ -71,17 +74,17 @@ libMesh::Point makeControlPoint(const libMesh::Point & start_point,
                                 const libMesh::Point & end_point,
                                 const libMesh::RealVectorValue & direction_vector,
                                 const libMesh::Real sharpness);
+
 /**
  * Determines the two points defining the shortest line segment between two lines in space. If the
- * lines intersection, the closest points returned will be identical.
+ * lines intersect, the two points returned will be identical.
  * @param point_1 starting point of the first line
  * @param point_2 starting point of the second line
  * @param direction_1 direction of the first line
  * @param direction_2 direction of the second line
  */
-std::vector<Point> closestPoints(const libMesh::Point & point_1,
-                                 const libMesh::Point & point_2,
-                                 const libMesh::RealVectorValue & direction_1,
-                                 const libMesh::RealVectorValue & direction_2);
-
+std::pair<Point, Point> closestPoints(const libMesh::Point & point_1,
+                                      const libMesh::Point & point_2,
+                                      const libMesh::RealVectorValue & direction_1,
+                                      const libMesh::RealVectorValue & direction_2);
 }
