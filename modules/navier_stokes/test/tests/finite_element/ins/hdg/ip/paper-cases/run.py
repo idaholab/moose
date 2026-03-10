@@ -8,9 +8,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc, profile, base_n):
+def run_case(exec_path,
+             input_file,
+             procs,
+             refine,
+             set_schur_pre,
+             num_steps,
+             disc,
+             profile,
+             base_n,
+             a_solve):
     input_base = input_file[:-2]
-    tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre-{disc}"
+    tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre-{disc}-{a_solve}"
     print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
     if disc == "edghdg":
         vel_face_fe_type = "LAGRANGE"
@@ -33,6 +42,18 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, dis
       cmd.append(f"Executioner/num_steps={num_steps}")
     if base_n is not None:
       cmd.append(f"n={base_n}")
+    if a_solve == "strumpack-lu":
+      # Override the A/velocity block preconditioner from STRUMPACK ILU to STRUMPACK LU.
+      cmd.append("Preconditioning/FSP/u/petsc_options='-ksp_converged_reason'")
+      cmd.append(
+          "Preconditioning/FSP/u/petsc_options_iname="
+          "'-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side "
+          "-pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'"
+      )
+      cmd.append(
+          "Preconditioning/FSP/u/petsc_options_value="
+          "'lu gmres 1e-2 300 right strumpack 300 1e-8 unpreconditioned'"
+      )
 
     # Prepare environment (set MOOSE_PROFILE_BASE per run)
     env = os.environ.copy()
@@ -123,6 +144,15 @@ def main():
         "--base-n", type=int,
         help="Base mesh n value; passed as Mesh/n when provided."
     )
+    parser.add_argument(
+        "--A-solve",
+        choices=["strumpack-ilu", "strumpack-lu"],
+        default="strumpack-ilu",
+        help=(
+            "A/velocity block solve strategy: 'strumpack-ilu' (default) "
+            "or 'strumpack-lu'."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -154,7 +184,8 @@ def main():
                  case_num_steps,
                  args.disc,
                  args.profile,
-                 args.base_n)
+                 args.base_n,
+                 args.A_solve)
 
         if _case < args.num_cases:
             procs *= args.proc_multiplier
