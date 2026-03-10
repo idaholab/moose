@@ -256,6 +256,24 @@ public:
    */
   T * deviceData() const { return _device_data; }
   /**
+   * Get the host unmanaged view
+   * @returns The host unmanaged view
+   */
+  auto hostView() const
+  {
+    return ::Kokkos::View<T *, ::Kokkos::HostSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+        _host_data, _size);
+  }
+  /**
+   * Get the device unmanaged view
+   * @returns The device unmanaged view
+   */
+  auto deviceView() const
+  {
+    return ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(_device_data,
+                                                                                      _size);
+  }
+  /**
    * Allocate array on host and device
    * @param n The vector containing the size of each dimension
    */
@@ -352,11 +370,18 @@ public:
   class iterator
   {
   public:
-    KOKKOS_FUNCTION iterator(T * it) : it(it) {}
-    KOKKOS_FUNCTION bool operator==(const iterator & other) const { return it == other.it; }
-    KOKKOS_FUNCTION bool operator!=(const iterator & other) const { return it != other.it; }
-    KOKKOS_FUNCTION T & operator*() const { return *it; }
-    KOKKOS_FUNCTION T * operator&() const { return it; }
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
+
+    KOKKOS_FUNCTION iterator() : it(nullptr) {}
+    KOKKOS_FUNCTION explicit iterator(T * p) : it(p) {}
+
+    KOKKOS_FUNCTION reference operator*() const { return *it; }
+    KOKKOS_FUNCTION pointer operator->() const { return it; }
+    KOKKOS_FUNCTION pointer operator&() const { return it; }
     KOKKOS_FUNCTION iterator & operator++()
     {
       ++it;
@@ -368,9 +393,17 @@ public:
       ++it;
       return pre;
     }
+    KOKKOS_FUNCTION friend bool operator==(const iterator & a, const iterator & b)
+    {
+      return a.it == b.it;
+    }
+    KOKKOS_FUNCTION friend bool operator!=(const iterator & a, const iterator & b)
+    {
+      return a.it != b.it;
+    }
 
   private:
-    T * it;
+    pointer it;
   };
 
   /**
@@ -1056,11 +1089,7 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
-  {
-    ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> data(_device_data,
-                                                                                    _size);
-    ::Kokkos::Experimental::fill_n(ExecSpace(), data, _size, scalar);
-  }
+    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
 
   return *this;
 }
