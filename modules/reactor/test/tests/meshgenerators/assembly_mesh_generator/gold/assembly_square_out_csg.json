@@ -728,16 +728,6 @@
         "pin1_cell_radial_2_axial_0",
         "pin1_cell_radial_2_axial_1",
         "pin1_void_cell"
-      ],
-      "transformations": [
-        [
-          "ROTATION",
-          [
-            30.0,
-            0.0,
-            0.0
-          ]
-        ]
       ]
     },
     "pin2_univ": {
@@ -745,16 +735,6 @@
         "pin2_cell_radial_0_axial_0",
         "pin2_cell_radial_0_axial_1",
         "pin2_void_cell"
-      ],
-      "transformations": [
-        [
-          "ROTATION",
-          [
-            30.0,
-            0.0,
-            0.0
-          ]
-        ]
       ]
     }
   }
