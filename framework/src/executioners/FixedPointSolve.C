@@ -85,7 +85,7 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
       "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
       "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
       "fixed_point_force_norms custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
-      "Fixed point iterations");
+      "MultiApp fixed point iterations");
 
   return params;
 }

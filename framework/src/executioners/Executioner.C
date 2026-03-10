@@ -47,7 +47,7 @@ Executioner::validParams()
 
   params.registerBase("Executioner");
 
-  params.addParamNamesToGroup("fixed_point_algorithm", "Fixed point iterations");
+  params.addParamNamesToGroup("fixed_point_algorithm", "MultiApp fixed point iterations");
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
   // Whether or not this executioner supports --test-restep capability
