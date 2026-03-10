@@ -63,5 +63,6 @@
     cli_args = "LinearFVKernels/diffusion/coeff_interp_method=geom FVInterpolationMethods/geom/type=FVAdvectedUpwind"
     expect_err = "does not support face interpolation and cannot be used by LinearFVDiffusion"
     requirement = "The system shall reject using an advected-only FVInterpolationMethod with LinearFVDiffusion."
+    max_threads = 1 # see libmesh issue #3808
   []
 []
