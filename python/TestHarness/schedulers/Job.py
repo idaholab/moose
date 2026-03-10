@@ -759,8 +759,8 @@ class Job(OutputInterface):
 
         if env_ran:
             header += [
-                "Environment variable(s): "
-                + " ".join([f'{k}="{v}"' for k, v in env_ran.items()])
+                "Environment variable(s):",
+                *[f'  {k}="{v}"' for k, v in sorted(env_ran.items())],
             ]
         output = "\n".join(header) + "\n"
 
