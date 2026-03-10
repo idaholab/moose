@@ -10,7 +10,6 @@
 #include "HenryGasConstant.h"
 #include "MathUtils.h"
 
-
 registerMooseObject("ChemicalReactionsApp", HenryGasConstant);
 
 InputParameters

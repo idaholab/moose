@@ -53,7 +53,8 @@ GasLiquidMassTransfer::GasLiquidMassTransfer(const InputParameters & parameters)
     case Equationlist::WILKECHANG:
     {
       if (!isParamSetByUser("molar_weight"))
-        paramError("molar_weight", "Must set the molecular weight of the gas when using WilkeChang");
+        paramError("molar_weight",
+                   "Must set the molecular weight of the gas when using WilkeChang");
       break;
     }
     case Equationlist::STOKESEINSTEIN:
@@ -106,9 +107,9 @@ GasLiquidMassTransfer::mtc(Real pressure, Real temperature, Real fluid_velocity)
       Real cm_to_m = 1. / m_to_cm;
       Real mu_cgs = mu * kg_to_g / m_to_cm; // g/cm/s = Poise
       Real poise_to_centipoise = 100;
-      mu_cgs = mu_cgs * poise_to_centipoise;           // cP
+      mu_cgs = mu_cgs * poise_to_centipoise;                    // cP
       Real molar_volume = _mw / rho * Utility::pow<3>(m_to_cm); // cm3/mol
-      Real molar_weight = _mw * kg_to_g;               // g/mol
+      Real molar_weight = _mw * kg_to_g;                        // g/mol
       Diffusivity = _wc * temperature * std::sqrt(_phi * molar_weight) /
                     (mu_cgs * std::pow(molar_volume, 0.6));
       Diffusivity = Diffusivity * Utility::pow<2>(cm_to_m);

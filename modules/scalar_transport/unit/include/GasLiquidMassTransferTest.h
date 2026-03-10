@@ -16,14 +16,9 @@
 class GasLiquidMassTransferTest : public MooseObjectUnitTest
 {
 public:
-  GasLiquidMassTransferTest()
-    : MooseObjectUnitTest("ScalarTransportApp")
-  {
-    buildObjects();
-  }
+  GasLiquidMassTransferTest() : MooseObjectUnitTest("ScalarTransportApp") { buildObjects(); }
 
 protected:
-
   void buildObjects()
   {
     {
@@ -33,31 +28,29 @@ protected:
       _fe_problem->addUserObject("IdealGasFluidProperties", "fp", eos_pars);
     }
 
-     // Set up object for Stokes-Einstein
-     {
-        InputParameters params = _factory.getValidParams("GasLiquidMassTransfer");
-        params.set<MooseEnum>("equation") = "StokesEinstein";
-        params.set<Real>("d") = 10e-3;
-        params.set<UserObjectName>("fp") = "fp";
-        params.set<Real>("radius") = 1e-3;
-        _fe_problem->addUserObject("GasLiquidMassTransfer", "mtc_stokes", params);
-        _mtc_stokes = &_fe_problem->getUserObject<GasLiquidMassTransfer>("mtc_stokes");
-     }
+    // Set up object for Stokes-Einstein
+    {
+      InputParameters params = _factory.getValidParams("GasLiquidMassTransfer");
+      params.set<MooseEnum>("equation") = "StokesEinstein";
+      params.set<Real>("d") = 10e-3;
+      params.set<UserObjectName>("fp") = "fp";
+      params.set<Real>("radius") = 1e-3;
+      _fe_problem->addUserObject("GasLiquidMassTransfer", "mtc_stokes", params);
+      _mtc_stokes = &_fe_problem->getUserObject<GasLiquidMassTransfer>("mtc_stokes");
+    }
 
-     // Set up object for Wilke-Chang
-     {
-        InputParameters params = _factory.getValidParams("GasLiquidMassTransfer");
-        params.set<MooseEnum>("equation") = "WilkeChang";
-        params.set<Real>("d") = 10e-3;
-        params.set<UserObjectName>("fp") = "fp";
-        params.set<Real>("molar_weight") = 30e-3;
-        _fe_problem->addUserObject("GasLiquidMassTransfer", "mtc_wilkes", params);
-        _mtc_wilkes = &_fe_problem->getUserObject<GasLiquidMassTransfer>("mtc_wilkes");
-     }
-
+    // Set up object for Wilke-Chang
+    {
+      InputParameters params = _factory.getValidParams("GasLiquidMassTransfer");
+      params.set<MooseEnum>("equation") = "WilkeChang";
+      params.set<Real>("d") = 10e-3;
+      params.set<UserObjectName>("fp") = "fp";
+      params.set<Real>("molar_weight") = 30e-3;
+      _fe_problem->addUserObject("GasLiquidMassTransfer", "mtc_wilkes", params);
+      _mtc_wilkes = &_fe_problem->getUserObject<GasLiquidMassTransfer>("mtc_wilkes");
+    }
   }
 
   const GasLiquidMassTransfer * _mtc_stokes;
   const GasLiquidMassTransfer * _mtc_wilkes;
-
 };

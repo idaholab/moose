@@ -16,8 +16,8 @@
 class SinglePhaseFluidProperties;
 
 /**
-  * Computes the mass transfer coefficient of a gas/liquid interface
-  */
+ * Computes the mass transfer coefficient of a gas/liquid interface
+ */
 class GasLiquidMassTransfer : public GeneralUserObject
 {
 public:
@@ -35,8 +35,6 @@ public:
   static constexpr Real _kB = 1.38064852e-23;
 
 protected:
-
-
   /// Diameter of the flow channel [m]
   const Real _diameter;
 

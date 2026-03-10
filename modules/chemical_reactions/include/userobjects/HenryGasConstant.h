@@ -53,8 +53,6 @@ public:
   static constexpr Real _dgamma_dT_FLiNaK = -0.0788;
 
 protected:
-
-
   /// van der Waals radius
   const Real _radius;
 
