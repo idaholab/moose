@@ -3,7 +3,7 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
-- MOOSE Modeling and Simulation User Training (2026 April 16th, Texas A&M)
+- MOOSE Modeling and Simulation User Training (2026 April 16th, Texas A&M) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
 - [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin Italy)
 
