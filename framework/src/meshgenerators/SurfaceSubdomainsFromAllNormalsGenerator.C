@@ -215,7 +215,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       const auto normal = get2DElemNormal(elem);
 
       bool sub_id_found = false;
-      SubdomainID sub_id;
+      SubdomainID sub_id = 0;
       std::map<SubdomainID, unsigned int> sub_id_neighbors;
 
       // NOTE: we use side neighbors instead of point neighbors as side neighbors

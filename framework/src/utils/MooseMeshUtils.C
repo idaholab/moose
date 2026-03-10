@@ -703,7 +703,7 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
     const Node * starting_node = side_elem->node_ptr(0);
     const auto new_mesh_starting_node = edge_mesh->add_point(side_elem->point(0));
     Node * new_first_node = new_mesh_starting_node;
-    dof_id_type first_node_index = starting_node->id();
+    [[maybe_unused]] dof_id_type first_node_index = starting_node->id();
     dof_id_type second_node_index = input_mesh.node_ptr(side_elem->node_id(1))->id();
 
     while (!looped_back && num_visited_from_this_side < 1e7)
