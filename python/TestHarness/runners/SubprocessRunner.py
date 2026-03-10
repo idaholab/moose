@@ -127,11 +127,10 @@ class SubprocessRunner(Runner):
                 )
                 # Allow oversubscription for hosts that don't have a hostfile
                 process_env["PRTE_MCA_rmaps_default_mapping_policy"] = ":oversubscribe"
-            # MPICH with hwloc with a prebuilt topology file
-            elif mpi_config.mpi_type == MPIType.MPICH:
-                if mpi_config.hwloc and mpi_config.hwloc_topo_file is not None:
-                    process_env["HWLOC_XMLFILE"] = mpi_config.hwloc_topo_file
-                    process_env["HWLOC_THISSYSTEM"] = "1"
+            # hwloc with a prebuilt topology file
+            if mpi_config.hwloc and mpi_config.hwloc_topo_file is not None:
+                process_env["HWLOC_XMLFILE"] = mpi_config.hwloc_topo_file
+                process_env["HWLOC_THISSYSTEM"] = "1"
 
         # Add to environment if requested
         if process_env:
