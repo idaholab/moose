@@ -1,0 +1,21 @@
+[Tests]
+  design = 'SideLinearFVFluxIntegral.md'
+  [linearfv_flux]
+    type = CSVDiff
+    input = linearfv_flux_integral.i
+    csvdiff = linearfv_flux_integral_out.csv
+    requirement = 'The system shall integrate boundary flux contributions from linear finite volume flux kernels and sum contributions from multiple kernels in a single postprocessor.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [errors]
+    requirement = 'The system shall throw an error message '
+    [wrong_kernel_type]
+      type = RunException
+      input = linearfv_flux_integral.i
+      detail = "when the user inputs a non-flux linear finite volume kernel to SideLinearFVFluxIntegral."
+      cli_args = 'LinearFVKernels/source/type=LinearFVSource LinearFVKernels/source/variable=u Postprocessors/flux_left_total/linearfvkernels=source'
+      expect_err = "The given LinearFVFluxKernel with name 'source' was not found!"
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]
