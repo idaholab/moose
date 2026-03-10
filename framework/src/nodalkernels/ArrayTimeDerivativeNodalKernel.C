@@ -34,8 +34,9 @@ ArrayTimeDerivativeNodalKernel::computeQpResidual(RealEigenVector & residual)
   residual = _u_dot[_qp];
 }
 
-RealEigenVector
+void
 ArrayTimeDerivativeNodalKernel::computeQpJacobian()
 {
-  return RealEigenVector::Constant(_count, _du_dot_du[_qp]);
+  for (const auto i : make_range(_count))
+    setJacobian(i, i, _du_dot_du[_qp]);
 }
