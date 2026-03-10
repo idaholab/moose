@@ -32,6 +32,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       false,
       "Whether to only group elements in a subdomain using the 'flooding' algorithm. "
       "We strongly recommend pairing this with the 'flood_elements_once' parameter");
+
+  // Post flooding operations/cleanup
   params.addParam<bool>("select_max_neighbor_element_subdomains",
                         false,
                         "Whether to perform a final subdomain assignment phase where each element "
@@ -119,9 +121,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     bool sub_id_found = false;
     if (!_contiguous_assignments_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
-        if (normalsWithinTol(id_pair.second, elem_normal, _normal_tol) ||
-            (_consider_flipped_normals &&
-             normalsWithinTol(id_pair.second, elem_normal, _normal_tol)))
+        if (elementSatisfiesRequirements(
+                elem, id_pair.second, *_subdomain_to_starting_elem[id_pair.first], elem_normal))
         {
           sub_id_found = true;
           item = &id_pair;
