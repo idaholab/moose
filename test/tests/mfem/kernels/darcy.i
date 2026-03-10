@@ -1,7 +1,7 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
-  uniform_refine = 4
+  uniform_refine = 2
 []
 
 [Problem]
@@ -78,7 +78,7 @@
 []
 
 [Solver]
-  type = MFEMSuperLU
+  type = MFEMMUMPS
 []
 
 [Executioner]

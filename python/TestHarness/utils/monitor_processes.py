@@ -34,8 +34,7 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     """
     Get the memory of a process, if running.
 
-    With prefer to use PSS (proportional set size) as the memory
-    count if available.
+    Prefer to use PSS (proportional set size) as the memory count if available.
 
     Arguments:
     ---------
@@ -45,7 +44,7 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     Returns:
     -------
     int:
-        The process memory in kB, if available.
+        The process memory in bytes, if available.
 
     """
     # Prefer PSS if available
@@ -64,7 +63,7 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
             end = start
             while data[end] != 32:
                 end += 1
-            return int(data[start:end]) * 1000
+            return int(data[start:end]) * 1024
 
     # Otherwise, use RSS (will double count shared memory)
     else:

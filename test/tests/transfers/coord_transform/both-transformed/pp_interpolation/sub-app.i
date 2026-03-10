@@ -5,8 +5,8 @@
   xmax = 0
   ymin = 0
   ymax = 1
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 1
   alpha_rotation = -90
 []
 

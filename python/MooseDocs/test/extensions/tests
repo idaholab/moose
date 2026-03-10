@@ -55,7 +55,7 @@
     [appsyntax]
       type = PythonUnitTest
       input = test_appsyntax.py
-      min_slots = 2 # uses threads
+      min_slots = 4 # uses threads and is heavy
       detail = "automatically retrieving application syntax,"
       max_time = 400
     []
