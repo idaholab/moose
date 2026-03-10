@@ -1802,13 +1802,6 @@ class TestHarness:
         failgroup = parser.add_argument_group(
             "Failure Criteria", "Control the failure criteria"
         )
-        failgroup.add_argument(
-            "--max-fails",
-            nargs=1,
-            type=int,
-            default=50,
-            help="The number of tests allowed to fail before any additional tests will run",
-        )
         default_max_cpu_per_slot = (
             110.0 if "microsoft" in platform.release().lower() else 105.0
         )  # give more wiggle room in WSL; see #32464
@@ -1821,6 +1814,13 @@ class TestHarness:
                 "The maximum percent CPU to allow for a job, per slot "
                 f"(default: {default_max_cpu_per_slot})"
             ),
+        )
+        failgroup.add_argument(
+            "--max-fails",
+            nargs=1,
+            type=int,
+            default=50,
+            help="The number of tests allowed to fail before any additional tests will run",
         )
         failgroup.add_argument(
             "--max-memory-per-slot",
