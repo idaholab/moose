@@ -84,6 +84,7 @@ def get_mpi_config() -> MPIConfig:
                     config.hwloc = True
             elif "Open MPI" in out:
                 config.mpi_type = MPIType.OPENMPI
+                config.hwloc = True
 
     if config.hwloc:
         config.hwloc_topo_file = build_hwloc_topo()
