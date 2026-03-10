@@ -88,6 +88,10 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
                         "Whether to prevent merging subdomains by offsetting ids. The first mesh "
                         "in the input will keep the same subdomains ids, the others will have "
                         "offsets. All subdomain names will remain valid");
+  params.addParam<bool>("clear_stitching_boundaries",
+                        true,
+                        "Whether to clear the boundaries between the subdomains being stitched "
+                        "together after they were re-meshed with triangles");
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
   params.addParam<MooseEnum>(
       "stitching_algorithm",
@@ -95,8 +99,9 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Control the use of binary search for the nodes of the stitched surfaces.");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
-  params.addParamNamesToGroup("avoid_merging_subdomains stitching_algorithm verbose_stitching",
-                              "Stitching triangularized meshes");
+  params.addParamNamesToGroup(
+      "avoid_merging_subdomains clear_stitching_boundaries stitching_algorithm verbose_stitching",
+      "Stitching triangularized meshes");
 
   params.addParam<bool>(
       "verbose", false, "Whether the generator should output additional information");
@@ -197,7 +202,10 @@ SurfaceSubdomainsDelaunayRemesher::generate()
 
   // TODO: can we gain efficiency by using different boundary ids for each stitch?
   const auto primary_bcid = 1;
-  const auto paired_bcid = 1;
+  // Prevent deleting a legitimate ID if we start conserving boundary IDs from the input mesh
+  // to the output mesh
+  const auto starting_stitching_id = MooseMeshUtils::getNextFreeBoundaryID(*mesh_3d);
+  auto paired_bcid = starting_stitching_id;
   const auto verbose_stitching = getParam<bool>("verbose_stitching");
   const auto use_binary_search = getParam<MooseEnum>("stitching_algorithm") == "BINARY";
 
@@ -212,54 +220,56 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   {
     if (remesh_i == 0)
       continue;
-    else
-    {
-      UnstructuredMesh & remeshed = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
 
-      // NOTE: we cannot use MeshedHole because the meshes are no longer in the XY plane
-      // Potential optimization: instead of using the full mesh outer boundary for stitching
-      // use what is done in the XYDelaunayGenerator and re-build only the boundary near the
-      // mesh that we are stitching (in XYDelaunay, these are the holes being stitched)
-      // Potential optimization: we could keep the external boundaries from the triangulation phase
+    UnstructuredMesh & remeshed = dynamic_cast<UnstructuredMesh &>(*remeshed_2d[remesh_i]);
 
-      // Create the boundary outside the remeshed mesh
-      bool rem_has_external_bdy = false;
-      MooseMeshUtils::addExternalBoundary(remeshed, paired_bcid, rem_has_external_bdy);
-      mooseAssert(rem_has_external_bdy, "Subdomain mesh should have an external boundary");
+    // NOTE: we cannot use MeshedHole because the meshes are no longer in the XY plane
+    // Potential optimization: instead of using the full mesh outer boundary for stitching
+    // use what is done in the XYDelaunayGenerator and re-build only the boundary near the
+    // mesh that we are stitching
+    // Potential optimization: we could keep the external boundaries from the triangulation phase
 
-      // We need to re-create the boundary outside the parent mesh because we are clearing
-      // it on every stitch
-      bool base_has_external_bdy = false;
-      MooseMeshUtils::addExternalBoundary(*full_mesh, primary_bcid, base_has_external_bdy);
-      if (!base_has_external_bdy)
-        mooseWarning(
-            "Full mesh should have an external boundary. This could occur if the surface mesh is "
-            "disconnected in several parts and a part's surface mesh has just been fully remeshed");
+    // Create the boundary outside the remeshed mesh
+    bool rem_has_external_bdy = false;
+    MooseMeshUtils::addExternalBoundary(remeshed, paired_bcid, rem_has_external_bdy);
+    mooseAssert(rem_has_external_bdy, "Subdomain mesh should have an external boundary");
 
-      // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
-      // subdomain map
-      const auto & increment_subdomain_map = remeshed.get_subdomain_name_map();
-      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+    // We need to re-create the boundary outside the parent mesh because we are clearing
+    // it on every stitch
+    bool base_has_external_bdy = false;
+    MooseMeshUtils::addExternalBoundary(*full_mesh, primary_bcid, base_has_external_bdy);
+    if (!base_has_external_bdy)
+      mooseWarning(
+          "Full mesh should have an external boundary. This could occur if the surface mesh is "
+          "disconnected in several parts and a part's surface mesh has just been fully remeshed");
 
-      full_mesh->stitch_meshes(remeshed,
-                               primary_bcid,
-                               paired_bcid,
-                               TOLERANCE,
-                               /*clear_stitched_bcids*/ true,
-                               verbose_stitching,
-                               use_binary_search,
-                               /*enforce_all_nodes_match_on_boundaries*/ false,
-                               /*merge_boundary_nodes_all_or_nothing*/ false,
-                               /*remap_subdomain_ids*/ !getParam<bool>("avoid_merging_subdomains"));
+    // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
+    // subdomain map
+    const auto & increment_subdomain_map = remeshed.get_subdomain_name_map();
+    main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
-      // TODO: when implementing hole meshes, we might want to also stitch the hole meshes
-    }
+    full_mesh->stitch_meshes(remeshed,
+                             primary_bcid,
+                             paired_bcid,
+                             TOLERANCE,
+                             /*clear_stitched_bcids*/ getParam<bool>("clear_stitching_boundaries"),
+                             verbose_stitching,
+                             use_binary_search,
+                             /*enforce_all_nodes_match_on_boundaries*/ false,
+                             /*merge_boundary_nodes_all_or_nothing*/ false,
+                             /*remap_subdomain_ids*/ !getParam<bool>("avoid_merging_subdomains"));
+
+    // If we want to keep track of the stitching boundaries
+    paired_bcid++;
+    // TODO: when implementing hole meshes, we might want to also stitch the hole meshes
   }
 
   // We do not need the 3D mesh anymore
   mesh_3d->clear();
-  // The stitching boundary is usually removed by stitching, but this does not hurt
-  full_mesh->get_boundary_info().remove_id(primary_bcid);
+  // The stitching boundary should be removed by the stitcher, but this does not hurt
+  if (getParam<bool>("clear_stitching_boundaries"))
+    for (const auto bcid : make_range(starting_stitching_id, paired_bcid))
+      full_mesh->get_boundary_info().remove_id(bcid);
   // Mesh is not prepared after stitching
   full_mesh->unset_is_prepared();
 
@@ -378,7 +388,8 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       {
         paramError("level_set",
                    "The level set function does not match the nodes in the given boundary of the "
-                   "input mesh.");
+                   "input mesh. Level set evaluates at: " +
+                       std::to_string(levelSetEvaluator(*node)) + " at node: " + node->get_info());
       }
     }
   }
