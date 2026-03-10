@@ -20,7 +20,9 @@ where $\sigma$ is the Stefan-Boltzmann constant, $\varepsilon$ is the surface em
 The LinearFV framework solves a linear system at each time step.  The diffusion and
 time-derivative terms are treated implicitly, but the nonlinear $T^4$ radiative term
 cannot appear directly in the linear system.  It must be linearized by lagging the
-nonlinear coefficients to the previous iteration's solution.
+nonlinear coefficients to the previous iteration's solution. The linear system can be solved repeatedly
+within a fixed point iteration loop if the nonlinear term is to be treated implicitly (in time) or is
+treated explicitly if the linear system is only solved once.
 
 ### First-order Taylor expansion
 
@@ -69,16 +71,18 @@ The `diffusion_coeff` parameter must match the diffusion coefficient used in the
 Because $\beta$ and $\gamma$ depend on $T_{b,\text{old}}$ from the previous iteration,
 the linear system must be reassembled with updated coefficients until the solution
 converges to the nonlinear radiative balance.  The diffusion and time-derivative terms
-are fully implicit; only the radiative coefficients are lagged.  This implicit-explicit
+are fully implicit; only the radiative coefficients are lagged. If the linear system is only solved once within
+the time step, the nonlinear coefficients are explicit in time. This implicit-explicit
 split does not affect the steady-state solution, only the convergence path.
 
-Two strategies drive the outer iteration:
+Two strategies can be chosen to drive the solution of this nonlinear problem:
 
 - **Pseudo-transient stepping**: use `LinearFVTimeDerivative` + `Transient` executioner
   with large time steps. The matrix is rebuilt at each step with the updated solution,
   and the time derivative vanishes at steady state.
 - **Iterative multi-system solve**: if the temperature variable is part of a multi-system
   problem, the outer multi-system iteration updates the lagged coefficients between solves.
+  If converged for each time step, this enables an implicit time integration scheme.
 
 !syntax parameters /LinearFVBCs/LinearFVFunctorRadiativeBC
 

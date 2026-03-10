@@ -6,10 +6,9 @@
     input = 'linear_fv_functor_radiative_bc.i'
     csvdiff = 'linear_fv_functor_radiative_bc_hot_body_out.csv'
     max_threads = 1
-    requirement = 'The system shall apply a linearized radiative heat flux boundary condition
-                   in the linear finite volume system, converging via pseudo-transient iteration
-                   to a steady-state temperature distribution consistent with the nonlinear
-                   radiative flux q = sigma * eps * (T^4 - Tinf^4).'
+    requirement = 'The system shall be able to apply a linearized radiative heat flux boundary condition
+                   in the linear finite volume system to solve a conduction-radiation problem, converging via pseudo-transient iteration
+                   to a steady-state temperature distribution.'
   []
   [equilibrium]
     type = CSVDiff
@@ -28,6 +27,6 @@
     capabilities = 'installation_type=in_tree'
     requirement = 'The system shall achieve second-order spatial accuracy (O(h^2) convergence
                    in the L2 norm) for the radiative boundary condition on manufactured solutions
-                   with exponential and 2D spatially varying temperature profiles.'
+                   with for both 1D and 2D spatially varying temperature manufactured solutions.'
   []
 []

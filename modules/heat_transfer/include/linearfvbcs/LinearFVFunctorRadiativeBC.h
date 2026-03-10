@@ -13,14 +13,14 @@
 
 /**
  * Boundary condition for radiative heat flux in a linear finite volume system.
- * The radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is linearized via
+ * The outgoing radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is linearized via
  * first-order Taylor expansion around the extrapolated boundary face temperature T_b_old:
  *   T_b^4 ~ 4*T_b_old^3*T_b - 3*T_b_old^4
  * yielding a Robin BC:
  *   k * dT/dn + [4*sigma*eps*T_b_old^3]*T_b = [sigma*eps*(3*T_b_old^4 + Tinf^4)]
  * with alpha=k, beta=4*sigma*eps*T_b_old^3, gamma=sigma*eps*(3*T_b_old^4+Tinf^4).
  * Second-order spatial accuracy is achieved by extrapolating T_b_old to the face.
- * The lagged coefficients are updated each time step or outer iteration.
+ * The lagged coefficients are updated on each linear system assembly.
  */
 class LinearFVFunctorRadiativeBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {

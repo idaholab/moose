@@ -21,8 +21,9 @@ LinearFVFunctorRadiativeBC::validParams()
       "The nonlinear radiative flux q = sigma * emissivity * (T^4 - Tinfinity^4) is "
       "linearized via first-order Taylor expansion around the extrapolated boundary face "
       "temperature from the previous iteration, yielding a Robin-type condition with "
-      "second-order spatial accuracy. The lagged coefficients are updated each time step "
-      "or outer iteration until convergence to the nonlinear solution.");
+      "second-order spatial accuracy. The lagged coefficients are updated on every linear system "
+      "assembly. Fixed point iterations can be used to converge the nonlinear problem every time "
+      "step.");
   params.addRequiredParam<MooseFunctorName>(
       "emissivity",
       "Functor describing the surface emissivity for the radiative boundary condition");
