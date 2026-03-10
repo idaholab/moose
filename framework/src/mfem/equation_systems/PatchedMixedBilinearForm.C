@@ -9,8 +9,6 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
-
 #include "PatchedMixedBilinearForm.h"
 
 namespace Moose::MFEM

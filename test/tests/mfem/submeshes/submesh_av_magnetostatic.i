@@ -6,6 +6,9 @@ high_terminal_bdr = 1
 low_terminal_bdr = 2
 exterior_bdr = '1 2 3'
 
+vacuum_reluctivity = ${fparse (1.0e7)/(4*pi)} # H/m
+wire_conductivity = 1.0e7 # S/m
+
 [Mesh]
   type = MFEMMesh
   file = ../mesh/cylinder-hex-q2.gen
@@ -61,7 +64,7 @@ exterior_bdr = '1 2 3'
 
 
 [AuxKernels]
-  [curl]
+  [curlA]
     type = MFEMCurlAux
     variable = b_field
     source = a_field
@@ -75,7 +78,6 @@ exterior_bdr = '1 2 3'
     variable = a_field
     boundary = ${exterior_bdr}
   []
-
   [top]
     type = MFEMScalarDirichletBC
     variable = electric_potential
@@ -90,18 +92,21 @@ exterior_bdr = '1 2 3'
 []
 
 [Kernels]
-  [curlcurl]
+  [curlA,curlA']
     type = MFEMCurlCurlKernel
     variable = a_field
+    coefficient = ${vacuum_reluctivity}
   []
-  [source]
+  [sigma.gradV,A']
     type = MFEMMixedVectorGradientKernel
     trial_variable = electric_potential
     variable = a_field
-  []  
-  [diff]
+    coefficient = ${wire_conductivity}
+  []
+  [sigma.gradV,gradV']
     type = MFEMDiffusionKernel
     variable = electric_potential
+    coefficient = ${wire_conductivity}
   []
 []
 
@@ -114,16 +119,19 @@ exterior_bdr = '1 2 3'
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Magnetostatic
-    vtk_format = ASCII
+[Postprocessors]
+  [MagneticEnergy]
+    type = MFEMVectorFEInnerProductIntegralPostprocessor
+    coefficient = ${fparse 0.5*vacuum_reluctivity}
+    dual_variable = b_field
+    primal_variable = b_field
+    execution_order_group = 2
   []
-  [SubmeshParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/MagnetostaticSubmesh
-    vtk_format = ASCII
-    submesh = wire
-  []  
+[]
+
+[Outputs]
+  [ReportedPostprocessors]
+    type = CSV
+    file_base = OutputData/SubmeshAVMagnetostaticCSV
+  []
 []

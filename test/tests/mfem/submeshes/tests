@@ -45,7 +45,16 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
-  []  
+  []
+  [MFEMCoupledSubmeshVariableSource]
+    type = CSVDiff
+    input = submesh_av_magnetostatic.i
+    csvdiff = 'OutputData/SubmeshAVMagnetostaticCSV.csv'    
+    requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables defined on a submesh.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []   
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
