@@ -7,10 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "gtest/gtest.h"
 #include "BSpline.h"
-#include "libmesh/point.h"
 #include "MooseError.h"
+
+#include "libmesh/point.h"
+#include "gtest/gtest.h"
 
 //* The following tests check that the BSpline utility and its submethods work as intended.
 //* Degrees 2, 3, and 4 interpolating polynomials will be evaluated at prescribed values of

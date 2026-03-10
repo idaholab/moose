@@ -7,17 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Reference for B-Spline: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
-
 #pragma once
 
-#include <vector>
 #include "libmesh/point.h"
+#include <vector>
 
 namespace Moose
 {
 /**
  * Class implementing a B-Spline curve.
+ * Reference used for implementation: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
  */
 class BSpline
 {
@@ -47,20 +46,31 @@ private:
    * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
    * recursive formula.
    *
-   * @param t,i,j parameter t in [0,1], index corresponding to which control point, and the degree
-   * of the basis funtion
+   * @param t parameter t in [0,1]
+   * @param i index corresponding to which control point
+   * @param j degree of the basis funtion
    * @return scalar quantity for the contribution of the basis function at i in the sum.
    */
-  libMesh::Real CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  libMesh::Real CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned int j) const;
+
   /**
-   * firstCoeff and secondCoeff are submethods used in CdBBasis routine.
+   * Submethod used in CdBBasis routine.
+   * @param t parameter t in [0,1]
+   * @param i index corresponding to which control point
+   * @param j degree of the basis funtion
+   */
+  libMesh::Real firstCoeff(const libMesh::Real t, const unsigned int i, const unsigned int j) const;
+
+  /**
+   * Submethod used in CdBBasis routine.
+   * @param t parameter t in [0,1]
+   * @param i index corresponding to which control point
+   * @param j degree of the basis funtion
    */
   libMesh::Real
-  firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
-  libMesh::Real
-  secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  secondCoeff(const libMesh::Real t, const unsigned int i, const unsigned int j) const;
 
-  /// The polynomial degree.
+  /// The polynomial degree of the B-Spline.
   const unsigned int _degree;
   /// The control points.
   const std::vector<libMesh::Point> _control_points;

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BSpline.h"
-#include "libmesh/point.h"
 #include "libMeshReducedNamespace.h"
 #include "MooseError.h"
 
@@ -21,9 +20,6 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 {
 }
 
-/**
- * Evaluate B-Spline at given t value using the control points.
- */
 libMesh::Point
 BSpline::getPoint(const libMesh::Real t) const
 {
@@ -35,9 +31,6 @@ BSpline::getPoint(const libMesh::Real t) const
   return returnPoint;
 }
 
-/**
- * Creates normalized open uniform knot vector.
- */
 std::vector<libMesh::Real>
 BSpline::buildKnotVector() const
 {
@@ -74,9 +67,9 @@ BSpline::buildKnotVector() const
 }
 
 libMesh::Real
-BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
+BSpline::CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(i < _knot_vector.size() - 1, "knot index must stay within bounds");
+  mooseAssert(i + 1 < _knot_vector.size(), "Out of bounds access in knot vector");
   if (j == 0)
   {
     libMesh::Real basis_return =
@@ -90,13 +83,10 @@ BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned 
            BSpline::secondCoeff(t, i, j) * BSpline::CdBBasis(t, i + 1, j - 1);
 }
 
-/**
- * Submethod to aid in computing the basis function in CdBBasis.
- */
 libMesh::Real
-BSpline::firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
+BSpline::firstCoeff(const libMesh::Real t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(i + j < _knot_vector.size(), "Index must stay within bounds");
+  mooseAssert(i + j < _knot_vector.size(), "Out of bounds access in knot vector");
   const auto ti = _knot_vector[i];
   const auto tij = _knot_vector[i + j];
   if (ti != tij)
@@ -105,12 +95,10 @@ BSpline::firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigne
     return 0;
 }
 
-/**
- * Submethod to aid in computing the basis function in CdBBasis.
- */
 libMesh::Real
-BSpline::secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
+BSpline::secondCoeff(const libMesh::Real t, const unsigned int i, const unsigned int j) const
 {
+  mooseAssert(i + j + 1 < _knot_vector.size(), "Out of bounds access in knot vector");
   libMesh::Real ti1 = _knot_vector[i + 1];
   libMesh::Real tij1 = _knot_vector[i + j + 1];
   if (ti1 != tij1)
