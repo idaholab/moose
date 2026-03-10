@@ -28,6 +28,13 @@ public:
   {
   }
 
+  ParMixedBilinearForm(mfem::ParFiniteElementSpace * tr_fes,
+                       mfem::ParFiniteElementSpace * te_fes,
+                       mfem::ParMixedBilinearForm * mbf)
+    : mfem::ParMixedBilinearForm(tr_fes, te_fes, mbf)
+  {
+  }
+
   // Re-implementation of Assemble to maintain functionality when the trial variable is defined on a
   // submesh of the test variable. Defaults to mfem::ParMixedBilinearForm::Assemble otherwise.
   void Assemble(int skip_zeros = 1);
