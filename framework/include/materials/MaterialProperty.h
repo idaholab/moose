@@ -92,6 +92,13 @@ public:
   virtual void load(std::istream & stream) = 0;
 
   /**
+   * Serialize a single quadrature point value to stream.
+   * The output format is identical to one element of the store() loop,
+   * so blobs can be concatenated to form a valid full PropertyValue stream.
+   */
+  virtual void storeQp(std::ostream & stream, unsigned int qp) const = 0;
+
+  /**
    * @return The type_info for the underlying stored type T
    */
   virtual const std::type_info & typeID() const = 0;
@@ -167,6 +174,11 @@ public:
    * Load the property from a binary stream
    */
   virtual void load(std::istream & stream) override final;
+
+  /**
+   * Serialize a single quadrature point value to stream
+   */
+  virtual void storeQp(std::ostream & stream, unsigned int qp) const override final;
 
   virtual void swap(PropertyValue & rhs) override final;
 
@@ -274,6 +286,14 @@ MaterialPropertyBase<T, is_ad>::store(std::ostream & stream)
 {
   for (const auto i : index_range(_value))
     storeHelper(stream, _value[i], nullptr);
+}
+
+template <typename T, bool is_ad>
+inline void
+MaterialPropertyBase<T, is_ad>::storeQp(std::ostream & stream, unsigned int qp) const
+{
+  auto val = MetaPhysicL::raw_value(_value[qp]);
+  storeHelper(stream, val, nullptr);
 }
 
 template <typename T, bool is_ad>
