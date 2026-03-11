@@ -9,12 +9,13 @@
 
 // MOOSE includes
 #include "BSplineCurveGenerator.h"
+#include "CastUniquePointer.h"
+#include "libMeshReducedNamespace.h"
 #include "LinearInterpolation.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
 #include "BSpline.h"
 #include "SplineUtils.h"
-#include "libMeshReducedNamespace.h"
 
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
