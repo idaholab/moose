@@ -1,5 +1,6 @@
 [Tests]
   design = 'SideLinearFVFluxIntegral.md'
+  issues = '#32466'
   [linearfv_flux]
     type = CSVDiff
     input = linearfv_flux_integral.i
