@@ -8,9 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "MeshGenerator.h"
 #include "LinearInterpolation.h"
 
+/**
+ * Mesh generator to create a 1D B-spline curve mesh in 3D space
+ */
 class BSplineCurveGenerator : public MeshGenerator
 {
 public:
@@ -21,30 +25,24 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Subdomain ID for the elements created
+  const SubdomainID _new_subdomain_id;
   /// degree of interpolating spline
   const unsigned int _degree;
   /// starting point of curve
   const libMesh::Point _start_point;
-  /// endung point of curve
+  /// ending point of curve
   const libMesh::Point _end_point;
   /// direction of curve at start point
   const libMesh::RealVectorValue _start_dir;
   /// direction of curve at end point
   const libMesh::RealVectorValue _end_dir;
-  /// sharpness of curve
+  /// sharpness of curve (measure of how close it is to the curve with three orthogonal segments)
   const libMesh::Real _sharpness;
   /// number of control points to be generated
   const unsigned int _num_cps;
   /// order of the EDGE elements to be generated
   const unsigned int _order;
-  /// number of elements to be drawn
+  /// number of edge elements on the curve
   const unsigned int _num_elements;
-
-  /**
-   * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t
-   * @param t_param parameter t that is used to determine the coordinates of the point, exists in
-   * [0,1]
-   * @return the point coordinates
-   */
-  // libMesh::Point pointCalculator(const Real t);
 };
