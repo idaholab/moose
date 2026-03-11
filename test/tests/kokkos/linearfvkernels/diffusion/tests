@@ -1,0 +1,13 @@
+[Tests]
+  design = 'LinearFVDiffusion.md'
+  issues = '#30655'
+  [mms-kokkos-diffusion-2d-orthogonal]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestKokkosLinearFVDiffusion2DOrthogonal
+    requirement = 'The Kokkos system shall support an orthogonal two-dimensional diffusion problem solved with a linear finite volume system.'
+    capabilities = 'kokkos & !cuda'
+    compute_devices = 'cpu'
+    max_threads = 1
+  []
+[]
