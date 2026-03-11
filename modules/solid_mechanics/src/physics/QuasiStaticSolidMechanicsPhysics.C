@@ -114,7 +114,10 @@ QuasiStaticSolidMechanicsPhysics::validParams()
       "column-major order, and there must be 9 entries in total.");
   params.addParam<std::vector<FunctionName>>(
       "targets", {}, "Functions giving the targets to hit for constraint types that are not none.");
-  params.addParam<bool>("homogenized_off_diagonal_jacobian", true, "Whether to include the off diagonal scalar contributions to the homogenized jacobian");
+  params.addParam<bool>(
+      "homogenized_off_diagonal_jacobian",
+      true,
+      "Whether to include the off-diagonal scalar contributions to the homogenized jacobian");
 
   params.addParamNamesToGroup("scaling", "Variables");
   params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");

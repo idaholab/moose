@@ -24,7 +24,8 @@ HomogenizedTotalLagrangianStressDivergence::validParams()
   params.renameCoupledVar(
       "scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
 
-  params.addParam<bool>("off_diagonal_jacobian", true, "Include the off diagonal parts of the constraint Jacobian");
+  params.addParam<bool>(
+      "off_diagonal_jacobian", true, "Include the off diagonal parts of the constraint Jacobian");
 
   return params;
 }
