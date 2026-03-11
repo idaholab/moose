@@ -14,6 +14,7 @@
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
+#include "LinearSystem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialBase.h"
@@ -89,6 +90,54 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
       bc_name, name, parameters, nl_sys_num, "KokkosBoundaryCondition", _reinit_displaced_face);
 
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
+FEProblemBase::addKokkosLinearFVKernel(const std::string & kernel_name,
+                                       const std::string & name,
+                                       InputParameters & parameters)
+{
+  parallel_object_only();
+
+  const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (isSolverSystemNonlinear(sys_num))
+    mooseError("You are trying to add a LinearFVKernel to a nonlinear variable/system, which is "
+               "not supported.");
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num - _num_nl_sys].get();
+
+  logAdd("KokkosLinearFVKernel", name, kernel_name, parameters);
+  _linear_systems[sys_num - _num_nl_sys]->addKokkosKernel(kernel_name, name, parameters);
+
+  addKokkosMeshInitializationHook([this]() { _mesh.getKokkosMesh()->initLinearFV(); });
+
+  _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
+}
+
+void
+FEProblemBase::addKokkosLinearFVBC(const std::string & bc_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  parallel_object_only();
+
+  const auto sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (isSolverSystemNonlinear(sys_num))
+    mooseError("You are trying to add a LinearFVBoundaryCondition to a nonlinear variable/system, "
+               "which is not supported.");
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.set<SystemBase *>("_sys") = _linear_systems[sys_num - _num_nl_sys].get();
+
+  logAdd("KokkosLinearFVBoundaryCondition", name, bc_name, parameters);
+  _linear_systems[sys_num - _num_nl_sys]->addKokkosBoundaryCondition(bc_name, name, parameters);
+
+  addKokkosMeshInitializationHook([this]() { _mesh.getKokkosMesh()->initLinearFV(); });
 
   _has_kokkos_objects = true;
   _has_kokkos_residual_objects = true;
@@ -268,6 +317,9 @@ FEProblemBase::initKokkos()
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)
     max_system_number = std::max(max_system_number, getNonlinearSystemBase(s).number());
 
+  for (unsigned int s = 0; s < numLinearSystems(); ++s)
+    max_system_number = std::max(max_system_number, getLinearSystem(s).number());
+
   max_system_number = std::max(max_system_number, getAuxiliarySystem().number());
 
   // Kokkos system does not have a default constructor, so this simply allocates buffer to which we
@@ -278,6 +330,12 @@ FEProblemBase::initKokkos()
   {
     auto & nl = getNonlinearSystemBase(s);
     new (&_kokkos_systems[nl.number()]) Moose::Kokkos::System(nl);
+  }
+
+  for (unsigned int s = 0; s < numLinearSystems(); ++s)
+  {
+    auto & linear = getLinearSystem(s);
+    new (&_kokkos_systems[linear.number()]) Moose::Kokkos::System(linear);
   }
 
   auto & aux = getAuxiliarySystem();

@@ -668,6 +668,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
   _the_warehouse->registerAttribute<AttribPostAux>("post_aux");
   _the_warehouse->registerAttribute<AttribName>("name", "dummy");
   _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
+  _the_warehouse->registerAttribute<AttribKokkos>("kokkos", false);
   _the_warehouse->registerAttribute<AttribVar>("variable", -1);
   _the_warehouse->registerAttribute<AttribInterfaces>("interfaces", 0);
   _the_warehouse->registerAttribute<AttribSysNum>("sys_num", libMesh::invalid_uint);
