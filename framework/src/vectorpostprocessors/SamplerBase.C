@@ -27,8 +27,8 @@ SamplerBase::validParams()
 
   params.addRequiredParam<std::string>(
       "sort_by",
-      "What to sort the samples by. Options are 'x y z id' and the name of any of the sampled "
-      "quantities (= name of the vector created by the vectorpostprocessor).");
+      "What to sort the samples by. Options include 'x', 'y', 'z', 'id', and the name of any of "
+      "the sampled quantities (which each create a vector of the same name).");
 
   // The value from this VPP is naturally already on every processor
   // TODO: Make this not the case!  See #11415
@@ -188,13 +188,13 @@ SamplerBase::finalize()
   else
   {
     // Find in 'variable_names'
-    const auto & it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
+    const auto it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
     if (it != _variable_names.end())
       sort_by_i = 4 + it - _variable_names.begin();
     else
-      mooseError("Sorting index '" + _sort_by +
-                 "' was not found in x/y/z/id or sampled variable names: " +
-                 Moose::stringify(_variable_names));
+      mooseError(
+          "The 'sort_by' parameter must be one of x/y/z/id or one of the sampled variable names: " +
+          Moose::stringify(_variable_names));
   }
 
   // Now create an index vector by using an indirect sort
