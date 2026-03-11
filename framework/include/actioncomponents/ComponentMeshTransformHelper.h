@@ -40,7 +40,7 @@ public:
   }
   /// Return the translation of the component
   /// The default translation is the null vector
-  Point translation() const { return _translation; }
+  virtual Point translation() const { return _translation; }
 
 protected:
   virtual void addMeshGenerators() override;

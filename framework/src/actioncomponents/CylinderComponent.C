@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "CylinderComponent.h"
+#include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
 // CylinderComponent is an example of ComponentPhysicsInterface
@@ -40,6 +41,10 @@ CylinderComponent::validParams()
   // Geometry
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
+  params.addParam<bool>(
+      "position_is_bottom_center",
+      true,
+      "Whether the 'position' parameter gives the position of the bottom-center of the cylinder");
 
   // Discretization
   params.addRangeCheckedParam<std::vector<unsigned int>>(
@@ -60,8 +65,11 @@ CylinderComponent::validParams()
   // Boundary layers
   params.addRangeCheckedParam<Real>("boundary_layer_width",
                                     "boundary_layer_width>=0",
-                                    "The width of the boundary layer (if assigned).");
-  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers. Only active if boundary_layer_width is specified");
+                                    "The width of the radial boundary layer (if assigned).");
+  params.addParam<unsigned int>(
+      "n_boundary_layers",
+      1,
+      "The number of radial boundary layers. Only active if boundary_layer_width is specified");
   params.addParamNamesToGroup("boundary_layer_width n_boundary_layers", "Radial boundary layer");
 
   return params;
@@ -75,7 +83,8 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
     ComponentBoundaryConditionInterface(params),
     ComponentMeshTransformHelper(params),
     _radius(getParam<Real>("radius")),
-    _height(getParam<Real>("length"))
+    _height(getParam<Real>("length")),
+    _offset_position_to_center(getParam<bool>("position_is_bottom_center"))
 {
   _dimension = getParam<MooseEnum>("dimension");
   addRequiredTask("add_mesh_generator");
@@ -204,4 +213,27 @@ CylinderComponent::checkIntegrity()
 {
   ComponentInitialConditionInterface::checkIntegrity();
   ComponentBoundaryConditionInterface::checkIntegrity();
+}
+
+Point
+CylinderComponent::translation() const
+{
+  // The 1D or 2D RZ cylinders are naturally centered
+  if (!_offset_position_to_center || _dimension <= 2)
+    return ComponentMeshTransformHelper::translation();
+
+  auto input_translation = ComponentMeshTransformHelper::translation();
+  // The translation will be applied after the rotation, we need to translate by the rotated radius
+  // There are two options for specifying rotations / translations
+  if (_rotation)
+    paramError("position_is_bottom_center",
+               "Rotation + offset cylinder to center not implemented. Use 'direction' instead");
+
+  const auto rotation_matrix =
+      _direction
+          ? RotationMatrix::rodriguesRotationMatrix<false>(RealVectorValue(1, 0, 0), *_direction)
+          : RealTensorValue(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  input_translation -= rotation_matrix * Point(_radius, 0, 0);
+
+  return input_translation;
 }

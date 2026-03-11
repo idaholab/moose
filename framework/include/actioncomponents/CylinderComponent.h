@@ -40,10 +40,13 @@ protected:
   const Real _radius;
   /// Height of the cylinder
   const Real _height;
+  /// Whether to center the cylinder
+  const bool _offset_position_to_center;
 
   virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius); }
   virtual Real outerSurfaceArea() const override
   {
     return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
   }
+  virtual Point translation() const override;
 };
