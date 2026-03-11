@@ -150,7 +150,7 @@ protected:
   const LKFormulation _lk_formulation;
 
   /// Simplified volumetric locking correction flag for new kernels
-  bool _lk_locking;
+  const bool _lk_locking;
 
   /// Flag indicating if the homogenization system is present for new kernels
   bool _lk_homogenization;
@@ -167,7 +167,7 @@ protected:
   MultiMooseEnum _constraint_types;
   std::vector<FunctionName> _targets;
   // Use the off diagonal scalar jacobian for the homogenization system
-  bool _lk_h_off_jac;
+  const bool _lk_h_off_jac;
 };
 
 template <typename T, typename T2>
