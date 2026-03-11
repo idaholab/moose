@@ -19,7 +19,8 @@
     [final]
       type = Exodiff
       input = 'mesh_generator_component.i'
-      cli_args = "ActionComponents/cylinder_2/mesh_generator='move_down'
+      cli_args = "Mesh/move_down/vector_value='0 -11 0'
+                  ActionComponents/cylinder_2/mesh_generator='move_down'
                   ActionComponents/cylinder_2/mesh_generator_type='final_generator'
                   Outputs/file_base='final_mg_out'"
       exodiff = 'final_mg_out.e'

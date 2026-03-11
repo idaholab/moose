@@ -87,6 +87,7 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
     _offset_position_to_center(getParam<bool>("position_is_bottom_center"))
 {
   _dimension = getParam<MooseEnum>("dimension");
+  // The other component interfaces add their required task
   addRequiredTask("add_mesh_generator");
 }
 
@@ -152,8 +153,6 @@ CylinderComponent::addMeshGenerators()
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");
 
-    // TODO: Transform the mesh to center the cylinder
-
     // rotate to have extrusion axis be along x-axis
     // NOTE: this is re-rotated by the ComponentMeshTransformHelper
     InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
@@ -165,7 +164,7 @@ CylinderComponent::addMeshGenerators()
         "TransformGenerator", name() + "_3D_init_rotate", rotate_params);
     _mg_names.push_back(name() + "_3D_init_rotate");
 
-    // extrude surface
+    // extrude the surface
     InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
     ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
     ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
