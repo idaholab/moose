@@ -62,16 +62,19 @@ TEST(SplineUtilsTest, 3DCircularCPTest)
   const libMesh::Point start(0, 0, 0);
   const libMesh::Point end(1, 0, 1);
   const libMesh::RealVectorValue direction(0, 1, 0);
-  const unsigned int cps_per_half = 2;
-  const libMesh::Real sharpness = 1.0; // not used in calculation but needed for function
+  const unsigned int cps = 5;
   const std::vector<Point> expected_cps = {
       libMesh::Point(0, 0, 0),
       libMesh::Point(1.46446609e-01, 5.00000000e-01, 1.46446609e-01),
       libMesh::Point(5.00000000e-01, 7.07106781e-01, 5.00000000e-01),
       libMesh::Point(8.53553391e-01, 5.00000000e-01, 8.53553391e-01),
       libMesh::Point(1.00000000e+00, 8.65956056e-17, 1.00000000e+00)};
+  // Allow warning
+  const auto save_status = Moose::_throw_on_warning;
+  Moose::_throw_on_warning = false;
   const auto evaluated_points =
-      SplineUtils::bSplineControlPoints(start, end, direction, direction, cps_per_half, sharpness);
+      SplineUtils::bSplineControlPoints(start, end, direction, direction, cps / 2, /*sharpness*/ 0);
+  Moose::_throw_on_warning = save_status;
   for (const auto i : index_range(expected_cps))
     EXPECT_NEAR((expected_cps[i] - evaluated_points[i]).norm(), 0, libMesh::TOLERANCE);
 }
@@ -151,14 +154,14 @@ TEST(SplineUtilsTest, TrivialCPsTest)
   const libMesh::Point end(2, 1, 0);
   const libMesh::RealVectorValue direction1(1, 0, 0);
   const libMesh::RealVectorValue direction2(0, 1, 0);
-  const Real sharpness = 0;
-  const unsigned int cps_per_half = 2;
+  const unsigned int cps_per_half = 3;
   const auto evaluated_cps = SplineUtils::bSplineControlPoints(
-      start, end, direction1, direction2, cps_per_half, sharpness);
+      start, end, direction1, direction2, cps_per_half, /*sharpness*/ 0);
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
                                            libMesh::Point(1, 2, 0),
-                                           libMesh::Point(2, 2, 0),
+                                           libMesh::Point(1, 2, 0),
+                                           libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0),
                                            libMesh::Point(2, 1, 0)};
   for (const auto i : index_range(expected_cps))
@@ -178,7 +181,6 @@ TEST(SplineUtilsTest, HalfSharpCPsTest)
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 0),
                                            libMesh::Point(1.5, 2, 0),
-                                           libMesh::Point(2, 2, 0),
                                            libMesh::Point(2, 1.5, 0),
                                            libMesh::Point(2, 1, 0)};
   for (const auto i : index_range(expected_cps))
@@ -198,7 +200,6 @@ TEST(SplineUtilsTest, HalfSharpCPs3DTest)
 
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 1),
                                            libMesh::Point(1.5, 2, 1),
-                                           libMesh::Point(2, 2, 0.5),
                                            libMesh::Point(2, 1.5, 0),
                                            libMesh::Point(2, 1, 0)};
   for (const auto i : index_range(expected_cps))
@@ -219,7 +220,6 @@ TEST(SplineUtilsTest, FullSharpCPs3DTest)
   const std::vector<Point> expected_cps = {libMesh::Point(1, 2, 1),
                                            libMesh::Point(1.5, 2, 1),
                                            libMesh::Point(2, 2, 1),
-                                           libMesh::Point(2, 2, 0.5),
                                            libMesh::Point(2, 2, 0),
                                            libMesh::Point(2, 1.5, 0),
                                            libMesh::Point(2, 1, 0)};
@@ -274,6 +274,7 @@ TEST(SplineUtilsTest, ZeroDirection1Error)
       },
       std::exception);
 }
+
 TEST(SplineUtilsTest, ZeroDirection2Error)
 {
   const libMesh::Point start(1, 0, 0);
