@@ -82,7 +82,7 @@ protected:
   /**
    * Kokkos thread object
    */
-  Thread _thread;
+  Thread<> _thread;
   /**
    * Kokkos functor dispatchers
    */
