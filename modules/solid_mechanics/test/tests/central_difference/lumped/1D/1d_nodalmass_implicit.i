@@ -78,6 +78,7 @@
   [./density]
     type = GenericConstantMaterial
     block = 0
+    # The effects of density (inertia) is done through a nodal kernel
     prop_names = density
     prop_values = 0
   [../]

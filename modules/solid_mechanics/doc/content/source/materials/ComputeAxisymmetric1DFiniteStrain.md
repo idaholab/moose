@@ -85,7 +85,7 @@ The coordinate type in the Problem block of the input file must be set to
 
 The common use of the `ComputeAxisymmetric1DFiniteStrain` class is with the
 [Generalized Plane Strain](solid_mechanics/generalized_plane_strain.md) system;
-this type of simulation uses the scalar strain variables. The material is creates automatically by the
+this type of simulation uses the scalar strain variables. The material is created automatically by the
 solid mechanics `Physics` when a small strain model is selected with an axisymmetric coordinate system.
 
 !listing modules/solid_mechanics/test/tests/1D_axisymmetric/axisymm_gps_finite.i block=Mesh Physics
