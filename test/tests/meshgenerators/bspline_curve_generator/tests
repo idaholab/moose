@@ -1,5 +1,6 @@
 [Tests]
   design = 'meshgenerators/BSplineCurveGenerator.md'
+  issues = '#31003'
   [2D_curve_simple]
     type = 'Exodiff'
     input = 'bspline_curve_2D.i'
