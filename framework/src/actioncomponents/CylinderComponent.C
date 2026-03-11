@@ -41,10 +41,10 @@ CylinderComponent::validParams()
   // Geometry
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
-  params.addParam<bool>(
-      "position_is_bottom_center",
-      true,
-      "Whether the 'position' parameter gives the position of the bottom-center of the cylinder");
+  params.addParam<bool>("position_is_bottom_center",
+                        true,
+                        "Whether the 'position' parameter gives the position of the bottom-center "
+                        "of the cylinder. Only used in 3D");
 
   // Discretization
   params.addRangeCheckedParam<std::vector<unsigned int>>(
@@ -190,19 +190,9 @@ CylinderComponent::setupComponent()
   {
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
     if (_direction)
-    {
-      // TODO: get some direction comparison utils OR add a specialization for Point/RealVectorValue
-      if (MooseUtils::absoluteFuzzyEqual((*_direction)(0), 1.) &&
-          MooseUtils::absoluteFuzzyEqual((*_direction)(1), 0.) &&
-          MooseUtils::absoluteFuzzyEqual((*_direction)(2), 0.))
-        _awh.getMesh()->setAxisymmetricCoordAxis(MooseEnum("x"));
-      else if (MooseUtils::absoluteFuzzyEqual((*_direction)(0), 0.) &&
-               MooseUtils::absoluteFuzzyEqual((*_direction)(1), 1.) &&
-               MooseUtils::absoluteFuzzyEqual((*_direction)(2), 0.))
-        _awh.getMesh()->setAxisymmetricCoordAxis(MooseEnum("y"));
-      else
-        paramError("direction", "Non X/Y direction + 2D RZ cylinder not implemented");
-    }
+      _awh.getMesh()->setGeneralAxisymmetricCoordAxes(
+          {getParam<SubdomainName>("block")},
+          {std::make_pair(translation(), _direction ? *_direction : RealVectorValue(0, 1, 0))});
     if (_rotation)
       paramError("rotation", "Rotation + 2D RZ cylinder not implemented");
   }
