@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#0000'
+  design = 'userobjects/StatefulMaterialPropertyExporter.md userobjects/StatefulMaterialPropertyImporter.md'
+
+  [export]
+    type = 'RunApp'
+    input = 'export.i'
+    requirement = 'The system shall export stateful material property data with quadrature point '
+                  'positions and subdomain information to a binary file.'
+  []
+
+  [import]
+    type = 'RunApp'
+    input = 'import.i'
+    prereq = 'export'
+    requirement = 'The system shall import stateful material property data from a binary file and '
+                  'remap it onto a different mesh using closest-point matching.'
+  []
+
+  [type_mismatch]
+    type = 'RunException'
+    input = 'type_mismatch.i'
+    prereq = 'export'
+    expect_err = 'Type mismatch for stateful property'
+    requirement = 'The system shall error when importing stateful material property data with a '
+                  'type that does not match the current simulation.'
+  []
+[]
