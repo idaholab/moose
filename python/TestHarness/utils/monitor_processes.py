@@ -63,7 +63,7 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
             end = start
             while data[end] != 32:
                 end += 1
-            return int(data[start:end]) * 1024
+            return int(data[start:end]) * 1024  # kilobytes -> bytes
 
     # Otherwise, use RSS (will double count shared memory)
     else:
@@ -87,7 +87,7 @@ def get_processes_memory(pids: Iterable[int]) -> dict[int, int]:
     Returns:
     -------
     dict[int, int]:
-        Mapping of pid -> estimated process memory.
+        Mapping of pid -> estimated process memory in bytes.
 
     """
 

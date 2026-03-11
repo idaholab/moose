@@ -1802,9 +1802,7 @@ class TestHarness:
         failgroup = parser.add_argument_group(
             "Failure Criteria", "Control the failure criteria"
         )
-        default_max_cpu_per_slot = (
-            110.0 if "microsoft" in platform.release().lower() else 105.0
-        )  # give more wiggle room in WSL; see #32464
+        default_max_cpu_per_slot = 110.0
         failgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
