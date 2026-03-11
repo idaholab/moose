@@ -10,6 +10,7 @@
 #include "SplineUtils.h"
 #include "MooseError.h"
 #include "libMeshReducedNamespace.h"
+#include "MooseUtils.h"
 #include <algorithm>
 
 namespace SplineUtils

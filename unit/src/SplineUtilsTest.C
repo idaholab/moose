@@ -70,11 +70,14 @@ TEST(SplineUtilsTest, 3DCircularCPTest)
       libMesh::Point(8.53553391e-01, 5.00000000e-01, 8.53553391e-01),
       libMesh::Point(1.00000000e+00, 8.65956056e-17, 1.00000000e+00)};
   // Allow warning
-  const auto save_status = Moose::_throw_on_warning;
+  const auto save_tow = Moose::_throw_on_warning;
+  const auto save_wae = Moose::_warnings_are_errors;
   Moose::_throw_on_warning = false;
+  Moose::_warnings_are_errors = false;
   const auto evaluated_points =
       SplineUtils::bSplineControlPoints(start, end, direction, direction, cps / 2, /*sharpness*/ 0);
-  Moose::_throw_on_warning = save_status;
+  Moose::_throw_on_warning = save_tow;
+  Moose::_warnings_are_errors = save_wae;
   for (const auto i : index_range(expected_cps))
     EXPECT_NEAR((expected_cps[i] - evaluated_points[i]).norm(), 0, libMesh::TOLERANCE);
 }
