@@ -89,7 +89,7 @@ FlagElementsThread::onElement(const Elem * elem)
     marker_value = static_cast<Marker::MarkerValue>(round(dof_value));
 
     // Make sure we aren't masking an issue in the Marker system by rounding its values.
-    if (std::abs(marker_value - dof_value) > TOLERANCE * TOLERANCE)
+    if (std::abs(static_cast<int>(marker_value) - dof_value) > TOLERANCE * TOLERANCE)
       mooseError("Invalid Marker value detected: ", dof_value);
   }
 
