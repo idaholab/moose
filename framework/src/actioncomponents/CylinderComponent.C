@@ -149,6 +149,12 @@ CylinderComponent::addMeshGenerators()
     circle_params.set<std::vector<unsigned int>>("rings") = ring_disc_vec;
 
     circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
+    if (isParamValid("block"))
+    {
+      const auto block_name = getParam<SubdomainName>("block");
+      circle_params.set<SubdomainName>("subdomain_name") = block_name;
+      _blocks.push_back(block_name);
+    }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");
