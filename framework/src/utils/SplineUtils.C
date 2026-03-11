@@ -77,6 +77,7 @@ bSplineControlPoints(const libMesh::Point & start_point,
   if (start_direction.norm_sq() < libMesh::TOLERANCE ||
       end_direction.norm_sq() < libMesh::TOLERANCE)
     mooseError("Direction vectors must have a nonzero magnitude.");
+  mooseAssert(sharpness <= 1.0 && sharpness >= 0, "Sharpness must be in [0,1]!");
 
   // check if directions are parallel, use a special case if so
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
@@ -84,7 +85,7 @@ bSplineControlPoints(const libMesh::Point & start_point,
   {
     mooseWarning("Directions are parallel! Attempting to use circular control points...");
     unsigned int num_cps = 2 * cps_per_half + 1;
-    if (num_cps < 25)
+    if (num_cps < 30)
       mooseWarning("Number of control points required for circular control points is much greater "
                    "than for BSplines. Current num_cps: " +
                    std::to_string(num_cps));
