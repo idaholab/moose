@@ -26,7 +26,8 @@ ComponentMeshTransformHelper::validParams()
   params.addParam<RealVectorValue>(
       "direction",
       "Direction to orient the component mesh with, assuming it is initially oriented along the "
-      "X-axis (1, 0, 0). Note that this rotation is applied before the translation.");
+      "X-axis (1, 0, 0). Note that this rotation is applied before the translation. Note that "
+      "specifying the direction is an alternative to specifying the 'rotation'");
   // Position is widely applicable to components
   params.addParam<Point>(
       "position", Point(0., 0., 0.), "Vector to translate the mesh of this component by.");
