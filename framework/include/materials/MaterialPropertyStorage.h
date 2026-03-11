@@ -22,6 +22,18 @@
 class FEProblemBase;
 class MaterialBase;
 class QpMap;
+class StatefulMaterialPropertyImporter;
+
+/**
+ * Key class that restricts access to MaterialPropertyStorage::addToRestartableMap.
+ * Only StatefulMaterialPropertyImporter can construct this key.
+ */
+class MaterialPropertyStorageRemapKey
+{
+  friend class StatefulMaterialPropertyImporter;
+  MaterialPropertyStorageRemapKey() {}
+  MaterialPropertyStorageRemapKey(const MaterialPropertyStorageRemapKey &) {}
+};
 
 // libMesh forward declarations
 namespace libMesh
@@ -373,6 +385,25 @@ public:
    * @return Whether or not the material property with name \p name was restored
    */
   bool isRestoredProperty(const std::string & name) const;
+
+  using RemapKey = MaterialPropertyStorageRemapKey;
+
+  /**
+   * Populate _restartable_map for remap-based initialization.
+   * Must be called BEFORE initElementStatefulProps().
+   * @param key Access key (only constructible by StatefulMaterialPropertyImporter)
+   * @param elem Element pointer
+   * @param side Side number (0 for volumetric)
+   * @param stateful_id The stateful property ID
+   * @param state The time state (0=current, 1=old, 2=older)
+   * @param data The serialized property data as a stringstream
+   */
+  void addToRestartableMap(const RemapKey,
+                           const Elem * elem,
+                           unsigned int side,
+                           unsigned int stateful_id,
+                           unsigned int state,
+                           std::stringstream data);
 
 protected:
   /// Reference to the problem
