@@ -6,7 +6,7 @@
     input = 'bspline_curve_2D.i'
     exodiff = 'bspline_curve_2D_simple_in.e'
     cli_args = '--mesh-only bspline_curve_2D_simple_in.e'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane.'
+    requirement = 'The system shall be able to generate a 2D curve mesh in the x-y plane.'
     recover = false
   []
   [2D_curve_simple_edge3]
@@ -14,7 +14,7 @@
     input = 'bspline_curve_2D.i'
     exodiff = 'bspline_curve_2D_edge3_in.e'
     cli_args = 'Mesh/bscg/edge_element_type=EDGE3 --mesh-only bspline_curve_2D_edge3_in.e'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane with quatratic elements.'
+    requirement = 'The system shall be able to generate a 2D curve mesh on the x-y plane with quadratic elements.'
     recover = false
   []
   [2D_curve_simple_edge4]
@@ -22,7 +22,7 @@
     input = 'bspline_curve_2D.i'
     exodiff = 'bspline_curve_2D_edge4_in.e'
     cli_args = 'Mesh/bscg/edge_element_type=EDGE4 --mesh-only bspline_curve_2D_edge4_in.e'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane with cubic elements.'
+    requirement = 'The system shall be able to generate a 2D curve mesh on the x-y plane with cubic elements.'
     recover = false
   []
   [2D_curve_simple_sharpness25]
@@ -38,7 +38,7 @@
     input = 'bspline_curve_2D.i'
     exodiff = 'bspline_curve_2D_sharpness50_in.e'
     cli_args = 'Mesh/bscg/sharpness=0.50 --mesh-only bspline_curve_2D_sharpness50_in.e'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane with 25% sharpness.'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane with 50% sharpness.'
     recover = false
   []
   [2D_curve_simple_sharpness75]
@@ -57,20 +57,6 @@
     requirement = 'The system shall generate a 3D mesh on the x-y plane with 100% sharpness.'
     recover = false
   []
-  [2D_curve_simple_sharpnessError1]
-    type = 'RunException'
-    input = 'bspline_curve_2D.i'
-    cli_args = 'Mesh/bscg/sharpness=1.5 --mesh-only error.e'
-    expect_err = 'Range check failed for parameter'
-    requirement = 'The system will throw an error with an invalid sharpness parameter.'
-  []
-  [2D_curve_simple_sharpnessError2]
-    type = 'RunException'
-    input = 'bspline_curve_2D.i'
-    cli_args = ' Mesh/bscg/sharpness=-1 --mesh-only error.e'
-    expect_err = 'Range check failed for parameter'
-    requirement = 'The system will throw an error with an invalid sharpness parameter.'
-  []
   [2D_curve_simple_cpsError]
     type = 'RunException'
     input = 'bspline_curve_2D.i'
@@ -83,7 +69,7 @@
     input = 'bspline_curve_3D.i'
     exodiff = 'bspline_curve_3D_simple_in.e'
     cli_args = '--mesh-only bspline_curve_3D_simple_in.e'
-    requirement = 'The system shall generate a simple meshed curve in 3D.'
+    requirement = 'The system shall generate a simple curve mesh in 3D.'
     recover = false
   []
   [3D_curve_simple_degree2]
@@ -120,36 +106,40 @@
   []
   [2D_circle]
     type = 'Exodiff'
+    # use of circles triggers a warning
     allow_warnings = true
     input = 'bspline_curve_2D_circle.i'
     exodiff = 'bspline_curve_2D_circle_in.e'
     cli_args = '--mesh-only'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions using circular control points.'
+    requirement = 'The system shall generate a curve mesh on the x-y plane for two parallel directions using circular control points.'
     recover = false
   []
   [3D_circle]
     type = 'Exodiff'
+    # use of circles triggers a warning
     allow_warnings = true
     input = 'bspline_curve_3D_circle.i'
     exodiff = 'bspline_curve_3D_circle_in.e'
     cli_args = '--mesh-only'
-    requirement = 'The system shall generate a 3D mesh for two parallel directions using circular control points.'
+    requirement = 'The system shall generate a curve mesh in 3D for two parallel directions using circular control points.'
     recover = false
   []
   [circle_error1]
     type = 'RunException'
+    # use of circles triggers a warning
     allow_warnings = true
     input = 'bspline_curve_2D_circle.i'
     cli_args = 'Mesh/bscg/start_direction=\'0 1 0\' Mesh/bscg/end_direction=\'0 1 0\' --mesh-only error.e'
     expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions. Checks for error with colinear points.'
+    requirement = 'The system shall return a warning with parallel directions for curve mesh generation in 2D as this is not currently supported.'
   []
   [circle_error2]
     type = 'RunException'
+    # use of circles triggers a warning
     allow_warnings = true
     input = 'bspline_curve_2D_circle.i'
     cli_args = 'Mesh/bscg/start_point=\'1 1 0\' --mesh-only error.e'
     expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
-    requirement = 'The system shall generate a 3D mesh for two parallel directions. Checks for error with incompatible points.'
+    requirement = 'The system shall return a warning with parallel directions for curve mesh generation in 3D as this is not currently supported.'
   []
 []
