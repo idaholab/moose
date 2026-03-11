@@ -34,26 +34,35 @@ CylinderComponent::validParams()
                                      dims,
                                      "Dimension of the cylinder. 0 for a point (not implemented), "
                                      "1 for an (axial) 1D line, 2 for a 2D-RZ cylinder, and 3 for "
-                                     "a 3D cylinder (not implemented)");
+                                     "a 3D cylinder");
+  params.addParam<SubdomainName>("block", "Block name for the cylinder");
+
+  // Geometry
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
 
-  params.addParam<unsigned int>("n_radial",
-                                "Number of radial elements. Only assign if mesh is 2D!");
-  params.addParam<unsigned int>(
-      "n_radial_rings",
-      1,
-      "Number of radial rings within the mesh (does not affect boundary layers).");
+  // Discretization
+  params.addRangeCheckedParam<std::vector<unsigned int>>(
+      "n_radial",
+      {1},
+      "n_radial > 0",
+      "Number of radial elements (per ring if multiple values specified). All rings are lumped at "
+      "this time.");
+  // TODO: Specify the ring radii and subdomains as well
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "n_axial", "n_axial>0", "Number of axial elements of the cylinder");
+  params.addRangeCheckedParam<unsigned int>(
+      "n_sectors",
+      "n_sectors>0",
+      "Number of azimuthal sectors in each quadrant of cylinder face. Only used in 3D");
+  params.addParamNamesToGroup("n_radial n_axial n_sectors", "Discretization");
 
-  params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
+  // Boundary layers
   params.addRangeCheckedParam<Real>("boundary_layer_width",
                                     "boundary_layer_width>=0",
                                     "The width of the boundary layer (if assigned).");
-  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers.");
-  params.addParam<unsigned int>("n_sectors",
-                                "Number of azimuthal sectors in each quadrant of cylinder face.");
-
-  params.addParam<SubdomainName>("block", "Block name for the cylinder");
+  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers. Only active if boundary_layer_width is specified");
+  params.addParamNamesToGroup("boundary_layer_width n_boundary_layers", "Radial boundary layer");
 
   return params;
 }
@@ -88,10 +97,10 @@ CylinderComponent::addMeshGenerators()
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
-      params.set<Real>("ymin") = {-getParam<Real>("radius")};
+      params.set<Real>("ymin") = 0;
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
-      params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
+      params.set<unsigned int>("ny") = getParam<std::vector<unsigned int>>("n_radial")[0];
     }
     else if (isParamValid("n_radial"))
       paramError("n_radial", "Should not be provided for a 1D cylinder");
@@ -116,26 +125,28 @@ CylinderComponent::addMeshGenerators()
     InputParameters circle_params = _factory.getValidParams("ConcentricCircleMeshGenerator");
     circle_params.set<bool>("preserve_volumes") = true;
     circle_params.set<bool>("has_outer_square") = false;
+    auto ring_disc_vec = getParam<std::vector<unsigned int>>("n_radial");
+    // TODO: multi-ring support
+    ring_disc_vec = {std::accumulate(ring_disc_vec.begin(), ring_disc_vec.end(), (unsigned int)0)};
     if (isParamValid("boundary_layer_width"))
     {
       Real inner_radius = getParam<Real>("radius") - getParam<Real>("boundary_layer_width");
       circle_params.set<std::vector<Real>>("radii") = {inner_radius, getParam<Real>("radius")};
-      circle_params.set<std::vector<unsigned int>>("rings") = {
-          getParam<unsigned int>("n_radial_rings"), getParam<unsigned int>("n_boundary_layers")};
+      ring_disc_vec.push_back(getParam<unsigned int>("n_boundary_layers"));
     }
     else
-    {
       circle_params.set<std::vector<Real>>("radii") = {getParam<Real>("radius")};
-      circle_params.set<std::vector<unsigned int>>("rings") = {
-          getParam<unsigned int>("n_radial_rings")};
-    }
+    circle_params.set<std::vector<unsigned int>>("rings") = ring_disc_vec;
 
     circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");
 
+    // TODO: Transform the mesh to center the cylinder
+
     // rotate to have extrusion axis be along x-axis
+    // NOTE: this is re-rotated by the ComponentMeshTransformHelper
     InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
     rotate_params.set<MeshGeneratorName>("input") = _mg_names.back();
     rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
@@ -167,7 +178,25 @@ void
 CylinderComponent::setupComponent()
 {
   if (_dimension == 2)
+  {
     _awh.getMesh()->setCoordSystem(_blocks, MultiMooseEnum("COORD_RZ"));
+    if (_direction)
+    {
+      // TODO: get some direction comparison utils OR add a specialization for Point/RealVectorValue
+      if (MooseUtils::absoluteFuzzyEqual((*_direction)(0), 1.) &&
+          MooseUtils::absoluteFuzzyEqual((*_direction)(1), 0.) &&
+          MooseUtils::absoluteFuzzyEqual((*_direction)(2), 0.))
+        _awh.getMesh()->setAxisymmetricCoordAxis(MooseEnum("x"));
+      else if (MooseUtils::absoluteFuzzyEqual((*_direction)(0), 0.) &&
+               MooseUtils::absoluteFuzzyEqual((*_direction)(1), 1.) &&
+               MooseUtils::absoluteFuzzyEqual((*_direction)(2), 0.))
+        _awh.getMesh()->setAxisymmetricCoordAxis(MooseEnum("y"));
+      else
+        paramError("direction", "Non X/Y direction + 2D RZ cylinder not implemented");
+    }
+    if (_rotation)
+      paramError("rotation", "Rotation + 2D RZ cylinder not implemented");
+  }
 }
 
 void

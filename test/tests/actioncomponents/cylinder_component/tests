@@ -1,5 +1,6 @@
 [Tests]
   issues = '#31158'
+  design = 'CylinderComponent.md'
   [3D_mesh]
     requirement = 'The system shall be able to create a 3D cylinder mesh.'
     [x-axis]
@@ -48,7 +49,7 @@
       type = Exodiff
       input = '3D_cylinder.i'
       exodiff = '3D_cylinder_radial_rings_in.e'
-      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/n_radial_rings=4 --mesh-only 3D_cylinder_radial_rings_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/n_radial=4 --mesh-only 3D_cylinder_radial_rings_in.e'
       requirement = 'The system shall be able to create 3D cylindrical mesh with multiple boundary layers.'
     []
   []

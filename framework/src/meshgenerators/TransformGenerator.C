@@ -29,16 +29,17 @@ TransformGenerator::validParams()
       "transform",
       transforms,
       "The type of transformation to perform (TRANSLATE, TRANSLATE_CENTER_ORIGIN, "
-      "TRANSLATE_MIN_ORIGIN, ROTATE, SCALE)");
+      "TRANSLATE_MIN_ORIGIN, ROTATE, SCALE, ROTATE_WITH_MATRIX, ROTATE_EXT)");
   params.addParam<RealVectorValue>(
       "vector_value",
       "The value to use for the transformation. When using TRANSLATE or SCALE, the "
       "xyz coordinates are applied in each direction respectively. When using "
       "ROTATE, the values are interpreted as the Euler angles phi, theta and psi "
-      "given in degrees. For ROTATE_EXT, and extrinsic rotation is carried out using prescribed "
-      "angles alpha, beta, and gamma in degrees.");
-  params.addParam<RealTensorValue>("rotation_matrix",
-                                   "Precomputed extrinsic rotation matrix to be applied to mesh.");
+      "given in degrees. For ROTATE_EXT, an extrinsic rotation is carried out using prescribed "
+      "Euler angles alpha, beta, and gamma in degrees.");
+  params.addParam<RealTensorValue>(
+      "rotation_matrix",
+      "Precomputed extrinsic rotation matrix to be applied to mesh (ROTATE_WITH_MATRIX option).");
 
   return params;
 }
