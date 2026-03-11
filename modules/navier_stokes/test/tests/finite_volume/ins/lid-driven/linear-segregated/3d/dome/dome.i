@@ -37,13 +37,9 @@ reactor_load = 300e3 # W
 # Parameter range from 45F to 68F
 T_outside_air = ${units 45 degF -> K}
 
-# AHU heat mode trigger points
-# Reserved for the follow-on cooling simulation
-# T_heat_trigger_low = ${units 60 degF -> K}
-T_heat_trigger_high = ${units 68 degF -> K}
-# We're not currently interested in cooling, so stop it from happening by setting this trigger
-# temperature very high, e.g. the boiling temperature of water
-T_cooling_trigger = ${units 100 degC -> K}
+# Driver inputs define the thermostat logic with these symbols:
+# T_heat_trigger
+# T_cooling_trigger
 
 # Dome wall thermal resistance model
 h_out = 10 # W/m^2/K, outdoor convection coefficient. Could be larger if there's a lot of wind
@@ -139,11 +135,9 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   []
   [mu_t]
     type = MooseLinearVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
   []
   [k_t]
     type = MooseLinearVariableFVReal
-    initial_condition = 1.
   []
   [yplus]
     type = MooseLinearVariableFVReal
@@ -211,51 +205,36 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     body_force_kernel_names = "; ; w_buoyancy w_fan"
     pressure_projection_method = consistent
   []
-  [heating_complete]
-    type = Terminator
-    expression = 'heating_mode < 0.5'
-    fail_mode = HARD
-    error_level = INFO
-    message = 'Heating response complete: six-sensor average reached the 68 F set point.'
-    execute_on = TIMESTEP_END
-  []
 []
 
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.0
     solver_sys = u_system
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.0
     solver_sys = v_system
   []
   [vel_z]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.0
     solver_sys = w_system
   []
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_condition = 0
   []
   [TKE]
     type = MooseLinearVariableFVReal
     solver_sys = TKE_system
-    initial_condition = ${k_init}
   []
   [TKED]
     type = MooseLinearVariableFVReal
     solver_sys = TKED_system
-    initial_condition = ${eps_init}
   []
   [T_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${T_0}
   []
 []
 
@@ -954,7 +933,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   []
   [heating_mode]
     type = ParsedPostprocessor
-    expression = 'if(sensor_avg < ${T_heat_trigger_high}, 1, 0)'
+    expression = 'if(sensor_avg < ${T_heat_trigger}, 1, 0)'
     pp_names = 'sensor_avg'
   []
   [cooling_mode]
