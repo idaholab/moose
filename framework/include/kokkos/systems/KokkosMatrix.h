@@ -77,7 +77,7 @@ public:
   {
     auto idx = find(i, j);
 
-    KOKKOS_ASSERT(idx != -1)
+    KOKKOS_ASSERT(idx != -1);
 
     return _val[idx];
   }

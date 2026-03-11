@@ -257,6 +257,9 @@ Assembly::initShape()
   _map_grad_phi_face.create(num_subdomains, num_elem_types);
   _map_grad_psi_face.create(num_subdomains, num_elem_types);
 
+  _normal_dx_dxi.create(num_subdomains, num_elem_types);
+  _normal_dx_deta.create(num_subdomains, num_elem_types);
+
   _n_dofs.create(num_elem_types, _fe_type_map.size());
   _n_dofs = 0;
 
@@ -324,11 +327,11 @@ Assembly::initShape()
     for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
       auto elem = &libMesh::ReferenceElem::get(elem_type);
+      auto fe_type = FEType(elem->default_order(), LAGRANGE);
+      auto shape_deriv_ptr = libMesh::FEInterface::shape_deriv_function(fe_type, elem);
 
-      std::unique_ptr<FEBase> fe(
-          FEBase::build(_dimension, FEType(elem->default_order(), LAGRANGE)));
-      std::unique_ptr<FEBase> fe_face(
-          FEBase::build(_dimension, FEType(elem->default_order(), LAGRANGE)));
+      std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
+      std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
 
       fe->attach_quadrature_rule(qrule);
       fe_face->attach_quadrature_rule(qrule_face);
@@ -353,8 +356,13 @@ Assembly::initShape()
       _map_psi_face(sid, elem_type_id).create(elem->n_sides());
       _map_grad_psi_face(sid, elem_type_id).create(elem->n_sides());
 
+      _normal_dx_dxi(sid, elem_type_id).create(elem->n_sides());
+      _normal_dx_deta(sid, elem_type_id).create(elem->n_sides());
+
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
+        auto side_ptr = elem->build_side_ptr(side);
+
         auto & phi = fe_face->get_phi();
         auto & grad_phi = fe_face->get_dphi();
 
@@ -386,6 +394,30 @@ Assembly::initShape()
             if (elem->dim() > 2)
               _map_grad_psi_face(sid, elem_type_id)(side)(i, qp)(1) = dpsideta[i][qp];
           }
+
+        _normal_dx_dxi(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
+        _normal_dx_deta(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
+
+        for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+        {
+          Point reference_point;
+
+          if (_dimension == 1)
+            reference_point = side ? Point(1) : Point(-1);
+          else if (_dimension == 2)
+            for (unsigned int i = 0; i < psi.size(); ++i)
+              reference_point.add_scaled(side_ptr->point(i), psi[i][qp]);
+
+          for (unsigned int i = 0; i < phi.size(); ++i)
+          {
+            if (_dimension < 3)
+              _normal_dx_dxi(sid, elem_type_id)(side)(i, qp) =
+                  shape_deriv_ptr(fe_type, elem, i, 0, reference_point, false);
+            if (_dimension == 2)
+              _normal_dx_deta(sid, elem_type_id)(side)(i, qp) =
+                  shape_deriv_ptr(fe_type, elem, i, 1, reference_point, false);
+          }
+        }
       }
     }
   }
@@ -401,6 +433,9 @@ Assembly::initShape()
   _map_grad_phi.copyToDeviceNested();
   _map_grad_phi_face.copyToDeviceNested();
   _map_grad_psi_face.copyToDeviceNested();
+
+  _normal_dx_dxi.copyToDeviceNested();
+  _normal_dx_deta.copyToDeviceNested();
 
   _n_dofs.copyToDevice();
 }
