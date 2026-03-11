@@ -25,6 +25,8 @@ BSpline::getPoint(const libMesh::Real t) const
 {
   mooseAssert((t >= 0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
   libMesh::Point returnPoint(0, 0, 0);
+  if (t == 1.0)
+    return _control_points.back();
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
 
@@ -70,14 +72,10 @@ libMesh::Real
 BSpline::CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned int j) const
 {
   mooseAssert(i + 1 < _knot_vector.size(), "Out of bounds access in knot vector");
+  mooseAssert(_knot_vector[i] <= _knot_vector[i + 1],
+              "Something is not right with knot vector " + Moose::stringify(_knot_vector));
   if (j == 0)
-  {
-    libMesh::Real basis_return =
-        (t <= _knot_vector[i + 1] && _knot_vector[i] <= t && _knot_vector[i] < _knot_vector[i + 1])
-            ? 1
-            : 0;
-    return basis_return;
-  }
+    return ((t < _knot_vector[i + 1]) && (_knot_vector[i] <= t)) ? 1 : 0;
   else
     return BSpline::firstCoeff(t, i, j) * BSpline::CdBBasis(t, i, j - 1) +
            BSpline::secondCoeff(t, i, j) * BSpline::CdBBasis(t, i + 1, j - 1);
