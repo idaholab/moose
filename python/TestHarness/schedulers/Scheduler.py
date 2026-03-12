@@ -220,7 +220,7 @@ class Scheduler(MooseObject):
         # if enabled but no time utility available
         time_utility_type = TimeUtilityType.NONE
         time_utility_path: Optional[str] = None
-        if monitor_job_memory:
+        if monitor_job_cpu:
             if time_utility_path := findGNUTime():
                 time_utility_type = TimeUtilityType.GNU
             elif time_utility_path := findBSDTime():

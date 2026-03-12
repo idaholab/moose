@@ -11,18 +11,9 @@
 
 import os
 import sys
+import psutil
 from collections import defaultdict
-from typing import TYPE_CHECKING, Optional
-
-if TYPE_CHECKING:
-    import psutil
-else:
-    from importlib.util import find_spec
-
-    if find_spec("psutil") is not None:
-        import psutil
-    else:
-        raise ModuleNotFoundError("Requires the 'psutil' package")
+from typing import Optional
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
     f"/proc/{os.getpid()}/smaps_rollup"
