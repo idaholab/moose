@@ -107,7 +107,7 @@ private:
   /// Names of the source functors
   const std::vector<MooseFunctorName> _functor_names;
   /// Pointers to the source functors
-  std::vector<const Moose::Functor<Real> *> _functors;
+  std::vector<std::vector<const Moose::Functor<Real> *>> _functors;
 
   /// Extrapolation behavior
   const MooseEnum _extrapolation_behavior;
