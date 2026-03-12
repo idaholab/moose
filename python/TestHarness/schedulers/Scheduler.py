@@ -270,7 +270,7 @@ class Scheduler(MooseObject):
             }
 
         # Get memory for running jobs
-        processes_memory = get_processes_memory(pid_to_job.keys())
+        processes_memory = get_processes_memory(set(pid_to_job.keys()))
 
         # Update job memory and kill jobs over memory
         max_memory_per_slot = self.options.max_memory_per_slot
@@ -281,14 +281,12 @@ class Scheduler(MooseObject):
                     continue
 
                 runner = job.getRunner()
-                slots = job.getSlots()
-
                 max_memory = runner.max_memory  # bytes
                 if max_memory is None or memory > max_memory:
                     runner.setMaxMemory(memory)
 
                     if max_memory_per_slot:
-                        memory_per_slot_mb = memory / slots * 2**-20
+                        memory_per_slot_mb = memory / job.getSlots() * 2**-20
                         if memory_per_slot_mb > max_memory_per_slot:
                             message = (
                                 "JOB KILLED (OVER MEMORY): "
@@ -309,7 +307,7 @@ class Scheduler(MooseObject):
             while True:
                 if not self.isRunning():
                     break
-                sleep(0.25)
+                sleep(0.1)
                 self.monitorJobProcesses()
 
             error_state = self.getErrorState()

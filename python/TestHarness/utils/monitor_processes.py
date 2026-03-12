@@ -11,8 +11,8 @@
 
 import os
 import sys
-from contextlib import suppress
-from typing import TYPE_CHECKING, Iterable, Optional
+from collections import defaultdict
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     import psutil
@@ -49,61 +49,59 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     """
     # Prefer PSS if available
     if MEMORY_PSS:
-        data = None
-        with (
-            suppress(FileNotFoundError),
-            suppress(ProcessLookupError),
-            open(f"/proc/{process.pid}/smaps_rollup", "rb") as f,
-        ):
-            data = f.read()
-        if data is not None and (idx := data.find(b"Pss:")) != -1:
-            start = idx + 4
-            while data[start] == 32:
-                start += 1
-            end = start
-            while data[end] != 32:
-                end += 1
-            return int(data[start:end]) * 1024  # kilobytes -> bytes
-
+        try:
+            with open(f"/proc/{process.pid}/smaps_rollup", "rb") as f:
+                for line in f:
+                    if line.startswith(b"Pss:"):
+                        return int(line.split()[1]) * 1024  # b"Pss:   1234 kB"
+        except (FileNotFoundError, ProcessLookupError):
+            pass
     # Otherwise, use RSS (will double count shared memory)
     else:
-        with suppress(psutil.NoSuchProcess):
+        try:
             return process.memory_info().rss
+        except psutil.NoSuchProcess:
+            pass
 
     return None
 
 
-def get_processes_memory(pids: Iterable[int]) -> dict[int, int]:
+def get_processes_memory(pids: set[int]) -> defaultdict[int, int]:
     """
     Get the estimated total memory for each process, including children.
+
+    The children of the parent processes (the ones in "pids") must
+    have their process group IDs set to that of the parent. This
+    enables loading all processes at once, searching by process
+    group ID instead of needing to recurse through the process
+    tree for children for each parent process. This is true
+    in the SubprocessRunner, as we set preexec_fn=os.setsid
+    when spawning the parent subprocess.
 
     If a process is not running, it will not be included.
 
     Arguments:
     ---------
     pids : Iterable[int]
-        The IDs of the processes.
+        The PIDs of the parent processes.
 
     Returns:
     -------
-    dict[int, int]:
-        Mapping of pid -> estimated process memory in bytes.
+    defaultdict[int, int]:
+        Mapping of parent PID -> estimated process memory in bytes.
 
     """
 
-    def recursive_memory(pid: int) -> Optional[int]:
+    result = defaultdict(int)
+
+    for p in psutil.process_iter(["pid"]):
         try:
-            p = psutil.Process(pid)
-        except psutil.NoSuchProcess:
-            return None
+            pgid = os.getpgid(p.info["pid"])
+        except ProcessLookupError:
+            continue
+        if pgid not in pids:
+            continue
+        if (memory := get_process_memory(p)) is not None:
+            result[pgid] += memory
 
-        ps: list[psutil.Process] = [p]
-        with suppress(psutil.NoSuchProcess):
-            ps += p.children(recursive=True)
-
-        if memory := sum([memory for p in ps if (memory := get_process_memory(p))]):
-            return memory
-
-        return None
-
-    return {pid: memory for pid in pids if (memory := recursive_memory(pid))}
+    return result
