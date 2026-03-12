@@ -36,7 +36,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
   if (!(this->size() == x.size() && (x.size() == y.size())))
     mooseError("Kokkos array error: all arrays for axby() should have the same size.");
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, this->size());
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<index_type>> policy(0, this->size());
 
   auto data = this->deviceData();
 
@@ -44,7 +44,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
   {
     case '+':
       ::Kokkos::parallel_for(
-          policy, KOKKOS_LAMBDA(const ThreadID i) {
+          policy, KOKKOS_LAMBDA(const index_type i) {
             if (accumulate)
               data[i] += (a * x[i]) + (b * y[i]);
             else
@@ -53,7 +53,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
       break;
     case '-':
       ::Kokkos::parallel_for(
-          policy, KOKKOS_LAMBDA(const ThreadID i) {
+          policy, KOKKOS_LAMBDA(const index_type i) {
             if (accumulate)
               data[i] += (a * x[i]) - (b * y[i]);
             else
@@ -62,7 +62,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
       break;
     case '*':
       ::Kokkos::parallel_for(
-          policy, KOKKOS_LAMBDA(const ThreadID i) {
+          policy, KOKKOS_LAMBDA(const index_type i) {
             if (accumulate)
               data[i] += (a * x[i]) * (b * y[i]);
             else
@@ -71,7 +71,7 @@ Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
       break;
     case '/':
       ::Kokkos::parallel_for(
-          policy, KOKKOS_LAMBDA(const ThreadID i) {
+          policy, KOKKOS_LAMBDA(const index_type i) {
             if (accumulate)
               data[i] += (a * x[i]) / (b * y[i]);
             else
