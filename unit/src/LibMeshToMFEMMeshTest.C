@@ -29,7 +29,7 @@
 #include "mfem/mesh/element.hpp"
 #include "type_traits"
 
-template <class M, bool fallback = false, bool first_order = false>
+template <class M>
 class LibMeshToMFEMMeshTest : public ::testing::Test
 {
 public:
@@ -54,21 +54,20 @@ public:
   std::shared_ptr<M> _moose_mesh_ptr;
   std::shared_ptr<mfem::ParMesh> _mfem_mesh_ptr;
 
-  constexpr static bool _fallback = fallback;
-  constexpr static bool _first_order = first_order;
-
   InputParameters getValidParams() { return _factory->getValidParams(_mesh_type); }
 
-  void buildMesh(InputParameters & mesh_params)
+  void buildMesh(InputParameters & mesh_params, bool fallback = false, bool first_order = false)
   {
     // The input parameters in the third argument won't be used, but
     // we need a dummy value.
-    buildMesh(mesh_params, "", _factory->getValidParams("ElementGenerator"));
+    buildMesh(mesh_params, "", _factory->getValidParams("ElementGenerator"), fallback, first_order);
   }
 
   void buildMesh(InputParameters & mesh_params,
                  std::string generator_class,
-                 InputParameters generator_params)
+                 InputParameters generator_params,
+                 bool fallback = false,
+                 bool first_order = false)
   {
     // If the parameters were created without using the factory
     // object, we need to set the app parameter ourselves.
@@ -119,27 +118,23 @@ public:
   }
 };
 
-template <int N>
-using CoordND = std::array<mfem::real_t, N>;
-using Coord1D = CoordND<1>;
-using Coord2D = CoordND<2>;
-using Coord3D = CoordND<3>;
+using Coord = std::vector<mfem::real_t>;
 
-template <int N>
-std::set<std::set<CoordND<N>>>
+std::set<std::set<Coord>>
 getElementSet(std::shared_ptr<mfem::ParMesh> mesh, mfem::Element::Type elem_type)
 {
-  std::set<std::set<CoordND<N>>> actual_elements;
+  std::set<std::set<Coord>> actual_elements;
+  const int N = mesh->SpaceDimension();
   for (int i = 0; i < mesh->GetNE(); ++i)
   {
     mfem::Element * elem = mesh->GetElement(i);
     EXPECT_EQ(elem->GetType(), elem_type);
     int * vertices = elem->GetVertices();
-    std::set<CoordND<N>> vert_coords;
+    std::set<Coord> vert_coords;
     for (int j = 0; j < elem->GetNVertices(); ++j)
     {
       mfem::real_t * vc = mesh->GetVertex(vertices[j]);
-      CoordND<N> c;
+      Coord c(N);
       for (int k = 0; k < N; ++k)
       {
         c[k] = vc[k];
@@ -165,9 +160,9 @@ TEST_F(GeneratedMeshMFEMTest, Check1D)
   EXPECT_EQ(_mfem_mesh_ptr->GetNV(), 4);
   EXPECT_EQ(_mfem_mesh_ptr->GetNE(), 3);
 
-  std::set<std::set<Coord1D>> actual_elements =
-      getElementSet<1>(_mfem_mesh_ptr, mfem::Element::Type::SEGMENT);
-  std::set<std::set<Coord1D>> expected_elements{{{0.}, {1.}}, {{1.}, {2.}}, {{2.}, {3.}}};
+  std::set<std::set<Coord>> actual_elements =
+      getElementSet(_mfem_mesh_ptr, mfem::Element::Type::SEGMENT);
+  std::set<std::set<Coord>> expected_elements{{{0.}, {1.}}, {{1.}, {2.}}, {{2.}, {3.}}};
   EXPECT_EQ(expected_elements, actual_elements);
 }
 
@@ -184,12 +179,12 @@ TEST_F(GeneratedMeshMFEMTest, Check2D)
   EXPECT_EQ(_mfem_mesh_ptr->GetNE(), 4);
   EXPECT_EQ(_mfem_mesh_ptr->GetNEdges(), 12);
 
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::QUADRILATERAL);
-  std::set<std::set<Coord2D>> expected_elements{{{0., 0.}, {0., .5}, {.5, 0.}, {.5, .5}},
-                                                {{0.5, 0.}, {0.5, 0.5}, {1., 0.}, {1., 0.5}},
-                                                {{0., 0.5}, {0., 1.}, {0.5, 0.5}, {0.5, 1.}},
-                                                {{0.5, 0.5}, {0.5, 1.0}, {1.0, 0.5}, {1.0, 1.0}}};
+  std::set<std::set<Coord>> actual_elements =
+      getElementSet(_mfem_mesh_ptr, mfem::Element::Type::QUADRILATERAL);
+  std::set<std::set<Coord>> expected_elements{{{0., 0.}, {0., .5}, {.5, 0.}, {.5, .5}},
+                                              {{0.5, 0.}, {0.5, 0.5}, {1., 0.}, {1., 0.5}},
+                                              {{0., 0.5}, {0., 1.}, {0.5, 0.5}, {0.5, 1.}},
+                                              {{0.5, 0.5}, {0.5, 1.0}, {1.0, 0.5}, {1.0, 1.0}}};
   EXPECT_EQ(expected_elements, actual_elements);
 }
 
@@ -208,40 +203,40 @@ TEST_F(GeneratedMeshMFEMTest, Check3D)
   EXPECT_EQ(_mfem_mesh_ptr->GetNEdges(), 33);
   EXPECT_EQ(_mfem_mesh_ptr->GetNFaces(), 20);
 
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements{{{0., 0., 0.},
-                                                 {0., 0., .5},
-                                                 {0., 1., 0.},
-                                                 {0., 1., .5},
-                                                 {.5, 0., 0.},
-                                                 {.5, 0., .5},
-                                                 {.5, 1., 0.},
-                                                 {.5, 1., .5}},
-                                                {{0.5, 0., 0.},
-                                                 {0.5, 0., 0.5},
-                                                 {0.5, 1., 0.},
-                                                 {0.5, 1., 0.5},
-                                                 {1., 0., 0.},
-                                                 {1., 0., 0.5},
-                                                 {1., 1., 0.},
-                                                 {1., 1., 0.5}},
-                                                {{0., 0., 0.5},
-                                                 {0., 0., 1.},
-                                                 {0., 1., 0.5},
-                                                 {0., 1., 1.},
-                                                 {0.5, 0., 0.5},
-                                                 {0.5, 0., 1.},
-                                                 {0.5, 1., 0.5},
-                                                 {0.5, 1., 1.}},
-                                                {{0.5, 0., 0.5},
-                                                 {0.5, 0., 1.0},
-                                                 {0.5, 1., 0.5},
-                                                 {0.5, 1., 1.0},
-                                                 {1.0, 0., 0.5},
-                                                 {1.0, 0., 1.0},
-                                                 {1.0, 1., 0.5},
-                                                 {1.0, 1., 1.0}}};
+  std::set<std::set<Coord>> actual_elements =
+      getElementSet(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
+  std::set<std::set<Coord>> expected_elements{{{0., 0., 0.},
+                                               {0., 0., .5},
+                                               {0., 1., 0.},
+                                               {0., 1., .5},
+                                               {.5, 0., 0.},
+                                               {.5, 0., .5},
+                                               {.5, 1., 0.},
+                                               {.5, 1., .5}},
+                                              {{0.5, 0., 0.},
+                                               {0.5, 0., 0.5},
+                                               {0.5, 1., 0.},
+                                               {0.5, 1., 0.5},
+                                               {1., 0., 0.},
+                                               {1., 0., 0.5},
+                                               {1., 1., 0.},
+                                               {1., 1., 0.5}},
+                                              {{0., 0., 0.5},
+                                               {0., 0., 1.},
+                                               {0., 1., 0.5},
+                                               {0., 1., 1.},
+                                               {0.5, 0., 0.5},
+                                               {0.5, 0., 1.},
+                                               {0.5, 1., 0.5},
+                                               {0.5, 1., 1.}},
+                                              {{0.5, 0., 0.5},
+                                               {0.5, 0., 1.0},
+                                               {0.5, 1., 0.5},
+                                               {0.5, 1., 1.0},
+                                               {1.0, 0., 0.5},
+                                               {1.0, 0., 1.0},
+                                               {1.0, 1., 0.5},
+                                               {1.0, 1., 1.0}}};
   EXPECT_EQ(expected_elements, actual_elements);
 }
 
@@ -309,28 +304,22 @@ INSTANTIATE_TEST_SUITE_P(
         "tet-4.e", "tet-10.e", "hex-8.e", "hex-27.e", "wedge-6.e", "wedge-18.e", "pyramid-5.e"));
 
 Point
-toPoint(const CoordND<1> & x, libMesh::ElemType)
-{
-  return Point(2 * x[0] - 1);
-}
-Point
-toPoint(const CoordND<2> & x, libMesh::ElemType etype)
+toPoint(const Coord & x, libMesh::ElemType etype)
 {
   switch (etype)
   {
+    case libMesh::ElemType::EDGE2:
+    case libMesh::ElemType::EDGE3:
+    case libMesh::ElemType::EDGE4:
+      return Point(2 * x[0] - 1);
     case libMesh::ElemType::TRI3:
     case libMesh::ElemType::TRI6:
     case libMesh::ElemType::TRI7:
       return Point(x[0], x[1]);
-    default:
+    case libMesh::ElemType::QUAD4:
+    case libMesh::ElemType::QUAD8:
+    case libMesh::ElemType::QUAD9:
       return Point(2 * x[0] - 1, 2 * x[1] - 1);
-  }
-}
-Point
-toPoint(const CoordND<3> & x, libMesh::ElemType etype)
-{
-  switch (etype)
-  {
     case libMesh::ElemType::TET4:
     case libMesh::ElemType::TET10:
     case libMesh::ElemType::TET14:
@@ -357,18 +346,16 @@ toPoint(const CoordND<3> & x, libMesh::ElemType etype)
 /**
  * Check the libMesh and MFEM transforms return the same
  * results. Reference coordinates should be in the range [0, 1], as is
- * the case for MFEM. The `x_is_unit`, `y_is_unit`, and `z_is_unit`
- * determine whether this is the same domain used by the libMesh
- * element for that reference coordinate. If `true` then that
- * coordinate is in rnage [0, 1], otherwise it is in range [-1, 1].
+ * the case for MFEM.
  */
-template <int M, int N>
 void
 checkTransform(const Elem * libmesh_elem,
                mfem::ElementTransformation & mfem_transform,
-               std::array<CoordND<M>, N> ref_coords)
+               const std::vector<Coord> & ref_coords)
 {
   // Assemble matrices to use for the MFEM transform
+  const int M = ref_coords[0].size();
+  const int N = ref_coords.size();
   mfem::DenseMatrix ref_coords_mat(M, N), actual_phys_coords_mat(M, N);
   for (int i = 0; i < M; ++i)
   {
@@ -400,18 +387,17 @@ checkTransform(const Elem * libmesh_elem,
   }
 }
 
-template <int N>
 struct ElementTestData
 {
   InputParameters mesh_params;
   InputParameters mg_params;
-  std::set<std::set<CoordND<N>>> expected_element;
-  std::array<CoordND<N>, 3> test_coords;
+  std::set<std::set<Coord>> expected_element;
+  std::vector<Coord> test_coords;
   bool higher_order;
   mfem::Element::Type type;
 };
 
-ElementTestData<1>
+ElementTestData
 edge2Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -423,12 +409,12 @@ edge2Data()
   return {mesh_params,
           mg_params,
           {{{1.}, {2.}}},
-          {{{0.}, {0.5}, {1.}}},
+          {{0.}, {0.5}, {1.}},
           false,
           mfem::Element::Type::SEGMENT};
 }
 
-ElementTestData<1>
+ElementTestData
 edge3Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -440,12 +426,12 @@ edge3Data()
   return {mesh_params,
           mg_params,
           {{{0.}, {4.}}},
-          {{{0.}, {0.5}, {1.}}},
+          {{0.}, {0.5}, {1.}},
           true,
           mfem::Element::Type::SEGMENT};
 }
 
-ElementTestData<1>
+ElementTestData
 edge4Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -458,12 +444,12 @@ edge4Data()
   return {mesh_params,
           mg_params,
           {{{-1.}, {26.}}},
-          {{{0.25}, {0.75}, {1.}}},
+          {{0.25}, {0.75}, {1.}},
           true,
           mfem::Element::Type::SEGMENT};
 }
 
-ElementTestData<2>
+ElementTestData
 tri3Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -475,12 +461,12 @@ tri3Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {2., 0.}, {0., 2.}}},
-          {{{0., 0.}, {0.5, 0.25}, {1., 0.}}},
+          {{0., 0.}, {0.5, 0.25}, {1., 0.}},
           false,
           mfem::Element::TRIANGLE};
 }
 
-ElementTestData<2>
+ElementTestData
 tri6Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -493,12 +479,12 @@ tri6Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {1., 0.}, {0., 1.}}},
-          {{{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}}},
+          {{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}},
           true,
           mfem::Element::TRIANGLE};
 }
 
-ElementTestData<2>
+ElementTestData
 tri7Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -516,12 +502,12 @@ tri7Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {1., 0.}, {0., 1.}}},
-          {{{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}}},
+          {{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}},
           true,
           mfem::Element::TRIANGLE};
 }
 
-ElementTestData<2>
+ElementTestData
 quad4Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -534,12 +520,12 @@ quad4Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {1., 0.}, {0.5, 1.}, {2., 2.}}},
-          {{{0., 0.5}, {0.75, 1.}, {0.5, 0.5}}},
+          {{0., 0.5}, {0.75, 1.}, {0.5, 0.5}},
           false,
           mfem::Element::QUADRILATERAL};
 }
 
-ElementTestData<2>
+ElementTestData
 quad8Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -558,12 +544,12 @@ quad8Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}},
-          {{{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}}},
+          {{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}},
           true,
           mfem::Element::QUADRILATERAL};
 }
 
-ElementTestData<2>
+ElementTestData
 quad9Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -583,12 +569,12 @@ quad9Data()
   return {mesh_params,
           mg_params,
           {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}},
-          {{{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}}},
+          {{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}},
           true,
           mfem::Element::QUADRILATERAL};
 }
 
-ElementTestData<3>
+ElementTestData
 tet4Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -601,12 +587,12 @@ tet4Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0., -1.}}},
-          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          {{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}},
           false,
           mfem::Element::TETRAHEDRON};
 }
 
-ElementTestData<3>
+ElementTestData
 tet10Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -628,19 +614,19 @@ tet10Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., -1.}, {1., -1., -1.}, {-1., 1., -1.}, {-1., -1., 1.}}},
-          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          {{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}},
           true,
           mfem::Element::TETRAHEDRON};
 }
 
-ElementTestData<3>
+ElementTestData
 tet14Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET14";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
                                                           {-1., 1., -1.},
@@ -659,12 +645,12 @@ tet14Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., -1.}, {1., -1., -1.}, {-1., 1., -1.}, {-1., -1., 1.}}},
-          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          {{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}},
           true,
           mfem::Element::TETRAHEDRON};
 }
 
-ElementTestData<3>
+ElementTestData
 pyr5Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -677,12 +663,12 @@ pyr5Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1., 0.}, {1.5, 0., 2}}},
-          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}}},
+          {{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}},
           false,
           mfem::Element::PYRAMID};
 }
 
-ElementTestData<3>
+ElementTestData
 pyr13Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -707,12 +693,12 @@ pyr13Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}},
-          {{{0.25, 0.5, 0.}, {0.5, 0., 0.3}, {0.25, 0.25, 0.5}}},
+          {{0.25, 0.5, 0.}, {0.5, 0., 0.3}, {0.25, 0.25, 0.5}},
           true,
           mfem::Element::PYRAMID};
 }
 
-ElementTestData<3>
+ElementTestData
 pyr14Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -738,16 +724,12 @@ pyr14Data()
   return {mesh_params,
           mg_params,
           {{{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}},
-          {{{0., 0.5, 0.5}, {0.5, 0., 0.3}, {0.25, 0.25, 0.6}}},
+          {{0., 0.5, 0.5}, {0.5, 0., 0.3}, {0.25, 0.25, 0.6}},
           true,
           mfem::Element::PYRAMID};
 }
-// // A bug in MFEM currently means we can't support higher-order
-// // libmesh pyramids. Once that is fixed buildMesh() should no longe
-// // throw an error and the commented out tests below should pass.
-// EXPECT_THROW(buildMesh(mesh_params, "ElementGenerator", mg_params), MooseRuntimeError);
 
-ElementTestData<3>
+ElementTestData
 prism6Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -765,12 +747,12 @@ prism6Data()
             {0, -1.0, 1.},
             {2, -1., 1.},
             {2., 1., 1.}}},
-          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}}},
+          {{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}},
           false,
           mfem::Element::WEDGE};
 }
 
-ElementTestData<3>
+ElementTestData
 prism15Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -802,12 +784,12 @@ prism15Data()
             {-1., -1.0, 1.},
             {1., -1., 1.},
             {0., 1., 1.}}},
-          {{{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}},
+          {{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}},
           true,
           mfem::Element::WEDGE};
 }
 
-ElementTestData<3>
+ElementTestData
 prism18Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -842,12 +824,12 @@ prism18Data()
             {-1., -1.0, 1.},
             {1., -1., 1.},
             {0., 1., 1.}}},
-          {{{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}},
+          {{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}},
           true,
           mfem::Element::WEDGE};
 }
 
-ElementTestData<3>
+ElementTestData
 hex8Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -873,12 +855,12 @@ hex8Data()
             {1., 0., 1.},
             {2., 1., 2.},
             {1., 1., 2.}}},
-          {{{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}}},
+          {{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}},
           false,
           mfem::Element::HEXAHEDRON};
 }
 
-ElementTestData<3>
+ElementTestData
 hex20Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -903,12 +885,12 @@ hex20Data()
             {1., 0., 1.},
             {1., 1., 1.},
             {0., 1., 1.}}},
-          {{{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}},
+          {{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}},
           true,
           mfem::Element::HEXAHEDRON};
 }
 
-ElementTestData<3>
+ElementTestData
 hex27Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
@@ -937,31 +919,28 @@ hex27Data()
             {1., 0., 1.},
             {1., 1., 1.},
             {0., 1., 1.}}},
-          {{{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}},
+          {{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}},
           true,
           mfem::Element::HEXAHEDRON};
 }
 
-template <int N>
-class ElementGeneratorMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, false>,
-                                 public testing::WithParamInterface<ElementTestData<N>>
+class ElementGeneratorMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+                                 public testing::WithParamInterface<ElementTestData>
 {
 public:
-  static std::string testParamName(const testing::TestParamInfo<ElementTestData<N>> & info)
+  static std::string testParamName(const testing::TestParamInfo<ElementTestData> & info)
   {
     auto & params = info.param.mg_params;
     return params.template get<MooseEnum>("elem_type");
   }
 };
 
-using Element1DGeneratorMFEMTest = ElementGeneratorMFEMTest<1>;
-
-TEST_P(Element1DGeneratorMFEMTest, CheckElem)
+TEST_P(ElementGeneratorMFEMTest, CheckElem)
 {
   auto data = GetParam();
-  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
+  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord1D>> actual_elements = getElementSet<1>(_mfem_mesh_ptr, data.type);
+  std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
   EXPECT_EQ(data.expected_element, actual_elements);
   if (data.higher_order)
   {
@@ -971,75 +950,25 @@ TEST_P(Element1DGeneratorMFEMTest, CheckElem)
   {
     EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
   }
-  mfem::DenseMatrix jac(1, 1);
+  const int N = _mfem_mesh_ptr->SpaceDimension();
+  mfem::DenseMatrix jac(N, N);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(
+  checkTransform(
       _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
 }
 
 INSTANTIATE_TEST_SUITE_P(SingleElement,
-                         Element1DGeneratorMFEMTest,
-                         testing::Values(edge2Data(), edge3Data(), edge4Data()),
-                         Element1DGeneratorMFEMTest::testParamName);
-
-using Element2DGeneratorMFEMTest = ElementGeneratorMFEMTest<2>;
-
-TEST_P(Element2DGeneratorMFEMTest, CheckElem)
-{
-  auto data = GetParam();
-  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements = getElementSet<2>(_mfem_mesh_ptr, data.type);
-  EXPECT_EQ(data.expected_element, actual_elements);
-  if (data.higher_order)
-  {
-    EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  }
-  else
-  {
-    EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  }
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(
-      _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    SingleElement,
-    Element2DGeneratorMFEMTest,
-    testing::Values(tri3Data(), tri6Data(), quad4Data(), quad8Data(), quad9Data()),
-    Element2DGeneratorMFEMTest::testParamName);
-
-using Element3DGeneratorMFEMTest = ElementGeneratorMFEMTest<3>;
-
-TEST_P(Element3DGeneratorMFEMTest, CheckElem)
-{
-  auto data = GetParam();
-  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements = getElementSet<3>(_mfem_mesh_ptr, data.type);
-  EXPECT_EQ(data.expected_element, actual_elements);
-  if (data.higher_order)
-  {
-    EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  }
-  else
-  {
-    EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  }
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(
-      _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
-}
-
-INSTANTIATE_TEST_SUITE_P(SingleElement,
-                         Element3DGeneratorMFEMTest,
-                         testing::Values(tet4Data(),
+                         ElementGeneratorMFEMTest,
+                         testing::Values(edge2Data(),
+                                         edge3Data(),
+                                         edge4Data(),
+                                         tri3Data(),
+                                         tri6Data(),
+                                         quad4Data(),
+                                         quad8Data(),
+                                         quad9Data(),
+                                         tet4Data(),
                                          tet10Data(),
                                          pyr5Data(),
                                          // A bug in MFEM currently means we can't support
@@ -1053,9 +982,9 @@ INSTANTIATE_TEST_SUITE_P(SingleElement,
                                          hex8Data(),
                                          hex20Data(),
                                          hex27Data()),
-                         Element3DGeneratorMFEMTest::testParamName);
+                         ElementGeneratorMFEMTest::testParamName);
 
-using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest<3>;
+using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest;
 
 TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
 {
@@ -1070,72 +999,119 @@ INSTANTIATE_TEST_SUITE_P(SingleElement,
                          testing::Values(pyr13Data(), pyr14Data()),
                          UnsupportedElementGeneratorMFEMTest::testParamName);
 
-using LibMeshToMFEMMeshFallbackTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, false>;
-
-TEST_F(LibMeshToMFEMMeshFallbackTest, CheckTri7)
+class ElementComparisonMFEMTest
+  : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+    public testing::WithParamInterface<std::pair<ElementTestData, ElementTestData>>
 {
-  auto data = tri7Data();
+public:
+  static std::string
+  testParamName(const testing::TestParamInfo<std::pair<ElementTestData, ElementTestData>> & info)
+  {
+    auto & params = info.param.first.mg_params;
+    return params.template get<MooseEnum>("elem_type");
+  }
+};
+
+using LibMeshToMFEMMeshFallbackTest = ElementComparisonMFEMTest;
+
+TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
+{
+  auto data = GetParam().first;
   // A warning should be emitted when converting from TRI7 to TRI6
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), std::runtime_error);
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false),
+               std::runtime_error);
   // Temporarily allow warnings to be emitted, so we can test the
   // conversion actually works properly.
   Moose::_throw_on_warning = false;
-  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, _fallback, _first_order);
+  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, true, false);
   Moose::_throw_on_warning = true;
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements = getElementSet<2>(_mfem_mesh_ptr, data.type);
+  std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
   EXPECT_EQ(data.expected_element, actual_elements);
   EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
+  const int N = _mfem_mesh_ptr->SpaceDimension();
+  mfem::DenseMatrix jac(N, N);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
 
-  auto data2 = tri6Data();
+  auto data2 = GetParam().second;
   std::shared_ptr<MeshGeneratorMesh> expected_mesh =
       buildAdditionalMesh(data2.mesh_params, "ElementGenerator", data2.mg_params);
-  checkTransform<2, 3>(
+  checkTransform(
       expected_mesh->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
 }
 
-TEST_F(LibMeshToMFEMMeshFallbackTest, CheckTet14)
+TEST_P(LibMeshToMFEMMeshFallbackTest, CheckError)
 {
-  auto data = tet14Data();
-  // A warning should be emitted when converting from TRI7 to TRI6
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), std::runtime_error);
-  // Temporarily allow warnings to be emitted, so we can test the
-  // conversion actually works properly.
-  Moose::_throw_on_warning = false;
-  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, _fallback, _first_order);
-  Moose::_throw_on_warning = true;
+  auto data = GetParam().first;
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+}
+
+INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
+                         LibMeshToMFEMMeshFallbackTest,
+                         testing::Values(std::make_pair(tri7Data(), tri6Data()),
+                                         std::make_pair(tet14Data(), tet10Data())),
+                         ElementComparisonMFEMTest::testParamName);
+
+class LibMeshToMFEMMeshFirstOrderTest
+  : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+    public testing::WithParamInterface<std::tuple<ElementTestData, std::string, int>>
+{
+public:
+  static std::string
+  testParamName(const testing::TestParamInfo<std::tuple<ElementTestData, std::string, int>> & info)
+  {
+    auto & params = std::get<0>(info.param).mg_params;
+    return params.template get<MooseEnum>("elem_type");
+  }
+};
+
+TEST_P(LibMeshToMFEMMeshFirstOrderTest, CheckConversion)
+{
+  auto data = std::get<0>(GetParam());
+  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, false, true);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements = getElementSet<3>(_mfem_mesh_ptr, data.type);
+  std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
   EXPECT_EQ(data.expected_element, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
+  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
+  const int N = _mfem_mesh_ptr->SpaceDimension();
+  mfem::DenseMatrix jac(N, N);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
 
-  auto data2 = tet10Data();
+  const int M = std::get<2>(GetParam());
+  data.mg_params.set<MooseEnum>("elem_type") = std::get<1>(GetParam());
+  data.mg_params.set<std::vector<unsigned long>>("element_connectivity").resize(M);
+  data.mg_params.set<std::vector<Point>>("nodal_positions").resize(M);
   std::shared_ptr<MeshGeneratorMesh> expected_mesh =
-      buildAdditionalMesh(data2.mesh_params, "ElementGenerator", data2.mg_params);
-  checkTransform<3, 3>(
+      buildAdditionalMesh(data.mesh_params, "ElementGenerator", data.mg_params);
+  checkTransform(
       expected_mesh->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
 }
 
-using LibMeshToMFEMMeshNoFallbackTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, false, false>;
-
-TEST_F(libMeshToMFEMMeshNoFallbackTest, CheckTRI7)
-{
-  auto data = tri7Data();
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
-}
-
-TEST_F(libMeshToMFEMMeshNoFallbackTest, CheckTET14)
-{
-  auto data = tet14Data();
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
-}
-
-using ElementToFirstOrderMFEMTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, true>;
+INSTANTIATE_TEST_SUITE_P(ConvertToFirstOrder,
+                         LibMeshToMFEMMeshFirstOrderTest,
+                         testing::Values(std::make_tuple(edge2Data(), std::string("EDGE2"), 2),
+                                         std::make_tuple(edge3Data(), std::string("EDGE2"), 2),
+                                         std::make_tuple(edge4Data(), std::string("EDGE2"), 2),
+                                         std::make_tuple(tri3Data(), std::string("TRI3"), 3),
+                                         std::make_tuple(tri6Data(), std::string("TRI3"), 3),
+                                         std::make_tuple(tri7Data(), std::string("TRI3"), 3),
+                                         std::make_tuple(quad4Data(), std::string("QUAD4"), 4),
+                                         std::make_tuple(quad8Data(), std::string("QUAD4"), 4),
+                                         std::make_tuple(quad9Data(), std::string("QUAD4"), 4),
+                                         std::make_tuple(tet4Data(), std::string("TET4"), 4),
+                                         std::make_tuple(tet10Data(), std::string("TET4"), 4),
+                                         std::make_tuple(tet14Data(), std::string("TET4"), 4),
+                                         std::make_tuple(pyr5Data(), std::string("PYRAMID5"), 5),
+                                         std::make_tuple(pyr13Data(), std::string("PYRAMID5"), 5),
+                                         std::make_tuple(pyr14Data(), std::string("PYRAMID5"), 5),
+                                         std::make_tuple(prism6Data(), std::string("PRISM6"), 6),
+                                         std::make_tuple(prism15Data(), std::string("PRISM6"), 6),
+                                         std::make_tuple(prism18Data(), std::string("PRISM6"), 6),
+                                         std::make_tuple(hex8Data(), std::string("HEX8"), 8),
+                                         std::make_tuple(hex20Data(), std::string("HEX8"), 8),
+                                         std::make_tuple(hex27Data(), std::string("HEX8"), 8)),
+                         LibMeshToMFEMMeshFirstOrderTest::testParamName);
 
 #endif
