@@ -380,6 +380,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
 
 void
 MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValues(
+    const unsigned int /*var_index*/,
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {

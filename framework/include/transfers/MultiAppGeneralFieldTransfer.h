@@ -65,13 +65,15 @@ protected:
 
   /*
    * Evaluate interpolation values for incoming points
+   * @param var_index the index of the variable being transferred (same for source & target)
    * @param incoming_points vector of point requests with an additional integer to add constraints
    *                  on the source regions
    * @param outgoing_vals vector of (evaluated value, distance to value location) for each of the
    *                incoming point requests
    */
   virtual void
-  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+  evaluateInterpValues(const unsigned int var_index,
+                       const std::vector<std::pair<Point, unsigned int>> & incoming_points,
                        std::vector<std::pair<Real, Real>> & outgoing_vals) = 0;
 
   /*
