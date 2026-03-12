@@ -15,8 +15,10 @@
 namespace Moose
 {
 /**
- * Class implementing a B-Spline curve.
+ * Class implementing a uniform clamped B-Spline curve.
  * Reference used for implementation: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
+ * The B-Spline is uniform because of the spacing in the knot vector
+ * The B-Spline is clamped because the knot vector starts (and ends) with (degree + 1) 0s (and 1s)
  */
 class BSpline
 {
