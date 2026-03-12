@@ -19,6 +19,7 @@
 #include "Positions.h"
 #include "Factory.h"
 #include "MooseAppCoordTransform.h"
+#include "MultiAppGeneralFieldFunctorTransfer.h"
 
 // libmesh includes
 #include "libmesh/point_locator_base.h"
@@ -518,7 +519,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   ProcessorToPointVec outgoing_points;
   extractOutgoingPoints(i, outgoing_points);
 
-  if (_from_var_names.size())
+  if (_from_var_names.size() || dynamic_cast<MultiAppGeneralFieldFunctorTransfer *>(this))
     prepareEvaluationOfInterpValues(i);
   else
     prepareEvaluationOfInterpValues(-1);
@@ -526,15 +527,15 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
   auto gather_functor =
-      [this](processor_id_type /*pid*/,
-             const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
-             std::vector<std::pair<Real, Real>> & outgoing_vals)
+      [this, &i](processor_id_type /*pid*/,
+                 const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
+                 std::vector<std::pair<Real, Real>> & outgoing_vals)
   {
     outgoing_vals.resize(
         incoming_locations.size(),
         {GeneralFieldTransfer::BetterOutOfMeshValue, GeneralFieldTransfer::BetterOutOfMeshValue});
     // Evaluate interpolation values for these incoming points
-    evaluateInterpValues(incoming_locations, outgoing_vals);
+    evaluateInterpValues(i, incoming_locations, outgoing_vals);
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());

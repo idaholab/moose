@@ -141,6 +141,12 @@ MultiAppGeneralFieldFunctorTransfer::prepareEvaluationOfInterpValues(const unsig
   _local_points.clear();
   _local_values.clear();
   buildKDTrees(var_index);
+
+  // Get the point locators
+  _point_locators.resize(_num_sources);
+  for (const auto i_from : make_range(_num_sources))
+    _point_locators[i_from] =
+        _from_problems[i_from]->mesh(_displaced_source_mesh).getPointLocator();
 }
 
 void
@@ -153,6 +159,7 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
   _local_values.resize(_num_sources);
   unsigned int max_leaf_size = 0;
 
+  const auto & functor = _functors[var_index];
   const auto from_blocks =
       _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
 
@@ -171,15 +178,27 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
       // Get access to the variable and some variable information
       FEProblemBase & from_problem = *_from_problems[i_from];
       auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
+      // No need for displaced mesh for checking domain of definition
+      const auto & node_to_elem_map = from_problem.mesh().nodeToActiveSemilocalElemMap();
 
-      const auto & functor = _functors[var_index];
-
-      // TODO: loop on boundary nodes instead
+      // We need to loop on the nodes on the node at the edge of the domain of definition the current functor
       for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
       {
         // No way to check number of dofs for a functor
-        // if (node->n_dofs(from_sys.number(), from_var_num) < 1)
-        //   continue;
+        bool on_at_least_one_block = false;
+        bool not_on_a_block = false;
+        for (const auto eid : libmesh_map_find(node_to_elem_map, node->id()))
+        {
+          bool has_block = functor->hasBlocks(from_mesh.elemPtr(eid)->subdomain_id());
+          if (has_block)
+            on_at_least_one_block = true;
+          else
+            not_on_a_block = true;
+        }
+
+        // Not on a boundary
+        if (!on_at_least_one_block || !not_on_a_block)
+          continue;
 
         if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
           continue;
@@ -226,8 +245,6 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
         Moose::NodeArg node_arg = {node, &from_blocks};
         Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
         _local_values[i_source].push_back((*functor)(node_arg, time_arg));
-        // const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
-        // _local_values[i_source].push_back((*from_sys.solution)(dof));
       }
       max_leaf_size = std::max(max_leaf_size, from_mesh.getMaxLeafSize());
     }
@@ -241,18 +258,26 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
 
 void
 MultiAppGeneralFieldFunctorTransfer::evaluateInterpValues(
+    const unsigned int var_index,
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
-  evaluateValues(incoming_points, outgoing_vals);
+  evaluateValues(var_index, incoming_points, outgoing_vals);
 }
 
 void
 MultiAppGeneralFieldFunctorTransfer::evaluateValues(
+    const unsigned int var_index,
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   dof_id_type i_pt = 0;
+  std::set<const Elem *> elem_candidates;
+
+  const auto & functor = *_functors[var_index];
+  const auto from_blocks =
+      _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
+
   for (const auto & [pt, mesh_div] : incoming_points)
   {
     // Reset distance
@@ -267,7 +292,25 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         continue;
 
       // If in domain, use the functor evaluation at the point
-      // TODO
+      // Locate the point and an element
+      (*_point_locators[i_from])(pt, elem_candidates, &from_blocks);
+      if (elem_candidates.size())
+      {
+        // Average the result for now
+        // TODO: if we knew the functor was continuous, could return earlier
+        Real value = 0;
+        for (const auto elem : elem_candidates)
+        {
+          Moose::ElemPointArg elem_pt_arg = {elem, pt, /*correct skewness*/ false};
+          Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
+          value += functor(elem_pt_arg, time_arg);
+        }
+        value /= elem_candidates.size();
+
+        outgoing_vals[i_pt] = {value, 0};
+        // Skip nearest node KD-Tree evaluation
+        continue;
+      }
 
       // TODO: Pre-allocate these two work arrays. They will be regularly resized by the
       // searches

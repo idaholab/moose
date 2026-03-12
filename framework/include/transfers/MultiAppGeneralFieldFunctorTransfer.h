@@ -35,7 +35,8 @@ protected:
 
   // TODO: rename! We are not just interpolating anymore
   virtual void
-  evaluateInterpValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+  evaluateInterpValues(const unsigned int var_index,
+                       const std::vector<std::pair<Point, unsigned int>> & incoming_points,
                        std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
   using MultiAppGeneralFieldTransfer::inBlocks;
@@ -60,7 +61,8 @@ private:
    * @param incoming_points all the points at which we need values
    * @param outgoing_vals vector containing the values and distances from point to nearest node
    */
-  void evaluateValues(const std::vector<std::pair<Point, unsigned int>> & incoming_points,
+  void evaluateValues(const unsigned int var_index,
+                      const std::vector<std::pair<Point, unsigned int>> & incoming_points,
                       std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /// Pre-compute the number of sources
@@ -91,15 +93,16 @@ private:
 
   /// KD-Trees for all the local source apps
   std::vector<std::shared_ptr<KDTree>> _local_kdtrees;
-
   /// KD-Trees for nodes nearest to a given position on each local source app
   std::vector<std::vector<std::shared_ptr<KDTree>>> _local_positions_kdtrees;
 
-  /// All the nodes that meet the spatial restrictions in all the local source apps
+  /// All the boundary nodes that meet the spatial restrictions in all the local source apps
   std::vector<std::vector<Point>> _local_points;
-
   /// Values of the variable being transferred at all the points in _local_points
   std::vector<std::vector<Real>> _local_values;
+
+  // Point locators for all source meshes
+  std::vector<std::unique_ptr<libMesh::PointLocatorBase>> _point_locators;
 
   /// Names of the source functors
   const std::vector<MooseFunctorName> _functor_names;
