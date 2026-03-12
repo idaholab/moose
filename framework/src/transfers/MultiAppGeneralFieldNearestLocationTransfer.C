@@ -150,12 +150,15 @@ MultiAppGeneralFieldNearestLocationTransfer::initialSetup()
 
     // Some variables can be sampled directly at their 0 dofs
     // - lagrange at nodes on a first order mesh
+    // Higher order mesh is also fine incidentally because on the 'other' (mid-face for example)
+    // nodes, the 1st order lagrange variable has 0 dofs, and the second order lagrange
+    // use the mid-edge nodes as lagrange points (and 0 dofs on extra ones).
+    // Third order is different (except on edge4, but not used much)
     // - anything constant and elemental obviously has the 0-dof value at the centroid (or
     // vertex-average). However, higher order elemental, even monomial, do not hold the centroid
-    // value at dof index 0 For example: pyramid has dof 0 at the center of the base, prism has dof
+    // value at dof index 0. For example: pyramid has dof 0 at the center of the base, prism has dof
     // 0 on an edge etc
-    if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE &&
-         !from_problem.mesh().hasSecondOrderElements()) ||
+    if ((_source_is_nodes[var_index] && fe_type.family == LAGRANGE && fe_type.order <= SECOND) ||
         (!_source_is_nodes[var_index] && fe_type.order == CONSTANT))
       _use_zero_dof_for_value[var_index] = true;
     else
@@ -253,6 +256,8 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
       {
         for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
         {
+          // This notably excludes first order Lagrange variables on the mid-nodes
+          // e.g. the mid-nodes are not added to the KD tree
           if (node->n_dofs(from_sys.number(), from_var_num) < 1)
             continue;
 
@@ -301,7 +306,7 @@ MultiAppGeneralFieldNearestLocationTransfer::buildKDTrees(const unsigned int var
           const auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
           _local_values[i_source].push_back((*from_sys.solution)(dof));
           if (!_use_zero_dof_for_value[var_index])
-            flagInvalidSolution(
+            flagSolutionWarning(
                 "Nearest-location is not implemented for this source variable type on "
                 "this mesh. Returning value at dof 0");
         }
