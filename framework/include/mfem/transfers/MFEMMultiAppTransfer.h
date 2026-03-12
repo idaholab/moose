@@ -49,12 +49,12 @@ protected:
   virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
 
   /// Set default value for transfers evaluated at points outside source mesh
-  void setMFEMOutOfMeshValue(mfem::real_t & mfem_out_of_mesh_value)
+  void setMFEMOutOfMeshValue(mfem::real_t mfem_out_of_mesh_value)
   {
     _mfem_out_of_mesh_value = mfem_out_of_mesh_value;
   }
   /// Getter for default value for transfers evaluated at points outside source mesh
-  auto const & getMFEMOutOfMeshValue() const { return _mfem_out_of_mesh_value; }
+  mfem::real_t getMFEMOutOfMeshValue() const { return _mfem_out_of_mesh_value; }
 
   /// Templated method to check source and destination problems are of the expected types
   template <typename TO_PROBLEM, typename FROM_PROBLEM>
