@@ -1,0 +1,1 @@
+../../../../user_object/boundary/gold/projection_receive_sub0_out.e

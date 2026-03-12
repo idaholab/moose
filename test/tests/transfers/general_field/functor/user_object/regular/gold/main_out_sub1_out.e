@@ -1,0 +1,1 @@
+../../../../user_object/regular/gold/main_out_sub1_out.e

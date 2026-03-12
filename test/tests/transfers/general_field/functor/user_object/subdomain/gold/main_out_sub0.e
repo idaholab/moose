@@ -1,0 +1,1 @@
+../../../../user_object/subdomain/gold/main_out_sub0.e
