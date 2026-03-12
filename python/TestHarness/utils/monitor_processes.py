@@ -11,9 +11,10 @@
 
 import os
 import sys
-import psutil
 from collections import defaultdict
 from typing import Optional
+
+import psutil
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
     f"/proc/{os.getpid()}/smaps_rollup"
@@ -57,23 +58,15 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     return None
 
 
-def get_processes_memory(pids: set[int]) -> defaultdict[int, int]:
+def get_processes_memory(parent_pids: set[int]) -> defaultdict[int, int]:
     """
-    Get the estimated total memory for each process, including children.
-
-    The children of the parent processes (the ones in "pids") must
-    have their process group IDs set to that of the parent. This
-    enables loading all processes at once, searching by process
-    group ID instead of needing to recurse through the process
-    tree for children for each parent process. This is true
-    in the SubprocessRunner, as we set preexec_fn=os.setsid
-    when spawning the parent subprocess.
+    Get the estimated total memory for each parent process, including children.
 
     If a process is not running, it will not be included.
 
     Arguments:
     ---------
-    pids : Iterable[int]
+    parent_pids : set[int]
         The PIDs of the parent processes.
 
     Returns:
@@ -82,17 +75,26 @@ def get_processes_memory(pids: set[int]) -> defaultdict[int, int]:
         Mapping of parent PID -> estimated process memory in bytes.
 
     """
+    # Get the entire flattened process tree
+    all_processes: dict[int, psutil.Process] = {
+        p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
+    }
 
+    # Recrusively check if any of the processes in "parent_pids"
+    # are a parent of this process at any level
+    def in_parent_pids(p: psutil.Process) -> Optional[int]:
+        ppid = p.info["ppid"]
+        # Found a parent
+        if ppid in parent_pids:
+            return p.info["ppid"]
+        # Recursively check
+        return in_parent_pids(pp) if (pp := all_processes.get(ppid)) else None
+
+    # Accumulate memory from relevant processes
     result = defaultdict(int)
-
-    for p in psutil.process_iter(["pid"]):
-        try:
-            pgid = os.getpgid(p.info["pid"])
-        except ProcessLookupError:
-            continue
-        if pgid not in pids:
-            continue
-        if (memory := get_process_memory(p)) is not None:
-            result[pgid] += memory
-
+    for pid, p in all_processes.items():
+        if (ppid := pid if pid in parent_pids else in_parent_pids(p)) is not None and (
+            memory := get_process_memory(p)
+        ) is not None:
+            result[ppid] += memory
     return result
