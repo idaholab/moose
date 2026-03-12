@@ -68,6 +68,9 @@ class MemoryMonitor:
         self._parent_pid: int = parent_pid
         """PID of the parent process to sample the children of."""
 
+        self._interval: float = interval
+        """How often to sample in seconds."""
+
         self._process: Optional[Process] = None
         """The Multiprocessing process."""
 
@@ -79,9 +82,6 @@ class MemoryMonitor:
 
         self._stop_event = None
         """Event to stop the Multiprocessing process, once started."""
-
-        self._interval: float = interval
-        """How often to sample in seconds."""
 
     def get_samples(self) -> dict[int, int]:
         """
