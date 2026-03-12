@@ -7,6 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import platform
 import sys
 import threading
 import traceback
@@ -28,7 +29,7 @@ Whether or not get_process_memory() is available.
 
 Will be false if psutil is not available."""
 
-if find_spec("psutil") is not None or TYPE_CHECKING:
+if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CHECKING:
     from TestHarness.utils.monitor_processes import get_processes_memory
 
     _HAS_GET_PROCESSES_MEMORY = True

@@ -867,6 +867,8 @@ class TestHarness:
         if self.options.show_last_run and job.isSkip():
             return
         elif not job.isSilent():
+            memory = None if self.scheduler.MONITOR_JOB_MEMORY else False
+
             # Print results and perform any desired post job processing
             if job.isFinished():
                 joint_status = job.getJointStatus()
@@ -880,7 +882,10 @@ class TestHarness:
                 # Print status with caveats (if caveats not overridden)
                 caveats = True if caveats is None else caveats
                 print(
-                    util.formatJobResult(job, self.options, caveats=caveats), flush=True
+                    util.formatJobResult(
+                        job, self.options, caveats=caveats, memory=memory
+                    ),
+                    flush=True,
                 )
 
                 # Store job as finished for printing
@@ -899,7 +904,11 @@ class TestHarness:
                 caveats = False if caveats is None else caveats
                 print(
                     util.formatJobResult(
-                        job, self.options, status_message=False, caveats=caveats
+                        job,
+                        self.options,
+                        status_message=False,
+                        caveats=caveats,
+                        memory=memory,
                     ),
                     flush=True,
                 )
@@ -1014,13 +1023,18 @@ class TestHarness:
                 for job in longest_jobs:
                     print(
                         util.formatJobResult(
-                            job, self.options, caveats=True, timing=True
+                            job,
+                            self.options,
+                            caveats=True,
+                            timing=True,
+                            memory=None if self.scheduler.MONITOR_JOB_MEMORY else False,
                         )
                     )
 
             # Heaviest jobs by memory
-            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
-            if heaviest_jobs:
+            if self.scheduler.MONITOR_JOB_MEMORY and (
+                heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
+            ):
                 print(
                     header(f"{self.options.longest_jobs} Heaviest Jobs (memory/slot)")
                 )
@@ -1031,7 +1045,7 @@ class TestHarness:
                             self.options,
                             caveats=True,
                             timing=True,
-                            memory=True,
+                            memory=self.scheduler.MONITOR_JOB_MEMORY,
                             memory_per_slot=True,
                         )
                     )
