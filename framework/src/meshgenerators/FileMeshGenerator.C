@@ -99,7 +99,7 @@ FileMeshGenerator::generate()
     mesh->allow_renumbering(false);
 
   // Figure out if we are reading an Exodus file, but not Tetgen (*.ele)
-  bool exodus = (_file_name.rfind(".exd") < _file_name.size() ||
+  bool exodus = (_file_name.rfind(".exo") < _file_name.size() ||
                  _file_name.rfind(".e") < _file_name.size()) &&
                 _file_name.rfind(".ele") == std::string::npos;
   bool has_exodus_integers = isParamValid("exodus_extra_element_integers");

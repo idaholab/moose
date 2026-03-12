@@ -34,7 +34,7 @@ MOOSE supports reading and writing a large number of formats and could be extend
 | Extension   | Description                              |
 | :-          | :-                                       |
 | .dat        | Tecplot ASCII file                       |
-| .e, .exd    | Sandia's ExodusII format                 |
+| .e, .exo    | Sandia's ExodusII format                 |
 | .fro        | ACDL's surface triangulation file        |
 | .gmv        | LANL's GMV (General Mesh Viewer) format  |
 | .mat        | Matlab triangular ASCII file (read only) |
