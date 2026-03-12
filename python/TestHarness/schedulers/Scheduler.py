@@ -235,10 +235,10 @@ class Scheduler(MooseObject):
             and mpi_config.hwloc
             and not options.no_hwloc_topology
         ):
-            hwloc_topology_path = build_hwloc_topology()
-            self.harness.printInfo(
-                f"Using cached hwloc topology in '{hwloc_topology_path}'"
-            )
+            if hwloc_topology_path := build_hwloc_topology():
+                self.harness.printInfo(
+                    f"Using cached hwloc topology in '{hwloc_topology_path}'"
+                )
 
         # Can't restrict resources without tracking
         if self.options.max_memory_per_slot and (
