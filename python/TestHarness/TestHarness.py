@@ -2052,10 +2052,8 @@ class TestHarness:
 
         if self.app_name is None:
             print_info(
-                "Setting [--no-hwloc-topology, --minimal-capabilities] because "
-                "there is not an application",
+                "Setting --minimal-capabilities because there is not an application",
             )
-            opts.no_hwloc_topology = True
             opts.minimal_capabilities = True
 
         # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
