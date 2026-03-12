@@ -32,4 +32,12 @@
     max_parallel = 1
     requirement = "The system shall support the ability to constrain nodal values of different variables."
   []
+
+  [extra_vector_tags]
+    type = 'CSVDiff'
+    input = 'nodal_constraint_extra_tag_test.i'
+    csvdiff = 'nodal_constraint_extra_tag_test_out.csv'
+    max_parallel = 1
+    requirement = "NodalConstraint contributions to extra_vector_tags shall be correctly written to the tagged system vectors."
+  []
 []
