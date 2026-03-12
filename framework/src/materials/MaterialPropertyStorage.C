@@ -530,7 +530,7 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name,
 
   // Fill the record
   auto & record = *_prop_records[prop_id];
-  record.type = type.name();
+  record.type = MooseUtils::prettyCppType(libMesh::demangle(type.name()));
   if (declarer)
     record.declarers.emplace(declarer->typeAndName());
   record.state = std::max(state, record.state);
