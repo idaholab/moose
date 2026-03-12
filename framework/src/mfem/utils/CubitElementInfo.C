@@ -368,7 +368,7 @@ CubitBlockInfo::getElementInfo(libMesh::ElemType elem_type, bool warn) const
       return getElementInfo(search->second);
     }
   }
-  mooseException("Can not represent libMesh element type ", elem_type, " in MFEM mesh.");
+  mooseError("Can not represent libMesh element type ", elem_type, " in MFEM mesh.");
 }
 
 /**
