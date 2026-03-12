@@ -100,6 +100,7 @@ class RunHPC(RunParallel):
     """
 
     CAN_SET_HWLOC_TOPOLOGY = False
+    CAN_SET_MAX_MEMORY = False
     CAN_OPENMPI_OVERSUBSCRIBE = False
     MONITOR_JOB_CPU = False
     MONITOR_JOB_MEMORY = False
@@ -1168,3 +1169,7 @@ class RunHPC(RunParallel):
             )
 
         return submit_env, app_exec_prefix, app_exec_suffix
+
+    def monitorJobProcesses(self):
+        """Monitor job processes; nothing to do for HPC jobs."""
+        pass

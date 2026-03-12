@@ -8,10 +8,16 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import traceback
+import platform
+from typing import TYPE_CHECKING
+from importlib.util import find_spec
 
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
+
+if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CHECKING:
+    from TestHarness.utils.monitor_processes import get_processes_memory
 
 
 class RunParallel(Scheduler):
@@ -94,3 +100,37 @@ class RunParallel(Scheduler):
             message = "PART1"
 
         tester.setStatus(tester.success, message)
+
+    def monitorJobProcesses(self):
+        """Monitor the running job processes, if enabled."""
+        # Process memory monitoring is disabled
+        if not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking:
+            return
+
+        # Get the PIDs of the current running jobs so that they can be sampled
+        pid_to_job = self.getActiveJobPIDMap()
+
+        # Get memory for running jobs
+        processes_memory = get_processes_memory(set(pid_to_job.keys()))
+
+        # Update job memory and kill jobs over memory
+        max_memory_per_slot = self.options.max_memory_per_slot
+        for pid, job in pid_to_job.items():
+            if (memory := processes_memory.get(pid)) is not None:
+                # If the job is already an error (we killed it), nothing to do:
+                if job.getStatus() == job.error:
+                    continue
+
+                # Update max memory, if greater; this is True if it was greater
+                updated = job.getRunner().updateMaxMemory(memory)
+
+                # Check memory usage if needed
+                if updated and max_memory_per_slot:
+                    memory_per_slot_mb = memory / job.getSlots() * 2**-20
+                    if memory_per_slot_mb > max_memory_per_slot:
+                        message = (
+                            "JOB KILLED (OVER MEMORY): "
+                            f"Memory/slot {memory_per_slot_mb:.2f} "
+                            f"MB > allowed {max_memory_per_slot:.2f} MB"
+                        )
+                        job.killProcess(job.error, "KILLED: OVER MEMORY", message)

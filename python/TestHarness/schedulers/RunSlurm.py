@@ -18,6 +18,8 @@ class RunSlurm(RunHPC):
     Scheduler class for the slurm HPC scheduler.
     """
 
+    MONITOR_JOB_MEMORY = True
+
     def __init__(self, harness, params):
         super().__init__(harness, params)
 
@@ -35,8 +37,11 @@ class RunSlurm(RunHPC):
             "--parsable2",
             "--noheader",
             "-o",
-            "jobid,exitcode,state,reason,start,end,maxrss",
+            "jobid,exitcode,state,reason,start,end",
         ]
+        if self.scheduler_options.monitor_job_memory:
+            cmd[-1] += ",maxrss"
+
         exit_code, result, _ = self.callHPC(CallHPCPoolType.status, " ".join(cmd))
         if exit_code != 0:
             return False
@@ -64,7 +69,9 @@ class RunSlurm(RunHPC):
                     "max_rss": 0,
                 }
             # Update max memory, across all sub-jobs in a single job
-            if max_rss := status_split[6]:
+            if self.scheduler_options.monitor_job_memory and (
+                max_rss := status_split[6]
+            ):
                 max_rss_bytes = int(max_rss.split("K")[0]) * 1024
                 statuses[id_num]["max_rss"] = max(
                     statuses[id_num]["max_rss"], max_rss_bytes

@@ -516,7 +516,9 @@ class RunApp(Tester):
         if (
             force_mpi
             or ncpus > 1
-            or (options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI)
+            or (
+                options.hpc and options.scheduler.mpi_config.mpi_type == MPIType.OPENMPI
+            )
         ):
             command = f"{mpi_command} -n {ncpus} {command}"
 

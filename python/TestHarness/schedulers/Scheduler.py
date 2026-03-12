@@ -43,6 +43,9 @@ if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CH
 
     _HAS_GET_PROCESSES_MEMORY = True
 
+if TYPE_CHECKING:
+    from TestHarness.schedulers.Job import Job
+
 
 class SchedulerError(Exception):
     pass
@@ -113,6 +116,8 @@ class Scheduler(MooseObject):
 
     CAN_SET_HWLOC_TOPOLOGY = True
     """Whether or not to set hwloc topology if available."""
+    CAN_SET_MAX_MEMORY = True
+    """Whether or not Job max memory can be set (Jobs can be killed if over memory)."""
     CAN_OPENMPI_OVERSUBSCRIBE = True
     """Whether or not OpenMPI can be set to oversubscribe."""
     MONITOR_JOB_CPU = True
@@ -236,7 +241,9 @@ class Scheduler(MooseObject):
             )
 
         # Can't restrict resources without tracking
-        if self.options.max_memory_per_slot and not monitor_job_memory:
+        if self.options.max_memory_per_slot and (
+            not monitor_job_memory or not self.CAN_SET_MAX_MEMORY
+        ):
             self.harness.errorExit(
                 "Cannot specify --max-memory-per-slot; memory tracking is not available"
             )
@@ -370,43 +377,18 @@ class Scheduler(MooseObject):
         return True
 
     def monitorJobProcesses(self):
-        """Monitor the running job processes, if enabled."""
-        # Process memory monitoring is disabled
-        if not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking:
-            return
+        """Monitor the running job processes; called during the poll loop."""
 
-        # Get the PIDs of the current running jobs so that they can be sampled
+        pass
+
+    def getActiveJobPIDMap(self) -> dict[int, "Job"]:
+        """Get the active job PID -> Job map."""
         with self.__active_jobs_lock:
-            pid_to_job = {
+            return {
                 pid: job
                 for job in self.__active_jobs
                 if ((runner := job.getRunner()) and (pid := runner.pid))
             }
-
-        # Get memory for running jobs
-        processes_memory = get_processes_memory(set(pid_to_job.keys()))
-
-        # Update job memory and kill jobs over memory
-        max_memory_per_slot = self.options.max_memory_per_slot
-        for pid, job in pid_to_job.items():
-            if (memory := processes_memory.get(pid)) is not None:
-                # If the job is already an error (we killed it), nothing to do:
-                if job.getStatus() == job.error:
-                    continue
-
-                # Update max memory, if greater; this is True if it was greater
-                updated = job.getRunner().updateMaxMemory(memory)
-
-                # Check memory usage if needed
-                if updated and max_memory_per_slot:
-                    memory_per_slot_mb = memory / job.getSlots() * 2**-20
-                    if memory_per_slot_mb > max_memory_per_slot:
-                        message = (
-                            "JOB KILLED (OVER MEMORY): "
-                            f"Memory/slot {memory_per_slot_mb:.2f} "
-                            f"MB > allowed {max_memory_per_slot:.2f} MB"
-                        )
-                        job.killProcess(job.error, "KILLED: OVER MEMORY", message)
 
     def waitFinish(self):
         """
