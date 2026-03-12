@@ -27,13 +27,13 @@ public:
   void checkSiblingsTransferSupported() const override;
 
   /// Getter for source variable name
-  auto const & getFromVarName(int i) const { return _from_var_names.at(i); }
+  const VariableName & getFromVarName(int i) const { return _from_var_names.at(i); }
   /// Getter for destination variable name
-  auto const & getToVarName(int i) const { return _to_var_names.at(i); }
+  const VariableName & getToVarName(int i) const { return _to_var_names.at(i); }
   /// Return the number of source variables
-  auto numFromVar() const { return _from_var_names.size(); }
+  unsigned int numFromVar() const { return _from_var_names.size(); }
   /// Return for the number of destination variables
-  auto numToVar() const { return _to_var_names.size(); }
+  unsigned int numToVar() const { return _to_var_names.size(); }
 
 protected:
   /// Transfer all variables from active source problem to active destination problem.
@@ -92,7 +92,7 @@ private:
   /// Vector of source variable names to be transferred
   std::vector<VariableName> _from_var_names;
   /// Vector of destination variable names to transfer to
-  std::vector<AuxVariableName> _to_var_names;
+  std::vector<VariableName> _to_var_names;
   /// Pointer to active source problem variable is being transferred from
   FEProblemBase * _active_to_problem{nullptr};
   /// Pointer to active destination problem variable is being transferred to

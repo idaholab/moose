@@ -30,7 +30,7 @@ protected:
   MFEMNodalProjector _mfem_projector;
 
   /// Transfer all variables from active source problem to active destination problem.
-  void transferVariables() override;
+  virtual void transferVariables() override;
 
   /// Interpolate libMesh variable corresponding to var_index at target points for DoF evaluation
   void interpolatelibMeshVariable(std::map<processor_id_type, std::vector<Point>> & outgoing_points,
