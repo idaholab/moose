@@ -124,9 +124,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
         """
         argv = (
-            ["unused"]
-            + list(args)
-            + ["--term-format", "njCst", "--disable-hwloc-topology"]
+            ["unused"] + list(args) + ["--term-format", "njCst", "--no-hwloc-topology"]
         )
         if minimal_capabilities:
             argv += ["--minimal-capabilities"]

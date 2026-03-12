@@ -112,7 +112,7 @@ class SubprocessRunner(Runner):
 
         # OpenMPI, allow for oversubscription
         if (
-            not self.options.disable_openmpi_oversubscribe
+            not self.options.no_openmpi_oversubscribe
             and self.scheduler_options.mpi_config.mpi_type == MPIType.OPENMPI
         ):
             # Don't clobber state

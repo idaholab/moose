@@ -1710,12 +1710,12 @@ class TestHarness:
             "Environment Options", "Control the runtime environment"
         )
         envgroup.add_argument(
-            "--disable-hwloc-topology",
+            "--no-hwloc-topology",
             action="store_true",
             help="Disable pre-caching the hwloc topology for MPI execution",
         )
         envgroup.add_argument(
-            "--disable-openmpi-oversubscribe",
+            "--no-openmpi-oversubscribe",
             action="store_true",
             help="Disable allowing oversubscribe with OpenMPI",
         )
@@ -2057,10 +2057,10 @@ class TestHarness:
 
         if self.app_name is None:
             print_info(
-                "Setting [--disable-hwloc-topology, --minimal-capabilities] because "
+                "Setting [--no-hwloc-topology, --minimal-capabilities] because "
                 "there is not an application",
             )
-            opts.disable_hwloc_topology = True
+            opts.no_hwloc_topology = True
             opts.minimal_capabilities = True
 
         # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT

@@ -228,7 +228,7 @@ class Scheduler(MooseObject):
         if (
             self.CAN_SET_HWLOC_TOPOLOGY
             and mpi_config.hwloc
-            and not options.disable_hwloc_topology
+            and not options.no_hwloc_topology
         ):
             hwloc_topology_path = build_hwloc_topology()
             self.harness.printInfo(
@@ -241,15 +241,14 @@ class Scheduler(MooseObject):
                 "Cannot specify --max-memory-per-slot; memory tracking is not available"
             )
         # Can't disable hwloc topology
-        if options.disable_hwloc_topology and not self.CAN_SET_HWLOC_TOPOLOGY:
+        if options.no_hwloc_topology and not self.CAN_SET_HWLOC_TOPOLOGY:
             self.harness.errorExit(
-                "Cannot --disable-hwloc-topology; scheduler does not "
-                "support setting it"
+                "Cannot --no-hwloc-topology; scheduler does not " "support setting it"
             )
         # Can't disable openmpi oversubscribe
-        if options.disable_openmpi_oversubscribe and not self.CAN_OPENMPI_OVERSUBSCRIBE:
+        if options.no_openmpi_oversubscribe and not self.CAN_OPENMPI_OVERSUBSCRIBE:
             self.harness.errorExit(
-                "Cannot --disable-openmpi-oversubscribe; scheduler does not "
+                "Cannot --no-openmpi-oversubscribe; scheduler does not "
                 "support setting it"
             )
 
