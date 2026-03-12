@@ -71,18 +71,24 @@ class Runner(OutputInterface):
         with self._max_memory_lock:
             return self._max_memory
 
-    def setMaxMemory(self, value: int):
+    def updateMaxMemory(self, value: int) -> bool:
         """
-        Set the max memory in bytes for the process.
+        Update the max memory in bytes for the process, if greater.
 
         Should be used by derived runners to set the memory
         as it is running if available.
 
         Is thread safe so that a running job can update its memory
         usage while being read by the long running job printer.
+
+        Returns whether or not the max memory was updated (if
+        the value was greater than the current max memory).
         """
         with self._max_memory_lock:
-            self._max_memory = value
+            if self._max_memory is None or value > self._max_memory:
+                self._max_memory = value
+                return True
+        return False
 
     @property
     def cpu_percent(self) -> Optional[float]:
