@@ -75,10 +75,13 @@ def get_processes_memory(parent_pids: set[int]) -> defaultdict[int, int]:
         Mapping of parent PID -> estimated process memory in bytes.
 
     """
-    # Get the entire flattened process tree
+    # Get the entire flattened process tree, removing process 0 as
+    # it's the exit condition when searching recursively
     all_processes: dict[int, psutil.Process] = {
         p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
     }
+    if 0 in all_processes:
+        del all_processes[0]
 
     # Recrusively check if any of the processes in "parent_pids"
     # are a parent of this process at any level
