@@ -9,15 +9,18 @@
 
 import traceback
 import platform
+import os
 from typing import TYPE_CHECKING
 from importlib.util import find_spec
+from time import perf_counter
+from typing import Optional
 
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
 
 if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CHECKING:
-    from TestHarness.utils.monitor_processes import get_processes_memory
+    from TestHarness.utils.monitor_processes import MemoryMonitor
 
 
 class RunParallel(Scheduler):
@@ -30,6 +33,15 @@ class RunParallel(Scheduler):
     def validParams():
         params = Scheduler.validParams()
         return params
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._memory_monitor: Optional[MemoryMonitor] = None
+        """The MemoryMonitor for sampling child process memory, if any."""
+
+        if self.scheduler_options.monitor_job_memory:
+            self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.1)
 
     def run(self, job):
         """Run a tester command"""
@@ -101,22 +113,30 @@ class RunParallel(Scheduler):
 
         tester.setStatus(tester.success, message)
 
+    def waitFinish(self):
+        # Start the memory monitor if enabled
+        if self.scheduler_options.monitor_job_memory:
+            self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.1)
+            self._memory_monitor.start()
+
+        super().waitFinish()
+
     def monitorJobProcesses(self):
         """Monitor the running job processes, if enabled."""
         # Process memory monitoring is disabled
-        if not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking:
+        if self._memory_monitor is None:
             return
 
         # Get the PIDs of the current running jobs so that they can be sampled
         pid_to_job = self.getActiveJobPIDMap()
 
-        # Get memory for running jobs
-        processes_memory = get_processes_memory(set(pid_to_job.keys()))
+        # Get latest samples from the monitor
+        samples = self._memory_monitor.get_samples()
 
         # Update job memory and kill jobs over memory
         max_memory_per_slot = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
-            if (memory := processes_memory.get(pid)) is not None:
+            if (memory := samples.get(pid)) is not None:
                 # If the job is already an error (we killed it), nothing to do:
                 if job.getStatus() == job.error:
                     continue

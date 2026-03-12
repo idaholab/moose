@@ -12,6 +12,8 @@
 import os
 import sys
 from collections import defaultdict
+from multiprocessing import Event, Manager, Process, get_context
+from multiprocessing.managers import DictProxy
 from typing import Optional
 
 import psutil
@@ -58,46 +60,115 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     return None
 
 
-def get_processes_memory(parent_pids: set[int]) -> defaultdict[int, int]:
-    """
-    Get the estimated total memory for each parent process, including children.
+class MemoryMonitor:
+    """Monitor that runs in a separate thread to track children memory usage."""
 
-    If a process is not running, it will not be included.
+    def __init__(self, parent_pid: int, interval: float = 0.1):
+        """Initialize state."""
+        self._parent_pid: int = parent_pid
+        """PID of the parent process to sample the children of."""
 
-    Arguments:
-    ---------
-    parent_pids : set[int]
-        The PIDs of the parent processes.
+        self._process: Optional[Process] = None
+        """The Multiprocessing process."""
 
-    Returns:
-    -------
-    defaultdict[int, int]:
-        Mapping of parent PID -> estimated process memory in bytes.
+        self._manager = None
+        """Manager for sharing data with the Multiprocessing process, once started."""
 
-    """
-    # Get the entire flattened process tree, removing process 0 as
-    # it's the exit condition when searching recursively
-    all_processes: dict[int, psutil.Process] = {
-        p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
-    }
-    if 0 in all_processes:
-        del all_processes[0]
+        self._samples: Optional[DictProxy[int, int]] = None
+        """The shareable samples (child pid -> memory in bytes), once started."""
 
-    # Recrusively check if any of the processes in "parent_pids"
-    # are a parent of this process at any level
-    def in_parent_pids(p: psutil.Process) -> Optional[int]:
-        ppid = p.info["ppid"]
-        # Found a parent
-        if ppid in parent_pids:
-            return ppid
-        # Recursively check
-        return in_parent_pids(pp) if (pp := all_processes.get(ppid)) else None
+        self._stop_event = None
+        """Event to stop the Multiprocessing process, once started."""
 
-    # Accumulate memory from relevant processes
-    result = defaultdict(int)
-    for pid, p in all_processes.items():
-        if (ppid := pid if pid in parent_pids else in_parent_pids(p)) is not None and (
-            memory := get_process_memory(p)
-        ) is not None:
-            result[ppid] += memory
-    return result
+        self._interval: float = interval
+        """How often to sample in seconds."""
+
+    def get_samples(self) -> dict[int, int]:
+        """
+        Get the last samples; child PID to cumulative memory usage in bytes.
+
+        This returns a copy so that the dict can be accessed without
+        locking (required for synchronization with the other thread).
+        Thus, you should get a copy to this once and then use it many
+        times as needed.
+        """
+        assert self._samples is not None
+        return self._samples.copy()
+
+    @staticmethod
+    def _sampler(
+        parent_pid: int, interval: float, stop_event, samples: DictProxy[int, int]
+    ):
+        """Run the sampler process; internal method called by start()."""
+        while not stop_event.is_set():
+            # Get the entire flattened process tree, removing process 0 as
+            # it's the exit condition when searching recursively
+            all_processes: dict[int, psutil.Process] = {
+                p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
+            }
+            if 0 in all_processes:
+                del all_processes[0]
+
+            # Get the processes that are immediate children of the parent
+            children_pids = set(
+                pid for pid, p in all_processes.items() if p.info["ppid"] == parent_pid
+            )
+
+            # Recrusively check if any of the processes in "children_pids"
+            # are a parent of this process at any level
+            def in_children_pids(p: psutil.Process) -> Optional[int]:
+                ppid = p.info["ppid"]
+                # Found a parent
+                if ppid in children_pids:
+                    return ppid
+                # Recursively check
+                return in_children_pids(pp) if (pp := all_processes.get(ppid)) else None
+
+            # Accumulate memory from relevant processes
+            result = defaultdict(int)
+            for pid, p in all_processes.items():
+                if (
+                    ppid := pid if pid in children_pids else in_children_pids(p)
+                ) is not None and (memory := get_process_memory(p)) is not None:
+                    result[ppid] += memory
+
+            # And update the shared state
+            samples.clear()
+            samples.update(result)
+
+            # Wait, but wake early if stop_event is set
+            stop_event.wait(interval)
+
+    def start(self):
+        """Start the sampler process."""
+        assert self._process is None
+
+        ctx = get_context("fork")
+        self._manager = ctx.Manager()
+        self._samples = self._manager.dict()
+        self._stop_event = ctx.Event()
+        self._process = ctx.Process(
+            target=self._sampler,
+            args=(
+                self._parent_pid,
+                self._interval,
+                self._stop_event,
+                self._samples,
+            ),
+            daemon=True,
+        )
+        assert self._process is not None
+        self._process.start()
+
+    def stop(self):
+        """Stop the sampler process."""
+        process = self._process
+        if process is not None:
+            assert self._stop_event is not None
+            self._stop_event.set()
+            process.join(timeout=1)
+            if process.is_alive():
+                process.terminate()
+                process.join()
+            self._process = None
+            self._stop_event = None

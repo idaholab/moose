@@ -32,17 +32,6 @@ from TestHarness.mpi_config import (
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.util import findBSDTime, findGNUTime
 
-_HAS_GET_PROCESSES_MEMORY = False
-"""
-Whether or not get_process_memory() is available.
-
-Will be false if psutil is not available."""
-
-if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CHECKING:
-    from TestHarness.utils.monitor_processes import get_processes_memory
-
-    _HAS_GET_PROCESSES_MEMORY = True
-
 if TYPE_CHECKING:
     from TestHarness.schedulers.Job import Job
 
@@ -122,7 +111,9 @@ class Scheduler(MooseObject):
     """Whether or not OpenMPI can be set to oversubscribe."""
     MONITOR_JOB_CPU = True
     """Whether or not this Scheduler should monitor Job process CPU usage."""
-    MONITOR_JOB_MEMORY = _HAS_GET_PROCESSES_MEMORY
+    MONITOR_JOB_MEMORY = (
+        platform.system() != "Windows" and find_spec("psutil") is not None
+    )
     """Whether or not this Scheduler should monitor Job process memory usage."""
 
     def __init__(self, harness, params):
