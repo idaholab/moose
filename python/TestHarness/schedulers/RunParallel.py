@@ -121,6 +121,9 @@ class RunParallel(Scheduler):
 
         super().waitFinish()
 
+        if self._memory_monitor:
+            self._memory_monitor.stop()
+
     def monitorJobProcesses(self):
         """Monitor the running job processes, if enabled."""
         # Process memory monitoring is disabled
