@@ -147,7 +147,11 @@ def formatResult(
         ):
             if entry.memory is not None or entry.timing == 0:
                 value = int(entry.memory * 2**-20) if entry.memory else 0
-                message = f"[{value:>4}MB]"
+                if value < 10000:
+                    message = f"[{value:>4}MB]"
+                else:
+                    value = int(value / 1024)
+                    message = f"[{value:>4}GB]"
             else:
                 message = "[   ?MB]"
 
