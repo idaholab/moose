@@ -116,7 +116,7 @@ class RunParallel(Scheduler):
     def waitFinish(self):
         # Start the memory monitor if enabled
         if self.scheduler_options.monitor_job_memory:
-            self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.1)
+            self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.2)
             self._memory_monitor.start()
 
         super().waitFinish()
