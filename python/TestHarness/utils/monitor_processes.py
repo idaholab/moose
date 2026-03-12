@@ -115,7 +115,7 @@ class MemoryMonitor:
                 pid for pid, p in all_processes.items() if p.info["ppid"] == parent_pid
             )
 
-            # Recrusively check if any of the processes in "children_pids"
+            # Recursively check if any of the processes in "children_pids"
             # are a parent of this process at any level
             def in_children_pids(p: psutil.Process) -> Optional[int]:
                 ppid = p.info["ppid"]
