@@ -123,7 +123,11 @@ class TestHarnessTestCase(unittest.TestCase):
             Test spec (dict of str -> params) to run instead.
 
         """
-        argv = ["unused"] + list(args) + ["--term-format", "njCst"]
+        argv = (
+            ["unused"]
+            + list(args)
+            + ["--term-format", "njCst", "--disable-hwloc-topology"]
+        )
         if minimal_capabilities:
             argv += ["--minimal-capabilities"]
 

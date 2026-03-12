@@ -18,7 +18,7 @@ from Tester import Tester
 
 from TestHarness import TestHarness, util
 from TestHarness.capability_util import addAugmentedCapability
-from TestHarness.mpi_config import MPIConfig, MPIType
+from TestHarness.mpi_config import MPIType
 
 
 class RunApp(Tester):
@@ -392,7 +392,7 @@ class RunApp(Tester):
             )
 
             # Need to run mpiexec with containerized openmpi
-            if options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI:
+            if options.hpc and options.scheduler.mpi_config.mpi_type == MPIType.OPENMPI:
                 cmd = f"mpiexec -n 1 {cmd}"
 
             return cmd

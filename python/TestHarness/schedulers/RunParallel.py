@@ -70,7 +70,7 @@ class RunParallel(Scheduler):
         This exists as a method so that derived schedulers can change how they
         run commands (i.e., for PBS and slurm)
         """
-        return SubprocessRunner(job, options)
+        return SubprocessRunner(job, options, self.scheduler_options)
 
     def setSuccessfulMessage(self, tester):
         """properly set a finished successful message for tester"""

@@ -423,26 +423,8 @@ def _findTimeUtility(test_utility: Callable[[str], bool]) -> Optional[str]:
     return None
 
 
-_GNU_TIME_PATH: Optional[str] = None
-"""Global used in findGNUTime() for the path to GNU time."""
-
-_GNU_TIME_PATH_SET: bool = False
-"""Global used in findGNUTime() for if _GNU_TIME_PATH is set."""
-
-_GNU_TIME_LOCK = threading.Lock()
-"""Global thread lock for accessing _GNU_TIME_PATH and _GNU_TIME_PATH_SET."""
-
-
 def findGNUTime() -> Optional[str]:
-    """
-    Find the GNU time utility.
-
-    This is cached so that it only searches for the utility
-    once and then stores the result. The cache is thread safe.
-    """
-    global _GNU_TIME_PATH
-    global _GNU_TIME_PATH_SET
-    global _GNU_TIME_LOCK
+    """Find the GNU time utility, if any."""
 
     # Helper for testing "time" to see if it is GNU time
     def test_gnu_time(path: str) -> bool:
@@ -455,37 +437,11 @@ def findGNUTime() -> Optional[str]:
         else:
             return "(GNU Time)" in out
 
-    # Obtain a lock so that this is thread safe
-    with _GNU_TIME_LOCK:
-        # First time; search for time
-        if not _GNU_TIME_PATH_SET:
-            _GNU_TIME_PATH = _findTimeUtility(test_gnu_time)
-            _GNU_TIME_PATH_SET = True
-
-        # Use value from cache
-        return _GNU_TIME_PATH
-
-
-_BSD_TIME_PATH: Optional[str] = None
-"""Global used in findBSDTime() for the path to BSD time."""
-
-_BSD_TIME_PATH_SET: bool = False
-"""Global used in findBSDTime() for if _BSD_TIME_PATH is set."""
-
-_BSD_TIME_LOCK = threading.Lock()
-"""Global thread lock for accessing _BSD_TIME_PATH and _BSD_TIME_PATH_SET."""
+    return _findTimeUtility(test_gnu_time)
 
 
 def findBSDTime() -> Optional[str]:
-    """
-    Find the BSD time utility.
-
-    This is cached so that it only searches for the utility
-    once and then stores the result. The cache is thread safe.
-    """
-    global _BSD_TIME_PATH
-    global _BSD_TIME_PATH_SET
-    global _BSD_TIME_LOCK
+    """Find the BSD time utility, if any."""
 
     # Helper for testing "time" to see if it is BSD time
     def test_bsd_time(path: str) -> bool:
@@ -500,15 +456,7 @@ def findBSDTime() -> Optional[str]:
             return "illegal option -- -" in process.stderr
         return False
 
-    # Obtain a lock so that this is thread safe
-    with _BSD_TIME_LOCK:
-        # First time; search for time
-        if not _BSD_TIME_PATH_SET:
-            _BSD_TIME_PATH = _findTimeUtility(test_bsd_time)
-            _BSD_TIME_PATH_SET = True
-
-        # Use value from cache
-        return _BSD_TIME_PATH
+    return _findTimeUtility(test_bsd_time)
 
 
 def printPrefixed(prefix: str, *args, color: Optional[str] = None):
@@ -522,3 +470,12 @@ def printPrefixed(prefix: str, *args, color: Optional[str] = None):
 def printInfo(*args, colored: bool):
     """Print the given message as information."""
     printPrefixed("INFO", *args, color="CYAN" if colored else None)
+
+
+def errorExit(*args, colored: bool = True, exit_code: int = 1):
+    """Print an error message with a ERROR prefix and exit."""
+    prefix = "ERROR:"
+    if colored:
+        prefix = colorText(prefix, "RED")
+    print(prefix, *args, flush=True)
+    raise SystemExit(exit_code)

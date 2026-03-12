@@ -99,6 +99,8 @@ class RunHPC(RunParallel):
     Base scheduler for jobs that are ran on HPC.
     """
 
+    CAN_SET_HWLOC_TOPOLOGY = False
+    CAN_OPENMPI_OVERSUBSCRIBE = False
     MONITOR_JOB_CPU = False
     MONITOR_JOB_MEMORY = False
 
@@ -815,7 +817,7 @@ class RunHPC(RunParallel):
     def buildRunner(self, job, options):
         from TestHarness.runners.HPCRunner import HPCRunner
 
-        return HPCRunner(job, options, self)
+        return HPCRunner(job, options, self.scheduler_options, self)
 
     def augmentJobs(self, jobs):
         super().augmentJobs(jobs)

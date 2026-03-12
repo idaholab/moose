@@ -11,16 +11,24 @@ import platform
 import sys
 import threading
 import traceback
+from dataclasses import dataclass
+from enum import Enum
 from importlib.util import find_spec
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from timeit import default_timer as clock
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import pyhit
 from FactorySystem.MooseObject import MooseObject
 
 from TestHarness.JobDAG import JobDAG
+from TestHarness.mpi_config import (
+    MPIConfig,
+    MPIType,
+    build_hwloc_topology,
+    get_mpi_config,
+)
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.util import findBSDTime, findGNUTime
 
@@ -38,6 +46,35 @@ if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CH
 
 class SchedulerError(Exception):
     pass
+
+
+class TimeUtilityType(Enum):
+    """The type of time utility found, if any."""
+
+    BSD = 0
+    GNU = 1
+    NONE = 2
+
+
+@dataclass(frozen=True)
+class SchedulerOptions:
+    """Options for the Scheduler."""
+
+    hwloc_topology_path: Optional[str]
+    """Path to the pre-built hwloc topology file, if any."""
+
+    mpi_config: MPIConfig
+    """The MPI configuration."""
+
+    monitor_job_cpu: bool
+    """Whether or not to monitor Job CPU usage."""
+    monitor_job_memory: bool
+    """Whether or not to monitor Job memory usage."""
+
+    time_utility_path: Optional[str]
+    """The path to the time utility found, if any."""
+    time_utility_type: TimeUtilityType
+    """The type of time utility found, if any."""
 
 
 class Scheduler(MooseObject):
@@ -74,11 +111,14 @@ class Scheduler(MooseObject):
     # This is what will be checked for when we look for valid schedulers
     IS_SCHEDULER = True
 
+    CAN_SET_HWLOC_TOPOLOGY = True
+    """Whether or not to set hwloc topology if available."""
+    CAN_OPENMPI_OVERSUBSCRIBE = True
+    """Whether or not OpenMPI can be set to oversubscribe."""
+    MONITOR_JOB_CPU = True
+    """Whether or not this Scheduler should monitor Job process CPU usage."""
     MONITOR_JOB_MEMORY = _HAS_GET_PROCESSES_MEMORY
     """Whether or not this Scheduler should monitor Job process memory usage."""
-
-    MONITOR_JOB_CPU = findBSDTime() is not None or findGNUTime() is not None
-    """Whether or not this Scheduler should monitor Job process CPU usage."""
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -152,13 +192,75 @@ class Scheduler(MooseObject):
         # Whether or not to enforce the timeout of jobs
         self.enforce_timeout = True
 
-        # Can't restrict resources without tracking
-        if self.options.max_memory_per_slot and (
-            not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking
+        self.scheduler_options: SchedulerOptions = self.buildSchedulerOptions(
+            self.options
+        )
+        """The options for the scheduler."""
+
+    def buildSchedulerOptions(self, options) -> SchedulerOptions:
+        """Build the SchedulerOptions for this scheduler."""
+        # Build MPI configuration
+        mpi_config = get_mpi_config()
+
+        # Whether or not to monitor Job resources, depending on static
+        # Scheduler options and runtime command line options
+        monitor_job_cpu: bool = (
+            self.MONITOR_JOB_CPU is True and not options.no_cpu_tracking
+        )
+        monitor_job_memory: bool = (
+            self.MONITOR_JOB_MEMORY is True and not options.no_memory_tracking
+        )
+
+        # Find the time utility if needed, disabling CPU tracking
+        # if enabled but no time utility available
+        time_utility_type = TimeUtilityType.NONE
+        time_utility_path: Optional[str] = None
+        if monitor_job_memory:
+            if time_utility_path := findGNUTime():
+                time_utility_type = TimeUtilityType.GNU
+            elif time_utility_path := findBSDTime():
+                time_utility_type = TimeUtilityType.BSD
+            if time_utility_type == TimeUtilityType.NONE:
+                monitor_job_cpu = False
+
+        # Build hwloc topology file if set to do so
+        hwloc_topology_path: Optional[str] = None
+        if (
+            self.CAN_SET_HWLOC_TOPOLOGY
+            and mpi_config.hwloc
+            and not options.disable_hwloc_topology
         ):
+            hwloc_topology_path = build_hwloc_topology()
+            self.harness.printInfo(
+                f"Using cached hwloc topology in '{hwloc_topology_path}'"
+            )
+
+        # Can't restrict resources without tracking
+        if self.options.max_memory_per_slot and not monitor_job_memory:
             self.harness.errorExit(
                 "Cannot specify --max-memory-per-slot; memory tracking is not available"
             )
+        # Can't disable hwloc topology
+        if options.disable_hwloc_topology and not self.CAN_SET_HWLOC_TOPOLOGY:
+            self.harness.errorExit(
+                "Cannot --disable-hwloc-topology; scheduler does not "
+                "support setting it"
+            )
+        # Can't disable openmpi oversubscribe
+        if options.disable_openmpi_oversubscribe and not self.CAN_OPENMPI_OVERSUBSCRIBE:
+            self.harness.errorExit(
+                "Cannot --disable-openmpi-oversubscribe; scheduler does not "
+                "support setting it"
+            )
+
+        return SchedulerOptions(
+            hwloc_topology_path=hwloc_topology_path,
+            mpi_config=mpi_config,
+            monitor_job_cpu=monitor_job_cpu,
+            monitor_job_memory=monitor_job_memory,
+            time_utility_path=time_utility_path,
+            time_utility_type=time_utility_type,
+        )
 
     def getErrorState(self):
         """

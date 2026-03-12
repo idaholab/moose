@@ -31,8 +31,6 @@ from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 
-from .mpi_config import get_mpi_config
-
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
 
@@ -451,16 +449,9 @@ class TestHarness:
         # So that testers can see if we have an application
         self.options._app_name = self.app_name
 
-        # Store the mpi configuration we have discovered
-        self.options.mpi_config = get_mpi_config()
-        if self.options.mpi_config.hwloc_topo_file:
-            self.printInfo(
-                "Using hwloc topology in "
-                f'"{self.options.mpi_config.hwloc_topo_file}"'
-            )
-
         # Initialize the scheduler
         self.initialize()
+        self.options.scheduler = self.scheduler.scheduler_options
 
         os.chdir(self._orig_cwd)
 
@@ -568,7 +559,9 @@ class TestHarness:
                     required_capabilities, capabilities
                 )
             except Exception as e:
-                TestHarness.errorExit(f"--only-tests-that-require: {e}")
+                util.errorExit(
+                    f"--only-tests-that-require: {e}", colored=options.colored
+                )
 
         return capabilities, augmented_capabilities, required
 
@@ -1019,8 +1012,6 @@ class TestHarness:
         if not self.finished_jobs:
             print("No tests ran")
 
-        memory = None if self.shouldOutputMemory() else False
-
         # Longest jobs and longest folders
         if not self.options.dry_run and self.options.longest_jobs:
             longest_jobs = self.getLongestJobs(self.options.longest_jobs)
@@ -1029,7 +1020,11 @@ class TestHarness:
                 for job in longest_jobs:
                     print(
                         util.formatJobResult(
-                            job, self.options, caveats=True, timing=True, memory=memory
+                            job,
+                            self.options,
+                            caveats=True,
+                            timing=True,
+                            memory=None if self.shouldOutputMemory() else False,
                         )
                     )
 
@@ -1715,10 +1710,14 @@ class TestHarness:
             "Environment Options", "Control the runtime environment"
         )
         envgroup.add_argument(
-            "--disable-mpi-options",
+            "--disable-hwloc-topology",
             action="store_true",
-            dest="disable_mpi_options",
-            help="Disable automated MPI environment options",
+            help="Disable pre-caching the hwloc topology for MPI execution",
+        )
+        envgroup.add_argument(
+            "--disable-openmpi-oversubscribe",
+            action="store_true",
+            help="Disable allowing oversubscribe with OpenMPI",
         )
 
         screengroup = parser.add_argument_group(
@@ -2058,8 +2057,10 @@ class TestHarness:
 
         if self.app_name is None:
             print_info(
-                "Setting --minimal-capabilities because there is not an application",
+                "Setting [--disable-hwloc-topology, --minimal-capabilities] because "
+                "there is not an application",
             )
+            opts.disable_hwloc_topology = True
             opts.minimal_capabilities = True
 
         # Set --max-memory-per-slot from MOOSE_MAX_MEMORY_PER_SLOT
@@ -2134,11 +2135,7 @@ class TestHarness:
         """
         Helper for printing an error and exiting
         """
-        prefix = "ERROR:"
-        if self.options.colored:
-            prefix = util.colorText(prefix, "RED")
-        print(prefix, *args)
-        raise SystemExit(1)
+        util.errorExit(args, colored=self.options.colored is True)
 
     def printInfo(self, *args):
         """Print the given message as information."""
