@@ -313,6 +313,8 @@ public:
   NumericType num_type;
 
 protected:
+  bool _fallback_elements, _first_order_mesh;
+
   MFEMProblemData _problem_data;
 };
 

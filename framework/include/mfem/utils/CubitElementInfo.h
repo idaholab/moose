@@ -24,7 +24,7 @@ public:
   /**
    * Default initializer.
    */
-  CubitBlockInfo(int dimension);
+  CubitBlockInfo(int dimension, bool fallback, bool force_first_order);
 
   struct ElementInfo
   {
@@ -87,13 +87,16 @@ protected:
   bool validBlockID(int block_id) const;
   bool validDimension(int dimension) const;
 
-  static const ElementInfo & getElementInfo(libMesh::ElemType elem_type);
+  const ElementInfo & getElementInfo(libMesh::ElemType elem_type, bool warn = false) const;
 
 private:
   /**
    * Stores all block IDs.
    */
   std::set<int> _block_ids;
+
+  bool _fallback;
+  bool _force_first_order;
 
   /**
    * Maps from block ID to element.
@@ -109,6 +112,13 @@ private:
 
   /// Map between libMesh element types and information about that element.
   static const std::map<libMesh::ElemType, ElementInfo> _elem_info;
+
+  /// Map between libMesh element types not supported by MFEM and
+  /// simpler types which can approximate them.
+  static const std::map<libMesh::ElemType, libMesh::ElemType> _fallback_types;
+
+  /// Map between libMesh element types and the first-order version of that shape.
+  static const std::map<libMesh::ElemType, libMesh::ElemType> _first_order_types;
 
   /**
    * Map from enums for basis types used for higher-order elements in libmesh and MFEM.
