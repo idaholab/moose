@@ -1158,7 +1158,7 @@ class RunHPC(RunParallel):
 
         if submit_env["LOAD_MODULES"]:
             self.harness.printInfo(
-                f'Using modules "{" ".join(submit_env["LOAD_MODULES"])} '
+                f'Using modules "{" ".join(submit_env["LOAD_MODULES"])}" '
                 "for HPC environment"
             )
         if app_exec_prefix:
