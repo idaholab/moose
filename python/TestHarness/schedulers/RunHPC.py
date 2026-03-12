@@ -999,7 +999,7 @@ class RunHPC(RunParallel):
             job.appendOutput(util.outputHeader(f"Job {hpc_job.id} {output}"))
 
     def waitFinish(self):
-        super().waitFinish()
+        RunParallel.waitFinish(self)
 
         # Kill the remaining jobs that are held, which would exist if things
         # fail and jobs that we pre-submitted were skipped due to a failed
