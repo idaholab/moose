@@ -1,5 +1,6 @@
 #include "CubitElementInfo.h"
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/enum_order.h"
 #include "mfem/fem/fe/fe_base.hpp"
 
 namespace
@@ -60,16 +61,16 @@ const std::map<libMesh::ElemType, CubitBlockInfo::ElementInfo> CubitBlockInfo::_
       {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3},
       {1, 2, 3, 4, 5, 6},
       ::no_additional_points}},
-    {libMesh::ElemType::TRI7,
-     {mfem::Element::Type::TRIANGLE,
-      2,
-      7,
-      3,
-      3,
-      3,
-      {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3},
-      {1, 2, 3, 4, 5, 6, 7},
-      ::no_additional_points}},
+    // {libMesh::ElemType::TRI7,
+    //  {mfem::Element::Type::TRIANGLE,
+    //   2,
+    //   7,
+    //   3,
+    //   3,
+    //   3,
+    //   {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE3},
+    //   {1, 2, 3, 4, 5, 6, 7},
+    //   ::no_additional_points}},
     {libMesh::ElemType::QUAD4,
      {mfem::Element::Type::QUADRILATERAL,
       2,
@@ -135,19 +136,19 @@ const std::map<libMesh::ElemType, CubitBlockInfo::ElementInfo> CubitBlockInfo::_
        libMesh::ElemType::TRI6},
       {1, 2, 3, 4, 5, 7, 8, 6, 9, 10},
       ::no_additional_points}},
-    {libMesh::ElemType::TET14,
-     {mfem::Element::Type::TETRAHEDRON,
-      3,
-      14,
-      4,
-      4,
-      3,
-      {libMesh::ElemType::TRI7,
-       libMesh::ElemType::TRI7,
-       libMesh::ElemType::TRI7,
-       libMesh::ElemType::TRI7},
-      {1, 2, 3, 4, 5, 7, 8, 6, 9, 10, 11, 12, 13, 14},
-      ::no_additional_points}},
+    // {libMesh::ElemType::TET14,
+    //  {mfem::Element::Type::TETRAHEDRON,
+    //   3,
+    //   14,
+    //   4,
+    //   4,
+    //   3,
+    //   {libMesh::ElemType::TRI7,
+    //    libMesh::ElemType::TRI7,
+    //    libMesh::ElemType::TRI7,
+    //    libMesh::ElemType::TRI7},
+    //   {1, 2, 3, 4, 5, 7, 8, 6, 9, 10, 11, 12, 13, 14},
+    //   ::no_additional_points}},
     {libMesh::ElemType::HEX8,
      {mfem::Element::Type::HEXAHEDRON,
       3,
@@ -294,25 +295,86 @@ const std::map<libMesh::ElemType, CubitBlockInfo::ElementInfo> CubitBlockInfo::_
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
       ::no_additional_points}}};
 
+const std::map<libMesh::ElemType, libMesh::ElemType> CubitBlockInfo::_first_order_types{
+    {libMesh::ElemType::NODEELEM, libMesh::ElemType::NODEELEM},
+    {libMesh::ElemType::EDGE2, libMesh::ElemType::EDGE2},
+    {libMesh::ElemType::EDGE3, libMesh::ElemType::EDGE2},
+    {libMesh::ElemType::EDGE4, libMesh::ElemType::EDGE2},
+    {libMesh::ElemType::TRI3, libMesh::ElemType::TRI3},
+    {libMesh::ElemType::TRI6, libMesh::ElemType::TRI3},
+    {libMesh::ElemType::TRI7, libMesh::ElemType::TRI3},
+    {libMesh::ElemType::QUAD4, libMesh::ElemType::QUAD4},
+    {libMesh::ElemType::QUAD8, libMesh::ElemType::QUAD4},
+    {libMesh::ElemType::QUAD9, libMesh::ElemType::QUAD4},
+    {libMesh::ElemType::TET4, libMesh::ElemType::TET4},
+    {libMesh::ElemType::TET10, libMesh::ElemType::TET4},
+    {libMesh::ElemType::TET14, libMesh::ElemType::TET4},
+    {libMesh::ElemType::HEX8, libMesh::ElemType::HEX8},
+    {libMesh::ElemType::HEX20, libMesh::ElemType::HEX8},
+    {libMesh::ElemType::HEX27, libMesh::ElemType::HEX8},
+    {libMesh::ElemType::PRISM6, libMesh::ElemType::PRISM6},
+    {libMesh::ElemType::PRISM15, libMesh::ElemType::PRISM6},
+    {libMesh::ElemType::PRISM18, libMesh::ElemType::PRISM6},
+    {libMesh::ElemType::PRISM20, libMesh::ElemType::PRISM6},
+    {libMesh::ElemType::PRISM21, libMesh::ElemType::PRISM6},
+    {libMesh::ElemType::PYRAMID5, libMesh::ElemType::PYRAMID5},
+    {libMesh::ElemType::PYRAMID13, libMesh::ElemType::PYRAMID5},
+    {libMesh::ElemType::PYRAMID14, libMesh::ElemType::PYRAMID5},
+    {libMesh::ElemType::PYRAMID18, libMesh::ElemType::PYRAMID5},
+};
+
+const std::map<libMesh::ElemType, libMesh::ElemType> CubitBlockInfo::_fallback_types{
+    {libMesh::ElemType::TRI7, libMesh::ElemType::TRI6},
+    {libMesh::ElemType::TET14, libMesh::ElemType::TET10},
+    {libMesh::ElemType::PRISM20, libMesh::ElemType::PRISM18},
+    {libMesh::ElemType::PRISM21, libMesh::ElemType::PRISM18},
+    {libMesh::ElemType::PYRAMID18, libMesh::ElemType::PYRAMID14},
+};
+
 const std::map<libMesh::ElemMappingType, int> CubitBlockInfo::_libmesh_to_mfem_basis_types{
     {libMesh::ElemMappingType::RATIONAL_BERNSTEIN_MAP, mfem::BasisType::Positive},
     {libMesh::ElemMappingType::LAGRANGE_MAP, mfem::BasisType::ClosedUniform}};
 
 const CubitBlockInfo::ElementInfo &
-CubitBlockInfo::getElementInfo(libMesh::ElemType elem_type)
+CubitBlockInfo::getElementInfo(libMesh::ElemType elem_type, bool warn) const
 {
+  if (_force_first_order)
+  {
+    elem_type = _first_order_types.at(elem_type);
+  }
   if (elem_type == libMesh::ElemType::PYRAMID13 || elem_type == libMesh::ElemType::PYRAMID14 ||
       elem_type == libMesh::ElemType::PYRAMID18)
   {
     mooseError("Due to bug in MFEM, can not convert higher order libMesh pyramid elements.");
   }
-  return CubitBlockInfo::_elem_info.at(elem_type);
+  auto search = CubitBlockInfo::_elem_info.find(elem_type);
+  if (search != CubitBlockInfo::_elem_info.end())
+  {
+    return search->second;
+  }
+  else if (_fallback)
+  {
+    auto search = CubitBlockInfo::_fallback_types.find(elem_type);
+    if (search != CubitBlockInfo::_fallback_types.end())
+    {
+      if (warn)
+      {
+        mooseWarning("Can not represent libMesh element type ",
+                     elem_type,
+                     " in MFEM mesh. Falling back to use element type ",
+                     search->second,
+                     ".");
+      }
+      return getElementInfo(search->second);
+    }
+  }
+  mooseException("Can not represent libMesh element type ", elem_type, " in MFEM mesh.");
 }
 
 /**
  * CubitBlockInfo
  */
-CubitBlockInfo::CubitBlockInfo(int dimension)
+CubitBlockInfo::CubitBlockInfo(int dimension, bool fallback, bool force_first_order)
 {
   if (!validDimension(dimension))
   {
@@ -320,6 +382,8 @@ CubitBlockInfo::CubitBlockInfo(int dimension)
   }
 
   _dimension = dimension;
+  _fallback = fallback;
+  _force_first_order = force_first_order;
 
   clearBlockElements();
 }
@@ -334,7 +398,7 @@ CubitBlockInfo::addBlockElement(int block_id,
   else if (!validBlockID(block_id))
     mooseError("Illegal block ID '", block_id, "'.");
 
-  const auto & block_element = getElementInfo(elem_type);
+  const auto & block_element = getElementInfo(elem_type, true);
 
   if (!hasBlocks()) // Set order of elements.
   {

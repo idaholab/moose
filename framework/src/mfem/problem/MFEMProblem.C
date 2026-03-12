@@ -67,6 +67,17 @@ MFEMProblem::validParams()
                              "using the MFEM finite element library.");
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem");
+  params.addParam<bool>(
+      "fallback_elements",
+      false,
+      "Whether to fall back to using simpler elements when the element types in a libMesh mesh "
+      "(e.g., TRI7, TET14) can not be represented in an MFEM mesh.");
+  params.addParam<bool>(
+      "first_order_mesh",
+      false,
+      "Whether to force a higher-order libMesh mesh to be represented as a first-order mesh in "
+      "MFEM. This can be useful if the higher order was only needed in libMesh for the basis "
+      "functions, rather than to represent curvature in the elements..");
 
   return params;
 }
@@ -74,6 +85,8 @@ MFEMProblem::validParams()
 MFEMProblem::MFEMProblem(const InputParameters & params)
   : ExternalProblem(params),
     _num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
+    _fallback_elements(getParam<bool>("fallback_elements")),
+    _first_order_mesh(getParam<bool>("first_order_mesh")),
     _solution_state_data(declareRestartableDataWithContext<Moose::MFEM::SolutionState>(
         "mfem_solution_state", &_problem_data))
 {
@@ -109,7 +122,7 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = buildMFEMMesh(_mesh);
+  auto pmesh = buildMFEMMesh(_mesh, _fallback_elements, _first_order_mesh);
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();

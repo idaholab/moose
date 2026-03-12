@@ -33,7 +33,14 @@
 /// MooseMesh argument. If the argument is of type MFEMMesh then the
 /// MFEM mesh it contains is what is returned. Otherwise the MFEM mesh
 /// will be constructed based on libmesh data.
-std::shared_ptr<mfem::ParMesh> buildMFEMMesh(MooseMesh & mesh);
+///
+/// The boolean arguments only have an effect if the mesh is not
+/// already an MFEMMesh. In that case, `fallback` indicates whether
+/// element types which can not be represented in MFEM should be
+/// represented by simpler ones which can be. `first_order` indicates
+/// whether the mesh should be converted to have only first-order
+/// elements.
+std::shared_ptr<mfem::ParMesh> buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order);
 
 using IDMap = std::map<int, std::vector<int>>;
 
@@ -91,9 +98,12 @@ void convertSerialDofMappingsToParallel(
     std::map<int, int> & mfem_local_node_id_for_libmesh_global_node_id);
 
 /**
- * Add block elements to _block_info.
+ * Assemble information on block elements .
  */
-CubitBlockInfo buildCubitBlockInfo(MeshBase & libmesh, const std::vector<int> & unique_block_ids);
+CubitBlockInfo buildCubitBlockInfo(MeshBase & libmesh,
+                                   const std::vector<int> & unique_block_ids,
+                                   bool fallback,
+                                   bool first_order);
 
 /**
  * Blocks/subdomains are separate subsets of the mesh that could have different

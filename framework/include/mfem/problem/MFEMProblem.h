@@ -466,6 +466,11 @@ protected:
   NumericType _num_type;
 
   /**
+   * Options controlling how a libMesh mesh is converted into an MFEM mesh.
+   */
+  bool _fallback_elements, _first_order_mesh;
+
+  /**
    * Solver definitions recorded by AddMFEMSolverAction before the dependency resolver constructs
    * them. Each key is the user-provided solver object name, which corresponds to a child block
    * name under [Solvers]. Solver parameters of type MFEMSolverName refer to these same keys when
