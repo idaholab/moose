@@ -21,7 +21,7 @@
 #include <vector>
 
 std::shared_ptr<mfem::ParMesh>
-buildMFEMMesh(MooseMesh & mesh)
+buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
 {
   // If working with an MFEMMesh object then the underlying
   // `mfem::ParMesh` is already available.
@@ -43,7 +43,8 @@ buildMFEMMesh(MooseMesh & mesh)
   std::vector<int> unique_block_ids = getLibmeshBlockIDs(mesh.getMesh());
 
   // 3. Retrieve information about the elements used within the mesh.
-  CubitBlockInfo block_info = buildCubitBlockInfo(mesh.getMesh(), unique_block_ids);
+  CubitBlockInfo block_info =
+      buildCubitBlockInfo(mesh.getMesh(), unique_block_ids, fallback, first_order);
 
   // 4. Build maps:
   // Map from block ID --> vector of element IDs.
@@ -445,9 +446,12 @@ convertSerialDofMappingsToParallel(
 }
 
 CubitBlockInfo
-buildCubitBlockInfo(MeshBase & libmesh, const std::vector<int> & unique_block_ids)
+buildCubitBlockInfo(MeshBase & libmesh,
+                    const std::vector<int> & unique_block_ids,
+                    bool fallback,
+                    bool first_order)
 {
-  CubitBlockInfo block_info(libmesh.mesh_dimension());
+  CubitBlockInfo block_info(libmesh.mesh_dimension(), fallback, first_order);
   /**
    * Iterate over the block_ids. Note that we only need to extract the first element from
    * each block since only a single element type can be specified per block.

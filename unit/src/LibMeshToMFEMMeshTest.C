@@ -7,7 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "mfem/config/config.hpp"
+#include <stdexcept>
 #ifdef MOOSE_MFEM_ENABLED
+
+#include "mfem/fem/gridfunc.hpp"
 #include "gtest/gtest.h"
 #include "GeneratedMesh.h"
 #include "MeshGeneratorMesh.h"
@@ -25,10 +29,10 @@
 #include "mfem/mesh/element.hpp"
 #include "type_traits"
 
-template <class M>
+template <class M, bool fallback = false, bool first_order = false>
 class LibMeshToMFEMMeshTest : public ::testing::Test
 {
-protected:
+public:
   void SetUp() override
   {
     const char * argv[2] = {"foo", "\0"};
@@ -37,11 +41,21 @@ protected:
     _mesh_type = Registry::getClassName<M>();
   }
 
+  void TearDown() override
+  {
+    // Some tests changes this setting. We want to make sure it is
+    // always changed back, even if the test fails to complete.
+    Moose::_throw_on_warning = true;
+  }
+
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
   std::string _mesh_type;
   std::shared_ptr<M> _moose_mesh_ptr;
   std::shared_ptr<mfem::ParMesh> _mfem_mesh_ptr;
+
+  constexpr static bool _fallback = fallback;
+  constexpr static bool _first_order = first_order;
 
   InputParameters getValidParams() { return _factory->getValidParams(_mesh_type); }
 
@@ -56,11 +70,14 @@ protected:
                  std::string generator_class,
                  InputParameters generator_params)
   {
+    // If the parameters were created without using the factory
+    // object, we need to set the app parameter ourselves.
+    mesh_params.addPrivateParam(MooseBase::app_param, _app.get());
+    generator_params.addPrivateParam(MooseBase::app_param, _app.get());
     _moose_mesh_ptr = _factory->create<M>(_mesh_type, "moose_mesh", mesh_params);
     _app->actionWarehouse().mesh() = _moose_mesh_ptr;
     if (generator_class != "")
     {
-      // Rank is not being assigned to elements
       std::unique_ptr<MeshBase> libmesh =
           _factory->create<MeshGenerator>(generator_class, "mesh_generator", generator_params)
               ->generate();
@@ -72,7 +89,33 @@ protected:
       _moose_mesh_ptr->setMeshBase(_moose_mesh_ptr->buildMeshBaseObject());
     }
     _moose_mesh_ptr->buildMesh();
-    _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr);
+    _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, fallback, first_order);
+  }
+
+  std::shared_ptr<M> buildAdditionalMesh(InputParameters & mesh_params,
+                                         std::string generator_class,
+                                         InputParameters generator_params)
+  {
+    // If the parameters were created without using the factory
+    // object, we need to set the app parameter ourselves.
+    mesh_params.addPrivateParam(MooseBase::app_param, _app.get());
+    generator_params.addPrivateParam(MooseBase::app_param, _app.get());
+    auto result = _factory->create<M>(_mesh_type, "moose_mesh2", mesh_params);
+    // _app->actionWarehouse().mesh() = result;
+    if (generator_class != "")
+    {
+      std::unique_ptr<MeshBase> libmesh =
+          _factory->create<MeshGenerator>(generator_class, "mesh_generator2", generator_params)
+              ->generate();
+      libmesh->prepare_for_use();
+      result->setMeshBase(std::move(libmesh));
+    }
+    else
+    {
+      result->setMeshBase(result->buildMeshBaseObject());
+    }
+    result->buildMesh();
+    return result;
   }
 };
 
@@ -83,7 +126,7 @@ using Coord2D = CoordND<2>;
 using Coord3D = CoordND<3>;
 
 template <int N>
-std::set<std::set<std::array<mfem::real_t, N>>>
+std::set<std::set<CoordND<N>>>
 getElementSet(std::shared_ptr<mfem::ParMesh> mesh, mfem::Element::Type elem_type)
 {
   std::set<std::set<CoordND<N>>> actual_elements;
@@ -265,8 +308,6 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         "tet-4.e", "tet-10.e", "hex-8.e", "hex-27.e", "wedge-6.e", "wedge-18.e", "pyramid-5.e"));
 
-using ElementGeneratorMFEMTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh>;
-
 Point
 toPoint(const CoordND<1> & x, libMesh::ElemType)
 {
@@ -359,151 +400,150 @@ checkTransform(const Elem * libmesh_elem,
   }
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE2)
+template <int N>
+struct ElementTestData
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params;
+  InputParameters mg_params;
+  std::set<std::set<CoordND<N>>> expected_element;
+  std::array<CoordND<N>, 3> test_coords;
+  bool higher_order;
+  mfem::Element::Type type;
+};
+
+ElementTestData<1>
+edge2Data()
+{
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE2";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{1., 0., 0.}, {2., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord1D>> actual_elements =
-      getElementSet<1>(_mfem_mesh_ptr, mfem::Element::Type::SEGMENT);
-  std::set<std::set<Coord1D>> expected_elements = {{{1.}, {2.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1, 1);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0.}, {0.5}, {1.}}});
+  return {mesh_params,
+          mg_params,
+          {{{1.}, {2.}}},
+          {{{0.}, {0.5}, {1.}}},
+          false,
+          mfem::Element::Type::SEGMENT};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE3)
+ElementTestData<1>
+edge3Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE3";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {4., 0., 0.}, {1., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord1D>> actual_elements =
-      getElementSet<1>(_mfem_mesh_ptr, mfem::Element::Type::SEGMENT);
-  std::set<std::set<Coord1D>> expected_elements = {{{0.}, {4.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1, 1);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0.25}, {0.75}, {1.}}});
+  return {mesh_params,
+          mg_params,
+          {{{0.}, {4.}}},
+          {{{0.}, {0.5}, {1.}}},
+          true,
+          mfem::Element::Type::SEGMENT};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE4)
+ElementTestData<1>
+edge4Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE4";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., 0., 0.}, {26., 0., 0.}, {0., 0., 0.}, {7., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord1D>> actual_elements =
-      getElementSet<1>(_mfem_mesh_ptr, mfem::Element::Type::SEGMENT);
-  std::set<std::set<Coord1D>> expected_elements = {{{-1.}, {26.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1, 1);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0.25}, {0.75}, {1.}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1.}, {26.}}},
+          {{{0.25}, {0.75}, {1.}}},
+          true,
+          mfem::Element::Type::SEGMENT};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckTRI3)
+ElementTestData<2>
+tri3Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TRI3";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {2., 0., 0.}, {0., 2., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::TRIANGLE);
-  std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {2., 0.}, {0., 2.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.}, {0.5, 0.25}, {1., 0.}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {2., 0.}, {0., 2.}}},
+          {{{0., 0.}, {0.5, 0.25}, {1., 0.}}},
+          false,
+          mfem::Element::TRIANGLE};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckTRI6)
+ElementTestData<2>
+tri6Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TRI6";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.}, {1., 0., 0.}, {0., 1., 0.}, {.5, 0.1, 0.0}, {0.5, 0.5, 0.0}, {0., .5, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::TRIANGLE);
-  std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {1., 0.}, {0., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {1., 0.}, {0., 1.}}},
+          {{{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}}},
+          true,
+          mfem::Element::TRIANGLE};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckQUAD4)
+ElementTestData<2>
+tri7Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
+  mg_params.set<MooseEnum>("elem_type") = "TRI7";
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
+                                                          {1., 0., 0.},
+                                                          {0., 1., 0.},
+                                                          {.5, 0.1, 0.0},
+                                                          {0.5, 0.5, 0.0},
+                                                          {0., .5, 0.},
+                                                          {0.3, 0.25, 0.}};
+  mg_params.set<unsigned short>("subdomain_id") = 1;
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {1., 0.}, {0., 1.}}},
+          {{{0., 0.5}, {0.25, 0.0}, {0.4, 0.2}}},
+          true,
+          mfem::Element::TRIANGLE};
+}
+
+ElementTestData<2>
+quad4Data()
+{
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD4";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.}, {1., 0., 0.}, {2., 2., 0.}, {0.5, 1.0, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::QUADRILATERAL);
-  std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {1., 0.}, {0.5, 1.}, {2., 2.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5}, {0.75, 1.}, {0.5, 0.5}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {1., 0.}, {0.5, 1.}, {2., 2.}}},
+          {{{0., 0.5}, {0.75, 1.}, {0.5, 0.5}}},
+          false,
+          mfem::Element::QUADRILATERAL};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckQUAD8)
+ElementTestData<2>
+quad8Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD8";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
@@ -515,25 +555,19 @@ TEST_F(ElementGeneratorMFEMTest, CheckQUAD8)
                                                           {0.5, 1., 0.},
                                                           {0., 0.5, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::QUADRILATERAL);
-  std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5}, {0.4, 0.}, {0.75, 0.5}, {0.5, 0.25}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}},
+          {{{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}}},
+          true,
+          mfem::Element::QUADRILATERAL};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckQUAD9)
+ElementTestData<2>
+quad9Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD9";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7, 8};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
@@ -546,50 +580,37 @@ TEST_F(ElementGeneratorMFEMTest, CheckQUAD9)
                                                           {0., 0.5, 0.},
                                                           {0.5, 0.6, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord2D>> actual_elements =
-      getElementSet<2>(_mfem_mesh_ptr, mfem::Element::Type::QUADRILATERAL);
-  std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2, 2);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5}, {0.4, 0.}, {0.75, 0.5}, {0.5, 0.25}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0.}, {1., 0.}, {1., 1.}, {0., 1.}}},
+          {{{0., 0.5}, {0.75, 0.5}, {0.5, 0.25}}},
+          true,
+          mfem::Element::QUADRILATERAL};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckTET4)
+ElementTestData<3>
+tet4Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET4";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0.0, -1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::TETRAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {
-      {{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0., -1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0., -1.}}},
+          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          false,
+          mfem::Element::TETRAHEDRON};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckTET10)
+ElementTestData<3>
+tet10Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET10";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -604,51 +625,68 @@ TEST_F(ElementGeneratorMFEMTest, CheckTET10)
                                                           {0., -1., 0.},
                                                           {-1., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::TETRAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {
-      {{-1., -1., -1.}, {1., -1., -1.}, {-1., 1., -1.}, {-1., -1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.}, {1., -1., -1.}, {-1., 1., -1.}, {-1., -1., 1.}}},
+          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          true,
+          mfem::Element::TETRAHEDRON};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID5)
+ElementTestData<3>
+tet14Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
+  mg_params.set<MooseEnum>("elem_type") = "TET14";
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
+                                                          {1., -1., -1.},
+                                                          {-1., 1., -1.},
+                                                          {-1., -1.0, 1.},
+                                                          {0., -.8, -.8},
+                                                          {0., 0., -1.},
+                                                          {-1., 0., -1},
+                                                          {-1., -1., 0.},
+                                                          {0., -1., 0.},
+                                                          {-1., 0., 0.},
+                                                          {0., -0.5, -0.9},
+                                                          {0., -1.1, -0.5},
+                                                          {0.01, -0.01, 0.01},
+                                                          {-0.95, 0., -0.5}};
+  mg_params.set<unsigned short>("subdomain_id") = 1;
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.}, {1., -1., -1.}, {-1., 1., -1.}, {-1., -1., 1.}}},
+          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+          true,
+          mfem::Element::TETRAHEDRON};
+}
+
+ElementTestData<3>
+pyr5Data()
+{
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID5";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1.0, 0.}, {1.5, 0., 2.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::PYRAMID);
-  std::set<std::set<Coord3D>> expected_elements = {
-      {{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1., 0.}, {1.5, 0., 2}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1., 0.}, {1.5, 0., 2}}},
+          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}}},
+          false,
+          mfem::Element::PYRAMID};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID13)
+ElementTestData<3>
+pyr13Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID13";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -666,28 +704,19 @@ TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID13)
                                                           {0.5, 0.5, 0.},
                                                           {-.5, .5, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  // A bug in MFEM currently means we can't support higher-order
-  // libmesh pyramids. Once that is fixed buildMesh() should no longe
-  // throw an error and the commented out tests below should pass.
-  EXPECT_THROW(buildMesh(mesh_params, "ElementGenerator", mg_params), MooseRuntimeError);
-  // ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  // std::set<std::set<Coord3D>> actual_elements =
-  //     getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::PYRAMID);
-  // std::set<std::set<Coord3D>> expected_elements = {
-  //     {{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}};
-  // EXPECT_EQ(expected_elements, actual_elements);
-  // EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  // mfem::DenseMatrix jac(3, 3);
-  // _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  // EXPECT_GT(jac.Det(), 0.);
-  // checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0),
-  //                      {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0., 0.3}, {0.25, 0.25, 0.5}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}},
+          {{{0.25, 0.5, 0.}, {0.5, 0., 0.3}, {0.25, 0.25, 0.5}}},
+          true,
+          mfem::Element::PYRAMID};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID14)
+ElementTestData<3>
+pyr14Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID14";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
@@ -706,53 +735,46 @@ TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID14)
                                                           {-.5, .5, 0.},
                                                           {0., 0.05, -1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  // A bug in MFEM currently means we can't support higher-order
-  // libmesh pyramids. Once that is fixed buildMesh() should no longe
-  // throw an error and the commented out tests below should pass.
-  EXPECT_THROW(buildMesh(mesh_params, "ElementGenerator", mg_params), MooseRuntimeError);
-  // ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  // std::set<std::set<Coord3D>> actual_elements =
-  //     getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::PYRAMID);
-  // std::set<std::set<Coord3D>> expected_elements = {
-  //     {{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}};
-  // EXPECT_EQ(expected_elements, actual_elements);
-  // EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  // mfem::DenseMatrix jac(3, 3);
-  // _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  // EXPECT_GT(jac.Det(), 0.);
-  // checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0),
-  //                      {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0., 0.3}, {0.25, 0.25, 0.6}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.}, {1., -1., -1.}, {1., 1., -1.}, {-1., 1., -1.}, {0., 0., 1.}}},
+          {{{0., 0.5, 0.5}, {0.5, 0., 0.3}, {0.25, 0.25, 0.6}}},
+          true,
+          mfem::Element::PYRAMID};
 }
+// // A bug in MFEM currently means we can't support higher-order
+// // libmesh pyramids. Once that is fixed buildMesh() should no longe
+// // throw an error and the commented out tests below should pass.
+// EXPECT_THROW(buildMesh(mesh_params, "ElementGenerator", mg_params), MooseRuntimeError);
 
-TEST_F(ElementGeneratorMFEMTest, CheckPRISM6)
+ElementTestData<3>
+prism6Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM6";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::WEDGE);
-  std::set<std::set<Coord3D>> expected_elements = {
-      {{-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.},
+            {1., -1., -1.},
+            {0.5, 1., -1.},
+            {0, -1.0, 1.},
+            {2, -1., 1.},
+            {2., 1., 1.}}},
+          {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}}},
+          false,
+          mfem::Element::WEDGE};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckPRISM15)
+ElementTestData<3>
+prism15Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM15";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
@@ -772,30 +794,24 @@ TEST_F(ElementGeneratorMFEMTest, CheckPRISM15)
                                                           {0.5, 0., 1.},
                                                           {-0.4, 0.1, 1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::WEDGE);
-  std::set<std::set<Coord3D>> expected_elements = {{{-1., -1., -1.},
-                                                    {1., -1., -1.},
-                                                    {0.0, 1., -1.},
-                                                    {-1., -1.0, 1.},
-                                                    {1., -1., 1.},
-                                                    {0., 1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.},
+            {1., -1., -1.},
+            {0.0, 1., -1.},
+            {-1., -1.0, 1.},
+            {1., -1., 1.},
+            {0., 1., 1.}}},
+          {{{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}},
+          true,
+          mfem::Element::WEDGE};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckPRISM18)
+ElementTestData<3>
+prism18Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM18";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
@@ -818,30 +834,24 @@ TEST_F(ElementGeneratorMFEMTest, CheckPRISM18)
                                                           {0.5, 0., 0.},
                                                           {-0.5, 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::WEDGE);
-  std::set<std::set<Coord3D>> expected_elements = {{{-1., -1., -1.},
-                                                    {1., -1., -1.},
-                                                    {0.0, 1., -1.},
-                                                    {-1., -1.0, 1.},
-                                                    {1., -1., 1.},
-                                                    {0., 1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}});
+  return {mesh_params,
+          mg_params,
+          {{{-1., -1., -1.},
+            {1., -1., -1.},
+            {0.0, 1., -1.},
+            {-1., -1.0, 1.},
+            {1., -1., 1.},
+            {0., 1., 1.}}},
+          {{{0.25, 0.5, 0.}, {0.5, 0., 0.8}, {0.5, 0.5, 0.75}}},
+          true,
+          mfem::Element::WEDGE};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckHEX8)
+ElementTestData<3>
+hex8Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX8";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
@@ -853,32 +863,26 @@ TEST_F(ElementGeneratorMFEMTest, CheckHEX8)
                                                           {2., 1., 2.},
                                                           {1., 1., 2.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {{{0., 0., 0.},
-                                                    {1., 0., 0.},
-                                                    {2., 1., 1.},
-                                                    {1., 1., 1.},
-                                                    {0., 0., 1.},
-                                                    {1., 0., 1.},
-                                                    {2., 1., 2.},
-                                                    {1., 1., 2.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0., 0.},
+            {1., 0., 0.},
+            {2., 1., 1.},
+            {1., 1., 1.},
+            {0., 0., 1.},
+            {1., 0., 1.},
+            {2., 1., 2.},
+            {1., 1., 2.}}},
+          {{{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}}},
+          false,
+          mfem::Element::HEXAHEDRON};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckHEX20)
+ElementTestData<3>
+hex20Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX20";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
@@ -889,32 +893,26 @@ TEST_F(ElementGeneratorMFEMTest, CheckHEX20)
       {0., 1., 0.5}, {0.5, 0., 1.}, {1., 0.5, 1.},  {0.5, 1., 1.},  {0., 0.5, 1.},
   };
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
-  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {{{0., 0., 0.},
-                                                    {1., 0., 0.},
-                                                    {1., 1., 0.},
-                                                    {0., 1., 0.},
-                                                    {0., 0., 1.},
-                                                    {1., 0., 1.},
-                                                    {1., 1., 1.},
-                                                    {0., 1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
-  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3, 3);
-  _mfem_mesh_ptr->GetElementJacobian(0, jac);
-  EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0.0, 0., 0.25}, {1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}});
+  return {mesh_params,
+          mg_params,
+          {{{0., 0., 0.},
+            {1., 0., 0.},
+            {1., 1., 0.},
+            {0., 1., 0.},
+            {0., 0., 1.},
+            {1., 0., 1.},
+            {1., 1., 1.},
+            {0., 1., 1.}}},
+          {{{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}},
+          true,
+          mfem::Element::HEXAHEDRON};
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckHEX27)
+ElementTestData<3>
+hex27Data()
 {
-  InputParameters mesh_params = getValidParams();
-  InputParameters mg_params = _factory->getValidParams("ElementGenerator");
+  InputParameters mesh_params = MeshGeneratorMesh::validParams();
+  InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX27";
   mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
@@ -929,26 +927,215 @@ TEST_F(ElementGeneratorMFEMTest, CheckHEX27)
 
   };
   mg_params.set<unsigned short>("subdomain_id") = 1;
-  buildMesh(mesh_params, "ElementGenerator", mg_params);
+  return {mesh_params,
+          mg_params,
+          {{{0., 0., 0.},
+            {1., 0., 0.},
+            {1., 1., 0.},
+            {0., 1., 0.},
+            {0., 0., 1.},
+            {1., 0., 1.},
+            {1., 1., 1.},
+            {0., 1., 1.}}},
+          {{{1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}},
+          true,
+          mfem::Element::HEXAHEDRON};
+}
+
+template <int N>
+class ElementGeneratorMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, false>,
+                                 public testing::WithParamInterface<ElementTestData<N>>
+{
+public:
+  static std::string testParamName(const testing::TestParamInfo<ElementTestData<N>> & info)
+  {
+    auto & params = info.param.mg_params;
+    return params.template get<MooseEnum>("elem_type");
+  }
+};
+
+using Element1DGeneratorMFEMTest = ElementGeneratorMFEMTest<1>;
+
+TEST_P(Element1DGeneratorMFEMTest, CheckElem)
+{
+  auto data = GetParam();
+  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
-  std::set<std::set<Coord3D>> actual_elements =
-      getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {{{0., 0., 0.},
-                                                    {1., 0., 0.},
-                                                    {1., 1., 0.},
-                                                    {0., 1., 0.},
-                                                    {0., 0., 1.},
-                                                    {1., 0., 1.},
-                                                    {1., 1., 1.},
-                                                    {0., 1., 1.}}};
-  EXPECT_EQ(expected_elements, actual_elements);
+  std::set<std::set<Coord1D>> actual_elements = getElementSet<1>(_mfem_mesh_ptr, data.type);
+  EXPECT_EQ(data.expected_element, actual_elements);
+  if (data.higher_order)
+  {
+    EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  else
+  {
+    EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  mfem::DenseMatrix jac(1, 1);
+  _mfem_mesh_ptr->GetElementJacobian(0, jac);
+  EXPECT_GT(jac.Det(), 0.);
+  checkTransform<1, 3>(
+      _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
+}
+
+INSTANTIATE_TEST_SUITE_P(SingleElement,
+                         Element1DGeneratorMFEMTest,
+                         testing::Values(edge2Data(), edge3Data(), edge4Data()),
+                         Element1DGeneratorMFEMTest::testParamName);
+
+using Element2DGeneratorMFEMTest = ElementGeneratorMFEMTest<2>;
+
+TEST_P(Element2DGeneratorMFEMTest, CheckElem)
+{
+  auto data = GetParam();
+  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
+  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
+  std::set<std::set<Coord2D>> actual_elements = getElementSet<2>(_mfem_mesh_ptr, data.type);
+  EXPECT_EQ(data.expected_element, actual_elements);
+  if (data.higher_order)
+  {
+    EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  else
+  {
+    EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  mfem::DenseMatrix jac(2, 2);
+  _mfem_mesh_ptr->GetElementJacobian(0, jac);
+  EXPECT_GT(jac.Det(), 0.);
+  checkTransform<2, 3>(
+      _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SingleElement,
+    Element2DGeneratorMFEMTest,
+    testing::Values(tri3Data(), tri6Data(), quad4Data(), quad8Data(), quad9Data()),
+    Element2DGeneratorMFEMTest::testParamName);
+
+using Element3DGeneratorMFEMTest = ElementGeneratorMFEMTest<3>;
+
+TEST_P(Element3DGeneratorMFEMTest, CheckElem)
+{
+  auto data = GetParam();
+  buildMesh(data.mesh_params, "ElementGenerator", data.mg_params);
+  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
+  std::set<std::set<Coord3D>> actual_elements = getElementSet<3>(_mfem_mesh_ptr, data.type);
+  EXPECT_EQ(data.expected_element, actual_elements);
+  if (data.higher_order)
+  {
+    EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  else
+  {
+    EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
+  }
+  mfem::DenseMatrix jac(3, 3);
+  _mfem_mesh_ptr->GetElementJacobian(0, jac);
+  EXPECT_GT(jac.Det(), 0.);
+  checkTransform<3, 3>(
+      _moose_mesh_ptr->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
+}
+
+INSTANTIATE_TEST_SUITE_P(SingleElement,
+                         Element3DGeneratorMFEMTest,
+                         testing::Values(tet4Data(),
+                                         tet10Data(),
+                                         pyr5Data(),
+                                         // A bug in MFEM currently means we can't support
+                                         // higher-order libmesh pyramids. Once that is fixed
+                                         // these cases should be uncommented.
+                                         // pyr13Data(),
+                                         // pyr14Data(),
+                                         prism6Data(),
+                                         prism15Data(),
+                                         prism18Data(),
+                                         hex8Data(),
+                                         hex20Data(),
+                                         hex27Data()),
+                         Element3DGeneratorMFEMTest::testParamName);
+
+using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest<3>;
+
+TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
+{
+  auto data = GetParam();
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+}
+
+// A bug in MFEM currently means we can't support higher-order
+// libmesh pyramids. Once that is fixed this test should be removed.
+INSTANTIATE_TEST_SUITE_P(SingleElement,
+                         UnsupportedElementGeneratorMFEMTest,
+                         testing::Values(pyr13Data(), pyr14Data()),
+                         UnsupportedElementGeneratorMFEMTest::testParamName);
+
+using LibMeshToMFEMMeshFallbackTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, false>;
+
+TEST_F(LibMeshToMFEMMeshFallbackTest, CheckTri7)
+{
+  auto data = tri7Data();
+  // A warning should be emitted when converting from TRI7 to TRI6
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), std::runtime_error);
+  // Temporarily allow warnings to be emitted, so we can test the
+  // conversion actually works properly.
+  Moose::_throw_on_warning = false;
+  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, _fallback, _first_order);
+  Moose::_throw_on_warning = true;
+  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
+  std::set<std::set<Coord2D>> actual_elements = getElementSet<2>(_mfem_mesh_ptr, data.type);
+  EXPECT_EQ(data.expected_element, actual_elements);
+  EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
+  mfem::DenseMatrix jac(2, 2);
+  _mfem_mesh_ptr->GetElementJacobian(0, jac);
+  EXPECT_GT(jac.Det(), 0.);
+
+  auto data2 = tri6Data();
+  std::shared_ptr<MeshGeneratorMesh> expected_mesh =
+      buildAdditionalMesh(data2.mesh_params, "ElementGenerator", data2.mg_params);
+  checkTransform<2, 3>(
+      expected_mesh->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
+}
+
+TEST_F(LibMeshToMFEMMeshFallbackTest, CheckTet14)
+{
+  auto data = tet14Data();
+  // A warning should be emitted when converting from TRI7 to TRI6
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), std::runtime_error);
+  // Temporarily allow warnings to be emitted, so we can test the
+  // conversion actually works properly.
+  Moose::_throw_on_warning = false;
+  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, _fallback, _first_order);
+  Moose::_throw_on_warning = true;
+  ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
+  std::set<std::set<Coord3D>> actual_elements = getElementSet<3>(_mfem_mesh_ptr, data.type);
+  EXPECT_EQ(data.expected_element, actual_elements);
   EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
   mfem::DenseMatrix jac(3, 3);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 4>(_moose_mesh_ptr->elemPtr(0),
-                       *_mfem_mesh_ptr->GetElementTransformation(0),
-                       {{{0.0, 0., 0.25}, {1., 0.4, 0.5}, {0.75, 0., 0.5}, {0.1, 0.25, 0.25}}});
+
+  auto data2 = tet10Data();
+  std::shared_ptr<MeshGeneratorMesh> expected_mesh =
+      buildAdditionalMesh(data2.mesh_params, "ElementGenerator", data2.mg_params);
+  checkTransform<3, 3>(
+      expected_mesh->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
 }
+
+using LibMeshToMFEMMeshNoFallbackTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, false, false>;
+
+TEST_F(libMeshToMFEMMeshNoFallbackTest, CheckTRI7)
+{
+  auto data = tri7Data();
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+}
+
+TEST_F(libMeshToMFEMMeshNoFallbackTest, CheckTET14)
+{
+  auto data = tet14Data();
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+}
+
+using ElementToFirstOrderMFEMTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh, true, true>;
 
 #endif
