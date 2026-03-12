@@ -121,8 +121,14 @@ MultiAppGeneralFieldFunctorTransfer::initialSetup()
   MultiAppGeneralFieldTransfer::initialSetup();
 
   // Retrieve the functors
+  _functors.resize(_from_problems.size());
   for (const auto & fname : _functor_names)
-    _functors.push_back(&getFunctor<Real>(fname));
+  {
+    // Different functors for every source
+    for (const auto i_from : index_range(_from_problems))
+      _functors[i_from].push_back(
+          &_from_problems[i_from]->getFunctor<Real>(fname, /*thread*/ 0, name(), false));
+  }
 
   // Same as NL transfer
   // We need to improve the indexing if we are to allow this
@@ -159,7 +165,6 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
   _local_values.resize(_num_sources);
   unsigned int max_leaf_size = 0;
 
-  const auto & functor = _functors[var_index];
   const auto from_blocks =
       _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
 
@@ -181,7 +186,11 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
       // No need for displaced mesh for checking domain of definition
       const auto & node_to_elem_map = from_problem.mesh().nodeToActiveSemilocalElemMap();
 
-      // We need to loop on the nodes on the node at the edge of the domain of definition the current functor
+      // Get functor for that app
+      const auto & functor = _functors[i_from][var_index];
+
+      // We need to loop on the nodes on the node at the edge of the domain of definition the
+      // current functor
       for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
       {
         // No way to check number of dofs for a functor
@@ -274,7 +283,6 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
   dof_id_type i_pt = 0;
   std::set<const Elem *> elem_candidates;
 
-  const auto & functor = *_functors[var_index];
   const auto from_blocks =
       _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
 
@@ -290,6 +298,9 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Examine all restrictions for the point. This source (KDTree+values) could be ruled out
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
+
+      // Retrieve the functor
+      const auto & functor = *_functors[i_from][var_index];
 
       // If in domain, use the functor evaluation at the point
       // Locate the point and an element
@@ -309,6 +320,12 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
 
         outgoing_vals[i_pt] = {value, 0};
         // Skip nearest node KD-Tree evaluation
+        continue;
+      }
+
+      if (_extrapolation_behavior == 0)
+      {
+        outgoing_vals[i_pt] = {_extrapolation_constant, 10};
         continue;
       }
 
