@@ -86,7 +86,7 @@ def get_processes_memory(parent_pids: set[int]) -> defaultdict[int, int]:
         ppid = p.info["ppid"]
         # Found a parent
         if ppid in parent_pids:
-            return p.info["ppid"]
+            return ppid
         # Recursively check
         return in_parent_pids(pp) if (pp := all_processes.get(ppid)) else None
 
