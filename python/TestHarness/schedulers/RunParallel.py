@@ -25,9 +25,6 @@ class RunParallel(Scheduler):
         params = Scheduler.validParams()
         return params
 
-    def __init__(self, harness, params):
-        Scheduler.__init__(self, harness, params)
-
     def run(self, job):
         """Run a tester command"""
         # Build and set the runner that will actually run the commands

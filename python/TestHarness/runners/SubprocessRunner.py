@@ -70,7 +70,7 @@ class SubprocessRunner(Runner):
         # If the tester supports wrapping with a time utility
         # and we're not using shell, wrap the command with
         # a time utility if a timing utility is available
-        if tester.SUPPORTS_TIME and not use_shell:
+        if not self.options.no_cpu_tracking and tester.SUPPORTS_TIME and not use_shell:
             time_command = None
 
             # GNU time; output to file just CPU %

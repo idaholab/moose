@@ -859,6 +859,10 @@ class TestHarness:
         else:
             return True
 
+    def shouldOutputMemory(self) -> bool:
+        """Whether or not memory should be output in the Job status."""
+        return self.scheduler.MONITOR_JOB_MEMORY and not self.options.no_memory_tracking
+
     def handleJobStatus(self, job, caveats=None):
         """
         The Scheduler is calling back the TestHarness to inform us of a status change.
@@ -867,7 +871,7 @@ class TestHarness:
         if self.options.show_last_run and job.isSkip():
             return
         elif not job.isSilent():
-            memory = None if self.scheduler.MONITOR_JOB_MEMORY else False
+            memory = None if self.shouldOutputMemory() else False
 
             # Print results and perform any desired post job processing
             if job.isFinished():
@@ -1015,6 +1019,8 @@ class TestHarness:
         if not self.finished_jobs:
             print("No tests ran")
 
+        memory = None if self.shouldOutputMemory() else False
+
         # Longest jobs and longest folders
         if not self.options.dry_run and self.options.longest_jobs:
             longest_jobs = self.getLongestJobs(self.options.longest_jobs)
@@ -1023,16 +1029,12 @@ class TestHarness:
                 for job in longest_jobs:
                     print(
                         util.formatJobResult(
-                            job,
-                            self.options,
-                            caveats=True,
-                            timing=True,
-                            memory=None if self.scheduler.MONITOR_JOB_MEMORY else False,
+                            job, self.options, caveats=True, timing=True, memory=memory
                         )
                     )
 
             # Heaviest jobs by memory
-            if self.scheduler.MONITOR_JOB_MEMORY and (
+            if self.shouldOutputMemory() and (
                 heaviest_jobs := self.getHeaviestJobs(self.options.longest_jobs)
             ):
                 print(
@@ -1045,7 +1047,7 @@ class TestHarness:
                             self.options,
                             caveats=True,
                             timing=True,
-                            memory=self.scheduler.MONITOR_JOB_MEMORY,
+                            memory=True,
                             memory_per_slot=True,
                         )
                     )
@@ -1816,8 +1818,26 @@ class TestHarness:
         failgroup = parser.add_argument_group(
             "Failure Criteria", "Control the failure criteria"
         )
-        default_max_cpu_per_slot = 110.0
         failgroup.add_argument(
+            "--max-fails",
+            nargs=1,
+            type=int,
+            default=50,
+            help="The number of tests allowed to fail before any additional tests will run",
+        )
+        failgroup.add_argument(
+            "--valgrind-max-fails",
+            nargs=1,
+            type=int,
+            default=5,
+            help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
+        )
+
+        resourcesgroup = parser.add_argument_group(
+            "Resource tracking", "Control tracking of resources"
+        )
+        default_max_cpu_per_slot = 110.0
+        resourcesgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
             type=float,
@@ -1827,25 +1847,21 @@ class TestHarness:
                 f"(default: {default_max_cpu_per_slot})"
             ),
         )
-        failgroup.add_argument(
-            "--max-fails",
-            nargs=1,
-            type=int,
-            default=50,
-            help="The number of tests allowed to fail before any additional tests will run",
-        )
-        failgroup.add_argument(
+        resourcesgroup.add_argument(
             "--max-memory-per-slot",
             nargs=1,
             type=float,
             help="The maximum memory to allow for a job in MB, per slot",
         )
-        failgroup.add_argument(
-            "--valgrind-max-fails",
-            nargs=1,
-            type=int,
-            default=5,
-            help="The number of valgrind tests allowed to fail before any additional valgrind tests will run",
+        resourcesgroup.add_argument(
+            "--no-cpu-tracking",
+            action="store_true",
+            help="Disable all CPU tracking of jobs",
+        )
+        resourcesgroup.add_argument(
+            "--no-memory-tracking",
+            action="store_true",
+            help="Disable all memory tracking of jobs",
         )
 
         hpcgroup = parser.add_argument_group("HPC", "Enable and control HPC execution")
@@ -2114,13 +2130,15 @@ class TestHarness:
                 return config
         return None
 
-    @staticmethod
-    def errorExit(*args):
+    def errorExit(self, *args):
         """
         Helper for printing an error and exiting
         """
-        message = " ".join([f"{v}" for v in args])
-        raise SystemExit(f"ERROR: {message}")
+        prefix = "ERROR:"
+        if self.options.colored:
+            prefix = util.colorText(prefix, "RED")
+        print(prefix, *args)
+        raise SystemExit(1)
 
     def printInfo(self, *args):
         """Print the given message as information."""

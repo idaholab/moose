@@ -99,6 +99,7 @@ class RunHPC(RunParallel):
     Base scheduler for jobs that are ran on HPC.
     """
 
+    MONITOR_JOB_CPU = False
     MONITOR_JOB_MEMORY = False
 
     def __init__(self, harness, params):

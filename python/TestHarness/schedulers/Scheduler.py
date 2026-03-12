@@ -22,6 +22,7 @@ from FactorySystem.MooseObject import MooseObject
 
 from TestHarness.JobDAG import JobDAG
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.util import findBSDTime, findGNUTime
 
 _HAS_GET_PROCESSES_MEMORY = False
 """
@@ -75,6 +76,9 @@ class Scheduler(MooseObject):
 
     MONITOR_JOB_MEMORY = _HAS_GET_PROCESSES_MEMORY
     """Whether or not this Scheduler should monitor Job process memory usage."""
+
+    MONITOR_JOB_CPU = findBSDTime() is not None or findGNUTime() is not None
+    """Whether or not this Scheduler should monitor Job process CPU usage."""
 
     def __init__(self, harness, params):
         MooseObject.__init__(self, harness, params)
@@ -147,6 +151,14 @@ class Scheduler(MooseObject):
         self.report_long_jobs = True
         # Whether or not to enforce the timeout of jobs
         self.enforce_timeout = True
+
+        # Can't restrict resources without tracking
+        if self.options.max_memory_per_slot and (
+            not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking
+        ):
+            self.harness.errorExit(
+                "Cannot specify --max-memory-per-slot; memory tracking is not available"
+            )
 
     def getErrorState(self):
         """
@@ -259,7 +271,7 @@ class Scheduler(MooseObject):
     def monitorJobProcesses(self):
         """Monitor the running job processes, if enabled."""
         # Process memory monitoring is disabled
-        if not self.MONITOR_JOB_MEMORY:
+        if not self.MONITOR_JOB_MEMORY or self.options.no_memory_tracking:
             return
 
         # Get the PIDs of the current running jobs so that they can be sampled
