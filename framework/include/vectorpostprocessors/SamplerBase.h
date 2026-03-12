@@ -117,6 +117,8 @@ protected:
 
   /// What to sort by
   const std::string _sort_by;
+  /// The index for what to sort by: x=0, y=1, z=2, then sampled variables in ordered specified in the parameter
+  unsigned int _sort_by_index;
 
   /// x coordinate of the points
   VectorPostprocessorValue & _x;

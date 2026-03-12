@@ -82,7 +82,7 @@ LineValueSampler::getValue(const Point & p) const
                "only one variable can be provided as input to LineValueSampler.");
 
   // Check if vectors are sorted by id
-  if (_sort_by != "id")
+  if (_sort_by_index != 3) /*id*/
     mooseError("LineValueSampler: When calling getValue() on LineValueSampler, "
                "`sort_by` should be set to `id`.");
 

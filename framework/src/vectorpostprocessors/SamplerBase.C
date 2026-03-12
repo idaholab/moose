@@ -48,11 +48,21 @@ SamplerBase::SamplerBase(const InputParameters & parameters,
             ->getMooseApp()
             .getExecutioner())),
     _sort_by(parameters.get<std::string>("sort_by")),
+    _sort_by_index(libMesh::invalid_uint),
     _x(vpp->declareVector("x")),
     _y(vpp->declareVector("y")),
     _z(vpp->declareVector("z")),
     _id(vpp->declareVector("id"))
 {
+  if (_sort_by == "x")
+    _sort_by_index = 0;
+  else if (_sort_by == "y")
+    _sort_by_index = 1;
+  else if (_sort_by == "z")
+    _sort_by_index = 2;
+  else if (_sort_by == "id")
+    _sort_by_index = 3;
+  // Sort by index for variables determined in setupVariables()
 }
 
 void
@@ -63,6 +73,18 @@ SamplerBase::setupVariables(const std::vector<std::string> & variable_names)
 
   for (const auto & variable_name : variable_names)
     _values.push_back(&_vpp->declareVector(variable_name));
+
+  // Find the index of the column to sort by for variables
+  if (_sort_by_index == libMesh::invalid_uint)
+  {
+    const auto it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
+    if (it != _variable_names.end())
+      _sort_by_index = 4 + it - _variable_names.begin();
+    else
+      mooseError(
+          "The 'sort_by' parameter must be one of x/y/z/id or one of the sampled variable names: " +
+          Moose::stringify(_variable_names));
+  }
 }
 
 void
@@ -175,31 +197,10 @@ SamplerBase::finalize()
   for (auto vec_ptr : vec_ptrs)
     _comm.allgather(*vec_ptr, /* identical buffer lengths = */ false);
 
-  // Find the index of the column to sort by
-  unsigned int sort_by_i = 0;
-  if (_sort_by == "x")
-    sort_by_i = 0;
-  else if (_sort_by == "y")
-    sort_by_i = 1;
-  else if (_sort_by == "z")
-    sort_by_i = 2;
-  else if (_sort_by == "id")
-    sort_by_i = 3;
-  else
-  {
-    // Find in 'variable_names'
-    const auto it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
-    if (it != _variable_names.end())
-      sort_by_i = 4 + it - _variable_names.begin();
-    else
-      mooseError(
-          "The 'sort_by' parameter must be one of x/y/z/id or one of the sampled variable names: " +
-          Moose::stringify(_variable_names));
-  }
-
   // Now create an index vector by using an indirect sort
   std::vector<std::size_t> sorted_indices;
-  Moose::indirectSort(vec_ptrs[sort_by_i]->begin(), vec_ptrs[sort_by_i]->end(), sorted_indices);
+  Moose::indirectSort(
+      vec_ptrs[_sort_by_index]->begin(), vec_ptrs[_sort_by_index]->end(), sorted_indices);
 
   /**
    * We now have one sorted vector. The remaining vectors need to be sorted according to that
