@@ -160,24 +160,33 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
   for (const auto file_sid : index_range(_file_props))
   {
     const auto & file_prop = _file_props[file_sid];
-    if (const auto query_id = registry.queryID(file_prop.name))
-    {
-      const auto target_prop_id = *query_id;
-      const auto & record = storage.getPropRecord(target_prop_id);
-      if (record.stateful())
-      {
-        // Validate type match
-        if (record.type != file_prop.type_str)
-          mooseError("Type mismatch for stateful property '",
-                     file_prop.name,
-                     "': file has '",
-                     file_prop.type_str,
-                     "', current sim has '",
-                     record.type,
-                     "'.");
-        file_to_current_sid[file_sid] = record.stateful_id;
-      }
-    }
+    const auto query_id = registry.queryID(file_prop.name);
+    if (!query_id)
+      mooseError("Stateful material property '",
+                 file_prop.name,
+                 "' exists in the import file but is not declared as a stateful property "
+                 "in the current simulation. All properties present in the import file "
+                 "must exist in the current simulation.");
+
+    const auto target_prop_id = *query_id;
+    const auto & record = storage.getPropRecord(target_prop_id);
+    if (!record.stateful())
+      mooseError("Stateful material property '",
+                 file_prop.name,
+                 "' exists in the import file but is not declared as a stateful property "
+                 "in the current simulation. All properties present in the import file "
+                 "must exist in the current simulation.");
+
+    // Validate type match
+    if (record.type != file_prop.type_str)
+      mooseError("Type mismatch for stateful property '",
+                 file_prop.name,
+                 "': file has '",
+                 file_prop.type_str,
+                 "', current sim has '",
+                 record.type,
+                 "'.");
+    file_to_current_sid[file_sid] = record.stateful_id;
   }
 
   // Check we have at least one match
