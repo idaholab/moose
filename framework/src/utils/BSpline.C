@@ -36,29 +36,30 @@ BSpline::getPoint(const libMesh::Real t) const
 std::vector<libMesh::Real>
 BSpline::buildKnotVector() const
 {
-  const unsigned int num_points_left = _control_points.size() - _degree;
+  std::vector<libMesh::Real> knot_vector(_degree, 0); // initialize bottom to zeros
 
+  const unsigned int num_points_left = _control_points.size() + 1 - _degree;
   if (num_points_left <= 0)
     mooseError("Number of control points must be greater than or equal to degree + 1!");
 
-  std::vector<libMesh::Real> knot_vector(_degree, 0); // initialize bottom to zeros
-
-  for (const auto i : make_range(num_points_left + 1))
+  for (const auto i : make_range(num_points_left))
   {
     knot_vector.push_back(i); // count up
     mooseAssert(i < _control_points.size(),
                 "i must be less than the number of control points because of 0 indexing.");
   }
 
+  // Filling with int(degree) 0s at the beginning and 1s at the end makes the B-spline go through
+  // the start and end point
   for (const auto i : make_range(_degree))
   {
     libmesh_ignore(i);
-    knot_vector.push_back(num_points_left); // append values to create the open knot vector
+    knot_vector.push_back(num_points_left);
   }
 
   // Normalize values s.t. the the max value is 1.
   // This must be done to have a constant domain of t to be between 0 and 1 (inclusive).
-  for (libMesh::Real & value : knot_vector)
+  for (auto & value : knot_vector)
   {
     value /= num_points_left;
     mooseAssert(value <= 1.0 && value >= 0.0,

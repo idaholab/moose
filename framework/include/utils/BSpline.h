@@ -75,6 +75,8 @@ private:
   /// The control points.
   const std::vector<libMesh::Point> _control_points;
   /// The knot vector.
+  /// Size: degree + n_control_points + 1
+  /// The multiplicity of each knot influences the continuity of the spline
   const std::vector<libMesh::Real> _knot_vector;
 };
 }
