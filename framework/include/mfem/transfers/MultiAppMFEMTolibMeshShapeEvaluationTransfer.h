@@ -44,7 +44,11 @@ protected:
   /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override
   {
-    return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
+    MFEMProblem * mfem_from_problem =
+        dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
+    if (!mfem_from_problem)
+      mooseError("Transfer source problem is not an MFEM problem");
+    return *mfem_from_problem;
   }
 };
 
