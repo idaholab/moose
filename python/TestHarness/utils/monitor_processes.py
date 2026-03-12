@@ -12,7 +12,8 @@
 import os
 import sys
 from collections import defaultdict
-from multiprocessing import Event, Manager, Process, get_context
+from multiprocessing import Process, get_context
+from multiprocessing.context import ForkProcess
 from multiprocessing.managers import DictProxy
 from typing import Optional
 
@@ -71,7 +72,7 @@ class MemoryMonitor:
         self._interval: float = interval
         """How often to sample in seconds."""
 
-        self._process: Optional[Process] = None
+        self._process: Optional[ForkProcess] = None
         """The Multiprocessing process."""
 
         self._manager = None
