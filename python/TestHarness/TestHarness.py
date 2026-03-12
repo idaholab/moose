@@ -2135,7 +2135,7 @@ class TestHarness:
         """
         Helper for printing an error and exiting
         """
-        util.errorExit(args, colored=self.options.colored is True)
+        util.errorExit(*args, colored=self.options.colored is True)
 
     def printInfo(self, *args):
         """Print the given message as information."""
