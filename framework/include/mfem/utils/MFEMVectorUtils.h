@@ -25,10 +25,10 @@ namespace Moose::MFEM
 /**
  * Convert an index of a vector of libMesh::Points to an MFEM vector index, given an MFEM ordering
  */
-size_t MFEMIndex(const size_t i_dim,
-                 const size_t i_point,
-                 const size_t num_dims,
-                 const size_t num_points,
+std::size_t MFEMIndex(const std::size_t i_dim,
+                 const std::size_t i_point,
+                 const std::size_t num_dims,
+                 const std::size_t num_points,
                  const mfem::Ordering::Type ordering);
 
 /**
