@@ -232,6 +232,10 @@ class Scheduler(MooseObject):
                 )
 
         # Can't restrict resources without tracking
+        if self.options.max_cpu_per_slot and not monitor_job_cpu:
+            self.harness.errorExit(
+                "Cannot specify --max-cpu-per-slot; CPU tracking is not available"
+            )
         if self.options.max_memory_per_slot and (
             not monitor_job_memory or not self.CAN_SET_MAX_MEMORY
         ):

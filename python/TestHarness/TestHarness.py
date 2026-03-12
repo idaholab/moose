@@ -1835,16 +1835,11 @@ class TestHarness:
         resourcesgroup = parser.add_argument_group(
             "Resource tracking", "Control tracking of resources"
         )
-        default_max_cpu_per_slot = 110.0
         resourcesgroup.add_argument(
             "--max-cpu-per-slot",
             nargs=1,
             type=float,
-            default=default_max_cpu_per_slot,
-            help=(
-                "The maximum percent CPU to allow for a job, per slot "
-                f"(default: {default_max_cpu_per_slot})"
-            ),
+            help=("The maximum percent CPU to allow for a job, per slot"),
         )
         resourcesgroup.add_argument(
             "--max-memory-per-slot",
