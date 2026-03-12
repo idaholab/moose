@@ -275,19 +275,29 @@ public:
   }
   /**
    * Allocate array on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    */
-  void create(const std::vector<index_type> & n) { createInternal<true, true>(n); }
+  template <bool initialize = true>
+  void create(const std::vector<index_type> & n)
+  {
+    createInternal<true, true, initialize>(n);
+  }
   /**
    * Allocate array on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    */
-  void createHost(const std::vector<index_type> & n) { createInternal<true, false>(n); }
+  template <bool initialize = true>
+  void createHost(const std::vector<index_type> & n)
+  {
+    createInternal<true, false, initialize>(n);
+  }
   /**
    * Allocate array on device only
    * @param n The vector containing the size of each dimension
    */
-  void createDevice(const std::vector<index_type> & n) { createInternal<false, true>(n); }
+  void createDevice(const std::vector<index_type> & n) { createInternal<false, true, false>(n); }
   /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
@@ -445,22 +455,29 @@ protected:
    * Flag whether the array indices are offset
    */
   bool _is_offset = false;
+  /**
+   * Flag whether host data was allocated using malloc
+   */
+  bool _is_malloc = false;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * The internal method to initialize and allocate this array
    * @tparam host Whether host data will be allocated
    * @tparam device Whether device data will be allocated
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    */
-  template <bool host, bool device>
+  template <bool host, bool device, bool initialize>
   void createInternal(const std::vector<index_type> & n);
   /**
    * The internal method to initialize and allocate this array
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    * @param host The flag whether host data will be allocated
    * @param device The flag whether device data will be allocated
    */
+  template <bool initialize>
   void createInternal(const std::vector<index_type> & n, bool host, bool device);
   /**
    * The internal method to perform a memory copy
@@ -478,7 +495,9 @@ private:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Allocate host data for an initialized array that has not allocated host data
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    */
+  template <bool initialize>
   void allocHost();
   /**
    * Allocate device data for an initialized array that has not allocated device data
@@ -550,7 +569,7 @@ ArrayBase<T, dimension, index_type>::freeHost()
   }
   else
   {
-    if constexpr (std::is_default_constructible<T>::value)
+    if (!_is_malloc)
       // Allocated by new
       delete[] _host_data;
     else
@@ -564,6 +583,7 @@ ArrayBase<T, dimension, index_type>::freeHost()
   }
 
   _is_host_alloc = false;
+  _is_malloc = false;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -613,6 +633,7 @@ ArrayBase<T, dimension, index_type>::destroy()
 
   _is_init = false;
   _is_offset = false;
+  _is_malloc = false;
   _is_host_alloc = false;
   _is_device_alloc = false;
   _is_host_alias = false;
@@ -643,6 +664,7 @@ ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, i
 
   _is_init = array._is_init;
   _is_offset = array._is_offset;
+  _is_malloc = array._is_malloc;
   _is_host_alloc = array._is_host_alloc;
   _is_device_alloc = array._is_device_alloc;
   _is_host_alias = array._is_host_alias;
@@ -684,18 +706,26 @@ ArrayBase<T, dimension, index_type>::aliasDevice(T * ptr)
 }
 
 template <typename T, unsigned int dimension, typename index_type>
+template <bool initialize>
 void
 ArrayBase<T, dimension, index_type>::allocHost()
 {
   if (_is_host_alloc)
     return;
 
-  if constexpr (std::is_default_constructible<T>::value)
+  if constexpr (initialize)
+  {
+    static_assert(
+        std::is_default_constructible<T>::value,
+        "Data type is not default-constructible. Initialization argument should be set to false.");
+
     _host_data = new T[_size];
+  }
   else
     _host_data = static_cast<T *>(std::malloc(_size * sizeof(T)));
 
   _is_host_alloc = true;
+  _is_malloc = !initialize;
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -712,7 +742,7 @@ ArrayBase<T, dimension, index_type>::allocDevice()
 }
 
 template <typename T, unsigned int dimension, typename index_type>
-template <bool host, bool device>
+template <bool host, bool device, bool initialize>
 void
 ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type> & n)
 {
@@ -766,7 +796,7 @@ ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type
   }
 
   if constexpr (host)
-    allocHost();
+    allocHost<initialize>();
 
   if constexpr (device)
     allocDevice();
@@ -775,19 +805,20 @@ ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type
 }
 
 template <typename T, unsigned int dimension, typename index_type>
+template <bool initialize>
 void
 ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type> & n,
                                                     bool host,
                                                     bool device)
 {
   if (host && device)
-    createInternal<true, true>(n);
+    createInternal<true, true, initialize>(n);
   else if (host && !device)
-    createInternal<true, false>(n);
+    createInternal<true, false, initialize>(n);
   else if (!host && device)
-    createInternal<false, true>(n);
+    createInternal<false, true, initialize>(n);
   else
-    createInternal<false, false>(n);
+    createInternal<false, false, initialize>(n);
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -854,7 +885,7 @@ ArrayBase<T, dimension, index_type>::copyToHost()
   {
     if (_counter.use_count() == 1)
       // allocate memory if this array is not shared with other arrays
-      allocHost();
+      allocHost<false>();
     else
       // print error if this array is shared with other arrays
       mooseError("Kokkos array error: cannot copy from device to host because host memory "
@@ -1043,7 +1074,7 @@ ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, inde
 
   std::vector<index_type> n(std::begin(array._n), std::end(array._n));
 
-  createInternal(n, array._is_host_alloc, array._is_device_alloc);
+  createInternal<false>(n, array._is_host_alloc, array._is_device_alloc);
 
   if constexpr (ArrayDeepCopy<T>::value)
   {
@@ -1275,22 +1306,32 @@ public:
    * Initialize array with given dimensions but do not allocate
    * @param n0 The first dimension size
    */
-  void init(index_type n0) { this->template createInternal<false, false>({n0}); }
+  void init(index_type n0) { this->template createInternal<false, false, false>({n0}); }
   /**
    * Initialize and allocate array with given dimensions on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    */
-  void create(index_type n0) { this->template createInternal<true, true>({n0}); }
+  template <bool initialize = true>
+  void create(index_type n0)
+  {
+    this->template createInternal<true, true, initialize>({n0});
+  }
   /**
    * Initialize and allocate array with given dimensions on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    */
-  void createHost(index_type n0) { this->template createInternal<true, false>({n0}); }
+  template <bool initialize = true>
+  void createHost(index_type n0)
+  {
+    this->template createInternal<true, false, initialize>({n0});
+  }
   /**
    * Initialize and allocate array with given dimensions on device only
    * @param n0 The first dimension size
    */
-  void createDevice(index_type n0) { this->template createInternal<false, true>({n0}); }
+  void createDevice(index_type n0) { this->template createInternal<false, true, false>({n0}); }
   /**
    * Set starting index offsets
    * @param d0 The first dimension offset
@@ -1307,7 +1348,7 @@ public:
   template <bool host, bool device>
   void copyVector(const std::vector<T> & vector)
   {
-    this->template createInternal<host, device>({static_cast<index_type>(vector.size())});
+    this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
     if (host)
       std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
@@ -1455,21 +1496,31 @@ public:
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void init(index_type n0, index_type n1) { this->template createInternal<false, false>({n0, n1}); }
+  void init(index_type n0, index_type n1)
+  {
+    this->template createInternal<false, false, false>({n0, n1});
+  }
   /**
    * Initialize and allocate array with given dimensions on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void create(index_type n0, index_type n1) { this->template createInternal<true, true>({n0, n1}); }
+  template <bool initialize = true>
+  void create(index_type n0, index_type n1)
+  {
+    this->template createInternal<true, true, initialize>({n0, n1});
+  }
   /**
    * Initialize and allocate array with given dimensions on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
+  template <bool initialize = true>
   void createHost(index_type n0, index_type n1)
   {
-    this->template createInternal<true, false>({n0, n1});
+    this->template createInternal<true, false, initialize>({n0, n1});
   }
   /**
    * Initialize and allocate array with given dimensions on device only
@@ -1478,7 +1529,7 @@ public:
    */
   void createDevice(index_type n0, index_type n1)
   {
-    this->template createInternal<false, true>({n0, n1});
+    this->template createInternal<false, true, false>({n0, n1});
   }
   /**
    * Set starting index offsets
@@ -1579,27 +1630,31 @@ public:
    */
   void init(index_type n0, index_type n1, index_type n2)
   {
-    this->template createInternal<false, false>({n0, n1, n2});
+    this->template createInternal<false, false, false>({n0, n1, n2});
   }
   /**
    * Initialize and allocate array with given dimensions on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
+  template <bool initialize = true>
   void create(index_type n0, index_type n1, index_type n2)
   {
-    this->template createInternal<true, true>({n0, n1, n2});
+    this->template createInternal<true, true, initialize>({n0, n1, n2});
   }
   /**
    * Initialize and allocate array with given dimensions on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
+  template <bool initialize = true>
   void createHost(index_type n0, index_type n1, index_type n2)
   {
-    this->template createInternal<true, false>({n0, n1, n2});
+    this->template createInternal<true, false, initialize>({n0, n1, n2});
   }
   /**
    * Initialize and allocate array with given dimensions on device only
@@ -1609,7 +1664,7 @@ public:
    */
   void createDevice(index_type n0, index_type n1, index_type n2)
   {
-    this->template createInternal<false, true>({n0, n1, n2});
+    this->template createInternal<false, true, false>({n0, n1, n2});
   }
   /**
    * Set starting index offsets
@@ -1717,29 +1772,33 @@ public:
    */
   void init(index_type n0, index_type n1, index_type n2, index_type n3)
   {
-    this->template createInternal<false, false>({n0, n1, n2, n3});
+    this->template createInternal<false, false, false>({n0, n1, n2, n3});
   }
   /**
    * Initialize and allocate array with given dimensions on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
+  template <bool initialize = true>
   void create(index_type n0, index_type n1, index_type n2, index_type n3)
   {
-    this->template createInternal<true, true>({n0, n1, n2, n3});
+    this->template createInternal<true, true, initialize>({n0, n1, n2, n3});
   }
   /**
    * Initialize and allocate array with given dimensions on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
+  template <bool initialize = true>
   void createHost(index_type n0, index_type n1, index_type n2, index_type n3)
   {
-    this->template createInternal<true, false>({n0, n1, n2, n3});
+    this->template createInternal<true, false, initialize>({n0, n1, n2, n3});
   }
   /**
    * Initialize and allocate array with given dimensions on device only
@@ -1750,7 +1809,7 @@ public:
    */
   void createDevice(index_type n0, index_type n1, index_type n2, index_type n3)
   {
-    this->template createInternal<false, true>({n0, n1, n2, n3});
+    this->template createInternal<false, true, false>({n0, n1, n2, n3});
   }
   /**
    * Set starting index offsets
@@ -1868,31 +1927,35 @@ public:
    */
   void init(index_type n0, index_type n1, index_type n2, index_type n3, index_type n4)
   {
-    this->template createInternal<false, false>({n0, n1, n2, n3, n4});
+    this->template createInternal<false, false, false>({n0, n1, n2, n3, n4});
   }
   /**
    * Initialize and allocate array with given dimensions on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
+  template <bool initialize = true>
   void create(index_type n0, index_type n1, index_type n2, index_type n3, index_type n4)
   {
-    this->template createInternal<true, true>({n0, n1, n2, n3, n4});
+    this->template createInternal<true, true, initialize>({n0, n1, n2, n3, n4});
   }
   /**
    * Initialize and allocate array with given dimensions on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
+  template <bool initialize = true>
   void createHost(index_type n0, index_type n1, index_type n2, index_type n3, index_type n4)
   {
-    this->template createInternal<true, false>({n0, n1, n2, n3, n4});
+    this->template createInternal<true, false, initialize>({n0, n1, n2, n3, n4});
   }
   /**
    * Initialize and allocate array with given dimensions on device only
@@ -1904,7 +1967,7 @@ public:
    */
   void createDevice(index_type n0, index_type n1, index_type n2, index_type n3, index_type n4)
   {
-    this->template createInternal<false, true>({n0, n1, n2, n3, n4});
+    this->template createInternal<false, true, false>({n0, n1, n2, n3, n4});
   }
   /**
    * Set starting index offsets

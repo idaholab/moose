@@ -61,14 +61,15 @@ vector.aliasHost(petsc_ptr);
 vector.copyToDevice();
 ```
 
-If the data type is not default-constructable, `create()` will only allocate a raw block of uninitialized memory using `malloc()`.
-It is your responsibility to loop over the array and perform placement new to properly construct each entry.
+If the data type is not default-constructible or if you do not want to initialize array using the default constructor, you can set an optional template argument to `false` when calling `create()` or `createHost()`.
+It will only allocate a raw chunk of uninitialized memory using `malloc()` instead of `new`.
+Then, it becomes your responsibility to loop over the array and properly construct each entry using placement new.
 For example:
 
 ```cpp
 Array<NotDefaultConstructable> data;
 
-data.create(n);
+data.create<false>(n);
 
 for (auto & datum : data)
   new (&datum) NotDefaultConstructable(...);
