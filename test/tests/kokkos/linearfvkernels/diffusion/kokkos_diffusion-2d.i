@@ -89,8 +89,8 @@
   type = Steady
   system_names = u_sys
   l_tol = 1e-10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
+  multi_system_fixed_point = true
+  multi_system_fixed_point_convergence = linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
@@ -99,5 +99,9 @@
   [csv]
     type = CSV
     execute_on = FINAL
+  []
+  [console]
+    type = Console
+    execute_postprocessors_on = 'FINAL'
   []
 []
