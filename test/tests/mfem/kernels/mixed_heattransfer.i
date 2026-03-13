@@ -95,10 +95,27 @@
   end_time = 0.09
 []
 
+[VectorPostprocessors]
+  [temperature_line_sample]
+    type = MFEMLineValueSampler
+    variable = 'temperature'
+    start_point = '0.01 0.01 0'
+    end_point = '0.99 0.99 0'
+    num_points = 114
+  []
+  [time_integrated_heat_flux_line_sample]
+    type = MFEMLineValueSampler
+    variable = 'time_integrated_heat_flux'
+    start_point = '0 0 0'
+    end_point = '1 1 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/MixedHeatTransfer
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/MixedHeatTransfer/mht
   []
 []
