@@ -9,7 +9,7 @@
 
 #include "KokkosNodalL2Norm.h"
 
-registerKokkosPostprocessor("MooseApp", KokkosNodalL2Norm);
+registerKokkosReducer("MooseApp", KokkosNodalL2Norm);
 
 InputParameters
 KokkosNodalL2Norm::validParams()

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosUserObject.h"
+#include "KokkosSideReducer.h"
 
 #include "BoundaryRestrictableRequired.h"
 #include "MaterialPropertyInterface.h"
@@ -21,7 +22,7 @@ namespace Moose::Kokkos
 {
 
 class SideUserObject : public UserObject,
-                       public ::BoundaryRestrictableRequired,
+                       public SideReducer,
                        public ::MaterialPropertyInterface,
                        public ::CoupleableMooseVariableDependencyIntermediateInterface,
                        public ::TransientInterface,
@@ -38,6 +39,38 @@ public:
   SideUserObject(const SideUserObject & object);
 
   virtual void compute() override;
+
+  /**
+   * The parallel computation entry function called by Kokkos
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(DefaultLoop, const ThreadID tid, const Derived & object) const;
+
+  /**
+   * Shim for hook method that can be leveraged to implement static polymorphism
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void executeShim(const Derived & object, Datum & datum) const
+  {
+    object.execute(datum);
+  }
+
+  using SideReducer::operator();
+  using SideReducer::executeShim;
+
+protected:
+  virtual void dispatch();
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+SideUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & object) const
+{
+  auto [elem, side] = kokkosBoundaryElementSideID(tid);
+
+  Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
+
+  object.executeShim(object, datum);
+}
 
 } // namespace Moose::Kokkos

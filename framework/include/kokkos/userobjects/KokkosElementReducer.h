@@ -10,31 +10,37 @@
 #pragma once
 
 #include "KokkosReducerBase.h"
-#include "KokkosElementUserObject.h"
+
+#include "BlockRestrictable.h"
 
 namespace Moose::Kokkos
 {
 
-class ElementReducer : public ReducerBase, public ElementUserObject
+class ElementReducer : public ReducerBase, public ::BlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  ElementReducer(const InputParameters & parameters);
+  ElementReducer(const MooseObject * object);
 
-  virtual void compute() override;
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  ElementReducer(const ElementReducer & object);
+
+  virtual void reduce() override;
 
   /**
    * The parallel computation entry function called by Kokkos
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
-  operator()(DefaultLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
+  operator()(ReducerLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-ElementReducer::operator()(DefaultLoop,
+ElementReducer::operator()(ReducerLoop,
                            const ThreadID tid,
                            const Derived & reducer,
                            Real * result) const

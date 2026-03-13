@@ -31,8 +31,8 @@ public:
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
 
 protected:
   dof_id_type _node_id = libMesh::DofObject::invalid_id;
@@ -57,7 +57,7 @@ KokkosNodalMaxValueId::executeShim(const Derived & postprocessor,
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::join(DefaultLoop, Real * result, const Real * source) const
+KokkosNodalMaxValueId::join(ReducerLoop, Real * result, const Real * source) const
 {
   if (source[0] > result[0])
   {
@@ -67,7 +67,7 @@ KokkosNodalMaxValueId::join(DefaultLoop, Real * result, const Real * source) con
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::init(DefaultLoop, Real * result) const
+KokkosNodalMaxValueId::init(ReducerLoop, Real * result) const
 {
   result[0] = -std::numeric_limits<Real>::max();
 }

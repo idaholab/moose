@@ -11,13 +11,30 @@
 
 #include "KokkosHeader.h"
 #include "KokkosDatum.h"
+#include "KokkosDispatcher.h"
+
+#include "MooseObject.h"
+
+class FEProblemBase;
 
 namespace Moose::Kokkos
 {
 
-class ReducerBase
+class ReducerBase : public MeshHolder, public AssemblyHolder, public SystemHolder
 {
 public:
+  ReducerBase(const MooseObject * object);
+
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  ReducerBase(const ReducerBase & reducer);
+
+  /**
+   * Dispatch reduction operation
+   */
+  virtual void reduce() = 0;
+
   /**
    * Shim for hook method that can be leveraged to implement static polymorphism
    */
@@ -27,7 +44,22 @@ public:
     reducer.execute(datum, result);
   }
 
+  /**
+   * Kokkos function tag
+   */
+  struct ReducerLoop
+  {
+  };
+
 protected:
+  /**
+   * MOOSE object
+   */
+  const MooseObject * _reducer_object;
+  /**
+   * Kokkos functor dispatcher
+   */
+  std::unique_ptr<DispatcherBase> _dispatcher;
   /**
    * Reduction buffer
    */

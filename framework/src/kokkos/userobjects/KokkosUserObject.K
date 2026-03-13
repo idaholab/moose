@@ -24,17 +24,8 @@ UserObject::validParams()
   return params;
 }
 
-UserObject::UserObject(const InputParameters & parameters)
-  : ::UserObjectBase(parameters),
-    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
-    AssemblyHolder(_fe_problem.kokkosAssembly()),
-    SystemHolder(_fe_problem.getKokkosSystems())
-{
-}
+UserObject::UserObject(const InputParameters & parameters) : ::UserObjectBase(parameters) {}
 
-UserObject::UserObject(const UserObject & object)
-  : ::UserObjectBase(object, {}), MeshHolder(object), AssemblyHolder(object), SystemHolder(object)
-{
-}
+UserObject::UserObject(const UserObject & object) : ::UserObjectBase(object, {}) {}
 
 } // namespace Moose::Kokkos

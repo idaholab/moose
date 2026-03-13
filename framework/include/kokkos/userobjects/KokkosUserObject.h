@@ -19,10 +19,7 @@
 namespace Moose::Kokkos
 {
 
-class UserObject : public ::UserObjectBase,
-                   public MeshHolder,
-                   public AssemblyHolder,
-                   public SystemHolder
+class UserObject : public ::UserObjectBase
 {
 public:
   static InputParameters validParams();
@@ -48,21 +45,6 @@ public:
   struct DefaultLoop
   {
   };
-
-  /**
-   * Shim for hook method that can be leveraged to implement static polymorphism
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void executeShim(const Derived & userobject, Datum & datum) const
-  {
-    userobject.execute(datum);
-  }
-
-protected:
-  /**
-   * Kokkos functor dispatcher
-   */
-  std::unique_ptr<DispatcherBase> _dispatcher;
 };
 
 } // namespace Moose::Kokkos

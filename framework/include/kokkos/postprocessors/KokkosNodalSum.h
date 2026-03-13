@@ -31,8 +31,8 @@ public:
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
 };
 
 template <typename Derived>
@@ -44,13 +44,13 @@ KokkosNodalSum::executeShim(const Derived & postprocessor, Datum & datum, Real *
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalSum::join(DefaultLoop, Real * result, const Real * source) const
+KokkosNodalSum::join(ReducerLoop, Real * result, const Real * source) const
 {
   result[0] += source[0];
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalSum::init(DefaultLoop, Real * result) const
+KokkosNodalSum::init(ReducerLoop, Real * result) const
 {
   result[0] = 0;
 }

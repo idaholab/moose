@@ -15,14 +15,22 @@ namespace Moose::Kokkos
 InputParameters
 SideReducer::validParams()
 {
-  InputParameters params = SideUserObject::validParams();
+  InputParameters params = ::BoundaryRestrictableRequired::validParams();
   return params;
 }
 
-SideReducer::SideReducer(const InputParameters & parameters) : SideUserObject(parameters) {}
+SideReducer::SideReducer(const MooseObject * object)
+  : ReducerBase(object), ::BoundaryRestrictableRequired(object, false)
+{
+}
+
+SideReducer::SideReducer(const SideReducer & object)
+  : ReducerBase(object), ::BoundaryRestrictableRequired(object, {})
+{
+}
 
 void
-SideReducer::compute()
+SideReducer::reduce()
 {
   if (!_reduction_buffer.is_allocated())
     mooseError("Reduction buffer was not allocated.");
@@ -30,7 +38,7 @@ SideReducer::compute()
   Policy policy(0, numKokkosBoundarySides());
 
   if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
+    _dispatcher = DispatcherRegistry::build<ReducerLoop>(_reducer_object, _reducer_object->type());
 
   _dispatcher->parallelReduce(policy, _reduction_buffer);
 }

@@ -15,13 +15,13 @@ namespace Moose::Kokkos
 InputParameters
 NodalPostprocessor::validParams()
 {
-  InputParameters params = NodalReducer::validParams();
+  InputParameters params = NodalUserObject::validParams();
   params += Postprocessor::validParams();
   return params;
 }
 
 NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters)
-  : NodalReducer(parameters), Postprocessor(this)
+  : NodalUserObject(parameters), Postprocessor(this)
 {
 }
 

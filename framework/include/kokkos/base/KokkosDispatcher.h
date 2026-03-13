@@ -286,13 +286,28 @@ public:
   }
 
   /**
+   * Check whether a dispatcher exists for an object and function
+   * @tparam Operation The function tag of operator()
+   * @param name The registered object type name
+   * @returns Whether a dispatcher exists
+   */
+  template <typename Operation>
+  static bool hasDispatcher(const std::string & name)
+  {
+    auto operation = std::type_index(typeid(Operation));
+
+    return getRegistry()._dispatchers.find(std::make_pair(operation, name)) !=
+           getRegistry()._dispatchers.end();
+  }
+
+  /**
    * Set whether the user has overriden the hook method associated with an operation of a functor
    * @tparam Operation The function tag of operator()
    * @param name The registered object type name
    * @param flag Whether the user has overriden the hook method
    */
   template <typename Operation>
-  static void hasUserMethod(const std::string & name, bool flag)
+  static void hasUserMethod(const std::string & name, const bool flag)
   {
     getDispatcher<Operation>(name)->hasUserMethod(flag);
   }
@@ -481,14 +496,14 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosUserObjectFunction(classname, alias)
 
-// Postprocessor, VectorPostprocessor, Reporter
+// Reducer
 
 #define callRegisterKokkosReducerFunction(classname, objectname)                                   \
   static char registerKokkosReducer##classname()                                                   \
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::addReducer<classname::DefaultLoop, classname>(objectname);                 \
+    DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -503,10 +518,6 @@ private:
 #define registerKokkosReducerAliased(app, classname, alias)                                        \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosReducerFunction(classname, alias)
-
-#define registerKokkosPostprocessor(app, classname) registerKokkosReducer(app, classname)
-#define registerKokkosPostprocessorAliased(app, classname, alias)                                  \
-  registerKokkosReducerAliased(app, classname, alias)
 
 // User-defined parallel operation registry
 

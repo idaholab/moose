@@ -28,8 +28,8 @@ public:
   KOKKOS_FUNCTION void
   executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
-  KOKKOS_FUNCTION void join(typename Base::DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(typename Base::DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
 
 protected:
   const bool _average;
@@ -61,7 +61,7 @@ KokkosIntegralPostprocessor<Base>::executeShim(const Derived & postprocessor,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::join(typename Base::DefaultLoop,
+KokkosIntegralPostprocessor<Base>::join(typename Base::ReducerLoop,
                                         Real * result,
                                         const Real * source) const
 {
@@ -73,7 +73,7 @@ KokkosIntegralPostprocessor<Base>::join(typename Base::DefaultLoop,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::init(typename Base::DefaultLoop, Real * result) const
+KokkosIntegralPostprocessor<Base>::init(typename Base::ReducerLoop, Real * result) const
 {
   result[0] = 0;
 

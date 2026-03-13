@@ -16,7 +16,7 @@ InputParameters
 SideUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::BoundaryRestrictableRequired::validParams();
+  params += SideReducer::validParams();
   params += ::MaterialPropertyInterface::validParams();
   params += ::TransientInterface::validParams();
   params += ::ElementIDInterface::validParams();
@@ -25,7 +25,7 @@ SideUserObject::validParams()
 
 SideUserObject::SideUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    ::BoundaryRestrictableRequired(this, false),
+    SideReducer(this),
     ::MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     ::CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     ::TransientInterface(this),
@@ -35,7 +35,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
 
 SideUserObject::SideUserObject(const SideUserObject & object)
   : UserObject(object),
-    ::BoundaryRestrictableRequired(object, {}),
+    SideReducer(object),
     ::MaterialPropertyInterface(object, {}),
     ::CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
     ::TransientInterface(object, {}),
@@ -45,6 +45,15 @@ SideUserObject::SideUserObject(const SideUserObject & object)
 
 void
 SideUserObject::compute()
+{
+  if (DispatcherRegistry::hasDispatcher<ReducerLoop>(type()))
+    reduce();
+  else
+    dispatch();
+}
+
+void
+SideUserObject::dispatch()
 {
   Policy policy(0, numKokkosBoundarySides());
 

@@ -9,7 +9,7 @@
 
 #include "KokkosNodalMaxValueId.h"
 
-registerKokkosPostprocessor("MooseApp", KokkosNodalMaxValueId);
+registerKokkosReducer("MooseApp", KokkosNodalMaxValueId);
 
 InputParameters
 KokkosNodalMaxValueId::validParams()

@@ -10,12 +10,12 @@
 #pragma once
 
 #include "KokkosPostprocessor.h"
-#include "KokkosNodalReducer.h"
+#include "KokkosNodalUserObject.h"
 
 namespace Moose::Kokkos
 {
 
-class NodalPostprocessor : public NodalReducer, public Postprocessor
+class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {
 public:
   static InputParameters validParams();
@@ -31,7 +31,7 @@ public:
   virtual void finalize() override {}
 
   // Disambiguation with FunctorBase::operator()
-  using NodalReducer::operator();
+  using NodalUserObject::operator();
 };
 
 } // namespace Moose::Kokkos
