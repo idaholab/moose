@@ -1418,8 +1418,9 @@ public:
    * @param name The name of the method.
    * @param parameters The input parameters of the method.
    */
-  virtual std::vector<std::shared_ptr<FVInterpolationMethod>> addFVInterpolationMethod(
-      const std::string & method_type, const std::string & name, InputParameters & parameters);
+  virtual void addFVInterpolationMethod(const std::string & method_type,
+                                        const std::string & name,
+                                        InputParameters & parameters);
 
   /**
    * Retrieve an FV interpolation method

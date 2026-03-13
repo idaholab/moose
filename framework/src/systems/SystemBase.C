@@ -1592,10 +1592,10 @@ SystemBase::linearFVLimitedGradientContainer(
   return linearFVGradientContainer();
 }
 
-const std::set<Moose::FV::GradientLimiterType> &
+const std::unordered_set<Moose::FV::GradientLimiterType> &
 SystemBase::requestedLinearFVLimitedGradientTypes() const
 {
-  static const std::set<Moose::FV::GradientLimiterType> empty_limiter_types;
+  static const std::unordered_set<Moose::FV::GradientLimiterType> empty_limiter_types;
   return empty_limiter_types;
 }
 

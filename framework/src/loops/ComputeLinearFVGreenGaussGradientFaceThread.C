@@ -21,7 +21,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
         _fe_problem.getLinearSystem(_linear_system_number).system())),
     _system_number(_linear_system.number()),
-    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newlinearFVGradientContainer())
+    _temporary_gradient(
+        _fe_problem.getLinearSystem(_linear_system_number).temporaryLinearFVGradientContainer())
 {
 }
 
@@ -34,7 +35,7 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     _system_number(x._system_number),
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
-    _new_gradient(x._new_gradient)
+    _temporary_gradient(x._temporary_gradient)
 {
 }
 
@@ -58,9 +59,9 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       if (!size)
         size = range.size();
 
-      std::vector<std::vector<Real>> new_values_elem(_new_gradient.size(),
+      std::vector<std::vector<Real>> new_values_elem(_temporary_gradient.size(),
                                                      std::vector<Real>(size, 0.0));
-      std::vector<std::vector<Real>> new_values_neighbor(_new_gradient.size(),
+      std::vector<std::vector<Real>> new_values_neighbor(_temporary_gradient.size(),
                                                          std::vector<Real>(size, 0.0));
       std::vector<dof_id_type> dof_indices_elem(size, 0);
       std::vector<dof_id_type> dof_indices_neighbor(size, 0);
@@ -145,8 +146,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       }
       for (const auto i : make_range(_dim))
       {
-        _new_gradient[i]->add_vector(new_values_elem[i].data(), dof_indices_elem);
-        _new_gradient[i]->add_vector(new_values_neighbor[i].data(), dof_indices_neighbor);
+        _temporary_gradient[i]->add_vector(new_values_elem[i].data(), dof_indices_elem);
+        _temporary_gradient[i]->add_vector(new_values_neighbor[i].data(), dof_indices_neighbor);
       }
     }
   }

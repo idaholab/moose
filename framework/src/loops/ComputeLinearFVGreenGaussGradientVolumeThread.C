@@ -44,7 +44,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
 
   // This will be the vector we work on since the old gradient might still be needed
   // to compute extrapolated boundary conditions for example.
-  auto & grad_container = linear_system.newlinearFVGradientContainer();
+  auto & temporary_gradient_container = linear_system.temporaryLinearFVGradientContainer();
 
   // Computing this size can be very expensive so we only want to do it once
   unsigned int size = 0;
@@ -63,13 +63,13 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
       const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
       const auto state = Moose::currentState();
 
-      std::vector<std::vector<Real>> new_values(grad_container.size(),
+      std::vector<std::vector<Real>> new_values(temporary_gradient_container.size(),
                                                 std::vector<Real>(size, 0.0));
       std::vector<dof_id_type> dof_indices(size, 0);
       {
         std::vector<PetscVectorReader> grad_reader;
-        for (const auto dim_index : index_range(grad_container))
-          grad_reader.emplace_back(*grad_container[dim_index]);
+        for (const auto dim_index : index_range(temporary_gradient_container))
+          grad_reader.emplace_back(*temporary_gradient_container[dim_index]);
 
         // Iterate over all the elements in the range
         auto elem_iterator = range.begin();
@@ -88,7 +88,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
             dof_indices[elem_i] = elem_info->dofIndices()[_system_number][_current_var->number()];
             const auto volume = elem_info->volume() * elem_info->coordFactor();
 
-            for (const auto dim_index : index_range(grad_container))
+            for (const auto dim_index : index_range(temporary_gradient_container))
               new_values[dim_index][elem_i] = grad_reader[dim_index](dof_indices[elem_i]) / volume;
 
             if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
@@ -102,10 +102,11 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
           elem_iterator++;
         }
       }
-      for (const auto dim_index : index_range(grad_container))
+      for (const auto dim_index : index_range(temporary_gradient_container))
       {
-        grad_container[dim_index]->zero();
-        grad_container[dim_index]->add_vector(new_values[dim_index].data(), dof_indices);
+        temporary_gradient_container[dim_index]->zero();
+        temporary_gradient_container[dim_index]->add_vector(new_values[dim_index].data(),
+                                                            dof_indices);
       }
     }
   }
