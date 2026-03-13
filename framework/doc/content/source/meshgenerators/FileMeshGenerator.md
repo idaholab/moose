@@ -12,7 +12,7 @@ libMesh file IO readers.
 
 | Extension   | Description |
 | :-          | :- |
-| .e, .exd    | Sandia's ExodusII format |
+| .e, .exo    | Sandia's ExodusII format |
 | .bxt        | DynaIO |
 | .cpr        | Checkpoint file |
 | .fro        | ACDL's surface triangulation file |
@@ -32,7 +32,7 @@ for convenience if you are considering using MOOSE as a mesh file converter.
 
 | Extension   | Description              | Output type |
 | :-          | :-                       | :- |
-| .e, .exd    | Sandia's ExodusII format | [Exodus.md] |
+| .e, .exo    | Sandia's ExodusII format | [Exodus.md] |
 | .cpr        | Checkpoint file          | [Checkpoint.md] |
 | .dat        | Tecplot ASCII file       | [Tecplot.md] |
 | .gmv        | LANL's GMV (General Mesh Viewer) format | [GMVOutput.md] |
