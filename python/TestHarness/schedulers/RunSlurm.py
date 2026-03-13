@@ -8,7 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
+from contextlib import suppress
 from datetime import datetime
+
 from RunHPC import CallHPCPoolType, RunHPC
 
 
@@ -36,6 +38,7 @@ class RunSlurm(RunHPC):
             active_job_ids,
             "--parsable2",
             "--noheader",
+            "--units=K",
             "-o",
             "jobid,exitcode,state,reason,start,end",
         ]
@@ -72,10 +75,11 @@ class RunSlurm(RunHPC):
             if self.scheduler_options.monitor_job_memory and (
                 max_rss := status_split[6]
             ):
-                max_rss_bytes = int(max_rss.split("K")[0]) * 1024
-                statuses[id_num]["max_rss"] = max(
-                    statuses[id_num]["max_rss"], max_rss_bytes
-                )
+                with suppress(ValueError):
+                    max_rss_bytes = int(max_rss.split("K")[0]) * 1024
+                    statuses[id_num]["max_rss"] = max(
+                        statuses[id_num]["max_rss"], max_rss_bytes
+                    )
 
         # Update the jobs that we can
         for hpc_job in hpc_jobs:
