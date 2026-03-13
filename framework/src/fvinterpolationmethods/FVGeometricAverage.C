@@ -33,7 +33,7 @@ FVGeometricAverage::interpolate(const FaceInfo & face,
   return gc * elem_value + (1.0 - gc) * neighbor_value;
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
+FVAdvectedInterpolationMethod::AdvectedSystemContribution
 FVGeometricAverage::advectedInterpolate(const FaceInfo & face,
                                         Real /*elem_value*/,
                                         Real /*neighbor_value*/,

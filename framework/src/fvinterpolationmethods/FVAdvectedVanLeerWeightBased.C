@@ -45,7 +45,7 @@ FVAdvectedVanLeerWeightBased::FVAdvectedVanLeerWeightBased(const InputParameters
 {
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
+FVAdvectedInterpolationMethod::AdvectedSystemContribution
 FVAdvectedVanLeerWeightBased::advectedInterpolate(const FaceInfo & face,
                                                   Real elem_value,
                                                   Real neighbor_value,

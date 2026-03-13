@@ -9,21 +9,22 @@
 
 #pragma once
 
+#include "FVAdvectedInterpolationMethod.h"
+#include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
 #include "MooseTypes.h"
 
 /**
  * Simple linear interpolation that uses the geometric weighting stored on FaceInfo.
  */
-class FVGeometricAverage : public FVInterpolationMethod
+class FVGeometricAverage : public FVInterpolationMethod,
+                           public FVFaceInterpolationMethod,
+                           public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
   FVGeometricAverage(const InputParameters & params);
-
-  bool supportsFaceInterpolation() const override { return true; }
-  bool supportsAdvectedInterpolation() const override { return true; }
 
   /**
    * Interpolate using FaceInfo's geometric weight.

@@ -10,8 +10,9 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
+#include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
-#include "FVInterpolationMethod.h"
+
 /**
  * Kernel that adds contributions from an advection term discretized using the finite volume method
  * to a linear system.
@@ -47,10 +48,10 @@ protected:
   const RealVectorValue _velocity;
 
   /// The interpolation method to use for the advected quantity
-  const FVInterpolationMethod * _adv_interp_method;
+  const FVAdvectedInterpolationMethod & _adv_interp_method;
 
   /// Cached weights/correction for the current face (refreshed in setupFaceData)
-  FVInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
+  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
 
   /// Reusable gradient storage used when advected interpolation requires gradients.
   VectorValue<Real> _elem_grad_storage;

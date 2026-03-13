@@ -9,20 +9,22 @@
 
 #pragma once
 
+#include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
+
 /**
  * Minmod interpolation for advected quantities that blends between upwind and the
  * higher-order limited value using only (elem, neighbor) weights.
  */
-class FVAdvectedMinmodWeightBased : public FVInterpolationMethod
+class FVAdvectedMinmodWeightBased : public FVInterpolationMethod,
+                                    public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
   FVAdvectedMinmodWeightBased(const InputParameters & params);
 
-  bool supportsAdvectedInterpolation() const override { return true; }
-  bool advectedInterpolationNeedsGradients() const override { return true; }
+  bool needsGradients() const override { return true; }
 
   /**
    * Compute the matrix weights for the advected face value. Interpolation is used on

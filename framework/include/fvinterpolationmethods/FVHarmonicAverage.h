@@ -9,19 +9,18 @@
 
 #pragma once
 
+#include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
 
 /**
  * Harmonic-mean interpolation using the geometric weighting stored on FaceInfo.
  */
-class FVHarmonicAverage : public FVInterpolationMethod
+class FVHarmonicAverage : public FVInterpolationMethod, public FVFaceInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
   FVHarmonicAverage(const InputParameters & params);
-
-  bool supportsFaceInterpolation() const override { return true; }
 
   /**
    * Harmonic-mean interpolation using FaceInfo's geometric weight.

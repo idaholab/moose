@@ -38,7 +38,7 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff")),
     _coeff_interp_method(
         isParamValid("coeff_interp_method")
-            ? &getFVInterpolationMethod(getParam<InterpolationMethodName>("coeff_interp_method"))
+            ? &getFVFaceInterpolationMethod(getParam<InterpolationMethodName>("coeff_interp_method"))
             : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _flux_matrix_contribution(0.0),
@@ -46,15 +46,6 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
     _cached_face_diffusivity(false),
     _face_diffusivity(0.0)
 {
-  if (_coeff_interp_method && !_coeff_interp_method->supportsFaceInterpolation())
-    mooseError("FVInterpolationMethod '",
-               _coeff_interp_method->name(),
-               "' (",
-               _coeff_interp_method->type(),
-               ") does not support face interpolation and cannot be used by ",
-               type(),
-               ".");
-
   if (_use_nonorthogonal_correction)
     _var.computeCellGradients();
 }

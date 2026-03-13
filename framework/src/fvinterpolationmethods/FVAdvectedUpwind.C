@@ -23,7 +23,7 @@ FVAdvectedUpwind::FVAdvectedUpwind(const InputParameters & params) : FVInterpola
 {
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
+FVAdvectedInterpolationMethod::AdvectedSystemContribution
 FVAdvectedUpwind::advectedInterpolate(const FaceInfo & /*face*/,
                                       Real /*elem_value*/,
                                       Real /*neighbor_value*/,

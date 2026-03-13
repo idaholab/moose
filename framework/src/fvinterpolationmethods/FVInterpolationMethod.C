@@ -23,32 +23,3 @@ FVInterpolationMethod::validParams()
 FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params) : MooseObject(params)
 {
 }
-
-Real
-FVInterpolationMethod::interpolate(const FaceInfo &, Real, Real) const
-{
-  mooseError(
-      "Interpolation method '", name(), "' (", type(), ") does not define face interpolation.");
-}
-
-FVInterpolationMethod::AdvectedSystemContribution
-FVInterpolationMethod::advectedInterpolate(
-    const FaceInfo &, Real, Real, const VectorValue<Real> *, const VectorValue<Real> *, Real) const
-{
-  mooseError(
-      "Interpolation method '", name(), "' (", type(), ") does not define advected interpolation.");
-}
-
-Real
-FVInterpolationMethod::advectedInterpolateValue(const FaceInfo & face,
-                                                const Real elem_value,
-                                                const Real neighbor_value,
-                                                const VectorValue<Real> * elem_grad,
-                                                const VectorValue<Real> * neighbor_grad,
-                                                const Real mass_flux) const
-{
-  const auto result =
-      advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value -
-         result.rhs_face_value;
-}
