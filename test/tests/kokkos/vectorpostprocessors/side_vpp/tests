@@ -1,0 +1,13 @@
+[Tests]
+  design = 'syntax/KokkosUserObjects/index.md'
+  issues = '#30655'
+
+  [side_vpp]
+    type = 'CSVDiff'
+    input = 'kokkos_side_vpp_test.i'
+    csvdiff = 'kokkos_side_vpp_test_out_boundary_solution_0001.csv'
+    requirement = 'The Kokkos system shall be able to aggregate and output vector data by iterating over sides.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
