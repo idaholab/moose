@@ -657,9 +657,10 @@ class RunApp(Tester):
         derived testers from having a successful status set, before actually running
         the derived processResults method.
 
-        # TODO: because RunParallel is now setting every successful status message,
+        # TODO: because Scheduler is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
+
         # If we had capability requirements and get an exit 77, it means that the
         # capability doesn't exist in the binary
         if self.specs["capabilities"] and exit_code == 77:

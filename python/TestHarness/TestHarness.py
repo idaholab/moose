@@ -1141,7 +1141,7 @@ class TestHarness:
         elif self.options.hpc == "slurm":
             return "RunSlurm"
         # The default scheduler plugin
-        return "RunParallel"
+        return "RunLocal"
 
     def initializeResults(self):
         """Initializes the results storage

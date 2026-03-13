@@ -24,7 +24,7 @@ from enum import Enum
 from multiprocessing.pool import ThreadPool
 from typing import Optional
 
-from RunParallel import RunParallel
+from Scheduler import Scheduler
 
 from TestHarness import util
 
@@ -94,16 +94,10 @@ CallHPCPoolType = Enum("CallHPCPoolType", ["submit", "queue", "status", "kill"])
 """The types for the pools for calling HPC commands."""
 
 
-class RunHPC(RunParallel):
+class RunHPC(Scheduler):
     """
     Base scheduler for jobs that are ran on HPC.
     """
-
-    CAN_SET_HWLOC_TOPOLOGY = False
-    CAN_SET_MAX_MEMORY = False
-    CAN_OPENMPI_OVERSUBSCRIBE = False
-    MONITOR_JOB_CPU = False
-    MONITOR_JOB_MEMORY = False
 
     def __init__(self, harness, params):
         import paramiko
@@ -999,7 +993,7 @@ class RunHPC(RunParallel):
             job.appendOutput(util.outputHeader(f"Job {hpc_job.id} {output}"))
 
     def waitFinish(self):
-        RunParallel.waitFinish(self)
+        super().waitFinish()
 
         # Kill the remaining jobs that are held, which would exist if things
         # fail and jobs that we pre-submitted were skipped due to a failed

@@ -7,32 +7,27 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import traceback
-import platform
 import os
-from typing import TYPE_CHECKING
+import platform
 from importlib.util import find_spec
-from time import perf_counter
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from TestHarness.schedulers.Scheduler import Scheduler
-from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
+from TestHarness.schedulers.Scheduler import Scheduler
 
-if platform.system() != "Windows" and find_spec("psutil") is not None or TYPE_CHECKING:
+_MONITOR_JOB_MEMORY = platform.system() != "Windows" and find_spec("psutil") is not None
+if _MONITOR_JOB_MEMORY or TYPE_CHECKING:
     from TestHarness.utils.monitor_processes import MemoryMonitor
 
 
-class RunParallel(Scheduler):
-    """
-    RunParallel is a Scheduler plugin responsible for executing a tester
-    command and doing something with its output.
-    """
+class RunLocal(Scheduler):
+    """A scheduler for executing tester commands locally."""
 
-    @staticmethod
-    def validParams():
-        params = Scheduler.validParams()
-        return params
+    CAN_SET_HWLOC_TOPOLOGY = True
+    CAN_SET_MAX_MEMORY = True
+    CAN_OPENMPI_OVERSUBSCRIBE = True
+    MONITOR_JOB_CPU = True
+    MONITOR_JOB_MEMORY = _MONITOR_JOB_MEMORY
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,75 +38,9 @@ class RunParallel(Scheduler):
         if self.scheduler_options.monitor_job_memory:
             self._memory_monitor = MemoryMonitor(os.getpid(), interval=0.1)
 
-    def run(self, job):
-        """Run a tester command"""
-        # Build and set the runner that will actually run the commands
-        # This is abstracted away so we can support local runners and PBS/slurm runners
-        job.setRunner(self.buildRunner(job, self.options))
-
-        tester = job.getTester()
-
-        # Do not execute app, and do not processResults
-        if self.options.dry_run:
-            self.setSuccessfulMessage(tester)
-            return
-        # Load results from a previous run
-        elif self.options.show_last_run:
-            job.loadPreviousResults()
-            return
-
-        # Start job timer
-        job.timer.startMain()
-
-        # Anything that throws while running or processing a job should be caught
-        # and the job should fail
-        try:
-            # Launch and wait for the command to finish
-            job.run()
-
-            # Set the successful message
-            if not tester.isSkip() and not job.isFail():
-                self.setSuccessfulMessage(tester)
-        except:
-            trace = traceback.format_exc()
-            job.appendOutput(
-                util.outputHeader("Python exception encountered in Job") + trace
-            )
-            job.setStatus(job.error, "JOB EXCEPTION")
-        finally:
-            # Stop job timer
-            job.timer.stopMain()
-
     def buildRunner(self, job, options) -> Runner:
-        """Builds the runner for a given tester
-
-        This exists as a method so that derived schedulers can change how they
-        run commands (i.e., for PBS and slurm)
-        """
+        """Build a SubprocessRunner."""
         return SubprocessRunner(job, options, self.scheduler_options)
-
-    def setSuccessfulMessage(self, tester):
-        """properly set a finished successful message for tester"""
-        message = ""
-
-        # Handle 'dry run' first, because if true, job.run() never took place
-        if self.options.dry_run:
-            message = "DRY RUN"
-
-        elif tester.specs["check_input"]:
-            message = "SYNTAX PASS"
-
-        elif self.options.scaling and tester.specs["scale_refine"]:
-            message = "SCALED"
-
-        elif (
-            self.options.enable_recover
-            and tester.specs.isValid("skip_checks")
-            and tester.specs["skip_checks"]
-        ):
-            message = "PART1"
-
-        tester.setStatus(tester.success, message)
 
     def waitFinish(self):
         # Start the memory monitor if enabled
