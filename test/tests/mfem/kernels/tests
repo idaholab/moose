@@ -161,10 +161,14 @@
     restep = false
   []
   [MFEMMixedHeatTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = mixed_heattransfer.i
-    xmldiff = 'OutputData/MixedHeatTransfer/Run0/Run0.pvd
-                OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    csvdiff = 'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0001.csv '
+              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0002.csv '
+              'OutputData/MixedHeatTransfer/mht_temperature_line_sample_0003.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0001.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0002.csv '
+              'OutputData/MixedHeatTransfer/mht_time_integrated_heat_flux_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
