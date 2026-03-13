@@ -1,6 +1,6 @@
 [Tests]
   design = 'vectorpostprocessors/ExtraIDIntegralVectorPostprocessor.md'
-  issues = '#19617 #27138 #30975'
+  issues = '#19617 #27138 #30975 #32477'
   [test]
     requirement = 'The system shall be able to integrate or average variables or material properties parsed by extra IDs'
     [default]
@@ -43,6 +43,13 @@
       detail = 'with multiple variable and material property averages and multiple extra IDs'
       recover = false
     []
+    [rz_coordinates]
+      type = 'CSVDiff'
+      input = 'rz_test.i'
+      csvdiff = 'rz_test_out_average_0001.csv'
+      detail = 'when the mesh is in rz-coordinates'
+      recover = false
+    []    
   []
 
   [functor]

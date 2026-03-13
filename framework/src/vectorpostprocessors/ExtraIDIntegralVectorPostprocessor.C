@@ -142,7 +142,7 @@ ExtraIDIntegralVectorPostprocessor::execute()
         (*_integrals[i])[ipos] += _JxW[qp] * _coord[qp] * (*_props[iprop])[qp];
 
     if (_average)
-      _volumes[ipos] += _current_elem->volume();
+      _volumes[ipos] += _current_elem_volume;
   }
 }
 
