@@ -1,6 +1,8 @@
 dx = 3.5
 phi = ${fparse (1 + sqrt(5)) / 2}
 phi_inv = ${fparse 1./phi}
+silver = ${fparse 1 + sqrt(2)}
+one_ds = ${fparse 1 / silver}
 a = 1.5
 b = 2
 c = 1.5
@@ -33,9 +35,87 @@ c = 1.5
     subdomain_name = 'truncated_tetrahedron'
   []
 
+  [cuboctahedron]
+    type = ElementGenerator
+    input = 'truncated_tetrahedron'
+    nodal_positions = '1 1 1
+                       1 -1 1
+                      -1 -1 1
+                      -1  1 1
+                      ${fparse sqrt(2)} 0 0
+                      0 ${fparse sqrt(2)} 0
+                      -${fparse sqrt(2)} 0 0
+                      0 -${fparse sqrt(2)} 0
+                       1  1 -1
+                       1 -1 -1
+                      -1 -1 -1
+                      -1  1 -1'
+    element_connectivity = '0 1 2 3;
+                            0 1 4;
+                            0 4 8 5;
+                            0 5 3;
+                            3 5 11 6;
+                            3 6 2;
+                            2 6 10 7;
+                            2 7 1;
+                            1 7 9 4;
+                            8 9 4;
+                            8 11 5;
+                            10 11 6;
+                            9 10 7;
+                            8 9 10 11'
+    elem_type = "C0POLYHEDRON"
+    subdomain_name = 'cuboctahedron'
+  []
+
+  [truncated_cube]
+    input = 'cuboctahedron'
+    nodal_positions = '${one_ds} 1 1
+                       1 ${one_ds} 1
+                       1 -${one_ds} 1
+                      ${one_ds} 1 1
+                      ${one_ds} -1 1
+                      -${one_ds} -1 1
+                      -1 -${one_ds} 1
+                      -1 ${one_ds} 1
+                      -${one_ds} 1 1
+                      -1 1 ${one_ds}
+                      1  1 ${one_ds}
+                      1 -1 ${one_ds}
+                      -1 -1 ${one_ds}
+                      -1 1 -${one_ds}
+                      1 1 -${one_ds}
+                      1 -1 -${one_ds}
+                      -1 -1 -${one_ds}
+                      ${one_ds} 1 -1
+                      1 -${one_ds} -1
+                       1 ${one_ds} -1
+                      ${one_ds} 1 -1
+                      ${one_ds} -1 -1
+                      1 -${one_ds} -1
+                      1 ${one_ds} -1
+                      ${one_ds} 1 -1
+                      -${one_ds} -1 -1
+                      -1 -${one_ds} -1
+                      -1 ${one_ds} -1
+                      -${one_ds} 1 -1'
+    element_connectivity = '0 1 2 3 4 5 6 7;
+                            0 1 9;
+                            6 7 8;
+                            5 4 11;
+                            3 2 10;
+                            2 1 9 13 18 17 14 10;
+                            4 3 10 14 16 20 15 11;
+                            6 5 11 15 21 22 12 8;
+                            0 7 8 12 23 19 13 9;
+                            16 17 18 19 23 22 21 20'
+    elem_type = "C0POLYHEDRON"
+    subdomain_name = 'cuboctahedron'
+  []
+
   [convert]
     type = ElementsToTetrahedronsConverter
-    input = ''
+    input = 'cuboctahedron'
   []
   [check]
     type = MeshDiagnosticsGenerator
