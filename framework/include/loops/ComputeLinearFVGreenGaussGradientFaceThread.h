@@ -82,7 +82,7 @@ protected:
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Cache for the new gradient which is being built. It is needed because in certain scenarios the
-  /// old gradient is used for computing the new gradient.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _new_gradient;
+  /// Cache for the temporary gradient being built. It is needed because in certain scenarios the
+  /// old gradient is used while assembling the replacement gradient.
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
 };

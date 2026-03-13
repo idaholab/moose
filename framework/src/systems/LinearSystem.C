@@ -309,7 +309,8 @@ LinearSystem::computeGradients()
 }
 
 std::vector<std::unique_ptr<NumericVector<Number>>> &
-LinearSystem::newlinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
+LinearSystem::temporaryLinearFVLimitedGradientContainer(
+    const Moose::FV::GradientLimiterType limiter_type)
 {
   return _new_limited_gradient[limiter_type];
 }

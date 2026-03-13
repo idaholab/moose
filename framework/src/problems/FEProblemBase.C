@@ -4639,14 +4639,12 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   return uos;
 }
 
-std::vector<std::shared_ptr<FVInterpolationMethod>>
+void
 FEProblemBase::addFVInterpolationMethod(const std::string & method_type,
                                         const std::string & name,
                                         InputParameters & parameters)
 {
   parallel_object_only();
-
-  std::vector<std::shared_ptr<FVInterpolationMethod>> methods;
 
   addObjectParamsHelper(parameters, name);
 
@@ -4654,11 +4652,8 @@ FEProblemBase::addFVInterpolationMethod(const std::string & method_type,
   {
     auto method = _factory.create<FVInterpolationMethod>(method_type, name, parameters, tid);
     logAdd("FVInterpolationMethod", name, method_type, parameters);
-    methods.push_back(method);
     theWarehouse().add(method);
   }
-
-  return methods;
 }
 
 const UserObject &

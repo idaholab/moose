@@ -11,6 +11,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "DataIO.h"
@@ -948,7 +949,7 @@ public:
   /**
    * Get the set of limited gradient types.
    */
-  virtual const std::set<Moose::FV::GradientLimiterType> &
+  virtual const std::unordered_set<Moose::FV::GradientLimiterType> &
   requestedLinearFVLimitedGradientTypes() const;
 
   /**

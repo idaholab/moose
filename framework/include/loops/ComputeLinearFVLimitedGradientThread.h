@@ -80,6 +80,6 @@ protected:
   /// Pointer to the current variable we are operating on.
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Reference to the new limited gradient
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _new_limited_gradient;
+  /// Reference to the temporary limited gradient storage
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_limited_gradient;
 };

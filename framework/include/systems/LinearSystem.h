@@ -13,8 +13,9 @@
 #include "PerfGraphInterface.h"
 #include "GradientLimiterType.h"
 
-#include <map>
 #include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
@@ -143,7 +144,7 @@ public:
   linearFVLimitedGradientContainer(
       const Moose::FV::GradientLimiterType limiter_type) const override;
 
-  virtual const std::set<Moose::FV::GradientLimiterType> &
+  virtual const std::unordered_set<Moose::FV::GradientLimiterType> &
   requestedLinearFVLimitedGradientTypes() const override
   {
     return _requested_limited_gradient_types;
@@ -155,19 +156,22 @@ public:
   void computeGradients();
 
   /**
-   * Return a reference to the new (temporary) gradient container vectors
+   * Return temporary storage for gradients being assembled.
+   * The returned vectors are temporary and are moved into the final gradient container before
+   * the gradient assembly is finished.
    */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & newlinearFVGradientContainer()
+  std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
   {
     return _new_gradient;
   }
 
   /**
-   * Return a reference to the new (temporary) limited gradient container vectors for the supplied
-   * limiter type.
+   * Return temporary storage for limited gradients during gradient assembly.
+   * The returned vectors are temporary and are moved into the final linear
+   * gradient container before the gradient assembly is finished.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> &
-  newlinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
+  temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
 
   virtual void compute(ExecFlagType type) override;
 
@@ -237,20 +241,22 @@ protected:
   /// move the nev vectors to the original containers.
   std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 
-  /// Raw cell-centered gradient components. Vector index = spatial component, NumericVector index
-  /// = variable DoF.
+  /// Raw cell-centered gradient components. First index is spatial component
+  /// ([0] is du/dx and so on).
   std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
 
   /// Set of requested limiter types for which limited gradients should be computed.
-  std::set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
+  std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
 
   /// Persisted limited gradient components keyed by limiter type.
-  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
+  std::unordered_map<Moose::FV::GradientLimiterType,
+                     std::vector<std::unique_ptr<NumericVector<Number>>>>
       _raw_limited_grad_containers;
 
   /// Vectors to store new limited gradients during computation:
   /// <limiter type, vector index = spatial component>.
-  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
+  std::unordered_map<Moose::FV::GradientLimiterType,
+                     std::vector<std::unique_ptr<NumericVector<Number>>>>
       _new_limited_gradient;
 
 private:

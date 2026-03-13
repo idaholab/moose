@@ -32,8 +32,9 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
         _fe_problem.getLinearSystem(_linear_system_number).system())),
     _system_number(_linear_system.number()),
     _limiter_type(limiter_type),
-    _new_limited_gradient(_fe_problem.getLinearSystem(_linear_system_number)
-                              .newlinearFVLimitedGradientContainer(_limiter_type))
+    _temporary_limited_gradient(
+        _fe_problem.getLinearSystem(_linear_system_number)
+            .temporaryLinearFVLimitedGradientContainer(_limiter_type))
 {
 }
 
@@ -45,7 +46,7 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     _linear_system(x._linear_system),
     _system_number(x._system_number),
     _limiter_type(x._limiter_type),
-    _new_limited_gradient(x._new_limited_gradient)
+    _temporary_limited_gradient(x._temporary_limited_gradient)
 {
 }
 
@@ -77,7 +78,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
     if (!size)
       size = range.size();
 
-    std::vector<std::vector<Real>> new_values(_new_limited_gradient.size(),
+    std::vector<std::vector<Real>> new_values(_temporary_limited_gradient.size(),
                                               std::vector<Real>(size, 0.0));
     std::vector<dof_id_type> dof_indices(size, 0);
 
@@ -89,7 +90,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
 
     mooseAssert(raw_grad_container.size() >= _dim,
                 "Raw gradient container has fewer components than mesh dimension.");
-    mooseAssert(_new_limited_gradient.size() >= _dim,
+    mooseAssert(_temporary_limited_gradient.size() >= _dim,
                 "Limited gradient container has fewer components than mesh dimension.");
 
     auto elem_iterator = range.begin();
@@ -202,7 +203,8 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
 
     for (const auto dim_index : make_range(_dim))
     {
-      _new_limited_gradient[dim_index]->add_vector(new_values[dim_index].data(), dof_indices);
+      _temporary_limited_gradient[dim_index]->add_vector(new_values[dim_index].data(),
+                                                         dof_indices);
     }
   }
 }
