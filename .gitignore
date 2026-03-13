@@ -346,3 +346,7 @@ binaryoutput
 # Nsight Systems profiling output
 *.nsys-rep
 *.sqlite
+
+# Local agent instructions
+AGENTS.local.md
+AGENTS.user.md
