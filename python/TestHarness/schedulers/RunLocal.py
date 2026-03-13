@@ -66,23 +66,30 @@ class RunLocal(Scheduler):
         samples = self._memory_monitor.get_samples()
 
         # Update job memory and kill jobs over memory
-        max_memory_per_slot = self.options.max_memory_per_slot
+        max_memory_per_slot_mb = self.options.max_memory_per_slot
         for pid, job in pid_to_job.items():
-            if (memory := samples.get(pid)) is not None:
+            if (job_memory_bytes := samples.get(pid)) is not None:
                 # If the job is already an error (we killed it), nothing to do:
                 if job.getStatus() == job.error:
                     continue
 
                 # Update max memory, if greater; this is True if it was greater
-                updated = job.getRunner().updateMaxMemory(memory)
+                updated = job.getRunner().updateMaxMemory(job_memory_bytes)
 
                 # Check memory usage if needed
-                if updated and max_memory_per_slot:
-                    memory_per_slot_mb = memory / job.getSlots() * 2**-20
-                    if memory_per_slot_mb > max_memory_per_slot:
-                        message = (
-                            "JOB KILLED (OVER MEMORY): "
-                            f"Memory/slot {memory_per_slot_mb:.2f} "
-                            f"MB > allowed {max_memory_per_slot:.2f} MB"
+                if (
+                    updated
+                    and max_memory_per_slot_mb
+                    and (
+                        job_memory_per_slot_mb := (
+                            job_memory_bytes / job.getSlots() * 2**-20
                         )
-                        job.killProcess(job.error, "KILLED: OVER MEMORY", message)
+                    )
+                    > max_memory_per_slot_mb
+                ):
+                    message = (
+                        "JOB KILLED (OVER MEMORY): "
+                        f"Memory/slot {job_memory_per_slot_mb:.2f} "
+                        f"MB > allowed {max_memory_per_slot_mb:.2f} MB"
+                    )
+                    job.killProcess(job.error, "KILLED: OVER MEMORY", message)
