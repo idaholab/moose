@@ -41,9 +41,6 @@ public:
   /// Methods for computing and setting mean and standard deviation
   void computeSet(const RealEigenMatrix & input);
 
-  /// Helper for dataStore
-  void storeHelper(std::ostream & stream, void * context) const;
-
   /// Returns the standardized (centered and scaled) of the provided input
   void getStandardized(RealEigenMatrix & input) const;
 
@@ -61,9 +58,32 @@ protected:
   std::vector<Real> _stdev;
 };
 
-} // StochasticTools namespace
+// Template implementation of store/load functions
+template <typename Context>
+void
+dataStore(std::ostream & stream, Standardizer & standardizer, Context context)
+{
+  unsigned int n = standardizer.getMean().size();
+  ::dataStore(stream, n, context);
+  for (unsigned int ii = 0; ii < n; ++ii)
+    ::dataStore(stream, standardizer.getMean()[ii], context);
+  for (unsigned int ii = 0; ii < n; ++ii)
+    ::dataStore(stream, standardizer.getStdDev()[ii], context);
+}
 
-template <>
-void dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context);
-template <>
-void dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, void * context);
+template <typename Context>
+void
+dataLoad(std::istream & stream, Standardizer & standardizer, Context context)
+{
+  unsigned int n;
+  ::dataLoad(stream, n, context);
+  std::vector<Real> mean(n);
+  std::vector<Real> stdev(n);
+  for (unsigned int ii = 0; ii < n; ++ii)
+    ::dataLoad(stream, mean[ii], context);
+  for (unsigned int ii = 0; ii < n; ++ii)
+    ::dataLoad(stream, stdev[ii], context);
+  standardizer.set(mean, stdev);
+}
+
+} // StochasticTools namespace

@@ -57,10 +57,10 @@ fnv1aHash(const Pair<T1, T2> & key)
 template <typename T1, typename T2>
 class Map;
 
-template <typename T1, typename T2>
-void dataStore(std::ostream & stream, Map<T1, T2> & map, void * context);
-template <typename T1, typename T2>
-void dataLoad(std::istream & stream, Map<T1, T2> & map, void * context);
+template <typename T1, typename T2, typename Context>
+void dataStore(std::ostream & stream, Map<T1, T2> & map, Context context);
+template <typename T1, typename T2, typename Context>
+void dataLoad(std::istream & stream, Map<T1, T2> & map, Context context);
 
 /**
  * The Kokkos wrapper class for standard map.
@@ -235,8 +235,10 @@ private:
    */
   Array<dof_id_type> _offset;
 
-  friend void dataStore<T1, T2>(std::ostream &, Map<T1, T2> &, void *);
-  friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, void *);
+  template <typename Context>
+  friend void dataStore(std::ostream &, Map<T1, T2> &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, Map<T1, T2> &, Context);
 };
 
 template <typename T1, typename T2>
@@ -331,9 +333,9 @@ Map<T1, T2>::find(const T1 & key) const
   return invalid_id;
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, typename Context>
 void
-dataStore(std::ostream & stream, Map<T1, T2> & map, void * context)
+dataStore(std::ostream & stream, Map<T1, T2> & map, Context context)
 {
   using ::dataStore;
 
@@ -343,9 +345,9 @@ dataStore(std::ostream & stream, Map<T1, T2> & map, void * context)
   dataStore(stream, map._offset, context);
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, typename Context>
 void
-dataLoad(std::istream & stream, Map<T1, T2> & map, void * context)
+dataLoad(std::istream & stream, Map<T1, T2> & map, Context context)
 {
   using ::dataLoad;
 

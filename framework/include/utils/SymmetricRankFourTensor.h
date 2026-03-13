@@ -401,11 +401,11 @@ protected:
    */
   void fillGeneralOrthotropicFromInputVector(const std::vector<T> & input);
 
-  template <class T2>
-  friend void dataStore(std::ostream &, SymmetricRankFourTensorTempl<T2> &, void *);
+  template <class T2, typename Context>
+  friend void dataStore(std::ostream &, SymmetricRankFourTensorTempl<T2> &, Context);
 
-  template <class T2>
-  friend void dataLoad(std::istream &, SymmetricRankFourTensorTempl<T2> &, void *);
+  template <class T2, typename Context>
+  friend void dataLoad(std::istream &, SymmetricRankFourTensorTempl<T2> &, Context);
 
   template <typename T2>
   friend class SymmetricRankTwoTensorTempl;

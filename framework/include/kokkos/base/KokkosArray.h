@@ -1094,9 +1094,13 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
   return *this;
 }
 
-template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename T,
+          unsigned int dimension,
+          typename index_type,
+          LayoutType layout,
+          typename Context>
 void
-dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array, void * context)
+dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array, Context context)
 {
   using ::dataStore;
 
@@ -1138,9 +1142,13 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
       dataStore(stream, value, context);
 }
 
-template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename T,
+          unsigned int dimension,
+          typename index_type,
+          LayoutType layout,
+          typename Context>
 void
-dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array, void * context)
+dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array, Context context)
 {
   using ::dataLoad;
 

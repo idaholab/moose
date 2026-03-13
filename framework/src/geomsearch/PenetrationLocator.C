@@ -42,7 +42,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _fe_type(order),
     _nearest_node(nearest_node),
     _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *>>(
-        "penetration_info", &_mesh)),
+        "penetration_info", _mesh.getMesh())),
     _has_penetrated(declareRestartableData<std::set<dof_id_type>>("has_penetrated")),
     _check_whether_reasonable(true),
     _update_location(declareRestartableData<bool>("update_location", true)),

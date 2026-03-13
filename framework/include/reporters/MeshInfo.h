@@ -100,9 +100,13 @@ MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
 }
 
 void to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo> & sidesets);
-void dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);
-void dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, Context context);
 
 void to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SubdomainInfo> & sidesets);
-void dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & sideset_info, void * context);
-void dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & sideset_info, void * context);
+template <typename Context>
+void dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & sideset_info, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & sideset_info, Context context);
