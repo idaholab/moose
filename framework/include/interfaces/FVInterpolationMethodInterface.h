@@ -14,7 +14,8 @@
 #include "InputParameters.h"
 
 class FEProblemBase;
-class FVInterpolationMethod;
+class FVFaceInterpolationMethod;
+class FVAdvectedInterpolationMethod;
 
 /**
  * Helper interface for objects that need access to FVInterpolationMethod instances.
@@ -26,8 +27,11 @@ public:
 
   static InputParameters validParams();
 
-  const FVInterpolationMethod &
-  getFVInterpolationMethod(const InterpolationMethodName & name) const;
+  const FVFaceInterpolationMethod &
+  getFVFaceInterpolationMethod(const InterpolationMethodName & name) const;
+
+  const FVAdvectedInterpolationMethod &
+  getFVAdvectedInterpolationMethod(const InterpolationMethodName & name) const;
 
   bool hasFVInterpolationMethod(const InterpolationMethodName & name) const;
 

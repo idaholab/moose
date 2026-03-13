@@ -9,15 +9,16 @@
 
 #pragma once
 
-#include "MooseObject.h"
+#include "FaceInfo.h"
 
 /**
- * Registered base class for linear FV interpolation objects.
+ * Interface for interpolation methods that produce a scalar face value from adjacent cell values.
  */
-class FVInterpolationMethod : public MooseObject
+class FVFaceInterpolationMethod
 {
 public:
-  static InputParameters validParams();
-
-  FVInterpolationMethod(const InputParameters & params);
+  /**
+   * Face interpolation operation for this method.
+   */
+  virtual Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const = 0;
 };

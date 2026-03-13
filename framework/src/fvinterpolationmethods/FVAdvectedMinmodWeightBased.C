@@ -43,7 +43,7 @@ FVAdvectedMinmodWeightBased::FVAdvectedMinmodWeightBased(const InputParameters &
 {
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
+FVAdvectedInterpolationMethod::AdvectedSystemContribution
 FVAdvectedMinmodWeightBased::advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
                                                  Real neighbor_value,

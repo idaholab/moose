@@ -9,7 +9,8 @@
 
 #include "FVInterpolationMethodInterface.h"
 
-#include "FVInterpolationMethod.h"
+#include "FVAdvectedInterpolationMethod.h"
+#include "FVFaceInterpolationMethod.h"
 #include "FEProblemBase.h"
 
 InputParameters
@@ -26,10 +27,18 @@ FVInterpolationMethodInterface::FVInterpolationMethodInterface(const MooseObject
 {
 }
 
-const FVInterpolationMethod &
-FVInterpolationMethodInterface::getFVInterpolationMethod(const InterpolationMethodName & name) const
+const FVFaceInterpolationMethod &
+FVInterpolationMethodInterface::getFVFaceInterpolationMethod(
+    const InterpolationMethodName & name) const
 {
-  return _fvim_feproblem.getFVInterpolationMethod(name, _fvim_tid);
+  return _fvim_feproblem.getFVFaceInterpolationMethod(name, _fvim_tid);
+}
+
+const FVAdvectedInterpolationMethod &
+FVInterpolationMethodInterface::getFVAdvectedInterpolationMethod(
+    const InterpolationMethodName & name) const
+{
+  return _fvim_feproblem.getFVAdvectedInterpolationMethod(name, _fvim_tid);
 }
 
 bool

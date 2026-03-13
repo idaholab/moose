@@ -34,7 +34,7 @@ FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCo
 {
 }
 
-FVInterpolationMethod::AdvectedSystemContribution
+FVAdvectedInterpolationMethod::AdvectedSystemContribution
 FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
     const FaceInfo & face,
     const Real elem_value,

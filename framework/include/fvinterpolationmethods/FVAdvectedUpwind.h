@@ -9,19 +9,18 @@
 
 #pragma once
 
+#include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
 
 /**
  * Upwind interpolation for advected quantities based on the sign of the face mass flux.
  */
-class FVAdvectedUpwind : public FVInterpolationMethod
+class FVAdvectedUpwind : public FVInterpolationMethod, public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
   FVAdvectedUpwind(const InputParameters & params);
-
-  bool supportsAdvectedInterpolation() const override { return true; }
 
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.

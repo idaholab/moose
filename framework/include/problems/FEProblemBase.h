@@ -93,6 +93,8 @@ class LineSearch;
 class UserObject;
 class UserObjectBase;
 class FVInterpolationMethod;
+class FVFaceInterpolationMethod;
+class FVAdvectedInterpolationMethod;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;
@@ -1429,6 +1431,24 @@ public:
    */
   const FVInterpolationMethod & getFVInterpolationMethod(const InterpolationMethodName & name,
                                                          const THREAD_ID tid = 0) const;
+
+  /**
+   * Retrieve a scalar face interpolation method.
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVFaceInterpolationMethod &
+  getFVFaceInterpolationMethod(const InterpolationMethodName & name,
+                               const THREAD_ID tid = 0) const;
+
+  /**
+   * Retrieve an advected interpolation method.
+   * @param name The name of the method.
+   * @param tid The thread ID.
+   */
+  const FVAdvectedInterpolationMethod &
+  getFVAdvectedInterpolationMethod(const InterpolationMethodName & name,
+                                   const THREAD_ID tid = 0) const;
 
   /**
    * Check if an FV interpolation method with a given name exists

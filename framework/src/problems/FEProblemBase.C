@@ -45,6 +45,8 @@
 #include "SolverSystem.h"
 #include "Distribution.h"
 #include "Sampler.h"
+#include "FVAdvectedInterpolationMethod.h"
+#include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
@@ -4711,6 +4713,40 @@ FEProblemBase::getFVInterpolationMethod(const InterpolationMethodName & name,
 
   mooseAssert(methods.size() == 1, "Expected a single FVInterpolationMethod per thread");
   return *(methods[0]);
+}
+
+const FVFaceInterpolationMethod &
+FEProblemBase::getFVFaceInterpolationMethod(const InterpolationMethodName & name,
+                                            const THREAD_ID tid) const
+{
+  const auto & method = getFVInterpolationMethod(name, tid);
+  const auto * face_method = dynamic_cast<const FVFaceInterpolationMethod *>(&method);
+
+  if (!face_method)
+    mooseError("FVInterpolationMethod '",
+               name,
+               "' (",
+               method.type(),
+               ") is not a scalar face interpolation method.");
+
+  return *face_method;
+}
+
+const FVAdvectedInterpolationMethod &
+FEProblemBase::getFVAdvectedInterpolationMethod(const InterpolationMethodName & name,
+                                                const THREAD_ID tid) const
+{
+  const auto & method = getFVInterpolationMethod(name, tid);
+  const auto * advected_method = dynamic_cast<const FVAdvectedInterpolationMethod *>(&method);
+
+  if (!advected_method)
+    mooseError("FVInterpolationMethod '",
+               name,
+               "' (",
+               method.type(),
+               ") is not an advected interpolation method.");
+
+  return *advected_method;
 }
 
 bool

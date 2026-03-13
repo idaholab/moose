@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethod.h"
 
 /**
@@ -18,15 +19,15 @@
  * The matrix contribution is pure upwind; the high-order reconstruction is added to the right hand
  * side as a deferred correction.
  */
-class FVAdvectedVenkatakrishnanDeferredCorrection : public FVInterpolationMethod
+class FVAdvectedVenkatakrishnanDeferredCorrection : public FVInterpolationMethod,
+                                                    public FVAdvectedInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
   FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
 
-  bool supportsAdvectedInterpolation() const override { return true; }
-  bool advectedInterpolationNeedsGradients() const override { return true; }
+  bool needsGradients() const override { return true; }
 
   /**
    * @return The cell-gradient limiter used by this interpolation method.

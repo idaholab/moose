@@ -10,7 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "FVInterpolationMethod.h"
+#include "FVFaceInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
 
 /**
@@ -70,7 +70,7 @@ protected:
   const Moose::Functor<Real> & _diffusion_coeff;
 
   /// Optional interpolation method for the diffusion coefficient
-  const FVInterpolationMethod * _coeff_interp_method;
+  const FVFaceInterpolationMethod * _coeff_interp_method;
 
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
