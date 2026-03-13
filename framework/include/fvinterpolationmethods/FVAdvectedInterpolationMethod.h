@@ -11,6 +11,7 @@
 
 #include "FaceInfo.h"
 #include "GradientLimiterType.h"
+#include "MooseFunctor.h"
 
 #include <utility>
 
@@ -39,6 +40,32 @@ public:
                                                          Real mass_flux) const = 0;
 
   /**
+   * Convenience overload that evaluates a scalar Moose functor at the adjacent cell centers and,
+   * if needed, its cell gradients before applying this interpolation method.
+   */
+  AdvectedSystemContribution advectedInterpolate(const Moose::FunctorBase<Real> & functor,
+                                                 const FaceInfo & face,
+                                                 const Moose::StateArg & state,
+                                                 const Real mass_flux) const
+  {
+    mooseAssert(face.neighborPtr(),
+                "Advected interpolation with a Moose functor requires a two-sided internal face.");
+
+    const Moose::ElemArg elem_arg{face.elemPtr(), false};
+    const Moose::ElemArg neighbor_arg{face.neighborPtr(), false};
+    const Real elem_value = functor(elem_arg, state);
+    const Real neighbor_value = functor(neighbor_arg, state);
+
+    if (!needsGradients())
+      return advectedInterpolate(face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
+
+    const auto elem_grad = functor.gradient(elem_arg, state);
+    const auto neighbor_grad = functor.gradient(neighbor_arg, state);
+    return advectedInterpolate(
+        face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
+  }
+
+  /**
    * Advected interpolation operation that returns only the face value.
    */
   virtual Real advectedInterpolateValue(const FaceInfo & face,
@@ -52,6 +79,33 @@ public:
         advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
     return result.weights_matrix.first * elem_value +
            result.weights_matrix.second * neighbor_value - result.rhs_face_value;
+  }
+
+  /**
+   * Convenience overload that evaluates a scalar Moose functor at the adjacent cell centers and
+   * returns only the implied face value.
+   */
+  Real advectedInterpolateValue(const Moose::FunctorBase<Real> & functor,
+                                const FaceInfo & face,
+                                const Moose::StateArg & state,
+                                const Real mass_flux) const
+  {
+    mooseAssert(face.neighborPtr(),
+                "Advected interpolation with a Moose functor requires a two-sided internal face.");
+
+    const Moose::ElemArg elem_arg{face.elemPtr(), false};
+    const Moose::ElemArg neighbor_arg{face.neighborPtr(), false};
+    const Real elem_value = functor(elem_arg, state);
+    const Real neighbor_value = functor(neighbor_arg, state);
+
+    if (!needsGradients())
+      return advectedInterpolateValue(
+          face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
+
+    const auto elem_grad = functor.gradient(elem_arg, state);
+    const auto neighbor_grad = functor.gradient(neighbor_arg, state);
+    return advectedInterpolateValue(
+        face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
   }
 
   /**

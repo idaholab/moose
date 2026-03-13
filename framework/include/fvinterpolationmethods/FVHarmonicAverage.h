@@ -22,6 +22,8 @@ public:
 
   FVHarmonicAverage(const InputParameters & params);
 
+  using FVFaceInterpolationMethod::interpolate;
+
   /**
    * Harmonic-mean interpolation using FaceInfo's geometric weight.
    * @param face The face being interpolated.
