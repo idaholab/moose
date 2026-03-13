@@ -211,7 +211,7 @@ class Scheduler(MooseObject):
                 time_utility_type = TimeUtilityType.GNU
             elif time_utility_path := findBSDTime():
                 time_utility_type = TimeUtilityType.BSD
-            if time_utility_type == TimeUtilityType.NONE:
+            else:
                 monitor_job_cpu = False
 
         # Build hwloc topology file if set to do so
