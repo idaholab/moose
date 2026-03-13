@@ -26,6 +26,10 @@ public:
 
   FVGeometricAverage(const InputParameters & params);
 
+  using FVFaceInterpolationMethod::interpolate;
+  using FVAdvectedInterpolationMethod::advectedInterpolate;
+  using FVAdvectedInterpolationMethod::advectedInterpolateValue;
+
   /**
    * Interpolate using FaceInfo's geometric weight.
    * @param face The face being interpolated.

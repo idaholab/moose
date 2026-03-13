@@ -55,25 +55,14 @@ LinearFVDiffusion::faceDiffusivity() const
 {
   if (!_cached_face_diffusivity)
   {
+    mooseAssert(_current_face_type == FaceInfo::VarFaceNeighbors::BOTH,
+                "faceDiffusivity() is only valid for two-sided internal faces.");
+
     const auto state = determineState();
 
     if (_coeff_interp_method)
-    {
-      const Elem * const side_elem = _current_face_type != FaceInfo::VarFaceNeighbors::NEIGHBOR
-                                         ? _current_face_info->elemPtr()
-                                         : _current_face_info->neighborPtr();
-      const Real side_value = _diffusion_coeff(makeElemArg(side_elem), state);
-
-      if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-      {
-        const Real neighbor_value =
-            _diffusion_coeff(makeElemArg(_current_face_info->neighborPtr()), state);
-        _face_diffusivity =
-            _coeff_interp_method->interpolate(*_current_face_info, side_value, neighbor_value);
-      }
-      else
-        _face_diffusivity = side_value;
-    }
+      _face_diffusivity =
+          _coeff_interp_method->interpolate(_diffusion_coeff, *_current_face_info, state);
     else
       _face_diffusivity = _diffusion_coeff(makeCDFace(*_current_face_info), state);
 

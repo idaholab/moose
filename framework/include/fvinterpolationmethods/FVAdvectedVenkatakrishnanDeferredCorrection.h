@@ -27,6 +27,9 @@ public:
 
   FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
 
+  using FVAdvectedInterpolationMethod::advectedInterpolate;
+  using FVAdvectedInterpolationMethod::advectedInterpolateValue;
+
   bool needsGradients() const override { return true; }
 
   /**

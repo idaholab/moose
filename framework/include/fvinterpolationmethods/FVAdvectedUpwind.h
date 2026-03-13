@@ -22,6 +22,9 @@ public:
 
   FVAdvectedUpwind(const InputParameters & params);
 
+  using FVAdvectedInterpolationMethod::advectedInterpolate;
+  using FVAdvectedInterpolationMethod::advectedInterpolateValue;
+
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.
    * @param face The face being interpolated.
