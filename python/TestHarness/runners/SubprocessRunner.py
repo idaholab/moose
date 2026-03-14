@@ -13,44 +13,36 @@ import re
 import shlex
 import subprocess
 import time
-from enum import Enum
 from signal import SIGTERM
 from tempfile import SpooledTemporaryFile
 from threading import Lock
 from typing import Optional
 
-from TestHarness.mpi_config import MPIConfig, MPIType
+from TestHarness.mpi_config import MPIType
 from TestHarness.runners.Runner import Runner
-from TestHarness.util import findBSDTime, findGNUTime
-
-
-class TimeType(Enum):
-    """Type of the time utility found, if any."""
-
-    BSD = 0
-    GNU = 1
-    NONE = 2
+from TestHarness.schedulers.Scheduler import SchedulerOptions, TimeUtilityType
 
 
 class SubprocessRunner(Runner):
     """Runner that spawns a local subprocess."""
 
-    def __init__(self, job, options):
-        Runner.__init__(self, job, options)
+    def __init__(self, job, options, scheduler_options: SchedulerOptions):
+        Runner.__init__(self, job, options, scheduler_options)
 
-        # The output file handler
-        self.outfile = None
-        # The error file handler
-        self.errfile = None
-        # The underlying subprocess
+        self.outfile: Optional[SpooledTemporaryFile] = None
+        """The output file handler."""
+        self.errfile: Optional[SpooledTemporaryFile] = None
+        """The error file handler."""
+
         self.process: Optional[subprocess.Popen] = None
-        # The running process' process ID, if any
+        """The underlying process."""
         self._pid: Optional[int] = None
-        # The lock for self.process
+        """The running process' process ID, if any."""
         self._pid_lock = Lock()
+        """The lock for self._pid."""
 
-        self._time_type: TimeType = TimeType.NONE
-        """The type of time utility used, if any."""
+        self.monitor_time = False
+        """Whether or not we're monitoring the process with a time utility."""
 
     @property
     def pid(self) -> Optional[int]:
@@ -70,25 +62,27 @@ class SubprocessRunner(Runner):
         # If the tester supports wrapping with a time utility
         # and we're not using shell, wrap the command with
         # a time utility if a timing utility is available
-        if tester.SUPPORTS_TIME and not use_shell:
-            time_command = None
+        if (
+            self.scheduler_options.monitor_job_cpu
+            and tester.SUPPORTS_TIME
+            and not use_shell
+        ):
+            time_utility_type = self.scheduler_options.time_utility_type
+            assert time_utility_type != TimeUtilityType.NONE
 
-            # GNU time; output to file just CPU %
-            if gnu_time := findGNUTime():
-                self._time_type = TimeType.GNU
-                time_command = f"{gnu_time} -o {self.timeFilePath()} -f '%P' -q"
-            # BSD time; output to file real, user, sys time
-            if bsd_time := findBSDTime():
-                self._time_type = TimeType.BSD
-                time_command = f"{bsd_time} -o {self.timeFilePath()}"
+            time_utility_path = self.scheduler_options.time_utility_path
+            assert time_utility_path is not None
 
-            # Found a time utility, so wrap the command with
-            # the utility, update the command, and delete any
-            # older time files if they exist
-            if time_command is not None:
-                cmd = f"{time_command} {cmd}"
-                self.deleteTimeFile(graceful=True)
-                tester.setCommandRan(cmd)
+            time_command = f"{time_utility_path} -o {self.timeFilePath()}"
+
+            # GNU time; enable quiet and just output CPU %
+            if self.scheduler_options.time_utility_type == TimeUtilityType.GNU:
+                time_command += " -f '%P' -q"
+
+            cmd = f"{time_command} {cmd}"
+            self.monitor_time = True
+            self.deleteTimeFile(graceful=True)
+            tester.setCommandRan(cmd)
 
         # Split command into list of args to be passed to Popen
         if not use_shell:
@@ -116,21 +110,19 @@ class SubprocessRunner(Runner):
         # Augment the environment if needed
         process_env = tester.augmentEnvironment(self.options)
 
-        # Special MPI environment options, if not disabled
-        if not self.options.disable_mpi_options:
-            mpi_config: MPIConfig = self.options.mpi_config
-            # OpenMPI
-            if mpi_config.mpi_type == MPIType.OPENMPI:
-                # Don't clobber state
-                process_env["OMPI_MCA_orte_tmpdir_base"] = (
-                    self.job.getTempDirectory().name
-                )
-                # Allow oversubscription for hosts that don't have a hostfile
-                process_env["PRTE_MCA_rmaps_default_mapping_policy"] = ":oversubscribe"
-            # hwloc with a prebuilt topology file
-            if mpi_config.hwloc and mpi_config.hwloc_topo_file is not None:
-                process_env["HWLOC_XMLFILE"] = mpi_config.hwloc_topo_file
-                process_env["HWLOC_THISSYSTEM"] = "1"
+        # OpenMPI, allow for oversubscription
+        if (
+            not self.options.no_openmpi_oversubscribe
+            and self.scheduler_options.mpi_config.mpi_type == MPIType.OPENMPI
+        ):
+            # Don't clobber state
+            process_env["OMPI_MCA_orte_tmpdir_base"] = self.job.getTempDirectory().name
+            # Allow oversubscription for hosts that don't have a hostfile
+            process_env["PRTE_MCA_rmaps_default_mapping_policy"] = ":oversubscribe"
+        # hwloc with a prebuilt topology file
+        if hwloc_topo_file := self.scheduler_options.hwloc_topology_path:
+            process_env["HWLOC_XMLFILE"] = hwloc_topo_file
+            process_env["HWLOC_THISSYSTEM"] = "1"
 
         # Add to environment if requested
         if process_env:
@@ -176,7 +168,7 @@ class SubprocessRunner(Runner):
             if (
                 file == self.errfile
                 and self.exit_code != 0
-                and self.options.mpi_config.mpi_type == MPIType.OPENMPI
+                and self.scheduler_options.mpi_config.mpi_type == MPIType.OPENMPI
                 and len(output) > 2
                 and output[-3:] in ["\n\0\n", "\n\x00\n"]
             ):
@@ -185,12 +177,12 @@ class SubprocessRunner(Runner):
             self.getRunOutput().appendOutput(output)
 
         # Parse the time output if we have one
-        if self._time_type != TimeType.NONE:
+        if self.monitor_time:
             self.parseTimeFile(timer)
 
     def parseTimeFile(self, timer):
         """Parse the time file."""
-        assert self._time_type != TimeType.NONE
+        assert self.monitor_time
 
         # Load the time utility output
         try:
@@ -202,12 +194,14 @@ class SubprocessRunner(Runner):
             self.appendOutput(f"\n\nFailed to find time file {self.timeFilePath()}")
         # Obtain the CPU percentage from the time output
         else:
+            time_type = self.scheduler_options.time_utility_type
+
             # GNU time; should contain just the percentage
-            if self._time_type == TimeType.GNU:
+            if time_type == TimeUtilityType.GNU:
                 if match := re.fullmatch(r"(\d+)%", contents):
                     self.cpu_percent = float(match.group(1))
             # BSD time; need to compute percentage from (user+sys)/real
-            elif self._time_type == TimeType.BSD and (
+            elif time_type == TimeUtilityType.BSD and (
                 match := re.fullmatch(
                     r"(\d+.\d+) real \s+ (\d+.\d+) user \s+ (\d+.\d+) sys", contents
                 )
@@ -236,7 +230,7 @@ class SubprocessRunner(Runner):
 
     def deleteTimeFile(self, graceful: bool):
         """Delete the time file."""
-        assert self._time_type != TimeType.NONE
+        assert self.monitor_time
         try:
             os.remove(self.timeFilePath())
         except FileNotFoundError:
@@ -247,7 +241,7 @@ class SubprocessRunner(Runner):
         super().cleanup()
 
         # Cleanup the time file if it exists
-        if self._time_type != TimeType.NONE:
+        if self.monitor_time:
             self.deleteTimeFile(graceful=True)
 
     def kill(self):

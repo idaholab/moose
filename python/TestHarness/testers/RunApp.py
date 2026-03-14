@@ -18,7 +18,7 @@ from Tester import Tester
 
 from TestHarness import TestHarness, util
 from TestHarness.capability_util import addAugmentedCapability
-from TestHarness.mpi_config import MPIConfig, MPIType
+from TestHarness.mpi_config import MPIType
 
 
 class RunApp(Tester):
@@ -392,7 +392,7 @@ class RunApp(Tester):
             )
 
             # Need to run mpiexec with containerized openmpi
-            if options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI:
+            if options.hpc and options.scheduler.mpi_config.mpi_type == MPIType.OPENMPI:
                 cmd = f"mpiexec -n 1 {cmd}"
 
             return cmd
@@ -516,7 +516,9 @@ class RunApp(Tester):
         if (
             force_mpi
             or ncpus > 1
-            or (options.hpc and options.mpi_config.mpi_type == MPIType.OPENMPI)
+            or (
+                options.hpc and options.scheduler.mpi_config.mpi_type == MPIType.OPENMPI
+            )
         ):
             command = f"{mpi_command} -n {ncpus} {command}"
 
@@ -655,9 +657,10 @@ class RunApp(Tester):
         derived testers from having a successful status set, before actually running
         the derived processResults method.
 
-        # TODO: because RunParallel is now setting every successful status message,
+        # TODO: because Scheduler is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
+
         # If we had capability requirements and get an exit 77, it means that the
         # capability doesn't exist in the binary
         if self.specs["capabilities"] and exit_code == 77:

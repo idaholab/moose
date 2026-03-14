@@ -92,14 +92,13 @@ class TestRequireCapability(TestHarnessTestCase):
         )
 
         # Catch exceptions with CLI error
-        with self.assertRaisesRegex(
-            SystemExit,
-            "ERROR: --only-tests-that-require: Capability 'fOO!' has unallowed "
-            "characters",
-        ):
-            self.runTests(
-                "--only-tests-that-require", "fOO!", minimal_capabilities=True
-            )
+        result = self.runTests(
+            "--only-tests-that-require", "fOO!", minimal_capabilities=True, exit_code=1
+        )
+        self.assertIn(
+            "--only-tests-that-require: Capability 'fOO!' has unallowed characters",
+            result.output,
+        )
 
     def testTesterSkip(self):
         """Test the Tester skipping tests with --only-tests-that-require."""

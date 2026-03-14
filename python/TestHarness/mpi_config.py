@@ -15,7 +15,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import which
 from socket import gethostname
-from subprocess import CalledProcessError, check_output, run, PIPE, STDOUT
+from subprocess import PIPE, STDOUT, CalledProcessError, check_output, run
 from traceback import format_exc
 from typing import Optional
 
@@ -28,14 +28,17 @@ class MPIType(Enum):
     MPICH = 2
 
 
-@dataclass
+@dataclass(frozen=True)
 class MPIConfig:
+    """The found MPI configuration."""
+
     mpi_type: MPIType
+    """The MPI type found, if any."""
     hwloc: bool
-    hwloc_topo_file: Optional[str]
+    """Whether or not the found MPI uses hwloc."""
 
 
-def build_hwloc_topo() -> Optional[str]:
+def build_hwloc_topology() -> Optional[str]:
     """
     Build the hwloc topology file, if possible.
 
@@ -43,7 +46,6 @@ def build_hwloc_topo() -> Optional[str]:
     on every single application execution), we can save a
     sizeable amount of time on init.
     """
-
     if (exe := which("lstopo-no-graphics")) is None and (
         exe := which("lstopo")
     ) is None:
@@ -68,7 +70,8 @@ def build_hwloc_topo() -> Optional[str]:
 
 def get_mpi_config() -> MPIConfig:
     """Get the MPI configuration for the implementations that we special case."""
-    config = MPIConfig(mpi_type=MPIType.UNKNOWN, hwloc=False, hwloc_topo_file=None)
+    mpi_type = MPIType.UNKNOWN
+    hwloc = False
 
     mpi_command = os.environ.get("MOOSE_MPI_COMMAND", "mpiexec").split()[0]
     which_mpiexec = which(mpi_command)
@@ -79,14 +82,11 @@ def get_mpi_config() -> MPIConfig:
             pass
         else:
             if "HYDRA" in out:
-                config.mpi_type = MPIType.MPICH
+                mpi_type = MPIType.MPICH
                 if "hwloc" in out:
-                    config.hwloc = True
+                    hwloc = True
             elif "Open MPI" in out:
-                config.mpi_type = MPIType.OPENMPI
-                config.hwloc = True
+                mpi_type = MPIType.OPENMPI
+                hwloc = True
 
-    if config.hwloc:
-        config.hwloc_topo_file = build_hwloc_topo()
-
-    return config
+    return MPIConfig(mpi_type=mpi_type, hwloc=hwloc)

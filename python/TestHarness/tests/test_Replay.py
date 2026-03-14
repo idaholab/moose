@@ -84,13 +84,8 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testNoResultsFile(self):
         """Verify the TestHarness errors correctly when there is no results file."""
-        with (
-            tempfile.TemporaryDirectory() as output_dir,
-            self.assertRaisesRegex(
-                SystemExit, f"The previous run {output_dir}/non_existent does not exist"
-            ),
-        ):
-            self.runTests(
+        with tempfile.TemporaryDirectory() as output_dir:
+            result = self.runTests(
                 "--show-last-run",
                 "--results-file",
                 "non_existent",
@@ -100,3 +95,6 @@ class TestHarnessTester(TestHarnessTestCase):
                 capture_results=False,
                 exit_code=1,
             )
+        self.assertIn(
+            f"The previous run {output_dir}/non_existent does not exist", result.output
+        )

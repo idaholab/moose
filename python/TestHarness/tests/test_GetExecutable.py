@@ -50,8 +50,8 @@ class TestGetExecutable(TestHarnessTestCase):
             # Cannot test for an absent method when all methods are present
             return
 
-        with self.assertRaisesRegex(SystemExit, "Failed to find MOOSE executable"):
-            self.runTests(f"--{method}")
+        result = self.runTests(f"--{method}", exit_code=1)
+        self.assertIn("Failed to find MOOSE executable", result.output)
 
     def testMethodIsPresent(self):
         """Test for method that exists in test."""

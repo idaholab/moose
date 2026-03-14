@@ -24,7 +24,7 @@ from enum import Enum
 from multiprocessing.pool import ThreadPool
 from typing import Optional
 
-from RunParallel import RunParallel
+from Scheduler import Scheduler
 
 from TestHarness import util
 
@@ -94,12 +94,10 @@ CallHPCPoolType = Enum("CallHPCPoolType", ["submit", "queue", "status", "kill"])
 """The types for the pools for calling HPC commands."""
 
 
-class RunHPC(RunParallel):
+class RunHPC(Scheduler):
     """
     Base scheduler for jobs that are ran on HPC.
     """
-
-    MONITOR_JOB_MEMORY = False
 
     def __init__(self, harness, params):
         import paramiko
@@ -814,7 +812,7 @@ class RunHPC(RunParallel):
     def buildRunner(self, job, options):
         from TestHarness.runners.HPCRunner import HPCRunner
 
-        return HPCRunner(job, options, self)
+        return HPCRunner(job, options, self.scheduler_options, self)
 
     def augmentJobs(self, jobs):
         super().augmentJobs(jobs)
@@ -1155,7 +1153,7 @@ class RunHPC(RunParallel):
 
         if submit_env["LOAD_MODULES"]:
             self.harness.printInfo(
-                f'Using modules "{" ".join(submit_env["LOAD_MODULES"])} '
+                f'Using modules "{" ".join(submit_env["LOAD_MODULES"])}" '
                 "for HPC environment"
             )
         if app_exec_prefix:
@@ -1165,3 +1163,7 @@ class RunHPC(RunParallel):
             )
 
         return submit_env, app_exec_prefix, app_exec_suffix
+
+    def monitorJobProcesses(self):
+        """Monitor job processes; nothing to do for HPC jobs."""
+        pass

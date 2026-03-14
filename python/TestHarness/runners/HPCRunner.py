@@ -7,9 +7,19 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, time, os, subprocess, yaml
+import os
+import re
+import subprocess
+import time
+from typing import TYPE_CHECKING, Optional
+
+import yaml
+from TestHarness.mpi_config import MPIType
 from TestHarness.runners.Runner import Runner
-from TestHarness.mpi_config import MPIConfig, MPIType
+
+if TYPE_CHECKING:
+    from TestHarness.schedulers.RunHPC import HPCJob, RunHPC
+    from TestHarness.schedulers.Scheduler import SchedulerOptions
 
 
 class HPCRunner(Runner):
@@ -17,20 +27,22 @@ class HPCRunner(Runner):
     Base Runner to be used with HPC schedulers (PBS, slurm)
     """
 
-    def __init__(self, job, options, run_hpc):
-        super().__init__(job, options)
+    def __init__(
+        self, job, options, scheduler_options: "SchedulerOptions", run_hpc: "RunHPC"
+    ):
+        super().__init__(job, options, scheduler_options)
 
-        # The RunHPC object
         self.run_hpc = run_hpc
+        """The RunHPC object."""
 
-        # The HPC job, set during spawn()
-        self.hpc_job = None
+        self.hpc_job: Optional["HPCJob"] = None
+        """The HPCJob, set during spawn()."""
 
-        # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
+        """The interval in seconds for polling for job status."""
 
-        # Interval in seconds for polling for file completion
         self.file_completion_poll_time = 0.1
+        """The interval in seconds for polling for file completion"""
 
     def spawn(self, timer):
         # The runner_run output, which is the output from what we're
@@ -174,7 +186,10 @@ class HPCRunner(Runner):
         #
         # Where <NULL> is there the null character ends up. Thus, in cases
         # where we have a nonzero exit code and a MPI_ABORT, we'll try to remove these.
-        if self.exit_code != 0 and self.options.mpi_config.mpi_type == MPIType.OPENMPI:
+        if (
+            self.exit_code != 0
+            and self.scheduler_options.mpi_config.mpi_type == MPIType.OPENMPI
+        ):
             output = self.getRunOutput().getOutput(sanitize=False)
             if "MPI_ABORT" in output:
                 output_changed = False

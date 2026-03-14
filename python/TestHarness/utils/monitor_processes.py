@@ -11,18 +11,13 @@
 
 import os
 import sys
-from contextlib import suppress
-from typing import TYPE_CHECKING, Iterable, Optional
+from collections import defaultdict
+from multiprocessing import Process, get_context
+from multiprocessing.context import ForkProcess
+from multiprocessing.managers import DictProxy
+from typing import Optional
 
-if TYPE_CHECKING:
-    import psutil
-else:
-    from importlib.util import find_spec
-
-    if find_spec("psutil") is not None:
-        import psutil
-    else:
-        raise ModuleNotFoundError("Requires the 'psutil' package")
+import psutil
 
 MEMORY_PSS = sys.platform.startswith("linux") and os.path.exists(
     f"/proc/{os.getpid()}/smaps_rollup"
@@ -49,61 +44,132 @@ def get_process_memory(process: psutil.Process) -> Optional[int]:
     """
     # Prefer PSS if available
     if MEMORY_PSS:
-        data = None
-        with (
-            suppress(FileNotFoundError),
-            suppress(ProcessLookupError),
-            open(f"/proc/{process.pid}/smaps_rollup", "rb") as f,
-        ):
-            data = f.read()
-        if data is not None and (idx := data.find(b"Pss:")) != -1:
-            start = idx + 4
-            while data[start] == 32:
-                start += 1
-            end = start
-            while data[end] != 32:
-                end += 1
-            return int(data[start:end]) * 1024  # kilobytes -> bytes
-
+        try:
+            with open(f"/proc/{process.pid}/smaps_rollup", "rb") as f:
+                for line in f:
+                    if line.startswith(b"Pss:"):
+                        return int(line.split()[1]) * 1024  # b"Pss:   1234 kB"
+        except (FileNotFoundError, ProcessLookupError):
+            pass
     # Otherwise, use RSS (will double count shared memory)
     else:
-        with suppress(psutil.NoSuchProcess):
+        try:
             return process.memory_info().rss
+        except psutil.NoSuchProcess:
+            pass
 
     return None
 
 
-def get_processes_memory(pids: Iterable[int]) -> dict[int, int]:
-    """
-    Get the estimated total memory for each process, including children.
+class MemoryMonitor:
+    """Monitor that runs in a separate thread to track children memory usage."""
 
-    If a process is not running, it will not be included.
+    def __init__(self, parent_pid: int, interval: float = 0.1):
+        """Initialize state."""
+        self._parent_pid: int = parent_pid
+        """PID of the parent process to sample the children of."""
 
-    Arguments:
-    ---------
-    pids : Iterable[int]
-        The IDs of the processes.
+        self._interval: float = interval
+        """How often to sample in seconds."""
 
-    Returns:
-    -------
-    dict[int, int]:
-        Mapping of pid -> estimated process memory in bytes.
+        self._process: Optional[ForkProcess] = None
+        """The Multiprocessing process."""
 
-    """
+        self._manager = None
+        """Manager for sharing data with the Multiprocessing process, once started."""
 
-    def recursive_memory(pid: int) -> Optional[int]:
-        try:
-            p = psutil.Process(pid)
-        except psutil.NoSuchProcess:
-            return None
+        self._samples: Optional[DictProxy[int, int]] = None
+        """The shareable samples (child pid -> memory in bytes), once started."""
 
-        ps: list[psutil.Process] = [p]
-        with suppress(psutil.NoSuchProcess):
-            ps += p.children(recursive=True)
+        self._stop_event = None
+        """Event to stop the Multiprocessing process, once started."""
 
-        if memory := sum([memory for p in ps if (memory := get_process_memory(p))]):
-            return memory
+    def get_samples(self) -> dict[int, int]:
+        """
+        Get the last samples; child PID to cumulative memory usage in bytes.
 
-        return None
+        This returns a copy so that the dict can be accessed without
+        locking (required for synchronization with the other thread).
+        Thus, you should get a copy to this once and then use it many
+        times as needed.
+        """
+        assert self._samples is not None
+        return self._samples.copy()
 
-    return {pid: memory for pid in pids if (memory := recursive_memory(pid))}
+    @staticmethod
+    def _sampler(
+        parent_pid: int, interval: float, stop_event, samples: DictProxy[int, int]
+    ):
+        """Run the sampler process; internal method called by start()."""
+        while not stop_event.is_set():
+            # Get the entire flattened process tree, removing process 0 as
+            # it's the exit condition when searching recursively
+            all_processes: dict[int, psutil.Process] = {
+                p.info["pid"]: p for p in psutil.process_iter(["pid", "ppid"])
+            }
+            if 0 in all_processes:
+                del all_processes[0]
+
+            # Get the processes that are immediate children of the parent
+            children_pids = set(
+                pid for pid, p in all_processes.items() if p.info["ppid"] == parent_pid
+            )
+
+            # Recursively check if any of the processes in "children_pids"
+            # are a parent of this process at any level
+            def in_children_pids(p: psutil.Process) -> Optional[int]:
+                ppid = p.info["ppid"]
+                # Found a parent
+                if ppid in children_pids:
+                    return ppid
+                # Recursively check
+                return in_children_pids(pp) if (pp := all_processes.get(ppid)) else None
+
+            # Accumulate memory from relevant processes
+            result = defaultdict(int)
+            for pid, p in all_processes.items():
+                if (
+                    ppid := pid if pid in children_pids else in_children_pids(p)
+                ) is not None and (memory := get_process_memory(p)) is not None:
+                    result[ppid] += memory
+
+            # And update the shared state
+            samples.clear()
+            samples.update(result)
+
+            # Wait, but wake early if stop_event is set
+            stop_event.wait(interval)
+
+    def start(self):
+        """Start the sampler process."""
+        assert self._process is None
+
+        ctx = get_context("fork")
+        self._manager = ctx.Manager()
+        self._samples = self._manager.dict()
+        self._stop_event = ctx.Event()
+        self._process = ctx.Process(
+            target=self._sampler,
+            args=(
+                self._parent_pid,
+                self._interval,
+                self._stop_event,
+                self._samples,
+            ),
+            daemon=True,
+        )
+        assert self._process is not None
+        self._process.start()
+
+    def stop(self):
+        """Stop the sampler process."""
+        process = self._process
+        if process is not None:
+            assert self._stop_event is not None
+            self._stop_event.set()
+            process.join(timeout=1)
+            if process.is_alive():
+                process.terminate()
+                process.join()
+            self._process = None
+            self._stop_event = None
