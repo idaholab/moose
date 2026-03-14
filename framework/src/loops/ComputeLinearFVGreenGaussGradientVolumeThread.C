@@ -104,8 +104,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
       for (const auto dim_index : index_range(_temporary_gradient))
       {
         _temporary_gradient[dim_index]->zero();
-        _temporary_gradient[dim_index]->add_vector(temporary_values[dim_index].data(),
-                                                   dof_indices);
+        _temporary_gradient[dim_index]->add_vector(temporary_values[dim_index].data(), dof_indices);
       }
     }
   }

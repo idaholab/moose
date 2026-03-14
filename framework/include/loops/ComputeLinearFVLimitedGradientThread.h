@@ -38,13 +38,12 @@ public:
    * @param temporary_limited_gradient Scratch storage for limited gradients being assembled.
    * @param limiter_type The type of the limiter which should be computed.
    */
-  ComputeLinearFVLimitedGradientThread(FEProblemBase & fe_problem,
-                                       SystemBase & system,
-                                       const std::vector<std::unique_ptr<NumericVector<Number>>> &
-                                           raw_gradient,
-                                       std::vector<std::unique_ptr<NumericVector<Number>>> &
-                                           temporary_limited_gradient,
-                                       const Moose::FV::GradientLimiterType limiter_type);
+  ComputeLinearFVLimitedGradientThread(
+      FEProblemBase & fe_problem,
+      SystemBase & system,
+      const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_gradient,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_limited_gradient,
+      const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Splitting constructor.
