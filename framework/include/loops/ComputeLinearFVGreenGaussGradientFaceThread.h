@@ -41,10 +41,10 @@ public:
    * @param system The system which contains variables that need gradients.
    * @param temporary_gradient Scratch storage for gradients being assembled.
    */
-  ComputeLinearFVGreenGaussGradientFaceThread(FEProblemBase & fe_problem,
-                                              SystemBase & system,
-                                              std::vector<std::unique_ptr<NumericVector<Number>>> &
-                                                  temporary_gradient);
+  ComputeLinearFVGreenGaussGradientFaceThread(
+      FEProblemBase & fe_problem,
+      SystemBase & system,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient);
 
   /**
    * Splitting constructor.

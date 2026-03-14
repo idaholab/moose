@@ -80,8 +80,7 @@ AuxiliarySystem::linearFVGradientContainer() const
 }
 
 void
-AuxiliarySystem::requestLinearFVLimitedGradients(
-    const Moose::FV::GradientLimiterType limiter_type)
+AuxiliarySystem::requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return;
@@ -112,9 +111,8 @@ AuxiliarySystem::linearFVLimitedGradientContainer(
   {
     const auto it = _raw_limited_grad_containers.find(limiter_type);
     if (it == _raw_limited_grad_containers.end())
-      mooseError("Limited gradient container was requested but not initialized on system '",
-                 name(),
-                 "'.");
+      mooseError(
+          "Limited gradient container was requested but not initialized on system '", name(), "'.");
 
     return it->second;
   }

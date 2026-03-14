@@ -1438,8 +1438,7 @@ public:
    * @param tid The thread ID.
    */
   const FVFaceInterpolationMethod &
-  getFVFaceInterpolationMethod(const InterpolationMethodName & name,
-                               const THREAD_ID tid = 0) const;
+  getFVFaceInterpolationMethod(const InterpolationMethodName & name, const THREAD_ID tid = 0) const;
 
   /**
    * Retrieve an advected interpolation method.
