@@ -21,7 +21,6 @@
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
 #include "GradientLimiterType.h"
-
 // libMesh
 #include "libmesh/exodusII_io.h"
 #include "libmesh/parallel_object.h"
@@ -926,31 +925,6 @@ public:
    * @return the type of variables this system holds, e.g. nonlinear or auxiliary
    */
   Moose::VarKindType varKind() const { return _var_kind; }
-
-  /**
-   * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
-   */
-  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVGradientContainer() const;
-
-  /**
-   * Request limiting on the computed gradient for linear FV.
-   * @param limiter_type the type of limiting requested.
-   */
-  virtual void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
-  /**
-   * Fetch the limited gradient container.
-   * @param limiter_type the type of limiting requested.
-   */
-  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /**
-   * Get the set of limited gradient types.
-   */
-  virtual const std::unordered_set<Moose::FV::GradientLimiterType> &
-  requestedLinearFVLimitedGradientTypes() const;
 
   /**
    * Compute time derivatives, auxiliary variables, etc.

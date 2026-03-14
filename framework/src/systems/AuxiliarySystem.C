@@ -20,6 +20,9 @@
 #include "ComputeElemAuxVarsThread.h"
 #include "ComputeElemAuxBcsThread.h"
 #include "ComputeMortarNodalAuxBndThread.h"
+#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
+#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
+#include "ComputeLinearFVLimitedGradientThread.h"
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
@@ -70,12 +73,80 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 
 AuxiliarySystem::~AuxiliarySystem() = default;
 
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+AuxiliarySystem::linearFVGradientContainer() const
+{
+  return _raw_grad_container;
+}
+
+void
+AuxiliarySystem::requestLinearFVLimitedGradients(
+    const Moose::FV::GradientLimiterType limiter_type)
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return;
+
+  _requested_limited_gradient_types.insert(limiter_type);
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+AuxiliarySystem::linearFVLimitedGradientContainer(
+    const Moose::FV::GradientLimiterType limiter_type) const
+{
+  if (limiter_type != Moose::FV::GradientLimiterType::None)
+  {
+    const auto it = _raw_limited_grad_containers.find(limiter_type);
+    if (it == _raw_limited_grad_containers.end())
+      mooseError("Limited gradient container was requested but not initialized on system '",
+                 name(),
+                 "'.");
+
+    return it->second;
+  }
+
+  return _raw_grad_container;
+}
+
+const std::unordered_set<Moose::FV::GradientLimiterType> &
+AuxiliarySystem::requestedLinearFVLimitedGradientTypes() const
+{
+  return _requested_limited_gradient_types;
+}
+
 void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
+
+  bool gradient_storage_initialized = false;
+  for (const auto & field_var : _vars[0].fieldVariables())
+    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
+    {
+      _raw_grad_container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        _raw_grad_container.push_back(currentSolution()->zero_clone());
+      }
+      gradient_storage_initialized = true;
+    }
+
+  if (!_requested_limited_gradient_types.empty())
+    for (const auto limiter_type : _requested_limited_gradient_types)
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+
+      auto & container = _raw_limited_grad_containers[limiter_type];
+      container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        container.push_back(currentSolution()->zero_clone());
+      }
+    }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -450,6 +521,13 @@ AuxiliarySystem::compute(ExecFlagType type)
     kokkosCompute(type);
 #endif
 
+    if (!_raw_grad_container.empty())
+    {
+      solution().close();
+      _sys.update();
+      computeGradients();
+    }
+
     // compute time derivatives of nodal aux variables _after_ the values were updated
     if (_fe_problem.dt() > 0.)
       for (auto & ti : _time_integrators)
@@ -458,6 +536,84 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_serialized_solution.get())
     serializeSolution();
+}
+
+void
+AuxiliarySystem::computeGradients()
+{
+  auto & temporary_gradient = temporaryLinearFVGradientContainer();
+  temporary_gradient.clear();
+  for (auto & vec : _raw_grad_container)
+    temporary_gradient.push_back(vec->zero_clone());
+
+  TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
+
+  PARALLEL_TRY
+  {
+    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
+                                  _fe_problem.mesh().ownedFaceInfoEnd());
+
+    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
+        _fe_problem, *this, temporary_gradient);
+    Threads::parallel_reduce(face_info_range, gradient_face_thread);
+  }
+  PARALLEL_CATCH;
+
+  for (auto & vec : temporary_gradient)
+    vec->close();
+
+  PARALLEL_TRY
+  {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
+        _fe_problem, *this, temporary_gradient);
+    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
+  }
+  PARALLEL_CATCH;
+
+  for (const auto i : index_range(_raw_grad_container))
+  {
+    temporary_gradient[i]->close();
+    _raw_grad_container[i] = std::move(temporary_gradient[i]);
+  }
+
+  if (!requestedLinearFVLimitedGradientTypes().empty())
+  {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    for (const auto limiter_type : requestedLinearFVLimitedGradientTypes())
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+
+      auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
+      temporary_container.clear();
+      for (const auto i : make_range(_fe_problem.mesh().dimension()))
+      {
+        libmesh_ignore(i);
+        temporary_container.push_back(currentSolution()->zero_clone());
+      }
+
+      PARALLEL_TRY
+      {
+        ComputeLinearFVLimitedGradientThread limited_gradient_thread(
+            _fe_problem, *this, _raw_grad_container, temporary_container, limiter_type);
+        Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
+      }
+      PARALLEL_CATCH;
+
+      for (auto & vec : temporary_container)
+        vec->close();
+
+      _raw_limited_grad_containers[limiter_type] = std::move(temporary_container);
+    }
+  }
 }
 
 std::set<std::string>

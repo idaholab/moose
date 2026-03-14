@@ -28,7 +28,6 @@
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
 #include "GradientLimiterType.h"
-
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
@@ -1562,41 +1561,6 @@ SystemBase::initialSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     _vars[tid].initialSetup();
-}
-
-void
-SystemBase::requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
-{
-  if (limiter_type != Moose::FV::GradientLimiterType::None)
-    mooseError("Requested limited gradients on system '",
-               name(),
-               "' but only LinearSystem supports finite-volume gradient storage.");
-}
-
-const std::vector<std::unique_ptr<NumericVector<Number>>> &
-SystemBase::linearFVGradientContainer() const
-{
-  static const std::vector<std::unique_ptr<NumericVector<Number>>> empty_gradient_container;
-  return empty_gradient_container;
-}
-
-const std::vector<std::unique_ptr<NumericVector<Number>>> &
-SystemBase::linearFVLimitedGradientContainer(
-    const Moose::FV::GradientLimiterType limiter_type) const
-{
-  if (limiter_type != Moose::FV::GradientLimiterType::None)
-    mooseError("Requested limited gradients on system '",
-               name(),
-               "' but only LinearSystem supports finite-volume gradient storage.");
-
-  return linearFVGradientContainer();
-}
-
-const std::unordered_set<Moose::FV::GradientLimiterType> &
-SystemBase::requestedLinearFVLimitedGradientTypes() const
-{
-  static const std::unordered_set<Moose::FV::GradientLimiterType> empty_limiter_types;
-  return empty_limiter_types;
 }
 
 void

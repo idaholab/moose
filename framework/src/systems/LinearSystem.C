@@ -233,9 +233,10 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 void
 LinearSystem::computeGradients()
 {
-  _new_gradient.clear();
+  auto & temporary_gradient = temporaryLinearFVGradientContainer();
+  temporary_gradient.clear();
   for (auto & vec : _raw_grad_container)
-    _new_gradient.push_back(vec->zero_clone());
+    temporary_gradient.push_back(vec->zero_clone());
 
   TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
 
@@ -246,12 +247,12 @@ LinearSystem::computeGradients()
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
     ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
+        _fe_problem, *this, temporary_gradient);
     Threads::parallel_reduce(face_info_range, gradient_face_thread);
   }
   PARALLEL_CATCH;
 
-  for (auto & vec : _new_gradient)
+  for (auto & vec : temporary_gradient)
     vec->close();
 
   PARALLEL_TRY
@@ -261,15 +262,15 @@ LinearSystem::computeGradients()
                                   _fe_problem.mesh().ownedElemInfoEnd());
 
     ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
+        _fe_problem, *this, temporary_gradient);
     Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
   }
   PARALLEL_CATCH;
 
   for (const auto i : index_range(_raw_grad_container))
   {
-    _new_gradient[i]->close();
-    _raw_grad_container[i] = std::move(_new_gradient[i]);
+    temporary_gradient[i]->close();
+    _raw_grad_container[i] = std::move(temporary_gradient[i]);
   }
 
   // Compute any requested limited gradients using the newly updated raw gradients.
@@ -284,26 +285,26 @@ LinearSystem::computeGradients()
       if (limiter_type == Moose::FV::GradientLimiterType::None)
         continue;
 
-      auto & new_container = _new_limited_gradient[limiter_type];
-      new_container.clear();
+      auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
+      temporary_container.clear();
       for (const auto i : make_range(_fe_problem.mesh().dimension()))
       {
         libmesh_ignore(i);
-        new_container.push_back(currentSolution()->zero_clone());
+        temporary_container.push_back(currentSolution()->zero_clone());
       }
 
       PARALLEL_TRY
       {
         ComputeLinearFVLimitedGradientThread limited_gradient_thread(
-            _fe_problem, _fe_problem.linearSysNum(name()), limiter_type);
+            _fe_problem, *this, _raw_grad_container, temporary_container, limiter_type);
         Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
       }
       PARALLEL_CATCH;
 
-      for (auto & vec : new_container)
+      for (auto & vec : temporary_container)
         vec->close();
 
-      _raw_limited_grad_containers[limiter_type] = std::move(new_container);
+      _raw_limited_grad_containers[limiter_type] = std::move(temporary_container);
     }
   }
 }
@@ -312,7 +313,7 @@ std::vector<std::unique_ptr<NumericVector<Number>>> &
 LinearSystem::temporaryLinearFVLimitedGradientContainer(
     const Moose::FV::GradientLimiterType limiter_type)
 {
-  return _new_limited_gradient[limiter_type];
+  return _temporary_limited_gradient[limiter_type];
 }
 
 void

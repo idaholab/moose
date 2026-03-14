@@ -10,7 +10,7 @@
 #include "ComputeLinearFVLimitedGradientThread.h"
 
 #include "GradientLimiterType.h"
-#include "LinearSystem.h"
+#include "SystemBase.h"
 #include "PetscVectorReader.h"
 #include "FEProblemBase.h"
 #include "FVUtils.h"
@@ -23,18 +23,18 @@
 
 ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     FEProblemBase & fe_problem,
-    const unsigned int linear_system_num,
+    SystemBase & system,
+    const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_gradient,
+    std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_limited_gradient,
     const Moose::FV::GradientLimiterType limiter_type)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
-    _linear_system_number(linear_system_num),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _system_number(_linear_system.number()),
+    _system(system),
+    _libmesh_system(system.system()),
+    _system_number(_libmesh_system.number()),
+    _raw_gradient(raw_gradient),
     _limiter_type(limiter_type),
-    _temporary_limited_gradient(
-        _fe_problem.getLinearSystem(_linear_system_number)
-            .temporaryLinearFVLimitedGradientContainer(_limiter_type))
+    _temporary_limited_gradient(temporary_limited_gradient)
 {
 }
 
@@ -42,9 +42,10 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     ComputeLinearFVLimitedGradientThread & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
-    _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system),
+    _system(x._system),
+    _libmesh_system(x._libmesh_system),
     _system_number(x._system_number),
+    _raw_gradient(x._raw_gradient),
     _limiter_type(x._limiter_type),
     _temporary_limited_gradient(x._temporary_limited_gradient)
 {
@@ -56,8 +57,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  auto & linear_system = _fe_problem.getLinearSystem(_linear_system_number);
-  const auto & raw_grad_container = linear_system.linearFVGradientContainer();
+  const auto & raw_grad_container = _raw_gradient;
 
   if (_limiter_type != Moose::FV::GradientLimiterType::Venkatakrishnan)
     mooseError("ComputeLinearFVLimitedGradientThread currently supports only the Venkatakrishnan "
@@ -65,12 +65,11 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
 
   unsigned int size = 0;
 
-  for (const auto & variable : linear_system.getVariables(_tid))
+  for (const auto & variable : _system.getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
-    mooseAssert(_current_var,
-                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                "the linear system?");
+    if (!_current_var)
+      continue;
 
     if (!_current_var->needsGradientVectorStorage())
       continue;
@@ -78,11 +77,11 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
     if (!size)
       size = range.size();
 
-    std::vector<std::vector<Real>> new_values(_temporary_limited_gradient.size(),
-                                              std::vector<Real>(size, 0.0));
+    std::vector<std::vector<Real>> temporary_values(_temporary_limited_gradient.size(),
+                                                    std::vector<Real>(size, 0.0));
     std::vector<dof_id_type> dof_indices(size, 0);
 
-    PetscVectorReader solution_reader(*_linear_system.current_local_solution);
+    PetscVectorReader solution_reader(*_libmesh_system.current_local_solution);
     std::vector<PetscVectorReader> grad_reader;
     grad_reader.reserve(raw_grad_container.size());
     for (const auto dim_index : index_range(raw_grad_container))
@@ -144,7 +143,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
       if (std::abs(max_value - min_value) < 1e-14)
       {
         for (const auto dim_index : make_range(_dim))
-          new_values[dim_index][elem_i] = raw_grad(dim_index);
+          temporary_values[dim_index][elem_i] = raw_grad(dim_index);
         continue;
       }
 
@@ -198,12 +197,12 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
 
       const VectorValue<Real> limited_grad = alpha * raw_grad;
       for (const auto dim_index : make_range(_dim))
-        new_values[dim_index][elem_i] = limited_grad(dim_index);
+        temporary_values[dim_index][elem_i] = limited_grad(dim_index);
     }
 
     for (const auto dim_index : make_range(_dim))
     {
-      _temporary_limited_gradient[dim_index]->add_vector(new_values[dim_index].data(),
+      _temporary_limited_gradient[dim_index]->add_vector(temporary_values[dim_index].data(),
                                                          dof_indices);
     }
   }

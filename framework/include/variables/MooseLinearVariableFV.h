@@ -28,9 +28,11 @@ template <typename>
 class MooseLinearVariableFV;
 
 typedef MooseLinearVariableFV<Real> MooseLinearVariableFVReal;
+class AuxiliarySystem;
 class FVDirichletBCBase;
 class FVFluxBC;
 class LinearFVBoundaryCondition;
+class LinearSystem;
 
 namespace libMesh
 {
@@ -102,13 +104,7 @@ public:
    *
    * `GradientLimiterType::None` is equivalent to requesting the regular gradients only.
    */
-  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type)
-  {
-    if (limiter_type == Moose::FV::GradientLimiterType::None)
-      computeCellGradients();
-    else
-      computeCellLimitedGradients(limiter_type);
-  }
+  void computeCellGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Switch to request limited cell gradient computations.
@@ -116,11 +112,7 @@ public:
    * Limited gradients are stored in limiter-specific containers on the system and are computed
    * using the raw cell gradients.
    */
-  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
-  {
-    computeCellGradients();
-    this->_sys.requestLinearFVLimitedGradients(limiter_type);
-  }
+  void computeCellLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
 
   /**
    * Check if cell gradient computations were requested for this variable.
@@ -241,7 +233,11 @@ protected:
   /// Temporary storage for the cell gradient to avoid unnecessary allocations.
   mutable RealVectorValue _cell_gradient;
 
-  /// Pointer to the cell gradients which are stored on the linear system
+  /// Owning concrete system pointers. One will be null.
+  LinearSystem * const _linear_system;
+  AuxiliarySystem * const _auxiliary_system;
+
+  /// Pointer to the cell gradients stored by the owning concrete system
   const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
 
   /// Holder for all the data associated with the "main" element. The data in this is

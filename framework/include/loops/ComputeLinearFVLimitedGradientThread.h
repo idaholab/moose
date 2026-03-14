@@ -17,9 +17,10 @@
 // libmesh
 #include "libmesh/elem_range.h"
 #include "libmesh/threads.h"
-#include "libmesh/linear_implicit_system.h"
+#include "libmesh/system.h"
 
 class FEProblemBase;
+class SystemBase;
 
 /**
  * Compute limited cell gradients for linear FV variables.
@@ -32,11 +33,17 @@ public:
   /**
    * Class constructor.
    * @param fe_problem Reference to the problem
-   * @param linear_system_num The number of the linear system which is assembled by this thread
+   * @param system The system whose variables are assembled by this thread.
+   * @param raw_gradient The raw gradient container used as limiter input.
+   * @param temporary_limited_gradient Scratch storage for limited gradients being assembled.
    * @param limiter_type The type of the limiter which should be computed.
    */
   ComputeLinearFVLimitedGradientThread(FEProblemBase & fe_problem,
-                                       const unsigned int linear_system_num,
+                                       SystemBase & system,
+                                       const std::vector<std::unique_ptr<NumericVector<Number>>> &
+                                           raw_gradient,
+                                       std::vector<std::unique_ptr<NumericVector<Number>>> &
+                                           temporary_limited_gradient,
                                        const Moose::FV::GradientLimiterType limiter_type);
 
   /**
@@ -62,14 +69,17 @@ protected:
   /// The dimension of the domain
   const unsigned int _dim;
 
-  /// The number of the linear system we are contributing to
-  const unsigned int _linear_system_number;
+  /// The system wrapper this thread operates on.
+  SystemBase & _system;
 
-  /// Reference to the linear system at libmesh level
-  const libMesh::LinearImplicitSystem & _linear_system;
+  /// Reference to the libMesh system backing the wrapper system.
+  const libMesh::System & _libmesh_system;
 
-  /// The number of the linear system we are contributing to
+  /// Global system number in the libMesh equation system.
   const unsigned int _system_number;
+
+  /// Reference to the raw gradient storage used as input for limiting.
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & _raw_gradient;
 
   /// The type of the limiter we requested
   const Moose::FV::GradientLimiterType _limiter_type;
