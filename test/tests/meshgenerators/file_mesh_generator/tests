@@ -9,7 +9,7 @@
 
     requirement = 'The system shall have the ability to generate a mesh by reading it from a file.'
     design = 'meshgenerators/FileMeshGenerator.md'
-    issues = '#11640'
+    issues = '#11640 #32487'
   [../]
   [./extra_integer_test]
     type = 'Exodiff'
