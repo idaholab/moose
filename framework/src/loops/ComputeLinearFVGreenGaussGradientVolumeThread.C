@@ -8,19 +8,21 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
-#include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "SystemBase.h"
 #include "PetscVectorReader.h"
 #include "FEProblemBase.h"
 
 ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradientVolumeThread(
-    FEProblemBase & fe_problem, const unsigned int linear_system_num)
+    FEProblemBase & fe_problem,
+    SystemBase & system,
+    std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
-    _linear_system_number(linear_system_num),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _system_number(_linear_system.number())
+    _system(system),
+    _libmesh_system(system.system()),
+    _system_number(_libmesh_system.number()),
+    _temporary_gradient(temporary_gradient)
 {
 }
 
@@ -28,9 +30,10 @@ ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradient
     ComputeLinearFVGreenGaussGradientVolumeThread & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
-    _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system),
-    _system_number(x._system_number)
+    _system(x._system),
+    _libmesh_system(x._libmesh_system),
+    _system_number(x._system_number),
+    _temporary_gradient(x._temporary_gradient)
 {
 }
 
@@ -40,21 +43,15 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  auto & linear_system = _fe_problem.getLinearSystem(_linear_system_number);
-
-  // This will be the vector we work on since the old gradient might still be needed
-  // to compute extrapolated boundary conditions for example.
-  auto & temporary_gradient_container = linear_system.temporaryLinearFVGradientContainer();
-
   // Computing this size can be very expensive so we only want to do it once
   unsigned int size = 0;
 
-  for (const auto & variable : linear_system.getVariables(_tid))
+  for (const auto & variable : _system.getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
-    mooseAssert(_current_var,
-                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                "the linear system?");
+    if (!_current_var)
+      continue;
+
     if (_current_var->needsGradientVectorStorage())
     {
       if (!size)
@@ -63,13 +60,13 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
       const auto rz_radial_coord = _fe_problem.mesh().getAxisymmetricRadialCoord();
       const auto state = Moose::currentState();
 
-      std::vector<std::vector<Real>> new_values(temporary_gradient_container.size(),
-                                                std::vector<Real>(size, 0.0));
+      std::vector<std::vector<Real>> temporary_values(_temporary_gradient.size(),
+                                                      std::vector<Real>(size, 0.0));
       std::vector<dof_id_type> dof_indices(size, 0);
       {
         std::vector<PetscVectorReader> grad_reader;
-        for (const auto dim_index : index_range(temporary_gradient_container))
-          grad_reader.emplace_back(*temporary_gradient_container[dim_index]);
+        for (const auto dim_index : index_range(_temporary_gradient))
+          grad_reader.emplace_back(*_temporary_gradient[dim_index]);
 
         // Iterate over all the elements in the range
         auto elem_iterator = range.begin();
@@ -88,25 +85,27 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
             dof_indices[elem_i] = elem_info->dofIndices()[_system_number][_current_var->number()];
             const auto volume = elem_info->volume() * elem_info->coordFactor();
 
-            for (const auto dim_index : index_range(temporary_gradient_container))
-              new_values[dim_index][elem_i] = grad_reader[dim_index](dof_indices[elem_i]) / volume;
+            for (const auto dim_index : index_range(_temporary_gradient))
+              temporary_values[dim_index][elem_i] =
+                  grad_reader[dim_index](dof_indices[elem_i]) / volume;
 
             if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
             {
               mooseAssert(elem_info->centroid()(rz_radial_coord) != 0,
                           "Axisymmetric control volumes should not have a zero radial coordinate");
-              new_values[rz_radial_coord][elem_i] -= _current_var->getElemValue(*elem_info, state) /
-                                                     elem_info->centroid()(rz_radial_coord);
+              temporary_values[rz_radial_coord][elem_i] -=
+                  _current_var->getElemValue(*elem_info, state) /
+                  elem_info->centroid()(rz_radial_coord);
             }
           }
           elem_iterator++;
         }
       }
-      for (const auto dim_index : index_range(temporary_gradient_container))
+      for (const auto dim_index : index_range(_temporary_gradient))
       {
-        temporary_gradient_container[dim_index]->zero();
-        temporary_gradient_container[dim_index]->add_vector(new_values[dim_index].data(),
-                                                            dof_indices);
+        _temporary_gradient[dim_index]->zero();
+        _temporary_gradient[dim_index]->add_vector(temporary_values[dim_index].data(),
+                                                   dof_indices);
       }
     }
   }

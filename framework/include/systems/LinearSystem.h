@@ -131,21 +131,18 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVGradientContainer() const override
+  const std::vector<std::unique_ptr<NumericVector<Number>>> & linearFVGradientContainer() const
   {
     return _raw_grad_container;
   }
 
-  virtual void
-  requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type) override;
+  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
 
-  virtual const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVLimitedGradientContainer(
-      const Moose::FV::GradientLimiterType limiter_type) const override;
+  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
 
-  virtual const std::unordered_set<Moose::FV::GradientLimiterType> &
-  requestedLinearFVLimitedGradientTypes() const override
+  const std::unordered_set<Moose::FV::GradientLimiterType> &
+  requestedLinearFVLimitedGradientTypes() const
   {
     return _requested_limited_gradient_types;
   }
@@ -162,7 +159,7 @@ public:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
   {
-    return _new_gradient;
+    return _temporary_gradient;
   }
 
   /**
@@ -235,11 +232,11 @@ protected:
   /// Base class reference to the linear implicit system in libmesh
   libMesh::LinearImplicitSystem & _linear_implicit_system;
 
-  /// Vectors to store the new gradients during the computation. This is needed
+  /// Vectors to store the temporary gradients during the computation. This is needed
   /// because the old gradients might still be needed to determine boundary values
   /// (for extrapolated boundary conditions). Once the computation is done, we
-  /// move the nev vectors to the original containers.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
+  /// move the temporary vectors to the original containers.
+  std::vector<std::unique_ptr<NumericVector<Number>>> _temporary_gradient;
 
   /// Raw cell-centered gradient components. First index is spatial component
   /// ([0] is du/dx and so on).
@@ -253,11 +250,11 @@ protected:
                      std::vector<std::unique_ptr<NumericVector<Number>>>>
       _raw_limited_grad_containers;
 
-  /// Vectors to store new limited gradients during computation:
+  /// Vectors to store temporary limited gradients during computation:
   /// <limiter type, vector index = spatial component>.
   std::unordered_map<Moose::FV::GradientLimiterType,
                      std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _new_limited_gradient;
+      _temporary_limited_gradient;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)

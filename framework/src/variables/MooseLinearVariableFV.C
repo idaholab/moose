@@ -34,6 +34,22 @@ using namespace Moose;
 
 registerMooseObject("MooseApp", MooseLinearVariableFVReal);
 
+namespace
+{
+const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
+linearFVGradientContainer(SystemBase & sys)
+{
+  if (auto * const linear_system = dynamic_cast<LinearSystem *>(&sys))
+    return linear_system->linearFVGradientContainer();
+
+  if (auto * const auxiliary_system = dynamic_cast<AuxiliarySystem *>(&sys))
+    return auxiliary_system->linearFVGradientContainer();
+
+  mooseError("The assigned system is not a linear or an auxiliary system. Linear variables can "
+             "only be assigned to linear or auxiliary systems.");
+}
+}
+
 template <typename OutputType>
 InputParameters
 MooseLinearVariableFV<OutputType>::validParams()
@@ -49,7 +65,9 @@ template <typename OutputType>
 MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters),
     _needs_cell_gradients(false),
-    _grad_container(this->_sys.linearFVGradientContainer()),
+    _linear_system(dynamic_cast<LinearSystem *>(&this->_sys)),
+    _auxiliary_system(dynamic_cast<AuxiliarySystem *>(&this->_sys)),
+    _grad_container(linearFVGradientContainer(this->_sys)),
     _sys_num(this->_sys.number()),
     _solution(this->_sys.currentSolution()),
     // The following members are needed to be able to interface with the postprocessor and
@@ -66,7 +84,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL)))
 {
-  if (!dynamic_cast<LinearSystem *>(&_sys) && !dynamic_cast<AuxiliarySystem *>(&_sys))
+  if (!_linear_system && !_auxiliary_system)
     this->paramError("solver_sys",
                      "The assigned system is not a linear or an auxiliary system! Linear variables "
                      "can only be assigned to linear or auxiliary systems!");
@@ -77,6 +95,30 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
 
   if (libMesh::n_threads() > 1)
     mooseError("MooseLinearVariableFV does not support threading at the moment!");
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeCellGradients(
+    const Moose::FV::GradientLimiterType limiter_type)
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    computeCellGradients();
+  else
+    computeCellLimitedGradients(limiter_type);
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
+    const Moose::FV::GradientLimiterType limiter_type)
+{
+  computeCellGradients();
+
+  if (_linear_system)
+    _linear_system->requestLinearFVLimitedGradients(limiter_type);
+  else
+    _auxiliary_system->requestLinearFVLimitedGradients(limiter_type);
 }
 
 template <typename OutputType>
@@ -143,7 +185,9 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
     const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
 {
   _cell_gradient.zero();
-  const auto & limited_grad_container = this->_sys.linearFVLimitedGradientContainer(limiter_type);
+  const auto & limited_grad_container =
+      _linear_system ? _linear_system->linearFVLimitedGradientContainer(limiter_type)
+                     : _auxiliary_system->linearFVLimitedGradientContainer(limiter_type);
   for (const auto i : make_range(this->_mesh.dimension()))
     _cell_gradient(i) =
         (*limited_grad_container[i])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
