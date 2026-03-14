@@ -109,6 +109,7 @@ void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
+  _current_solution = system().current_local_solution.get();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -117,34 +118,7 @@ LinearSystem::initialSetup()
                  "which is assigned to the wrong system: ",
                  name);
 
-  // If we need raw gradients, initialize storage once for this system.
-  bool gradient_storage_initialized = false;
-  for (const auto & field_var : _vars[0].fieldVariables())
-    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
-    {
-      _raw_grad_container.clear();
-      for (const auto i : make_range(this->_mesh.dimension()))
-      {
-        libmesh_ignore(i);
-        _raw_grad_container.push_back(currentSolution()->zero_clone());
-      }
-      gradient_storage_initialized = true;
-    }
-
-  // If we need limited gradients, initialize the requested limiter containers.
-  if (!_requested_limited_gradient_types.empty())
-    for (const auto limiter_type : _requested_limited_gradient_types)
-    {
-      if (limiter_type == Moose::FV::GradientLimiterType::None)
-        continue;
-      auto & container = _raw_limited_grad_containers[limiter_type];
-      container.clear();
-      for (const auto i : make_range(this->_mesh.dimension()))
-      {
-        libmesh_ignore(i);
-        container.push_back(currentSolution()->zero_clone());
-      }
-    }
+  rebuildLinearFVGradientStorage();
 
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -182,11 +156,74 @@ LinearSystem::initialSetup()
 }
 
 void
+LinearSystem::reinit()
+{
+  _current_solution = system().current_local_solution.get();
+  rebuildLinearFVGradientStorage();
+}
+
+void
+LinearSystem::rebuildLinearFVGradientStorage()
+{
+  _raw_grad_container.clear();
+  _temporary_gradient.clear();
+  _raw_limited_grad_containers.clear();
+  _temporary_limited_gradient.clear();
+
+  bool gradient_storage_initialized = false;
+  for (const auto & field_var : _vars[0].fieldVariables())
+    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
+      gradient_storage_initialized = true;
+
+  if (!gradient_storage_initialized)
+    return;
+
+  const auto initialize_container =
+      [this](std::vector<std::unique_ptr<NumericVector<Number>>> & container)
+  {
+    container.clear();
+    for (const auto i : make_range(this->_mesh.dimension()))
+    {
+      libmesh_ignore(i);
+      container.push_back(currentSolution()->zero_clone());
+    }
+  };
+
+  initialize_container(_raw_grad_container);
+  initialize_container(_temporary_gradient);
+
+  for (const auto limiter_type : _requested_limited_gradient_types)
+  {
+    if (limiter_type == Moose::FV::GradientLimiterType::None)
+      continue;
+
+    initialize_container(_raw_limited_grad_containers[limiter_type]);
+    initialize_container(_temporary_limited_gradient[limiter_type]);
+  }
+}
+
+void
 LinearSystem::requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return;
-  _requested_limited_gradient_types.insert(limiter_type);
+
+  if (_requested_limited_gradient_types.insert(limiter_type).second && !_raw_grad_container.empty())
+  {
+    const auto initialize_container =
+        [this](std::vector<std::unique_ptr<NumericVector<Number>>> & container)
+    {
+      container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        container.push_back(currentSolution()->zero_clone());
+      }
+    };
+
+    initialize_container(_raw_limited_grad_containers[limiter_type]);
+    initialize_container(_temporary_limited_gradient[limiter_type]);
+  }
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
@@ -233,10 +270,14 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
 void
 LinearSystem::computeGradients()
 {
+  if (_raw_grad_container.empty())
+    return;
+
   auto & temporary_gradient = temporaryLinearFVGradientContainer();
-  temporary_gradient.clear();
-  for (auto & vec : _raw_grad_container)
-    temporary_gradient.push_back(vec->zero_clone());
+  mooseAssert(temporary_gradient.size() == _raw_grad_container.size(),
+              "Temporary and raw gradient containers must have the same size.");
+  for (auto & vec : temporary_gradient)
+    vec->zero();
 
   TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
 
@@ -268,10 +309,9 @@ LinearSystem::computeGradients()
   PARALLEL_CATCH;
 
   for (const auto i : index_range(_raw_grad_container))
-  {
     temporary_gradient[i]->close();
-    _raw_grad_container[i] = std::move(temporary_gradient[i]);
-  }
+
+  _raw_grad_container.swap(temporary_gradient);
 
   // Compute any requested limited gradients using the newly updated raw gradients.
   if (!requestedLinearFVLimitedGradientTypes().empty())
@@ -285,13 +325,12 @@ LinearSystem::computeGradients()
       if (limiter_type == Moose::FV::GradientLimiterType::None)
         continue;
 
+      auto & raw_container = _raw_limited_grad_containers[limiter_type];
       auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
-      temporary_container.clear();
-      for (const auto i : make_range(_fe_problem.mesh().dimension()))
-      {
-        libmesh_ignore(i);
-        temporary_container.push_back(currentSolution()->zero_clone());
-      }
+      mooseAssert(temporary_container.size() == raw_container.size(),
+                  "Temporary and raw limited gradient containers must have the same size.");
+      for (auto & vec : temporary_container)
+        vec->zero();
 
       PARALLEL_TRY
       {
@@ -304,7 +343,7 @@ LinearSystem::computeGradients()
       for (auto & vec : temporary_container)
         vec->close();
 
-      _raw_limited_grad_containers[limiter_type] = std::move(temporary_container);
+      raw_container.swap(temporary_container);
     }
   }
 }

@@ -49,6 +49,7 @@ public:
   virtual ~AuxiliarySystem();
 
   virtual void initialSetup() override;
+  virtual void reinit() override;
   virtual void timestepSetup() override;
   virtual void customSetup(const ExecFlagType & exec_type) override;
   virtual void subdomainSetup() override;
@@ -191,10 +192,12 @@ protected:
   template <typename AuxKernelType>
   void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
+  void rebuildLinearFVGradientStorage();
+
   /**
    * Return temporary storage for gradients during gradient assembly.
-   * The returned vectors are scratch storage and are moved into the final gradient
-   * container at the end of the assembly.
+   * The returned vectors are persistent scratch storage reused across calls and swapped with the
+   * final gradient container before gradient assembly returns.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
   {
@@ -203,8 +206,8 @@ protected:
 
   /**
    * Return temporary storage for limited gradients during gradient assembly.
-   * The returned vectors are scratch storage and are moved into the final limited-gradient
-   * container at the end of the assembly.
+   * The returned vectors are persistent scratch storage reused across calls and swapped with the
+   * final limited-gradient container before gradient assembly returns.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)

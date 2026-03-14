@@ -86,7 +86,22 @@ AuxiliarySystem::requestLinearFVLimitedGradients(
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return;
 
-  _requested_limited_gradient_types.insert(limiter_type);
+  if (_requested_limited_gradient_types.insert(limiter_type).second && !_raw_grad_container.empty())
+  {
+    const auto initialize_container =
+        [this](std::vector<std::unique_ptr<NumericVector<Number>>> & container)
+    {
+      container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        container.push_back(currentSolution()->zero_clone());
+      }
+    };
+
+    initialize_container(_raw_limited_grad_containers[limiter_type]);
+    initialize_container(_temporary_limited_gradient[limiter_type]);
+  }
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
@@ -119,34 +134,8 @@ AuxiliarySystem::initialSetup()
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
-
-  bool gradient_storage_initialized = false;
-  for (const auto & field_var : _vars[0].fieldVariables())
-    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
-    {
-      _raw_grad_container.clear();
-      for (const auto i : make_range(this->_mesh.dimension()))
-      {
-        libmesh_ignore(i);
-        _raw_grad_container.push_back(currentSolution()->zero_clone());
-      }
-      gradient_storage_initialized = true;
-    }
-
-  if (!_requested_limited_gradient_types.empty())
-    for (const auto limiter_type : _requested_limited_gradient_types)
-    {
-      if (limiter_type == Moose::FV::GradientLimiterType::None)
-        continue;
-
-      auto & container = _raw_limited_grad_containers[limiter_type];
-      container.clear();
-      for (const auto i : make_range(this->_mesh.dimension()))
-      {
-        libmesh_ignore(i);
-        container.push_back(currentSolution()->zero_clone());
-      }
-    }
+  _current_solution = _sys.current_local_solution.get();
+  rebuildLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -182,6 +171,53 @@ AuxiliarySystem::initialSetup()
   _kokkos_elemental_aux_storage.sort(/*tid=*/0);
   _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
 #endif
+}
+
+void
+AuxiliarySystem::reinit()
+{
+  _current_solution = _sys.current_local_solution.get();
+  rebuildLinearFVGradientStorage();
+}
+
+void
+AuxiliarySystem::rebuildLinearFVGradientStorage()
+{
+  _raw_grad_container.clear();
+  _temporary_gradient.clear();
+  _raw_limited_grad_containers.clear();
+  _temporary_limited_gradient.clear();
+
+  bool gradient_storage_initialized = false;
+  for (const auto & field_var : _vars[0].fieldVariables())
+    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
+      gradient_storage_initialized = true;
+
+  if (!gradient_storage_initialized)
+    return;
+
+  const auto initialize_container =
+      [this](std::vector<std::unique_ptr<NumericVector<Number>>> & container)
+  {
+    container.clear();
+    for (const auto i : make_range(this->_mesh.dimension()))
+    {
+      libmesh_ignore(i);
+      container.push_back(currentSolution()->zero_clone());
+    }
+  };
+
+  initialize_container(_raw_grad_container);
+  initialize_container(_temporary_gradient);
+
+  for (const auto limiter_type : _requested_limited_gradient_types)
+  {
+    if (limiter_type == Moose::FV::GradientLimiterType::None)
+      continue;
+
+    initialize_container(_raw_limited_grad_containers[limiter_type]);
+    initialize_container(_temporary_limited_gradient[limiter_type]);
+  }
 }
 
 void
@@ -541,10 +577,14 @@ AuxiliarySystem::compute(ExecFlagType type)
 void
 AuxiliarySystem::computeGradients()
 {
+  if (_raw_grad_container.empty())
+    return;
+
   auto & temporary_gradient = temporaryLinearFVGradientContainer();
-  temporary_gradient.clear();
-  for (auto & vec : _raw_grad_container)
-    temporary_gradient.push_back(vec->zero_clone());
+  mooseAssert(temporary_gradient.size() == _raw_grad_container.size(),
+              "Temporary and raw gradient containers must have the same size.");
+  for (auto & vec : temporary_gradient)
+    vec->zero();
 
   TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
 
@@ -576,10 +616,9 @@ AuxiliarySystem::computeGradients()
   PARALLEL_CATCH;
 
   for (const auto i : index_range(_raw_grad_container))
-  {
     temporary_gradient[i]->close();
-    _raw_grad_container[i] = std::move(temporary_gradient[i]);
-  }
+
+  _raw_grad_container.swap(temporary_gradient);
 
   if (!requestedLinearFVLimitedGradientTypes().empty())
   {
@@ -592,13 +631,12 @@ AuxiliarySystem::computeGradients()
       if (limiter_type == Moose::FV::GradientLimiterType::None)
         continue;
 
+      auto & raw_container = _raw_limited_grad_containers[limiter_type];
       auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
-      temporary_container.clear();
-      for (const auto i : make_range(_fe_problem.mesh().dimension()))
-      {
-        libmesh_ignore(i);
-        temporary_container.push_back(currentSolution()->zero_clone());
-      }
+      mooseAssert(temporary_container.size() == raw_container.size(),
+                  "Temporary and raw limited gradient containers must have the same size.");
+      for (auto & vec : temporary_container)
+        vec->zero();
 
       PARALLEL_TRY
       {
@@ -611,7 +649,7 @@ AuxiliarySystem::computeGradients()
       for (auto & vec : temporary_container)
         vec->close();
 
-      _raw_limited_grad_containers[limiter_type] = std::move(temporary_container);
+      raw_container.swap(temporary_container);
     }
   }
 }
