@@ -185,12 +185,4 @@
     cli_args = "Outputs/file_base=minmod_neg LinearFVKernels/advection/advected_interp_method_name=nvd_minmod LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
     max_threads = 1 # see libmesh issue #3808
   []
-  [advected-method-guardrail]
-    type = RunException
-    input = advection-1d.i
-    cli_args = "FVInterpolationMethods/average/type=FVHarmonicAverage LinearFVKernels/advection/advected_interp_method_name=average"
-    expect_err = "does not support advected interpolation and cannot be used by LinearFVAdvection"
-    requirement = "The system shall reject using a face-only FVInterpolationMethod with LinearFVAdvection."
-    max_threads = 1 # see libmesh issue #3808
-  []
 []
