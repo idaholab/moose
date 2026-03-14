@@ -53,6 +53,7 @@ public:
   virtual bool converged() override { return _converged; }
 
   virtual void initialSetup() override;
+  virtual void reinit() override;
 
   // Overriding these to make sure the linear systems don't do anything during
   // residual/jacobian setup
@@ -154,8 +155,8 @@ public:
 
   /**
    * Return temporary storage for gradients being assembled.
-   * The returned vectors are temporary and are moved into the final gradient container before
-   * the gradient assembly is finished.
+   * The returned vectors are persistent scratch storage reused across calls and swapped with the
+   * final gradient container before gradient assembly returns.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
   {
@@ -164,8 +165,8 @@ public:
 
   /**
    * Return temporary storage for limited gradients during gradient assembly.
-   * The returned vectors are temporary and are moved into the final linear
-   * gradient container before the gradient assembly is finished.
+   * The returned vectors are persistent scratch storage reused across calls and swapped with the
+   * final limited-gradient container before gradient assembly returns.
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> &
   temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
@@ -183,6 +184,8 @@ protected:
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags,
                                    const bool compute_gradients = true);
+
+  void rebuildLinearFVGradientStorage();
 
   /// Base class reference to the libmesh system
   System & _sys;
