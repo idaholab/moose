@@ -93,5 +93,13 @@
       recover = false
       detail = 'print finite difference gradient information to the screen when using the automatically formed adjoint.'
     []
+    [gradient_test]
+      type = TaoGradientTester
+      input = main_auto_adjoint.i
+      cosine_tol = 1e-2
+      max_norm_tol = 5e-4
+      max_threads = 1 # Optimize executioner does not support multiple threads
+      detail = 'verifying the adjoint gradient against finite differences.'
+    []
   []
 []
