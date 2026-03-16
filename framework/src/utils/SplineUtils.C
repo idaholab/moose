@@ -72,11 +72,11 @@ bSplineControlPoints(const libMesh::Point & start_point,
                      const libMesh::Real sharpness)
 {
   // check that start_point is different from end_point
-  if ((start_point - end_point).norm_sq() < libMesh::TOLERANCE)
+  if ((start_point - end_point).norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
     mooseError("Start and end points must be different.");
   // check that neither direction is the zero vector
-  if (start_direction.norm_sq() < libMesh::TOLERANCE ||
-      end_direction.norm_sq() < libMesh::TOLERANCE)
+  if (start_direction.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE ||
+      end_direction.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
     mooseError("Direction vectors must have a nonzero magnitude.");
   mooseAssert(sharpness <= 1.0 && sharpness >= 0, "Sharpness must be in [0,1]!");
 
@@ -186,7 +186,7 @@ closestPoints(const libMesh::Point & point_1,
   const auto n_vec = direction_1.cross(direction_2);
 
   // check if n_vec is the zero vector (indicates parallel lines)
-  if (n_vec.norm_sq() < libMesh::TOLERANCE)
+  if (n_vec.norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
     mooseError("Lines are parallel! Infinitely many closest points exist.");
 
   const auto n1_vec = direction_1.cross(n_vec);
