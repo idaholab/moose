@@ -64,9 +64,7 @@
       type = TaoGradientTester
       input = debug_gradient.i
       allow_test_objects = True
-      cosine_tol = 1e-2
-      max_rel_tol = 1e-5
-      max_threads = 1 # Optimize executioner does not support multiple threads
+      max_rel_tol = 1e-6
       detail = 'verifying the adjoint gradient against finite differences.'
     []
   []

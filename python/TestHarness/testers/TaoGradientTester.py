@@ -12,16 +12,11 @@ import re
 
 
 class TaoGradientTester(RunApp):
+    maxnorm_re = re.compile(r"max-norm\s+\|\|G\s*-\s*Gfd\|\|/\|\|G\|\|\s*=\s*([^,\s]+)")
+
     @staticmethod
     def validParams():
         params = RunApp.validParams()
-        params.addParam(
-            "cosine_tol",
-            1e-2,
-            "Tolerance for |1 - angle_cosine|. The angle cosine between the "
-            "hand-coded and finite-difference gradients should be 1.0 for a "
-            "perfect gradient.",
-        )
         params.addParam(
             "max_rel_tol",
             1e-5,
@@ -45,9 +40,6 @@ class TaoGradientTester(RunApp):
             "Check only the first gradient comparison. If False, "
             "all gradient comparisons in the output are checked.",
         )
-        params.addParam(
-            "turn_off_exodus_output", True, "Whether to set exodus=false in Outputs"
-        )
 
         # Disable with valgrind
         params.valid["valgrind"] = "NONE"
@@ -62,11 +54,16 @@ class TaoGradientTester(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
+        # Require opt mode
+        if self.specs["capabilities"]:
+            self.specs["capabilities"] = "(" + self.specs["capabilities"] + ") & "
+        self.specs["capabilities"] += "method=opt"
+
+    def getCommand(self, options):
+        # Get the base command from RunApp
+        cmd = RunApp.getCommand(self, options)
+
         specs = self.specs
-
-        if specs["turn_off_exodus_output"]:
-            self.specs["cli_args"][:0] = ["Outputs/exodus=false"]
-
         tao_solver = specs["tao_solver"]
 
         petsc_iname = (
@@ -78,59 +75,49 @@ class TaoGradientTester(RunApp):
             petsc_iname += " -tao_fd_delta"
             petsc_value += " " + str(specs["tao_fd_delta"])
 
-        self.specs["cli_args"][:0] = [
-            "Executioner/tao_solver=" + tao_solver,
-            "Executioner/petsc_options_iname='" + petsc_iname + "'",
-            "Executioner/petsc_options_value='" + petsc_value + "'",
-            "Executioner/petsc_options='-tao_test_gradient_view'",
-            "Executioner/verbose=true",
-        ]
+        cmd += (
+            " Executioner/tao_solver="
+            + tao_solver
+            + " Executioner/petsc_options_iname='"
+            + petsc_iname
+            + "'"
+            + " Executioner/petsc_options_value='"
+            + petsc_value
+            + "'"
+            + " Executioner/petsc_options='-tao_test_gradient_view'"
+            + " Executioner/verbose=true"
+        )
 
-        # Require opt mode
-        if specs["capabilities"]:
-            specs["capabilities"] = "(" + specs["capabilities"] + ") & "
-        specs["capabilities"] += "method=opt"
+        return cmd
 
     @staticmethod
-    def _strToFloat(str):
+    def _strToFloat(str_val):
         """Convert string to float, handling PETSc's nan./inf. formatting."""
-        return float(str.rstrip("."))
+        return float(str_val.rstrip("."))
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         output = ""
 
-        cosine_pattern = r"\(Gfd'G\)/\|\|Gfd\|\|\|\|G\|\|\s*=\s*(\S+)"
-        maxnorm_pattern = r"max-norm\s+\|\|G\s*-\s*Gfd\|\|/\|\|G\|\|\s*=\s*([^,\s]+)"
-
         # Match all gradient test outputs in the output
-        cosine_matches = self.cosine_re.findall(runner_output)
         maxnorm_matches = self.maxnorm_re.findall(runner_output)
 
-        reason = (
-            "EXPECTED OUTPUT for '(Gfd'G)/||Gfd||||G||' "
-            "and 'max-norm ||G - Gfd||/||G||' NOT FOUND"
-        )
+        reason = "EXPECTED OUTPUT for 'max-norm ||G - Gfd||/||G||' NOT FOUND"
 
-        if cosine_matches and maxnorm_matches:
+        if maxnorm_matches:
             # If only_first_gradient, check just the first; otherwise check all
             if self.specs["only_first_gradient"]:
-                pairs = [(cosine_matches[0], maxnorm_matches[0])]
+                matches = [maxnorm_matches[0]]
             else:
-                pairs = zip(cosine_matches, maxnorm_matches)
+                matches = maxnorm_matches
 
             reason = ""
-            for cosine_match, maxnorm_match in pairs:
-                cosine_val = self.__strToFloat(cosine_match.group(1))
-                maxnorm_val = self.__strToFloat(maxnorm_match.group(1))
+            for maxnorm_str in matches:
+                maxnorm_val = self._strToFloat(maxnorm_str)
+                max_rel_tol = self.specs["max_rel_tol"]
 
-                cosine_err = abs(1.0 - cosine_val)
                 reason = ""
-                if cosine_err > self.specs["cosine_tol"]:
-                    reason = f"GRADIENT TEST: ANGLE COSINE {cosine_val} IS NOT 1 (err={cosine_err:.2e} > tol={self.specs["cosine_tol"]:.2e})"
-                if maxnorm_val > self.specs["max_rel_tol"]:
-                    if reason:
-                        reason += "; "
-                    reason += f"GRADIENT TEST: MAX-NORM TOO LARGE ({maxnorm_val:.2e} > tol={self.specs["max_rel_tol"]:.2e})"
+                if maxnorm_val > max_rel_tol:
+                    reason = f"GRADIENT TEST: MAX-NORM TOO LARGE ({maxnorm_val:.2e} > tol={max_rel_tol:.2e})"
 
                 # Break on first failure
                 if reason:

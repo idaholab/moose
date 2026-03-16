@@ -19,7 +19,6 @@
     type = TaoGradientTester
     input = main.i
     only_first_gradient = true
-    max_threads = 1 # Optimize executioner does not support multiple threads
     requirement = 'The system shall be able to perform gradient based material parameter inversion '
                   'for a single material property and perform a grad check.'
 

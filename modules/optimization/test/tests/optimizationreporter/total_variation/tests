@@ -39,11 +39,7 @@
       prereq = 'gradient_l2_regularization/mesh'
       type = TaoGradientTester
       input = 'main.i optimizationReporterMeshIC.i'
-      only_first_gradient = true
       max_rel_tol = 2e-4
-      # Optimize executioner does not support multiple threads
-      max_threads = 1
-      recover = False
       detail = " the adjoint gradient will be accurate."
     []
   []

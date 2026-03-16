@@ -13,10 +13,6 @@ page for more information on debugging optimization gradients.
 
 Test configuration options are specified in the `tests` file, see [testBlock].
 
-- `cosine_tol`: Tolerance for `|1 - angle_cosine|`. The angle cosine between the
-  hand-coded and finite-difference gradients should be 1.0 for a perfect gradient.
-  Defaults to 1e-2.
-
 - `max_rel_tol`: Tolerance for the relative max-norm `||G - Gfd||/||G||`. Should be near
   zero for a correct gradient. Defaults to 1e-5.
 
@@ -25,8 +21,6 @@ Test configuration options are specified in the `tests` file, see [testBlock].
 - `tao_fd_delta`: Finite difference step size (`-tao_fd_delta`) used by TAO when
   computing the finite-difference gradient. This is problem dependent. If not
   specified, TAO uses its default.
-
-- `turn_off_exodus_output`: Whether to set `exodus=false` in Outputs. Defaults to True.
 
 - `only_first_gradient`: Check only the first gradient comparison. Defaults to True.
   It is best to check the first gradient since later gradients are evaluated near
@@ -46,13 +40,13 @@ Other test commands & restrictions may be found in the MOOSE TestHarness documen
 The tester automates the manual gradient testing setup that would otherwise need to be
 added directly to the `Executioner` block of an input file, such as:
 
-!listing test/tests/executioners/basic_optimize/debug_gradient.i block=Executioner
+!listing modules/optimization/test/tests/executioners/basic_optimize/debug_gradient.i block=Executioner
          id=executionerBlock
          caption=Example Executioner block for manual gradient testing with TAO.
 
 Output from the gradient test in the Executioner block will produce the following output comparing the finite difference gradient `Gfd` to the adjoint gradient computed by the code `G`:
 
-!listing executioners/basic_optimize/gold/debug_gradient.out start=||Gfd|| end=TAO SOLVER include-end=True
+!listing modules/optimization/test/tests/executioners/basic_optimize/gold/debug_gradient.out start=||Gfd|| end=TAO SOLVER include-end=True
 
 The tester prepends CLI arguments to override the input file's `Executioner` block,
 configuring TAO to:
@@ -63,19 +57,14 @@ configuring TAO to:
 4. Use unit line search to minimize extra solves (`-tao_ls_type unit`)
 5. Print the gradient comparison (`-tao_test_gradient_view`)
 
-After running, the tester parses two values from the TAO output. If TAO prints
+After running, the tester parses the relative max-norm from the TAO output. If TAO prints
 multiple gradient comparisons (e.g. one per optimization iteration), the tester
-checks every one of them and fails if any single comparison exceeds the tolerances.
+checks every one of them and fails if any single comparison exceeds the tolerance.
 If `only_first_gradient` is set to `true`, only the first gradient comparison is checked:
 
-- +Angle cosine+: Computed as `(Gfd'G) / (||Gfd|| ||G||)`, this is the cosine of the
-  angle between the hand-coded gradient `G` and the finite-difference gradient `Gfd`.
-  A value close to 1 means the two gradient vectors are pointing in the same direction,
-  confirming the adjoint gradient has the correct direction. The test checks that
-  `|1 - angle_cosine| < cosine_tol`.
 - +Max-norm+: `||G - Gfd||/||G||`, the relative max-norm of the difference between the
   hand-coded and finite-difference gradients, normalized by the gradient magnitude.
-  Should be near zero for a correct gradient, confirming the adjoint gradient also has
+  Should be near zero for a correct gradient, confirming the adjoint gradient has
   the correct magnitude. The test checks that this value is less than `max_rel_tol`.
 
 ## Example test configuration in the MOOSE test suite
@@ -83,6 +72,6 @@ If `only_first_gradient` is set to `true`, only the first gradient comparison is
 In this example, `TaoGradientTester` is used to verify the adjoint gradient for a
 point load inversion problem:
 
-!listing test/tests/executioners/basic_optimize/tests block=debug/gradient_test
+!listing modules/optimization/test/tests/executioners/basic_optimize/tests block=debug/gradient_test
          id=testBlock
          caption=Example TaoGradientTester configuration in a tests file.
