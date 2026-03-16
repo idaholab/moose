@@ -539,7 +539,9 @@ LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
     }
   }
 
-  double mfem_coordinates[3];
+  // This needs to be initialised, so we don't have garbage in the 2nd
+  // and 3rd elements when getting 1D and 2D data.
+  double mfem_coordinates[3] = {0., 0., 0.};
 
   for (int ielement = 0; ielement < NumOfElements; ielement++)
   {
