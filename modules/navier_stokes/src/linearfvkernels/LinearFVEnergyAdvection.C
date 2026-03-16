@@ -11,6 +11,7 @@
 #include "MooseLinearVariableFV.h"
 #include "NSFVUtils.h"
 #include "NS.h"
+#include "PorousRhieChowMassFlux.h"
 
 registerMooseObject("NavierStokesApp", LinearFVEnergyAdvection);
 
@@ -20,7 +21,7 @@ LinearFVEnergyAdvection::validParams()
   InputParameters params = LinearFVFluxKernel::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
                              "advection term for the energy e.g. h=int(cp dT). A user may still "
-                             "override what quantity is advected, but the default is temperature.");
+                             "override what quantity is advected, but the default is enthalpy.");
   MooseEnum advected_quantity("enthalpy temperature", "enthalpy");
   params.addParam<MooseEnum>("advected_quantity", advected_quantity, "The advected quantity");
   params.addParam<Real>("cp", "Constant specific heat value");
@@ -46,6 +47,12 @@ LinearFVEnergyAdvection::LinearFVEnergyAdvection(const InputParameters & params)
 
   if (!isParamValid("cp") && _advected_quantity == AdvectedQuantityEnum::TEMPERATURE)
     paramError("cp", "cp should be specified for temperature advection");
+
+  if (dynamic_cast<const PorousRhieChowMassFlux *>(&_mass_flux_provider) &&
+      _advected_quantity != AdvectedQuantityEnum::ENTHALPY)
+    paramError("advected_quantity",
+               "LinearFVEnergyAdvection only supports specific enthalpy advection when used with "
+               "PorousRhieChowMassFlux.");
 }
 
 Real
@@ -109,7 +116,9 @@ LinearFVEnergyAdvection::setupFaceData(const FaceInfo * face_info)
   _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
-  // side terms
-  _advected_interp_coeffs =
-      interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  // side terms. For porous-medium cases, the Rhie-Chow object can override this hook while
+  // energy transport still uses the superficial mass flux directly, i.e. without 1/epsilon
+  // scaling of the advected quantity interpolation.
+  _advected_interp_coeffs = _mass_flux_provider.getAdvectedInterpolationCoeffs(
+      *_current_face_info, _advected_interp_method, _face_mass_flux, false);
 }
