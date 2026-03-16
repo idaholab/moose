@@ -9,13 +9,13 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMHypreLOBPCG.h"
+#include "MFEMHypreAME.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMHypreLOBPCG);
+registerMooseObject("MooseApp", MFEMHypreAME);
 
 InputParameters
-MFEMHypreLOBPCG::validParams()
+MFEMHypreAME::validParams()
 {
   InputParameters params = MFEMEigensolverBase::validParams();
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
@@ -25,28 +25,26 @@ MFEMHypreLOBPCG::validParams()
   return params;
 }
 
-MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
+MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
   : MFEMEigensolverBase(parameters), _coef(getScalarCoefficient("coefficient"))
 {
   constructSolver(parameters);
 }
 
 void
-MFEMHypreLOBPCG::constructSolver(const InputParameters &)
+MFEMHypreAME::constructSolver(const InputParameters &)
 {
-  _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
+  _eigensolver = std::make_unique<mfem::HypreAME>(getMFEMProblem().getComm());
 
   _eigensolver->SetNumModes(_num_modes);
-  _eigensolver->SetRandomSeed(getParam<int>("random_seed"));
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
-  _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
   setPreconditioner(*_eigensolver);
 }
 
 void
-MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+MFEMHypreAME::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
     mooseError("Eigensolver cannot use LOR method");

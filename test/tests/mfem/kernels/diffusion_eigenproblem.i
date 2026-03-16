@@ -65,7 +65,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Eigensolver
+    file_base = OutputData/DiffEigenproblem
     vtk_format = ASCII
   []
 []
