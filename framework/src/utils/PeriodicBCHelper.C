@@ -53,7 +53,7 @@ PeriodicBCHelper::checkPeriodicParams() const
     for (const auto & param :
          {"primary", "secondary", "translation", "transform_func", "inv_transform_func"})
       if (_params.isParamValid(param))
-        paramError(param, "Should not be specified along with 'auto_direction'");
+        _params.paramError(param, "Should not be specified along with 'auto_direction'");
   }
   else if (!_params.isParamValid("primary") || !_params.isParamValid("secondary"))
     _action.mooseError(
@@ -110,16 +110,20 @@ PeriodicBCHelper::setupAutoPeriodicBoundaries(FEProblemBase & problem)
   {
     const int component = dir.id();
     if (component > (cast_int<int>(mesh.dimension()) - 1))
-      paramError("auto_direction",
-                 "Component '" + dir.name() + "' not valid for " +
-                     std::to_string(mesh.dimension()) + "D mesh");
+      _params.paramError("auto_direction",
+                         "Component '",
+                         dir.name(),
+                         "' not valid for ",
+                         mesh.dimension(),
+                         "D mesh");
 
     const auto boundary_ids = mesh.getPairedBoundaryMapping(component);
     if (!boundary_ids)
-      paramError("auto_direction",
-                 "Couldn't auto-detect a paired boundary for use with periodic boundary "
-                 "conditions in the '" +
-                     dir.name() + "' direction");
+      _params.paramError("auto_direction",
+                         "Couldn't auto-detect a paired boundary for use with periodic boundary "
+                         "conditions in the '",
+                         dir.name(),
+                         "' direction");
 
     RealVectorValue v;
     v(component) = mesh.dimensionWidth(component);
@@ -145,13 +149,13 @@ PeriodicBCHelper::setupManualPeriodicBoundaries(FEProblemBase & problem)
     const auto inv_fn_names_ptr =
         _params.queryParam<std::vector<std::string>>("inv_transform_func");
     if (!inv_fn_names_ptr)
-      paramError("transform_func", "Must also specify 'inv_transform_func'");
+      _params.paramError("transform_func", "Must also specify 'inv_transform_func'");
     if (fn_names_ptr->size() != mesh.dimension())
-      paramError("transform_func",
-                 "Must be the size of the mesh dimension " + std::to_string(mesh.dimension()));
+      _params.paramError(
+          "transform_func", "Must be the size of the mesh dimension ", mesh.dimension());
     if (inv_fn_names_ptr->size() != mesh.dimension())
-      paramError("inv_transform_func",
-                 "Must be the size of the mesh dimension " + std::to_string(mesh.dimension()));
+      _params.paramError(
+          "inv_transform_func", "Must be the size of the mesh dimension ", mesh.dimension());
 
     p = std::make_unique<FunctionPeriodicBoundary>(problem, *fn_names_ptr, *inv_fn_names_ptr);
   }
@@ -166,7 +170,7 @@ PeriodicBCHelper::setupManualPeriodicBoundaries(FEProblemBase & problem)
       if (const auto id = MooseMeshUtils::getBoundaryID(*name_ptr, mesh);
           id != Moose::INVALID_BOUNDARY_ID)
         return id;
-      paramError(param, "Boundary '" + *name_ptr + "' does not exist in the mesh");
+      _params.paramError(param, "Boundary '", *name_ptr, "' does not exist in the mesh");
     }
     _action.mooseError("Parameter '", param, "' is required when 'auto_direction' is not set");
   };
@@ -174,13 +178,6 @@ PeriodicBCHelper::setupManualPeriodicBoundaries(FEProblemBase & problem)
   p->pairedboundary = get_boundary("secondary");
 
   addPeriodicBoundary(std::move(p));
-}
-
-void
-PeriodicBCHelper::paramError(const std::string & param_name, const std::string & message) const
-{
-  // Eventually we should be able to do _params.paramError(), but that's not in yet
-  mooseError(_params.errorPrefix(param_name), ": ", message);
 }
 
 const InputParameters &

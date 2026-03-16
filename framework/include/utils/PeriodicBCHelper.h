@@ -76,16 +76,6 @@ private:
   void setupManualPeriodicBoundaries(FEProblemBase & problem);
 
   /**
-   * Helper for throwing a parameter error.
-   *
-   * Needed because this class can be used by both Actions and MooseObjectActions.
-   *
-   * In the future, we should be able to just call _params.paramError(),
-   * but that's not in yet.
-   */
-  void paramError(const std::string & param_name, const std::string & message) const;
-
-  /**
    * Internal method for getting the parameters by the owned action.
    *
    * Enables the use of the MOOSE object parameters if the owner is a

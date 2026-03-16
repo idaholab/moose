@@ -2264,7 +2264,7 @@ template <typename T>
 const T *
 InputParameters::queryParam(const std::string & name) const
 {
-  return isParamValid(name) ? &getParamHelper(name, *this, static_cast<T *>(0)) : nullptr;
+  return isParamValid(name) ? &getParamHelper<T>(name, *this) : nullptr;
 }
 
 template <typename T>
