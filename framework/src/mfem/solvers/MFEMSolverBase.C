@@ -47,7 +47,7 @@ MFEMSolverBase::setPreconditioner(T & solver)
       mooseError("Eigensolvers cannot be used as preconditioners.");
 
     auto & mfem_pre = _preconditioner->getSolver();
-    if constexpr (std::is_base_of_v<mfem::HypreSolver, T>)
+    if constexpr (std::is_base_of_v<mfem::HypreSolver, T> || std::is_same_v<mfem::HypreAME, T>)
       if (auto * const hypre_pre = dynamic_cast<mfem::HypreSolver *>(&mfem_pre))
         solver.SetPreconditioner(*hypre_pre);
       else
@@ -63,6 +63,7 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreLOBPCG &);
+template void MFEMSolverBase::setPreconditioner(mfem::HypreAME &);
 
 void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
