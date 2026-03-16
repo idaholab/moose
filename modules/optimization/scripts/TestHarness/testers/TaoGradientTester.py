@@ -54,6 +54,8 @@ class TaoGradientTester(RunApp):
         # No recover or restep
         params["recover"] = False
         params["restep"] = False
+        # TAO implementation does not currently support threading
+        params["max_threads"] = 1
 
         return params
 
@@ -89,14 +91,10 @@ class TaoGradientTester(RunApp):
             specs["capabilities"] = "(" + specs["capabilities"] + ") & "
         specs["capabilities"] += "method=opt"
 
-    def __strToFloat(self, str):
+    @staticmethod
+    def _strToFloat(str):
         """Convert string to float, handling PETSc's nan./inf. formatting."""
-        if str == "nan." or str == "inf.":
-            return float(str[:-1])
-        elif str == "-nan.":
-            return float("nan")
-        else:
-            return float(str)
+        return float(str.rstrip("."))
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         output = ""
@@ -105,8 +103,8 @@ class TaoGradientTester(RunApp):
         maxnorm_pattern = r"max-norm\s+\|\|G\s*-\s*Gfd\|\|/\|\|G\|\|\s*=\s*([^,\s]+)"
 
         # Match all gradient test outputs in the output
-        cosine_matches = list(re.finditer(cosine_pattern, runner_output))
-        maxnorm_matches = list(re.finditer(maxnorm_pattern, runner_output))
+        cosine_matches = self.cosine_re.findall(runner_output)
+        maxnorm_matches = self.maxnorm_re.findall(runner_output)
 
         reason = (
             "EXPECTED OUTPUT for '(Gfd'G)/||Gfd||||G||' "
@@ -115,7 +113,7 @@ class TaoGradientTester(RunApp):
 
         if cosine_matches and maxnorm_matches:
             # If only_first_gradient, check just the first; otherwise check all
-            if str(self.specs["only_first_gradient"]).lower() == "true":
+            if self.specs["only_first_gradient"]:
                 pairs = [(cosine_matches[0], maxnorm_matches[0])]
             else:
                 pairs = zip(cosine_matches, maxnorm_matches)
@@ -127,16 +125,12 @@ class TaoGradientTester(RunApp):
 
                 cosine_err = abs(1.0 - cosine_val)
                 reason = ""
-                if cosine_err > float(self.specs["cosine_tol"]):
-                    reason = "GRADIENT TEST: ANGLE COSINE {} IS NOT 1 (err={:.2e} > tol={:.2e})".format(
-                        cosine_val, cosine_err, float(self.specs["cosine_tol"])
-                    )
-                if maxnorm_val > float(self.specs["max_rel_tol"]):
+                if cosine_err > self.specs["cosine_tol"]:
+                    reason = f"GRADIENT TEST: ANGLE COSINE {cosine_val} IS NOT 1 (err={cosine_err:.2e} > tol={self.specs["cosine_tol"]:.2e})"
+                if maxnorm_val > self.specs["max_rel_tol"]:
                     if reason:
                         reason += "; "
-                    reason += "GRADIENT TEST: MAX-NORM TOO LARGE ({:.2e} > tol={:.2e})".format(
-                        maxnorm_val, float(self.specs["max_rel_tol"])
-                    )
+                    reason += f"GRADIENT TEST: MAX-NORM TOO LARGE ({maxnorm_val:.2e} > tol={self.specs["max_rel_tol"]:.2e})"
 
                 # Break on first failure
                 if reason:
