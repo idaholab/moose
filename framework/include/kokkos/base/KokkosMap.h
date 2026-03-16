@@ -54,21 +54,21 @@ fnv1aHash(const Pair<T1, T2> & key)
 }
 #endif
 
-template <typename T1, typename T2>
-class Map;
+template <typename T1, typename T2, template <typename...> class MapType>
+class MapBase;
 
-template <typename T1, typename T2>
-void dataStore(std::ostream & stream, Map<T1, T2> & map, void * context);
-template <typename T1, typename T2>
-void dataLoad(std::istream & stream, Map<T1, T2> & map, void * context);
+template <typename T1, typename T2, template <typename...> class MapType>
+void dataStore(std::ostream & stream, MapBase<T1, T2, MapType> & map, void * context);
+template <typename T1, typename T2, template <typename...> class MapType>
+void dataLoad(std::istream & stream, MapBase<T1, T2, MapType> & map, void * context);
 
 /**
  * The Kokkos wrapper class for standard map.
  * The map can only be populated on host.
  * Make sure to call copyToDevice() or copyToDeviceNested() after populating the map on host.
  */
-template <typename T1, typename T2>
-class Map
+template <typename T1, typename T2, template <typename...> class MapType>
+class MapBase
 {
 public:
   /**
@@ -98,7 +98,7 @@ public:
   auto & get()
   {
     if (!_map_host)
-      _map_host = std::make_shared<std::map<T1, T2>>();
+      _map_host = std::make_shared<MapType<T1, T2>>();
 
     return *_map_host;
   }
@@ -109,7 +109,7 @@ public:
   const auto & get() const
   {
     if (!_map_host)
-      _map_host = std::make_shared<std::map<T1, T2>>();
+      _map_host = std::make_shared<MapType<T1, T2>>();
 
     return *_map_host;
   }
@@ -137,7 +137,7 @@ public:
    * Swap with another Kokkos map
    * @param map The Kokkos map to be swapped
    */
-  void swap(Map<T1, T2> & map);
+  void swap(MapBase<T1, T2, MapType> & map);
 
   /**
    * Get the size of map
@@ -221,7 +221,7 @@ private:
    * Standard map on host
    * Stored as a shared pointer to avoid deep copy
    */
-  mutable std::shared_ptr<std::map<T1, T2>> _map_host;
+  mutable std::shared_ptr<MapType<T1, T2>> _map_host;
   /**
    * Keys on device
    */
@@ -235,13 +235,13 @@ private:
    */
   Array<dof_id_type> _offset;
 
-  friend void dataStore<T1, T2>(std::ostream &, Map<T1, T2> &, void *);
-  friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, void *);
+  friend void dataStore<T1, T2, MapType>(std::ostream &, MapBase<T1, T2, MapType> &, void *);
+  friend void dataLoad<T1, T2, MapType>(std::istream &, MapBase<T1, T2, MapType> &, void *);
 };
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-Map<T1, T2>::clear()
+MapBase<T1, T2, MapType>::clear()
 {
   get().clear();
 
@@ -251,9 +251,9 @@ Map<T1, T2>::clear()
 }
 
 #ifdef MOOSE_KOKKOS_SCOPE
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-Map<T1, T2>::copy()
+MapBase<T1, T2, MapType>::copy()
 {
   _keys.create(size());
   _values.create(size());
@@ -283,9 +283,9 @@ Map<T1, T2>::copy()
   }
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-Map<T1, T2>::copyToDevice()
+MapBase<T1, T2, MapType>::copyToDevice()
 {
   copy();
 
@@ -293,9 +293,9 @@ Map<T1, T2>::copyToDevice()
   _values.copyToDevice();
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-Map<T1, T2>::copyToDeviceNested()
+MapBase<T1, T2, MapType>::copyToDeviceNested()
 {
   copy();
 
@@ -303,9 +303,9 @@ Map<T1, T2>::copyToDeviceNested()
   _values.copyToDeviceNested();
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-Map<T1, T2>::swap(Map<T1, T2> & map)
+MapBase<T1, T2, MapType>::swap(MapBase<T1, T2, MapType> & map)
 {
   get().swap(map.get());
   _keys.swap(map._keys);
@@ -313,9 +313,9 @@ Map<T1, T2>::swap(Map<T1, T2> & map)
   _offset.swap(map._offset);
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 KOKKOS_FUNCTION dof_id_type
-Map<T1, T2>::find(const T1 & key) const
+MapBase<T1, T2, MapType>::find(const T1 & key) const
 {
   if (!size())
     return invalid_id;
@@ -331,9 +331,9 @@ Map<T1, T2>::find(const T1 & key) const
   return invalid_id;
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-dataStore(std::ostream & stream, Map<T1, T2> & map, void * context)
+dataStore(std::ostream & stream, MapBase<T1, T2, MapType> & map, void * context)
 {
   using ::dataStore;
 
@@ -343,9 +343,9 @@ dataStore(std::ostream & stream, Map<T1, T2> & map, void * context)
   dataStore(stream, map._offset, context);
 }
 
-template <typename T1, typename T2>
+template <typename T1, typename T2, template <typename...> class MapType>
 void
-dataLoad(std::istream & stream, Map<T1, T2> & map, void * context)
+dataLoad(std::istream & stream, MapBase<T1, T2, MapType> & map, void * context)
 {
   using ::dataLoad;
 
@@ -355,5 +355,11 @@ dataLoad(std::istream & stream, Map<T1, T2> & map, void * context)
   dataLoad(stream, map._offset, context);
 }
 #endif
+
+template <typename T1, typename T2>
+using Map = MapBase<T1, T2, std::map>;
+
+template <typename T1, typename T2>
+using UnorderedMap = MapBase<T1, T2, std::unordered_map>;
 
 } // namespace Moose::Kokkos
