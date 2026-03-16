@@ -10,16 +10,16 @@ an `mfem::L2ZienkiewiczZhuEstimator` to the [MFEMRefinementMarker.md].
 ## Overview
 
 This class implements `createEstimator()`. If the user doesn't supply an FESpace for the smoothed flux,
-then the method creates and stores an L2 finite element collection. Similarly, if the user doesn't
-supply an FESpace for the discontinuous flux, then the method creates and stores an H1 finite element
+then the method creates and stores an H1 finite element collection. Similarly, if the user doesn't
+supply an FESpace for the discontinuous flux, then the method creates and stores an L2 finite element
 collection. Be aware that the vector dimensions for each of these should match the space dimension.
 
-We can then construct the `L2ZienkiewiczZhuEstimator` object using the bilinear form integrator
+We can then construct the `mfem::L2ZienkiewiczZhuEstimator` object using the bilinear form integrator
 associated with the chosen kernel, the grid function associated with the variable, and the two finite
 element spaces we created for the fluxes. This object needs the underlying `mfem::BilinearFormIntegrator`
-to implement the methods `ComputeElementFlux()` and `ComputeFluxEnergy()`. Practically speaking, this
+to implement the method `ComputeElementFlux()`. Practically speaking, this
 means the only kernels we can attach this indicator to are [MFEMDiffusionKernel.md],
-[MFEMCurlCurlKernel.md] and [MFEMLinearElasticityKernel.md]
+[MFEMCurlCurlKernel.md] and [MFEMLinearElasticityKernel.md].
 
 This object is accessed once (by an `MFEMRefinementMarker`) using the `getEstimator()` method.
 

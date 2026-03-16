@@ -14,8 +14,8 @@
 #include "MFEMIndicator.h"
 
 /**
- * Wrapper for the Zienkiewicz-Zhu estimator with L2 projection. See mfem example 6p
- * for more details.
+ * Wrapper for the Zienkiewicz-Zhu estimator with L2 projection.
+ * See mfem example 6p for more details.
  */
 class MFEMZienkiewiczZhuIndicator : public MFEMIndicator
 {
@@ -31,15 +31,20 @@ public:
   virtual void createEstimator() override;
 
 protected:
+  /// Finite element space for the smoothed flux.
   std::shared_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
-  /// Finite element collection for the smoothed flux. Only used if the user doesn't supply
-  /// an existing FESpace for the smooth flux
+  /// Finite element collection for the smoothed flux.
+  /// Only used if the user doesn't supply an existing FESpace for the smooth flux.
   std::shared_ptr<mfem::FiniteElementCollection> _smooth_flux_fec;
 
+  /// Finite element space for the discontinuous flux.
   std::shared_ptr<mfem::ParFiniteElementSpace> _flux_fes;
-  /// Finite element collection for the discontinuous flux. Only used if the user doesn't supply
-  /// an existing FESpace for the discontinuous flux
+  /// Finite element collection for the discontinuous flux.
+  /// Only used if the user doesn't supply an existing FESpace for the discontinuous flux.
   std::shared_ptr<mfem::FiniteElementCollection> _flux_fec;
+
+  /// Auxiliary blf integrator implementing ComputeElementFlux().
+  std::unique_ptr<mfem::BilinearFormIntegrator> _integ;
 };
 
 #endif

@@ -19,8 +19,8 @@ InputParameters
 MFEMZienkiewiczZhuIndicator::validParams()
 {
   InputParameters params = MFEMIndicator::validParams();
-  params.addParam<UserObjectName>("flux_fespace", "fespace to write the flux into");
-  params.addParam<UserObjectName>("smooth_flux_fespace", "fespace to write the smooth flux into");
+  params.addParam<UserObjectName>("flux_fespace", "FE space to write the flux into");
+  params.addParam<UserObjectName>("smooth_flux_fespace", "FE space to write the smooth flux into");
   return params;
 }
 
@@ -48,26 +48,19 @@ MFEMZienkiewiczZhuIndicator::MFEMZienkiewiczZhuIndicator(const InputParameters &
 void
 MFEMZienkiewiczZhuIndicator::createEstimator()
 {
-  MFEMProblemData & problem = getMFEMProblem().getProblemData();
-  mfem::BilinearFormIntegrator * integ;
-
-  // fetch the kernel first so we can get the blf integrator
-  mooseAssert(dynamic_cast<const MFEMKernel *>(&(getMFEMProblem().getUserObjectBase(_kernel_name))),
-              "Could not fetch kernel with name " + _kernel_name);
-  std::shared_ptr<MooseObject> object_ptr =
-      getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name).getSharedPtr();
-  std::shared_ptr<MFEMKernel> kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
-  integ = kernel->createBFIntegrator();
+  // fetch the kernel first so we can build an auxiliary blf integrator
+  MFEMKernel & kernel = getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name);
+  _integ = std::unique_ptr<mfem::BilinearFormIntegrator>(kernel.createBFIntegrator());
 
   // Next, we need to check that this integrator is supported by mfem::L2ZienkiewiczZhuEstimator
   [[maybe_unused]] bool is_supported = false;
 
   // Check it correctly casts into DiffusionIntegrator
-  is_supported |= (dynamic_cast<mfem::DiffusionIntegrator *>(integ) != nullptr);
+  is_supported |= (dynamic_cast<mfem::DiffusionIntegrator *>(_integ.get()) != nullptr);
   // Check it correctly casts into CurlCurlIntegrator
-  is_supported |= (dynamic_cast<mfem::CurlCurlIntegrator *>(integ) != nullptr);
+  is_supported |= (dynamic_cast<mfem::CurlCurlIntegrator *>(_integ.get()) != nullptr);
   // Check it correctly casts into ElasticityIntegrator
-  is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(integ) != nullptr);
+  is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()) != nullptr);
 
   mooseAssert(is_supported,
               "MFEMZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
@@ -93,11 +86,11 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
   }
 
   // fetch the grid function we need
-  auto gridfunction = problem.gridfunctions.GetShared(_var_name);
+  auto gridfunction = getMFEMProblem().getProblemData().gridfunctions.GetShared(_var_name);
 
   // finally, initialise the estimator
   _error_estimator = std::make_shared<mfem::L2ZienkiewiczZhuEstimator>(
-      *integ, *gridfunction, *_flux_fes, *_smooth_flux_fes);
+      *_integ, *gridfunction, *_flux_fes, *_smooth_flux_fes);
 }
 
 #endif
