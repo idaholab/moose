@@ -47,12 +47,12 @@ SamplerBase::SamplerBase(const InputParameters & parameters,
         parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
             ->getMooseApp()
             .getExecutioner())),
-    _sort_by(parameters.get<std::string>("sort_by")),
     _sort_by_index(libMesh::invalid_uint),
     _x(vpp->declareVector("x")),
     _y(vpp->declareVector("y")),
     _z(vpp->declareVector("z")),
-    _id(vpp->declareVector("id"))
+    _id(vpp->declareVector("id")),
+    _sort_by(parameters.get<std::string>("sort_by"))
 {
   if (_sort_by == "x")
     _sort_by_index = 0;
