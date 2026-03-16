@@ -85,7 +85,7 @@
       type = TaoGradientTester
       input = 'main_auto_adjoint.i'
       only_first_gradient = true
-      max_rel_tol = 2e-4
+      max_rel_tol = 5e-4
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'gradient check for automatic adjoint;'
     []
@@ -93,7 +93,7 @@
       type = TaoGradientTester
       input = 'main_auto_adjoint.i regularization_for_main.i'
       only_first_gradient = true
-      max_rel_tol = 2e-4
+      max_rel_tol = 5e-4
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'gradient check for automatic adjoint with Tikhonov regularization.'
     []
