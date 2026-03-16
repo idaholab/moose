@@ -39,6 +39,8 @@ c = 1.5
                             3 0 4 7;
                             4 5 6 7'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 1
+    subdomain_name = 'cube'
   []
 
   [octahedron]
@@ -54,6 +56,8 @@ c = 1.5
     element_connectivity = '4 0 1; 4 0 2; 4 1 3; 4 2 3;
                             5 0 1; 5 0 2; 5 1 3; 5 2 3'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 2
+    subdomain_name = 'octahedron'
   []
 
   [dodecahedron]
@@ -93,6 +97,8 @@ c = 1.5
                             19 5 13 15 7;
                             13 4 8 10 5'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 3
+    subdomain_name = 'dodecahedron'
   []
 
   [icosahedron]
@@ -137,6 +143,8 @@ c = 1.5
                              4 2 5;
                              2 5 11'
      elem_type = "C0POLYHEDRON"
+    subdomain_id = 4
+    subdomain_name = 'icosahedron'
    []
 
   [convert]
