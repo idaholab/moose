@@ -99,6 +99,13 @@ As a result, the cost of initialization and join can overwhelm the gain from par
 In addition, the temporary buffers are typically allocated in configurable caches with limited sizes like shared memory in CUDA, so small arrays are desired.
 If the array being reduced is too large, you will likely get an error like `Kokkos::Impl::ParallelReduce<Cuda> requested too much L0 scratch memory`.
 Such type of reduction operation is therefore better be implemented using [atomic operations](https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Atomic-Operations.html) in an ordinary parallel loop instead of a reduction loop.
+See the following example of `KokkosExtraIDIntegralVectorPostprocessor`, which implements both atomic addition and reduction algorithms and provides users an option to choose the calculation mode:
+
+!listing framework/include/kokkos/vectorpostprocessors/KokkosExtraIDIntegralVectorPostprocessor.h id=kokkos-extra-id-vpp-header
+         caption=The `KokkosExtraIDIntegralVectorPostprocessor` header file.
+
+!listing framework/src/kokkos/vectorpostprocessors/KokkosExtraIDIntegralVectorPostprocessor.K id=kokkos-extra-id-vpp-source language=cpp
+         caption=The `KokkosExtraIDIntegralVectorPostprocessor` source file.
 
 ## User-defined APIs and Virtual Functions
 
