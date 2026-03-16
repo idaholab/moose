@@ -27,13 +27,11 @@ EquationSystemEigenproblemOperator::Solve()
       GetEquationSystem()->_ess_tdof_lists.at(0));
 
   auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver);
-  eigensolver->setOperator(*GetEquationSystem());
   eigensolver->setMassMatrix(*_mass_rhs);
+  eigensolver->setOperator(*GetEquationSystem()->_jacobian.As<mfem::HypreParMatrix>());
   eigensolver->Solve();
   mfem::Array<mfem::real_t> eigenvalues;
   eigensolver->getEigenvalues(eigenvalues);
-  for (int i = 0; i < 5; ++i)
-    std::cout << "Eigenvalue " << i << ": " << eigenvalues[i] << std::endl;
   GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions, eigensolver.get());
 }
 

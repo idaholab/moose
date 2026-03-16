@@ -283,8 +283,14 @@ void
 EquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
 {
   mfem::ConstantCoefficient one(1.0);
-  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(_test_pfespaces.at(0));
-  m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
+  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(fespace);
+
+  if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
+    m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  else
+    m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
+  
   m->Assemble();
   //// Shift the eigenvalue corresponding to eliminated dofs to a large value
   m->EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
