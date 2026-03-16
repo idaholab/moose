@@ -31,24 +31,25 @@ c = 1.5
                             7 4 3 9 8 6;
                             2 9 8 10 11 1'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 0
     subdomain_name = 'truncated_tetrahedron'
   []
 
   [cuboctahedron]
     type = ElementGenerator
     input = 'truncated_tetrahedron'
-    nodal_positions = '${fparse 2 * dx + 1} 1 1
-                       ${fparse 2 * dx + 1} -1 1
-                       ${fparse 2 * dx -1} -1 1
-                       ${fparse 2 * dx -1}  1 1
-                       ${fparse 2 * dx + sqrt(2)} 0 0
-                       ${fparse 2 * dx} ${fparse sqrt(2)} 0
-                       ${fparse 2 * dx - sqrt(2)} 0 0
-                       ${fparse 2 * dx} -${fparse sqrt(2)} 0
-                       ${fparse 2 * dx + 1}  1 -1
-                       ${fparse 2 * dx + 1} -1 -1
-                       ${fparse 2 * dx -1} -1 -1
-                       ${fparse 2 * dx -1}  1 -1'
+    nodal_positions = '${fparse dx + 1} 1 ${fparse sqrt(2)}
+                       ${fparse dx + 1} -1 ${fparse sqrt(2)}
+                       ${fparse dx -1} -1 ${fparse sqrt(2)}
+                       ${fparse dx -1}  1 ${fparse sqrt(2)}
+                       ${fparse dx + 2} 0 0
+                       ${fparse dx} ${fparse 2} 0
+                       ${fparse dx - 2} 0 0
+                       ${fparse dx} -${fparse 2} 0
+                       ${fparse dx + 1}  1 -${fparse sqrt(2)}
+                       ${fparse dx + 1} -1 -${fparse sqrt(2)}
+                       ${fparse dx -1} -1 -${fparse sqrt(2)}
+                       ${fparse dx -1}  1 -${fparse sqrt(2)}'
     element_connectivity = '0 1 2 3;
                             0 1 4;
                             0 4 8 5;
@@ -64,39 +65,40 @@ c = 1.5
                             9 10 7;
                             8 9 10 11'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 1
     subdomain_name = 'cuboctahedron'
   []
 
   [truncated_cube]
     type = ElementGenerator
     input = 'cuboctahedron'
-    nodal_positions = '${fparse 3 * dx + one_ds} 1 1
-                       ${fparse 3 * dx + 1} ${one_ds} 1
-                       ${fparse 3 * dx + 1} -${one_ds} 1
-                       ${fparse 3 * dx + one_ds} -1 1
-                       ${fparse 3 * dx -one_ds} -1 1
-                       ${fparse 3 * dx -1} -${one_ds} 1
-                       ${fparse 3 * dx -1} ${one_ds} 1
-                       ${fparse 3 * dx -one_ds} 1 1
+    nodal_positions = '${fparse 2 * dx + one_ds} 1 1
+                       ${fparse 2 * dx + 1} ${one_ds} 1
+                       ${fparse 2 * dx + 1} -${one_ds} 1
+                       ${fparse 2 * dx + one_ds} -1 1
+                       ${fparse 2 * dx -one_ds} -1 1
+                       ${fparse 2 * dx -1} -${one_ds} 1
+                       ${fparse 2 * dx -1} ${one_ds} 1
+                       ${fparse 2 * dx -one_ds} 1 1
 
-                       ${fparse 3 * dx -1} 1 ${one_ds}
-                       ${fparse 3 * dx + 1}  1 ${one_ds}
-                       ${fparse 3 * dx + 1} -1 ${one_ds}
-                       ${fparse 3 * dx -1} -1 ${one_ds}
+                       ${fparse 2 * dx -1} 1 ${one_ds}
+                       ${fparse 2 * dx + 1}  1 ${one_ds}
+                       ${fparse 2 * dx + 1} -1 ${one_ds}
+                       ${fparse 2 * dx -1} -1 ${one_ds}
 
-                       ${fparse 3 * dx -1} 1 -${one_ds}
-                       ${fparse 3 * dx + 1} 1 -${one_ds}
-                       ${fparse 3 * dx + 1} -1 -${one_ds}
-                       ${fparse 3 * dx -1} -1 -${one_ds}
+                       ${fparse 2 * dx -1} 1 -${one_ds}
+                       ${fparse 2 * dx + 1} 1 -${one_ds}
+                       ${fparse 2 * dx + 1} -1 -${one_ds}
+                       ${fparse 2 * dx -1} -1 -${one_ds}
 
-                       ${fparse 3 * dx + one_ds} -1 -1
-                       ${fparse 3 * dx + 1} -${one_ds} -1
-                       ${fparse 3 * dx + 1} ${one_ds} -1
-                       ${fparse 3 * dx + one_ds} 1 -1
-                       ${fparse 3 * dx -one_ds} -1 -1
-                       ${fparse 3 * dx -1} -${one_ds} -1
-                       ${fparse 3 * dx -1} ${one_ds} -1
-                       ${fparse 3 * dx -one_ds} 1 -1'
+                       ${fparse 2 * dx + one_ds} -1 -1
+                       ${fparse 2 * dx + 1} -${one_ds} -1
+                       ${fparse 2 * dx + 1} ${one_ds} -1
+                       ${fparse 2 * dx + one_ds} 1 -1
+                       ${fparse 2 * dx -one_ds} -1 -1
+                       ${fparse 2 * dx -1} -${one_ds} -1
+                       ${fparse 2 * dx -1} ${one_ds} -1
+                       ${fparse 2 * dx -one_ds} 1 -1'
 
     element_connectivity = '0 1 2 3 4 5 6 7;
                             0 1 9;
@@ -113,12 +115,64 @@ c = 1.5
                             12 23 22;
                             16 17 18 19 23 22 21 20'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 2
     subdomain_name = 'truncated_cube'
+  []
+
+  [truncated_octahedron]
+    type = ElementGenerator
+    input = 'truncated_cube'
+    nodal_positions = '${fparse 3 * dx -sqrt(2)} ${fparse sqrt(2)/2} 0
+                       ${fparse 3 * dx -sqrt(2)} 0 ${fparse sqrt(2)/2}
+                       ${fparse 3 * dx -sqrt(2)} -${fparse sqrt(2)/2} 0
+                       ${fparse 3 * dx -sqrt(2)} 0 -${fparse sqrt(2)/2}
+
+                       ${fparse 3 * dx -sqrt(2)/2} ${fparse sqrt(2)} 0
+                       ${fparse 3 * dx -sqrt(2)/2} 0 ${fparse sqrt(2)}
+                       ${fparse 3 * dx -sqrt(2)/2} -${fparse sqrt(2)} 0
+                       ${fparse 3 * dx -sqrt(2)/2} 0 -${fparse sqrt(2)}
+
+                       ${fparse 3 * dx} ${fparse sqrt(2)} ${fparse sqrt(2)/2}
+                       ${fparse 3 * dx} ${fparse sqrt(2)/2} ${fparse sqrt(2)}
+                       ${fparse 3 * dx} -${fparse sqrt(2)} ${fparse sqrt(2)/2}
+                       ${fparse 3 * dx} ${fparse sqrt(2)/2} -${fparse sqrt(2)}
+                       ${fparse 3 * dx} ${fparse sqrt(2)} -${fparse sqrt(2)/2}
+                       ${fparse 3 * dx} -${fparse sqrt(2)/2} ${fparse sqrt(2)}
+                       ${fparse 3 * dx} -${fparse sqrt(2)} -${fparse sqrt(2)/2}
+                       ${fparse 3 * dx} -${fparse sqrt(2)/2} -${fparse sqrt(2)}
+
+                       ${fparse 3 * dx + sqrt(2)/2} ${fparse sqrt(2)} 0
+                       ${fparse 3 * dx + sqrt(2)/2} 0 ${fparse sqrt(2)}
+                       ${fparse 3 * dx + sqrt(2)/2} -${fparse sqrt(2)} 0
+                       ${fparse 3 * dx + sqrt(2)/2} 0 -${fparse sqrt(2)}
+
+                       ${fparse 3 * dx + sqrt(2)} ${fparse sqrt(2)/2} 0
+                       ${fparse 3 * dx + sqrt(2)} 0 ${fparse sqrt(2)/2}
+                       ${fparse 3 * dx + sqrt(2)} -${fparse sqrt(2)/2} 0
+                       ${fparse 3 * dx + sqrt(2)} 0 -${fparse sqrt(2)/2}'
+
+    element_connectivity = '0 1 2 3;
+                            20 21 22 23;
+                            4 8 16 12;
+                            5 9 17 13;
+                            6 10 18 14;
+                            7 11 19 15;
+                            0 4 8 9 5 1;
+                            1 5 13 10 6 2;
+                            2 6 14 15 7 3;
+                            3 7 11 12 4 0;
+                            20 16 8 9 17 21;
+                            21 17 13 10 18 22;
+                            22 18 14 15 19 23;
+                            23 19 11 12 16 20'
+    elem_type = "C0POLYHEDRON"
+    subdomain_id = 3
+    subdomain_name = 'truncated_octahedron'
   []
 
   [rhombicuboctahedron]
     type = ElementGenerator
-    input = 'truncated_cube'
+    input = 'truncated_octahedron'
     nodal_positions = '${fparse 4 * dx -0.5} 0.5 1
                        ${fparse 4 * dx + 0.5} 0.5 1
                        ${fparse 4 * dx + 0.5} -0.5 1
@@ -173,6 +227,7 @@ c = 1.5
                             10 22 12;
                             11 16 13'
     elem_type = "C0POLYHEDRON"
+    subdomain_id = 4
     subdomain_name = 'rhombicuboctahedron'
   []
 
