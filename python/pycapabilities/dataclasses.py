@@ -24,6 +24,7 @@ class CheckOptions:
     ignore_capabilities: set[str] = field(default_factory=set)
     """Capabilities to ignore; checks using them will always pass."""
 
+
 @dataclass
 class CheckResult:
     """Storage from the result from Capabilities.check()."""

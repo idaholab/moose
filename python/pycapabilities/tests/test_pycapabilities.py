@@ -21,6 +21,7 @@ POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
 POSSIBLE_PASS = pycapabilities.CheckState.POSSIBLE_PASS
 CERTAIN_PASS = pycapabilities.CheckState.CERTAIN_PASS
 
+
 class TestCapabilities(unittest.TestCase):
     """Test capabilities module."""
 
@@ -133,7 +134,7 @@ class TestCapabilities(unittest.TestCase):
             req: str,
             expect_status: pycapabilities.CheckState,
             expect_capability_names: list[str],
-            certain: bool = True
+            certain: bool = True,
         ):
             result = capabilities.check(req, options=CheckOptions(certain=certain))
             self.assertIsInstance(result, CheckResult)
@@ -211,7 +212,8 @@ class TestCapabilities(unittest.TestCase):
 
         # Normal behavior, capability is added
         self.assertEqual(
-            capabilities.check("added", options=CheckOptions(certain=False)).state, POSSIBLE_FAIL
+            capabilities.check("added", options=CheckOptions(certain=False)).state,
+            POSSIBLE_FAIL,
         )
         add = {"added": {"doc": "doc", "value": "added"}}
         self.assertEqual(
