@@ -290,7 +290,7 @@ EquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
     m->AddDomainIntegrator(new mfem::MassIntegrator(one));
   else
     m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
-  
+
   m->Assemble();
   //// Shift the eigenvalue corresponding to eliminated dofs to a large value
   m->EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
