@@ -138,8 +138,7 @@ public:
    * Checks if a set of requirements is satisified by the capabilities
    *
    * @param requirements The requirement string
-   * @param certain Whether or not the capabilites must be certain, that is,
-   * all capabilities must be known
+   * @param options Options to apply to the check
    *
    * This method is exposed to Python within pycapabilities.Capabilities.check in
    * python/pycapabilities/_pycapabilities.C. This external method is used
@@ -158,9 +157,6 @@ public:
    * The logic operators & and | can be used to chain multiple checks as
    * "thermochimica & thermochimica>1.0". Parenthesis can be used to build
    * complex logic expressions.
-   *
-   * See the description for CheckState for more information on why a
-   * certain state would be returned.
    */
   CheckResult check(
       std::string requirements,
