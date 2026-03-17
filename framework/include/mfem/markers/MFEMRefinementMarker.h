@@ -46,7 +46,7 @@ protected:
   const mfem::real_t _error_threshold;
 
   /// Whether to rebalance the mesh after h-refinement
-  const bool _rebalance;
+  bool _rebalance;
 
   /// The max no. of times h-refinement can be performed
   const unsigned _max_h_level;

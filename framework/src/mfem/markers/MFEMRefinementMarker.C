@@ -65,6 +65,15 @@ MFEMRefinementMarker::initialSetup()
     _p_ref_counter = _max_p_level;
   }
 
+  // We do not want to allow rebalancing if p-refinement is enabled, because that mesh-only
+  // operation has no notion of p-refinement and the computational imbalance that may result.
+  // Though p-refinement is not supported at this time, we add this in anyway for future-proofing.
+  if (_max_p_level > 0 and _rebalance)
+  {
+    mooseWarning("Asked for rebalancing as well as p-refinement, which is not supported.");
+    _rebalance = false;
+  }
+
   _threshold_refiner = std::make_unique<mfem::ThresholdRefiner>(*(_estimator->getEstimator()));
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
