@@ -29,16 +29,6 @@ public:
 
   bool needsGradients() const override { return true; }
 
-  /**
-   * Compute the matrix weights for the advected face value. Interpolation is used on
-   * internal faces, boundary treatment is localized to the boundary conditions.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   * @param elem_grad Element-side cell gradient (required).
-   * @param neighbor_grad Neighbor-side cell gradient (required).
-   * @param mass_flux Face mass flux for determining upwind direction.
-   */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
                                                  Real neighbor_value,
@@ -46,15 +36,6 @@ public:
                                                  const VectorValue<Real> * neighbor_grad,
                                                  Real mass_flux) const override;
 
-  /**
-   * Convenience wrapper that returns only the face value implied by the weights.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   * @param elem_grad Element-side cell gradient (required).
-   * @param neighbor_grad Neighbor-side cell gradient (required).
-   * @param mass_flux Face mass flux for determining upwind direction.
-   */
   Real advectedInterpolateValue(const FaceInfo & face,
                                 Real elem_value,
                                 Real neighbor_value,

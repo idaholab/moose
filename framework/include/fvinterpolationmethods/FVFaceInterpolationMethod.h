@@ -20,6 +20,9 @@ class FVFaceInterpolationMethod
 public:
   /**
    * Face interpolation operation for this method.
+   * @param face The face being interpolated.
+   * @param elem_value Element-side scalar value.
+   * @param neighbor_value Neighbor-side scalar value.
    */
   virtual Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const = 0;
 
@@ -27,16 +30,11 @@ public:
    * Convenience overload that evaluates a scalar Moose functor at the adjacent cell centers and
    * then applies this interpolation method.
    * This requires a two-sided internal face.
+   * @param functor The function which will be interpolated onto the face.
+   * @param face The face which will be use for interpolation.
+   * @param state The state argument for which we are performing the interpolation.
    */
   Real interpolate(const Moose::FunctorBase<Real> & functor,
                    const FaceInfo & face,
-                   const Moose::StateArg & state) const
-  {
-    mooseAssert(face.neighborPtr(),
-                "Face interpolation with a Moose functor requires a two-sided internal face.");
-
-    const Real elem_value = functor(Moose::ElemArg{face.elemPtr(), false}, state);
-    const Real neighbor_value = functor(Moose::ElemArg{face.neighborPtr(), false}, state);
-    return interpolate(face, elem_value, neighbor_value);
-  }
+                   const Moose::StateArg & state) const;
 };
