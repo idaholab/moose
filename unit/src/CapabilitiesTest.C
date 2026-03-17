@@ -210,17 +210,25 @@ const nlohmann::json JSON_CAPABILITIES = {
 /// Test --testharness-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
 {
+  // Shouldn't be passed without --required-capabilities
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities=unused"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(),
+        "--testharness-capabilities: Should not be specified without --required-capabilities");
+  }
+
   // Check string that satisfies each entry in JSON_CAPABILITIES
-  const std::string check_capabilities =
-      "--check-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
+  const std::string required_capabilities =
+      "--required-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
       "string_enum & string_enum=string_enum & string_explicit=string_explicit & "
       "string_explicit_enum=string_explicit_enum & true'";
 
-  // Check fails without augmenting via --testharness-capabilities
+  // Check is a skip without augmenting via --testharness-capabilities
   {
-    auto app = AppFactory::create("MooseUnitApp", {check_capabilities});
-    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
-                                   "--check-capablities: The following capabilities are unknown:");
+    auto app = AppFactory::create("MooseUnitApp", {required_capabilities, "--minimal"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
   }
 
   // Success once adding --testharness-capabilities to augment
@@ -228,11 +236,41 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
     Moose::UnitUtils::TempFile temp_file;
 
     std::ofstream out(temp_file.path());
-    out << JSON_CAPABILITIES.dump() << std::flush;
+    nlohmann::json json_out;
+    json_out["capabilities"] = JSON_CAPABILITIES;
+    out << json_out.dump() << std::flush;
     out.close();
 
     auto app = AppFactory::create(
-        "MooseUnitApp", {"--testharness-capabilities", temp_file.path(), check_capabilities});
+        "MooseUnitApp",
+        {"--testharness-capabilities", temp_file.path(), required_capabilities, "--minimal"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 0);
+  }
+
+  // Check a capability before it is ignored, which will be a skip
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='false'", "--minimal"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Ignore a capability via --testharness-capabilities
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    std::ofstream out(temp_file.path());
+    nlohmann::json json_out;
+    json_out["capabilities"] = JSON_CAPABILITIES;
+    json_out["ignore_capabilities"] = std::vector<std::string>{"false"};
+    out << json_out.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create("MooseUnitApp",
+                                  {"--testharness-capabilities",
+                                   temp_file.path(),
+                                   "--required-capabilities='false'",
+                                   "--minimal"});
     app->run();
     EXPECT_EQ(app->exitCode(), 0);
   }
@@ -240,7 +278,8 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
   // File doesn't exist
   {
     const std::string bad_file = "/testharness/capabilities/no/exist.json";
-    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", bad_file});
+    auto app = AppFactory::create(
+        "MooseUnitApp", {"--testharness-capabilities", bad_file, "--required-capabilities=unused"});
     EXPECT_MOOSEERROR_MSG_CONTAINS(
         app->run(), "--testharness-capabilities: Could not open \"" + bad_file + "\"");
   }
@@ -253,7 +292,9 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
     out << "{" << std::flush;
     out.close();
 
-    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    auto app = AppFactory::create(
+        "MooseUnitApp",
+        {"--testharness-capabilities", temp_file.path(), "--required-capabilities=unused"});
     EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
                                    "--testharness-capabilities: Failed to load capabilities \"" +
                                        std::string(temp_file.path()) +
@@ -264,12 +305,16 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
   {
     Moose::UnitUtils::TempFile temp_file;
 
-    const nlohmann::json root = {{"name", {{"foo", "bar"}}}};
+    const nlohmann::json capabilities = {{"name", {{"foo", "bar"}}}};
+    nlohmann::json root;
+    root["capabilities"] = capabilities;
     std::ofstream out(temp_file.path());
     out << root.dump() << std::flush;
     out.close();
 
-    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    auto app = AppFactory::create(
+        "MooseUnitApp",
+        {"--testharness-capabilities", temp_file.path(), "--required-capabilities=unused"});
     EXPECT_MOOSEERROR_MSG_CONTAINS(
         app->run(),
         "--testharness-capabilities: Failed to load capabilities \"" +

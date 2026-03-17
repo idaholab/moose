@@ -190,9 +190,6 @@ MooseApp::validParams()
       "testharness_capabilities",
       "--testharness-capabilities",
       "Path to JSON from the TestHarness that contains capabilities to be appended.");
-  params.addCommandLineParam<std::string>("testharness_ignore_capabilities",
-                                          "--testharness-ignore-capabilities",
-                                          "Capabilities to ignore from the TestHarness");
 
   params.addCommandLineParam<std::string>(
       "check_capabilities",
@@ -927,8 +924,13 @@ MooseApp::setupOptions()
 #endif
 
   // Augment capabilities from the TestHarness
+  std::optional<std::set<std::string>> ignore_capabilities;
   if (isParamValid("testharness_capabilities"))
   {
+    if (!isParamValid("required_capabilities"))
+      mooseError(
+          "--testharness-capabilities: Should not be specified without --required-capabilities");
+
     const auto file_path = std::filesystem::absolute(
         std::filesystem::path(getParam<std::string>("testharness_capabilities")));
 
@@ -940,7 +942,10 @@ MooseApp::setupOptions()
     try
     {
       file >> root;
-      Moose::internal::Capabilities::getCapabilities({}).augment(root, {});
+      if (const auto it = root.find("capabilities"); it != root.end())
+        Moose::internal::Capabilities::getCapabilities({}).augment(*it, {});
+      if (const auto it = root.find("ignore_capabilities"); it != root.end())
+        ignore_capabilities = it->get<std::set<std::string>>();
     }
     catch (const std::exception & e)
     {
@@ -959,12 +964,8 @@ MooseApp::setupOptions()
     // Allowed to be unknown
     options.certain = false;
     // Add ignored capabilities, if any
-    if (isParamValid("testharness_ignore_capabilities"))
-    {
-      const auto & ignore_capabilities = getParam<std::string>("testharness_ignore_capabilities");
-      for (const auto & value : MooseUtils::split(ignore_capabilities, " "))
-        options.ignore_capabilities.insert(value);
-    }
+    if (ignore_capabilities)
+      options.ignore_capabilities = *ignore_capabilities;
 
     CapabilityRegistry::CheckResult result;
     try

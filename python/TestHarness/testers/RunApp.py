@@ -410,12 +410,6 @@ class RunApp(Tester):
                 cli_args.append(
                     f"--testharness-capabilities={quote(self._augmented_capabilities_file)}"
                 )
-
-            # Add any ignored capabilities so that the check still passes
-            if (ignore := options.ignore_capability) is not None:
-                cli_args.append(
-                    f"--testharness-ignore-capabilities={quote(' '.join(ignore))}"
-                )
         else:
             assert self._augmented_capabilities_file is None
 
@@ -748,19 +742,36 @@ class RunApp(Tester):
             else:
                 capabilities = options._augmented_capabilities
 
-            # Capture the capabilities that we need to dump, if any.
-            store_capabilities = {}
-            for capability, entry in capabilities.items():
-                if capability in self._capability_names:
-                    store_capabilities[capability] = entry
+            # The capabilities that we need to dump, if any
+            store_capabilities = {
+                capability: entry
+                for capability, entry in capabilities.items()
+                if capability in self._capability_names
+            }
 
-            # We have capabilities to store
+            # Store if we have any to store
             if store_capabilities:
+                store: dict = {"capabilities": store_capabilities}
+
+                # Also store ignored capabilities, if any
+                store_ignore_capabilities = (
+                    [
+                        v
+                        for v in options.ignore_capability
+                        if v in self._capability_names
+                    ]
+                    if options.ignore_capability is not None
+                    else None
+                )
+                if store_ignore_capabilities:
+                    store["ignore_capabilities"] = store_ignore_capabilities
+
+                # Dump to JSON for the app
                 self._augmented_capabilities_file = self.getCapabilitiesFilePath(
                     options
                 )
                 with open(self._augmented_capabilities_file, "w") as f:
-                    json.dump(store_capabilities, f)
+                    json.dump(store, f)
 
     def augmentEnvironment(self, options) -> dict:
         return super().augmentEnvironment(options) | self._runapp_environment
