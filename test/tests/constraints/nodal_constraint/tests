@@ -38,6 +38,6 @@
     input = 'nodal_constraint_extra_tag_test.i'
     csvdiff = 'nodal_constraint_extra_tag_test_out.csv'
     max_parallel = 1
-    requirement = "NodalConstraint contributions to extra_vector_tags shall be correctly written to the tagged system vectors."
+    requirement = "The system shall be able to tally the contributions of nodal constraints in additional tagged system vectors."
   []
 []
