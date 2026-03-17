@@ -228,24 +228,31 @@ CapabilityRegistry::check(std::string requirements,
     result.capability_names.insert(name);
 
     // comparator
-    auto comp = [](int i, auto a, auto b)
+    auto comp = [&options, &name](int i, auto a, auto b)
     {
-      switch (i)
+      if (options.ignore_capabilities.count(name))
+        return CheckState::IGNORE;
+
+      const auto do_comp = [&i, &a, &b]()
       {
-        case OP_LESS_EQ:
-          return a <= b;
-        case OP_GREATER_EQ:
-          return a >= b;
-        case OP_LESS:
-          return a < b;
-        case OP_GREATER:
-          return a > b;
-        case OP_NOT_EQ:
-          return a != b;
-        case OP_EQ:
-          return a == b;
-      }
-      return false;
+        switch (i)
+        {
+          case OP_LESS_EQ:
+            return a <= b;
+          case OP_GREATER_EQ:
+            return a >= b;
+          case OP_LESS:
+            return a < b;
+          case OP_GREATER:
+            return a > b;
+          case OP_NOT_EQ:
+            return a != b;
+          case OP_EQ:
+            return a == b;
+        }
+        return false;
+      };
+      return do_comp() ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
     };
 
     // version comparison
@@ -262,7 +269,7 @@ CapabilityRegistry::check(std::string requirements,
           if (right.size() != 1)
             checkException(vs, "cannot be compared to a version.", capability);
 
-          return comp(op, *int_ptr, right[0]) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+          return comp(op, *int_ptr, right[0]);
         }
 
         const auto string_ptr = capability.queryStringValue();
@@ -275,13 +282,8 @@ CapabilityRegistry::check(std::string requirements,
         if (!MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
           checkException(vs, "cannot be compared to a version.", capability);
 
-        // is ignored
-        if (options.ignore_capabilities.count(name))
-          return CheckState::IGNORE;
-
         // compare versions
-        return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
-                                                  : CheckState::CERTAIN_FAIL;
+        return comp(op, app_value_version, right);
       }
 
       case 1: // Identifier _ Operator _ String
@@ -303,11 +305,7 @@ CapabilityRegistry::check(std::string requirements,
         if (MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
           checkException(vs, "cannot be compared to a string.", capability);
 
-        // is ignored
-        if (options.ignore_capabilities.count(name))
-          return CheckState::IGNORE;
-
-        return comp(op, *string_ptr, right) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+        return comp(op, *string_ptr, right);
       }
     }
 
