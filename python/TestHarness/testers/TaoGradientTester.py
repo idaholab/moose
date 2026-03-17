@@ -24,11 +24,6 @@ class TaoGradientTester(RunApp):
             "zero for a correct gradient.",
         )
         params.addParam(
-            "tao_solver",
-            "taobncg",
-            "TAO solver to use for gradient testing.",
-        )
-        params.addParam(
             "tao_fd_delta",
             None,
             "Finite difference step size for the gradient test (-tao_fd_delta). "
@@ -63,19 +58,21 @@ class TaoGradientTester(RunApp):
         # Get the base command from RunApp
         cmd = RunApp.getCommand(self, options)
 
-        specs = self.specs
-        tao_solver = specs["tao_solver"]
-
         petsc_iname = [
-            "-tao_max_it", "-tao_fd_test", "-tao_test_gradient", "-tao_fd_gradient", "-tao_ls_type"
+            "-tao_max_it",
+            "-tao_fd_test",
+            "-tao_test_gradient",
+            "-tao_fd_gradient",
+            "-tao_ls_type",
         ]
         petsc_value = ["1", "true", "true", "false", "unit"]
 
+        specs = self.specs
         if specs["tao_fd_delta"] is not None:
             petsc_iname.append("-tao_fd_delta")
             petsc_value.append(str(specs["tao_fd_delta"]))
-            
-        cmd += f" Executioner/tao_solver={tao_solver}"
+
+        cmd += f" Executioner/tao_solver=taobncg"
         cmd += " Executioner/petsc_options_iname='" + " ".join(petsc_iname) + "'"
         cmd += " Executioner/petsc_options_value='" + " ".join(petsc_value) + "'"
         cmd += " Executioner/petsc_options='-tao_test_gradient_view'"

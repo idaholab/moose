@@ -1,9 +1,10 @@
 # TaoGradientTester
 
-The `TaoGradientTester` uses TAO's gradient testing functionality to compare
-hand-coded (adjoint) gradients against finite-difference gradients. It automatically
-injects the necessary PETSc options into the optimization Executioner (see [executionerBlock]) to perform the gradient test and parses the output
-to verify the gradient is accurate within specified tolerances.
+The `TaoGradientTester` compares hand-coded (adjoint) gradients against
+finite-difference gradients using TAO's built-in gradient testing functionality.
+It automatically injects the necessary PETSc options into the optimization
+Executioner (see [executionerBlock]) and parses the output to verify the gradient
+is accurate within a specified tolerance.
 
 This tester is useful for verifying that adjoint-based gradient computations are
 correct in optimization problems. See the [debugging help](optimization/examples/debuggingHelp.md)
@@ -13,27 +14,31 @@ page for more information on debugging optimization gradients.
 
 Test configuration options are specified in the `tests` file, see [testBlock].
 
-- `max_rel_tol`: Tolerance for the relative max-norm `||G - Gfd||/||G||`. Should be near
-  zero for a correct gradient. Defaults to 1e-5.
+- `max_rel_tol`: Tolerance for the relative max-norm `||G - Gfd||/||G||`, where
+  `G` is the hand-coded gradient and `Gfd` is the finite-difference gradient.
+  Should be near zero for a correct gradient. Defaults to 1e-5.
 
-- `tao_solver`: TAO solver to use for gradient testing. Defaults to `taobncg`.
-
-- `tao_fd_delta`: Finite difference step size (`-tao_fd_delta`) used by TAO when
-  computing the finite-difference gradient. This is problem dependent. If not
-  specified, TAO uses its default.
+- `tao_fd_delta`: Finite-difference step size (`-tao_fd_delta`) used by TAO when
+  computing the finite-difference gradient. If not specified, TAO uses its default.
+  This parameter is problem dependent and may need to be adjusted for problems with
+  large or small parameter values.
 
 - `only_first_gradient`: Check only the first gradient comparison. Defaults to True.
   It is best to check the first gradient since later gradients are evaluated near
-  convergence where the gradient magnitude is small, making the relative finite-difference
-  error larger. Set to False to check all gradient comparisons in the output.
+  convergence where the gradient magnitude is small, making the relative
+  finite-difference error larger. Set to False to check all gradient comparisons
+  in the output.
 
 The tester automatically sets the following:
 
+- `tao_solver = taobncg` (bounded nonlinear conjugate gradient). This gradient-based
+  solver requires only one gradient evaluation per optimization iteration, minimizing
+  the number of forward and adjoint solves needed for the test.
 - `recover = false` and `restep = false`
 - Valgrind is disabled
 - Requires `method=opt` (optimized build)
 
-Other test commands & restrictions may be found in the MOOSE TestHarness documentation.
+Other test commands and restrictions may be found in the MOOSE TestHarness documentation.
 
 ## How It Works
 
@@ -44,7 +49,8 @@ added directly to the `Executioner` block of an input file, such as:
          id=executionerBlock
          caption=Example Executioner block for manual gradient testing with TAO.
 
-Output from the gradient test in the Executioner block will produce the following output comparing the finite difference gradient `Gfd` to the adjoint gradient computed by the code `G`:
+Running the input file above produces the following output comparing the finite-difference
+gradient `Gfd` to the adjoint gradient `G`:
 
 !listing modules/optimization/test/tests/executioners/basic_optimize/gold/debug_gradient.out start=||Gfd|| end=TAO SOLVER include-end=True
 
@@ -53,19 +59,17 @@ configuring TAO to:
 
 1. Run only a single optimization iteration (`-tao_max_it 1`)
 2. Enable finite-difference gradient testing (`-tao_fd_test`, `-tao_test_gradient`)
-3. Disable the finite-difference gradient for the solve itself (`-tao_fd_gradient false`) so that TAO uses the hand-coded adjoint gradient during optimization. Without this, TAO would compare the finite-difference gradient against itself.
-4. Use unit line search to minimize extra solves (`-tao_ls_type unit`)
+3. Disable the finite-difference gradient for the solve itself (`-tao_fd_gradient false`),
+   so that TAO compares the hand-coded adjoint gradient against the finite-difference
+   gradient. Without this, TAO would compare the finite-difference gradient against itself.
+4. Use a unit line search to avoid extra solves (`-tao_ls_type unit`)
 5. Print the gradient comparison (`-tao_test_gradient_view`)
 
-After running, the tester parses the relative max-norm from the TAO output. If TAO prints
-multiple gradient comparisons (e.g. one per optimization iteration), the tester
-checks every one of them and fails if any single comparison exceeds the tolerance.
-If `only_first_gradient` is set to `true`, only the first gradient comparison is checked:
-
-- +Max-norm+: `||G - Gfd||/||G||`, the relative max-norm of the difference between the
-  hand-coded and finite-difference gradients, normalized by the gradient magnitude.
-  Should be near zero for a correct gradient, confirming the adjoint gradient has
-  the correct magnitude. The test checks that this value is less than `max_rel_tol`.
+After running, the tester parses the relative max-norm `||G - Gfd||/||G||` from the
+TAO output and checks that it is less than `max_rel_tol`. A value near zero confirms
+the adjoint gradient has the correct magnitude. If `only_first_gradient` is False
+and TAO prints multiple gradient comparisons, the tester checks all of them and fails
+if any comparison exceeds the tolerance.
 
 ## Example test configuration in the MOOSE test suite
 
