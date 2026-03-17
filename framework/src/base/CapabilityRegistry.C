@@ -133,7 +133,7 @@ CapabilityRegistry::check(std::string requirements,
 
   // Make sure that the capabilities to ignore are valid capabilities
   for (const auto & name : options.ignore_capabilities)
-    if (!query(name))
+    if (!_registry.count(name))
       throw CapabilityException("Capability to ignore '" + name + "' is not known");
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
