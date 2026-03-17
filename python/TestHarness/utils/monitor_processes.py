@@ -97,9 +97,7 @@ class MemoryMonitor:
         return self._samples.copy()
 
     @staticmethod
-    def _sampler(
-        parent_pid: int, interval: float, stop_event, samples: DictProxy[int, int]
-    ):
+    def _sampler(parent_pid: int, interval: float, stop_event, samples: DictProxy):
         """Run the sampler process; internal method called by start()."""
         while not stop_event.is_set():
             # Get the entire flattened process tree, removing process 0 as

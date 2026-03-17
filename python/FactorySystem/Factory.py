@@ -10,6 +10,7 @@
 import os, sys
 import json
 import inspect
+import traceback
 
 
 class Factory:
@@ -57,9 +58,9 @@ class Factory:
                         print(
                             '\nERROR: Your Plugin Tester "'
                             + module_name
-                            + '" failed to import. (skipping)\n\n'
-                            + str(e)
+                            + '" failed to import:'
                         )
+                        traceback.print_exc()
 
     def printDump(self, root_node_name):
         print("[" + root_node_name + "]")
