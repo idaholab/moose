@@ -710,8 +710,7 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
     while (!looped_back && !already_seen_this_side_tuple)
     {
       if (MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index),
-                                         Point(*starting_node)),
-          libMesh::TOLERANCE * libMesh::TOLERANCE)
+                                         Point(*starting_node)))
         looped_back = true;
 
       // Get the opposite node (the next node) and add it to the edge mesh
