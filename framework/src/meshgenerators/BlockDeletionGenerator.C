@@ -19,9 +19,12 @@ InputParameters
 BlockDeletionGenerator::validParams()
 {
   InputParameters params = ElementDeletionGeneratorBase::validParams();
-  
-  MooseEnum operation("remove keep","remove");
-  params.addParam<MooseEnum>("operation",operation,"Whether to remove or keep the listed blocks. If keep, all blocks not in the list will be removed.");
+
+  MooseEnum operation("remove keep", "remove");
+  params.addParam<MooseEnum>("operation",
+                             operation,
+                             "Whether to remove or keep the listed blocks. If keep, all blocks not "
+                             "in the list will be removed.");
 
   params.addClassDescription("Mesh generator which removes elements from the specified subdomains");
   params.addParam<std::vector<SubdomainName>>("block", "The list of blocks to be deleted");
@@ -32,8 +35,7 @@ BlockDeletionGenerator::validParams()
 }
 
 BlockDeletionGenerator::BlockDeletionGenerator(const InputParameters & parameters)
-  : ElementDeletionGeneratorBase(parameters),
-    _operation(getParam<MooseEnum>("operation"))
+  : ElementDeletionGeneratorBase(parameters), _operation(getParam<MooseEnum>("operation"))
 {
   // Handle deprecated parameter
   if (isParamValid("block_id"))
@@ -75,9 +77,13 @@ bool
 BlockDeletionGenerator::shouldDelete(const Elem * elem)
 {
   if (_operation == "remove")
-  {return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) != _block_ids.end();
+  {
+    return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) !=
+           _block_ids.end();
   }
   else
-  {return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) == _block_ids.end();
+  {
+    return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) ==
+           _block_ids.end();
   }
 }
