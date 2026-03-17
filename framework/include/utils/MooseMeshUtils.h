@@ -425,7 +425,7 @@ void extraElemIntegerSwapParametersProcessor(
  * @param input_mesh  The input mesh
  * @param boundary_id The boundary id
  */
-std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_mesh,
+std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const MeshBase & input_mesh,
                                                   const boundary_id_type boundary_id);
 
 /**
@@ -436,7 +436,7 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
  * @param input_mesh  The input mesh
  * @param boundary_id The boundary id
  */
-std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh,
+std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const MeshBase & input_mesh,
                                                           const boundary_id_type boundary_id);
 
 /**
@@ -446,7 +446,7 @@ std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const ReplicatedMesh &
  * @param boundary_id The boundary id of interest
  */
 std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
-buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id);
+buildBoundaryNodeToElemMap(const MeshBase & input_mesh, const boundary_id_type boundary_id);
 
 /**
  * Get all the nodes on that particular boundary, whether a nodeset or a sideset.

@@ -608,8 +608,11 @@ extraElemIntegerSwapParametersProcessor(
 }
 
 std::unique_ptr<ReplicatedMesh>
-buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+buildBoundaryMesh(const MeshBase & input_mesh, const boundary_id_type boundary_id)
 {
+  if (!input_mesh.is_serial())
+    ::mooseError("Input mesh should be serialized for extracting the boundary mesh.\nInput mesh:" +
+                 input_mesh.get_info());
   auto poly_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
 
   auto side_list = input_mesh.get_boundary_info().build_side_list();
@@ -652,8 +655,12 @@ buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boun
 }
 
 std::unique_ptr<ReplicatedMesh>
-buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+buildLoopBoundaryOf2DMesh(const MeshBase & input_mesh, const boundary_id_type boundary_id)
 {
+  if (!input_mesh.is_serial())
+    ::mooseError(
+        "Input 2D mesh should be serialized for extracting the loop boundary mesh.\nInput mesh:" +
+        input_mesh.get_info());
   auto edge_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
   auto side_list = input_mesh.get_boundary_info().build_side_list();
   std::set<BoundaryInfo::BCTuple> visited;
@@ -863,8 +870,13 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
 }
 
 std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
-buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+buildBoundaryNodeToElemMap(const MeshBase & input_mesh, const boundary_id_type boundary_id)
 {
+  if (!input_mesh.is_serial())
+    ::mooseError(
+        "Input 2D mesh should be serialized for extracting the loop boundary mesh.\nInput mesh:" +
+        input_mesh.get_info());
+
   // Get all nodes on that boundary
   // Boundary ID might be a sideset or a nodeset, get nodes regardless
   const auto particular_node_ids = getBoundaryNodes(input_mesh, boundary_id);

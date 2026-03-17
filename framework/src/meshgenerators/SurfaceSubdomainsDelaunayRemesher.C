@@ -228,8 +228,6 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   if (getParam<bool>("clear_stitching_boundaries"))
     for (const auto bcid : make_range(starting_stitching_id, paired_bcid))
       full_mesh->get_boundary_info().remove_id(bcid);
-  // Mesh is not prepared after stitching
-  full_mesh->unset_is_prepared();
 
   return full_mesh;
 }
