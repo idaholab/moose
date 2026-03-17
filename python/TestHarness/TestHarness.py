@@ -570,8 +570,9 @@ class TestHarness:
                     name not in capabilities.values
                     and name not in AUGMENTED_CAPABILITY_NAMES
                 ):
-                    TestHarness.errorExit(
-                        "--ignore-capability: Unknown " f"capability '{name}'"
+                    util.errorExit(
+                        "--ignore-capability: Unknown " f"capability '{name}'",
+                        colored=options.colored,
                     )
 
         return capabilities, augmented_capabilities, required

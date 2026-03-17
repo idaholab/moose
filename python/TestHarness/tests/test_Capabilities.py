@@ -13,8 +13,10 @@ import json
 import os
 import unittest
 from argparse import Namespace
+from contextlib import redirect_stdout
 from copy import deepcopy
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from shlex import quote
 from typing import Any, Optional, Tuple
@@ -128,6 +130,8 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
         default_options.minimal_capabilities = True
         default_options.only_tests_that_require = None
         default_options.hpc = None
+        default_options.ignore_capability = None
+        default_options.colored = None
 
         def test_get_capabilities(
             check_capabilities: list[Tuple[str, Any]],
@@ -176,6 +180,24 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             check_required_capabilities=[("machine", False)],
             only_tests_that_require="machine",
         )
+        # --only-tests-that-require with an invalid capability
+        out = StringIO()
+        with self.assertRaises(SystemExit), redirect_stdout(out):
+            test_get_capabilities([], only_tests_that_require="foo")
+        self.assertIn(
+            "--only-tests-that-require: Capability 'foo' is not registered",
+            out.getvalue(),
+        )
+
+        # --ignore-capability with a valid capability
+        test_get_capabilities([], ignore_capability=["machine"])
+        # --ignore-capability with a derived Tester augmented capability
+        test_get_capabilities([], ignore_capability=["mpi_procs"])
+        # --ignore-capability with an invalid capability
+        out = StringIO()
+        with self.assertRaises(SystemExit), redirect_stdout(out):
+            test_get_capabilities([], ignore_capability=["foo"])
+        self.assertIn("--ignore-capability: Unknown capability 'foo'", out.getvalue())
 
     @dataclass
     class CapabilityTestCase:
