@@ -390,16 +390,15 @@ CapabilityRegistry::check(std::string requirements,
       {
         const auto left = std::any_cast<CheckState>(vs[0]);
         const auto right = std::any_cast<CheckState>(vs[2]);
-
-        if (left == CheckState::IGNORE)
-          return right;
-        if (right == CheckState::IGNORE)
-          return left;
-
         const auto op = std::any_cast<LogicOperator>(vs[1]);
+
         switch (op)
         {
           case OP_AND:
+            if (left == CheckState::IGNORE)
+              return right;
+            if (right == CheckState::IGNORE)
+              return left;
             for (const auto state : {CheckState::CERTAIN_FAIL,
                                      CheckState::POSSIBLE_FAIL,
                                      CheckState::UNKNOWN,
@@ -410,6 +409,8 @@ CapabilityRegistry::check(std::string requirements,
             throw CapabilityException("Conjunction failure");
 
           case OP_OR:
+            if (left == CheckState::IGNORE || right == CheckState::IGNORE)
+              return CheckState::IGNORE;
             for (const auto state : {CheckState::CERTAIN_PASS,
                                      CheckState::POSSIBLE_PASS,
                                      CheckState::UNKNOWN,
