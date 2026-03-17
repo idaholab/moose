@@ -923,76 +923,79 @@ MooseApp::setupOptions()
     mooseError("You specified --n-threads > 1, but there is no threading model active!");
 #endif
 
-  // Augment capabilities from the TestHarness
-  std::optional<std::set<std::string>> ignore_capabilities;
-  if (isParamValid("testharness_capabilities"))
+  // Capability checking
   {
-    if (!isParamValid("required_capabilities"))
-      mooseError(
-          "--testharness-capabilities: Should not be specified without --required-capabilities");
-
-    const auto file_path = std::filesystem::absolute(
-        std::filesystem::path(getParam<std::string>("testharness_capabilities")));
-
-    std::ifstream file(file_path);
-    if (!file)
-      mooseError("--testharness-capabilities: Could not open ", file_path);
-
-    nlohmann::json root;
-    try
+    // Augment capabilities from the TestHarness
+    std::optional<std::set<std::string>> ignore_capabilities;
+    if (isParamValid("testharness_capabilities"))
     {
-      file >> root;
-      if (const auto it = root.find("capabilities"); it != root.end())
-        Moose::internal::Capabilities::getCapabilities({}).augment(*it, {});
-      if (const auto it = root.find("ignore_capabilities"); it != root.end())
-        ignore_capabilities = it->get<std::set<std::string>>();
-    }
-    catch (const std::exception & e)
-    {
-      mooseError(
-          "--testharness-capabilities: Failed to load capabilities ", file_path, ":\n", e.what());
-    }
-  }
+      if (!isParamValid("required_capabilities"))
+        mooseError(
+            "--testharness-capabilities: Should not be specified without --required-capabilities");
 
-  if (isParamValid("required_capabilities"))
-  {
-    using Moose::internal::CapabilityRegistry;
+      const auto file_path = std::filesystem::absolute(
+          std::filesystem::path(getParam<std::string>("testharness_capabilities")));
 
-    const auto & required_capabilities = getParam<std::string>("required_capabilities");
+      std::ifstream file(file_path);
+      if (!file)
+        mooseError("--testharness-capabilities: Could not open ", file_path);
 
-    CapabilityRegistry::CheckOptions options;
-    // Allowed to be unknown
-    options.certain = false;
-    // Add ignored capabilities, if any
-    if (ignore_capabilities)
-      options.ignore_capabilities = *ignore_capabilities;
-
-    CapabilityRegistry::CheckResult result;
-    try
-    {
-      result =
-          Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities, options);
-    }
-    catch (const std::exception & e)
-    {
-      mooseError("--required-capablities: ", e.what());
+      nlohmann::json root;
+      try
+      {
+        file >> root;
+        if (const auto it = root.find("capabilities"); it != root.end())
+          Moose::internal::Capabilities::getCapabilities({}).augment(*it, {});
+        if (const auto it = root.find("ignore_capabilities"); it != root.end())
+          ignore_capabilities = it->get<std::set<std::string>>();
+      }
+      catch (const std::exception & e)
+      {
+        mooseError(
+            "--testharness-capabilities: Failed to load capabilities ", file_path, ":\n", e.what());
+      }
     }
 
-    if (result.state < CapabilityRegistry::CheckState::UNKNOWN)
+    if (isParamValid("required_capabilities"))
     {
-      mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
-      _ready_to_exit = true;
-      // we use code 77 as "skip" in the Testharness
-      _exit_code = 77;
-      return;
+      using Moose::internal::CapabilityRegistry;
+
+      const auto & required_capabilities = getParam<std::string>("required_capabilities");
+
+      CapabilityRegistry::CheckOptions options;
+      // Allowed to be unknown
+      options.certain = false;
+      // Add ignored capabilities, if any
+      if (ignore_capabilities)
+        options.ignore_capabilities = *ignore_capabilities;
+
+      CapabilityRegistry::CheckResult result;
+      try
+      {
+        result = Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities,
+                                                                          options);
+      }
+      catch (const std::exception & e)
+      {
+        mooseError("--required-capablities: ", e.what());
+      }
+
+      if (result.state < CapabilityRegistry::CheckState::UNKNOWN)
+      {
+        mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
+        _ready_to_exit = true;
+        // we use code 77 as "skip" in the Testharness
+        _exit_code = 77;
+        return;
+      }
+      if (result.state == CapabilityRegistry::CheckState::UNKNOWN)
+        mooseError("Required capabilities '",
+                   required_capabilities,
+                   "' are not specific enough. A comparison test is performed on an undefined "
+                   "capability. Disambiguate this requirement by adding an existence/non-existence "
+                   "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
+                   "or '!unknown | unknown<1.2.3'");
     }
-    if (result.state == CapabilityRegistry::CheckState::UNKNOWN)
-      mooseError("Required capabilities '",
-                 required_capabilities,
-                 "' are not specific enough. A comparison test is performed on an undefined "
-                 "capability. Disambiguate this requirement by adding an existence/non-existence "
-                 "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
-                 "or '!unknown | unknown<1.2.3'");
   }
 
   // Build a minimal running application, ignoring the input file.
