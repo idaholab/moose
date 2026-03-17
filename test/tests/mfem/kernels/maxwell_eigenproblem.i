@@ -64,10 +64,14 @@
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/MaxwellEigenproblem
-    vtk_format = ASCII
+[VectorPostprocessors]
+  [eigenvalues]
+    type = MFEMEigenvaluesPostprocessor
   []
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  csv = true
+  file_base = OutputData/MaxwellEigenproblem
 []
