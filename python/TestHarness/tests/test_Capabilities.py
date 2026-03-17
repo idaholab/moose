@@ -379,12 +379,15 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                     Path(capabilities_file).is_relative_to(job.getTestDir())
                 )
             with open(capabilities_file, "r") as f:
-                capabilities = json.load(f)
+                loaded_capabilities_file = json.load(f)
             # Should only contain those two capabilities that
             # we used if we did this right
+            capabilities = loaded_capabilities_file["capabilities"]
             self.assertTrue(len(capabilities), 2)
             self.assertIn("mpi_procs", capabilities)
             self.assertIn("machine", capabilities)
+            # Not testing ignore_capabilities here
+            self.assertNotIn("ignore_capabilities", loaded_capabilities_file)
 
             # And should have ran the app with the given capabilities
             # and the augmented capabilities file

@@ -227,12 +227,21 @@ CapabilityRegistry::check(std::string requirements,
     // register capability as seen
     result.capability_names.insert(name);
 
+    // whether or not the capability is ignored
+    const auto is_ignored = [&name, &options]() { return options.ignore_capabilities.count(name); };
+
+    // explicitly false causes any comparison to fail unless ignored
+    if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
+      return is_ignored() ? CheckState::IGNORE : CheckState::CERTAIN_FAIL;
+
     // comparator
-    auto comp = [&options, &name](int i, auto a, auto b)
+    auto comp = [&is_ignored](const int i, const auto & a, const auto & b)
     {
-      if (options.ignore_capabilities.count(name))
+      // early exit for ignored capabilities
+      if (is_ignored())
         return CheckState::IGNORE;
 
+      // do the comparison
       const auto do_comp = [&i, &a, &b]()
       {
         switch (i)
@@ -295,7 +304,8 @@ CapabilityRegistry::check(std::string requirements,
         if (!string_ptr)
           checkException(vs, "cannot be compared to a string.", capability);
 
-        // If this capability has an enumeration, make sure a valid choice is used
+        // If this capability has an enumeration, make sure a valid
+        // choice is used
         if (!capability.hasEnumeration(right))
           checkException(vs,
                          "'" + right + "' invalid for capability '" + left +

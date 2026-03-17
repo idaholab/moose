@@ -51,6 +51,7 @@ TEST(CapabilityRegistryTest, checkBool)
   CAP_CHECK_EXPECT_EQ("!bool", CheckState::CERTAIN_FAIL, {"bool"});
   CAP_CHECK_EXPECT_EQ("!bool2", CheckState::CERTAIN_PASS, {"bool2"});
   CAP_CHECK_EXPECT_EQ("bool2", CheckState::CERTAIN_FAIL, {"bool2"});
+  CAP_CHECK_EXPECT_EQ("bool2=foo", CheckState::CERTAIN_FAIL, {"bool2"});
 
   CAP_CHECK_EXPECT_ERROR("bool2=>1.0.0", "Capability statement '=>': unknown operator.");
   CAP_CHECK_EXPECT_ERROR("bool=", "Unable to parse requested capabilities 'bool='.");
@@ -61,9 +62,6 @@ TEST(CapabilityRegistryTest, checkBool)
   CAP_CHECK_EXPECT_ERROR("bool>1.1",
                          "Capability statement 'bool>1.1': capability 'bool=true' cannot be "
                          "compared to a version number.")
-  CAP_CHECK_EXPECT_ERROR(
-      "bool=foo",
-      "Capability statement 'bool=foo': capability 'bool=true' cannot be compared to a string.");
 }
 
 /// Test CapabilityRegistry::checkfor int capabilities
@@ -409,16 +407,14 @@ TEST(CapabilityRegistryTest, checkIgnoreCapabilities)
   {
     CapabilityRegistry::CheckOptions options;
     options.ignore_capabilities = {"falsevalue"};
-    const std::vector<std::string> checks = {"!falsevalue", "!!falsevalue", "falsevalue"};
+    const std::vector<std::string> checks = {
+        "!falsevalue", "!!falsevalue", "falsevalue", "falsevalue=foo"};
     for (const auto & check : checks)
     {
       const auto result = registry.check(check, options);
       EXPECT_EQ(result.state, CheckState::CERTAIN_PASS);
       EXPECT_EQ(result.capability_names, std::set<std::string>{"falsevalue"});
     }
-    CAP_EXPECT_THROW_MSG(registry.check("falsevalue=foo", options),
-                         "Capability statement 'falsevalue=foo': capability 'falsevalue=false' "
-                         "cannot be compared to a string.");
   }
 
   // Ignore boolean true
