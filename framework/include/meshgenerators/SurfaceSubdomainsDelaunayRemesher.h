@@ -13,6 +13,7 @@
 #include "LevelSetMeshingHelper.h"
 
 #include "libmesh/meshfree_interpolation.h"
+#include "libmesh/unstructured_mesh.h"
 
 /**
  * Class to remesh surface subdomains using a triangle mesh inside the subdomain boundaries
@@ -54,8 +55,8 @@ protected:
    * @param group_i the index of the group
    * @return a unique pointer to the generated 2D mesh
    */
-  std::unique_ptr<ReplicatedMesh>
-  General2DDelaunay(std::unique_ptr<ReplicatedMesh> & mesh_2d,
-                    std::vector<std::unique_ptr<ReplicatedMesh>> & hole_meshes_2d,
+  std::unique_ptr<UnstructuredMesh>
+  General2DDelaunay(UnstructuredMesh & mesh_2d,
+                    std::vector<std::unique_ptr<UnstructuredMesh>> & hole_meshes_2d,
                     unsigned int group_i);
 };
