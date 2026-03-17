@@ -156,13 +156,25 @@ stringify(const std::pair<T, U> & p, const std::string & delim = ":")
   return stringify(p.first) + delim + stringify(p.second);
 }
 
-/// Add 3-tuple stringify
-template <typename T, typename U, typename V>
+/// Add tuple stringify
+template <typename... Args>
 std::string
-stringify(const std::tuple<T, U, V> & t, const std::string & delim = ":")
+stringify(const std::tuple<Args...> & t, const std::string & delim = ":")
 {
-  return stringify(std::get<0>(t)) + delim + stringify(std::get<1>(t)) + delim +
-         stringify(std::get<2>(t));
+  if constexpr (sizeof...(Args) == 0)
+  {
+    return "";
+  }
+
+  return std::apply(
+      [&delim](const auto &... args)
+      {
+        std::size_t n{0};
+        std::string result;
+        ((result += (n++ == 0 ? "" : delim) + stringify(args)), ...);
+        return result;
+      },
+      t);
 }
 
 /**
