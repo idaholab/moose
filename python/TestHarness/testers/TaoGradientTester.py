@@ -66,34 +66,22 @@ class TaoGradientTester(RunApp):
         specs = self.specs
         tao_solver = specs["tao_solver"]
 
-        petsc_iname = (
-            "-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_ls_type"
-        )
-        petsc_value = "1 true true false unit"
+        petsc_iname = [
+            "-tao_max_it", "-tao_fd_test", "-tao_test_gradient", "-tao_fd_gradient", "-tao_ls_type"
+        ]
+        petsc_value = ["1", "true", "true", "false", "unit"]
 
         if specs["tao_fd_delta"] is not None:
-            petsc_iname += " -tao_fd_delta"
-            petsc_value += " " + str(specs["tao_fd_delta"])
-
-        cmd += (
-            " Executioner/tao_solver="
-            + tao_solver
-            + " Executioner/petsc_options_iname='"
-            + petsc_iname
-            + "'"
-            + " Executioner/petsc_options_value='"
-            + petsc_value
-            + "'"
-            + " Executioner/petsc_options='-tao_test_gradient_view'"
-            + " Executioner/verbose=true"
-        )
+            petsc_iname.append("-tao_fd_delta")
+            petsc_value.append(str(specs["tao_fd_delta"]))
+            
+        cmd += f" Executioner/tao_solver={tao_solver}"
+        cmd += " Executioner/petsc_options_iname='" + " ".join(petsc_iname) + "'"
+        cmd += " Executioner/petsc_options_value='" + " ".join(petsc_value) + "'"
+        cmd += " Executioner/petsc_options='-tao_test_gradient_view'"
+        cmd += " Executioner/verbose=true"
 
         return cmd
-
-    @staticmethod
-    def _strToFloat(str_val):
-        """Convert string to float, handling PETSc's nan./inf. formatting."""
-        return float(str_val.rstrip("."))
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         output = ""
@@ -112,7 +100,7 @@ class TaoGradientTester(RunApp):
 
             reason = ""
             for maxnorm_str in matches:
-                maxnorm_val = self._strToFloat(maxnorm_str)
+                maxnorm_val = float(maxnorm_str.rstrip("."))
                 max_rel_tol = self.specs["max_rel_tol"]
 
                 reason = ""
