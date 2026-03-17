@@ -30,18 +30,8 @@ public:
   using FVAdvectedInterpolationMethod::advectedInterpolateValue;
   using FVFaceInterpolationMethod::interpolate;
 
-  /**
-   * Interpolate using FaceInfo's geometric weight.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   */
   Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const override;
 
-  /**
-   * Advected variant: returns matrix weights and no deferred correction.
-   * @param face The face being interpolated.
-   */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real,
                                                  Real,
@@ -49,12 +39,6 @@ public:
                                                  const VectorValue<Real> *,
                                                  Real) const override;
 
-  /**
-   * Advected variant returning only the face value.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   */
   Real advectedInterpolateValue(const FaceInfo & face,
                                 Real elem_value,
                                 Real neighbor_value,

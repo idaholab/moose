@@ -24,11 +24,5 @@ public:
 
   using FVFaceInterpolationMethod::interpolate;
 
-  /**
-   * Harmonic-mean interpolation using FaceInfo's geometric weight.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   */
   Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const override;
 };

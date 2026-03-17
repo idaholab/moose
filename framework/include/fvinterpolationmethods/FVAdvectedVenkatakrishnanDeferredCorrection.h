@@ -32,20 +32,8 @@ public:
 
   bool needsGradients() const override { return true; }
 
-  /**
-   * @return The cell-gradient limiter used by this interpolation method.
-   */
   Moose::FV::GradientLimiterType gradientLimiter() const override { return _gradient_limiter; }
 
-  /**
-   * Compute the matrix weights and RHS deferred correction for the advected face value.
-   * @param face The face being interpolated.
-   * @param elem_value Element-side scalar value.
-   * @param neighbor_value Neighbor-side scalar value.
-   * @param elem_grad Element-side cell gradient (required).
-   * @param neighbor_grad Neighbor-side cell gradient (required).
-   * @param mass_flux Face mass flux; sign determines upwind direction.
-   */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
                                                  Real neighbor_value,
