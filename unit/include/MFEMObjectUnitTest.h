@@ -82,7 +82,6 @@ protected:
     _mfem_problem = _factory.create<MFEMProblem>("MFEMProblem", "problem", problem_params);
 
     _app->actionWarehouse().problemBase() = _mfem_problem;
-    _mfem_problem->setMesh();
   }
 
   template <typename T>
