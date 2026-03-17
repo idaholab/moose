@@ -302,7 +302,18 @@ NEML2ModelExecutor::fillInputs()
     if (_keep_tensors_on_device || !_skip_vars.empty())
     {
       const auto options = neml2::default_tensor_options().dtype(neml2::kFloat64).device(device());
-      const auto shape = neml2::TensorShape{neml2::Size(_batch_index_generator.getBatchIndex())};
+
+      // Infer the batch shape from already-inserted inputs (e.g. those provided by
+      // moose_input_kernels such as NEML2SmallStrain which may produce a 2D batch
+      // [nelem, nqp] rather than the flat [nelem*nqp] from the index generator).
+      // Fall back to the flat batch from the index generator if no batched input is found.
+      const neml2::TensorShape shape = [&]() -> neml2::TensorShape
+      {
+        for (const auto & [key, val] : _in)
+          if (val.defined() && !val.batch_sizes().concrete().empty())
+            return val.batch_sizes().concrete();
+        return neml2::TensorShape{neml2::Size(_batch_index_generator.getBatchIndex())};
+      }();
 
       for (const auto & [vname, var] : model().input_variables())
       {
