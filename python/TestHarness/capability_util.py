@@ -89,7 +89,7 @@ def checkAppCapabilities(
         required,
         add_capabilities=add_capabilities,
         negate_capabilities=negate_capabilities,
-        options=options
+        options=options,
     )
 
     status = result.state
