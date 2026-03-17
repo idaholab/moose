@@ -37,36 +37,8 @@ protected:
   ///The boundaries to be used as holes
   const std::vector<std::vector<BoundaryName>> _hole_boundary_names;
 
-  /// Max angle deviation from the global average normal vector in the input mesh
-  const Real _max_angle_deviation;
-
   /// The name of the external boundary of the mesh to generate
   BoundaryName _output_external_boundary_name;
-
-  /**
-   * Calculate the normal vector of a 2D element based the first three vertices.
-   * @param elem The element for which the normal vector is to be calculated
-   * @return the normal vector of the 2D element
-   */
-  Point elemNormal(const Elem & elem);
-
-  /**
-   * Calculate the average normal vector of a 2D mesh based on the normal vectors of its elements
-   * using the element areas as weights.
-   * @param mesh The mesh for which the average normal vector is to be calculated
-   * @return the average normal vector of the 2D mesh
-   */
-  Point meshNormal2D(const MeshBase & mesh);
-
-  /**
-   * Calculate the maximum deviation of the normal vectors in a given mesh from a global average
-   * normal vector.
-   * @param mesh The mesh for which the maximum deviation is to be calculated
-   * @param global_norm The global average normal vector
-   * @return the maximum deviation of the normal vectors in the mesh from the global average normal
-   * in degrees
-   */
-  Real meshNormalDeviation2D(const MeshBase & mesh, const Point & global_norm);
 
   /**
    * Generate a 2D mesh using Delaunay triangulation based on the input 2D boundary mesh and the 2D

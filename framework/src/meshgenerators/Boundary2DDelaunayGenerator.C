@@ -38,12 +38,6 @@ Boundary2DDelaunayGenerator::validParams()
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
 
-  params.addRangeCheckedParam<Real>(
-      "max_angle_deviation",
-      60.0,
-      "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the global average normal vector in the input mesh.");
-
   params.addParam<BoundaryName>(
       "output_external_boundary_name",
       "",
@@ -59,7 +53,6 @@ Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters &
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
     _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
-    _max_angle_deviation(getParam<Real>("max_angle_deviation")),
     _output_external_boundary_name(getParam<BoundaryName>("output_external_boundary_name"))
 {
 }
@@ -119,57 +112,6 @@ Boundary2DDelaunayGenerator::generate()
   mesh_3d->clear();
 
   return General2DDelaunay(mesh_2d, hole_meshes_2d);
-}
-
-Point
-Boundary2DDelaunayGenerator::elemNormal(const Elem & elem)
-{
-  mooseAssert(elem.n_vertices() == 3 || elem.n_vertices() == 4, "unsupported element type.");
-  // Only the first three vertices are used to calculate the normal vector
-  const Point & p0 = *elem.node_ptr(0);
-  const Point & p1 = *elem.node_ptr(1);
-  const Point & p2 = *elem.node_ptr(2);
-
-  if (elem.n_vertices() == 4)
-  {
-    const Point & p3 = *elem.node_ptr(3);
-    return ((p2 - p0).cross(p3 - p1)).unit();
-  }
-
-  return ((p2 - p1).cross(p0 - p1)).unit();
-}
-
-Point
-Boundary2DDelaunayGenerator::meshNormal2D(const MeshBase & mesh)
-{
-  Point mesh_norm = Point(0.0, 0.0, 0.0);
-  Real mesh_area = 0.0;
-
-  // Check all the elements' normal vectors
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_area = elem->volume();
-    mesh_norm += elemNormal(*elem) * elem_area;
-    mesh_area += elem_area;
-  }
-  mesh.comm().sum(mesh_norm);
-  mesh.comm().sum(mesh_area);
-  mesh_norm /= mesh_area;
-  return mesh_norm.unit();
-}
-
-Real
-Boundary2DDelaunayGenerator::meshNormalDeviation2D(const MeshBase & mesh, const Point & global_norm)
-{
-  Real max_deviation(0.0);
-  // Check all the elements' deviation from the global normal vector
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
-    max_deviation = std::max(max_deviation, elem_deviation);
-  }
-  mesh.comm().max(max_deviation);
-  return max_deviation;
 }
 
 std::unique_ptr<MeshBase>

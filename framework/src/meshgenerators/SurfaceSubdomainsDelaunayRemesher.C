@@ -63,14 +63,8 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Target element size when triangulating projection of the subdomain group. Can be set to a "
       "single value for all groups at once, or specified individually. Default of 0 means no "
       "constraint.");
-  params.addRangeCheckedParam<Real>(
-      "max_angle_deviation",
-      60.0,
-      "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the average normal vector in each group of subdomains.");
-  params.addParamNamesToGroup(
-      "max_edge_length interpolate_boundaries desired_areas max_angle_deviation",
-      "Delaunay triangulation");
+  params.addParamNamesToGroup("max_edge_length interpolate_boundaries desired_areas",
+                              "Delaunay triangulation");
 
   // Parameters for stitching meshes at the end
   params.addParam<bool>("avoid_merging_subdomains",
@@ -93,9 +87,6 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "avoid_merging_subdomains clear_stitching_boundaries stitching_algorithm verbose_stitching",
       "Stitching triangularized meshes");
 
-  params.addParam<bool>(
-      "verbose", false, "Whether the generator should output additional information");
-
   return params;
 }
 
@@ -105,12 +96,8 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     LevelSetMeshingHelper(parameters),
     _input(getMesh("input")),
     _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
-    _max_level_set_correction_iterations(
-        getParam<unsigned int>("max_level_set_correction_iterations")),
-    _max_angle_deviation(getParam<Real>("max_angle_deviation")),
     _interpolate_boundaries(getParam<std::vector<unsigned int>>("interpolate_boundaries")),
-    _desired_areas(getParam<std::vector<Real>>("desired_areas")),
-    _verbose(getParam<bool>("verbose"))
+    _desired_areas(getParam<std::vector<Real>>("desired_areas"))
 {
   if (isParamSetByUser("subdomain_names") && isParamSetByUser("exclude_subdomain_names"))
     paramError("exclude_subdomain_names",
@@ -245,61 +232,6 @@ SurfaceSubdomainsDelaunayRemesher::generate()
   full_mesh->unset_is_prepared();
 
   return full_mesh;
-}
-
-Point
-SurfaceSubdomainsDelaunayRemesher::elemNormal(const Elem & elem)
-{
-  mooseAssert(elem.n_vertices() == 3 || elem.n_vertices() == 4, "unsupported element type.");
-  // Only the first three vertices are used to calculate the normal vector
-  const Point & p0 = *elem.node_ptr(0);
-  const Point & p1 = *elem.node_ptr(1);
-  const Point & p2 = *elem.node_ptr(2);
-
-  if (elem.n_vertices() == 4)
-  {
-    const Point & p3 = *elem.node_ptr(3);
-    return ((p2 - p0).cross(p3 - p1)).unit();
-  }
-
-  return ((p2 - p1).cross(p0 - p1)).unit();
-}
-
-Point
-SurfaceSubdomainsDelaunayRemesher::meshNormal2D(const MeshBase & mesh)
-{
-  Point mesh_norm = Point(0.0, 0.0, 0.0);
-  Real mesh_area = 0.0;
-
-  // Check all the elements' normal vectors
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_area = elem->volume();
-    mesh_norm += elemNormal(*elem) * elem_area;
-    mesh_area += elem_area;
-  }
-  mesh.comm().sum(mesh_norm);
-  mesh.comm().sum(mesh_area);
-  mesh_norm /= mesh_area;
-  return mesh_norm.unit();
-}
-
-Real
-SurfaceSubdomainsDelaunayRemesher::meshNormalDeviation2D(const MeshBase & mesh,
-                                                         const Point & global_norm)
-{
-  Real max_deviation(0.0);
-  // Check all the elements' deviation from the global normal vector
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
-    max_deviation = std::max(max_deviation, elem_deviation);
-    if (_verbose && elem_deviation > _max_angle_deviation)
-      _console << "Element " << elem->id() << " from subdomain ID " << elem->subdomain_id()
-               << " has normal deviation: " << elem_deviation << std::endl;
-  }
-  mesh.comm().max(max_deviation);
-  return max_deviation;
 }
 
 std::unique_ptr<ReplicatedMesh>
