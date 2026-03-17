@@ -389,7 +389,6 @@ CapabilityRegistry::check(std::string requirements,
       case 0: // Bool _ LogicOperator _ Expression
       {
         const auto left = std::any_cast<CheckState>(vs[0]);
-        const auto op = std::any_cast<LogicOperator>(vs[1]);
         const auto right = std::any_cast<CheckState>(vs[2]);
 
         if (left == CheckState::IGNORE)
@@ -397,6 +396,7 @@ CapabilityRegistry::check(std::string requirements,
         if (right == CheckState::IGNORE)
           return left;
 
+        const auto op = std::any_cast<LogicOperator>(vs[1]);
         switch (op)
         {
           case OP_AND:
