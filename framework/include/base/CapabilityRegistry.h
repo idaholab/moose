@@ -64,7 +64,8 @@ public:
     POSSIBLE_FAIL = 1,
     UNKNOWN = 2,
     POSSIBLE_PASS = 3,
-    CERTAIN_PASS = 4
+    CERTAIN_PASS = 4,
+    IGNORE = 5
   };
 
   /**

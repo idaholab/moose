@@ -37,6 +37,8 @@ class CheckState(IntEnum):
     """A possible pass."""
     CERTAIN_PASS = 4
     """A certain pass."""
+    IGNORE = 5
+    """An ignored state."""
 
 class Capabilities:
     """Python representation of the MOOSE::Capabilities system."""

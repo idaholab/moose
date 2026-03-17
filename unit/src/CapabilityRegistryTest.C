@@ -32,6 +32,14 @@ using CheckState = Moose::internal::CapabilityRegistry::CheckState;
 #define CAP_CHECK_EXPECT_ERROR(requirement, error)                                                 \
   CAP_EXPECT_THROW_MSG(registry.check(requirement), error)
 
+CapabilityRegistry::CheckOptions
+notCertainOptions()
+{
+  CapabilityRegistry::CheckOptions options;
+  options.certain = false;
+  return options;
+}
+
 /// Test CapabilityRegistry::check for bool capabilities
 TEST(CapabilityRegistryTest, checkBool)
 {
@@ -53,6 +61,9 @@ TEST(CapabilityRegistryTest, checkBool)
   CAP_CHECK_EXPECT_ERROR("bool>1.1",
                          "Capability statement 'bool>1.1': capability 'bool=true' cannot be "
                          "compared to a version number.")
+  CAP_CHECK_EXPECT_ERROR(
+      "bool=foo",
+      "Capability statement 'bool=foo': capability 'bool=true' cannot be compared to a string.");
 }
 
 /// Test CapabilityRegistry::checkfor int capabilities
@@ -245,19 +256,20 @@ TEST(CapabilityRegistryTest, checkMultiple)
       .setEnumeration({"clang", "gcc"});
   registry.add("version", std::string("3.2.1"), "Multiple capability test version number");
 
-  EXPECT_EQ(
-      registry.check("!doesnotexist & version<4.2.2 & int<100 & int>50 & string!=Popel", false)
-          .state,
-      CheckState::POSSIBLE_PASS);
+  EXPECT_EQ(registry
+                .check("!doesnotexist & version<4.2.2 & int<100 & int>50 & string!=Popel",
+                       notCertainOptions())
+                .state,
+            CheckState::POSSIBLE_PASS);
   EXPECT_EQ(
       registry
           .check("!doesnotexist & version<4.2.2 & int<100 & unittest2_int>50 & string != Popel ",
-                 false)
+                 notCertainOptions())
           .state,
       CheckState::UNKNOWN);
-  EXPECT_EQ(registry.check("doesnotexist & doesnotexist>2.0.1", false).state,
+  EXPECT_EQ(registry.check("doesnotexist & doesnotexist>2.0.1", notCertainOptions()).state,
             CheckState::POSSIBLE_FAIL);
-  EXPECT_EQ(registry.check("!doesnotexist | doesnotexist<=2.0.1", false).state,
+  EXPECT_EQ(registry.check("!doesnotexist | doesnotexist<=2.0.1", notCertainOptions()).state,
             CheckState::POSSIBLE_PASS);
   {
     const std::vector<std::string> capability_names = {"bool", "int"};
@@ -331,12 +343,12 @@ TEST(CapabilityRegistryTest, checkCertain)
   }
   // Possible state with certain=false
   {
-    const auto result = registry.check("noexist", false);
+    const auto result = registry.check("noexist", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::POSSIBLE_FAIL);
     EXPECT_EQ(result.capability_names.size(), 0);
   }
   {
-    const auto result = registry.check("!noexist", false);
+    const auto result = registry.check("!noexist", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::POSSIBLE_PASS);
     EXPECT_EQ(result.capability_names.size(), 0);
   }
@@ -357,24 +369,91 @@ TEST(CapabilityRegistryTest, checkCertain)
   }
   // Unknown state with certain=false
   {
-    const auto result = registry.check("noexist=1", false);
+    const auto result = registry.check("noexist=1", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::UNKNOWN);
     EXPECT_EQ(result.capability_names.size(), 0);
   }
   {
-    const auto result = registry.check("noexist=foo", false);
+    const auto result = registry.check("noexist=foo", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::UNKNOWN);
     EXPECT_EQ(result.capability_names.size(), 0);
   }
   {
-    const auto result = registry.check("noexist<1", false);
+    const auto result = registry.check("noexist<1", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::UNKNOWN);
     EXPECT_EQ(result.capability_names.size(), 0);
   }
   {
-    const auto result = registry.check("noexist>1", false);
+    const auto result = registry.check("noexist>1", notCertainOptions());
     EXPECT_EQ(result.state, CheckState::UNKNOWN);
     EXPECT_EQ(result.capability_names.size(), 0);
+  }
+}
+
+/// Test CapabilityRegistry::check with ignoring capabilities
+TEST(CapabilityRegistryTest, checkIgnoreCapabilities)
+{
+  CapabilityRegistry registry;
+  registry.add("falsevalue", bool(false), "doc");
+  registry.add("truevalue", bool(true), "doc");
+  registry.add("foovalue", std::string("foo"), "doc");
+
+  // Unknown ignore capabilities
+  {
+    CapabilityRegistry::CheckOptions options;
+    options.ignore_capabilities = {"foo"};
+    CAP_EXPECT_THROW_MSG(registry.check("foo", options), "Capability to ignore 'foo' is not known");
+  }
+
+  // Ignore boolean false
+  {
+    CapabilityRegistry::CheckOptions options;
+    options.ignore_capabilities = {"falsevalue"};
+    const std::vector<std::string> checks = {"!falsevalue", "!!falsevalue", "falsevalue"};
+    for (const auto & check : checks)
+    {
+      const auto result = registry.check(check, options);
+      EXPECT_EQ(result.state, CheckState::CERTAIN_PASS);
+      EXPECT_EQ(result.capability_names, std::set<std::string>{"falsevalue"});
+    }
+    CAP_EXPECT_THROW_MSG(registry.check("falsevalue=foo", options),
+                         "Capability statement 'falsevalue=foo': capability 'falsevalue=false' "
+                         "cannot be compared to a string.");
+  }
+
+  // Ignore boolean true
+  {
+    CapabilityRegistry::CheckOptions options;
+    options.ignore_capabilities = {"truevalue"};
+    const std::vector<std::string> checks = {"!truevalue", "!!truevalue", "truevalue"};
+    for (const auto & check : checks)
+    {
+      const auto result = registry.check(check, options);
+      EXPECT_EQ(result.state, CheckState::CERTAIN_PASS);
+      EXPECT_EQ(result.capability_names, std::set<std::string>{"truevalue"});
+    }
+    CAP_EXPECT_THROW_MSG(registry.check("truevalue=foo", options),
+                         "Capability statement 'truevalue=foo': capability 'truevalue=true' cannot "
+                         "be compared to a string.");
+  }
+
+  {
+    CapabilityRegistry::CheckOptions options;
+    options.ignore_capabilities = {"foovalue"};
+    const std::vector<std::string> checks = {"!foovalue",
+                                             "!!foovalue",
+                                             "foovalue",
+                                             "foovalue=foo",
+                                             "foovalue=bar",
+                                             "!(foovalue=bar)",
+                                             "foovalue!=bar",
+                                             "foovalue!=foo"};
+    for (const auto & check : checks)
+    {
+      const auto result = registry.check(check, options);
+      EXPECT_EQ(result.state, CheckState::CERTAIN_PASS);
+      EXPECT_EQ(result.capability_names, std::set<std::string>{"foovalue"});
+    }
   }
 }
 
