@@ -14,6 +14,8 @@
 #include "MooseLinearVariableFV.h"
 #include "GradientLimiterType.h"
 
+#include <unordered_set>
+
 // libmesh
 #include "libmesh/elem_range.h"
 #include "libmesh/threads.h"
@@ -37,13 +39,15 @@ public:
    * @param raw_gradient The raw gradient container used as limiter input.
    * @param temporary_limited_gradient Scratch storage for limited gradients being assembled.
    * @param limiter_type The type of the limiter which should be computed.
+   * @param requested_variables Variable numbers that requested this limiter.
    */
   ComputeLinearFVLimitedGradientThread(
       FEProblemBase & fe_problem,
       SystemBase & system,
       const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_gradient,
       std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_limited_gradient,
-      const Moose::FV::GradientLimiterType limiter_type);
+      const Moose::FV::GradientLimiterType limiter_type,
+      const std::unordered_set<unsigned int> & requested_variables);
 
   /**
    * Splitting constructor.
@@ -82,6 +86,9 @@ protected:
 
   /// The type of the limiter we requested
   const Moose::FV::GradientLimiterType _limiter_type;
+
+  /// Variable numbers that requested the current limiter.
+  const std::unordered_set<unsigned int> & _requested_variables;
 
   /// Thread ID
   THREAD_ID _tid;

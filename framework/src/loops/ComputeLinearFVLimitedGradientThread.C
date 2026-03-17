@@ -26,7 +26,8 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     SystemBase & system,
     const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_gradient,
     std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_limited_gradient,
-    const Moose::FV::GradientLimiterType limiter_type)
+    const Moose::FV::GradientLimiterType limiter_type,
+    const std::unordered_set<unsigned int> & requested_variables)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
     _system(system),
@@ -34,6 +35,7 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     _system_number(_libmesh_system.number()),
     _raw_gradient(raw_gradient),
     _limiter_type(limiter_type),
+    _requested_variables(requested_variables),
     _temporary_limited_gradient(temporary_limited_gradient)
 {
 }
@@ -47,6 +49,7 @@ ComputeLinearFVLimitedGradientThread::ComputeLinearFVLimitedGradientThread(
     _system_number(x._system_number),
     _raw_gradient(x._raw_gradient),
     _limiter_type(x._limiter_type),
+    _requested_variables(x._requested_variables),
     _temporary_limited_gradient(x._temporary_limited_gradient)
 {
 }
@@ -72,6 +75,9 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
       continue;
 
     if (!_current_var->needsGradientVectorStorage())
+      continue;
+
+    if (!_requested_variables.count(_current_var->number()))
       continue;
 
     if (!size)

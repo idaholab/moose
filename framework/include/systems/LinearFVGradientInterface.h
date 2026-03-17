@@ -47,8 +47,10 @@ public:
   /**
    * Request storage and assembly of limiter-specific cell gradients.
    * @param limiter_type The limiter whose gradient storage should be made available.
+   * @param variable_number The libMesh variable number requesting the limited gradients.
    */
-  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type,
+                                       unsigned int variable_number);
 
   /**
    * Access the stored raw or limited cell-centered gradient components.
@@ -108,6 +110,18 @@ protected:
     return _raw_limited_grad_containers[limiter_type];
   }
 
+  /**
+   * Access the variable numbers that requested limited gradients for a specific limiter.
+   * @param limiter_type The limiter type whose request set is being accessed.
+   * @return The set of variable numbers that requested the limiter.
+   */
+  const std::unordered_set<unsigned int> &
+  requestedLinearFVLimitedGradientVariables(
+      const Moose::FV::GradientLimiterType limiter_type) const
+  {
+    return _requested_limited_gradient_variables.at(limiter_type);
+  }
+
   bool needsLinearFVGradientStorage() const;
 
   void initializeContainer(
@@ -124,6 +138,10 @@ protected:
 
   /// Set of requested limiter types for which limited gradients should be computed.
   std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
+
+  /// Variable numbers requesting limited gradients, keyed by limiter type.
+  std::unordered_map<Moose::FV::GradientLimiterType, std::unordered_set<unsigned int>>
+      _requested_limited_gradient_variables;
 
   /// Persisted limited gradient components keyed by limiter type.
   std::unordered_map<Moose::FV::GradientLimiterType,

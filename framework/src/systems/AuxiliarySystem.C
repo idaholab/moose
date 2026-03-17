@@ -547,7 +547,12 @@ AuxiliarySystem::computeGradients()
       PARALLEL_TRY
       {
         ComputeLinearFVLimitedGradientThread limited_gradient_thread(
-            _fe_problem, *this, _raw_grad_container, temporary_container, limiter_type);
+            _fe_problem,
+            *this,
+            _raw_grad_container,
+            temporary_container,
+            limiter_type,
+            requestedLinearFVLimitedGradientVariables(limiter_type));
         Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
       }
       PARALLEL_CATCH;
