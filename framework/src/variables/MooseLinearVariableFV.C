@@ -116,9 +116,9 @@ MooseLinearVariableFV<OutputType>::computeCellLimitedGradients(
   computeCellGradients();
 
   if (_linear_system)
-    _linear_system->requestLinearFVLimitedGradients(limiter_type);
+    _linear_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
   else
-    _auxiliary_system->requestLinearFVLimitedGradients(limiter_type);
+    _auxiliary_system->requestLinearFVLimitedGradients(limiter_type, this->_var_num);
 }
 
 template <typename OutputType>

@@ -10,6 +10,7 @@
 #include "LinearFVGradientInterface.h"
 
 #include "SystemBase.h"
+#include "MooseVariableFieldBase.h"
 #include "MooseError.h"
 
 #include "libmesh/numeric_vector.h"
@@ -63,10 +64,28 @@ LinearFVGradientInterface::rebuildLinearFVGradientStorage()
 
 void
 LinearFVGradientInterface::requestLinearFVLimitedGradients(
-    const Moose::FV::GradientLimiterType limiter_type)
+    const Moose::FV::GradientLimiterType limiter_type, const unsigned int variable_number)
 {
   if (limiter_type == Moose::FV::GradientLimiterType::None)
     return;
+
+  auto * const variable =
+      dynamic_cast<MooseVariableFieldBase *>(_sys.variableWarehouse().getVariable(variable_number));
+  if (!variable)
+    mooseError("Limited gradients were requested for variable number ",
+               variable_number,
+               " on system '",
+               _sys.name(),
+               "', but no field variable with that number exists on the system.");
+
+  if (!variable->needsGradientVectorStorage())
+    mooseError("Limited gradients were requested for variable '",
+               variable->name(),
+               "' on system '",
+               _sys.name(),
+               "', but regular gradients were not requested for that variable.");
+
+  _requested_limited_gradient_variables[limiter_type].insert(variable_number);
 
   if (_requested_limited_gradient_types.insert(limiter_type).second && !_raw_grad_container.empty())
   {
