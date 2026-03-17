@@ -213,11 +213,19 @@
     recover = false
   []
   [MFEMDiffusionEigenproblem]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion_eigenproblem.i
-    xmldiff = 'OutputData/DiffEigenproblem/Run0/Run0.pvd
-                OutputData/DiffEigenproblem/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/DiffusionEigenproblem_eigenvalues_0001.csv'
     requirement = 'The system shall have the ability to solve a scalar eigenproblem with Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMMaxwellEigenproblem]
+    type = CSVDiff
+    input = maxwell_eigenproblem.i
+    csvdiff = 'OutputData/MaxwellEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a vector-valued eigenproblem with Dirichlet BCs using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false

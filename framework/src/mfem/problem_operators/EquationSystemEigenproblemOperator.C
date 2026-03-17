@@ -31,7 +31,6 @@ EquationSystemEigenproblemOperator::Solve()
   eigensolver->setOperator(*GetEquationSystem()->_jacobian.As<mfem::HypreParMatrix>());
   eigensolver->Solve();
   mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->getEigenvalues(eigenvalues);
   GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions, eigensolver.get());
 }
 
