@@ -7,7 +7,7 @@
 [Adaptivity]
   [Indicators]
     [l2zz]
-      type = MFEMZienkiewiczZhuIndicator
+      type = MFEML2ZienkiewiczZhuIndicator
       variable = concentration
       kernel = diff
     []

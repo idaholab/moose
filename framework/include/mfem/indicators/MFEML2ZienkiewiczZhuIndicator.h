@@ -17,11 +17,11 @@
  * Wrapper for the Zienkiewicz-Zhu estimator with L2 projection.
  * See mfem example 6p for more details.
  */
-class MFEMZienkiewiczZhuIndicator : public MFEMIndicator
+class MFEML2ZienkiewiczZhuIndicator : public MFEMIndicator
 {
 public:
-  MFEMZienkiewiczZhuIndicator(const InputParameters & parameters);
-  virtual ~MFEMZienkiewiczZhuIndicator() = default;
+  MFEML2ZienkiewiczZhuIndicator(const InputParameters & parameters);
+  virtual ~MFEML2ZienkiewiczZhuIndicator() = default;
 
   static InputParameters validParams();
 

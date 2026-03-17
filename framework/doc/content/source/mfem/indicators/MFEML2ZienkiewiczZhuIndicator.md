@@ -1,4 +1,4 @@
-# MFEMZienkiewiczZhuIndicator
+# MFEML2ZienkiewiczZhuIndicator
 
 !if! function=hasCapability('mfem')
 
@@ -27,11 +27,11 @@ This object is accessed once (by an `MFEMRefinementMarker`) using the `getEstima
 
 !listing mfem/kernels/diffusion_amr.i block=Adaptivity
 
-!syntax parameters /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
+!syntax parameters /Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator
 
-!syntax inputs /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
+!syntax inputs /Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator
 
-!syntax children /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
+!syntax children /Adaptivity/Indicators/MFEML2ZienkiewiczZhuIndicator
 
 !if-end!
 

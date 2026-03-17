@@ -9,14 +9,14 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMZienkiewiczZhuIndicator.h"
+#include "MFEML2ZienkiewiczZhuIndicator.h"
 #include "MFEMProblem.h"
 #include "MFEMKernel.h"
 
-registerMooseObject("MooseApp", MFEMZienkiewiczZhuIndicator);
+registerMooseObject("MooseApp", MFEML2ZienkiewiczZhuIndicator);
 
 InputParameters
-MFEMZienkiewiczZhuIndicator::validParams()
+MFEML2ZienkiewiczZhuIndicator::validParams()
 {
   InputParameters params = MFEMIndicator::validParams();
   params.addParam<UserObjectName>("flux_fespace", "FE space to write the flux into");
@@ -25,7 +25,7 @@ MFEMZienkiewiczZhuIndicator::validParams()
 }
 
 // Make sure we don't do this until all the grid functions etc are set up!
-MFEMZienkiewiczZhuIndicator::MFEMZienkiewiczZhuIndicator(const InputParameters & params)
+MFEML2ZienkiewiczZhuIndicator::MFEML2ZienkiewiczZhuIndicator(const InputParameters & params)
   : MFEMIndicator(params)
 {
   if (isParamSetByUser("flux_fespace"))
@@ -46,7 +46,7 @@ MFEMZienkiewiczZhuIndicator::MFEMZienkiewiczZhuIndicator(const InputParameters &
 }
 
 void
-MFEMZienkiewiczZhuIndicator::createEstimator()
+MFEML2ZienkiewiczZhuIndicator::createEstimator()
 {
   // fetch the kernel first so we can build an auxiliary blf integrator
   MFEMKernel & kernel = getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name);
@@ -63,7 +63,7 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
   is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()) != nullptr);
 
   mooseAssert(is_supported,
-              "MFEMZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
+              "MFEML2ZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
               "and MFEMLinearElasticityKernel");
 
   int order = getFESpace().GetMaxElementOrder();
