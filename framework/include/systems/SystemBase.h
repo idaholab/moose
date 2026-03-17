@@ -756,6 +756,8 @@ public:
     return _vars[tid].fieldVariables();
   }
 
+  const VariableWarehouse & variableWarehouse(THREAD_ID tid = 0) const { return _vars[tid]; }
+
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid)
   {
     return _vars[tid].scalars();

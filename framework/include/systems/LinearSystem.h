@@ -10,12 +10,11 @@
 #pragma once
 
 #include "SolverSystem.h"
+#include "LinearFVGradientInterface.h"
 #include "PerfGraphInterface.h"
 #include "GradientLimiterType.h"
 
 #include <set>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
@@ -37,7 +36,7 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem, public PerfGraphInterface
+class LinearSystem : public SolverSystem, public PerfGraphInterface, public LinearFVGradientInterface
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
@@ -132,44 +131,13 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & linearFVGradientContainer() const
-  {
-    return _raw_grad_container;
-  }
-
-  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
-  const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
-
-  const std::unordered_set<Moose::FV::GradientLimiterType> &
-  requestedLinearFVLimitedGradientTypes() const
-  {
-    return _requested_limited_gradient_types;
-  }
+  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
+  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
 
   /**
    * Compute the Green-Gauss gradients
    */
   void computeGradients();
-
-  /**
-   * Return temporary storage for gradients being assembled.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final gradient container before gradient assembly returns.
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
-  {
-    return _temporary_gradient;
-  }
-
-  /**
-   * Return temporary storage for limited gradients during gradient assembly.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final limited-gradient container before gradient assembly returns.
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> &
-  temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
 
   virtual void compute(ExecFlagType type) override;
 
@@ -184,8 +152,6 @@ protected:
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags,
                                    const bool compute_gradients = true);
-
-  void rebuildLinearFVGradientStorage();
 
   /// Base class reference to the libmesh system
   System & _sys;
@@ -234,30 +200,6 @@ protected:
 
   /// Base class reference to the linear implicit system in libmesh
   libMesh::LinearImplicitSystem & _linear_implicit_system;
-
-  /// Vectors to store the temporary gradients during the computation. This is needed
-  /// because the old gradients might still be needed to determine boundary values
-  /// (for extrapolated boundary conditions). Once the computation is done, we
-  /// move the temporary vectors to the original containers.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _temporary_gradient;
-
-  /// Raw cell-centered gradient components. First index is spatial component
-  /// ([0] is du/dx and so on).
-  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
-
-  /// Set of requested limiter types for which limited gradients should be computed.
-  std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
-
-  /// Persisted limited gradient components keyed by limiter type.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _raw_limited_grad_containers;
-
-  /// Vectors to store temporary limited gradients during computation:
-  /// <limiter type, vector index = spatial component>.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _temporary_limited_gradient;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)
