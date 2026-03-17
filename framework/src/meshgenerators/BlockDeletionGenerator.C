@@ -9,6 +9,7 @@
 
 #include "BlockDeletionGenerator.h"
 #include "MooseMeshUtils.h"
+#include "MooseEnum.h"
 
 #include "libmesh/elem.h"
 
@@ -18,6 +19,9 @@ InputParameters
 BlockDeletionGenerator::validParams()
 {
   InputParameters params = ElementDeletionGeneratorBase::validParams();
+  
+  MooseEnum operation("remove keep","remove");
+  params.addParam<MooseEnum>("operation",operation,"Whether to remove or keep the listed blocks. If keep, all blocks not in the list will be removed.");
 
   params.addClassDescription("Mesh generator which removes elements from the specified subdomains");
   params.addParam<std::vector<SubdomainName>>("block", "The list of blocks to be deleted");
@@ -28,13 +32,14 @@ BlockDeletionGenerator::validParams()
 }
 
 BlockDeletionGenerator::BlockDeletionGenerator(const InputParameters & parameters)
-  : ElementDeletionGeneratorBase(parameters)
+  : ElementDeletionGeneratorBase(parameters),
+    _operation(getParam<MooseEnum>("operation"))
 {
   // Handle deprecated parameter
   if (isParamValid("block_id"))
     _block_ids.push_back(getParam<SubdomainID>("block_id"));
   if (!isParamValid("block_id") && !isParamValid("block"))
-    mooseError("Must provide the blocks to be deleted in the 'block' parameter");
+    mooseError("Must provide the blocks to be processed in the 'block' parameter");
   if (isParamValid("block_id") && isParamValid("block"))
     paramError("block_id", "Cannot use with the parameter 'block'. Please use just 'block'.");
 }
@@ -69,5 +74,10 @@ BlockDeletionGenerator::generate()
 bool
 BlockDeletionGenerator::shouldDelete(const Elem * elem)
 {
-  return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) != _block_ids.end();
+  if (_operation == "remove")
+  {return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) != _block_ids.end();
+  }
+  else
+  {return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) == _block_ids.end();
+  }
 }

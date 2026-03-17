@@ -26,6 +26,9 @@ protected:
   virtual bool shouldDelete(const Elem * elem) override;
 
 private:
+  ///Whether to remove or keep the specified blocks
+  MooseEnum _operation;
+	
   /// Ids of the blocks to be removed
   std::vector<SubdomainID> _block_ids;
 };
