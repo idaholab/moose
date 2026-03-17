@@ -25,10 +25,10 @@ public:
   GasLiquidMassTransfer(const InputParameters & parameters);
   virtual ~GasLiquidMassTransfer() {}
 
-  virtual void initialSetup();
-  virtual void initialize();
-  virtual void finalize();
-  virtual void execute();
+  virtual void initialSetup() {};
+  virtual void initialize() {};
+  virtual void finalize() {};
+  virtual void execute() {};
   virtual Real mtc(Real pressure, Real temperature, Real fluid_velocity) const;
 
   /// Boltzman constant [J/K]

@@ -75,26 +75,6 @@ HenryGasConstant::HenryGasConstant(const InputParameters & parameters)
   }
 }
 
-void
-HenryGasConstant::initialSetup()
-{
-}
-
-void
-HenryGasConstant::initialize()
-{
-}
-
-void
-HenryGasConstant::finalize()
-{
-}
-
-void
-HenryGasConstant::execute()
-{
-}
-
 Real
 HenryGasConstant::henry(Real temperature) const
 {

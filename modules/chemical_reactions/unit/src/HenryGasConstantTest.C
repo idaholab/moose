@@ -57,4 +57,13 @@ TEST_F(HenryGasConstantTest, test)
   EXPECT_LT(std::abs(_henry_argon_flinak->henry(900.0) - gold), gold * tol);
   gold = 4.0e-8 / (1e-6 * 101325);
   EXPECT_LT(std::abs(_henry_argon_flinak->henry(1100.0) - gold), gold * tol);
+
+  // argon/Custom tests (custom is actually FLiNaK)
+  // Use a tighter tolerance because these should be identical
+  gold = _henry_argon_custom->henry(750.0);
+  EXPECT_LT(std::abs(_henry_argon_flinak->henry(750.0) - gold), gold * libMesh::TOLERANCE);
+  gold = _henry_argon_custom->henry(900.0);
+  EXPECT_LT(std::abs(_henry_argon_flinak->henry(900.0) - gold), gold * libMesh::TOLERANCE);
+  gold = _henry_argon_custom->henry(1100.0);
+  EXPECT_LT(std::abs(_henry_argon_flinak->henry(1100.0) - gold), gold * libMesh::TOLERANCE);
 }

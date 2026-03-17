@@ -66,26 +66,6 @@ GasLiquidMassTransfer::GasLiquidMassTransfer(const InputParameters & parameters)
   }
 }
 
-void
-GasLiquidMassTransfer::initialSetup()
-{
-}
-
-void
-GasLiquidMassTransfer::initialize()
-{
-}
-
-void
-GasLiquidMassTransfer::finalize()
-{
-}
-
-void
-GasLiquidMassTransfer::execute()
-{
-}
-
 Real
 GasLiquidMassTransfer::mtc(Real pressure, Real temperature, Real fluid_velocity) const
 {

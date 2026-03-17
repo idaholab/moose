@@ -11,10 +11,11 @@
 
 #include "GeneralUserObject.h"
 
-// This AuxKernel performs a calculation of the Henry coefficient for noble gases using the model
-// by K. Lee, et al., "Semi-empirical model for Henry's law constant of noble gases in molten salt",
-// Scientific Reports (2024) 14:12847, https://doi.org/10.1038/s41598-024-60006-9.
-
+/**
+ * This UserObject performs a calculation of the Henry coefficient for noble gases using the model
+ * by K. Lee, et al., "Semi-empirical model for Henry's law constant of noble gases in molten salt",
+ * Scientific Reports (2024) 14:12847, https://doi.org/10.1038/s41598-024-60006-9.
+ */
 class HenryGasConstant : public GeneralUserObject
 {
 public:
@@ -22,10 +23,11 @@ public:
   HenryGasConstant(const InputParameters & parameters);
   virtual ~HenryGasConstant() {}
 
-  virtual void initialSetup() override;
-  virtual void initialize() override;
-  virtual void finalize() override;
-  virtual void execute() override;
+  virtual void initialSetup() override {};
+  virtual void initialize() override {};
+  virtual void finalize() override {};
+  virtual void execute() override {};
+  /// Returns the henry constant at the specified temperature
   virtual Real henry(Real temperature) const;
 
   /// multiplier to convert atm to Pa

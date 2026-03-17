@@ -13,9 +13,9 @@
 
 #include <cmath>
 
-const double tol = 1.0e-6;
+const Real tol = libMesh::TOLERANCE;
 
-const double p = 1e5;
+const Real p = 1e5;
 const double T = 800;
 const double M = 30e-3;
 const double R = 8.31446;
