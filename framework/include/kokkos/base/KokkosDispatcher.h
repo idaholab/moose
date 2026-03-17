@@ -385,9 +385,15 @@ private:
     DispatcherRegistry::addDispatcher<classname::JacobianLoop, classname>(objectname);             \
     DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
     DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(                                    \
-        objectname, &classname::computeQpJacobian != classname::defaultJacobian());                \
+        objectname,                                                                                \
+        &classname::computeQpJacobian != classname::defaultJacobian() ||                           \
+            &classname::computeQpJacobianShim<classname> !=                                        \
+                classname::defaultJacobianShim<classname>());                                      \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
-        objectname, &classname::computeQpOffDiagJacobian != classname::defaultOffDiagJacobian());  \
+        objectname,                                                                                \
+        &classname::computeQpOffDiagJacobian != classname::defaultOffDiagJacobian() ||             \
+            &classname::computeQpOffDiagJacobianShim<classname> !=                                 \
+                classname::defaultOffDiagJacobianShim<classname>());                               \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -429,11 +435,20 @@ private:
     DispatcherRegistry::addDispatcher<classname::SideCompute, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
+            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
+                classname::defaultInitStatefulShim<classname>());                                  \
     DispatcherRegistry::hasUserMethod<classname::SideInit>(                                        \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
+            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
+                classname::defaultInitStatefulShim<classname>());                                  \
     DispatcherRegistry::hasUserMethod<classname::NeighborInit>(                                    \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
+            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
+                classname::defaultInitStatefulShim<classname>());                                  \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

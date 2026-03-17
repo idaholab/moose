@@ -62,13 +62,10 @@ public:
                                          const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    KOKKOS_ASSERT(false);
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
   ///@}
 
   /**
@@ -91,6 +88,21 @@ public:
     return kernel.computeQpJacobian(j, qp, datum);
   }
   ///@}
+
+  /**
+   * Get the function pointer of the default computeQpJacobianShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultJacobianShim()
+  {
+    return &KernelValue::computeQpJacobianShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
 
   /**
    * The parallel computation bodies that hide the base class methods to optimize for factoring

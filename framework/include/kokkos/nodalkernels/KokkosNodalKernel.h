@@ -64,6 +64,8 @@ public:
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    KOKKOS_ASSERT(false);
+
     return 0;
   }
   /**
@@ -77,18 +79,10 @@ public:
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
+    KOKKOS_ASSERT(false);
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &NodalKernel::computeQpJacobian; }
-  /**
-   * Get the function pointer of the default computeQpOffDiagJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultOffDiagJacobian() { return &NodalKernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
@@ -118,6 +112,35 @@ public:
     return kernel.computeQpOffDiagJacobian(jvar, qp, datum);
   }
   ///@}
+
+  /**
+   * Get the function pointer of the default computeQpJacobianShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultJacobianShim()
+  {
+    return &NodalKernel::computeQpJacobianShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &NodalKernel::computeQpJacobian; }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobianShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultOffDiagJacobianShim()
+  {
+    return &NodalKernel::computeQpOffDiagJacobianShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultOffDiagJacobian() { return &NodalKernel::computeQpOffDiagJacobian; }
 
   /**
    * The parallel computation entry functions called by Kokkos

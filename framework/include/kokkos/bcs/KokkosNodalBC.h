@@ -77,18 +77,10 @@ public:
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
+    KOKKOS_ASSERT(false);
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &NodalBC::computeQpJacobian; }
-  /**
-   * Get the function pointer of the default computeQpOffDiagJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultOffDiagJacobian() { return &NodalBC::computeQpOffDiagJacobian; }
   ///@}
 
   /**
@@ -118,6 +110,35 @@ public:
     return bc.computeQpOffDiagJacobian(jvar, qp, datum);
   }
   ///@}
+
+  /**
+   * Get the function pointer of the default computeQpJacobianShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultJacobianShim()
+  {
+    return &NodalBC::computeQpJacobianShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &NodalBC::computeQpJacobian; }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobianShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultOffDiagJacobianShim()
+  {
+    return &NodalBC::computeQpOffDiagJacobianShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultOffDiagJacobian() { return &NodalBC::computeQpOffDiagJacobian; }
 
   /**
    * The parallel computation entry functions called by Kokkos
