@@ -868,7 +868,7 @@ class Tester(MooseObject, OutputInterface):
         if (ignore := options.ignore_capability) is not None and (
             ignored := result.capability_names.union(ignore)
         ):
-            self.addCaveats(f"ignored: {",".join(sorted(ignored))}")
+            self.addCaveats(f"ignored: {','.join(sorted(ignored))}")
 
         # Store the capability names that were consumed
         self._capability_names = result.capability_names
