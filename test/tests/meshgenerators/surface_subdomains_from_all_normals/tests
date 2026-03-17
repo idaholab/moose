@@ -10,6 +10,8 @@
     requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm that creates subdomain patches with a limited maximum size.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
   [input_normal_and_fixed]
     type = Exodiff
@@ -19,6 +21,8 @@
     requirement = 'The system shall be able to assign subdomains to surface elements, selecting them based on their normal being compared to a user input normal.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
   [contiguous_subdomains_only]
     type = Exodiff
@@ -28,6 +32,8 @@
     requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm with the constraint that subdomains should be assigned to contiguous elements with the flooding algorithm.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
   [handle_flipped_orientations]
     type = Exodiff
@@ -37,6 +43,8 @@
     requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm that creates subdomain patches and ignores element orientation flips.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
   [post_treatment_assign_to_most_common_neighbor_subdomain]
     type = Exodiff
@@ -50,6 +58,8 @@
     requirement = 'The system shall be to re-assign elements to a subdomain when surrounded by elements from subdomain.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
   [post_treatment_remove_single_node_connections]
     type = Exodiff
@@ -59,5 +69,7 @@
     requirement = 'The system shall be to re-assign elements to another subdomain when connected by only a single node to a subdomain.'
     recover = false
     mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
   []
 []

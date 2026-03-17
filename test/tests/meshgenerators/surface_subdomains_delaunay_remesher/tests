@@ -10,6 +10,8 @@
         requirement = 'The system shall be able to remesh subdomains of a surface mesh.'
         recover = false
         mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
     []
     [level_set_correction]
         type = Exodiff
@@ -21,6 +23,8 @@
         requirement = 'The system shall be able to remesh subdomains of a surface mesh, and correct the output using projection to a level set surface.'
         recover = false
         mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
     []
     [refine_patch_edge_factor]
         type = Exodiff
@@ -34,6 +38,8 @@
         requirement = 'The system shall be able to remesh subdomains of a surface mesh and refine the subdomain edges by a fixed factor.'
         recover = false
         mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
     []
     [refine_patch_edge_max_edge]
         type = Exodiff
@@ -46,5 +52,7 @@
         requirement = 'The system shall be able to remesh subdomains of a surface mesh and refine the subdomain edges by imposing a maximum edge length between consecutive nodes.'
         recover = false
         mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
     []
 []
