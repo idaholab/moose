@@ -282,7 +282,7 @@ public:
   std::string solverTypeString(unsigned int solver_sys_num) override;
 
   /**
-   * Calls Update() on all fespaces
+   * Calls Update() on all FE spaces
    */
   void updateFESpaces();
 
@@ -291,8 +291,19 @@ public:
    */
   void updateGridFunctions();
 
+  /**
+   * Whether AMR is enabled or not, determined by the existence of a refinement marker
+   */
   bool useAMR() const { return _problem_data.refiner != nullptr; }
+
+  /**
+   * If AMR is enabled, request (and perform if needed) h-refinement
+   */
   bool hRefine() { return useAMR() && _problem_data.refiner->hRefine(); }
+
+  /**
+   * If AMR is enabled, request (and perform if needed) p-refinement
+   */
   bool pRefine() { return useAMR() && _problem_data.refiner->pRefine(); }
 
   /**

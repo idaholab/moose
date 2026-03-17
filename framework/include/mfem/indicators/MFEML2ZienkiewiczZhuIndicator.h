@@ -20,14 +20,11 @@
 class MFEML2ZienkiewiczZhuIndicator : public MFEMIndicator
 {
 public:
-  MFEML2ZienkiewiczZhuIndicator(const InputParameters & parameters);
-  virtual ~MFEML2ZienkiewiczZhuIndicator() = default;
-
   static InputParameters validParams();
 
-  /**
-   * Override the createEstimator method to use a Zienkiewicz-Zhu estimator.
-   */
+  MFEML2ZienkiewiczZhuIndicator(const InputParameters & parameters);
+
+  /// Override the createEstimator method to use a Zienkiewicz-Zhu estimator.
   virtual void createEstimator() override;
 
 protected:

@@ -99,7 +99,6 @@ MFEMProblemSolve::solve()
   // Execute user objects, transfers, and multiapps at timestep end
   _mfem_problem.onTimestepEnd();
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-
   _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _executioner.postSolve();

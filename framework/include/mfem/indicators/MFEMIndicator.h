@@ -31,22 +31,26 @@ public:
   /// Create the estimator internally.
   virtual void createEstimator() = 0;
 
-  /// Get shared pointer to FE Space using the name we store when setting up this class
+  /// Get reference to FE space using the name we store when setting up this class
   mfem::ParFiniteElementSpace & getFESpace() const { return _fespace; }
 
+  /// Get reference to the FE space's underlying mesh
   mfem::ParMesh & getParMesh() const { return *(_fespace.GetParMesh()); }
 
   /// Method to fetch the error estimator after creation
   std::shared_ptr<mfem::ErrorEstimator> getEstimator() const;
 
 protected:
-  /// Name of (the test variable associated with) the weak form that the kernel is applied to.
+  /// Name of the variable associated with the weak form that the kernel is applied to
   const VariableName & _var_name;
 
+  /// Name of the kernel providing the error estimate
   const std::string & _kernel_name;
+
+  /// Shared pointer to the MFEM estimator wrapped by this class
   std::shared_ptr<mfem::ErrorEstimator> _error_estimator;
 
-  // FESpace that the variable lives in
+  // FE space that the variable lives in
   mfem::ParFiniteElementSpace & _fespace;
 };
 
