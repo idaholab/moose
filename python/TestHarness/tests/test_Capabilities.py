@@ -468,6 +468,22 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             test.getTester().getOutput(),
         )
 
+    def testIgnoreCapability(self):
+        """Test ignoring capabilities via --ignore-capability."""
+        # Capability not matched
+        self.runCapabilityTest(("compiler=unknown & platform=unknown", True))
+        # Capability not matched, one ignored but still skip
+        self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", True),
+            cli_args=["--ignore-capability=compiler"],
+        )
+        # Capability not matched, both ignored so no skip
+        _, jobs = self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", False),
+            cli_args=["--ignore-capability=compiler", "--ignore-capability=platform"],
+        )
+        self.assertIn("ignored: compiler,platform", jobs[0].getTester().getCaveats())
+
 
 if __name__ == "__main__":
     unittest.main()
