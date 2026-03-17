@@ -28,7 +28,6 @@ public:
   virtual void execute() override;
 
   std::reference_wrapper<VectorPostprocessorValue> _eigenvalues;
-
 };
 
 #endif

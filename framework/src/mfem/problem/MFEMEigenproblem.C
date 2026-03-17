@@ -75,7 +75,7 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
   }
 
   // Register gridfunction.
-  
+
   MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
   getProblemData().eigen_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
   if (mfem_variable.getFESpace().isScalar())
@@ -84,9 +84,6 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
   else
     getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         var_name, mfem_variable.getGridFunction().get());
-
 }
-  
-
 
 #endif

@@ -18,8 +18,7 @@ InputParameters
 MFEMEigenvaluesPostprocessor::validParams()
 {
   InputParameters params = MFEMVectorPostprocessor::validParams();
-  params.addClassDescription(
-      "Retrieves the eigenvalues from an eigensolve for exporting.");
+  params.addClassDescription("Retrieves the eigenvalues from an eigensolve for exporting.");
   return params;
 }
 
@@ -36,7 +35,8 @@ MFEMEigenvaluesPostprocessor::initialize()
 void
 MFEMEigenvaluesPostprocessor::execute()
 {
-  auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(getMFEMProblem().getProblemData().jacobian_solver);
+  auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(
+      getMFEMProblem().getProblemData().jacobian_solver);
   if (!eigensolver)
     mooseError("The solver is not an eigensolver, cannot retrieve eigenvalues.");
 
@@ -48,10 +48,6 @@ MFEMEigenvaluesPostprocessor::execute()
 
   for (int i = 0; i < ev_dim; i++)
     _eigenvalues.get()[i] = eigenvalues[i];
-
-  
-
-
 }
 
 #endif

@@ -31,7 +31,8 @@ EquationSystemEigenproblemOperator::Solve()
   eigensolver->setOperator(*GetEquationSystem()->_jacobian.As<mfem::HypreParMatrix>());
   eigensolver->Solve();
   mfem::Array<mfem::real_t> eigenvalues;
-  GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions, eigensolver.get());
+  GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions,
+                                                   eigensolver.get());
 }
 
 } // namespace Moose::MFEM
