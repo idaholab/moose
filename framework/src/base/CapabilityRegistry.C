@@ -83,7 +83,9 @@ checkException(const peg::SemanticValues & vs,
 }
 
 CapabilityRegistry::CheckResult
-CapabilityRegistry::check(std::string requirements, const bool certain /* = true */) const
+CapabilityRegistry::check(std::string requirements,
+                          const CapabilityRegistry::CheckOptions &
+                              options /* = CapabilityRegistry::CheckOptions() */) const
 {
   using namespace peg;
 
@@ -128,6 +130,11 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
   std::set<std::string> unknown_capabilities;
   const auto add_unknown_capability = [&unknown_capabilities](const auto & name)
   { unknown_capabilities.insert(MooseUtils::toLower(name)); };
+
+  // Make sure that the capabilities to ignore are valid capabilities
+  for (const auto & name : options.ignore_capabilities)
+    if (!query(name))
+      throw CapabilityException("Capability to ignore '" + name + "' is not known");
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
 
@@ -197,7 +204,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
+  parser["Comparison"] =
+      [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
@@ -214,9 +222,13 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
 
     // capability is registered by the app
     const auto & capability = *capability_ptr;
+    const auto & name = capability.getName();
 
     // register capability as seen
-    result.capability_names.insert(capability.getName());
+    result.capability_names.insert(name);
+    // is ignored
+    if (options.ignore_capabilities.count(name))
+      return CheckState::CERTAIN_PASS;
 
     // explicitly false causes any comparison to fail
     if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
@@ -301,7 +313,7 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
     checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
+  parser["Bool"] = [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
   {
     switch (vs.choice())
     {
@@ -332,17 +344,23 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
         if (const auto capability_ptr = query(identifier))
         {
           const auto & capability = *capability_ptr;
+          const auto & name = capability.getName();
 
+          // explicit; cannot be a bool expression
           if (capability.getExplicit())
           {
-            std::string message = "capability '" + capability.getName() +
+            std::string message = "capability '" + name +
                                   "' requires a value and cannot be used in a boolean expression";
             if (capability.queryEnumeration())
               message += "; valid values: " + capability.enumerationToString();
             checkException(vs, message);
           }
 
-          result.capability_names.insert(capability.getName());
+          // mark as used
+          result.capability_names.insert(name);
+          // is ignored
+          if (options.ignore_capabilities.count(name))
+            return CheckState::CERTAIN_PASS;
 
           const auto bool_to_certain = [&negated](const bool val)
           { return (val ^ negated) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL; };
@@ -413,7 +431,7 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
     throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
   // If certain and unknown capabilities were found, throw accordingly
-  if (certain && unknown_capabilities.size())
+  if (options.certain && unknown_capabilities.size())
     throw UnknownCapabilitiesException({unknown_capabilities.begin(), unknown_capabilities.end()});
 
   return result;

@@ -10,7 +10,7 @@
 from enum import IntEnum
 from typing import Iterable, Optional, Set
 
-from pycapabilities.dataclasses import CheckResult
+from pycapabilities.dataclasses import CheckOptions, CheckResult
 
 AUGMENTED_CAPABILITY_NAMES: Set[str]
 """
@@ -65,7 +65,7 @@ class Capabilities:
     def check(
         self,
         requirement: str,
-        certain: bool = True,
+        options: Optional[CheckOptions] = None,
         add_capabilities: Optional[dict] = None,
         negate_capabilities: Optional[Iterable[str]] = None,
     ) -> CheckResult:
@@ -85,8 +85,8 @@ class Capabilities:
 
         Optional Parameters
         -------------------
-        certain : bool
-            Whether or not the check must be certain (don't allow unknown capabilities).
+        options : CheckOptions
+            Additional options to specify for the check.
         add_capabilities : Optional[dict]
             Additional capabilities to temporarily add to the registry.
         negate_capabilities : Optional[Iterable[str]]

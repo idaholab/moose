@@ -825,6 +825,7 @@ class Tester(MooseObject, OutputInterface):
                 capabilities=options._capabilities,
                 required=self.specs["capabilities"],
                 certain=not bool(self.specs["dynamic_capabilities"]),
+                ignore_capabilities=options.ignore_capability,
                 add_capabilities=self._augmented_capabilities,
             )
         except Exception as e:
@@ -862,6 +863,12 @@ class Tester(MooseObject, OutputInterface):
         # Capabilities are missing
         if not success:
             return f"Need {self.specs['capabilities']}"
+
+        # Capability pass but something ignored
+        if (ignore := options.ignore_capability) is not None and (
+            ignored := result.capability_names.union(ignore)
+        ):
+            self.addCaveats(f"ignored: {",".join(ignored)}")
 
         # Store the capability names that were consumed
         self._capability_names = result.capability_names

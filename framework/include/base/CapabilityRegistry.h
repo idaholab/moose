@@ -79,6 +79,19 @@ public:
   };
 
   /**
+   * Options for check().
+   */
+  struct CheckOptions
+  {
+    CheckOptions() : certain(true), ignore_capabilities() {}
+
+    /// Whether or not all capabilities must be known
+    bool certain;
+    /// Capabilities to ignore; checks using them will always pass
+    std::set<std::string> ignore_capabilities;
+  };
+
+  /**
    * Add a capability.
    *
    * @param registry The registry
@@ -148,7 +161,9 @@ public:
    * See the description for CheckState for more information on why a
    * certain state would be returned.
    */
-  CheckResult check(std::string requirements, const bool certain = true) const;
+  CheckResult check(
+      std::string requirements,
+      const CapabilityRegistry::CheckOptions & options = CapabilityRegistry::CheckOptions()) const;
 
 protected:
 #ifdef MOOSE_UNIT_TEST

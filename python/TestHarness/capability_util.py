@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Iterable, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
-    from pycapabilities.dataclasses import CheckResult
+    from pycapabilities.dataclasses import CheckOptions, CheckResult
 
 from TestHarness.util import outputHeader, parseMOOSEJSON, runCommand
 
@@ -41,6 +41,7 @@ def checkAppCapabilities(
     capabilities: "Capabilities",
     required: str,
     certain: bool,
+    ignore_capabilities: Optional[Iterable[str]] = None,
     add_capabilities: Optional[dict] = None,
     negate_capabilities: Optional[Iterable[str]] = None,
 ) -> Tuple[bool, "CheckResult"]:
@@ -58,6 +59,8 @@ def checkAppCapabilities(
 
     Optional arguments:
     ------------------
+    ignore_capabilities : Optional[dict]
+        Capabilities to ignore during the check.
     add_capabilities : Optional[dict]
         Capabilities to add to the registry during the check.
     negate_capabilities : Optional[Iterable[str]]
@@ -76,12 +79,17 @@ def checkAppCapabilities(
     # load the pycapabilities module and that is
     # intentional as it can trigger a build
     from pycapabilities import CheckState
+    from pycapabilities.dataclasses import CheckOptions
+
+    options = CheckOptions(certain=certain)
+    if ignore_capabilities:
+        options.ignore_capabilities = set(ignore_capabilities)
 
     result = capabilities.check(
         required,
         add_capabilities=add_capabilities,
         negate_capabilities=negate_capabilities,
-        certain=certain,
+        options=options
     )
 
     status = result.state

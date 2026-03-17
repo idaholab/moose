@@ -410,6 +410,12 @@ class RunApp(Tester):
                 cli_args.append(
                     f"--testharness-capabilities={quote(self._augmented_capabilities_file)}"
                 )
+
+            # Add any ignored capabilities so that the check still passes
+            if (ignore := options.ignore_capability) is not None:
+                cli_args.append(
+                    f"--testharness-ignore-capabilities={quote(' '.join(ignore))}"
+                )
         else:
             assert self._augmented_capabilities_file is None
 

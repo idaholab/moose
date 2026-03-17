@@ -190,6 +190,10 @@ MooseApp::validParams()
       "testharness_capabilities",
       "--testharness-capabilities",
       "Path to JSON from the TestHarness that contains capabilities to be appended.");
+  params.addCommandLineParam<std::string>("testharness_ignore_capabilities",
+                                          "--testharness-ignore-capabilities",
+                                          "Capabilities to ignore from the TestHarness");
+
   params.addCommandLineParam<std::string>(
       "check_capabilities",
       "--check-capabilities",
@@ -949,13 +953,24 @@ MooseApp::setupOptions()
   {
     using Moose::internal::CapabilityRegistry;
 
-    const auto required_capabilities = getParam<std::string>("required_capabilities");
+    const auto & required_capabilities = getParam<std::string>("required_capabilities");
+
+    CapabilityRegistry::CheckOptions options;
+    // Allowed to be unknown
+    options.certain = false;
+    // Add ignored capabilities, if any
+    if (isParamValid("testharness_ignore_capabilities"))
+    {
+      const auto & ignore_capabilities = getParam<std::string>("testharness_ignore_capabilities");
+      for (const auto & value : MooseUtils::split(ignore_capabilities, " "))
+        options.ignore_capabilities.insert(value);
+    }
 
     CapabilityRegistry::CheckResult result;
     try
     {
       result =
-          Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities, false);
+          Moose::internal::Capabilities::getCapabilities({}).check(required_capabilities, options);
     }
     catch (const std::exception & e)
     {

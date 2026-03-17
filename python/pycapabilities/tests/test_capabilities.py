@@ -13,14 +13,13 @@
 import unittest
 
 import pycapabilities
-from pycapabilities.dataclasses import CheckResult
+from pycapabilities.dataclasses import CheckOptions, CheckResult
 from pycapabilities.exceptions import CapabilityException, UnknownCapabilitiesException
 
 CERTAIN_FAIL = pycapabilities.CheckState.CERTAIN_FAIL
 POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
 POSSIBLE_PASS = pycapabilities.CheckState.POSSIBLE_PASS
 CERTAIN_PASS = pycapabilities.CheckState.CERTAIN_PASS
-
 
 class TestCapabilities(unittest.TestCase):
     """Test capabilities module."""
@@ -125,17 +124,18 @@ class TestCapabilities(unittest.TestCase):
 
         capabilities = pycapabilities.Capabilities(cap)
 
-        # Pass check as non-bool
-        with self.assertRaisesRegex(TypeError, "certain must be a bool"):
-            capabilities.check("unused", None)
+        # Pass options as a bad type
+        err = "options must be of type pycapabilities.dataclasses.CheckOptions"
+        with self.assertRaisesRegex(TypeError, err):
+            capabilities.check("unused", options=True)
 
         def check(
             req: str,
             expect_status: pycapabilities.CheckState,
             expect_capability_names: list[str],
-            certain: bool = True,
+            certain: bool = True
         ):
-            result = capabilities.check(req, certain=certain)
+            result = capabilities.check(req, options=CheckOptions(certain=certain))
             self.assertIsInstance(result, CheckResult)
             state = result.state
             self.assertIsInstance(state, pycapabilities.CheckState)
@@ -211,7 +211,7 @@ class TestCapabilities(unittest.TestCase):
 
         # Normal behavior, capability is added
         self.assertEqual(
-            capabilities.check("added", certain=False).state, POSSIBLE_FAIL
+            capabilities.check("added", options=CheckOptions(certain=False)).state, POSSIBLE_FAIL
         )
         add = {"added": {"doc": "doc", "value": "added"}}
         self.assertEqual(

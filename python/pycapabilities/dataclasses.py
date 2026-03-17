@@ -9,10 +9,20 @@
 
 """Implement data classes for pycapabilities."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pycapabilities import CheckState
 
+
+@dataclass
+class CheckOptions:
+    """Options for pycapabilities.Capabilities.check()."""
+
+    certain: bool = True
+    """Whether or not all capabilities must be known."""
+
+    ignore_capabilities: set[str] = field(default_factory=set)
+    """Capabilities to ignore; checks using them will always pass."""
 
 @dataclass
 class CheckResult:
