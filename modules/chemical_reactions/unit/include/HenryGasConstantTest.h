@@ -52,21 +52,21 @@ protected:
       _fe_problem->addUserObject("HenryGasConstant", "henry_argon_flinak", params);
       _henry_argon_flinak = &_fe_problem->getUserObject<HenryGasConstant>("henry_argon_flinak");
     }
-    // Set up argon and custom, but make custom salt the same as FLiNaK and ensure results are the same
+    // Set up argon and custom, but make custom salt the same as FLiNaK and ensure results are the
+    // same
     {
       InputParameters params = _factory.getValidParams("HenryGasConstant");
       params.set<MooseEnum>("salt") = "CUSTOM";
       params.set<Real>("radius") = 1.88e-10;
-      params.set<Real>("alpha")     = HenryGasConstant::_alpha_FLiNaK;
-      params.set<Real>("beta")      = HenryGasConstant::_beta_FLiNaK;
-      params.set<Real>("KH0")       = HenryGasConstant::_KH0_FLiNaK;
-      params.set<Real>("gamma_0")     = HenryGasConstant::_gamma_0_FLiNaK;
+      params.set<Real>("alpha") = HenryGasConstant::_alpha_FLiNaK;
+      params.set<Real>("beta") = HenryGasConstant::_beta_FLiNaK;
+      params.set<Real>("KH0") = HenryGasConstant::_KH0_FLiNaK;
+      params.set<Real>("gamma_0") = HenryGasConstant::_gamma_0_FLiNaK;
       params.set<Real>("dgamma_dT") = HenryGasConstant::_dgamma_dT_FLiNaK;
 
       _fe_problem->addUserObject("HenryGasConstant", "henry_argon_custom", params);
       _henry_argon_custom = &_fe_problem->getUserObject<HenryGasConstant>("henry_argon_custom");
     }
-
   }
 
   const HenryGasConstant * _henry_argon_flibe;
@@ -74,5 +74,4 @@ protected:
   const HenryGasConstant * _henry_argon_flinak;
   const HenryGasConstant * _henry_helium_flinak;
   const HenryGasConstant * _henry_argon_custom;
-
 };
