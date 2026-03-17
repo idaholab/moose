@@ -14,18 +14,23 @@ from dataclasses import dataclass, field
 from pycapabilities import CheckState
 
 
-@dataclass
+@dataclass(frozen=True)
 class CheckOptions:
     """Options for pycapabilities.Capabilities.check()."""
 
     certain: bool = True
     """Whether or not all capabilities must be known."""
-
     ignore_capabilities: set[str] = field(default_factory=set)
     """Capabilities to ignore; checks using them will always pass."""
 
+    def __post_init__(self):
+        """Perform type checking."""
+        assert isinstance(self.certain, bool)
+        assert isinstance(self.ignore_capabilities, set)
+        assert all(isinstance(v, str) for v in self.ignore_capabilities)
 
-@dataclass
+
+@dataclass(frozen=True)
 class CheckResult:
     """Storage from the result from Capabilities.check()."""
 
@@ -33,3 +38,9 @@ class CheckResult:
     """The state of the check."""
     capability_names: set[str]
     """The capability names that existed in the check string."""
+
+    def __post_init__(self):
+        """Perform type checking."""
+        assert isinstance(self.state, CheckState)
+        assert isinstance(self.capability_names, set)
+        assert all(isinstance(v, str) for v in self.capability_names)

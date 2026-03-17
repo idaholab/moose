@@ -81,9 +81,10 @@ def checkAppCapabilities(
     from pycapabilities import CheckState
     from pycapabilities.dataclasses import CheckOptions
 
-    options = CheckOptions(certain=certain)
-    if ignore_capabilities:
-        options.ignore_capabilities = set(ignore_capabilities)
+    options = CheckOptions(
+        certain=certain,
+        ignore_capabilities=set(ignore_capabilities) if ignore_capabilities else set(),
+    )
 
     result = capabilities.check(
         required,
