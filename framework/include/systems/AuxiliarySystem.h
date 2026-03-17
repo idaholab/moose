@@ -11,11 +11,9 @@
 
 // MOOSE includes
 #include "SystemBase.h"
+#include "LinearFVGradientInterface.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "PerfGraphInterface.h"
-
-#include <unordered_map>
-#include <unordered_set>
 
 #include "libmesh/system.h"
 #include "libmesh/transient_system.h"
@@ -42,7 +40,9 @@ class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemBase, public PerfGraphInterface
+class AuxiliarySystem : public SystemBase,
+                        public PerfGraphInterface,
+                        public LinearFVGradientInterface
 {
 public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
@@ -136,19 +136,8 @@ public:
   virtual libMesh::System & system() override { return _sys; }
   virtual const libMesh::System & system() const override { return _sys; }
 
-  /// Access the stored raw cell-centered gradient components for linear FV auxiliary variables.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & linearFVGradientContainer() const;
-
-  /// Request storage and assembly of limiter-specific cell gradients.
-  void requestLinearFVLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
-
-  /// Access the stored raw or limited cell-centered gradient components.
-  const std::vector<std::unique_ptr<NumericVector<Number>>> &
-  linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
-
-  /// Access the limiter types requested for this auxiliary system.
-  const std::unordered_set<Moose::FV::GradientLimiterType> &
-  requestedLinearFVLimitedGradientTypes() const;
+  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
+  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();
@@ -192,29 +181,6 @@ protected:
   template <typename AuxKernelType>
   void computeNodalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
 
-  void rebuildLinearFVGradientStorage();
-
-  /**
-   * Return temporary storage for gradients during gradient assembly.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final gradient container before gradient assembly returns.
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & temporaryLinearFVGradientContainer()
-  {
-    return _temporary_gradient;
-  }
-
-  /**
-   * Return temporary storage for limited gradients during gradient assembly.
-   * The returned vectors are persistent scratch storage reused across calls and swapped with the
-   * final limited-gradient container before gradient assembly returns.
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> &
-  temporaryLinearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
-  {
-    return _temporary_limited_gradient[limiter_type];
-  }
-
   libMesh::System & _sys;
 
   /// solution vector from nonlinear solver
@@ -232,25 +198,6 @@ protected:
    */
   std::vector<std::vector<MooseVariableFieldBase *>> _elem_vars;
   ///@}
-
-  /// Scratch storage for raw gradients assembled during the current compute pass.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _temporary_gradient;
-
-  /// Persisted raw cell-centered gradient components keyed by spatial direction.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
-
-  /// Set of requested limiter types for which limited gradients should be computed.
-  std::unordered_set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
-
-  /// Persisted limited gradient components keyed by limiter type.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _raw_limited_grad_containers;
-
-  /// Scratch storage for limited gradients assembled during the current compute pass.
-  std::unordered_map<Moose::FV::GradientLimiterType,
-                     std::vector<std::unique_ptr<NumericVector<Number>>>>
-      _temporary_limited_gradient;
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;
