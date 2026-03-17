@@ -28,7 +28,7 @@ InputParameters
 SurfaceSubdomainsDelaunayRemesher::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
-  params += FunctionParserUtils<false>::validParams();
+  params += LevelSetMeshingHelper::validParams();
   params.renameParameterGroup("Parsed expression advanced", "Level set shape parsed expression");
 
   params.addClassDescription(
@@ -41,22 +41,6 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "subdomain_names", {}, "The surface mesh subdomains to be re-meshed");
   params.addParam<std::vector<SubdomainName>>(
       "exclude_subdomain_names", {}, "The surface mesh subdomains that should not be re-meshed");
-
-  // Shape parameters
-  params.addRangeCheckedParam<Real>(
-      "max_angle_deviation",
-      60.0,
-      "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the average normal vector in each group of subdomains.");
-  params.addParam<std::string>(
-      "level_set",
-      "Level set used to achieve more accurate reverse projection compared to interpolation.");
-  params.addParam<unsigned int>(
-      "max_level_set_correction_iterations",
-      3,
-      "Maximum number of iterations to correct the nodes based on the level set function.");
-  params.addParamNamesToGroup("level_set max_level_set_correction_iterations",
-                              "Level set shape correction");
 
   // Surface re-meshing parameters
   params.addRangeCheckedParam<Real>(
@@ -79,8 +63,14 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
       "Target element size when triangulating projection of the subdomain group. Can be set to a "
       "single value for all groups at once, or specified individually. Default of 0 means no "
       "constraint.");
-  params.addParamNamesToGroup("max_edge_length interpolate_boundaries desired_areas",
-                              "Delaunay triangulation");
+  params.addRangeCheckedParam<Real>(
+      "max_angle_deviation",
+      60.0,
+      "max_angle_deviation>0 & max_angle_deviation<90",
+      "Maximum angle deviation from the average normal vector in each group of subdomains.");
+  params.addParamNamesToGroup(
+      "max_edge_length interpolate_boundaries desired_areas max_angle_deviation",
+      "Delaunay triangulation");
 
   // Parameters for stitching meshes at the end
   params.addParam<bool>("avoid_merging_subdomains",
@@ -112,7 +102,7 @@ SurfaceSubdomainsDelaunayRemesher::validParams()
 SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     const InputParameters & parameters)
   : SurfaceDelaunayGeneratorBase(parameters),
-    FunctionParserUtils<false>(parameters),
+    LevelSetMeshingHelper(parameters),
     _input(getMesh("input")),
     _subdomain_names(getParam<std::vector<std::vector<SubdomainName>>>("subdomain_names")),
     _max_level_set_correction_iterations(
@@ -122,25 +112,6 @@ SurfaceSubdomainsDelaunayRemesher::SurfaceSubdomainsDelaunayRemesher(
     _desired_areas(getParam<std::vector<Real>>("desired_areas")),
     _verbose(getParam<bool>("verbose"))
 {
-  if (isParamValid("level_set"))
-  {
-    _func_level_set = std::make_shared<SymFunction>();
-    // set FParser internal feature flags
-    setParserFeatureFlags(_func_level_set);
-    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-      addFParserConstants(_func_level_set,
-                          getParam<std::vector<std::string>>("constant_names"),
-                          getParam<std::vector<std::string>>("constant_expressions"));
-    if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
-      mooseError("Invalid function f(x,y,z)\n",
-                 _func_level_set,
-                 "\nin ",
-                 name(),
-                 ".\n",
-                 _func_level_set->ErrorMsg());
-
-    _func_params.resize(3);
-  }
   if (isParamSetByUser("subdomain_names") && isParamSetByUser("exclude_subdomain_names"))
     paramError("exclude_subdomain_names",
                "Excluding subdomain names is only to be set when 'subdomain_names' is not set");
@@ -329,33 +300,6 @@ SurfaceSubdomainsDelaunayRemesher::meshNormalDeviation2D(const MeshBase & mesh,
   }
   mesh.comm().max(max_deviation);
   return max_deviation;
-}
-
-Real
-SurfaceSubdomainsDelaunayRemesher::levelSetEvaluator(const Point & point)
-{
-  return evaluate(_func_level_set, std::vector<Real>({point(0), point(1), point(2), 0}));
-}
-
-void
-SurfaceSubdomainsDelaunayRemesher::levelSetCorrection(Node & node)
-{
-  // Based on the given level set, we try to move the node in its normal direction
-  const Real diff = libMesh::TOLERANCE * 10.0; // A small value to perturb the node
-  const Real original_eval = levelSetEvaluator(node);
-  const Real xp_eval = levelSetEvaluator(node + Point(diff, 0.0, 0.0));
-  const Real yp_eval = levelSetEvaluator(node + Point(0.0, diff, 0.0));
-  const Real zp_eval = levelSetEvaluator(node + Point(0.0, 0.0, diff));
-  const Real xm_eval = levelSetEvaluator(node - Point(diff, 0.0, 0.0));
-  const Real ym_eval = levelSetEvaluator(node - Point(0.0, diff, 0.0));
-  const Real zm_eval = levelSetEvaluator(node - Point(0.0, 0.0, diff));
-  const Point grad = Point((xp_eval - xm_eval) / (2.0 * diff),
-                           (yp_eval - ym_eval) / (2.0 * diff),
-                           (zp_eval - zm_eval) / (2.0 * diff));
-  const Real xyz_diff = -original_eval / grad.contract(grad);
-  node(0) += xyz_diff * grad(0);
-  node(1) += xyz_diff * grad(1);
-  node(2) += xyz_diff * grad(2);
 }
 
 std::unique_ptr<ReplicatedMesh>

@@ -10,6 +10,7 @@
 #include "SideSetsBetweenSubdomainsGenerator.h"
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "MeshTraversingUtils.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
@@ -73,7 +74,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     // We only need to loop over elements in the primary subdomain
-    if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+    if (_check_subdomains &&
+        !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
       continue;
 
     for (const auto & side : make_range(elem->n_sides()))

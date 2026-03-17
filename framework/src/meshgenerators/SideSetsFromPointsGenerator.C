@@ -10,6 +10,7 @@
 #include "SideSetsFromPointsGenerator.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "MeshTraversingUtils.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
@@ -103,8 +104,9 @@ SideSetsFromPointsGenerator::generate()
 
           // If we *already* found a good but different side to paint
           // our sideset with, we've got an ambiguity here.
-          if (elem_to_flood && (!normalsWithinTol(normal_to_flood, normals[0], _normal_tol) ||
-                                elem_to_flood->which_neighbor_am_i(elem) == libMesh::invalid_uint))
+          if (elem_to_flood &&
+              (!MeshTraversingUtils::normalsWithinTol(normal_to_flood, normals[0], _normal_tol) ||
+               elem_to_flood->which_neighbor_am_i(elem) == libMesh::invalid_uint))
             mooseError("Two ambiguous potential sideset sources found for boundary `",
                        _boundary_names[i],
                        "' at ",

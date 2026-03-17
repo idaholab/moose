@@ -9,6 +9,7 @@
 
 #include "ParsedGenerateSideset.h"
 #include "Conversion.h"
+#include "MeshTraversingUtils.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
@@ -89,7 +90,8 @@ ParsedGenerateSideset::generate()
   for (const auto & elem : mesh->active_element_ptr_range())
   {
     // check if the element is included
-    if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+    if (_check_subdomains &&
+        !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
       continue;
 
     for (const auto side : make_range(elem->n_sides()))

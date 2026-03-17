@@ -10,12 +10,15 @@
 #pragma once
 
 #include "SurfaceDelaunayGeneratorBase.h"
-#include "FunctionParserUtils.h"
+#include "LevelSetMeshingHelper.h"
 
 #include "libmesh/meshfree_interpolation.h"
 
+/**
+ * Class to remesh surface subdomains using a triangle mesh inside the subdomain boundaries
+ */
 class SurfaceSubdomainsDelaunayRemesher : public SurfaceDelaunayGeneratorBase,
-                                          public FunctionParserUtils<false>
+                                          public LevelSetMeshingHelper
 {
 public:
   static InputParameters validParams();
@@ -37,9 +40,6 @@ protected:
   ///The edge boundaries delineating holes
   const std::vector<std::vector<BoundaryName>> _hole_boundary_names;
 
-  /// Maximum number of iterations to correct the nodes based on the level set function
-  const unsigned int _max_level_set_correction_iterations;
-
   /// Max angle deviation from the global average normal vector in the input mesh
   const Real _max_angle_deviation;
 
@@ -51,9 +51,6 @@ protected:
 
   /// Whether the generator should be verbose
   const bool _verbose;
-
-  /// function parser object describing the level set
-  SymFunctionPtr _func_level_set;
 
   /**
    * Calculate the normal vector of a 2D element based the first three vertices.
@@ -79,19 +76,6 @@ protected:
    * in degrees
    */
   Real meshNormalDeviation2D(const MeshBase & mesh, const Point & global_norm);
-
-  /**
-   * Evaluate the level set function at a given point.
-   * @param point The point at which the level set function is to be evaluated
-   * @return the value of the level set function at the given point
-   */
-  Real levelSetEvaluator(const Point & point);
-
-  /**
-   * Correct the position of a node based on the level set function.
-   * @param node The node to be corrected
-   */
-  void levelSetCorrection(Node & node);
 
   /**
    * Generate a 2D mesh using Delaunay triangulation based on the input 2D surface mesh and the 2D

@@ -31,7 +31,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       "contiguous_assignments_only",
       false,
       "Whether to only group elements in a subdomain using the 'flooding' algorithm. "
-      "We strongly recommend pairing this with the 'flood_elements_once' parameter");
+      "Note: this also sets 'flood_elements_once' to true if the user did not explicitly pass "
+      "false.");
 
   // Post flooding operations/cleanup
   params.addParam<bool>("select_max_neighbor_element_subdomains",
@@ -70,19 +71,25 @@ SurfaceSubdomainsFromAllNormalsGenerator::SurfaceSubdomainsFromAllNormalsGenerat
   : SurfaceMeshGeneratorBase(parameters),
     _contiguous_assignments_only(getParam<bool>("contiguous_assignments_only"))
 {
+  if (_contiguous_assignments_only && !isParamSetByUser("flood_elements_once"))
+    _flood_only_once = true;
 }
 
 std::unique_ptr<MeshBase>
 SurfaceSubdomainsFromAllNormalsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  if (!mesh->is_replicated())
+  if (!mesh->is_serial())
     mooseError(
-        "SurfaceSubdomainsFromAllNormalsGenerator is not implemented for distributed meshes");
+        "SurfaceSubdomainsFromAllNormalsGenerator is not implemented for non serialized meshes");
   setup(*mesh);
 
   unsigned int num_neighborless = 0;
   const bool user_specified_normal = isParamSetByUser("normal");
+
+  // Make sure neighbors are known
+  if (!mesh->preparation().has_neighbor_ptrs)
+    mesh->find_neighbors();
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all in one go. We have to flood from multiple elements
@@ -90,11 +97,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   // Depending on user parameters, we may be "flooding" multiple times the same elements
   for (auto & elem : mesh->element_ptr_range())
   {
-    // Nothing to do with edges
-    if (elem->dim() < 2)
-      continue;
-    // Nothing to do with 3D elements
-    if (elem->dim() > 2)
+    // Nothing to do with edges or 3D elements
+    if (elem->dim() != 2)
       continue;
     // Likely an issue with the mesh
     if (_contiguous_assignments_only && elem->n_neighbors() == 0)
@@ -204,11 +208,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   if (getParam<bool>("select_max_neighbor_element_subdomains"))
     for (auto & elem : mesh->element_ptr_range())
     {
-      // Nothing to do with edges
-      if (elem->dim() < 2)
-        continue;
-      // Nothing to do with 3D elements
-      if (elem->dim() > 2)
+      // Nothing to do with edges or 3D elements
+      if (elem->dim() != 2)
         continue;
 
       // Compute the normal
@@ -255,11 +256,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   if (getParam<bool>("separate_elements_connected_by_a_single_node"))
     for (auto & elem : mesh->element_ptr_range())
     {
-      // Nothing to do with edges
-      if (elem->dim() < 2)
-        continue;
-      // Nothing to do with 3D elements
-      if (elem->dim() > 2)
+      // Nothing to do with edges or 3D elements
+      if (elem->dim() != 2)
         continue;
 
       bool connected_to_a_neighbor = false;

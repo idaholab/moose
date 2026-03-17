@@ -83,11 +83,8 @@ OrientSurfaceMeshGenerator::generate()
     // We'll need to loop over all of the elements to adjust normals with the fixed normal option
     for (auto & elem : mesh->element_ptr_range())
     {
-      // Nothing to do with edges
-      if (elem->dim() < 2)
-        continue;
-      // Nothing to do with 3D elements
-      if (elem->dim() > 2)
+      // Nothing to do with edges or 3D elements
+      if (elem->dim() != 2)
         continue;
 
       // Check if element should be used to paint from
@@ -113,11 +110,8 @@ OrientSurfaceMeshGenerator::generate()
     {
       auto elem = mesh->elem_ptr(eid);
 
-      // Nothing to do with edges
-      if (elem->dim() < 2)
-        continue;
-      // Nothing to do with 3D elements
-      if (elem->dim() > 2)
+      // Nothing to do with edges or 3D elements
+      if (elem->dim() != 2)
         continue;
 
       // Compute the normal

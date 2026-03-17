@@ -11,6 +11,7 @@
 #include "Parser.h"
 #include "InputParameters.h"
 #include "CastUniquePointer.h"
+#include "MeshTraversingUtils.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/mesh_generation.h"
@@ -80,7 +81,7 @@ SideSetsFromAllNormalsGenerator::generate()
         // See if we've seen this normal before (linear search)
         const std::map<BoundaryID, RealVectorValue>::value_type * item = nullptr;
         for (const auto & id_pair : _boundary_to_normal_map)
-          if (normalsWithinTol(id_pair.second, normals[0], 1e-5))
+          if (MeshTraversingUtils::normalsWithinTol(id_pair.second, normals[0], 1e-5))
           {
             item = &id_pair;
             break;

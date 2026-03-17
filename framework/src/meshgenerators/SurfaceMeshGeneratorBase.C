@@ -10,6 +10,7 @@
 #include "SurfaceMeshGeneratorBase.h"
 #include "InputParameters.h"
 #include "MooseMeshUtils.h"
+#include "MeshTraversingUtils.h"
 
 #include "libmesh/mesh_generation.h"
 #include "libmesh/mesh.h"
@@ -186,7 +187,8 @@ SurfaceMeshGeneratorBase::flood(Elem * const elem,
     return;
 
   // Skip if element is not in specified subdomains
-  if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+  if (_check_subdomains &&
+      !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
     return;
 
   _visited[sub_id].insert(elem);
@@ -243,36 +245,21 @@ SurfaceMeshGeneratorBase::flood(Elem * const elem,
 }
 
 bool
-SurfaceMeshGeneratorBase::normalsWithinTol(const Point & normal_1,
-                                           const Point & normal_2,
-                                           const Real tol) const
-{
-  return (1.0 - normal_1 * normal_2) <= tol;
-}
-
-bool
-SurfaceMeshGeneratorBase::elementSubdomainIdInList(
-    const Elem * const elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
-{
-  subdomain_id_type curr_subdomain = elem->subdomain_id();
-  return std::find(subdomain_id_list.begin(), subdomain_id_list.end(), curr_subdomain) !=
-         subdomain_id_list.end();
-}
-
-bool
 SurfaceMeshGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
                                                        const Point & desired_normal,
                                                        const Elem & base_elem,
                                                        const Point & face_normal) const
 {
   // False if element is not in specified subdomains
-  if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+  if (_check_subdomains &&
+      !MeshTraversingUtils::elementSubdomainIdInList(elem, _included_subdomain_ids))
     return false;
 
   // False if normal does not meet criteria
-  if (_using_normal && (!normalsWithinTol(desired_normal, face_normal, _normal_tol) &&
-                        (!_consider_flipped_normals ||
-                         !normalsWithinTol(desired_normal, -face_normal, _flipped_normal_tol))))
+  if (_using_normal &&
+      (!MeshTraversingUtils::normalsWithinTol(desired_normal, face_normal, _normal_tol) &&
+       (!_consider_flipped_normals ||
+        !MeshTraversingUtils::normalsWithinTol(desired_normal, -face_normal, _flipped_normal_tol))))
     return false;
 
   // False if exceeding the patch size
@@ -298,6 +285,17 @@ SurfaceMeshGeneratorBase::get2DElemNormal(const Elem * const elem) const
 {
   mooseAssert(elem->dim() == 2, "Should be a 2D element");
   mooseAssert(elem->default_order() == FIRST, "Should be a first order element");
+  // TODO: add support for non-planar element
+  // TODO: optimize to avoid the allocation
+  if (elem->n_nodes() > 3)
+  {
+    std::vector<Point> vec_pts(elem->n_nodes());
+    for (const auto & node : elem->node_ref_range())
+      vec_pts.push_back(node);
+    if (!MooseMeshUtils::isCoPlanar(vec_pts))
+      mooseDoOnce(mooseWarning("A non planar element was detected. Normal is approximated with the "
+                               "first 3 nodes at time."););
+  }
 
   const auto & p1 = elem->point(0);
   const auto & p2 = elem->point(1);

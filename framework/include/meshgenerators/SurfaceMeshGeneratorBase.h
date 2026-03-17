@@ -54,23 +54,6 @@ protected:
                          MeshBase & mesh) = 0;
 
   /**
-   * Determines whether two normal vectors are within normal_tol of each other.
-   * @param normal_1 The first normal vector to compare to normal_2.
-   * @param normal_2 The second normal vector to compare to normal_1.
-   * @param tol The comparison tolerance.
-   * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
-   */
-  bool normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real tol) const;
-
-  /**
-   * Determines whether the given element's subdomain id is in the given subdomain_id_list.
-   * @param elem the element to consider
-   * @param subdomain_id_list a vector of all the subdomains to consider
-   */
-  bool elementSubdomainIdInList(const Elem * const elem,
-                                const std::vector<subdomain_id_type> & subdomain_id_list) const;
-
-  /**
    * Determines whether the given element satisfies a set of criteria that are defined in this base
    * class
    * @param elem element to consider
@@ -127,11 +110,11 @@ protected:
   std::unordered_map<subdomain_id_type, Real> _max_elem_distance;
 
   /// Map used for the flooding algorithm to keep track of which elements have been visited for which subdomain
-  std::map<subdomain_id_type, std::set<Elem *>> _visited;
-  /// Only visit each element once
-  const bool _flood_only_once;
+  std::unordered_map<subdomain_id_type, std::unordered_set<Elem *>> _visited;
+  /// Only act on each element once
+  bool _flood_only_once;
   /// Set used when flooding each element once. If the element pointer is in the set, it has been visited and acted upon
-  std::set<Elem *> _acted_upon_once;
+  std::unordered_set<Elem *> _acted_upon_once;
   /// Maximum amount of calls to the flood routine at once
   const unsigned int _flood_max_recursion;
   /// Current tally for the number of flood routine calls active

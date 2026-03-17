@@ -24,7 +24,7 @@ InputParameters
 Boundary2DDelaunayGenerator::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
-  params += FunctionParserUtils<false>::validParams();
+  params += LevelSetMeshingHelper::validParams();
 
   params.addClassDescription(
       "Mesh generator that convert a 2D surface given as one or a few boundaries of a 3D mesh into "
@@ -38,13 +38,6 @@ Boundary2DDelaunayGenerator::validParams()
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
 
-  params.addParam<std::string>(
-      "level_set",
-      "Level set used to achieve more accurate reverse projection compared to interpolation.");
-  params.addParam<unsigned int>(
-      "max_level_set_correction_iterations",
-      3,
-      "Maximum number of iterations to correct the nodes based on the level set function.");
   params.addRangeCheckedParam<Real>(
       "max_angle_deviation",
       60.0,
@@ -62,34 +55,13 @@ Boundary2DDelaunayGenerator::validParams()
 
 Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters & parameters)
   : SurfaceDelaunayGeneratorBase(parameters),
-    FunctionParserUtils<false>(parameters),
+    LevelSetMeshingHelper(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
     _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
-    _max_level_set_correction_iterations(
-        getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),
     _output_external_boundary_name(getParam<BoundaryName>("output_external_boundary_name"))
 {
-  if (isParamValid("level_set"))
-  {
-    _func_level_set = std::make_shared<SymFunction>();
-    // set FParser internal feature flags
-    setParserFeatureFlags(_func_level_set);
-    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-      addFParserConstants(_func_level_set,
-                          getParam<std::vector<std::string>>("constant_names"),
-                          getParam<std::vector<std::string>>("constant_expressions"));
-    if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
-      mooseError("Invalid function f(x,y,z)\n",
-                 _func_level_set,
-                 "\nin ",
-                 name(),
-                 ".\n",
-                 _func_level_set->ErrorMsg());
-
-    _func_params.resize(3);
-  }
 }
 
 std::unique_ptr<MeshBase>
@@ -198,33 +170,6 @@ Boundary2DDelaunayGenerator::meshNormalDeviation2D(const MeshBase & mesh, const 
   }
   mesh.comm().max(max_deviation);
   return max_deviation;
-}
-
-Real
-Boundary2DDelaunayGenerator::levelSetEvaluator(const Point & point)
-{
-  return evaluate(_func_level_set, std::vector<Real>({point(0), point(1), point(2), 0}));
-}
-
-void
-Boundary2DDelaunayGenerator::levelSetCorrection(Node & node)
-{
-  // Based on the given level set, we try to move the node in its normal direction
-  const Real diff = libMesh::TOLERANCE * 10.0; // A small value to perturb the node
-  const Real original_eval = levelSetEvaluator(node);
-  const Real xp_eval = levelSetEvaluator(node + Point(diff, 0.0, 0.0));
-  const Real yp_eval = levelSetEvaluator(node + Point(0.0, diff, 0.0));
-  const Real zp_eval = levelSetEvaluator(node + Point(0.0, 0.0, diff));
-  const Real xm_eval = levelSetEvaluator(node - Point(diff, 0.0, 0.0));
-  const Real ym_eval = levelSetEvaluator(node - Point(0.0, diff, 0.0));
-  const Real zm_eval = levelSetEvaluator(node - Point(0.0, 0.0, diff));
-  const Point grad = Point((xp_eval - xm_eval) / (2.0 * diff),
-                           (yp_eval - ym_eval) / (2.0 * diff),
-                           (zp_eval - zm_eval) / (2.0 * diff));
-  const Real xyz_diff = -original_eval / grad.contract(grad);
-  node(0) += xyz_diff * grad(0);
-  node(1) += xyz_diff * grad(1);
-  node(2) += xyz_diff * grad(2);
 }
 
 std::unique_ptr<MeshBase>
