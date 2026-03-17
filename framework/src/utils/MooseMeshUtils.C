@@ -657,6 +657,7 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
   auto edge_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
   auto side_list = input_mesh.get_boundary_info().build_side_list();
   std::set<BoundaryInfo::BCTuple> visited;
+  bool already_seen_this_side_tuple = false;
   BoundaryInfo::BCTuple first_side_visited = {libMesh::invalid_uint, 0, 0};
 
   // Helps move elem to elem at a given node
@@ -692,28 +693,25 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
     auto side_elem = elem->build_side_ptr(current_side);
 
     // 3D elements should not be part of this boundary
-    if (elem->dim() > 2)
-      mooseError("Finding the loop boundary of a 2D mesh cannot be done with 3D elements such as ",
-                 *elem);
+    if (elem->dim() != 2)
+      mooseError(
+          "Finding the loop boundary of a 2D mesh cannot be done with non-2D elements such as ",
+          *elem);
 
     // Start from node 0 of the side (on the boundary), set the next node as the other node
     // one that side, and keep going from tht next node
     bool looped_back = false;
-    unsigned int num_visited_from_this_side = 0;
     const Node * starting_node = side_elem->node_ptr(0);
     const auto new_mesh_starting_node = edge_mesh->add_point(side_elem->point(0));
     Node * new_first_node = new_mesh_starting_node;
     [[maybe_unused]] dof_id_type first_node_index = starting_node->id();
     dof_id_type second_node_index = input_mesh.node_ptr(side_elem->node_id(1))->id();
 
-    while (!looped_back && num_visited_from_this_side < 1e7)
+    while (!looped_back && !already_seen_this_side_tuple)
     {
-      if (MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index)(0),
-                                         Point(*starting_node)(0)) &&
-          MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index)(1),
-                                         Point(*starting_node)(1)) &&
-          MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index)(2),
-                                         Point(*starting_node)(2)))
+      if (MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index),
+                                         Point(*starting_node)),
+          libMesh::TOLERANCE * libMesh::TOLERANCE)
         looped_back = true;
 
       // Get the opposite node (the next node) and add it to the edge mesh
@@ -731,7 +729,9 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
       // Make this side as 'visited'
       std::tuple<dof_id_type, unsigned short int, boundary_id_type> bc_tuple = {
           elem->id(), current_side, boundary_id};
-      visited.insert(bc_tuple);
+      const auto & visit_iter = visited.insert(bc_tuple);
+      if (!looped_back && !visit_iter.second)
+        already_seen_this_side_tuple = true;
 
       // Find the next element and side_elem
       auto & connected_elems = libmesh_map_find(node_to_elem_map, second_node_index);
@@ -837,7 +837,6 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
       first_node_index = second_node_index;
 
       // Handle loop ending criterion
-      num_visited_from_this_side++;
       if (!found_match)
       {
         mooseWarning("Search for next element in loop boundary failed. Is boundary '" +
@@ -848,6 +847,10 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
       }
     }
   }
+
+  if (already_seen_this_side_tuple)
+    mooseWarning("Boundary " + std::to_string(boundary_id) +
+                 " seems to have cycles. A single-cycle loop should be used");
 
   edge_mesh->skip_partitioning(true);
   edge_mesh->prepare_for_use();
@@ -860,14 +863,14 @@ buildLoopBoundaryOf2DMesh(const ReplicatedMesh & input_mesh, const boundary_id_t
   return edge_mesh;
 }
 
-std::map<dof_id_type, std::set<dof_id_type>>
+std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
 buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
 {
   // Get all nodes on that boundary
   // Boundary ID might be a sideset or a nodeset, get nodes regardless
   const auto particular_node_ids = getBoundaryNodes(input_mesh, boundary_id);
 
-  std::map<dof_id_type, std::set<dof_id_type>> nid_to_eids_map;
+  std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> nid_to_eids_map;
   // Fill the map from looping over elements
   for (const auto & elem :
        as_range(input_mesh.active_elements_begin(), input_mesh.active_elements_end()))
@@ -878,7 +881,7 @@ buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_
       if (!particular_node_ids.count(nd.id()))
         continue;
 
-      std::set<dof_id_type> & elem_ids = nid_to_eids_map[nd.id()];
+      auto & elem_ids = nid_to_eids_map[nd.id()];
       elem_ids.insert(elem->id());
     }
   }

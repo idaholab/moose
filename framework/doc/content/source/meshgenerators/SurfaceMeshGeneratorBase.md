@@ -9,7 +9,7 @@ an operation.
 It is currently only implemented to handle surface elements.
 
 !alert note
-The only operation currently implemented are changing the subdomain ID of the element,
+The only operations currently implemented are changing the subdomain ID of the element,
 and flipping its orientation if the surface element normal is opposite the painting/flooding normal.
 
 Several techniques and restrictions are implemented for this flooding algorithm:

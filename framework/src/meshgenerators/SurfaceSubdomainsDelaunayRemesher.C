@@ -401,7 +401,7 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
         const Elem & elem_xyz = *mesh_2d_xyz->elem_ptr(elem_id);
 
         const Point elem_normal = elemNormal(elem_xyz);
-        const auto elem_p = *mesh_2d_xyz->elem_ptr(elem_id)->node_ptr(0);
+        const auto & elem_p = mesh_2d_xyz->elem_ptr(elem_id)->point(0);
 
         // if the x and y values of the node is the same as the elem_p's first node, we can just
         // move it to that node's position

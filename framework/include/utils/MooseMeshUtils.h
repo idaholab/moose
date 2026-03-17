@@ -445,7 +445,7 @@ std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const ReplicatedMesh &
  * @param input_mesh  The input mesh to get the map for
  * @param boundary_id The boundary id of interest
  */
-std::map<dof_id_type, std::set<dof_id_type>>
+std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
 buildBoundaryNodeToElemMap(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id);
 
 /**

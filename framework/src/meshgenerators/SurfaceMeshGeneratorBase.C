@@ -130,8 +130,8 @@ void
 SurfaceMeshGeneratorBase::setup(MeshBase & mesh)
 {
   // To know the dimension of the mesh
-  if (!mesh.is_prepared())
-    mesh.prepare_for_use();
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
 
   // Get the subdomain ids from the names
   if (isParamValid("included_subdomains"))
