@@ -64,7 +64,7 @@
 [UserObjects]
   [importer]
     type = StatefulMaterialPropertyImporter
-    file = 'stateful_export.smatprop'
+    file_base = 'stateful_export'
   []
 []
 
