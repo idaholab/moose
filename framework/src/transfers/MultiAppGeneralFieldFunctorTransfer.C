@@ -45,7 +45,7 @@ MultiAppGeneralFieldFunctorTransfer::validParams()
   // - functor evaluation time argument type
   // - number of points to use when creating extrapolation 'patches'
 
-  MooseEnum extrapolation("flat nearest-node linear", "linear");
+  MooseEnum extrapolation("flat evaluate_oob nearest-node", "nearest-node");
   params.addParam<MooseEnum>("extrapolation_behavior",
                              extrapolation,
                              "How to extrapolate the functors when a target point for the transfer "
@@ -149,6 +149,7 @@ MultiAppGeneralFieldFunctorTransfer::prepareEvaluationOfInterpValues(const unsig
   buildKDTrees(var_index);
 
   // Get the point locators
+  // Should be done after we know the number of sources
   _point_locators.resize(_num_sources);
   for (const auto i_from : make_range(_num_sources))
     _point_locators[i_from] =
@@ -283,8 +284,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
   dof_id_type i_pt = 0;
   std::set<const Elem *> elem_candidates;
 
-  const auto from_blocks =
-      _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
+  const auto from_blocks = _from_blocks.size() ? &_from_blocks : nullptr;
 
   for (const auto & [pt, mesh_div] : incoming_points)
   {
@@ -298,21 +298,30 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Examine all restrictions for the point. This source (KDTree+values) could be ruled out
       if (!checkRestrictionsForSource(pt, mesh_div, i_from))
         continue;
+      // Note: because this transfer is intended for extrapolation,
+      // this will usually not restrict the source. The distance comparisons will be crucial
 
       // Retrieve the functor
       const auto & functor = *_functors[i_from][var_index];
 
       // If in domain, use the functor evaluation at the point
       // Locate the point and an element
-      (*_point_locators[i_from])(pt, elem_candidates, &from_blocks);
+      // Clear the nearest candidates
+      elem_candidates.clear();
+      const auto transformed_pt = getPointInLocalSourceFrame(i_from, pt);
+      if (from_blocks)
+        (*_point_locators[i_from])(transformed_pt, elem_candidates, from_blocks);
+      else
+        (*_point_locators[i_from])(transformed_pt, elem_candidates);
       if (elem_candidates.size())
       {
+        point_found = true;
         // Average the result for now
-        // TODO: if we knew the functor was continuous, could return earlier
+        // TODO: if we knew the functor were continuous, we could return earlier
         Real value = 0;
         for (const auto elem : elem_candidates)
         {
-          Moose::ElemPointArg elem_pt_arg = {elem, pt, /*correct skewness*/ false};
+          Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
           Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
           value += functor(elem_pt_arg, time_arg);
         }
@@ -323,9 +332,13 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         continue;
       }
 
-      if (_extrapolation_behavior == 0)
+      // Check if we have already found a point to avoid over-writing a valid value
+      // No need to check the KD-Tree if the extrapolation behavior is flat
+      if (!point_found && _extrapolation_behavior == 0) /*flat*/
       {
-        outgoing_vals[i_pt] = {_extrapolation_constant, 10};
+        // The base class will do take care of replacing the value
+        outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
+                               GeneralFieldTransfer::BetterOutOfMeshValue};
         continue;
       }
 
@@ -353,7 +366,16 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         // If the new value found is closer than for other sources, use it
         const auto new_distance = dist_sum / return_dist_sqr.size();
         if (new_distance < outgoing_vals[i_pt].second)
-          outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
+        {
+          if (_extrapolation_behavior == 1) /*evaluate oob*/
+          {
+            Moose::ElemPointArg elem_pt_arg = {nullptr, transformed_pt, /*correct skewness*/ false};
+            Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
+            outgoing_vals[i_pt] = {functor(elem_pt_arg, time_arg), new_distance};
+          }
+          else
+            outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
+        }
       }
     }
 
