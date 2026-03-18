@@ -266,6 +266,7 @@ PolycrystalVoronoi::buildSearchTree()
   // Domain will be extended along the periodic directions
   // For each direction, a half domain is constructed
   std::vector<std::vector<Real>> xyzs(LIBMESH_DIM);
+  const auto & periodic_dims = _mesh.queryPeriodicDimensions(*_vars[0]);
   for (auto & point : _centerpoints)
   {
     // Cear up
@@ -279,7 +280,7 @@ PolycrystalVoronoi::buildSearchTree()
     // Add new coords when there exists periodic boundary conditions
     // We extend half domain
     for (unsigned int i = 0; i < _mesh.dimension(); i++)
-      if (_mesh.isTranslatedPeriodic(*_vars[0], i))
+      if (periodic_dims[i])
         xyzs[i].push_back(point(i) <= midplane(i) ? point(i) + _range(i) : point(i) - _range(i));
 
     // Construct all combinations
