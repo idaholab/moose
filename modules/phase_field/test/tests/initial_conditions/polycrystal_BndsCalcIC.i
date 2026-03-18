@@ -86,7 +86,7 @@
 [Postprocessors]
   [./ngrains]
     type = FeatureFloodCount
-    variable = bnds
+    variable = "gr0 gr1 gr2"
     threshold = 0.7
   [../]
 []
