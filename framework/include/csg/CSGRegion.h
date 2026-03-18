@@ -171,6 +171,14 @@ protected:
   bool nextRegionOpIsIdentical(const RegionType region,
                                const std::size_t postfix_token_index) const;
 
+  /**
+   * @brief Loop through postfix tokens and check equality with another list of postfix tokens
+   *
+   * @param other_tokens list of postfix tokens to compare to
+   * @return true if postfix token lists are equal, false otherwise
+   */
+  bool checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const;
+
   /// An enum for type of type of operation that defines region
   MooseEnum _region_type{"EMPTY=0 HALFSPACE=1 COMPLEMENT=2 INTERSECTION=3 UNION=4"};
 
