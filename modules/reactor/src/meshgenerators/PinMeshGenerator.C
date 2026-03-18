@@ -735,14 +735,19 @@ PinMeshGenerator::generateCSG()
   // Define all radial regions
   std::vector<CSG::CSGRegion> radial_regions;
   CSG::CSGRegion inner_region, outer_region;
-  for (const auto & radial_surfaces : surfaces_by_radial_region)
+  for (const auto i : index_range(surfaces_by_radial_region))
   {
+    const auto & radial_surfaces = surfaces_by_radial_region[i];
     CSG::CSGRegion radial_region;
+    bool is_last_radial_region = i == surfaces_by_radial_region.size() - 1;
     if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
     {
-      // We are in the innermost radial region, the radial region is inner_region
-      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
-      radial_region = inner_region;
+      if (!is_last_radial_region)
+      {
+        // We are in the innermost radial region, the radial region is inner_region
+        inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
+        radial_region = inner_region;
+      }
     }
     else
     {
@@ -750,7 +755,7 @@ PinMeshGenerator::generateCSG()
       // outer_region
       outer_region = ~inner_region;
       inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
-      radial_region = inner_region & outer_region;
+      radial_region = is_last_radial_region ? outer_region : (inner_region & outer_region);
     }
     radial_regions.push_back(radial_region);
   }
@@ -765,13 +770,24 @@ PinMeshGenerator::generateCSG()
     for (const auto i : make_range(surfaces_by_axial_region.size()))
       if (i != 0)
       {
+        CSG::CSGRegion axial_region;
         const auto & lower_surf = surfaces_by_axial_region[i - 1].get();
+        if (lower_surf != surfaces_by_axial_region.front())
+          axial_region = +lower_surf;
         const auto & upper_surf = surfaces_by_axial_region[i].get();
-        axial_regions.push_back((+lower_surf & -upper_surf));
+        if (upper_surf != surfaces_by_axial_region.back())
+        {
+          if (axial_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+            axial_region = -upper_surf;
+          else
+            axial_region &= -upper_surf;
+        }
+        axial_regions.push_back(axial_region);
       }
   }
 
-  // Define all cells within pin domain
+  // Define all cells within pin domain and add to separate universe
+  const auto & pin_univ = csg_obj->createUniverse(name() + "_univ");
   for (const auto i : index_range(radial_regions))
   {
     for (const auto j : make_range(extruded_pin ? axial_regions.size() : 1))
@@ -784,25 +800,30 @@ PinMeshGenerator::generateCSG()
       {
         // update name and region with axial info only if extruded
         const auto axial_region = axial_regions[j];
-        cell_region &= axial_region;
+        if (axial_region.getRegionType() != CSG::CSGRegion::RegionType::EMPTY)
+        {
+          if (cell_region.getRegionType() != CSG::CSGRegion::RegionType::EMPTY)
+            cell_region &= axial_region;
+          else
+            cell_region = axial_region;
+        }
         cell_name += "_axial_" + std::to_string(j);
       }
-      csg_obj->createCell(cell_name, mat_name, cell_region);
+      csg_obj->createCell(cell_name, mat_name, cell_region, &pin_univ);
     }
   }
 
-  // Define void cell to cover region outside pin domain, where the complement of the last set
-  // inner_region is the outermost defined zone of the pin
-  const auto void_cell_name = name() + "_void_cell";
-  auto void_region = ~inner_region;
+  // Create new cell to bound universe based on pin outer boundaries and add this cell to the root
+  // universe
+  auto pin_region = CSGUtils::getInnerRegion(surfaces_by_radial_region.back(), Point(0, 0, 0));
   if (extruded_pin)
   {
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
     const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
-    void_region = (~inner_region & +lowest_axial_surf & -highest_axial_surf) | -lowest_axial_surf |
-                  +highest_axial_surf;
+    auto axial_region = +lowest_axial_surf & -highest_axial_surf;
+    pin_region &= axial_region;
   }
-  csg_obj->createCell(void_cell_name, void_region);
+  csg_obj->createCell(name() + "_root_cell", pin_univ, pin_region);
 
   return csg_obj;
 }
