@@ -453,28 +453,31 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
 }
 
 void
-CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle)
+CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object,
+                           RotationAxisType axis,
+                           const Real angle)
 {
-  // convert axis string to lowercase:
-  std::transform(
-      axis.begin(), axis.end(), axis.begin(), [](unsigned char c) { return std::tolower(c); });
-
   // convert to the Euler angles (phi, theta, psi) based on axis
   Real phi = 0.0;
   Real theta = 0.0;
   Real psi = 0.0;
-  if (axis == "x")
-    theta = angle;
-  else if (axis == "y")
+
+  switch (axis)
   {
-    phi = 90.0;
-    theta = angle;
-    psi = -90.0;
+    case RotationAxisType::X:
+      theta = angle;
+      break;
+    case RotationAxisType::Y:
+      phi = 90.0;
+      theta = angle;
+      psi = -90.0;
+      break;
+    case RotationAxisType::Z:
+      phi = angle;
+      break;
+    default:
+      mooseError("Invalid axis type provided for axis rotation.");
   }
-  else if (axis == "z")
-    phi = angle;
-  else
-    mooseError("Invalid axis '", axis, "' provided for axis rotation. Must be 'x', 'y', or 'z'.");
 
   addTransformation(csg_object, TransformationType::ROTATION, std::make_tuple(phi, theta, psi));
 }

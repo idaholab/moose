@@ -101,7 +101,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
 
   // apply rotation around z-axis if specified
   if (_rotation != 0.0)
-    csg_obj->applyAxisRotation(csg_cell, "z", _rotation);
+    csg_obj->applyAxisRotation(csg_cell, CSG::RotationAxisType::Z, _rotation);
 
   return csg_obj;
 }

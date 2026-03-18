@@ -835,41 +835,41 @@ TEST(CSGBaseTest, testApplyRotation)
 
   // apply to surface
   {
-    csg_obj->applyAxisRotation(*surf, "x", angle);
-    csg_obj->applyAxisRotation(*surf, "y", angle);
-    csg_obj->applyAxisRotation(*surf, "z", angle);
+    csg_obj->applyAxisRotation(*surf, RotationAxisType::X, angle);
+    csg_obj->applyAxisRotation(*surf, RotationAxisType::Y, angle);
+    csg_obj->applyAxisRotation(*surf, RotationAxisType::Z, angle);
     csg_obj->applyRotation(*surf, euler_angles);
     ASSERT_EQ(surf->getTransformations(), expected_rotations);
   }
   // apply to cell
   {
-    csg_obj->applyAxisRotation(*cell, "x", angle);
-    csg_obj->applyAxisRotation(*cell, "y", angle);
-    csg_obj->applyAxisRotation(*cell, "z", angle);
+    csg_obj->applyAxisRotation(*cell, RotationAxisType::X, angle);
+    csg_obj->applyAxisRotation(*cell, RotationAxisType::Y, angle);
+    csg_obj->applyAxisRotation(*cell, RotationAxisType::Z, angle);
     csg_obj->applyRotation(*cell, euler_angles);
     ASSERT_EQ(cell->getTransformations(), expected_rotations);
   }
   // apply to universe
   {
-    csg_obj->applyAxisRotation(*univ, "x", angle);
-    csg_obj->applyAxisRotation(*univ, "y", angle);
-    csg_obj->applyAxisRotation(*univ, "z", angle);
+    csg_obj->applyAxisRotation(*univ, RotationAxisType::X, angle);
+    csg_obj->applyAxisRotation(*univ, RotationAxisType::Y, angle);
+    csg_obj->applyAxisRotation(*univ, RotationAxisType::Z, angle);
     csg_obj->applyRotation(*univ, euler_angles);
     ASSERT_EQ(univ->getTransformations(), expected_rotations);
   }
   // apply to lattice
   {
-    csg_obj->applyAxisRotation(*lat, "x", angle);
-    csg_obj->applyAxisRotation(*lat, "y", angle);
-    csg_obj->applyAxisRotation(*lat, "z", angle);
+    csg_obj->applyAxisRotation(*lat, RotationAxisType::X, angle);
+    csg_obj->applyAxisRotation(*lat, RotationAxisType::Y, angle);
+    csg_obj->applyAxisRotation(*lat, RotationAxisType::Z, angle);
     csg_obj->applyRotation(*lat, euler_angles);
     ASSERT_EQ(lat->getTransformations(), expected_rotations);
   }
   // apply to region (should apply to the surface)
   {
-    csg_obj->applyAxisRotation(reg, "x", angle);
-    csg_obj->applyAxisRotation(reg, "y", angle);
-    csg_obj->applyAxisRotation(reg, "z", angle);
+    csg_obj->applyAxisRotation(reg, RotationAxisType::X, angle);
+    csg_obj->applyAxisRotation(reg, RotationAxisType::Y, angle);
+    csg_obj->applyAxisRotation(reg, RotationAxisType::Z, angle);
     csg_obj->applyRotation(reg, euler_angles);
     // surface should have the transformations applied x2 (from the above transformations applied
     // directly to the surface and then from the region)
@@ -877,13 +877,6 @@ TEST(CSGBaseTest, testApplyRotation)
     double_rotations.insert(
         double_rotations.end(), expected_rotations.begin(), expected_rotations.end());
     ASSERT_EQ(surf->getTransformations(), double_rotations);
-  }
-
-  // assert error is raised if invalid axis is provided
-  {
-    Moose::UnitUtils::assertThrows(
-        [&csg_obj, &surf]() { csg_obj->applyAxisRotation(*surf, "Fake", 1.0); },
-        "Invalid axis 'fake' provided for axis rotation. Must be 'x', 'y', or 'z'.");
   }
 }
 
@@ -1017,20 +1010,20 @@ TEST(CSGBaseTest, testAddTransformationErrors)
   // try to apply transformations to each object via the first base, should raise errors
   {
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &surf2]() { csg_obj->applyAxisRotation(*surf2, "x", 90); },
+        [&csg_obj, &surf2]() { csg_obj->applyAxisRotation(*surf2, RotationAxisType::X, 90); },
         "Cannot apply transformation to surface cyl that is not in this CSGBase instance.");
     Moose::UnitUtils::assertThrows([&csg_obj, &reg2]()
-                                   { csg_obj->applyAxisRotation(reg2, "x", 90); },
+                                   { csg_obj->applyAxisRotation(reg2, RotationAxisType::X, 90); },
                                    "Cannot apply transformation to region with surface cyl that is "
                                    "not in this CSGBase instance.");
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &cell2]() { csg_obj->applyAxisRotation(*cell2, "x", 90); },
+        [&csg_obj, &cell2]() { csg_obj->applyAxisRotation(*cell2, RotationAxisType::X, 90); },
         "Cannot apply transformation to cell cell that is not in this CSGBase instance.");
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &univ2]() { csg_obj->applyAxisRotation(*univ2, "x", 90); },
+        [&csg_obj, &univ2]() { csg_obj->applyAxisRotation(*univ2, RotationAxisType::X, 90); },
         "Cannot apply transformation to universe univ that is not in this CSGBase instance.");
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &lat2]() { csg_obj->applyAxisRotation(*lat2, "x", 90); },
+        [&csg_obj, &lat2]() { csg_obj->applyAxisRotation(*lat2, RotationAxisType::X, 90); },
         "Cannot apply transformation to lattice lat that is not in this CSGBase instance.");
   }
   // try to apply an invalid value for a transformation

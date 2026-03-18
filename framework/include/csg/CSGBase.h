@@ -25,6 +25,16 @@ namespace CSG
 {
 
 /**
+ * Enumeration of axis types for rotations
+ */
+enum class RotationAxisType
+{
+  X = 0, // X axis
+  Y = 1, // Y axis
+  Z = 2  // Z axis
+};
+
+/**
  * Define a variant type that can hold references to different CSG object types
  */
 typedef std::variant<std::reference_wrapper<const CSGSurface>,
@@ -509,13 +519,14 @@ public:
   }
 
   /**
-   * @brief Apply a rotation to a CSG object about a specified axis (x, y, z).
+   * @brief Apply a rotation to a CSG object about a specified axis (X, Y, Z).
    *
    * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
-   * @param axis x, y, or z axis about which to rotate
+   * @param axis Axis type (X, Y, or Z) about which to rotate
    * @param angle angle in degrees to rotate about the specified axis
    */
-  void applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle);
+  void
+  applyAxisRotation(const CSGObjectVariant & csg_object, RotationAxisType axis, const Real angle);
 
   /**
    * @brief Scale a CSG object in the specified x, y, and z directions.
