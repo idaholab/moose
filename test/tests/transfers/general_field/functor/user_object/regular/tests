@@ -23,9 +23,8 @@
     []
   []
 
-  # Not implemented at this time in the UO part, hence the min_parallel
   [overlap]
-    requirement = "The system shall be able to detect indetermination in a transfer due to"
+    requirement = "The system shall be able to detect indetermination in the transfer of functor evaluations due to"
     [origin_mesh]
       type = RunException
       input = main.i
@@ -35,7 +34,6 @@
       detail = 'overlapping origin child application, causing multiple shape evaluations to be valid'
       # In serial, the overlap will be found in the local conflicts
       # In parallel, it will be found in the received conflicts
-      min_parallel = 2
     []
   []
 []

@@ -59,7 +59,7 @@ MultiAppGeneralFieldFunctorTransfer::validParams()
                         "Whether to group source locations and values from all subapps "
                         "when considering algorithm");
   // This is a convenient heuristic to limit communication
-  params.renameParam("use_nearest_app", "assume_nearest_app_holds_nearest_location", "");
+  params.renameParam("use_nearest_app", "assume_nearest_app_holds_evaluation_location", "");
 
   return params;
 }
@@ -339,6 +339,16 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         (*_point_locators[i_from])(transformed_pt, elem_candidates);
       if (elem_candidates.size())
       {
+        // Register conflict if any
+        if (point_found && _search_value_conflicts)
+        {
+          // In the nearest-position/app mode, we save conflicts in the reference frame
+          if (_nearest_positions_obj)
+            registerConflict(i_from, /*dof*/ 0, pt, 0, true);
+          else
+            registerConflict(i_from, 0, transformed_pt, 0, true);
+        }
+
         point_found = true;
         // Average the result for now
         // TODO: if we knew the functor were continuous, we could return earlier
@@ -409,9 +419,10 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
                              GeneralFieldTransfer::BetterOutOfMeshValue};
     else if (_search_value_conflicts)
     {
-      // There are no search value conflicts within the domain.
+      // Within the domain: implemented above
       // Outside the domain, it depends on the extrapolation option
       // Flat: no conflict
+      // Evaluate out-of-bounds: same issue as nearest location
       // Nearest-node: same issue as nearest location
       // Linear: TBD
     }
