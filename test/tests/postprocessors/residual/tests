@@ -1,6 +1,6 @@
 [Tests]
   design = 'Residual.md'
-  issues = '#28765'
+  issues = '#28765 #32506'
 
   [test]
     type = CSVDiff
@@ -13,5 +13,17 @@
     # magnitude here.
     rel_err = 1
     requirement = 'The system shall be able to report the nonlinear residual norm at each nonlinear iteration.'
+  []
+  [eigen_problem]
+    type = CSVDiff
+    input = 'eigen_problem.i'
+    csvdiff = 'eigen_problem_out.csv'
+    # Since we test a nonlinear residual instead of a tightly converged solution, we
+    # restrict to 1 process for consistency and furthermore use a loose tolerance;
+    # this test does not care about the residual value itself but just that a nonzero
+    # value is returned.
+    max_parallel = 1
+    rel_err = 1
+    requirement = 'The system shall be able to report the final nonlinear residual for a nonlinear eigenvalue problem.'
   []
 []

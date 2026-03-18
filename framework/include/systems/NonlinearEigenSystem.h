@@ -84,6 +84,7 @@ public:
 
   virtual unsigned int nNonlinearIterations() const override;
   virtual unsigned int nLinearIterations() const override;
+  virtual Real finalNonlinearResidual() const override;
 
   virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() override;
 
