@@ -236,9 +236,12 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::limitedGradSln(
     const FaceInfo & fi,
-    const StateArg & /*state*/,
+    const StateArg & libmesh_dbg_var(state),
     const Moose::FV::GradientLimiterType limiter_type) const
 {
+  mooseAssert(state.state == 0,
+              "Limited gradients are only available for the current state.");
+
   const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
               "Limited gradient requested on a face where the variable is defined on neither "
