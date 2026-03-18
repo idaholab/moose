@@ -29,6 +29,7 @@ public:
   MultiAppGeneralFieldFunctorTransfer(const InputParameters & parameters);
 
   void initialSetup() override;
+  void execute() override;
 
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;

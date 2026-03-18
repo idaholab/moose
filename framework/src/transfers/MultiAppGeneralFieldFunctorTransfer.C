@@ -141,6 +141,30 @@ MultiAppGeneralFieldFunctorTransfer::initialSetup()
 }
 
 void
+MultiAppGeneralFieldFunctorTransfer::execute()
+{
+  // Execute the user object if it was specified to execute on TRANSFER
+  for (const auto & fname : _functor_names)
+    switch (_current_direction)
+    {
+      case TO_MULTIAPP:
+      {
+        if (!_fe_problem.hasUserObject(fname))
+          continue;
+        checkParentAppUserObjectExecuteOn(fname);
+        _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, fname);
+        _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, fname);
+        break;
+      }
+      case FROM_MULTIAPP:
+        errorIfObjectExecutesOnTransferInSourceApp(fname);
+    }
+
+  // Perfom the actual transfer
+  MultiAppGeneralFieldTransfer::execute();
+}
+
+void
 MultiAppGeneralFieldFunctorTransfer::prepareEvaluationOfInterpValues(const unsigned int var_index)
 {
   _local_kdtrees.clear();
