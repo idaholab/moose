@@ -52,20 +52,19 @@ class TaoGradientTester(RunApp):
         # Get the base command from RunApp
         cmd = super().getCommand(options)
 
-        petsc_iname = [
-            "-tao_max_it",
-            "-tao_fd_test",
-            "-tao_test_gradient",
-            "-tao_fd_gradient",
-            "-tao_ls_type",
+        petsc_options = [
+            ("-tao_max_it", "1"),
+            ("-tao_fd_test", "true"),
+            ("-tao_test_gradient", "true"),
+            ("-tao_fd_gradient", "false"),
+            ("-tao_ls_type", "unit"),
         ]
-        petsc_value = ["1", "true", "true", "false", "unit"]
 
         specs = self.specs
         if specs["tao_fd_delta"] is not None:
-            petsc_iname.append("-tao_fd_delta")
-            petsc_value.append(str(specs["tao_fd_delta"]))
-
+            petsc_options.append(("-tao_fd_delta", f"{specs['tao_fd_delta']}"))
+        petsc_iname = [v[0] for v in petsc_options]
+        petsc_value = [v[1] for v in petsc_options]
         cmd += f" Executioner/tao_solver=taobncg"
         cmd += " Executioner/petsc_options_iname='" + " ".join(petsc_iname) + "'"
         cmd += " Executioner/petsc_options_value='" + " ".join(petsc_value) + "'"
