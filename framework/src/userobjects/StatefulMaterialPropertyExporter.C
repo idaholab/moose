@@ -56,7 +56,6 @@ StatefulMaterialPropertyExporter::execute()
   auto & assembly = _fe_problem.assembly(0, 0);
 
   const auto & stateful_ids = storage.statefulProps();
-  const auto & registry = storage.getMaterialPropertyRegistry();
 
   // Gather property metadata
   struct PropMeta
