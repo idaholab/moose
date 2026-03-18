@@ -117,8 +117,7 @@ PeriodicBCHelper::setupAutoPeriodicBoundaries(MooseMesh & mesh)
     const auto boundary_ids = mesh.getPairedBoundaryMapping(component);
     if (!boundary_ids)
       _params.paramError("auto_direction",
-                         "Couldn't auto-detect a paired boundary for use with periodic boundary "
-                         "conditions in the ",
+                         "Couldn't auto-detect a paired boundary in the ",
                          MooseUtils::toLower(dir.name()),
                          "-direction");
 
