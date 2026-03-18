@@ -91,19 +91,18 @@ public:
   ///@}
 
   /**
-   * Get the function pointer of the default computeQpJacobianShim()
-   * @returns The function pointer
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
    */
+  ///@{
   template <typename Derived>
   static auto defaultJacobianShim()
   {
     return &KernelGrad::computeQpJacobianShim<Derived>;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
   static auto defaultJacobian() { return &KernelGrad::computeQpJacobian; }
+  ///@}
 
   /**
    * The parallel computation bodies that hide the base class methods to optimize for factoring

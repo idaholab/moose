@@ -70,8 +70,8 @@ KokkosElementStatistics::join(ReducerLoop, Real * result, const Real * source) c
 KOKKOS_FUNCTION inline void
 KokkosElementStatistics::init(ReducerLoop, Real * result) const
 {
-  result[0] = std::numeric_limits<Real>::min();
-  result[1] = std::numeric_limits<Real>::max();
+  result[0] = Kokkos::Experimental::finite_min_v<Real>;
+  result[1] = Kokkos::Experimental::finite_max_v<Real>;
   result[2] = 0;
   result[3] = 0;
   result[4] = 0;

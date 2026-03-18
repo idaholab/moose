@@ -45,7 +45,7 @@ This makes your user object a `Reducer` object, which uses a different paralleli
 
 Reduction operations are not trivial on GPU due to its massively parallel nature that requires the data race to be carefully managed.
 Therefore, you cannot directly perform reduction operations on your own variables.
-Instead, the redcution operations should be performed on a preallocated buffer defined by the reducer.
+Instead, the reduction operations should be performed on a preallocated buffer defined by the reducer.
 Every reducer should allocate the buffer with the desired size by calling `allocateReductionBuffer()` prior to the calculation, which can be done either in the constructor or in the `initialize()` hook.
 It allocates `_reduction_buffer`, which is a one-dimensional `Kokkos::View` defined in the CPU space.
 And the `execute()` hook method now receives an additional argument `result` that points to a buffer where you need to perform your reduction operations.
@@ -112,7 +112,7 @@ See the following example of `KokkosExtraIDIntegralVectorPostprocessor`, which i
 While user objects are intended to embrace user-defined APIs, Kokkos-MOOSE user objects currently require GPU APIs to not rely on virtual dispatch.
 Namely, you should always retrieve your user objects in their concrete types if you intend to use your own GPU APIs.
 Using virtual functions on GPU has two prerequisites: enabling the relocatable device code (RDC) option and constructing objects on GPU.
-The RDC is option is currently disabled in Kokkos-MOOSE due to the restrictions imposed by upstream packages (see [the discussions on this page](syntax/KokkosFunctions/index.md#kokkos_rdc)), and its resolution is being actively worked on.
+The RDC option is currently disabled in Kokkos-MOOSE due to the restrictions imposed by upstream packages (see [the discussions on this page](syntax/KokkosFunctions/index.md#kokkos_rdc)), and its resolution is being actively worked on.
 Even with the RDC option, however, the object vtables are populated with CPU function pointers as all objects in MOOSE are constructed on CPU.
 As a result, you still cannot call virtual functions of your user objects on GPU unless you directly construct them on GPU (see [this page](syntax/Kokkos/index.md#kokkos_crtp)).
 

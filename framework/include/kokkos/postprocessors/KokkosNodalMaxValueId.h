@@ -69,5 +69,5 @@ KokkosNodalMaxValueId::join(ReducerLoop, Real * result, const Real * source) con
 KOKKOS_FUNCTION inline void
 KokkosNodalMaxValueId::init(ReducerLoop, Real * result) const
 {
-  result[0] = -std::numeric_limits<Real>::max();
+  result[0] = Kokkos::Experimental::finite_min_v<Real>;
 }
