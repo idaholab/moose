@@ -2308,6 +2308,15 @@ MooseMesh::isTranslatedPeriodic(const MooseVariableBase & var, const unsigned in
   return isTranslatedPeriodic(var.sys().number(), var.number(), component);
 }
 
+bool
+MooseMesh::isTranslatedPeriodic(const unsigned int var_num, const unsigned int component) const
+{
+  mooseDoOnce(mooseDeprecated(
+      "MooseMesh::isTranslatedPeriodic(const unsigned int, const unsigned int) is deprecated. Use "
+      "the method that additionally takes the system number or the MooseVariableBase instead."));
+  return isTranslatedPeriodic(0, var_num, component);
+}
+
 RealVectorValue
 MooseMesh::minPeriodicVector(const unsigned int sys_num,
                              const unsigned int var_num,
@@ -2344,6 +2353,15 @@ MooseMesh::minPeriodicVector(const MooseVariableBase & var, const Point & p, con
   return minPeriodicVector(var.sys().number(), var.number(), p, q);
 }
 
+RealVectorValue
+MooseMesh::minPeriodicVector(const unsigned int var_num, const Point & p, const Point & q) const
+{
+  mooseDoOnce(mooseDeprecated("MooseMesh::minPeriodicVector(const unsigned int, const Point &, "
+                              "const Point &) is deprecated. Use the method that additionally "
+                              "takes the system number or the MooseVariableBase instead."));
+  return minPeriodicVector(0, var_num, p, q);
+}
+
 Real
 MooseMesh::minPeriodicDistance(const unsigned int sys_num,
                                const unsigned int var_num,
@@ -2359,6 +2377,15 @@ MooseMesh::minPeriodicDistance(const MooseVariableBase & var,
                                const Point & q) const
 {
   return minPeriodicDistance(var.sys().number(), var.number(), p, q);
+}
+
+Real
+MooseMesh::minPeriodicDistance(const unsigned int var_num, const Point & p, const Point & q) const
+{
+  mooseDoOnce(mooseDeprecated("MooseMesh::minPeriodicDistance(const unsigned int, const Point &, "
+                              "const Point &) is deprecated. Use the method that additionally "
+                              "takes the system number or the MooseVariableBase instead."));
+  return minPeriodicDistance(0, var_num, p, q);
 }
 
 const std::pair<BoundaryID, BoundaryID> *

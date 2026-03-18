@@ -901,6 +901,17 @@ public:
   bool isTranslatedPeriodic(const MooseVariableBase & var, const unsigned int component) const;
 
   /**
+   * Returns whether this generated mesh is periodic in the given dimension for the given variable.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param component - An integer representing the desired component (dimension)
+   */
+  bool isTranslatedPeriodic(const unsigned int var_num, const unsigned int component) const;
+
+  /**
    * Returns the minimum vector between two points on the mesh taking into account
    * periodicity for the given variable on the given system.
    * @param sys_num - The number of the system the variable is on
@@ -920,6 +931,20 @@ public:
    */
   RealVectorValue
   minPeriodicVector(const MooseVariableBase & var, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param p, q - The points between which to compute a minimum vector
+   * @return RealVectorValue - The vector pointing from p to q
+   */
+  RealVectorValue
+  minPeriodicVector(const unsigned int var_num, const Point & p, const Point & q) const;
 
   /**
    * Returns the distance between two points on the mesh taking into account
@@ -942,6 +967,19 @@ public:
    * @return Real - The L2 distance between p and q
    */
   Real minPeriodicDistance(const MooseVariableBase & var, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(const unsigned int var_num, const Point & p, const Point & q) const;
 
   /**
    * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets
