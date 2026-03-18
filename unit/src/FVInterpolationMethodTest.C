@@ -174,11 +174,15 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
   const Real expected_w_elem_linear = gc;
   const Real expected_w_neighbor_linear = 1.0 - gc;
 
-  const Real elem_value = 3.0;
-  const Real neighbor_value = 3.0;
+  // So phi_i - phi_j = +/- 1 depending on the mass flux
+  const Real elem_value = 1.0;
+  const Real neighbor_value = 2.0;
 
-  const VectorValue<Real> elem_grad = face.dCN();
-  const VectorValue<Real> neighbor_grad = -face.dCN();
+  // This here makes the limiting active the gradients would result in
+  // a change of 1.5 (compared to the 1 difference above)
+  const Real grad_scale_clip = 1.5 / (face.dCN() * face.dCN());
+  const VectorValue<Real> elem_grad = grad_scale_clip * face.dCN();
+  const VectorValue<Real> neighbor_grad = elem_grad;
 
   InputParameters params_clamped = _factory.getValidParams("FVAdvectedVanLeerWeightBased");
   params_clamped.set<bool>("limit_to_linear") = true;
@@ -192,7 +196,11 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
   auto & method_unclamped = addObject<FVAdvectedVanLeerWeightBased>(
       "FVAdvectedVanLeerWeightBased", "adv_vanleer_method_unclamped", params_unclamped);
 
-  auto expected_unclamped = [&](const Real mass_flux)
+  auto expected_unclamped = [&](const Real elem_value,
+                                const Real neighbor_value,
+                                const VectorValue<Real> & elem_grad,
+                                const VectorValue<Real> & neighbor_grad,
+                                const Real mass_flux)
   {
     const bool upwind_is_elem = mass_flux >= 0.0;
 
@@ -214,6 +222,9 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
     return std::make_pair(w_elem, w_neighbor);
   };
 
+  // This point produces r_f > 1 and therefore beta > 1 with a nonzero value jump across the face,
+  // so the unclamped weights become more downwind-biased than linear interpolation.
+  // `limit_to_linear = true` should therefore matter here.
   for (const Real mass_flux : {1.0, -1.0})
   {
     const auto contrib_clamped = method_clamped.advectedInterpolate(
@@ -223,7 +234,50 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
 
     const auto contrib_unclamped = method_unclamped.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
-    const auto expected = expected_unclamped(mass_flux);
+    const auto expected =
+        expected_unclamped(elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+    EXPECT_NEAR(contrib_unclamped.weights_matrix.first, expected.first, 1e-12);
+    EXPECT_NEAR(contrib_unclamped.weights_matrix.second, expected.second, 1e-12);
+    EXPECT_GT(
+        std::abs(contrib_unclamped.weights_matrix.first - contrib_clamped.weights_matrix.first),
+        1e-12);
+    EXPECT_GT(
+        std::abs(contrib_unclamped.weights_matrix.second - contrib_clamped.weights_matrix.second),
+        1e-12);
+  }
+
+  // This point produces 0 < beta < 1, so the scheme is already less downwind-biased than linear
+  // interpolation and the linear clamp should have no effect.
+  const Real elem_value_noclip = 1.0;
+  const Real neighbor_value_noclip = 2.0;
+
+  // This gradient will produce a 0.75 change in the value (compared to the 1 we have above)
+  const Real grad_scale = 0.75 / (face.dCN() * face.dCN());
+  const VectorValue<Real> elem_grad_noclip = grad_scale * face.dCN();
+  const VectorValue<Real> neighbor_grad_noclip = elem_grad_noclip;
+
+  for (const Real mass_flux : {1.0, -1.0})
+  {
+    const auto contrib_clamped = method_clamped.advectedInterpolate(face,
+                                                                    elem_value_noclip,
+                                                                    neighbor_value_noclip,
+                                                                    &elem_grad_noclip,
+                                                                    &neighbor_grad_noclip,
+                                                                    mass_flux);
+    const auto contrib_unclamped = method_unclamped.advectedInterpolate(face,
+                                                                        elem_value_noclip,
+                                                                        neighbor_value_noclip,
+                                                                        &elem_grad_noclip,
+                                                                        &neighbor_grad_noclip,
+                                                                        mass_flux);
+    const auto expected = expected_unclamped(elem_value_noclip,
+                                             neighbor_value_noclip,
+                                             elem_grad_noclip,
+                                             neighbor_grad_noclip,
+                                             mass_flux);
+
+    EXPECT_NEAR(contrib_clamped.weights_matrix.first, expected.first, 1e-12);
+    EXPECT_NEAR(contrib_clamped.weights_matrix.second, expected.second, 1e-12);
     EXPECT_NEAR(contrib_unclamped.weights_matrix.first, expected.first, 1e-12);
     EXPECT_NEAR(contrib_unclamped.weights_matrix.second, expected.second, 1e-12);
   }
