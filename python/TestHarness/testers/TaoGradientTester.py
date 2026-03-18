@@ -48,6 +48,10 @@ class TaoGradientTester(RunApp):
             self.specs["capabilities"] = "(" + self.specs["capabilities"] + ") & "
         self.specs["capabilities"] += "method=opt"
 
+        # Require no threads
+        if params["max_threads"] != 1:
+            raise Exception("max_threads must be 1")
+
     def getCommand(self, options):
         # Get the base command from RunApp
         cmd = super().getCommand(options)
