@@ -43,8 +43,8 @@ public:
   virtual void finalize() override {}
 
 protected:
-  /// The file to read from
-  const std::string & _file;
+  /// Base name for the set of .smatprop files (rank suffix is appended automatically)
+  const std::string & _file_base;
 
   /// Property metadata from file
   struct FilePropRecord
@@ -73,8 +73,11 @@ protected:
   /// Mapping from file stateful_id to current simulation stateful_id
   std::vector<std::optional<unsigned int>> _file_to_current_sid;
 
-  /// Read the binary file
-  void readFile();
+  /// Read all rank files ({base}.0.smatprop … {base}.{n_ranks-1}.smatprop)
+  void readAllFiles();
+
+  /// Read and merge one rank file into _stored_data / _file_props
+  void readSingleFile(const std::string & filename, bool first);
 
   /// Build one KDTree per subdomain
   void buildKDTrees();
