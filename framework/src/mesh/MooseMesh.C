@@ -2058,6 +2058,8 @@ MooseMesh::detectPairedSidesets()
 
   // Helper for iterating through unit dimensions (0=x, 1=y, 2=z)
   static constexpr std::array<std::size_t, 3> unit_dims{0, 1, 2};
+  // Helper for mapping from unit dim -> name
+  static const std::array<std::string, 3> unit_dim_names{"x", "y", "z"};
 
   // Boundary id sets for elements of different dimensions
   // First index: side dimension; 0=1D, 1=2D, 2=3D
@@ -2167,7 +2169,7 @@ MooseMesh::detectPairedSidesets()
     for (const auto unit_dim : unit_dims)
       if (nonzero_dims[unit_dim])
       {
-        const auto unit_name = unit_dim == 0 ? "x" : (unit_dim == 1 ? "y" : "z");
+        const auto & unit_name = unit_dim_names[unit_dim];
         const auto & minus = ids[side_dim][unit_dim][false];
         const auto & plus = ids[side_dim][unit_dim][true];
 
