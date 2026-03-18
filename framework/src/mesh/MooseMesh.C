@@ -2044,6 +2044,8 @@ MooseMesh::detectPairedSidesets()
 {
   TIME_SECTION("detectPairedSidesets", 5);
 
+  _paired_boundary = std::vector<std::pair<BoundaryID, BoundaryID>>();
+
   // Loop over level-0 elements (since boundary condition information
   // is only directly stored for them) and find sidesets with normals
   // that point in the -x, +x, -y, +y, and -z, +z direction.  If there
@@ -2186,7 +2188,7 @@ MooseMesh::detectPairedSidesets()
           oss_found << "\n  " << side_dim + 1 << "D " << unit_name
                     << "-direction: " << get_boundary_name(*minus.begin()) << " <-> "
                     << get_boundary_name(*plus.begin());
-          _paired_boundary.emplace_back(std::make_pair(*minus.begin(), *plus.begin()));
+          _paired_boundary->emplace_back(std::make_pair(*minus.begin(), *plus.begin()));
         }
         else
           oss_missing << "\n  " << side_dim + 1 << "D -" << unit_name << "/+" << unit_name
@@ -2360,7 +2362,7 @@ MooseMesh::minPeriodicDistance(const MooseVariableBase & var,
 }
 
 const std::pair<BoundaryID, BoundaryID> *
-MooseMesh::getPairedBoundaryMapping(unsigned int component)
+MooseMesh::getPairedBoundaryMapping(unsigned int component) const
 {
   if (!_regular_orthogonal_mesh)
     mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and "
@@ -2368,11 +2370,12 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
-  if (_paired_boundary.empty())
-    detectPairedSidesets();
+  if (!_paired_boundary)
+    mooseError("MooseMesh::getPairedBoundaryMapping(): Paired boundaries not built; must call "
+               "detectPairedSidesets() first");
 
-  if (component < _paired_boundary.size())
-    return &_paired_boundary[component];
+  if (component < _paired_boundary->size())
+    return &(*_paired_boundary)[component];
   else
     return nullptr;
 }

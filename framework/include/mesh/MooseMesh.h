@@ -944,12 +944,23 @@ public:
   Real minPeriodicDistance(const MooseVariableBase & var, const Point & p, const Point & q) const;
 
   /**
+   * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets
+   * "across" from one and other).
+   *
+   * The _paired_boundary datastructure is populated with this information.
+   */
+  void detectPairedSidesets();
+
+  /**
    * This function attempts to return the paired boundary ids for the given component.  For example,
    * in a generated 2D mesh, passing 0 for the "x" component will return (3, 1).
+   *
+   * Must call detectPairedSidesets() before calling.
+   *
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair pointer - The matching boundary pairs for the passed component
    */
-  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
+  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component) const;
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material
@@ -1677,7 +1688,7 @@ protected:
   std::vector<std::vector<Real>> _bounds;
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
-  std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
+  std::optional<std::vector<std::pair<BoundaryID, BoundaryID>>> _paired_boundary;
 
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _is_split;
@@ -1731,13 +1742,6 @@ private:
 
   /// A vector containing the nodes at the corners of a regular orthogonal mesh
   std::vector<Node *> _extreme_nodes;
-
-  /**
-   * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets
-   * "across" from one and other).
-   * The _paired_boundary datastructure is populated with this information.
-   */
-  void detectPairedSidesets();
 
   /**
    * Build the refinement map for a given element type.  This will tell you what quadrature points
