@@ -425,10 +425,11 @@ class Job(OutputInterface):
             nonlocal runner_spawned
 
             # Fail the job if is used too much CPU
-            if (cpu_percent := runner.cpu_percent) is not None:
+            if (max_cpu_per_slot := self.options.max_cpu_per_slot) is not None and (
+                cpu_percent := runner.cpu_percent
+            ) is not None:
                 slots = self.getSlots()
                 cpu_per_slot = cpu_percent / slots
-                max_cpu_per_slot = self.options.max_cpu_per_slot * slots
                 if cpu_per_slot > max_cpu_per_slot:
                     message = (
                         "\n\nJOB OVER CPU: "

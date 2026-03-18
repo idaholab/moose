@@ -8,7 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
+from contextlib import suppress
 from datetime import datetime
+
 from RunHPC import CallHPCPoolType, RunHPC
 
 
@@ -17,6 +19,8 @@ class RunSlurm(RunHPC):
     """
     Scheduler class for the slurm HPC scheduler.
     """
+
+    MONITOR_JOB_MEMORY = True
 
     def __init__(self, harness, params):
         super().__init__(harness, params)
@@ -34,9 +38,13 @@ class RunSlurm(RunHPC):
             active_job_ids,
             "--parsable2",
             "--noheader",
+            "--units=K",
             "-o",
             "jobid,exitcode,state,reason,start,end",
         ]
+        if self.scheduler_options.monitor_job_memory:
+            cmd[-1] += ",maxrss"
+
         exit_code, result, _ = self.callHPC(CallHPCPoolType.status, " ".join(cmd))
         if exit_code != 0:
             return False
@@ -46,19 +54,32 @@ class RunSlurm(RunHPC):
         for status in result.splitlines():
             # jobid,exitcode,state,reason are split by |
             status_split = status.split("|")
-            # Slurm has sub jobs under each job, and we only care about the top-level job
+            # Slurm has sub jobs under each job, and we only care about
+            # the top level job for most things except max memory
             id = status_split[0]
-            if not id.isdigit():
-                continue
+            id_split = id.split(".")
+            id_num = int(id_split[0])
+            id_suffix = id_split[1] if len(id_split) > 1 else None
             # exitcode is <val>:<val>, where the first value is the
             # exit code of the process, the second is a slurm internal code
-            statuses[id] = {
-                "exitcode": int(status_split[1].split(":")[0]),
-                "state": status_split[2],
-                "reason": status_split[3],
-                "start": status_split[4],
-                "end": status_split[5],
-            }
+            if id_suffix is None:
+                statuses[id_num] = {
+                    "exitcode": int(status_split[1].split(":")[0]),
+                    "state": status_split[2],
+                    "reason": status_split[3],
+                    "start": status_split[4],
+                    "end": status_split[5],
+                    "max_rss": 0,
+                }
+            # Update max memory, across all sub-jobs in a single job
+            if self.scheduler_options.monitor_job_memory and (
+                max_rss := status_split[6]
+            ):
+                with suppress(ValueError):
+                    max_rss_bytes = int(max_rss.split("K")[0]) * 1024
+                    statuses[id_num]["max_rss"] = max(
+                        statuses[id_num]["max_rss"], max_rss_bytes
+                    )
 
         # Update the jobs that we can
         for hpc_job in hpc_jobs:
@@ -69,7 +90,7 @@ class RunSlurm(RunHPC):
                 return None
 
             # Slurm jobs are sometimes not immediately available
-            status = statuses.get(hpc_job.id)
+            status = statuses.get(int(hpc_job.id))
             if status is None:
                 continue
 
@@ -88,13 +109,17 @@ class RunSlurm(RunHPC):
                     "RUNNING",
                     "COMPLETING",
                 ]:
+                    job = hpc_job.job
+
+                    # Update max memory if available
+                    if max_rss := status["max_rss"]:
+                        job.getRunner().updateMaxMemory(max_rss)
+
                     exit_code = int(status["exitcode"])
                     if state == "FAILED" and exit_code == 0:
                         raise Exception(
                             f"Job {hpc_job.id} has unexpected exit code {exit_code} with FAILED state"
                         )
-
-                    job = hpc_job.job
 
                     # Job has timed out; setting a timeout status means that this
                     # state is recoverable
