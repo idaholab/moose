@@ -11,5 +11,7 @@
     exodiff_opts = '-pedantic'
     requirement = 'The system shall be able to use the partitioner to also assign subdomains to elements.'
     recover = false
+    # Centroid partitioner returns "not implemented" on distributed mesh
+    mesh_mode = replicated
   []
 []

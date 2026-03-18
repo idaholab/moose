@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SurfaceDelaunayGeneratorBase.h"
+#include "libmesh/parallel_implementation.h"
+#include "libmesh/parallel_algebra.h"
 
 InputParameters
 SurfaceDelaunayGeneratorBase::validParams()

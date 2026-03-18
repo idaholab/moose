@@ -19,7 +19,7 @@ namespace MeshTraversingUtils
  * @param elem pointer to the element to consider
  * @param subdomain_id_list vector of subdomains to consider
  */
-bool
+inline bool
 elementSubdomainIdInList(const Elem * const elem,
                          const std::vector<subdomain_id_type> & subdomain_id_list)
 {
@@ -34,7 +34,7 @@ elementSubdomainIdInList(const Elem * const elem,
  * @param tol The comparison tolerance.
  * @return A bool indicating whether 1 - dot(normal_1, normal_2) <= tol.
  */
-bool
+inline bool
 normalsWithinTol(const Point & normal_1, const Point & normal_2, const Real tol)
 {
   return (1.0 - normal_1 * normal_2) <= tol;
