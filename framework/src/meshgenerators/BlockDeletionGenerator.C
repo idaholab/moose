@@ -27,7 +27,7 @@ BlockDeletionGenerator::validParams()
                              "in the list will be removed.");
 
   params.addClassDescription("Mesh generator which removes elements from the specified subdomains");
-  params.addParam<std::vector<SubdomainName>>("block", "The list of blocks to be deleted");
+  params.addParam<std::vector<SubdomainName>>("block", "The list of blocks to be processed (deleted or kept)");
   params.addDeprecatedParam<SubdomainID>(
       "block_id", "The block to be deleted.", "Use block instead");
 
@@ -76,14 +76,10 @@ BlockDeletionGenerator::generate()
 bool
 BlockDeletionGenerator::shouldDelete(const Elem * elem)
 {
-  if (_operation == "remove")
-  {
-    return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) !=
-           _block_ids.end();
-  }
+  bool in_list = std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) != _block_ids.end();
+  
+  if ((int)_operation == 0) 
+  	return in_list;
   else
-  {
-    return std::find(_block_ids.begin(), _block_ids.end(), elem->subdomain_id()) ==
-           _block_ids.end();
-  }
+	return !in_list;
 }
