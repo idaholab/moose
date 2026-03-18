@@ -24,27 +24,25 @@ StatefulMaterialPropertyImporter::validParams()
       "StatefulMaterialPropertyExporter and remaps it onto the current mesh using "
       "closest-point matching within each subdomain. Overwrites old/older states directly "
       "after initStatefulProperties() has run for all elements.");
-  params.addRequiredParam<std::string>("file",
-                                       "The .smatprop file to read stateful property data from.");
+  params.addRequiredParam<std::string>(
+      "file_base",
+      "Base name for the .smatprop files written by StatefulMaterialPropertyExporter "
+      "(e.g. 'my_sim'). The importer reads {file_base}.0.smatprop, determines the total "
+      "rank count from that file's header, then reads all {file_base}.{rank}.smatprop files.");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
   return params;
 }
 
 StatefulMaterialPropertyImporter::StatefulMaterialPropertyImporter(
     const InputParameters & parameters)
-  : GeneralUserObject(parameters), _file(getParam<std::string>("file"))
+  : GeneralUserObject(parameters), _file_base(getParam<std::string>("file_base"))
 {
 }
 
 void
 StatefulMaterialPropertyImporter::initialSetup()
 {
-  if (n_processors() > 1)
-    mooseError("StatefulMaterialPropertyImporter does not yet support parallel execution. "
-               "Run with a single processor or implement MPI gather in "
-               "StatefulMaterialPropertyExporter first.");
-
-  readFile();
+  readAllFiles();
   buildKDTrees();
   buildPropertyMapping();
 }
@@ -56,35 +54,121 @@ StatefulMaterialPropertyImporter::execute()
 }
 
 void
-StatefulMaterialPropertyImporter::readFile()
+StatefulMaterialPropertyImporter::readAllFiles()
 {
-  std::ifstream in(_file, std::ios::binary);
-  if (!in.good())
-    mooseError("Failed to open file '", _file, "' for reading.");
+  // Read rank-0 file first to determine the total number of export ranks.
+  // Every file carries n_ranks in its header so stale files from a previous
+  // run with a different rank count are automatically excluded.
+  const auto rank0_file = _file_base + ".0.smatprop";
+  {
+    std::ifstream in(rank0_file, std::ios::binary);
+    if (!in.good())
+      mooseError("Failed to open '",
+                 rank0_file,
+                 "'. Make sure StatefulMaterialPropertyExporter has been run with "
+                 "file_base = '",
+                 _file_base,
+                 "'.");
 
-  // Read and validate header
-  unsigned int magic = 0, version = 0;
+    unsigned int magic = 0, version = 0, n_ranks = 0;
+    dataLoad(in, magic, nullptr);
+    dataLoad(in, version, nullptr);
+    dataLoad(in, n_ranks, nullptr);
+
+    if (magic != 0x4D504D53)
+      mooseError("Invalid .smatprop format in '", rank0_file, "'.");
+    if (version != 1)
+      mooseError("Unsupported .smatprop version ", version, " in '", rank0_file, "'.");
+
+    mooseInfo("Reading ", n_ranks, " .smatprop file(s) from base '", _file_base, "'...");
+
+    for (unsigned int rank = 0; rank < n_ranks; ++rank)
+      readSingleFile(_file_base + "." + std::to_string(rank) + ".smatprop",
+                     /*first=*/rank == 0);
+  }
+
+  std::size_t total_qps = 0;
+  for (const auto & [name, recs] : _stored_data)
+    total_qps += recs.size();
+
+  mooseInfo("Loaded ",
+            _file_props.size(),
+            " properties, ",
+            _stored_data.size(),
+            " subdomains, ",
+            total_qps,
+            " quadrature points total.");
+}
+
+void
+StatefulMaterialPropertyImporter::readSingleFile(const std::string & filename, bool first)
+{
+  std::ifstream in(filename, std::ios::binary);
+  if (!in.good())
+    mooseError("Failed to open .smatprop file '", filename, "'.");
+
+  // Read and validate header (magic, version, n_ranks already consumed from rank-0
+  // file; re-read and discard here to stay in sync with the stream)
+  unsigned int magic = 0, version = 0, n_ranks = 0;
   dataLoad(in, magic, nullptr);
   dataLoad(in, version, nullptr);
+  dataLoad(in, n_ranks, nullptr);
 
   if (magic != 0x4D504D53)
-    mooseError("Invalid file format in '", _file, "'. Expected .smatprop file.");
+    mooseError("Invalid .smatprop format in '", filename, "'.");
   if (version != 1)
-    mooseError("Unsupported .smatprop file version: ", version);
+    mooseError("Unsupported .smatprop version in '", filename, "'.");
 
-  // Read property metadata
+  // Property metadata
   unsigned int n_props = 0;
   dataLoad(in, n_props, nullptr);
 
-  _file_props.resize(n_props);
-  for (unsigned int i = 0; i < n_props; ++i)
+  if (first)
   {
-    dataLoad(in, _file_props[i].name, nullptr);
-    dataLoad(in, _file_props[i].type_str, nullptr);
-    dataLoad(in, _file_props[i].max_state, nullptr);
+    // First file — read and store property registry
+    _file_props.resize(n_props);
+    for (auto & fp : _file_props)
+    {
+      dataLoad(in, fp.name, nullptr);
+      dataLoad(in, fp.type_str, nullptr);
+      dataLoad(in, fp.max_state, nullptr);
+    }
+  }
+  else
+  {
+    // Subsequent files — validate registry matches (same props from the same simulation)
+    if (n_props != _file_props.size())
+      mooseError("Property count mismatch between rank files: rank-0 has ",
+                 _file_props.size(),
+                 " properties, '",
+                 filename,
+                 "' has ",
+                 n_props,
+                 ".");
+    for (unsigned int i = 0; i < n_props; ++i)
+    {
+      FilePropRecord fp;
+      dataLoad(in, fp.name, nullptr);
+      dataLoad(in, fp.type_str, nullptr);
+      dataLoad(in, fp.max_state, nullptr);
+      if (fp.name != _file_props[i].name || fp.type_str != _file_props[i].type_str)
+        mooseError("Property registry mismatch between rank files at index ",
+                   i,
+                   ": expected '",
+                   _file_props[i].name,
+                   "' (",
+                   _file_props[i].type_str,
+                   "), got '",
+                   fp.name,
+                   "' (",
+                   fp.type_str,
+                   ") in '",
+                   filename,
+                   "'.");
+    }
   }
 
-  // Read subdomain data
+  // Subdomain data — append into _stored_data (multiple ranks may share a subdomain)
   unsigned int n_subdomains = 0;
   dataLoad(in, n_subdomains, nullptr);
 
@@ -97,41 +181,31 @@ StatefulMaterialPropertyImporter::readFile()
     dataLoad(in, n_qpoints, nullptr);
 
     auto & records = _stored_data[sub_name];
-    records.resize(n_qpoints);
+    const auto offset = records.size();
+    records.resize(offset + n_qpoints);
 
     for (uint64_t q = 0; q < n_qpoints; ++q)
     {
-      dataLoad(in, records[q].coord, nullptr);
+      auto & rec = records[offset + q];
+      dataLoad(in, rec.coord, nullptr);
 
-      records[q].blobs.resize(n_props);
+      rec.blobs.resize(n_props);
       for (unsigned int sid = 0; sid < n_props; ++sid)
       {
-        records[q].blobs[sid].resize(_file_props[sid].max_state + 1);
+        rec.blobs[sid].resize(_file_props[sid].max_state + 1);
         for (unsigned int state = 0; state <= _file_props[sid].max_state; ++state)
         {
           uint64_t blob_size = 0;
           dataLoad(in, blob_size, nullptr);
           if (blob_size > 0)
           {
-            records[q].blobs[sid][state].resize(blob_size);
-            in.read(records[q].blobs[sid][state].data(), blob_size);
+            rec.blobs[sid][state].resize(blob_size);
+            in.read(rec.blobs[sid][state].data(), blob_size);
           }
         }
       }
     }
   }
-
-  std::size_t total_qps = 0;
-  for (const auto & [name, recs] : _stored_data)
-    total_qps += recs.size();
-
-  mooseInfo("Loaded .smatprop: ",
-            _file_props.size(),
-            " properties, ",
-            _stored_data.size(),
-            " subdomains, ",
-            total_qps,
-            " quadrature points.");
 }
 
 void

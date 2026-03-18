@@ -40,10 +40,6 @@ StatefulMaterialPropertyExporter::StatefulMaterialPropertyExporter(
 void
 StatefulMaterialPropertyExporter::execute()
 {
-  // Only rank 0 writes the file to avoid race conditions
-  if (processor_id() != 0)
-    return;
-
   const auto & storage = _fe_problem.getMaterialPropertyStorage();
 
   if (!storage.hasStatefulProperties())
@@ -126,8 +122,8 @@ StatefulMaterialPropertyExporter::execute()
     }
   }
 
-  // Write the file (rank 0 only for now; parallel gather can be added later)
-  const auto filename = _file_base + ".smatprop";
+  // Each rank writes its own file: {base}.{rank}.smatprop
+  const auto filename = _file_base + "." + std::to_string(processor_id()) + ".smatprop";
   std::ofstream out(filename, std::ios::binary);
   if (!out.good())
     mooseError("Failed to open file '", filename, "' for writing.");
@@ -135,8 +131,12 @@ StatefulMaterialPropertyExporter::execute()
   // Header
   const unsigned int magic = 0x4D504D53; // "MPMS"
   const unsigned int version = 1;
+  auto n_ranks = static_cast<unsigned int>(n_processors());
   dataStore(out, magic, nullptr);
   dataStore(out, version, nullptr);
+  // n_ranks is written by every rank so that the importer can discover the
+  // full set of files by reading only rank 0's file.
+  dataStore(out, n_ranks, nullptr);
 
   // Property metadata
   auto n_props = static_cast<unsigned int>(prop_meta.size());
@@ -186,7 +186,11 @@ StatefulMaterialPropertyExporter::execute()
     }
   }
 
-  mooseInfo("Exported stateful material properties: ",
+  mooseInfo("Exported stateful material properties (rank ",
+            processor_id(),
+            "/",
+            n_processors(),
+            "): ",
             n_props,
             " properties, ",
             n_subdomains,
