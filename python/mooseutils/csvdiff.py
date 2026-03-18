@@ -358,10 +358,11 @@ class CSVDiffer(CSVTools):
             return self.getMessages()
 
         # now check all the values in the table
+        time_col = table1.get("time", table1.get("Time", None))
         for key in keys1:
             if key in self.ignore:
                 continue
-            for val1, val2 in zip(table1[key], table2[key]):
+            for row, (val1, val2) in enumerate(zip(table1[key], table2[key])):
                 # if customized tolerances specified use them otherwise
                 # use the default
                 if self.custom_columns:
@@ -404,10 +405,22 @@ class CSVDiffer(CSVTools):
                     except:
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
+                    time_info = ""
+                    if time_col is not None and row < len(time_col):
+                        time_info = " at row %d (time = %.6g)" % (row, time_col[row])
+                    else:
+                        time_info = " at row %d" % row
                     self.addError(
                         self.files[1],
-                        'The values in column "%s" don\'t match. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)'
-                        % (key.strip(), val1, val2, rel_diff, Decimal(rel_diff)),
+                        'The values in column "%s" don\'t match%s. \n\trelative diff:   %.3e ~ %.3e = %.3e (%.3e)'
+                        % (
+                            key.strip(),
+                            time_info,
+                            val1,
+                            val2,
+                            rel_diff,
+                            Decimal(rel_diff),
+                        ),
                     )
                     # assume all other vals in this column are wrong too, so don't report them
                     break
