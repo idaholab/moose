@@ -2145,21 +2145,20 @@ MooseMesh::detectPairedSidesets()
   // we all need to go there (or not go there)
   if (_use_distributed_mesh && !_mesh->is_serial())
   {
-    // Pack all data together so that we send them via one communication
-    // [side dim, unit dim, plus, boundary id]
-    std::vector<std::tuple<unsigned int, unsigned int, unsigned char, boundary_id_type>> data;
-
-    // Collect and communicate all boundary data that we've obtained
+    // Communicate id data by packing as [side dim, unit dim, plus (as a char), boundary id]
+    std::vector<std::tuple<unsigned int, unsigned int, unsigned char, boundary_id_type>> id_data;
     for (const auto side_dim : side_dims)
       for (const auto unit_dim : unit_dims)
         for (const auto plus : {false, true})
           for (const auto bd : ids[side_dim][unit_dim][plus])
-            data.emplace_back(side_dim, unit_dim, plus, bd);
-    _communicator.allgather(data, false);
-
-    // Unpack data
-    for (const auto & [side_dim, unit_dim, plus_char, bd] : data)
+            id_data.emplace_back(side_dim, unit_dim, plus, bd);
+    _communicator.allgather(id_data, false);
+    for (const auto & [side_dim, unit_dim, plus_char, bd] : id_data)
       ids[side_dim][unit_dim][bool(plus_char)].insert(bd);
+
+    // Gather true-ness of nonzero_dims
+    for (auto & entry : nonzero_dims)
+      _communicator.max(entry);
   } // end if (_use_distributed_mesh && !_need_ghost_ghosted_boundaries)
 
   // Find pairings that have exactly one boundary on each side
