@@ -21,8 +21,8 @@ public:
 
   CrackFrontPointsProvider(const InputParameters & parameters, const bool uses_mesh = false);
 
-  /** get the number of crack front points
-   * @return The number of crack front points
+  /** Get the current number of crack front points
+   * @return The current number of crack front points
    */
   virtual unsigned int getNumberOfCrackFrontPoints() const = 0;
 
