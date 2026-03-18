@@ -22,10 +22,11 @@ StatefulMaterialPropertyImporter::validParams()
   params.addClassDescription(
       "Imports stateful material property data from a binary .smatprop file produced by "
       "StatefulMaterialPropertyExporter and remaps it onto the current mesh using "
-      "closest-point matching within each subdomain. Populates the restartable map "
-      "so initStatefulProperties() is bypassed for remapped elements.");
+      "closest-point matching within each subdomain. Overwrites old/older states directly "
+      "after initStatefulProperties() has run for all elements.");
   params.addRequiredParam<std::string>("file",
                                        "The .smatprop file to read stateful property data from.");
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
   return params;
 }
 
@@ -45,7 +46,13 @@ StatefulMaterialPropertyImporter::initialSetup()
 
   readFile();
   buildKDTrees();
-  populateRestartableMap();
+  buildPropertyMapping();
+}
+
+void
+StatefulMaterialPropertyImporter::execute()
+{
+  overwriteStorageStates();
 }
 
 void
@@ -145,18 +152,17 @@ StatefulMaterialPropertyImporter::buildKDTrees()
 }
 
 void
-StatefulMaterialPropertyImporter::populateRestartableMap()
+StatefulMaterialPropertyImporter::buildPropertyMapping()
 {
   // Get non-const storage via the RemapKey pattern
   MaterialPropertyStorage::RemapKey key;
   auto & storage = _fe_problem.getMaterialPropertyStorageForRemap(key);
 
   const auto & registry = storage.getMaterialPropertyRegistry();
-  const auto & stateful_ids = storage.statefulProps();
 
   // Build mapping: file stateful_id → current stateful_id
   // based on property name matching
-  std::vector<std::optional<unsigned int>> file_to_current_sid(_file_props.size());
+  _file_to_current_sid.resize(_file_props.size());
   for (const auto file_sid : index_range(_file_props))
   {
     const auto & file_prop = _file_props[file_sid];
@@ -186,12 +192,12 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
                  "', current sim has '",
                  record.type,
                  "'.");
-    file_to_current_sid[file_sid] = record.stateful_id;
+    _file_to_current_sid[file_sid] = record.stateful_id;
   }
 
   // Check we have at least one match
   bool any_match = false;
-  for (const auto & m : file_to_current_sid)
+  for (const auto & m : _file_to_current_sid)
     if (m)
     {
       any_match = true;
@@ -199,11 +205,16 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
     }
 
   if (!any_match)
-  {
     mooseWarning("No matching stateful material properties found between .smatprop file and "
                  "current simulation.");
-    return;
-  }
+}
+
+void
+StatefulMaterialPropertyImporter::overwriteStorageStates()
+{
+  // Get non-const storage via the RemapKey pattern
+  MaterialPropertyStorage::RemapKey key;
+  auto & storage = _fe_problem.getMaterialPropertyStorageForRemap(key);
 
   auto & mesh = _fe_problem.mesh();
   auto & assembly = _fe_problem.assembly(0, 0);
@@ -234,20 +245,22 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
     const auto & q_points = assembly.qPoints();
     const auto n_qpoints = static_cast<unsigned int>(q_points.size());
 
-    // For each current stateful_id that has a file match, assemble a concatenated
-    // blob of per-qp values (one per current qp, each from nearest stored qp).
-    // This blob is compatible with PropertyValue::load() which reads n_qpoints
-    // consecutive T values.
+    // For each current stateful_id that has a file match, overwrite states 1 and 2
+    // only (state 0 = current will be recomputed in the first timestep).
     for (const auto file_sid : index_range(_file_props))
     {
-      if (!file_to_current_sid[file_sid])
+      if (!_file_to_current_sid[file_sid])
         continue;
 
-      const auto current_sid = *file_to_current_sid[file_sid];
+      const auto current_sid = *_file_to_current_sid[file_sid];
       const auto max_state = std::min(_file_props[file_sid].max_state, storage.maxState());
 
-      for (unsigned int state = 0; state <= max_state; ++state)
+      // Only overwrite stateful states (1 = old, 2 = older); skip state 0 (current)
+      for (unsigned int state = 1; state <= max_state; ++state)
       {
+        // Assemble a blob by concatenating per-qp data from nearest stored qps.
+        // This blob is compatible with PropertyValue::load() which reads n_qpoints
+        // consecutive T values.
         std::stringstream assembled;
 
         for (unsigned int qp = 0; qp < n_qpoints; ++qp)
@@ -276,14 +289,17 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
           }
         }
 
-        storage.addToRestartableMap(key, elem, side, current_sid, state, std::move(assembled));
+        // Deserialize directly into the live PropertyValue in _storage
+        assembled.seekg(0, std::ios::beg);
+        auto & target_props = storage.setProps(elem, side, state);
+        dataLoad(assembled, target_props[current_sid], nullptr);
       }
     }
 
     remapped_elems++;
   }
 
-  mooseInfo("Populated restartable map for ",
+  mooseInfo("Overwrote stateful storage (states 1+) for ",
             remapped_elems,
             " elements (",
             skipped_elems,
