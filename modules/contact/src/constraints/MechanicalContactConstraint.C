@@ -775,7 +775,7 @@ MechanicalContactConstraint::computeContactForce(const Node & node,
       !newly_captured && _tension_release >= 0.0 &&
       (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
   {
-    // If we don't have a non-default _tension_release, we don't need
+    // If _tension_release is zero (the default), we don't need
     // to query a nodalArea because we only care about the sign of
     // contact pressure.
     if (!_tension_release)
