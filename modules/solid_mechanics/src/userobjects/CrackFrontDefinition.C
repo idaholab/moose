@@ -39,12 +39,6 @@ CrackFrontDefinition::validParams()
 }
 
 void
-addCrackFrontDefinitionParams(InputParameters & params)
-{
-  CrackFrontDefinition::includeCrackFrontDefinitionParams(params);
-}
-
-void
 CrackFrontDefinition::includeCrackFrontDefinitionParams(InputParameters & params)
 {
   MooseEnum direction_method("CrackDirectionVector CrackMouth CurvedCrackFront");
