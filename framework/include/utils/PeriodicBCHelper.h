@@ -16,6 +16,7 @@
 class Action;
 class FEProblemBase;
 class InputParameters;
+class MooseMesh;
 
 namespace Moose
 {
@@ -68,7 +69,7 @@ private:
   /**
    * Internal method for setting up periodic boundaries via the "auto_direction" param.
    */
-  void setupAutoPeriodicBoundaries(FEProblemBase & problem);
+  void setupAutoPeriodicBoundaries(MooseMesh & mesh);
   /**
    * Internal method for setting up manual periodic boundaries via the
    * "translation" and "transform_func" params.

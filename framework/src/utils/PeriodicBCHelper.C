@@ -66,7 +66,7 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   mooseAssert(_periodic_boundaries.empty(), "Already set");
 
   if (_params.isParamValid("auto_direction"))
-    setupAutoPeriodicBoundaries(problem);
+    setupAutoPeriodicBoundaries(problem.mesh());
   else
     setupManualPeriodicBoundaries(problem);
 
@@ -97,10 +97,8 @@ PeriodicBCHelper::addPeriodicBoundary(std::unique_ptr<libMesh::PeriodicBoundaryB
 }
 
 void
-PeriodicBCHelper::setupAutoPeriodicBoundaries(FEProblemBase & problem)
+PeriodicBCHelper::setupAutoPeriodicBoundaries(MooseMesh & mesh)
 {
-  auto & mesh = problem.mesh();
-
   // If we are working with a parallel mesh then we're going to ghost all the boundaries
   // everywhere because we don't know what we need...
   if (mesh.isDistributedMesh() && !mesh.detectOrthogonalDimRanges())
