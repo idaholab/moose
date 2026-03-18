@@ -2089,7 +2089,7 @@ MooseMesh::detectPairedSidesets()
   std::set<unsigned int> side_dims;
   // Normal dimensions that we found that were nonzero; lets us
   // skip warnings for dimensions that we don't have
-  std::array<bool, 3> nonzero_dims{};
+  std::array<bool, 3> nonzero_dims{false, false, false};
   for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
   {
     // If not on the boundary, nothing to do
