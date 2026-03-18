@@ -27,7 +27,8 @@
     [keep_blocks]
       type = 'Exodiff'
       input = 'keep_blocks.i'
-      exodiff = 'keep_blocks_out.e'
+      cli_args = '--mesh-only'
+      exodiff = 'keep_blocks_in.e'
       recover = false
       detail = 'all blocks except those specified when using the keep operation.'
     []
