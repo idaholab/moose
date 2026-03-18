@@ -2179,8 +2179,8 @@ MooseMesh::detectPairedSidesets()
             return name.size() ? name : std::to_string(id);
           };
 
-          oss_found << "\n  " << side_dim + 1 << "D -" << unit_name << " <-> +" << unit_name << ": "
-                    << get_boundary_name(*minus.begin()) << " <-> "
+          oss_found << "\n  " << side_dim + 1 << "D " << unit_name
+                    << "-direction: " << get_boundary_name(*minus.begin()) << " <-> "
                     << get_boundary_name(*plus.begin());
           _paired_boundary.emplace_back(std::make_pair(*minus.begin(), *plus.begin()));
         }
