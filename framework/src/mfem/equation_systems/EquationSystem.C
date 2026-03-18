@@ -346,6 +346,15 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               aux_rhs,
                               /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
+        if (_nlfs.Has(test_var_name))
+        {
+          auto nlf = _nlfs.Get(test_var_name);
+          mfem::HypreParMatrix * nlf_jac = dynamic_cast<mfem::HypreParMatrix *>(
+              &nlf->GetGradient(*_var_ess_constraints.at(j)->GetTrueDofs()));
+          if (!nlf_jac)
+            mooseError("nlf_jac is null");
+          aux_a = mfem::ParAdd(aux_a, nlf_jac);
+        }
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
@@ -413,6 +422,13 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::UpdateJacobian() const
 {
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto nlf = _nlfs.Get(test_var_name);
+    nlf->Update();
+    nlf->Setup();
+  }
 
   for (unsigned int i = 0; i < _test_var_names.size(); i++)
   {

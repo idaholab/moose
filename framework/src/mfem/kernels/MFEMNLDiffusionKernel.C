@@ -14,14 +14,44 @@
 
 registerMooseObject("MooseApp", MFEMNLDiffusionKernel);
 
+MFEMNLDiffusionIntegrator::MFEMNLDiffusionIntegrator(mfem::Coefficient & q,
+                                                     const mfem::GridFunction * gf,
+                                                     const mfem::IntegrationRule * ir)
+  : _grad_trial(gf),
+    _diffusion_integ(q, ir),
+    _product_coef_jac(_one, _grad_trial),
+    _weak_div_integ(_product_coef_jac)
+{
+  _sum.AddIntegrator(&_diffusion_integ);
+  _sum.AddIntegrator(&_weak_div_integ);
+}
+
+void
+MFEMNLDiffusionIntegrator::AssembleElementVector(const mfem::FiniteElement & el,
+                                                 mfem::ElementTransformation & Tr,
+                                                 const mfem::Vector & elfun,
+                                                 mfem::Vector & elvect)
+{
+  _diffusion_integ.AssembleElementVector(el, Tr, elfun, elvect);
+}
+
+void
+MFEMNLDiffusionIntegrator::AssembleElementGrad(const mfem::FiniteElement & el,
+                                               mfem::ElementTransformation & Tr,
+                                               const mfem::Vector & elfun,
+                                               mfem::DenseMatrix & elmat)
+{
+  _sum.AssembleElementGrad(el, Tr, elfun, elmat);
+}
+
 InputParameters
 MFEMNLDiffusionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("Adds the domain integrator for integrating the non-linear action"
-                             "$(k(u)\\vec\\nabla v, \\vec\\nabla v)_\\Omega$"
+                             "$(k(u)\\vec\\nabla u, \\vec\\nabla v)_\\Omega$"
                              "Adds the domain integrator to an MFEM problem for the bilinear form "
-                             "$(k(u)\\vec\\nable v, \\vec\\nabla v)_\\Omega + (k'(u) v, "
+                             "$(k(u)\\vec\\nable u, \\vec\\nabla v)_\\Omega + (k'(u) u, "
                              "\\vec\\nabla u \\vec\\nabla v)_\\Omega$ "
                              "The above terms arises from the weak form of the non-linear operator "
                              "$- \\vec\\nabla \\cdot ( k(u) \\vec\\nabla u)$.");
@@ -35,28 +65,13 @@ MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(const InputParameters & parameters)
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
 {
-  // declares GradientGridFunctionCoefficient
-  getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
-      name(), getMFEMProblem().getProblemData().gridfunctions.Get(_test_var_name));
-}
-
-mfem::BilinearFormIntegrator *
-MFEMNLDiffusionKernel::createBFIntegrator()
-{
-  _sum = new mfem::SumIntegrator;
-  _sum->AddIntegrator(new mfem::DiffusionIntegrator(_coef));
-  mfem::VectorCoefficient & vec_coef =
-      getMFEMProblem().getCoefficients().getVectorCoefficient(name());
-  _one = new mfem::ConstantCoefficient(1.0);
-  _product_coef_jac = new mfem::ScalarVectorProductCoefficient(*_one, vec_coef);
-  _sum->AddIntegrator(new mfem::MixedScalarWeakDivergenceIntegrator(*_product_coef_jac));
-  return _sum;
 }
 
 mfem::NonlinearFormIntegrator *
 MFEMNLDiffusionKernel::createNLIntegrator()
 {
-  return new mfem::DiffusionIntegrator(_coef);
+  return new MFEMNLDiffusionIntegrator(
+      _coef, getMFEMProblem().getProblemData().gridfunctions.Get(_test_var_name));
 }
 
 #endif
