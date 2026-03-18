@@ -63,6 +63,8 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
         _need_viscoelastic_properties_inverse
             ? &declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_0_inv")
             : nullptr),
+    _longterm_elasticity_tensor(nullptr),
+    _longterm_elasticity_tensor_inv(nullptr),
     _apparent_creep_strain(declareProperty<RankTwoTensor>(_base_name + "apparent_creep_strain")),
     _apparent_creep_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "apparent_creep_strain")),
@@ -127,6 +129,15 @@ LinearViscoelasticityBase::declareViscoelasticProperties()
           _base_name + "spring_elasticity_tensor_" + ith + "_inv"));
     }
   }
+
+  if (_has_longterm_dashpot)
+  {
+    _longterm_elasticity_tensor =
+        &declareProperty<RankFourTensor>(_base_name + "longterm_elasticity_tensor");
+    if (_need_viscoelastic_properties_inverse)
+      _longterm_elasticity_tensor_inv =
+          &declareProperty<RankFourTensor>(_base_name + "longterm_elasticity_tensor_inv");
+  }
 }
 
 void
@@ -143,7 +154,11 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   _elasticity_tensor_inv[_qp].zero();
   _first_elasticity_tensor[_qp].zero();
   if (_need_viscoelastic_properties_inverse)
+  {
     (*_first_elasticity_tensor_inv)[_qp].zero();
+    if (_longterm_elasticity_tensor)
+      (*_longterm_elasticity_tensor_inv)[_qp].zero();
+  }
 
   for (unsigned int i = 0; i < _components; ++i)
   {
@@ -207,6 +222,14 @@ LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
       (*_springs_elasticity_tensors_inv[i])[_qp].zero();
     else
       (*_springs_elasticity_tensors_inv[i])[_qp] = (*_springs_elasticity_tensors[i])[_qp].invSymm();
+  }
+
+  if (_longterm_elasticity_tensor)
+  {
+    if (MooseUtils::absoluteFuzzyEqual((*_longterm_elasticity_tensor)[_qp].L2norm(), 0.0))
+      (*_longterm_elasticity_tensor_inv)[_qp].zero();
+    else
+      (*_longterm_elasticity_tensor_inv)[_qp] = (*_longterm_elasticity_tensor)[_qp].invSymm();
   }
 }
 

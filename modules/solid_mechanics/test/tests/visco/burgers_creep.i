@@ -106,6 +106,8 @@
     creep_viscosity = '1 10'
     poisson_ratio = 0.2
     young_modulus = 10e9
+    longterm_poissons_ratio = 0.2
+    longterm_youngs_modulus = 10e9
   [../]
   [./stress]
     type = ComputeMultipleInelasticStress

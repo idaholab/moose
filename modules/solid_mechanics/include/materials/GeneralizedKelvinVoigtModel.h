@@ -23,6 +23,7 @@ public:
   static InputParameters validParams();
 
   GeneralizedKelvinVoigtModel(const InputParameters & parameters);
+  ~GeneralizedKelvinVoigtModel();
 
 protected:
   virtual void computeQpViscoelasticProperties();
@@ -42,4 +43,9 @@ protected:
   RankFourTensor _S0;
   /// The inverse of each subsequent spring elasticity tensor
   std::vector<RankFourTensor> _Si;
+
+  /// The elasticity tensor associated with the long-term dashpot, if applicable
+  RankFourTensor * _C_longterm;
+  /// The inverse of the elasticity tensor associated with the long-term dashpot, if applicable
+  RankFourTensor * _S_longterm;
 };
