@@ -24,22 +24,18 @@ TEST(CSGTransformationTest, testInvalidValues)
   {
     std::tuple<Real, Real, Real> invalid_scale_values = {
         1.0, -2.0, 0.0}; // negative value is invalid for scale
-    ASSERT_FALSE(isValidTransformationValue(TransformationType::SCALE, invalid_scale_values));
+    ASSERT_FALSE(CSGTransformation::isValidTransformationValue(TransformationType::SCALE,
+                                                               invalid_scale_values));
   }
 }
 
 /// tests that the string representation of transformation types is correct and that the conversion function properly converts a vector of transformation pairs to string representations for types
-TEST(CSGTransformationTest, testConvertToString)
+TEST(CSGTransformationTest, testGetStrings)
 {
-  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> transformations = {
-      {TransformationType::TRANSLATION, {1.0, 2.0, 3.0}},
-      {TransformationType::ROTATION, {45.0, 30.0, 60.0}},
-      {TransformationType::SCALE, {-2.0, 2.0, 2.0}}};
-  std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> exp_strings = {
-      {"TRANSLATION", {1.0, 2.0, 3.0}},
-      {"ROTATION", {45.0, 30.0, 60.0}},
-      {"SCALE", {-2.0, 2.0, 2.0}}};
-  auto out_strings = convertTransformationsToString(transformations);
-  ASSERT_EQ(out_strings, exp_strings);
+  std::vector<TransformationType> transformations = {
+      TransformationType::TRANSLATION, TransformationType::ROTATION, TransformationType::SCALE};
+  std::vector<std::string> exp_strings = {"TRANSLATION", "ROTATION", "SCALE"};
+  for (size_t i = 0; i < transformations.size(); ++i)
+    ASSERT_EQ(CSGTransformation::getTransformationTypeString(transformations[i]), exp_strings[i]);
 }
 }

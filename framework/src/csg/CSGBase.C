@@ -369,11 +369,6 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
                            TransformationType type,
                            const std::tuple<Real, Real, Real> & values)
 {
-  // Validate the transformation values
-  if (!isValidTransformationValue(type, values))
-    mooseError("Invalid transformation values provided for transformation type ",
-               getTransformationTypeString(type));
-
   // Use std::visit to handle each type in the variant
   std::visit(
       [&](const auto & obj)
@@ -725,10 +720,8 @@ CSGBase::generateOutput() const
     for (const auto & c : coeffs)
       csg_json["surfaces"][surf_name]["coefficients"][c.first] = c.second;
     // include any information about transformations if present
-    const auto & transformations = s.getTransformations();
-    if (transformations.size() > 0)
-      csg_json["surfaces"][surf_name]["transformations"] =
-          convertTransformationsToString(transformations);
+    if (s.getTransformations().size() > 0)
+      csg_json["surfaces"][surf_name]["transformations"] = s.getTransformationsAsStrings();
   }
 
   // Print out cell information
@@ -745,10 +738,8 @@ CSGBase::generateOutput() const
     csg_json["cells"][cell_name]["region_postfix"] = cell_region_postfix;
     csg_json["cells"][cell_name]["fill"] = fill_name;
     // include any information about transformations if present
-    const auto & transformations = c.getTransformations();
-    if (transformations.size())
-      csg_json["cells"][cell_name]["transformations"] =
-          convertTransformationsToString(transformations);
+    if (c.getTransformations().size())
+      csg_json["cells"][cell_name]["transformations"] = c.getTransformationsAsStrings();
   }
 
   // Print out universe information
@@ -763,10 +754,8 @@ CSGBase::generateOutput() const
     if (u.isRoot())
       csg_json["universes"][univ_name]["root"] = u.isRoot();
     // include any information about transformations if present
-    const auto & transformations = u.getTransformations();
-    if (transformations.size())
-      csg_json["universes"][univ_name]["transformations"] =
-          convertTransformationsToString(transformations);
+    if (u.getTransformations().size())
+      csg_json["universes"][univ_name]["transformations"] = u.getTransformationsAsStrings();
   }
 
   // print out lattice information if lattices exist
@@ -793,10 +782,8 @@ CSGBase::generateOutput() const
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
       // include any information about transformations if present
-      const auto & transformations = lat.getTransformations();
-      if (transformations.size())
-        csg_json["lattices"][lat_name]["transformations"] =
-            convertTransformationsToString(transformations);
+      if (lat.getTransformations().size())
+        csg_json["lattices"][lat_name]["transformations"] = lat.getTransformationsAsStrings();
     }
   }
 

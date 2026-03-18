@@ -8,13 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGTransformation.h"
-#include "MooseError.h"
 
 namespace CSG
 {
 
+void
+CSGTransformation::addTransformation(TransformationType type,
+                                     const std::tuple<Real, Real, Real> & values)
+{
+  if (!isValidTransformationValue(type, values))
+    mooseError("Invalid transformation values provided for transformation type " +
+               getTransformationTypeString(type));
+  _transformations.emplace_back(type, values);
+}
+
 bool
-isValidTransformationValue(TransformationType type, const std::tuple<Real, Real, Real> & value)
+CSGTransformation::isValidTransformationValue(TransformationType type,
+                                              const std::tuple<Real, Real, Real> & values)
 {
   // Additional validation specific to each transformation type could be added here
   switch (type)
@@ -33,7 +43,7 @@ isValidTransformationValue(TransformationType type, const std::tuple<Real, Real,
 
     case TransformationType::SCALE:
       // Scaling factors should be non-zero
-      if (std::get<0>(value) == 0.0 || std::get<1>(value) == 0.0 || std::get<2>(value) == 0.0)
+      if (std::get<0>(values) == 0.0 || std::get<1>(values) == 0.0 || std::get<2>(values) == 0.0)
         return false;
       return true;
 
@@ -42,8 +52,8 @@ isValidTransformationValue(TransformationType type, const std::tuple<Real, Real,
   }
 }
 
-const std::string
-getTransformationTypeString(TransformationType type)
+std::string
+CSGTransformation::getTransformationTypeString(TransformationType type)
 {
   // Set the enum to the value and convert it to string
   MooseEnum enum_copy = transformation_type_enum;
@@ -52,13 +62,10 @@ getTransformationTypeString(TransformationType type)
 }
 
 std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>>
-convertTransformationsToString(
-    const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
-        transformations)
+CSGTransformation::getTransformationsAsStrings() const
 {
   std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> result;
-  result.reserve(transformations.size());
-  for (const auto & transform_pair : transformations)
+  for (const auto & transform_pair : _transformations)
     result.emplace_back(getTransformationTypeString(transform_pair.first), transform_pair.second);
   return result;
 }

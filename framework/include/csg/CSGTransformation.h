@@ -29,28 +29,62 @@ enum class TransformationType
 static const MooseEnum transformation_type_enum{"TRANSLATION=0 ROTATION=1 SCALE=2"};
 
 /**
- * Check if the transformation values are valid for the given transformation type.
- * @param type The transformation type
- * @param values tuple of transformation values (size 3)
- * @return True if the values are valid for the transformation type
+ * Class for managing transformations in CSG objects
  */
-bool isValidTransformationValue(TransformationType type,
-                                const std::tuple<Real, Real, Real> & value);
+class CSGTransformation
+{
+public:
+  /**
+   * Default constructor
+   */
+  CSGTransformation() = default;
 
-/**
- * Get the string representation of the transformation type.
- * @param type The transformation type
- * @return String name of the transformation type
- */
-const std::string getTransformationTypeString(TransformationType type);
+  /**
+   * Get the list of transformations
+   * @return The list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
+  getTransformations() const
+  {
+    return _transformations;
+  }
 
-/**
- * Convert a vector of transformation pairs to a vector with string representations for types.
- * @param transformations Vector of transformation pairs with enum types
- * @return Vector of transformation pairs with string representations for types
- */
-std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> convertTransformationsToString(
-    const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
-        transformations);
+  /**
+   * Check if the transformation value is valid for the given type
+   * @param type The type of transformation
+   * @param values The values for the transformation
+   * @return True if the values are valid for the type
+   */
+  static bool isValidTransformationValue(TransformationType type,
+                                         const std::tuple<Real, Real, Real> & values);
+
+  /**
+   * Get the string representation of the transformation type.
+   * @param type The transformation type
+   * @return String name of the transformation type
+   */
+  static std::string getTransformationTypeString(TransformationType type);
+
+  /**
+   * Get the transformations of this object with string representations for types.
+   * @return Vector of transformation pairs with string representations for types
+   */
+  std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>>
+  getTransformationsAsStrings() const;
+
+protected:
+  /**
+   * Add a transformation to the list of transformations
+   * @param type The type of transformation
+   * @param values The values for the transformation
+   */
+  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
+
+  /// List of transformations applied to this object
+  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
+
+  // CSGBase needs to be a friend to access addTransformation
+  friend class CSGBase;
+};
 
 } // namespace CSG

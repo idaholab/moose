@@ -23,7 +23,7 @@ namespace CSG
  * CSGSurface creates an internal representation of a Constructive Solid Geometry (CSG)
  * surface, represented as some polynomial in x, y, and z
  */
-class CSGSurface
+class CSGSurface : public CSGTransformation
 {
 public:
   /// Enum for the sign of the half-space being represented by a point and surface
@@ -94,17 +94,6 @@ public:
    */
   const std::string & getName() const { return _name; }
 
-  /**
-   * @brief Get the list of transformations applied to this surface
-   *
-   * @return const reference to the list of transformations
-   */
-  const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
-  getTransformations() const
-  {
-    return _transformations;
-  }
-
   /// Operator overload for checking if two CSGSurface objects are equal
   bool operator==(const CSGSurface & other) const;
 
@@ -123,23 +112,12 @@ protected:
   // name needs to be managed at the CSGSurfaceList level
   void setName(const std::string & name) { _name = name; }
 
-  /**
-   * @brief add a transformation to a surface
-   *
-   * @param type type of transformation to apply
-   * @param values values for the transformation (3 values for any transformation type)
-   */
-  void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
-
   /// Name of surface
   std::string _name;
 
   /// Type of surface that is being represented
   /// string is taken directly from the surface class name
   const std::string _surface_type;
-
-  /// list of transformations applied to the surface (type, value) in the order they are applied
-  std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

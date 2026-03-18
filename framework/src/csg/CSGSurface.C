@@ -50,15 +50,4 @@ CSGSurface::operator!=(const CSGSurface & other) const
   return !(*this == other);
 }
 
-void
-CSGSurface::addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values)
-{
-  // Assert valid input as a safety measure
-  // Main validation is done in CSGBase::addTransformation
-  mooseAssert(isValidTransformationValue(type, values),
-              "Invalid transformation values for transformation type " +
-                  getTransformationTypeString(type) + " on surface " + getName());
-  _transformations.emplace_back(type, values);
-}
-
 } // namespace CSG
