@@ -46,7 +46,7 @@ MultiAppGeneralFieldFunctorTransfer::validParams()
   // - number of points to use when creating extrapolation 'patches'
   // - other 'nearest' locations: node, element, side or a general 'location'
 
-  MooseEnum extrapolation("flat evaluate_oob nearest-node", "nearest-node");
+  MooseEnum extrapolation("flat evaluate_oob nearest-node nearest-elem", "nearest-node");
   params.addParam<MooseEnum>("extrapolation_behavior",
                              extrapolation,
                              "How to extrapolate the functors when a target point for the transfer "
@@ -228,70 +228,155 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
 
       // We need to loop on the nodes on the node at the edge of the domain of definition the
       // current functor
-      for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
-      {
-        // No way to check number of dofs for a functor
-        bool on_at_least_one_block = false;
-        bool not_on_a_block = false;
-        for (const auto eid : libmesh_map_find(node_to_elem_map, node->id()))
+      if (_extrapolation_behavior == 2) // nearest-node
+        for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
         {
-          bool has_block = functor->hasBlocks(from_mesh.elemPtr(eid)->subdomain_id());
-          if (has_block)
-            on_at_least_one_block = true;
-          else
-            not_on_a_block = true;
+          // No way to check number of dofs for a functor
+          bool on_at_least_one_block = false;
+          bool not_on_a_block = false;
+          for (const auto eid : libmesh_map_find(node_to_elem_map, node->id()))
+          {
+            bool has_block = functor->hasBlocks(from_mesh.elemPtr(eid)->subdomain_id());
+            if (has_block)
+              on_at_least_one_block = true;
+            else
+              not_on_a_block = true;
+          }
+
+          // Not on a boundary
+          if (!on_at_least_one_block || !not_on_a_block)
+            continue;
+
+          if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
+            continue;
+
+          if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
+            continue;
+
+          // Handle the various source mesh divisions behaviors
+          // NOTE: This could be more efficient, as instead of rejecting points in the
+          // wrong division, we could just be adding them to the tree for the right division
+          if (!_from_mesh_divisions.empty())
+          {
+            const auto tree_division_index = i_source % getNumDivisions();
+            const auto node_div_index = _from_mesh_divisions[i_from]->divisionIndex(*node);
+
+            // Spatial restriction is always active
+            if (node_div_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
+              continue;
+            // We fill one tree per division index for matching subapp index or division index. We
+            // only accept source data from the division index
+            else if ((_from_mesh_division_behavior ==
+                          MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+                      _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+                      _from_mesh_division_behavior ==
+                          MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
+                     tree_division_index != node_div_index)
+              continue;
+          }
+
+          // Transformed node is in the reference space, as is the _nearest_positions_obj
+          const auto transformed_node = (*_from_transforms[getGlobalSourceAppIndex(i_from)])(*node);
+
+          // Only add to the KDTree nodes that are closest to the 'position'
+          // When querying values at a target point, the KDTree associated to the closest
+          // position to the target point is queried
+          // We do not need to check the positions when using nearest app as we will assume
+          // (somewhat incorrectly) that all the points in each subapp are closer to that subapp
+          // than to any other
+          if (!_use_nearest_app && _nearest_positions_obj &&
+              !closestToPosition(i_pos, transformed_node))
+            continue;
+
+          _local_points[i_source].push_back(transformed_node);
+
+          // Evaluate the functor on the boundary node
+          Moose::NodeArg node_arg = {node, &from_blocks};
+          Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
+          _local_values[i_source].push_back((*functor)(node_arg, time_arg));
+        }
+      // Nearest-element option
+      // We also use this for 'evaluate_oob', which will influence the distance found and used to
+      // select the nearest value from out of bounds evaluations. It will not influence the result
+      // of the evaluation
+      else
+        for (const auto & elem : from_mesh.getMesh().local_element_ptr_range())
+        {
+          // No way to check number of dofs for a functor
+          if (!functor->hasBlocks(elem->subdomain_id()))
+            continue;
+
+          // Make sure sure it is at a boundary, for either the mesh or a functor
+          bool at_a_boundary = false;
+          for (const auto side : elem->side_index_range())
+          {
+            // Boundary of the mesh
+            if (!elem->neighbor_ptr(side))
+            {
+              at_a_boundary = true;
+              break;
+            }
+            // Boundary of the domain of definition of the functor
+            else if (!functor->hasBlocks(elem->neighbor_ptr(side)->subdomain_id()))
+            {
+              at_a_boundary = true;
+              break;
+            }
+          }
+          if (!at_a_boundary)
+            continue;
+
+          if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, elem))
+            continue;
+
+          if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
+            continue;
+
+          // Handle the various source mesh divisions behaviors
+          // NOTE: This could be more efficient, as instead of rejecting points in the
+          // wrong division, we could just be adding them to the tree for the right division
+          if (!_from_mesh_divisions.empty())
+          {
+            const auto tree_division_index = i_source % getNumDivisions();
+            const auto node_div_index =
+                _from_mesh_divisions[i_from]->divisionIndex(elem->vertex_average());
+
+            // Spatial restriction is always active
+            if (node_div_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
+              continue;
+            // We fill one tree per division index for matching subapp index or division index. We
+            // only accept source data from the division index
+            else if ((_from_mesh_division_behavior ==
+                          MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+                      _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
+                      _from_mesh_division_behavior ==
+                          MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
+                     tree_division_index != node_div_index)
+              continue;
+          }
+
+          // Transformed centroid is in the reference space, as is the _nearest_positions_obj
+          const auto transformed_centroid =
+              (*_from_transforms[getGlobalSourceAppIndex(i_from)])(elem->vertex_average());
+
+          // Only add to the KDTree nodes that are closest to the 'position'
+          // When querying values at a target point, the KDTree associated to the closest
+          // position to the target point is queried
+          // We do not need to check the positions when using nearest app as we will assume
+          // (somewhat incorrectly) that all the points in each subapp are closer to that subapp
+          // than to any other
+          if (!_use_nearest_app && _nearest_positions_obj &&
+              !closestToPosition(i_pos, transformed_centroid))
+            continue;
+
+          _local_points[i_source].push_back(transformed_centroid);
+
+          // Evaluate the functor on the boundary node
+          Moose::ElemArg elem_arg = {elem, /*sknewness*/ false};
+          Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
+          _local_values[i_source].push_back((*functor)(elem_arg, time_arg));
         }
 
-        // Not on a boundary
-        if (!on_at_least_one_block || !not_on_a_block)
-          continue;
-
-        if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
-          continue;
-
-        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
-          continue;
-
-        // Handle the various source mesh divisions behaviors
-        // NOTE: This could be more efficient, as instead of rejecting points in the
-        // wrong division, we could just be adding them to the tree for the right division
-        if (!_from_mesh_divisions.empty())
-        {
-          const auto tree_division_index = i_source % getNumDivisions();
-          const auto node_div_index = _from_mesh_divisions[i_from]->divisionIndex(*node);
-
-          // Spatial restriction is always active
-          if (node_div_index == MooseMeshDivision::INVALID_DIVISION_INDEX)
-            continue;
-          // We fill one tree per division index for matching subapp index or division index. We
-          // only accept source data from the division index
-          else if ((_from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
-                    _to_mesh_division_behavior == MeshDivisionTransferUse::MATCH_DIVISION_INDEX ||
-                    _from_mesh_division_behavior == MeshDivisionTransferUse::MATCH_SUBAPP_INDEX) &&
-                   tree_division_index != node_div_index)
-            continue;
-        }
-
-        // Transformed node is in the reference space, as is the _nearest_positions_obj
-        const auto transformed_node = (*_from_transforms[getGlobalSourceAppIndex(i_from)])(*node);
-
-        // Only add to the KDTree nodes that are closest to the 'position'
-        // When querying values at a target point, the KDTree associated to the closest
-        // position to the target point is queried
-        // We do not need to check the positions when using nearest app as we will assume
-        // (somewhat incorrectly) that all the points in each subapp are closer to that subapp
-        // than to any other
-        if (!_use_nearest_app && _nearest_positions_obj &&
-            !closestToPosition(i_pos, transformed_node))
-          continue;
-
-        _local_points[i_source].push_back(transformed_node);
-
-        // Evaluate the functor on the boundary node
-        Moose::NodeArg node_arg = {node, &from_blocks};
-        Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
-        _local_values[i_source].push_back((*functor)(node_arg, time_arg));
-      }
       max_leaf_size = std::max(max_leaf_size, from_mesh.getMaxLeafSize());
     }
 
