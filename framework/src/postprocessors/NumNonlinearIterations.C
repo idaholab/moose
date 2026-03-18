@@ -19,10 +19,10 @@ InputParameters
 NumNonlinearIterations::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addParam<bool>(
-      "accumulate_over_step",
-      false,
-      "When set to true, accumulates to count the total over all Picard iterations for each step");
+  params.addParam<bool>("accumulate_over_step",
+                        false,
+                        "When set to true, accumulates to count the total over all fixed point "
+                        "iterations for each step");
   params.addClassDescription("Outputs the number of nonlinear iterations");
 
   // Not supported
