@@ -2159,6 +2159,9 @@ MooseMesh::detectPairedSidesets()
     // Gather true-ness of nonzero_dims
     for (auto & entry : nonzero_dims)
       _communicator.max(entry);
+
+    // Gather found side dimensions
+    _communicator.set_union(side_dims);
   } // end if (_use_distributed_mesh && !_need_ghost_ghosted_boundaries)
 
   // Find pairings that have exactly one boundary on each side
