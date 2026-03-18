@@ -480,10 +480,21 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             ("compiler=unknown & platform=unknown", True),
             cli_args=["--ignore-capability=compiler"],
         )
-        # Capability not matched, both ignored so no skip
+        # Capability not matched, both ignored, no skip
         _, jobs = self.runCapabilityTest(
             ("compiler=unknown & platform=unknown", False),
             cli_args=["--ignore-capability=compiler", "--ignore-capability=platform"],
+        )
+        self.assertIn("ignored: compiler,platform", jobs[0].getTester().getCaveats())
+        # Capability not matched, both ignored, no skip, plus
+        # one additional ignore that won't show up in caveats
+        _, jobs = self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", False),
+            cli_args=[
+                "--ignore-capability=compiler",
+                "--ignore-capability=platform",
+                "--ignore-capability=method",
+            ],
         )
         self.assertIn("ignored: compiler,platform", jobs[0].getTester().getCaveats())
 

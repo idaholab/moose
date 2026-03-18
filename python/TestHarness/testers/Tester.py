@@ -866,7 +866,7 @@ class Tester(MooseObject, OutputInterface):
 
         # Capability pass but something ignored
         if (ignore := options.ignore_capability) is not None and (
-            ignored := result.capability_names.union(ignore)
+            ignored := result.capability_names.intersection(ignore)
         ):
             self.addCaveats(f"ignored: {','.join(sorted(ignored))}")
 
