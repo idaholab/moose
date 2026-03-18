@@ -92,15 +92,14 @@ protected:
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
   /// Build non-linear action forms
-  virtual void BuildNonLinearActionForms();
+  virtual void BuildNonlinearForms();
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
-  // Reassemble the Jacobian matrix/Operator (Assuming Gridfunction dependant Operator)
-  virtual void ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs);
+  // Reassemble the Jacobian matrix/Operator
   virtual void UpdateJacobian() const;
 
   /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
