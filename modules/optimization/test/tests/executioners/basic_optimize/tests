@@ -49,8 +49,8 @@
 
   [debug]
     requirement = 'The system shall be able to debug a optimization solve by '
+    design = 'Optimize.md TaoGradientTester.md'
     [fd]
-      design = 'Optimize.md'
       type = RunApp
       input = debug_fd.i
       cli_args = '-tao_ls_type unit'
@@ -60,7 +60,6 @@
       detail = 'using finite-difference to compute the gradient;'
     []
     [gradient_test]
-      design = 'Optimize.md TaoGradientTester.md'
       type = TaoGradientTester
       input = debug_gradient.i
       allow_test_objects = True
