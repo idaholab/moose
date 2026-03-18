@@ -182,7 +182,7 @@ TEST(ReactionNetworkParserUtilsTest, non_unique_species)
   EXPECT_EQ(reaction.getUniqueSpecies()[1], "B");
   EXPECT_EQ(reaction.getReactantSpecies()[0], "A");
   EXPECT_EQ(reaction.getUniqueReactantSpecies()[0], "A");
-  EXPECT_EQ(reaction.getUniqueReactantSpecies().size(), 1);
+  EXPECT_EQ(reaction.getUniqueReactantSpecies().size(), (unsigned int)1);
   EXPECT_EQ(reaction.getProductSpecies()[0], "B");
   EXPECT_EQ(reaction.getUniqueProductSpecies()[0], "B");
   EXPECT_EQ(reaction.getStoichiometricCoefficients()[0], 1);
