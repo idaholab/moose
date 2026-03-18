@@ -319,8 +319,7 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
     const auto contrib = method.advectedInterpolate(
         face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
 
-    const Point face_on_cn_line = face.faceCentroid() - face.skewnessCorrectionVector();
-    const Point face_delta = face_on_cn_line - face.elemCentroid();
+    const Point face_delta = face.faceCentroid() - face.elemCentroid();
     const Real expected_phi_high = elem_value + (elem_grad * face_delta);
 
     EXPECT_DOUBLE_EQ(contrib.weights_matrix.first, 1.0);
