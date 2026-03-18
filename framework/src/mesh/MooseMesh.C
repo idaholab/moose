@@ -2155,12 +2155,9 @@ MooseMesh::detectPairedSidesets()
             data.emplace_back(side_dim, unit_dim, plus, bd);
     _communicator.allgather(data, false);
 
-    // Unpack data, and add them into minus/plus_x/y_ids
+    // Unpack data
     for (const auto & [side_dim, unit_dim, plus_char, bd] : data)
-    {
-      const bool plus = plus_char;
-      ids[side_dim][unit_dim][plus].insert(bd);
-    }
+      ids[side_dim][unit_dim][bool(plus_char)].insert(bd);
   } // end if (_use_distributed_mesh && !_need_ghost_ghosted_boundaries)
 
   // Find pairings that have exactly one boundary on each side
