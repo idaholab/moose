@@ -20,10 +20,15 @@
  * by StatefulMaterialPropertyExporter and remaps it onto the current mesh using
  * closest-point matching within each subdomain.
  *
- * This UserObject does its work in initialSetup(), which runs BEFORE
- * initElementStatefulProps(). It populates MaterialPropertyStorage::_restartable_map
- * so that initStatefulProps() finds entries for each element and loads the remapped
- * data instead of calling initStatefulProperties().
+ * Timing: execute_on = EXEC_INITIAL, which fires AFTER FEProblemBase::initialSetup()
+ * completes (including initElementStatefulProps()). initStatefulProperties() runs
+ * normally for ALL elements first. The importer then overwrites only states 1 (old)
+ * and 2 (older) for elements/properties present in the import file. State 0 (current)
+ * is left as-is and recomputed in the first timestep.
+ *
+ * This correctly handles partial imports: materials with both imported and non-imported
+ * properties will have all properties properly initialized via initStatefulProperties(),
+ * with only the imported ones subsequently overwritten.
  */
 class StatefulMaterialPropertyImporter : public GeneralUserObject
 {
@@ -34,7 +39,7 @@ public:
 
   virtual void initialSetup() override;
   virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void execute() override;
   virtual void finalize() override {}
 
 protected:
@@ -65,12 +70,18 @@ protected:
   std::map<std::string, std::unique_ptr<KDTree>> _kdtrees;
   std::map<std::string, std::vector<Point>> _kdtree_points;
 
+  /// Mapping from file stateful_id to current simulation stateful_id
+  std::vector<std::optional<unsigned int>> _file_to_current_sid;
+
   /// Read the binary file
   void readFile();
 
   /// Build one KDTree per subdomain
   void buildKDTrees();
 
-  /// Populate _restartable_map with remapped data
-  void populateRestartableMap();
+  /// Build the property name mapping from file IDs to current simulation stateful IDs
+  void buildPropertyMapping();
+
+  /// Overwrite states 1 and 2 in _storage with remapped data from the file
+  void overwriteStorageStates();
 };
