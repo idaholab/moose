@@ -433,6 +433,7 @@ TEST(CapabilityRegistryTest, checkIgnoreCapabilities)
                          "be compared to a string.");
   }
 
+  // Ignore string
   {
     CapabilityRegistry::CheckOptions options;
     options.ignore_capabilities = {"foovalue"};
@@ -450,6 +451,26 @@ TEST(CapabilityRegistryTest, checkIgnoreCapabilities)
       EXPECT_EQ(result.state, CheckState::CERTAIN_PASS);
       EXPECT_EQ(result.capability_names, std::set<std::string>{"foovalue"});
     }
+  }
+
+  // Ignore in expressions
+  {
+    CapabilityRegistry::CheckOptions options;
+    options.ignore_capabilities = {"falsevalue", "foovalue"};
+    // op and, left is ignore
+    EXPECT_EQ(registry.check("falsevalue & truevalue", options).state, CheckState::CERTAIN_PASS);
+    // op and, right is ignore
+    EXPECT_EQ(registry.check("truevalue & falsevalue", options).state, CheckState::CERTAIN_PASS);
+    // op and, both are ignore
+    EXPECT_EQ(registry.check("falsevalue & foovalue", options).state, CheckState::CERTAIN_PASS);
+    EXPECT_EQ(registry.check("foovalue & falsevalue", options).state, CheckState::CERTAIN_PASS);
+    // op or, left is ignore
+    EXPECT_EQ(registry.check("falsevalue | truevalue", options).state, CheckState::CERTAIN_PASS);
+    // op or, right is ignore
+    EXPECT_EQ(registry.check("foovalue | falsevalue", options).state, CheckState::CERTAIN_PASS);
+    // op or, both are ignore
+    EXPECT_EQ(registry.check("falsevalue | foovalue", options).state, CheckState::CERTAIN_PASS);
+    EXPECT_EQ(registry.check("foovalue | falsevalue", options).state, CheckState::CERTAIN_PASS);
   }
 }
 
