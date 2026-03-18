@@ -50,6 +50,40 @@ CSGRegion::halfspaceSymbol(const CSGSurface::Halfspace halfspace)
   return symbols[static_cast<std::size_t>(halfspace)];
 }
 
+bool
+CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const
+{
+  const auto tokens = getPostfixTokens();
+  if (tokens.size() != other_tokens.size())
+    return false;
+
+  // Loop through all tokens and check equality
+  for (const auto i : make_range(tokens.size()))
+  {
+    const auto & token = tokens[i];
+    const auto & other_token = other_tokens[i];
+    if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(token))
+    {
+      // For surface references, compare references themselves for equality
+      if (!std::holds_alternative<std::reference_wrapper<const CSGSurface>>(other_token))
+        return false;
+      const auto & surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(token);
+      const auto & other_surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(other_token);
+      if (surf_ref.get() != other_surf_ref.get())
+        return false;
+    }
+    else
+    {
+      // For region types and halfspaces, compare based on string representations
+      if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(other_token))
+        return false;
+      if (postfixTokenToString(token) != postfixTokenToString(other_token))
+        return false;
+    }
+  }
+  return true;
+}
+
 CSGRegion::CSGRegion()
 {
   _region_type = "EMPTY";
@@ -293,8 +327,7 @@ bool
 CSGRegion::operator==(const CSGRegion & other) const
 {
   const bool region_type_eq = this->getRegionType() == other.getRegionType();
-  const bool region_eq = this->toPostfixStringList() == other.toPostfixStringList();
-  return (region_type_eq && region_eq);
+  return (region_type_eq && checkRegionEquality(other.getPostfixTokens()));
 }
 
 bool
