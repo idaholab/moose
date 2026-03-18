@@ -102,6 +102,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [ff]
     block = subchannel
   []
+  [HTC]
+    block = subchannel
+  []
 []
 
 [FluidProperties]
