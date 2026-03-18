@@ -17,6 +17,15 @@
                   'remap it onto a different mesh using closest-point matching.'
   []
 
+  [import_partial]
+    type = 'RunApp'
+    input = 'import_partial.i'
+    prereq = 'export'
+    requirement = 'The system shall correctly initialize non-imported stateful properties via '
+                  'initStatefulProperties() when a material has both imported and non-imported '
+                  'stateful properties (partial import).'
+  []
+
   [type_mismatch]
     type = 'RunException'
     input = 'type_mismatch.i'
