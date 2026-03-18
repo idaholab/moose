@@ -182,7 +182,7 @@ ComputeLinearFVLimitedGradientThread::operator()(const ElemInfoRange & range)
                         Moose::stringify(neighbor->vertex_average()) +
                         " while computing limited gradients.");
 
-        const Point face_point = fi->faceCentroid() - fi->skewnessCorrectionVector();
+        const Point face_point = fi->faceCentroid();
 
         const Real delta_face = raw_grad * (face_point - elem_centroid);
 

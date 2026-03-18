@@ -17,7 +17,9 @@ from the upwind cell:
 \phi_f^{HO} = \phi_U + \nabla \phi_U^{\,L}\cdot(\mathbf{x}_f - \mathbf{x}_U),
 
 where $\mathbf{x}_U$ is the upwind cell centroid and $\mathbf{x}_f$ is a face
-location projected onto the centroid-to-centroid line.
+centroid. In MOOSE, both the Venkatakrishnan limiting step for the cell gradient and the MUSCL
+reconstruction use this same face point, so on skewed meshes the skewness is included directly in
+the limited reconstruction rather than added afterward as a separate correction.
 
 Deferred correction splits the face value into a low-order implicit part and a high-order explicit
 correction:
@@ -31,6 +33,21 @@ With $\gamma=0$ the method reduces to pure upwind; with $\gamma=1$ it applies th
 reconstruction while still assembling the matrix with the upwind weights and placing the correction
 explicitly on the right-hand side. Values $0<\gamma<1$ are sometimes useful for fixed-point
 robustness.
+
+## Notes on boundedness and skewness
+
+Using the actual face centroid in both the limiter and the MUSCL reconstruction makes the scheme
+internally consistent on skewed meshes: the limited gradient is constrained against the same face
+location at which the higher-order value is reconstructed.
+
+This does *not* guarantee strict boundedness of the final scheme. The Venkatakrishnan
+limiter is a smooth limiter with a small relaxation term, which is intentionally less restrictive
+than a hard clipping procedure in order to avoid degrading smooth extrema. As a result, small
+overshoots or undershoots may still occur. In addition, this object applies the high-order term
+through deferred correction on the right-hand side, so the overall discretization is not a strict
+monotone or maximum-principle-preserving scheme.
+
+The positive effect, however, is that this advection discretization second order on skewed meshes as well.
 
 For limiter definitions and behavior, see [Limiters](syntax/Limiters/index.md).
 

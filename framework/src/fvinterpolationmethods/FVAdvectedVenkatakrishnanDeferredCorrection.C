@@ -51,10 +51,9 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
   const VectorValue<Real> grad_upwind = upwind_is_elem ? *elem_grad : *neighbor_grad;
 
   // Reconstruct a higher-order face value from the upwind cell using the (limited) cell gradient.
-  // We use a skewness-corrected face centroid projected to the line connecting cell centroids.
-  const Point face_on_cn_line = face.faceCentroid() - face.skewnessCorrectionVector();
   const Point upwind_centroid = upwind_is_elem ? face.elemCentroid() : face.neighborCentroid();
-  const Point face_delta = face_on_cn_line - upwind_centroid;
+  // For the Venkatakrishnan MUSCL scheme we reconstruct to the actual face centroid.
+  const Point face_delta = face.faceCentroid() - upwind_centroid;
 
   const Real phi_high = phi_upwind + (grad_upwind * face_delta);
 
