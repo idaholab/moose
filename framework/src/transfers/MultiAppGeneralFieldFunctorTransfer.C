@@ -44,6 +44,7 @@ MultiAppGeneralFieldFunctorTransfer::validParams()
   // - functor evaluation spatial argument type
   // - functor evaluation time argument type
   // - number of points to use when creating extrapolation 'patches'
+  // - other 'nearest' locations: node, element, side or a general 'location'
 
   MooseEnum extrapolation("flat evaluate_oob nearest-node", "nearest-node");
   params.addParam<MooseEnum>("extrapolation_behavior",
@@ -190,9 +191,6 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
   _local_values.resize(_num_sources);
   unsigned int max_leaf_size = 0;
 
-  const auto from_blocks =
-      _from_blocks.size() ? _from_blocks : Moose::NodeArg::undefined_subdomain_connection;
-
   // Construct a local KDTree for each source. A source can be a single app or multiple apps
   // combined (option for nearest-position / mesh-divisions)
   for (const auto i_source : make_range(_num_sources))
@@ -213,6 +211,20 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
 
       // Get functor for that app
       const auto & functor = _functors[i_from][var_index];
+
+      // Form the block restriction for evaluation. We need to prevent evaluation outside the
+      // domain of evaluation of the functor (could crash) or the transfer (disobeys user)
+      // Note: the functor subdomains of evaluation are checked below as well, so we
+      // should be fairly safe
+      std::set<SubdomainID> from_blocks;
+      if (_from_blocks.size())
+      {
+        for (const auto bl : _from_blocks)
+          if (functor->hasBlocks(bl))
+            from_blocks.insert(bl);
+      }
+      else
+        from_blocks = Moose::NodeArg::undefined_subdomain_connection;
 
       // We need to loop on the nodes on the node at the edge of the domain of definition the
       // current functor
@@ -308,8 +320,6 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
   dof_id_type i_pt = 0;
   std::set<const Elem *> elem_candidates;
 
-  const auto from_blocks = _from_blocks.size() ? &_from_blocks : nullptr;
-
   for (const auto & [pt, mesh_div] : incoming_points)
   {
     // Reset distance
@@ -328,13 +338,21 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Retrieve the functor
       const auto & functor = *_functors[i_from][var_index];
 
+      // Get the intersection of the functor and transfer source block restrictions
+      std::set<SubdomainID> from_blocks;
+      for (const auto bl : _from_blocks.size()
+                               ? _from_blocks
+                               : _from_problems[i_from]->mesh().getMesh().get_mesh_subdomains())
+        if (functor.hasBlocks(bl))
+          from_blocks.insert(bl);
+
       // If in domain, use the functor evaluation at the point
       // Locate the point and an element
       // Clear the nearest candidates
       elem_candidates.clear();
       const auto transformed_pt = getPointInLocalSourceFrame(i_from, pt);
-      if (from_blocks)
-        (*_point_locators[i_from])(transformed_pt, elem_candidates, from_blocks);
+      if (from_blocks.size())
+        (*_point_locators[i_from])(transformed_pt, elem_candidates, &from_blocks);
       else
         (*_point_locators[i_from])(transformed_pt, elem_candidates);
       if (elem_candidates.size())
