@@ -21,13 +21,15 @@ public:
 
   KokkosPostprocessorAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::PostprocessorValue _pp_val;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosPostprocessorAux::computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
 {
   return _pp_val;

@@ -371,14 +371,11 @@ private:
     DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
     DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(                                    \
         objectname,                                                                                \
-        &classname::computeQpJacobian != classname::defaultJacobian() ||                           \
-            &classname::computeQpJacobianShim<classname> !=                                        \
-                classname::defaultJacobianShim<classname>());                                      \
+        &classname::computeQpJacobian<classname> != classname::defaultJacobian<classname>());      \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
         objectname,                                                                                \
-        &classname::computeQpOffDiagJacobian != classname::defaultOffDiagJacobian() ||             \
-            &classname::computeQpOffDiagJacobianShim<classname> !=                                 \
-                classname::defaultOffDiagJacobianShim<classname>());                               \
+        &classname::computeQpOffDiagJacobian<classname> !=                                         \
+            classname::defaultOffDiagJacobian<classname>());                                       \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -421,19 +418,16 @@ private:
     DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
         objectname,                                                                                \
-        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
-            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
-                classname::defaultInitStatefulShim<classname>());                                  \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
     DispatcherRegistry::hasUserMethod<classname::SideInit>(                                        \
         objectname,                                                                                \
-        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
-            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
-                classname::defaultInitStatefulShim<classname>());                                  \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
     DispatcherRegistry::hasUserMethod<classname::NeighborInit>(                                    \
         objectname,                                                                                \
-        &classname::initQpStatefulProperties != classname::defaultInitStateful() ||                \
-            &classname::initQpStatefulPropertiesShim<classname> !=                                 \
-                classname::defaultInitStatefulShim<classname>());                                  \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -483,18 +477,9 @@ private:
     DispatcherRegistry::addDispatcher<classname::DefaultLoop, classname>(objectname);              \
     DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
     DispatcherRegistry::hasUserMethod<classname::DefaultLoop>(                                     \
-        objectname,                                                                                \
-        static_cast<decltype(classname::defaultExecute())>(&classname::execute) !=                 \
-                classname::defaultExecute() ||                                                     \
-            static_cast<decltype(classname::defaultExecuteShim<classname>())>(                     \
-                &classname::executeShim<classname>) !=                                             \
-                classname::defaultExecuteShim<classname>());                                       \
+        objectname, &classname::execute<classname> != classname::defaultExecute<classname>());     \
     DispatcherRegistry::hasUserMethod<classname::ReducerLoop>(                                     \
-        objectname,                                                                                \
-        static_cast<decltype(classname::defaultReduce())>(&classname::reduce) !=                   \
-                classname::defaultReduce() ||                                                      \
-            static_cast<decltype(classname::defaultReduceShim<classname>())>(                      \
-                &classname::reduceShim<classname>) != classname::defaultReduceShim<classname>());  \
+        objectname, &classname::reduce<classname> != classname::defaultReduce<classname>());       \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \

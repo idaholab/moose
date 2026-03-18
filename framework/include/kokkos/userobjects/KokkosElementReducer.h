@@ -49,7 +49,7 @@ ElementReducer::operator()(ReducerLoop,
 
   Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
-  reducer.reduceShim(reducer, datum, result);
+  reducer.template reduce<Derived>(datum, result);
 }
 
 } // namespace Moose::Kokkos

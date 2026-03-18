@@ -21,6 +21,7 @@ public:
 
   KokkosConstantAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
@@ -28,7 +29,8 @@ protected:
   Moose::Kokkos::Scalar<const Real> _value;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosConstantAux::computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
 {
   return _value;

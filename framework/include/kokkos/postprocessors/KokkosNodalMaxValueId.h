@@ -23,8 +23,7 @@ public:
   virtual Real getValue() const override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, Datum & datum) const
   {
@@ -40,11 +39,11 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosNodalMaxValueId::reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const
+KokkosNodalMaxValueId::reduce(Datum & datum, Real * result) const
 {
   if (datum.isNodalDefined(_u.variable()))
   {
-    Real value = postprocessor.computeValue(0, datum);
+    Real value = static_cast<const Derived *>(this)->computeValue(0, datum);
 
     if (value > result[0])
     {

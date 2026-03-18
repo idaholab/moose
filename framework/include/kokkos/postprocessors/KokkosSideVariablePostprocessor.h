@@ -19,10 +19,6 @@ public:
 
   KokkosSideVariablePostprocessor(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
-
 protected:
   /// Holds the solution at current quadrature points
   const Moose::Kokkos::VariableValue _u;
@@ -30,13 +26,3 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const Moose::Kokkos::VariableGradient _grad_u;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION inline void
-KokkosSideVariablePostprocessor::reduceShim(const Derived & postprocessor,
-                                            Datum & datum,
-                                            Real * result) const
-{
-  for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    postprocessor.computeQpValue(qp, datum, result);
-}

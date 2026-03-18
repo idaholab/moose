@@ -27,10 +27,12 @@ namespace Moose::Kokkos
  * virtual override). The signature of computeValue() expected to be defined in the derived
  * class is as follows:
  *
+ * @tparam Derived The object type
  * @param qp The local quadrature point index
  * @param datum The AssemblyDatum object of the current thread
  * @returns The value at the quadrature point
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
  */
 class AuxKernel : public ::AuxKernelBase,
@@ -76,17 +78,6 @@ public:
   {
   };
   ///@}
-
-  /**
-   * Shim for hook method that can be leveraged to implement static polymorphism
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeValueShim(const Derived & auxkernel,
-                                        const unsigned int qp,
-                                        AssemblyDatum & datum) const
-  {
-    return auxkernel.computeValue(qp, datum);
-  }
 
   /**
    * The parallel computation entry functions called by Kokkos
@@ -262,7 +253,7 @@ AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & dat
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    const auto value = auxkernel.computeValueShim(auxkernel, qp, datum);
+    const auto value = auxkernel.template computeValue<Derived>(qp, datum);
 
     datum.reinit();
 
@@ -289,7 +280,7 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
-  auto value = auxkernel.computeValueShim(auxkernel, 0, datum);
+  auto value = auxkernel.template computeValue<Derived>(0, datum);
 
   setNodeSolution(value, datum);
 }

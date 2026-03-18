@@ -20,9 +20,11 @@ public:
 
   virtual void timestepSetup() override;
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -34,19 +36,21 @@ protected:
   int & _last_t_step;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosRestartDiffusion::computeQpResidual(const unsigned int i,
                                           const unsigned int qp,
                                           AssemblyDatum & datum) const
 {
-  return _coef(_step) * KokkosDiffusion::computeQpResidual(i, qp, datum);
+  return _coef(_step) * KokkosDiffusion::computeQpResidual<Derived>(i, qp, datum);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosRestartDiffusion::computeQpJacobian(const unsigned int i,
                                           const unsigned int j,
                                           const unsigned int qp,
                                           AssemblyDatum & datum) const
 {
-  return _coef(_step) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);
+  return _coef(_step) * KokkosDiffusion::computeQpJacobian<Derived>(i, j, qp, datum);
 }

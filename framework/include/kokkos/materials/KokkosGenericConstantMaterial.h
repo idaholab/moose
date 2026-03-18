@@ -16,6 +16,7 @@ public:
 
   KokkosGenericConstantMaterial(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     for (unsigned int i = 0; i < _num_props; ++i)

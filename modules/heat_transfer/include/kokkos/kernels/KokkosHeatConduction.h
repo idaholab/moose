@@ -18,9 +18,11 @@ public:
 
   KokkosHeatConduction(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -31,24 +33,27 @@ private:
   Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient_dT;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosHeatConduction::computeQpResidual(const unsigned int i,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
 {
-  return _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpResidual(i, qp, datum);
+  return _diffusion_coefficient(datum, qp) *
+         KokkosDiffusion::computeQpResidual<Derived>(i, qp, datum);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosHeatConduction::computeQpJacobian(const unsigned int i,
                                         const unsigned int j,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
 {
-  Real jac =
-      _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);
+  Real jac = _diffusion_coefficient(datum, qp) *
+             KokkosDiffusion::computeQpJacobian<Derived>(i, j, qp, datum);
   if (_diffusion_coefficient_dT)
     jac += _diffusion_coefficient_dT(datum, qp) * _phi(datum, j, qp) *
-           KokkosDiffusion::computeQpResidual(i, qp, datum);
+           KokkosDiffusion::computeQpResidual<Derived>(i, qp, datum);
   return jac;
 }

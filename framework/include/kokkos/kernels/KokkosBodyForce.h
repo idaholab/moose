@@ -18,6 +18,7 @@ public:
 
   KokkosBodyForce(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
@@ -30,7 +31,8 @@ protected:
   const Moose::Kokkos::PostprocessorValue _postprocessor;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosBodyForce::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
                                    AssemblyDatum & datum) const

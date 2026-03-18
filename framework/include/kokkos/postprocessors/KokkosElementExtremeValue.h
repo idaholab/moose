@@ -23,8 +23,7 @@ public:
                                                              Datum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
 protected:
   const Moose::Kokkos::VariableValue _proxy_variable;
@@ -38,10 +37,8 @@ KokkosElementExtremeValue::getProxyValuePair(const unsigned int qp, Datum & datu
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosElementExtremeValue::reduceShim(const Derived & postprocessor,
-                                      Datum & datum,
-                                      Real * result) const
+KokkosElementExtremeValue::reduce(Datum & datum, Real * result) const
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    postprocessor.computeExtremeValue(postprocessor, qp, datum, result);
+    static_cast<const Derived *>(this)->template computeExtremeValue<Derived>(qp, datum, result);
 }

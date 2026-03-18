@@ -18,18 +18,22 @@ public:
 
   KokkosTimeDerivativeNodalKernel(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosTimeDerivativeNodalKernel::computeQpResidual(const unsigned int qp,
                                                    AssemblyDatum & datum) const
 {
   return _u_dot(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosTimeDerivativeNodalKernel::computeQpJacobian(const unsigned int /* qp */,
                                                    AssemblyDatum & /* datum */) const
 {

@@ -18,11 +18,12 @@ public:
 
   KokkosStatefulSpatialTest(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
     _thermal_conductivity(datum, qp) = _t_step + (datum.q_point(qp)(0) * datum.q_point(qp)(1));
   }
-
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     _thermal_conductivity(datum, qp) = _thermal_conductivity_old(datum, qp) + 1.;

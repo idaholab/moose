@@ -9,18 +9,20 @@
 
 #include "KokkosDirichletBC.h"
 
-registerKokkosResidualObjectAliased("MooseApp", KokkosDirichletBCWrapper, "KokkosDirichletBC");
+registerKokkosDirichletBC("MooseApp", KokkosDirichletBC);
 
 InputParameters
-KokkosDirichletBCWrapper::validParams()
+KokkosDirichletBC::validParams()
 {
-  InputParameters params = KokkosDirichletBC::validParams();
+  InputParameters params = DirichletBCBase::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
                              "is a constant, controllable value.");
   return params;
 }
 
-KokkosDirichletBCWrapper::KokkosDirichletBCWrapper(const InputParameters & parameters)
-  : KokkosDirichletBC(parameters)
+KokkosDirichletBC::KokkosDirichletBC(const InputParameters & parameters)
+  : DirichletBCBase(parameters), _value(getParam<Real>("value"))
 {
 }

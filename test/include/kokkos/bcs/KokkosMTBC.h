@@ -18,6 +18,7 @@ public:
 
   KokkosMTBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
@@ -30,7 +31,8 @@ private:
   const Moose::Kokkos::MaterialProperty<Real> _mat;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMTBC::computeQpResidual(const unsigned int i,
                               const unsigned int qp,
                               AssemblyDatum & datum) const

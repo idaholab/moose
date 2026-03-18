@@ -11,11 +11,8 @@
 
 #include "KokkosDirichletBCBase.h"
 
-template <typename DirichletBC>
-class KokkosDirichletBC : public Moose::Kokkos::DirichletBCBase<DirichletBC>
+class KokkosDirichletBC : public Moose::Kokkos::DirichletBCBase
 {
-  usingKokkosDirichletBCBaseMembers(DirichletBC);
-
 public:
   static InputParameters validParams();
 
@@ -28,29 +25,4 @@ public:
 
 protected:
   const Moose::Kokkos::Scalar<const Real> _value;
-};
-
-template <typename DirichletBC>
-InputParameters
-KokkosDirichletBC<DirichletBC>::validParams()
-{
-  InputParameters params = Moose::Kokkos::DirichletBCBase<DirichletBC>::validParams();
-  params.addRequiredParam<Real>("value", "Value of the BC");
-  params.declareControllable("value");
-  return params;
-}
-
-template <typename DirichletBC>
-KokkosDirichletBC<DirichletBC>::KokkosDirichletBC(const InputParameters & parameters)
-  : Moose::Kokkos::DirichletBCBase<DirichletBC>(parameters),
-    _value(this->template getParam<Real>("value"))
-{
-}
-
-class KokkosDirichletBCWrapper final : public KokkosDirichletBC<KokkosDirichletBCWrapper>
-{
-public:
-  static InputParameters validParams();
-
-  KokkosDirichletBCWrapper(const InputParameters & parameters);
 };

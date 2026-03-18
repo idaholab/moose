@@ -19,7 +19,7 @@ public:
   KokkosNodalStatistics(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION void reduceShim(const Derived & reducer, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
@@ -37,11 +37,11 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION inline void
-KokkosNodalStatistics::reduceShim(const Derived & reducer, Datum & datum, Real * result) const
+KOKKOS_FUNCTION void
+KokkosNodalStatistics::reduce(Datum & datum, Real * result) const
 {
   // Get value to to update statistics
-  Real value = reducer.computeValue(datum);
+  Real value = static_cast<const Derived *>(this)->computeValue(datum);
 
   if (result[0] < value)
     result[0] = value;

@@ -26,6 +26,7 @@ public:
 
   KokkosPostprocessorNeumannBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
@@ -35,7 +36,8 @@ protected:
   Moose::Kokkos::PostprocessorValue _value;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosPostprocessorNeumannBC::computeQpResidual(const unsigned int i,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const

@@ -19,20 +19,6 @@ public:
 
   KokkosNodalVariablePostprocessor(const InputParameters & parameters);
 
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
-
 protected:
   const Moose::Kokkos::VariableValue _u;
 };
-
-template <typename Derived>
-KOKKOS_FUNCTION void
-KokkosNodalVariablePostprocessor::reduceShim(const Derived & postprocessor,
-                                             Datum & datum,
-                                             Real * result) const
-{
-  if (datum.isNodalDefined(_u.variable()))
-    postprocessor.execute(datum, result);
-}

@@ -18,6 +18,7 @@ public:
 
   KokkosOnDemandTest(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     unsigned int num_active = 0;

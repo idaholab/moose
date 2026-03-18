@@ -25,11 +25,13 @@ namespace Moose::Kokkos
  * are different from the base class. The signature of computeQpResidual() expected to be defined in
  * the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param qp The local quadrature point index
  * @param datum The AssemblyDatum object of the current thread
  * @returns The vector component of the residual contribution that will be multiplied by the
  * gradient of the test function
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
  *                                         AssemblyDatum & datum) const;
  *
@@ -53,12 +55,14 @@ public:
   ///@{
   /**
    * Compute diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
    * @param datum The AssemblyDatum object of the current thread
    * @returns The vector component of the Jacobian contribution that will be multiplied by the
    * gradient of the test function
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int /* j */,
                                           const unsigned int /* qp */,
                                           AssemblyDatum & /* datum */) const
@@ -71,38 +75,16 @@ public:
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
-   */
-  ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION Real3 computeQpResidualShim(const Derived & kernel,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const
-  {
-    return kernel.computeQpResidual(qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real3 computeQpJacobianShim(const Derived & kernel,
-                                              const unsigned int j,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const
-  {
-    return kernel.computeQpJacobian(j, qp, datum);
-  }
-  ///@}
-
-  /**
    * Functions used to check if users have overriden the hook methods, whose calculations can be
    * skipped when not overriden
    * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  static auto defaultJacobianShim()
+  static auto defaultJacobian()
   {
-    return &KernelGrad::computeQpJacobianShim<Derived>;
+    return &KernelGrad::computeQpJacobian<Derived>;
   }
-  static auto defaultJacobian() { return &KernelGrad::computeQpJacobian; }
   ///@}
 
   /**
@@ -129,7 +111,7 @@ KernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
         {
           datum.reinit();
 
-          Real3 value = datum.JxW(qp) * kernel.computeQpResidualShim(kernel, qp, datum);
+          Real3 value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _grad_test(datum, i, qp);
@@ -160,7 +142,7 @@ KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datu
 
             if (j != j_old)
             {
-              value = datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, j, qp, datum);
+              value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
               j_old = j;
             }
 

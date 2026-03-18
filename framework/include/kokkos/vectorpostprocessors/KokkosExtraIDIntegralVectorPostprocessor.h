@@ -35,7 +35,9 @@ public:
 
   KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
+  template <typename Derived>
   KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
+  template <typename Derived>
   KOKKOS_FUNCTION void execute(Datum & datum) const;
 
 protected:
@@ -95,7 +97,8 @@ KokkosExtraIDIntegralVectorPostprocessor::init(ReducerLoop, Real * result) const
     result[i] = 0;
 }
 
-KOKKOS_FUNCTION inline void
+template <typename Derived>
+KOKKOS_FUNCTION void
 KokkosExtraIDIntegralVectorPostprocessor::reduce(Datum & datum, Real * result) const
 {
   const auto ipos = _unique_vpp_ids[datum.subdomain()](datum.elemID());
@@ -130,7 +133,8 @@ KokkosExtraIDIntegralVectorPostprocessor::reduce(Datum & datum, Real * result) c
     result[ipos + (_nvar + _nprop) * _vector_size] += vol;
 }
 
-KOKKOS_FUNCTION inline void
+template <typename Derived>
+KOKKOS_FUNCTION void
 KokkosExtraIDIntegralVectorPostprocessor::execute(Datum & datum) const
 {
   const auto ipos = _unique_vpp_ids[datum.subdomain()](datum.elemID());

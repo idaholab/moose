@@ -61,7 +61,7 @@ ElementUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & o
 
   Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
-  object.executeShim(object, datum);
+  object.template execute<Derived>(datum);
 }
 
 } // namespace Moose::Kokkos

@@ -21,10 +21,12 @@ public:
 
   KokkosCoupledMaterial(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
     _mat_prop(datum, qp) = 1.0;
   }
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     _mat_prop(datum, qp) =
