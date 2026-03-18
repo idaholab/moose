@@ -29,12 +29,6 @@ class TaoGradientTester(RunApp):
             "Finite difference step size for the gradient test (-tao_fd_delta). "
             "If not specified, TAO uses its default.",
         )
-        params.addParam(
-            "only_first_gradient",
-            True,
-            "Check only the first gradient comparison. If False, "
-            "all gradient comparisons in the output are checked.",
-        )
 
         # Disable with valgrind
         params.valid["valgrind"] = "NONE"
@@ -47,7 +41,7 @@ class TaoGradientTester(RunApp):
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        super().__init__(name, params)
 
         # Require opt mode
         if self.specs["capabilities"]:
@@ -56,7 +50,7 @@ class TaoGradientTester(RunApp):
 
     def getCommand(self, options):
         # Get the base command from RunApp
-        cmd = RunApp.getCommand(self, options)
+        cmd = super().getCommand(options)
 
         petsc_iname = [
             "-tao_max_it",
@@ -81,34 +75,30 @@ class TaoGradientTester(RunApp):
         return cmd
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
-        output = ""
+        # Check parent for failures (capabilities, exit code)
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
+        if self.isFail():
+            return output
+
+        fail_reason = None
 
         # Match all gradient test outputs in the output
-        maxnorm_matches = self.maxnorm_re.findall(runner_output)
+        if maxnorm_matches := self.maxnorm_re.findall(runner_output):
+            assert len(maxnorm_matches) > 0
+            match = maxnorm_matches[0]
+            maxnorm_val = float(match.rstrip("."))
+            max_rel_tol = self.specs["max_rel_tol"]
 
-        reason = "EXPECTED OUTPUT for 'max-norm ||G - Gfd||/||G||' NOT FOUND"
-
-        if maxnorm_matches:
-            # If only_first_gradient, check just the first; otherwise check all
-            if self.specs["only_first_gradient"]:
-                matches = [maxnorm_matches[0]]
+            if maxnorm_val > max_rel_tol:
+                fail_reason = "MAX-NORM TOO LARGE"
+                output = f"Gradient test max-norm too large: {maxnorm_val:.2e} > tol={max_rel_tol:.2e}"
             else:
-                matches = maxnorm_matches
+                output = f"Gradient test max-norm check successful: {maxnorm_val:.2e} < tol={max_rel_tol:.2e}"
+        else:
+            fail_reason = "EXPECTED OUTPUT NOT FOUND"
+            output = "Expected output for 'max-norm ||G - Gfd||/||G||' not found"
 
-            reason = ""
-            for maxnorm_str in matches:
-                maxnorm_val = float(maxnorm_str.rstrip("."))
-                max_rel_tol = self.specs["max_rel_tol"]
-
-                reason = ""
-                if maxnorm_val > max_rel_tol:
-                    reason = f"GRADIENT TEST: MAX-NORM TOO LARGE ({maxnorm_val:.2e} > tol={max_rel_tol:.2e})"
-
-                # Break on first failure
-                if reason:
-                    break
-
-        if reason:
-            self.setStatus(self.fail, reason)
+        if fail_reason:
+            self.setStatus(self.fail, fail_reason)
 
         return output
