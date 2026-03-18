@@ -232,19 +232,27 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
         for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
         {
           // No way to check number of dofs for a functor
+          // Functor should be defined on at least one block by the block to have a value
+          // Node should be either on a functor or a mesh boundary to be relevant for extrapolation
           bool on_at_least_one_block = false;
-          bool not_on_a_block = false;
+          bool on_boundary = false;
           for (const auto eid : libmesh_map_find(node_to_elem_map, node->id()))
           {
             bool has_block = functor->hasBlocks(from_mesh.elemPtr(eid)->subdomain_id());
             if (has_block)
               on_at_least_one_block = true;
             else
-              not_on_a_block = true;
+              on_boundary = true;
+            // Detect a mesh boundary
+            const auto elem = from_mesh.elemPtr(eid);
+            for (const auto side : elem->side_index_range())
+              if (!elem->neighbor_ptr(side) &&
+                  elem->is_node_on_side(elem->get_node_index(node), side))
+                on_boundary = true;
           }
 
           // Not on a boundary
-          if (!on_at_least_one_block || !not_on_a_block)
+          if (!on_at_least_one_block || !on_boundary)
             continue;
 
           if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
@@ -323,6 +331,7 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
               break;
             }
           }
+          // Non boundary elements are not relevant as we can just evaluate the functor
           if (!at_a_boundary)
             continue;
 
@@ -510,6 +519,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
             outgoing_vals[i_pt] = {functor(elem_pt_arg, time_arg), new_distance};
           }
+          // /* nearest-node and nearest-elem */
           else
             outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
         }
