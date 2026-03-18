@@ -111,9 +111,8 @@ PeriodicBCHelper::setupAutoPeriodicBoundaries(FEProblemBase & problem)
     const int component = dir.id();
     if (component > (cast_int<int>(mesh.dimension()) - 1))
       _params.paramError("auto_direction",
-                         "Component '",
-                         dir.name(),
-                         "' not valid for ",
+                         MooseUtils::toLower(dir.name()),
+                         "-dimension component not valid for ",
                          mesh.dimension(),
                          "D mesh");
 
@@ -121,9 +120,9 @@ PeriodicBCHelper::setupAutoPeriodicBoundaries(FEProblemBase & problem)
     if (!boundary_ids)
       _params.paramError("auto_direction",
                          "Couldn't auto-detect a paired boundary for use with periodic boundary "
-                         "conditions in the '",
-                         dir.name(),
-                         "' direction");
+                         "conditions in the ",
+                         MooseUtils::toLower(dir.name()),
+                         "-direction");
 
     RealVectorValue v;
     v(component) = mesh.dimensionWidth(component);
