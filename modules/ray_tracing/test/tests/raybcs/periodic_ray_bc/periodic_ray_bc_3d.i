@@ -16,10 +16,9 @@
   ray_kernel_coverage_check = false
   vertex_to_vertex = true
   centroid_to_vertex = true
-  centroid_to_centroid = true
-  edge_to_edge = true
+  centroid_to_centroid = false
   execute_on = initial
-  ray_distance = 3
+  ray_distance = 5
 []
 
 [Postprocessors/total_distance]
