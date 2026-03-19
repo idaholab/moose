@@ -149,23 +149,30 @@ AddPeriodicBCAction::getVariables() const
                    "Variable '" + var_name +
                        "' is a scalar variable and does not support a periodic boundary condition");
       if (!_problem->hasVariable(var_name))
-        paramError("variable", "Nonlinear variable '" + var_name + "' not found");
+        paramError("variable", "Variable '" + var_name + "' not found");
+      if (_problem->getVariable(0, var_name).isFV())
+        paramError("variable",
+                   "Variable '" + var_name +
+                       "' is a finite volume variable and does not support a periodic boundary "
+                       "condition.");
     }
   }
-  // Variable is not set, use all the variables
+  // Variable is not set, use all nonlinear variables that are non-scalar and non-FV
   else
   {
     // We can't currently distinguish PeriodicBoundaries objects across
     // multiple systems so we can't use vars across all systems
     if (_problem->numSolverSystems() > 1)
       mooseError("Parameter 'variable' must be specified when multiple solver systems exist");
-    // Use all field variables from system 0, excluding scalar variables
     const auto & nl = _problem->getNonlinearSystemBase(0);
     var_names = nl.getVariableNames();
     var_names.erase(std::remove_if(var_names.begin(),
                                    var_names.end(),
                                    [&nl](const auto & var_name)
-                                   { return nl.hasScalarVariable(var_name); }),
+                                   {
+                                     return nl.hasScalarVariable(var_name) ||
+                                            nl.getVariable(0, var_name).isFV();
+                                   }),
                     var_names.end());
     if (var_names.empty())
       mooseError("There are no variables to apply periodic boundaries to");
