@@ -748,25 +748,20 @@ class RunApp(Tester):
                 for capability, entry in capabilities.items()
                 if capability in self._capability_names
             }
+            # The capabilities that need to be ignored in the app, if any
+            store_ignore_capabilities = (
+                [v for v in options.ignore_capability if v in self._capability_names]
+                if options.ignore_capability is not None
+                else None
+            )
 
             # Store if we have any to store
+            store = {}
             if store_capabilities:
-                store: dict = {"capabilities": store_capabilities}
-
-                # Also store ignored capabilities, if any
-                store_ignore_capabilities = (
-                    [
-                        v
-                        for v in options.ignore_capability
-                        if v in self._capability_names
-                    ]
-                    if options.ignore_capability is not None
-                    else None
-                )
-                if store_ignore_capabilities:
-                    store["ignore_capabilities"] = store_ignore_capabilities
-
-                # Dump to JSON for the app
+                store["capabilities"] = store_capabilities
+            if store_ignore_capabilities:
+                store["ignore_capabilities"] = store_ignore_capabilities
+            if store:
                 self._augmented_capabilities_file = self.getCapabilitiesFilePath(
                     options
                 )
