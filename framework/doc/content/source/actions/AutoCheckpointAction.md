@@ -16,6 +16,10 @@ based checkpoints while disabling wall time based checkpoints.
 []
 ```
 
+!alert note
+Note that manually setting `checkpoint = false` with automatically also change the default value for `wall_time_checkpoint` to false.
+If the latter is set manually in the input to true, wall time checkpoints are still created.
+
 Please refer to the [syntax/Outputs/index.md] for more information.
 
 !syntax parameters /Outputs/AutoCheckpointAction
