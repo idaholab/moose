@@ -113,7 +113,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     findBoundaryEdges();
     sortBoundaryNodes();
     findActiveBoundaryNodes();
-    initialCrackFrontNodes();
+    initializeCrackFrontNodes();
   }
   // test element type; only tri3 elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
@@ -570,7 +570,7 @@ CrackMeshCut3DUserObject::sortBoundaryNodes()
 }
 
 void
-CrackMeshCut3DUserObject::initialCrackFrontNodes()
+CrackMeshCut3DUserObject::initializeCrackFrontNodes()
 {
   _tracked_crack_front_points.clear();
   _tracked_crack_front_points.assign(_active_boundary[0].rbegin(), _active_boundary[0].rend());

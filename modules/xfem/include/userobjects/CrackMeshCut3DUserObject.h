@@ -249,7 +249,7 @@ protected:
   /**
    * Determine initial crack front nodes from cutter mesh
    */
-  void initialCrackFrontNodes();
+  void initializeCrackFrontNodes();
 
   /**
     Parsed functions of front growth
