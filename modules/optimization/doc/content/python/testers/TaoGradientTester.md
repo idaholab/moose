@@ -6,6 +6,13 @@ It automatically injects the necessary PETSc options into the optimization
 Executioner (see [executionerBlock]) and parses the output to verify the gradient
 is accurate within a specified tolerance.
 
+Only the first computed gradient is checked; all subsequent gradient comparisons
+in the TAO output are ignored. This is because the first gradient is evaluated at
+the initial parameter values where gradient magnitudes are typically large, making
+the relative finite-difference comparison meaningful. Later gradients are evaluated
+near convergence where the gradient magnitude is small, causing the relative
+finite-difference error to be artificially large.
+
 This tester is useful for verifying that adjoint-based gradient computations are
 correct in optimization problems. See the [debugging help](optimization/examples/debuggingHelp.md)
 page for more information on debugging optimization gradients.
@@ -22,12 +29,6 @@ Test configuration options are specified in the `tests` file, see [testBlock].
   computing the finite-difference gradient. If not specified, TAO uses its default.
   This parameter is problem dependent and may need to be adjusted for problems with
   large or small parameter values.
-
-- `only_first_gradient`: Check only the first gradient comparison. Defaults to True.
-  It is best to check the first gradient since later gradients are evaluated near
-  convergence where the gradient magnitude is small, making the relative
-  finite-difference error larger. Set to False to check all gradient comparisons
-  in the output.
 
 The tester automatically sets the following:
 
@@ -66,15 +67,11 @@ configuring TAO to:
 5. Print the gradient comparison (`-tao_test_gradient_view`)
 
 After running, the tester parses the relative max-norm `||G - Gfd||/||G||` from the
-TAO output and checks that it is less than `max_rel_tol`. A value near zero confirms
-the adjoint gradient has the correct magnitude. If `only_first_gradient` is False
-and TAO prints multiple gradient comparisons, the tester checks all of them and fails
-if any comparison exceeds the tolerance.
+first gradient comparison in the TAO output and checks that it is less than `max_rel_tol`.
+A value near zero confirms the adjoint gradient has the correct magnitude. Any subsequent
+gradient comparisons in the output are ignored.
 
 ## Example test configuration in the MOOSE test suite
-
-In this example, `TaoGradientTester` is used to verify the adjoint gradient for a
-point load inversion problem:
 
 !listing modules/optimization/test/tests/executioners/basic_optimize/tests block=debug/gradient_test
          id=testBlock

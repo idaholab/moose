@@ -18,7 +18,6 @@
   [grad_check]
     type = TaoGradientTester
     input = main.i
-    only_first_gradient = true
     requirement = 'The system shall be able to perform gradient based material parameter inversion '
                   'for a single material property and perform a grad check.'
 
