@@ -53,13 +53,11 @@ SetupQuadratureAction::SetupQuadratureAction(const InputParameters & parameters)
     _allow_negative_qweights(getParam<bool>("allow_negative_qweights"))
 {
   for (const auto & t : getParam<MultiMooseEnum>("custom_types"))
-    _custom_block_types.push_back(
-        Moose::stringToEnum<libMesh::QuadratureType>(std::string(t)));
+    _custom_block_types.push_back(Moose::stringToEnum<libMesh::QuadratureType>(std::string(t)));
 
-  if (!_custom_block_types.empty() &&
-      _custom_block_types.size() != _custom_block_orders.size())
-    mooseError("'custom_types' must have the same number of entries as 'custom_blocks' "
-               "(got ",
+  if (!_custom_block_types.empty() && _custom_block_types.size() != _custom_block_orders.size())
+    paramError("custom_types",
+               "Must have the same number of entries as 'custom_blocks' (got ",
                _custom_block_types.size(),
                " types for ",
                _custom_block_orders.size(),
