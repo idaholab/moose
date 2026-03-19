@@ -557,12 +557,12 @@ public:
   /**
    * Return the number of non-linear iterations
    */
-  unsigned int nNonlinearIterations() const { return _n_iters; }
+  virtual unsigned int nNonlinearIterations() const { return _n_iters; }
 
   /**
    * Return the number of linear iterations
    */
-  unsigned int nLinearIterations() const { return _n_linear_iters; }
+  virtual unsigned int nLinearIterations() const { return _n_linear_iters; }
 
   /**
    * Return the total number of residual evaluations done so far in this calculation

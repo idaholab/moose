@@ -82,6 +82,9 @@ public:
    */
   unsigned int getNumConvergedEigenvalues() const { return _eigen_sys.get_n_converged(); };
 
+  virtual unsigned int nNonlinearIterations() const override;
+  virtual unsigned int nLinearIterations() const override;
+
   virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() override;
 
   /**
