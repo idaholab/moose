@@ -992,6 +992,11 @@ public:
   void detectPairedSidesets();
 
   /**
+   * Whether or not detectedPairedSidesets() has been called.
+   */
+  bool hasDetectedPairedSidesets() const { return _paired_boundary.has_value(); }
+
+  /**
    * This function attempts to return the paired boundary ids for the given component.  For example,
    * in a generated 2D mesh, passing 0 for the "x" component will return (3, 1).
    *

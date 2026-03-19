@@ -2397,7 +2397,7 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component) const
 
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
-  if (!_paired_boundary)
+  if (!hasDetectedPairedSidesets())
     mooseError("MooseMesh::getPairedBoundaryMapping(): Paired boundaries not built; must call "
                "detectPairedSidesets() first");
 

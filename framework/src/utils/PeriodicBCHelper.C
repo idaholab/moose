@@ -66,7 +66,8 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   mooseAssert(_periodic_boundaries.empty(), "Already set");
 
   // Setup paired sidesets to be able to call MooseMesh::getPairedBoundaryMapping()
-  problem.mesh().detectPairedSidesets();
+  if (!problem.mesh().hasDetectedPairedSidesets())
+    problem.mesh().detectPairedSidesets();
 
   if (_params.isParamValid("auto_direction"))
     setupAutoPeriodicBoundaries(problem.mesh());
