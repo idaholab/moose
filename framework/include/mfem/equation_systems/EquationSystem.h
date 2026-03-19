@@ -50,6 +50,7 @@ public:
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
   /// Compute J = M + grad_H(u)
+  void FormGradient(const mfem::Vector & u);
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
   /// Update variable from solution vector after solve
@@ -187,7 +188,7 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
-  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
+  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _j_blocks;
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
@@ -200,6 +201,7 @@ protected:
 
   // Operator handle for the jacobian matrix
   mutable mfem::OperatorHandle _jacobian;
+  mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;
 
   // Temporary vectors used for non-linear action

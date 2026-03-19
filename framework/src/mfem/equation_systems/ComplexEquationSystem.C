@@ -277,7 +277,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 void
 ComplexEquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
-  _jacobian->Mult(x, residual);
+  _linear_operator->Mult(x, residual);
   x.HostRead();
   residual.HostRead();
 }

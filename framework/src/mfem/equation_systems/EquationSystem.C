@@ -346,15 +346,6 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                               aux_rhs,
                               /*copy_interior=*/true);
         trueX.GetBlock(j) = aux_x;
-        if (_nlfs.Has(test_var_name))
-        {
-          auto nlf = _nlfs.Get(test_var_name);
-          mfem::HypreParMatrix * nlf_jac = dynamic_cast<mfem::HypreParMatrix *>(
-              &nlf->GetGradient(*_var_ess_constraints.at(j)->GetTrueDofs()));
-          if (!nlf_jac)
-            mooseError("nlf_jac is null");
-          aux_a = mfem::ParAdd(aux_a, nlf_jac);
-        }
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
@@ -387,7 +378,7 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 {
   height = trueX.Size();
   width = trueRHS.Size();
-  FormLinearSystem(_jacobian, trueX, trueRHS);
+  FormLinearSystem(_linear_operator, trueX, trueRHS);
 }
 
 void
@@ -413,7 +404,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
       auto lf = _lfs.GetShared(test_var_name);
       lf->ParallelAssemble(b);
       b.SyncAliasMemory(b);
-
       auto nlf = _nlfs.GetShared(test_var_name);
       nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
       nlf->Mult(_trueBlockSol.GetBlock(i), _blockResidual.GetBlock(i));
@@ -426,18 +416,46 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   else
   {
     residual = 0.0;
-    _jacobian->Mult(sol, residual);
+    _linear_operator->Mult(sol, residual);
   }
 
   sol.HostRead();
   residual.HostRead();
 }
 
+void
+EquationSystem::FormGradient(const mfem::Vector & u)
+{
+  mfem::BlockVector update_vector(*_block_true_offsets);
+  static_cast<mfem::Vector &>(update_vector) = u;
+  _j_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _j_blocks = nullptr;
+
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    if (_nlfs.Has(test_var_name))
+    {
+      auto nlf = _nlfs.Get(test_var_name);
+      mfem::HypreParMatrix * nlf_jac =
+          dynamic_cast<mfem::HypreParMatrix *>(&nlf->GetGradient(update_vector.GetBlock(i)));
+      if (!nlf_jac)
+        mooseError("nlf_jac is null");
+      _j_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+    }
+  }
+  // Create monolithic matrix
+  _jacobian.Reset(mfem::HypreParMatrixFromBlocks(_j_blocks));
+}
+
 mfem::Operator &
-EquationSystem::GetGradient(const mfem::Vector &) const
+EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   if (_non_linear)
-    const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
+    const_cast<EquationSystem *>(this)->FormGradient(u);
+  else
+    _jacobian = _linear_operator;
+
   return *_jacobian;
 }
 
