@@ -45,4 +45,40 @@
     requirement = 'The system shall report the unit conversions performed at parse time when running in debug mode.'
     capabilities = 'method=dbg'
   []
+
+  [nested_braces]
+    type = 'CSVDiff'
+    input = 'nested_braces.i'
+
+    csvdiff = 'nested_braces_out.csv'
+
+    requirement = 'The system shall support arbitrarily nested brace expressions with innermost-first evaluation across different brace-expression commands.'
+  []
+
+  [deep_nested_fparse_units]
+    type = 'CSVDiff'
+    input = 'deep_nested_fparse_units.i'
+
+    csvdiff = 'deep_nested_fparse_units_out.csv'
+
+    requirement = 'The system shall support repeated deep nesting of fparse and units brace-expression commands with innermost-first evaluation.'
+  []
+
+  [forward_brace_dependency]
+    type = 'CSVDiff'
+    input = 'forward_brace_dependency.i'
+
+    csvdiff = 'forward_brace_dependency_out.csv'
+
+    requirement = 'The system shall resolve referenced brace-expression fields on demand rather than relying on lexical input order.'
+  []
+
+  [cyclic_brace_dependency]
+    type = RunException
+    input = 'cyclic_brace_dependency.i'
+
+    expect_err = 'cyclic brace-expression dependency detected'
+
+    requirement = 'The system shall report a parse-time error when brace-expression field dependencies form a cycle.'
+  []
 []
