@@ -391,45 +391,8 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 }
 
 void
-EquationSystem::UpdateJacobian() const
-{
-  for (unsigned int i = 0; i < _test_var_names.size(); i++)
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto nlf = _nlfs.Get(test_var_name);
-    nlf->Update();
-    nlf->Setup();
-  }
-
-  for (unsigned int i = 0; i < _test_var_names.size(); i++)
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    blf->Update();
-    blf->Assemble();
-  }
-
-  // Form off-diagonal blocks
-  for (unsigned int i = 0; i < _test_var_names.size(); i++)
-  {
-    auto test_var_name = _test_var_names.at(i);
-    for (unsigned int j = 0; j < _test_var_names.size(); j++)
-    {
-      auto trial_var_name = _test_var_names.at(j);
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
-      {
-        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        mblf->Update();
-        mblf->Assemble();
-      }
-    }
-  }
-}
-
-void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-
   static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
@@ -453,7 +416,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
       auto nlf = _nlfs.GetShared(test_var_name);
       nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-      nlf->Mult(sol, _blockResidual.GetBlock(i));
+      nlf->Mult(_trueBlockSol.GetBlock(i), _blockResidual.GetBlock(i));
       _blockResidual.GetBlock(i) -= b;
       _blockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
       _blockResidual.GetBlock(i).SyncAliasMemory(_blockResidual);

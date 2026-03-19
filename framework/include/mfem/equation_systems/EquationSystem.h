@@ -99,8 +99,6 @@ protected:
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
-  // Reassemble the Jacobian matrix/Operator
-  virtual void UpdateJacobian() const;
 
   /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
