@@ -16,7 +16,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/periodic_boundary.h"
-#include "libmesh/default_coupling.h"
+#include "libmesh/ghost_point_neighbors.h"
 
 namespace Moose
 {
@@ -78,9 +78,7 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   const auto add_ghosting = [this](auto & problem)
   {
     auto & mesh = problem.mesh().getMesh();
-    auto functor = std::make_shared<libMesh::DefaultCoupling>();
-    functor->set_mesh(&mesh);
-    functor->set_n_levels(1);
+    auto functor = std::make_shared<libMesh::GhostPointNeighbors>(mesh);
     functor->set_periodic_boundaries(&getPeriodicBoundaries());
     mesh.add_ghosting_functor(functor);
   };
