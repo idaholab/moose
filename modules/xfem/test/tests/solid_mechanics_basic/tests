@@ -110,7 +110,17 @@
       map = false
       # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
-      detail = ' growth directions determined by an parsed function.'
+      detail = ' growth directions determined by an parsed function, or'
+    []
+    [num_points_error]
+      type = RunException
+      issues = '#32418'
+      input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
+      cli_args = 'DomainIntegral/number_points_from_provider=3'
+      expect_err = 'Trying to nucleate crack smaller than element length'
+      # XFEM requires --enable-unique-ids in libmesh
+      capabilities = 'unique_id'
+      detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction.'
     []
   []
   [penny_crack]

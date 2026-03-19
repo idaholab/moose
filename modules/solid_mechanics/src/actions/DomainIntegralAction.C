@@ -431,6 +431,23 @@ DomainIntegralAction::act()
     params.set<MooseEnum>("q_function_type") = _q_function_type;
 
     _problem->addUserObject(uo_type_name, uo_name, params);
+
+    // Check that the number specified by the XFEM cutter object matches the number of points
+    // specified in the DomainIntegralAction block
+    if (_use_crack_front_points_provider && isParamValid("number_points_from_provider"))
+    {
+      auto crack_front_points_provider = &_problem->getUserObject<CrackFrontPointsProvider>(
+          getParam<UserObjectName>("crack_front_points_provider"));
+      auto xfem_cutter_points = crack_front_points_provider->getNumberOfCrackFrontPoints();
+      if (xfem_cutter_points != num_crack_front_points)
+        paramError("number_points_from_provider",
+                   "This must match the number of points provided by the XFEM cutter "
+                   "object."
+                   "\n   number_points_from_provider:",
+                   num_crack_front_points,
+                   "\n   XFEM Crack Front Points: ",
+                   xfem_cutter_points);
+    }
   }
   else if (_current_task == "add_aux_variable" && _output_q)
   {
