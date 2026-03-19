@@ -113,7 +113,7 @@ DomainIntegralAction::validParams()
       "equivalent_k",
       false,
       "Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
-  params.addParam<bool>("output_q", true, "Output q");
+  params.addParam<bool>("output_q", false, "Output q");
   params.addRequiredParam<bool>(
       "incremental", "Flag to indicate whether an incremental or total model is being used.");
   params.addParam<std::vector<MaterialPropertyName>>(
@@ -366,12 +366,10 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
+    // The CrackFrontDefinition updates the vpps and MUST execute before them
+    params.set<int>("execution_order_group") = -1;
     if (_use_crack_front_points_provider)
-    {
-      // The CrackFrontDefinition updates the vpps and MUST execute before them
-      params.set<int>("execution_order_group") = -1;
       params.set<ExecFlagEnum>("execute_on") = xfem_exec_flags;
-    }
     else
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
