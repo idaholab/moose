@@ -31,7 +31,7 @@ $(info Building hit for python with $(pyconfig))
 
 hit_srcdir         := src/hit
 hit_srcfiles       := $(hit_srcdir)/parse.cc $(hit_srcdir)/lex.cc $(hit_srcdir)/braceexpr.cc
-hit_includeflags   := -Iinclude
+hit_includeflags   := -Iinclude -I../cpp-peglib/include
 
 PYTHONPREFIX ?= `$(pyconfig) --prefix`
 PYTHONCFLAGS ?= `$(pyconfig) --cflags`
