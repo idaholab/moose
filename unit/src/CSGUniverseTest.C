@@ -139,4 +139,33 @@ TEST(CSGUniverseTest, testSetName)
   ASSERT_EQ("new_name", univ.getName());
 }
 
+/// CSGUniverse equality operators
+TEST(CSGUniverseTest, testUniverseEquality)
+{
+  auto [c1, c2, c3] = setupCells();
+  std::vector<CSGCell *> cells = {&c1, &c2};
+  // two identical universes
+  CSGUniverse univ1("univ", cells);
+  CSGUniverse univ2("univ", cells);
+  // universes that differ by name
+  CSGUniverse univ_diff_name("new_univ", cells);
+  // universes that differ by cells
+  std::vector<CSGCell *> cells_diff = {&c1, &c3};
+  CSGUniverse univ_diff_cells("univ", cells_diff);
+  // universe that differs by transformations
+  CSGUniverse univ_diff_transforms("univ", cells);
+  univ_diff_transforms.addTransformation(TransformationType::TRANSLATION,
+                                         std::make_tuple(1.0, 0.0, 0.0));
+  // check equality
+  {
+    ASSERT_TRUE(univ1 == univ2);
+  }
+  // check inequality
+  {
+    ASSERT_TRUE(univ1 != univ_diff_name);
+    ASSERT_TRUE(univ1 != univ_diff_cells);
+    ASSERT_TRUE(univ1 != univ_diff_transforms);
+  }
+}
+
 } // namespace CSG

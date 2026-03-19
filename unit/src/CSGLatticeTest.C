@@ -545,6 +545,9 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   // differs by outer name - material outer
   auto l11 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
   l11.updateOuter("outer2");
+  // differs by transformation
+  auto l12 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  l12.addTransformation(TransformationType::TRANSLATION, {1.0, 0.0, 0.0});
 
   // check equality
   {
@@ -553,7 +556,7 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   // check inequality
   {
     // all lattices 2-7 should differ from each other in some way
-    std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7, l8, l9, l10, l11};
+    std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12};
     for (std::size_t i = 0; i < diff_compare.size(); i++)
     {
       for (std::size_t j = i + 1; j < diff_compare.size(); ++j)
