@@ -13,8 +13,10 @@ import json
 import os
 import unittest
 from argparse import Namespace
+from contextlib import redirect_stdout
 from copy import deepcopy
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from shlex import quote
 from typing import Any, Optional, Tuple
@@ -128,6 +130,8 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
         default_options.minimal_capabilities = True
         default_options.only_tests_that_require = None
         default_options.hpc = None
+        default_options.ignore_capability = None
+        default_options.colored = None
 
         def test_get_capabilities(
             check_capabilities: list[Tuple[str, Any]],
@@ -176,6 +180,24 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             check_required_capabilities=[("machine", False)],
             only_tests_that_require="machine",
         )
+        # --only-tests-that-require with an invalid capability
+        out = StringIO()
+        with self.assertRaises(SystemExit), redirect_stdout(out):
+            test_get_capabilities([], only_tests_that_require="foo")
+        self.assertIn(
+            "--only-tests-that-require: Capability 'foo' is not registered",
+            out.getvalue(),
+        )
+
+        # --ignore-capability with a valid capability
+        test_get_capabilities([], ignore_capability=["machine"])
+        # --ignore-capability with a derived Tester augmented capability
+        test_get_capabilities([], ignore_capability=["mpi_procs"])
+        # --ignore-capability with an invalid capability
+        out = StringIO()
+        with self.assertRaises(SystemExit), redirect_stdout(out):
+            test_get_capabilities([], ignore_capability=["foo"])
+        self.assertIn("--ignore-capability: Unknown capability 'foo'", out.getvalue())
 
     @dataclass
     class CapabilityTestCase:
@@ -357,12 +379,15 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                     Path(capabilities_file).is_relative_to(job.getTestDir())
                 )
             with open(capabilities_file, "r") as f:
-                capabilities = json.load(f)
+                loaded_capabilities_file = json.load(f)
             # Should only contain those two capabilities that
             # we used if we did this right
+            capabilities = loaded_capabilities_file["capabilities"]
             self.assertTrue(len(capabilities), 2)
             self.assertIn("mpi_procs", capabilities)
             self.assertIn("machine", capabilities)
+            # Not testing ignore_capabilities here
+            self.assertNotIn("ignore_capabilities", loaded_capabilities_file)
 
             # And should have ran the app with the given capabilities
             # and the augmented capabilities file
@@ -445,6 +470,33 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             ),
             test.getTester().getOutput(),
         )
+
+    def testIgnoreCapability(self):
+        """Test ignoring capabilities via --ignore-capability."""
+        # Capability not matched
+        self.runCapabilityTest(("compiler=unknown & platform=unknown", True))
+        # Capability not matched, one ignored but still skip
+        self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", True),
+            cli_args=["--ignore-capability=compiler"],
+        )
+        # Capability not matched, both ignored, no skip
+        _, jobs = self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", False),
+            cli_args=["--ignore-capability=compiler", "--ignore-capability=platform"],
+        )
+        self.assertIn("ignored: compiler,platform", jobs[0].getTester().getCaveats())
+        # Capability not matched, both ignored, no skip, plus
+        # one additional ignore that won't show up in caveats
+        _, jobs = self.runCapabilityTest(
+            ("compiler=unknown & platform=unknown", False),
+            cli_args=[
+                "--ignore-capability=compiler",
+                "--ignore-capability=platform",
+                "--ignore-capability=method",
+            ],
+        )
+        self.assertIn("ignored: compiler,platform", jobs[0].getTester().getCaveats())
 
 
 if __name__ == "__main__":

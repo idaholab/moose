@@ -64,7 +64,8 @@ public:
     POSSIBLE_FAIL = 1,
     UNKNOWN = 2,
     POSSIBLE_PASS = 3,
-    CERTAIN_PASS = 4
+    CERTAIN_PASS = 4,
+    IGNORE = 5
   };
 
   /**
@@ -76,6 +77,19 @@ public:
     CheckState state;
     /// The capability names that existed in the check string
     std::set<std::string> capability_names;
+  };
+
+  /**
+   * Options for check().
+   */
+  struct CheckOptions
+  {
+    CheckOptions() : certain(true), ignore_capabilities() {}
+
+    /// Whether or not all capabilities must be known
+    bool certain;
+    /// Capabilities to ignore; checks using them will always pass
+    std::set<std::string> ignore_capabilities;
   };
 
   /**
@@ -124,8 +138,7 @@ public:
    * Checks if a set of requirements is satisified by the capabilities
    *
    * @param requirements The requirement string
-   * @param certain Whether or not the capabilites must be certain, that is,
-   * all capabilities must be known
+   * @param options Options to apply to the check
    *
    * This method is exposed to Python within pycapabilities.Capabilities.check in
    * python/pycapabilities/_pycapabilities.C. This external method is used
@@ -144,11 +157,10 @@ public:
    * The logic operators & and | can be used to chain multiple checks as
    * "thermochimica & thermochimica>1.0". Parenthesis can be used to build
    * complex logic expressions.
-   *
-   * See the description for CheckState for more information on why a
-   * certain state would be returned.
    */
-  CheckResult check(std::string requirements, const bool certain = true) const;
+  CheckResult check(
+      std::string requirements,
+      const CapabilityRegistry::CheckOptions & options = CapabilityRegistry::CheckOptions()) const;
 
 protected:
 #ifdef MOOSE_UNIT_TEST
