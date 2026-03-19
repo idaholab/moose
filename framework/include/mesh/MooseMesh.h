@@ -98,7 +98,9 @@ public:
   static InputParameters validParams();
 
   /**
-   * Default value for periodic boundary dimensions.
+   * Default value for the automatically detected paired boundaries for
+   * each unit dimension, in which the value for each unit dimension is
+   * false (not detected).
    */
   static const std::array<bool, 3> periodic_dim_default;
 
@@ -993,7 +995,7 @@ public:
    * This function attempts to return the paired boundary ids for the given component.  For example,
    * in a generated 2D mesh, passing 0 for the "x" component will return (3, 1).
    *
-   * Must call detectPairedSidesets() before calling.
+   * Must have called detectPairedSidesets() prior to using.
    *
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair pointer - The matching boundary pairs for the passed component

@@ -1655,7 +1655,9 @@ protected:
   T * getVarHelper(const std::string & var_name, unsigned int comp);
 
   /**
-   * Helper that that be used to retrieve variables of arbitrary type \p T
+   * Helper that can be used to retrieve all the component variables of a variable
+   * of arbitrary type \p T
+   * @param var_name of the variable, can be a regular, vector or array variable
    */
   template <typename T>
   std::vector<const T *> getVarsHelper(const std::string & var_name) const;
