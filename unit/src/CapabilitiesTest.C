@@ -210,7 +210,7 @@ const nlohmann::json JSON_CAPABILITIES = {
 /// Test --testharness-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
 {
-  // Shouldn't be passed without --required-capabilities
+  // --testharness-capabilities should not be used without --required-capabilities
   {
     auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities=unused"});
     EXPECT_MOOSEERROR_MSG_CONTAINS(
@@ -218,61 +218,105 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
         "--testharness-capabilities: Should not be specified without --required-capabilities");
   }
 
-  // Check string that satisfies each entry in JSON_CAPABILITIES
-  const std::string required_capabilities =
-      "--required-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
-      "string_enum & string_enum=string_enum & string_explicit=string_explicit & "
-      "string_explicit_enum=string_explicit_enum & true'";
-
-  // Check is a skip without augmenting via --testharness-capabilities
+  // Test augmenting capabilities
   {
-    auto app = AppFactory::create("MooseUnitApp", {required_capabilities, "--minimal"});
-    app->run();
-    EXPECT_EQ(app->exitCode(), 77);
+    // Check string that satisfies each entry in JSON_CAPABILITIES
+    const std::string required_capabilities =
+        "--required-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
+        "string_enum & string_enum=string_enum & string_explicit=string_explicit & "
+        "string_explicit_enum=string_explicit_enum & true'";
+
+    // Capabilities aren't augmented, will skip
+    {
+      auto app = AppFactory::create("MooseUnitApp", {required_capabilities, "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 77);
+    }
+
+    // Capabilities are augmented, will not skip
+    {
+      Moose::UnitUtils::TempFile temp_file;
+
+      std::ofstream out(temp_file.path());
+      nlohmann::json json_out;
+      json_out["capabilities"] = JSON_CAPABILITIES;
+      out << json_out.dump() << std::flush;
+      out.close();
+
+      auto app = AppFactory::create(
+          "MooseUnitApp",
+          {"--testharness-capabilities", temp_file.path(), required_capabilities, "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 0);
+    }
   }
 
-  // Success once adding --testharness-capabilities to augment
+  // Test augmenting and ignoring capabilities together
   {
-    Moose::UnitUtils::TempFile temp_file;
-
-    std::ofstream out(temp_file.path());
     nlohmann::json json_out;
     json_out["capabilities"] = JSON_CAPABILITIES;
-    out << json_out.dump() << std::flush;
-    out.close();
 
-    auto app = AppFactory::create(
-        "MooseUnitApp",
-        {"--testharness-capabilities", temp_file.path(), required_capabilities, "--minimal"});
-    app->run();
-    EXPECT_EQ(app->exitCode(), 0);
+    // Make sure it is skipped before ignoring
+    {
+      Moose::UnitUtils::TempFile temp_file;
+      std::ofstream out(temp_file.path());
+      out << json_out.dump() << std::flush;
+      out.close();
+      auto app = AppFactory::create("MooseUnitApp",
+                                    {"--testharness-capabilities",
+                                     temp_file.path(),
+                                     "--required-capabilities='false'",
+                                     "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 77);
+    }
+
+    // Should not be skipped now that it is ignored
+    {
+      json_out["ignore_capabilities"] = std::vector<std::string>{"false"};
+      Moose::UnitUtils::TempFile temp_file;
+      std::ofstream out(temp_file.path());
+      out << json_out.dump() << std::flush;
+      out.close();
+
+      auto app = AppFactory::create("MooseUnitApp",
+                                    {"--testharness-capabilities",
+                                     temp_file.path(),
+                                     "--required-capabilities='false'",
+                                     "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 0);
+    }
   }
 
-  // Check a capability before it is ignored, which will be a skip
+  // Test just ignoring capabilities without augmenting them
   {
-    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='false'", "--minimal"});
-    app->run();
-    EXPECT_EQ(app->exitCode(), 77);
-  }
+    _capabilities->add("test_ignore", bool(true), "doc");
 
-  // Ignore a capability via --testharness-capabilities
-  {
-    Moose::UnitUtils::TempFile temp_file;
+    // Make sure it is skipped before ignoring
+    {
+      auto app = AppFactory::create("MooseUnitApp",
+                                    {"--required-capabilities='!test_ignore'", "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 77);
+    }
 
-    std::ofstream out(temp_file.path());
-    nlohmann::json json_out;
-    json_out["capabilities"] = JSON_CAPABILITIES;
-    json_out["ignore_capabilities"] = std::vector<std::string>{"false"};
-    out << json_out.dump() << std::flush;
-    out.close();
-
-    auto app = AppFactory::create("MooseUnitApp",
-                                  {"--testharness-capabilities",
-                                   temp_file.path(),
-                                   "--required-capabilities='false'",
-                                   "--minimal"});
-    app->run();
-    EXPECT_EQ(app->exitCode(), 0);
+    // Should not be skipped now that it is ignored
+    {
+      Moose::UnitUtils::TempFile temp_file;
+      std::ofstream out(temp_file.path());
+      nlohmann::json json_out;
+      json_out["ignore_capabilities"] = std::vector<std::string>{"test_ignore"};
+      out << json_out.dump() << std::flush;
+      out.close();
+      auto app = AppFactory::create("MooseUnitApp",
+                                    {"--testharness-capabilities",
+                                     temp_file.path(),
+                                     "--required-capabilities='!test_ignore'",
+                                     "--minimal"});
+      app->run();
+      EXPECT_EQ(app->exitCode(), 0);
+    }
   }
 
   // File doesn't exist
@@ -320,6 +364,23 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
         "--testharness-capabilities: Failed to load capabilities \"" +
             std::string(temp_file.path()) +
             "\":\nCapabilities::augment: Capability 'name' missing 'doc' entry");
+  }
+
+  // Bad ignore, caught as mooseError
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    nlohmann::json root;
+    root["ignore_capabilities"] = {"foo"};
+    std::ofstream out(temp_file.path());
+    out << root.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create(
+        "MooseUnitApp",
+        {"--testharness-capabilities", temp_file.path(), "--required-capabilities=unused"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--required-capablities: Capability to ignore 'foo' is not known");
   }
 }
 
