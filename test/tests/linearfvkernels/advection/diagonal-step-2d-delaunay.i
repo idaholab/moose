@@ -1,33 +1,7 @@
 [Mesh]
-  [square_boundary]
-    type = PolyLineMeshGenerator
-    points = '0 0 0
-              1 0 0
-              1 1 0
-              0 1 0'
-    loop = true
-  []
-  [triangulation]
-    type = XYDelaunayGenerator
-    boundary = square_boundary
-    add_nodes_per_boundary_segment = 10
-    refine_boundary = false
-    desired_area = 5e-4
-  []
-  [sidesets]
-    type = SideSetsFromNormalsGenerator
-    input = triangulation
-    fixed_normal = true
-    normals = '-1  0  0
-                1  0  0
-                0 -1  0
-                0  1  0'
-    new_boundary = 'left right bottom top'
-  []
-  [deletion]
-    type = BoundaryDeletionGenerator
-    input = sidesets
-    boundary_names = '0' # we sneaked this in in the mesh generator
+  [file_mesh]
+    type = FileMeshGenerator
+    file = diagonal-step-2d-delaunay_in.e
   []
   # Prevent test diffing on distributed parallel element numbering
   allow_renumbering = false
