@@ -27,7 +27,7 @@ HenryGasConstant::validParams()
                         "gamma derivative fit parameter in Henry model, if defining custom fluid");
   params.addParam<Real>(
       "KH0", "Reference Henry parameter in Henry model, if defining custom fluid [mol/m3/Pa]");
-  params.addClassDescription("Calculates Henry gas constant of a noble gas [mol/m3/Pa]");
+  params.addClassDescription("Calculates Henry gas constant of a noble gas `[mol/m3/Pa]`");
   return params;
 }
 

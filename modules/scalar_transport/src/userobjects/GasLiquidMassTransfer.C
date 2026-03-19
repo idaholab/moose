@@ -33,7 +33,7 @@ GasLiquidMassTransfer::validParams()
   params.addParam<Real>("phi", 1.0, "The association parameter for the solute (see Wilke-Chang)");
   params.addParam<Real>("wc", 7.4e-8, "WilkeChang constant");
   params.addParam<Real>("db", 0.023, "Dittus-Boelter equation constant");
-  params.addClassDescription("Calculates overall liquid mass transfer coefficient [m/s].");
+  params.addClassDescription("Calculates overall liquid mass transfer coefficient `[m/s]`.");
   return params;
 }
 
