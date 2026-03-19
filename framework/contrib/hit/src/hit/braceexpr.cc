@@ -391,6 +391,7 @@ BraceExpander::resolve(Field * n)
     {
       BraceTemplate root;
       BraceParseError error;
+      const auto error_count = errors.size();
       try
       {
         root = parseBraceTemplate(unquoted, &error);
@@ -401,7 +402,13 @@ BraceExpander::resolve(Field * n)
       }
 
       entry.result = evaluate(n, root);
-      if (!root.pureExpression() && (root.expressionCount() > 0 || root.hasLiteralText()))
+      if (errors.size() != error_count)
+      {
+        // Preserve the original field text when brace expansion recorded an error.
+        entry.result.value = unquoted;
+        entry.result.kind = n->kind();
+      }
+      else if (!root.pureExpression() && (root.expressionCount() > 0 || root.hasLiteralText()))
         entry.result.kind = Field::Kind::String;
       else if (root.pureExpression() && entry.result.kind == Field::Kind::None)
         entry.result.kind = n->kind();
