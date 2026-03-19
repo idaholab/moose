@@ -42,16 +42,15 @@ FVAdvectedInterpolationMethod::advectedInterpolateValue(const FaceInfo & face,
 {
   const auto result =
       advectedInterpolate(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
-  return result.weights_matrix.first * elem_value +
-         result.weights_matrix.second * neighbor_value - result.rhs_face_value;
+  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value -
+         result.rhs_face_value;
 }
 
 Real
-FVAdvectedInterpolationMethod::advectedInterpolateValue(
-    const Moose::FunctorBase<Real> & functor,
-    const FaceInfo & face,
-    const Moose::StateArg & state,
-    const Real mass_flux) const
+FVAdvectedInterpolationMethod::advectedInterpolateValue(const Moose::FunctorBase<Real> & functor,
+                                                        const FaceInfo & face,
+                                                        const Moose::StateArg & state,
+                                                        const Real mass_flux) const
 {
   mooseAssert(face.neighborPtr(),
               "Advected interpolation with a Moose functor requires a two-sided internal face.");
