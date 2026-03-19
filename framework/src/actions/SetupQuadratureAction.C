@@ -58,12 +58,12 @@ SetupQuadratureAction::SetupQuadratureAction(const InputParameters & parameters)
 
   if (!_custom_block_types.empty() &&
       _custom_block_types.size() != _custom_block_orders.size())
-    mooseError("'custom_types' must have the same number of entries as 'custom_blocks' "
-               "(got ",
-               _custom_block_types.size(),
-               " types for ",
-               _custom_block_orders.size(),
-               " blocks)");
+    paramError("custom_types",
+              "Must have the same number of entries as 'custom_blocks' (got ",
+              _custom_block_types.size(),
+              " types for ",
+              _custom_block_orders.size(),
+              " blocks)");
 }
 
 void
