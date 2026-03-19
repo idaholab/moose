@@ -44,7 +44,6 @@
   block = 1
   incremental = true
   use_automatic_differentiation = true
-  output_q = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

@@ -431,26 +431,17 @@ DomainIntegralAction::act()
     params.set<MooseEnum>("q_function_type") = _q_function_type;
 
     _problem->addUserObject(uo_type_name, uo_name, params);
-
-    // Check that the number specified by the XFEM cutter object matches the number of points
-    // specified in the DomainIntegralAction block
-    if (_use_crack_front_points_provider && isParamValid("number_points_from_provider"))
-    {
-      auto crack_front_points_provider = &_problem->getUserObject<CrackFrontPointsProvider>(
-          getParam<UserObjectName>("crack_front_points_provider"));
-      auto xfem_cutter_points = crack_front_points_provider->getNumberOfCrackFrontPoints();
-      if (xfem_cutter_points != num_crack_front_points)
-        paramError("number_points_from_provider",
-                   "This must match the number of points provided by the XFEM cutter "
-                   "object."
-                   "\n   number_points_from_provider:",
-                   num_crack_front_points,
-                   "\n   XFEM Crack Front Points: ",
-                   xfem_cutter_points);
-    }
   }
   else if (_current_task == "add_aux_variable" && _output_q)
   {
+    if (isParamValid("number_points_from_provider") && num_crack_front_points == 0)
+    {
+      paramError("output_q",
+                 "Requesting AuxVariable output of q functions but the number of crack fronts for "
+                 "output is zero.  AuxVariable output for XFEM cutter objects requires "
+                 "number_points_from_provider to be set.");
+    }
+
     for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
     {
       std::string aux_var_type;
@@ -545,6 +536,26 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_postprocessor")
   {
+    // Check that the number specified by the XFEM cutter object matches the number of points
+    // specified in the DomainIntegralAction block.  This is being done in teh add_postprocessor
+    // block because it must be done after all userObjects have been created.
+    if (_use_crack_front_points_provider && isParamValid("number_points_from_provider"))
+    {
+      auto crack_front_points_provider = &_problem->getUserObject<CrackFrontPointsProvider>(
+          getParam<UserObjectName>("crack_front_points_provider"));
+      if (crack_front_points_provider->usesMesh())
+      {
+        auto xfem_cutter_points = crack_front_points_provider->getNumberOfCrackFrontPoints();
+        if (xfem_cutter_points != num_crack_front_points)
+          paramError("number_points_from_provider",
+                     "This must match the number of points provided by the XFEM mesh cutter "
+                     "object."
+                     "\n   number_points_from_provider:",
+                     num_crack_front_points,
+                     "\n   XFEM Crack Front Points: ",
+                     xfem_cutter_points);
+      }
+    }
     for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
     {
       std::string pp_base_name;

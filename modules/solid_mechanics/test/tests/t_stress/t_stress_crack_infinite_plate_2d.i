@@ -46,7 +46,6 @@
   axis_2d = 2
   symmetry_plane = 1
   incremental = true
-  output_q = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]

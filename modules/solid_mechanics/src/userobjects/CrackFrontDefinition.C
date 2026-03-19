@@ -307,6 +307,18 @@ CrackFrontDefinition::initialSetup()
                   _num_points_from_provider,
                   " crack front points from mesh-based provider");
       }
+      else
+      {
+        auto xfem_cutter_points = _crack_front_points_provider->getNumberOfCrackFrontPoints();
+        if (_num_points_from_provider != xfem_cutter_points)
+          paramError("number_points_from_provider",
+                     "This must match the number of points provided by the XFEM cutter "
+                     "object."
+                     "\n   number_points_from_provider: ",
+                     _num_points_from_provider,
+                     "\n   XFEM Crack Front Points: ",
+                     xfem_cutter_points);
+      }
 
       if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
         paramError("crack_direction_method",

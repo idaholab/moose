@@ -43,7 +43,6 @@
   poissons_ratio = 0.3
   block = 1
   incremental = true
-  output_q = false
 []
 
 [Physics/SolidMechanics/QuasiStatic]
