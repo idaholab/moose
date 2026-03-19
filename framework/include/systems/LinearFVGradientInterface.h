@@ -116,8 +116,7 @@ protected:
    * @return The set of variable numbers that requested the limiter.
    */
   const std::unordered_set<unsigned int> &
-  requestedLinearFVLimitedGradientVariables(
-      const Moose::FV::GradientLimiterType limiter_type) const
+  requestedLinearFVLimitedGradientVariables(const Moose::FV::GradientLimiterType limiter_type) const
   {
     return _requested_limited_gradient_variables.at(limiter_type);
   }

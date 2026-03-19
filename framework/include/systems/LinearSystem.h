@@ -36,7 +36,9 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem, public PerfGraphInterface, public LinearFVGradientInterface
+class LinearSystem : public SolverSystem,
+                     public PerfGraphInterface,
+                     public LinearFVGradientInterface
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
