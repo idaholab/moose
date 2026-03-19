@@ -66,6 +66,8 @@ private:
   const std::vector<MooseFunctorName> _functor_names;
   /// Pointers to the source functors
   std::vector<std::vector<const Moose::Functor<Real> *>> _functors;
+  /// Whether the functor is a variable
+  std::vector<bool> _functor_is_variable;
 
   /// Extrapolation behavior
   const MooseEnum _extrapolation_behavior;

@@ -84,12 +84,21 @@ MultiAppGeneralFieldFunctorTransfer::initialSetup()
 
   // Retrieve the functors
   _functors.resize(_from_problems.size());
-  for (const auto & fname : _functor_names)
+  _functor_is_variable.resize(_functor_names.size());
+  for (const auto i_functor : index_range(_functor_names))
   {
+    const auto & fname = _functor_names[i_functor];
+
     // Different functors for every source
     for (const auto i_from : index_range(_from_problems))
       _functors[i_from].push_back(
           &_from_problems[i_from]->getFunctor<Real>(fname, /*thread*/ 0, name(), false));
+
+    // Need to keep track of variables because of ghosting needs
+    // NOTE: we don't really expect the functor type to vary between problems
+    for (const auto i_from : index_range(_from_problems))
+      _functor_is_variable[i_functor] =
+          _functor_is_variable[i_from] || _from_problems[i_from]->hasVariable(fname);
   }
 }
 
@@ -410,18 +419,25 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             registerConflict(i_from, 0, transformed_pt, 0, true);
         }
 
-        point_found = true;
         // Average the result for now
         // TODO: if we knew the functor were continuous, we could return earlier
         Real value = 0;
+        unsigned int num_values = 0;
         for (const auto elem : elem_candidates)
         {
+          // Variables would hit a ghosting error
+          if (_functor_is_variable[var_index] && elem->processor_id() != processor_id())
+            continue;
           Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
           Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
           value += functor(elem_pt_arg, time_arg);
+          num_values++;
         }
-        value /= elem_candidates.size();
+        if (num_values == 0)
+          continue;
 
+        value /= num_values;
+        point_found = true;
         outgoing_vals[i_pt] = {value, 0};
         // Skip nearest node KD-Tree evaluation
         continue;
