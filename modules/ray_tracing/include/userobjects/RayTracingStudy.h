@@ -918,7 +918,7 @@ private:
 
   /**
    * Check for overlapping PeriodicRayBC boundaries and check for cases in which
-   * ghosting may not be sufficient with distribtued mesh for overlapping
+   * ghosting may not be sufficient with distributed mesh for overlapping
    * periodic boundaries.
    */
   void periodicBoundaryChecks();
