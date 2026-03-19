@@ -145,6 +145,46 @@
     cli_args = "Outputs/file_base=minmod LinearFVKernels/advection/advected_interp_method_name=nvd_minmod"
     max_threads = 1 # see libmesh issue #3808
   []
+  [diagonal-step-2d-delaunay-upwind]
+    type = CSVDiff
+    input = diagonal-step-2d-delaunay.i
+    csvdiff = 'diagonal-step-2d-delaunay-upwind_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using upwind interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-upwind LinearFVKernels/advection/advected_interp_method_name=upwind"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-delaunay-linear]
+    type = CSVDiff
+    input = diagonal-step-2d-delaunay.i
+    csvdiff = 'diagonal-step-2d-delaunay-linear_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using linear (average) interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-linear LinearFVKernels/advection/advected_interp_method_name=average"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-delaunay-venkat-deferred]
+    type = CSVDiff
+    input = diagonal-step-2d-delaunay.i
+    csvdiff = 'diagonal-step-2d-delaunay-venkat-deferred_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using deferred-correction Venkatakrishnan MUSCL interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-venkat-deferred LinearFVKernels/advection/advected_interp_method_name=muscl_venkat"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-delaunay-vanleer]
+    type = CSVDiff
+    input = diagonal-step-2d-delaunay.i
+    csvdiff = 'diagonal-step-2d-delaunay-vanleer_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using NVD vanLeer weight-based interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-vanleer LinearFVKernels/advection/advected_interp_method_name=nvd_vanleer"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-delaunay-minmod]
+    type = CSVDiff
+    input = diagonal-step-2d-delaunay.i
+    csvdiff = 'diagonal-step-2d-delaunay-minmod_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection using NVD minmod weight-based interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries on an unstructured triangular mesh.'
+    cli_args = "Outputs/file_base=diagonal-step-2d-delaunay-minmod LinearFVKernels/advection/advected_interp_method_name=nvd_minmod"
+    max_threads = 1 # see libmesh issue #3808
+  []
   [diagonal-step-2d-neg-upwind]
     type = CSVDiff
     input = diagonal-step-2d.i
