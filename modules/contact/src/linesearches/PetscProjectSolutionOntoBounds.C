@@ -52,7 +52,6 @@ PetscProjectSolutionOntoBounds::lineSearch()
   Vec X, F, Y, W, G;
   SNESLineSearch line_search;
   PetscReal fnorm, xnorm, ynorm;
-  PetscBool domainerror;
   SNES snes = _solver->snes();
 
   LibmeshPetscCall(SNESGetLineSearch(snes, &line_search));
@@ -134,9 +133,17 @@ PetscProjectSolutionOntoBounds::lineSearch()
   LibmeshPetscCall(VecAssemblyEnd(W));
 
   LibmeshPetscCall(SNESComputeFunction(snes, W, F));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
+  PetscBool domainerror;
   LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
   if (domainerror)
     LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
+#else
+  SNESConvergedReason reason;
+  LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+  if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+    LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+#endif
 
   LibmeshPetscCall(VecNorm(F, NORM_2, &fnorm));
 

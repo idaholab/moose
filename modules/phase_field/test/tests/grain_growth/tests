@@ -122,6 +122,10 @@
     requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations on a mesh generated in parallel.'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348'
+    # For regression tests, we use linear partitioner that should not be used in production run.
+    # We will receive a mooseWarning when using linear partitioner.
+    # Linear partitioner produces machine independent results
+    allow_warnings = true
   [../]
 
   [./mesh_adaptivity_voronoi]
@@ -134,6 +138,10 @@
     requirement = 'The system shall be able to apply mesh adaptivity and solve phase field equations using PolycrystalVoronoi UO on a mesh generated in parallel.'
     design = 'DistributedRectilinearMeshGenerator.md'
     issues = '#15348  #16143'
+    # For regression tests, we use linear partitioner that should not be used in production run.
+    # We will receive a mooseWarning when using linear partitioner.
+    # Linear partitioner produces machine independent results
+    allow_warnings = true
   [../]
 
   [./mesh_adaptivity_ghost]

@@ -4,7 +4,7 @@
   nx = 10
   ny = 10
   [Partitioner]
-    # You need to use PetscExternalPartitioner to gain an access to these external packages
+    # You need to use PetscExternalPartitioner to gain access to these external packages
     type = PetscExternalPartitioner
     # specify which package you want to use
     # you could choose one of {Chaco, Party, PTScotch, ParMETIS}
