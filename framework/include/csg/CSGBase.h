@@ -14,7 +14,7 @@
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
 #include "CSGLatticeList.h"
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 #include "nlohmann/json.h"
 
 #ifdef MOOSE_UNIT_TEST

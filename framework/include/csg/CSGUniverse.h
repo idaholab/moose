@@ -10,7 +10,7 @@
 #pragma once
 
 #include "CSGCellList.h"
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -24,7 +24,7 @@ namespace CSG
  * universe, which represents a collection of cells that can be defined repeatedly within a separate
  * container of cells
  */
-class CSGUniverse : public CSGTransformation
+class CSGUniverse : public CSGTransformationHelper
 {
 public:
   /**

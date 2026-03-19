@@ -14,7 +14,7 @@
 #endif
 
 #include "MooseApp.h"
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 
 namespace CSG
 {
@@ -23,7 +23,7 @@ namespace CSG
  * CSGSurface creates an internal representation of a Constructive Solid Geometry (CSG)
  * surface, represented as some polynomial in x, y, and z
  */
-class CSGSurface : public CSGTransformation
+class CSGSurface : public CSGTransformationHelper
 {
 public:
   /// Enum for the sign of the half-space being represented by a point and surface

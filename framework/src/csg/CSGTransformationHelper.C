@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 
 namespace CSG
 {
 
 void
-CSGTransformation::addTransformation(TransformationType type,
-                                     const std::tuple<Real, Real, Real> & values)
+CSGTransformationHelper::addTransformation(TransformationType type,
+                                           const std::tuple<Real, Real, Real> & values)
 {
   if (!isValidTransformationValue(type, values))
     mooseError("Invalid transformation values provided for transformation type " +
@@ -23,8 +23,8 @@ CSGTransformation::addTransformation(TransformationType type,
 }
 
 bool
-CSGTransformation::isValidTransformationValue(TransformationType type,
-                                              const std::tuple<Real, Real, Real> & values)
+CSGTransformationHelper::isValidTransformationValue(TransformationType type,
+                                                    const std::tuple<Real, Real, Real> & values)
 {
   // Additional validation specific to each transformation type could be added here
   switch (type)
@@ -53,7 +53,7 @@ CSGTransformation::isValidTransformationValue(TransformationType type,
 }
 
 std::string
-CSGTransformation::getTransformationTypeString(TransformationType type)
+CSGTransformationHelper::getTransformationTypeString(TransformationType type)
 {
   // Set the enum to the value and convert it to string
   MooseEnum enum_copy = transformation_type_enum;
@@ -62,7 +62,7 @@ CSGTransformation::getTransformationTypeString(TransformationType type)
 }
 
 std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>>
-CSGTransformation::getTransformationsAsStrings() const
+CSGTransformationHelper::getTransformationsAsStrings() const
 {
   std::vector<std::pair<std::string, std::tuple<Real, Real, Real>>> result;
   for (const auto & transform_pair : _transformations)

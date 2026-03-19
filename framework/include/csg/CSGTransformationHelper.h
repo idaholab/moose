@@ -31,13 +31,13 @@ static const MooseEnum transformation_type_enum{"TRANSLATION=0 ROTATION=1 SCALE=
 /**
  * Class for managing transformations in CSG objects
  */
-class CSGTransformation
+class CSGTransformationHelper
 {
 public:
   /**
    * Default constructor
    */
-  CSGTransformation() = default;
+  CSGTransformationHelper() = default;
 
   /**
    * Get the list of transformations

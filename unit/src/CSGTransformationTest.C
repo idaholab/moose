@@ -9,7 +9,7 @@
 
 #include "gtest/gtest.h"
 
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 
 #include "MooseUnitUtils.h"
 
@@ -24,8 +24,8 @@ TEST(CSGTransformationTest, testInvalidValues)
   {
     std::tuple<Real, Real, Real> invalid_scale_values = {
         1.0, -2.0, 0.0}; // negative value is invalid for scale
-    ASSERT_FALSE(CSGTransformation::isValidTransformationValue(TransformationType::SCALE,
-                                                               invalid_scale_values));
+    ASSERT_FALSE(CSGTransformationHelper::isValidTransformationValue(TransformationType::SCALE,
+                                                                     invalid_scale_values));
   }
 }
 
@@ -36,6 +36,7 @@ TEST(CSGTransformationTest, testGetStrings)
       TransformationType::TRANSLATION, TransformationType::ROTATION, TransformationType::SCALE};
   std::vector<std::string> exp_strings = {"TRANSLATION", "ROTATION", "SCALE"};
   for (size_t i = 0; i < transformations.size(); ++i)
-    ASSERT_EQ(CSGTransformation::getTransformationTypeString(transformations[i]), exp_strings[i]);
+    ASSERT_EQ(CSGTransformationHelper::getTransformationTypeString(transformations[i]),
+              exp_strings[i]);
 }
 }

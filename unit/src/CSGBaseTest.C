@@ -14,7 +14,7 @@
 #include "CSGXCylinder.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
-#include "CSGTransformation.h"
+#include "CSGTransformationHelper.h"
 
 #include "MooseUnitUtils.h"
 
