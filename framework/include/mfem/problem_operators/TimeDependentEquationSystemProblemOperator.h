@@ -44,6 +44,7 @@ public:
   }
 
 protected:
+  /// Add kernels/bcs and assemble the linear part of the equation system
   void BuildEquationSystemOperator(mfem::real_t dt);
 
 private:
