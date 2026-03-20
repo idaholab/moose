@@ -26,7 +26,6 @@ public:
   }
 
   virtual void SetGridFunctions() override;
-  virtual void Init(mfem::BlockVector & X) override;
   virtual void Solve() override;
 
   [[nodiscard]] virtual Moose::MFEM::EquationSystem * GetEquationSystem() const override
@@ -34,6 +33,9 @@ public:
     mooseAssert(_equation_system, "No EquationSystem in EquationSystemProblemOperator.");
     return _equation_system.get();
   }
+
+protected:
+  void BuildEquationSystemOperator();
 
 private:
   std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};

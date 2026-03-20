@@ -28,7 +28,6 @@ public:
   }
 
   virtual void SetGridFunctions() override;
-  virtual void Init(mfem::BlockVector & X) override;
   virtual void Solve() override;
 
   [[nodiscard]] virtual Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override

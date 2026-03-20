@@ -135,8 +135,8 @@ ComplexEquationSystem::ApplyEssentialBCs()
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
 
-    // For now, we zero out the gridfunction before populating it with the essential dofs
-    trial_gf = std::complex<mfem::real_t>(0, 0);
+    // Assign initial condition as initial guess for non-linear problems
+    static_cast<mfem::Vector &>(trial_gf) = _complex_gfuncs->GetRef(trial_var_name);
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
