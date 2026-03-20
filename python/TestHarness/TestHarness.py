@@ -535,7 +535,7 @@ class TestHarness:
         # This is one of the few places where we actually
         # load the pycapabilities module and that is
         # intentional as it can trigger a build
-        from pycapabilities import Capabilities
+        from pycapabilities import Capabilities, AUGMENTED_CAPABILITY_NAMES
 
         # Build the capabilities.Capabilities object, which
         # has the application capabilities plus the ones
@@ -562,6 +562,18 @@ class TestHarness:
                 util.errorExit(
                     f"--only-tests-that-require: {e}", colored=options.colored
                 )
+
+        # Check --ignore-capability to make sure they exist
+        if (ignore := options.ignore_capability) is not None:
+            for name in ignore:
+                if (
+                    name not in capabilities.values
+                    and name not in AUGMENTED_CAPABILITY_NAMES
+                ):
+                    util.errorExit(
+                        "--ignore-capability: Unknown " f"capability '{name}'",
+                        colored=options.colored,
+                    )
 
         return capabilities, augmented_capabilities, required
 
@@ -1522,6 +1534,13 @@ class TestHarness:
             help="Ignore specified caveats when checking if a test should run; using --ignore without a conditional will ignore all caveats",
         )
         filtergroup.add_argument(
+            "--ignore-capability",
+            action="extend",
+            nargs=1,
+            type=str,
+            help="Ignore the specified capability when checking if a test should run",
+        )
+        filtergroup.add_argument(
             "--min-parallel",
             dest="min_parallel",
             type=int,
@@ -2071,6 +2090,11 @@ class TestHarness:
                 "MOOSE_MAX_MEMORY_PER_SLOT",
             )
             opts.max_memory_per_slot = value
+
+        # Convert extend action params to lists if they have a single value
+        for name in ["ignore_capability"]:
+            if (value := getattr(opts, name)) is not None and isinstance(value, str):
+                setattr(opts, name, [value])
 
     def preRun(self):
         if self.options.json:

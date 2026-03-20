@@ -115,7 +115,8 @@ function configure_petsc()
       --with-strict-petscerrorcode=1 \
       --with-shared-libraries=1 \
       --with-sowing=0 \
-      --download-fblaslapack=1 \
+      --download-openblas=1 \
+      --download-openblas-make-options='DYNAMIC_ARCH=1' \
       --download-hpddm=1 \
       --download-hypre=1 \
       --download-metis=1 \
@@ -129,6 +130,8 @@ function configure_petsc()
       --download-kokkos=1 \
       --download-kokkos-kernels=1 \
       --download-libceed=1 \
+      --download-umpire \
+      --download-umpire-commit=v2025.12.0 \
       "${EXTRA_CONFIGURE_OPTIONS[@]}" \
       "$@"
 

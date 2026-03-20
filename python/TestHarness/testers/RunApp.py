@@ -742,19 +742,31 @@ class RunApp(Tester):
             else:
                 capabilities = options._augmented_capabilities
 
-            # Capture the capabilities that we need to dump, if any.
-            store_capabilities = {}
-            for capability, entry in capabilities.items():
-                if capability in self._capability_names:
-                    store_capabilities[capability] = entry
+            # The capabilities that we need to dump, if any
+            store_capabilities = {
+                capability: entry
+                for capability, entry in capabilities.items()
+                if capability in self._capability_names
+            }
+            # The capabilities that need to be ignored in the app, if any
+            store_ignore_capabilities = (
+                [v for v in options.ignore_capability if v in self._capability_names]
+                if options.ignore_capability is not None
+                else None
+            )
 
-            # We have capabilities to store
+            # Store if we have any to store
+            store = {}
             if store_capabilities:
+                store["capabilities"] = store_capabilities
+            if store_ignore_capabilities:
+                store["ignore_capabilities"] = store_ignore_capabilities
+            if store:
                 self._augmented_capabilities_file = self.getCapabilitiesFilePath(
                     options
                 )
                 with open(self._augmented_capabilities_file, "w") as f:
-                    json.dump(store_capabilities, f)
+                    json.dump(store, f)
 
     def augmentEnvironment(self, options) -> dict:
         return super().augmentEnvironment(options) | self._runapp_environment

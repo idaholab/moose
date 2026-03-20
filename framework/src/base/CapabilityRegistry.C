@@ -83,7 +83,9 @@ checkException(const peg::SemanticValues & vs,
 }
 
 CapabilityRegistry::CheckResult
-CapabilityRegistry::check(std::string requirements, const bool certain /* = true */) const
+CapabilityRegistry::check(std::string requirements,
+                          const CapabilityRegistry::CheckOptions &
+                              options /* = CapabilityRegistry::CheckOptions() */) const
 {
   using namespace peg;
 
@@ -128,6 +130,11 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
   std::set<std::string> unknown_capabilities;
   const auto add_unknown_capability = [&unknown_capabilities](const auto & name)
   { unknown_capabilities.insert(MooseUtils::toLower(name)); };
+
+  // Make sure that the capabilities to ignore are valid capabilities
+  for (const auto & name : options.ignore_capabilities)
+    if (!_registry.count(name))
+      throw CapabilityException("Capability to ignore '" + name + "' is not known");
 
   parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
 
@@ -197,7 +204,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
+  parser["Comparison"] =
+      [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
@@ -214,33 +222,46 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
 
     // capability is registered by the app
     const auto & capability = *capability_ptr;
+    const auto & name = capability.getName();
 
     // register capability as seen
-    result.capability_names.insert(capability.getName());
+    result.capability_names.insert(name);
 
-    // explicitly false causes any comparison to fail
+    // whether or not the capability is ignored
+    const auto is_ignored = [&name, &options]() { return options.ignore_capabilities.count(name); };
+
+    // explicitly false causes any comparison to fail unless ignored
     if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
-      return CheckState::CERTAIN_FAIL;
+      return is_ignored() ? CheckState::IGNORE : CheckState::CERTAIN_FAIL;
 
     // comparator
-    auto comp = [](int i, auto a, auto b)
+    auto comp = [&is_ignored](const int i, const auto & a, const auto & b)
     {
-      switch (i)
+      // early exit for ignored capabilities
+      if (is_ignored())
+        return CheckState::IGNORE;
+
+      // do the comparison
+      const auto do_comp = [&i, &a, &b]()
       {
-        case OP_LESS_EQ:
-          return a <= b;
-        case OP_GREATER_EQ:
-          return a >= b;
-        case OP_LESS:
-          return a < b;
-        case OP_GREATER:
-          return a > b;
-        case OP_NOT_EQ:
-          return a != b;
-        case OP_EQ:
-          return a == b;
-      }
-      return false;
+        switch (i)
+        {
+          case OP_LESS_EQ:
+            return a <= b;
+          case OP_GREATER_EQ:
+            return a >= b;
+          case OP_LESS:
+            return a < b;
+          case OP_GREATER:
+            return a > b;
+          case OP_NOT_EQ:
+            return a != b;
+          case OP_EQ:
+            return a == b;
+        }
+        return false;
+      };
+      return do_comp() ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
     };
 
     // version comparison
@@ -257,7 +278,7 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
           if (right.size() != 1)
             checkException(vs, "cannot be compared to a version.", capability);
 
-          return comp(op, *int_ptr, right[0]) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+          return comp(op, *int_ptr, right[0]);
         }
 
         const auto string_ptr = capability.queryStringValue();
@@ -271,8 +292,7 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
           checkException(vs, "cannot be compared to a version.", capability);
 
         // compare versions
-        return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
-                                                  : CheckState::CERTAIN_FAIL;
+        return comp(op, app_value_version, right);
       }
 
       case 1: // Identifier _ Operator _ String
@@ -284,7 +304,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
         if (!string_ptr)
           checkException(vs, "cannot be compared to a string.", capability);
 
-        // If this capability has an enumeration, make sure a valid choice is used
+        // If this capability has an enumeration, make sure a valid
+        // choice is used
         if (!capability.hasEnumeration(right))
           checkException(vs,
                          "'" + right + "' invalid for capability '" + left +
@@ -294,14 +315,14 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
         if (MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
           checkException(vs, "cannot be compared to a string.", capability);
 
-        return comp(op, *string_ptr, right) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+        return comp(op, *string_ptr, right);
       }
     }
 
     checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [this, &add_unknown_capability, &result](const SemanticValues & vs)
+  parser["Bool"] = [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
   {
     switch (vs.choice())
     {
@@ -320,6 +341,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
             return CheckState::POSSIBLE_PASS;
           case CheckState::POSSIBLE_PASS:
             return CheckState::POSSIBLE_FAIL;
+          case CheckState::IGNORE:
+            return CheckState::IGNORE;
           default:
             return CheckState::UNKNOWN;
         }
@@ -332,24 +355,32 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
         if (const auto capability_ptr = query(identifier))
         {
           const auto & capability = *capability_ptr;
+          const auto & name = capability.getName();
 
+          // explicit; cannot be a bool expression
           if (capability.getExplicit())
           {
-            std::string message = "capability '" + capability.getName() +
+            std::string message = "capability '" + name +
                                   "' requires a value and cannot be used in a boolean expression";
             if (capability.queryEnumeration())
               message += "; valid values: " + capability.enumerationToString();
             checkException(vs, message);
           }
 
-          result.capability_names.insert(capability.getName());
+          // mark as used
+          result.capability_names.insert(name);
+          // is ignored
+          if (options.ignore_capabilities.count(name))
+            return CheckState::IGNORE;
 
-          const auto bool_to_certain = [&negated](const bool val)
-          { return (val ^ negated) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL; };
-
+          // helper for negating a passing value if needed
+          const auto bool_to_pass = [&negated](const bool val)
+          { return (val ^ negated) ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS; };
+          // has a boolean value, so use it
           if (const auto bool_ptr = capability.queryBoolValue())
-            return bool_to_certain(*bool_ptr);
-          return bool_to_certain(true);
+            return bool_to_pass(!*bool_ptr);
+          // not ignored and doesn't have a boolean value
+          return bool_to_pass(false);
         }
 
         add_unknown_capability(identifier);
@@ -368,12 +399,16 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
       case 0: // Bool _ LogicOperator _ Expression
       {
         const auto left = std::any_cast<CheckState>(vs[0]);
-        const auto op = std::any_cast<LogicOperator>(vs[1]);
         const auto right = std::any_cast<CheckState>(vs[2]);
+        const auto op = std::any_cast<LogicOperator>(vs[1]);
 
         switch (op)
         {
           case OP_AND:
+            if (left == CheckState::IGNORE)
+              return right;
+            if (right == CheckState::IGNORE)
+              return left;
             for (const auto state : {CheckState::CERTAIN_FAIL,
                                      CheckState::POSSIBLE_FAIL,
                                      CheckState::UNKNOWN,
@@ -384,6 +419,8 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
             throw CapabilityException("Conjunction failure");
 
           case OP_OR:
+            if (left == CheckState::IGNORE || right == CheckState::IGNORE)
+              return CheckState::IGNORE;
             for (const auto state : {CheckState::CERTAIN_PASS,
                                      CheckState::POSSIBLE_PASS,
                                      CheckState::UNKNOWN,
@@ -413,8 +450,12 @@ CapabilityRegistry::check(std::string requirements, const bool certain /* = true
     throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
   // If certain and unknown capabilities were found, throw accordingly
-  if (certain && unknown_capabilities.size())
+  if (options.certain && unknown_capabilities.size())
     throw UnknownCapabilitiesException({unknown_capabilities.begin(), unknown_capabilities.end()});
+
+  // Consider an ignored state to be a pass
+  if (result.state == CheckState::IGNORE)
+    result.state = CheckState::CERTAIN_PASS;
 
   return result;
 }

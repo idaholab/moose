@@ -40,7 +40,8 @@ CSGSurface::operator==(const CSGSurface & other) const
 {
   return (this->getName() == other.getName()) &&
          (this->getSurfaceType() == other.getSurfaceType()) &&
-         (this->getCoeffs() == other.getCoeffs());
+         (this->getCoeffs() == other.getCoeffs()) &&
+         (this->getTransformations() == other.getTransformations());
 }
 
 bool

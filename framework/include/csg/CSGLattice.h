@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGUniverse.h"
+#include "CSGTransformationHelper.h"
 #include "JsonIO.h"
 #include <variant>
 #include <optional>
@@ -30,7 +31,7 @@ typedef std::variant<std::reference_wrapper<const CSGUniverse>, std::string> Out
 /**
  * CSGLattice is the abstract class for defining lattices.
  */
-class CSGLattice
+class CSGLattice : public CSGTransformationHelper
 {
 public:
   /**
@@ -243,6 +244,7 @@ protected:
   FRIEND_TEST(CSGLatticeTest, testSetName);
   FRIEND_TEST(CSGLatticeTest, testUpdateOuter);
   FRIEND_TEST(CSGBaseTest, testAddLattice);
+  FRIEND_TEST(CSGLatticeTest, testCartLatticeEquality);
   ///@}
 #endif
 };

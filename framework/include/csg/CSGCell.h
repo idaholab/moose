@@ -14,6 +14,7 @@
 #endif
 
 #include "CSGRegion.h"
+#include "CSGTransformationHelper.h"
 
 namespace CSG
 {
@@ -25,7 +26,7 @@ class CSGLattice;
  * CSGCell creates an internal representation of a Constructive Solid Geometry (CSG)
  * cell, which represents a region of space filled by a material or void
  */
-class CSGCell
+class CSGCell : public CSGTransformationHelper
 {
 public:
   /**
@@ -158,6 +159,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGCellTest, testSetName);
   FRIEND_TEST(CSGCellTest, testUpdateRegion);
+  FRIEND_TEST(CSGCellTest, testCellEquality);
   ///@}
 #endif
 };

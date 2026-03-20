@@ -144,6 +144,8 @@ TEST(CSGCellTest, testCellEquality)
   // void cells that differ by one attribute
   CSGCell vcdiff1("void_cell", region2);
   CSGCell vcdiff2("void_cell2", region1);
+  CSGCell vcdiff3("void_cell", region1);
+  vcdiff3.addTransformation(TransformationType::TRANSLATION, std::make_tuple(1.0, 0.0, 0.0));
 
   // identical material cells
   CSGCell mcell1("mat_cell", "matname", region1);
@@ -175,6 +177,7 @@ TEST(CSGCellTest, testCellEquality)
     std::vector<CSGCell> diff_compare = {vcell1,
                                          vcdiff1,
                                          vcdiff2,
+                                         vcdiff3,
                                          mcell1,
                                          mcdiff1,
                                          mcdiff2,
