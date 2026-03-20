@@ -4,18 +4,6 @@
       "fill": "rgmb_region_5",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "+amg_radial_duct_1_surf_0",
-        "&",
-        "+amg_radial_duct_1_surf_1",
-        "&",
-        "+amg_radial_duct_1_surf_2",
-        "&",
-        "+amg_radial_duct_1_surf_3",
-        "&",
-        "+amg_radial_duct_1_surf_4",
-        "&",
-        "+amg_radial_duct_1_surf_5",
-        "&",
         "~",
         [
           "+amg_radial_duct_0_surf_0",
@@ -32,23 +20,6 @@
         ]
       ],
       "region_postfix": [
-        "amg_radial_duct_1_surf_0",
-        "+",
-        "amg_radial_duct_1_surf_1",
-        "+",
-        "&",
-        "amg_radial_duct_1_surf_2",
-        "+",
-        "&",
-        "amg_radial_duct_1_surf_3",
-        "+",
-        "&",
-        "amg_radial_duct_1_surf_4",
-        "+",
-        "&",
-        "amg_radial_duct_1_surf_5",
-        "+",
-        "&",
         "amg_radial_duct_0_surf_0",
         "+",
         "amg_radial_duct_0_surf_1",
@@ -66,8 +37,7 @@
         "amg_radial_duct_0_surf_5",
         "+",
         "&",
-        "~",
-        "&"
+        "~"
       ]
     },
     "amg_lattice_cell": {
@@ -106,24 +76,21 @@
         "&"
       ]
     },
-    "amg_void_cell": {
-      "fill": "",
-      "filltype": "VOID",
+    "amg_root_cell": {
+      "fill": "amg_univ",
+      "filltype": "UNIVERSE",
       "region_infix": [
-        "~",
-        [
-          "+amg_radial_duct_1_surf_0",
-          "&",
-          "+amg_radial_duct_1_surf_1",
-          "&",
-          "+amg_radial_duct_1_surf_2",
-          "&",
-          "+amg_radial_duct_1_surf_3",
-          "&",
-          "+amg_radial_duct_1_surf_4",
-          "&",
-          "+amg_radial_duct_1_surf_5"
-        ]
+        "+amg_radial_duct_1_surf_0",
+        "&",
+        "+amg_radial_duct_1_surf_1",
+        "&",
+        "+amg_radial_duct_1_surf_2",
+        "&",
+        "+amg_radial_duct_1_surf_3",
+        "&",
+        "+amg_radial_duct_1_surf_4",
+        "&",
+        "+amg_radial_duct_1_surf_5"
       ],
       "region_postfix": [
         "amg_radial_duct_1_surf_0",
@@ -142,8 +109,7 @@
         "&",
         "amg_radial_duct_1_surf_5",
         "+",
-        "&",
-        "~"
+        "&"
       ]
     },
     "pin1_cell_radial_0": {
@@ -208,18 +174,6 @@
       "fill": "rgmb_region_3",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        "+pin1_radial_duct_2_surf_0",
-        "&",
-        "+pin1_radial_duct_2_surf_1",
-        "&",
-        "+pin1_radial_duct_2_surf_2",
-        "&",
-        "+pin1_radial_duct_2_surf_3",
-        "&",
-        "+pin1_radial_duct_2_surf_4",
-        "&",
-        "+pin1_radial_duct_2_surf_5",
-        "&",
         "~",
         [
           "+pin1_radial_duct_1_surf_0",
@@ -236,23 +190,6 @@
         ]
       ],
       "region_postfix": [
-        "pin1_radial_duct_2_surf_0",
-        "+",
-        "pin1_radial_duct_2_surf_1",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_2",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_3",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_4",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_5",
-        "+",
-        "&",
         "pin1_radial_duct_1_surf_0",
         "+",
         "pin1_radial_duct_1_surf_1",
@@ -268,47 +205,6 @@
         "+",
         "&",
         "pin1_radial_duct_1_surf_5",
-        "+",
-        "&",
-        "~",
-        "&"
-      ]
-    },
-    "pin1_void_cell": {
-      "fill": "",
-      "filltype": "VOID",
-      "region_infix": [
-        "~",
-        [
-          "+pin1_radial_duct_2_surf_0",
-          "&",
-          "+pin1_radial_duct_2_surf_1",
-          "&",
-          "+pin1_radial_duct_2_surf_2",
-          "&",
-          "+pin1_radial_duct_2_surf_3",
-          "&",
-          "+pin1_radial_duct_2_surf_4",
-          "&",
-          "+pin1_radial_duct_2_surf_5"
-        ]
-      ],
-      "region_postfix": [
-        "pin1_radial_duct_2_surf_0",
-        "+",
-        "pin1_radial_duct_2_surf_1",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_2",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_3",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_4",
-        "+",
-        "&",
-        "pin1_radial_duct_2_surf_5",
         "+",
         "&",
         "~"
@@ -571,18 +467,21 @@
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
-        "amg_lattice_cell",
-        "amg_duct_cell_radial_0",
-        "amg_void_cell"
+        "amg_root_cell"
       ],
       "root": true
+    },
+    "amg_univ": {
+      "cells": [
+        "amg_lattice_cell",
+        "amg_duct_cell_radial_0"
+      ]
     },
     "pin1_univ": {
       "cells": [
         "pin1_cell_radial_0",
         "pin1_cell_radial_1",
-        "pin1_cell_radial_2",
-        "pin1_void_cell"
+        "pin1_cell_radial_2"
       ],
       "transformations": [
         [
