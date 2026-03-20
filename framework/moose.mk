@@ -226,7 +226,7 @@ endif
 $(pyhit_srcfiles) $(hit_CLI_srcfiles): | prebuild
 
 pyhit_LIB          := $(HIT_DIR)/hit.$(PYMOD_EXTENSION)
-pyhit_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) $(wasp_CXXFLAGS) $(wasp_LDFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include
+pyhit_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking $(pyhit_LIB)..."
