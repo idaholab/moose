@@ -23,7 +23,7 @@ ElementOrderConversionGenerator::validParams()
   params.addClassDescription("Mesh generator which converts orders of elements");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<MooseEnum>("conversion_type",
-                             MooseEnum(getOrderConversionTypeOptions()),
+                             MooseEnum(getOrderConversionTypeOptions(), "FIRST_ORDER"),
                              "The type of element order conversion to perform");
   return params;
 }
