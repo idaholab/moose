@@ -11,6 +11,9 @@ packages:
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
+    influential:
+      # must be updated when requirements are updated
+      - requirements.txt
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
     version: 2026.03.19
@@ -104,6 +107,8 @@ packages:
     apptainer:
       from: libmesh
     influential:
+      # python environment
+      - requirements.txt
       # container build definitions
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
