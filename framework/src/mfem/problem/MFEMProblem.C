@@ -41,7 +41,7 @@ MFEMProblem::validParams()
       false,
       "Whether to force a higher-order libMesh mesh to be represented as a first-order mesh in "
       "MFEM. This can be useful if the higher order was only needed in libMesh for the basis "
-      "functions, rather than to represent curvature in the elements..");
+      "functions, rather than to represent curvature in the elements.");
 
   return params;
 }
