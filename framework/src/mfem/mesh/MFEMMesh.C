@@ -29,14 +29,14 @@ MFEMMesh::validParams()
   params.addParam<unsigned int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
-  params.addParam<bool>(
-      "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
-  params.addParam<bool>(
-      "nonconforming", false, "Determines whether ensure the mesh is non-conforming.");
+  params.addParam<bool>("nonconforming",
+                        false,
+                        "Ensures the mesh is non-conforming: necessary for refining quad/hex "
+                        "meshes and load (re)balancing.");
   params.addParam<bool>("reorder_mesh",
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
-                        "Only Hilbert is supported at present.");
+                        "Only Hilbert sorting is supported at present.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -78,12 +78,11 @@ MFEMMesh::buildMesh()
     mfem_ser_mesh.ReorderElements(ordering);
   }
 
-  // Make sure mesh is in non-conforming mode to enable local refinement
-  // of quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument
-  // (true/false) determines whether a simplex mesh is considered to be
-  // non-conforming.
+  // Make sure mesh is in non-conforming mode to enable local refinement of
+  // quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument (true/false)
+  // determines whether a simplex mesh is considered to be non-conforming.
   if (getParam<bool>("nonconforming"))
-    mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
+    mfem_ser_mesh.EnsureNCMesh(true);
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = this->comm().get();

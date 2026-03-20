@@ -50,8 +50,6 @@ MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
   addMFEMNonlinearSolver();
-  if (useAMR())
-    getProblemData().refiner->initialSetup();
 }
 
 void

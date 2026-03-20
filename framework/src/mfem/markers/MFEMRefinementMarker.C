@@ -58,17 +58,17 @@ MFEMRefinementMarker::initialSetup()
     _p_ref_counter = _max_p_level;
   }
 
-  // For now, we lock out p-refinement, since we are unsure of the implementation.
-  if (_max_p_level > 0)
+  // For now, we only allow one level of p-refinement exclusively.
+  if ((_max_h_level and _max_p_level) or _max_p_level > 1)
   {
-    mooseWarning("p-refinement is not supported at present.");
+    mooseWarning("At present, only either a) h-refinement or b) one level of p-refinement is "
+                 "supported. Disabling p-refinement.");
     _p_ref_counter = _max_p_level;
   }
 
   // We do not want to allow rebalancing if p-refinement is enabled, because that mesh-only
   // operation has no notion of p-refinement and the computational imbalance that may result.
-  // Though p-refinement is not supported at this time, we add this in anyway for future-proofing.
-  if (_max_p_level > 0 and _rebalance)
+  if (_max_p_level and _rebalance)
   {
     mooseWarning("Asked for rebalancing as well as p-refinement, which is not supported.");
     _rebalance = false;

@@ -63,16 +63,27 @@
 []
 
 [BCs]
+  [top]
+    type = MFEMScalarDirichletBC
+    variable = concentration
+    boundary = 4
+    coefficient = 1
+  []
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = '1'
-    coefficient = 1.0
+    boundary = 2
   []
-  [low_terminal]
-    type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = '2'
+[]
+
+[Functions]
+  [D]
+    type = ParsedFunction
+    expression = 1+1/(1+exp(20*y-10))
+  []
+  [solution]
+    type = ParsedFunction
+    expression = (20*y+log(exp(20*y)+2*exp(10))-log(1+2*exp(10)))/(30+log(2+exp(10))-log(1+2*exp(10)))
   []
 []
 
@@ -80,6 +91,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
+    coefficient = D
   []
 []
 
@@ -100,10 +112,15 @@
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion_amr
-    vtk_format = ASCII
+[Postprocessors]
+  [error]
+    type = MFEML2Error
+    variable = concentration
+    function = solution
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/DiffusionHRefinement
 []
