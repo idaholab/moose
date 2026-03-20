@@ -1,0 +1,68 @@
+[Tests]
+  design = 'PeriodicRayBC.md SetupPeriodicRayBCAction.md RayBCs/index.md'
+  issues = '#31025 #31280'
+
+  [test]
+    requirement = 'The system shall support tracing rays with periodic boundary conditions for'
+
+    [1d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_1d.i'
+      csvdiff = 'periodic_ray_bc_1d_out.csv'
+      allow_test_objects = true
+      detail = 'one-dimensional meshes,'
+    []
+    [2d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_2d.i'
+      csvdiff = 'periodic_ray_bc_2d_out.csv'
+      allow_test_objects = true
+      mesh_mode = REPLICATED
+      detail = 'two-dimensional meshes,'
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_3d.i'
+      csvdiff = 'periodic_ray_bc_3d_out.csv'
+      allow_test_objects = true
+      mesh_mode = REPLICATED
+      detail = 'and three-dimensional meshes.'
+    []
+  []
+
+  [repeat_bc_check]
+    type = 'RunException'
+    input = 'periodic_ray_bc_2d.i'
+    cli_args = 'Outputs/csv=false
+                RayBCs/periodic2/type=PeriodicRayBC
+                RayBCs/periodic2/auto_direction=x'
+    allow_test_objects = true
+    expect_err = "The periodic boundary '(left|right)' has been defined in both PeriodicRayBC \"periodic2\" and PeriodicRayBC \"periodic\""
+    requirement = 'The system shall report a reasonable error when adding multiple periodic ray boundary conditions on the same boundary'
+  []
+
+  [distributed_neighbor_check]
+    requirement = 'The system shall report a reasonable warning when tracing rays with periodic boundary conditions with an unsupported neighbor configuration in'
+
+    [2d]
+      type = 'RunException'
+      input = 'periodic_ray_bc_2d.i'
+      cli_args = 'Outputs/csv=false'
+      allow_test_objects = true
+      mesh_mode = DISTRIBUTED
+      min_parallel = 2
+      expect_err = "4 ray tracing periodic boundaries were found to be neighbors"
+      detail = 'two-dimensional meshes'
+    []
+    [3d]
+      type = 'RunException'
+      input = 'periodic_ray_bc_3d.i'
+      cli_args = 'Outputs/csv=false'
+      allow_test_objects = true
+      mesh_mode = DISTRIBUTED
+      min_parallel = 2
+      expect_err = "12 ray tracing periodic boundaries were found to be neighbors"
+      detail = 'and three-dimensional meshes'
+    []
+  []
+[]

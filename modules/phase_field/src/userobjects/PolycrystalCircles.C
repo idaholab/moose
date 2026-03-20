@@ -65,7 +65,7 @@ PolycrystalCircles::getGrainsBasedOnPoint(const Point & point,
       distance = std::sqrt(d_x + d_y);
     }
     else
-      distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[i], point);
+      distance = _mesh.minPeriodicDistance(*_vars[0], _centerpoints[i], point);
 
     if (distance < _radii[i] + _int_width)
       grains.push_back(i);
@@ -188,7 +188,7 @@ PolycrystalCircles::computeDiffuseInterface(const Point & p, const unsigned int 
     d = std::sqrt(d_x + d_y);
   }
   else
-    d = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[i], p);
+    d = _mesh.minPeriodicDistance(*_vars[0], _centerpoints[i], p);
 
   return 0.5 * (1 - std::tanh(2.0 * (d - _radii[i]) / _int_width));
 }
