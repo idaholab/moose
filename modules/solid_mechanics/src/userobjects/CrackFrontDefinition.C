@@ -159,13 +159,6 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
                  "CrackFrontDefinition error: since boundary is defined, "
                  "crack_front_points_provider should not be added.");
 
-    // number_points_from_provider is optional - will be auto-detected in initialSetup()
-    // for mesh-based providers
-    if (isParamValid("number_points_from_provider"))
-      _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
-    else
-      _num_points_from_provider = 0; // Will be set in initialSetup() for mesh-based providers
-
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
   }
   else if (isParamValid("number_points_from_provider"))
@@ -300,25 +293,10 @@ CrackFrontDefinition::initialSetup()
       _use_mesh_cutter = true;
 
       // Automatically get number of crack front points from mesh-based provider
-      if (_num_points_from_provider == 0)
-      {
-        _num_points_from_provider = _crack_front_points_provider->getNumberOfCrackFrontPoints();
-        mooseInfo("CrackFrontDefinition: Automatically detected ",
-                  _num_points_from_provider,
-                  " crack front points from mesh-based provider");
-      }
-      else
-      {
-        auto xfem_cutter_points = _crack_front_points_provider->getNumberOfCrackFrontPoints();
-        if (_num_points_from_provider != xfem_cutter_points)
-          paramError("number_points_from_provider",
-                     "This must match the number of points provided by the XFEM cutter "
-                     "object."
-                     "\n   number_points_from_provider: ",
-                     _num_points_from_provider,
-                     "\n   XFEM Crack Front Points: ",
-                     xfem_cutter_points);
-      }
+      _num_points_from_provider = _crack_front_points_provider->getNumberOfCrackFrontPoints();
+      mooseInfo("CrackFrontDefinition: Automatically detected ",
+                _num_points_from_provider,
+                " crack front points from mesh-based provider");
 
       if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
         paramError("crack_direction_method",
@@ -328,6 +306,10 @@ CrackFrontDefinition::initialSetup()
         paramError("crack_mouth_boundary",
                    "'crack_mouth_boundary' cannot be set when using a "
                    "'crack_front_points_provider' that uses an XFEM cutter mesh");
+    }
+    else if (isParamValid("number_points_from_provider"))
+    {
+      _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
     }
     else if (_num_points_from_provider == 0)
     {
