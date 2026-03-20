@@ -123,45 +123,26 @@ protected:
   }
 
   /// Check that the field pointer is valid and the field has not already been registered.
-  void CheckFieldIsRegistrable(const std::string & field_name, T * field) const
+  void CheckFieldIsRegistrable([[maybe_unused]] const std::string & field_name,
+                               [[maybe_unused]] T * field) const
   {
-    if (!field)
-    {
-      MFEM_ABORT("Cannot register NULL field with name '" << field_name << "'.");
-    }
-
-    CheckForDoubleRegistration(field_name, field);
-  }
-
-  /// Check for double-registration of a field. A double-registered field may
-  /// result in undefined behavior.
-  void CheckForDoubleRegistration(const std::string & field_name, T * field) const
-  {
-    if (Has(field_name) && Get(field_name) == field)
-    {
-      MFEM_ABORT("The field '" << field_name << "' is already registered.");
-    }
+    mooseAssert(field, "Cannot register NULL field with name '" + field_name + "'.");
+    mooseAssert(!Has(field_name) || Get(field_name) != field,
+                "The field '" + field_name + "' is already registered.");
   }
 
   /// Check that a field exists in the map.
   void CheckFieldIsRegistered(const std::string & field_name) const
   {
     if (!Has(field_name))
-    {
-      MFEM_ABORT("The field '" << field_name << "' has not been registered.");
-    }
+      mooseError("The field '" + field_name + "' has not been registered.");
   }
 
   /// Ensure that a returned shared pointer is valid.
   inline std::shared_ptr<T> EnsureFieldPointerIsNonNull(const_iterator & iterator) const
   {
     auto owned_ptr = iterator->second;
-
-    if (!owned_ptr)
-    {
-      MFEM_ABORT("The field '" << iterator->first << "' is NULL.");
-    }
-
+    mooseAssert(owned_ptr, "The field '" + iterator->first + "' is NULL.");
     return owned_ptr;
   }
 
@@ -170,12 +151,7 @@ protected:
   inline TDerived * EnsurePointerCastIsNonNull(T * ptr) const
   {
     auto derived_ptr = dynamic_cast<TDerived *>(ptr);
-
-    if (!derived_ptr)
-    {
-      MFEM_ABORT("The dynamic cast performed on the field pointer failed.");
-    }
-
+    mooseAssert(derived_ptr, "The dynamic cast performed on the field pointer failed.");
     return derived_ptr;
   }
 
