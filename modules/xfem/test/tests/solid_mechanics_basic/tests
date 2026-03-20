@@ -114,7 +114,6 @@
     []
     [num_points_error]
       type = RunException
-      issues = '#32418'
       input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
       cli_args = 'DomainIntegral/number_points_from_provider=3'
       expect_err = 'This must match the number of points provided by the XFEM mesh cutter object.'
