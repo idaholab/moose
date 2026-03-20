@@ -650,21 +650,35 @@ AssemblyMeshGenerator::generateCSG()
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
   // Combine all bases from PinMG inputs into this base. Root universes from
-  // inputs are renamed to a new universe name. For hex lattices, apply a
-  // 30 degree rotation to each of the constituent pins before they are
-  // placed into a lattice
+  // inputs are renamed to a new universe name. These universes and their
+  // cells will be discarded, so that only the infinite pin universe is retained
   std::unordered_map<unsigned int, std::string> univ_id_names;
+  std::vector<std::string> univs_to_discard;
   for (const auto i : index_range(_inputs))
   {
+    const auto input_univ_name_discard = _inputs[i] + "_root_univ";
     const auto input_univ_name = _inputs[i] + "_univ";
-    csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name);
+    csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
+    univs_to_discard.push_back(input_univ_name_discard);
     univ_id_names[i] = input_univ_name;
 
     if (_geom_type == "Hex")
     {
+      // For hex lattices, apply a 30 degree rotation to each of the constitutent pins
+      // before they are placed into a lattice
       const auto & csg_univ = csg_obj->getUniverseByName(input_univ_name);
       csg_obj->applyAxisRotation(csg_univ, CSG::RotationAxisType::Z, 30.);
     }
+  }
+
+  // Discard root universes of the input pins and their cells
+  for (const auto & univ_name : univs_to_discard)
+  {
+    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
+    const auto cells_to_delete = universe_to_delete.getAllCells();
+    csg_obj->deleteUniverse(universe_to_delete);
+    for (const auto & cell : cells_to_delete)
+      csg_obj->deleteCell(cell.get());
   }
 
   // Build the universe pattern for the assembly lattice from the input pattern
@@ -683,7 +697,8 @@ AssemblyMeshGenerator::generateCSG()
   // Define axial boundaries for problem
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
   CSG::CSGRegion axial_extent;
-  if (_mesh_dimensions == 3)
+  const auto extruded_assembly = _mesh_dimensions == 3;
+  if (extruded_assembly)
   {
     surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
     const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
@@ -691,12 +706,15 @@ AssemblyMeshGenerator::generateCSG()
     axial_extent = +lowest_axial_surf & -highest_axial_surf;
   }
 
-  // Define all duct boundaries and create the appropriate cell to fill each duct region
+  // Define all duct boundaries and create the appropriate cell to fill each duct region.
+  // Add these cells to a separate universe
   std::vector<Real> duct_boundaries = _duct_sizes;
   duct_boundaries.push_back(getReactorParam<Real>(RGMB::assembly_pitch) / 2.);
-  CSG::CSGRegion inner_region, outer_region;
+  CSG::CSGRegion inner_region;
+  const auto & assembly_univ = csg_obj->createUniverse(name() + "_univ");
   for (const auto i : index_range(duct_boundaries))
   {
+    bool is_last_radial_region = i == duct_boundaries.size() - 1;
     if (i == 0)
     {
       // For innermost duct region, we create a lattice cell as the fill
@@ -706,31 +724,33 @@ AssemblyMeshGenerator::generateCSG()
 
       // Define lattice cell
       std::string lat_cell_name = name() + "_lattice_cell";
-      const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
-      inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
-      if (_mesh_dimensions == 3)
-        inner_region &= axial_extent;
-      csg_obj->createCell(lat_cell_name, assembly_lattice, inner_region);
+      if (!is_last_radial_region)
+      {
+        const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
+        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+      }
+      csg_obj->createCell(lat_cell_name, assembly_lattice, inner_region, &assembly_univ);
     }
     else
     {
       // Update ducted region
-      outer_region = ~inner_region;
-      const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
-      inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
-      if (_mesh_dimensions == 3)
-        inner_region &= axial_extent;
-      CSG::CSGRegion radial_region = inner_region & outer_region;
+      CSG::CSGRegion radial_region = ~inner_region;
+      if (!is_last_radial_region)
+      {
+        const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
+        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        radial_region &= inner_region;
+      }
 
       // Define cell fill of lattice
       std::string duct_cell_name = name() + "_duct_cell_radial_" + std::to_string(i - 1);
-      if (_mesh_dimensions == 2)
+      if (!extruded_assembly)
       {
         // In 2D, the cell fill will be a material
         std::string region_name = "rgmb_region_" + std::to_string(_duct_region_ids[0][i - 1]);
-        csg_obj->createCell(duct_cell_name, region_name, radial_region);
+        csg_obj->createCell(duct_cell_name, region_name, radial_region, &assembly_univ);
       }
-      else // _mesh_dimension == 3
+      else
       {
         // In 3D, the cell fill will be a universe
         const auto & name_prefix = name() + "_duct_radial_" + std::to_string(i - 1);
@@ -739,16 +759,19 @@ AssemblyMeshGenerator::generateCSG()
           duct_region_ids.push_back(_duct_region_ids[j][i - 1]);
         auto & fill_univ = createDuctFillUniverse(
             name_prefix, surfaces_by_axial_region, duct_region_ids, *csg_obj);
-        csg_obj->createCell(duct_cell_name, fill_univ, radial_region);
+        csg_obj->createCell(duct_cell_name, fill_univ, radial_region, &assembly_univ);
       }
     }
   }
 
-  // Define void cell to cover region outside assembly domain, where the complement of the last set
-  // inner_region is the outermost defined zone of the assembly
-  const auto void_cell_name = name() + "_void_cell";
-  auto void_region = ~inner_region;
-  csg_obj->createCell(void_cell_name, void_region);
+  // Create new cell to bound universe based on assembly outer boundaries, and add this cell
+  // to the root universe
+  const auto & duct_surfaces =
+      getOuterRadialSurfaces(duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
+  auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+  if (extruded_assembly)
+    assembly_region &= axial_extent;
+  csg_obj->createCell(name() + "_root_cell", assembly_univ, assembly_region);
 
   return csg_obj;
 }
@@ -807,18 +830,22 @@ AssemblyMeshGenerator::createDuctFillUniverse(
   auto & fill_univ = csg_obj.createUniverse(name_prefix + "_univ");
   for (const auto i : make_range(surfaces_by_axial_region.size() - 1))
   {
+    CSG::CSGRegion axial_region;
     const auto & lower_surf = surfaces_by_axial_region[i].get();
+    if (lower_surf != surfaces_by_axial_region.front())
+      axial_region = +lower_surf;
     const auto & upper_surf = surfaces_by_axial_region[i + 1].get();
+    if (upper_surf != surfaces_by_axial_region.back())
+    {
+      if (axial_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+        axial_region = -upper_surf;
+      else
+        axial_region &= -upper_surf;
+    }
     auto cell_name = name_prefix + "_axial_" + std::to_string(i);
-    const auto cell_region = +lower_surf & -upper_surf;
     const auto mat_name = "rgmb_region_" + std::to_string(region_ids[i]);
-    csg_obj.createCell(cell_name, mat_name, cell_region, &fill_univ);
+    csg_obj.createCell(cell_name, mat_name, axial_region, &fill_univ);
   }
-  const auto void_cell_name = name_prefix + "_void_cell";
-  const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
-  const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
-  const auto void_region = -lowest_axial_surf | +highest_axial_surf;
-  csg_obj.createCell(void_cell_name, void_region, &fill_univ);
 
   return fill_univ;
 }
