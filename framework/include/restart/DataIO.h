@@ -51,6 +51,7 @@ class VectorValue;
 template <typename T>
 class TensorValue;
 class Elem;
+class FEType;
 class Point;
 }
 
@@ -420,6 +421,8 @@ template <>
 void dataStore(std::ostream & stream, UserObjectName & v, void * context);
 template <>
 void dataStore(std::ostream & stream, bool & v, void * context);
+template <>
+void dataStore(std::ostream & stream, libMesh::FEType & v, void * context);
 // Vectors of bools are special
 // https://en.wikipedia.org/w/index.php?title=Sequence_container_(C%2B%2B)&oldid=767869909#Specialization_for_bool
 template <>
@@ -788,6 +791,8 @@ template <>
 void dataLoad(std::istream & stream, UserObjectName & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, bool & v, void * /*context*/);
+template <>
+void dataLoad(std::istream & stream, libMesh::FEType & v, void * /*context*/);
 // Vectors of bools are special
 // https://en.wikipedia.org/w/index.php?title=Sequence_container_(C%2B%2B)&oldid=767869909#Specialization_for_bool
 template <>

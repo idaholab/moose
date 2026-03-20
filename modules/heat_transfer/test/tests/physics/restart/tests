@@ -33,6 +33,7 @@
       csvdiff = 'from_file.csv'
       cli_args = "Mesh/active='fmg_restart' Physics/HeatConduction/FiniteVolume/h1/initialize_variables_from_mesh_file=true Outputs/file_base=from_file"
       detail = 'when performing manual restart from a mesh file, ignoring the default initial condition.'
+      prereq = 'restart/user_ics'
     []
   []
   [error]

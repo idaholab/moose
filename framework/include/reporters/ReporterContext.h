@@ -375,7 +375,7 @@ ReporterContext<T>::finalize()
 
     // Perform broadcast in the case
     //            ROOT -> REPLICATED
-    if (producer == REPORTER_MODE_ROOT && consumer == REPORTER_MODE_REPLICATED)
+    if (static_cast<int>(producer) == REPORTER_MODE_ROOT && consumer == REPORTER_MODE_REPLICATED)
       auto_operation = ReporterContext::AutoOperation::BROADCAST;
 
     // The following are not support and create an error
@@ -383,10 +383,14 @@ ReporterContext<T>::finalize()
     //      REPLICATED -> DISTRIBUTED
     //     DISTRIBUTED -> ROOT
     //     DISTRIBUTED -> REPLICATED
-    else if ((producer == REPORTER_MODE_ROOT && consumer == REPORTER_MODE_DISTRIBUTED) ||
-             (producer == REPORTER_MODE_REPLICATED && consumer == REPORTER_MODE_DISTRIBUTED) ||
-             (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_ROOT) ||
-             (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_REPLICATED))
+    else if ((static_cast<int>(producer) == REPORTER_MODE_ROOT &&
+              consumer == REPORTER_MODE_DISTRIBUTED) ||
+             (static_cast<int>(producer) == REPORTER_MODE_REPLICATED &&
+              consumer == REPORTER_MODE_DISTRIBUTED) ||
+             (static_cast<int>(producer) == REPORTER_MODE_DISTRIBUTED &&
+              consumer == REPORTER_MODE_ROOT) ||
+             (static_cast<int>(producer) == REPORTER_MODE_DISTRIBUTED &&
+              consumer == REPORTER_MODE_REPLICATED))
       mooseError("The Reporter value \"",
                  name(),
                  "\" is being produced in ",
