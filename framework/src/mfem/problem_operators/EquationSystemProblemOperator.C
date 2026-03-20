@@ -26,18 +26,15 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   ProblemOperator::Init(X);
   GetEquationSystem()->BuildEquationSystem();
+  // Assign initial condition as initial guess for non-linear problems
+  if ((GetEquationSystem()->_non_linear))
+    for (const auto i : index_range(_trial_variables))
+      *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
 }
 
 void
 EquationSystemProblemOperator::Solve()
 {
-  // Assign initial condition as initial guess for non-linear problems
-  if ((GetEquationSystem()->_non_linear))
-  {
-    for (const auto i : index_range(_trial_variables))
-      *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
-  }
-
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)

@@ -191,14 +191,9 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   // Build the temporary BlockVectors
   _block_true_offsets = new mfem::Array<int>(_trial_var_names.size() + 1);
   (*_block_true_offsets)[0] = 0;
-
   for (unsigned i = 0; i < _trial_var_names.size(); i++)
-  {
     (*_block_true_offsets)[i + 1] = _gfuncs->Get(_trial_var_names.at(i))->ParFESpace()->TrueVSize();
-  }
   _block_true_offsets->PartialSum();
-  _trueBlockSol.Update(*_block_true_offsets);
-  _blockResidual.Update(*_block_true_offsets);
 }
 
 void
@@ -384,26 +379,27 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  static_cast<mfem::Vector &>(_trueBlockSol) = sol;
+  // Auxiliary BlockVectors to simplify fetching sol and residual blocks
+  const mfem::BlockVector blockSolution(const_cast<mfem::Vector &>(sol), *_block_true_offsets);
+  mfem::BlockVector blockResidual(residual, *_block_true_offsets);
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    _trueBlockSol.GetBlock(i).SyncAliasMemory(_trueBlockSol);
-    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
+    blockSolution.GetBlock(i).SyncAliasMemory(blockSolution);
+    _gfuncs->Get(trial_var_name)->Distribute(&(blockSolution.GetBlock(i)));
   }
 
   if (_non_linear)
   {
-    _blockResidual = 0.0;
+    blockResidual = 0.0;
     for (unsigned int i = 0; i < _test_var_names.size(); i++)
     {
       auto & test_var_name = _test_var_names.at(i);
       auto nlf = _nlfs.GetShared(test_var_name);
       nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-      nlf->Mult(_trueBlockSol.GetBlock(i), _blockResidual.GetBlock(i));
-      _blockResidual.GetBlock(i).SyncAliasMemory(_blockResidual);
+      nlf->Mult(blockSolution.GetBlock(i), blockResidual.GetBlock(i));
+      blockResidual.GetBlock(i).SyncAliasMemory(blockResidual);
     }
-    residual = static_cast<mfem::Vector &>(_blockResidual);
     _linear_operator->AddMult(sol, residual);
   }
   else
@@ -436,6 +432,9 @@ EquationSystem::FormGradient(const mfem::Vector & u)
         mooseError("nlf_jac is null");
       _j_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
     }
+    for (const auto j : index_range(_trial_var_names))
+      if (i != j) // nlf->GetGradient only contributes to on-diagonal blocks
+        _j_blocks(i, j) = _h_blocks(i, j);
   }
   // Create monolithic matrix
   _jacobian.Reset(mfem::HypreParMatrixFromBlocks(_j_blocks));

@@ -204,12 +204,11 @@ protected:
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;
 
-  // Temporary vectors used for non-linear action
-  // assembly process
-  mutable mfem::BlockVector _trueBlockSol, _blockResidual;
+  // Pointer to GridFunctions to enable updates during nonlinear iterations
   Moose::MFEM::GridFunctions * _gfuncs;
+  // Array storing block offsets of solution and residual vector
   mfem::Array<int> * _block_true_offsets = NULL;
-  mfem::Array<int> empty_tdof;
+  // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
 
 private:
