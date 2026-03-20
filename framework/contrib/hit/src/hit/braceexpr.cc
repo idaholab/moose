@@ -1,10 +1,7 @@
 #include "hit/braceexpr.h"
 
-#include "peglib.h"
-
 #include <cstdlib>
 #include <iostream>
-#include <stdexcept>
 
 namespace hit
 {
@@ -12,108 +9,179 @@ namespace hit
 namespace
 {
 
-BraceTemplate braceTemplateFromAst(const std::shared_ptr<peg::Ast> & node,
-                                   const std::string & input);
-
-BracePart
-bracePartFromAst(const std::shared_ptr<peg::Ast> & node, const std::string & input)
+class BraceTemplateParser
 {
-  if (!node)
-    throw std::runtime_error("null brace-expression AST node");
-
-  if (node->name == "Part" || node->name == "ArgPart")
-    return bracePartFromAst(node->nodes.front(), input);
-
-  if (node->name == "Literal" || node->name == "ArgText")
-    return node->token_to_string();
-
-  if (node->name == "Expr")
+public:
+  BraceTemplateParser(const std::string & input, BraceParseError * error)
+    : _input(input), _error(error)
   {
-    auto expr = std::make_shared<BraceExpr>();
-    expr->line() = node->line;
-    expr->column() = node->column;
-    expr->position() = node->position;
-    expr->length() = node->length;
-    expr->text() = input.substr(node->position, node->length);
-    for (const auto & child : node->nodes)
-      if (child->name == "ExprBody")
-        for (const auto & arg_node : child->nodes)
-        {
-          if (arg_node->name != "Arg")
-            continue;
+  }
 
-          BraceArg arg;
-          for (const auto & part_node : arg_node->nodes)
-            arg.value().parts().push_back(bracePartFromAst(part_node, input));
-          expr->args().push_back(std::move(arg));
-        }
+  BraceTemplate parse()
+  {
+    auto result = parseTemplate(ParseMode::TopLevel);
+    if (!eof())
+      failHere("unexpected trailing input");
+    return result;
+  }
+
+private:
+  enum class ParseMode
+  {
+    TopLevel,
+    Argument
+  };
+
+  struct Position
+  {
+    std::size_t index;
+    std::size_t line;
+    std::size_t column;
+  };
+
+  bool eof() const { return _pos >= _input.size(); }
+
+  char current() const { return eof() ? '\0' : _input[_pos]; }
+
+  bool startsExpr() const { return _input.compare(_pos, 2, "${") == 0; }
+
+  static bool isWhitespace(char c)
+  {
+    return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+  }
+
+  Position mark() const { return {_pos, _line, _column}; }
+
+  void advance()
+  {
+    if (eof())
+      return;
+
+    if (_input[_pos] == '\n')
+    {
+      ++_line;
+      _column = 1;
+    }
+    else
+      ++_column;
+
+    ++_pos;
+  }
+
+  void advance(std::size_t count)
+  {
+    for (std::size_t i = 0; i < count; ++i)
+      advance();
+  }
+
+  void skipWhitespace()
+  {
+    while (!eof() && isWhitespace(current()))
+      advance();
+  }
+
+  [[noreturn]] void fail(const Position & pos, const std::string & message) const
+  {
+    if (_error && _error->message.empty())
+    {
+      _error->line = pos.line;
+      _error->column = pos.column;
+      _error->message = message;
+    }
+    throw Error("invalid brace expression");
+  }
+
+  [[noreturn]] void failHere(const std::string & message) const { fail(mark(), message); }
+
+  std::string slice(const Position & begin, const Position & end) const
+  {
+    return _input.substr(begin.index, end.index - begin.index);
+  }
+
+  BraceTemplate parseTemplate(ParseMode mode)
+  {
+    BraceTemplate root;
+    while (!eof())
+    {
+      if (startsExpr())
+        root.parts().push_back(parseExpression());
+      else if (mode == ParseMode::Argument && (current() == '}' || isWhitespace(current())))
+        break;
+      else
+      {
+        const auto start = mark();
+        while (!eof() && !startsExpr() &&
+               !(mode == ParseMode::Argument && (current() == '}' || isWhitespace(current()))))
+          advance();
+        root.parts().push_back(slice(start, mark()));
+      }
+    }
+
+    return root;
+  }
+
+  std::shared_ptr<BraceExpr> parseExpression()
+  {
+    if (!startsExpr())
+      failHere("missing opening '${' in brace expression");
+
+    const auto start = mark();
+    auto expr = std::make_shared<BraceExpr>();
+
+    advance(2);
+    skipWhitespace();
+
+    if (eof())
+      failHere("missing closing '}' in brace expression");
+
+    while (!eof() && current() != '}')
+    {
+      expr->args().push_back(parseArgument());
+      skipWhitespace();
+    }
+
+    if (eof() || current() != '}')
+      failHere("missing closing '}' in brace expression");
+
+    advance();
+
+    const auto end = mark();
+    expr->line() = start.line;
+    expr->column() = start.column;
+    expr->position() = start.index;
+    expr->length() = end.index - start.index;
+    expr->text() = slice(start, end);
     return expr;
   }
 
-  throw std::runtime_error("unexpected brace-expression AST node '" + node->name + "'");
-}
-
-BraceTemplate
-braceTemplateFromAst(const std::shared_ptr<peg::Ast> & node, const std::string & input)
-{
-  if (!node)
-    throw std::runtime_error("null brace-expression AST node");
-
-  if (node->name == "Input")
-    return braceTemplateFromAst(node->nodes.front(), input);
-
-  if (node->name == "Template")
+  BraceArg parseArgument()
   {
-    BraceTemplate root;
-    for (const auto & child : node->nodes)
-      root.parts().push_back(bracePartFromAst(child, input));
-    return root;
+    BraceArg arg;
+    auto & parts = arg.value().parts();
+
+    while (!eof() && current() != '}' && !isWhitespace(current()))
+      if (startsExpr())
+        parts.push_back(parseExpression());
+      else
+      {
+        const auto start = mark();
+        while (!eof() && !startsExpr() && current() != '}' && !isWhitespace(current()))
+          advance();
+        parts.push_back(slice(start, mark()));
+      }
+
+    if (parts.empty())
+      failHere("expected brace-expression argument");
+
+    return arg;
   }
 
-  if (node->name == "Literal" || node->name == "ArgText" || node->name == "Expr" ||
-      node->name == "Part" || node->name == "ArgPart")
-  {
-    BraceTemplate root;
-    root.parts().push_back(bracePartFromAst(node, input));
-    return root;
-  }
-
-  throw std::runtime_error("unexpected brace-template AST node '" + node->name + "'");
-}
-
-peg::parser &
-braceTemplateParser()
-{
-  using namespace peg;
-
-  static parser parser(R"(
-    Input      <- Template !.
-    Template   <- Part*
-    Part       <- Expr / Literal
-    Expr       <- '${' Spacing ExprBody? Spacing '}'
-    ExprBody   <- Arg (RequiredWS Arg)*
-    Arg        <- ArgPart+
-    ArgPart    <- Expr / ArgText
-    Literal    <- <(!'${' .)+>
-    ArgText    <- <(!WS !'}' !'${' .)+>
-    Spacing    <- WS*
-    RequiredWS <- WS+
-    WS         <- [ \t\r\n]
-  )");
-
-  static const bool initialized = []()
-  {
-    parser.enable_packrat_parsing();
-    parser.enable_ast();
-
-    return true;
-  }();
-
-  if (!initialized || !static_cast<bool>(parser))
-    throw Error("brace-expression parser build failure");
-
-  return parser;
-}
+  const std::string & _input;
+  BraceParseError * _error = nullptr;
+  std::size_t _pos = 0;
+  std::size_t _line = 1;
+  std::size_t _column = 1;
+};
 
 std::pair<int, int>
 fieldValueStart(const Field * n)
@@ -217,28 +285,7 @@ BraceTemplate::expressionCount() const
 BraceTemplate
 parseBraceTemplate(const std::string & input, BraceParseError * error)
 {
-  auto & parser = braceTemplateParser();
-  parser.set_logger(
-      [error](std::size_t line,
-              std::size_t column,
-              const std::string & message,
-              const std::string & /*rule*/)
-      {
-        if (!error || !error->message.empty())
-          return;
-
-        error->line = line;
-        error->column = column;
-        error->message = message;
-      });
-
-  std::shared_ptr<peg::Ast> ast;
-  const auto parsed = parser.parse(input, ast);
-  parser.set_logger(peg::Log{});
-  if (!parsed)
-    throw Error("invalid brace expression");
-
-  return braceTemplateFromAst(ast, input);
+  return BraceTemplateParser(input, error).parse();
 }
 
 EvalResult
