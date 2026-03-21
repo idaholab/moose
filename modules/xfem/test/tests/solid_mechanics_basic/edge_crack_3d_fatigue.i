@@ -22,7 +22,6 @@
     growth_direction_y = growth_func_y
     growth_direction_z = growth_func_z
     growth_reporter = "fatigue/growth_increment"
-    crack_front_nodes = '7 6 5 4'
   []
 []
 
@@ -30,7 +29,6 @@
   integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y disp_z'
   crack_front_points_provider = cut_mesh
-  number_points_from_provider = 4
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.15'
   radius_outer = '0.45'

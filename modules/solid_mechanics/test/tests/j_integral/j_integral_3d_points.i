@@ -44,7 +44,6 @@
   crack_direction_vector = '1 0 0'
   radius_inner = '4.0 5.5'
   radius_outer = '5.5 7.0'
-  output_q = false
   incremental = true
   symmetry_plane = 1
 []

@@ -43,7 +43,6 @@
   q_function_type = Topology
   ring_first = 1
   ring_last = 4
-  output_q = false
   incremental = true
   symmetry_plane = 1
 []

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6320 #23572'
+  issues = '#6320 #23572 #32418'
   [crack_propagation_ave]
     type = Exodiff
     input = crack_propagation_2d.i
@@ -110,7 +110,16 @@
       map = false
       # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
-      detail = ' growth directions determined by an parsed function.'
+      detail = ' growth directions determined by an parsed function, or'
+    []
+    [num_points_error]
+      type = RunException
+      input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
+      cli_args = 'DomainIntegral/number_points_from_provider=3'
+      expect_err = 'This must match the number of points provided by the XFEM mesh cutter object.'
+      # XFEM requires --enable-unique-ids in libmesh
+      capabilities = 'unique_id'
+      detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction.'
     []
   []
   [penny_crack]

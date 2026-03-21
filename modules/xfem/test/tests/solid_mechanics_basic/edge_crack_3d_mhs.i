@@ -6,7 +6,6 @@
     size_control = 1
     n_step_growth = 1
     growth_rate = growth_func_v
-    crack_front_nodes = '7 6 5 4'
   []
 []
 
