@@ -26,12 +26,17 @@ public:
   void setupFaceData(const FaceInfo * face_info) override;
   Real computeElemMatrixContribution() override;
   Real computeNeighborMatrixContribution() override;
+  Real computeElemRightHandSideContribution() override;
+  Real computeNeighborRightHandSideContribution() override;
 
 protected:
   Real computeAdvectionBoundaryMatrixContribution(const LinearFVAdvectionDiffusionBC * bc) override;
   Real computeAdvectionBoundaryRHSContribution(const LinearFVAdvectionDiffusionBC * bc) override;
 
 private:
+  bool isInternalBaffleFace() const;
+  Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
+
   /// Whether to include porosity outside the divergence in the advection term
   const bool _porosity_outside_divergence;
 };
