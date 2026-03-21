@@ -130,8 +130,7 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
   if (!baffle_form_loss.empty())
   {
     if (baffle_names.empty())
-      paramError("pressure_baffle_sidesets",
-                 "Must be provided when baffle_form_loss is set.");
+      paramError("pressure_baffle_sidesets", "Must be provided when baffle_form_loss is set.");
 
     for (const auto & val : baffle_form_loss)
       if (val < 0.0)
@@ -288,6 +287,97 @@ void
 PorousRhieChowMassFlux::computeFaceMassFlux()
 {
   RhieChowMassFlux::computeFaceMassFlux();
+
+  const auto time_arg = Moose::currentState();
+  PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
+
+  // Collect porous cells that touch the limited interface
+  std::unordered_set<dof_id_type> porous_interface_cells;
+  for (auto & fi : _flow_face_info)
+  {
+    if (!fi->neighborPtr())
+      continue;
+    if (!isPressureGradientLimited(*fi))
+      continue;
+
+    if (fi->elem().subdomain_id() == 2)
+      porous_interface_cells.insert(fi->elem().id());
+    if (fi->neighbor().subdomain_id() == 2)
+      porous_interface_cells.insert(fi->neighbor().id());
+  }
+
+  for (auto & fi : _flow_face_info)
+  {
+    if (!fi->neighborPtr())
+      continue;
+    if (!hasBlocks(fi->elemPtr()->subdomain_id()) || !hasBlocks(fi->neighborPtr()->subdomain_id()))
+      continue;
+
+    const bool interface_face = isPressureGradientLimited(*fi);
+
+    const bool first_porous_interior_face = fi->elem().subdomain_id() == 2 &&
+                                            fi->neighbor().subdomain_id() == 2 &&
+                                            (porous_interface_cells.count(fi->elem().id()) ||
+                                             porous_interface_cells.count(fi->neighbor().id()));
+
+    if (!interface_face && !first_porous_interior_face)
+      continue;
+
+    const auto & elem_info = *fi->elemInfo();
+    const auto & neigh_info = *fi->neighborInfo();
+
+    const auto elem_pdof = elem_info.dofIndices()[_global_pressure_system_number][0];
+    const auto neigh_pdof = neigh_info.dofIndices()[_global_pressure_system_number][0];
+
+    const Real p_elem = p_reader(elem_pdof);
+    const Real p_neigh = p_reader(neigh_pdof);
+
+    const Real rho_elem = _rho(makeElemArg(fi->elemPtr()), time_arg);
+    const Real rho_neigh = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+    const Real eps_elem = _eps(makeElemArg(fi->elemPtr()), time_arg);
+    const Real eps_neigh = _eps(makeElemArg(fi->neighborPtr()), time_arg);
+
+    const Real phi = _face_mass_flux.evaluate(fi);
+
+    const Real U_n_elem = (rho_elem != 0.0) ? phi / rho_elem : 0.0;
+    const Real U_n_neigh = (rho_neigh != 0.0) ? phi / rho_neigh : 0.0;
+
+    const Real u_n_elem = (rho_elem != 0.0 && eps_elem != 0.0) ? phi / (rho_elem * eps_elem) : 0.0;
+    const Real u_n_neigh =
+        (rho_neigh != 0.0 && eps_neigh != 0.0) ? phi / (rho_neigh * eps_neigh) : 0.0;
+
+    const Real bernoulli_elem_minus_neigh =
+        0.5 * (rho_neigh * u_n_neigh * u_n_neigh - rho_elem * u_n_elem * u_n_elem);
+
+    const auto upw = getAdvectedInterpolationCoeffs(
+        *fi, Moose::FV::InterpMethod::Upwind, phi, /*apply_porosity_scaling=*/true);
+
+    RealVectorValue U_elem_vec(0.0);
+    RealVectorValue U_neigh_vec(0.0);
+    for (const auto d : make_range(_dim))
+    {
+      U_elem_vec(d) = _vel[d]->getElemValue(elem_info, time_arg);
+      U_neigh_vec(d) = _vel[d]->getElemValue(neigh_info, time_arg);
+    }
+
+    // Normal component of the actual advected interstitial state used by the embedded 1/eps form
+    const Real u_adv_n = (upw.first * U_elem_vec + upw.second * U_neigh_vec) * fi->normal();
+
+    _console << (interface_face ? "IFACE" : "POROUS_1ST") << " face=" << fi->id()
+             << " elem=" << fi->elem().id() << " neigh=" << fi->neighbor().id()
+             << " elem_blk=" << fi->elem().subdomain_id()
+             << " neigh_blk=" << fi->neighbor().subdomain_id() << " phi=" << phi
+             << " HbyA_flux=" << _HbyA_flux[fi->id()] << " p_grad_flux=" << _p_grad_flux[fi->id()]
+             << " p_elem=" << p_elem << " p_neigh=" << p_neigh
+             << " dp_elem_minus_neigh=" << (p_elem - p_neigh) << " rho_elem=" << rho_elem
+             << " rho_neigh=" << rho_neigh << " eps_elem=" << eps_elem << " eps_neigh=" << eps_neigh
+             << " U_n_elem=" << U_n_elem << " U_n_neigh=" << U_n_neigh << " u_n_elem=" << u_n_elem
+             << " u_n_neigh=" << u_n_neigh
+             << " bernoulli_elem_minus_neigh=" << bernoulli_elem_minus_neigh << " upw=("
+             << upw.first << "," << upw.second << ")"
+             << " u_adv_n=" << u_adv_n << " phi_u_adv_n=" << (phi * u_adv_n) << std::endl;
+  }
 }
 
 const std::vector<std::unique_ptr<NumericVector<Number>>> &
@@ -371,8 +461,9 @@ PorousRhieChowMassFlux::getSignedBaffleJump(const FaceInfo & fi, bool elem_side)
     return 0.0;
 
   const Real J = _baffle_jump.evaluate(&fi);
-  // J is defined as (p_neighbor - p_elem), so the elem-side sees -J.
-  return elem_side ? -J : J;
+  const bool elem_is_owner = elemIsBaffleOwner(fi);
+  // J is stored as (p_non_owner - p_owner), so the owner side sees -J.
+  return (elem_side == elem_is_owner) ? -J : J;
 }
 
 Real
@@ -432,16 +523,27 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     Moose::FV::interpolate(
         Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
 
+    const Real eps_elem = _eps(makeElemArg(elem), time_arg);
+    const Real eps_neighbor = _eps(makeElemArg(neighbor), time_arg);
+    const bool elem_is_owner = elemIsBaffleOwner(*fi);
+
     const Real phi = _face_mass_flux.evaluate(fi);
     const Real U_n = face_rho != 0.0 ? phi / face_rho : 0.0;
 
-    const Real eps_elem = _eps(makeElemArg(elem), time_arg);
-    const Real eps_neighbor = _eps(makeElemArg(neighbor), time_arg);
+    // The momentum predictor keeps the ordinary conservative advection treatment while the
+    // pressure-baffle operator carries the reversible Bernoulli jump, so we use the full
+    // side-local kinetic-head difference here.
+    const Real u_elem = (elem_rho != 0.0 && eps_elem != 0.0) ? phi / (elem_rho * eps_elem) : 0.0;
+    const Real u_neighbor =
+        (neighbor_rho != 0.0 && eps_neighbor != 0.0) ? phi / (neighbor_rho * eps_neighbor) : 0.0;
+    const Real rho_owner = elem_is_owner ? elem_rho : neighbor_rho;
+    const Real rho_non_owner = elem_is_owner ? neighbor_rho : elem_rho;
+    const Real eps_owner = elem_is_owner ? eps_elem : eps_neighbor;
+    const Real eps_non_owner = elem_is_owner ? eps_neighbor : eps_elem;
+    const Real u_owner = elem_is_owner ? u_elem : u_neighbor;
+    const Real u_non_owner = elem_is_owner ? u_neighbor : u_elem;
 
-    const Real u_elem = U_n / eps_elem;
-    const Real u_neighbor = U_n / eps_neighbor;
-
-    Real J_new = 0.5 * (elem_rho * u_elem * u_elem - neighbor_rho * u_neighbor * u_neighbor);
+    Real J_new = 0.5 * (rho_owner * u_owner * u_owner - rho_non_owner * u_non_owner * u_non_owner);
 
     Real J_loss = 0.0;
     Real form_loss = 0.0;
@@ -468,7 +570,8 @@ PorousRhieChowMassFlux::updateBaffleJumps()
 
     if (form_loss > 0.0 && U_n != 0.0)
     {
-      const bool pick_elem = use_higher_eps ? (eps_elem >= eps_neighbor) : (eps_elem <= eps_neighbor);
+      const bool pick_elem =
+          use_higher_eps ? (eps_elem >= eps_neighbor) : (eps_elem <= eps_neighbor);
       const Real u_ref = pick_elem ? u_elem : u_neighbor;
       const Real flow_sign = U_n > 0.0 ? 1.0 : -1.0;
       J_loss = -flow_sign * 0.5 * form_loss * face_rho * u_ref * u_ref;
@@ -486,12 +589,13 @@ PorousRhieChowMassFlux::updateBaffleJumps()
       const auto neigh_bnds = _moose_mesh.getBoundaryIDs(fi->neighborPtr(), fi->neighborSideID());
       _console << "Baffle jump face " << fi->id() << " elem_block=" << fi->elem().subdomain_id()
                << " neigh_block=" << fi->neighbor().subdomain_id()
+               << " elem_is_owner=" << elem_is_owner
                << " elem_bnds=" << stringify_bnds(elem_bnds)
                << " neigh_bnds=" << stringify_bnds(neigh_bnds) << " phi=" << phi << " U_n=" << U_n
                << " rho_f=" << face_rho << " eps_elem=" << eps_elem << " eps_neigh=" << eps_neighbor
+               << " eps_owner=" << eps_owner << " eps_non_owner=" << eps_non_owner
                << " K=" << form_loss << " J_new=" << J_new << " J_loss=" << J_loss
-               << " J_old=" << J_old
-               << " J=" << _baffle_jump[fi->id()] << std::endl;
+               << " J_old=" << J_old << " J=" << _baffle_jump[fi->id()] << std::endl;
     }
   }
 }
@@ -557,7 +661,31 @@ PorousRhieChowMassFlux::computeCorrectedPressureGradient()
           neighbor && neighbor_info_face && hasBlocks(neighbor_info_face->subdomain_id());
 
       const bool limited = isPressureGradientLimited(*fi);
-      if (neighbor_active && (!limited || _pressure_gradient_limiter_blend > 0.0))
+      if (neighbor_active && isBaffleFace(*fi))
+      {
+        const auto neighbor_dof =
+            neighbor_info_face->dofIndices()[_global_pressure_system_number][0];
+        const Real p_neighbor = p_reader(neighbor_dof);
+        const Real phi = _face_mass_flux.evaluate(fi);
+        const bool sided_elem_is_upwind = elem_has_info ? (phi >= 0.0) : (phi <= 0.0);
+
+        // Mirror the Bernoulli pressure-variable treatment:
+        // - the upwind side sees a Dirichlet face value reconstructed from the downwind cell
+        //   plus the Bernoulli jump
+        // - the downwind side uses a one-term expansion from its own cell
+        if (sided_elem_is_upwind)
+        {
+          const Real jump_side = getSignedBaffleJump(*fi, elem_has_info);
+          p_face = p_neighbor + jump_side;
+        }
+
+        if (_debug_baffle)
+          _console << "Baffle grad face " << fi->id() << " elem_has_info=" << elem_has_info
+                   << " phi=" << phi << " upwind_side=" << sided_elem_is_upwind
+                   << " p_elem=" << p_elem << " p_neigh=" << p_neighbor << " p_face=" << p_face
+                   << std::endl;
+      }
+      else if (neighbor_active && (!limited || _pressure_gradient_limiter_blend > 0.0))
       {
         const auto neighbor_dof =
             neighbor_info_face->dofIndices()[_global_pressure_system_number][0];
@@ -675,6 +803,12 @@ PorousRhieChowMassFlux::isReconstructionZeroFluxFace(const FaceInfo & fi) const
   return false;
 }
 
+bool
+PorousRhieChowMassFlux::isOneSidedReconstructionFace(const FaceInfo & fi) const
+{
+  return isBaffleFace(fi) || isPressureGradientLimited(fi);
+}
+
 void
 PorousRhieChowMassFlux::updateGradPrevFromFaceVelocity()
 {
@@ -714,6 +848,7 @@ PorousRhieChowMassFlux::updateGradPrevFromFaceVelocity()
 
       const bool neighbor_active =
           neighbor_info_face && hasBlocks(neighbor_info_face->subdomain_id());
+      const bool one_sided_face = neighbor_active && isOneSidedReconstructionFace(*fi);
 
       for (const auto comp_index : make_range(_dim))
       {
@@ -721,7 +856,8 @@ PorousRhieChowMassFlux::updateGradPrevFromFaceVelocity()
         const Real u_neighbor = neighbor_active
                                     ? _vel[comp_index]->getElemValue(*neighbor_info_face, time_arg)
                                     : u_elem;
-        const Real u_face = neighbor_active ? 0.5 * (u_elem + u_neighbor) : u_elem;
+        const Real u_face =
+            one_sided_face ? u_elem : (neighbor_active ? 0.5 * (u_elem + u_neighbor) : u_elem);
         sum[comp_index] += surface_vector * u_face;
       }
     };
@@ -842,14 +978,18 @@ PorousRhieChowMassFlux::computeCellVelocity()
 
       const bool neighbor_active =
           neighbor && neighbor_face && hasBlocks(neighbor_face->subdomain_id());
+      const bool one_sided_face = neighbor_active && isOneSidedReconstructionFace(*fi);
 
       Real face_rho = 0.0;
       if (neighbor_active)
       {
         const Real elem_rho = _rho(makeElemArg(elem_face), time_arg);
         const Real neighbor_rho = _rho(makeElemArg(neighbor_face), time_arg);
-        Moose::FV::interpolate(
-            Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
+        if (one_sided_face)
+          face_rho = elem_rho;
+        else
+          Moose::FV::interpolate(
+              Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
       }
       else
       {
@@ -887,7 +1027,10 @@ PorousRhieChowMassFlux::computeCellVelocity()
             const Real grad_elem = (*_grad_w_prev[comp_index][dir_index])(elem_dof);
             const Real grad_neighbor =
                 neighbor_active ? (*_grad_w_prev[comp_index][dir_index])(neighbor_dof) : grad_elem;
-            const Real grad_face = neighbor_active ? 0.5 * (grad_elem + grad_neighbor) : grad_elem;
+            const Real grad_face =
+                one_sided_face
+                    ? grad_elem
+                    : (neighbor_active ? 0.5 * (grad_elem + grad_neighbor) : grad_elem);
             comp_val += grad_face * dPf(dir_index);
           }
           grad_times_dpf[comp_index] = comp_val;

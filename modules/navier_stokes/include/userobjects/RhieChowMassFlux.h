@@ -66,6 +66,9 @@ public:
   /// Get the signed baffle jump on a face side (returns 0 if not a baffle face)
   virtual Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
 
+  /// Public baffle-face query for kernel-side assembly decisions
+  bool faceIsBaffle(const FaceInfo & fi) const { return isBaffleFace(fi); }
+
   /// Get the corrected pressure gradient component at an element center
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center
