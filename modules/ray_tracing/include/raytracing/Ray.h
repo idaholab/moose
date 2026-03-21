@@ -32,6 +32,7 @@ class TestRayLots;
 class RayBoundaryConditionBase;
 // Friend access to ChangeStartDirectionKey for accessing changeStartDirection()
 class RayKernelBase;
+class PeriodicRayBC;
 // Friend access to NonResetCountersKey for accessing constructor/reset without counter reset
 namespace MooseUtils
 {
@@ -76,6 +77,17 @@ public:
     friend class RayKernelBase;
     ChangeStartDirectionKey() {}
     ChangeStartDirectionKey(const ChangeStartDirectionKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to changePointElem() that allows only
+   * PeriodicRayBC methods to call changeStartDirection()
+   */
+  class ChangePointElemSideKey
+  {
+    friend class PeriodicRayBC;
+    ChangePointElemSideKey() {}
+    ChangePointElemSideKey(const ChangePointElemSideKey &) {}
   };
 
   /**
@@ -248,6 +260,18 @@ public:
    */
   void
   changeStartDirection(const Point & start, const Point & direction, const ChangeStartDirectionKey);
+
+  /**
+   * This method is for internal use only. It is intended to be called only by
+   * PeriodicRayBC::onBoundary().
+   *
+   * ChangePointElemSideKey is constructable only by PeriodicRayBC objects on purpose to limit
+   * usage of this method.
+   */
+  void changePointElemSide(const Point & point,
+                           const Elem & elem,
+                           const unsigned int side,
+                           const ChangePointElemSideKey);
 
   /**
    * Gets the Ray's direction
@@ -686,9 +710,13 @@ private:
    */
   unsigned short _current_incoming_side;
 
+  /// Whether or not this Ray had its trajectory changed (not sent in parallel)
+  bool _trajectory_changed;
   /// Whether or not the user has set an end point for this Ray (via limiting its
   /// distance with setStartingEndPoint())
   bool _end_set;
+  /// Wether or not the Ray should continue to be traced (not sent in parallel)
+  bool _should_continue;
 
   /// Number of times this Ray has been communicated
   unsigned int _processor_crossings;
@@ -698,16 +726,11 @@ private:
 
   /// Number of times this Ray has had its trajectory changed
   unsigned int _trajectory_changes;
-  /// Whether or not this Ray had its trajectory changed (not sent in parallel)
-  bool _trajectory_changed;
 
   /// Total distance this Ray has traveled
   Real _distance;
   /// Maximum distance the Ray is allowed to travel
   Real _max_distance;
-
-  /// Wether or not the Ray should continue to be traced (not sent in parallel)
-  bool _should_continue;
 
   /// The data that is carried with the Ray
   /// This is mutable so that we can resize it if needed within const accessors
@@ -719,9 +742,6 @@ private:
 
   /// The RayTracingStudy that owns this Ray (not sent in parallel)
   RayTracingStudy & _study;
-
-  /// Extra padding to avoid false sharing
-  long padding[8];
 
   // TraceRay is the only object that should be executing Rays and therefore needs access
   friend class TraceRay;

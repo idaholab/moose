@@ -11,33 +11,37 @@
 
 #include "Moose.h"
 
-// libMesh
 #include "libmesh/point.h"
 #include "libmesh/periodic_boundary_base.h"
 
+#include <array>
 #include <vector>
 
 class FEProblemBase;
 class Function;
 
 /**
- * Periodic boundary for calculation periodic BC on domains where the translation is given by
- * functions
+ * Periodic boundary for calculation periodic BC on domains where the
+ * translation is given by Function objects
  */
 class FunctionPeriodicBoundary : public libMesh::PeriodicBoundaryBase
 {
 public:
   /**
-   * Initialize the periodic boundary with three functions
+   * Initialize the periodic with the functions and inverse functions, one
+   * for each dimension needed
    */
-  FunctionPeriodicBoundary(FEProblemBase & subproblem, std::vector<std::string> fn_names);
+  FunctionPeriodicBoundary(FEProblemBase & subproblem,
+                           const std::vector<std::string> & fn_names,
+                           const std::vector<std::string> & inv_fn_names);
 
   /**
    * Copy constructor for creating the periodic boundary and inverse periodic boundary
    *
    * @param o - Periodic boundary being copied
+   * @param t - Transformation direction
    */
-  FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o);
+  FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o, TransformationType t = FORWARD);
 
   /**
    * Get the translation based on point 'pt'
@@ -46,26 +50,17 @@ public:
    */
   virtual libMesh::Point get_corresponding_pos(const libMesh::Point & pt) const override;
 
-  /**
-   * Required interface, this class must be able to clone itself
-   */
   virtual std::unique_ptr<libMesh::PeriodicBoundaryBase> clone(TransformationType t) const override;
 
-protected:
-  //  /// The dimension of the problem (says which _tr_XYZ member variables are active)
-  unsigned int _dim;
+private:
+  static std::array<const Function *, 3> getFunctions(FEProblemBase & problem,
+                                                      const std::vector<std::string> & names);
 
-  /// Pointer to Function for x-component of the boundary
-  const Function * const _tr_x;
+  /// The dimension of the problem (says which of _tr and _inv_tr are active)
+  const unsigned int _dim;
 
-  /// Pointer to Function for y-component of the boundary
-  const Function * const _tr_y;
-
-  /// Pointer to Function for z-component of the boundary
-  const Function * const _tr_z;
-
-  /**
-   * An initialization method to make certain that initialSetup() of a function prior to value()
-   */
-  void init();
+  /// Pointers to translation functions in each dimension
+  const std::array<const Function *, 3> _tr;
+  /// Pointers to inverse translation functions in each dimension
+  const std::array<const Function *, 3> _inv_tr;
 };

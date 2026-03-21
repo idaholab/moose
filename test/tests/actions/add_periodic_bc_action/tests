@@ -1,0 +1,113 @@
+[Tests]
+  issues = '#31025'
+  design = 'AddPeriodicBCAction.md'
+
+  [errors]
+    requirement = "The system shall report a reasonable error when adding periodic boundary conditions when"
+    [missing_action]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/variable=u"
+      expect_err = "Either 'auto_direction' or both 'primary' and 'secondary' must be specified"
+      detail = "it is not specified on which boundaries to define the periodic boundary conditions"
+    []
+    [no_variables_param]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/auto_direction=x
+                  BCs/Periodic/all/variable=''"
+      expect_err = 'BCs/Periodic/all/variable: No variables are set to apply periodic boundaries to'
+      detail = "it is not specified which variables on which to apply a periodic boundary condition"
+    []
+    [missing_variable]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/auto_direction=x
+                  BCs/Periodic/all/variable=foo"
+      expect_err = "BCs/Periodic/all/variable: Variable 'foo' not found"
+      detail = "a variable on which to apply the periodic boundary condition does not exist"
+    []
+    [no_variables]
+      type = RunException
+      input = base.i
+      cli_args = "Variables/active=
+                  BCs/Periodic/all/auto_direction=x"
+      expect_err = "There are no variables to apply periodic boundaries to"
+      detail = "there are no variables on which to apply periodic boundary conditions"
+    []
+    [multisystem_explicit_variable]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/auto_direction=x
+                  Problem/nl_sys_names='u v'
+                  Variables/u/solver_sys=u
+                  Variables/v/solver_sys=v
+                  Executioner/type=SteadySolve2
+                  Executioner/first_nl_sys_to_solve=u
+                  Executioner/second_nl_sys_to_solve=v"
+      expect_err = "Parameter 'variable' must be specified when multiple solver systems exist"
+      detail = "using multiple solver systems and the variable(s) to apply periodic boundary conditions to are not explicitly defined"
+    []
+    [invalid_auto_direction]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/auto_direction=y"
+      expect_err = "BCs/Periodic/all/auto_direction: y-dimension component not valid for 1D mesh"
+      detail = "detecting paired periodic boundaries automatically in a dimension that is invalid for the physical mesh dimension"
+    []
+    [bad_auto_direction]
+      type = RunException
+      input = base.i
+      cli_args = "Mesh/rotate/type=TransformGenerator
+                  Mesh/rotate/input=gmg
+                  Mesh/rotate/transform=rotate
+                  Mesh/rotate/vector_value='45 0 0'
+                  BCs/Periodic/all/auto_direction=x"
+      expect_err = "BCs/Periodic/all/auto_direction: Couldn't auto-detect a paired boundary in the x-direction"
+      detail = "detecting paired periodic boundaries automatically when the automatic detection fails in a unit dimension"
+    []
+    [no_transform_func]
+      type = RunException
+      input = base.i
+      cli_args = "BCs/Periodic/all/primary=left
+                  BCs/Periodic/all/secondary=right"
+      expect_err = "You need to specify either 'auto_direction', 'translation', or 'transform_func'"
+      detail = "specifying the translation using a function when the translation was not provided"
+    []
+    [no_inv_transform_func]
+      type = RunException
+      input = base.i
+      cli_args = "Functions/tr/type=ParsedFunction
+                  Functions/tr/expression=x
+                  BCs/Periodic/all/primary=left
+                  BCs/Periodic/all/secondary=right
+                  BCs/Periodic/all/transform_func=tr"
+      expect_err = "BCs/Periodic/all/transform_func: Must also specify 'inv_transform_func'"
+      detail = "specifying the translation using a function when the inverse translation was not provided"
+    []
+    [transform_func_mesh_dim]
+      type = RunException
+      input = base.i
+      cli_args = "Functions/tr/type=ParsedFunction
+                  Functions/tr/expression=x
+                  BCs/Periodic/all/primary=left
+                  BCs/Periodic/all/secondary=right
+                  BCs/Periodic/all/transform_func='tr tr'
+                  BCs/Periodic/all/inv_transform_func=tr"
+      expect_err = "BCs/Periodic/all/transform_func: Must be the size of the mesh dimension 1"
+      detail = "specifying the translation using a function and the incorrect number of dimensions for the translation were provided"
+    []
+    [inv_transform_func_mesh_dim]
+      type = RunException
+      input = base.i
+      cli_args = "Functions/tr/type=ParsedFunction
+                  Functions/tr/expression=x
+                  BCs/Periodic/all/primary=left
+                  BCs/Periodic/all/secondary=right
+                  BCs/Periodic/all/transform_func=tr
+                  BCs/Periodic/all/inv_transform_func='tr tr'"
+      expect_err = "BCs/Periodic/all/inv_transform_func: Must be the size of the mesh dimension 1"
+      detail = "specifying the translation using a function and the incorrect number of dimensions for the inverse translation were provided"
+    []
+  []
+[]

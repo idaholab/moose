@@ -24,7 +24,7 @@ DiscreteNucleationMarker::validParams()
 DiscreteNucleationMarker::DiscreteNucleationMarker(const InputParameters & parameters)
   : Marker(parameters),
     _map(getUserObject<DiscreteNucleationMap>("map")),
-    _periodic(_map.getPeriodic()),
+    _periodic_var(_map.getPeriodicVar()),
     _inserter(_map.getInserter()),
     _int_width(_map.getWidth()),
     _nucleus_list(_inserter.getNucleusList())
@@ -44,9 +44,9 @@ DiscreteNucleationMarker::computeElementMarker()
     const Real radius = _nucleus_list[i].radius;
 
     // use a non-periodic or periodic distance
-    const Real r = _periodic < 0
-                       ? (centroid - _nucleus_list[i].center).norm()
-                       : _mesh.minPeriodicDistance(_periodic, centroid, _nucleus_list[i].center);
+    const Real r =
+        _periodic_var ? _mesh.minPeriodicDistance(*_periodic_var, centroid, _nucleus_list[i].center)
+                      : (centroid - _nucleus_list[i].center).norm();
     if (r < radius + size && r > radius - size && size > _int_width)
       return REFINE;
   }

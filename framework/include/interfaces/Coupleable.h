@@ -1634,6 +1634,14 @@ protected:
    */
   MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp);
 
+  /*
+   * Extract pointers to all components of a base coupled field variable.
+   * Could be either a finite volume or finite element variable
+   * @param var_name Name of variable desired
+   * @return Pointers to the desired variables
+   */
+  std::vector<const MooseVariableFieldBase *> getFieldVars(const std::string & var_name) const;
+
   /**
    * Helper that that be used to retrieve a variable of arbitrary type \p T
    */
@@ -1645,6 +1653,14 @@ protected:
    */
   template <typename T>
   T * getVarHelper(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Helper that can be used to retrieve all the component variables of a variable
+   * of arbitrary type \p T
+   * @param var_name of the variable, can be a regular, vector or array variable
+   */
+  template <typename T>
+  std::vector<const T *> getVarsHelper(const std::string & var_name) const;
 
   /**
    * Extract pointer to a coupled variable
@@ -2002,4 +2018,15 @@ const T *
 Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
 {
   return const_cast<Coupleable *>(this)->getVarHelper<T>(var_name, comp);
+}
+
+template <typename T>
+std::vector<const T *>
+Coupleable::getVarsHelper(const std::string & var_name) const
+{
+  const auto components = coupledComponents(var_name);
+  std::vector<const T *> vars(components);
+  for (const auto i : make_range(components))
+    vars[i] = getVarHelper<T>(var_name, i);
+  return vars;
 }
