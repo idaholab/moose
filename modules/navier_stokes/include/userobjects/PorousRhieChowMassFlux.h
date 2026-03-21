@@ -60,6 +60,7 @@ protected:
   bool useFluxVelocityReconstruction() const override { return _use_flux_velocity_reconstruction; }
 
 private:
+  bool isOneSidedReconstructionFace(const FaceInfo & fi) const;
   void updateGradPrevFromFaceVelocity();
 
   const Moose::Functor<Real> & _eps;
