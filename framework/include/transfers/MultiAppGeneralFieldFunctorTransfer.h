@@ -69,6 +69,6 @@ private:
   /// Whether the functor is a variable
   std::vector<bool> _functor_is_variable;
 
-  /// Extrapolation behavior
+  /// How to determine values where the target mesh does not overlap the source mesh
   const MooseEnum _extrapolation_behavior;
 };
