@@ -376,6 +376,9 @@ private:
   /// The distance indicates whether a potential conflict ended up materializing
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _received_conflicts;
 
+  /// Extrapolation behavior
+  const MooseEnum _extrapolation_behavior;
+
   /**
    * Initialize supporting attributes like bounding boxes, processor app indexes etc
    */

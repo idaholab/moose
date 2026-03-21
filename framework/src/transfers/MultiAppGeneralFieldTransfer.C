@@ -1545,6 +1545,63 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     to_sys->solution->close();
     // Sync local solutions
     to_sys->update();
+
+    // We might need the synchronization of values that update provides
+    // to find the nearest target value
+    if (_extrapolation_behavior == "nearest-valid-target")
+    {
+      if (fe_type.order > CONSTANT && !is_nodal)
+        paramError("extrapolation_behavior",
+                   "Nearest-valid-target is not implemented for higher order elemental variables");
+      const auto & node_to_elem_map = nodeToActiveSemilocalElemMap();
+
+      for (const auto & val_pair : dofobject_to_val)
+      {
+        const auto dof_object_id = val_pair.first;
+
+        // Check that the value was out of bounds
+        const DofObject * dof_object = nullptr;
+        if (is_nodal)
+          dof_object = to_mesh.node_ptr(dof_object_id);
+        else
+          dof_object = to_mesh.elem_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = val_pair.second.interp;
+        if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        {
+          Real nearest_value = 0.;
+          // Find the nearest valid value
+          if (is_nodal)
+          {
+            const auto node = to_mesh.node_ptr(dof_object_id);
+            // Find nearest node
+            // NOTE: we have access to a bunch of values now here, we could interpolate!
+            Real min_distance_sq = std::numeric_limits<Real>::max();
+            dof_id_type min_dist_id = libMesh::invalid_dof_id;
+            for (const auto elem : libmesh_map_find(node_to_elem_map, node))
+            {
+              for (const auto elem_node : elem->node_ref_range())
+              {
+                Real distance_sq = (Point(elem_node) - Point(*node)).norm_sq();
+                if (distance_sq < min_distance_sq && dofobject_to_val.count(elem_node->id()))
+                {
+                  min_distance_sq = distance_sq;
+                  min_dist_id = elem_node->id();
+                }
+              }
+            }
+            if (min_dist_id != std::numeric_limits<dof_id_type>::max())
+              to_sys->solution->set(dof, libmesh_map_find(dofobject_to_val, min_dist_id));
+            else
+              paramWarning("extrapolation_behavior", "Search for the valid target nearest from a target point for which no values were found (and thus extrapolation is required) failed");
+          }
+          else
+          {
+
+          }
+        }
+      }
+    }
   }
 }
 
