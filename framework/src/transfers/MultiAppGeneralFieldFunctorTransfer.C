@@ -71,6 +71,10 @@ MultiAppGeneralFieldFunctorTransfer::MultiAppGeneralFieldFunctorTransfer(
     paramError("extrapolation_behavior",
                "Flat (single-constant) extrapolation must be selected if an extrapolation constant "
                "is specified");
+  if (_post_transfer_extrapolation != "none" && _extrapolation_behavior != "flat")
+    paramError("extrapolation_behavior",
+               "Flat (single-constant) extrapolation must be selected if an extrapolation post-"
+               "treatment is specified");
 
   // Check size
   if (_functor_names.size() != _to_var_names.size())

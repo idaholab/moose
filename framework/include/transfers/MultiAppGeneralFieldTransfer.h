@@ -56,6 +56,12 @@ protected:
   /// Siblings transfers fully supported
   virtual void checkSiblingsTransferSupported() const override {}
 
+  /// Return a pointer to a target variable
+  MooseVariableFieldBase * getToVariable(unsigned int var_index) const
+  {
+    return _to_variables[var_index];
+  }
+
   /*
    * Prepare evaluation of interpolation values
    * @param var_index index of the variable & component to prepare for. This routine is called once
@@ -276,6 +282,9 @@ protected:
   /// How many conflicts are output to console
   const unsigned int _search_value_conflicts_max_log;
 
+  /// How to post treat after the transfer
+  const MooseEnum _post_transfer_extrapolation;
+
   /**
    * @brief Detects whether two source values are valid and equidistant for a desired target
    * location
@@ -376,9 +385,6 @@ private:
   /// The distance indicates whether a potential conflict ended up materializing
   std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _received_conflicts;
 
-  /// Extrapolation behavior
-  const MooseEnum _extrapolation_behavior;
-
   /**
    * Initialize supporting attributes like bounding boxes, processor app indexes etc
    */
@@ -455,6 +461,18 @@ private:
   void setSolutionVectorValues(const unsigned int var_index,
                                const DofobjectToInterpValVec & dofobject_to_valsvec,
                                const InterpCaches & interp_caches);
+
+  /*
+   * Modify the solution values after having set AND synchronized the solution
+   * @param var the variable to set
+   * @param dofobject_to_valsvec a vector of maps from DoF to values, for each to_problem
+   *                             Used for nodal + constant monomial variables
+   * @param interp_caches a vector of maps from point to value, for each to_problem
+   *                      Used for higher order elemental variables
+   */
+  void correctSolutionVectorValues(const unsigned int var_index,
+                                   const DofobjectToInterpValVec & dofobject_to_valsvec,
+                                   const InterpCaches & interp_caches);
 
   /*
    * Cache pointInfo
