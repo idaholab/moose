@@ -24,6 +24,14 @@
       recover = false
       detail = 'multiple blocks simultaneously in a mesh based on subdomain ID.'
     []
+    [keep_blocks]
+      type = 'Exodiff'
+      input = 'keep_blocks.i'
+      cli_args = '--mesh-only'
+      exodiff = 'keep_blocks_in.e'
+      recover = false
+      detail = 'all blocks except those specified when using the keep operation.'
+    []
     [input_not_prepared]
       type = 'Exodiff'
       input = 'block_deletion_not_prepared.i'
