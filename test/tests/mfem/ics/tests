@@ -26,11 +26,10 @@
     recover = false
   []
   [MFEMTransientScalarIC]
-    type = XMLDiff
+    type = CSVDiff
     input = transient_scalar_ic.i
-    xmldiff = 'OutputData/TransientScalarIC/Run0/Run0.pvd
-                OutputData/TransientScalarIC/Run0/Cycle000000/proc000000.vtu
-                OutputData/TransientScalarIC/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/TransientScalarIC/transient_scalar_ic_line_sample_h1_scalar_0001.csv '
+              'OutputData/TransientScalarIC/transient_scalar_ic_line_sample_l2_scalar_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
