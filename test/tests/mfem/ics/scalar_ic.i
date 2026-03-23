@@ -58,10 +58,27 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample_h1_scalar]
+    type = MFEMLineValueSampler
+    variable = 'h1_scalar'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+  [line_sample_l2_scalar]
+    type = MFEMLineValueSampler
+    variable = 'l2_scalar'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/ScalarIC
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/ScalarIC/scalar_ic
   []
 []
