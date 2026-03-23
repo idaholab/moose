@@ -91,10 +91,41 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample_h1_vector]
+    type = MFEMLineValueSampler
+    variable = 'h1_vector'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+  [line_sample_nd_vector]
+    type = MFEMLineValueSampler
+    variable = 'nd_vector'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+  [line_sample_rt_vector]
+    type = MFEMLineValueSampler
+    variable = 'rt_vector'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+  [line_sample_l2_vector]
+    type = MFEMLineValueSampler
+    variable = 'l2_vector'
+    start_point = '-1 0 -0.5'
+    end_point = '1 0 0.5'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/VectorIC
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/VectorIC/vector_ic
   []
 []
