@@ -77,6 +77,8 @@
                   MultiApps/ma2/cli_args='AuxVariables/ghosting_request/family=MONOMIAL_VEC;AuxVariables/ghosting_request/order=CONSTANT;AuxVariables/ghosting_request/AuxKernel/type=FunctorElementalGradientAux;AuxVariables/ghosting_request/AuxKernel/functor=sent_elem;AuxVariables/ghosting_request/outputs=none'
                   GlobalParams/error_on_miss=false"
       detail = 'with an extrapolation post-treatment from the transferred values on the target mesh onto locations missing transferred data.'
+      # Note: we are adding an object to the multiapps to get the desired ghosting.
+      # no longer needed once #32533 is addressed
       # Meshes are not closely overlapping, post-treatment will not be able to correct every point
       allow_warnings = true
     []

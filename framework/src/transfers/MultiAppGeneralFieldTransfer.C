@@ -158,6 +158,21 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
+
+  // We need a level of ghosting to move elemental value one layer out when using post transfer
+  // extrapolation. We need geometric for the element vertex average, and algebraic for the dof
+  // value NOTE: we need this on the target mesh!
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        if (!obj_params.isParamValid("from_multi_app") &&
+            obj_params.get<MooseEnum>("post_transfer_extrapolation") == "nearest-valid-target")
+          rm_params.set<unsigned short>("layers") = 2;
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("displaced_target_mesh");
+      });
+
   return params;
 }
 
@@ -1545,7 +1560,6 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
             to_sys->solution->set(dof, _default_extrapolation_value);
           continue;
         }
-
         to_sys->solution->set(dof, val);
       }
     }
@@ -1631,6 +1645,8 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & /*interp_caches*/)
 {
+  // TODO: variable component support
+
   // Get the variable name, with the accommodation for array/vector names
   const auto & var_name = getToVarName(var_index);
 
@@ -1696,14 +1712,42 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
               for (const auto & elem_node : elem->node_ref_range())
               {
                 Real distance_sq = (Point(elem_node) - Point(*node)).norm_sq();
-                // Avoid using another bad node
-                if (distance_sq < min_distance_sq && dofobject_to_val.count(elem_node.id()) &&
-                    elem_node.id() != node->id() &&
-                    !GeneralFieldTransfer::isBetterOutOfMeshValue(
-                        libmesh_map_find(dofobject_to_val, elem_node.id()).interp))
+                // Avoid using another bad value from a node which did not receive data
+                // Note: if the node is on another process ID, we can't obtain the value from a
+                // buffer here Note: we could seek from the solution vector instead BUT if we do
+                // that we may be ignoring source restrictions set to the transfer.
+                // Note: Target mesh restrictions are fine since we are picking from
+                // dofobject_to_val
+                if (distance_sq < min_distance_sq && elem_node.id() != node->id())
                 {
-                  min_distance_sq = distance_sq;
-                  min_dist_id = elem_node.id();
+                  if (dofobject_to_val.count(elem_node.id()) &&
+                      !GeneralFieldTransfer::isBetterOutOfMeshValue(
+                          libmesh_map_find(dofobject_to_val, elem_node.id()).interp))
+                  {
+                    min_distance_sq = distance_sq;
+                    min_dist_id = elem_node.id();
+                    nearest_value = libmesh_map_find(dofobject_to_val, min_dist_id).interp;
+                  }
+                  else if (elem_node.n_dofs(sys_num, var_num) > 0)
+                  {
+                    const auto other_dof = elem_node.dof_number(sys_num, var_num, 0);
+                    try
+                    {
+                      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(
+                              (*to_sys->current_local_solution)(other_dof)) &&
+                          (*to_sys->current_local_solution)(other_dof) !=
+                              _default_extrapolation_value)
+                      {
+                        min_distance_sq = distance_sq;
+                        min_dist_id = elem_node.id();
+                        nearest_value = (*to_sys->current_local_solution)(other_dof);
+                      }
+                    }
+                    catch (...)
+                    {
+                      // Access in ghosted vector failed, just keep going
+                    }
+                  }
                 }
               }
             }
@@ -1717,14 +1761,43 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
               if (!neigh || neigh == libMesh::remote_elem)
                 continue;
               Real distance_sq = (neigh->vertex_average() - elem->vertex_average()).norm_sq();
-              if (distance_sq < min_distance_sq && dofobject_to_val.count(neigh->id()))
+              if (distance_sq < min_distance_sq)
               {
-                min_distance_sq = distance_sq;
-                min_dist_id = neigh->id();
+                if (dofobject_to_val.count(neigh->id()) &&
+                    !GeneralFieldTransfer::isBetterOutOfMeshValue(
+                        libmesh_map_find(dofobject_to_val, neigh->id()).interp))
+                {
+                  min_distance_sq = distance_sq;
+                  min_dist_id = neigh->id();
+                  nearest_value = libmesh_map_find(dofobject_to_val, min_dist_id).interp;
+                }
+                // Access into ghosted solution vector. See comments for node
+                else if (neigh->n_dofs(sys_num, var_num) > 0)
+                {
+                  const auto other_dof = neigh->dof_number(sys_num, var_num, 0);
+                  try
+                  {
+                    if (!GeneralFieldTransfer::isBetterOutOfMeshValue(
+                            (*to_sys->current_local_solution)(other_dof)) &&
+                        (*to_sys->current_local_solution)(other_dof) !=
+                            _default_extrapolation_value)
+                    {
+                      nearest_value = (*to_sys->current_local_solution)(other_dof);
+                      min_distance_sq = distance_sq;
+                      min_dist_id = neigh->id();
+                    }
+                  }
+                  catch (...)
+                  {
+                    // Access in ghosted vector failed, just keep going
+                  }
+                }
               }
             }
           }
-          nearest_value = min_dist_id != std::numeric_limits<dof_id_type>::max() ? libmesh_map_find(dofobject_to_val, min_dist_id).interp : _default_extrapolation_value;
+          nearest_value = (min_dist_id != std::numeric_limits<dof_id_type>::max())
+                              ? nearest_value
+                              : _default_extrapolation_value;
 
           if (min_dist_id != std::numeric_limits<dof_id_type>::max())
             to_sys->solution->set(dof, nearest_value);
