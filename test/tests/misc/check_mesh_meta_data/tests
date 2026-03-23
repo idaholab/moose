@@ -2,7 +2,7 @@
   [./check_mesh_meta_data]
     type = 'RunApp'
     input = 'check_mesh_meta_data_test.i'
-    # Note: AllSideSetsByNormalsGenerator used by this test only works with replicated mesh
+    # Note: SideSetsFromAllNormalsGenerator used by this test only works with replicated mesh
     mesh_mode = REPLICATED
     issues = '#15987'
     design = '/MeshMetaDataInterface.md'

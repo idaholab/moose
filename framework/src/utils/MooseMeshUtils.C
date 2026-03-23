@@ -371,7 +371,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point fixed_pt)
+isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec, const Point fixed_pt)
 {
   for (const auto & pt : vec_pts)
     if (!MooseUtils::absoluteFuzzyEqual((pt - fixed_pt) * plane_nvec, 0.0))
@@ -380,13 +380,13 @@ isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec)
+isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec)
 {
   return isCoPlanar(vec_pts, plane_nvec, vec_pts.front());
 }
 
 bool
-isCoPlanar(const std::vector<Point> vec_pts)
+isCoPlanar(const std::vector<Point> & vec_pts)
 {
   // Assuming that overlapped Points are allowed, the Points that are overlapped with vec_pts[0] are
   // removed before further calculation.
@@ -608,8 +608,11 @@ extraElemIntegerSwapParametersProcessor(
 }
 
 std::unique_ptr<ReplicatedMesh>
-buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boundary_id)
+buildBoundaryMesh(const MeshBase & input_mesh, const boundary_id_type boundary_id)
 {
+  if (!input_mesh.is_serial())
+    ::mooseError("Input mesh should be serialized for extracting the boundary mesh.\nInput mesh:" +
+                 input_mesh.get_info());
   auto poly_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
 
   auto side_list = input_mesh.get_boundary_info().build_side_list();
@@ -643,13 +646,295 @@ buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boun
   poly_mesh->skip_partitioning(true);
   poly_mesh->prepare_for_use();
   if (poly_mesh->n_elem() == 0)
-    mooseError("The input mesh does not have a boundary with id ", boundary_id);
+    mooseError("The input mesh to extract the boundary from does not have a boundary with id ",
+               boundary_id,
+               ".\n",
+               input_mesh);
 
   return poly_mesh;
 }
 
+std::unique_ptr<ReplicatedMesh>
+buildLoopBoundaryOf2DMesh(const MeshBase & input_mesh, const boundary_id_type boundary_id)
+{
+  if (!input_mesh.is_serial())
+    ::mooseError(
+        "Input 2D mesh should be serialized for extracting the loop boundary mesh.\nInput mesh:" +
+        input_mesh.get_info());
+  auto edge_mesh = std::make_unique<ReplicatedMesh>(input_mesh.comm());
+  auto side_list = input_mesh.get_boundary_info().build_side_list();
+  std::set<BoundaryInfo::BCTuple> visited;
+  bool already_seen_this_side_tuple = false;
+  BoundaryInfo::BCTuple first_side_visited = {libMesh::invalid_uint, 0, 0};
+
+  // Helps move elem to elem at a given node
+  const auto node_to_elem_map = buildBoundaryNodeToElemMap(input_mesh, boundary_id);
+  // Helps check if a node is part of a boundary
+  const auto & node_to_bids = input_mesh.get_boundary_info().get_nodeset_map();
+
+  // Traverse from the first side (edge) in the side_list that matches the boundary_id
+  for (const auto & bside : side_list)
+  {
+    if (std::get<2>(bside) != boundary_id)
+      continue;
+
+    // Check that we are not starting 'another' loop
+    if (bside != first_side_visited)
+    {
+      if (visited.size() && !visited.count(bside))
+        mooseWarning(
+            "Boundary " + std::to_string(boundary_id) +
+            " is not a (contiguous) loop. Boundary side: (" + Moose::stringify(bside) +
+            ") was not visited after a single pass around the boundary. Boundary sides visited: " +
+            Moose::stringify(visited));
+      else if (visited.empty())
+        first_side_visited = bside;
+      else
+        continue;
+    }
+
+    // Form the element to be able to find the side
+    // These three variables will be updated while traversing the loop boundary
+    const Elem * elem = input_mesh.elem_ptr(std::get<0>(bside));
+    auto current_side = std::get<1>(bside);
+    auto side_elem = elem->build_side_ptr(current_side);
+
+    // 3D elements should not be part of this boundary
+    if (elem->dim() != 2)
+      mooseError(
+          "Finding the loop boundary of a 2D mesh cannot be done with non-2D elements such as ",
+          *elem);
+
+    // Start from node 0 of the side (on the boundary), set the next node as the other node
+    // one that side, and keep going from tht next node
+    bool looped_back = false;
+    const Node * starting_node = side_elem->node_ptr(0);
+    const auto new_mesh_starting_node = edge_mesh->add_point(side_elem->point(0));
+    Node * new_first_node = new_mesh_starting_node;
+    [[maybe_unused]] dof_id_type first_node_index = starting_node->id();
+    dof_id_type second_node_index = input_mesh.node_ptr(side_elem->node_id(1))->id();
+
+    while (!looped_back && !already_seen_this_side_tuple)
+    {
+      if (MooseUtils::absoluteFuzzyEqual(input_mesh.point(second_node_index),
+                                         Point(*starting_node)))
+        looped_back = true;
+
+      // Get the opposite node (the next node) and add it to the edge mesh
+      Node * new_second_node = looped_back
+                                   ? new_mesh_starting_node
+                                   : edge_mesh->add_point(input_mesh.point(second_node_index));
+
+      // Add a copy of the edge side element to the mesh
+      side_elem = elem->build_side_ptr(current_side);
+      auto copy = side_elem->build(side_elem->type());
+      copy->set_node(0, new_first_node);
+      copy->set_node(1, new_second_node);
+      edge_mesh->add_elem(copy.release());
+
+      // Make this side as 'visited'
+      std::tuple<dof_id_type, unsigned short int, boundary_id_type> bc_tuple = {
+          elem->id(), current_side, boundary_id};
+      const auto & visit_iter = visited.insert(bc_tuple);
+      if (!looped_back && !visit_iter.second)
+        already_seen_this_side_tuple = true;
+
+      // Find the next element and side_elem
+      auto & connected_elems = libmesh_map_find(node_to_elem_map, second_node_index);
+      bool found_match = false;
+      const auto current_eid = elem->id();
+
+      for (const auto eid : connected_elems)
+      {
+        mooseAssert(!found_match,
+                    "We should only find one node on a connected element on this boundary");
+        if (eid != current_eid)
+        {
+          // Update the element (on the input mesh)
+          elem = input_mesh.elem_ptr(eid);
+
+          // Find the side and the opposite node index in that side
+          for (const auto si : elem->side_index_range())
+          {
+            // Check that second node is on the side
+            const auto local_second_node_index =
+                elem->get_node_index(input_mesh.node_ptr(second_node_index));
+            // 2 sides should match this
+            if (elem->is_node_on_side(local_second_node_index, si))
+            {
+              // Only one side should be on the same boundary (node is connected to two elements)
+              // Form a bc_tuple and check the list of boundary sides
+              std::tuple<dof_id_type, unsigned short int, boundary_id_type> side_bc_tuple = {
+                  elem->id(), si, boundary_id};
+
+              if (std::find(side_list.begin(), side_list.end(), side_bc_tuple) == side_list.end())
+                continue;
+
+              // We are on the right boundary, just need to get the other node
+              for (const auto local_side_node_id : elem->nodes_on_side(si))
+              {
+                const auto side_node_id = elem->node_id(local_side_node_id);
+
+                // Skip current node (use global index to compare)
+                if (side_node_id == second_node_index)
+                  continue;
+                mooseAssert(side_node_id != first_node_index,
+                            "Somehow looped back in a single element");
+
+                current_side = si;
+                second_node_index = side_node_id;
+                found_match = true;
+                break;
+              }
+            }
+            // No need to examine more sides
+            if (found_match)
+              break;
+          }
+
+          // No need to examine more elements
+          if (found_match)
+            break;
+        }
+        // next node could be on the same element, just moving on to the next side
+        else if (connected_elems.size() == 1)
+        {
+          elem = input_mesh.elem_ptr(eid);
+          const auto local_second_node_index =
+              elem->get_node_index(input_mesh.node_ptr(second_node_index));
+
+          // Move on to the next side
+          for (const auto si : elem->side_index_range())
+            if (si != current_side && elem->is_node_on_side(local_second_node_index, si))
+            {
+              // Check all nodes on that next side
+              for (const auto local_side_node_id : elem->nodes_on_side(si))
+              {
+                const auto side_node_id = elem->node_id(local_side_node_id);
+                // Skip current node
+                if (side_node_id == second_node_index)
+                  continue;
+                mooseAssert((side_node_id != first_node_index) ||
+                                (side_list.size() == elem->n_sides()),
+                            "Somehow looped back in a single element");
+
+                // Check all the boundaries the other node (on the edge side) is part of
+                const auto bids_range = node_to_bids.equal_range(input_mesh.node_ptr(side_node_id));
+
+                for (auto iter = bids_range.first; iter != bids_range.second; iter++)
+                  if (iter->second == boundary_id)
+                  {
+                    current_side = si;
+                    second_node_index = side_node_id;
+                    found_match = true;
+                  }
+              }
+
+              // no need to examine other sides
+              if (found_match)
+                break;
+            }
+        }
+      }
+
+      // Set current node to opposite node of new element
+      // NOTE: do not use new_first_node or new_second_node to search in the input mesh!
+      new_first_node = new_second_node;
+      first_node_index = second_node_index;
+
+      // Handle loop ending criterion
+      if (!found_match)
+      {
+        mooseWarning("Search for next element in loop boundary failed. Is boundary '" +
+                         std::to_string(boundary_id) + "' of mesh ",
+                     input_mesh,
+                     " a loop boundary?");
+        break;
+      }
+    }
+  }
+
+  if (already_seen_this_side_tuple)
+    mooseWarning("Boundary " + std::to_string(boundary_id) +
+                 " seems to have cycles. A single-cycle loop should be used");
+
+  edge_mesh->skip_partitioning(true);
+  edge_mesh->prepare_for_use();
+  if (edge_mesh->n_elem() == 0)
+    mooseError("The input mesh to extract the boundary from does not have a boundary with id ",
+               boundary_id,
+               "\n",
+               input_mesh);
+
+  return edge_mesh;
+}
+
+std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
+buildBoundaryNodeToElemMap(const MeshBase & input_mesh, const boundary_id_type boundary_id)
+{
+  if (!input_mesh.is_serial())
+    ::mooseError(
+        "Input 2D mesh should be serialized for extracting the loop boundary mesh.\nInput mesh:" +
+        input_mesh.get_info());
+
+  // Get all nodes on that boundary
+  // Boundary ID might be a sideset or a nodeset, get nodes regardless
+  const auto particular_node_ids = getBoundaryNodes(input_mesh, boundary_id);
+
+  std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>> nid_to_eids_map;
+  // Fill the map from looping over elements
+  for (const auto & elem :
+       as_range(input_mesh.active_elements_begin(), input_mesh.active_elements_end()))
+  {
+    for (const auto & nd : elem->node_ref_range())
+    {
+      // Only add the element id if the node is on the boundary
+      if (!particular_node_ids.count(nd.id()))
+        continue;
+
+      auto & elem_ids = nid_to_eids_map[nd.id()];
+      elem_ids.insert(elem->id());
+    }
+  }
+  return nid_to_eids_map;
+}
+
+std::set<dof_id_type>
+getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id)
+{
+  std::set<dof_id_type> boundary_node_ids;
+  const BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+  // Get all nodes from the sideset with ID of boundary_id
+  const auto & bc_sides =
+      boundary_info.build_side_list(libMesh::BoundaryInfo::BCTupleSortBy::BOUNDARY_ID);
+  for (const auto & bc_s : bc_sides)
+  {
+    auto bc_id = std::get<2>(bc_s);
+    if (bc_id == boundary_id)
+    {
+      auto elem_id = std::get<0>(bc_s);
+      const auto elem = mesh.elem_ptr(elem_id);
+      auto side = std::get<1>(bc_s);
+      for (const auto ni : elem->nodes_on_side(side))
+        boundary_node_ids.insert(elem->node_id(ni));
+    }
+  }
+
+  // Get all nodes from nodeset with ID of boundary_id
+  const auto & bc_nodes = boundary_info.build_node_list();
+  for (const auto & bc_n : bc_nodes)
+  {
+    auto bc_id = std::get<1>(bc_n);
+    if (bc_id == boundary_id)
+      boundary_node_ids.insert(std::get<0>(bc_n));
+  }
+
+  return boundary_node_ids;
+}
+
 void
-createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+createSubdomainFromSidesets(MeshBase & mesh,
                             std::vector<BoundaryName> boundary_names,
                             const SubdomainID new_subdomain_id,
                             const SubdomainName new_subdomain_name,
@@ -659,25 +944,25 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
   SubdomainID new_block_id = new_subdomain_id;
 
   // Make sure our boundary info and parallel counts are setup
-  if (!mesh->is_prepared())
+  if (!mesh.is_prepared())
   {
-    const bool allow_remote_element_removal = mesh->allow_remote_element_removal();
+    const bool allow_remote_element_removal = mesh.allow_remote_element_removal();
     // We want all of our boundary elements available, so avoid removing them if they haven't
     // already been so
-    mesh->allow_remote_element_removal(false);
-    mesh->prepare_for_use();
-    mesh->allow_remote_element_removal(allow_remote_element_removal);
+    mesh.allow_remote_element_removal(false);
+    mesh.prepare_for_use();
+    mesh.allow_remote_element_removal(allow_remote_element_removal);
   }
 
   // Check that the sidesets are present in the mesh
   for (const auto & sideset : boundary_names)
-    if (!MooseMeshUtils::hasBoundaryName(*mesh, sideset))
+    if (!MooseMeshUtils::hasBoundaryName(mesh, sideset))
       mooseException("The sideset '", sideset, "' was not found within the mesh");
 
-  auto sideset_ids = MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+  auto sideset_ids = MooseMeshUtils::getBoundaryIDs(mesh, boundary_names, true);
   std::set<boundary_id_type> sidesets(sideset_ids.begin(), sideset_ids.end());
-  auto side_list = mesh->get_boundary_info().build_side_list();
-  if (!mesh->is_serial() && mesh->comm().size() > 1)
+  auto side_list = mesh.get_boundary_info().build_side_list();
+  if (!mesh.is_serial() && mesh.comm().size() > 1)
   {
     std::vector<Elem *> elements_to_send;
     unsigned short i_need_boundary_elems = 0;
@@ -689,8 +974,8 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
         // Whether we have this boundary information through our locally owned element or a ghosted
         // element, we'll need the boundary elements for parallel consistent addition
         i_need_boundary_elems = 1;
-        auto * elem = mesh->elem_ptr(elem_id);
-        if (elem->processor_id() == mesh->processor_id())
+        auto * elem = mesh.elem_ptr(elem_id);
+        if (elem->processor_id() == mesh.processor_id())
           elements_to_send.push_back(elem);
       }
     }
@@ -703,14 +988,14 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     for (auto * nd : connected_nodes)
       connected_node_ids.insert(nd->id());
 
-    std::vector<unsigned short> need_boundary_elems(mesh->comm().size());
-    mesh->comm().allgather(i_need_boundary_elems, need_boundary_elems);
+    std::vector<unsigned short> need_boundary_elems(mesh.comm().size());
+    mesh.comm().allgather(i_need_boundary_elems, need_boundary_elems);
     std::unordered_map<processor_id_type, decltype(elements_to_send)> push_element_data;
     std::unordered_map<processor_id_type, decltype(connected_nodes)> push_node_data;
 
-    for (const auto pid : index_range(mesh->comm()))
+    for (const auto pid : index_range(mesh.comm()))
       // Don't need to send to self
-      if (pid != mesh->processor_id() && need_boundary_elems[pid])
+      if (pid != mesh.processor_id() && need_boundary_elems[pid])
       {
         if (elements_to_send.size())
           push_element_data[pid] = elements_to_send;
@@ -722,17 +1007,15 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     {
       // Node packing specialization already has unpacked node into mesh, so nothing to do
     };
-    Parallel::push_parallel_packed_range(
-        mesh->comm(), push_node_data, mesh.get(), node_action_functor);
+    Parallel::push_parallel_packed_range(mesh.comm(), push_node_data, &mesh, node_action_functor);
     auto elem_action_functor = [](processor_id_type, const auto &)
     {
       // Elem packing specialization already has unpacked elem into mesh, so nothing to do
     };
-    TIMPI::push_parallel_packed_range(
-        mesh->comm(), push_element_data, mesh.get(), elem_action_functor);
+    TIMPI::push_parallel_packed_range(mesh.comm(), push_element_data, &mesh, elem_action_functor);
 
     // now that we've gathered everything, we need to rebuild the side list
-    side_list = mesh->get_boundary_info().build_side_list();
+    side_list = mesh.get_boundary_info().build_side_list();
   }
 
   std::vector<std::pair<dof_id_type, ElemSidePair>> element_sides_on_boundary;
@@ -740,7 +1023,7 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
     {
-      if (auto elem = mesh->query_elem_ptr(std::get<0>(triple)))
+      if (auto elem = mesh.query_elem_ptr(std::get<0>(triple)))
       {
         if (!elem->active())
           mooseError(
@@ -754,8 +1037,8 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
       ++counter;
     }
 
-  dof_id_type max_elem_id = mesh->max_elem_id();
-  unique_id_type max_unique_id = mesh->parallel_max_unique_id();
+  dof_id_type max_elem_id = mesh.max_elem_id();
+  unique_id_type max_unique_id = mesh.parallel_max_unique_id();
 
   // Making an important assumption that at least our boundary elements are the same on all
   // processes even in distributed mesh mode (this is reliant on the correct ghosting functors
@@ -783,33 +1066,33 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     side_elem->set_id(max_elem_id + i);
     side_elem->set_unique_id(max_unique_id + i);
 
-    // Finally, add the lower-dimensional element to the mesh->
-    mesh->add_elem(side_elem.release());
+    // Finally, add the lower-dimensional element to the mesh.
+    mesh.add_elem(side_elem.release());
   };
 
   // Assign block name, if provided
   if (new_subdomain_name.size())
-    mesh->subdomain_name(new_block_id) = new_subdomain_name;
+    mesh.subdomain_name(new_block_id) = new_subdomain_name;
 
-  const bool skip_partitioning_old = mesh->skip_partitioning();
-  mesh->skip_partitioning(true);
-  mesh->prepare_for_use();
-  mesh->skip_partitioning(skip_partitioning_old);
+  const bool skip_partitioning_old = mesh.skip_partitioning();
+  mesh.skip_partitioning(true);
+  mesh.prepare_for_use();
+  mesh.skip_partitioning(skip_partitioning_old);
 }
 
 void
-convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
-                   std::unique_ptr<MeshBase> & target_mesh,
+convertBlockToMesh(MeshBase & source_mesh,
+                   MeshBase & target_mesh,
                    const std::vector<SubdomainName> & target_blocks)
 {
-  if (!source_mesh->is_replicated())
+  if (!source_mesh.is_replicated())
     mooseError("This generator does not support distributed meshes.");
 
-  const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(*source_mesh, target_blocks);
+  const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(source_mesh, target_blocks);
 
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
-  source_mesh->subdomain_ids(mesh_blocks);
+  source_mesh.subdomain_ids(mesh_blocks);
 
   for (const auto i : index_range(target_block_ids))
     if (target_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(target_block_ids[i]))
@@ -823,7 +1106,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
   for (const auto target_block_id : target_block_ids)
   {
 
-    for (auto elem : source_mesh->active_subdomain_elements_ptr_range(target_block_id))
+    for (auto elem : source_mesh.active_subdomain_elements_ptr_range(target_block_id))
     {
       if (elem->level() != 0)
         mooseError("Refined blocks are not supported by this generator. "
@@ -849,7 +1132,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
           // case where we have already inserted this particular point before
           // then we need to find the already-inserted one and hook it up right
           // to it's respective element
-          copy->set_node(copy_n_index++, target_mesh->node_ptr(old_new_node_map[n.id()]));
+          copy->set_node(copy_n_index++, target_mesh.node_ptr(old_new_node_map[n.id()]));
         }
         else
         {
@@ -859,7 +1142,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
           // Nodes' IDs are their indexes in the nodes' respective mesh
           // If we set them as invalid they are automatically assigned
           // Add to mesh, auto-assigning a new id.
-          Node * node = target_mesh->add_point(elem->point(i));
+          Node * node = target_mesh.add_point(elem->point(i));
 
           // Add to element copy (manually)
           copy->set_node(copy_n_index++, node);
@@ -871,13 +1154,13 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
 
       // it is ok to release the copy element into the mesh because derived meshes class
       // (ReplicatedMesh, DistributedMesh) manage their own elements, will delete them
-      target_mesh->add_elem(copy.release());
+      target_mesh.add_elem(copy.release());
     }
   }
 
   // Move subdomain names
   for (const auto sbd_id : target_block_ids)
-    target_mesh->subdomain_name(sbd_id) = source_mesh->subdomain_name(sbd_id);
+    target_mesh.subdomain_name(sbd_id) = source_mesh.subdomain_name(sbd_id);
 }
 
 void
@@ -1135,5 +1418,18 @@ buildPolyLineMesh(MeshBase & mesh,
   }
 
   buildPolyLineMesh(mesh, points, loop, start_boundary, end_boundary, nums_edges_between_points);
+}
+
+void
+addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid)
+{
+  auto & binfo = mesh.get_boundary_info();
+  for (const auto & elem : mesh.active_element_ptr_range())
+    for (const auto & i_side : elem->side_index_range())
+      if (elem->neighbor_ptr(i_side) == nullptr)
+      {
+        has_external_bid = true;
+        binfo.add_side(elem, i_side, extern_bid);
+      }
 }
 }

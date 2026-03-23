@@ -1,0 +1,75 @@
+[Tests]
+  design = 'SurfaceSubdomainsFromAllNormalsGenerator.md'
+  issues = '#32396 #32456'
+  # Note: the base use is covered through this test notably
+  [max_subdomain_patch_size]
+    type = Exodiff
+    input = 'test_flood.i'
+    cli_args = '--mesh-only'
+    exodiff = 'test_flood_in.e'
+    requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm that creates subdomain patches with a limited maximum size.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+  [input_normal_and_fixed]
+    type = Exodiff
+    input = 'test_fixed.i'
+    cli_args = '--mesh-only'
+    exodiff = 'test_fixed_in.e'
+    requirement = 'The system shall be able to assign subdomains to surface elements, selecting them based on their normal being compared to a user input normal.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+  [contiguous_subdomains_only]
+    type = Exodiff
+    input = 'test_two_parts.i'
+    cli_args = 'Mesh/assign_subdomains/contiguous_assignments_only=true --mesh-only'
+    exodiff = 'test_two_parts_in.e'
+    requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm with the constraint that subdomains should be assigned to contiguous elements with the flooding algorithm.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+  [handle_flipped_orientations]
+    type = Exodiff
+    input = 'test_flipped.i'
+    cli_args = '--mesh-only'
+    exodiff = 'test_flipped_in.e'
+    requirement = 'The system shall be able to assign subdomains to surface elements, selecting them through a flooding algorithm that creates subdomain patches and ignores element orientation flips.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+  [post_treatment_assign_to_most_common_neighbor_subdomain]
+    type = Exodiff
+    input = 'test_flood.i'
+    # if you run without select_max_neighbor_element_subdomains, there is an extra isolated element with its own subdomain
+    cli_args = "Mesh/assign_subdomains_in_patches/select_max_neighbor_element_subdomains=true
+                Mesh/assign_subdomains_in_patches/max_subdomain_size_centroids=10
+                Mesh/assign_subdomains_in_patches/normal_tol=0.4
+                --mesh-only assign_neighbor_majority_subdomain.e"
+    exodiff = 'assign_neighbor_majority_subdomain.e'
+    requirement = 'The system shall be to re-assign elements to a subdomain when surrounded by elements from subdomain.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+  [post_treatment_remove_single_node_connections]
+    type = Exodiff
+    input = 'test_flood.i'
+    cli_args = 'Mesh/assign_subdomains_in_patches/separate_elements_connected_by_a_single_node=true --mesh-only remove_isolated_elem.e'
+    exodiff = 'remove_isolated_elem.e'
+    requirement = 'The system shall be to re-assign elements to another subdomain when connected by only a single node to a subdomain.'
+    recover = false
+    mesh_mode = 'replicated'
+    # Non planar element in mesh
+    allow_warnings = true
+  []
+[]

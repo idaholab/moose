@@ -9,7 +9,7 @@
 
     requirement = "The system shall support automatic addition of sidesets based on outward facing normals of the mesh."
     issues = '#3306'
-    design = 'AllSideSetsByNormalsGenerator.md'
+    design = 'SideSetsFromAllNormalsGenerator.md'
   [../]
 
   [./less_simple]
@@ -22,6 +22,6 @@
 
     requirement = "The system shall group automatically added sidesets when multiple surfaces share the same outward facing normal."
     issues = '#3306'
-    design = 'AllSideSetsByNormalsGenerator.md'
+    design = 'SideSetsFromAllNormalsGenerator.md'
   [../]
 []

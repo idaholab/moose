@@ -97,7 +97,7 @@
     expect_err = 'The variable must be an elemental variable'
     requirement = 'The system shall be able to calculate element normal, and shall produce an error if a nodal variable is used to store the result.'
     issues = '#18232'
-    design = 'PorousFlowElementNormal.md'
+    design = 'ElementNormalAux.md'
   []
   [element_normal_except2]
     type = RunException
@@ -105,7 +105,7 @@
     expect_err = 'Must not be the zero vector'
     requirement = 'The system shall be able to calculate element normal for 1D elements if provided with a perpendicular vector, and shall produce an error if the perpendicular vector is incorrectly specified.'
     issues = '#18232'
-    design = 'PorousFlowElementNormal.md'
+    design = 'ElementNormalAux.md'
   []
   [element_normal_except3]
     type = RunException
@@ -113,7 +113,7 @@
     expect_err = 'Must not be the zero vector'
     requirement = 'The system shall be able to calculate element normals for meshes containing 3D elements if provided with a default value for the 3D elements, but shall produce an error if that default value is incorrectly specified.'
     issues = '#18232'
-    design = 'PorousFlowElementNormal.md'
+    design = 'ElementNormalAux.md'
   []
   [element_normal_1D_2D]
     type = CSVDiff
@@ -121,7 +121,7 @@
     csvdiff = element_normal_1D_2D_out.csv
     requirement = 'The system shall be able to calculate element normals for 1D and 2D elements, if provided with a perpendicular vector for the 1D elements.'
     issues = '#18232'
-    design = 'PorousFlowElementNormal.md'
+    design = 'ElementNormalAux.md'
   []
   [element_normal_2D_3D]
     type = CSVDiff
@@ -129,6 +129,6 @@
     csvdiff = element_normal_2D_3D_out.csv
     requirement = 'The system shall be able to calculate element normals for 2D and 3D elements, if provided with a default value for the 3D elements.'
     issues = '#18232'
-    design = 'PorousFlowElementNormal.md'
+    design = 'ElementNormalAux.md'
   []
 []

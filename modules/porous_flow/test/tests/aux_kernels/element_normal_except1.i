@@ -1,4 +1,4 @@
-# The PorousFlowElementNormal is used with a nodal AuxVariable to illustrate that an error is produced
+# The ElementNormalAux is used with a nodal AuxVariable to illustrate that an error is produced
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -26,7 +26,7 @@
 
 [AuxKernels]
   [nodal_aux]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = nodal_aux
     component = x
   []

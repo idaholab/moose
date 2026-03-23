@@ -1,4 +1,4 @@
-# The PorousFlowElementNormal is used with a zero 3D_default vector to illustrate that an error is produced
+# The ElementNormalAux is used with a zero 3D_default vector to illustrate that an error is produced
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -28,7 +28,7 @@
 
 [AuxKernels]
   [nodal_aux]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = n
     component = x
     3D_default = '0 0 0'

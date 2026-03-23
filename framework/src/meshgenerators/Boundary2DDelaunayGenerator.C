@@ -24,7 +24,7 @@ InputParameters
 Boundary2DDelaunayGenerator::validParams()
 {
   InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
-  params += FunctionParserUtils<false>::validParams();
+  params += LevelSetMeshingHelper::validParams();
 
   params.addClassDescription(
       "Mesh generator that convert a 2D surface given as one or a few boundaries of a 3D mesh into "
@@ -38,19 +38,6 @@ Boundary2DDelaunayGenerator::validParams()
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
 
-  params.addParam<std::string>(
-      "level_set",
-      "Level set used to achieve more accurate reverse projection compared to interpolation.");
-  params.addParam<unsigned int>(
-      "max_level_set_correction_iterations",
-      3,
-      "Maximum number of iterations to correct the nodes based on the level set function.");
-  params.addRangeCheckedParam<Real>(
-      "max_angle_deviation",
-      60.0,
-      "max_angle_deviation>0 & max_angle_deviation<90",
-      "Maximum angle deviation from the global average normal vector in the input mesh.");
-
   params.addParam<BoundaryName>(
       "output_external_boundary_name",
       "",
@@ -62,34 +49,12 @@ Boundary2DDelaunayGenerator::validParams()
 
 Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters & parameters)
   : SurfaceDelaunayGeneratorBase(parameters),
-    FunctionParserUtils<false>(parameters),
+    LevelSetMeshingHelper(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
     _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
-    _max_level_set_correction_iterations(
-        getParam<unsigned int>("max_level_set_correction_iterations")),
-    _max_angle_deviation(getParam<Real>("max_angle_deviation")),
     _output_external_boundary_name(getParam<BoundaryName>("output_external_boundary_name"))
 {
-  if (isParamValid("level_set"))
-  {
-    _func_level_set = std::make_shared<SymFunction>();
-    // set FParser internal feature flags
-    setParserFeatureFlags(_func_level_set);
-    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-      addFParserConstants(_func_level_set,
-                          getParam<std::vector<std::string>>("constant_names"),
-                          getParam<std::vector<std::string>>("constant_expressions"));
-    if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
-      mooseError("Invalid function f(x,y,z)\n",
-                 _func_level_set,
-                 "\nin CutMeshByLevelSetGenerator ",
-                 name(),
-                 ".\n",
-                 _func_level_set->ErrorMsg());
-
-    _func_params.resize(3);
-  }
 }
 
 std::unique_ptr<MeshBase>
@@ -102,7 +67,7 @@ Boundary2DDelaunayGenerator::generate()
   try
   {
     MooseMeshUtils::createSubdomainFromSidesets(
-        mesh_3d, _boundary_names, new_block_id, SubdomainName(), type());
+        *mesh_3d, _boundary_names, new_block_id, SubdomainName(), type());
   }
   catch (MooseException & e)
   {
@@ -120,7 +85,7 @@ Boundary2DDelaunayGenerator::generate()
     try
     {
       MooseMeshUtils::createSubdomainFromSidesets(
-          mesh_3d, hole, hole_block_ids.back(), SubdomainName(), type());
+          *mesh_3d, hole, hole_block_ids.back(), SubdomainName(), type());
     }
     catch (MooseException & e)
     {
@@ -133,98 +98,20 @@ Boundary2DDelaunayGenerator::generate()
 
   // Create a 2D mesh form the 2D block
   auto mesh_2d = buildMeshBaseObject();
-  MooseMeshUtils::convertBlockToMesh(mesh_3d, mesh_2d, {std::to_string(new_block_id)});
+  MooseMeshUtils::convertBlockToMesh(*mesh_3d, *mesh_2d, {std::to_string(new_block_id)});
   // If holes are provided, we need to create a 2D mesh for each hole
   std::vector<std::unique_ptr<MeshBase>> hole_meshes_2d;
   for (const auto & hole_block_id : hole_block_ids)
   {
     hole_meshes_2d.push_back(buildMeshBaseObject());
     MooseMeshUtils::convertBlockToMesh(
-        mesh_3d, hole_meshes_2d.back(), {std::to_string(hole_block_id)});
+        *mesh_3d, *hole_meshes_2d.back(), {std::to_string(hole_block_id)});
   }
 
   // We do not need the 3D mesh anymore
   mesh_3d->clear();
 
   return General2DDelaunay(mesh_2d, hole_meshes_2d);
-}
-
-Point
-Boundary2DDelaunayGenerator::elemNormal(const Elem & elem)
-{
-  mooseAssert(elem.n_vertices() == 3 || elem.n_vertices() == 4, "unsupported element type.");
-  // Only the first three vertices are used to calculate the normal vector
-  const Point & p0 = *elem.node_ptr(0);
-  const Point & p1 = *elem.node_ptr(1);
-  const Point & p2 = *elem.node_ptr(2);
-
-  if (elem.n_vertices() == 4)
-  {
-    const Point & p3 = *elem.node_ptr(3);
-    return ((p2 - p0).cross(p3 - p1)).unit();
-  }
-
-  return ((p2 - p1).cross(p0 - p1)).unit();
-}
-
-Point
-Boundary2DDelaunayGenerator::meshNormal2D(const MeshBase & mesh)
-{
-  Point mesh_norm = Point(0.0, 0.0, 0.0);
-  Real mesh_area = 0.0;
-
-  // Check all the elements' normal vectors
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_area = elem->volume();
-    mesh_norm += elemNormal(*elem) * elem_area;
-    mesh_area += elem_area;
-  }
-  mesh.comm().sum(mesh_norm);
-  mesh.comm().sum(mesh_area);
-  mesh_norm /= mesh_area;
-  return mesh_norm.unit();
-}
-
-Real
-Boundary2DDelaunayGenerator::meshNormalDeviation2D(const MeshBase & mesh, const Point & global_norm)
-{
-  Real max_deviation(0.0);
-  // Check all the elements' deviation from the global normal vector
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-  {
-    const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
-    max_deviation = std::max(max_deviation, elem_deviation);
-  }
-  mesh.comm().max(max_deviation);
-  return max_deviation;
-}
-
-Real
-Boundary2DDelaunayGenerator::levelSetEvaluator(const Point & point)
-{
-  return evaluate(_func_level_set, std::vector<Real>({point(0), point(1), point(2), 0}));
-}
-
-void
-Boundary2DDelaunayGenerator::levelSetCorrection(Node & node)
-{
-  // Based on the given level set, we try to move the node in its normal direction
-  const Real diff = libMesh::TOLERANCE * 10.0; // A small value to perturb the node
-  const Real original_eval = levelSetEvaluator(node);
-  const Real xp_eval = levelSetEvaluator(node + Point(diff, 0.0, 0.0));
-  const Real yp_eval = levelSetEvaluator(node + Point(0.0, diff, 0.0));
-  const Real zp_eval = levelSetEvaluator(node + Point(0.0, 0.0, diff));
-  const Real xm_eval = levelSetEvaluator(node - Point(diff, 0.0, 0.0));
-  const Real ym_eval = levelSetEvaluator(node - Point(0.0, diff, 0.0));
-  const Real zm_eval = levelSetEvaluator(node - Point(0.0, 0.0, diff));
-  const Point grad = Point((xp_eval - xm_eval) / (2.0 * diff),
-                           (yp_eval - ym_eval) / (2.0 * diff),
-                           (zp_eval - zm_eval) / (2.0 * diff));
-  const Real xyz_diff = -original_eval / grad.contract(grad);
-  node(0) += xyz_diff * grad(0);
-  node(1) += xyz_diff * grad(1);
-  node(2) += xyz_diff * grad(2);
 }
 
 std::unique_ptr<MeshBase>
@@ -262,11 +149,11 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
   const auto new_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*mesh_2d_dummy);
 
   MooseMeshUtils::createSubdomainFromSidesets(
-      mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName(), type());
+      *mesh_2d_dummy, {std::to_string(mesh_2d_ext_bdry)}, new_block_id_1d, SubdomainName(), type());
 
   // Create a 1D mesh form the 1D block
   auto mesh_1d = buildMeshBaseObject();
-  MooseMeshUtils::convertBlockToMesh(mesh_2d_dummy, mesh_1d, {std::to_string(new_block_id_1d)});
+  MooseMeshUtils::convertBlockToMesh(*mesh_2d_dummy, *mesh_1d, {std::to_string(new_block_id_1d)});
   mesh_2d_dummy->clear();
 
   // If we have holes, we need to create a 1D mesh for each hole
@@ -282,7 +169,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
         if (elem->neighbor_ptr(i_side) == nullptr)
           hole_mesh_2d->get_boundary_info().add_side(elem, i_side, hole_mesh_2d_ext_bdry);
     const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
-    MooseMeshUtils::createSubdomainFromSidesets(hole_mesh_2d,
+    MooseMeshUtils::createSubdomainFromSidesets(*hole_mesh_2d,
                                                 {std::to_string(hole_mesh_2d_ext_bdry)},
                                                 new_hole_block_id_1d,
                                                 SubdomainName(),
@@ -290,7 +177,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
     // Create a 1D mesh form the 1D block
     hole_meshes_1d.push_back(buildMeshBaseObject());
     MooseMeshUtils::convertBlockToMesh(
-        hole_mesh_2d, hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
+        *hole_mesh_2d, *hole_meshes_1d.back(), {std::to_string(new_hole_block_id_1d)});
     hole_mesh_2d->clear();
   }
 

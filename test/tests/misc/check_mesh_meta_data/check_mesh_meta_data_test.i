@@ -6,7 +6,7 @@
     dim = 2
   []
   [normal]
-    type = AllSideSetsByNormalsGenerator
+    type = SideSetsFromAllNormalsGenerator
     input = square
   []
 []

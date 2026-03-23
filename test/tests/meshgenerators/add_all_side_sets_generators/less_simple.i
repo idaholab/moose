@@ -4,7 +4,7 @@
     file = reactor.e
   []
   [block_1]
-    type = AllSideSetsByNormalsGenerator
+    type = SideSetsFromAllNormalsGenerator
     input = read
   []
 []
