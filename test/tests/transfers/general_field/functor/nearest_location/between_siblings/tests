@@ -65,5 +65,15 @@
       # Transferring between nodes and centroids
       allow_warnings = true
     []
+    [extrapolation_target_mesh]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'block_restricted_extrapolation_ma10.e block_restricted_extrapolation_ma20.e'
+      cli_args = "Outputs/file_base=block_restricted_extrapolation
+                  Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal app1_to_2_elem_elem app2_to_1_elem_elem'
+                  extrapolation_behavior='flat'
+                  GlobalParams/post_transfer_extrapolation=nearest-valid-target"
+      detail = 'with an extrapolation post-treatment from the transferred values on the target mesh onto locations missing transferred data.'
+    []
   []
 []

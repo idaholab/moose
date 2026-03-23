@@ -26,6 +26,8 @@
   input_files = sub_between_diffusion2.i
 []
 
+extrapolation_behavior = 'nearest-node'
+
 [Transfers]
   # Nodal to nodal variables
   [app1_to_2_nodal_nodal]
@@ -34,7 +36,7 @@
     to_multi_app = ma2
     source_functors = sent_nodal
     variable = received_nodal
-    extrapolation_behavior = 'nearest-node'
+    extrapolation_behavior = ${extrapolation_behavior}
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldFunctorTransfer
@@ -42,7 +44,7 @@
     to_multi_app = ma1
     source_functors = sent_nodal
     variable = received_nodal
-    extrapolation_behavior = 'nearest-node'
+    extrapolation_behavior = ${extrapolation_behavior}
   []
 
   # Elemental to elemental variables
@@ -88,7 +90,7 @@
     to_multi_app = ma2
     source_functors= sent_nodal
     variable = received_elem
-    extrapolation_behavior = 'nearest-node'
+    extrapolation_behavior = ${extrapolation_behavior}
   []
   [app2_to_1_nodal_elem]
     type = MultiAppGeneralFieldFunctorTransfer
@@ -96,7 +98,7 @@
     to_multi_app = ma1
     source_functors= sent_nodal
     variable = received_elem
-    extrapolation_behavior = 'nearest-node'
+    extrapolation_behavior = ${extrapolation_behavior}
   []
 []
 
