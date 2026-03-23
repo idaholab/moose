@@ -673,6 +673,15 @@ FEProblemBase::mesh(bool use_displaced) const
   return ((use_displaced && _displaced_problem) ? _displaced_problem->mesh() : mesh());
 }
 
+MooseMesh &
+FEProblemBase::mesh(bool use_displaced)
+{
+  if (use_displaced && !_displaced_problem)
+    mooseWarning("Displaced mesh was requested but the displaced problem does not exist. "
+                 "Regular mesh will be returned");
+  return ((use_displaced && _displaced_problem) ? _displaced_problem->mesh() : mesh());
+}
+
 void
 FEProblemBase::createTagVectors()
 {
