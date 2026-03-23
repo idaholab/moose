@@ -2,10 +2,10 @@
   design = 'syntax/Problem/index.md'
   issues = '#30806'
   [MFEMScalarIC]
-    type = XMLDiff
+    type = CSVDiff
     input = scalar_ic.i
-    xmldiff = 'OutputData/ScalarIC/Run0/Run0.pvd
-                OutputData/ScalarIC/Run0/Cycle000000/proc000000.vtu'
+    csvdiff = 'OutputData/ScalarIC/scalar_ic_line_sample_h1_scalar_0001.csv '
+              'OutputData/ScalarIC/scalar_ic_line_sample_l2_scalar_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
