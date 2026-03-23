@@ -69,8 +69,7 @@ ComplexEquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  GetEquationSystem()->RecoverComplexFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
+  GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
 } // namespace Moose::MFEM

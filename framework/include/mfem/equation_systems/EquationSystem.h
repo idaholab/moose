@@ -108,7 +108,7 @@ protected:
   virtual void FormSystemOperator(mfem::OperatorHandle & op,
                                   mfem::BlockVector & trueX,
                                   mfem::BlockVector & trueRHS);
-  /// Form matrix representation of of linear components of system operator as a HypreParMatrix.
+  /// Form matrix representation of linear components of system operator as a HypreParMatrix.
   /// Used when EquationSystem assembly level is set to 'LEGACY'.
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
