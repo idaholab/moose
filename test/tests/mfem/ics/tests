@@ -13,10 +13,12 @@
     recover = false
   []
   [MFEMVectorIC]
-    type = XMLDiff
+    type = CSVDiff
     input = vector_ic.i
-    xmldiff = 'OutputData/VectorIC/Run0/Run0.pvd
-                OutputData/VectorIC/Run0/Cycle000000/proc000000.vtu'
+    csvdiff = 'OutputData/VectorIC/vector_ic_line_sample_h1_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_nd_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_rt_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_l2_vector_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a vector MFEM variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
