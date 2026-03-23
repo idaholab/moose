@@ -73,6 +73,4 @@ protected:
 
   /// Method used for wall treatment
   const NS::WallTreatmentEnum _wall_treatment;
-  /// Whether to set k_t or k_eff
-  const bool _set_turbulent_thermal_conductivity;
 };
