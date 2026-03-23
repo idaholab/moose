@@ -25,7 +25,7 @@ public:
   MFEMComplexAuxKernel(const InputParameters & parameters);
   virtual ~MFEMComplexAuxKernel() = default;
 
-  /// Method called to update any owned objects upon a mesh update.
+  /// Method called to update any owned objects upon an FE space update
   virtual void update() {};
 
   /// Method to add a scaled complex variable to another complex variable.
@@ -43,6 +43,9 @@ protected:
 
   /// Reference to result complex gridfunction.
   mfem::ParComplexGridFunction & _result_var;
+
+  /// Counter to keep track of FE space updates
+  long _sequence{0};
 };
 
 #endif
