@@ -19,7 +19,7 @@ MFEMNLDiffusionIntegrator::MFEMNLDiffusionIntegrator(mfem::Coefficient & q,
                                                      const mfem::IntegrationRule * ir)
   : _grad_trial(gf),
     _diffusion_integ(q, ir),
-    _product_coef_jac(_one, _grad_trial),
+    _product_coef_jac(_neg_one, _grad_trial),
     _weak_div_integ(_product_coef_jac)
 {
   _sum.AddIntegrator(&_diffusion_integ);
@@ -48,13 +48,10 @@ InputParameters
 MFEMNLDiffusionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
-  params.addClassDescription("Adds the domain integrator for integrating the non-linear action"
-                             "$(k(u)\\vec\\nabla u, \\vec\\nabla v)_\\Omega$"
-                             "Adds the domain integrator to an MFEM problem for the bilinear form "
-                             "$(k(u)\\vec\\nable u, \\vec\\nabla v)_\\Omega + (k'(u) u, "
-                             "\\vec\\nabla u \\vec\\nabla v)_\\Omega$ "
-                             "The above terms arises from the weak form of the non-linear operator "
-                             "$- \\vec\\nabla \\cdot ( k(u) \\vec\\nabla u)$.");
+  params.addClassDescription("Adds the domain integrator to an MFEM problem for the nonlinear form "
+                             "$(u \\vec\\nabla u, \\vec\\nabla v)_\\Omega "
+                             "arising from the weak form of the non-linear operator "
+                             "$- \\vec\\nabla \\cdot (u \\vec\\nabla u)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property for MixedScalarWeakDivergence coefficient k.");
   return params;

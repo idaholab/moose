@@ -36,7 +36,7 @@ public:
 protected:
   mfem::GradientGridFunctionCoefficient _grad_trial;
   mfem::DiffusionIntegrator _diffusion_integ;
-  mfem::ConstantCoefficient _one{1.0};
+  mfem::ConstantCoefficient _neg_one{-1.0};
   mfem::ScalarVectorProductCoefficient _product_coef_jac;
   mfem::MixedScalarWeakDivergenceIntegrator _weak_div_integ;
   mfem::SumIntegrator _sum{0};
