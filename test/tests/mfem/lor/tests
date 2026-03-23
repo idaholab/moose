@@ -3,16 +3,15 @@
   issues = '#30591'
   parallel_scheduling = true
   [MFEMCurlCurlLOR]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/curlcurl.i
-    xmldiff = 'OutputData/CurlCurlLOR/Run0/Run0.pvd
-                OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CurlCurlLOR/curlcurllor_line_sample_0001.csv'
     cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
                'Solver/type=MFEMGMRESSolver Solver/l_tol=1e-14 '
                'Preconditioner/ams/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
+               'Outputs/CSV/file_base=OutputData/CurlCurlLOR/curlcurllor'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem & method!=dbg & platform=linux'
     compute_devices = 'cpu cuda'
