@@ -46,17 +46,14 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level);
   /// Build linear system, with essential boundary conditions accounted for
-  virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  virtual void FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
-  /// Compute J = M + grad_H(u)
-  void FormGradient(const mfem::Vector & u);
+  /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
   /// Update variable from solution vector after solve
-  virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  GridFunctions & gridfunctions,
-                                  ComplexGridFunctions & cmplx_gridfunctions);
+  virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
@@ -101,21 +98,23 @@ protected:
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
 
-  /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
+  /// Form linear components of system based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
-  /// Form matrix-free representation of system operator.
+  /// Form matrix-free representation of linear components of system operator.
   /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
   virtual void FormSystemOperator(mfem::OperatorHandle & op,
                                   mfem::BlockVector & trueX,
                                   mfem::BlockVector & trueRHS);
-  /// Form matrix representation of system operator as a HypreParMatrix.
+  /// Form matrix representation of of linear components of system operator as a HypreParMatrix.
   /// Used when EquationSystem assembly level is set to 'LEGACY'.
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+  /// Compute Jacobian matrix at the provided vector of true DoFs of trial variables
+  void FormJacobianMatrix(const mfem::Vector & u);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -188,7 +187,7 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
-  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _j_blocks;
+  mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
@@ -199,15 +198,16 @@ protected:
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
-  // Operator handle for the jacobian matrix
+  // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
+  // Operator handle for the linear components of the system operator
   mutable mfem::OperatorHandle _linear_operator;
   mfem::AssemblyLevel _assembly_level;
 
   // Pointer to GridFunctions to enable updates during nonlinear iterations
   Moose::MFEM::GridFunctions * _gfuncs;
   // Array storing block offsets of solution and residual vector
-  mfem::Array<int> * _block_true_offsets = NULL;
+  mfem::Array<int> _block_true_offsets;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
 

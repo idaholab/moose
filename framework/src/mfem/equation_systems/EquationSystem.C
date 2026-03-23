@@ -15,12 +15,7 @@
 namespace Moose::MFEM
 {
 
-EquationSystem::~EquationSystem()
-{
-  if (_block_true_offsets != NULL)
-    delete _block_true_offsets;
-  DeleteAllBlocks();
-}
+EquationSystem::~EquationSystem() { DeleteAllBlocks(); }
 
 void
 EquationSystem::DeleteAllBlocks()
@@ -29,6 +24,11 @@ EquationSystem::DeleteAllBlocks()
     for (const auto j : make_range(_h_blocks.NumCols()))
       delete _h_blocks(i, j);
   _h_blocks.DeleteAll();
+
+  for (const auto i : make_range(_jacobian_blocks.NumRows()))
+    for (const auto j : make_range(_jacobian_blocks.NumCols()))
+      delete _jacobian_blocks(i, j);
+  _jacobian_blocks.DeleteAll();
 }
 
 bool
@@ -187,13 +187,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 
   // Get a reference to the GridFunctions
   _gfuncs = &gridfunctions;
-
-  // Build the temporary BlockVectors
-  _block_true_offsets = new mfem::Array<int>(_trial_var_names.size() + 1);
-  (*_block_true_offsets)[0] = 0;
-  for (unsigned i = 0; i < _trial_var_names.size(); i++)
-    (*_block_true_offsets)[i + 1] = _gfuncs->Get(_trial_var_names.at(i))->ParFESpace()->TrueVSize();
-  _block_true_offsets->PartialSum();
 }
 
 void
@@ -369,34 +362,33 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
+EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
   height = trueX.Size();
   width = trueRHS.Size();
+  // Store block offsets
+  _block_true_offsets.SetSize(trueX.NumBlocks() + 1);
+  _block_true_offsets[0] = 0;
+  for (unsigned i = 0; i < _trial_var_names.size(); i++)
+    _block_true_offsets[i + 1] = trueX.BlockSize(i);
+  _block_true_offsets.PartialSum();
   FormLinearSystem(_linear_operator, trueX, trueRHS);
 }
 
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  // Auxiliary BlockVectors to simplify fetching sol and residual blocks
-  const mfem::BlockVector blockSolution(const_cast<mfem::Vector &>(sol), *_block_true_offsets);
-  mfem::BlockVector blockResidual(residual, *_block_true_offsets);
-  for (unsigned int i = 0; i < _trial_var_names.size(); i++)
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    blockSolution.GetBlock(i).SyncAliasMemory(blockSolution);
-    _gfuncs->Get(trial_var_name)->Distribute(&(blockSolution.GetBlock(i)));
-  }
+  // Update gridfunctions that may be referenced by coefficients within nonlinear integrators
+  const mfem::BlockVector blockSolution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
+  SetTrialVariablesFromTrueVectors(blockSolution);
 
   if (_non_linear)
   {
-    blockResidual = 0.0;
+    mfem::BlockVector blockResidual(residual, _block_true_offsets);
     for (unsigned int i = 0; i < _test_var_names.size(); i++)
     {
       auto & test_var_name = _test_var_names.at(i);
       auto nlf = _nlfs.GetShared(test_var_name);
-      nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
       nlf->Mult(blockSolution.GetBlock(i), blockResidual.GetBlock(i));
       blockResidual.GetBlock(i).SyncAliasMemory(blockResidual);
     }
@@ -413,12 +405,11 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 }
 
 void
-EquationSystem::FormGradient(const mfem::Vector & u)
+EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
 {
-  mfem::BlockVector update_vector(*_block_true_offsets);
-  static_cast<mfem::Vector &>(update_vector) = u;
-  _j_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
-  _j_blocks = nullptr;
+  const mfem::BlockVector update_vector(const_cast<mfem::Vector &>(u), _block_true_offsets);
+  _jacobian_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _jacobian_blocks = nullptr;
 
   for (const auto i : index_range(_test_var_names))
   {
@@ -429,22 +420,24 @@ EquationSystem::FormGradient(const mfem::Vector & u)
       mfem::HypreParMatrix * nlf_jac =
           dynamic_cast<mfem::HypreParMatrix *>(&nlf->GetGradient(update_vector.GetBlock(i)));
       if (!nlf_jac)
-        mooseError("nlf_jac is null");
-      _j_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
+        mooseError("Jacobian contribution of nonlinear form associated with ",
+                   test_var_name,
+                   " is not castable into a HypreParMatrix");
+      _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
     }
     for (const auto j : index_range(_trial_var_names))
       if (i != j) // nlf->GetGradient only contributes to on-diagonal blocks
-        _j_blocks(i, j) = _h_blocks(i, j);
+        _jacobian_blocks(i, j) = _h_blocks(i, j);
   }
   // Create monolithic matrix
-  _jacobian.Reset(mfem::HypreParMatrixFromBlocks(_j_blocks));
+  _jacobian.Reset(mfem::HypreParMatrixFromBlocks(_jacobian_blocks));
 }
 
 mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & u) const
 {
   if (_non_linear)
-    const_cast<EquationSystem *>(this)->FormGradient(u);
+    const_cast<EquationSystem *>(this)->FormJacobianMatrix(u);
   else
     _jacobian = _linear_operator;
 
@@ -452,12 +445,14 @@ EquationSystem::GetGradient(const mfem::Vector & u) const
 }
 
 void
-EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   Moose::MFEM::GridFunctions & gridfunctions,
-                                   Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/)
+EquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const
 {
   for (const auto i : index_range(_trial_var_names))
-    gridfunctions.Get(_trial_var_names.at(i))->Distribute(&(trueX.GetBlock(i)));
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    _gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+  }
 }
 
 void
@@ -495,12 +490,9 @@ EquationSystem::BuildNonlinearForms()
   {
     auto test_var_name = _test_var_names.at(i);
     _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
-  }
-
-  for (auto & test_var_name : _test_var_names)
-  {
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map);
   }

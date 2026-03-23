@@ -60,7 +60,7 @@ ComplexEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
+  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR())
     mooseError("LOR solve is not supported for complex equation systems.");

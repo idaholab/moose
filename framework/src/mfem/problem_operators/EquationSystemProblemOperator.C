@@ -35,7 +35,7 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::Solve()
 {
-  GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
+  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("LOR solve is only supported for single-variable systems");
@@ -46,9 +46,7 @@ EquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
-
-  GetEquationSystem()->RecoverFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
+  GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
 } // namespace Moose::MFEM

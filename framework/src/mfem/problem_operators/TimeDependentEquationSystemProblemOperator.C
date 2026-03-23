@@ -97,7 +97,7 @@ TimeDependentEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::re
 {
   GetEquationSystem()->SetTimeStep(dt);
   GetEquationSystem()->BuildEquationSystem();
-  GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
+  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
 }
 
 } // namespace Moose::MFEM
