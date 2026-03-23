@@ -16,7 +16,7 @@ InputParameters
 LinearFVTemperatureWallFunctionBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
-  params.addClassDescription("Adds Dirichlet BC for wall values of the turbulent viscosity.");
+  params.addClassDescription("Computes the wall value of the turbulent thermal conductivity based on turbulent temperature wall functions.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -24,16 +24,13 @@ LinearFVTemperatureWallFunctionBC::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "The specific heat at constant pressure.");
   params.addParam<MooseFunctorName>(NS::k, "The thermal conductivity.");
-  params.addParam<MooseFunctorName>("Pr_t", 0.58, "The turbulent Prandtl number.");
+  params.addParam<MooseFunctorName>("Pr_t", 0.7, "The turbulent Prandtl number.");
   params.addParam<MooseFunctorName>(NS::TKE, "The turbulent kinetic energy.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>(
       "wall_treatment", wall_treatment, "The method used for computing the wall functions");
-  params.addParam<bool>(
-      "set_turbulent_thermal_conductivity", false, "Whether to set the thermal conductivity or"
-      "the effective thermal conductivity at the wall");
   return params;
 }
 
@@ -51,8 +48,7 @@ LinearFVTemperatureWallFunctionBC::LinearFVTemperatureWallFunctionBC(
     _Pr_t(getFunctor<Real>("Pr_t")),
     _tke(getFunctor<Real>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
-    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
-    _set_turbulent_thermal_conductivity(getParam<bool>("set_turbulent_thermal_conductivity"))
+    _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>())
 {
 }
 
@@ -73,6 +69,7 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
   const auto cp = _cp(re, old_state);
   const auto k = _k(re, old_state);
   const auto Pr_t = _Pr_t(re,old_state);
+  const auto Pr = cp * mu / k;
 
   // Get the velocity vector
   RealVectorValue velocity(_u_var(re, old_state));
@@ -95,7 +92,6 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
     u_tau = NS::findUStar<Real>(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
-    // mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
@@ -103,8 +99,6 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
     y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     u_tau = parallel_speed /
             (log(max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) / NS::von_karman_constant);
-    // mu_wall = mu * (NS::von_karman_constant * y_plus /
-    //                 std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
   {
@@ -116,7 +110,6 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
 
     u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
-    // mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
@@ -124,49 +117,32 @@ LinearFVTemperatureWallFunctionBC::computeTurbulentThermalConductivity() const
     y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_tke(re, old_state)) * rho / mu;
     u_tau = parallel_speed /
             (log(max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)) / NS::von_karman_constant);
-    // mu_wall = mu * (NS::von_karman_constant * y_plus /
-    //                 std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
   }
   else
     mooseAssert(false,
                 "For `LinearFVTemperatureWallFunctionBC` , wall treatment should not reach here");
 
-  // Total alpha (turbulent + laminar )
-  Real alpha_eff = 0.0;
+  Real T_plus = 0.0;
+  Real y_plus_thermal = 0.0;
 
-  if (y_plus <= 5.0) // sub-laminar layer
+  // Compute thermal viscous layer thickness
+  y_plus_thermal = NS::findYplusThermal<Real>(Pr,Pr_t);
+
+  if (y_plus <= y_plus_thermal) // sub-laminar layer
   {
-    alpha_eff = k / (rho * cp);
+    T_plus = y_plus * Pr;
   }
-  else if (y_plus >= 30.0) // log-layer
+  else // log-layer
   {
-    const auto Pr = cp * mu / k;
     const auto Pr_ratio = Pr / Pr_t;
     const auto jayatilleke_P =
         9.24 * (pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * exp(-0.007 * Pr_ratio));
     const auto wall_scaling =
         1.0 / NS::von_karman_constant * log(NS::E_turb_constant * y_plus) + jayatilleke_P;
-    alpha_eff = u_tau * wall_dist / (Pr_t * wall_scaling);
+    T_plus = Pr_t * wall_scaling;
   }
-  else // buffer layer
-  {
-    const auto alpha_lam = k / (rho * cp);
-    const auto Pr = cp * mu / k;
-    const auto Pr_ratio = Pr / Pr_t;
-    const auto jayatilleke_P =
-        9.24 * (pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * exp(-0.007 * Pr_ratio));
-    const auto wall_scaling =
-        1.0 / NS::von_karman_constant * log(NS::E_turb_constant * y_plus) + jayatilleke_P;
-    const auto alpha_turb = u_tau * wall_dist / (Pr_t * wall_scaling);
-    const auto blending_function = (y_plus - 5.0) / 25.0;
-    alpha_eff = blending_function * alpha_turb + (1.0 - blending_function) * alpha_lam;
-  }
-
-  if (!_set_turbulent_thermal_conductivity)
-    return rho * cp * alpha_eff; //
-  else
-    return rho * cp * alpha_eff-k;
-
+  // Returns the effective thermal conductivity at the wall
+  return rho * cp * u_tau * wall_dist / T_plus;
 }
 
 Real

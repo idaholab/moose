@@ -157,6 +157,75 @@ findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real 
 
 template <typename T>
 T
+findYplusThermal(const T & Pr, const T & Pr_t)
+{
+  using std::abs, std::exp, std::log, std::max, std::pow;
+
+  constexpr int MAX_ITERS{35};
+  constexpr Real REL_TOLERANCE{1e-3};
+  constexpr Real DERIV_TOLERANCE{1e-12};
+
+  mooseAssert(Pr > 0, "Need a strictly positive Prandtl number");
+  mooseAssert(Pr_t > 0, "Need a strictly positive turbulent Prandtl number");
+
+  const auto Pr_ratio = Pr / Pr_t;
+
+  const auto jayatilleke_P =
+      9.24 * (pow(Pr_ratio, 0.75) - 1.0) * (1.0 + 0.28 * exp(-0.007 * Pr_ratio));
+
+  auto f = [&](const T y)
+  {
+    return Pr * y - Pr_t * (1.0 / NS::von_karman_constant * log(NS::E_turb_constant * y) + jayatilleke_P);
+  };
+
+  auto df = [&](const T y)
+  {
+    return Pr - Pr_t * (1.0 / NS::von_karman_constant / y);
+  };
+
+  // Location of the minimum of f(y); the larger root is to the right of this.
+  const auto y_plus_min = Pr_t / (Pr * NS::von_karman_constant);
+
+  // Start to the right of the minimum so Newton converges to the larger root.
+  auto y_plus = max(1.5 * y_plus_min, NS::min_y_plus);
+  auto y_plus_last = y_plus;
+
+  // If the minimum is above zero, no real intersection exists.
+  const auto f_min = f(y_plus_min);
+  if (f_min > 0.0)
+    return T(y_plus);
+
+  unsigned int iters = 0;
+  do
+  {
+    y_plus_last = y_plus;
+
+    const auto f_val = f(y_plus);
+    const auto df_val = df(y_plus);
+
+    // Avoid division by nearly zero derivative
+    if (abs(df_val) < DERIV_TOLERANCE)
+      break;
+
+    auto y_new = y_plus - f_val / df_val;
+
+    // Keep Newton on the right branch so we get the largest root
+    if (y_new <= y_plus_min)
+      y_new = 0.5 * (y_plus + y_plus_min);
+
+    y_plus = max(y_new, NS::min_y_plus);
+  } while (abs((y_plus - y_plus_last) / y_plus_last) > REL_TOLERANCE && ++iters < MAX_ITERS);
+
+  return T(max(y_plus, NS::min_y_plus));
+}
+
+template Real
+findYplusThermal<Real>(const Real & Pr, const Real & Pr_t);
+template ADReal
+findYplusThermal<ADReal>(const ADReal & Pr, const ADReal & Pr_t);
+
+template <typename T>
+T
 computeSpeed(const libMesh::VectorValue<T> & velocity)
 {
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
