@@ -1,0 +1,11 @@
+[Tests]
+  design = 'LinearFVTemperatureWallFunctionBC.md FunctorEffectiveTurbulentThermalConductivity.md'
+  issues = '#32476'
+  [channel_ERCOFTAC_heated]
+    type = 'Exodiff'
+    input = 'channel_ERCOFTAC_heated.i'
+    exodiff = 'channel_ERCOFTAC_heated_out.e'
+    abs_zero = 1e-6
+    requirement = 'The system shall be able to turbulent fluid flow problems with k-epsilon turbulence model and with temperature wall functions in a heated channel.'
+  []
+[]
