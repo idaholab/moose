@@ -1,19 +1,90 @@
+# Verification case for the porous linear-segregated inlet/outlet solve with:
+# - a prescribed density change across the domain
+# - a prescribed porosity jump across one internal pressure baffle
+# - no irreversible form loss
+#
+# The purpose of this file is to isolate the reversible Bernoulli pressure jump that is
+# implemented through the porous-baffle machinery. This is the right place to test that
+# jump because the standard non-porous channel solve does not have an internal pressure
+# baffle treatment.
+#
+# Geometry:
+# - 2D rectangular channel
+# - left block: clear region
+# - right block: porous region
+# - one internal sideset named 'baffle' located at the block interface
+# - top and bottom are symmetry planes, so the solution is effectively one-dimensional
+#
+# Physics choices:
+# - mu = 0 and no porous friction, so there are no distributed losses
+# - baffle_form_loss is intentionally omitted, so there are no irreversible losses either
+# - the only pressure change is the reversible Bernoulli jump at the interface
+#
+# Notation used below:
+#   U_s  = superficial velocity
+#   u    = interstitial velocity = U_s / epsilon
+#   phi  = superficial mass flux = rho * U_s
+#
+# Since the problem is steady and one-dimensional, phi is constant:
+#   phi = rho_left * U_s,left
+#
+# In each block, rho and epsilon are constant, so U_s and u are also constant there:
+#   U_s,i = phi / rho_i
+#   u_i   = phi / (rho_i * epsilon_i)
+#
+# With no irreversible losses, the porous-baffle jump is purely Bernoulli:
+#   Delta p = p_left - p_right
+#           = 0.5 * (rho_right * u_right^2 - rho_left * u_left^2)
+#           = 0.5 * phi^2 * (1 / (rho_right * epsilon_right^2)
+#                            - 1 / (rho_left  * epsilon_left^2))
+#
+# Parameter values used here:
+#   rho_left      = 1.0
+#   rho_right     = 0.5
+#   epsilon_left  = 1.0
+#   epsilon_right = 0.5
+#   U_s,left      = 1.0
+#   p_out         = 0.0
+#
+# Therefore:
+#   phi           = 1.0
+#   U_s,right     = 2.0
+#   u_left        = 1.0
+#   u_right       = 4.0
+#   Delta p       = 3.5
+#   p_left        = 3.5
+#   p_right       = 0.0
+#
+# The postprocessors compare both the total pressure drop and the block-to-block pressure
+# jump against those analytical values. Auxiliary variables also write the exact fields
+# to the output so the solution can be inspected directly.
+
 length_left = 5.0
 length_right = 5.0
 height = 1.0
 
 nx_left = 40
 nx_right = 40
-ny = 3
+ny = 2
+
+rho_left = 1.0
+rho_right = 0.5
 
 epsilon_left = 1.0
-epsilon_right = 1.0
+epsilon_right = 0.5
 
 u_in = 1.0
 p_out = 0.0
 mu = 1.0
 
 advected_interp_method = 'upwind'
+
+mass_flux = '${fparse rho_left * u_in}'
+u_right_superficial_exact_const = '${fparse mass_flux / rho_right}'
+# u_left_interstitial_exact_const = ${fparse mass_flux / (rho_left * epsilon_left)}
+# u_right_interstitial_exact_const = ${fparse mass_flux / (rho_right * epsilon_right)}
+delta_p_exact_const = '${fparse 0.5 * mass_flux * mass_flux * (1 / (rho_right * epsilon_right * epsilon_right) - 1 / (rho_left * epsilon_left * epsilon_left))}'
+p_left_exact_const = '${fparse p_out + delta_p_exact_const}'
 
 [Mesh]
   [mesh]
@@ -58,7 +129,7 @@ advected_interp_method = 'upwind'
     u = superficial_u
     v = superficial_v
     pressure = pressure
-    rho = 'rho_aux'
+    rho = 'rho'
     porosity = 'porosity'
     p_diffusion_kernel = p_diffusion
 
@@ -81,7 +152,7 @@ advected_interp_method = 'upwind'
     # use_corrected_pressure_gradient = false
 
     pressure_gradient_limiter = 'baffle'
-    pressure_gradient_limiter_blend = 0.0
+    pressure_gradient_limiter_blend = 1.0
     use_corrected_pressure_gradient = true
   []
 []
@@ -115,7 +186,7 @@ advected_interp_method = 'upwind'
     momentum_component = 'x'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = false
+    porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
   []
   [v_advection]
@@ -128,7 +199,7 @@ advected_interp_method = 'upwind'
     momentum_component = 'y'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = false
+    porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
   []
   [u_pressure]
@@ -224,14 +295,12 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Functions]
-  [rho]
-    type = ParsedFunction
-    expression = '1e3 - 0.05e3 * x'
-  []
-[]
-
 [FunctorMaterials]
+  [rho]
+    type = PiecewiseByBlockFunctorMaterial
+    prop_name = rho
+    subdomain_to_prop_value = '1 ${rho_left} 2 ${rho_right}'
+  []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
@@ -242,6 +311,30 @@ advected_interp_method = 'upwind'
     property_name = mu
     expression = '${mu}'
   []
+
+  # Exact superficial velocity from constant superficial mass flux phi = rho * U_s.
+  [u_superficial_exact]
+    type = ParsedFunctorMaterial
+    property_name = u_superficial_exact
+    functor_names = 'rho'
+    expression = '${mass_flux} / rho'
+  []
+
+  # Exact interstitial velocity used in the Bernoulli relation.
+  [u_interstitial_exact]
+    type = ParsedFunctorMaterial
+    property_name = u_interstitial_exact
+    functor_names = 'rho porosity'
+    expression = '${mass_flux} / (rho * porosity)'
+  []
+
+  # Exact pressure is piecewise constant because rho and epsilon are piecewise constant
+  # and there are no distributed losses.
+  [p_exact]
+    type = PiecewiseByBlockFunctorMaterial
+    prop_name = p_exact
+    subdomain_to_prop_value = '1 ${p_left_exact_const} 2 ${p_out}'
+  []
 []
 
 [AuxVariables]
@@ -249,6 +342,15 @@ advected_interp_method = 'upwind'
     type = MooseLinearVariableFVReal
   []
   [porosity_aux]
+    type = MooseLinearVariableFVReal
+  []
+  [u_superficial_exact_aux]
+    type = MooseLinearVariableFVReal
+  []
+  [u_interstitial_exact_aux]
+    type = MooseLinearVariableFVReal
+  []
+  [p_exact_aux]
     type = MooseLinearVariableFVReal
   []
 []
@@ -264,6 +366,24 @@ advected_interp_method = 'upwind'
     type = FunctorAux
     variable = porosity_aux
     functor = 'porosity'
+    execute_on = 'initial timestep_end'
+  []
+  [assign_u_superficial_exact_aux]
+    type = FunctorAux
+    variable = u_superficial_exact_aux
+    functor = 'u_superficial_exact'
+    execute_on = 'initial timestep_end'
+  []
+  [assign_u_interstitial_exact_aux]
+    type = FunctorAux
+    variable = u_interstitial_exact_aux
+    functor = 'u_interstitial_exact'
+    execute_on = 'initial timestep_end'
+  []
+  [assign_p_exact_aux]
+    type = FunctorAux
+    variable = p_exact_aux
+    functor = 'p_exact'
     execute_on = 'initial timestep_end'
   []
 []
@@ -285,6 +405,15 @@ advected_interp_method = 'upwind'
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
+  [delta_p_expected]
+    type = Receiver
+    default = ${delta_p_exact_const}
+  []
+  [delta_p_error]
+    type = ParsedPostprocessor
+    expression = 'delta_p - delta_p_expected'
+    pp_names = 'delta_p delta_p_expected'
+  []
 
   # The block averages give a more direct measure of the interface jump because the exact
   # solution is piecewise constant in each block.
@@ -303,6 +432,11 @@ advected_interp_method = 'upwind'
     expression = 'p_block_1 - p_block_2'
     pp_names = 'p_block_1 p_block_2'
   []
+  [p_block_jump_error]
+    type = ParsedPostprocessor
+    expression = 'p_block_jump - delta_p_expected'
+    pp_names = 'p_block_jump delta_p_expected'
+  []
 
   # Check the superficial velocities on both sides of the jump.
   [u_block_1]
@@ -315,12 +449,30 @@ advected_interp_method = 'upwind'
     variable = superficial_u
     block = 2
   []
+  [u_block_1_expected]
+    type = Receiver
+    default = ${u_in}
+  []
+  [u_block_2_expected]
+    type = Receiver
+    default = ${u_right_superficial_exact_const}
+  []
+  [u_block_1_error]
+    type = ParsedPostprocessor
+    expression = 'u_block_1 - u_block_1_expected'
+    pp_names = 'u_block_1 u_block_1_expected'
+  []
+  [u_block_2_error]
+    type = ParsedPostprocessor
+    expression = 'u_block_2 - u_block_2_expected'
+    pp_names = 'u_block_2 u_block_2_expected'
+  []
 []
 
 [VectorPostprocessors]
   [centerline_solution]
     type = LineValueSampler
-    variable = 'rho_aux porosity_aux superficial_u pressure'
+    variable = 'rho_aux porosity_aux superficial_u u_superficial_exact_aux u_interstitial_exact_aux pressure p_exact_aux'
     start_point = '0 0.5 0'
     end_point = '${fparse length_left + length_right} 0.5 0'
     num_points = 401
