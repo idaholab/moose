@@ -1,9 +1,11 @@
 [Tests]
   [MFEMScalarVectorProjectionAux]
-    type = XMLDiff
+    type = CSVDiff
     input = projection.i
-    xmldiff = 'OutputData/Projection/Run0/Run0.pvd
-                OutputData/Projection/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Projection/projection_line_sample_Az_0001.csv '
+              'OutputData/Projection/projection_line_sample_GAz_0001.csv '
+              'OutputData/Projection/projection_line_sample_GAz_copy_0001.csv '
+              'OutputData/Projection/projection_line_sample_J_0001.csv'
     design = 'MFEMScalarProjectionAux.md MFEMVectorProjectionAux.md'
     issues = '#31153'
     requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM auxvariables.'

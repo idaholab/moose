@@ -112,10 +112,45 @@
   type = MFEMSteady
 []
 
+[VectorPostprocessors]
+  [line_sample_Az]
+    type = MFEMLineValueSampler
+    variable = 'Az'
+    start_point = '-3 -2 0'
+    end_point = '3 2 0'
+    num_points = 101
+    execute_on = 'final'
+  []
+  [line_sample_J]
+    type = MFEMLineValueSampler
+    variable = 'J'
+    start_point = '-2.9 -1.9 0'
+    end_point = '2.9 1.9 0'
+    num_points = 101
+    execute_on = 'final'
+  []
+  [line_sample_GAz]
+    type = MFEMLineValueSampler
+    variable = 'GAz'
+    start_point = '-3 -2 0'
+    end_point = '3 2 0'
+    num_points = 101
+    execute_on = 'final'
+  []
+  [line_sample_GAz_copy]
+    type = MFEMLineValueSampler
+    variable = 'GAz(copy)'
+    start_point = '-3 -2 0'
+    end_point = '3 2 0'
+    num_points = 101
+    execute_on = 'final'
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Projection
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'final'
+    file_base = OutputData/Projection/projection
   []
 []
