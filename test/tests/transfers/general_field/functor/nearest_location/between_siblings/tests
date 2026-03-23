@@ -52,7 +52,6 @@
                   MultiApps/ma1/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'
                   MultiApps/ma2/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'"
       detail = 'with block restricted variables of matching types,'
-      # custom_cmp = 'nodal_only.cmp'
     []
     [block_restriction_variables_different_type]
       type = Exodiff
@@ -68,12 +67,18 @@
     [extrapolation_target_mesh]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'block_restricted_extrapolation_ma10.e block_restricted_extrapolation_ma20.e'
-      cli_args = "Outputs/file_base=block_restricted_extrapolation
+      exodiff = 'post_extrapolation_ma10.e post_extrapolation_ma20.e'
+      cli_args = "Outputs/file_base=post_extrapolation
                   Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal app1_to_2_elem_elem app2_to_1_elem_elem'
-                  extrapolation_behavior='flat'
-                  GlobalParams/post_transfer_extrapolation=nearest-valid-target"
+                  extrapolation_behavior_node='flat'
+                  extrapolation_behavior_elem='flat'
+                  GlobalParams/post_transfer_extrapolation=nearest-valid-target
+                  MultiApps/ma1/cli_args='AuxVariables/ghosting_request/family=MONOMIAL_VEC;AuxVariables/ghosting_request/order=CONSTANT;AuxVariables/ghosting_request/AuxKernel/type=FunctorElementalGradientAux;AuxVariables/ghosting_request/AuxKernel/functor=sent_elem;AuxVariables/ghosting_request/outputs=none'
+                  MultiApps/ma2/cli_args='AuxVariables/ghosting_request/family=MONOMIAL_VEC;AuxVariables/ghosting_request/order=CONSTANT;AuxVariables/ghosting_request/AuxKernel/type=FunctorElementalGradientAux;AuxVariables/ghosting_request/AuxKernel/functor=sent_elem;AuxVariables/ghosting_request/outputs=none'
+                  GlobalParams/error_on_miss=false"
       detail = 'with an extrapolation post-treatment from the transferred values on the target mesh onto locations missing transferred data.'
+      # Meshes are not closely overlapping, post-treatment will not be able to correct every point
+      allow_warnings = true
     []
   []
 []
