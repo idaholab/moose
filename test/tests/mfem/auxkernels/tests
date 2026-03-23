@@ -54,10 +54,11 @@
     restep = false
   []
   [MFEMCrossProductAux]
-    type = XMLDiff
+    type = CSVDiff
     input = crossproduct.i
-    xmldiff = 'OutputData/CrossProduct/Run0/Run0.pvd
-                OutputData/CrossProduct/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/CrossProduct/crossproduct_line_sample_e_field_0001.csv '
+              'OutputData/CrossProduct/crossproduct_line_sample_b_field_0001.csv '
+              'OutputData/CrossProduct/crossproduct_line_sample_lorentz_force_0001.csv'
     design = 'MFEMCrossProductAux.md'
     issues = '#31613'
     requirement = 'The system shall have the ability to project the cross product of two gridfunctions onto an MFEM vector auxvariable'
