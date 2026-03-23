@@ -9,6 +9,7 @@
   [subdomains]
     type = SubdomainPerElementGenerator
     input = gmg
+    # Note: this is a 1D vector per element ID
     subdomain_ids = '0 0 1 1
                      0 0 1 1
                      2 2 3 3
@@ -21,6 +22,9 @@
     operation = keep
     block = '0 3'
   []
+
+  # Subdomain assignment depend on element ids
+  allow_renumbering = false
 []
 
 [Outputs]
