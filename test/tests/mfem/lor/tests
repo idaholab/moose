@@ -56,17 +56,18 @@
     abs_zero = 1e-6
   []
   [MFEMHeatConductionLOR]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/heattransfer.i
-    xmldiff = 'OutputData/HeatConductionLOR/Run0/Run0.pvd
-                OutputData/HeatConductionLOR/Run0/Cycle000001/proc000000.vtu
-                OutputData/HeatConductionLOR/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionLOR/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConductionLOR/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConductionLOR/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConductionLOR/heatconduction_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'FESpaces/H1FESpace/fec_order=SECOND '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Preconditioner/jacobi/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR'
+               'Outputs/CSV/file_base=OutputData/HeatConductionLOR/heatconduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
