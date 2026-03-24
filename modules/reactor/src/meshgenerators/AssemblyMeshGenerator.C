@@ -625,8 +625,7 @@ AssemblyMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Assembly, _extrude);
   }
 
-  // Mark mesh as not prepared, as block IDs were re-assigned in this method
-  (*_build_mesh)->unset_is_prepared();
+  // updateElementBlockNameId already marked those caches unprepared
 
   return std::move(*_build_mesh);
 }
