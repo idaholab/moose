@@ -409,6 +409,7 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
     params.set<AuxVariableName>("variable") = NS::k_eff_t;
     params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
 
     const auto & k_names = _fluid_energy_physics->getThermalConductivityName();
     if (k_names.size() != 1)
