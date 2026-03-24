@@ -35,15 +35,11 @@
 []
 
 [Postprocessors]
-  [int_unity_substrate]
-    type = ElementIntegralVariablePostprocessor
-    variable = unity
-    block = 1
+  [num_elems]
+    type = NumElements
   []
-  [int_unity_boundary_layer]
-    type = ElementIntegralVariablePostprocessor
-    variable = unity
-    block = 0
+  [area]
+    type = VolumePostprocessor
   []
 []
 

@@ -37,9 +37,11 @@
 []
 
 [Postprocessors]
-  [int_unity]
-    type = ElementIntegralVariablePostprocessor
-    variable = unity
+  [num_elems]
+    type = NumElements
+  []
+  [area]
+    type = VolumePostprocessor
   []
 []
 

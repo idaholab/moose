@@ -557,8 +557,8 @@ void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & ha
  * either the outward or inward direction.
  * @param mg The mesh generator calling this function, used for error messages and debugging
  * purposes
- * @param ply_mesh_u The mesh generated from the original points, used to determine the normal
- * direction for the offset points
+ * @param ply_mesh_u The 1D polyline mesh generated from the original points, used to determine the
+ * normal direction for the offset points
  * @param points The original list of points to be offset
  * @param mid_points The list of midpoints corresponding to the points for quadratic elements.
  * @param outward_direction Whether to offset the points in the outward direction (true) or inward

@@ -28,29 +28,17 @@
   solve = false
 []
 
-[AuxVariables]
-  [unity]
-    family = MONOMIAL
-    order = CONSTANT
-    initial_condition = 1.0
-  []
-[]
-
 [Executioner]
   type = Transient
   num_steps = 1
 []
 
 [Postprocessors]
-  [int_unity_substrate]
-    type = ElementIntegralVariablePostprocessor
-    variable = unity
-    block = 2
+  [num_elems]
+    type = NumElements
   []
-  [int_unity_boundary_layer]
-    type = ElementIntegralVariablePostprocessor
-    variable = unity
-    block = 0
+  [area]
+    type = VolumePostprocessor
   []
 []
 
