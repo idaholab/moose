@@ -28,6 +28,7 @@ public:
   MFEMBoundaryRestrictable(const InputParameters & parameters, const mfem::ParMesh & mfem_mesh);
 
   mfem::Array<int> boundariesToAttributes(const std::vector<BoundaryName> & boundary_names);
+  std::vector<std::string> boundariesToStrings(const std::vector<BoundaryName> & boundary_names);
 
   /// Returns a bool indicating if the object is restricted to a subset of boundaries
   bool isBoundaryRestricted() const

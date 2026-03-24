@@ -65,4 +65,13 @@ MFEMBoundaryRestrictable::boundariesToAttributes(const std::vector<BoundaryName>
   return attributes;
 }
 
+std::vector<std::string>
+MFEMBoundaryRestrictable::boundariesToStrings(const std::vector<BoundaryName> & boundary_names)
+{
+  auto attrs = boundariesToAttributes(boundary_names);
+  std::vector<std::string> strs(attrs.Size());
+  std::transform(attrs.begin(), attrs.end(), strs.begin(), [](int n) { return std::to_string(n); });
+  return strs;
+}
+
 #endif
