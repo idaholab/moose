@@ -69,8 +69,12 @@ BoundaryDeletionGenerator::generate()
     ids_to_remove = ids;
 
   for (const auto & id : ids_to_remove)
-    mesh->get_boundary_info().remove_id(id);
+    mesh->get_boundary_info().remove_id(id, /* global = */ true);
 
-  mesh->unset_is_prepared();
+  // BoundaryInfo should have updated its caches here, leaving the
+  // mesh just as prepared as it was to begin with, but that's broken
+  // prior to libMesh/libmesh#4419
+  mesh->unset_has_boundary_id_sets();
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

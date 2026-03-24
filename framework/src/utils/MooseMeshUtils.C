@@ -1314,6 +1314,11 @@ copyIntoMesh(MeshGenerator & mg,
   for (const auto & [edgeset_id, edgeset_name] : other_boundary.get_edgeset_name_map())
     boundary.set_edgeset_name_map().insert(
         std::make_pair<BoundaryID, BoundaryName>(edgeset_id + bid_offset, edgeset_name));
+
+  // libMesh copy_nodes_and_elements should have set us as unprepared
+  // as appropriate for itself, but then we've been editing boundary
+  // ids afterward
+  destination.unset_has_boundary_id_sets();
 }
 
 void
