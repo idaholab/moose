@@ -1177,11 +1177,29 @@ AdvancedExtruderGenerator::generate()
   if (_has_top_boundary)
     boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
 
-  mesh->unset_is_prepared();
-  // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
-  // which will crash both paraview and trigger exodiff. Best to be safe.
+  // Our new mesh is still unprepared in most ways.  We don't need to
+  // repartition, since we just extruded our partitioning, but
+  // depending on our ghosting functors we might even have built some
+  // elements that can go remote!
+  mesh->unset_has_synched_id_counts();
+  mesh->unset_has_neighbor_ptrs();
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_interior_parent_ptrs();
+  mesh->unset_has_removed_remote_elements();
+  mesh->unset_has_reinit_ghosting_functors();
+  mesh->unset_has_boundary_id_sets();
+  mesh->clear_point_locator();
+
+  // Creating the layered meshes with non-full-order elements creates
+  // a lot of leftover nodes, notably in the boundary_info, which will
+  // crash both paraview and trigger exodiff.
   if (extruding_quad_eights)
-    mesh->prepare_for_use();
+    mesh->unset_has_removed_orphaned_nodes();
+
+  // We used to force orphaned node removal *here*, but we should be
+  // getting it downstream with the proper settings above.
+  // if (extruding_quad_eights)
+  //   mesh->prepare_for_use();
 
   return mesh;
 }
