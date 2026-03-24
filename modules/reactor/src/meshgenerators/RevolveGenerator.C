@@ -1493,9 +1493,19 @@ RevolveGenerator::generate()
     mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
                                                             input_nodeset_map.end());
 
-  mesh->remove_orphaned_nodes();
-  mesh->renumber_nodes_and_elements();
-  mesh->unset_is_prepared();
+  // Our new mesh is still unprepared in most ways.  We don't need to
+  // repartition, since we just revolved our partitioning, but
+  // depending on our ghosting functors we might even have built some
+  // elements that can go remote!
+  mesh->unset_has_removed_orphaned_nodes();
+  mesh->unset_has_synched_id_counts();
+  mesh->unset_has_neighbor_ptrs();
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_interior_parent_ptrs();
+  mesh->unset_has_removed_remote_elements();
+  mesh->unset_has_reinit_ghosting_functors();
+  mesh->unset_has_boundary_id_sets();
+  mesh->clear_point_locator();
 
   return mesh;
 }
