@@ -20,6 +20,13 @@
       detail = 'automatic specification of points to output unique values and'
     []
 
+    [bounds_test]
+      type = 'Exodiff'
+      input = 'layered_integral_bounds_test.i'
+      exodiff = 'layered_integral_bounds_test_out.e'
+      detail = "using layers specified by their bounds and each layer's uniform splits"
+    []
+
     [cumulative]
       type = 'Exodiff'
       input = 'cumulative_layered_integral.i'

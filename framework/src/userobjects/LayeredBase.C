@@ -34,6 +34,8 @@ LayeredBase::validParams()
                                             "bound_uniform_splits > 0",
                                             "The number of times the bins specified in 'bounds' "
                                             "should be split uniformly.");
+  params.addParam<std::vector<unsigned int>>(
+      "bound_splits", "Number of uniform splits of all layers in 'bounds' (default to all ones)");
 
   MooseEnum sample_options("direct interpolate average", "direct");
   params.addParam<MooseEnum>("sample_type",
@@ -73,7 +75,7 @@ LayeredBase::validParams()
   params.addParam<Real>("direction_max",
                         "Maximum coordinate along 'direction' that bounds the layers");
   params.addParamNamesToGroup(
-      "direction num_layers bounds direction_min direction_max bound_uniform_splits",
+      "direction num_layers bounds direction_min direction_max bound_uniform_splits bound_splits",
       "Layers extent and definition");
   params.addParamNamesToGroup("sample_type average_radius cumulative positive_cumulative_direction",
                               "Value sampling / aggregating");
@@ -125,6 +127,10 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     // Make sure the bounds are sorted - we're going to depend on this
     std::sort(_layer_bounds.begin(), _layer_bounds.end());
 
+    if (_layered_base_params.isParamValid("bound_splits") &&
+        _layered_base_params.isParamValid("bound_uniform_splits"))
+      mooseError("Parameters 'bound_splits' and 'bound_uniform_splits' cannot be both supplied");
+
     // If requested, we uniformly split the layers.
     if (_layered_base_params.isParamValid("bound_uniform_splits"))
     {
@@ -141,6 +147,28 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
         new_bnds.emplace_back(_layer_bounds.back());
         _layer_bounds = new_bnds;
       }
+    }
+
+    if (_layered_base_params.isParamValid("bound_splits"))
+    {
+      // expand layers with subdivisions
+      const auto nsubs = _layered_base_params.get<std::vector<unsigned int>>("bound_splits");
+      if (nsubs.size() != _layer_bounds.size() - 1)
+        mooseError("'bound_splits' size must be equal to the size of 'bounds' minus one");
+
+      std::vector<Real> new_layers;
+      new_layers.reserve(std::accumulate(nsubs.begin(), nsubs.end(), (unsigned int)0));
+      new_layers.push_back(_layer_bounds[0]);
+      for (const auto i : index_range(nsubs))
+      {
+        Real dz = (_layer_bounds[i + 1] - _layer_bounds[i]) / nsubs[i];
+        for (const auto j : make_range(nsubs[i]))
+        {
+          libmesh_ignore(j);
+          new_layers.push_back(new_layers.back() + dz);
+        }
+      }
+      _layer_bounds = new_layers;
     }
 
     _num_layers = _layer_bounds.size() - 1; // Layers are only in-between the bounds
