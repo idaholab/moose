@@ -16,12 +16,12 @@
  * connected mesh with only one outer boundary manifold. The polyline mesh generated along with the
  * boundary of the input mesh form a gap with a specified thickness.
  */
-class GapLineMeshGenerator : public MeshGenerator
+class PolyLineMeshWithFixedDistanceFromSidesetGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  GapLineMeshGenerator(const InputParameters & parameters);
+  PolyLineMeshWithFixedDistanceFromSidesetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

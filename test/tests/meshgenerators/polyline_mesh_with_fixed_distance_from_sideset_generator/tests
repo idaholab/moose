@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/GapLineMeshGenerator.md'
+  design = 'meshgenerators/PolyLineMeshWithFixedDistanceFromSidesetGenerator.md'
   issues = '#32119 #32515'
   [test]
     requirement = "The system shall generate "

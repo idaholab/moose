@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GapLineMeshGenerator.h"
+#include "PolyLineMeshWithFixedDistanceFromSidesetGenerator.h"
 
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
@@ -18,10 +18,14 @@
 #include "libmesh/mesh_triangle_holes.h"
 #include "libmesh/poly2tri_triangulator.h"
 
-registerMooseObject("MooseApp", GapLineMeshGenerator);
+registerMooseObject("MooseApp", PolyLineMeshWithFixedDistanceFromSidesetGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           GapLineMeshGenerator,
+                           "06/30/2027 24:00",
+                           PolyLineMeshWithFixedDistanceFromSidesetGenerator);
 
 InputParameters
-GapLineMeshGenerator::validParams()
+PolyLineMeshWithFixedDistanceFromSidesetGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -56,7 +60,8 @@ GapLineMeshGenerator::validParams()
   return params;
 }
 
-GapLineMeshGenerator::GapLineMeshGenerator(const InputParameters & parameters)
+PolyLineMeshWithFixedDistanceFromSidesetGenerator::
+    PolyLineMeshWithFixedDistanceFromSidesetGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _thickness(getParam<Real>("thickness")),
@@ -67,7 +72,7 @@ GapLineMeshGenerator::GapLineMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-GapLineMeshGenerator::generate()
+PolyLineMeshWithFixedDistanceFromSidesetGenerator::generate()
 {
   // Put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh =

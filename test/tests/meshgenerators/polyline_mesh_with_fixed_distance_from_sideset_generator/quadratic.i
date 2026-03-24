@@ -19,7 +19,7 @@
     tri_element_type = TRI6
   []
   [gap]
-    type = GapLineMeshGenerator
+    type = PolyLineMeshWithFixedDistanceFromSidesetGenerator
     input = 'xyd'
     thickness = 0.1
     skip_node_reduction = true
