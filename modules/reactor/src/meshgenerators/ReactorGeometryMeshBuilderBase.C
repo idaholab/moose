@@ -120,6 +120,8 @@ ReactorGeometryMeshBuilderBase::updateElementBlockNameId(
     elem_block_id = name_id_map[elem_block_name];
     elem->subdomain_id() = elem_block_id;
   }
+
+  input_mesh.unset_has_cached_elem_data();
 }
 
 void
