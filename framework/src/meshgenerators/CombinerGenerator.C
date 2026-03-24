@@ -180,7 +180,8 @@ CombinerGenerator::generate()
                                    _communicator);
     }
 
-    mesh->unset_is_prepared();
+    // libMesh and MooseMeshUtils should already have marked us
+    // unprepared in the appropriate ways
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
@@ -247,7 +248,8 @@ CombinerGenerator::generate()
       }
     }
 
-    final_mesh->unset_is_prepared();
+    // libMesh and MooseMeshUtils should already have marked us
+    // unprepared in the appropriate ways.
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }
