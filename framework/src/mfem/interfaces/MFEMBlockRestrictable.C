@@ -64,13 +64,12 @@ MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> &
 }
 
 std::vector<std::string>
-MFEMBlockRestrictable::subdomainsToStrings(const std::vector<SubdomainName> & subdomain_names)
+MFEMBlockRestrictable::subdomainsToStrings(const std::vector<SubdomainName> & names)
 {
-  auto attributes = subdomainsToAttributes(subdomain_names);
-  std::vector<std::string> subdomain_attr_strings(subdomain_names.size());
-  for (const auto i : index_range(subdomain_names))
-    subdomain_attr_strings[i] = std::to_string(attributes[i]);
-  return subdomain_attr_strings;
+  auto attrs = subdomainsToAttributes(names);
+  std::vector<std::string> strs(attrs.Size());
+  std::transform(attrs.begin(), attrs.end(), strs.begin(), [](int n) { return std::to_string(n); });
+  return strs;
 }
 
 #endif
