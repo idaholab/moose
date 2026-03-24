@@ -16,6 +16,7 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "MaterialBase.h"
 
 #include "FEProblemBase.h"
 #include "MooseVariableFieldBase.h"
