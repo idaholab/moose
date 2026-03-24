@@ -503,6 +503,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
 
   for (const auto & elem : mesh0->element_ptr_range())
     elem->subdomain_id() = block_ids_new[elem->subdomain_id() - 1];
+  mesh0->unset_has_cached_elem_data();
 
   return mesh0;
 }
