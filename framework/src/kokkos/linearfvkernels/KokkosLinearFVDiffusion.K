@@ -74,12 +74,14 @@ KokkosLinearFVDiffusion::initialSetup()
   }
 
   _dirichlet_boundary_ids.create(boundary_ids.size());
+  // Kokkos functions do not have default constructors, so we allocate here and do placement new
+  // later
   _dirichlet_values.create(values.size());
 
   for (const auto i : index_range(boundary_ids))
   {
     _dirichlet_boundary_ids[i] = boundary_ids[i];
-    _dirichlet_values[i] = values[i];
+    new (&_dirichlet_values[i]) Moose::Kokkos::Function(values[i]);
   }
 
   _dirichlet_boundary_ids.moveToDevice();
