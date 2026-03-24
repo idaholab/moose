@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Conformal2DCoatingGenerator.h"
+#include "BoundaryLayerTriangleGenerator.h"
 
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
@@ -18,20 +18,21 @@
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/mesh_modification.h"
 
-registerMooseObject("MooseApp", Conformal2DCoatingGenerator);
+registerMooseObject("MooseApp", BoundaryLayerTriangleGenerator);
 
 InputParameters
-Conformal2DCoatingGenerator::validParams()
+BoundaryLayerTriangleGenerator::validParams()
 {
   InputParameters params = LayerDelaunayBase::validParams();
 
   params.addRequiredParam<MeshGeneratorName>(
-      "input", "The input mesh based on which to create the conformal coating layers.");
+      "input", "The input mesh based on which to create the conformal boundary layer layers.");
 
-  params.addRequiredParam<Real>("thickness", "The total thickness of the coating to be created.");
+  params.addRequiredParam<Real>("thickness",
+                                "The total thickness of the boundary layer to be created.");
 
   params.addRangeCheckedParam<unsigned int>(
-      "num_layers", 1, "num_layers>0", "The total number of coating layers to be created.");
+      "num_layers", 1, "num_layers>0", "The total number of boundary layers to be created.");
 
   params.addParam<Real>(
       "layer_bias",
@@ -40,52 +41,56 @@ Conformal2DCoatingGenerator::validParams()
       "from the input mesh, while a value < 1 leads to thicker layers close to the input mesh. The "
       "default value of 1 leads to uniform layer thickness.");
 
-  MooseEnum coating_direction("OUTWARD INWARD", "OUTWARD");
+  MooseEnum boundary_layer_direction("OUTWARD INWARD", "OUTWARD");
 
-  params.addParam<MooseEnum>("coating_direction",
-                             coating_direction,
-                             "In which direction the coating is created with respect to the side "
-                             "normal of the elements along the boundary of the input mesh.");
+  params.addParam<MooseEnum>(
+      "boundary_layer_direction",
+      boundary_layer_direction,
+      "In which direction the boundary layer is created with respect to the side "
+      "normal of the elements along the boundary of the input mesh.");
 
   params.addParam<std::vector<BoundaryName>>(
       "boundary_names",
       std::vector<BoundaryName>(),
-      "The boundary names around which the coating will be created.");
+      "The boundary names around which the boundary layer will be created.");
 
   params.addParam<BoundaryName>("interface_name",
                                 "The optional boundary name to be assigned to the interface "
-                                "between the generated coating and the input mesh.");
+                                "between the generated boundary layer and the input mesh.");
   params.addParam<BoundaryName>(
       "surface_name",
-      "The optional boundary name to be assigned to the surface of the generated coating.");
+      "The optional boundary name to be assigned to the surface of the generated boundary layer.");
 
-  params.addParam<SubdomainName>("subdomain_name", "Subdomain name to set for the coating mesh.");
-  params.addParam<SubdomainID>("subdomain_id", "Subdomain id to set for the coating mesh.");
+  params.addParam<SubdomainName>("subdomain_name",
+                                 "Subdomain name to set for the boundary layer mesh.");
+  params.addParam<SubdomainID>("subdomain_id", "Subdomain id to set for the boundary layer mesh.");
 
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7", "TRI3");
 
-  params.addParam<MooseEnum>(
-      "tri_elem_type", tri_elem_type, "The type of triangular elements to use for the coating.");
+  params.addParam<MooseEnum>("tri_elem_type",
+                             tri_elem_type,
+                             "The type of triangular elements to use for the boundary layer.");
 
   params.addParam<bool>("keep_input",
                         false,
                         "Whether to keep the input mesh in the final output. If false, only the "
-                        "coating layers will be included in the output mesh.");
+                        "boundary layers will be included in the output mesh.");
 
-  params.addClassDescription("Generate a 2D layered mesh that represents a conformal coating along "
-                             "the boundary of an input 2D mesh or a 1D loop mesh.");
+  params.addClassDescription(
+      "Generate a 2D layered mesh that represents a conformal boundary layer along "
+      "the boundary of an input 2D mesh or a 1D loop mesh.");
 
   return params;
 }
 
-Conformal2DCoatingGenerator::Conformal2DCoatingGenerator(const InputParameters & parameters)
+BoundaryLayerTriangleGenerator::BoundaryLayerTriangleGenerator(const InputParameters & parameters)
   : LayerDelaunayBase(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _thickness(getParam<Real>("thickness")),
     _num_layers(getParam<unsigned int>("num_layers")),
     _layer_bias(getParam<Real>("layer_bias")),
-    _coating_direction(
-        getParam<MooseEnum>("coating_direction").template getEnum<CoatingDirection>()),
+    _boundary_layer_direction(
+        getParam<MooseEnum>("boundary_layer_direction").template getEnum<BoundaryLayerDirection>()),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
     _interface_name(isParamValid("interface_name") ? getParam<BoundaryName>("interface_name")
                                                    : BoundaryName()),
@@ -99,23 +104,23 @@ Conformal2DCoatingGenerator::Conformal2DCoatingGenerator(const InputParameters &
 {
   declareMeshForSub("input");
 
-  _build_mesh = &getMeshByName(
-      create_conformal_coating_mesh(_num_layers,
-                                    _thickness,
-                                    _layer_bias,
-                                    _coating_direction == CoatingDirection::OUTWARD,
-                                    _keep_input,
-                                    _input_name,
-                                    _boundary_names,
-                                    _tri_elem_type,
-                                    _output_subdomain_id,
-                                    _subdomain_name,
-                                    _interface_name.empty() ? libMesh::BoundaryInfo::invalid_id : 0,
-                                    _surface_name.empty() ? libMesh::BoundaryInfo::invalid_id : 1));
+  _build_mesh = &getMeshByName(create_conformal_boundary_layer_mesh(
+      _num_layers,
+      _thickness,
+      _layer_bias,
+      _boundary_layer_direction == BoundaryLayerDirection::OUTWARD,
+      _keep_input,
+      _input_name,
+      _boundary_names,
+      _tri_elem_type,
+      _output_subdomain_id,
+      _subdomain_name,
+      _interface_name.empty() ? libMesh::BoundaryInfo::invalid_id : 0,
+      _surface_name.empty() ? libMesh::BoundaryInfo::invalid_id : 1));
 }
 
 std::unique_ptr<MeshBase>
-Conformal2DCoatingGenerator::generate()
+BoundaryLayerTriangleGenerator::generate()
 {
   bool has_conflict = false;
   if (_interface_name.size())

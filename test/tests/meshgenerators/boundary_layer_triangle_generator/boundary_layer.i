@@ -9,13 +9,13 @@
     nums_segments = '16 12'
     is_closed_loop = true
   []
-  [coating]
-    type = Conformal2DCoatingGenerator
+  [boundary_layer]
+    type = BoundaryLayerTriangleGenerator
     input = 'outer_bdy'
     thickness = 0.3
     num_layers = 3
     subdomain_id = 1
-    subdomain_name = 'coating'
+    subdomain_name = 'boundary_layer'
   []
 []
 
@@ -44,7 +44,7 @@
 []
 
 [Outputs]
-  file_base = 'coating_outward'
+  file_base = 'boundary_layer_outward'
   csv = true
   execute_on = 'FINAL'
 []

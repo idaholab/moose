@@ -22,19 +22,20 @@ LayerDelaunayBase::LayerDelaunayBase(const InputParameters & parameters) : MeshG
 }
 
 MeshGeneratorName
-LayerDelaunayBase::create_conformal_coating_mesh(const unsigned int num_layers,
-                                                 const Real thickness,
-                                                 const Real layer_bias,
-                                                 const bool is_outward_coating,
-                                                 const bool keep_input,
-                                                 const MeshGeneratorName & input_name,
-                                                 const std::vector<BoundaryName> & boundary_names,
-                                                 const MooseEnum & tri_elem_type,
-                                                 const SubdomainID & block_id,
-                                                 const SubdomainName & block_name,
-                                                 const boundary_id_type innermost_boundary_id,
-                                                 const boundary_id_type outermost_boundary_id,
-                                                 const MeshGeneratorName & name_suffix)
+LayerDelaunayBase::create_conformal_boundary_layer_mesh(
+    const unsigned int num_layers,
+    const Real thickness,
+    const Real layer_bias,
+    const bool is_outward_boundary_layer,
+    const bool keep_input,
+    const MeshGeneratorName & input_name,
+    const std::vector<BoundaryName> & boundary_names,
+    const MooseEnum & tri_elem_type,
+    const SubdomainID & block_id,
+    const SubdomainName & block_name,
+    const boundary_id_type innermost_boundary_id,
+    const boundary_id_type outermost_boundary_id,
+    const MeshGeneratorName & name_suffix)
 {
   const MeshGeneratorName mg_name_prefix =
       name() + MeshGeneratorName(name_suffix.empty() ? "" : ("_" + name_suffix));
@@ -49,19 +50,19 @@ LayerDelaunayBase::create_conformal_coating_mesh(const unsigned int num_layers,
     layerthickness_values[layer_i] = unit_layerthickness * std::pow(layer_bias, layer_i - 1);
   for (const auto & layer_i : make_range(layerthickness_values.size()))
   {
-    const unsigned int layer_index = is_outward_coating ? layer_i : (num_layers - layer_i);
+    const unsigned int layer_index = is_outward_boundary_layer ? layer_i : (num_layers - layer_i);
     const MeshGeneratorName submg_name = mg_name_prefix + "_gline_" + std::to_string(layer_index);
     const MeshGeneratorName submg_input_name =
         layer_i == 0
             ? input_name
             : MeshGeneratorName(mg_name_prefix + "_gline_" +
-                                std::to_string(layer_index + (is_outward_coating ? -1 : 1)));
+                                std::to_string(layer_index + (is_outward_boundary_layer ? -1 : 1)));
     auto params = _app.getFactory().getValidParams("GapLineMeshGenerator");
     if (layer_i == 0 && boundary_names.size())
       params.set<std::vector<BoundaryName>>("boundary_names") = boundary_names;
     params.set<MeshGeneratorName>("input") = submg_input_name;
     params.set<Real>("thickness") = layerthickness_values[layer_i];
-    params.set<MooseEnum>("gap_direction") = is_outward_coating ? "OUTWARD" : "INWARD";
+    params.set<MooseEnum>("gap_direction") = is_outward_boundary_layer ? "OUTWARD" : "INWARD";
     params.set<bool>("skip_node_reduction") = true;
     addMeshSubgenerator("GapLineMeshGenerator", submg_name, params);
   }
@@ -109,14 +110,15 @@ LayerDelaunayBase::create_conformal_coating_mesh(const unsigned int num_layers,
   {
     const MeshGeneratorName submg_name = mg_name_prefix + "_stitch_input";
     auto params = _app.getFactory().getValidParams("StitchMeshGenerator");
-    // Here we put the coating mesh as the first input so that its boundary ids will not change
+    // Here we put the boundary layer mesh as the first input so that its boundary ids will not
+    // change
     params.set<std::vector<MeshGeneratorName>>("inputs") = {final_mg_name,
                                                             mg_name_prefix + "_input_stitch_prep"};
     params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
-        {is_outward_coating ? std::to_string(1) : std::to_string(2 * num_layers - 2),
+        {is_outward_boundary_layer ? std::to_string(1) : std::to_string(2 * num_layers - 2),
          BoundaryName(mg_name_prefix + "_input_stitch_prep")}};
-    // Let's keep the stitched boundaries for now. We might need the innermost one of the coating in
-    // some applications.
+    // Let's keep the stitched boundaries for now. We might need the innermost one of the boundary
+    // layer in some applications.
     params.set<bool>("clear_stitched_boundary_ids") = false;
     addMeshSubgenerator("StitchMeshGenerator", submg_name, params);
     final_mg_name = submg_name;

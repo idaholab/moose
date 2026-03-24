@@ -8,8 +8,8 @@
     portion = left_half
     preserve_volumes = true
   []
-  [coating]
-    type = Conformal2DCoatingGenerator
+  [boundary_layer]
+    type = BoundaryLayerTriangleGenerator
     input = 'cc'
     thickness = 0.1
     num_layers = 3
@@ -40,7 +40,7 @@
     variable = unity
     block = 1
   []
-  [int_unity_coating]
+  [int_unity_boundary_layer]
     type = ElementIntegralVariablePostprocessor
     variable = unity
     block = 0
@@ -48,7 +48,7 @@
 []
 
 [Outputs]
-  file_base = 'coating_stitch_outward'
+  file_base = 'boundary_layer_stitch_outward'
   csv = true
   execute_on = 'FINAL'
 []

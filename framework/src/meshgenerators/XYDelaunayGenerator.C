@@ -234,7 +234,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
       paramError("refine_boundary", "Cannot refine boundary when using an outer boundary layer.");
 
     declareMeshForSubByName(_bdy_name);
-    _bdy_ptr = &getMeshByName(create_conformal_coating_mesh(
+    _bdy_ptr = &getMeshByName(create_conformal_boundary_layer_mesh(
         _outer_boundary_layer_num,
         _outer_boundary_layer_thickness,
         _outer_boundary_layer_bias,
@@ -290,7 +290,7 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
       if ((_refine_holes.size() > i && _refine_holes[i]) || _refine_holes.empty())
         paramError("refine_holes", "Cannot refine hole boundary when using a hole boundary layer.");
       declareMeshForSubByName(_hole_names[i]);
-      _hole_ptrs.push_back(&getMeshByName(create_conformal_coating_mesh(
+      _hole_ptrs.push_back(&getMeshByName(create_conformal_boundary_layer_mesh(
           _holes_boundary_layer_num[i],
           _holes_boundary_layer_thickness[i],
           _holes_boundary_layer_bias[i],

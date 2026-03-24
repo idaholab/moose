@@ -13,14 +13,14 @@
     block = '1'
     new_boundary = '100'
   []
-  [coating]
-    type = Conformal2DCoatingGenerator
+  [boundary_layer]
+    type = BoundaryLayerTriangleGenerator
     input = 'bdg'
     thickness = 0.1
     num_layers = 3
     keep_input = true
     boundary_names = '100'
-    coating_direction = 'INWARD'
+    boundary_layer_direction = 'INWARD'
   []
 []
 
@@ -47,7 +47,7 @@
     variable = unity
     block = 2
   []
-  [int_unity_coating]
+  [int_unity_boundary_layer]
     type = ElementIntegralVariablePostprocessor
     variable = unity
     block = 0
@@ -55,7 +55,7 @@
 []
 
 [Outputs]
-  file_base = 'coating_stitch_inward'
+  file_base = 'boundary_layer_stitch_inward'
   csv = true
   execute_on = 'FINAL'
 []
