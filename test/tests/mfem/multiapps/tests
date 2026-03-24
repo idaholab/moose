@@ -4,13 +4,27 @@
   [MFEMTransientMultiApps]
     requirement = "The system shall support execution of sub-applications in transient problems:"
     [MFEM_dt_from_parent]
-      type = XMLDiff
+      type = CSVDiff
       input = 'dt_from_parent.i'
-      xmldiff = 'OutputData/dt_from_parent/Run0/Run0.pvd
-                  OutputData/dt_from_parent/Run0/Cycle000001/proc000000.vtu
-                  OutputData/dt_from_parent/Run0/Cycle000010/proc000000.vtu
-                  OutputData/dt_from_parent_sub/Run0/Run0.pvd
-                  OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
+      csvdiff = 'OutputData/dt_from_parent/dt_from_parent_line_sample_0001.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0002.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0003.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0004.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0005.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0006.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0007.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0008.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0009.csv '
+                'OutputData/dt_from_parent/dt_from_parent_line_sample_0010.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0002.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0003.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0004.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0005.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0006.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0007.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0008.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0009.csv '
+                'OutputData/dt_from_parent_sub/dt_from_parent_sub_line_sample_0010.csv'
       detail = "with a time step governed by the MFEM parent application,"
       capabilities = 'mfem & platform=linux'
       compute_devices = 'cpu cuda'
@@ -19,13 +33,12 @@
       restep = false
     []
     [MFEM_sub_cycling]
-      type = XMLDiff
+      type = CSVDiff
       input = 'sub_cycling_parent.i'
-      xmldiff = 'OutputData/sub_cycling_parent/Run0/Run0.pvd
-                  OutputData/sub_cycling_parent/Run0/Cycle000000/proc000000.vtu
-                  OutputData/sub_cycling_parent/Run0/Cycle000002/proc000000.vtu
-                  OutputData/sub_cycling_sub/Run0/Run0.pvd
-                  OutputData/sub_cycling_sub/Run0/Cycle000002/proc000000.vtu'
+      csvdiff = 'OutputData/sub_cycling_parent/sub_cycling_parent_line_sample_0001.csv '
+                'OutputData/sub_cycling_parent/sub_cycling_parent_line_sample_0002.csv '
+                'OutputData/sub_cycling_sub/sub_cycling_sub_line_sample_0010.csv '
+                'OutputData/sub_cycling_sub/sub_cycling_sub_line_sample_0020.csv'
       detail = "and with the sub-app running multiple timesteps for each timestep of the parent app."
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
@@ -37,13 +50,12 @@
   [MFEMFullSolveMultiApps]
     requirement = "The system shall support executing a sub-application solving an entire sub-problem:"
     [MFEM_full_solve_transient]
-      type = XMLDiff
+      type = CSVDiff
       input = 'full_solve_parent.i'
-      xmldiff = 'OutputData/full_solve_parent/Run0/Run0.pvd
-                  OutputData/full_solve_parent/Run0/Cycle000000/proc000000.vtu
-                  OutputData/full_solve_parent/Run0/Cycle000002/proc000000.vtu
-                  OutputData/full_solve_sub/Run0/Run0.pvd
-                  OutputData/full_solve_sub/Run0/Cycle000005/proc000000.vtu'
+      csvdiff = 'OutputData/full_solve_parent/full_solve_parent_line_sample_0001.csv '
+                'OutputData/full_solve_parent/full_solve_parent_line_sample_0002.csv '
+                'OutputData/full_solve_sub/full_solve_sub_line_sample_0001.csv '
+                'OutputData/full_solve_sub/full_solve_sub_line_sample_0002.csv'
       detail = "with a transient problem running in the parent app."
       capabilities = 'mfem'
       compute_devices = 'cpu cuda'
