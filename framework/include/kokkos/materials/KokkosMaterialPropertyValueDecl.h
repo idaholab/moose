@@ -67,7 +67,48 @@ protected:
 };
 
 template <typename T, unsigned int dimension>
-class MaterialPropertyValue;
+class MaterialPropertyValue : public MaterialPropertyValueBase<T, dimension>
+{
+  usingKokkosMaterialPropertyValueBaseMembers(T, dimension);
+
+public:
+  /**
+   * Constructor
+   * @param property The material property constructing this object
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature point index
+   */
+  KOKKOS_FUNCTION MaterialPropertyValue(const MaterialProperty<T, dimension> & property,
+                                        const Datum & datum,
+                                        const unsigned int qp);
+
+  /**
+   * Get the writeable reference of a property value
+   * @param i The index of each dimension
+   * @returns The writeable reference of the property value
+   */
+  template <typename... index_type>
+  KOKKOS_FUNCTION T & operator()(index_type... i)
+  {
+    static_assert(sizeof...(i) == dimension,
+                  "Number of arguments should match material property dimension");
+
+    return (*_data)(i..., _idx);
+  }
+  /**
+   * Get the const reference of a property value
+   * @param i The index of each dimension
+   * @returns The const reference of the property value
+   */
+  template <typename... index_type>
+  KOKKOS_FUNCTION const T & operator()(index_type... i) const
+  {
+    static_assert(sizeof...(i) == dimension,
+                  "Number of arguments should match material property dimension");
+
+    return _data ? (*_data)(i..., _idx) : _value;
+  }
+};
 
 template <typename T>
 class MaterialPropertyValue<T, 0> : public MaterialPropertyValueBase<T, 0>
@@ -101,164 +142,6 @@ public:
    * @param value The property to copy
    */
   KOKKOS_FUNCTION auto & operator=(const MaterialPropertyValue<T, 0> & value);
-};
-
-template <typename T>
-class MaterialPropertyValue<T, 1> : public MaterialPropertyValueBase<T, 1>
-{
-  usingKokkosMaterialPropertyValueBaseMembers(T, 1);
-
-public:
-  /**
-   * Constructor
-   * @param property The material property constructing this object
-   * @param datum The Datum object of the current thread
-   * @param qp The local quadrature point index
-   */
-  KOKKOS_FUNCTION
-  MaterialPropertyValue(const MaterialProperty<T, 1> & property,
-                        const Datum & datum,
-                        unsigned int qp);
-
-  /**
-   * Get the writeable reference of a property value
-   * @param i0 The first dimension index
-   * @returns The writeable reference of the property value
-   */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0) { return (*_data)(i0, _idx); }
-  /**
-   * Get the const reference of a property value
-   * @param i0 The first dimension index
-   * @returns The const reference of the property value
-   */
-  KOKKOS_FUNCTION const T & operator()(unsigned int i0) const
-  {
-    return _data ? (*_data)(i0, _idx) : _value;
-  }
-};
-
-template <typename T>
-class MaterialPropertyValue<T, 2> : public MaterialPropertyValueBase<T, 2>
-{
-  usingKokkosMaterialPropertyValueBaseMembers(T, 2);
-
-public:
-  /**
-   * Constructor
-   * @param property The material property constructing this object
-   * @param datum The Datum object of the current thread
-   * @param qp The local quadrature point index
-   */
-  KOKKOS_FUNCTION
-  MaterialPropertyValue(const MaterialProperty<T, 2> & property,
-                        const Datum & datum,
-                        unsigned int qp);
-
-  /**
-   * Get the writeable reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @returns The writeable reference of the property value
-   */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1)
-  {
-    return (*_data)(i0, i1, _idx);
-  }
-  /**
-   * Get the const reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @returns The const reference of the property value
-   */
-  KOKKOS_FUNCTION const T & operator()(unsigned int i0, unsigned int i1) const
-  {
-    return _data ? (*_data)(i0, i1, _idx) : _value;
-  }
-};
-
-template <typename T>
-class MaterialPropertyValue<T, 3> : public MaterialPropertyValueBase<T, 3>
-{
-  usingKokkosMaterialPropertyValueBaseMembers(T, 3);
-
-public:
-  /**
-   * Constructor
-   * @param property The material property constructing this object
-   * @param datum The Datum object of the current thread
-   * @param qp The local quadrature point index
-   */
-  KOKKOS_FUNCTION
-  MaterialPropertyValue(const MaterialProperty<T, 3> & property,
-                        const Datum & datum,
-                        unsigned int qp);
-
-  /**
-   * Get the writeable reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @returns The writeable reference of the property value
-   */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1, unsigned int i2)
-  {
-    return (*_data)(i0, i1, i2, _idx);
-  }
-  /**
-   * Get the const reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @returns The const reference of the property value
-   */
-  KOKKOS_FUNCTION const T & operator()(unsigned int i0, unsigned int i1, unsigned int i2) const
-  {
-    return _data ? (*_data)(i0, i1, i2, _idx) : _value;
-  }
-};
-
-template <typename T>
-class MaterialPropertyValue<T, 4> : public MaterialPropertyValueBase<T, 4>
-{
-  usingKokkosMaterialPropertyValueBaseMembers(T, 4);
-
-public:
-  /**
-   * Constructor
-   * @param property The material property constructing this object
-   * @param datum The Datum object of the current thread
-   * @param qp The local quadrature point index
-   */
-  KOKKOS_FUNCTION
-  MaterialPropertyValue(const MaterialProperty<T, 4> & property,
-                        const Datum & datum,
-                        unsigned int qp);
-
-  /**
-   * Get the writeable reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @param i3 The fourth dimension index
-   * @returns The writeable reference of the property value
-   */
-  KOKKOS_FUNCTION T & operator()(unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3)
-  {
-    return (*_data)(i0, i1, i2, i3, _idx);
-  }
-  /**
-   * Get the const reference of a property value
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @param i3 The fourth dimension index
-   * @returns The const reference of the property value
-   */
-  KOKKOS_FUNCTION const T &
-  operator()(unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3) const
-  {
-    return _data ? (*_data)(i0, i1, i2, i3, _idx) : _value;
-  }
 };
 ///@}
 

@@ -249,8 +249,6 @@ MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
                                             const std::vector<unsigned int> & dims,
                                             const bool on_demand)
 {
-  static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
-
   if (dims.size() != dimension)
     mooseError("The declared Kokkos material property '",
                prop_name,
