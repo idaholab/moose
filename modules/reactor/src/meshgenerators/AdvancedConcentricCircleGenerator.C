@@ -332,6 +332,8 @@ AdvancedConcentricCircleGenerator::generate()
 
   assignInterfaceBoundaryNames(*mesh);
 
-  mesh->unset_is_prepared();
+  // At this point the mesh should already know in what ways it isn't
+  // prepared, both from its default state and the above MOOSE/libMesh
+  // operations
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -292,6 +292,6 @@ RenameBlockGenerator::generate()
   for (const auto & pair : new_names)
     mesh->subdomain_name(pair.first) = pair.second;
 
-  mesh->unset_is_prepared();
+  // change_subdomain_id already set our caches as unprepared
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
