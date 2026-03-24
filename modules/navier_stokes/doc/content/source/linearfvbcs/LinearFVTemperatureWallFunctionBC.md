@@ -1,4 +1,4 @@
-# LinearFVTurbulentTemperatureWallFunctionBC
+# LinearFVTemperatureWallFunctionBC
 
 Implements a wall function boundary condition for the effective thermal
 conductivity at the wall for the linear finite volume discretization.
@@ -67,37 +67,16 @@ on $\mathrm{Pr}$ and $\mathrm{Pr}_t$.
 
 The thermal sublayer thickness $y^+_{t}$ is then used as the parameter
 to discern whether to employ laminar sublayer thermal wall functions or turbulent
-logarithmic layer thermal wall functions.
-
-### Thermal sublayer
-
-If
+logarithmic layer thermal wall functions:
 
 \begin{equation}
-    y^+ \le y^+_{t}\,,
-\end{equation}
-
-the dimensionless temperature is defined as
-
-\begin{equation}
-    T^+ = y^+ \mathrm{Pr}\,.
-\end{equation}
-
-### Thermal logarithmic layer
-
-If
-
-\begin{equation}
-    y^+ > y^+_{t}\,,
-\end{equation}
-
-the dimensionless temperature is defined from a Jayatilleke-type correlation as
-
-\begin{equation}
-    T^+ = \mathrm{Pr}_t
-    \left[
-    \frac{1}{\kappa}\ln(E y^+) + P
-    \right]\,,
+    T^+ =
+    \begin{cases}
+        y^+ \mathrm{Pr} & \text{if } y^+ \le y^+_{t} \\
+        \mathrm{Pr}_t \left[
+        \frac{1}{\kappa}\ln(E y^+) + P
+        \right] & \text{if } y^+ > y^+_{t},
+    \end{cases}
 \end{equation}
 
 with
@@ -109,9 +88,9 @@ P = 9.24 \left[ \left( \frac{\mathrm{Pr}}{\mathrm{Pr}_t} \right)^{0.75} - 1 \rig
 
 where:
 
-$\kappa = 0.4187$ is the von Karman constant,
-$E = 9.793$ is the wall-function log law offset constant,
-$P$ is the Jayatilleke temperature offset
+- $\kappa = 0.4187$ is the von Karman constant,
+- $E = 9.793$ is the wall-function log law offset constant,
+- $P$ is the Jayatilleke temperature offset
 
 The returned boundary value is then
 

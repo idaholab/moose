@@ -6,7 +6,8 @@
 
 This is the auxiliary kernel used to compute the effective turbulent thermal conductivity.
 In wall-bounded turbulent flows, the effective turbulent thermal conductivity requires the use
-of a temperature wall function that computes its value at the wall as a boundary condition.
+of a temperature wall function that computes its value at the wall as a boundary condition
+[LinearFVTemperatureWallFunctionBC.md].
 
 \begin{equation}
 k_eff = \frac{c_p \mu_t}{Pr_t} +k\,,
