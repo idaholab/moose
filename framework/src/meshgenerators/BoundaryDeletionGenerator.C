@@ -43,6 +43,10 @@ BoundaryDeletionGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // We need prepared boundary id sets here
+  if (!mesh->preparation().has_boundary_id_sets)
+    mesh->get_boundary_info().regenerate_id_sets();
+
   // Gather the boundary ids of interest from the names
   std::set<boundary_id_type> ids;
   for (const auto & name : _boundary_names)

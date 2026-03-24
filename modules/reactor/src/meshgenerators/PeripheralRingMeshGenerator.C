@@ -155,6 +155,9 @@ PeripheralRingMeshGenerator::generate()
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!input_mesh)
     paramError("input", "Input is not a replicated mesh, which is required.");
+
+  if (!input_mesh->preparation().has_cached_elem_data)
+    input_mesh->cache_elem_data();
   if (*(input_mesh->elem_dimensions().begin()) != 2 ||
       *(input_mesh->elem_dimensions().rbegin()) != 2)
     paramError("input", "Only 2D meshes are supported.");
