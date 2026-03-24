@@ -242,7 +242,7 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
 {
   if (_verbose)
   {
-    if (!mesh_2d._preparation.has_cached_elem_data)
+    if (!mesh_2d.preparation().has_cached_elem_data)
       mesh_2d.cache_elem_data();
     _console << "Re-meshing mesh\n " << mesh_2d << std::endl;
     _console << "with subdomains " << Moose::stringify(mesh_2d.get_subdomain_name_map())
@@ -251,7 +251,7 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
       _console << "With " << hole_meshes_2d.size() << " holes:" << std::endl;
     for (const auto & hole_m : hole_meshes_2d)
     {
-      if (!hole_m->_preparation.has_cached_elem_data)
+      if (!hole_m->preparation().has_cached_elem_data)
         hole_m->cache_elem_data();
       _console << "Hole subdomains " << Moose::stringify(hole_m->get_subdomain_name_map())
                << std::endl;
