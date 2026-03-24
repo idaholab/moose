@@ -169,7 +169,7 @@ public:
    *
    * @return list of references to unique CSGUniverse objects
    */
-  const std::vector<std::reference_wrapper<const CSGUniverse>> getUniqueUniverses();
+  const std::vector<std::reference_wrapper<const CSGUniverse>> getUniqueUniverses() const;
 
   /// Operator overload for checking if two CSGLattice objects are equal
   bool operator==(const CSGLattice & other) const;

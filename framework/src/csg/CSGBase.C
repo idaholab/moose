@@ -55,6 +55,32 @@ CSGBase::CSGBase(const CSGBase & other_base)
 
 CSGBase::~CSGBase() {}
 
+void
+CSGBase::deleteSurface(const CSGSurface & surface)
+{
+  if (!checkSurfaceInBase(surface))
+    mooseError("Surface with name ",
+               surface.getName(),
+               " cannot be deleted as it is different from the surface of the same name in the "
+               "CSGBase instance.");
+
+  // Check if surface is used in region definition of existing cells
+  for (const auto & cell_ref : _cell_list.getAllCells())
+  {
+    const auto & cell = cell_ref.get();
+    const auto & cell_region = cell.getRegion();
+    const auto & region_surfaces = cell_region.getSurfaces();
+    for (const auto & region_surf : region_surfaces)
+      if (region_surf.get() == surface)
+        mooseError("Cannot delete surface with name ",
+                   surface.getName(),
+                   " as it is used in region definition of cell with name ",
+                   cell.getName());
+  }
+
+  _surface_list.getSurfaceListMap().erase(surface.getName());
+}
+
 const CSGCell &
 CSGBase::addCellToList(const CSGCell & cell)
 {
@@ -146,6 +172,29 @@ CSGBase::addLatticeToList(const CSGLattice & lattice)
   return addLattice(std::move(cloned_lattice));
 }
 
+void
+CSGBase::deleteLattice(const CSGLattice & lattice)
+{
+  if (!checkLatticeInBase(lattice))
+    mooseError("Lattice with name ",
+               lattice.getName(),
+               " cannot be deleted as it is different from the lattice of the same name in the "
+               "CSGBase instance.");
+
+  // Check if lattice is used as fill in existing cells
+  for (const auto & cell_ref : _cell_list.getAllCells())
+  {
+    const auto & cell = cell_ref.get();
+    if ((cell.getFillType() == "LATTICE") && (cell.getFillLattice() == lattice))
+      mooseError("Cannot delete lattice with name ",
+                 lattice.getName(),
+                 " as it is used as the fill of cell with name ",
+                 cell.getName());
+  }
+
+  _lattice_list.getLatticeListMap().erase(lattice.getName());
+}
+
 const CSGCell &
 CSGBase::createCell(const std::string & name,
                     const std::string & mat_name,
@@ -223,6 +272,36 @@ CSGBase::createCell(const std::string & name,
 }
 
 void
+CSGBase::deleteCell(const CSGCell & cell)
+{
+  if (!checkCellInBase(cell))
+    mooseError("Cell with name ",
+               cell.getName(),
+               " cannot be deleted as it is different from the cell of the same name in the "
+               "CSGBase instance.");
+
+  // Check if cell exists in any existing universes. Cell will be removed from these universes
+  for (const auto & univ_ref : _universe_list.getAllUniverses())
+  {
+    const auto & univ = univ_ref.get();
+    const auto & univ_cells = univ.getAllCells();
+    for (const auto & univ_cell : univ_cells)
+      if (cell == univ_cell.get() && univ != getRootUniverse())
+      {
+        mooseWarning("Removing cell ",
+                     cell.getName(),
+                     " from universe with name ",
+                     univ.getName(),
+                     " before cell deletion.");
+        auto & univ_to_modify = _universe_list.getUniverse(univ.getName());
+        univ_to_modify.removeCell(cell.getName());
+      }
+  }
+
+  _cell_list.getCellListMap().erase(cell.getName());
+}
+
+void
 CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 {
   checkRegionSurfaces(region);
@@ -241,6 +320,50 @@ CSGBase::createUniverse(const std::string & name,
   auto & univ = _universe_list.addUniverse(name);
   addCellsToUniverse(univ, cells); // performs a check that cells are a part of this base
   return univ;
+}
+
+void
+CSGBase::deleteUniverse(const CSGUniverse & univ)
+{
+  if (!checkUniverseInBase(univ))
+    mooseError("Universe with name ",
+               univ.getName(),
+               " cannot be deleted as it is different from the universe of the same name in the "
+               "CSGBase instance.");
+
+  // Check if universe is the root universe
+  if (univ == getRootUniverse())
+    mooseError("Cannot delete root universe from CSGBase instance");
+
+  // Check if universe is used in any existing lattices
+  for (const auto & lat : _lattice_list.getAllLattices())
+  {
+    const auto & lattice_univs = lat.get().getUniqueUniverses();
+    for (const auto & lat_univ : lattice_univs)
+      if (univ == lat_univ.get())
+        mooseError("Cannot delete universe with name ",
+                   univ.getName(),
+                   " as it is used in lattice with name ",
+                   lat.get().getName());
+    if ((lat.get().getOuterType() == "UNIVERSE") && (lat.get().getOuterUniverse() == univ))
+      mooseError("Cannot delete universe with name ",
+                 univ.getName(),
+                 " as it is used as the outer universe of lattice with name ",
+                 lat.get().getName());
+  }
+
+  // Check if universe is used as fill in existing cells
+  for (const auto & cell_ref : _cell_list.getAllCells())
+  {
+    const auto & cell = cell_ref.get();
+    if ((cell.getFillType() == "UNIVERSE") && (cell.getFillUniverse() == univ))
+      mooseError("Cannot delete universe with name ",
+                 univ.getName(),
+                 " as it is used as the fill of cell with name ",
+                 cell.getName());
+  }
+
+  _universe_list.getUniverseListMap().erase(univ.getName());
 }
 
 void
