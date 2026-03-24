@@ -2,10 +2,9 @@
   design = 'syntax/Problem/index.md'
   issues = '#30478'
   [MFEMDomainSubMesh]
-    type = XMLDiff
+    type = CSVDiff
     input = domain_submesh.i
-    xmldiff = 'OutputData/DomainPotential/Run0/Run0.pvd
-                OutputData/DomainPotential/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/DomainPotential/domain_potential_line_sample_0001.csv'
     requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted submesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
