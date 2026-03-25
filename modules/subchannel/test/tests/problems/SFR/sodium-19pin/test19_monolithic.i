@@ -46,6 +46,7 @@ P_out = 2.0e5 # Pa
   segregated = false
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

@@ -92,6 +92,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   verbose_subchannel = true
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

@@ -21,6 +21,7 @@ SubChannelAddVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Adds the variables associated with the subchannel problem");
+  params.addParam<bool>("full_output", false, "Add optional subchannel output variables");
   return params;
 }
 
@@ -38,7 +39,6 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::SURFACE_AREA,
                                         SubChannelApp::SUM_CROSSFLOW,
                                         SubChannelApp::PRESSURE,
-                                        SubChannelApp::PRESSURE_DROP,
                                         SubChannelApp::WETTED_PERIMETER,
                                         SubChannelApp::LINEAR_HEAT_RATE,
                                         SubChannelApp::DUCT_HEAT_FLUX,
@@ -52,6 +52,11 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::DISPLACEMENT,
                                         SubChannelApp::FRICTION_FACTOR,
                                         SubChannelApp::HEAT_TRANSFER_COEFFICIENT};
+  const bool full_output = getParam<bool>("full_output");
+  _console << "SubChannelAddVariablesAction full_output = " << full_output << std::endl;
+
+  if (full_output)
+    var_names.push_back(SubChannelApp::PRESSURE_DROP);
 
   // Get a list of the already existing AddAuxVariableAction
   const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();

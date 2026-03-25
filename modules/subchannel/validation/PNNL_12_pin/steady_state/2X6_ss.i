@@ -90,6 +90,7 @@ P_out = 101325 # Pa
   segregated = false
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]

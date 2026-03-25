@@ -68,6 +68,7 @@ length = 0.5
   segregated = false
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]

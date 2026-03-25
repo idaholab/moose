@@ -125,6 +125,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   verbose_subchannel = true
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]
