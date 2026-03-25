@@ -106,23 +106,18 @@ P_out = 4.923e6 # Pa
     value = ${T_in}
   []
 
-  [Dpin_ic]
-    type = ConstantIC
-    variable = Dpin
-    value = 0.00950
-  []
-
   [P_ic]
     type = ConstantIC
     variable = P
     value = 0.0
   []
 
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
+  # DP is by default set to zero
+  # [DP_ic]
+  #   type = ConstantIC
+  #   variable = DP
+  #   value = 0.0
+  # []
 
   [Viscosity_ic]
     type = ViscosityIC

@@ -112,6 +112,8 @@ SubChannel1PhaseProblem::validParams()
                                   "Closure computing HTC on duct (required if duct mesh exists).");
   params.addParam<bool>(
       "full_output", false, "Flag that enables the output of maximum number of variables");
+  params.addPrivateParam<bool>("pin_mesh_exist", false);
+  params.addPrivateParam<bool>("duct_mesh_exist", false);
   return params;
 }
 
@@ -130,8 +132,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_density(getParam<bool>("compute_density")),
     _compute_viscosity(getParam<bool>("compute_viscosity")),
     _compute_power(getParam<bool>("compute_power")),
-    _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
-    _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
+    _pin_mesh_exist(getParam<bool>("pin_mesh_exist")),
+    _duct_mesh_exist(getParam<bool>("duct_mesh_exist")),
     _P_out(getPostprocessorValue("P_out")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
@@ -274,6 +276,7 @@ SubChannel1PhaseProblem::initialSetup()
   if (getParam<bool>("full_output"))
   {
     _DP_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE_DROP));
+    _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
   }
   _h_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::ENTHALPY));
   _T_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::TEMPERATURE));
@@ -293,7 +296,6 @@ SubChannel1PhaseProblem::initialSetup()
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
-  _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
@@ -673,7 +675,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
         _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
-        _ff_soln->set(node_out, ff);
+        if (_ff_soln)
+          _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
@@ -737,7 +740,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
           _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
           Real ff = _friction_closure->computeFrictionFactor(_friction_args);
-          _ff_soln->set(node_out, ff);
+          if (_ff_soln)
+            _ff_soln->set(node_out, ff);
           /// Upwind local form loss
           auto ki = 0.0;
           if ((*_mdot_soln)(node_out) >= 0)
@@ -973,7 +977,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
         _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
-        _ff_soln->set(node_out, ff);
+        if (_ff_soln)
+          _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)

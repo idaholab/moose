@@ -13,6 +13,7 @@
 #include "AddAuxVariableAction.h"
 #include "SubChannelApp.h"
 #include <string_view>
+#include "AddMeshGeneratorAction.h"
 
 registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
 
@@ -35,28 +36,58 @@ SubChannelAddVariablesAction::SubChannelAddVariablesAction(const InputParameters
 void
 SubChannelAddVariablesAction::act()
 {
+  bool pin_mesh_exist = false;
+  bool duct_mesh_exist = false;
+
+  const auto & mesh_actions = _awh.getActions<AddMeshGeneratorAction>();
+
+  for (const auto * mesh_action : mesh_actions)
+  {
+    if (!mesh_action->parameters().isParamValid("type"))
+      continue;
+
+    const auto & generator_type = mesh_action->getParam<std::string>("type");
+    _console << "Mesh generator type = " << generator_type << std::endl;
+
+    if (generator_type == "SCMTriDuctMeshGenerator" || generator_type == "SCMQuadDuctMeshGenerator")
+      duct_mesh_exist = true;
+
+    if (generator_type == "SCMTriPinMeshGenerator" || generator_type == "SCMQuadPinMeshGenerator")
+      pin_mesh_exist = true;
+  }
+
   std::vector<std::string> var_names = {SubChannelApp::MASS_FLOW_RATE,
                                         SubChannelApp::SURFACE_AREA,
                                         SubChannelApp::SUM_CROSSFLOW,
                                         SubChannelApp::PRESSURE,
                                         SubChannelApp::WETTED_PERIMETER,
                                         SubChannelApp::LINEAR_HEAT_RATE,
-                                        SubChannelApp::DUCT_HEAT_FLUX,
                                         SubChannelApp::ENTHALPY,
                                         SubChannelApp::TEMPERATURE,
-                                        SubChannelApp::PIN_TEMPERATURE,
-                                        SubChannelApp::PIN_DIAMETER,
-                                        SubChannelApp::DUCT_TEMPERATURE,
                                         SubChannelApp::DENSITY,
                                         SubChannelApp::VISCOSITY,
-                                        SubChannelApp::DISPLACEMENT,
-                                        SubChannelApp::FRICTION_FACTOR,
-                                        SubChannelApp::HEAT_TRANSFER_COEFFICIENT};
+                                        SubChannelApp::DISPLACEMENT};
+
+  if (pin_mesh_exist)
+  {
+    var_names.push_back(SubChannelApp::PIN_TEMPERATURE);
+    var_names.push_back(SubChannelApp::PIN_DIAMETER);
+    var_names.push_back(SubChannelApp::HEAT_TRANSFER_COEFFICIENT);
+  }
+
+  if (duct_mesh_exist)
+  {
+    var_names.push_back(SubChannelApp::DUCT_HEAT_FLUX);
+    var_names.push_back(SubChannelApp::DUCT_TEMPERATURE);
+  }
+
   const bool full_output = getParam<bool>("full_output");
-  _console << "SubChannelAddVariablesAction full_output = " << full_output << std::endl;
 
   if (full_output)
+  {
     var_names.push_back(SubChannelApp::PRESSURE_DROP);
+    var_names.push_back(SubChannelApp::FRICTION_FACTOR);
+  }
 
   // Get a list of the already existing AddAuxVariableAction
   const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();

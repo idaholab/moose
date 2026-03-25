@@ -46,7 +46,6 @@ P_out = 2.0e5 # Pa
   segregated = false
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
-  full_output = true
 []
 
 [SCMClosures]
@@ -80,18 +79,6 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
-  []
-
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
   []
 
   [Viscosity_ic]

@@ -23,7 +23,7 @@ P_out = 4.923e6 # Pa
     type = SolutionUserObject
     mesh = steady_out.e
     timestep = LATEST
-    system_variables = 'mdot SumWij P DP h T Tpin rho mu S w_perim q_prime'
+    system_variables = 'mdot SumWij P DP h T rho mu S w_perim q_prime'
   []
 []
 
