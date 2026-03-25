@@ -12,7 +12,7 @@ from peacock.Input.InputFile import InputFile
 from peacock.utils import Testing
 from peacock import PeacockException
 from PyQt5 import QtWidgets
-from pyhit import hit
+from moosetools.hit import hit
 
 
 class Tests(Testing.PeacockTester):

@@ -7,6 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+import hashlib
 import importlib.util
 import inspect
 import json
@@ -292,8 +293,52 @@ class Tester(MooseObject, OutputInterface):
     This is a list of old param name -> capability name.
     """
 
-    @staticmethod
-    def augmentParams(params):
+    _validation_cache: dict[str, list[type[ValidationCase]]] = {}
+    """
+    Shared cache for ValidationCase types loaded from the 'validation_test' param.
+
+    Used and filled by Tester.getValidationCases().
+    """
+
+    @classmethod
+    def getValidationCases(cls, absolute_path: str) -> list[type[ValidationCase]]:
+        """Get the ValidationCase objects in the given external validation script."""
+        # Generate a hash based on the realpath, which will allow us to load it
+        # once and only once even if the same script is shared multiple times
+        real_path = os.path.realpath(absolute_path)
+        hash = hashlib.sha256(os.path.realpath(absolute_path).encode()).hexdigest()[:16]
+
+        # Get from the cache if it exists
+        cases = cls._validation_cache.get(hash, None)
+        # Doesn't exist in the cache, so load
+        if cases is None:
+            sys_module_name = f"tester_validation_{hash}"
+            module = sys.modules.get(sys_module_name)
+            if module is None:
+                spec = importlib.util.spec_from_file_location(
+                    sys_module_name, real_path
+                )
+                assert spec is not None and spec.loader is not None
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[sys_module_name] = module
+                try:
+                    spec.loader.exec_module(module)
+                except Exception:
+                    sys.modules.pop(sys_module_name, None)
+                    raise
+
+            # Find the classes that are derived from the base validation
+            # classes in the module (the user's python script)
+            classes = inspect.getmembers(module, inspect.isclass)
+            base_classes = [c[1] for c in classes if c[1] in ValidationCaseClasses]
+            other_classes = [c[1] for c in classes if c[1] not in base_classes]
+            cases = [c for c in other_classes if issubclass(c, ValidationCase)]
+            cls._validation_cache[hash] = cases
+
+        return cases
+
+    @classmethod
+    def augmentParams(cls, params):
         # Augment our parameters with parameters from the validation test, if we
         # have any validation tests
         script = params["validation_test"]
@@ -308,31 +353,16 @@ class Tester(MooseObject, OutputInterface):
                 message = f"validation_test={path} not found"
                 raise FileNotFoundError(message)
 
-            # Load the script; throw an exception here if it fails
-            # so that the Parser can report a reasonable error
-            spec = importlib.util.spec_from_file_location("validation_load", path)
-            module = importlib.util.module_from_spec(spec)
-            try:
-                spec.loader.exec_module(module)
-            except Exception as e:
-                raise ImportError(f"In validation_test={path}:\n{e}")
-
-            # Find the classes that are derived from the base validation
-            # classes in the module (the user's python script)
-            module_classes = inspect.getmembers(module, inspect.isclass)
-            base_classes = [
-                c[1] for c in module_classes if c[1] in ValidationCaseClasses
-            ]
-            other_classes = [c[1] for c in module_classes if c[1] not in base_classes]
-            subclasses = [c for c in other_classes if issubclass(c, ValidationCase)]
+            # Get the ValidationCase classes in this validation script
+            cases = cls.getValidationCases(path)
 
             # Store each of the classes in the script that derives from
             # ValidationCase, and add their parameters to this Tester's
             # parameters
             validation_classes = []
             validation_params = InputParameters()
-            for subclass in subclasses:
-                validation_params = subclass.validParams()
+            for validation_case in cases:
+                validation_params = validation_case.validParams()
 
                 # Don't allow validation parameters that override
                 # parameters from the Tester
@@ -343,9 +373,9 @@ class Tester(MooseObject, OutputInterface):
                         )
 
                 # Collect the cumulative validation params
-                validation_params += subclass.validParams()
+                validation_params += validation_case.validParams()
                 # Store the class so that it can be used later
-                validation_classes.append(subclass)
+                validation_classes.append(validation_case)
 
             # Extend the Tester parameters
             params += validation_params
@@ -355,9 +385,6 @@ class Tester(MooseObject, OutputInterface):
         params.addPrivateParam("_validation_classes", validation_classes)
 
         return params
-
-    # This is what will be checked for when we look for valid testers
-    IS_TESTER = True
 
     @dataclass
     class JSONMetadata:
@@ -546,15 +573,15 @@ class Tester(MooseObject, OutputInterface):
         return self.getStatus() == self.error
 
     def getTestName(self):
-        """return test name"""
+        """Return test name"""
         return self.specs["test_name"]
 
     def getTestNameShort(self):
-        """return test short name (not including the path)"""
+        """Return test short name (not including the path)"""
         return self.specs["test_name_short"]
 
     def getTestNameForFile(self):
-        """return test short name for file creation ('/' to '.')"""
+        """Return test short name for file creation ('/' to '.')"""
         return self.getTestNameShort().replace(os.sep, ".")
 
     def appendTestName(self, value):
@@ -567,19 +594,15 @@ class Tester(MooseObject, OutputInterface):
         self.specs["test_name_short"] += value
 
     def getPrereqs(self):
-        """return list of prerequisite tests this test depends on"""
+        """Return list of prerequisite tests this test depends on"""
         return self.specs["prereq"]
 
     def getMooseDir(self):
-        """return moose directory"""
+        """Return moose directory"""
         return self.specs["moose_dir"]
 
-    def getMoosePythonDir(self):
-        """return moose directory"""
-        return self.specs["moose_python_dir"]
-
     def getTestDir(self):
-        """return directory in which this tester is located"""
+        """Return directory in which this tester is located"""
         if self.specs["working_directory"]:
             return os.path.join(self.specs["test_dir"], self.specs["working_directory"])
         return self.specs["test_dir"]
@@ -588,11 +611,11 @@ class Tester(MooseObject, OutputInterface):
         return os.path.join(self.specs["test_dir"], self.specs["spec_file"])
 
     def getMinReportTime(self):
-        """return minimum time elapse before reporting a 'long running' status"""
+        """Return minimum time elapse before reporting a 'long running' status"""
         return self.specs["min_reported_time"]
 
     def getMaxTime(self):
-        """return maximum time elapse before reporting a 'timeout' status"""
+        """Return maximum time elapse before reporting a 'timeout' status"""
         return float(self.specs["max_time"])
 
     def setMaxTime(self, value):
@@ -609,7 +632,7 @@ class Tester(MooseObject, OutputInterface):
         return int(os.getenv("MOOSE_TEST_MAX_TIME", 300))
 
     def getUniqueTestID(self):
-        """return unique hash for test"""
+        """Return unique hash for test"""
         return (
             self.specs["unique_test_id"]
             if self.specs.isValid("unique_test_id")
@@ -617,21 +640,21 @@ class Tester(MooseObject, OutputInterface):
         )
 
     def getRunnable(self, options):
-        """return bool and cache results, if this test can run"""
+        """Return bool and cache results, if this test can run"""
         if self._runnable is None:
             self._runnable = self.checkRunnableBase(options)
         return self._runnable
 
     def getInputFile(self):
-        """return the input file if applicable to this Tester"""
+        """Return the input file if applicable to this Tester"""
         return None
 
     def getInputFileContents(self):
-        """return the contents of the input file applicable to this Tester"""
+        """Return the contents of the input file applicable to this Tester"""
         return None
 
     def getOutputFiles(self, options):
-        """return the output files if applicable to this Tester"""
+        """Return the output files if applicable to this Tester"""
         return [v.path for v in self.json_metadata.values()]
 
     def getCheckInput(self):
@@ -656,7 +679,7 @@ class Tester(MooseObject, OutputInterface):
 
     def shouldExecute(self):
         """
-        return boolean for tester allowed to execute its command
+        Return boolean for tester allowed to execute its command
         see .getCommand for more information
         """
         return self.should_execute
@@ -669,15 +692,15 @@ class Tester(MooseObject, OutputInterface):
         return
 
     def getThreads(self, options):
-        """return number of threads to use for this tester"""
+        """Return number of threads to use for this tester"""
         return 1
 
     def getProcs(self, options):
-        """return number of processors to use for this tester"""
+        """Return number of processors to use for this tester"""
         return 1
 
     def getSlots(self, options):
-        """return number of slots to use for this tester"""
+        """Return number of slots to use for this tester"""
         slots = self.getThreads(options) * self.getProcs(options)
         if (min_slots := self.specs["min_slots"]) is not None:
             min_slots = int(min_slots)
@@ -731,11 +754,11 @@ class Tester(MooseObject, OutputInterface):
         return
 
     def processResultsCommand(self, moose_dir, options):
-        """method to return the commands (list) used for processing results"""
+        """Method to return the commands (list) used for processing results"""
         return []
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
-        """method to process the results of a finished tester"""
+        """Method to process the results of a finished tester"""
         if self.specs["expect_exit_code"] != exit_code:
             reason = f'EXIT CODE {exit_code} != {self.specs["expect_exit_code"]}'
             self.setStatus(self.fail, str(reason))
@@ -744,7 +767,7 @@ class Tester(MooseObject, OutputInterface):
         return ""
 
     def hasRedirectedOutput(self, options):
-        """return bool on tester having redirected output"""
+        """Return bool on tester having redirected output"""
         return (
             self.specs.isValid("redirect_output")
             and self.specs["redirect_output"] == True
@@ -752,7 +775,7 @@ class Tester(MooseObject, OutputInterface):
         )
 
     def getRedirectedOutputFiles(self, options):
-        """return a list of redirected output"""
+        """Return a list of redirected output"""
         if self.hasRedirectedOutput(options):
             return [
                 os.path.join(self.getTestDir(), self.name() + ".processor.{}".format(p))
@@ -783,13 +806,15 @@ class Tester(MooseObject, OutputInterface):
         return self.getCaveats()
 
     def mustOutputExist(self, exit_code):
-        """Whether or not we should check for the output once it has ran
+        """
+        Whether or not we should check for the output once it has ran
 
         We need this because the PBS/slurm Runner objects, which use
         networked file IO, need to wait until the output is available on
         on the machine that submitted the jobs. A good example is RunException,
         where we should only look for output when we get a nonzero return
-        code."""
+        code.
+        """
         return exit_code == 0
 
     def getAugmentedCapabilities(self, options) -> dict:
@@ -829,7 +854,7 @@ class Tester(MooseObject, OutputInterface):
                 add_capabilities=self._augmented_capabilities,
             )
         except Exception as e:
-            from pycapabilities.exceptions import (
+            from moosetools.capabilities.exceptions import (
                 CapabilityException,
                 UnknownCapabilitiesException,
             )
@@ -1043,10 +1068,11 @@ class Tester(MooseObject, OutputInterface):
         # Check python version
         py_version = self.specs["python"]
         if py_version is not None:
-            if isinstance(py_version, int) and (py_version != sys.version_info[0]):
-                reasons["python"] = "PYTHON != {}".format(py_version)
-            elif isinstance(py_version, float) and (
-                py_version != float("{}.{}".format(*sys.version_info[0:2]))
+            if (
+                isinstance(py_version, int)
+                and (py_version != sys.version_info[0])
+                or isinstance(py_version, float)
+                and (py_version != float("{}.{}".format(*sys.version_info[0:2])))
             ):
                 reasons["python"] = "PYTHON != {}".format(py_version)
             elif isinstance(py_version, str):
@@ -1102,12 +1128,8 @@ class Tester(MooseObject, OutputInterface):
             self.addCaveats(flat_reason)
 
             # Reasons we wish to silence tests
-            if "deleted" in reasons.keys():
-                self.setStatus(self.silent)
-            elif (
-                "heavy" in reasons.keys()
-                and options.heavy_tests
-                and not self.specs["heavy"]
+            if "deleted" in reasons or (
+                "heavy" in reasons and options.heavy_tests and not self.specs["heavy"]
             ):
                 self.setStatus(self.silent)
 

@@ -9,8 +9,6 @@
 import os
 import re
 import logging
-import mooseutils
-import moosetree
 import moosesyntax
 from .LogHelper import LogHelper
 

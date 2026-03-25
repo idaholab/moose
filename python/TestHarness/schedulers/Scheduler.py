@@ -17,7 +17,6 @@ from time import sleep
 from timeit import default_timer as clock
 from typing import TYPE_CHECKING, Optional
 
-import pyhit
 from FactorySystem.MooseObject import MooseObject
 
 from TestHarness.JobDAG import JobDAG
@@ -96,9 +95,6 @@ class Scheduler(MooseObject):
         )
 
         return params
-
-    # This is what will be checked for when we look for valid schedulers
-    IS_SCHEDULER = True
 
     CAN_SET_HWLOC_TOPOLOGY = False
     """Whether or not to set hwloc topology if available."""
@@ -497,7 +493,9 @@ class Scheduler(MooseObject):
             return
 
         # Whether or not we have parallel scheduling
-        root = pyhit.load(testers[0].getSpecFile())
+        from moosetools import hit
+
+        root = hit.load(testers[0].getSpecFile())
         parallel_scheduling = root.children[0].get("parallel_scheduling", False)
 
         # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)

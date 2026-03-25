@@ -16,19 +16,19 @@ import subprocess
 import sys
 import traceback
 from contextlib import suppress
+from importlib.util import find_spec
 from typing import Optional
 
-# Add MOOSE python to path
-MOOSE_DIR = os.environ.get(
-    "MOOSE_DIR",
-    os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")),
-)
-sys.path.append(os.path.join(MOOSE_DIR, "python"))
+# Add in-tree moosetools to path if we can't find it
+if find_spec("moosetools") is None:
+    moosetools_src_dir = os.path.abspath(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "..", "moosetools", "src"
+        )
+    )
+    sys.path.append(moosetools_src_dir)
 
-# pyhit here needs to be imported first so that it adds
-# the hit lib to path
-import pyhit  # noqa: I001 E402
-import hit  # noqa: E402
+from moosetools import hit
 
 
 class SpecModifier:
@@ -49,7 +49,7 @@ class SpecModifier:
         # Whether or not we've modified the file
         self.modified: bool = False
 
-    def recurse(self, node: pyhit.Node):
+    def recurse(self, node: hit.Node):
         """Recursively find a single spec, fix it, and fix all of its children."""
         for child in node:
             if child.get("type") is not None:
@@ -59,13 +59,13 @@ class SpecModifier:
                 self.recurse(child)
 
     @staticmethod
-    def modify_test(node: pyhit.Node) -> bool:
+    def modify_test(node: hit.Node) -> bool:
         """
         Modify a test spec, changing old options to capabilities.
 
         Arguments:
         ---------
-        node : pyhit.Node
+        node : hit.Node
             The node that represents the HIT tree for the test spec.
 
         Returns:
@@ -250,7 +250,9 @@ class SpecModifier:
         if node.get("capabilities") is None:
             assert isinstance(insert_index, int)
             hitnode = node.__dict__["_Node__hitnode"]
-            new = hit.NewField("capabilities", hit.FieldKind.String, capabilities)
+            new = hit.hit.NewField(
+                "capabilities", hit.hit.FieldKind.String, capabilities
+            )
             hitnode.insertChild(insert_index - 1, new)
         # Update the current capabilities string
         else:
@@ -278,7 +280,7 @@ class SpecModifier:
 
         Returns whether or not the spec was modified.
         """
-        root = pyhit.load(self.file)
+        root = hit.load(self.file)
 
         # Find [Tests] node
         tests_node = None
@@ -299,7 +301,7 @@ class SpecModifier:
 
         # Overwrite changes
         if not dry_run:
-            pyhit.write(self.file, root)
+            hit.write(self.file, root)
         return True
 
 

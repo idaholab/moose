@@ -6,17 +6,13 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import sys
 import re
 import importlib
-import collections
 import logging
-import moosetree
 import mooseutils
 import MooseDocs
 from types import ModuleType
-from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
 from ..tree import tokens

@@ -7,11 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
-import re
 import math
-from TestHarness import util
 import os
+import re
+
+from TestHarness.testers.RunApp import RunApp
 
 
 class PetscJacobianTester(RunApp):
@@ -103,17 +103,19 @@ class PetscJacobianTester(RunApp):
 
     def __compare(self, value, threshold):
         """
-        return True if:
+        Return True if:
           1. `value` and `threshold` are both Inf
           2. `value` and `threshold` are both NaN
           3. `value` is less then `threshold`
         otherwise False
         """
-        if math.isnan(value) and math.isnan(float(threshold)):
-            return True
-        elif math.isinf(value) and math.isinf(float(threshold)):
-            return True
-        elif value < float(threshold):
+        if (
+            math.isnan(value)
+            and math.isnan(float(threshold))
+            or math.isinf(value)
+            and math.isinf(float(threshold))
+            or value < float(threshold)
+        ):
             return True
         else:
             return False

@@ -8,8 +8,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
 import copy
-import moosetree
 import MooseDocs
+from moosetools import tree
 from .base import NodeBase
 
 LOG = logging.getLogger(__name__)
@@ -83,7 +83,7 @@ class Token(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in moosetree.iterate(self):
+        for node in tree.iterate(self):
             if node.name in ["Word", "Number", "String"]:
                 strings.append(node["content"])
         return sep.join(strings)

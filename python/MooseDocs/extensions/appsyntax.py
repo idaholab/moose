@@ -10,17 +10,16 @@
 import os
 import collections
 import logging
-import copy
 import re
 import time
 import traceback
-import moosetree
 import moosesyntax
 import mooseutils
 
 import MooseDocs
+from moosetools import tree
 from .. import common
-from ..common import exceptions, report_error
+from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
 from . import command, core, floats, table, autolink, materialicon, modal, alert
@@ -218,7 +217,7 @@ class AppSyntaxExtension(command.CommandExtension):
 
         # Enable test objects by removing the test flag (i.e., don't consider them test objects)
         if self["allow-test-objects"] and (self._app_syntax is not None):
-            for node in moosetree.iterate(self._app_syntax):
+            for node in tree.iterate(self._app_syntax):
                 node.test = False
 
         LOG.info("MOOSE application syntax complete [%s sec.]", time.time() - start)
@@ -240,7 +239,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
-        for node in moosetree.iterate(self._app_syntax):
+        for node in tree.iterate(self._app_syntax):
             if not (node.removed or node.test):
                 self._cache[node.fullpath()] = node
                 if node.alias:

@@ -11,8 +11,8 @@ import re
 import subprocess
 import logging
 import collections
-import moosetree
 import mooseutils
+from moosetools import tree
 from ..base import renderers
 from ..common import exceptions, box
 from ..tree import base, latex, pages
@@ -54,7 +54,7 @@ class PDFExtension(command.CommandExtension):
         """
 
         depth = page.depth if page.depth < 2 else 2
-        for node in moosetree.iterate(ast):
+        for node in tree.iterate(ast):
 
             if node.name == "Heading":
                 lvl = node["level"] + depth
@@ -109,7 +109,7 @@ class PDFExtension(command.CommandExtension):
 
         # Process output
         root = self.processLatexOutput(output, content)
-        for node in moosetree.iterate(root):
+        for node in tree.iterate(root):
             if node["warnings"]:
                 self._reportLatexWarnings(node, content)
 
@@ -141,7 +141,7 @@ class PDFExtension(command.CommandExtension):
             cmd.parent = main
 
         doc = latex.Environment(main, "document", end="\n")
-        for node in moosetree.iterate(root, lambda n: "page" in n):
+        for node in tree.iterate(root, lambda n: "page" in n):
             page = node["page"]
             if page.get("active", True):
                 cmd = latex.Command(doc, "input", start="\n")
@@ -189,7 +189,7 @@ class PDFExtension(command.CommandExtension):
             # Locate the rendered node that that caused the error
             r_node = None
             if result:
-                for r in moosetree.iterate(result):
+                for r in tree.iterate(result):
                     if w.line >= r.get("_start_line", float("Inf")):
                         r_node = r
 
@@ -261,7 +261,7 @@ class PDFExtension(command.CommandExtension):
         root = PDFExtension.parseOutput(output)
 
         # Loop through the result and capture filenames and warnings
-        for n in moosetree.iterate(root):
+        for n in tree.iterate(root):
             match = regex.search(n["content"])
             if match:
                 n["content"] = match.group("content")
@@ -284,13 +284,11 @@ class PDFExtension(command.CommandExtension):
     @staticmethod
     def parseOutput(content):
         """Convert the nested parenthesis output from pdflatex to a tree structure."""
-        root = moosetree.Node(None, "root", content="", filename="", warnings=[])
+        root = tree.Node(None, "root", content="", filename="", warnings=[])
         node = root
         for char in content:
             if char == "(":
-                node = moosetree.Node(
-                    node, "paren", content="", filename="", warnings=[]
-                )
+                node = tree.Node(node, "paren", content="", filename="", warnings=[])
             elif char == ")":
                 node = node.parent
             else:

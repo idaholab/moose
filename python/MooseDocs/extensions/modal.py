@@ -6,20 +6,22 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import collections
+import fnmatch
+import logging
 import os
 import uuid
-import logging
-import fnmatch
 
-import mooseutils
-import moosetree
-import collections
+from moosetools import tree
+
 import MooseDocs
+import mooseutils
+
 from .. import common
-from ..common import exceptions, report_error
 from ..base import components
-from ..tree import tokens, html, latex
-from . import core, command
+from ..common import exceptions, report_error
+from ..tree import html, latex, tokens
+from . import command, core
 
 LOG = logging.getLogger("MooseDocs.extensions.modal")
 
@@ -76,7 +78,7 @@ class ModalExtension(command.CommandExtension):
             )
 
     def postRender(self, page, results):
-        parent = moosetree.find(
+        parent = tree.find(
             results.root, lambda n: n.name == "div" and "moose-content" in n["class"]
         )
         for div in self.__modals.get(page.uid, list()):

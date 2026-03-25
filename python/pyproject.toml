@@ -1,0 +1,44 @@
+[tool.black]
+target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
+
+# Nothing in python/ is currently ruff compliant :(
+[tool.ruff]
+include = [
+  "unused"
+]
+
+[tool.ruff.lint]
+# Enable pycodestyle (E) and Pyflakes (F) codes by default.
+# D - NumPy docstring rules
+# I - Sorting imports
+# N801 - Class name should use CapWords convention
+# SIM - code simplification rules
+# TID - tidy imports
+select = ["D", "E", "F", "I", "N801", "SIM", "TID"]
+ignore = ["D203", "D212"]
+
+[tool.pytest]
+addopts = [
+    "-vvv",
+    "--cov=TestHarness/resultsstore",
+    "--cov=TestHarness/resultssummary",
+    "--durations=20"
+]
+testpaths = [
+    "tests"
+]
+pythonpath = [
+    ".",
+    "../moosetools/src"
+]
+markers = [
+    "moose: marks tests as requiring moose (use --no-moose to skip)",
+    "live_db: marks tests as using a live database (use --no-live-db to skip)"
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100

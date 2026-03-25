@@ -74,17 +74,6 @@ hit_CLI_srcfiles := $(hit_srcdir)/main.cc
 hit_CLI          := $(HIT_DIR)/hit
 $(hit_objects): | prebuild
 
-#
-# hit python bindings
-#
-pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/parse.cc $(hit_srcdir)/braceexpr.cc
-
-#
-# capabilities python bindings
-#
-PYCAPABILITIES_DIR ?= $(MOOSE_DIR)/python/pycapabilities
-pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.C $(FRAMEWORK_DIR)/src/base/Capability.C $(FRAMEWORK_DIR)/src/base/CapabilityException.C $(FRAMEWORK_DIR)/src/base/CapabilityRegistry.C
-
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 moose_DYLIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).$(lib_suffix)
@@ -197,50 +186,38 @@ endif
 #
 ADDITIONAL_CPPFLAGS += -DADFPARSER_INCLUDES="\"-I$(FRAMEWORK_DIR)/include/utils -I$(FRAMEWORK_DIR)/include/base $(libmesh_INCLUDE)\""
 
-# some systems have python2/3 but no python2/3-config command - fall back to python-config for them
-pyconfig := python3-config
-ifeq (, $(shell which $(pyconfig) 2>/dev/null))
-	pyconfig := python-config
-endif
+#
+# hit executable
+#
+hit $(hit_CLI): $(hit_srcfiles) $(hit_CLI_srcfiles)
+	@bash -c '(cd "$(HIT_DIR)" && $(MAKE) --no-print-directory)'
 
-UNAME := $(shell uname)
-ifeq ($(UNAME), Darwin)
-	DYNAMIC_LOOKUP := -undefined dynamic_lookup
-	hit_pad_LDFLAGS := -Wl,-headerpad_max_install_names
-else
-	DYNAMIC_LOOKUP :=
-	hit_pad_LDFLAGS :=
-endif
+#
+# moosetools
+#
+MOOSETOOLS_DIR ?= $(MOOSE_DIR)/moosetools
+python_EXT_SUFFIX := $(shell python -c "import sysconfig; print(sysconfig.get_config_var('EXT_SUFFIX'))")
 
-# windows (msys2) specific settings (we need to cut the version number off)
-UNAME10 := $(shell uname | cut -c-10)
-ifeq ($(UNAME10), MINGW64_NT)
-	libmesh_LDFLAGS    += -no-undefined
-	PYMOD_EXTENSION    := pyd
-	PYMOD_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
-else
-	PYMOD_EXTENSION    := so
-	PYMOD_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
-endif
+#
+# moosetools.hit.hit lib
+#
+MOOSETOOLS_HIT_DIR ?= $(MOOSETOOLS_DIR)/src/moosetools/hit
+moosetools_hit_srcfiles  := $(hit_srcdir)/hit_cython.cpp $(hit_srcfiles)
+$(moosetools_hit_LIB) $(hit_CLI_srcfiles): | prebuild
+moosetools_hit_LIB := $(MOOSETOOLS_HIT_DIR)/hit$(python_EXT_SUFFIX)
+moosetools_hit $(moosetools_hit_LIB): $(moosetools_capabilities_srcfiles)
+	@bash -c '(cd "$(MOOSETOOLS_HIT_DIR)" && python3 _setup_external.py)'
 
-$(pyhit_srcfiles) $(hit_CLI_srcfiles): | prebuild
-
-pyhit_LIB          := $(HIT_DIR)/hit.$(PYMOD_EXTENSION)
-pyhit_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
-
-hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
-	@echo "Building and linking $(pyhit_LIB)..."
-	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) $(CXXFLAGS) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB) $(hit_pad_LDFLAGS))'
-	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
-
-pycapabilities_LIBNAME      := _pycapabilities.$(PYMOD_EXTENSION)
-pycapabilities_LIB          := $(PYCAPABILITIES_DIR)/$(pycapabilities_LIBNAME)
-pycapabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/base -I$(FRAMEWORK_DIR)/include/utils
-pycapabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
-
-pycapabilities $(pycapabilities_LIB) : $(pycapabilities_srcfiles)
-	@echo "Building and linking $(pycapabilities_LIB)..."
-	@bash -c '(cd "$(PYCAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DFOR_PYCAPABILITIES -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
+#
+# moosetools.capabilities._external
+#
+MOOSETOOLS_CAPABILITIES_DIR ?= $(MOOSETOOLS_DIR)/src/moosetools/capabilities
+moosetools_capabilities_srcfiles := $(MOOSETOOLS_CAPABILITIES_DIR)/_external.cpp $(FRAMEWORK_DIR)/src/base/Capability.C $(FRAMEWORK_DIR)/src/base/CapabilityException.C $(FRAMEWORK_DIR)/src/base/CapabilityRegistry.C
+$(moosetools_capabilities_srcfiles) $(moosetools_capabilities_LIB) $(hit_CLI_srcfiles): | prebuild
+$(moosetools_capabilities_LIB): | prebuild
+moosetools_capabilities_LIB := $(MOOSETOOLS_CAPABILITIES_DIR)/_external$(python_EXT_SUFFIX)
+moosetools_capabilities $(moosetools_capabilities_LIB): $(moosetools_capabilities_srcfiles)
+	@bash -c '(cd "$(MOOSETOOLS_CAPABILITIES_DIR)" && python3 _setup_external.py)'
 
 #
 # gtest
@@ -369,6 +346,7 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # 4: The unity build area (for filtering out, not a dependency)
 # The "|" in the prereqs starts the beginning of "position dependent" prereqs
 # these are prereqs that must be run first - but their timestamp isn't used
+UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
 define unity_file_rule
 $(1): $(2) $(3) | $(4) prebuild
@@ -559,7 +537,7 @@ prebuild:: | $(moose_config)
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
-moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(pycapabilities_LIB)
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(moosetools_capabilities_LIB) $(moosetools_hit_LIB) $(hit_CLI)
 
 # Check for support for process substitution, and if supported, we delete a known warning on MacOS from
 # the output because it is printed thousands of times
@@ -683,7 +661,7 @@ install_exodiff: all
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_python:: $(pyhit_LIB) $(pycapabilities_LIB)
+install_python:: $(pyhit_LIB) $(moosecapabilities_LIB)
 	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
@@ -699,7 +677,6 @@ install_harness: install_python
 	@cp -f $(MOOSE_DIR)/scripts/moose_test_runner $(bin_install_dir)/moose_test_runner
 	@cp -f $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(moose_share_dir)/bin/
 	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
-	@echo "libmesh_install_dir = '$(LIBMESH_DIR)'" > $(moose_share_dir)/moose_config.py
 
 install_hit: all
 	@echo "Installing HIT"
@@ -753,7 +730,9 @@ clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
 	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS) $(app_KOKKOS_UNITY_SRC_FILES)
-	@rm -rf $(APPLICATION_DIR)/build $(pycapabilities_LIB)
+	@rm -rf $(APPLICATION_DIR)/build
+	@rm -rf $(MOOSETOOLS_DIR)/build $(moosetools_capabilities_LIB) $(moosetools_hit_LIB)
+	@rm -rf $(HIT_DIR)/hit $(HIT_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could

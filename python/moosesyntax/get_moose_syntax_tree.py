@@ -6,14 +6,13 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
-import collections
 import logging
-import json
 
-import moosetree
+from moosetools import tree
+
 import mooseutils
-from .nodes import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
+
+from .nodes import ActionNode, MooseObjectActionNode, MooseObjectNode, SyntaxNode
 
 
 def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdown=None):
@@ -32,7 +31,7 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
     """
     # Create the JSON tree, unless it is provided directly
     if isinstance(exe, dict):
-        tree = exe
+        json_tree = exe
     else:
         raw = mooseutils.runExe(exe, ["--json", "--allow-test-objects"])
         if len(raw.split("**START JSON DATA**\n")) == 1:
@@ -41,11 +40,11 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
             )
         raw = raw.split("**START JSON DATA**\n")[1]
         raw = raw.split("**END JSON DATA**")[0]
-        tree = mooseutils.json_parse(raw)
+        json_tree = mooseutils.json_parse(raw)
 
     # Build the complete syntax tree
     root = SyntaxNode(None, "")
-    for key, value in tree["blocks"].items():
+    for key, value in json_tree["blocks"].items():
         node = SyntaxNode(root, key)
         __syntax_tree_helper(node, value)
 
@@ -56,7 +55,7 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
     markdown = __build_dict_from_yaml(markdown or dict())
 
     # Apply remove/alias/unregister restrictions
-    for node in moosetree.iterate(root):
+    for node in tree.iterate(root):
 
         # Removed
         if (node.fullpath() in removed) or (
@@ -114,7 +113,6 @@ def __build_dict_from_yaml(item):
 
 def __syntax_tree_helper(parent, item):
     """Helper to build the proper node from the supplied JSON item."""
-
     if item is None:
         return
 

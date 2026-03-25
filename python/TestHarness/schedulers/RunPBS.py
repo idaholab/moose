@@ -7,11 +7,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, json
 import datetime
-from RunHPC import CallHPCPoolType, RunHPC
-from PBScodes import PBS_User_EXITCODES
-from TestHarness import util
+import json
+import re
+
+from TestHarness.schedulers.PBScodes import PBS_User_EXITCODES
+from TestHarness.schedulers.RunHPC import CallHPCPoolType, RunHPC
 
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax

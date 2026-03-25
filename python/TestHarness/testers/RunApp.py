@@ -14,11 +14,10 @@ import shutil
 from shlex import quote
 from typing import Optional, Tuple
 
-from Tester import Tester
-
 from TestHarness import TestHarness, util
 from TestHarness.capability_util import addAugmentedCapability
 from TestHarness.mpi_config import MPIType
+from TestHarness.testers.Tester import Tester
 
 
 class RunApp(Tester):
@@ -541,7 +540,8 @@ class RunApp(Tester):
                 errors += "expect_out and absent_out can not be supplied when using a custom evaluation function!"
                 self.setStatus(self.fail, "CUSTOM EVAL FAILED")
                 return errors
-            import importlib.util, sys
+            import importlib.util
+            import sys
 
             custom_mod_spec = importlib.util.spec_from_file_location(
                 "custom_module",
@@ -660,7 +660,6 @@ class RunApp(Tester):
         # TODO: because Scheduler is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
-
         # If we had capability requirements and get an exit 77, it means that the
         # capability doesn't exist in the binary
         if self.specs["capabilities"] and exit_code == 77:

@@ -15,8 +15,8 @@ import sys
 from typing import TYPE_CHECKING, Iterable, Optional, Tuple, Union
 
 if TYPE_CHECKING:
-    from pycapabilities import Capabilities
-    from pycapabilities.dataclasses import CheckOptions, CheckResult
+    from moosetools.capabilities import Capabilities
+    from moosetools.capabilities.dataclasses import CheckResult
 
 from TestHarness.util import outputHeader, parseMOOSEJSON, runCommand
 
@@ -50,7 +50,7 @@ def checkAppCapabilities(
 
     Arguments:
     ---------
-    capabilities : pycapabilities.Capabilities
+    capabilities : moosetools.capabilities.Capabilities
         The built application capabilities.
     required : str
         The capability expression to check.
@@ -71,15 +71,15 @@ def checkAppCapabilities(
     -------
     bool:
         Whether or not the check passed.
-    pycapabilities.dataclasses.CheckResult:
+    moosetools.capabilities.dataclasses.CheckResult:
         The CheckResult from calling Capabilities.check().
 
     """
     # This is one of the few places where we actually
-    # load the pycapabilities module and that is
+    # load the moosetools.capabilities module and that is
     # intentional as it can trigger a build
-    from pycapabilities import CheckState
-    from pycapabilities.dataclasses import CheckOptions
+    from moosetools.capabilities import CheckState
+    from moosetools.capabilities.dataclasses import CheckOptions
 
     options = CheckOptions(
         certain=certain,
@@ -137,7 +137,7 @@ def addAugmentedCapability(
         Whether or not the capability is explicit (non bool-valued capabilites only).
 
     """
-    from pycapabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
+    from moosetools.capabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
 
     assert isinstance(app_capabilities, (Capabilities, set))
     assert isinstance(augmented_capabilities, dict)
@@ -202,7 +202,7 @@ def parseRequiredCapabilities(
     assert isinstance(required, list)
     assert all(isinstance(v, str) for v in required)
 
-    from pycapabilities import AUGMENTED_CAPABILITY_NAMES
+    from moosetools.capabilities import AUGMENTED_CAPABILITY_NAMES
 
     result = []
     for entry in required:

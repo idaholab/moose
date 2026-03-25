@@ -7,13 +7,14 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
-from mooseutils.csvdiff import CSVTools
-from mooseutils import colorText
-import os
 import math
+import os
 import statistics
+
+from mooseutils import colorText
+from mooseutils.csvdiff import CSVTools
+
+from TestHarness.testers.FileTester import FileTester
 
 
 def diff_files(gold_file, out_file, err_type="relative"):
@@ -22,7 +23,6 @@ def diff_files(gold_file, out_file, err_type="relative"):
 
     'time' column is ignored
     """
-
     found_column = {}
 
     csv = CSVTools()

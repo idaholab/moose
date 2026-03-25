@@ -7,8 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from SchemaDiff import SchemaDiff
 from TestHarness import util
+from TestHarness.testers.SchemaDiff import SchemaDiff
 
 
 class XMLDiff(SchemaDiff):

@@ -6,14 +6,14 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import collections
-import logging
-import pyhit
+import os
+
+from moosetools import hit, tree
+
 import mooseutils
-import moosetree
-import moosesqa
-from .Requirement import TestSpecification, Requirement, Detail
+
+from .Requirement import Detail, Requirement, TestSpecification
 
 
 def get_requirements_from_tests(directories, specs, include_non_testable=False):
@@ -68,13 +68,14 @@ def get_requirements_from_file(
 
     Returns:
          A list of Requirement objects.
+
     """
     if not os.path.isfile(filename):
         raise FileNotFoundError(
             "The supplied filename does not exist: {}".format(filename)
         )
     requirements = list()
-    root = pyhit.load(filename)
+    root = hit.load(filename)
 
     # Options available at the top-level
     #   [Tests]
@@ -148,10 +149,10 @@ def get_test_specification(filename, block):
     but still reference tests for the purpose of SQA traceability. Support for this was added to
     allow for non-functional requirements to be defined outside of the test specifications.
     """
-    root = pyhit.load(filename)
+    root = hit.load(filename)
 
     # Locate the desired block
-    node = moosetree.find(root, lambda n: n.fullpath.endswith(block))
+    node = tree.find(root, lambda n: n.fullpath.endswith(block))
     if node is None:
         raise KeyError("Unable to locate '{}' in {}".format(block, filename))
 
@@ -194,7 +195,7 @@ def _create_specification(child, name, filename, root_dir):
     Create and return a TestSpecificaiton object.
 
     Inputs:
-        child[pyhit.Node]: Node containing test specification
+        child[hit.Node]: Node containing test specification
         name: The name to apply to the specification
         filename: Location of the specification
     """

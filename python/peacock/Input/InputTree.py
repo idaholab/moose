@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-from pyhit import hit
+from moosetools.hit import hit
 import mooseutils
 from .InputFile import InputFile
 from . import InputTreeWriter
