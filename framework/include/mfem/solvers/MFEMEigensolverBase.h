@@ -24,10 +24,10 @@ public:
   MFEMEigensolverBase(const InputParameters & parameters);
 
   /// Sets the operator for the eigensolver in derived classes
-  virtual void setOperator(mfem::Operator & op) = 0;
+  virtual void setOperator(mfem::OperatorHandle & op) = 0;
 
   /// Sets the mass matrix for the eigensolver in derived classes
-  virtual void setMassMatrix(mfem::Operator & mass) = 0;
+  virtual void setMassMatrix(mfem::OperatorHandle & mass) = 0;
 
   /// Retrieves the computed eigenvalues
   virtual void getEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const = 0;
