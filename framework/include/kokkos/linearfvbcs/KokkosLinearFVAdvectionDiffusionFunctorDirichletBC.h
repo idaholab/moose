@@ -26,5 +26,6 @@ public:
   const Moose::Kokkos::Function & functor() const { return _functor; }
 
 private:
+  /// The functor providing the Dirichlet value(s) on a boundary
   const Moose::Kokkos::Function _functor;
 };
