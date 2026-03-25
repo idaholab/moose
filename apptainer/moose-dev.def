@@ -167,17 +167,16 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Install code-server
     cd ${ROOT_BUILD_DIR}
-    CODE_SERVER_FILE="code-server-${CODE_SERVER_VERSION}-amd64"
     if [ -n "$IS_RHEL" ]; then
-        CODE_SERVER_FILE+=".rpm"
+        CODE_SERVER_FILE="code-server-${CODE_SERVER_VERSION}-amd64.rpm"
     elif [ -n "$IS_DEBIAN" ]; then
-        CODE_SERVER_FILE+=".deb"
+        CODE_SERVER_FILE="code-server_${CODE_SERVER_VERSION}_amd64.deb"
     fi
     curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
     if [ -n "$IS_RHEL" ]; then
         rpm -i ${CODE_SERVER_FILE}
     elif [ -n "$IS_DEBIAN" ]; then
-        apt install ${CODE_SERVER_FILE}
+        apt install -y ./${CODE_SERVER_FILE}
     fi
     rm ${CODE_SERVER_FILE}
 
