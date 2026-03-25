@@ -242,7 +242,7 @@ c = 1.5
     examine_element_types = WARNING
     examine_element_volumes = WARNING
     examine_nonplanar_sides = INFO
-    # check_local_jacobian = WARNING
+    check_local_jacobian = WARNING
   []
 []
 
