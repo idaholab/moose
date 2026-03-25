@@ -39,7 +39,7 @@ DiracKernelBase::validParams()
 
   params.addParam<MooseEnum>(
       "point_not_found_behavior",
-      MooseEnum(getPointNotFoundBehaviorOptions(), "IGNORE"),
+      MooseEnum(DiracKernelInfo::getPointNotFoundBehaviorOptions(), "IGNORE"),
       "By default (IGNORE), it is ignored if an added point cannot be located in the "
       "specified subdomains. If this option is set to ERROR, this situation will result in an "
       "error. If this option is set to WARNING, then a warning will be issued.");
@@ -70,8 +70,8 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points")),
-    _point_not_found_behavior(
-        parameters.get<MooseEnum>("point_not_found_behavior").getEnum<PointNotFoundBehavior>()),
+    _point_not_found_behavior(parameters.get<MooseEnum>("point_not_found_behavior")
+                                  .getEnum<DiracKernelInfo::PointNotFoundBehavior>()),
     _allow_moving_sources(getParam<bool>("allow_moving_sources"))
 {
   // Stateful material properties are not allowed on DiracKernels
@@ -82,24 +82,7 @@ void
 DiracKernelBase::addPoint(const Elem * elem, Point p, unsigned /*id*/, Real value)
 {
   if (!elem || !hasBlocks(elem->subdomain_id()))
-  {
-    std::stringstream msg;
-    msg << "Point " << p << " not found in block(s) " << Moose::stringify(blockIDs(), ", ") << ".";
-    switch (_point_not_found_behavior)
-    {
-      case PointNotFoundBehavior::ERROR:
-        mooseError(msg.str());
-        break;
-      case PointNotFoundBehavior::WARNING:
-        mooseDoOnce(mooseWarning(msg.str()));
-        break;
-      case PointNotFoundBehavior::IGNORE:
-        break;
-      default:
-        mooseError("Internal enum error.");
-    }
     return;
-  }
 
   if (elem->processor_id() != processor_id())
     return;
@@ -123,8 +106,8 @@ DiracKernelBase::addPoint(Point p, unsigned id, Real value)
   // If id == libMesh::invalid_uint (the default), the user is not
   // enabling caching when they add Dirac points.  So all we can do is
   // the PointLocator lookup, and call the other addPoint() method.
-  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
-  addPoint(elem, p, id, value);
+  const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs(), _point_not_found_behavior);
+  addPoint(elem, p, id);
   return elem;
 }
 
@@ -152,7 +135,8 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id, Real value)
   // safe, because all processors have the same value of we_found_it.
   if (!we_found_it)
   {
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
+    const Elem * elem =
+        _dirac_kernel_info.findPoint(p, _mesh, blockIDs(), _point_not_found_behavior);
 
     // Only add the point to the cache on this processor if the Elem is local
     if (elem && (elem->processor_id() == processor_id()))
@@ -165,9 +149,9 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id, Real value)
       points.push_back(std::make_pair(p, id));
     }
 
-    // Call the other addPoint() method.  This method ignores non-local
-    // and NULL elements automatically.
-    addPoint(elem, p, id, value);
+    // Call the other addPoint() method.
+    if (elem)
+      addPoint(elem, p, id, value);
     return_elem = elem;
   }
 
@@ -299,7 +283,8 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id, Real value)
   if (we_need_find_point)
   {
     // findPoint() is a parallel-only function
-    const Elem * elem = _dirac_kernel_info.findPoint(p, _mesh, blockIDs());
+    const Elem * elem =
+        _dirac_kernel_info.findPoint(p, _mesh, blockIDs(), _point_not_found_behavior);
 
     updateCaches(cached_elem, elem, p, id);
     addPoint(elem, p, id, value);

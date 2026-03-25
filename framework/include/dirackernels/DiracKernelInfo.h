@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
 
 #include <set>
 #include <map>
@@ -75,12 +76,21 @@ public:
    */
   void updatePointLocator(const MooseMesh & mesh);
 
+  // @{ Point-not-found behavior
+  CreateMooseEnumClass(PointNotFoundBehavior, ERROR, WARNING, IGNORE);
+
   /**
    * Used by client DiracKernel classes to determine the Elem in which
    * the Point p resides.  Uses the PointLocator owned by this object.
+   * @param p the point to find the element which contains it
+   * @param mesh the mesh with elements to look at
+   * @param blocks block restriction to find the element in
+   * @param point_not_found_behavior what to do if the point is not found
    */
-  const Elem *
-  findPoint(const Point & p, const MooseMesh & mesh, const std::set<SubdomainID> & blocks);
+  const Elem * findPoint(const Point & p,
+                         const MooseMesh & mesh,
+                         const std::set<SubdomainID> & blocks,
+                         const PointNotFoundBehavior point_not_found_behavior);
 
 protected:
   /**
