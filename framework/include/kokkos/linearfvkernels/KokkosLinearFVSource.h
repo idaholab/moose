@@ -21,15 +21,20 @@ public:
 
   KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum &) const { return 0; }
 
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const
-  {
-    const auto elem = datum.elemID();
-    const auto centroid = datum.mesh().getElementCentroid(elem);
-    return _scale.value(_t, centroid) * _source_density.value(_t, centroid) *
-           datum.mesh().getElementVolume(elem);
-  }
+  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
 
 private:
+  /// The source density
   const Moose::Kokkos::Function _source_density;
+  /// Coefficient for multiplying the surface density
   const Moose::Kokkos::Function _scale;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVSource::computeRightHandSideContribution(const AssemblyDatum & datum) const
+{
+  const auto elem = datum.elemID();
+  const auto centroid = datum.mesh().getElementCentroid(elem);
+  return _scale.value(_t, centroid) * _source_density.value(_t, centroid) *
+         datum.mesh().getElementVolume(elem);
+}
