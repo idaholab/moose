@@ -105,6 +105,7 @@ LayerDelaunayBase::create_conformal_boundary_layer_mesh(
     params.set<MeshGeneratorName>("input") = input_name;
     params.set<std::vector<BoundaryName>>("new_boundary") = {(BoundaryName(submg_name))};
     params.set<bool>("include_only_external_sides") = true;
+    params.set<bool>("apply_to_all_blocks") = true;
     addMeshSubgenerator("SideSetsAroundSubdomainGenerator", submg_name, params);
   }
   if (keep_input)
