@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.e
-  dim = 2
 []
 
 [Problem]
@@ -33,19 +32,9 @@
 []
 
 [Functions]
-  [one]
-    type = ParsedFunction
-    expression = 1.0
-  []
   [initial]
     type = ParsedFunction
     expression = 2*y+1
-  []
-  [diffCoeff]
-    type = MFEMParsedFunction
-    expression = u
-    symbol_names = 'u'
-    symbol_values = 'concentration'
   []
 []
 
@@ -70,7 +59,8 @@
   [nl]
     type = MFEMNLDiffusionKernel
     variable = concentration
-    coefficient = diffCoeff
+    k_coefficient = concentration
+    dk_du_coefficient = 1.0
   []
   [force]
     type = MFEMDomainLFKernel

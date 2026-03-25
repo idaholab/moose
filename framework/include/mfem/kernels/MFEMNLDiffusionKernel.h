@@ -14,37 +14,7 @@
 
 /**
  * \f[
- * (u \vec \nabla u, \vec \nabla v)
- * \f]
- */
-class MFEMNLDiffusionIntegrator : public mfem::NonlinearFormIntegrator
-{
-public:
-  MFEMNLDiffusionIntegrator(mfem::Coefficient & q,
-                            const mfem::GridFunction * gf,
-                            const mfem::IntegrationRule * ir = nullptr);
-
-  virtual void AssembleElementVector(const mfem::FiniteElement & el,
-                                     mfem::ElementTransformation & Tr,
-                                     const mfem::Vector & elfun,
-                                     mfem::Vector & elvect) override;
-  virtual void AssembleElementGrad(const mfem::FiniteElement & el,
-                                   mfem::ElementTransformation & Tr,
-                                   const mfem::Vector & elfun,
-                                   mfem::DenseMatrix & elmat) override;
-
-protected:
-  mfem::GradientGridFunctionCoefficient _grad_trial;
-  mfem::DiffusionIntegrator _diffusion_integ;
-  mfem::ConstantCoefficient _neg_one{-1.0};
-  mfem::ScalarVectorProductCoefficient _product_coef_jac;
-  mfem::MixedScalarWeakDivergenceIntegrator _weak_div_integ;
-  mfem::SumIntegrator _sum{0};
-};
-
-/**
- * \f[
- * (u \vec \nabla u, \vec \nabla v)
+ * (k(u) \vec \nabla u, \vec \nabla v)
  * \f]
  */
 class MFEMNLDiffusionKernel : public MFEMKernel
@@ -57,7 +27,9 @@ public:
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() override;
 
 protected:
-  mfem::Coefficient & _coef;
+  mfem::Coefficient & _k_coef;
+  mfem::Coefficient & _dk_du_coef;
+  mfem::ParGridFunction & _trial_var;
 };
 
 #endif
