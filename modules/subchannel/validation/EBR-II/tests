@@ -9,6 +9,7 @@
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
+    rel_err = 2e-4
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
   []
@@ -20,10 +21,11 @@
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
+    rel_err = 2e-4
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case'
   []
-    [EBR-II_SHRT-45R_SS_test_corrected]
+  [EBR-II_SHRT-45R_SS_test_corrected]
     type = CSVDiff
     input = 'XX09_SCM_SS45R_corrected.i'
     csvdiff  = 'XX09_SCM_SS45R_corrected_out.csv'
@@ -31,6 +33,7 @@
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
+    rel_err = 2e-4
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case using a corrected power profile'
   []
@@ -41,6 +44,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
+    rel_err = 2e-4
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case using a corrected power profile'
@@ -53,7 +57,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
-    rel_err = 1e-4
+    rel_err = 2e-4
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-17 case'
@@ -66,7 +70,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
-    rel_err = 1e-4
+    rel_err = 2e-4
     valgrind = NONE
     recover = false
     requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-45R case'

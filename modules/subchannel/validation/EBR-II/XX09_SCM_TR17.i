@@ -50,6 +50,12 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
+[FluidProperties]
+  [sodium]
+    type = PBSodiumFluidProperties
+  []
+[]
+
 [AuxVariables]
   [mdot]
     block = subchannel
@@ -102,18 +108,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [ff]
     block = subchannel
   []
-  [HTC]
-    block = subchannel
-  []
 []
 
-[FluidProperties]
-  [sodium]
-    type = PBSodiumFluidProperties
-  []
-[]
-
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
