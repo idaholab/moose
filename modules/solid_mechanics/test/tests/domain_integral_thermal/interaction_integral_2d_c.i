@@ -136,6 +136,7 @@
   radius_outer = '80.0 100.0 120.0 140.0'
   symmetry_plane = 1
   incremental = true
+  output_q = true
 
   # interaction integral parameters
   block = 1

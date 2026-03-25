@@ -572,7 +572,7 @@ public:
   /**
    * Return the final nonlinear residual
    */
-  Real finalNonlinearResidual() const { return _final_residual; }
+  virtual Real finalNonlinearResidual() const { return _final_residual; }
 
   /**
    * Return the last nonlinear norm

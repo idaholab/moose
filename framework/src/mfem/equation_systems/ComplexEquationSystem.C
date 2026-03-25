@@ -128,7 +128,13 @@ ComplexEquationSystem::ApplyEssentialBCs()
   {
     const auto & trial_var_name = _trial_var_names.at(i);
     mfem::ParComplexGridFunction & trial_gf = *_cmplx_var_ess_constraints.at(i);
+
+    // Make sure we update the size, if this mesh has changed recently for instance
+    trial_gf.Update();
+
+    // For now, we zero out the gridfunction before populating it with the essential dofs
     trial_gf = std::complex<mfem::real_t>(0, 0);
+
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all

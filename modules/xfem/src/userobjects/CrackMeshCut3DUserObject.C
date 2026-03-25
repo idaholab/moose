@@ -51,8 +51,6 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
   params.addParam<unsigned int>("n_step_growth", 0, "Number of steps for crack growth");
-  params.addParam<std::vector<dof_id_type>>("crack_front_nodes",
-                                            "Set of nodes to define crack front");
   params.addClassDescription("Creates a UserObject for a mesh cutter in 3D problems");
   return params;
 }
@@ -101,25 +99,22 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
-
-    if (isParamValid("crack_front_nodes"))
-    {
-      _tracked_crack_front_points = getParam<std::vector<dof_id_type>>("crack_front_nodes");
-      _num_crack_front_points = _tracked_crack_front_points.size();
-      _crack_front_points = _tracked_crack_front_points;
-      _cfd = true;
-    }
-    else
-      _cfd = false;
   }
 
-  if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
-       _growth_increment_method == GrowthRateEnum::REPORTER) &&
-      !_cfd)
-    paramError("crack_front_nodes",
-               "Required for any crack growth rate or direction criterion that requires fracture "
-               "integrals.");
+  if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
+      _growth_increment_method == GrowthRateEnum::REPORTER)
+    _cfd = true;
+  else
+    _cfd = false;
 
+  if (_grow)
+  {
+    findBoundaryNodes();
+    findBoundaryEdges();
+    sortBoundaryNodes();
+    findActiveBoundaryNodes();
+    initializeCrackFrontNodes();
+  }
   // test element type; only tri3 elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
@@ -136,13 +131,6 @@ CrackMeshCut3DUserObject::initialSetup()
   if (_cfd)
     _crack_front_definition =
         &_fe_problem.getUserObject<CrackFrontDefinition>("crackFrontDefinition");
-
-  if (_grow)
-  {
-    findBoundaryNodes();
-    findBoundaryEdges();
-    sortBoundaryNodes();
-  }
 }
 
 void
@@ -579,6 +567,16 @@ CrackMeshCut3DUserObject::sortBoundaryNodes()
     else
       mooseError("Discontinuity in cutter boundary");
   }
+}
+
+void
+CrackMeshCut3DUserObject::initializeCrackFrontNodes()
+{
+  _tracked_crack_front_points.clear();
+  _tracked_crack_front_points.assign(_active_boundary[0].rbegin(), _active_boundary[0].rend());
+
+  _num_crack_front_points = _tracked_crack_front_points.size();
+  _crack_front_points = _tracked_crack_front_points;
 }
 
 Real

@@ -14,6 +14,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "MFEMRefinementMarker.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -107,6 +108,15 @@ public:
                       InputParameters & parameters) override;
 
   /**
+   * Override of FEProblemBase::addElementalFieldVariable to be a no-op because we do not use the
+   * Marker/Indicator objects designed to work with libMesh infrastructure
+   */
+  void
+  addElementalFieldVariable(const std::string &, const std::string &, InputParameters &) override
+  {
+  }
+
+  /**
    * Override of ExternalProblem::addKernel. Uses ExternalProblem::addKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -180,6 +190,23 @@ public:
   void addMFEMPreconditioner(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
+  /**
+   * Override of FEProblemBase::addIndicator. Uses FEProblemBase::addIndicator to create an
+   * MFEMGeneralUserObject representing the error estimator in MOOSE, i.e. an
+   * MFEMIndicator to be used when setting up adaptive mesh refinement later.
+   */
+  void addIndicator(const std::string & type,
+                    const std::string & name,
+                    InputParameters & parameters) override;
+
+  /**
+   * Override of FEProblemBase::addMarker. Uses FEProblemBase::addMarker to create an
+   * MFEMGeneralUserObject representing the refinement marker in MOOSE, i.e. an
+   * MFEMRefinementMarker to be used for adaptive mesh refinement.
+   */
+  void addMarker(const std::string & type,
+                 const std::string & name,
+                 InputParameters & parameters) override;
 
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
@@ -240,6 +267,11 @@ public:
   void displaceMesh();
 
   /**
+   * Rebalance the (necessarily nonconforming) mesh.
+   */
+  void rebalanceMesh(mfem::ParMesh & pmesh);
+
+  /**
    * Returns optional reference to the displacement GridFunction to apply to nodes.
    */
   std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
@@ -248,6 +280,26 @@ public:
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
+
+  /**
+   * Calls Update() on all FE spaces
+   */
+  void updateFESpaces();
+
+  /**
+   * Calls Update() on all gridfunctions
+   */
+  void updateGridFunctions();
+
+  /**
+   * If AMR is enabled, request (and perform if needed) h-refinement
+   */
+  bool hRefine() { return _problem_data.refiner && _problem_data.refiner->hRefine(); }
+
+  /**
+   * If AMR is enabled, request (and perform if needed) p-refinement
+   */
+  bool pRefine() { return _problem_data.refiner && _problem_data.refiner->pRefine(); }
 
   /**
    * @returns a shared pointer to an MFEM parallel grid function

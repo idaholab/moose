@@ -365,6 +365,26 @@ doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
 }
 
 /**
+ * Function to check whether two points are the same for each component
+ * @param var1 The first variable to be checked
+ * @param var2 The second variable to be checked
+ * @param tol The tolerance to be used
+ * @return true if var1 and var2 are equal within tol for each component
+ * TODO: make this a template to make it work for all vector types
+ * Notably figure out the component access differences
+ */
+inline bool
+absoluteFuzzyEqual(const Point & v1,
+                   const Point & v2,
+                   const Real tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
+{
+  for (const auto i : make_range(LIBMESH_DIM))
+    if (std::abs(v1(i) - v2(i)) > tol)
+      return false;
+  return true;
+}
+
+/**
  * Function to check whether two variables are equal within an absolute tolerance
  * @param var1 The first variable to be checked
  * @param var2 The second variable to be checked

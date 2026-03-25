@@ -1,4 +1,4 @@
-# The PorousFlowElementNormal is used with a zero 1D_perp vector to illustrate that an error is produced
+# The ElementNormalAux is used with a zero 1D_perp vector to illustrate that an error is produced
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -28,7 +28,7 @@
 
 [AuxKernels]
   [nodal_aux]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = n
     component = x
     1D_perp = '0 0 0'

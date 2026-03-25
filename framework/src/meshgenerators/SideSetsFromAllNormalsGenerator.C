@@ -7,10 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AllSideSetsByNormalsGenerator.h"
+#include "SideSetsFromAllNormalsGenerator.h"
 #include "Parser.h"
 #include "InputParameters.h"
 #include "CastUniquePointer.h"
+#include "MeshTraversingUtils.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/mesh_generation.h"
@@ -23,19 +24,21 @@
 
 #include <typeinfo>
 
-registerMooseObject("MooseApp", AllSideSetsByNormalsGenerator);
+registerMooseObject("MooseApp", SideSetsFromAllNormalsGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           AllSideSetsByNormalsGenerator,
+                           "06/30/2027 24:00",
+                           SideSetsFromAllNormalsGenerator);
 
 InputParameters
-AllSideSetsByNormalsGenerator::validParams()
+SideSetsFromAllNormalsGenerator::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
 
   // This is the expected behavior of this sideset generator
-  // This is the expected behavior of this sideset generator
   params.setParameters("include_only_external_sides", true);
   params.suppressParameter<bool>("include_only_external_sides");
 
-  // The normals are found from the actual orientation of sidesets, not user-specified
   // The normals are found from the actual orientation of sidesets, not user-specified
   params.suppressParameter<bool>("fixed_normal");
   params.suppressParameter<Point>("normal");
@@ -46,7 +49,7 @@ AllSideSetsByNormalsGenerator::validParams()
   return params;
 }
 
-AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParameters & parameters)
+SideSetsFromAllNormalsGenerator::SideSetsFromAllNormalsGenerator(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
     _boundary_to_normal_map(
         declareMeshProperty<std::map<BoundaryID, RealVectorValue>>("boundary_normals"))
@@ -54,11 +57,11 @@ AllSideSetsByNormalsGenerator::AllSideSetsByNormalsGenerator(const InputParamete
 }
 
 std::unique_ptr<MeshBase>
-AllSideSetsByNormalsGenerator::generate()
+SideSetsFromAllNormalsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   if (!mesh->is_replicated())
-    mooseError("AllSideSetsByNormalsGenerator is not implemented for distributed meshes");
+    mooseError("SideSetsFromAllNormalsGenerator is not implemented for distributed meshes");
   setup(*mesh);
 
   // Get the current list of boundaries so we can generate new ones that won't conflict
@@ -78,7 +81,7 @@ AllSideSetsByNormalsGenerator::generate()
         // See if we've seen this normal before (linear search)
         const std::map<BoundaryID, RealVectorValue>::value_type * item = nullptr;
         for (const auto & id_pair : _boundary_to_normal_map)
-          if (normalsWithinTol(id_pair.second, normals[0], 1e-5))
+          if (MeshTraversingUtils::normalsWithinTol(id_pair.second, normals[0], 1e-5))
           {
             item = &id_pair;
             break;
@@ -102,7 +105,7 @@ AllSideSetsByNormalsGenerator::generate()
 }
 
 boundary_id_type
-AllSideSetsByNormalsGenerator::getNextBoundaryID()
+SideSetsFromAllNormalsGenerator::getNextBoundaryID()
 {
   std::set<boundary_id_type>::iterator it;
   boundary_id_type next_id = 1;

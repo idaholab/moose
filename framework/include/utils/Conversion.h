@@ -156,6 +156,27 @@ stringify(const std::pair<T, U> & p, const std::string & delim = ":")
   return stringify(p.first) + delim + stringify(p.second);
 }
 
+/// Add tuple stringify
+template <typename... Args>
+std::string
+stringify(const std::tuple<Args...> & t, const std::string & delim = ":")
+{
+  if constexpr (sizeof...(Args) == 0)
+  {
+    return "";
+  }
+
+  return std::apply(
+      [&delim](const auto &... args)
+      {
+        std::size_t n{0};
+        std::string result;
+        ((result += (n++ == 0 ? "" : delim) + stringify(args)), ...);
+        return result;
+      },
+      t);
+}
+
 /**
  * Convert a container to a string with elements separated by delimiter of user's choice
  *

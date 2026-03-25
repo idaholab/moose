@@ -34,6 +34,7 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _div(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
   _div.Assemble();
   _div.Finalize();
 }
@@ -42,7 +43,20 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
 void
 MFEMDivAux::execute()
 {
+  update();
   _div.AddMult(_source_var, _result_var = 0, _scale_factor);
+}
+
+void
+MFEMDivAux::update()
+{
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _div.Update();
+    _div.Assemble();
+    _div.Finalize();
+  }
 }
 
 #endif

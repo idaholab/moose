@@ -25,6 +25,31 @@
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
+  [MFEMDiffusionAMR]
+    design = 'MFEMRefinementMarker.md MFEMIndicator.md MFEML2ZienkiewiczZhuIndicator.md'
+    issues = '#30943'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with AMR using both '
+    [hRefinement]
+      type = CSVDiff
+      input = diffusion_amr.i
+      csvdiff = 'OutputData/DiffusionHRefinement.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'h-refinement, '
+    []
+    [pRefinement]
+      type = CSVDiff
+      input = diffusion_amr.i
+      csvdiff = 'OutputData/DiffusionPRefinement.csv'
+      cli_args = 'Adaptivity/Markers/ref/max_h_level=0 Adaptivity/Markers/ref/max_p_level=1 '
+                 'Outputs/file_base=OutputData/DiffusionPRefinement'
+      capabilities = 'mfem'
+      compute_devices = 'cpu cuda'
+      recover = false
+      detail = 'and p-refinement.'
+    []
+  []
   [MFEMDiffusionPartial]
     type = XMLDiff
     input = diffusion.i

@@ -242,7 +242,7 @@ with $h$ being calculated by the following AuxKernel that implements [eqn.sugges
 
 The simulation's coupling involves the following steps (see also the [page on transfers](multiapp_fracture_flow_transfers.md)).
 
-1. Each fracture element must be prescribed with a normal direction, using a [PorousFlowElementNormal](PorousFlowElementNormal.md) AuxKernel, such as
+1. Each fracture element must be prescribed with a normal direction, using a [ElementNormalAux](ElementNormalAux.md) (formerly `PorousFlowElementNormal`) AuxKernel, such as
 
 !listing 3dFracture/fracture_only_aperture_changing.i block=normal_dirn_x_auxk
 

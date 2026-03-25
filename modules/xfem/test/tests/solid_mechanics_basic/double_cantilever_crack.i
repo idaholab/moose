@@ -10,6 +10,9 @@ H = 3.94
 W = 4
 poissons = 0.3
 youngs = 3e7
+a = 3.94
+da = 0.3
+dtheta = 5.71 # 1.43, 2.86, 5.71
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -23,12 +26,27 @@ youngs = 3e7
 []
 
 [Mesh]
-  # for cutter mesh with crack deviation angle = 5.71 deg
-  [read_in_cutter_mesh]
-    type = FileMeshGenerator
-    file = double_cantilever_crack.xda
+  [cut_profile]
+    type = PolyLineMeshGenerator
+    loop = false
+    points = '-0.01 0 -2.01
+              ${a} 0 -2.01
+              ${fparse a+da*cos(dtheta*pi/180)} ${fparse da*sin(dtheta*pi/180)} -2.01'
+  []
+  [cut_surfaace]
+    type = AdvancedExtruderGenerator
+    input = cut_profile
+    direction = '0 0 1'
+    heights = '4.02'
+    num_layers = '3'
+    biases = '1'
+  []
+  [tri]
+    type = ElementsToSimplicesConverter
+    input = cut_surfaace
     save_with_name = cut_mesh
   []
+
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
@@ -76,7 +94,6 @@ youngs = 3e7
     size_control = 1
     n_step_growth = 1
     growth_rate = growth_func_v
-    crack_front_nodes = '7 6 5 4'
   []
 []
 
@@ -84,7 +101,6 @@ youngs = 3e7
   integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y disp_z'
   crack_front_points_provider = cut_mesh
-  number_points_from_provider = 4
   crack_direction_method = CurvedCrackFront
   radius_inner = 0.42 # to reproduce literature use 0.1
   radius_outer = 1.0 # to reproduce literature use 0.3
@@ -167,11 +183,6 @@ youngs = 3e7
 []
 
 [Outputs]
-  # [xfemcutter]
-  #   type = XFEMCutMeshOutput
-  #   xfem_cutter_uo = cut_mesh
-  # []
-  # exodus = true
   csv = true
   execute_on=final
 []

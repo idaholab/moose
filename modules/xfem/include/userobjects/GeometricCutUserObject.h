@@ -115,6 +115,11 @@ public:
   virtual void threadJoin(const UserObject & y) override;
   virtual void finalize() override;
 
+  virtual unsigned int getNumberOfCrackFrontPoints() const override
+  {
+    mooseError("getNumberOfCrackFrontPoints() is not implemented for this object.");
+  }
+
   /**
    * Check to see whether a specified 2D element should be cut based on geometric
    * conditions

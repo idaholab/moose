@@ -37,6 +37,8 @@ public:
                                      std::vector<Xfem::CutEdge> & cut_edges) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
                                      std::vector<Xfem::CutFace> & cut_faces) const override;
+  virtual unsigned int getNumberOfCrackFrontPoints() const override;
+
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 

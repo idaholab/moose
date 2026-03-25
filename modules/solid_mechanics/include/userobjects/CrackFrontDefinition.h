@@ -23,9 +23,6 @@ namespace libMesh
 class QBase;
 }
 
-// fixme lynn this needs to be removed from the globalname space in a seperate commit after Grizzly
-// is fixed to use includeCrackFrontDefinitionParams
-void addCrackFrontDefinitionParams(InputParameters & params);
 /**
  * Class used in fracture integrals to define geometric characteristics of the crack front
  */

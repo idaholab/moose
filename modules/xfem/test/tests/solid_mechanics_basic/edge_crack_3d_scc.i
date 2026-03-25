@@ -29,7 +29,6 @@
     n_step_growth = 1
     growth_increment_method = REPORTER
     growth_reporter = "scc_crack_growth/crack_growth"
-    crack_front_nodes = '7 6 5 4'
   []
 []
 
@@ -37,7 +36,6 @@
   integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
   displacements = 'disp_x disp_y disp_z'
   crack_front_points_provider = cut_mesh
-  number_points_from_provider = 4
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.15'
   radius_outer = '0.45'

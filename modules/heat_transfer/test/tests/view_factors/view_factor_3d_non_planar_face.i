@@ -17,7 +17,7 @@
     elem_type = 'HEX8'
   []
   [sides]
-    type = AllSideSetsByNormalsGenerator
+    type = SideSetsFromAllNormalsGenerator
     input = with_a_non_planar
   []
   [rename]
