@@ -27,10 +27,10 @@ public:
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
   /// Sets the operator for the eigensolver
-  virtual void setOperator(mfem::Operator & op) override { _eigensolver->SetOperator(op); }
+  virtual void setOperator(mfem::OperatorHandle & op) override { _eigensolver->SetOperator(*op); }
 
   /// Sets the mass matrix for the eigensolver
-  virtual void setMassMatrix(mfem::Operator & mass) override { _eigensolver->SetMassMatrix(mass); }
+  virtual void setMassMatrix(mfem::OperatorHandle & mass) override { _eigensolver->SetMassMatrix(*mass); }
 
   /// Solves the eigenvalue problem
   virtual void Solve() override { _eigensolver->Solve(); }
