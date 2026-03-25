@@ -48,6 +48,8 @@ P_out = 1.0e5 # Pa
 
   # friction model
   friction_closure = 'cheng'
+
+  full_output = true
 []
 
 [SCMClosures]

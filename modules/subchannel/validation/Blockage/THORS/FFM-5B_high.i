@@ -60,6 +60,7 @@ P_out = 2.0e5 # Pa
   interpolation_scheme = exponential
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

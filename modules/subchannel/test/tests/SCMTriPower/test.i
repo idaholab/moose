@@ -57,6 +57,7 @@ num_cells = 40
   pin_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

@@ -41,6 +41,7 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
   # friction model
   friction_closure = 'MATRA'
+  full_output = true
 []
 
 [SCMClosures]

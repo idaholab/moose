@@ -110,6 +110,8 @@ SubChannel1PhaseProblem::validParams()
       "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
   params.addParam<UserObjectName>("duct_HTC_closure",
                                   "Closure computing HTC on duct (required if duct mesh exists).");
+  params.addParam<bool>(
+      "full_output", false, "Flag that enables the output of maximum number of variables");
   return params;
 }
 
@@ -165,6 +167,9 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   // NOTE: The four quantities above are 0 for processor_id != 0
   _z_grid = _subchannel_mesh.getZGrid();
   _block_size = _n_cells / _n_blocks;
+  // Pressure drop (lives on subchannel nodes)
+  _DP.resize(_n_channels, _n_cells + 1);
+  _DP.zero();
   // Turbulent crossflow (stuff that live on the gaps)
   if (!_app.isRestarting() && !_app.isRecovering())
   {
@@ -266,7 +271,10 @@ SubChannel1PhaseProblem::initialSetup()
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
   _P_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE));
-  _DP_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE_DROP));
+  if (getParam<bool>("full_output"))
+  {
+    _DP_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE_DROP));
+  }
   _h_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::ENTHALPY));
   _T_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::TEMPERATURE));
   if (_pin_mesh_exist)
@@ -678,7 +686,9 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
         auto DP = (1 / S) * (time_term + mass_term1 + mass_term2 + crossflow_term + turbulent_term +
                              friction_term + gravity_term); // Pa
-        _DP_soln->set(node_out, DP);
+        _DP(i_ch, iz) = DP;
+        if (_DP_soln)
+          _DP_soln->set(node_out, DP);
       }
     }
   }
@@ -1083,12 +1093,16 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           if (S_interp != 0)
           {
             auto DP = (1 / S_interp) * xx[iz_ind * _n_channels + i_ch];
-            _DP_soln->set(node_out, DP);
+            _DP(i_ch, iz) = DP;
+            if (_DP_soln)
+              _DP_soln->set(node_out, DP);
           }
           else
           {
             auto DP = 0.0;
-            _DP_soln->set(node_out, DP);
+            _DP(i_ch, iz) = DP;
+            if (_DP_soln)
+              _DP_soln->set(node_out, DP);
           }
         }
       }
@@ -1114,7 +1128,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
           auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
           // update Pressure solution
-          _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out));
+          _P_soln->set(node_in, (*_P_soln)(node_out) + _DP(i_ch, iz));
         }
       }
     }
@@ -1135,13 +1149,13 @@ SubChannel1PhaseProblem::computeP(int iblock)
           auto alpha = computeInterpolationCoefficients(Pe);
           if (iz == last_node)
           {
-            _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out) / 2.0);
+            _P_soln->set(node_in, (*_P_soln)(node_out) + _DP(i_ch, iz) / 2.0);
           }
           else
           {
             _P_soln->set(node_in,
-                         (*_P_soln)(node_out) + (1.0 - alpha) * (*_DP_soln)(node_out) +
-                             alpha * (*_DP_soln)(node_in));
+                         (*_P_soln)(node_out) + (1.0 - alpha) * _DP(i_ch, iz) +
+                             alpha * _DP(i_ch, iz - 1));
           }
         }
       }
@@ -1190,7 +1204,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
 
           if (_segregated_bool)
           {
-            auto dp_out = (*_DP_soln)(node_out);
+            auto dp_out = _DP(i_ch, iz);
             PetscScalar value_v = -1.0 * dp_out * S_interp;
             PetscInt row_v = i_ch + _n_channels * iz_ind;
             LibmeshPetscCall(
@@ -1262,7 +1276,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
             PetscInt row = i_ch + _n_channels * iz_ind;
             LibmeshPetscCall(VecSetValues(_amc_pressure_force_rhs, 1, &row, &value, ADD_VALUES));
 
-            auto dp_out = (*_DP_soln)(node_out);
+            auto dp_out = _DP(i_ch, iz);
             PetscScalar value_v = -1.0 * dp_out / 2.0 * S_interp;
             PetscInt row_v = i_ch + _n_channels * iz_ind;
             LibmeshPetscCall(
@@ -1278,8 +1292,8 @@ SubChannel1PhaseProblem::computeP(int iblock)
 
             if (_segregated_bool)
             {
-              auto dp_in = (*_DP_soln)(node_in);
-              auto dp_out = (*_DP_soln)(node_out);
+              auto dp_in = _DP(i_ch, iz) - 1;
+              auto dp_out = _DP(i_ch, iz);
               auto dp_interp = computeInterpolatedValue(dp_out, dp_in, 0.5);
               PetscScalar value_v = -1.0 * dp_interp * S_interp;
               PetscInt row_v = i_ch + _n_channels * iz_ind;
