@@ -376,8 +376,52 @@ TEST(CSGBaseTest, testUpdateCellRegion)
     const auto & s2 = csg_obj2->addSurface(std::move(surf2));
     auto & c2 = csg_obj2->createCell("c1", +s2);
     Moose::UnitUtils::assertThrows([&csg_obj, &c2, &s1]() { csg_obj->updateCellRegion(c2, -s1); },
-                                   "is being updated that is different from the cell of the same "
+                                   "that is being updated is different from the cell of the same "
                                    "name in the CSGBase instance.");
+  }
+}
+
+/// tests CSGBase::updateCellFill and CSGBase::resetCellFill
+TEST(CSGBaseTest, testUpdateCellFill)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSG::CSGSphere> surf1 = std::make_unique<CSG::CSGSphere>("surf1", 1.0);
+  const auto & s1 = csg_obj->addSurface(std::move(surf1));
+  auto & c1 = csg_obj->createCell("c1", "mat", +s1);
+
+  // successfully update cell fill to a new material name
+  {
+    csg_obj->updateCellFill(c1, "new_mat");
+    ASSERT_EQ("new_mat", c1.getFillMaterial());
+  }
+  {
+    // successfully update cell fill to a universe
+    const auto & univ = csg_obj->createUniverse("universe");
+    csg_obj->updateCellFill(c1, &univ);
+    ASSERT_EQ(univ, c1.getFillUniverse());
+
+    // safely remove universe by resetting cell fill type
+    csg_obj->resetCellFill(c1);
+    csg_obj->deleteUniverse(univ);
+    ASSERT_FALSE(csg_obj->hasUniverse("universe"));
+  }
+  {
+    // successfully update cell fill to a lattice
+    std::unique_ptr<CSGCartesianLattice> lat_ptr =
+        std::make_unique<CSGCartesianLattice>("lattice", 1.0);
+    const auto & lattice = csg_obj->addLattice(std::move(lat_ptr));
+    csg_obj->updateCellFill(c1, &lattice);
+    ASSERT_EQ(lattice, c1.getFillLattice());
+
+    // safely remove lattice by resetting cell fill type
+    csg_obj->resetCellFill(c1);
+    csg_obj->deleteLattice(lattice);
+    ASSERT_FALSE(csg_obj->hasLattice("lattice"));
+  }
+  // successfully reset cell fill to void
+  {
+    csg_obj->resetCellFill(c1);
+    ASSERT_EQ("VOID", c1.getFillType());
   }
 }
 

@@ -307,10 +307,64 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
   checkRegionSurfaces(region);
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
-               " is being updated that is different " +
+               " that is being updated is different " +
                "from the cell of the same name in the CSGBase instance.");
   auto & list_cell = _cell_list.getCell(cell.getName());
   list_cell.updateRegion(region);
+}
+
+void
+CSGBase::resetCellFill(const CSGCell & cell)
+{
+  if (!checkCellInBase(cell))
+    mooseError("The fill of cell with name " + cell.getName() +
+               " that is being updated is different " +
+               "from the cell of the same name in the CSGBase instance.");
+  auto & list_cell = _cell_list.getCell(cell.getName());
+  list_cell.resetCellFill();
+}
+
+void
+CSGBase::updateCellFill(const CSGCell & cell, const std::string & mat_name)
+{
+  if (!checkCellInBase(cell))
+    mooseError("The region of cell with name " + cell.getName() +
+               " that is being updated is different " +
+               "from the cell of the same name in the CSGBase instance.");
+  auto & list_cell = _cell_list.getCell(cell.getName());
+  list_cell.updateCellFill(mat_name);
+}
+
+void
+CSGBase::updateCellFill(const CSGCell & cell, const CSGUniverse * univ)
+{
+  if (!checkUniverseInBase(*univ))
+    mooseError("Universe with name ",
+               univ->getName(),
+               " is being used as a cell fill that is different from the universe of the same name "
+               "in the CSGBase instance.");
+  if (!checkCellInBase(cell))
+    mooseError("The fill of cell with name " + cell.getName() +
+               " that is being updated is different " +
+               "from the cell of the same name in the CSGBase instance.");
+  auto & list_cell = _cell_list.getCell(cell.getName());
+  list_cell.updateCellFill(univ);
+}
+
+void
+CSGBase::updateCellFill(const CSGCell & cell, const CSGLattice * lattice)
+{
+  if (!checkLatticeInBase(*lattice))
+    mooseError("Lattice with name ",
+               lattice->getName(),
+               " is being used as a cell fill that is different from the lattice of the same name "
+               "in the CSGBase instance.");
+  if (!checkCellInBase(cell))
+    mooseError("The fill of cell with name " + cell.getName() +
+               " that is being updated is different " +
+               "from the cell of the same name in the CSGBase instance.");
+  auto & list_cell = _cell_list.getCell(cell.getName());
+  list_cell.updateCellFill(lattice);
 }
 
 const CSGUniverse &

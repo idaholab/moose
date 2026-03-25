@@ -151,6 +151,8 @@ The `CSGCell` objects can then be accessed or updated with the following methods
 - `getCellByName`: retrieve a const reference to the `CSGCell` object of the specified name
 - `renameCell`: change the name of the `CSGCell` object
 - `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
+- `updateCellFill`: change the fill of the cell - this takes in a material fill as a string, a universe fill as a pointer to a CSGUniverse instance, or a lattice fill as a pointer to a CSGLattice instance; if used, the CSGLattice and CSGUniverse instances also need to be a part of the current `CSGBase` instance
+- `resetCellFill`: resets the fill of the cell to void
 
 ### Universes
 

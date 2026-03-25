@@ -239,6 +239,37 @@ public:
   void updateCellRegion(const CSGCell & cell, const CSGRegion & region);
 
   /**
+   * @brief reset the fill of the specified cell to void
+   *
+   * @param cell cell to update the fill for
+   */
+  void resetCellFill(const CSGCell & cell);
+
+  /**
+   * @brief change the fill of the specified cell to a material fill
+   *
+   * @param cell cell to update the fill for
+   * @param mat_name name of material fill
+   */
+  void updateCellFill(const CSGCell & cell, const std::string & mat_name);
+
+  /**
+   * @brief change the fill of the specified cell to a universe fill
+   *
+   * @param cell cell to update the fill for
+   * @param univ pointer to universe fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGUniverse * univ);
+
+  /**
+   * @brief change the fill of the specified cell to a lattice fill
+   *
+   * @param cell cell to update the fill for
+   * @param lattice pointer to lattice fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGLattice * lattice);
+
+  /**
    * @brief Get the Root Universe object
    *
    * @return reference to root CSGUniverse
