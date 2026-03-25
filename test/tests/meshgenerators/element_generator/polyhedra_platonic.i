@@ -5,9 +5,6 @@ a = 1.5
 b = 2
 c = 1.5
 
-# TODO: port the two new heuristics in t4 (dont check neighbors if low q, dont check at n_surrounding == 3
-# TODO: test the 3 poly inputs
-
 [Mesh]
   [tetrahedron]
     type = ElementGenerator
