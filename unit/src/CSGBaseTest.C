@@ -125,6 +125,40 @@ TEST(CSGBaseTest, testCheckRegionSurfaces)
                                  "from the surface of the same name in the CSGBase instance.");
 }
 
+TEST(CSGBaseTest, testDeleteSurface)
+{
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // make a surface and add it to base
+  std::unique_ptr<CSG::CSGSphere> surf_ptr1 =
+      std::make_unique<CSG::CSGSphere>("surf_to_delete", 1.0);
+  const auto & surf_to_delete = csg_obj->addSurface(std::move(surf_ptr1));
+  ASSERT_TRUE(csg_obj->hasSurface("surf_to_delete"));
+
+  // delete surface and confirm it no longer exists in base
+  csg_obj->deleteSurface(surf_to_delete);
+  ASSERT_FALSE(csg_obj->hasSurface("surf_to_delete"));
+
+  // create a new surface that is used in a cell region definition
+  std::unique_ptr<CSG::CSGSphere> surf_ptr2 =
+      std::make_unique<CSG::CSGSphere>("surf_cannot_delete", 2.0);
+  const auto & surf_cannot_delete = csg_obj->addSurface(std::move(surf_ptr2));
+  const auto & cell = csg_obj->createCell("cell", +surf_cannot_delete);
+
+  // try to delete this surface, this should not be allowable as a cell depends on this surface
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &surf_cannot_delete]() { csg_obj->deleteSurface(surf_cannot_delete); },
+        "Cannot delete surface with name surf_cannot_delete as it is used in region definition");
+  }
+
+  // try to delete this surface by deleting cell first
+  csg_obj->deleteCell(cell);
+  csg_obj->deleteSurface(surf_cannot_delete);
+  ASSERT_FALSE(csg_obj->hasSurface("surf_cannot_delete"));
+}
+
 /**
  * Tests associated with CSGCellList or CSGCell functionality as called through CSGBase
  */
@@ -347,6 +381,38 @@ TEST(CSGBaseTest, testUpdateCellRegion)
   }
 }
 
+TEST(CSGBaseTest, testDeleteCell)
+{
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // make a cell and add it to base
+  CSGRegion empty_region;
+  const auto & cell_to_delete = csg_obj->createCell("cell_to_delete", empty_region);
+  ASSERT_TRUE(csg_obj->hasCell("cell_to_delete"));
+
+  // delete cell and confirm it no longer exists in base
+  csg_obj->deleteCell(cell_to_delete);
+  ASSERT_FALSE(csg_obj->hasCell("cell_to_delete"));
+
+  // create a cell that is used in a universe definition
+  const auto & universe = csg_obj->createUniverse("universe");
+  const auto & cell_cannot_delete =
+      csg_obj->createCell("cell_cannot_delete", empty_region, &universe);
+
+  // try to delete this cell, this should throw a warning that a universe depends on this cell
+  {
+    Moose::UnitUtils::assertThrows([&csg_obj, &cell_cannot_delete]()
+                                   { csg_obj->deleteCell(cell_cannot_delete); },
+                                   "Removing cell cell_cannot_delete from universe");
+  }
+
+  // try to delete this cell by deleting universe first
+  csg_obj->deleteUniverse(universe);
+  csg_obj->deleteCell(cell_cannot_delete);
+  ASSERT_FALSE(csg_obj->hasCell("cell_cannot_delete"));
+}
+
 /**
  * Tests associated with CSGUniverseList and CSGUniverse functionality as called through CSGBase
  */
@@ -536,6 +602,80 @@ TEST(CSGBaseTest, testGetUniverse)
     auto all_univs = csg_obj->getAllUniverses();
     ASSERT_EQ(2, all_univs.size());
   }
+}
+
+TEST(CSGBaseTest, testDeleteUniverse)
+{
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // try to delete the root universe, this is not allowable
+  {
+    Moose::UnitUtils::assertThrows([&csg_obj]()
+                                   { csg_obj->deleteUniverse(csg_obj->getRootUniverse()); },
+                                   "Cannot delete root universe");
+  }
+
+  // make a universe and add it to base
+  const auto & universe_to_delete = csg_obj->createUniverse("universe_to_delete");
+  ASSERT_TRUE(csg_obj->hasUniverse("universe_to_delete"));
+
+  // delete universe and confirm it no longer exists in base
+  csg_obj->deleteUniverse(universe_to_delete);
+  ASSERT_FALSE(csg_obj->hasUniverse("universe_to_delete"));
+
+  // create a universe that is used as a cell fill
+  const auto & universe_cannot_delete = csg_obj->createUniverse("universe_cannot_delete");
+  CSGRegion empty_region;
+  const auto & cell = csg_obj->createCell("cell", universe_cannot_delete, empty_region);
+
+  // try to delete this universe, this should throw an error that a cell depends on this universe
+  {
+    Moose::UnitUtils::assertThrows([&csg_obj, &universe_cannot_delete]()
+                                   { csg_obj->deleteUniverse(universe_cannot_delete); },
+                                   "Cannot delete universe with name universe_cannot_delete as it "
+                                   "is used as the fill of cell");
+  }
+
+  // try to delete this universe by deleting cell first
+  csg_obj->deleteCell(cell);
+  csg_obj->deleteUniverse(universe_cannot_delete);
+  ASSERT_FALSE(csg_obj->hasUniverse("universe_cannot_delete"));
+
+  // create two universes - one that is used as the outer of a lattice and one that is used to
+  // define the lattice itself
+  const auto & outer_univ = csg_obj->createUniverse("universe_cannot_delete2");
+  const auto & lattice_univ = csg_obj->createUniverse("universe_cannot_delete3");
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{lattice_univ},
+                                                                               {lattice_univ}};
+  std::unique_ptr<CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSGCartesianLattice>("lattice_to_delete", 1.0);
+  const auto & lattice = csg_obj->addLattice(std::move(lat_ptr));
+  csg_obj->setLatticeOuter(lattice, outer_univ);
+  csg_obj->setLatticeUniverses(lattice, univs);
+
+  // try to delete the outer universe, this should throw an error that a lattice depends on this
+  // universe
+  {
+    Moose::UnitUtils::assertThrows([&csg_obj, &outer_univ]()
+                                   { csg_obj->deleteUniverse(outer_univ); },
+                                   "Cannot delete universe with name universe_cannot_delete2 as it "
+                                   "is used as the outer universe");
+  }
+  // try to delete the lattice universe, this should throw an error that a lattice depends on this
+  // universe
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lattice_univ]() { csg_obj->deleteUniverse(lattice_univ); },
+        "Cannot delete universe with name universe_cannot_delete3 as it is used in lattice");
+  }
+
+  // try to delete these universes by deleting lattice first
+  csg_obj->deleteLattice(lattice);
+  csg_obj->deleteUniverse(outer_univ);
+  csg_obj->deleteUniverse(lattice_univ);
+  ASSERT_FALSE(csg_obj->hasUniverse("universe_cannot_delete2"));
+  ASSERT_FALSE(csg_obj->hasUniverse("universe_cannot_delete3"));
 }
 
 /**
@@ -779,6 +919,42 @@ TEST(CSGBaseTest, testGetLatticeMethods)
     ASSERT_TRUE(((all_lats[0].get() == lat) && (all_lats[1].get() == lat2)) ||
                 ((all_lats[0].get() == lat2) && (all_lats[1].get() == lat)));
   }
+}
+
+TEST(CSGBaseTest, testDeleteLattice)
+{
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // make a lattice and add it to base
+  std::unique_ptr<CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSGCartesianLattice>("lattice_to_delete", 1.0);
+  const auto & lattice_to_delete = csg_obj->addLattice(std::move(lat_ptr));
+
+  ASSERT_TRUE(csg_obj->hasLattice("lattice_to_delete"));
+
+  // delete lattice and confirm it no longer exists in base
+  csg_obj->deleteLattice(lattice_to_delete);
+  ASSERT_FALSE(csg_obj->hasLattice("lattice_to_delete"));
+
+  // create a lattice that is used as a cell fill
+  std::unique_ptr<CSGCartesianLattice> lat_ptr2 =
+      std::make_unique<CSGCartesianLattice>("lattice_cannot_delete", 1.0);
+  const auto & lattice_cannot_delete = csg_obj->addLattice(std::move(lat_ptr2));
+  CSGRegion empty_region;
+  const auto & cell = csg_obj->createCell("cell", lattice_cannot_delete, empty_region);
+
+  // try to delete this lattice, this should throw an error that a cell depends on this lattice
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lattice_cannot_delete]() { csg_obj->deleteLattice(lattice_cannot_delete); },
+        "Cannot delete lattice with name lattice_cannot_delete as it is used as the fill of cell");
+  }
+
+  // try to delete this lattice by deleting cell first
+  csg_obj->deleteCell(cell);
+  csg_obj->deleteLattice(lattice_cannot_delete);
+  ASSERT_FALSE(csg_obj->hasLattice("lattice_cannot_delete"));
 }
 
 /**
