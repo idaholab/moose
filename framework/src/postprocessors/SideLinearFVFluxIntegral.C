@@ -32,6 +32,9 @@ SideLinearFVFluxIntegral::SideLinearFVFluxIntegral(const InputParameters & param
     _system_number(0)
 {
   _qp_integration = false;
+
+  if (_kernel_names.empty())
+    paramError("linearfvkernels", "At least one kernel must be provided.");
 }
 
 void
@@ -49,7 +52,7 @@ SideLinearFVFluxIntegral::initialSetup()
   for (const auto & name : _kernel_names)
   {
     std::vector<LinearFVFluxKernel *> kernels;
-    auto query = base_query;
+    auto query = base_query.clone();
     query.condition<AttribName>(name).queryInto(kernels);
     if (kernels.empty())
       paramError("linearfvkernels",
@@ -60,9 +63,6 @@ SideLinearFVFluxIntegral::initialSetup()
 
     _kernel_objects.push_back(kernels[0]);
   }
-
-  if (_kernel_objects.empty())
-    paramError("linearfvkernels", "At least one kernel must be provided.");
 
   // Cache shared variable metadata and verify all kernels act on that same variable.
   const auto & first_variable = _kernel_objects.front()->variable();
@@ -132,8 +132,7 @@ SideLinearFVFluxIntegral::computeFaceInfoIntegral(const FaceInfo * const fi)
                _mesh.getBoundaryName(boundary_id),
                "' because the variable face type is not boundary-only.");
 
-  const auto bc_it = _boundary_bcs.find(boundary_id);
-  auto * bc = bc_it->second;
+  auto * const bc = libmesh_map_find(_boundary_bcs, boundary_id);
   bc->setupFaceData(fi, face_type);
 
   Real flux_value = 0.0;

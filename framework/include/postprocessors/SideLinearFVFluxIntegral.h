@@ -32,7 +32,7 @@ protected:
   virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   /// Names of the kernels whose boundary flux we want to integrate
-  const std::vector<std::string> _kernel_names;
+  const std::vector<std::string> & _kernel_names;
 
   /// Kernel objects to integrate
   std::vector<LinearFVFluxKernel *> _kernel_objects;
@@ -47,5 +47,5 @@ protected:
   unsigned int _system_number;
 
   /// Cached BC pointers on requested boundaries
-  std::map<BoundaryID, LinearFVBoundaryCondition *> _boundary_bcs;
+  std::unordered_map<BoundaryID, LinearFVBoundaryCondition *> _boundary_bcs;
 };
