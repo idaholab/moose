@@ -128,15 +128,8 @@ protected:
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;
 
-  // @{ Point-not-found behavior
-  enum class PointNotFoundBehavior
-  {
-    ERROR,
-    WARNING,
-    IGNORE
-  };
-  const PointNotFoundBehavior _point_not_found_behavior;
-  // @}
+  /// What to do if the point is not found. See DiracKernelInfo for definition
+  const DiracKernelInfo::PointNotFoundBehavior _point_not_found_behavior;
 
   /// Whether Dirac sources can move during the simulation
   const bool _allow_moving_sources;
