@@ -51,6 +51,7 @@
       input = test.py
       test_case = TestHierarchicTri
       detail = 'simplex elements with a L2 hierarchic basis for the interior variable, and'
+      min_slots = 2 # Memory greedy
     []
     [hierarchic_quad]
       type = MMSTest
