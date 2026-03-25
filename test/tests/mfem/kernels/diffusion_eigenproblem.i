@@ -69,7 +69,8 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  csv = true
-  file_base = OutputData/DiffusionEigenproblem
+  [ReportedPostprocessors]
+    type = CSV
+    file_base = OutputData/DiffusionEigenproblem
+  []
 []
