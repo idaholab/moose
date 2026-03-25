@@ -113,7 +113,10 @@ ElementGenerator::generate()
     }
 
     // With the polygons we can create the polyhedron
-    elem = std::make_unique<libMesh::C0Polyhedron>(sides);
+    std::unique_ptr<libMesh::Node> mid_elem_node;
+    elem = std::make_unique<libMesh::C0Polyhedron>(sides, mid_elem_node);
+    if (mid_elem_node)
+      mesh->add_node(std::move(mid_elem_node));
   }
 
   // Subdomain information

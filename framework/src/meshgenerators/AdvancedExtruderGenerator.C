@@ -1044,7 +1044,10 @@ AdvancedExtruderGenerator::generate()
             mooseAssert(sides.size() == 2 + num_sides, "Unexpected size of side vector");
 
             // Create the element from the sides, let libMesh figure out the orientation
-            new_elem = std::make_unique<libMesh::C0Polyhedron>(sides);
+            std::unique_ptr<libMesh::Node> mid_elem_node;
+            new_elem = std::make_unique<libMesh::C0Polyhedron>(sides, mid_elem_node);
+            if (mid_elem_node)
+              mesh->add_node(std::move(mid_elem_node));
 
             break;
           }
