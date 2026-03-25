@@ -324,6 +324,21 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 
 !alert-end!
 
+### Deletion Methods
+
+In order to delete CSG components from the `CSGBase` object, the `deleteSurface`, `deleteCell`, `deleteUniverse`, and `deleteLattice` methods can be used, which take in a reference to the CSG object to be deleted. Once the CSG component is deleted, the object is deallocated and the reference to that object should no longer be used. Additionally, these methods do not automtically delete any other components associated with the object to be deleted. Therefore, users should ensure that the CSG component to be deleted is not used in the definition of other CSG components. For these scenarios, an error is thrown:
+
+- A `CSGSurface` is deleted but it is used in the region definition of a `CSGCell`
+- A `CSGLattice` is deleted but it is used as a fill of a `CSGCell`
+- A `CSGUniverse` is deleted but it is used as a fill of a `CSGCell`
+- A `CSGUniverse` is deleted but it is used as either the outer definition or in the universe layout of a `CSGLattice`
+
+Additionally, when a `CSGCell` is deleted but it is used in the cells definition of a `CSGUniverse`, the cell is first removed from the cells of the `CSGUniverse` and a warning is thrown by MOOSE about this additional operation.
+
+Nested CSG components should be manually deteled by starting from the top-most level and going downwards in terms of the dependency tree. For example, when deleting a universe and the cells linked to the universe, start by deleting the universe first and then its cells, as shown in the following example:
+
+!listing TestCSGUniverseCellDeleterGenerator.C start=delete newly created universe and its cell end=Recreate
+
 ### Transformations
 
 Three types of object transformations are supported in the `CSGBase` class: rotation, translation, and scaling.
