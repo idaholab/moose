@@ -7,7 +7,7 @@ Upcoming MOOSE related training in chronological order:
 
 - [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
 
-- MOOSE Developer Training (2026 June 2-4, Idaho Falls)
+- MOOSE Developer Training (2026 June 2-4, Idaho Falls) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
 !style-end!
 
