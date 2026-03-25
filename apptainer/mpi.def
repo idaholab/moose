@@ -40,7 +40,7 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.
 
 %post -c /bin/bash
     umask 022
-    set -eo pipefail
+    set -xeo pipefail
 
     # Determine OS
     grep -q "rhel" /etc/os-release && IS_RHEL=1
