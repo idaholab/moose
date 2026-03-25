@@ -1397,12 +1397,13 @@ buildPolyLineMesh(MeshBase & mesh,
   for (auto i : make_range(n_elem))
   {
     std::unique_ptr<Elem> elem;
-    elem = std::make_unique<Edge2>();
     if (mid_points.size())
     {
       elem = std::make_unique<Edge3>();
       elem->set_node(2, mesh.node_ptr(n_points + i));
     }
+    else
+      elem = std::make_unique<Edge2>();
     const auto ip1 = (i + 1) % max_nodes;
     elem->set_node(0, mesh.node_ptr(i));
     elem->set_node(1, mesh.node_ptr(ip1));

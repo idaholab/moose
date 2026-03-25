@@ -52,7 +52,7 @@ BoundaryLayerTriangleGenerator::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "boundary_names",
       std::vector<BoundaryName>(),
-      "The boundary names around which the boundary layer will be created.");
+      "The names of the boundaries around which the coating will be created.");
 
   params.addParam<BoundaryName>("interface_name",
                                 "The optional boundary name to be assigned to the interface "

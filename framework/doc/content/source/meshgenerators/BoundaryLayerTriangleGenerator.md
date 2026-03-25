@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `BoundaryLayerTriangleGenerator` creates a layered 2D triangulated mesh utilizing the [`XYDelaunayGenerator`](/XYDelaunayGenerator.md) based on a given surface of a 2D-XY mesh. Aside from `XYDelaunayGenerator`, this mesh generator uses a series of existing MOOSE mesh generator as its sub mesh generators to achieve the meshing tasks, including [`GapLineMeshGenerator`](/GapLineMeshGenerator.md) and [`StitchMeshGenerator`](/StitchMeshGenerator.md). 
+The `BoundaryLayerTriangleGenerator` creates a layered 2D triangulated mesh utilizing the [`XYDelaunayGenerator`](/XYDelaunayGenerator.md) based on a given surface of a 2D-XY mesh. Aside from `XYDelaunayGenerator`, this mesh generator uses a series of existing MOOSE mesh generator as its sub mesh generators to achieve the meshing tasks, including [`PolyLineMeshWithFixedDistanceFromSidesetGenerator`](/PolyLineMeshWithFixedDistanceFromSidesetGenerator.md) and [`StitchMeshGenerator`](/StitchMeshGenerator.md). 
 
 ## Input Mesh
 

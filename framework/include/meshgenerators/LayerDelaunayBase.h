@@ -12,7 +12,7 @@
 #include "MeshGenerator.h"
 
 /**
- * Base class for mesh generators that needs Delaunay based layer mesh generation
+ * Base class for mesh generators that needs 2D Delaunay triangulation-based layer mesh generation
  */
 class LayerDelaunayBase : public MeshGenerator
 {
@@ -20,8 +20,6 @@ public:
   static InputParameters validParams();
 
   LayerDelaunayBase(const InputParameters & parameters);
-
-  virtual std::unique_ptr<MeshBase> generate() override = 0;
 
 protected:
   /**

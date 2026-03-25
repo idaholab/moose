@@ -12,8 +12,8 @@
 #include "LayerDelaunayBase.h"
 
 /**
- * Generate a 2D layered mesh that represents a conformal boundary layer along the boundary of an input 2D
- * mesh or a 1D loop mesh.
+ * Generate a 2D layered mesh that represents a conformal boundary layer along the boundary of an
+ * input 2D mesh or a 1D loop mesh.
  */
 class BoundaryLayerTriangleGenerator : public LayerDelaunayBase
 {

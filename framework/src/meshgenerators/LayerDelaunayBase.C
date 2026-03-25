@@ -57,14 +57,15 @@ LayerDelaunayBase::create_conformal_boundary_layer_mesh(
             ? input_name
             : MeshGeneratorName(mg_name_prefix + "_gline_" +
                                 std::to_string(layer_index + (is_outward_boundary_layer ? -1 : 1)));
-    auto params = _app.getFactory().getValidParams("GapLineMeshGenerator");
+    auto params =
+        _app.getFactory().getValidParams("PolyLineMeshWithFixedDistanceFromSidesetGenerator");
     if (layer_i == 0 && boundary_names.size())
       params.set<std::vector<BoundaryName>>("boundary_names") = boundary_names;
     params.set<MeshGeneratorName>("input") = submg_input_name;
     params.set<Real>("thickness") = layerthickness_values[layer_i];
     params.set<MooseEnum>("gap_direction") = is_outward_boundary_layer ? "OUTWARD" : "INWARD";
     params.set<bool>("skip_node_reduction") = true;
-    addMeshSubgenerator("GapLineMeshGenerator", submg_name, params);
+    addMeshSubgenerator("PolyLineMeshWithFixedDistanceFromSidesetGenerator", submg_name, params);
   }
   for (const auto & layer_i : make_range(num_layers))
   {
