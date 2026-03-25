@@ -22,6 +22,10 @@ SubChannelAddVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Adds the variables associated with the subchannel problem");
+  params.addParam<bool>(
+      "deformation",
+      false,
+      "Boolean that activates the deformation effect based on values for: displacement, Dpin");
   params.addParam<bool>("full_output", false, "Add optional subchannel output variables");
   return params;
 }
@@ -65,8 +69,7 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::ENTHALPY,
                                         SubChannelApp::TEMPERATURE,
                                         SubChannelApp::DENSITY,
-                                        SubChannelApp::VISCOSITY,
-                                        SubChannelApp::DISPLACEMENT};
+                                        SubChannelApp::VISCOSITY};
 
   if (pin_mesh_exist)
   {
@@ -87,6 +90,13 @@ SubChannelAddVariablesAction::act()
   {
     var_names.push_back(SubChannelApp::PRESSURE_DROP);
     var_names.push_back(SubChannelApp::FRICTION_FACTOR);
+  }
+
+  const bool deformation = getParam<bool>("deformation");
+
+  if (deformation)
+  {
+    var_names.push_back(SubChannelApp::DISPLACEMENT);
   }
 
   // Get a list of the already existing AddAuxVariableAction

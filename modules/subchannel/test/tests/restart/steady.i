@@ -68,18 +68,6 @@ P_out = 4.923e6 # Pa
     value = ${T_in}
   []
 
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
