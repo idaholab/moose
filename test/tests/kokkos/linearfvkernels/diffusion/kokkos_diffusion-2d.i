@@ -25,7 +25,6 @@
     type = KokkosLinearFVDiffusion
     variable = u
     diffusion_coeff = coeff_func_kokkos
-    use_nonorthogonal_correction = false
   []
   [source]
     type = KokkosLinearFVSource

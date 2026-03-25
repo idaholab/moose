@@ -28,26 +28,15 @@ public:
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
 
 private:
-  KOKKOS_FUNCTION Real faceConductance(const AssemblyDatum & datum) const
-  {
-    const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
-    return _diffusion_coeff.value(_t, face_centroid) *
-           datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
-           datum.mesh().getFaceDCNMag(datum.elemID(), datum.side());
-  }
+  KOKKOS_FUNCTION Real faceConductance(const AssemblyDatum & datum) const;
 
-  KOKKOS_FUNCTION int dirichletIndex(const BoundaryID boundary_id) const
-  {
-    for (std::size_t i = 0; i < _dirichlet_boundary_ids.size(); ++i)
-      if (_dirichlet_boundary_ids[i] == boundary_id)
-        return static_cast<int>(i);
+  KOKKOS_FUNCTION int dirichletIndex(const BoundaryID boundary_id) const;
 
-    return -1;
-  }
-
+  /// Diffusion coefficient
   const Moose::Kokkos::Function _diffusion_coeff;
-  const bool _use_nonorthogonal_correction;
+  /// The boundary IDs on which Dirichlet boundary conditions exist
   Moose::Kokkos::Array<BoundaryID> _dirichlet_boundary_ids;
+  /// The function providing the Dirichlet values for each boundary ID
   Moose::Kokkos::Array<Moose::Kokkos::Function> _dirichlet_values;
 };
 
@@ -81,4 +70,23 @@ KokkosLinearFVDiffusion::computeRightHandSideContribution(const AssemblyDatum & 
   return faceConductance(datum) *
          _dirichlet_values[index].value(_t,
                                         datum.mesh().getFaceCentroid(datum.elemID(), datum.side()));
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVDiffusion::faceConductance(const AssemblyDatum & datum) const
+{
+  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
+  return _diffusion_coeff.value(_t, face_centroid) *
+         datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
+         datum.mesh().getFaceDCNMag(datum.elemID(), datum.side());
+}
+
+KOKKOS_FUNCTION inline int
+KokkosLinearFVDiffusion::dirichletIndex(const BoundaryID boundary_id) const
+{
+  for (std::size_t i = 0; i < _dirichlet_boundary_ids.size(); ++i)
+    if (_dirichlet_boundary_ids[i] == boundary_id)
+      return static_cast<int>(i);
+
+  return -1;
 }
