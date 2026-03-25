@@ -110,6 +110,7 @@ MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
                                     mfem::real_t nl_rel_tol,
                                     unsigned int print_level)
 {
+  // TODO: allow users to specify other mfem::IterativeSolvers
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
