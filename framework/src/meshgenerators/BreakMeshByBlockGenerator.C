@@ -155,6 +155,10 @@ BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure subdomain caches are up to date
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
+
   // Max node id is used later to generate new unique node IDs
   auto max_node_id = mesh->max_node_id();
   // If the mesh is prepared, max_node_id is already the same on all processors so do not need to
