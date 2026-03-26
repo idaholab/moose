@@ -50,6 +50,7 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
     _k_a(normalizedCrossProduct(_a2, _k_c) *= _kc)
 {
   _robin_coef_im = std::make_unique<mfem::ConstantCoefficient>(_k.imag() / _mu);
+  std::cout << "k imag = " << std::setprecision(16)<< _k.imag() << std::endl;
 
   if (getParam<bool>("input_port"))
   {
@@ -64,6 +65,8 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
 void
 MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E)
 {
+
+  //std::cout << "InnerProduct = " << std::setprecision(16) << mfem::InnerProduct(_k_c, x) << std::endl;
 
   mfem::Vector e_hat(normalizedCrossProduct(_k_c, _k_a));
   std::complex<mfem::real_t> zi(0., 1.);
