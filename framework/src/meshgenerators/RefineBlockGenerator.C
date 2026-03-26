@@ -58,6 +58,8 @@ RefineBlockGenerator::generate()
       MooseMeshUtils::getSubdomainIDs(*_input, getParam<std::vector<SubdomainName>>("block"));
 
   // Check that the block ids/names exist in the mesh
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
   std::set<SubdomainID> mesh_blocks;
   _input->subdomain_ids(mesh_blocks);
 

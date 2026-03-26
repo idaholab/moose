@@ -214,6 +214,10 @@ XYDelaunayGenerator::generate()
   {
     const auto & subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
 
+    // Make sure subdomain info caches are up to date
+    if (!mesh->preparation().has_cached_elem_data)
+      mesh->cache_elem_data();
+
     const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomain_names);
 
     // Check that the requested subdomains exist in the mesh

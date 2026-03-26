@@ -53,6 +53,10 @@ UniqueExtraIDMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure subdomain caches are up to date
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
+
   std::set<SubdomainID> restricted_ids;
   if (_has_restriction)
   {

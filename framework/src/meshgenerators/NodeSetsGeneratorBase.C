@@ -81,6 +81,10 @@ NodeSetsGeneratorBase::NodeSetsGeneratorBase(const InputParameters & parameters)
 void
 NodeSetsGeneratorBase::setup(MeshBase & mesh)
 {
+  // We'll need cached subdomain_ids later
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
+
   // Parameter checks and filling vector of ids (used instead of names for efficiency)
   if (_check_included_nodesets)
   {

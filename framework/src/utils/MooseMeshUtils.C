@@ -1195,8 +1195,17 @@ copyIntoMesh(MeshGenerator & mg,
     // Note: if performance becomes an issue, this is overkill for just getting the max node id
     std::set<subdomain_id_type> source_ids;
     std::set<subdomain_id_type> dest_ids;
+
+    // We need source subdomain ids already cached; libMesh will
+    // scream otherwise
     source.subdomain_ids(source_ids, true);
+
+    // Our destination is non-const, so we can fix any missing caches
+    if (!destination.preparation().has_cached_elem_data)
+      destination.cache_elem_data();
+
     destination.subdomain_ids(dest_ids, true);
+
     mooseAssert(source_ids.size(), "Should have a subdomain");
     mooseAssert(dest_ids.size(), "Should have a subdomain");
     unsigned int max_dest_bid = *dest_ids.rbegin();

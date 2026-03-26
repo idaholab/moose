@@ -1298,6 +1298,11 @@ assignConvertedElementsSubdomainNameSuffix(
     const SubdomainName & tet_suffix,
     const SubdomainName & pyramid_suffix)
 {
+  // If we have an unprepared mesh, we at least need its element
+  // caches prepared for subdomain_ids
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
+
   for (const auto & subdomain_id : original_subdomain_ids)
   {
     if (MooseMeshUtils::hasSubdomainID(mesh, subdomain_id + sid_shift_base))
