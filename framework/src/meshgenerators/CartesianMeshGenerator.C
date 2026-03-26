@@ -31,13 +31,25 @@ CartesianMeshGenerator::validParams()
   params.addParam<std::vector<unsigned int>>(
       "ix", "Number of grids in all intervals in the X direction (default to all one)");
   params.addParam<std::vector<Real>>(
+      "max_sizes_in_x",
+      "Maximum element size in the X direction. This can be specified once for all 'dx' intervals "
+      "or specified for each interval. 'ix' is then determined using the ceiling of dx/size");
+  params.addParam<std::vector<Real>>(
       "dy", "Intervals in the Y direction (required when dim>1 otherwise ignored)");
   params.addParam<std::vector<unsigned int>>(
       "iy", "Number of grids in all intervals in the Y direction (default to all one)");
   params.addParam<std::vector<Real>>(
+      "max_sizes_in_y",
+      "Maximum element size in the Y direction. This can be specified once for all 'dy' intervals "
+      "or specified for each interval. 'iy' is then determined using the ceiling of dy/size");
+  params.addParam<std::vector<Real>>(
       "dz", "Intervals in the Z direction (required when dim>2 otherwise ignored)");
   params.addParam<std::vector<unsigned int>>(
       "iz", "Number of grids in all intervals in the Z direction (default to all one)");
+  params.addParam<std::vector<Real>>(
+      "max_sizes_in_z",
+      "Maximum element size in the Z direction. This can be specified once for all 'dz' intervals "
+      "or specified for each interval. 'iz' is then determined using the ceiling of dz/size");
   params.addParam<std::vector<unsigned int>>("subdomain_id", "Block IDs (default to all zero)");
   params.addClassDescription("This CartesianMeshGenerator creates a non-uniform Cartesian mesh.");
   return params;
@@ -53,10 +65,26 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _ix = getParam<std::vector<unsigned int>>("ix");
     if (_ix.size() != _dx.size())
-      mooseError("ix must be in the same size of dx");
+      mooseError("ix must be the same size of dx");
     for (unsigned int i = 0; i < _ix.size(); ++i)
       if (_ix[i] == 0)
         mooseError("ix cannot be zero");
+    if (isParamValid("max_sizes_in_x"))
+      paramError("max_sizes_in_x", "Cannot be provided if 'ix' is specified");
+  }
+  else if (isParamValid("max_sizes_in_x"))
+  {
+    _ix.resize(_dx.size());
+    auto max_sizes = getParam<std::vector<Real>>("max_sizes_in_x");
+    if (max_sizes.size() == 1)
+      max_sizes.resize(_dx.size(), max_sizes[0]);
+    if (max_sizes.size() != _dx.size())
+      paramError("max_sizes_in_x", "max_sizes_in_x must be size 1 or the same size of dx");
+    for (const auto i : index_range(_dx))
+      if (max_sizes[i] <= 0)
+        paramError("max_sizes_in_x", "max_sizes_in_x must be strictly positive.");
+    for (const auto i : index_range(_dx))
+      _ix[i] = std::ceil(_dx[i] / max_sizes[i]);
   }
   else
     _ix = std::vector<unsigned int>(_dx.size(), 1);
@@ -77,10 +105,26 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _iy = getParam<std::vector<unsigned int>>("iy");
     if (_iy.size() != _dy.size())
-      mooseError("iy must be in the same size of dy");
+      mooseError("iy must be the same size of dy");
     for (unsigned int i = 0; i < _iy.size(); ++i)
       if (_iy[i] == 0)
         mooseError("iy cannot be zero");
+    if (isParamValid("max_sizes_in_y"))
+      paramError("max_sizes_in_y", "Cannot be provided if 'iy' is specified");
+  }
+  else if (isParamValid("max_sizes_in_y"))
+  {
+    _iy.resize(_dy.size());
+    auto max_sizes = getParam<std::vector<Real>>("max_sizes_in_y");
+    if (max_sizes.size() == 1)
+      max_sizes.resize(_dy.size(), max_sizes[0]);
+    if (max_sizes.size() != _dy.size())
+      paramError("max_sizes_in_y", "max_sizes_in_y must be size 1 or the same size of dy");
+    for (const auto i : index_range(_dy))
+      if (max_sizes[i] <= 0)
+        paramError("max_sizes_in_y", "max_sizes_in_y must be strictly positive.");
+    for (const auto i : index_range(_dy))
+      _iy[i] = std::ceil(_dy[i] / max_sizes[i]);
   }
   else
     _iy = std::vector<unsigned int>(_dy.size(), 1);
@@ -97,10 +141,26 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _iz = getParam<std::vector<unsigned int>>("iz");
     if (_iz.size() != _dz.size())
-      mooseError("iz must be in the same size of dz");
+      mooseError("iz must be the same size of dz");
     for (unsigned int i = 0; i < _iz.size(); ++i)
       if (_iz[i] == 0)
         mooseError("iz cannot be zero");
+    if (isParamValid("max_sizes_in_z"))
+      paramError("max_sizes_in_z", "Cannot be provided if 'iz' is specified");
+  }
+  else if (isParamValid("max_sizes_in_z"))
+  {
+    _iz.resize(_dz.size());
+    auto max_sizes = getParam<std::vector<Real>>("max_sizes_in_z");
+    if (max_sizes.size() == 1)
+      max_sizes.resize(_dz.size(), max_sizes[0]);
+    if (max_sizes.size() != _dz.size())
+      paramError("max_sizes_in_z", "max_sizes_in_z must be size 1 or the same size of dz");
+    for (const auto i : index_range(_dz))
+      if (max_sizes[i] <= 0)
+        paramError("max_sizes_in_z", "max_sizes_in_z must be strictly positive.");
+    for (const auto i : index_range(_dz))
+      _iz[i] = std::ceil(_dz[i] / max_sizes[i]);
   }
   else
     _iz = std::vector<unsigned int>(_dz.size(), 1);
@@ -112,22 +172,21 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
     {
       if (_subdomain_id.size() != _dx.size() * _dy.size() * _dz.size())
         mooseError(
-            "subdomain_id must be in the size of product of sizes of dx, dy and dz. Sizes are '" +
+            "subdomain_id must be the size of product of sizes of dx, dy and dz. Sizes are '" +
             std::to_string(_subdomain_id.size()) + "' and '" +
             std::to_string(_dx.size() * _dy.size() * _dz.size()) + "' respectively");
     }
     else if (isParamValid("dy"))
     {
       if (_subdomain_id.size() != _dx.size() * _dy.size())
-        mooseError(
-            "subdomain_id must be in the size of product of sizes of dx and dy. Sizes are '" +
-            std::to_string(_subdomain_id.size()) + "' and '" +
-            std::to_string(_dx.size() * _dy.size()) + "' respectively");
+        mooseError("subdomain_id must be the size of product of sizes of dx and dy. Sizes are '" +
+                   std::to_string(_subdomain_id.size()) + "' and '" +
+                   std::to_string(_dx.size() * _dy.size()) + "' respectively");
     }
     else
     {
       if (_subdomain_id.size() != _dx.size())
-        mooseError("subdomain_id must be in the size of product of sizes of dx. Sizes are '" +
+        mooseError("subdomain_id must be the size of product of sizes of dx. Sizes are '" +
                    std::to_string(_subdomain_id.size()) + "' and '" + std::to_string(_dx.size()) +
                    "' respectively");
     }
@@ -168,6 +227,10 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
         mooseWarning("dz provided for 1D");
       if (isParamValid("iz"))
         mooseWarning("iz provided for 1D");
+      if (isParamValid("max_sizes_in_y"))
+        paramWarning("max_sizes_in_y", "Should not be provided for 1D");
+      if (isParamValid("max_sizes_in_z"))
+        paramWarning("max_sizes_in_z", "Should not be provided for 1D");
       break;
     }
     case 2:
@@ -195,6 +258,8 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
         mooseWarning("dz provided for 2D");
       if (isParamValid("iz"))
         mooseWarning("iz provided for 2D");
+      if (isParamValid("max_sizes_in_z"))
+        paramWarning("max_sizes_in_z", "Should not be provided for 2D");
       break;
     }
     case 3:
