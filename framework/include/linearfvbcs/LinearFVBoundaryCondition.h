@@ -117,6 +117,21 @@ protected:
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
 
+  /**
+   * Determine a face argument for evaluating a functor on a face. If the functor is defined on a
+   * single side, that side is selected. If it is defined on both sides, the face is left unsided.
+   * @param functor the functor whose sidedness is queried on the provided face
+   * @param fi the FaceInfo for this face
+   * @param limiter_type the limiter type to use when building the face argument
+   * @param correct_skewness whether to perform skew correction at the face
+   */
+  template <typename FunctorType>
+  Moose::FaceArg
+  functorFaceArg(const FunctorType & functor,
+                 const FaceInfo * fi,
+                 Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+                 bool correct_skewness = false) const;
+
   /// Thread id
   const THREAD_ID _tid;
 
@@ -157,4 +172,28 @@ LinearFVBoundaryCondition::setupFaceData(const FaceInfo * face_info,
       "The face info pointer should not be null when passing to the LinearFVBoundaryCondition!");
   _current_face_info = face_info;
   _current_face_type = face_type;
+}
+
+template <typename FunctorType>
+inline Moose::FaceArg
+LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
+                                          const FaceInfo * fi,
+                                          const Moose::FV::LimiterType limiter_type,
+                                          const bool correct_skewness) const
+{
+  auto face = singleSidedFaceArg(fi, limiter_type, correct_skewness);
+  const auto on_elem = functor.hasFaceSide(*fi, true);
+  const auto on_neighbor = functor.hasFaceSide(*fi, false);
+
+  if (on_elem && on_neighbor)
+    face.face_side = nullptr;
+  else if (on_elem)
+    face.face_side = fi->elemPtr();
+  else if (on_neighbor)
+    face.face_side = fi->neighborPtr();
+  else
+    mooseError(
+        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
+
+  return face;
 }
