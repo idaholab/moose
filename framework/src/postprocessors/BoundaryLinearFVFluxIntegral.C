@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SideLinearFVFluxIntegral.h"
+#include "BoundaryLinearFVFluxIntegral.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVFluxKernel.h"
 #include <set>
 
-registerMooseObject("MooseApp", SideLinearFVFluxIntegral);
+registerMooseObject("MooseApp", BoundaryLinearFVFluxIntegral);
 
 InputParameters
-SideLinearFVFluxIntegral::validParams()
+BoundaryLinearFVFluxIntegral::validParams()
 {
   InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredParam<std::vector<std::string>>(
@@ -25,7 +25,7 @@ SideLinearFVFluxIntegral::validParams()
   return params;
 }
 
-SideLinearFVFluxIntegral::SideLinearFVFluxIntegral(const InputParameters & parameters)
+BoundaryLinearFVFluxIntegral::BoundaryLinearFVFluxIntegral(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
     _kernel_names(getParam<std::vector<std::string>>("linearfvkernels")),
     _variable_number(0),
@@ -38,7 +38,7 @@ SideLinearFVFluxIntegral::SideLinearFVFluxIntegral(const InputParameters & param
 }
 
 void
-SideLinearFVFluxIntegral::initialSetup()
+BoundaryLinearFVFluxIntegral::initialSetup()
 {
   SideIntegralPostprocessor::initialSetup();
 
@@ -119,7 +119,7 @@ SideLinearFVFluxIntegral::initialSetup()
 }
 
 Real
-SideLinearFVFluxIntegral::computeFaceInfoIntegral(const FaceInfo * const fi)
+BoundaryLinearFVFluxIntegral::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
   mooseAssert(fi, "FaceInfo should not be null.");
   mooseAssert(fi->boundaryIDs().size() == 1, "Expected exactly one boundary per face.");
@@ -148,7 +148,7 @@ SideLinearFVFluxIntegral::computeFaceInfoIntegral(const FaceInfo * const fi)
 }
 
 Real
-SideLinearFVFluxIntegral::computeQpIntegral()
+BoundaryLinearFVFluxIntegral::computeQpIntegral()
 {
   mooseError("We should never call this function.");
 }

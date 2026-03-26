@@ -50,32 +50,32 @@
 
 [Postprocessors]
   [flux_left_total]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = left
     linearfvkernels = 'diffusion advection'
   []
   [flux_left_diff]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = left
     linearfvkernels = 'diffusion'
   []
   [flux_left_adv]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = left
     linearfvkernels = 'advection'
   []
   [flux_right_total]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = right
     linearfvkernels = 'diffusion advection'
   []
   [flux_right_diff]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = right
     linearfvkernels = 'diffusion'
   []
   [flux_right_adv]
-    type = SideLinearFVFluxIntegral
+    type = BoundaryLinearFVFluxIntegral
     boundary = right
     linearfvkernels = 'advection'
   []

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SideLinearFVFluxIntegral.md'
+  design = 'BoundaryLinearFVFluxIntegral.md'
   issues = '#32466'
   [linearfv_flux]
     type = CSVDiff
@@ -13,7 +13,7 @@
     [wrong_kernel_type]
       type = RunException
       input = linearfv_flux_integral.i
-      detail = "when the user inputs a non-flux linear finite volume kernel to SideLinearFVFluxIntegral."
+      detail = "when the user inputs a non-flux linear finite volume kernel to BoundaryLinearFVFluxIntegral."
       cli_args = 'LinearFVKernels/source/type=LinearFVSource LinearFVKernels/source/variable=u Postprocessors/flux_left_total/linearfvkernels=source'
       expect_err = "The given LinearFVFluxKernel with name 'source' was not found!"
       max_threads = 1 # see libmesh issue #3808

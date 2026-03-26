@@ -19,13 +19,13 @@ class LinearFVFluxKernel;
 /**
  * Computes the side integral of fluxes from selected LinearFVFluxKernel objects.
  */
-class SideLinearFVFluxIntegral : public SideIntegralPostprocessor
+class BoundaryLinearFVFluxIntegral : public SideIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
   virtual void initialSetup() override;
 
-  SideLinearFVFluxIntegral(const InputParameters & parameters);
+  BoundaryLinearFVFluxIntegral(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
