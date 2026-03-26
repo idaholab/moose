@@ -46,7 +46,8 @@ LinearFVGrayLambert::LinearFVGrayLambert(const InputParameters & parameters)
 Real
 LinearFVGrayLambert::getAlpha(Moose::FaceArg face, Moose::StateArg state) const
 {
-  const auto alpha = -_coeff_diffusion(face, state);
+  const auto functor_face_info = functorFaceArg(_coeff_diffusion, face.fi);
+  const auto alpha = -_coeff_diffusion(functor_face_info, state);
   return alpha;
 }
 
