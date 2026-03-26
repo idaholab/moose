@@ -14,7 +14,6 @@
 
 #include "libmesh/system.h"
 
-#include <memory>
 #include <string>
 
 class SubProblem;
@@ -128,8 +127,8 @@ protected:
   /// Boolean to see if solution is invalid
   bool _solution_is_invalid;
 
+  /// Used for relaxing entire system solution during fixed point (multi-)system iterations
   Real _fixed_point_relaxation_factor = 1.0;
-  std::unique_ptr<NumericVector<Number>> _fixed_point_old_solution;
 };
 
 inline const NumericVector<Number> * const &
