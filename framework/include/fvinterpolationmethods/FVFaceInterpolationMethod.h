@@ -13,14 +13,15 @@
 #include "MooseFunctor.h"
 
 /**
- * Interface for interpolation methods that produce a scalar face value from adjacent cell values.
+ * Abstract base class for interpolation methods that produce a scalar face
+ * value from adjacent cell values.
  */
 class FVFaceInterpolationMethod
 {
 public:
   /**
    * Face interpolation operation for this method.
-   * @param face The face being interpolated.
+   * @param face The face to interpolate at.
    * @param elem_value Element-side scalar value.
    * @param neighbor_value Neighbor-side scalar value.
    */

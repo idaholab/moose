@@ -20,7 +20,6 @@
 #include "InputParameters.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
-#include "GradientLimiterType.h"
 // libMesh
 #include "libmesh/exodusII_io.h"
 #include "libmesh/parallel_object.h"

@@ -172,8 +172,6 @@ protected:
   void computeElementalVars(ExecFlagType type);
   void computeElementalVecVars(ExecFlagType type);
   void computeElementalArrayVars(ExecFlagType type);
-  /// Compute and store the Green-Gauss gradients for linear FV auxiliary variables.
-  void computeGradients();
 
   template <typename AuxKernelType>
   void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);

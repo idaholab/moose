@@ -12,24 +12,6 @@
 #include "SubProblem.h"
 #include "NS.h"
 #include "FEProblemBase.h"
-#include "AuxiliarySystem.h"
-#include "LinearSystem.h"
-
-namespace
-{
-const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
-linearFVGradientContainer(SystemBase & sys)
-{
-  if (auto * const linear_system = dynamic_cast<LinearSystem *>(&sys))
-    return linear_system->linearFVGradientContainer();
-
-  if (auto * const auxiliary_system = dynamic_cast<AuxiliarySystem *>(&sys))
-    return auxiliary_system->linearFVGradientContainer();
-
-  mooseError("The assigned system is not a linear or an auxiliary system. Linear variables can "
-             "only be assigned to linear or auxiliary systems.");
-}
-}
 
 registerMooseObject("NavierStokesApp", LinearFVMomentumPressure);
 
@@ -52,10 +34,7 @@ LinearFVMomentumPressure::validParams()
 LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
-    _pressure_var(getPressureVariable(NS::pressure)),
-    _pressure_gradient(linearFVGradientContainer(_pressure_var.sys())),
-    _pressure_var_num(_pressure_var.number()),
-    _pressure_sys_num(_pressure_var.sys().number())
+    _pressure_var(getPressureVariable(NS::pressure))
 {
   _pressure_var.computeCellGradients();
 }
@@ -81,6 +60,5 @@ LinearFVMomentumPressure::computeMatrixContribution()
 Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
-  const auto dof_value = _current_elem_info->dofIndices()[_pressure_sys_num][_pressure_var_num];
-  return -(*_pressure_gradient[_index])(dof_value)*_current_elem_volume;
+  return -_pressure_var.gradSlnComponent(*_current_elem_info, _index) * _current_elem_volume;
 }

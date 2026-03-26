@@ -48,14 +48,14 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
 
   const bool upwind_is_elem = mass_flux >= 0.0;
   const Real phi_upwind = upwind_is_elem ? elem_value : neighbor_value;
-  const VectorValue<Real> grad_upwind = upwind_is_elem ? *elem_grad : *neighbor_grad;
+  const VectorValue<Real> * grad_upwind = upwind_is_elem ? elem_grad : neighbor_grad;
 
   // Reconstruct a higher-order face value from the upwind cell using the (limited) cell gradient.
-  const Point upwind_centroid = upwind_is_elem ? face.elemCentroid() : face.neighborCentroid();
+  const Point & upwind_centroid = upwind_is_elem ? face.elemCentroid() : face.neighborCentroid();
   // For the Venkatakrishnan MUSCL scheme we reconstruct to the actual face centroid.
   const Point face_delta = face.faceCentroid() - upwind_centroid;
 
-  const Real phi_high = phi_upwind + (grad_upwind * face_delta);
+  const Real phi_high = phi_upwind + (*grad_upwind * face_delta);
 
   AdvectedSystemContribution result;
   // Matrix contribution: pure upwind.

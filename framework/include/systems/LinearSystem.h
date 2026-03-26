@@ -133,13 +133,9 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
+  using LinearFVGradientInterface::computeGradients;
   using LinearFVGradientInterface::linearFVLimitedGradientContainer;
   using LinearFVGradientInterface::requestLinearFVLimitedGradients;
-
-  /**
-   * Compute the Green-Gauss gradients
-   */
-  void computeGradients();
 
   virtual void compute(ExecFlagType type) override;
 

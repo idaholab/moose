@@ -38,13 +38,4 @@ protected:
 
   /// Pointer to the linear finite volume pressure variable
   MooseLinearVariableFV<Real> & _pressure_var;
-
-  /// The pressure variable
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & _pressure_gradient;
-
-  /// Cache for the pressure variable number
-  const unsigned int _pressure_var_num;
-
-  /// Cache for the pressure system number
-  const unsigned int _pressure_sys_num;
 };

@@ -31,7 +31,7 @@ where $\phi_f^{LO}=\phi_U$ is the upwind (first-order) face value and $\gamma$ i
 [!param](/FVInterpolationMethods/FVAdvectedVenkatakrishnanDeferredCorrection/deferred_correction_factor).
 With $\gamma=0$ the method reduces to pure upwind; with $\gamma=1$ it applies the full MUSCL
 reconstruction while still assembling the matrix with the upwind weights and placing the correction
-explicitly on the right-hand side. Values $0<\gamma<1$ are sometimes useful for fixed-point
+explicitly on the right-hand side. Values $0<\gamma<1$ are sometimes useful for fixed-point iteration
 robustness.
 
 ## Notes on boundedness and skewness
