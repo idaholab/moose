@@ -170,6 +170,18 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
 }
 
 template <typename OutputType>
+Real
+MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
+                                                    const unsigned int component) const
+{
+  mooseAssert(_needs_cell_gradients,
+              "Gradient component requested without calling computeCellGradients().");
+  mooseAssert(component < _grad_container.size(), "Gradient component index out of range.");
+
+  return (*_grad_container[component])(elem_info.dofIndices()[this->_sys_num][this->_var_num]);
+}
+
+template <typename OutputType>
 const VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
                                            const Moose::FV::GradientLimiterType limiter_type) const

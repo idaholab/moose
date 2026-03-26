@@ -37,7 +37,8 @@ public:
    * @param fe_problem Reference to the problem
    * @param system The system whose variables are assembled by this thread.
    * @param raw_gradient The raw gradient container used as limiter input.
-   * @param temporary_limited_gradient Scratch storage for limited gradients being assembled.
+   * @param temporary_limited_gradient Scratch storage for limited gradients being assembled
+   * (used as output as well, but later swapped with another container).
    * @param limiter_type The type of the limiter which should be computed.
    * @param requested_variables Variable numbers that requested this limiter.
    */

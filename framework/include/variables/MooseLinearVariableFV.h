@@ -130,6 +130,13 @@ public:
   const VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
 
   /**
+   * Get one raw gradient component at a cell center without materializing the full gradient.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param component The gradient component to retrieve
+   */
+  Real gradSlnComponent(const ElemInfo & elem_info, unsigned int component) const;
+
+  /**
    * Get either the raw or limited gradient at a cell center.
    */
   const VectorValue<Real> gradSln(const ElemInfo & elem_info,
@@ -237,7 +244,7 @@ protected:
   LinearSystem * const _linear_system;
   AuxiliarySystem * const _auxiliary_system;
 
-  /// Pointer to the cell gradients stored by the owning concrete system
+  /// Pointer to the unlimited cell gradient stored by the owning concrete system
   const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> & _grad_container;
 
   /// Holder for all the data associated with the "main" element. The data in this is

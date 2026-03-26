@@ -27,7 +27,8 @@ class NumericVector;
 }
 
 /**
- * Shared storage and allocation logic for linear finite-volume cell gradients.
+ * Shared storage and allocation logic for linear finite-volume cell gradients for
+ * variables in the system attribute of this class
  */
 class LinearFVGradientInterface
 {
@@ -55,7 +56,7 @@ public:
   /**
    * Access the stored raw or limited cell-centered gradient components.
    * @param limiter_type The limiter type whose gradient container is being requested.
-   * @return The requested raw or limited gradient vectors keyed by spatial direction.
+   * @return The requested raw or limited gradient vectors ordered by spatial direction.
    */
   const std::vector<std::unique_ptr<libMesh::NumericVector<libMesh::Number>>> &
   linearFVLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
@@ -63,6 +64,7 @@ public:
   /**
    * Access the limiter types requested for this system.
    * @return The set of limiter types whose limited gradients should be assembled.
+   * They are only assembled for the variable(s) for which they were requested not all of them
    */
   const std::unordered_set<Moose::FV::GradientLimiterType> &
   requestedLinearFVLimitedGradientTypes() const
@@ -71,6 +73,11 @@ public:
   }
 
 protected:
+  /**
+   * Compute and store raw and requested limited Green-Gauss gradients for linear FV variables.
+   */
+  void computeGradients();
+
   /**
    * Rebuild persistent raw and temporary gradient storage after mesh/DOF changes.
    */
@@ -118,7 +125,7 @@ protected:
   const std::unordered_set<unsigned int> &
   requestedLinearFVLimitedGradientVariables(const Moose::FV::GradientLimiterType limiter_type) const
   {
-    return _requested_limited_gradient_variables.at(limiter_type);
+    return libmesh_map_find(_requested_limited_gradient_variables, limiter_type);
   }
 
   bool needsLinearFVGradientStorage() const;

@@ -20,9 +20,6 @@
 #include "ComputeElemAuxVarsThread.h"
 #include "ComputeElemAuxBcsThread.h"
 #include "ComputeMortarNodalAuxBndThread.h"
-#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
-#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
-#include "ComputeLinearFVLimitedGradientThread.h"
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
@@ -478,91 +475,6 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_serialized_solution.get())
     serializeSolution();
-}
-
-void
-AuxiliarySystem::computeGradients()
-{
-  if (_raw_grad_container.empty())
-    return;
-
-  auto & temporary_gradient = temporaryLinearFVGradientContainer();
-  mooseAssert(temporary_gradient.size() == _raw_grad_container.size(),
-              "Temporary and raw gradient containers must have the same size.");
-  for (auto & vec : temporary_gradient)
-    vec->zero();
-
-  TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
-
-  PARALLEL_TRY
-  {
-    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
-                                  _fe_problem.mesh().ownedFaceInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        _fe_problem, *this, temporary_gradient);
-    Threads::parallel_reduce(face_info_range, gradient_face_thread);
-  }
-  PARALLEL_CATCH;
-
-  for (auto & vec : temporary_gradient)
-    vec->close();
-
-  PARALLEL_TRY
-  {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
-                                  _fe_problem.mesh().ownedElemInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        _fe_problem, *this, temporary_gradient);
-    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
-  }
-  PARALLEL_CATCH;
-
-  for (const auto i : index_range(_raw_grad_container))
-    temporary_gradient[i]->close();
-
-  _raw_grad_container.swap(temporary_gradient);
-
-  if (!requestedLinearFVLimitedGradientTypes().empty())
-  {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
-                                  _fe_problem.mesh().ownedElemInfoEnd());
-
-    for (const auto limiter_type : requestedLinearFVLimitedGradientTypes())
-    {
-      if (limiter_type == Moose::FV::GradientLimiterType::None)
-        continue;
-
-      auto & raw_container = rawLinearFVLimitedGradientContainer(limiter_type);
-      auto & temporary_container = temporaryLinearFVLimitedGradientContainer(limiter_type);
-      mooseAssert(temporary_container.size() == raw_container.size(),
-                  "Temporary and raw limited gradient containers must have the same size.");
-      for (auto & vec : temporary_container)
-        vec->zero();
-
-      PARALLEL_TRY
-      {
-        ComputeLinearFVLimitedGradientThread limited_gradient_thread(
-            _fe_problem,
-            *this,
-            _raw_grad_container,
-            temporary_container,
-            limiter_type,
-            requestedLinearFVLimitedGradientVariables(limiter_type));
-        Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
-      }
-      PARALLEL_CATCH;
-
-      for (auto & vec : temporary_container)
-        vec->close();
-
-      raw_container.swap(temporary_container);
-    }
-  }
 }
 
 std::set<std::string>
