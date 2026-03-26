@@ -60,6 +60,7 @@ protected:
 
   /// Adds the DG kernels
   virtual void addDGKernels();
+  virtual void addHeatConductionDGKernel();
 
   /// Adds the aux kernels
   virtual void addAuxKernels();

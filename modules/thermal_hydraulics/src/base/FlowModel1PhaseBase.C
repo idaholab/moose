@@ -294,6 +294,22 @@ FlowModel1PhaseBase::addEnergyGravityKernel()
 void
 FlowModel1PhaseBase::addDGKernels()
 {
+  if (_flow_channel.getParam<bool>("enable_heat_conduction"))
+    addHeatConductionDGKernel();
+}
+
+void
+FlowModel1PhaseBase::addHeatConductionDGKernel()
+{
+  const std::string class_name = "HeatConduction3EqnDGKernel";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<NonlinearVariableName>("variable") = THM::RHOEA;
+  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  params.set<MaterialPropertyName>("k") = THM::THERMAL_CONDUCTIVITY;
+  params.set<MaterialPropertyName>("T") = THM::TEMPERATURE;
+  params.set<MaterialPropertyName>("direction") = THM::DIRECTION;
+  params.set<std::vector<VariableName>>("A") = {THM::AREA};
+  _sim.addDGKernel(class_name, genName(name(), "heat_cond"), params);
 }
 
 void
