@@ -26,6 +26,8 @@ using namespace libMesh;
 void
 LinearFVGradientInterface::computeGradients()
 {
+  // No gradients have been requested, by now we should have set up the
+  // containers to receive the gradients. Time to ealry return.
   if (_raw_grad_container.empty())
     return;
 
