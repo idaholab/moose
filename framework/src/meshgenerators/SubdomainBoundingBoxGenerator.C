@@ -62,6 +62,10 @@ SubdomainBoundingBoxGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // We'll need cached subdomain_ids later
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
+
   std::set<SubdomainID> restricted_ids;
   if (_has_restriction)
   {

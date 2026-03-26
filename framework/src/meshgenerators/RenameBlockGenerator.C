@@ -146,6 +146,8 @@ RenameBlockGenerator::generate()
   const MeshBase & const_mesh = *mesh;
 
   // Get the subdomains in the mesh (this is global)
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
   std::set<subdomain_id_type> block_ids;
   mesh->subdomain_ids(block_ids);
 
