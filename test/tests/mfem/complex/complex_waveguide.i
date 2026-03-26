@@ -2,6 +2,8 @@ freq = 900e6
 angfreq = ${fparse 2*pi*freq}
 epsilon0 = 8.8541878176e-12
 mu0 = ${fparse 4e-7*pi}
+kimag = 13.95736494992563
+robin_coef = ${fparse kimag/mu0}
 magnetic_reluctivity = ${fparse 1/mu0}
 elec_cond_mouse = 0.97
 elec_cond_air = 1e-323
@@ -32,6 +34,10 @@ elec_cond_air = 1e-323
 
 [Variables]
   [E]
+    type = MFEMComplexVariable
+    fespace = HCurlFESpace
+  []
+  [TE10]
     type = MFEMComplexVariable
     fespace = HCurlFESpace
   []
@@ -78,26 +84,33 @@ elec_cond_air = 1e-323
     boundary = '2 3 4'
   []
   [WaveguidePortIn]
-    type = MFEMRWTE10IntegratedBC
+    #type = MFEMRWTE10IntegratedBC
+    #variable = E
+    #boundary = '5'
+    #input_port = true
+    #port_length_vector = "24.76e-2 0.0 0.0"
+    #port_width_vector = "0.0 12.38e-2 0.0"
+    #frequency = ${freq}
+    #epsilon = ${epsilon0}
+    #mu = ${mu0}
+    type = MFEMComplexVectorTangentialDirichletBC
     variable = E
     boundary = '5'
-    input_port = true
-    port_length_vector = "24.76e-2 0.0 0.0"
-    port_width_vector = "0.0 12.38e-2 0.0"
-    frequency = ${freq}
-    epsilon = ${epsilon0}
-    mu = ${mu0}
+    vector_coefficient_real = TE10_real
+    vector_coefficient_imag = '0 0 0'
   []
   [WaveguidePortOut]
-    type = MFEMRWTE10IntegratedBC
+    type = MFEMComplexIntegratedBC
     variable = E
     boundary = '6'
-    input_port = false
-    port_length_vector = "24.76e-2 0.0 0.0"
-    port_width_vector = "0.0 12.38e-2 0.0"
-    frequency = ${freq}
-    epsilon = ${epsilon0}
-    mu = ${mu0}
+    [RealComponent]
+      type = MFEMVectorFEMassIntegratedBC
+      coefficient = 0
+    []
+    [ImagComponent]
+      type = MFEMVectorFEMassIntegratedBC
+      coefficient = ${robin_coef}
+    []
   []
 []
 
@@ -133,6 +146,24 @@ elec_cond_air = 1e-323
   assembly_level = legacy
 []
 
+[MultiApps]
+  [port_eigenproblem]
+    type = FullSolveMultiApp
+    input_files = port_submesh.i
+    execute_on = INITIAL
+  []
+[]
+
+[Transfers]
+  [from_port]
+    type = MultiAppMFEMCopyTransfer
+    source_variable = TE10
+    variable = TE10
+    from_multi_app = port_eigenproblem
+    to_component = real
+  []
+[]
+
 [Postprocessors]
   [ObstructionAbsorption]
     type = MFEMComplexVectorPeriodAveragedPostprocessor
@@ -148,5 +179,9 @@ elec_cond_air = 1e-323
   [ReportedPostprocessors]
     type = CSV
     file_base = OutputData/ComplexWaveguide
+  []
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/WaveguideNew
   []
 []
