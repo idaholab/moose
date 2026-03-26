@@ -45,6 +45,11 @@ RenumberBySubdomainGenerator::generate()
   if (!mesh->is_serial())
     mooseError("Not implemented for non-serialized distributed meshes");
 
+  // Orphaned nodes would cause problems on renumbering, we are looping on the nodes attached
+  // to elements
+  mesh->remove_orphaned_nodes();
+  mesh->prepare_for_use();
+
   // Get the blocks provided by the user
   std::optional<std::vector<SubdomainName>> blocks =
       isParamValid("blocks_to_renumber")
@@ -85,16 +90,10 @@ RenumberBySubdomainGenerator::generate()
   // Renumber all elements with an ID we can recognize (so we can tell an already renumbered elem)
   const auto max_elem_id = mesh->max_elem_id();
   const auto max_node_id = mesh->max_node_id();
-  for (const auto i : index_range(block_ids))
-    for (auto elem : mesh->active_subdomain_elements_ptr_range(block_ids[i]))
-    {
-      mesh->renumber_elem(elem->id(), max_elem_id + 1 + elem->id());
-
-      // Renumber all nodes with an ID we can recognize (so we can tell an already renumbered node)
-      for (auto & node : elem->node_ref_range())
-        if (node.id() <= max_node_id)
-          mesh->renumber_node(node.id(), max_node_id + 1 + node.id());
-    }
+  std::unordered_map<dof_id_type, dof_id_type> new_elem_ids;
+  new_elem_ids.reserve(max_elem_id);
+  std::unordered_set<dof_id_type> renumbered_nodes;
+  renumbered_nodes.reserve(max_node_id);
 
   // Renumber block IDs one at a time
   // We have to move them out of range, then back to range
@@ -104,22 +103,48 @@ RenumberBySubdomainGenerator::generate()
   {
     for (auto elem : mesh->active_subdomain_elements_ptr_range(block_ids[i]))
     {
-      // should always be true
-      if (elem->id() > max_elem_id)
-        mesh->renumber_elem(elem->id(), elem_count++);
+      // If we didn't specify all the subdomains, we might have to skip elem ids that are still
+      // taken
+      while (mesh->query_elem_ptr(elem_count))
+      {
+        elem_count++;
+      }
+      // We can't mess with the range while looping in them
+      new_elem_ids[elem->id()] = elem_count++;
 
       for (auto & node : elem->node_ref_range())
         // prevent re-renumbering
-        if (node.id() > max_node_id)
+        if (!renumbered_nodes.count(node.id()))
+        {
+          // If we didn't specify all the subdomains, we might have to skip node ids that are still
+          // taken
+          while (mesh->query_node_ptr(node_count))
+          {
+            node_count++;
+          }
+          renumbered_nodes.insert(node.id());
           mesh->renumber_node(node.id(), node_count++);
+        }
     }
   }
+
+  // Now change the IDs
+  for (const auto [key, value] : new_elem_ids)
+    mesh->renumber_elem(key, value);
+
+  // Update the max ids
+  mesh->contract();
+
   // Try to disallow renumbering from now on since we just renumbered
   mesh->allow_renumbering(false);
   // No gain if exodus just renumbers this. Better to tell the user
   if (mesh->n_nodes() != mesh->max_node_id() || mesh->n_elem() != mesh->max_elem_id())
     mooseWarning("Mesh is not contiguously numbered after renumbering. The numbering may be erased "
-                 "by outputs that require contiguous numbering such as Exodus");
+                 "by outputs that require contiguous numbering such as Exodus.\nNumber of nodes: " +
+                 std::to_string(mesh->n_nodes()) +
+                 "\nMax node ID: " + std::to_string(mesh->max_node_id() - 1) +
+                 "\nNumber of elements: " + std::to_string(mesh->n_elem()) +
+                 "\nMax elem ID: " + std::to_string(mesh->max_elem_id() - 1));
 
   mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
