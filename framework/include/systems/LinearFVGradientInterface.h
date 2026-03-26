@@ -12,6 +12,8 @@
 #include "MooseTypes.h"
 #include "GradientLimiterType.h"
 
+#include "libmesh/utility.h"
+
 #include <memory>
 #include <string>
 #include <unordered_map>
