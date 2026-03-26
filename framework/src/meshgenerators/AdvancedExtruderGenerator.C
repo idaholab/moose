@@ -319,6 +319,8 @@ AdvancedExtruderGenerator::generate()
   }
 
   // retrieve subdomain/sideset/nodeset name maps
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
   const auto & input_subdomain_map = _input->get_subdomain_name_map();
   const auto & input_sideset_map = _input->get_boundary_info().get_sideset_name_map();
   const auto & input_nodeset_map = _input->get_boundary_info().get_nodeset_name_map();
