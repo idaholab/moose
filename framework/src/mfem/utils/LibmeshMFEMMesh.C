@@ -133,7 +133,6 @@ LibmeshMFEMMesh::buildMFEMVerticesAndElements(
     const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id)
 {
   // Set dimensions.
-  // TODO: double check that Dim and spaceDim are always equal for LibMesh
   Dim = spaceDim = block_info.dimension();
 
   // Create the vertices.
@@ -250,7 +249,6 @@ LibmeshMFEMMesh::buildMFEMElements(
   {
     const auto block_id = pr.first;
     const auto & block_name = pr.second;
-    std::cout << "Block '" << block_name << "' has id " << block_id << "\n";
     if (!block_name.empty())
     {
       if (!attribute_sets.AttributeSetExists(block_name))
