@@ -1,0 +1,13 @@
+[Tests]
+  design = 'RenumberBySubdomainGenerator.md'
+  issues = '#32564'
+  [basic]
+    type = Exodiff
+    input = 'test.i'
+    cli_args = '--mesh-only'
+    exodiff = 'test_in.e'
+    requirement = "The system shall be able to renumber elements and nodes to have contiguous numbering of elements in each subdomain, and contiguous numbering of elements except at subdomain boundaries inside the mesh."
+    mesh_mode = 'replicated'
+    recover = false
+  []
+[]
