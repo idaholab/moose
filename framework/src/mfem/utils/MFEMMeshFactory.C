@@ -185,7 +185,7 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
   // to be returned and used once we do transfers between libmesh and
   // mfem objects?
 
-  //_mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
+  _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
   return _mfem_par_mesh;
 }
 
