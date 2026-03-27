@@ -3,6 +3,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/enum_io_package.h"
 #include "libmesh/exodusII_io.h"
+#include "libmesh/id_types.h"
 #include "libmesh/nemesis_io.h"
 #include "libmesh/node.h"
 #include "libmesh/parallel_mesh.h"
@@ -24,7 +25,9 @@ public:
   LibmeshMFEMMesh(const int num_elements_in_mesh,
                   const CubitBlockInfo & block_info,
                   const std::vector<int> & unique_block_ids,
+                  const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
                   const std::vector<int> & unique_side_boundary_ids,
+                  const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
                   const std::vector<int> & unique_libmesh_corner_node_ids,
                   const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
                   const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
@@ -40,7 +43,9 @@ public:
   LibmeshMFEMMesh(const int num_elements_in_mesh,
                   const CubitBlockInfo & block_info,
                   const std::vector<int> & unique_block_ids,
+                  const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
                   const std::vector<int> & unique_side_boundary_ids,
+                  const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
                   const std::vector<int> & unique_libmesh_corner_node_ids,
                   const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
                   const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
@@ -68,7 +73,9 @@ protected:
       const int num_elements_in_mesh,
       const CubitBlockInfo & block_info,
       const std::vector<int> & unique_block_ids,
+      const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
       const std::vector<int> & unique_side_boundary_ids,
+      const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
       const std::vector<int> & unique_libmesh_corner_node_ids,
       const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
       const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
@@ -90,11 +97,13 @@ protected:
   /**
    * Construct the MFEM elements array.
    */
-  void buildMFEMElements(const int num_elements_in_mesh,
-                         const CubitBlockInfo & block_info,
-                         const std::vector<int> & unique_block_ids,
-                         const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
-                         const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id);
+  void
+  buildMFEMElements(const int num_elements_in_mesh,
+                    const CubitBlockInfo & block_info,
+                    const std::vector<int> & unique_block_ids,
+                    const std::map<libMesh::subdomain_id_type, std::string> & block_ids_to_names,
+                    const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
+                    const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id);
 
   /**
    * Construct the boundary array of elements.
@@ -102,6 +111,7 @@ protected:
   void buildMFEMBoundaryElements(
       const CubitBlockInfo & block_info,
       const std::vector<int> & unique_side_boundary_ids,
+      const std::map<libMesh::boundary_id_type, std::string> & bound_ids_to_names,
       const std::map<int, std::vector<std::vector<unsigned int>>> &
           libmesh_node_ids_for_boundary_id,
       const std::map<int, std::vector<int>> & libmesh_side_ids_for_boundary_id,

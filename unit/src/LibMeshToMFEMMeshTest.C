@@ -295,6 +295,11 @@ TEST_P(FileMeshMFEMTest, CheckLoad)
       EXPECT_EQ(nodal_fespace->GetFE(i)->GetNodes().GetNPoints(), _nodes_per_element);
     }
   }
+  ASSERT_EQ(_mfem_mesh_ptr->attribute_sets.GetAttributeSetNames(), std::set<std::string>());
+  ASSERT_EQ(_mfem_mesh_ptr->bdr_attribute_sets.GetAttributeSetNames(),
+            std::set<std::string>({"top", "bottom"}));
+  EXPECT_EQ(_mfem_mesh_ptr->bdr_attribute_sets.GetAttributeSet("top").Size(), 1);
+  EXPECT_EQ(_mfem_mesh_ptr->bdr_attribute_sets.GetAttributeSet("bottom").Size(), 1);
 }
 
 INSTANTIATE_TEST_SUITE_P(
