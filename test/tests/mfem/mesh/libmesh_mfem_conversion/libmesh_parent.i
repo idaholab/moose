@@ -1,5 +1,5 @@
 [Mesh]
-  type = FileMesh    
+  type = FileMesh
   file = ../square.e
 []
 
