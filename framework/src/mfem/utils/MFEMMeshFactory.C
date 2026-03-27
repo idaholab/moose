@@ -3,6 +3,7 @@
 #include "libmesh/enum_io_package.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/face_quad4.h"
+#include "libmesh/id_types.h"
 #include "libmesh/ignore_warnings.h"
 #include "libmesh/libmesh_config.h"
 #include "libmesh/mesh_base.h"
@@ -41,6 +42,8 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
 
   // 2. Get the unique libmesh IDs of each block in the mesh.
   std::vector<int> unique_block_ids = getLibmeshBlockIDs(mesh.getMesh());
+  std::map<libMesh::subdomain_id_type, std::string> block_ids_to_names =
+      mesh.getMesh().get_subdomain_name_map();
 
   // 3. Retrieve information about the elements used within the mesh.
   CubitBlockInfo block_info =
@@ -76,6 +79,8 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
 
   // 8. Get a vector containing all boundary IDs on sides of semi-local elements.
   std::vector<int> unique_side_boundary_ids = getSideBoundaryIDs(mesh.getMesh());
+  std::map<libMesh::boundary_id_type, std::string> boundary_ids_to_names =
+      mesh.getMesh().get_boundary_info().get_sideset_name_map();
 
   // 9.
   // node_ids_for_boundary_id maps from the boundary ID to a vector of vectors containing
@@ -114,7 +119,9 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
       _mfem_mesh = std::make_shared<LibmeshMFEMMesh>(mesh.nElem(),
                                                      block_info,
                                                      unique_block_ids,
+                                                     block_ids_to_names,
                                                      unique_side_boundary_ids,
+                                                     boundary_ids_to_names,
                                                      unique_corner_node_ids,
                                                      element_ids_for_block_id,
                                                      node_ids_for_element_id,
@@ -131,7 +138,9 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
           std::make_shared<LibmeshMFEMMesh>(mesh.nElem(),
                                             block_info,
                                             unique_block_ids,
+                                            block_ids_to_names,
                                             unique_side_boundary_ids,
+                                            boundary_ids_to_names,
                                             unique_corner_node_ids,
                                             element_ids_for_block_id,
                                             node_ids_for_element_id,
