@@ -164,6 +164,22 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 }
 
 void
+TimeDependentEquationSystem::BuildNonlinearForms()
+{
+  // Register non-linear Action forms
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _nlfs.Register(test_var_name, std::make_shared<mfem::ParNonlinearForm>(_test_pfespaces.at(i)));
+    // Apply kernels
+    auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt);
+    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, _dt);
+  }
+}
+
+void
 TimeDependentEquationSystem::EliminateCoupledVariables()
 {
   for (const auto & test_var_name : _test_var_names)

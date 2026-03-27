@@ -262,6 +262,21 @@
       restep = false
     []
   []
-
-
+  [MFEMNonLinearHeatConduction]
+    design = 'EquationSystem.md'
+    issues = '#32256'
+    requirement = 'The system shall have the ability to solve a transient non-linear problem including both linear and nonlinear domain integrators.'
+    type = CSVDiff
+    input = nl_heatconduction.i
+    csvdiff = 'OutputData/NLHeatConduction_centre_temperature_0000.csv
+                OutputData/NLHeatConduction_centre_temperature_0010.csv
+                OutputData/NLHeatConduction_centre_temperature_0020.csv
+                OutputData/NLHeatConduction_centre_temperature_0030.csv
+                OutputData/NLHeatConduction_centre_temperature_0040.csv
+                OutputData/NLHeatConduction_centre_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    restep = false    
+  []
 []

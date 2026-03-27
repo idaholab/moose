@@ -20,6 +20,7 @@
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
+#include "NLScaleIntegrator.h"
 
 namespace Moose::MFEM
 {
@@ -136,7 +137,8 @@ protected:
   void ApplyDomainNLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+      std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
@@ -157,7 +159,8 @@ protected:
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-          integrated_bc_map);
+          integrated_bc_map,
+      std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.
@@ -273,7 +276,8 @@ inline void
 EquationSystem::ApplyDomainNLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParNonlinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    std::optional<mfem::real_t> scale_factor)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
   {
@@ -284,6 +288,8 @@ EquationSystem::ApplyDomainNLFIntegrators(
       if (integ)
       {
         _non_linear = true;
+        if (scale_factor.has_value())
+          integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
@@ -352,7 +358,8 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParNonlinearForm> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map)
+        integrated_bc_map,
+    std::optional<mfem::real_t> scale_factor)
 {
   if (integrated_bc_map.Has(test_var_name) &&
       integrated_bc_map.Get(test_var_name)->Has(test_var_name))
@@ -364,6 +371,8 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
       if (integ)
       {
         _non_linear = true;
+        if (scale_factor.has_value())
+          integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
