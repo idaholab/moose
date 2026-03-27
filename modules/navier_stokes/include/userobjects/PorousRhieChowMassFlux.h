@@ -33,6 +33,7 @@ public:
                            bool elem_side,
                            const Moose::StateArg & time) const override;
   Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const override;
+  bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const override;
   Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const override;
 
   void initFaceMassFlux() override;
@@ -60,7 +61,6 @@ protected:
   bool useFluxVelocityReconstruction() const override { return _use_flux_velocity_reconstruction; }
 
 private:
-  bool isOneSidedReconstructionFace(const FaceInfo & fi) const;
   void updateGradPrevFromFaceVelocity();
 
   const Moose::Functor<Real> & _eps;
@@ -70,6 +70,8 @@ private:
   std::unordered_set<BoundaryID> _reconstruction_zero_flux_boundary_ids;
 
   const Real _pressure_baffle_relaxation;
+  const bool _use_interpolated_density_in_bernoulli_jump;
+  const bool _use_interpolated_density_in_form_loss;
   std::unordered_map<BoundaryID, Real> _pressure_baffle_form_loss_by_id;
   std::unordered_map<BoundaryID, bool> _pressure_baffle_form_loss_use_higher_eps_by_id;
   const bool _debug_baffle;
