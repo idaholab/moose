@@ -338,7 +338,7 @@ FEProblemBase::validParams()
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
   params.addParam<bool>("show_invalid_solution_console",
                         true,
-                        "Set to true to show the invalid solution occurance summary in console");
+                        "Set to true to show the invalid solution occurrence summary in console");
   params.addParam<bool>("immediately_print_invalid_solution",
                         false,
                         "Whether or not to report invalid solution warnings at the time the "
