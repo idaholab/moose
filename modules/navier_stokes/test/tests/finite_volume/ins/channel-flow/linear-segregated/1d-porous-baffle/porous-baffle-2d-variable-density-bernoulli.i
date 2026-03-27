@@ -2,18 +2,19 @@ length_left = 5.0
 length_right = 5.0
 height = 1.0
 
-nx_left = 40
-nx_right = 40
+nx_left = 25
+nx_right = 25
 ny = 3
 
 epsilon_left = 1.0
-epsilon_right = 1.0
-
+epsilon_right = 0.5
 u_in = 1.0
 p_out = 0.0
 mu = 1.0
 
-advected_interp_method = 'upwind'
+density_factor = 1e-3
+
+advected_interp_method = 'average'
 
 [Mesh]
   [mesh]
@@ -62,26 +63,19 @@ advected_interp_method = 'upwind'
     porosity = 'porosity'
     p_diffusion_kernel = p_diffusion
 
-    # Mark the interface as a pressure baffle so the pressure equation can represent the
-    # jump. No form loss is supplied, so the jump is purely Bernoulli.
     pressure_baffle_sidesets = 'baffle'
-    # For a verification case we do not want the target jump itself to be under-relaxed.
     pressure_baffle_relaxation = 0.1
 
     debug_baffle = false
 
-    # Use the same reconstruction-based path as the sharp constant-density porous-baffle case.
-    # In the variable-density case the reconstruction must treat the baffle one-sidedly:
-    # each adjacent cell uses its own side density and its own previous gradients on the jump
-    # face instead of averaging across the discontinuity.
-    use_flux_velocity_reconstruction = true
-    use_reconstructed_pressure_gradient = true
+    # use_flux_velocity_reconstruction = true
+    # use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
-    # use_corrected_pressure_gradient = false
 
-    pressure_gradient_limiter = 'baffle'
-    pressure_gradient_limiter_blend = 0.0
+    use_interpolated_density_in_bernoulli_jump = true
+    # pressure_gradient_limiter = 'baffle'
+    # pressure_gradient_limiter_blend = 1.0
     use_corrected_pressure_gradient = true
   []
 []
@@ -115,8 +109,8 @@ advected_interp_method = 'upwind'
     momentum_component = 'x'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = false
-    use_two_point_stress_transmissibility = true
+    porosity_outside_divergence = true
+    use_two_point_stress_transmissibility = false
   []
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
@@ -128,8 +122,8 @@ advected_interp_method = 'upwind'
     momentum_component = 'y'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
-    porosity_outside_divergence = false
-    use_two_point_stress_transmissibility = true
+    porosity_outside_divergence = true
+    use_two_point_stress_transmissibility = false
   []
   [u_pressure]
     type = LinearFVMomentumPressureUO
@@ -164,8 +158,6 @@ advected_interp_method = 'upwind'
 []
 
 [LinearFVBCs]
-  # Fix the inlet superficial velocity. Since density changes across the domain, the
-  # right-block superficial velocity must adjust to keep rho * U_s constant.
   [left_u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
@@ -179,18 +171,29 @@ advected_interp_method = 'upwind'
     functor = 0.0
   []
 
+  [pressure-extrapolation]
+    type = LinearFVExtrapolatedPressureBC
+    boundary = 'left'
+    variable = pressure
+    use_two_term_expansion = true
+  []
+
   # Fix the outlet pressure and leave the outlet velocity free.
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
     boundary = right
     variable = superficial_u
-    use_two_term_expansion = false
+    use_two_term_expansion = true
+    assume_fully_developed_flow = false
+    # assume_fully_developed_flow = true
   []
   [outlet_v]
     type = LinearFVAdvectionDiffusionOutflowBC
     boundary = right
     variable = superficial_v
-    use_two_term_expansion = false
+    use_two_term_expansion = true
+    assume_fully_developed_flow = false
+    # assume_fully_developed_flow = true
   []
   [outlet_p]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -227,7 +230,8 @@ advected_interp_method = 'upwind'
 [Functions]
   [rho]
     type = ParsedFunction
-    expression = '1e3 - 0.05e3 * x'
+    expression = '(1e3 - 0.05e3 * x)*${density_factor}'
+    # expression = '1'
   []
 []
 
@@ -320,10 +324,12 @@ advected_interp_method = 'upwind'
 [VectorPostprocessors]
   [centerline_solution]
     type = LineValueSampler
-    variable = 'rho_aux porosity_aux superficial_u pressure'
-    start_point = '0 0.5 0'
-    end_point = '${fparse length_left + length_right} 0.5 0'
-    num_points = 401
+    variable = 'rho_aux superficial_u pressure'
+    # start_point = '${fparse length_left - 0.15} 0.5 0'
+    # end_point = '${fparse length_left + 0.15} 0.5 0'
+    start_point = '0.1 0.5 0'
+    end_point = '${fparse length_left + length_right -0.1} 0.5 0'
+    num_points = 50
     sort_by = x
     execute_on = timestep_end
   []
@@ -340,7 +346,7 @@ advected_interp_method = 'upwind'
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.4
   pressure_variable_relaxation = 0.2
-  num_iterations = 1000
+  num_iterations = 2000
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
