@@ -69,6 +69,9 @@ public:
   /// Public baffle-face query for kernel-side assembly decisions
   bool faceIsBaffle(const FaceInfo & fi) const { return isBaffleFace(fi); }
 
+  /// Query whether a face should use one-sided porous reconstruction/treatment
+  virtual bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
+
   /// Get the corrected pressure gradient component at an element center
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center

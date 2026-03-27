@@ -41,6 +41,14 @@ PorousRhieChowMassFlux::validParams()
                                     1.0,
                                     "0.0<pressure_baffle_relaxation<=1.0",
                                     "Under-relaxation factor for pressure baffle jump updates.");
+  params.addParam<bool>("use_interpolated_density_in_bernoulli_jump",
+                        false,
+                        "Use the face-interpolated density in the reversible Bernoulli jump term "
+                        "instead of the owner/non-owner side densities.");
+  params.addParam<bool>("use_interpolated_density_in_form_loss",
+                        false,
+                        "Use the face-interpolated density when forming the reference velocity "
+                        "for the irreversible baffle form-loss term.");
   params.addParam<std::vector<Real>>(
       "baffle_form_loss",
       std::vector<Real>(),
@@ -92,6 +100,9 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
   : RhieChowMassFlux(params),
     _eps(getFunctor<Real>(NS::porosity)),
     _pressure_baffle_relaxation(getParam<Real>("pressure_baffle_relaxation")),
+    _use_interpolated_density_in_bernoulli_jump(
+        getParam<bool>("use_interpolated_density_in_bernoulli_jump")),
+    _use_interpolated_density_in_form_loss(getParam<bool>("use_interpolated_density_in_form_loss")),
     _debug_baffle(getParam<bool>("debug_baffle")),
     _use_flux_velocity_reconstruction(getParam<bool>("use_flux_velocity_reconstruction")),
     _flux_velocity_reconstruction_relaxation(
@@ -531,8 +542,8 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     const Real U_n = face_rho != 0.0 ? phi / face_rho : 0.0;
 
     // The momentum predictor keeps the ordinary conservative advection treatment while the
-    // pressure-baffle operator carries the reversible Bernoulli jump, so we use the full
-    // side-local kinetic-head difference here.
+    // pressure-baffle operator carries the reversible Bernoulli jump. By default that jump uses
+    // the side-local densities; optionally it can use the face-interpolated density on both sides.
     const Real u_elem = (elem_rho != 0.0 && eps_elem != 0.0) ? phi / (elem_rho * eps_elem) : 0.0;
     const Real u_neighbor =
         (neighbor_rho != 0.0 && eps_neighbor != 0.0) ? phi / (neighbor_rho * eps_neighbor) : 0.0;
@@ -540,10 +551,29 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     const Real rho_non_owner = elem_is_owner ? neighbor_rho : elem_rho;
     const Real eps_owner = elem_is_owner ? eps_elem : eps_neighbor;
     const Real eps_non_owner = elem_is_owner ? eps_neighbor : eps_elem;
-    const Real u_owner = elem_is_owner ? u_elem : u_neighbor;
-    const Real u_non_owner = elem_is_owner ? u_neighbor : u_elem;
+    const Real bernoulli_rho_owner =
+        _use_interpolated_density_in_bernoulli_jump ? face_rho : rho_owner;
+    const Real bernoulli_rho_non_owner =
+        _use_interpolated_density_in_bernoulli_jump ? face_rho : rho_non_owner;
+    Real J_new = 0.0;
 
-    Real J_new = 0.5 * (rho_owner * u_owner * u_owner - rho_non_owner * u_non_owner * u_non_owner);
+    if (_use_interpolated_density_in_bernoulli_jump)
+    {
+      const Real u_owner = (eps_owner != 0.0) ? U_n / eps_owner : 0.0;
+      const Real u_non_owner = (eps_non_owner != 0.0) ? U_n / eps_non_owner : 0.0;
+
+      J_new = 0.5 * face_rho * (u_owner * u_owner - u_non_owner * u_non_owner);
+    }
+    else
+    {
+      const Real u_owner =
+          (rho_owner != 0.0 && eps_owner != 0.0) ? phi / (rho_owner * eps_owner) : 0.0;
+      const Real u_non_owner = (rho_non_owner != 0.0 && eps_non_owner != 0.0)
+                                   ? phi / (rho_non_owner * eps_non_owner)
+                                   : 0.0;
+
+      J_new = 0.5 * (rho_owner * u_owner * u_owner - rho_non_owner * u_non_owner * u_non_owner);
+    }
 
     Real J_loss = 0.0;
     Real form_loss = 0.0;
@@ -572,7 +602,10 @@ PorousRhieChowMassFlux::updateBaffleJumps()
     {
       const bool pick_elem =
           use_higher_eps ? (eps_elem >= eps_neighbor) : (eps_elem <= eps_neighbor);
-      const Real u_ref = pick_elem ? u_elem : u_neighbor;
+      const Real eps_ref = pick_elem ? eps_elem : eps_neighbor;
+      const Real u_ref = _use_interpolated_density_in_form_loss
+                             ? ((eps_ref != 0.0) ? U_n / eps_ref : 0.0)
+                             : (pick_elem ? u_elem : u_neighbor);
       const Real flow_sign = U_n > 0.0 ? 1.0 : -1.0;
       J_loss = -flow_sign * 0.5 * form_loss * face_rho * u_ref * u_ref;
       J_new += J_loss;
@@ -589,13 +622,15 @@ PorousRhieChowMassFlux::updateBaffleJumps()
       const auto neigh_bnds = _moose_mesh.getBoundaryIDs(fi->neighborPtr(), fi->neighborSideID());
       _console << "Baffle jump face " << fi->id() << " elem_block=" << fi->elem().subdomain_id()
                << " neigh_block=" << fi->neighbor().subdomain_id()
-               << " elem_is_owner=" << elem_is_owner
-               << " elem_bnds=" << stringify_bnds(elem_bnds)
+               << " elem_is_owner=" << elem_is_owner << " elem_bnds=" << stringify_bnds(elem_bnds)
                << " neigh_bnds=" << stringify_bnds(neigh_bnds) << " phi=" << phi << " U_n=" << U_n
                << " rho_f=" << face_rho << " eps_elem=" << eps_elem << " eps_neigh=" << eps_neighbor
                << " eps_owner=" << eps_owner << " eps_non_owner=" << eps_non_owner
-               << " K=" << form_loss << " J_new=" << J_new << " J_loss=" << J_loss
-               << " J_old=" << J_old << " J=" << _baffle_jump[fi->id()] << std::endl;
+               << " rho_owner=" << rho_owner << " rho_non_owner=" << rho_non_owner
+               << " bernoulli_rho_owner=" << bernoulli_rho_owner
+               << " bernoulli_rho_non_owner=" << bernoulli_rho_non_owner << " K=" << form_loss
+               << " J_new=" << J_new << " J_loss=" << J_loss << " J_old=" << J_old
+               << " J=" << _baffle_jump[fi->id()] << std::endl;
     }
   }
 }
@@ -666,24 +701,16 @@ PorousRhieChowMassFlux::computeCorrectedPressureGradient()
         const auto neighbor_dof =
             neighbor_info_face->dofIndices()[_global_pressure_system_number][0];
         const Real p_neighbor = p_reader(neighbor_dof);
-        const Real phi = _face_mass_flux.evaluate(fi);
-        const bool sided_elem_is_upwind = elem_has_info ? (phi >= 0.0) : (phi <= 0.0);
-
-        // Mirror the Bernoulli pressure-variable treatment:
-        // - the upwind side sees a Dirichlet face value reconstructed from the downwind cell
-        //   plus the Bernoulli jump
-        // - the downwind side uses a one-term expansion from its own cell
-        if (sided_elem_is_upwind)
-        {
-          const Real jump_side = getSignedBaffleJump(*fi, elem_has_info);
-          p_face = p_neighbor + jump_side;
-        }
+        const auto coeffs =
+            Moose::FV::interpCoeffs(Moose::FV::InterpMethod::Average, *fi, elem_has_info);
+        const Real jump_side = getSignedBaffleJump(*fi, elem_has_info);
+        p_face = coeffs.first * p_elem + coeffs.second * (p_neighbor + jump_side);
 
         if (_debug_baffle)
           _console << "Baffle grad face " << fi->id() << " elem_has_info=" << elem_has_info
-                   << " phi=" << phi << " upwind_side=" << sided_elem_is_upwind
                    << " p_elem=" << p_elem << " p_neigh=" << p_neighbor << " p_face=" << p_face
-                   << std::endl;
+                   << " jump_side=" << jump_side << " coeffs=(" << coeffs.first << ", "
+                   << coeffs.second << ")" << std::endl;
       }
       else if (neighbor_active && (!limited || _pressure_gradient_limiter_blend > 0.0))
       {
@@ -804,9 +831,9 @@ PorousRhieChowMassFlux::isReconstructionZeroFluxFace(const FaceInfo & fi) const
 }
 
 bool
-PorousRhieChowMassFlux::isOneSidedReconstructionFace(const FaceInfo & fi) const
+PorousRhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo & fi) const
 {
-  return isBaffleFace(fi) || isPressureGradientLimited(fi);
+  return isPressureGradientLimited(fi);
 }
 
 void
@@ -848,7 +875,7 @@ PorousRhieChowMassFlux::updateGradPrevFromFaceVelocity()
 
       const bool neighbor_active =
           neighbor_info_face && hasBlocks(neighbor_info_face->subdomain_id());
-      const bool one_sided_face = neighbor_active && isOneSidedReconstructionFace(*fi);
+      const bool one_sided_face = neighbor_active && faceUsesOneSidedReconstruction(*fi);
 
       for (const auto comp_index : make_range(_dim))
       {
@@ -944,7 +971,6 @@ PorousRhieChowMassFlux::computeCellVelocity()
     var_nums.push_back(
         _momentum_implicit_systems[comp_index]->variable_number(_vel[comp_index]->name()));
 
-  const auto time_arg = Moose::currentState();
   const auto & mesh = _fe_problem.mesh();
   const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
 
@@ -954,16 +980,14 @@ PorousRhieChowMassFlux::computeCellVelocity()
       continue;
 
     DenseMatrix<Real> M(_dim, _dim);
-    DenseVector<Real> b_h(_dim);
-    DenseVector<Real> b_p(_dim);
+    DenseVector<Real> b_grad(_dim);
     M.zero();
-    b_h.zero();
-    b_p.zero();
+    b_grad.zero();
 
     const Elem & elem = *elem_info->elem();
 
     auto act = [&](const Elem &,
-                   const Elem * const neighbor,
+                   const Elem * const,
                    const FaceInfo * const fi,
                    const Point & surface_vector,
                    const Real /*coord*/,
@@ -973,82 +997,18 @@ PorousRhieChowMassFlux::computeCellVelocity()
       if (magS == 0.0)
         return;
 
-      const Elem * const elem_face = elem_has_info ? fi->elemPtr() : fi->neighborPtr();
-      const Elem * const neighbor_face = elem_has_info ? fi->neighborPtr() : fi->elemPtr();
-
-      const bool neighbor_active =
-          neighbor && neighbor_face && hasBlocks(neighbor_face->subdomain_id());
-      const bool one_sided_face = neighbor_active && isOneSidedReconstructionFace(*fi);
-
-      Real face_rho = 0.0;
-      if (neighbor_active)
-      {
-        const Real elem_rho = _rho(makeElemArg(elem_face), time_arg);
-        const Real neighbor_rho = _rho(makeElemArg(neighbor_face), time_arg);
-        if (one_sided_face)
-          face_rho = elem_rho;
-        else
-          Moose::FV::interpolate(
-              Moose::FV::InterpMethod::Average, face_rho, elem_rho, neighbor_rho, *fi, true);
-      }
-      else
-      {
-        const Moose::FaceArg boundary_face{
-            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_face, nullptr};
-        face_rho = _rho(boundary_face, time_arg);
-      }
-
-      const bool enforce_zero_flux = !neighbor_active && isReconstructionZeroFluxFace(*fi);
-
-      const Real h_flux_raw = _HbyA_flux.evaluate(fi);
-      const Real h_flux = elem_has_info ? h_flux_raw : -h_flux_raw;
       const Real p_grad_flux_raw = _p_grad_flux.evaluate(fi);
       const Real p_grad_flux = elem_has_info ? p_grad_flux_raw : -p_grad_flux_raw;
-
-      const Real H = (enforce_zero_flux || face_rho == 0.0) ? 0.0 : h_flux / face_rho;
-      const Real P = (enforce_zero_flux || face_rho == 0.0) ? 0.0 : p_grad_flux / face_rho;
-
-      const Point dPf = fi->faceCentroid() - elem_info->centroid();
-
-      std::vector<Real> grad_times_dpf(_dim, 0.0);
-      if (!_grad_w_prev.empty())
-      {
-        for (const auto comp_index : make_range(_dim))
-        {
-          const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
-          const unsigned int var_num = var_nums[comp_index];
-          const auto elem_dof = elem_face->dof_number(system_number, var_num, 0);
-          const auto neighbor_dof =
-              neighbor_active ? neighbor_face->dof_number(system_number, var_num, 0) : elem_dof;
-
-          Real comp_val = 0.0;
-          for (const auto dir_index : make_range(_dim))
-          {
-            const Real grad_elem = (*_grad_w_prev[comp_index][dir_index])(elem_dof);
-            const Real grad_neighbor =
-                neighbor_active ? (*_grad_w_prev[comp_index][dir_index])(neighbor_dof) : grad_elem;
-            const Real grad_face =
-                one_sided_face
-                    ? grad_elem
-                    : (neighbor_active ? 0.5 * (grad_elem + grad_neighbor) : grad_elem);
-            comp_val += grad_face * dPf(dir_index);
-          }
-          grad_times_dpf[comp_index] = comp_val;
-        }
-      }
-
-      Real corr = 0.0;
-      for (const auto comp_index : make_range(_dim))
-        corr += grad_times_dpf[comp_index] * surface_vector(comp_index);
+      const auto & Ainv_face = _Ainv[fi->id()];
+      Real normal_diffusion = 0.0;
+      for (const auto i : make_range(_dim))
+        normal_diffusion += fi->normal()(i) * Ainv_face(i) * fi->normal()(i);
+      const Real face_normal_pressure_gradient =
+          normal_diffusion != 0.0 ? -p_grad_flux / normal_diffusion : 0.0;
 
       for (const auto i : make_range(_dim))
       {
-        // H and P are face-normal velocity components (flux density / rho). Convert to
-        // integrated face flux by multiplying with |S| via surface_vector.
-        b_h(i) += H * surface_vector(i);
-        // corr is built from grad(U) * dPf and dotted with surface_vector, so normalize by |S|
-        // before combining with P.
-        b_p(i) += (P - corr / magS) * surface_vector(i);
+        b_grad(i) += face_normal_pressure_gradient * surface_vector(i);
         for (const auto j : make_range(_dim))
           M(i, j) += surface_vector(i) * surface_vector(j) / magS;
       }
@@ -1057,36 +1017,28 @@ PorousRhieChowMassFlux::computeCellVelocity()
     Moose::FV::loopOverElemFaceInfo(
         elem, _moose_mesh, act, mesh.getCoordSystem(elem.subdomain_id()), rz_radial_coord);
 
-    DenseVector<Real> result_h(_dim);
-    DenseVector<Real> result_p(_dim);
+    DenseVector<Real> grad_result(_dim);
     if (_dim == 1)
     {
       const Real denom = M(0, 0);
-      result_h(0) = denom != 0.0 ? b_h(0) / denom : 0.0;
-      result_p(0) = denom != 0.0 ? b_p(0) / denom : 0.0;
+      grad_result(0) = denom != 0.0 ? b_grad(0) / denom : 0.0;
     }
     else
-    {
-      M.cholesky_solve(b_h, result_h);
-      M.cholesky_solve(b_p, result_p);
-    }
+      M.cholesky_solve(b_grad, grad_result);
 
     for (const auto comp_index : make_range(_dim))
     {
       const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
       const auto index = elem.dof_number(system_number, var_nums[comp_index], 0);
+      const Real old_grad = grad_p_old.empty() ? grad_result(comp_index)
+                                               : (*grad_p_old[comp_index])(index);
       const Real old_val = (*_momentum_implicit_systems[comp_index]->current_local_solution)(index);
       const Real alpha = _flux_velocity_reconstruction_relaxation;
-      const Real recon_val = -result_h(comp_index) + result_p(comp_index);
+      const Real new_grad = (1.0 - alpha) * old_grad + alpha * grad_result(comp_index);
+      const Real recon_val =
+          -(*_HbyA_raw[comp_index])(index) - (*_Ainv_raw[comp_index])(index) * new_grad;
       const Real new_val = (1.0 - alpha) * old_val + alpha * recon_val;
       _momentum_implicit_systems[comp_index]->solution->set(index, new_val);
-
-      const Real HbyA = (*_HbyA_raw[comp_index])(index);
-      const Real Ainv = (*_Ainv_raw[comp_index])(index);
-      Real grad_tilde =
-          Ainv != 0.0 ? (result_h(comp_index) - result_p(comp_index) - HbyA) / Ainv : 0.0;
-      const Real old_grad = grad_p_old.empty() ? grad_tilde : (*grad_p_old[comp_index])(index);
-      const Real new_grad = (1.0 - alpha) * old_grad + alpha * grad_tilde;
       _grad_p_reconstructed[comp_index]->set(index, new_grad);
     }
   }
