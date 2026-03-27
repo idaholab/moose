@@ -152,7 +152,7 @@ p_left_exact_const = '${fparse p_out + delta_p_exact_const}'
     # use_corrected_pressure_gradient = false
 
     pressure_gradient_limiter = 'baffle'
-    pressure_gradient_limiter_blend = 1.0
+    pressure_gradient_limiter_blend = 0.0
     use_corrected_pressure_gradient = true
   []
 []
