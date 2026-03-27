@@ -15,22 +15,37 @@ InputParameters
 LinearFVAdvectionDiffusionOutflowBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionExtrapolatedBC::validParams();
+
   params.addClassDescription("Adds a boundary condition which represents a surface with outflowing "
                              "material with a constant velocity. This kernel is only compatible "
                              "with advection-diffusion problems.");
+  params.addParam<bool>(
+      "assume_fully_developed_flow",
+      false,
+      "Flag to assume a zero normal gradient (fully developed flow) at the boundary.");
   return params;
 }
 
 LinearFVAdvectionDiffusionOutflowBC::LinearFVAdvectionDiffusionOutflowBC(
     const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionExtrapolatedBC(parameters)
+  : LinearFVAdvectionDiffusionExtrapolatedBC(parameters),
+    _assume_fully_developed_flow(getParam<bool>("assume_fully_developed_flow"))
 {
 }
 
 Real
 LinearFVAdvectionDiffusionOutflowBC::computeBoundaryNormalGradient() const
 {
-  return 0;
+  if (_assume_fully_developed_flow)
+    return 0;
+
+  const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
+  const Real sign = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+  return _var.gradSln(*elem_info) * (sign * _current_face_info->normal());
 }
 
 Real
@@ -42,5 +57,5 @@ LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientMatrixContribution()
 Real
 LinearFVAdvectionDiffusionOutflowBC::computeBoundaryGradientRHSContribution() const
 {
-  return 0;
+  return computeBoundaryNormalGradient();
 }
