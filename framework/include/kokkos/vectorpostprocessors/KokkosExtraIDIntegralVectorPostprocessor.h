@@ -16,6 +16,14 @@
 
 class KokkosExtraIDIntegralVectorPostprocessor : public Moose::Kokkos::ElementVectorPostprocessor
 {
+  template <typename T>
+  using Array = Moose::Kokkos::Array<T>;
+
+  template <typename T>
+  using MaterialProperty = Moose::Kokkos::MaterialProperty<T>;
+
+  using VariableValue = Moose::Kokkos::VariableValue;
+
 public:
   static InputParameters validParams();
   KokkosExtraIDIntegralVectorPostprocessor(const InputParameters & parameters);
@@ -27,7 +35,7 @@ public:
 
   KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
-  KOKKOS_FUNCTION void execute(Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
   KOKKOS_FUNCTION void execute(Datum & datum) const;
 
 protected:
@@ -49,15 +57,15 @@ protected:
   const unsigned int _n_extra_id;
   /// Map of element ids to parsed vpp ids
   std::unordered_map<dof_id_type, dof_id_type> _unique_vpp_id_map;
-  Moose::Kokkos::Array<dof_id_type> _unique_vpp_ids;
+  Array<Array<dof_id_type>> _unique_vpp_ids;
   /// Quadrature point values of coupled MOOSE variables
-  Moose::Kokkos::VariableValue _var_values;
+  VariableValue _var_values;
   /// Material properties to be integrated
-  Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _props;
+  Array<MaterialProperty<Real>> _props;
   /// Vector holding the volume of extra IDs
-  Moose::Kokkos::Array<Real> _volumes;
+  Array<Real> _volumes;
   /// Vectors holding integrals over extra IDs
-  Moose::Kokkos::Array<Moose::Kokkos::Array<Real>> _integrals;
+  Array<Array<Real>> _integrals;
   /// Vectors holding extra IDs
   std::vector<VectorPostprocessorValue *> _extra_ids;
   /// Size of each vector
@@ -87,9 +95,9 @@ KokkosExtraIDIntegralVectorPostprocessor::init(ReducerLoop, Real * result) const
 }
 
 KOKKOS_FUNCTION inline void
-KokkosExtraIDIntegralVectorPostprocessor::execute(Datum & datum, Real * result) const
+KokkosExtraIDIntegralVectorPostprocessor::reduce(Datum & datum, Real * result) const
 {
-  const auto ipos = _unique_vpp_ids[datum.elemID()];
+  const auto ipos = _unique_vpp_ids[datum.subdomain()](datum.elemID());
   const auto & var = _var_values.variable();
   const auto subdomain = datum.subdomain();
 
@@ -124,7 +132,7 @@ KokkosExtraIDIntegralVectorPostprocessor::execute(Datum & datum, Real * result) 
 KOKKOS_FUNCTION inline void
 KokkosExtraIDIntegralVectorPostprocessor::execute(Datum & datum) const
 {
-  const auto ipos = _unique_vpp_ids[datum.elemID()];
+  const auto ipos = _unique_vpp_ids[datum.subdomain()](datum.elemID());
   const auto & var = _var_values.variable();
   const auto subdomain = datum.subdomain();
 

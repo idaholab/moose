@@ -82,7 +82,9 @@ public:
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int /* qp */,
                                                 Datum & /* datum */) const
   {
-    KOKKOS_ASSERT(false);
+    ::Kokkos::abort(
+        "Default initQpStatefulProperties() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
   }
   ///@}
 

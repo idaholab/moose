@@ -29,7 +29,7 @@ public:
    */
   NodalReducer(const NodalReducer & object);
 
-  virtual void reduce() override;
+  virtual void computeReducer() override;
 
   /**
    * The parallel computation entry function called by Kokkos
@@ -60,7 +60,7 @@ NodalReducer::operator()(ReducerLoop,
 
   Datum datum(node, kokkosAssembly(), kokkosSystems());
 
-  reducer.executeShim(reducer, datum, result);
+  reducer.reduceShim(reducer, datum, result);
 }
 
 } // namespace Moose::Kokkos

@@ -46,7 +46,7 @@ NodalReducer::NodalReducer(const NodalReducer & object)
 }
 
 void
-NodalReducer::reduce()
+NodalReducer::computeReducer()
 {
   if (!_reduction_buffer.is_allocated())
     mooseError("Reduction buffer was not allocated.");

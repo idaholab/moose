@@ -46,20 +46,10 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void operator()(DefaultLoop, const ThreadID tid, const Derived & object) const;
 
-  /**
-   * Shim for hook method that can be leveraged to implement static polymorphism
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void executeShim(const Derived & object, Datum & datum) const
-  {
-    object.execute(datum);
-  }
-
   using SideReducer::operator();
-  using SideReducer::executeShim;
 
 protected:
-  virtual void dispatch();
+  virtual void computeUserObject();
 };
 
 template <typename Derived>

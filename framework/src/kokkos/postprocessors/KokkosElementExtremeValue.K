@@ -9,7 +9,7 @@
 
 #include "KokkosElementExtremeValue.h"
 
-registerKokkosReducer("MooseApp", KokkosElementExtremeValue);
+registerKokkosUserObject("MooseApp", KokkosElementExtremeValue);
 
 InputParameters
 KokkosElementExtremeValue::validParams()

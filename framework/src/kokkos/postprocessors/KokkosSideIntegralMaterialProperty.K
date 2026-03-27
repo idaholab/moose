@@ -9,7 +9,7 @@
 
 #include "KokkosSideIntegralMaterialProperty.h"
 
-registerKokkosReducer("MooseApp", KokkosSideIntegralMaterialProperty);
+registerKokkosUserObject("MooseApp", KokkosSideIntegralMaterialProperty);
 
 InputParameters
 KokkosSideIntegralMaterialProperty::validParams()

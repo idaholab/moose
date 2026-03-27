@@ -30,7 +30,7 @@ SideReducer::SideReducer(const SideReducer & object)
 }
 
 void
-SideReducer::reduce()
+SideReducer::computeReducer()
 {
   if (!_reduction_buffer.is_allocated())
     mooseError("Reduction buffer was not allocated.");

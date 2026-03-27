@@ -9,4 +9,4 @@
 
 #include "KokkosSideIntegralVariablePostprocessor.h"
 
-registerKokkosReducer("MooseApp", KokkosSideIntegralVariablePostprocessor);
+registerKokkosUserObject("MooseApp", KokkosSideIntegralVariablePostprocessor);

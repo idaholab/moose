@@ -9,7 +9,7 @@
 
 #include "KokkosNodalSum.h"
 
-registerKokkosReducer("MooseApp", KokkosNodalSum);
+registerKokkosUserObject("MooseApp", KokkosNodalSum);
 
 InputParameters
 KokkosNodalSum::validParams()

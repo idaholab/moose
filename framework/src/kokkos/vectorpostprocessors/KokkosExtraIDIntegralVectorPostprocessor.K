@@ -16,7 +16,6 @@
 #include "libmesh/mesh_base.h"
 
 registerKokkosUserObject("MooseApp", KokkosExtraIDIntegralVectorPostprocessor);
-registerKokkosReducer("MooseApp", KokkosExtraIDIntegralVectorPostprocessor);
 
 InputParameters
 KokkosExtraIDIntegralVectorPostprocessor::validParams()
@@ -74,7 +73,7 @@ KokkosExtraIDIntegralVectorPostprocessor::KokkosExtraIDIntegralVectorPostprocess
     {
       if (!hasBlocks(elem->subdomain_id()))
         continue;
-      auto vpp_id = _unique_vpp_id_map[elem->id()];
+      auto vpp_id = libmesh_map_find(_unique_vpp_id_map, elem->id());
       if (extra_ids.find(vpp_id) == extra_ids.end())
         extra_ids[vpp_id] = elem->get_extra_integer(getElementIDIndexByName(id_type));
     }
@@ -132,12 +131,26 @@ KokkosExtraIDIntegralVectorPostprocessor::KokkosExtraIDIntegralVectorPostprocess
 void
 KokkosExtraIDIntegralVectorPostprocessor::initialSetup()
 {
-  _unique_vpp_ids.create(_unique_vpp_id_map.size());
+  _unique_vpp_ids.create(kokkosMesh().getNumSubdomains());
 
-  for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
-    _unique_vpp_ids[kokkosMesh().getContiguousElementID(elem)] = _unique_vpp_id_map[elem->id()];
+  for (const auto block : blockIDs())
+  {
+    const auto sid = kokkosMesh().getContiguousSubdomainID(block);
 
-  _unique_vpp_ids.moveToDevice();
+    _unique_vpp_ids[sid].create(kokkosMesh().getNumSubdomainLocalElements(block));
+    _unique_vpp_ids[sid].offset(*kokkosMesh().getSubdomainContiguousElementIDRange(block).begin());
+
+    for (const auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(block))
+    {
+      const auto eid = kokkosMesh().getContiguousElementID(elem);
+
+      _unique_vpp_ids[sid](eid) = libmesh_map_find(_unique_vpp_id_map, elem->id());
+    }
+
+    _unique_vpp_ids[sid].moveToDevice();
+  }
+
+  _unique_vpp_ids.copyToDevice();
 }
 
 void
@@ -162,9 +175,9 @@ void
 KokkosExtraIDIntegralVectorPostprocessor::compute()
 {
   if (_mode == "atomic")
-    dispatch();
+    computeUserObject();
   else
-    reduce();
+    computeReducer();
 }
 
 void

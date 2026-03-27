@@ -46,14 +46,22 @@ SideUserObject::SideUserObject(const SideUserObject & object)
 void
 SideUserObject::compute()
 {
-  if (DispatcherRegistry::hasDispatcher<ReducerLoop>(type()))
-    reduce();
+  if (DispatcherRegistry::hasUserMethod<DefaultLoop>(type()) ==
+      DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    mooseError("Cannot determine whether '",
+               name(),
+               "' is a regular user object or a reducer object. Either none or both of the "
+               "execute() and reduce() methods were specified. Check if they were defined properly "
+               "and override compute() if you want to manually choose the behavior.");
+
+  if (DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    computeReducer();
   else
-    dispatch();
+    computeUserObject();
 }
 
 void
-SideUserObject::dispatch()
+SideUserObject::computeUserObject()
 {
   Policy policy(0, numKokkosBoundarySides());
 

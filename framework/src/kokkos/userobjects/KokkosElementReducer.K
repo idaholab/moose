@@ -30,7 +30,7 @@ ElementReducer::ElementReducer(const ElementReducer & object)
 }
 
 void
-ElementReducer::reduce()
+ElementReducer::computeReducer()
 {
   if (!_reduction_buffer.is_allocated())
     mooseError("Reduction buffer was not allocated.");

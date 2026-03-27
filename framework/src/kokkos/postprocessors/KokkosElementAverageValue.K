@@ -9,4 +9,4 @@
 
 #include "KokkosElementAverageValue.h"
 
-registerKokkosReducer("MooseApp", KokkosElementAverageValue);
+registerKokkosUserObject("MooseApp", KokkosElementAverageValue);

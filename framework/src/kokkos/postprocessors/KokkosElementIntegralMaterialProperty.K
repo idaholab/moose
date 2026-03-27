@@ -9,4 +9,4 @@
 
 #include "KokkosElementIntegralMaterialProperty.h"
 
-registerKokkosReducer("MooseApp", KokkosElementIntegralMaterialProperty);
+registerKokkosUserObject("MooseApp", KokkosElementIntegralMaterialProperty);

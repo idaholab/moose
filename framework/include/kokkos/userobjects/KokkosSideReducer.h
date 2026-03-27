@@ -28,7 +28,7 @@ public:
    */
   SideReducer(const SideReducer & object);
 
-  virtual void reduce() override;
+  virtual void computeReducer() override;
 
   /**
    * The parallel computation entry function called by Kokkos
@@ -49,7 +49,7 @@ SideReducer::operator()(ReducerLoop,
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  reducer.executeShim(reducer, datum, result);
+  reducer.reduceShim(reducer, datum, result);
 }
 
 } // namespace Moose::Kokkos

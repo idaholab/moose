@@ -9,7 +9,7 @@
 
 #include "KokkosElementL2Norm.h"
 
-registerKokkosReducer("MooseApp", KokkosElementL2Norm);
+registerKokkosUserObject("MooseApp", KokkosElementL2Norm);
 
 InputParameters
 KokkosElementL2Norm::validParams()

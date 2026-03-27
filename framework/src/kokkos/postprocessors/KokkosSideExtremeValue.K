@@ -9,7 +9,7 @@
 
 #include "KokkosSideExtremeValue.h"
 
-registerKokkosReducer("MooseApp", KokkosSideExtremeValue);
+registerKokkosUserObject("MooseApp", KokkosSideExtremeValue);
 
 InputParameters
 KokkosSideExtremeValue::validParams()

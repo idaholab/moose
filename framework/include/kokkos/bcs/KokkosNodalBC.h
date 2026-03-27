@@ -77,7 +77,9 @@ public:
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
-    KOKKOS_ASSERT(false);
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
 
     return 0;
   }

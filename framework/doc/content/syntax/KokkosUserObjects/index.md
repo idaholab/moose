@@ -40,19 +40,18 @@ Different types of Kokkos-MOOSE user objects are executed without any predefined
 
 Postprocessors, vector postprocessors, and reporters often perform calculations that aggregate data.
 Such aggregation calculation is also known as reduction operation.
-If your calculation is considered more suitable for a reduction operation than an ordinary parallel operation, you can register your user object with `registerKokkosReducer()` instead of `registerKokkosUserObject()`.
-This makes your user object a `Reducer` object, which uses a different parallelization scheme and interface from regular parallel objects.
+If your calculation is considered more suitable for a reduction operation than an ordinary parallel operation, you can make your user object a `Reducer` object by defining different hook methods, which will use a different parallelization scheme from regular parallel objects.
 
 Reduction operations are not trivial on GPU due to its massively parallel nature that requires the data race to be carefully managed.
 Therefore, you cannot directly perform reduction operations on your own variables.
 Instead, the reduction operations should be performed on a preallocated buffer defined by the reducer.
 Every reducer should allocate the buffer with the desired size by calling `allocateReductionBuffer()` prior to the calculation, which can be done either in the constructor or in the `initialize()` hook.
 It allocates `_reduction_buffer`, which is a one-dimensional `Kokkos::View` defined in the CPU space.
-And the `execute()` hook method now receives an additional argument `result` that points to a buffer where you need to perform your reduction operations.
+The hook method is now named as `reduce()` and receives an additional argument `result` that points to a buffer where you need to perform your reduction operations.
 This buffer has the same size with `_reduction_buffer`, but it is a buffer internally defined by Kokkos and is different from `_reduction_buffer`:
 
 ```cpp
-KOKKOS_FUNCTION void execute(Datum & datum, Real * result) const;
+KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 ```
 
 A reducer also requires two more hook methods to be defined in your derived object, which are `join()` and `init()`.

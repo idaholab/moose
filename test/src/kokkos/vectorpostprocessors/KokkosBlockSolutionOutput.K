@@ -51,7 +51,7 @@ KokkosBlockSolutionOutput::finalize()
   {
     sum[block] = 0;
 
-    for (auto elem : _mesh.active_local_subdomain_element_ptr_range(block))
+    for (auto elem : _mesh.active_local_subdomain_elements_ptr_range(block))
       sum[block] += _solution[kokkosMesh().getContiguousElementID(elem)];
   }
 

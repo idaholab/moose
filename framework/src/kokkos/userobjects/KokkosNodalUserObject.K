@@ -45,14 +45,22 @@ NodalUserObject::NodalUserObject(const NodalUserObject & object)
 void
 NodalUserObject::compute()
 {
-  if (DispatcherRegistry::hasDispatcher<ReducerLoop>(type()))
-    reduce();
+  if (DispatcherRegistry::hasUserMethod<DefaultLoop>(type()) ==
+      DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    mooseError("Cannot determine whether '",
+               name(),
+               "' is a regular user object or a reducer object. Either none or both of the "
+               "execute() and reduce() methods were specified. Check if they were defined properly "
+               "and override compute() if you want to manually choose the behavior.");
+
+  if (DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    computeReducer();
   else
-    dispatch();
+    computeUserObject();
 }
 
 void
-NodalUserObject::dispatch()
+NodalUserObject::computeUserObject()
 {
   Policy policy = _bnd ? Policy(0, numKokkosBoundaryNodes()) : Policy(0, numKokkosBlockNodes());
 

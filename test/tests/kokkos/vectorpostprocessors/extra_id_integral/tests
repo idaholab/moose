@@ -99,7 +99,7 @@
       detail = 'with multiple variable and material property integrals and multiple extra IDs'
       recover = false
       prereq = atomic/vars_and_mats
-      capabilities = 'kokkos'
+      capabilities = 'kokkos & !cuda'
       compute_devices = 'cpu' # Array too large for reduction using CUDA shared memory
     []
     [vars_and_mats_average]
@@ -110,7 +110,7 @@
       detail = 'with multiple variable and material property averages and multiple extra IDs'
       recover = false
       prereq = atomic/vars_and_mats_average
-      capabilities = 'kokkos'
+      capabilities = 'kokkos & !cuda'
       compute_devices = 'cpu' # Array too large for reduction using CUDA shared memory
     []
   []

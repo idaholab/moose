@@ -286,21 +286,6 @@ public:
   }
 
   /**
-   * Check whether a dispatcher exists for an object and function
-   * @tparam Operation The function tag of operator()
-   * @param name The registered object type name
-   * @returns Whether a dispatcher exists
-   */
-  template <typename Operation>
-  static bool hasDispatcher(const std::string & name)
-  {
-    auto operation = std::type_index(typeid(Operation));
-
-    return getRegistry()._dispatchers.find(std::make_pair(operation, name)) !=
-           getRegistry()._dispatchers.end();
-  }
-
-  /**
    * Set whether the user has overriden the hook method associated with an operation of a functor
    * @tparam Operation The function tag of operator()
    * @param name The registered object type name
@@ -496,6 +481,20 @@ private:
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::DefaultLoop, classname>(objectname);              \
+    DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
+    DispatcherRegistry::hasUserMethod<classname::DefaultLoop>(                                     \
+        objectname,                                                                                \
+        static_cast<decltype(classname::defaultExecute())>(&classname::execute) !=                 \
+                classname::defaultExecute() ||                                                     \
+            static_cast<decltype(classname::defaultExecuteShim<classname>())>(                     \
+                &classname::executeShim<classname>) !=                                             \
+                classname::defaultExecuteShim<classname>());                                       \
+    DispatcherRegistry::hasUserMethod<classname::ReducerLoop>(                                     \
+        objectname,                                                                                \
+        static_cast<decltype(classname::defaultReduce())>(&classname::reduce) !=                   \
+                classname::defaultReduce() ||                                                      \
+            static_cast<decltype(classname::defaultReduceShim<classname>())>(                      \
+                &classname::reduceShim<classname>) != classname::defaultReduceShim<classname>());  \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -510,29 +509,6 @@ private:
 #define registerKokkosUserObjectAliased(app, classname, alias)                                     \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosUserObjectFunction(classname, alias)
-
-// Reducer
-
-#define callRegisterKokkosReducerFunction(classname, objectname)                                   \
-  static char registerKokkosReducer##classname()                                                   \
-  {                                                                                                \
-    using namespace Moose::Kokkos;                                                                 \
-                                                                                                   \
-    DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
-                                                                                                   \
-    return 0;                                                                                      \
-  }                                                                                                \
-                                                                                                   \
-  static char combineNames(kokkos_reducer_##classname, __COUNTER__) =                              \
-      registerKokkosReducer##classname()
-
-#define registerKokkosReducer(app, classname)                                                      \
-  registerMooseObject(app, classname);                                                             \
-  callRegisterKokkosReducerFunction(classname, #classname)
-
-#define registerKokkosReducerAliased(app, classname, alias)                                        \
-  registerMooseObjectAliased(app, classname, alias);                                               \
-  callRegisterKokkosReducerFunction(classname, alias)
 
 // User-defined parallel operation registry
 

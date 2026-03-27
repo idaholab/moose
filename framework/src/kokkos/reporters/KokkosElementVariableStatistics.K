@@ -9,7 +9,7 @@
 
 #include "KokkosElementVariableStatistics.h"
 
-registerKokkosReducer("MooseApp", KokkosElementVariableStatistics);
+registerKokkosUserObject("MooseApp", KokkosElementVariableStatistics);
 
 InputParameters
 KokkosElementVariableStatistics::validParams()

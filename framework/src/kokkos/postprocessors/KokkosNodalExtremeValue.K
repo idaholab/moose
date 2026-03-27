@@ -9,7 +9,7 @@
 
 #include "KokkosNodalExtremeValue.h"
 
-registerKokkosReducer("MooseApp", KokkosNodalExtremeValue);
+registerKokkosUserObject("MooseApp", KokkosNodalExtremeValue);
 
 InputParameters
 KokkosNodalExtremeValue::validParams()

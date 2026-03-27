@@ -24,7 +24,7 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, Datum & datum) const
   {
@@ -37,7 +37,7 @@ public:
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosNodalSum::executeShim(const Derived & postprocessor, Datum & datum, Real * result) const
+KokkosNodalSum::reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const
 {
   if (datum.isNodalDefined(_u.variable()))
     result[0] += postprocessor.computeValue(0, datum);

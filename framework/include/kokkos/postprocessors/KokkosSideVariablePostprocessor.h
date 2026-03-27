@@ -21,7 +21,7 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
 protected:
   /// Holds the solution at current quadrature points
@@ -33,9 +33,9 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION inline void
-KokkosSideVariablePostprocessor::executeShim(const Derived & postprocessor,
-                                             Datum & datum,
-                                             Real * result) const
+KokkosSideVariablePostprocessor::reduceShim(const Derived & postprocessor,
+                                            Datum & datum,
+                                            Real * result) const
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     postprocessor.computeQpValue(qp, datum, result);

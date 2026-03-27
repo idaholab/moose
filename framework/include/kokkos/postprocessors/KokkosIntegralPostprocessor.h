@@ -26,7 +26,7 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
@@ -38,9 +38,9 @@ protected:
 template <typename Base>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::executeShim(const Derived & postprocessor,
-                                               Datum & datum,
-                                               Real * result) const
+KokkosIntegralPostprocessor<Base>::reduceShim(const Derived & postprocessor,
+                                              Datum & datum,
+                                              Real * result) const
 {
   Real sum = 0;
   Real vol = 0;

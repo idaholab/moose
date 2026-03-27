@@ -9,7 +9,7 @@
 
 #include "KokkosNodalVariableStatistics.h"
 
-registerKokkosReducer("MooseApp", KokkosNodalVariableStatistics);
+registerKokkosUserObject("MooseApp", KokkosNodalVariableStatistics);
 
 InputParameters
 KokkosNodalVariableStatistics::validParams()

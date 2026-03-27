@@ -9,4 +9,4 @@
 
 #include "KokkosSideAverageValue.h"
 
-registerKokkosReducer("MooseApp", KokkosSideAverageValue);
+registerKokkosUserObject("MooseApp", KokkosSideAverageValue);

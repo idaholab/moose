@@ -28,7 +28,7 @@ public:
    */
   ElementReducer(const ElementReducer & object);
 
-  virtual void reduce() override;
+  virtual void computeReducer() override;
 
   /**
    * The parallel computation entry function called by Kokkos
@@ -49,7 +49,7 @@ ElementReducer::operator()(ReducerLoop,
 
   Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
-  reducer.executeShim(reducer, datum, result);
+  reducer.reduceShim(reducer, datum, result);
 }
 
 } // namespace Moose::Kokkos

@@ -9,4 +9,4 @@
 
 #include "KokkosElementAverageMaterialProperty.h"
 
-registerKokkosReducer("MooseApp", KokkosElementAverageMaterialProperty);
+registerKokkosUserObject("MooseApp", KokkosElementAverageMaterialProperty);
