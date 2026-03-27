@@ -4,17 +4,13 @@
 
 ## Overview
 
-Adds the domain integrator for integrating the non-linear action
+Adds the domain integrator for integrating the non-linear form
 
 !equation
-(k(u)\vec\nabla v, \vec\nabla v)_\Omega \,\,\, \forall v \in V
+(k(u)\vec\nabla u, \vec\nabla v)_\Omega \,\,\, \forall v \in V
 
-Adds the domain integrator for integrating the bilinear form
-
-!equation
-(k(u)\vec\nabla v, \vec\nabla v)_\Omega + (k'(u) v, \vec\nabla u \vec\nabla v)_\Omega \,\,\, \forall v \in V
-
-where $u, v \in H^1$ and $k(u)$ is a scalar non-linear diffusivity coefficient.
+where $u, v \in H^1$ and $k(u)$ is a scalar non-linear diffusivity coefficient that may depend on
+the trial variable $u$.
 
 The above terms arises from the weak form of the non-linear operator
 

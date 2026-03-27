@@ -234,5 +234,34 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
+  [MFEMNonLinearHeatTransfer]
+    design = 'EquationSystem.md'
+    issues = '#32256'
+    requirement = 'The system shall have the ability to solve a transient non-linear problem with a non-linear boundary condition using MFEM, when '
+    [linearized]
+      detail = 'the non-linear BC is given constant coefficients, and '
+      type = CSVDiff
+      input = nl_heattransfer.i
+      csvdiff = 'OutputData/NLHeatTransferLinearized_line_sample_0003.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      cli_args = 'BCs/active="linearized" '
+                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '      
+    []
+    [non-linear]
+      detail = 'when the non-linear BC is given state-dependent coefficients.'
+      type = CSVDiff
+      input = nl_heattransfer.i
+      csvdiff = 'OutputData/NLHeatTransfer_line_sample_0003.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+    []
+  []
+
+
 []

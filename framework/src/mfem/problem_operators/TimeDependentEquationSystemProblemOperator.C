@@ -77,6 +77,10 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   X_new = X_old;
   SetTrialVariablesFromTrueVectors();
 
+  if ((GetEquationSystem()->_non_linear))
+    for (const auto i : index_range(_trial_variables))
+      *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
+
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
