@@ -623,7 +623,7 @@ RhieChowMassFlux::populateCouplingFunctors(
       }
 
       // We just do a one-term expansion for 1/A no matter what
-      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+      // const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
       for (const auto dim_i : index_range(raw_Ainv))
         Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
     }
@@ -897,6 +897,13 @@ void
 RhieChowMassFlux::computeCorrectedPressureGradient()
 {
   return;
+}
+
+bool
+RhieChowMassFlux::faceUsesOneSidedReconstruction(const FaceInfo & fi) const
+{
+  libmesh_ignore(fi);
+  return false;
 }
 
 void

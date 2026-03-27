@@ -35,6 +35,7 @@ protected:
 
 private:
   bool isInternalBaffleFace() const;
+  bool needsInternalBaffleAdvectionCorrection() const;
   Real computeBaffleAdvectionExplicitCorrection(bool elem_side) const;
 
   /// Whether to include porosity outside the divergence in the advection term
