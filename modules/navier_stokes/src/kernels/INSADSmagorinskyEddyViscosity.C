@@ -44,6 +44,6 @@ INSADSmagorinskyEddyViscosity::precomputeQpResidual()
   constexpr Real one_third = 1.0 / 3.0;
   return strain_rate_tensor_mag *
          Utility::pow<2>(_smagorinsky_constant * pow(_current_elem_volume, one_third) /
-                         _current_elem->default_order()) *
+                         static_cast<int>(_current_elem->default_order())) *
          _rho[_qp] * _grad_u[_qp];
 }
