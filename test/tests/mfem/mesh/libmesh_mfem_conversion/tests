@@ -13,19 +13,6 @@
       recover = false
       compute_devices = 'cpu cuda'
     []
-#    [H1Tri]
-#      type = CSVDiff
-#      input = libmesh_parent.i
-#      csvdiff = 'libmesh_to_mfem_mesh_tris.csv'
-#      detail = 'first order tris, '
-#      abs_zero = 1e-8
-#      capabilities = 'mfem'
-#      recover = false
-#      compute_devices = 'cpu cuda'
-#      cli_args = 'Mesh/file=../square_tri.e '
-#                'mfem_app0:Mesh/file=../square_tri.e '
-#                'Outputs/file_base=libmesh_to_mfem_mesh_tris '
-#    []
     [H1Hex]
       type = CSVDiff
       input = libmesh_parent.i
@@ -36,7 +23,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../hex-8.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_hexes '
                 'mfem_app0:Mesh/file=../hex-8.e '
     []
@@ -50,7 +36,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../hex-27.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_hexes2 '
                 'mfem_app0:Mesh/file=../hex-27.e '
     []
@@ -64,7 +49,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../tet-4.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_tets '
                 'mfem_app0:Mesh/file=../tet-4.e '
     []
@@ -78,7 +62,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../tet-10.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_tets2 '
                 'mfem_app0:Mesh/file=../tet-10.e '
     []
@@ -92,7 +75,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../pyramid-5.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_pyramids '
                 'mfem_app0:Mesh/file=../pyramid-5.e '
     []
@@ -106,7 +88,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../wedge-6.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_wedges '
                 'mfem_app0:Mesh/file=../wedge-6.e '
     []
@@ -120,7 +101,6 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../wedge-18.e '
-                'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_to_mfem_mesh_wedges2 '
                 'mfem_app0:Mesh/file=../wedge-18.e '
     []
