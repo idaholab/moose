@@ -38,4 +38,7 @@ public:
 
   virtual bool useBoundaryGradientExtrapolation() const override { return false; }
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+
+private:
+  bool _assume_fully_developed_flow;
 };
