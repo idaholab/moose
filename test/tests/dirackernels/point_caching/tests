@@ -1,9 +1,9 @@
 [Tests]
-  issues = '#2364'
   design = 'syntax/DiracKernels/index.md'
 
   [point_caching]
     requirement = "The system shall support source location caching using element ids:"
+    issues = '#2364'
 
     [basic]
       type = 'Exodiff'
@@ -45,5 +45,18 @@
     expect_err = "does not match point"
     requirement = "The DiracKernel system shall report an error if a location does not correspond "
                   "with the supplied element id."
+    issues = '#2364'
+  []
+  [point_found_on_other_rank]
+    type = 'RunApp'
+    input = 'found_on_other_rank.i'
+    # skip the solve, not the setup
+    cli_args = 'Executioner/nl_abs_tol=1e10'
+    requirement = "The DiracKernel system shall not report a warning if the point of application of the kernel is not found on the first rank because it is located in another process' mesh partition."
+    allow_warnings = false
+    # process 0 does not contain the point
+    min_parallel = 2
+    max_parallel = 2
+    issues = '#32551'
   []
 []

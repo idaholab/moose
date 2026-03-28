@@ -9,6 +9,8 @@
 
 #include "DiracKernelInfo.h"
 #include "MooseMesh.h"
+#include "MooseEnum.h"
+#include "DiracKernelBase.h"
 
 // LibMesh
 #include "libmesh/point_locator_base.h"
@@ -112,7 +114,8 @@ DiracKernelInfo::updatePointLocator(const MooseMesh & mesh)
 const Elem *
 DiracKernelInfo::findPoint(const Point & p,
                            const MooseMesh & mesh,
-                           const std::set<SubdomainID> & blocks)
+                           const std::set<SubdomainID> & blocks,
+                           const PointNotFoundBehavior point_not_found_behavior)
 {
   // If the PointLocator has never been created, do so now.  NOTE - WE
   // CAN'T DO THIS if findPoint() is only called on some processors,
@@ -146,7 +149,31 @@ DiracKernelInfo::findPoint(const Point & p,
   dof_id_type min_elem_id = elem_id;
   mesh.comm().min(min_elem_id);
 
-  return min_elem_id == elem_id ? elem : NULL;
+  if (min_elem_id == DofObject::invalid_id)
+  {
+    std::stringstream msg;
+    msg << "Point " << p << " not found in block(s) " << Moose::stringify(blocks, ", ") << ".\n";
+    switch (point_not_found_behavior)
+    {
+      case PointNotFoundBehavior::ERROR:
+        ::mooseError(msg.str());
+        break;
+      case PointNotFoundBehavior::WARNING:
+        mooseDoOnce(::mooseWarning(msg.str() + "This message will not be repeated."));
+        break;
+      case PointNotFoundBehavior::IGNORE:
+        break;
+      default:
+        ::mooseError("Internal enum error.");
+    }
+  }
+
+  // But we notably need the processor which owns elem_id to return it!
+  if (min_elem_id != DofObject::invalid_id)
+    if (const auto min_elem = mesh.elemPtr(min_elem_id);
+        min_elem && min_elem->processor_id() == mesh.processor_id())
+      return min_elem;
+  return nullptr;
 }
 
 bool
