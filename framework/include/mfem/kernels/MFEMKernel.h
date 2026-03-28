@@ -27,8 +27,10 @@ public:
 
   virtual ~MFEMKernel() = default;
 
-  /// Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
+
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() { return nullptr; }
 
