@@ -138,20 +138,6 @@ Component::getTHMProblem() const
 }
 
 void
-Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
-                                              const std::string & control_name,
-                                              const std::string & param) const
-{
-  mooseDeprecated("Component::makeFunctionControllableIfConstant is deprecated due to the issue "
-                  "identified in https://github.com/idaholab/moose/issues/31869. Please use an "
-                  "alternative parameter control strategy such as those identified in the issue.");
-
-  const Function & fn = _sim.getFunction(fn_name);
-  if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
-    connectObject(fn.parameters(), fn_name, control_name, param);
-}
-
-void
 Component::checkComponentExistsByName(const std::string & comp_name) const
 {
   if (!_sim.hasComponent(comp_name))
