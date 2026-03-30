@@ -88,14 +88,14 @@ moose_libstdcxx_devel:                                      # [linux]
   - libstdcxx-devel_linux-64 14.3.0 h9f08a49_118            # [linux]
 
 moose_libcxx:
-  - libcxx 22.1.0 ha0f52bf_1                                # [linux]
-  - libcxx 22.1.0 h19cb2f5_1                                # [not arm64 and osx]
-  - libcxx 22.1.0 h55c6f16_1                                # [arm64]
+  - libcxx 22.1.2 ha0f52bf_0                                # [linux]
+  - libcxx 22.1.2 h19cb2f5_0                                # [not arm64 and osx]
+  - libcxx 22.1.2 h55c6f16_0                                # [arm64]
 
 moose_libzlib:
-  - libzlib 1.3.1 hb9d3cd8_2                                # [linux]
-  - libzlib 1.3.1 hd23fc13_2                                # [not arm64 and osx]
-  - libzlib 1.3.1 h8359307_2                                # [arm64]
+  - libzlib 1.3.2 h25fd6f3_2                                # [linux]
+  - libzlib 1.3.2 hbb4bfdb_2                                # [not arm64 and osx]
+  - libzlib 1.3.2 h8088a28_2                                # [arm64]
 
 # Needed for psycopg2 2.9.11
 moose_icu:
@@ -106,8 +106,8 @@ moose_krb5:
   - krb5 1.21.3
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1030.6.3 llvm19_1_h8f0d4bb_3             # [not arm64 and osx]
-  - cctools_osx-arm64 1030.6.3 llvm19_1_h6d92914_3          # [arm64]
+  - cctools_osx-64 1030.6.3 llvm19_1_h8f0d4bb_4             # [not arm64 and osx]
+  - cctools_osx-arm64 1030.6.3 llvm19_1_hd01ab73_4          # [arm64]
 
 moose_compiler_rt:                                          # [osx]
   - compiler-rt 19.1.7 he914875_1                           # [not arm64 and osx]
@@ -118,15 +118,15 @@ moose_clang_osx:                                            # [osx]
   - clangxx_osx-arm64 19.1.7 h75f8d18_31                    # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
-  - llvm-openmp 22.1.0 h0d3cbff_0                           # [not arm64 and osx]
-  - llvm-openmp 22.1.0 hc7d1edf_0                           # [arm64]
+  - llvm-openmp 22.1.2 h0d3cbff_0                           # [not arm64 and osx]
+  - llvm-openmp 22.1.2 hc7d1edf_0                           # [arm64]
 
 moose_llvm_tools:                                           # [osx]
   - llvm-tools 19.1.7 hb0207f0_2                            # [not arm64 and osx]
   - llvm-tools 19.1.7 h855ad52_2                            # [arm64]
 
 moose_libclang:                                             # [osx]
-  - libclang-cpp19.1 19.1.7 default_hd70426c_7              # [not arm64 and osx]
+  - libclang-cpp19.1 19.1.7 default_h9399c5b_8              # [not arm64 and osx]
   - libclang-cpp19.1 19.1.7 default_hf3020a7_8              # [arm64]
 
 #### Darwin SDK SYSROOT
