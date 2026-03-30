@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseEnum.h"
 #include "FunctionMaterialBase.h"
 #include "FunctionParserUtils.h"
 #include "FunctionMaterialPropertyDescriptor.h"
@@ -44,20 +45,8 @@ class ParsedMaterialHelper : public FunctionMaterialBase<is_ad>, public Function
 public:
   typedef DerivativeMaterialPropertyNameInterface::SymbolName SymbolName;
 
-  enum class VariableNameMappingMode
-  {
-    USE_MOOSE_NAMES,
-    USE_PARAM_NAMES
-  };
-
-  enum class ExtraSymbols
-  {
-    x,
-    y,
-    z,
-    t,
-    dt
-  };
+  CreateMooseEnumClass(VariableNameMappingMode, USE_MOOSE_NAMES, USE_PARAM_NAMES);
+  CreateMooseEnumClass(ExtraSymbols, x, y, z, t, dt);
 
   ParsedMaterialHelper(const InputParameters & parameters,
                        const VariableNameMappingMode map_mode,
