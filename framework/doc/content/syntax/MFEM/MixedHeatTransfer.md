@@ -4,6 +4,8 @@
 
 Solves a transient heat conduction problem using a mixed weak form, representing temperature on piecewise constant $L^2$ conforming finite elements, and heat fluxes on $H(\mathrm{div})$ conforming Raviart-Thomas elements.
 
+This example is based on the [Firedrake Irksome demo_mixed_heat example](https://www.firedrakeproject.org/Irksome/demos/demo_mixed_heat.py.html).
+
 ## Description
 
 This problem solves the transient heat equation with strong form:

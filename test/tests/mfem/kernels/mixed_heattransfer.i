@@ -1,3 +1,7 @@
+# Mixed heat transfer problem.
+# Based on Firedrake Irksome demo_mixed_heat example:
+# https://www.firedrakeproject.org/Irksome/demos/demo_mixed_heat.py.html
+
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.e
