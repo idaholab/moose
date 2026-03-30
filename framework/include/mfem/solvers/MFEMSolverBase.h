@@ -45,7 +45,6 @@ protected:
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver(const InputParameters & parameters) = 0;
 
-protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual void checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 
@@ -57,6 +56,9 @@ protected:
 
   /// Preconditioner to be used for the problem
   MFEMSolverBase * _preconditioner;
+
+  private:
+    friend class ::MFEMProblemSolve;
 };
 
 inline mfem::Solver &
