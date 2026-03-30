@@ -12,9 +12,9 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "Executioner.h"
-#include "Eigenvalue.h"
 #include "FEProblem.h"
 #include "EigenProblem.h"
+#include "EigenProblemSolve.h"
 
 registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
 
@@ -47,10 +47,7 @@ CreateExecutionerAction::act()
   std::shared_ptr<Executioner> executioner =
       _factory.create<Executioner>(_type, "Executioner", _moose_object_pars);
 
-  std::shared_ptr<Eigenvalue> eigen_executioner =
-      std::dynamic_pointer_cast<Eigenvalue>(executioner);
-
-  if ((eigen_problem == nullptr) != (eigen_executioner == nullptr))
+  if ((eigen_problem != nullptr) != executioner->hasSolveObject<EigenProblemSolve>())
     mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
                "EigenProblem, and Steady and Transient need a FEProblem");
 

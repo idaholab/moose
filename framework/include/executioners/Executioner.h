@@ -135,6 +135,27 @@ public:
    */
   static MooseEnum iterationMethods() { return MooseEnum("picard secant steffensen", "picard"); }
 
+  /**
+   * Register a solve object to the executioner so that we can check whether a solve object
+   * has been built by the executioner
+   */
+  void registerSolveObject(const SolveObject & so) { _solve_objects.push_back(&so); }
+
+  /**
+   * Whether a solve object in a certain type has been built by the executioner
+   */
+  template <class T>
+  bool hasSolveObject() const
+  {
+    for (const auto & so : _solve_objects)
+    {
+      const T * tso = dynamic_cast<const T *>(so);
+      if (tso)
+        return true;
+    }
+    return false;
+  }
+
 protected:
   /**
    * Adds a postprocessor that the executioner can directly assign values to
@@ -155,4 +176,8 @@ protected:
 
   /// True if printing out additional information
   const bool & _verbose;
+
+private:
+  /// All solve objects built by this executioner
+  std::vector<const SolveObject *> _solve_objects;
 };
