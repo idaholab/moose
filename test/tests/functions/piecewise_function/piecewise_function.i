@@ -1,8 +1,6 @@
 # This test tests the PiecewiseFunction, which pieces functions together.
-# Piecing together the 2 CosineTransitionFunction functions should yield the
-# CosineHumpFunction function. This test samples the PiecewiseFunction and the
-# CosineHumpFunction and compares the samples using the
-# VectorPostprocessorComparison post-processor.
+# We piece together three arbitrary functions that are continuous from x = [0,5]
+# and then compare to a VectorPostprocessor line sample of the function.
 
 [Mesh]
   type = GeneratedMesh
