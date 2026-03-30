@@ -118,6 +118,33 @@ public:
    */
   const CSGRegion & getRegion() const { return _region; }
 
+  /**
+   * @brief Reset the cell fill to void
+   *
+   */
+  void resetCellFill();
+
+  /**
+   * @brief Set the cell fill to a material name
+   *
+   * @param mat_name name of material fill
+   */
+  void updateCellFill(const std::string & mat_name);
+
+  /**
+   * @brief Set the cell fill to a universe
+   *
+   * @param univ universe fill
+   */
+  void updateCellFill(const CSGUniverse * univ);
+
+  /**
+   * @brief Set the cell fill to a lattice
+   *
+   * @param lattice lattice fill
+   */
+  void updateCellFill(const CSGLattice * lattice);
+
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
 

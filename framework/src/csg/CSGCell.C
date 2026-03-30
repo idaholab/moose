@@ -81,6 +81,39 @@ CSGCell::getFillLattice() const
     return *_fill_lattice;
 }
 
+void
+CSGCell::resetCellFill()
+{
+  _fill_name = "";
+  _fill_universe = nullptr;
+  _fill_lattice = nullptr;
+  _fill_type = "VOID";
+}
+
+void
+CSGCell::updateCellFill(const std::string & mat_name)
+{
+  resetCellFill();
+  _fill_type = "CSG_MATERIAL";
+  _fill_name = mat_name;
+}
+
+void
+CSGCell::updateCellFill(const CSGUniverse * univ)
+{
+  resetCellFill();
+  _fill_type = "UNIVERSE";
+  _fill_universe = univ;
+}
+
+void
+CSGCell::updateCellFill(const CSGLattice * lattice)
+{
+  resetCellFill();
+  _fill_type = "LATTICE";
+  _fill_lattice = lattice;
+}
+
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {

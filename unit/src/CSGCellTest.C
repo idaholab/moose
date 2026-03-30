@@ -13,6 +13,7 @@
 #include "CSGUniverse.h"
 #include "CSGRegion.h"
 #include "CSGSphere.h"
+#include "CSGCartesianLattice.h"
 
 #include "MooseUnitUtils.h"
 
@@ -210,6 +211,40 @@ TEST(CSGCellTest, testUpdateRegion)
   CSGCell cell("cellname", region1);
   cell.updateRegion(region2);
   ASSERT_EQ(region2, cell.getRegion());
+}
+
+/// CSGCell::resetCellFill and CSGCell::updateCellFill
+TEST(CSGCellTest, testUpdateFill)
+{
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
+  std::string name = "cell";
+
+  std::string uname = "new_univ";
+  const CSGUniverse fill_univ(uname);
+  CSGCell cell(name, &fill_univ, region1);
+
+  std::string mname = "new_mat";
+  std::string lname = "new_lat";
+  const CSGCartesianLattice fill_lat(lname, 1.0);
+
+  // Set cell fill to void
+  cell.resetCellFill();
+  ASSERT_EQ(cell.getFillType(), "VOID");
+
+  // Set cell fill to material
+  cell.updateCellFill(mname);
+  ASSERT_EQ(cell.getFillType(), "CSG_MATERIAL");
+  ASSERT_EQ(cell.getFillMaterial(), mname);
+
+  // Set cell fill to universe
+  cell.updateCellFill(&fill_univ);
+  ASSERT_EQ(cell.getFillType(), "UNIVERSE");
+  ASSERT_EQ(cell.getFillUniverse(), fill_univ);
+
+  // Set cell fill to lattice
+  cell.updateCellFill(&fill_lat);
+  ASSERT_EQ(cell.getFillType(), "LATTICE");
+  ASSERT_EQ(cell.getFillLattice(), fill_lat);
 }
 
 } // namespace CSG

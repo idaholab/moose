@@ -82,6 +82,13 @@ public:
   }
 
   /**
+   * @brief Remove a Surface object passed in by reference from the stored surface list
+   *
+   * @param surface reference to surface to delete
+   */
+  void deleteSurface(const CSGSurface & surface);
+
+  /**
    * @brief Get all surface objects
    *
    * @return list of references to all CSGSurface objects in CSGBase
@@ -101,6 +108,14 @@ public:
   {
     return _surface_list.getSurface(name);
   }
+
+  /**
+   * @brief Check if a surface with given name exists in CSGBase object
+   *
+   * @param name surface name
+   * @return true if surface with given name exists in CSGBase
+   */
+  bool hasSurface(const std::string & name) const { return _surface_list.hasSurface(name); }
 
   /**
    * @brief rename the specified surface
@@ -172,6 +187,13 @@ public:
                              const CSGUniverse * add_to_univ = nullptr);
 
   /**
+   * @brief Remove a Cell object passed in by reference from the stored cell list
+   *
+   * @param cell reference to cell to delete
+   */
+  void deleteCell(const CSGCell & cell);
+
+  /**
    * @brief Get all cell objects
    *
    * @return list of references to all CSGCell objects in CSGBase
@@ -188,6 +210,14 @@ public:
    * @return reference to CSGCell object
    */
   const CSGCell & getCellByName(const std::string & name) const { return _cell_list.getCell(name); }
+
+  /**
+   * @brief Check if a cell with given name exists in CSGBase object
+   *
+   * @param name cell name
+   * @return true if cell with given name exists in CSGBase
+   */
+  bool hasCell(const std::string & name) const { return _cell_list.hasCell(name); }
 
   /**
    * @brief rename the specified cell
@@ -207,6 +237,37 @@ public:
    * @param region new region to assign to cell
    */
   void updateCellRegion(const CSGCell & cell, const CSGRegion & region);
+
+  /**
+   * @brief reset the fill of the specified cell to void
+   *
+   * @param cell cell to update the fill for
+   */
+  void resetCellFill(const CSGCell & cell);
+
+  /**
+   * @brief change the fill of the specified cell to a material fill
+   *
+   * @param cell cell to update the fill for
+   * @param mat_name name of material fill
+   */
+  void updateCellFill(const CSGCell & cell, const std::string & mat_name);
+
+  /**
+   * @brief change the fill of the specified cell to a universe fill
+   *
+   * @param cell cell to update the fill for
+   * @param univ pointer to universe fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGUniverse * univ);
+
+  /**
+   * @brief change the fill of the specified cell to a lattice fill
+   *
+   * @param cell cell to update the fill for
+   * @param lattice pointer to lattice fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGLattice * lattice);
 
   /**
    * @brief Get the Root Universe object
@@ -256,6 +317,13 @@ public:
    */
   const CSGUniverse & createUniverse(const std::string & name,
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);
+
+  /**
+   * @brief Remove a Universe object passed in by reference from the stored universe list
+   *
+   * @param univ reference to universe to delete
+   */
+  void deleteUniverse(const CSGUniverse & univ);
 
   /**
    * @brief Add a cell to an existing universe
@@ -313,6 +381,14 @@ public:
   }
 
   /**
+   * @brief Check if a universe with given name exists in CSGBase object
+   *
+   * @param name universe name
+   * @return true if universe with given name exists in CSGBase
+   */
+  bool hasUniverse(const std::string & name) const { return _universe_list.hasUniverse(name); }
+
+  /**
    * @brief add a unique lattice pointer to this base instance; universes that make the lattice
    * must already be a part of this CSGBase instance.
    *
@@ -342,6 +418,13 @@ public:
     auto & lat_ref = _lattice_list.addLattice(std::move(lattice));
     return dynamic_cast<LatticeType &>(lat_ref);
   }
+
+  /**
+   * @brief Remove a Lattice object passed in by reference from the stored lattice list
+   *
+   * @param lattice reference to lattice to delete
+   */
+  void deleteLattice(const CSGLattice & lattice);
 
   /**
    * @brief set location in the lattice to be the provided universe
@@ -432,6 +515,14 @@ public:
                  MooseUtils::prettyCppType<LatticeType>());
     return *typed_lattice;
   }
+
+  /**
+   * @brief Check if a lattice with given name exists in CSGBase object
+   *
+   * @param name lattice name
+   * @return true if lattice with given name exists in CSGBase
+   */
+  bool hasLattice(const std::string & name) const { return _lattice_list.hasLattice(name); }
 
   /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
