@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#19765'
+  issues = '#19765 #32577'
   design = 'PiecewiseFunction.md'
   [function_values]
     type = 'CSVDiff'
