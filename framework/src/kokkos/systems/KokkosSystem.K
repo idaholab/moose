@@ -508,10 +508,10 @@ System::reinit()
 
   dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
-  _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
-                  num_elems,
-                  _active_variables.size(),
-                  _active_solution_tags.size()});
+  _thread.resize(kokkosAssembly().getMaxQpsPerElem(),
+                 num_elems,
+                 _active_variables.size(),
+                 _active_solution_tags.size());
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);

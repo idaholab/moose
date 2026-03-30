@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosDirectionalNeumannBC.md'
+
+  [tests]
+    requirement = 'The Kokkos system shall support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)'
+    [1d]
+      type = Exodiff
+      input = 'kokkos_1d_directional_neumann_bc_test.i'
+      exodiff = 'kokkos_1d_directional_neumann_bc_test_out.e'
+      detail = 'in 1D geometries'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [2d]
+      type = Exodiff
+      input = 'kokkos_2d_directional_neumann_bc_test.i'
+      exodiff = 'kokkos_2d_directional_neumann_bc_test_out.e'
+      detail = 'in 2D geometries'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [3d]
+      type = Exodiff
+      input = 'kokkos_3d_directional_neumann_bc_test.i'
+      exodiff = 'kokkos_3d_directional_neumann_bc_test_out.e'
+      detail = 'in 3D geometries'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

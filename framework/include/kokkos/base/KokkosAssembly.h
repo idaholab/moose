@@ -247,13 +247,15 @@ public:
    * @param jacobian The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
+   * @param normal The pointer to store normal vector
    */
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int side,
                                           const unsigned int qp,
                                           Real33 * const jacobian,
                                           Real * const JxW,
-                                          Real3 * const q_points) const;
+                                          Real3 * const q_points,
+                                          Real3 * const normal) const;
 
   /**
    * Kokkos function for caching physical maps on element quadrature points
@@ -369,6 +371,13 @@ private:
   Array2D<Array<Array2D<Real3>>> _map_grad_psi_face;
   ///@}
   /**
+   * Shape functions for computing normal vectors
+   */
+  ///@{
+  Array2D<Array<Array2D<Real>>> _normal_dx_dxi;
+  Array2D<Array<Array2D<Real>>> _normal_dx_deta;
+  ///@}
+  /**
    * Cached physical maps on element quadrature points
    */
   ///@{
@@ -434,9 +443,11 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
   if (jacobian)
     *jacobian = J.inverse(_dimension);
+
   if (JxW)
     *JxW =
         J.determinant(_dimension) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
+
   if (q_points)
     *q_points = xyz;
 }
@@ -447,7 +458,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
                              Real33 * const jacobian,
                              Real * const JxW,
-                             Real3 * const q_points) const
+                             Real3 * const q_points,
+                             Real3 * const normal) const
 {
   auto sid = info.subdomain;
   auto eid = info.id;
@@ -458,8 +470,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto & phi = _map_phi_face(sid, elem_type)(side);
   auto & grad_phi = _map_grad_phi_face(sid, elem_type)(side);
 
+  auto & normal_dx_dxi = _normal_dx_dxi(sid, elem_type)(side);
+  auto & normal_dx_deta = _normal_dx_deta(sid, elem_type)(side);
+
   Real33 J;
   Real3 xyz;
+
+  Real3 dxyz_dxi;
+  Real3 dxyz_deta;
 
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
@@ -470,16 +488,25 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     if (JxW || q_points)
       xyz += phi(node, qp) * points;
+
+    if (normal)
+    {
+      if (_dimension < 3)
+        dxyz_dxi += normal_dx_dxi(node, qp) * points;
+      if (_dimension == 2)
+        dxyz_deta += normal_dx_deta(node, qp) * points;
+    }
   }
 
   if (jacobian)
     *jacobian = J.inverse(_dimension);
+
   if (q_points)
     *q_points = xyz;
 
-  if (JxW)
+  if (JxW || (normal && _dimension > 1))
   {
-    Real33 J;
+    J = 0;
 
     auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
 
@@ -489,9 +516,22 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
       J += grad_psi(node, qp).cartesian_product(points);
     }
+  }
 
+  if (JxW)
     *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
            _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
+
+  if (normal)
+  {
+    if (_dimension == 3)
+      *normal = J.row(0).cross_product(J.row(1));
+    else if (_dimension == 2)
+      *normal = J.row(0).cross_product(dxyz_dxi.cross_product(dxyz_deta));
+    else
+      *normal = side ? dxyz_dxi : -dxyz_dxi;
+
+    *normal *= 1.0 / normal->norm();
   }
 }
 #endif

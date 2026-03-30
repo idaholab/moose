@@ -26,43 +26,20 @@ MaterialPropertyValueBase<T, dimension>::MaterialPropertyValueBase(
 {
 }
 
+template <typename T, unsigned int dimension>
+KOKKOS_FUNCTION
+MaterialPropertyValue<T, dimension>::MaterialPropertyValue(
+    const MaterialProperty<T, dimension> & property, const Datum & datum, const unsigned int qp)
+  : MaterialPropertyValueBase<T, dimension>(property, datum, qp)
+{
+}
+
 template <typename T>
+KOKKOS_FUNCTION
 MaterialPropertyValue<T, 0>::MaterialPropertyValue(const MaterialProperty<T, 0> & property,
                                                    const Datum & datum,
-                                                   unsigned int qp)
+                                                   const unsigned int qp)
   : MaterialPropertyValueBase<T, 0>(property, datum, qp)
-{
-}
-
-template <typename T>
-MaterialPropertyValue<T, 1>::MaterialPropertyValue(const MaterialProperty<T, 1> & property,
-                                                   const Datum & datum,
-                                                   unsigned int qp)
-  : MaterialPropertyValueBase<T, 1>(property, datum, qp)
-{
-}
-
-template <typename T>
-MaterialPropertyValue<T, 2>::MaterialPropertyValue(const MaterialProperty<T, 2> & property,
-                                                   const Datum & datum,
-                                                   unsigned int qp)
-  : MaterialPropertyValueBase<T, 2>(property, datum, qp)
-{
-}
-
-template <typename T>
-MaterialPropertyValue<T, 3>::MaterialPropertyValue(const MaterialProperty<T, 3> & property,
-                                                   const Datum & datum,
-                                                   unsigned int qp)
-  : MaterialPropertyValueBase<T, 3>(property, datum, qp)
-{
-}
-
-template <typename T>
-MaterialPropertyValue<T, 4>::MaterialPropertyValue(const MaterialProperty<T, 4> & property,
-                                                   const Datum & datum,
-                                                   unsigned int qp)
-  : MaterialPropertyValueBase<T, 4>(property, datum, qp)
 {
 }
 

@@ -277,7 +277,7 @@ protected:
    * @param tid The thread ID
    * @returns The contiguous element ID
    */
-  KOKKOS_FUNCTION ContiguousElementID kokkosBlockElementID(ThreadID tid) const
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockElementID(Moose::Kokkos::ThreadID tid) const
   {
     return _kokkos_element_ids[tid];
   }
@@ -286,7 +286,7 @@ protected:
    * @param tid The thread ID
    * @returns the contiguous node ID
    */
-  KOKKOS_FUNCTION ContiguousElementID kokkosBlockNodeID(ThreadID tid) const
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockNodeID(Moose::Kokkos::ThreadID tid) const
   {
     return _kokkos_node_ids[tid];
   }
@@ -295,7 +295,7 @@ protected:
    * @param tid The thread ID
    * @returns The contiguous element ID - side index pair
    */
-  KOKKOS_FUNCTION auto kokkosBlockElementSideID(ThreadID tid) const
+  KOKKOS_FUNCTION auto kokkosBlockElementSideID(Moose::Kokkos::ThreadID tid) const
   {
     return _kokkos_element_side_ids[tid];
   }
