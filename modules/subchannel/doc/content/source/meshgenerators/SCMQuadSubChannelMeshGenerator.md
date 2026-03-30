@@ -23,6 +23,10 @@ Note that:
     id=side_gap
     caption=Geometric features of the quadrilateral SCM mesh
 
+## AuxVariables
+
+Defining this mesh automatically creates the auxvariables detailed [here](SCMAuxVariables.md).
+
 ## Example Input File Syntax
 
 !listing /test/tests/problems/psbt/psbt_explicit.i block=QuadSubChannelMesh language=moose

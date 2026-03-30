@@ -51,7 +51,6 @@ SubChannelAddVariablesAction::act()
       continue;
 
     const auto & generator_type = mesh_action->getParam<std::string>("type");
-    _console << "Mesh generator type = " << generator_type << std::endl;
 
     if (generator_type == "SCMTriDuctMeshGenerator" || generator_type == "SCMQuadDuctMeshGenerator")
       duct_mesh_exist = true;
