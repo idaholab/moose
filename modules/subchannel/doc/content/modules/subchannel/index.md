@@ -15,6 +15,7 @@ Familiarize yourself with the theory behind SCM, some important user notes and h
 
 - [Theory](general/subchannel_theory.md)
 - [Running SCM input file](general/using_SubChannel.md)
+- [SubChannel AuxVariables](general/SCMAuxVariables.md)
 - [User Notes](general/user_notes.md)
 - [Publication List](general/publication_list.md)
 !col-end!

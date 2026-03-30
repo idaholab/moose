@@ -111,7 +111,7 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<UserObjectName>("duct_HTC_closure",
                                   "Closure computing HTC on duct (required if duct mesh exists).");
   params.addParam<bool>(
-      "full_output", false, "Flag that enables the output of maximum number of variables");
+      "full_output", false, "Flag that enables the output of the maximum number of variables.");
   params.addPrivateParam<bool>("pin_mesh_exist", false);
   params.addPrivateParam<bool>("duct_mesh_exist", false);
   return params;

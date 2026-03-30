@@ -268,17 +268,17 @@ Once the main flow variables converge in a block, the enthalpy conservation equa
 
 ### Algorithm variations
 
-There are three variations [!cite](kyriakopoulos2022development), [!cite](kyriakopoulos2023demonstration) of the algorithm presented above. There should be no appreciable differences between the results of the algorithms when the time/spacial discretization scheme is converged.
+There are three variations [!cite](kyriakopoulos2026numerical) of the algorithm presented above in SCM: The Explicit-Segregated, Implicit-Segregated and Monolithic. There are also two subchannel geometries that SCM can solve, one with fuel pins in a quadrilateral lattice (Quadsolver) and one with fuel pins in a triangular lattice (Trisolver). There should be no appreciable differences between the results of the algorithms when the time/spacial discretization scheme is converged.
 
-#### Explicit
+#### Explicit-Segregated
 
 This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
 
-#### Implicit segregated
+#### Implicit-Segregated
 
 In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
 
-#### Implicit
+#### Monolithic
 
 In this case, the governing mass, axial momentum and crossflow momentum  conservation equations are recast in matrix form and combined into a single system. The system of all the subchannel equations looks like this:
 
@@ -304,7 +304,7 @@ In this case, the governing mass, axial momentum and crossflow momentum  conserv
 \end{bmatrix}
 \end{equation}
 
-Since the enthalpy governing equations are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to the flow equations via the fluid properties update), it makes sense to lag the enthalpy solution and solve for it separately. The flow variables are calculated by solving that big system (without the enthalpy) to retrieve all the unknowns at the same time instead of one by one, and on all the nodes of the block: $\vec{\dot{m}}, \vec{P}, \vec{w_{ij}}$. The solution algorithm is the same as in the default method and the solver used is PETSc KSPSolve.
+Since the enthalpy governing equations are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to the flow equations via the fluid properties update), it makes sense to lag the enthalpy solution and solve for it separately. The flow variables are calculated by solving that big system (without the enthalpy) to retrieve all the unknowns at the same time instead of one by one, and on all the nodes of the block: $\vec{\dot{m}}, \vec{P}, \vec{w_{ij}}. \vec{DP}$ is not explicitly calculated, otherwise the solution algorithm is the same as in the default method and the solver used is PETSc KSPSolve.
 
 As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
 
