@@ -168,7 +168,7 @@ Capabilities::registerMooseCapabilities()
                         "` libMesh configure option.");
   };
 
-  {
+    {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
 #ifdef MOOSE_LIBTORCH_ENABLED
     add_string("libtorch", TORCH_VERSION, doc);
@@ -180,9 +180,9 @@ Capabilities::registerMooseCapabilities()
             "install_libtorch.html for "
             "instructions on how to configure and build moose with libTorch.");
 #endif
-  }
+    }
 
-  {
+    {
     const auto doc = "MFEM finite element library";
 #ifdef MOOSE_MFEM_ENABLED
     add_string("mfem", MFEM_VERSION_STRING, doc);
@@ -193,9 +193,9 @@ Capabilities::registerMooseCapabilities()
             "first running scripts/update_and_rebuild_conduit.sh. Finally, configure "
             "moose with ./configure --with-mfem");
 #endif
-  }
+    }
 
-  {
+    {
     const auto doc = "New Engineering Material model Library, version 2";
 #ifdef NEML2_ENABLED
     have("neml2", doc);
@@ -205,9 +205,9 @@ Capabilities::registerMooseCapabilities()
             "Install neml2 using the scripts/update_and_rebuild_neml2.sh script, then "
             "configure moose with ./configure --with-neml2 --with-libtorch");
 #endif
-  }
+    }
 
-  {
+    {
     const auto doc = "gperftools code performance analysis and profiling library";
 #ifdef HAVE_GPERFTOOLS
     have("gperftools", doc);
@@ -217,9 +217,9 @@ Capabilities::registerMooseCapabilities()
             "Check https://mooseframework.inl.gov/application_development/profiling.html "
             "for instructions on profiling MOOSE based applications.");
 #endif
-  }
+    }
 
-  {
+    {
     const auto doc = "libPNG portable network graphics format library";
 #ifdef MOOSE_HAVE_LIBPNG
     have("libpng", doc);
@@ -229,9 +229,9 @@ Capabilities::registerMooseCapabilities()
             "Install libpng through conda or your distribution and check that it gets "
             "detected through pkg-config, then reconfigure and rebuild MOOSE.");
 #endif
-  }
+    }   
 
-  {
+    {
     const auto doc = "NVIDIA GPU parallel computing platform";
 #ifdef PETSC_HAVE_CUDA
     const std::string version = QUOTE(PETSC_PKG_CUDA_VERSION_MAJOR) "." QUOTE(
@@ -240,9 +240,9 @@ Capabilities::registerMooseCapabilities()
 #else
     missing("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
 #endif
-  }
+    }
 
-  {
+    {
     const auto doc = "Kokkos performance portability programming ecosystem";
 #ifdef MOOSE_KOKKOS_ENABLED
     const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(
@@ -254,9 +254,40 @@ Capabilities::registerMooseCapabilities()
             "Rebuild PETSc with Kokkos support and libMesh. Then, reconfigure MOOSE with "
             "--with-kokkos.");
 #endif
-  }
+    }
 
-  {
+    {
+    const auto doc = "Kokkos native FE shape/quadrature evaluation (MOOSE_KOKKOS_NATIVE_FE)";                        
+#ifdef MOOSE_KOKKOS_NATIVE_FE                                                                                        
+    add_bool("kokkos_native_fe", true, doc);                                                                         
+#else                                                                                                                
+      missing("kokkos_native_fe", doc,                                                                                 
+      "Rebuild with ADDITIONAL_KOKKOS_CPPFLAGS=-DMOOSE_KOKKOS_NATIVE_FE.");                                    
+#endif                                                                                                        
+    }                                                                                                          
+                                                                                                             
+    {                                                                                                           
+      const auto doc = "Kokkos native quadrature tables (MOOSE_KOKKOS_NATIVE_QUADRATURE)";                      
+#ifdef MOOSE_KOKKOS_NATIVE_QUADRATURE                                                                         
+      add_bool("kokkos_native_quadrature", true, doc);                                                          
+#else                                                                                                         
+      missing("kokkos_native_quadrature", doc,                                                                  
+      "Rebuild with ADDITIONAL_KOKKOS_CPPFLAGS=-DMOOSE_KOKKOS_NATIVE_QUADRATURE.");                     
+#endif                                                                                                        
+    }                                                                                                           
+
+    {                                                                                                           
+      const auto doc = "Kokkos on-demand per-element shape evaluation (MOOSE_KOKKOS_ONDEMAND_FE)";              
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE                                                                               
+      add_bool("kokkos_ondemand_fe", true, doc);                                                                
+#else                                                                                                         
+      missing("kokkos_ondemand_fe", doc,                                                                        
+      "Rebuild with ADDITIONAL_KOKKOS_CPPFLAGS=\"-DMOOSE_KOKKOS_NATIVE_FE "                             
+      "-DMOOSE_KOKKOS_ONDEMAND_FE\".");                                                                 
+#endif                                                                                                        
+    }                                                                                                           
+                                                                                                              
+    { 
     const auto doc = "Kokkos support for PETSc";
 #ifdef PETSC_HAVE_KOKKOS
     const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(

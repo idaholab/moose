@@ -13,6 +13,10 @@
 
 #include "MooseVariableBase.h"
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+#include "KokkosFEReinit.h"
+#endif
+
 namespace Moose::Kokkos
 {
 
@@ -34,11 +38,25 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    const auto topo = datum.assembly().getElemTopology(elem.type);
+    if (side == libMesh::invalid_uint)
+    {
+      const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
+      return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    else
+    {
+      const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
+      return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#else
+    auto fe = datum.jfe();
     return side == libMesh::invalid_uint
                ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
                : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+#endif
   }
 };
 
@@ -56,12 +74,28 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.jfe();
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    const auto topo = datum.assembly().getElemTopology(elem.type);
+    Real3 ref_grad;
+    if (side == libMesh::invalid_uint)
+    {
+      const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
+      ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    else
+    {
+      const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
+      ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    return datum.J(qp) * ref_grad;
+#else
+    auto fe = datum.jfe();
     return datum.J(qp) *
            (side == libMesh::invalid_uint
                 ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
                 : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
+#endif
   }
 };
 
@@ -79,11 +113,25 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.ife();
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    const auto topo = datum.assembly().getElemTopology(elem.type);
+    if (side == libMesh::invalid_uint)
+    {
+      const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
+      return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    else
+    {
+      const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
+      return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#else
+    auto fe = datum.ife();
     return side == libMesh::invalid_uint
                ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
                : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
+#endif
   }
 };
 
@@ -101,12 +149,28 @@ public:
   {
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto fe = datum.ife();
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    const auto topo = datum.assembly().getElemTopology(elem.type);
+    Real3 ref_grad;
+    if (side == libMesh::invalid_uint)
+    {
+      const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
+      ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    else
+    {
+      const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
+      ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+    return datum.J(qp) * ref_grad;
+#else
+    auto fe = datum.ife();
     return datum.J(qp) *
            (side == libMesh::invalid_uint
                 ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
                 : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
+#endif
   }
 };
 ///@}

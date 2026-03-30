@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosTypes.h"
+#include "KokkosFETypes.h"
 
 #include "MooseMesh.h"
 
@@ -137,6 +138,43 @@ public:
   KOKKOS_FUNCTION unsigned int getNumDofs(unsigned int elem_type, unsigned int fe_type) const
   {
     return _n_dofs(elem_type, fe_type);
+  }
+  /**
+   * Get the Kokkos element topology for a contiguous element type ID
+   * @param elem_type_id The contiguous element type ID
+   * @returns The element topology enum value
+   */
+  KOKKOS_FUNCTION FEElemTopology getElemTopology(unsigned int elem_type_id) const
+  {
+    return _elem_topologies[elem_type_id];
+  }
+  /**
+   * Get the reference-element coordinate of a volume quadrature point
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type_id The contiguous element type ID
+   * @param qp The local quadrature point index
+   * @returns The reference-element coordinate (xi, eta, zeta) in Real3.v[]
+   */
+  KOKKOS_FUNCTION Real3 getQPointRef(ContiguousSubdomainID subdomain,
+                                     unsigned int elem_type_id,
+                                     unsigned int qp) const
+  {
+    return _q_points(subdomain, elem_type_id)[qp];
+  }
+  /**
+   * Get the parent-reference-element coordinate of a face quadrature point
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type_id The contiguous element type ID
+   * @param side The side index
+   * @param qp The local face quadrature point index
+   * @returns The parent reference-element coordinate (xi, eta, zeta) in Real3.v[]
+   */
+  KOKKOS_FUNCTION Real3 getQPointRefFace(ContiguousSubdomainID subdomain,
+                                         unsigned int elem_type_id,
+                                         unsigned int side,
+                                         unsigned int qp) const
+  {
+    return _q_points_face_parent(subdomain, elem_type_id)[side][qp];
   }
   /**
    * Get the shape functions of a FE type for an element type and subdomain
@@ -277,6 +315,29 @@ private:
    */
   void initShape();
   /**
+   * CPU-only native path: fill _phi/_grad_phi/_phi_face/_grad_phi_face for one
+   * (fe_type, elem_type) pair using FEEvaluator directly, without FEBase::reinit().
+   * Called from initShape() when MOOSE_KOKKOS_NATIVE_FE is defined and the FE
+   * family is LAGRANGE.
+   */
+  void initShapeNative(unsigned int sid,
+                       unsigned int etid,
+                       unsigned int ftid,
+                       FEElemTopology topo,
+                       unsigned int n_vol_qps,
+                       unsigned int n_face_qps,
+                       const libMesh::Elem & ref_elem);
+  /**
+   * CPU-only native path: fill _map_phi/_map_grad_phi/_map_psi_face/_map_grad_psi_face
+   * for one elem_type using FEMapEvaluator, without FEBase::reinit().
+   * Called from initShape() when MOOSE_KOKKOS_NATIVE_FE is defined.
+   */
+  void initMapNative(unsigned int sid,
+                     unsigned int etid,
+                     FEElemTopology topo,
+                     unsigned int parent_dim,
+                     const libMesh::Elem & ref_elem);
+  /**
    * Cache physical maps on element quadrature points
    */
   void cachePhysicalMap();
@@ -347,6 +408,17 @@ private:
   Array2D<Array<Real>> _weights;
   Array2D<Array<Array<Real>>> _weights_face;
   ///@}
+  /**
+   * Per-element-type topology (for on-demand FE, Phase 6).
+   * Indexed by contiguous element type ID.
+   */
+  Array<FEElemTopology> _elem_topologies;
+  /**
+   * Face quadrature points mapped into the parent reference coordinate system
+   * (for on-demand FE, Phase 6).  Indexed as _q_points_face_parent(subdomain, elem_type)[side][qp].
+   * Computed during initShape() when MOOSE_KOKKOS_ONDEMAND_FE is defined.
+   */
+  Array2D<Array<Array<Real3>>> _q_points_face_parent;
   /**
    * Shape functions for reference elements
    */
