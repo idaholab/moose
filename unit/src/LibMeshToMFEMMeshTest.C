@@ -11,7 +11,6 @@
 #include <stdexcept>
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "mfem/fem/gridfunc.hpp"
 #include "gtest/gtest.h"
 #include "GeneratedMesh.h"
 #include "MeshGeneratorMesh.h"
@@ -25,8 +24,8 @@
 #include "libmesh/enum_elem_type.h"
 #include "mfem/fem/eltrans.hpp"
 #include "mfem/fem/fespace.hpp"
+#include "mfem/fem/gridfunc.hpp"
 #include "mfem/linalg/densemat.hpp"
-#include "mfem/mesh/element.hpp"
 #include "type_traits"
 
 template <class M>

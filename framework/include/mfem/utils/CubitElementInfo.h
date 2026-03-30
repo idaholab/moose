@@ -1,5 +1,4 @@
 #pragma once
-#include <mfem/mesh/element.hpp>
 #include <stdint.h>
 #include "MooseError.h"
 #include "libmesh/enum_elem_type.h"
