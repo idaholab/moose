@@ -64,4 +64,90 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
+
+  # ── Native FE path (MOOSE_KOKKOS_NATIVE_FE) ─────────────────────────────────
+  # These tests require the binary to be compiled with -DMOOSE_KOKKOS_NATIVE_FE.
+  # They reuse the same gold files as the default path: the native CPU-evaluated
+  # shape tables must produce a numerically identical solution.
+
+  [native_fe_dirichlet]
+    type = Exodiff
+    input = 'kokkos_2d_diffusion_test.i'
+    exodiff = 'kokkos_2d_diffusion_test_out.e'
+    prereq = testdirichlet
+    requirement = 'The Kokkos native FE path (MOOSE_KOKKOS_NATIVE_FE) shall produce '
+                  'identical results to the libMesh path for a 2D diffusion problem '
+                  'with Dirichlet boundary conditions.'
+    design = 'KokkosDiffusion.md'
+    capabilities = 'kokkos & kokkos_native_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  [native_fe_neumann]
+    type = Exodiff
+    input = 'kokkos_2d_diffusion_neumannbc_test.i'
+    exodiff = 'kokkos_2d_diffusion_neumannbc_test_out.e'
+    prereq = testneumann
+    requirement = 'The Kokkos native FE path shall produce identical results for a 2D '
+                  'diffusion problem with Neumann boundary conditions, exercising the '
+                  'face shape function evaluation path.'
+    design = 'KokkosDiffusion.md KokkosNeumannBC.md'
+    capabilities = 'kokkos & kokkos_native_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  [native_fe_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_2d_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false'
+    recover = false
+    requirement = 'The Kokkos native FE path shall produce a hand-coded Jacobian that '
+                  'matches the finite-difference Jacobian.'
+    design = 'KokkosDiffusion.md'
+    capabilities = 'kokkos & kokkos_native_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  # ── On-demand FE path (MOOSE_KOKKOS_ONDEMAND_FE) ────────────────────────────
+  # Both MOOSE_KOKKOS_NATIVE_FE and MOOSE_KOKKOS_ONDEMAND_FE must be defined.
+  # Shape functions are computed on-device per qp; no _phi/_grad_phi tables.
+
+  [ondemand_fe_dirichlet]
+    type = Exodiff
+    input = 'kokkos_2d_diffusion_test.i'
+    exodiff = 'kokkos_2d_diffusion_test_out.e'
+    prereq = testdirichlet
+    requirement = 'The Kokkos on-demand FE path (MOOSE_KOKKOS_ONDEMAND_FE) shall '
+                  'produce identical results to the libMesh path for a 2D diffusion '
+                  'problem with Dirichlet boundary conditions.'
+    design = 'KokkosDiffusion.md'
+    capabilities = 'kokkos & kokkos_ondemand_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  [ondemand_fe_neumann]
+    type = Exodiff
+    input = 'kokkos_2d_diffusion_neumannbc_test.i'
+    exodiff = 'kokkos_2d_diffusion_neumannbc_test_out.e'
+    prereq = testneumann
+    requirement = 'The Kokkos on-demand FE path shall produce identical results for a '
+                  '2D diffusion problem with Neumann boundary conditions, exercising '
+                  'the on-device face shape evaluation via _q_points_face_parent.'
+    design = 'KokkosDiffusion.md KokkosNeumannBC.md'
+    capabilities = 'kokkos & kokkos_ondemand_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  [ondemand_fe_jacobian]
+    type = PetscJacobianTester
+    input = 'kokkos_2d_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false'
+    recover = false
+    requirement = 'The Kokkos on-demand FE path shall produce a hand-coded Jacobian '
+                  'that matches the finite-difference Jacobian, confirming that '
+                  'nativeGradShape gives correct reference-element gradients.'
+    design = 'KokkosDiffusion.md'
+    capabilities = 'kokkos & kokkos_ondemand_fe'
+    compute_devices = 'cpu cuda'
+  []
 []

@@ -19,6 +19,27 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/reference_elem.h"
 
+// ── Native FE path headers ────────────────────────────────────────────────────
+// Included only when the native flag is active so that the default build has no
+// new compile-time dependencies.
+#ifdef MOOSE_KOKKOS_NATIVE_FE
+#include "KokkosFELagrange1D.h"
+#include "KokkosFELagrange2D.h"
+#include "KokkosFELagrange3D.h"
+#include "KokkosFEMapEvaluator.h"
+#endif
+
+// MOOSE_KOKKOS_ONDEMAND_FE (Phase 6) requires MOOSE_KOKKOS_NATIVE_FE.
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+#ifndef MOOSE_KOKKOS_NATIVE_FE
+#error "MOOSE_KOKKOS_ONDEMAND_FE requires MOOSE_KOKKOS_NATIVE_FE to also be defined"
+#endif
+#endif
+
+#ifdef MOOSE_KOKKOS_NATIVE_QUADRATURE
+#include "KokkosQuadrature.h"
+#endif
+
 namespace Moose::Kokkos
 {
 
@@ -113,6 +134,28 @@ Assembly::initQuadrature()
       _q_points_face(sid, elem_type_id).create(elem->n_sides());
       _weights_face(sid, elem_type_id).create(elem->n_sides());
 
+#ifdef MOOSE_KOKKOS_NATIVE_QUADRATURE
+      {
+        // Fill volume quadrature natively
+        const auto topo = toKokkosTopology(elem_type);
+        const auto vol_order = static_cast<unsigned int>(qrule->get_order());
+        fillQuadrature(topo, vol_order, _q_points(sid, elem_type_id), _weights(sid, elem_type_id));
+        n_qps[subdomain][elem_type] = _q_points(sid, elem_type_id).size();
+
+        // Fill face quadrature natively
+        const auto side_topo = getSideTopology(topo);
+        const auto face_order = static_cast<unsigned int>(qrule_face->get_order());
+        for (unsigned int side = 0; side < elem->n_sides(); ++side)
+        {
+          fillQuadrature(side_topo,
+                         face_order,
+                         _q_points_face(sid, elem_type_id)[side],
+                         _weights_face(sid, elem_type_id)[side]);
+          n_qps_face[subdomain][elem_type].push_back(
+              _q_points_face(sid, elem_type_id)[side].size());
+        }
+      }
+#else
       // Cache volume quadrature of each reference element
 
       qrule->init(*elem, /* p-level */ 0);
@@ -143,6 +186,7 @@ Assembly::initQuadrature()
           _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
         }
       }
+#endif
 
       _max_qps_per_elem = std::max(_max_qps_per_elem, n_qps[subdomain][elem_type]);
     }
@@ -245,10 +289,30 @@ Assembly::initShape()
   const auto num_subdomains = kokkosMesh().getNumSubdomains();
   const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+  // Phase 6: shape functions are computed on-device; physics phi tables are not needed.
+  // Verify all FE types are LAGRANGE so the on-demand path can handle every variable.
+  for (auto & [fe_type, fe_type_id] : _fe_type_map)
+    if (fe_type.family != libMesh::LAGRANGE)
+      mooseError("MOOSE_KOKKOS_ONDEMAND_FE requires all variables to use the LAGRANGE FE family; "
+                 "variable with family ",
+                 libMesh::Utility::enum_to_string(fe_type.family),
+                 " was found");
+
+  // Build the element-type → topology map needed by on-device evaluators.
+  _elem_topologies.create(num_elem_types);
+  for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
+    _elem_topologies[elem_type_id] = toKokkosTopology(elem_type);
+  _elem_topologies.copyToDevice();
+
+  // Allocate the face-qp-in-parent-coords array; filled per-subdomain in the loop below.
+  _q_points_face_parent.create(num_subdomains, num_elem_types);
+#else
   _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+#endif
 
   _map_phi.create(num_subdomains, num_elem_types);
   _map_phi_face.create(num_subdomains, num_elem_types);
@@ -271,6 +335,8 @@ Assembly::initShape()
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
+    // ── Physics DOF shape arrays ───────────────────────────────────────────────
+
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
       std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
@@ -282,47 +348,81 @@ Assembly::initShape()
       for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
       {
         auto elem = &libMesh::ReferenceElem::get(elem_type);
+        const auto topo = toKokkosTopology(elem_type);
 
-        auto & phi = fe->get_phi();
-        auto & grad_phi = fe->get_dphi();
+        // Three-way dispatch for LAGRANGE physics shape arrays:
+        //   Phase 6 (ONDEMAND): record DOF count only; evaluation happens on-device
+        //   Phase 5 (NATIVE):   evaluate on CPU into cached tables via initShapeNative
+        //   default:            evaluate on CPU via libMesh FEBase::reinit
+        bool use_libmesh_path = true;
 
-        fe->reinit(elem);
-
-        _n_dofs(elem_type_id, fe_type_id) = phi.size();
-
-        _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-        _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-
-        for (unsigned int i = 0; i < phi.size(); ++i)
-          for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
-          {
-            _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-            _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
-          }
-
-        _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-        _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-
-        for (unsigned int side = 0; side < elem->n_sides(); ++side)
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+        if (fe_type.family == libMesh::LAGRANGE)
         {
-          auto & phi = fe_face->get_phi();
-          auto & grad_phi = fe_face->get_dphi();
+          // nDofs() is a CPU-only helper in KokkosFETypes — safe to call here.
+          _n_dofs(elem_type_id, fe_type_id) = nDofs(FEFamily::LAGRANGE, topo);
+          use_libmesh_path = false;
+        }
+#elif defined(MOOSE_KOKKOS_NATIVE_FE)
+        if (fe_type.family == libMesh::LAGRANGE)
+        {
+          initShapeNative(sid,
+                          elem_type_id,
+                          fe_type_id,
+                          topo,
+                          qrule->n_points(),
+                          qrule_face->n_points(),
+                          *elem);
+          use_libmesh_path = false;
+        }
+#endif
 
-          fe_face->reinit(elem, side);
+        if (use_libmesh_path)
+        {
+          auto & phi = fe->get_phi();
+          auto & grad_phi = fe->get_dphi();
 
-          _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(), qrule_face->n_points());
-          _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                     qrule_face->n_points());
+          fe->reinit(elem);
+
+          _n_dofs(elem_type_id, fe_type_id) = phi.size();
+
+          _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+          _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
 
           for (unsigned int i = 0; i < phi.size(); ++i)
-            for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+            for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
             {
-              _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-              _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+              _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
             }
+
+          _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+          _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+
+          for (unsigned int side = 0; side < elem->n_sides(); ++side)
+          {
+            auto & phi = fe_face->get_phi();
+            auto & grad_phi = fe_face->get_dphi();
+
+            fe_face->reinit(elem, side);
+
+            _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                   qrule_face->n_points());
+            _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                        qrule_face->n_points());
+
+            for (unsigned int i = 0; i < phi.size(); ++i)
+              for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
+              {
+                _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+                _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              }
+          }
         }
       }
     }
+
+    // ── Geometric map arrays ───────────────────────────────────────────────────
 
     for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
@@ -330,8 +430,43 @@ Assembly::initShape()
       auto fe_type = FEType(elem->default_order(), LAGRANGE);
       auto shape_deriv_ptr = libMesh::FEInterface::shape_deriv_function(fe_type, elem);
 
+<<<<<<< HEAD
       std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
       std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
+=======
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+      // Phase 6: precompute face qp parent-reference coordinates so on-device
+      // shape evaluators can look up (xi, eta, zeta) without calling mapFaceQpToParent
+      // at kernel time.  The mapping depends only on element topology, not physics.
+      {
+        const auto topo = toKokkosTopology(elem_type);
+        const auto side_topo = getSideTopology(topo);
+        const unsigned int n_sides = elem->n_sides();
+
+        _q_points_face_parent(sid, elem_type_id).create(n_sides);
+
+        for (unsigned int side = 0; side < n_sides; ++side)
+        {
+          const auto & face_qpts = _q_points_face(sid, elem_type_id)[side];
+          const unsigned int n_face_qps = face_qpts.size();
+          _q_points_face_parent(sid, elem_type_id)[side].create(n_face_qps);
+
+          auto side_elem = elem->side_ptr(side);
+          for (unsigned int qp = 0; qp < n_face_qps; ++qp)
+            _q_points_face_parent(sid, elem_type_id)[side][qp] =
+                mapFaceQpToParent(*side_elem, side_topo, face_qpts[qp]);
+        }
+      }
+#endif
+
+#ifdef MOOSE_KOKKOS_NATIVE_FE
+      initMapNative(sid, elem_type_id, toKokkosTopology(elem_type), _dimension, *elem);
+#else
+      std::unique_ptr<FEBase> fe(
+          FEBase::build(_dimension, FEType(elem->default_order(), LAGRANGE)));
+      std::unique_ptr<FEBase> fe_face(
+          FEBase::build(_dimension, FEType(elem->default_order(), LAGRANGE)));
+>>>>>>> 33a4291664 (first step of porting libmesh with kokkos)
 
       fe->attach_quadrature_rule(qrule);
       fe_face->attach_quadrature_rule(qrule_face);
@@ -419,13 +554,19 @@ Assembly::initShape()
           }
         }
       }
+#endif
     }
   }
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+  // Physics phi tables were never filled; copy the parent-reference face qp table instead.
+  _q_points_face_parent.copyToDeviceNested();
+#else
   _phi.copyToDeviceNested();
   _phi_face.copyToDeviceNested();
   _grad_phi.copyToDeviceNested();
   _grad_phi_face.copyToDeviceNested();
+#endif
 
   _map_phi.copyToDeviceNested();
   _map_phi_face.copyToDeviceNested();
@@ -439,6 +580,236 @@ Assembly::initShape()
 
   _n_dofs.copyToDevice();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Native implementation helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+#ifdef MOOSE_KOKKOS_NATIVE_FE
+
+// Map a face quadrature point from the side element's reference coordinate
+// system to the parent element's reference coordinate system.
+//
+// side_in_parent  — libMesh side element whose node positions are in parent
+//                   reference coordinates (obtained from ReferenceElem::side_ptr)
+// side_topo       — Kokkos topology of the side element
+// face_qpt        — quadrature point in the side element's reference system
+//
+// The mapping is the isoparametric one:
+//   x_parent = sum_k  psi_k(face_qpt)  *  x_node_k_in_parent
+//
+// where psi_k are the LAGRANGE shape functions of the side element.
+static Real3
+mapFaceQpToParent(const libMesh::Elem & side_in_parent,
+                  FEElemTopology side_topo,
+                  Real3 face_qpt)
+{
+  const unsigned int n = side_in_parent.n_nodes();
+  Real3 parent_pt;
+
+  for (unsigned int k = 0; k < n; ++k)
+  {
+    Real psi;
+    const Real s = face_qpt.v[0];
+    const Real t = face_qpt.v[1];
+
+    switch (side_topo)
+    {
+      case FEElemTopology::EDGE2:
+        psi = FEEvaluator<LagrangeTag, Edge2Tag>::shape(k, s, 0.0, 0.0);
+        break;
+      case FEElemTopology::EDGE3:
+        psi = FEEvaluator<LagrangeTag, Edge3Tag>::shape(k, s, 0.0, 0.0);
+        break;
+      case FEElemTopology::TRI3:
+        psi = FEEvaluator<LagrangeTag, Tri3Tag>::shape(k, s, t, 0.0);
+        break;
+      case FEElemTopology::TRI6:
+        psi = FEEvaluator<LagrangeTag, Tri6Tag>::shape(k, s, t, 0.0);
+        break;
+      case FEElemTopology::QUAD4:
+        psi = FEEvaluator<LagrangeTag, Quad4Tag>::shape(k, s, t, 0.0);
+        break;
+      case FEElemTopology::QUAD8:
+        psi = FEEvaluator<LagrangeTag, Quad8Tag>::shape(k, s, t, 0.0);
+        break;
+      case FEElemTopology::QUAD9:
+        psi = FEEvaluator<LagrangeTag, Quad9Tag>::shape(k, s, t, 0.0);
+        break;
+      default:
+        psi = 0.0;
+        break;
+    }
+
+    const auto & pt = side_in_parent.point(k);
+    parent_pt.v[0] += psi * pt(0);
+    parent_pt.v[1] += psi * pt(1);
+    parent_pt.v[2] += psi * pt(2);
+  }
+
+  return parent_pt;
+}
+
+// Evaluate shape(i, xi, eta, zeta) and grad_shape(i, xi, eta, zeta) for the
+// given topology and write results into dest_phi and dest_grad at position
+// (i, qp).  Used by both initShapeNative (physics DOFs) and initMapNative
+// (geometric map DOFs) to avoid duplicating the big switch.
+#define MOOSE_KOKKOS_EVAL_SHAPE(Tag, dest_phi, dest_grad, i, qp, xi, eta, zeta) \
+  do                                                                              \
+  {                                                                               \
+    (dest_phi)(i, qp) = FEEvaluator<LagrangeTag, Tag>::shape(i, xi, eta, zeta); \
+    (dest_grad)(i, qp) =                                                         \
+        FEEvaluator<LagrangeTag, Tag>::grad_shape(i, xi, eta, zeta);             \
+  } while (false)
+
+static void
+evalShapeAtQp(FEElemTopology topo,
+              unsigned int i,
+              unsigned int qp,
+              Real xi,
+              Real eta,
+              Real zeta,
+              Array2D<Real> & phi,
+              Array2D<Real3> & grad_phi)
+{
+  switch (topo)
+  {
+    case FEElemTopology::EDGE2:  MOOSE_KOKKOS_EVAL_SHAPE(Edge2Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::EDGE3:  MOOSE_KOKKOS_EVAL_SHAPE(Edge3Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::TRI3:   MOOSE_KOKKOS_EVAL_SHAPE(Tri3Tag,   phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::TRI6:   MOOSE_KOKKOS_EVAL_SHAPE(Tri6Tag,   phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::QUAD4:  MOOSE_KOKKOS_EVAL_SHAPE(Quad4Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::QUAD8:  MOOSE_KOKKOS_EVAL_SHAPE(Quad8Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::QUAD9:  MOOSE_KOKKOS_EVAL_SHAPE(Quad9Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::TET4:   MOOSE_KOKKOS_EVAL_SHAPE(Tet4Tag,   phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::TET10:  MOOSE_KOKKOS_EVAL_SHAPE(Tet10Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::HEX8:   MOOSE_KOKKOS_EVAL_SHAPE(Hex8Tag,   phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::HEX20:  MOOSE_KOKKOS_EVAL_SHAPE(Hex20Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    case FEElemTopology::HEX27:  MOOSE_KOKKOS_EVAL_SHAPE(Hex27Tag,  phi, grad_phi, i, qp, xi, eta, zeta); break;
+    default: break;
+  }
+}
+
+#undef MOOSE_KOKKOS_EVAL_SHAPE
+
+void
+Assembly::initShapeNative(unsigned int sid,
+                           unsigned int etid,
+                           unsigned int ftid,
+                           FEElemTopology topo,
+                           unsigned int n_vol_qps,
+                           unsigned int n_face_qps,
+                           const libMesh::Elem & ref_elem)
+{
+  const unsigned int n = nDofs(FEFamily::LAGRANGE, topo);
+  _n_dofs(etid, ftid) = n;
+
+  // ── Volume shape functions ────────────────────────────────────────────────
+
+  _phi(sid, etid, ftid).create(n, n_vol_qps);
+  _grad_phi(sid, etid, ftid).create(n, n_vol_qps);
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int qp = 0; qp < n_vol_qps; ++qp)
+    {
+      const Real xi   = _q_points(sid, etid)[qp].v[0];
+      const Real eta  = _q_points(sid, etid)[qp].v[1];
+      const Real zeta = _q_points(sid, etid)[qp].v[2];
+      evalShapeAtQp(topo, i, qp, xi, eta, zeta,
+                    _phi(sid, etid, ftid),
+                    _grad_phi(sid, etid, ftid));
+    }
+
+  // ── Face shape functions ──────────────────────────────────────────────────
+  // Face quadrature points (_q_points_face) are in the side element's reference
+  // coordinate system.  We use the isoparametric mapping through the side
+  // element's nodes (which are stored at parent reference coordinates) to obtain
+  // the parent reference coordinates required by FEEvaluator.
+
+  const unsigned int n_sides = ref_elem.n_sides();
+  const auto side_topo = getSideTopology(topo);
+
+  _phi_face(sid, etid, ftid).create(n_sides);
+  _grad_phi_face(sid, etid, ftid).create(n_sides);
+
+  for (unsigned int side = 0; side < n_sides; ++side)
+  {
+    _phi_face(sid, etid, ftid)(side).create(n, n_face_qps);
+    _grad_phi_face(sid, etid, ftid)(side).create(n, n_face_qps);
+
+    auto side_elem = ref_elem.side_ptr(side);
+
+    for (unsigned int i = 0; i < n; ++i)
+      for (unsigned int qp = 0; qp < n_face_qps; ++qp)
+      {
+        const Real3 par = mapFaceQpToParent(
+            *side_elem, side_topo, _q_points_face(sid, etid)[side][qp]);
+        evalShapeAtQp(topo, i, qp, par.v[0], par.v[1], par.v[2],
+                      _phi_face(sid, etid, ftid)(side),
+                      _grad_phi_face(sid, etid, ftid)(side));
+      }
+  }
+}
+
+void
+Assembly::initMapNative(unsigned int sid,
+                         unsigned int etid,
+                         FEElemTopology topo,
+                         unsigned int parent_dim,
+                         const libMesh::Elem & ref_elem)
+{
+  // ── Volume map arrays ────────────────────────────────────────────────────
+  // FEMapEvaluator fills _map_phi and _map_grad_phi from the pre-cached volume
+  // quadrature points (in parent reference coordinates).
+
+  FEMapEvaluator::fillMapPhi(_map_phi(sid, etid), topo, _q_points(sid, etid));
+  FEMapEvaluator::fillMapGradPhi(_map_grad_phi(sid, etid), topo, _q_points(sid, etid));
+
+  // ── Face map arrays ───────────────────────────────────────────────────────
+
+  const unsigned int n_sides = ref_elem.n_sides();
+  const auto side_topo = getSideTopology(topo);
+
+  _map_phi_face(sid, etid).create(n_sides);
+  _map_grad_phi_face(sid, etid).create(n_sides);
+  _map_psi_face(sid, etid).create(n_sides);
+  _map_grad_psi_face(sid, etid).create(n_sides);
+
+  // Number of map nodes equals the Lagrange DOFs of the parent topology
+  const unsigned int n_map = nDofs(FEFamily::LAGRANGE, topo);
+
+  for (unsigned int side = 0; side < n_sides; ++side)
+  {
+    const auto & face_qpts = _q_points_face(sid, etid)[side];
+    const unsigned int n_face_qps = face_qpts.size();
+
+    // _map_phi_face / _map_grad_phi_face: parent LAGRANGE shapes at face qps
+    // expressed in parent reference coordinates.  Requires the same
+    // side-to-parent mapping used by initShapeNative.
+    _map_phi_face(sid, etid)(side).create(n_map, n_face_qps);
+    _map_grad_phi_face(sid, etid)(side).create(n_map, n_face_qps);
+
+    auto side_elem = ref_elem.side_ptr(side);
+
+    for (unsigned int i = 0; i < n_map; ++i)
+      for (unsigned int qp = 0; qp < n_face_qps; ++qp)
+      {
+        const Real3 par = mapFaceQpToParent(*side_elem, side_topo, face_qpts[qp]);
+        evalShapeAtQp(topo, i, qp, par.v[0], par.v[1], par.v[2],
+                      _map_phi_face(sid, etid)(side),
+                      _map_grad_phi_face(sid, etid)(side));
+      }
+
+    // _map_psi_face / _map_grad_psi_face: side LAGRANGE shapes at face qps
+    // in the side element's own reference coordinate system.
+    // FEMapEvaluator handles these directly.
+    FEMapEvaluator::fillMapPsiFace(_map_psi_face(sid, etid)(side), side_topo, face_qpts);
+    FEMapEvaluator::fillMapGradPsiFace(
+        _map_grad_psi_face(sid, etid)(side), side_topo, face_qpts, parent_dim);
+  }
+}
+
+#endif // MOOSE_KOKKOS_NATIVE_FE
 
 void
 Assembly::cachePhysicalMap()
