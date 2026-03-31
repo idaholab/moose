@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#31729'
+  design = 'ComputeCrackTipEnrichmentIncrementalStrain.md'
+  requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, '
+  'where the crack tip is arbitrarily inside elements'
+  [tip_location]
+    type = Exodiff
+    input = 'elastic_test.i output_cutter_mesh.i'
+    exodiff = 'elastic_test_XFEMCutMeshOutput.e-s0003'
+    abs_zero = 1e-8
+    map = false
+    capabilities = 'unique_id'
+    requirement = 'test crack tip location'
+  []
+  [JIntegral]
+    type = CSVDiff
+    input = 'elastic_test.i output_JIntegral.i'
+    csvdiff = 'elastic_test.csv'
+    capabilities = 'unique_id'
+    requirement = 'test J integral'
+  []
+[]
