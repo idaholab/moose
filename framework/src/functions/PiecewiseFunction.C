@@ -9,7 +9,7 @@
 
 #include "PiecewiseFunction.h"
 
-registerMooseObject("ThermalHydraulicsApp", PiecewiseFunction);
+registerMooseObject("MooseApp", PiecewiseFunction);
 
 InputParameters
 PiecewiseFunction::validParams()
