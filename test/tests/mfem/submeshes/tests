@@ -12,10 +12,9 @@
     recover = false
   []
   [MFEMBoundarySubMeshTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = boundary_submesh.i
-    xmldiff = 'OutputData/BoundaryPotential/Run0/Run0.pvd
-                OutputData/BoundaryPotential/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/BoundaryPotential/boundary_potential_line_sample_0001.csv'
     requirement = 'MOOSE shall have the ability to solve an FE problem defined on an MFEM boundary restricted submesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
