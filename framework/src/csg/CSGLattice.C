@@ -90,7 +90,7 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
 }
 
 const std::vector<std::reference_wrapper<const CSGUniverse>>
-CSGLattice::getUniqueUniverses()
+CSGLattice::getUniqueUniverses() const
 {
   std::vector<std::reference_wrapper<const CSGUniverse>> unique_univs;
   auto all_univs = getUniverses();

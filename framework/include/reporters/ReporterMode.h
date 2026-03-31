@@ -75,6 +75,30 @@ public:
   ///@}
 };
 
+inline bool
+operator==(const ReporterProducerEnum & producer_mode, const ReporterMode & mode)
+{
+  return static_cast<int>(producer_mode) == static_cast<int>(mode);
+}
+
+inline bool
+operator==(const ReporterMode & mode, const ReporterProducerEnum & producer_mode)
+{
+  return producer_mode == mode;
+}
+
+inline bool
+operator!=(const ReporterProducerEnum & producer_mode, const ReporterMode & mode)
+{
+  return !(producer_mode == mode);
+}
+
+inline bool
+operator!=(const ReporterMode & mode, const ReporterProducerEnum & producer_mode)
+{
+  return !(mode == producer_mode);
+}
+
 template <typename... Args>
 void
 ReporterProducerEnum::insert(const ReporterMode & mode, Args... modes)
