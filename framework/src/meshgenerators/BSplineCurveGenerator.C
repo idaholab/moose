@@ -52,7 +52,7 @@ BSplineCurveGenerator::validParams()
   params.addParam<unsigned int>(
       "num_cps",
       6,
-      "Number of control points used to draw the curve. Miniumum of degree+1 points are required.");
+      "Number of control points used to draw the curve. Minimum of degree+1 points are required.");
   params.addParamNamesToGroup("degree sharpness num_cps", "Spline");
 
   // Discretization parameters

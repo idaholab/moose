@@ -84,6 +84,9 @@ bSplineControlPoints(const libMesh::Point & start_point,
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
   if (parallel)
   {
+    // We should not revert to a circle for this case
+    if (MooseUtils::absoluteFuzzyEqual(start_direction.unit(), -end_direction.unit()))
+      mooseError("Start and end directions are opposite, this is not currently supported");
     mooseWarning("Directions are parallel! Attempting to use circular control points...");
     unsigned int num_cps = 2 * cps_per_half + 1;
     if (num_cps < 30)
