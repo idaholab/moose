@@ -78,6 +78,10 @@ AzimuthalBlockSplitGenerator::generate()
 
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
+  // We'll be querying the mesh for subdomain ids
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
+
   // Check the order of the input mesh's elements
   // Meanwhile, record the vertex average of each element for future comparison
   unsigned short order = 0;

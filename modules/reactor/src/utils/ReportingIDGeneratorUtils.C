@@ -80,7 +80,10 @@ ReportingIDGeneratorUtils::getCellBlockIDs(
     for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
     {
       std::set<SubdomainID> mesh_blks;
-      meshes[pattern[i][j]]->subdomain_ids(mesh_blks);
+      ReplicatedMesh & mesh = *meshes[pattern[i][j]];
+      if (!mesh.preparation().has_cached_elem_data)
+        mesh.cache_elem_data();
+      mesh.subdomain_ids(mesh_blks);
       blks.insert(mesh_blks.begin(), mesh_blks.end());
     }
   return blks;
