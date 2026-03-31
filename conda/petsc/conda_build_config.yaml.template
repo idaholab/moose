@@ -5,9 +5,8 @@ mpi:
 moose_mpi:
   - moose-mpi __VERSIONER_MPI_VERSION__
 
-#### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX14.5.sdk                                     # [osx]
+  - /opt/conda-sdks/MacOSX14.5.sdk                          # [osx]
 
 macos_min_version:                                          # [osx]
   - 14.5                                                    # [osx]

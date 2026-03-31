@@ -129,9 +129,8 @@ moose_libclang:                                             # [osx]
   - libclang-cpp19.1 19.1.7 default_h9399c5b_8              # [not arm64 and osx]
   - libclang-cpp19.1 19.1.7 default_hf3020a7_8              # [arm64]
 
-#### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX14.5.sdk                                     # [osx]
+  - /opt/conda-sdks/MacOSX14.5.sdk                          # [osx]
 
 macos_min_version:                                          # [osx]
   - 14.5                                                    # [osx]
