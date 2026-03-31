@@ -84,7 +84,7 @@ function baked_flags()
 
         # Make sure sdkroot is available when not building
         if [ "\${CONDA_BUILD:-0}" = "0" ]; then
-            SDK_VERSIONS=("14.5")
+            SDK_VERSIONS=("26.2" "15.5" "15.4" "15.2" "14.5" "14.2" "13.3")
             SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
             SDKROOT=
             for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
