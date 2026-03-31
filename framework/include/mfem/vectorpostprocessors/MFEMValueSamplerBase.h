@@ -13,10 +13,6 @@
 
 #include "MFEMVectorPostprocessor.h"
 
-#include "MooseTypes.h"
-#include "libmesh/point.h"
-#include "mfem.hpp"
-
 /*
  * MFEM Postprocessor which samples values at points.
  *
