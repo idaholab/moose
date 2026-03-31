@@ -47,10 +47,10 @@ elif [ "$OS_MAJOR" == "15" ]; then
 elif [ "$OS_MAJOR" == "26" ]; then
     XCODE_VERSION="26.3"
     if [ "$UNAME" == "arm64" ]; then
-        XCODE_DOWNLOAD_SUFFIX=" Apple silicon"
+        XCODE_DOWNLOAD_SUFFIX="_Apple_silicon"
         XCODE_SHASUM="f3a3a6394f03dd2b562bd0d78fbfedf31bed23c48ff5a881cadeb72b5552a1e9"
     else
-        XCODE_DOWNLOAD_SUFFIX=" Universal"
+        XCODE_DOWNLOAD_SUFFIX="_Universal"
         XCODE_SHASUM="cf87232e0419785170edcfa070b750f28808ec00b489ab540c08b7d197c79ae4"
     fi
     SDK_VERSION="26.2"
@@ -68,7 +68,7 @@ if [ -e "$SDK_DEST" ]; then
 fi
 
 # Source where Xcode should be downloaded to, which should exist
-XCODE_NAME="Xcode_${XCODE_VERSION}${XCODE_DOWNLOAD_SUFFIX// /_}.xip"
+XCODE_NAME="Xcode_${XCODE_VERSION}${XCODE_DOWNLOAD_SUFFIX}.xip"
 XCODE_XIP="/Users/$(whoami)/Downloads/${XCODE_NAME}"
 if [ ! -f "$XCODE_XIP" ]; then
     echo "ERROR: You must first download Xcode ${XCODE_VERSION} to use this script!" >&2
@@ -76,7 +76,7 @@ if [ ! -f "$XCODE_XIP" ]; then
     echo "1. Go to https://developer.apple.com/download/all/?q=Xcode%20${XCODE_VERSION}"
     echo "   in a web browser. This will require you to sign in." >&2
     echo "2. Expand 'View details' under the entry named 'Xcode ${XCODE_VERSION}'." >&2
-    echo "3. Click on the link 'Xcode ${XCODE_VERSION}${DOWNLOAD_SUFFIX}.xip', downloading it into" >&2
+    echo "3. Click on the link 'Xcode ${XCODE_VERSION}${XCODE_DOWNLOAD_SUFFIX//_/ }.xip', downloading it into" >&2
     echo "   your Downloads folder."  >&2
     echo "" >&2
     echo "Once Xcode is downloaded to '${XCODE_XIP}'," >&2
@@ -94,7 +94,8 @@ echo ""
 echo "Verifying download..."
 RESULT="$(shasum -a 256 "$XCODE_XIP" | awk '{print $1}')"
 if [ "$RESULT" != "$XCODE_SHASUM" ]; then
-    echo "ERROR: Xcode file verification failed" >&2
+    echo "ERROR: Xcode file verification failed!" >&2
+    echo "Delete ${XCODE_XIP} and download Xcode again." >&2
     exit 1
 fi
 
