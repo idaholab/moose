@@ -106,9 +106,6 @@ function baked_flags()
             echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it." >&2
         fi
 
-        CFLAGS+=" -isdkroot \${SDKROOT}"
-        CXXFLAGS+=" -isdkroot \${SDKROOT}"
-        LDFLAGS+=" -isdkroot \${SDKROOT}"
         if [ -z "\$CMAKE_ARGS" ]; then
             CMAKE_ARGS="-DCMAKE_OSX_SDKROOT=\${SDKROOT}"
         else
