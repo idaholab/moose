@@ -9,7 +9,6 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
 #include "LibmeshMFEMMesh.h"
 #include <mfem/mesh/element.hpp>
 
@@ -557,8 +556,6 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
    * there is a problem with the higher-order transfer.
    */
   verifyUniqueMappingBetweenLibmeshAndMFEMNodes(block_info,
-                                                unique_block_ids,
-                                                libmesh_element_ids_for_block_id,
                                                 libmesh_node_ids_for_element_id,
                                                 coordinates_for_libmesh_node_id,
                                                 libmesh_node_id_for_mfem_node_id);
@@ -567,8 +564,6 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
 void
 LibmeshMFEMMesh::verifyUniqueMappingBetweenLibmeshAndMFEMNodes(
     const CubitBlockInfo & block_info,
-    const std::vector<int> & unique_block_ids,
-    const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
     const std::map<int, std::vector<int>> & libmesh_node_ids_for_element_id,
     const std::map<int, std::array<double, 3>> & coordinates_for_libmesh_node_id,
     const std::map<int, int> & libmesh_node_id_for_mfem_node_id)
