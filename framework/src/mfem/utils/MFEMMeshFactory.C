@@ -7,6 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_MFEM_ENABLED
+#include <memory>
+#include <map>
+#include <tuple>
+#include <vector>
+
 #include "MFEMMeshFactory.h"
 #include "libmesh/elem.h"
 #include "libmesh/enum_io_package.h"
@@ -25,10 +31,6 @@
 #include "LibmeshMFEMMesh.h"
 #include "MooseMesh.h"
 #include "MFEMMesh.h"
-#include <memory>
-#include <map>
-#include <tuple>
-#include <vector>
 
 std::shared_ptr<mfem::ParMesh>
 buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
@@ -599,3 +601,5 @@ getMeshPartitioning(MeshBase & libmesh)
   // Wrap-up in a unique pointer.
   return std::unique_ptr<int[]>(mesh_partitioning);
 }
+
+#endif

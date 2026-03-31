@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_MFEM_ENABLED
+
 #include "CubitElementInfo.h"
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_order.h"
@@ -505,3 +507,5 @@ CubitBlockInfo::blockFace(int block_id, int face_id) const
 {
   return getElementInfo(blockElement(block_id).faces[face_id]);
 }
+
+#endif

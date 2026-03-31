@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
 #include <mfem.hpp>
 #include "libmesh/elem.h"
@@ -137,3 +139,5 @@ IDMap getBlockIDsForBoundaryID(const std::map<int, std::vector<int>> & element_i
  * pointer.
  */
 std::unique_ptr<int[]> getMeshPartitioning(MeshBase & libmesh);
+
+#endif

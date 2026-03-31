@@ -7,10 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "mfem/config/config.hpp"
-#include <stdexcept>
 #ifdef MOOSE_MFEM_ENABLED
 
+#include <stdexcept>
 #include "gtest/gtest.h"
 #include "GeneratedMesh.h"
 #include "MeshGeneratorMesh.h"
@@ -22,6 +21,7 @@
 #include "Registry.h"
 #include "MFEMMeshFactory.h"
 #include "libmesh/enum_elem_type.h"
+#include "mfem/config/config.hpp"
 #include "mfem/fem/eltrans.hpp"
 #include "mfem/fem/fespace.hpp"
 #include "mfem/fem/gridfunc.hpp"
