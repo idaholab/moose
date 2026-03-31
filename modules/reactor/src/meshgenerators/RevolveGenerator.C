@@ -253,6 +253,10 @@ RevolveGenerator::generate()
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
+  // Subdomain IDs for on-axis elements must be new
+  if (!input->preparation().has_cached_elem_data)
+    input->cache_elem_data();
+
   // check that subdomain swap sources exist in the mesh
   std::set<subdomain_id_type> blocks;
   input->subdomain_ids(blocks, true);
@@ -265,9 +269,6 @@ RevolveGenerator::generate()
                    "Source subdomain " + std::to_string(bid) + " was not found in the mesh");
     }
 
-  // Subdomain IDs for on-axis elements must be new
-  if (!input->preparation().has_cached_elem_data)
-    input->cache_elem_data();
   std::set<subdomain_id_type> subdomain_ids_set;
   input->subdomain_ids(subdomain_ids_set);
   const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin();
