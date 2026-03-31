@@ -30,9 +30,8 @@ moose_cxxcompiler:
   - clangxx_osx-64                                          # [not arm64 and osx]
   - clangxx_osx-arm64                                       # [arm64]
 
-#### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
-  - /opt/MacOSX14.5.sdk                                     # [osx]
+  - /opt/conda-sdks/MacOSX14.5.sdk                          # [osx]
 
 macos_min_version:                                          # [osx]
   - 14.5                                                    # [osx]

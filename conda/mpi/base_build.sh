@@ -71,17 +71,51 @@ function baked_flags()
     b_LDFLAGS="\$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')"
 
     # append necessary std c library
-    export CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
-    export CPPFLAGS=\${b_CPPFLAGS}
-    export CFLAGS=\${b_CFLAGS}
-    export FFLAGS=\${b_FFLAGS}
-
-    # specific OS linker flags
+    CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
+    CPPFLAGS=\${b_CPPFLAGS}
+    CFLAGS=\${b_CFLAGS}
+    FFLAGS=\${b_FFLAGS}
     LDFLAGS=\${b_LDFLAGS}
+
+    # special case for mac
     if [[ "\$(uname)" == 'Darwin' ]]; then
+        # Specific OS linker flags
         LDFLAGS+=" -Wl,-ld64 -Wl,-commons,use_dylibs"
+
+        # Make sure sdkroot is available
+        SDK_VERSIONS=("14.5")
+        SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
+        SDKROOT=
+        for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
+            SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
+            for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
+                if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
+                    SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+                    break
+                fi
+            done
+            if [ -n "\$SDKROOT" ]; then
+                break
+            fi
+        done
+        if [ -z "\$SDKROOT" ]; then
+            echo "ERROR: Mac SDK not found!" >&2
+            echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it."
+            exit 1
+        fi
+
+        CFLAGS+=" -isdkroot \${SDKROOT}"
+        CXXFLAGS+=" -isdkroot \${SDKROOT}"
+        LDFLAGS+=" -isdkroot \${SDKROOT}"
+        if [ -z "\$CMAKE_ARGS" ]; then
+            CMAKE_ARGS="-DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+        else
+            CMAKE_ARGS+=" -DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+        fi
+        export CMAKE_ARGS SDKROOT
     fi
-    export LDFLAGS
+
+    export CXXFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS SDKROOT
 }
 
 export CC=mpicc \
