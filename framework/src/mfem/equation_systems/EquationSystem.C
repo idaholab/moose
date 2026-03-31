@@ -377,6 +377,9 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 void
 EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
+  if (_non_linear && _assembly_level != mfem::AssemblyLevel::LEGACY)
+    mooseError("Nonlinear solves with modern MFEM assembly levels are not currently implemented.");
+
   height = trueX.Size();
   width = trueRHS.Size();
   // Store block offsets
