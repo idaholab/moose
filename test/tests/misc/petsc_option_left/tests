@@ -39,4 +39,22 @@
     issues = '#28053'
     capabilities = 'petsc>=3.19.2'
   []
+
+  [test_command_line_mat_type_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = '-nl0_mat_type aij'
+    absent_out = 'Option left.*-nl0_mat_type'
+    requirement = 'The system shall not warn about a nonlinear system matrix type option that was already consumed before the PETSc options database is rebuilt.'
+    capabilities = 'petsc>=3.19.2'
+  []
+
+  [test_command_line_vec_type_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = '-vec_type standard'
+    absent_out = 'Option left.*-vec_type'
+    requirement = 'The system shall not warn about a vector type option that was already consumed before the PETSc options database is rebuilt.'
+    capabilities = 'petsc>=3.19.2'
+  []
 []
