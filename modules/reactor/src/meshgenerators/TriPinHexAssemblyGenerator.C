@@ -298,6 +298,13 @@ TriPinHexAssemblyGenerator::generate()
                                OUTER_SIDESET_ID,
                                TOLERANCE,
                                /*clear_stitched_boundary_ids=*/true);
+
+      // We're missing neighbor pointers after the stitching?  This
+      // may be a libMesh bug, but we'll work around it here.  We'll
+      // actually call find_neighbors(), not just mark neighbors
+      // unprepared, because the stitcher wants valid neighbor
+      // pointers.
+      meshes[0]->find_neighbors();
     }
   }
 
