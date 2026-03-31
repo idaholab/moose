@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 #include "MFEMFESpace.h"
 
 /**
  * Wrapper for mfem::HypreAMS solver.
  */
-class MFEMHypreAMS : public MFEMSolverBase
+class MFEMHypreAMS : public Moose::MFEM::LinearSolverBase
 {
 public:
   static InputParameters validParams();

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MFEMProblem.h"
+#include <functional>
 
 namespace Moose::MFEM
 {
@@ -33,6 +34,14 @@ public:
   mfem::BlockVector _true_x, _true_rhs;
 
 protected:
+  /// Solve the current operator using the configured nonlinear solver, or a one-step Newton solve
+  /// when no nonlinear solver object has been provided for a linear problem.
+  void SolveWithOperator(mfem::Operator & op,
+                         const mfem::Vector & rhs,
+                         mfem::Vector & x,
+                         bool nonlinear,
+                         const std::function<void()> & prepare_linear_solver);
+
   /// Reference to the current problem.
   MFEMProblem & _problem;
   MFEMProblemData & _problem_data;

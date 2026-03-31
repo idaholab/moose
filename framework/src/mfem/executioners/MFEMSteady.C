@@ -35,6 +35,8 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
+  _fixed_point_solve->setInnerSolve(_mfem_problem_solve);
+
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
@@ -63,6 +65,11 @@ MFEMSteady::init()
 {
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
+  _fixed_point_solve->initialSetup();
+
+  if (_mfem_problem_data.nonlinear_solver)
+    _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
+        _mfem_problem_data.nonlinear_solver->requiresGradient());
 
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(
@@ -99,7 +106,7 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _last_solve_converged = _mfem_problem_solve.solve();
+  _last_solve_converged = _fixed_point_solve->solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();

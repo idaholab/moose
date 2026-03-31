@@ -229,15 +229,6 @@ public:
                      InputParameters & parameters);
 
   /**
-   * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
-   * similar to the linear solvers.
-   */
-  void addMFEMNonlinearSolver(unsigned int nl_max_its,
-                              mfem::real_t nl_abs_tol,
-                              mfem::real_t nl_rel_tol,
-                              unsigned int print_level);
-
-  /**
    * Execute MFEM executed objects scheduled on the supplied execute flag.
    */
   void executeMFEMObjects(const ExecFlagType & exec_type);

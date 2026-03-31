@@ -12,23 +12,162 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
+#include "EquationSystem.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMBoundaryNormalIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
+#include "NLBoundaryConvectiveHeatFluxIntegrator.h"
+#include "MFEMDiffusionKernel.h"
+#include "MFEMIntegratedBC.h"
+
+#include <functional>
+
+namespace
+{
+class ZeroBoundaryNonlinearIntegrator : public mfem::NonlinearFormIntegrator
+{
+public:
+  void AssembleFaceVector(const mfem::FiniteElement & el1,
+                          const mfem::FiniteElement &,
+                          mfem::FaceElementTransformations &,
+                          const mfem::Vector &,
+                          mfem::Vector & elvect) override
+  {
+    elvect.SetSize(el1.GetDof());
+    elvect = 0.0;
+  }
+
+  void AssembleFaceGrad(const mfem::FiniteElement & el1,
+                        const mfem::FiniteElement &,
+                        mfem::FaceElementTransformations &,
+                        const mfem::Vector &,
+                        mfem::DenseMatrix & elmat) override
+  {
+    elmat.SetSize(el1.GetDof());
+    elmat = 0.0;
+  }
+};
+
+class NonlinearGridFunctionCoefficient : public mfem::Coefficient
+{
+public:
+  NonlinearGridFunctionCoefficient(mfem::GridFunction & gf, std::function<double(double)> func)
+    : _gf(gf), _func(std::move(func))
+  {
+  }
+
+  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override
+  {
+    return _func(_gf.GetValue(T, ip));
+  }
+
+private:
+  mfem::GridFunction & _gf;
+  std::function<double(double)> _func;
+};
+
+class TestOffDiagonalLinearIntegratedBC : public MFEMIntegratedBC
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = MFEMIntegratedBC::validParams();
+    params.addParam<VariableName>("trial_variable",
+                                  "Trial variable this boundary condition acts on.");
+    params.addClassDescription(
+        "Test-only MFEM integrated boundary condition with a linear off-diagonal mass term.");
+    return params;
+  }
+
+  TestOffDiagonalLinearIntegratedBC(const InputParameters & parameters)
+    : MFEMIntegratedBC(parameters),
+      _trial_var_name(getParam<VariableName>("trial_variable")),
+      _coef(1.0)
+  {
+  }
+
+  const std::string & getTrialVariableName() const override { return _trial_var_name; }
+
+  mfem::BilinearFormIntegrator * createBFIntegrator() override
+  {
+    return new mfem::BoundaryMassIntegrator(_coef);
+  }
+
+private:
+  const VariableName _trial_var_name;
+  mfem::ConstantCoefficient _coef;
+};
+
+class TestOffDiagonalNonlinearIntegratedBC : public MFEMIntegratedBC
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = MFEMIntegratedBC::validParams();
+    params.addParam<VariableName>("trial_variable",
+                                  "Trial variable this boundary condition acts on.");
+    params.addClassDescription(
+        "Test-only MFEM integrated boundary condition with an off-diagonal nonlinear term.");
+    return params;
+  }
+
+  TestOffDiagonalNonlinearIntegratedBC(const InputParameters & parameters)
+    : MFEMIntegratedBC(parameters), _trial_var_name(getParam<VariableName>("trial_variable"))
+  {
+  }
+
+  const std::string & getTrialVariableName() const override { return _trial_var_name; }
+
+  mfem::NonlinearFormIntegrator * createNLIntegrator() override
+  {
+    return new ZeroBoundaryNonlinearIntegrator();
+  }
+
+private:
+  const VariableName _trial_var_name;
+};
+
+class TestEquationSystem : public Moose::MFEM::EquationSystem
+{
+public:
+  void initAndBuild(Moose::MFEM::GridFunctions & gridfunctions,
+                    Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
+                    mfem::AssemblyLevel assembly_level)
+  {
+    Init(gridfunctions, cmplx_gridfunctions, assembly_level);
+    BuildEquationSystem();
+  }
+};
+}
+
+registerMooseObject("MooseUnitApp", TestOffDiagonalLinearIntegratedBC);
+registerMooseObject("MooseUnitApp", TestOffDiagonalNonlinearIntegratedBC);
 
 class MFEMIntegratedBCTest : public MFEMObjectUnitTest
 {
 public:
   MFEMIntegratedBCTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
-    // Register a dummy (Par)GridFunction for the variable the BCs apply to
+    // Register dummy (Par)GridFunctions for the variables the BCs apply to
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
     mfem::common::H1_FESpace fe(pm, 1);
     mfem::GridFunction gf(&fe);
-    auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
-    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "test_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "trial_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+  }
+
+protected:
+  template <typename T>
+  std::shared_ptr<T>
+  addSharedObject(const std::string & type, const std::string & name, InputParameters & params)
+  {
+    auto objects = _mfem_problem->addObject<T>(type, name, params);
+    mooseAssert(objects.size() == 1, "Doesn't work with threading");
+    return objects[0];
   }
 };
 
@@ -153,6 +292,67 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   delete blf_integrator;
 }
 
+TEST_F(MFEMIntegratedBCTest, NLBoundaryConvectiveHeatFluxIntegratorJacobianMatchesFiniteDifference)
+{
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian2D(1, 1, mfem::Element::QUADRILATERAL, true, 1.0, 1.0);
+  mfem::H1_FECollection fec(1, mesh.Dimension());
+  mfem::FiniteElementSpace fespace(&mesh, &fec);
+
+  mfem::GridFunction gf(&fespace);
+  gf = 0.0;
+
+  const int be = 0;
+  mfem::Array<int> vdofs;
+  fespace.GetBdrElementVDofs(be, vdofs);
+
+  mfem::Vector elfun(vdofs.Size());
+  elfun(0) = 2.0;
+  elfun(1) = 3.0;
+  gf.SetSubVector(vdofs, elfun);
+
+  NonlinearGridFunctionCoefficient htc(gf, [](double u) { return 1.0 + 0.5 * u; });
+  mfem::ConstantCoefficient dhtc_dT(0.5);
+  mfem::ConstantCoefficient dTinf_dT(1.0);
+  NonlinearGridFunctionCoefficient Tinf(gf, [](double u) { return u + 1.0; });
+  mfem::GridFunctionCoefficient T(&gf);
+
+  Moose::MFEM::NLBoundaryConvectiveHeatFluxIntegrator integ(htc, dhtc_dT, dTinf_dT, Tinf, T);
+
+  const auto * fe = fespace.GetBE(be);
+  auto * T_be = fespace.GetBdrElementTransformation(be);
+  ASSERT_NE(fe, nullptr);
+  ASSERT_NE(T_be, nullptr);
+
+  mfem::DenseMatrix jacobian_numeric;
+  integ.AssembleElementGrad(*fe, *T_be, elfun, jacobian_numeric);
+
+  mfem::DenseMatrix jacobian_fd(fe->GetDof());
+  jacobian_fd = 0.0;
+
+  const double eps = 1e-7;
+  for (int j = 0; j < fe->GetDof(); ++j)
+  {
+    mfem::Vector elfun_plus(elfun), elfun_minus(elfun);
+    elfun_plus(j) += eps;
+    elfun_minus(j) -= eps;
+
+    gf.SetSubVector(vdofs, elfun_plus);
+    mfem::Vector residual_plus;
+    integ.AssembleElementVector(*fe, *T_be, elfun_plus, residual_plus);
+
+    gf.SetSubVector(vdofs, elfun_minus);
+    mfem::Vector residual_minus;
+    integ.AssembleElementVector(*fe, *T_be, elfun_minus, residual_minus);
+
+    residual_plus -= residual_minus;
+    residual_plus /= (2.0 * eps);
+    jacobian_fd.SetCol(j, residual_plus);
+  }
+
+  jacobian_numeric -= jacobian_fd;
+  EXPECT_NEAR(jacobian_numeric.MaxMaxNorm(), 0.0, 1e-8);
+}
+
 TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedConstantBC)
 {
   // Construct boundary condition
@@ -198,6 +398,78 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
   auto blf_integrator = bc.createBFIntegrator();
   ASSERT_EQ(blf_integrator, nullptr);
   delete blf_integrator;
+}
+
+TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters nonlinear_params =
+      _factory.getValidParams("TestOffDiagonalNonlinearIntegratedBC");
+  nonlinear_params.set<VariableName>("variable") = "test_variable_name";
+  nonlinear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  nonlinear_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+
+  auto diag_test =
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test_bc", diag_test_params);
+  auto nonlinear = addSharedObject<TestOffDiagonalNonlinearIntegratedBC>(
+      "TestOffDiagonalNonlinearIntegratedBC", "nonlinear_offdiag_bc", nonlinear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  eqn_system.AddIntegratedBC(nonlinear);
+  eqn_system.SetSolverRequiresGradient(true);
+
+  try
+  {
+    eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                            _mfem_problem->getProblemData().cmplx_gridfunctions,
+                            mfem::AssemblyLevel::LEGACY);
+    FAIL() << "Expected off-diagonal nonlinear MFEM integrated boundary condition to be rejected";
+  }
+  catch (const std::runtime_error & error)
+  {
+    const std::string message(error.what());
+    EXPECT_TRUE(message.find("Off-diagonal MFEM nonlinear boundary integrators") !=
+                std::string::npos);
+    EXPECT_TRUE(message.find("requires a gradient") != std::string::npos);
+  }
+}
+
+TEST_F(MFEMIntegratedBCTest, AcceptsLinearOffDiagonalIntegratedBCWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
+  diag_trial_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearIntegratedBC");
+  linear_params.set<VariableName>("variable") = "test_variable_name";
+  linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+  linear_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
+
+  auto diag_test = addSharedObject<MFEMDiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_test_bc_2", diag_test_params);
+  auto diag_trial = addSharedObject<MFEMDiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_trial_bc_2", diag_trial_params);
+  auto linear = addSharedObject<TestOffDiagonalLinearIntegratedBC>(
+      "TestOffDiagonalLinearIntegratedBC", "linear_offdiag_bc", linear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  // Keep a diagonal contribution on the trial variable so this exercises the supported mixed
+  // 2x2 system path rather than a case where trial_variable_name is only an eliminated coupling.
+  eqn_system.AddKernel(diag_trial);
+  eqn_system.AddIntegratedBC(linear);
+
+  EXPECT_NO_THROW(eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                                          _mfem_problem->getProblemData().cmplx_gridfunctions,
+                                          mfem::AssemblyLevel::LEGACY));
 }
 
 #endif

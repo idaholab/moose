@@ -33,6 +33,11 @@ MFEMNLConvectiveHeatFluxBC::validParams()
       "0.",
       "Name of the coefficient specifying the derivative of the heat transfer coefficient with "
       "respect to temperature");
+  params.addParam<MFEMScalarCoefficientName>(
+      "d_T_infinity_dT_coefficient",
+      "0.",
+      "Name of the coefficient specifying the derivative of the far-field temperature with "
+      "respect to temperature");
   return params;
 }
 
@@ -40,6 +45,7 @@ MFEMNLConvectiveHeatFluxBC::MFEMNLConvectiveHeatFluxBC(const InputParameters & p
   : MFEMIntegratedBC(parameters),
     _heat_transfer_coef(getScalarCoefficient("heat_transfer_coefficient")),
     _d_heat_transfer_dT_coef(getScalarCoefficient("d_heat_transfer_dT_coefficient")),
+    _d_T_inf_dT_coef(getScalarCoefficient("d_T_infinity_dT_coefficient")),
     _T_inf_coef(getScalarCoefficient("T_infinity")),
     _T_coef(getScalarCoefficientByName((getTrialVariableName())))
 {
@@ -50,7 +56,7 @@ mfem::NonlinearFormIntegrator *
 MFEMNLConvectiveHeatFluxBC::createNLIntegrator()
 {
   return new Moose::MFEM::NLBoundaryConvectiveHeatFluxIntegrator(
-      _heat_transfer_coef, _d_heat_transfer_dT_coef, _T_inf_coef, _T_coef);
+      _heat_transfer_coef, _d_heat_transfer_dT_coef, _d_T_inf_dT_coef, _T_inf_coef, _T_coef);
 }
 
 #endif
