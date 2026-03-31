@@ -67,6 +67,10 @@ SubdomainExtraElementIDGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // We'll be querying the mesh for subdomain ids
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
+
   // construct a map from the subdomain ID to the index in 'subdomains'
   const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _subdomain_names);
 
