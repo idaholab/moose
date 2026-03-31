@@ -82,36 +82,38 @@ function baked_flags()
         # Specific OS linker flags
         LDFLAGS+=" -Wl,-ld64 -Wl,-commons,use_dylibs"
 
-        # Make sure sdkroot is available
-        SDK_VERSIONS=("14.5")
-        SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
-        SDKROOT=
-        for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
-            SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
-            for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
-                if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
-                    SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+        # Make sure sdkroot is available when not building
+        if [ "\${CONDA_BUILD:-0}" = "0" ]; then
+            SDK_VERSIONS=("14.5")
+            SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
+            SDKROOT=
+            for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
+                SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
+                for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
+                    if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
+                        SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+                        break
+                    fi
+                done
+                if [ -n "\$SDKROOT" ]; then
                     break
                 fi
             done
-            if [ -n "\$SDKROOT" ]; then
-                break
+            if [ -z "\$SDKROOT" ]; then
+                echo "ERROR: Mac SDK not found!" >&2
+                echo "" >&2
+                echo "This environment will not work properly without the SDK downloaded." >&2
+                echo "" >&2
+                echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it." >&2
             fi
-        done
-        if [ -z "\$SDKROOT" ]; then
-            echo "ERROR: Mac SDK not found!" >&2
-            echo "" >&2
-            echo "This environment will not work properly without the SDK downloaded." >&2
-            echo "" >&2
-            echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it." >&2
-        fi
 
-        if [ -z "\$CMAKE_ARGS" ]; then
-            CMAKE_ARGS="-DCMAKE_OSX_SDKROOT=\${SDKROOT}"
-        else
-            CMAKE_ARGS+=" -DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+            if [ -z "\$CMAKE_ARGS" ]; then
+                CMAKE_ARGS="-DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+            else
+                CMAKE_ARGS+=" -DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+            fi
+            export CMAKE_ARGS SDKROOT
         fi
-        export CMAKE_ARGS SDKROOT
     fi
 
     export CXXFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS SDKROOT
