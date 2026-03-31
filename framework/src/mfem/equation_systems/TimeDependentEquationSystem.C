@@ -166,6 +166,9 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 void
 TimeDependentEquationSystem::BuildNonlinearForms()
 {
+  ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
+  ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
+
   // Register non-linear Action forms
   for (const auto i : index_range(_test_var_names))
   {

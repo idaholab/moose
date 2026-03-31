@@ -10,10 +10,12 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
+#include "EquationSystem.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
 #include "MFEMDivDivKernel.h"
 #include "MFEMLinearElasticityKernel.h"
+#include "MFEMMixedBilinearFormKernel.h"
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMVectorDomainLFKernel.h"
@@ -21,17 +23,113 @@
 #include "MFEMVectorFEMassKernel.h"
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 
+namespace
+{
+class ZeroNonlinearIntegrator : public mfem::NonlinearFormIntegrator
+{
+public:
+  void AssembleElementVector(const mfem::FiniteElement & el,
+                             mfem::ElementTransformation &,
+                             const mfem::Vector &,
+                             mfem::Vector & elvect) override
+  {
+    elvect.SetSize(el.GetDof());
+    elvect = 0.0;
+  }
+
+  void AssembleElementGrad(const mfem::FiniteElement & el,
+                           mfem::ElementTransformation &,
+                           const mfem::Vector &,
+                           mfem::DenseMatrix & elmat) override
+  {
+    elmat.SetSize(el.GetDof());
+    elmat = 0.0;
+  }
+};
+
+class TestOffDiagonalLinearKernel : public MFEMMixedBilinearFormKernel
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = MFEMMixedBilinearFormKernel::validParams();
+    params.addClassDescription("Test-only MFEM mixed kernel with a linear off-diagonal mass term.");
+    return params;
+  }
+
+  TestOffDiagonalLinearKernel(const InputParameters & parameters)
+    : MFEMMixedBilinearFormKernel(parameters)
+  {
+  }
+
+  mfem::BilinearFormIntegrator * createMBFIntegrator() override
+  {
+    return new mfem::MixedScalarMassIntegrator;
+  }
+};
+
+class TestOffDiagonalNonlinearKernel : public MFEMMixedBilinearFormKernel
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = MFEMMixedBilinearFormKernel::validParams();
+    params.addClassDescription(
+        "Test-only MFEM mixed kernel with an off-diagonal nonlinear contribution.");
+    return params;
+  }
+
+  TestOffDiagonalNonlinearKernel(const InputParameters & parameters)
+    : MFEMMixedBilinearFormKernel(parameters)
+  {
+  }
+
+  mfem::NonlinearFormIntegrator * createNLIntegrator() override
+  {
+    return new ZeroNonlinearIntegrator();
+  }
+};
+
+class TestEquationSystem : public Moose::MFEM::EquationSystem
+{
+public:
+  void initAndBuild(Moose::MFEM::GridFunctions & gridfunctions,
+                    Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
+                    mfem::AssemblyLevel assembly_level)
+  {
+    Init(gridfunctions, cmplx_gridfunctions, assembly_level);
+    BuildEquationSystem();
+  }
+};
+}
+
+registerMooseObject("MooseUnitApp", TestOffDiagonalLinearKernel);
+registerMooseObject("MooseUnitApp", TestOffDiagonalNonlinearKernel);
+
 class MFEMKernelTest : public MFEMObjectUnitTest
 {
 public:
   MFEMKernelTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
-    // Register a dummy (Par)GridFunction for kernels to apply to
+    // Register dummy (Par)GridFunctions for kernels to apply to
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
     mfem::common::H1_FESpace fe(pm, 1);
     mfem::GridFunction gf(&fe);
-    auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
-    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "test_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "trial_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+  }
+
+protected:
+  template <typename T>
+  std::shared_ptr<T> addSharedObject(const std::string & type,
+                                     const std::string & name,
+                                     InputParameters & params)
+  {
+    auto objects = _mfem_problem->addObject<T>(type, name, params);
+    mooseAssert(objects.size() == 1, "Doesn't work with threading");
+    return objects[0];
   }
 };
 
@@ -228,6 +326,71 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   auto integrator = dynamic_cast<mfem::MixedScalarCurlIntegrator *>(kernel.createBFIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
+}
+
+TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters nonlinear_params = _factory.getValidParams("TestOffDiagonalNonlinearKernel");
+  nonlinear_params.set<VariableName>("variable") = "test_variable_name";
+  nonlinear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+
+  auto diag_test =
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test", diag_test_params);
+  auto nonlinear = addSharedObject<TestOffDiagonalNonlinearKernel>(
+      "TestOffDiagonalNonlinearKernel", "nonlinear_offdiag", nonlinear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  eqn_system.AddKernel(nonlinear);
+
+  try
+  {
+    eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                            _mfem_problem->getProblemData().cmplx_gridfunctions,
+                            mfem::AssemblyLevel::LEGACY);
+    FAIL() << "Expected off-diagonal nonlinear MFEM kernel to be rejected";
+  }
+  catch (const std::runtime_error & error)
+  {
+    EXPECT_TRUE(std::string(error.what()).find("not currently implemented") != std::string::npos);
+  }
+}
+
+TEST_F(MFEMKernelTest, AcceptsLinearOffDiagonalKernelWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
+  diag_trial_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearKernel");
+  linear_params.set<VariableName>("variable") = "test_variable_name";
+  linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+
+  auto diag_test =
+      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test_2", diag_test_params);
+  auto diag_trial = addSharedObject<MFEMDiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_trial_2", diag_trial_params);
+  auto linear = addSharedObject<TestOffDiagonalLinearKernel>(
+      "TestOffDiagonalLinearKernel", "linear_offdiag", linear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  // Keep a diagonal contribution on the trial variable so this exercises the supported mixed
+  // 2x2 system path rather than a case where trial_variable_name is only an eliminated coupling.
+  eqn_system.AddKernel(diag_trial);
+  eqn_system.AddKernel(linear);
+
+  EXPECT_NO_THROW(eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                                          _mfem_problem->getProblemData().cmplx_gridfunctions,
+                                          mfem::AssemblyLevel::LEGACY));
 }
 
 #endif

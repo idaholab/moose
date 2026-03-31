@@ -134,17 +134,29 @@ protected:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
+  /**
+   * Apply domain LinearFormIntegrators from kernels to the linear form associated with the
+   * supplied test variable.
+   */
   void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
+  /**
+   * Apply domain NonlinearFormIntegrators from kernels to the nonlinear form associated with the
+   * supplied test variable.
+   */
   void ApplyDomainNLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
+  /**
+   * Template method for applying BilinearFormIntegrators on boundaries from integrated boundary
+   * conditions to a BilinearForm, or MixedBilinearForm.
+   */
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
@@ -154,18 +166,41 @@ protected:
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
+  /**
+   * Apply boundary LinearFormIntegrators from integrated boundary conditions to the linear form
+   * associated with the supplied test variable.
+   */
   void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
+  /**
+   * Apply boundary NonlinearFormIntegrators from integrated boundary conditions to the nonlinear
+   * form associated with the supplied test variable.
+   */
   void ApplyBoundaryNLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
+
+  /**
+   * Reject any off-diagonal domain kernel that contributes a nonlinear MFEM integrator, since
+   * block off-diagonal nonlinear forms are not currently implemented.
+   */
+  void ValidateNoOffDiagonalDomainNLFIntegrators(
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map) const;
+
+  /**
+   * Reject any off-diagonal integrated boundary condition that contributes a nonlinear MFEM
+   * integrator, since block off-diagonal nonlinear forms are not currently implemented.
+   */
+  void ValidateNoOffDiagonalBoundaryNLFIntegrators(
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map) const;
 
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.

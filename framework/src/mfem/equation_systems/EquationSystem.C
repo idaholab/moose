@@ -503,6 +503,9 @@ EquationSystem::BuildLinearForms()
 void
 EquationSystem::BuildNonlinearForms()
 {
+  ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
+  ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
+
   // Register non-linear Action forms
   for (const auto i : index_range(_test_var_names))
   {
@@ -514,6 +517,51 @@ EquationSystem::BuildNonlinearForms()
     ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map);
     ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map);
   }
+}
+
+void
+EquationSystem::ValidateNoOffDiagonalDomainNLFIntegrators(
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map) const
+{
+  for (const auto & [test_var_name, test_var_kernels] : kernels_map)
+    for (const auto & [trial_var_name, kernels] : *test_var_kernels)
+      if (trial_var_name != test_var_name)
+        for (const auto & kernel : *kernels)
+        {
+          std::unique_ptr<mfem::NonlinearFormIntegrator> integ(kernel->createNLIntegrator());
+          if (integ)
+            mooseError("Off-diagonal MFEM nonlinear domain integrators are not currently "
+                       "implemented. Kernel '",
+                       kernel->name(),
+                       "' contributes to test variable '",
+                       test_var_name,
+                       "' from trial variable '",
+                       trial_var_name,
+                       "'.");
+        }
+}
+
+void
+EquationSystem::ValidateNoOffDiagonalBoundaryNLFIntegrators(
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map) const
+{
+  for (const auto & [test_var_name, test_var_bcs] : integrated_bc_map)
+    for (const auto & [trial_var_name, bcs] : *test_var_bcs)
+      if (trial_var_name != test_var_name)
+        for (const auto & bc : *bcs)
+        {
+          std::unique_ptr<mfem::NonlinearFormIntegrator> integ(bc->createNLIntegrator());
+          if (integ)
+            mooseError("Off-diagonal MFEM nonlinear boundary integrators are not currently "
+                       "implemented. Boundary condition '",
+                       bc->name(),
+                       "' contributes to test variable '",
+                       test_var_name,
+                       "' from trial variable '",
+                       trial_var_name,
+                       "'.");
+        }
 }
 
 void
