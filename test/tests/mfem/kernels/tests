@@ -61,6 +61,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
+    abs_zero = 1e-8
     recover = false
   []
   [MFEMDiffusionMatFree]
@@ -207,6 +208,24 @@
     csvdiff = 'OutputData/Darcy.csv'
     requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
     abs_zero = 5e-5
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMDiffusionEigenproblem]
+    type = CSVDiff
+    input = diffusion_eigenproblem.i
+    csvdiff = 'OutputData/DiffusionEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a scalar eigenproblem with Dirichlet BCs using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMMaxwellEigenproblem]
+    type = CSVDiff
+    input = maxwell_eigenproblem.i
+    csvdiff = 'OutputData/MaxwellEigenproblem_eigenvalues_0001.csv'
+    requirement = 'The system shall have the ability to solve a vector-valued eigenproblem with Dirichlet BCs using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false

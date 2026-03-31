@@ -17,6 +17,9 @@
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
 #include "MFEMRefinementMarker.h"
+#include "MFEMEigensolverBase.h"
+#include <fstream>
+#include <iostream>
 
 /// Base problem data struct.
 struct MFEMProblemData
@@ -40,6 +43,7 @@ public:
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
+  Moose::MFEM::GridFunctions eigen_gridfunctions;
   Moose::MFEM::TimeDerivativeMap time_derivative_map;
   Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
 

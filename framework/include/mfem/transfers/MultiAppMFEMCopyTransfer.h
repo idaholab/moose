@@ -40,6 +40,10 @@ public:
 protected:
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
+  /** If true, copy into imaginary part of complex target; otherwise real part. */
+  bool _to_imag = false;
+  /** If true, copy from imaginary part of complex source; otherwise real part. */
+  bool _from_imag = false;
 
   void transfer(MFEMProblem & to_problem, MFEMProblem & from_problem);
 
