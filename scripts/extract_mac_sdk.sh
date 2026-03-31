@@ -15,10 +15,10 @@ XCODE_XIP="/Users/$(whoami)/Downloads/Xcode_${XCODE_VERSION}.xip"
 if [ ! -f "$XCODE_XIP" ]; then
     echo "ERROR: You must first download Xcode ${XCODE_VERSION} to use this script." >&2
     echo "" >&2
-    echo "First, sign-in within a web browser at developer.apple.com." >&2
+    echo "First, sign-in within a web browser at https://developer.apple.com." >&2
     echo "" >&2
     echo "Once signed in, either:" >&2
-    echo " - Go to developer.apple.com/download/all/, search for 'Xcode ${XCODE_VERSION}' and download it, or" >&2
+    echo " - Go to https://developer.apple.com/download/all/, search for 'Xcode ${XCODE_VERSION}' and download it, or" >&2
     echo " - Open https://download.developer.apple.com/Developer_Tools/Xcode_${XCODE_VERSION}/Xcode_${XCODE_VERSION}.xip in the same web browser" >&2
     echo "" >&2
     echo "This script expects Xcode ${XCODE_VERSION} to be downloaded to:" >&2
