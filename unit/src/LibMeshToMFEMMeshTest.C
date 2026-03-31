@@ -21,11 +21,6 @@
 #include "Registry.h"
 #include "MFEMMeshFactory.h"
 #include "libmesh/enum_elem_type.h"
-#include "mfem/config/config.hpp"
-#include "mfem/fem/eltrans.hpp"
-#include "mfem/fem/fespace.hpp"
-#include "mfem/fem/gridfunc.hpp"
-#include "mfem/linalg/densemat.hpp"
 #include "type_traits"
 
 template <class M>

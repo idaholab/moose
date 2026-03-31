@@ -10,7 +10,9 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include <mfem.hpp>
+#include "libmesh/ignore_warnings.h"
+#include "mfem.hpp"
+#include "libmesh/restore_warnings.h"
 #include "libmesh/elem.h"
 #include "libmesh/enum_io_package.h"
 #include "libmesh/equation_systems.h"
