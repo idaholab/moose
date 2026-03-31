@@ -140,7 +140,7 @@ CoarsenBlockGenerator::generate()
   // check that we are not returning a non-conformal mesh
   if (_check_output_mesh_for_nonconformality)
   {
-    mesh_ptr->prepare_for_use();
+    mesh_ptr->complete_preparation();
     unsigned int num_nonconformal_nodes = 0;
     MeshBaseDiagnosticsUtils::checkNonConformalMesh(
         mesh_ptr, _console, 10, TOLERANCE, num_nonconformal_nodes);
