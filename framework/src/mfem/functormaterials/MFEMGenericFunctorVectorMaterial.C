@@ -84,9 +84,8 @@ MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
 
   for (const auto i : index_range(_prop_names))
     _properties.declareVectorProperty(_prop_names[i],
-                                      isBoundaryRestricted()
-                                          ? boundariesToStrings(_boundary_names)
-                                          : subdomainsToStrings(_subdomain_names),
+                                      isBoundaryRestricted() ? boundariesToStrings()
+                                                             : subdomainsToStrings(),
                                       _prop_values[i]);
 }
 

@@ -27,8 +27,8 @@ public:
 
   MFEMBlockRestrictable(const InputParameters & parameters, const mfem::ParMesh & mfem_mesh);
 
-  mfem::Array<int> subdomainsToAttributes(const std::vector<SubdomainName> & subdomain_names);
-  std::vector<std::string> subdomainsToStrings(const std::vector<SubdomainName> & subdomain_names);
+  mfem::Array<int> subdomainsToAttributes();
+  std::vector<std::string> subdomainsToStrings();
 
   /// Returns a bool indicating if the object is restricted to a subset of subdomains.
   bool isSubdomainRestricted() { return _subdomain_names.size(); }

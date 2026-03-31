@@ -28,22 +28,21 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
                                                    const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _boundary_names(parameters.get<std::vector<BoundaryName>>("boundary")),
-    _boundary_attributes(_boundary_names.size())
+    _boundary_attributes(boundariesToAttributes())
 {
-  _boundary_attributes = boundariesToAttributes(_boundary_names);
   if (!_boundary_attributes.IsEmpty())
     mfem::common::AttrToMarker(
         _mfem_mesh.bdr_attributes.Max(), _boundary_attributes, _boundary_markers);
 }
 
 mfem::Array<int>
-MFEMBoundaryRestrictable::boundariesToAttributes(const std::vector<BoundaryName> & boundary_names)
+MFEMBoundaryRestrictable::boundariesToAttributes()
 {
-  mfem::Array<int> attributes(boundary_names.size());
+  mfem::Array<int> attributes(_boundary_names.size());
   auto & mesh = getMesh();
   std::transform(
-      boundary_names.begin(),
-      boundary_names.end(),
+      _boundary_names.begin(),
+      _boundary_names.end(),
       attributes.begin(),
       [&mesh](const BoundaryName & boundary) -> int
       {
@@ -66,9 +65,9 @@ MFEMBoundaryRestrictable::boundariesToAttributes(const std::vector<BoundaryName>
 }
 
 std::vector<std::string>
-MFEMBoundaryRestrictable::boundariesToStrings(const std::vector<BoundaryName> & boundary_names)
+MFEMBoundaryRestrictable::boundariesToStrings()
 {
-  auto attrs = boundariesToAttributes(boundary_names);
+  const auto & attrs = _boundary_attributes;
   std::vector<std::string> strs(attrs.Size());
   std::transform(attrs.begin(), attrs.end(), strs.begin(), [](int n) { return std::to_string(n); });
   return strs;

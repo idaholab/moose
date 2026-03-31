@@ -39,9 +39,8 @@ MFEMGenericFunctorMaterial::MFEMGenericFunctorMaterial(const InputParameters & p
 
   for (const auto i : index_range(_prop_names))
     _properties.declareScalarProperty(_prop_names[i],
-                                      isBoundaryRestricted()
-                                          ? boundariesToStrings(_boundary_names)
-                                          : subdomainsToStrings(_subdomain_names),
+                                      isBoundaryRestricted() ? boundariesToStrings()
+                                                             : subdomainsToStrings(),
                                       _prop_values[i]);
 }
 
