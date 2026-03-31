@@ -15,7 +15,7 @@ An `MFEMComplexAuxKernel` is derived from `MFEMGeneralUserObject`, and thus the 
 can be controlled similar to other MOOSE UserObjects using the `execution_order_group` input
 parameter.
 
-`MFEMComplexAuxKernel` is a purely virtual base class. Derived classes should override the `execute`
+`MFEMComplexAuxKernel` is a base class. Derived classes should override the `execute`
  method to update the `_result_var` during execution.
 
 !if-end!
