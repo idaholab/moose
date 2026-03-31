@@ -66,10 +66,12 @@ ComplexEquationSystemProblemOperator::Solve()
     mooseError("The configured MFEM nonlinear solver requires a Jacobian solver, but none was "
                "provided.");
 
-  if (_problem_data.jacobian_solver->isLOR())
-    mooseError("LOR solve is not supported for complex equation systems.");
-
-  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
+  if (_problem_data.nonlinear_solver->requiresGradient())
+  {
+    if (_problem_data.jacobian_solver->isLOR())
+      mooseError("LOR solve is not supported for complex equation systems.");
+    _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
+  }
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 

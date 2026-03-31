@@ -180,8 +180,9 @@ TimeDependentEquationSystem::BuildNonlinearForms()
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt);
-    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, _dt);
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt, !_solver_requires_gradient);
+    ApplyBoundaryNLFIntegrators(
+        test_var_name, nlf, _integrated_bc_map, _dt, !_solver_requires_gradient);
   }
 }
 

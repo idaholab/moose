@@ -221,9 +221,11 @@ public:
    * similar to the linear solvers.
    */
   void addMFEMNonlinearSolver(unsigned int nl_max_its,
+                              const MooseEnum & nonlinear_solver_type,
                               mfem::real_t nl_abs_tol,
                               mfem::real_t nl_rel_tol,
-                              unsigned int print_level);
+                              unsigned int print_level,
+                              mfem::real_t picard_damping);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.

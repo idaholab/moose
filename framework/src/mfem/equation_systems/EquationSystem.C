@@ -394,20 +394,9 @@ EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & 
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  // Update gridfunctions that may be referenced by coefficients within nonlinear integrators
-  const mfem::BlockVector blockSolution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
-  SetTrialVariablesFromTrueVectors(blockSolution);
-
   if (_non_linear)
   {
-    mfem::BlockVector blockResidual(residual, _block_true_offsets);
-    for (unsigned int i = 0; i < _test_var_names.size(); i++)
-    {
-      auto & test_var_name = _test_var_names.at(i);
-      auto nlf = _nlfs.GetShared(test_var_name);
-      nlf->Mult(blockSolution.GetBlock(i), blockResidual.GetBlock(i));
-      blockResidual.GetBlock(i).SyncAliasMemory(blockResidual);
-    }
+    ComputeNonlinearResidual(sol, residual);
     _linear_operator->AddMult(sol, residual);
   }
   else
@@ -418,6 +407,26 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
   sol.HostRead();
   residual.HostRead();
+}
+
+void
+EquationSystem::ComputeNonlinearResidual(const mfem::Vector & sol, mfem::Vector & residual) const
+{
+  residual = 0.0;
+  if (!_non_linear)
+    return;
+
+  const mfem::BlockVector block_solution(const_cast<mfem::Vector &>(sol), _block_true_offsets);
+  SetTrialVariablesFromTrueVectors(block_solution);
+
+  mfem::BlockVector block_residual(residual, _block_true_offsets);
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->Mult(block_solution.GetBlock(i), block_residual.GetBlock(i));
+    block_residual.GetBlock(i).SyncAliasMemory(block_residual);
+  }
 }
 
 void
@@ -517,8 +526,10 @@ EquationSystem::BuildNonlinearForms()
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map);
-    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map);
+    ApplyDomainNLFIntegrators(
+        test_var_name, nlf, _kernels_map, std::nullopt, !_solver_requires_gradient);
+    ApplyBoundaryNLFIntegrators(
+        test_var_name, nlf, _integrated_bc_map, std::nullopt, !_solver_requires_gradient);
   }
 }
 

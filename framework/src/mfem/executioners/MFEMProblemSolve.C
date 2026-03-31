@@ -19,8 +19,13 @@ MFEMProblemSolve::validParams()
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
   params.addParam<unsigned int>("nl_max_its", 1, "Max Nonlinear Iterations");
+  MooseEnum nonlinear_solvers("newton picard", "newton");
+  params.addParam<MooseEnum>("nonlinear_solver",
+                             nonlinear_solvers,
+                             "Nonlinear solver used for MFEM solves.");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
+  params.addParam<Real>("picard_damping", 1.0, "Picard fixed-point damping factor.");
   params.addParam<unsigned int>("print_level", 1, "Print level");
   params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
@@ -46,7 +51,12 @@ MFEMProblemSolve::MFEMProblemSolve(
                        : _app.isUltimateMaster() ? "cpu"
                                                  : "",
                        Moose::PassKey<MFEMProblemSolve>());
-  _mfem_problem.addMFEMNonlinearSolver(_nl_max_its, _nl_abs_tol, _nl_rel_tol, _print_level);
+  _mfem_problem.addMFEMNonlinearSolver(_nl_max_its,
+                                       getParam<MooseEnum>("nonlinear_solver"),
+                                       _nl_abs_tol,
+                                       _nl_rel_tol,
+                                       _print_level,
+                                       getParam<Real>("picard_damping"));
 }
 
 bool

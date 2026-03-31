@@ -16,6 +16,7 @@
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "MFEMNewtonNonlinearSolver.h"
+#include "MFEMPicardNonlinearSolver.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -106,12 +107,20 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 
 void
 MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
+                                    const MooseEnum & nonlinear_solver_type,
                                     mfem::real_t nl_abs_tol,
                                     mfem::real_t nl_rel_tol,
-                                    unsigned int print_level)
+                                    unsigned int print_level,
+                                    mfem::real_t picard_damping)
 {
-  getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::NewtonNonlinearSolver>(
-      getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level);
+  if (nonlinear_solver_type == "newton")
+    getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::NewtonNonlinearSolver>(
+        getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level);
+  else if (nonlinear_solver_type == "picard")
+    getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::PicardNonlinearSolver>(
+        getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level, picard_damping);
+  else
+    mooseError("Unsupported MFEM nonlinear solver type '", nonlinear_solver_type, "'.");
 }
 
 void

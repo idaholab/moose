@@ -50,8 +50,12 @@ public:
   virtual void FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
+  /// Compute the contribution to the residual from nonlinear forms only.
+  virtual void ComputeNonlinearResidual(const mfem::Vector & u, mfem::Vector & residual) const;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
+  /// Return the assembled linear operator used by the equation system.
+  mfem::Operator & GetLinearOperator() const { return *_linear_operator; }
 
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
@@ -154,7 +158,8 @@ protected:
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
-      std::optional<mfem::real_t> scale_factor = std::nullopt);
+      std::optional<mfem::real_t> scale_factor = std::nullopt,
+      bool include_off_diagonal = false);
 
   /**
    * Template method for applying BilinearFormIntegrators on boundaries from integrated boundary
@@ -188,7 +193,8 @@ protected:
       std::shared_ptr<mfem::ParNonlinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map,
-      std::optional<mfem::real_t> scale_factor = std::nullopt);
+      std::optional<mfem::real_t> scale_factor = std::nullopt,
+      bool include_off_diagonal = false);
 
   /**
    * Reject any off-diagonal domain kernel that contributes a nonlinear MFEM integrator, since
@@ -322,25 +328,25 @@ EquationSystem::ApplyDomainNLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParNonlinearForm> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
-    std::optional<mfem::real_t> scale_factor)
+    std::optional<mfem::real_t> scale_factor,
+    bool include_off_diagonal)
 {
-  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & kernel : kernels)
-    {
-      mfem::NonlinearFormIntegrator * integ = kernel->createNLIntegrator();
-      if (integ)
-      {
-        _non_linear = true;
-        if (scale_factor.has_value())
-          integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
-        kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
-            : form->AddDomainIntegrator(std::move(integ));
-      }
-    }
-  }
+  if (kernels_map.Has(test_var_name))
+    for (const auto & [trial_var_name, kernels] : kernels_map.GetRef(test_var_name))
+      if (include_off_diagonal || trial_var_name == test_var_name)
+        for (auto & kernel : *kernels)
+        {
+          mfem::NonlinearFormIntegrator * integ = kernel->createNLIntegrator();
+          if (integ)
+          {
+            _non_linear = true;
+            if (scale_factor.has_value())
+              integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+            kernel->isSubdomainRestricted()
+                ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+                : form->AddDomainIntegrator(std::move(integ));
+          }
+        }
 }
 
 template <class FormType>
@@ -404,26 +410,25 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
     std::shared_ptr<mfem::ParNonlinearForm> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map,
-    std::optional<mfem::real_t> scale_factor)
+    std::optional<mfem::real_t> scale_factor,
+    bool include_off_diagonal)
 {
-  if (integrated_bc_map.Has(test_var_name) &&
-      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & bc : bcs)
-    {
-      mfem::NonlinearFormIntegrator * integ = bc->createNLIntegrator();
-      if (integ)
-      {
-        _non_linear = true;
-        if (scale_factor.has_value())
-          integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
-        bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
-            : form->AddBoundaryIntegrator(std::move(integ));
-      }
-    }
-  }
+  if (integrated_bc_map.Has(test_var_name))
+    for (const auto & [trial_var_name, bcs] : integrated_bc_map.GetRef(test_var_name))
+      if (include_off_diagonal || trial_var_name == test_var_name)
+        for (auto & bc : *bcs)
+        {
+          mfem::NonlinearFormIntegrator * integ = bc->createNLIntegrator();
+          if (integ)
+          {
+            _non_linear = true;
+            if (scale_factor.has_value())
+              integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+            bc->isBoundaryRestricted()
+                ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+                : form->AddBoundaryIntegrator(std::move(integ));
+          }
+        }
 }
 
 } // namespace Moose::MFEM
