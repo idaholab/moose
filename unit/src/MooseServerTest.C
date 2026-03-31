@@ -1097,6 +1097,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
     type = Console
     system_info = AUX
     execute_on = LINEAR
+    wall_time_interval = 3600
   []
 []
 )INPUT";
@@ -1452,11 +1453,13 @@ TEST_F(MooseServerTest, HoverDocumentationRequests)
   expect_text = "Output an information message once.";
   check_hover(request_id, doc_uri, request_line, request_char, expect_text);
 
-  // check hover 04 - on system_info MultiMooseEnum AUX with no documentation
+  // check hover 04 - on wall_time_interval parameter for unit and range info
   request_id = 16;
-  request_line = 46;
-  request_char = 20;
-  expect_text = "";
+  request_line = 48;
+  request_char = 11;
+  expect_text = "The target wall time interval (in seconds) at which to output\n\n"
+                "Units: (no unit assumed)\n\n"
+                "Range: wall_time_interval > 0";
   check_hover(request_id, doc_uri, request_line, request_char, expect_text);
 
   // check hover 05 - on execute_on ExecFlagEnum LINEAR with no documentation
