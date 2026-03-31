@@ -157,9 +157,9 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
   if (coarse_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);
 
-  // Elements should know their neighbors
-  if (!mesh->is_prepared())
-    mesh->prepare_for_use();
+  // We need elements to know their neighbors
+  if (!mesh->preparation().has_neighbor_ptrs)
+    mesh->find_neighbors();
 
   // We wont be modifying the starting mesh for simplicity, we will make a copy and return that
   std::unique_ptr<MeshBase> mesh_return;
@@ -429,8 +429,8 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
 
       // Contract to remove the elements that were marked for deletion
       mesh_copy->contract();
-      // Prepare for use to refresh the element neighbors
-      mesh_copy->prepare_for_use();
+      // Refresh the element neighbors
+      mesh_copy->find_neighbors();
     }
 
     // We pick the configuration (eg starting node) for which we managed to coarsen the most

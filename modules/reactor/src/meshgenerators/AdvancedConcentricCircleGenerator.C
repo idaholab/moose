@@ -252,6 +252,9 @@ AdvancedConcentricCircleGenerator::generate()
                          _quad_elem_type);
   MeshTools::Modification::rotate(*mesh, -_azimuthal_angles[0], 0, 0);
 
+  // stitching will require at least prepared neighbor pointers
+  mesh->find_neighbors();
+
   for (unsigned int i = 1; i < _num_sectors; i++)
   {
     auto mesh_tmp = buildSlice(ring_radii_corr,
@@ -287,8 +290,7 @@ AdvancedConcentricCircleGenerator::generate()
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, -_azimuthal_angles[i], 0, 0);
-    mesh->prepare_for_use();
-    other_mesh.prepare_for_use();
+    other_mesh.find_neighbors();
     // As we rotate the mesh in the negative direction (see "-" before _azimuthal_angles[i]),
     // the order of SLICE_END and SLICE_BEGIN should be reversed compared to the similar call in
     // PolygonConcentricCircleMeshGeneratorBase.C
@@ -302,8 +304,6 @@ AdvancedConcentricCircleGenerator::generate()
 
   // An extra step to stich the first and last slices together
   mesh->stitch_surfaces(SLICE_END, SLICE_BEGIN, TOLERANCE, true, false);
-
-  mesh->prepare_for_use();
 
   // Set up customized Block Names and/or IDs
   unsigned int block_it = 0;
