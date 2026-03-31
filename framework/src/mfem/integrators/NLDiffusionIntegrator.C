@@ -21,7 +21,7 @@ NLDiffusionIntegrator::NLDiffusionIntegrator(mfem::Coefficient & k,
     _grad_trial(gf),
     _neg_grad_trial(_neg_one, _grad_trial),
     _neg_dk_du_grad_trial(dk_du, _neg_grad_trial),
-    _weak_div_integ(_neg_grad_trial)
+    _weak_div_integ(_neg_dk_du_grad_trial)
 {
   _sum.AddIntegrator(&_diffusion_integ);
   _sum.AddIntegrator(&_weak_div_integ);
