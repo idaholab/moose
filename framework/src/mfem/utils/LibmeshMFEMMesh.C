@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
 #include "LibmeshMFEMMesh.h"
 #include <mfem/mesh/element.hpp>
@@ -657,3 +659,5 @@ coordinatesMatch(const double * primary, const double * secondary, const double 
 
   return true;
 }
+
+#endif

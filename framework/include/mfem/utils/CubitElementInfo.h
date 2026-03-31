@@ -6,7 +6,11 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
+
 #include <stdint.h>
 #include "MooseError.h"
 #include "libmesh/enum_elem_type.h"
@@ -132,3 +136,5 @@ private:
    */
   static const std::map<libMesh::ElemMappingType, int> _libmesh_to_mfem_basis_types;
 };
+
+#endif
