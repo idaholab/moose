@@ -73,21 +73,10 @@ RefineBlockGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   int max = *std::max_element(_refinement.begin(), _refinement.end());
 
-  if (max > 0 && !mesh->is_replicated() && !mesh->is_prepared())
-    // refinement requires that (or at least it asserts that) the mesh is either replicated or
-    // prepared
-    mesh->prepare_for_use();
-
   auto mesh_ptr = recursive_refine(block_ids, mesh, _refinement, max);
-
-  if (max > 0 && !mesh_ptr->is_replicated() && !mesh_ptr->is_prepared())
-    // refinement requires that (or at least it asserts that) the mesh is either replicated or
-    // prepared
-    mesh_ptr->prepare_for_use();
 
   // Refine elements that are too big
   bool found_element_to_refine = true;
-  bool refined_on_size = false;
   while (found_element_to_refine)
   {
     found_element_to_refine = false;
@@ -107,12 +96,8 @@ RefineBlockGenerator::generate()
       if (!_enable_neighbor_refinement)
         refinedmesh.face_level_mismatch_limit() = 0;
       refinedmesh.refine_elements();
-      refined_on_size = true;
     }
   }
-
-  if (refined_on_size || max > 0)
-    mesh_ptr->unset_is_prepared();
 
   return mesh_ptr;
 }

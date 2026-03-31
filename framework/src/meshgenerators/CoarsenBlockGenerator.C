@@ -118,16 +118,21 @@ CoarsenBlockGenerator::generate()
                  " times but the max coarsening required is ",
                  max_c);
 
-  // Determine how many times the coarsening will be used
-  if (max_c > 0 && !mesh->is_prepared())
-    // we prepare for use to make sure the neighbors have been found
-    mesh->prepare_for_use();
-
   auto mesh_ptr = recursiveCoarsen(block_ids, mesh, _coarsening, max_c, /*step=*/0);
 
-  // element neighbors are not valid
+  // A lot of our cached data is invalid now.  Copying processor ids
+  // means we can get away without repartitioning yet, though, and in
+  // serial we don't have sync or remote elements to worry about.
   if (max_c > 0)
-    mesh_ptr->unset_is_prepared();
+  {
+    mesh_ptr->unset_has_neighbor_ptrs();
+    mesh_ptr->unset_has_cached_elem_data();
+    mesh_ptr->unset_has_interior_parent_ptrs();
+    mesh_ptr->unset_has_removed_orphaned_nodes();
+    mesh_ptr->unset_has_reinit_ghosting_functors();
+    mesh_ptr->unset_has_boundary_id_sets();
+    mesh_ptr->clear_point_locator();
+  }
 
   // flip elements as we were not careful to build them with a positive volume
   MeshTools::Modification::orient_elements(*mesh_ptr);
