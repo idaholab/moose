@@ -377,7 +377,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 void
 EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
-  if (_non_linear && _assembly_level != mfem::AssemblyLevel::LEGACY)
+  if (_non_linear && _solver_requires_gradient && _assembly_level != mfem::AssemblyLevel::LEGACY)
     mooseError("Nonlinear solves with modern MFEM assembly levels are not currently implemented.");
 
   height = trueX.Size();
@@ -503,8 +503,11 @@ EquationSystem::BuildLinearForms()
 void
 EquationSystem::BuildNonlinearForms()
 {
-  ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
-  ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
+  if (_solver_requires_gradient)
+  {
+    ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
+    ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
+  }
 
   // Register non-linear Action forms
   for (const auto i : index_range(_test_var_names))

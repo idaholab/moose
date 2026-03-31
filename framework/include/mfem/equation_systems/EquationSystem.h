@@ -56,6 +56,9 @@ public:
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
+  /// Set whether the nonlinear solver driving this equation system requires Jacobian information.
+  void SetSolverRequiresGradient(bool requires_gradient) { _solver_requires_gradient = requires_gradient; }
+
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
@@ -253,6 +256,8 @@ protected:
   mfem::Array<int> _block_true_offsets;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
+  // Whether the configured nonlinear solver requires Jacobian/gradient information.
+  bool _solver_requires_gradient = true;
 
 private:
   friend class EquationSystemProblemOperator;
