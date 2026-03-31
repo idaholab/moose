@@ -211,6 +211,7 @@ LinearViscoelasticityBase::computeQpElasticityTensor()
 void
 LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
 {
+  mooseAssert(_first_elasticity_tensor_inv, "_first_elasticity_tensor_inv is null");
   if (MooseUtils::absoluteFuzzyEqual(_first_elasticity_tensor[_qp].L2norm(), 0.0))
     (*_first_elasticity_tensor_inv)[_qp].zero();
   else
@@ -218,6 +219,7 @@ LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
 
   for (unsigned int i = 0; i < _springs_elasticity_tensors.size(); ++i)
   {
+    mooseAssert(_springs_elasticity_tensors_inv[i], "_springs_elasticity_tensors_inv[i] is null");
     if (MooseUtils::absoluteFuzzyEqual((*_springs_elasticity_tensors[i])[_qp].L2norm(), 0.0))
       (*_springs_elasticity_tensors_inv[i])[_qp].zero();
     else
@@ -226,6 +228,7 @@ LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
 
   if (_longterm_elasticity_tensor)
   {
+    mooseAssert(_longterm_elasticity_tensor_inv, "_longterm_elasticity_tensor_inv is null");
     if (MooseUtils::absoluteFuzzyEqual((*_longterm_elasticity_tensor)[_qp].L2norm(), 0.0))
       (*_longterm_elasticity_tensor_inv)[_qp].zero();
     else

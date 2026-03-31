@@ -41,7 +41,9 @@ GeneralizedKelvinVoigtModel::GeneralizedKelvinVoigtModel(const InputParameters &
   : GeneralizedKelvinVoigtBase(parameters),
     _Ci(getParam<std::vector<Real>>("creep_modulus").size()),
     _eta_i(getParam<std::vector<Real>>("creep_viscosity")),
-    _Si(getParam<std::vector<Real>>("creep_modulus").size())
+    _Si(getParam<std::vector<Real>>("creep_modulus").size()),
+    _C_longterm(std::nullopt),
+    _S_longterm(std::nullopt)
 {
   Real young_modulus = getParam<Real>("young_modulus");
   Real poisson_ratio = getParam<Real>("poisson_ratio");
@@ -87,23 +89,15 @@ GeneralizedKelvinVoigtModel::GeneralizedKelvinVoigtModel(const InputParameters &
     Real longterm_poissons_ratio =
         (isParamValid("longterm_poissons_ratio") ? getParam<Real>("longterm_poissons_ratio")
                                                  : poisson_ratio);
-    _C_longterm = new RankFourTensor;
+    _C_longterm = std::make_optional<RankFourTensor>();
     _C_longterm->fillFromInputVector({longterm_youngs_modulus, longterm_poissons_ratio},
                                      RankFourTensor::symmetric_isotropic_E_nu);
-    _S_longterm = new RankFourTensor;
+    _S_longterm = std::make_optional<RankFourTensor>();
     *_S_longterm = _C_longterm->invSymm();
   }
 
   issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
   declareViscoelasticProperties();
-}
-
-GeneralizedKelvinVoigtModel::~GeneralizedKelvinVoigtModel()
-{
-  if (_C_longterm)
-    delete _C_longterm;
-  if (_S_longterm)
-    delete _S_longterm;
 }
 
 void
