@@ -4,7 +4,7 @@ function do_build(){
     export GOPATH="$PREFIX/pprof"
     rm -rf "${GOPATH:?}"
     # Build/Install pprof from google at specified hash
-    go install github.com/google/pprof@71be6bfdd44051abe4dfbb7671d138363fb1f4a6 || return 1
+    go install github.com/google/pprof@a15ffb7f9dccb95074ad153aef0f1fcbb01e61e3 || return 1
     # go creates read-only files. Do this so Civet can properly clean up
     chmod -R 700 "${GOPATH:?}/pkg"
     rm -rf "${GOPATH:?}/pkg"

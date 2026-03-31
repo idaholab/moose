@@ -126,7 +126,7 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2026.01.11_71be6bf
+    version: 2026.03.01_a15ffb7
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
@@ -135,7 +135,7 @@ packages:
   # dependers: none
   seacas:
     version: 2025.10.14
-    build_number: 2
+    build_number: 3
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
