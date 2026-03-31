@@ -100,8 +100,10 @@ function baked_flags()
         done
         if [ -z "\$SDKROOT" ]; then
             echo "ERROR: Mac SDK not found!" >&2
-            echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it."
-            exit 1
+            echo "" >&2
+            echo "This environment will not work properly without the SDK downloaded." >&2
+            echo "" >&2
+            echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it." >&2
         fi
 
         CFLAGS+=" -isdkroot \${SDKROOT}"
