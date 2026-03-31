@@ -38,7 +38,7 @@ protected:
       _td_kernels_map;
   /// Containers to store contributions to weak form of the form (F du/dt, v)
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<Moose::MFEM::ParMixedBilinearForm>>
       _td_mblfs; // named according to trial variable
 
   /// Map between variable names and their time derivatives
