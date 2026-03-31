@@ -36,6 +36,9 @@ protected:
   /// Temperature
   const PostprocessorValue & _T;
 
+  /// Passives
+  std::vector<const PostprocessorValue *> _passives;
+
   /// Coupled area between junction and other application
   const Real _A_coupled;
 

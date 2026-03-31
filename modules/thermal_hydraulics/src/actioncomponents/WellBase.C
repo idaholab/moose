@@ -30,6 +30,13 @@ WellBase::validParams()
 
   params.addRequiredParam<FunctionName>("initial_pressure", "Initial pressure function [Pa]");
   params.addRequiredParam<FunctionName>("initial_temperature", "Initial temperature function [K]");
+  params.addParam<std::vector<FunctionName>>(
+      "initial_passives",
+      {},
+      "Initial passive transport variable values in the flow channels, if any (units are "
+      "[amount/m^3], where 'amount' may be mass (kg) or a number (molecules, moles, etc.))");
+  params.addParam<std::vector<VariableName>>(
+      "passives_names", {}, "Names for each passive transport variable [amount/m^3].");
 
   params.addRequiredParam<UserObjectName>("fluid_properties", "Fluid properties object");
   params.addParam<FunctionName>("friction_factor", "0.0", "Darcy friction factor function");
@@ -112,13 +119,17 @@ WellBase::addFlowChannel(unsigned int i, bool is_production)
   params.set<FunctionName>("A") = getParam<FunctionName>("area");
   params.set<FunctionName>("initial_p") = getParam<FunctionName>("initial_pressure");
   params.set<FunctionName>("initial_T") = getParam<FunctionName>("initial_temperature");
+  params.set<std::vector<FunctionName>>("initial_passives") =
+      getParam<std::vector<FunctionName>>("initial_passives");
+  params.set<std::vector<VariableName>>("passives_names") =
+      getParam<std::vector<VariableName>>("passives_names");
   params.set<FunctionName>("initial_vel") = "0.0";
   params.set<RealVectorValue>("gravity_vector") = {
       0, 0, -PhysicalConstants::acceleration_of_gravity};
   params.set<UserObjectName>("fp") = getParam<UserObjectName>("fluid_properties");
   params.set<std::vector<std::string>>("closures") = {_closures_name};
   params.set<FunctionName>("f") = getParam<FunctionName>("friction_factor");
-  params.set<MooseEnum>("rdg_slope_reconstruction") = "full";
+  params.set<MooseEnum>("rdg_slope_reconstruction") = "none";
   params.set<std::vector<Real>>("scaling_factor_1phase") = {1.0, 1.0, 1e-5};
   params.set<std::vector<VariableName>>("vpp_vars") = {"p"};
   params.set<bool>("create_flux_vpp") = true;
@@ -155,6 +166,8 @@ WellBase::addJunction(unsigned int i, bool is_production)
   params.set<FunctionName>("initial_vel_x") = "0.0";
   params.set<FunctionName>("initial_vel_y") = "0.0";
   params.set<FunctionName>("initial_vel_z") = "0.0";
+  params.set<std::vector<FunctionName>>("initial_passives") =
+      getParam<std::vector<FunctionName>>("initial_passives");
   params.set<Real>("volume") = getParam<Real>("junction_volume");
   params.set<Real>("scaling_factor_rhoEV") = 1e-5;
   addTHMComponent(class_name, volumeJunctionName(i), params);

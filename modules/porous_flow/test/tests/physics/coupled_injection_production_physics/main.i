@@ -1,6 +1,7 @@
 gravity_vector = '0 0 0'
 initial_p = 1e5
 initial_T = 300
+initial_C1 = 1e-3
 
 porosity = 0.8
 perm = 1e-8 # permeability
@@ -34,6 +35,7 @@ pro_point1 = '3.5 1.5 1.5'
   fp = fp
   pressure_unit = Pa
   stabilization = full
+  mass_fraction_vars = 'C1'
 []
 
 [FluidProperties]
@@ -49,6 +51,9 @@ pro_point1 = '3.5 1.5 1.5'
   [temperature]
     initial_condition = ${initial_T}
     scaling = 1e-6
+  []
+  [C1]
+    initial_condition = ${initial_C1}
   []
 []
 
@@ -104,6 +109,7 @@ pro_point1 = '3.5 1.5 1.5'
     [inj_prod]
       injection_points = '${inj_point1}'
       production_points = '${pro_point1}'
+      mass_fraction_vars = 'C1'
       multi_app = sub
     []
   []
@@ -111,4 +117,5 @@ pro_point1 = '3.5 1.5 1.5'
 
 [Outputs]
   exodus = true
+  show = 'porepressure temperature C1'
 []

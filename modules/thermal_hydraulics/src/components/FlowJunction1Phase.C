@@ -53,3 +53,10 @@ FlowJunction1Phase::check() const
   if (_passives_names.size() > 0 && !supportsPassiveTransport())
     logError("This Component type does not support passive transport.");
 }
+
+const std::vector<VariableName> &
+FlowJunction1Phase::passiveNames() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+  return _passives_names;
+}

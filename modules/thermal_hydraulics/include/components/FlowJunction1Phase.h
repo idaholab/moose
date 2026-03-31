@@ -19,6 +19,9 @@ class FlowJunction1Phase : public FlowJunction
 public:
   FlowJunction1Phase(const InputParameters & params);
 
+  /// Returns the names of the passive transport variables on the connected channels
+  const std::vector<VariableName> & passiveNames() const;
+
 protected:
   virtual void init() override;
   virtual void check() const override;

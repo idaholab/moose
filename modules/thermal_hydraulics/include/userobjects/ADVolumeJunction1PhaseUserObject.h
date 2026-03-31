@@ -49,6 +49,11 @@ protected:
   const ADVariableValue & _rhouA;
   /// rho*E*A of the connected flow channels
   const ADVariableValue & _rhoEA;
+  /// Passives transport variables of the connected flow channels
+  std::vector<const ADVariableValue *> _passives_times_area;
+
+  /// Number of passive transport variables
+  const unsigned int _n_passives;
 
   /// Form loss coefficient
   const Real & _K;
