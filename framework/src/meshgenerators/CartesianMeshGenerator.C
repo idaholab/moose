@@ -65,7 +65,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _ix = getParam<std::vector<unsigned int>>("ix");
     if (_ix.size() != _dx.size())
-      mooseError("ix must be the same size of dx");
+      mooseError("ix must be the same size as dx");
     for (unsigned int i = 0; i < _ix.size(); ++i)
       if (_ix[i] == 0)
         mooseError("ix cannot be zero");
@@ -79,7 +79,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
     if (max_sizes.size() == 1)
       max_sizes.resize(_dx.size(), max_sizes[0]);
     if (max_sizes.size() != _dx.size())
-      paramError("max_sizes_in_x", "max_sizes_in_x must be size 1 or the same size of dx");
+      paramError("max_sizes_in_x", "max_sizes_in_x must be size 1 or the same size as dx");
     for (const auto i : index_range(_dx))
       if (max_sizes[i] <= 0)
         paramError("max_sizes_in_x", "max_sizes_in_x must be strictly positive.");
@@ -105,7 +105,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _iy = getParam<std::vector<unsigned int>>("iy");
     if (_iy.size() != _dy.size())
-      mooseError("iy must be the same size of dy");
+      mooseError("iy must be the same size as dy");
     for (unsigned int i = 0; i < _iy.size(); ++i)
       if (_iy[i] == 0)
         mooseError("iy cannot be zero");
@@ -119,7 +119,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
     if (max_sizes.size() == 1)
       max_sizes.resize(_dy.size(), max_sizes[0]);
     if (max_sizes.size() != _dy.size())
-      paramError("max_sizes_in_y", "max_sizes_in_y must be size 1 or the same size of dy");
+      paramError("max_sizes_in_y", "max_sizes_in_y must be size 1 or the same size as dy");
     for (const auto i : index_range(_dy))
       if (max_sizes[i] <= 0)
         paramError("max_sizes_in_y", "max_sizes_in_y must be strictly positive.");
@@ -141,7 +141,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
   {
     _iz = getParam<std::vector<unsigned int>>("iz");
     if (_iz.size() != _dz.size())
-      mooseError("iz must be the same size of dz");
+      mooseError("iz must be the same size as dz");
     for (unsigned int i = 0; i < _iz.size(); ++i)
       if (_iz[i] == 0)
         mooseError("iz cannot be zero");
@@ -155,7 +155,7 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
     if (max_sizes.size() == 1)
       max_sizes.resize(_dz.size(), max_sizes[0]);
     if (max_sizes.size() != _dz.size())
-      paramError("max_sizes_in_z", "max_sizes_in_z must be size 1 or the same size of dz");
+      paramError("max_sizes_in_z", "max_sizes_in_z must be size 1 or the same size as dz");
     for (const auto i : index_range(_dz))
       if (max_sizes[i] <= 0)
         paramError("max_sizes_in_z", "max_sizes_in_z must be strictly positive.");
@@ -172,21 +172,22 @@ CartesianMeshGenerator::CartesianMeshGenerator(const InputParameters & parameter
     {
       if (_subdomain_id.size() != _dx.size() * _dy.size() * _dz.size())
         mooseError(
-            "subdomain_id must be the size of product of sizes of dx, dy and dz. Sizes are '" +
+            "subdomain_id must be the size of the product of sizes of dx, dy and dz. Sizes are '" +
             std::to_string(_subdomain_id.size()) + "' and '" +
             std::to_string(_dx.size() * _dy.size() * _dz.size()) + "' respectively");
     }
     else if (isParamValid("dy"))
     {
       if (_subdomain_id.size() != _dx.size() * _dy.size())
-        mooseError("subdomain_id must be the size of product of sizes of dx and dy. Sizes are '" +
-                   std::to_string(_subdomain_id.size()) + "' and '" +
-                   std::to_string(_dx.size() * _dy.size()) + "' respectively");
+        mooseError(
+            "subdomain_id must be the size of the product of sizes of dx and dy. Sizes are '" +
+            std::to_string(_subdomain_id.size()) + "' and '" +
+            std::to_string(_dx.size() * _dy.size()) + "' respectively");
     }
     else
     {
       if (_subdomain_id.size() != _dx.size())
-        mooseError("subdomain_id must be the size of product of sizes of dx. Sizes are '" +
+        mooseError("subdomain_id must be the size of the product of sizes of dx. Sizes are '" +
                    std::to_string(_subdomain_id.size()) + "' and '" + std::to_string(_dx.size()) +
                    "' respectively");
     }

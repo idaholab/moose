@@ -48,7 +48,7 @@ RenumberBySubdomainGenerator::generate()
   // Orphaned nodes would cause problems on renumbering, we are looping on the nodes attached
   // to elements
   mesh->remove_orphaned_nodes();
-  mesh->prepare_for_use();
+  mesh->renumber_nodes_and_elements();
 
   // Get the blocks provided by the user
   std::optional<std::vector<SubdomainName>> blocks =
