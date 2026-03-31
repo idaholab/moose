@@ -327,7 +327,7 @@ FlowChannelBase::addMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("variable") = vpp_vars;
-    params.set<MooseEnum>("sort_by") = sortBy();
+    params.set<std::string>("sort_by") = sortBy();
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addVectorPostprocessor(class_name, name() + "_vars_vpp", params);
   }
