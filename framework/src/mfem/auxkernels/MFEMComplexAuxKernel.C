@@ -27,7 +27,7 @@ MFEMComplexAuxKernel::validParams()
 MFEMComplexAuxKernel::MFEMComplexAuxKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _result_var_name(getParam<AuxVariableName>("variable")),
-    _result_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_result_var_name))
+    _result_var(*getMFEMProblem().getComplexGridFunction(_result_var_name))
 {
 }
 

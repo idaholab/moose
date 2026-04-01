@@ -27,7 +27,7 @@ MFEMAuxKernel::validParams()
 MFEMAuxKernel::MFEMAuxKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _result_var_name(getParam<AuxVariableName>("variable")),
-    _result_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_result_var_name))
+    _result_var(*getMFEMProblem().getGridFunction(_result_var_name))
 {
 }
 

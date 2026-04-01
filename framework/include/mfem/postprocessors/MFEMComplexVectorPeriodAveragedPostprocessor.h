@@ -41,18 +41,16 @@ private:
   mfem::real_t _integral;
 
   /// Input variables
-  mfem::ParComplexGridFunction & _primal_var;
-  mfem::ParComplexGridFunction & _dual_var;
   mfem::L2_FECollection _l2_fec;
   mfem::ParFiniteElementSpace _scalar_test_fespace;
   mfem::ParGridFunction _scalar_var;
   mfem::Coefficient & _scalar_coef;
 
   /// Coefficients extracted from real and imaginary parts of complex variables
-  mfem::VectorGridFunctionCoefficient _primal_var_real_coef;
-  mfem::VectorGridFunctionCoefficient _primal_var_imag_coef;
-  mfem::VectorGridFunctionCoefficient _dual_var_real_coef;
-  mfem::VectorGridFunctionCoefficient _dual_var_imag_coef;
+  mfem::VectorCoefficient & _primal_var_real_coef;
+  mfem::VectorCoefficient & _primal_var_imag_coef;
+  mfem::VectorCoefficient & _dual_var_real_coef;
+  mfem::VectorCoefficient & _dual_var_imag_coef;
 
   // Inner products and their weighted sum
   mfem::InnerProductCoefficient _real_inner_product_coef;

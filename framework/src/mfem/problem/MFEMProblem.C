@@ -12,7 +12,6 @@
 #include "MFEMProblem.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
-#include "MFEMComplexVariable.h"
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
@@ -674,12 +673,6 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
     FEProblemBase::addUserObject(transfer_name, name, parameters);
   else
     FEProblemBase::addTransfer(transfer_name, name, parameters);
-}
-
-std::shared_ptr<mfem::ParGridFunction>
-MFEMProblem::getGridFunction(const std::string & name)
-{
-  return getUserObject<MFEMVariable>(name).getGridFunction();
 }
 
 void

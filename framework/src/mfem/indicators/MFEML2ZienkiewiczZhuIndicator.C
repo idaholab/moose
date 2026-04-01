@@ -86,7 +86,7 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   }
 
   // fetch the grid function we need
-  auto gridfunction = getMFEMProblem().getProblemData().gridfunctions.GetShared(_var_name);
+  auto gridfunction = getMFEMProblem().getGridFunction(_var_name);
 
   // finally, initialise the estimator
   _error_estimator = std::make_shared<mfem::L2ZienkiewiczZhuEstimator>(

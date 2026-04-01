@@ -56,7 +56,7 @@ MFEMComplexSumAux::MFEMComplexSumAux(const InputParameters & parameters)
   for (const auto & var_name : _var_names)
   {
     const mfem::ParComplexGridFunction * gf =
-        getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(var_name);
+        getMFEMProblem().getComplexGridFunction(var_name).get();
     if (gf->ParFESpace() == _result_var.ParFESpace())
       _summed_vars.push_back(gf);
     else

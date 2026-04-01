@@ -44,8 +44,7 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
     _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
-        getMFEMProblem().mesh().getMFEMParMesh(),
-        getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
+        getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
@@ -56,7 +55,7 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
 void
 MFEMCutTransitionSubMesh::buildSubMesh()
 {
-  labelMesh(getMFEMProblem().mesh().getMFEMParMesh());
+  labelMesh(const_cast<mfem::ParMesh &>(getMesh()));
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
       getMesh(), getMesh().attribute_sets.GetAttributeSet(_transition_subdomain)));
   _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
