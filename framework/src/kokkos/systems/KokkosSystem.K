@@ -551,7 +551,7 @@ System::operator()(const ThreadID tid) const
   Real3 grad = 0;
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-  if (kokkosAssembly().isOnDemandFEType(fe_type))
+  if (kokkosAssembly().isOnDemandFEType(elem_type, fe_type))
   {
     // LAGRANGE: evaluate shape functions on-device.
     const auto topo = kokkosAssembly().getElemTopology(elem_type);

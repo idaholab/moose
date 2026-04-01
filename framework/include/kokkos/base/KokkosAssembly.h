@@ -153,9 +153,9 @@ public:
    * True only for LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE; always false otherwise.
    * @param fe_type_id The contiguous FE type ID
    */
-  KOKKOS_FUNCTION bool isOnDemandFEType(unsigned int fe_type_id) const
+  KOKKOS_FUNCTION bool isOnDemandFEType(unsigned int elem_type_id, unsigned int fe_type_id) const
   {
-    return _is_ondemand_fe_type[fe_type_id];
+    return _is_ondemand_fe_type(elem_type_id, fe_type_id);
   }
   /**
    * Get the reference-element coordinate of a volume quadrature point
@@ -429,7 +429,7 @@ private:
    * (LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE). Non-Lagrange types fall back to phi tables.
    * Indexed by contiguous FE type ID.
    */
-  Array<bool> _is_ondemand_fe_type;
+  Array2D<bool> _is_ondemand_fe_type;
   /**
    * Face quadrature points mapped into the parent reference coordinate system
    * (for on-demand FE, Phase 6).  Indexed as _q_points_face_parent(subdomain, elem_type)[side][qp].

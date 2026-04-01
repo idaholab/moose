@@ -305,11 +305,13 @@ Assembly::initShape()
     _elem_topologies[elem_type_id] = toKokkosTopology(elem_type);
   _elem_topologies.copyToDevice();
 
-  // Build per-FE-type flag: true only for LAGRANGE (on-demand path).
-  _is_ondemand_fe_type.create(_fe_type_map.size());
-  for (auto & [fe_type, fe_type_id] : _fe_type_map)
-    _is_ondemand_fe_type[fe_type_id] = (fe_type.family == libMesh::LAGRANGE);
-  _is_ondemand_fe_type.copyToDevice();
+  // Build per-(elem_type, fe_type) on-demand flag.  True only when the FE type
+  // is LAGRANGE *and* its DOF count matches what nativeShape provides for that
+  // element topology.  A lower-order Lagrange type on a higher-order element
+  // (e.g. FIRST on QUAD9) has fewer DOFs than nDofs() returns, so it must fall
+  // back to precomputed phi tables.  Filled inside the subdomain loop below;
+  // copied to device after the loop.
+  _is_ondemand_fe_type.create(num_elem_types, _fe_type_map.size());
 
   // Allocate the face-qp-in-parent-coords array; filled per-subdomain in the loop below.
   _q_points_face_parent.create(num_subdomains, num_elem_types);
@@ -371,9 +373,26 @@ Assembly::initShape()
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
         if (fe_type.family == libMesh::LAGRANGE)
         {
-          // nDofs() is a CPU-only helper in KokkosFETypes — safe to call here.
-          _n_dofs(elem_type_id, fe_type_id) = nDofs(FEFamily::LAGRANGE, topo);
-          use_libmesh_path = false;
+          // Reinit to get the actual DOF count libMesh assigns for this
+          // (fe_type, elem_type) pair.  It may be less than nDofs() when the
+          // FE order is lower than the element's native order (e.g. FIRST on
+          // QUAD9).  On-demand evaluation is only valid when the counts match
+          // because nativeShape assumes all element nodes carry DOFs.
+          auto & phi = fe->get_phi();
+          fe->reinit(elem);
+          const unsigned int native_ndofs = nDofs(FEFamily::LAGRANGE, topo);
+          if (phi.size() == native_ndofs)
+          {
+            _n_dofs(elem_type_id, fe_type_id) = native_ndofs;
+            _is_ondemand_fe_type(elem_type_id, fe_type_id) = true;
+            use_libmesh_path = false;
+          }
+          else{
+            // Order mismatch - fall through to the libMesh phi-table path
+            _is_ondemand_fe_type(elem_type_id, fe_type_id) = false;
+          }
+        }else {
+            _is_ondemand_fe_type(elem_type_id, fe_type_id) = false;
         }
 #elif defined(MOOSE_KOKKOS_NATIVE_FE)
         if (fe_type.family == libMesh::LAGRANGE)
@@ -571,8 +590,9 @@ Assembly::initShape()
   }
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-  // Copy parent-reference face qp table for on-demand FE.
+  // Copy parent-reference face qp table and per-(elem,fe) on-demand flags.
   _q_points_face_parent.copyToDeviceNested();
+  _is_ondemand_fe_type.copyToDevice();
   // Copy phi tables for non-LAGRANGE FE types that fall back to the table path.
   _phi.copyToDeviceNested();
   _phi_face.copyToDeviceNested();
@@ -623,6 +643,18 @@ mapFaceQpToParent(const libMesh::Elem & side_in_parent,
 {
   const unsigned int n = side_in_parent.n_nodes();
   Real3 parent_pt;
+
+  // 1-D elements: the "side" is a single vertex node.  There are no reference
+  // coordinates on a point element, so the parent reference coordinate is
+  // simply the node's own position in the parent reference element.
+  if (n == 1)
+  {
+    const auto & pt = side_in_parent.point(0);
+    parent_pt.v[0] = pt(0);
+    parent_pt.v[1] = pt(1);
+    parent_pt.v[2] = pt(2);
+    return parent_pt;
+  }
 
   for (unsigned int k = 0; k < n; ++k)
   {
