@@ -13,6 +13,7 @@
   displacements = 'disp_x disp_y'
   cut_off_boundary = all
   cut_off_radius = 0.3726
+  use_AD=true
 []
 
 [Mesh]
@@ -33,6 +34,7 @@
   output_q = true
   output_vpp = false
   incremental = true
+  use_automatic_differentiation =true
 []
 
 [UserObjects]
@@ -86,12 +88,13 @@
     add_variables = true
     incremental = true
     generate_output = 'stress_xx stress_yy'
+    use_automatic_differentiation =true
   []
 []
 
 [AuxKernels]
   [stress_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
@@ -99,7 +102,7 @@
     execute_on = timestep_end
   []
   [stress_yy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
@@ -107,7 +110,7 @@
     execute_on = timestep_end
   []
   [stress_xy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     variable = stress_xy
     index_i = 0
@@ -115,7 +118,7 @@
     execute_on = timestep_end
   []
   [vonmises]
-    type = RankTwoScalarAux
+    type = ADRankTwoScalarAux
     rank_two_tensor = stress
     variable = vonmises
     scalar_type = vonmisesStress
@@ -159,18 +162,18 @@
 
 [Materials]
   [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200000
     poissons_ratio = 0.3
   []
   [strain]
-    type = ComputeCrackTipEnrichmentIncrementalStrain
+    type = ADComputeCrackTipEnrichmentIncrementalStrain
     displacements = 'disp_x disp_y'
     crack_front_definition = crackFrontDefinition
     enrichment_displacements = 'enrich1_x enrich2_x enrich3_x enrich4_x enrich1_y enrich2_y enrich3_y enrich4_y'
   []
   [stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
   []
 []
 
@@ -187,8 +190,7 @@
     order = SECOND
   []
 
-  #l_max_its = 100
-  nl_max_its = 200
+  nl_max_its = 100
 
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-10

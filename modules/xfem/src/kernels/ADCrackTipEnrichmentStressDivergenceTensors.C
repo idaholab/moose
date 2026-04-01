@@ -29,16 +29,16 @@ ADCrackTipEnrichmentStressDivergenceTensors::validParams()
       "The string of enrichment displacements suitable for the problem statement");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
-                                  "The CrackFrontDefinition user object name");
+                                          "The CrackFrontDefinition user object name");
   params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 
 ADCrackTipEnrichmentStressDivergenceTensors::ADCrackTipEnrichmentStressDivergenceTensors(
     const InputParameters & parameters)
-  : ADKernel(parameters),  
-    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),   
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""), 
+  : ADKernel(parameters),
+    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getADMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
     // _Jacobian_mult(getADMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
@@ -60,15 +60,14 @@ ADCrackTipEnrichmentStressDivergenceTensors::ADCrackTipEnrichmentStressDivergenc
     _disp_var[i] = coupled("displacements", i);
 }
 
-
 ADReal
 ADCrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
 {
-  crackTipEnrichementFunctionAtPoint( *_current_elem->node_ptr(_i), _BI);
+  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
 
-  crackTipEnrichementFunctionAtPoint( _q_point[_qp], _B);
+  crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
   unsigned int crack_front_point_index =
-      crackTipEnrichementFunctionDerivativeAtPoint( _q_point[_qp], _dBx);
+      crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
 
   for (unsigned int i = 0; i < 4; ++i)
     rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
