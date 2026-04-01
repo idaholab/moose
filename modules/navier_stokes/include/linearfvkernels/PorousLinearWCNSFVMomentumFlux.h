@@ -40,4 +40,6 @@ private:
 
   /// Whether to include porosity outside the divergence in the advection term
   const bool _porosity_outside_divergence;
+  /// Whether to force a one-sided velocity break in the advection term on internal baffle faces
+  const bool _use_baffle_velocity_break;
 };
