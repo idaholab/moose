@@ -24,10 +24,9 @@ MFEMPetscNonlinearSolver::validParams()
   params.addClassDescription("MFEM PETSc-backed nonlinear solver using SNES.");
   params.addParam<MultiMooseEnum>(
       "petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>(
-      "petsc_options_iname",
-      Moose::PetscSupport::getCommonPetscKeys(),
-      "Names of PETSc name/value pairs");
+  params.addParam<MultiMooseEnum>("petsc_options_iname",
+                                  Moose::PetscSupport::getCommonPetscKeys(),
+                                  "Names of PETSc name/value pairs");
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\")");

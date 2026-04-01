@@ -24,7 +24,8 @@ MFEMSuperLU::validParams()
   return params;
 }
 
-MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
+MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

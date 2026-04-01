@@ -123,9 +123,8 @@ public:
 
 protected:
   template <typename T>
-  std::shared_ptr<T> addSharedObject(const std::string & type,
-                                     const std::string & name,
-                                     InputParameters & params)
+  std::shared_ptr<T>
+  addSharedObject(const std::string & type, const std::string & name, InputParameters & params)
   {
     auto objects = _mfem_problem->addObject<T>(type, name, params);
     mooseAssert(objects.size() == 1, "Doesn't work with threading");

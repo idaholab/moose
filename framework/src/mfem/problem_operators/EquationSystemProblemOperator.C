@@ -70,7 +70,8 @@ EquationSystemProblemOperator::Solve()
     _problem_data.jacobian_solver->updateSolver(
         *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
         GetEquationSystem()->_ess_tdof_lists.at(0));
-    _problem_data.jacobian_solver->getSolver().SetOperator(GetEquationSystem()->GetLinearOperator());
+    _problem_data.jacobian_solver->getSolver().SetOperator(
+        GetEquationSystem()->GetLinearOperator());
     _problem_data.jacobian_solver->getSolver().Mult(_true_rhs, _true_x);
   }
 

@@ -88,7 +88,8 @@ ComplexEquationSystemProblemOperator::Solve()
 
     if (_problem_data.jacobian_solver->isLOR())
       mooseError("LOR solve is not supported for complex equation systems.");
-    _problem_data.jacobian_solver->getSolver().SetOperator(GetEquationSystem()->GetLinearOperator());
+    _problem_data.jacobian_solver->getSolver().SetOperator(
+        GetEquationSystem()->GetLinearOperator());
     _problem_data.jacobian_solver->getSolver().Mult(_true_rhs, _true_x);
   }
 
