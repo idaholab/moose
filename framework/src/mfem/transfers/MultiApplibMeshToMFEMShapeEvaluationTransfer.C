@@ -177,6 +177,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
       comm(), outgoing_points, gather_functor, action_functor, ex);
 
   // Set interpolated field values at points on local processor
+  interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
   for (int i = 0; i < interp_vals.Size(); i++)
   {
     for (auto & group : incoming_vals_ids)
