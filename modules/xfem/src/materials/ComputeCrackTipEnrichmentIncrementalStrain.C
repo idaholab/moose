@@ -15,11 +15,13 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("XFEMApp", ComputeCrackTipEnrichmentIncrementalStrain);
+registerMooseObject("XFEMApp", ADComputeCrackTipEnrichmentIncrementalStrain);
 
+template <bool is_ad>
 InputParameters
-ComputeCrackTipEnrichmentIncrementalStrain::validParams()
+ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::validParams()
 {
-  InputParameters params = ComputeIncrementalStrainBase::validParams();
+  InputParameters params = ComputeIncrementalStrainBaseParent<is_ad>::validParams();
   params.addClassDescription(
       "Computes the crack tip enrichment strain for an incremental small-strain formulation.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("enrichment_displacements",
@@ -31,18 +33,19 @@ ComputeCrackTipEnrichmentIncrementalStrain::validParams()
   return params;
 }
 
-ComputeCrackTipEnrichmentIncrementalStrain::ComputeCrackTipEnrichmentIncrementalStrain(
+template <bool is_ad>
+ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::ComputeCrackTipEnrichmentIncrementalStrainTempl(
     const InputParameters & parameters)
-  : ComputeIncrementalStrainBase(parameters),
-    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+  : ComputeIncrementalStrainBaseParent<is_ad>(parameters),
+    EnrichmentFunctionCalculation(&this->template getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _enrich_disp(3),
     _grad_enrich_disp(3),
     _grad_enrich_disp_old(3),
     _enrich_variable(4),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-    _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
+    _mechanical_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>("mechanical_strain")),
+    _total_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>("total_strain")),
     _B(4),
     _dBX(4),
     _dBx(4)
@@ -51,7 +54,7 @@ ComputeCrackTipEnrichmentIncrementalStrain::ComputeCrackTipEnrichmentIncremental
     _enrich_variable[i].resize(_ndisp);
 
   const std::vector<NonlinearVariableName> & nl_vnames =
-      getParam<std::vector<NonlinearVariableName>>("enrichment_displacements");
+      this->template  getParam<std::vector<NonlinearVariableName>>("enrichment_displacements");
 
   if (_ndisp == 2 && nl_vnames.size() != 8)
     mooseError("The number of enrichment displacements should be total 8 for 2D.");
@@ -73,8 +76,9 @@ ComputeCrackTipEnrichmentIncrementalStrain::ComputeCrackTipEnrichmentIncremental
     _BI[i].resize(4);
 }
 
+template <bool is_ad>
 void
-ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
+ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::computeProperties()
 {
   FEType fe_type(Utility::string_to_enum<Order>("first"),
                  Utility::string_to_enum<FEFamily>("lagrange"));
@@ -115,7 +119,13 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
         for (unsigned int j = 0; j < 4; ++j)
         {
           dof_id_type dof = node_i->dof_number(_nl->number(), _enrich_variable[j][m]->number(), 0);
-          Real soln = (*_sln)(dof);
+          RealParent<is_ad> soln = (*_sln)(dof);
+          if constexpr (is_ad)
+          {
+            if (RealParent<true>::do_derivatives && is_ad)
+              Moose::derivInsert(soln.derivatives(), dof, 1.);
+          }
+
           Real soln_old = _nl->solutionOld()(dof);
 
           _enrich_disp[m] += (*_fe_phi)[i][_qp] * (_B[j] - _BI[i][j]) * soln;
@@ -123,22 +133,23 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
 
           _grad_enrich_disp[m] +=
               ((*_fe_dphi)[i][_qp] * (_B[j] - _BI[i][j]) + (*_fe_phi)[i][_qp] * grad_B) * soln;
+
           _grad_enrich_disp_old[m] +=
               ((*_fe_dphi)[i][_qp] * (_B[j] - _BI[i][j]) + (*_fe_phi)[i][_qp] * grad_B) * soln_old;
         }
       }
     }
 
-    RankTwoTensor grad_enrich_disp_tensor = RankTwoTensor::initializeFromRows(
+    auto grad_enrich_disp_tensor = GenericRankTwoTensor<is_ad>::initializeFromRows(
         _grad_enrich_disp[0], _grad_enrich_disp[1], _grad_enrich_disp[2]);
 
-    RankTwoTensor grad_enrich_disp_tensor_old = RankTwoTensor::initializeFromRows(
+    auto grad_enrich_disp_tensor_old = GenericRankTwoTensor<is_ad>::initializeFromRows(
         _grad_enrich_disp_old[0], _grad_enrich_disp_old[1], _grad_enrich_disp_old[2]);
 
-    RankTwoTensor grad_disp_tensor = RankTwoTensor::initializeFromRows(
+    auto grad_disp_tensor = GenericRankTwoTensor<is_ad>::initializeFromRows(
         (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
-    RankTwoTensor grad_disp_tensor_old = RankTwoTensor::initializeFromRows(
+    auto grad_disp_tensor_old = GenericRankTwoTensor<is_ad>::initializeFromRows(
         (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
 
     _strain_increment[_qp] =
@@ -151,7 +162,7 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
 
     // Remove the Eigen strain increment
-    subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+    this->subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
     // strain rate
     if (_dt > 0)
