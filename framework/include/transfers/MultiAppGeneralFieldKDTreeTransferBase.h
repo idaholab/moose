@@ -50,8 +50,14 @@ protected:
   /// Number of KDTrees used to hold the locations and variable value data
   void computeNumSources();
 
-  /// Get the index of the app in the loop over the trees and the apps contributing data to each tree
-  unsigned int getAppIndex(unsigned int kdtree_index, unsigned int app_index) const;
+  /**
+   * Get the index of the app when inside of a KD-Tree source loop, where multiple applications
+   * could be lumped (grouped) inside the same KD-Tree
+   * @param kdtree_index index of the kd-tree / source
+   * @param app_index_in_tree index of the application within the multiple apps contributing values
+   * to a KD-tree. This is a local index
+   */
+  unsigned int getAppIndex(unsigned int kdtree_index, unsigned int app_index_in_tree) const;
 
   /// Number of applications which contributed nearest-locations to each KD-tree
   unsigned int getNumAppsPerTree() const;
@@ -59,7 +65,11 @@ protected:
   /// Number of divisions (nearest-positions or source mesh divisions) used when building KD-Trees
   unsigned int getNumDivisions() const;
 
-  /// Transform a point towards the local frame
+  /**
+   * Transform a point towards the local frame
+   * @param i_from the local index of the source application
+   * @param pt the point to move from the global to the local frame
+   */
   Point getPointInLocalSourceFrame(unsigned int i_from, const Point & pt) const;
 
   /**
@@ -68,7 +78,8 @@ protected:
    * @param pt point of interest
    * @param valid_mesh_div if using source mesh divisions in a 'matching' mode, the point can only
    * be used if coming from the relevant match
-   * @param i_from index of the source (KDTree+values) of interest
+   * @param i_from index of the source (= a KDTree+values) of interest. Local index, goes from 0 to
+   * the number of sources - 1.
    */
   bool checkRestrictionsForSource(const Point & pt,
                                   const unsigned int valid_mesh_div,
