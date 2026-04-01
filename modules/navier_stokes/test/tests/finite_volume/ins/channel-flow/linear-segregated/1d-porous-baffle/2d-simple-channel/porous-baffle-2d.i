@@ -1,33 +1,19 @@
-length_left = 5.0
-length_right = 5.0
-height = 1.0
-
-nx_left = 25
-nx_right = 25
-ny = 3
-
-epsilon_left = 1.0
-epsilon_right = 0.5
-u_in = 1.0
-p_out = 0.0
-mu = 1.0
-
-density_factor = 1e-3
-
-advected_interp_method = 'average'
+mu = 2e-3 # 1e-2
+rho = 1000
+advected_interp_method = 'upwind'
+u_in = 2
+forcheimer = 10
+bf = '0 0'
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-
-    # Two blocks are enough for this verification problem: one block on each side of the
-    # internal porous-baffle interface.
-    dx = '${length_left} ${length_right}'
-    dy = '${height}'
-    ix = '${nx_left} ${nx_right}'
-    iy = '${ny}'
-    subdomain_id = '1 2'
+    dx = '0.5 0.5 0.5'
+    dy = '0.5'
+    ix = '21 21 21'
+    iy = '21'
+    subdomain_id = '1 2 3'
   []
   [baffle]
     type = SideSetsBetweenSubdomainsGenerator
@@ -36,9 +22,16 @@ advected_interp_method = 'average'
     paired_block = '2'
     new_boundary = 'baffle'
   []
+  [baffle2]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = baffle
+    primary_block = '2'
+    paired_block = '3'
+    new_boundary = 'baffle2'
+  []
   [split_top_bottom]
     type = BreakBoundaryOnSubdomainGenerator
-    input = baffle
+    input = baffle2
     boundaries = 'top bottom'
   []
   [delete]
@@ -59,24 +52,22 @@ advected_interp_method = 'average'
     u = superficial_u
     v = superficial_v
     pressure = pressure
-    rho = 'rho_aux'
-    porosity = 'porosity'
+    rho = ${rho}
+    porosity = porosity
     p_diffusion_kernel = p_diffusion
-
-    pressure_baffle_sidesets = 'baffle'
+    pressure_baffle_sidesets = 'baffle baffle2'
+    # pressure_gradient_limiter = 'baffle baffle2'
+    baffle_form_loss = ${bf}
+    velocity_form_loss = 'lower_epsilon higher_epsilon'
+    # pressure_gradient_limiter_blend = 0.5
     pressure_baffle_relaxation = 0.1
-
     debug_baffle = false
-
-    # use_flux_velocity_reconstruction = true
-    # use_reconstructed_pressure_gradient = true
+    use_flux_velocity_reconstruction = true
+    use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
-
-    use_interpolated_density_in_bernoulli_jump = true
-    # pressure_gradient_limiter = 'baffle'
-    # pressure_gradient_limiter_blend = 1.0
-    use_corrected_pressure_gradient = true
+    flux_velocity_reconstruction_zero_flux_sidesets = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    use_corrected_pressure_gradient = false
+    # body_force_kernel_names = "u_friction; v_friction"
   []
 []
 
@@ -94,7 +85,7 @@ advected_interp_method = 'average'
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_condition = ${p_out}
+    initial_condition = 0.0
   []
 []
 
@@ -103,34 +94,34 @@ advected_interp_method = 'average'
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_u
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu'
+    mu = ${mu}
     u = superficial_u
     v = superficial_v
     momentum_component = 'x'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
     porosity_outside_divergence = true
-    use_two_point_stress_transmissibility = false
+    use_two_point_stress_transmissibility = true
   []
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
     variable = superficial_v
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu'
+    mu = ${mu}
     u = superficial_u
     v = superficial_v
     momentum_component = 'y'
     rhie_chow_user_object = rc
     use_nonorthogonal_correction = false
     porosity_outside_divergence = true
-    use_two_point_stress_transmissibility = false
+    use_two_point_stress_transmissibility = true
   []
   [u_pressure]
     type = LinearFVMomentumPressureUO
     variable = superficial_u
     momentum_component = 'x'
     rhie_chow_user_object = rc
-    porosity = 'porosity'
+    porosity = porosity
     use_corrected_gradient = true
   []
   [v_pressure]
@@ -138,8 +129,30 @@ advected_interp_method = 'average'
     variable = superficial_v
     momentum_component = 'y'
     rhie_chow_user_object = rc
-    porosity = 'porosity'
+    porosity = porosity
     use_corrected_gradient = true
+  []
+  [u_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_u
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
+    momentum_component = 'x'
+    block = 2
+  []
+  [v_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_v
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = ${rho}
+    u = superficial_u
+    v = superficial_v
+    momentum_component = 'y'
+    block = 2
   []
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump
@@ -164,116 +177,92 @@ advected_interp_method = 'average'
     variable = superficial_u
     functor = ${u_in}
   []
+  [outlet_u]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    boundary = right
+    variable = superficial_u
+    use_two_term_expansion = false
+  []
+
   [left_v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
     variable = superficial_v
     functor = 0.0
   []
-
-  [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = 'left'
-    variable = pressure
-    use_two_term_expansion = true
-  []
-
-  # Fix the outlet pressure and leave the outlet velocity free.
-  [outlet_u]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = right
-    variable = superficial_u
-    use_two_term_expansion = true
-    assume_fully_developed_flow = false
-    # assume_fully_developed_flow = true
-  []
   [outlet_v]
     type = LinearFVAdvectionDiffusionOutflowBC
     boundary = right
     variable = superficial_v
-    use_two_term_expansion = true
-    assume_fully_developed_flow = false
-    # assume_fully_developed_flow = true
+    use_two_term_expansion = false
   []
-  [outlet_p]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = right
-    variable = pressure
-    functor = ${p_out}
-  []
+  # [noslip_v]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  #   variable = superficial_v
+  #   functor = 0.0
+  # []
+  # [noslip_u]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+  #   variable = superficial_u
+  #   functor = 0.0
+  # []
 
-  # Symmetry removes any wall losses and keeps the exact solution one-dimensional.
-  [symmetry_u]
+  [symmetry-u]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     variable = superficial_u
     u = superficial_u
     v = superficial_v
     momentum_component = x
   []
-  [symmetry_v]
+  [symmetry-v]
     type = LinearFVVelocitySymmetryBC
-    boundary = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
     variable = superficial_v
     u = superficial_u
     v = superficial_v
     momentum_component = y
   []
-  [pressure_symmetric]
-    type = LinearFVPressureSymmetryBC
-    boundary = 'top_to_1 top_to_2 bottom_to_1 bottom_to_2'
-    variable = pressure
-    HbyA_flux = 'HbyA'
-  []
-[]
 
-[Functions]
-  [rho]
-    type = ParsedFunction
-    expression = '(1e3 - 0.05e3 * x)*${density_factor}'
-    # expression = '1'
+  [outlet_p]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = right
+    variable = pressure
+    functor = 0.0
+  []
+
+  # [pressure-extrapolation]
+  #   type = LinearFVPressureFluxBC
+  #   boundary = 'bottom_to_1 bottom_to_2 bottom_to_3 top_to_1 top_to_2 top_to_3'
+  #   variable = pressure
+  #   HbyA_flux = HbyA
+  #   Ainv = Ainv
+  # []
+
+  [pressure-symmetry]
+    type = LinearFVPressureSymmetryBC
+    boundary = 'top_to_1 top_to_2 top_to_3 bottom_to_1 bottom_to_2 bottom_to_3'
+    variable = pressure
+    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
   []
 []
 
 [FunctorMaterials]
+  [forch]
+    type = GenericVectorFunctorMaterial
+    prop_names = forch
+    prop_values = '${forcheimer} ${forcheimer} ${forcheimer}'
+  []
   [porosity]
     type = PiecewiseByBlockFunctorMaterial
     prop_name = porosity
-    subdomain_to_prop_value = '1 ${epsilon_left} 2 ${epsilon_right}'
-  []
-  [mu]
-    type = ParsedFunctorMaterial
-    property_name = mu
-    expression = '${mu}'
-  []
-[]
-
-[AuxVariables]
-  [rho_aux]
-    type = MooseLinearVariableFVReal
-  []
-  [porosity_aux]
-    type = MooseLinearVariableFVReal
-  []
-[]
-
-[AuxKernels]
-  [assign_rho_aux]
-    type = FunctorAux
-    variable = rho_aux
-    functor = 'rho'
-    execute_on = 'initial timestep_end'
-  []
-  [assign_porosity_aux]
-    type = FunctorAux
-    variable = porosity_aux
-    functor = 'porosity'
-    execute_on = 'initial timestep_end'
+    subdomain_to_prop_value = '1 1.0 2 0.5 3 1.0'
   []
 []
 
 [Postprocessors]
-  # Overall pressure drop from the solved field.
   [p_left]
     type = SideAverageValue
     variable = pressure
@@ -284,14 +273,11 @@ advected_interp_method = 'average'
     variable = pressure
     boundary = right
   []
-  [delta_p]
+  [p_jump]
     type = ParsedPostprocessor
     expression = 'p_left - p_right'
     pp_names = 'p_left p_right'
   []
-
-  # The block averages give a more direct measure of the interface jump because the exact
-  # solution is piecewise constant in each block.
   [p_block_1]
     type = ElementAverageValue
     variable = pressure
@@ -307,8 +293,6 @@ advected_interp_method = 'average'
     expression = 'p_block_1 - p_block_2'
     pp_names = 'p_block_1 p_block_2'
   []
-
-  # Check the superficial velocities on both sides of the jump.
   [u_block_1]
     type = ElementAverageValue
     variable = superficial_u
@@ -319,19 +303,58 @@ advected_interp_method = 'average'
     variable = superficial_u
     block = 2
   []
+  [u_block_jump]
+    type = ParsedPostprocessor
+    expression = 'u_block_1 - u_block_2'
+    pp_names = 'u_block_1 u_block_2'
+  []
+  [v_top_int]
+    type = SideIntegralVariablePostprocessor
+    variable = superficial_v
+    boundary = 'top_to_1 top_to_2 top_to_3'
+  []
+  [top_area]
+    type = AreaPostprocessor
+    boundary = 'top_to_1 top_to_2 top_to_3'
+  []
+  [v_top_avg]
+    type = ParsedPostprocessor
+    pp_names = 'v_top_int top_area'
+    expression = 'v_top_int/top_area'
+  []
 []
 
 [VectorPostprocessors]
-  [centerline_solution]
+  [u_line]
     type = LineValueSampler
-    variable = 'rho_aux superficial_u pressure'
-    # start_point = '${fparse length_left - 0.15} 0.5 0'
-    # end_point = '${fparse length_left + 0.15} 0.5 0'
-    start_point = '0.1 0.5 0'
-    end_point = '${fparse length_left + length_right -0.1} 0.5 0'
-    num_points = 50
-    sort_by = x
-    execute_on = timestep_end
+    variable = superficial_u
+    start_point = '0 0.25 0'
+    end_point = '1.5 0.25 0'
+    num_points = 401
+    sort_by = id
+  []
+  [p_line]
+    type = LineValueSampler
+    variable = pressure
+    start_point = '0 0.25 0'
+    end_point = '1.5 0.25 0'
+    num_points = 401
+    sort_by = id
+  []
+[]
+
+[AuxVariables]
+  [porosity_aux]
+    type = MooseLinearVariableFVReal
+  []
+[]
+
+[AuxKernels]
+  [por]
+    type = FunctorAux
+    variable = porosity_aux
+    functor = porosity
+    execute_on = 'timestep_end'
   []
 []
 
@@ -345,20 +368,20 @@ advected_interp_method = 'average'
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
   momentum_equation_relaxation = 0.4
-  pressure_variable_relaxation = 0.2
-  num_iterations = 2000
-  pressure_absolute_tolerance = 1e-10
-  momentum_absolute_tolerance = 1e-10
+  pressure_variable_relaxation = 0.1
+  num_iterations = 1000
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  print_fields = false
+  # print_fields = true
   continue_on_max_its = true
 []
 
 [Outputs]
   exodus = true
   csv = true
-  execute_on = timestep_end
+  execute_on = 'timestep_end'
 []

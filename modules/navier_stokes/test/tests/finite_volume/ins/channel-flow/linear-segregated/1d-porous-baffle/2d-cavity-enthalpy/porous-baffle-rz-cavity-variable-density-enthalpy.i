@@ -8,16 +8,20 @@ nz_bottom = 16
 nz_middle = 12
 nz_top = 16
 
-mu = 1e-3
-rho_ref = 1000
-beta = 5e-4
-cp_fluid = 4200
-k_fluid = 0.6
+mu = 2e-5
+rho_ref = 1.2
+beta = 3e-3
+cp_fluid = 1000
+k_fluid = 0.025
 T_ref = 300
 T_initial = 300
 T_right = 300
-q_middle = 2e5
+q_middle = 2e4
 gravity_y = -9.81
+
+forch_coeff = 30
+forch_coeff_radial = 30
+form_factor = 30.0
 
 advected_interp_method = 'upwind'
 
@@ -62,16 +66,24 @@ advected_interp_method = 'upwind'
     u = superficial_r
     v = superficial_z
     pressure = pressure
+
     rho = 'rho'
     porosity = 'porosity'
+
     p_diffusion_kernel = p_diffusion
+
     pressure_baffle_sidesets = 'baffle_lower baffle_upper'
-    pressure_baffle_relaxation = 0.5
+    baffle_form_loss = '${form_factor} ${form_factor}'
+    pressure_baffle_relaxation = 0.1
+
     debug_baffle = false
+
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
-    flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
+
+    # flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
+
     use_interpolated_density_in_bernoulli_jump = true
     use_corrected_pressure_gradient = true
   []
@@ -146,11 +158,35 @@ advected_interp_method = 'upwind'
   [z_buoyancy]
     type = LinearFVMomentumBuoyancy
     variable = superficial_z
-    density = 'rho'
+    rho = 'rho'
     reference_rho = ${rho_ref}
     gravity = '0 ${gravity_y} 0'
     momentum_component = 'y'
   []
+
+  [u_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_r
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = rho
+    u = superficial_r
+    v = superficial_z
+    momentum_component = 'x'
+    block = 2
+  []
+  [v_friction]
+    type = LinearFVMomentumPorousFriction
+    variable = superficial_z
+    Forchheimer_name = forch
+    porosity = porosity
+    rho = rho
+    u = superficial_r
+    v = superficial_z
+    momentum_component = 'y'
+    block = 2
+  []
+
   [p_diffusion]
     type = LinearFVAnisotropicDiffusionJump
     variable = pressure
@@ -204,6 +240,14 @@ advected_interp_method = 'upwind'
     v = superficial_z
     momentum_component = y
   []
+
+  [pressure-symmetry]
+    type = LinearFVPressureSymmetryBC
+    boundary = 'left'
+    variable = pressure
+    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  []
+
   [noslip_r]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'right top bottom'
@@ -216,11 +260,19 @@ advected_interp_method = 'upwind'
     variable = superficial_z
     functor = 0.0
   []
-  [pressure_extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = 'left right top bottom'
+  # [pressure_extrapolation]
+  #   type = LinearFVExtrapolatedPressureBC
+  #   boundary = 'right top bottom'
+  #   variable = pressure
+  #   use_two_term_expansion = true
+  # []
+
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'right top bottom'
     variable = pressure
-    use_two_term_expansion = true
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
 
   [right_T_fluid]
@@ -286,6 +338,11 @@ advected_interp_method = 'upwind'
     functor_names = 'T_fluid'
     expression = '${rho_ref} * (1.0 - ${beta} * (T_fluid - ${T_ref}))'
   []
+  [forch]
+    type = GenericVectorFunctorMaterial
+    prop_names = forch
+    prop_values = '${forch_coeff_radial} ${forch_coeff} ${forch_coeff}'
+  []
 []
 
 [AuxVariables]
@@ -336,10 +393,10 @@ advected_interp_method = 'upwind'
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
   energy_system = energy_system
-  momentum_equation_relaxation = 0.5
-  pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.9
-  num_iterations = 1000
+  momentum_equation_relaxation = 0.2
+  pressure_variable_relaxation = 0.1
+  energy_equation_relaxation = 0.3
+  num_iterations = 3000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-8
