@@ -376,6 +376,7 @@ Assembly::initShape()
           // QUAD9).  On-demand evaluation is only valid when the counts match
           // because nativeShape assumes all element nodes carry DOFs.
           auto & phi = fe->get_phi();
+          fe->get_dphi();
           fe->reinit(elem);
           const unsigned int native_ndofs = nDofs(FEFamily::LAGRANGE, topo);
           if (phi.size() == native_ndofs)

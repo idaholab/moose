@@ -326,6 +326,15 @@ VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) co
     }
     else
     {
+      if (datum.isNodal())
+      {
+        // For a nodal datum the QP offset is invalid; return the DOF value at 
+        // the node directly (works for all Lagrange-type variables where 
+        // solution DOFs live at mesh nodes).
+        auto node = datum.node();
+        unsigned int dof = sys.getNodeLocalDofIndex(node, 0, var);
+        return sys.getVectorDofValue(dof, tag);
+      }
       auto & elem = datum.elem();
       auto side = datum.side();
       auto offset = datum.qpOffset();
