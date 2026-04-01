@@ -10,6 +10,10 @@
 #include "KokkosSystem.h"
 #include "KokkosNodalBCBase.h"
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+#include "KokkosFEReinit.h"
+#endif
+
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
@@ -541,12 +545,43 @@ System::operator()(const ThreadID tid) const
   if (qp >= num_qps)
     return;
 
-  auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
-  auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
   auto jacobian = kokkosAssembly().getJacobian(info, qp);
 
   Real value = 0;
   Real3 grad = 0;
+
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+  if (kokkosAssembly().isOnDemandFEType(fe_type))
+  {
+    // LAGRANGE: evaluate shape functions on-device.
+    const auto topo = kokkosAssembly().getElemTopology(elem_type);
+    const auto ref = kokkosAssembly().getQPointRef(sid, elem_type, qp);
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+      grad += vector * (jacobian * nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]));
+    }
+  }
+  else
+  {
+    // Non-LAGRANGE (e.g. MONOMIAL): fall back to precomputed phi tables.
+    auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
+    auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
+
+    for (unsigned int i = 0; i < num_dofs; ++i)
+    {
+      auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+
+      value += vector * phi(i, qp);
+      grad += vector * (jacobian * grad_phi(i, qp));
+    }
+  }
+#else
+  auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
+  auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
 
   for (unsigned int i = 0; i < num_dofs; ++i)
   {
@@ -555,6 +590,7 @@ System::operator()(const ThreadID tid) const
     value += vector * phi(i, qp);
     grad += vector * (jacobian * grad_phi(i, qp));
   }
+#endif
 
   getVectorQpValue(info, qp_offset + qp, var, tag) = value;
   getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;

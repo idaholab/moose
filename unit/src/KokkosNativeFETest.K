@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Tests for Phases 5 & 6: native FE evaluator correctness.
+// Tests : native FE evaluator correctness.
 //
 // Two things are verified:
 //
-//   A. FEEvaluator vs libMesh FEBase  (Phase 5 cross-validation)
+//   A. FEEvaluator vs libMesh FEBase  (cross-validation)
 //      For every (element type, quadrature order) pair, evaluate
 //      FEEvaluator<LagrangeTag, ElemTag>::shape/grad_shape at the native
 //      quadrature points and compare point-for-point against
 //      libMesh FEBase::reinit() output.
 //
-//   B. nativeShape / nativeGradShape dispatch parity  (Phase 6)
+//   B. nativeShape / nativeGradShape dispatch parity
 //      The runtime-dispatch functions in KokkosFEReinit.h must produce
 //      bit-identical results to direct FEEvaluator calls because they
 //      evaluate the same expression at the same coordinates.

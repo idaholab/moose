@@ -261,6 +261,12 @@ Assembly::initQuadrature()
   _n_elem_face_properties.copyToDevice();
 }
 
+#ifdef MOOSE_KOKKOS_NATIVE_FE
+static Real3 mapFaceQpToParent(const libMesh::Elem & side_in_parent,
+                                FEElemTopology side_topo,
+                                Real3 face_qpt);
+#endif
+
 void
 Assembly::initShape()
 {
@@ -290,23 +296,29 @@ Assembly::initShape()
   const auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-  // Phase 6: shape functions are computed on-device; physics phi tables are not needed.
-  // Verify all FE types are LAGRANGE so the on-demand path can handle every variable.
-  for (auto & [fe_type, fe_type_id] : _fe_type_map)
-    if (fe_type.family != libMesh::LAGRANGE)
-      mooseError("MOOSE_KOKKOS_ONDEMAND_FE requires all variables to use the LAGRANGE FE family; "
-                 "variable with family ",
-                 libMesh::Utility::enum_to_string(fe_type.family),
-                 " was found");
+  // On-demand FE: LAGRANGE variables use device-side shape evaluation; non-LAGRANGE
+  // variables (e.g. MONOMIAL aux vars) fall back to the precomputed phi-table path.
 
-  // Build the element-type → topology map needed by on-device evaluators.
+  // Build element-type → topology map for on-device evaluators.
   _elem_topologies.create(num_elem_types);
   for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     _elem_topologies[elem_type_id] = toKokkosTopology(elem_type);
   _elem_topologies.copyToDevice();
 
+  // Build per-FE-type flag: true only for LAGRANGE (on-demand path).
+  _is_ondemand_fe_type.create(_fe_type_map.size());
+  for (auto & [fe_type, fe_type_id] : _fe_type_map)
+    _is_ondemand_fe_type[fe_type_id] = (fe_type.family == libMesh::LAGRANGE);
+  _is_ondemand_fe_type.copyToDevice();
+
   // Allocate the face-qp-in-parent-coords array; filled per-subdomain in the loop below.
   _q_points_face_parent.create(num_subdomains, num_elem_types);
+
+  // Allocate phi tables for non-LAGRANGE FE types that fall back to the table path.
+  _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
 #else
   _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
@@ -559,8 +571,13 @@ Assembly::initShape()
   }
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-  // Physics phi tables were never filled; copy the parent-reference face qp table instead.
+  // Copy parent-reference face qp table for on-demand FE.
   _q_points_face_parent.copyToDeviceNested();
+  // Copy phi tables for non-LAGRANGE FE types that fall back to the table path.
+  _phi.copyToDeviceNested();
+  _phi_face.copyToDeviceNested();
+  _grad_phi.copyToDeviceNested();
+  _grad_phi_face.copyToDeviceNested();
 #else
   _phi.copyToDeviceNested();
   _phi_face.copyToDeviceNested();

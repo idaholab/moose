@@ -152,8 +152,7 @@ public:
   /**
    * Destructor
    */
-  ~ArrayBase() { destroy(); }
-
+  ~ArrayBase() {destroy(); }
   /**
    * Free all data and reset
    */

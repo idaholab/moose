@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Tests for Phase 4: KokkosQuadrature device-native quadrature tables.
+// Tests : KokkosQuadrature device-native quadrature tables.
 //
 // Three properties are verified for every element type and every supported
 // algebraic order:

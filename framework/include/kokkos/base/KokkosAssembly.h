@@ -149,6 +149,15 @@ public:
     return _elem_topologies[elem_type_id];
   }
   /**
+   * Return whether a given FE type uses the on-demand shape evaluation path.
+   * True only for LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE; always false otherwise.
+   * @param fe_type_id The contiguous FE type ID
+   */
+  KOKKOS_FUNCTION bool isOnDemandFEType(unsigned int fe_type_id) const
+  {
+    return _is_ondemand_fe_type[fe_type_id];
+  }
+  /**
    * Get the reference-element coordinate of a volume quadrature point
    * @param subdomain The contiguous subdomain ID
    * @param elem_type_id The contiguous element type ID
@@ -415,6 +424,12 @@ private:
    * Indexed by contiguous element type ID.
    */
   Array<FEElemTopology> _elem_topologies;
+  /**
+   * Per-FE-type flag: true if this FE type uses the on-demand shape evaluation path
+   * (LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE). Non-Lagrange types fall back to phi tables.
+   * Indexed by contiguous FE type ID.
+   */
+  Array<bool> _is_ondemand_fe_type;
   /**
    * Face quadrature points mapped into the parent reference coordinate system
    * (for on-demand FE, Phase 6).  Indexed as _q_points_face_parent(subdomain, elem_type)[side][qp].
