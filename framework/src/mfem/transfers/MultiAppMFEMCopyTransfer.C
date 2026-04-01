@@ -24,7 +24,7 @@ MultiAppMFEMCopyTransfer::validParams()
 MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & params)
   : MFEMMultiAppTransfer(params)
 {
-  checkValidTransferProblemTypes<FEProblemBase, MFEMProblem>();
+  checkValidTransferProblemTypes<MFEMProblem, MFEMProblem>();
 }
 
 void
