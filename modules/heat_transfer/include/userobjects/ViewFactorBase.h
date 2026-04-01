@@ -45,6 +45,9 @@ protected:
   /// maximum deviation of any view factor row sum from 1
   Real maxDevRowSum() const;
 
+  /// normalizes view factors by Lagrange multiplier method
+  void normalizeUsingLagrangeMultiplier();
+
   /// helper for finding index of correction for i,j-th entry
   unsigned int indexHelper(unsigned int i, unsigned int j) const;
 

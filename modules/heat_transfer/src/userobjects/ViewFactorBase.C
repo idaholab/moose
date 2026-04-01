@@ -185,69 +185,7 @@ ViewFactorBase::checkAndNormalizeViewFactor()
     if (_print_view_factor_info)
       _console << "\nNormalizing view factors.\n" << std::endl;
 
-    // allocate space
-    DenseVector<Real> rhs(_n_sides);
-    DenseVector<Real> lmults(_n_sides);
-    DenseMatrix<Real> matrix(_n_sides, _n_sides);
-
-    // equations for the Lagrange multiplier
-    for (unsigned int i = 0; i < _n_sides; ++i)
-    {
-      // set the right hand side
-      rhs(i) = 1 - viewFactorRowSum(i);
-
-      // contribution from the delta_ii element
-      matrix(i, i) = -0.5;
-
-      // contributions from the upper diagonal
-      for (unsigned int j = i + 1; j < _n_sides; ++j)
-      {
-        Real ar = _areas[i] / _areas[j];
-        Real f = 2 * (1 + ar * ar);
-        matrix(i, i) += -1 / f;
-        matrix(i, j) += -1 / f * ar;
-        rhs(i) += ar * ar / (1 + ar * ar) * devReciprocity(i, j);
-      }
-
-      // contributions from the lower diagonal
-      for (unsigned int j = 0; j < i; ++j)
-      {
-        Real ar = _areas[j] / _areas[i];
-        Real f = 2 * (1 + ar * ar);
-        matrix(i, i) += -1 / f * ar * ar;
-        matrix(i, j) += -1 / f * ar;
-        rhs(i) -= ar * devReciprocity(j, i) * (1 - ar * ar / (1 + ar * ar));
-      }
-    }
-
-    // solve the linear system
-    matrix.lu_solve(rhs, lmults);
-
-    // perform corrections but store view factors to temporary array
-    // because we cannot modify _view_factors as it's used in this calc
-    std::vector<std::vector<Real>> vf_temp = _view_factors;
-    for (unsigned int i = 0; i < _n_sides; ++i)
-      for (unsigned int j = 0; j < _n_sides; ++j)
-      {
-        Real correction;
-        if (i == j)
-          correction = -0.5 * lmults(i);
-        else
-        {
-          Real ar = _areas[i] / _areas[j];
-          Real f = 2 * (1 + ar * ar);
-          correction = -(lmults(i) + lmults(j) * ar + 2 * ar * ar * devReciprocity(i, j)) / f;
-        }
-
-        // update the temporary view factor
-        vf_temp[i][j] += correction;
-
-        if (correction < min_correction)
-          min_correction = correction;
-        if (correction > max_correction)
-          max_correction = correction;
-      }
-    _view_factors = vf_temp;
+    normalizeUsingLagrangeMultiplier();
   }
 
   if (_print_view_factor_info)
@@ -303,6 +241,74 @@ ViewFactorBase::checkAndNormalizeViewFactor()
              << max_reciprocity_deviation_after_normalization << std::endl;
     _console << std::endl;
   }
+}
+
+void
+ViewFactorBase::normalizeUsingLagrangeMultiplier()
+{
+  // allocate space
+  DenseVector<Real> rhs(_n_sides);
+  DenseVector<Real> lmults(_n_sides);
+  DenseMatrix<Real> matrix(_n_sides, _n_sides);
+
+  // equations for the Lagrange multiplier
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    // set the right hand side
+    rhs(i) = 1 - viewFactorRowSum(i);
+
+    // contribution from the delta_ii element
+    matrix(i, i) = -0.5;
+
+    // contributions from the upper diagonal
+    for (unsigned int j = i + 1; j < _n_sides; ++j)
+    {
+      Real ar = _areas[i] / _areas[j];
+      Real f = 2 * (1 + ar * ar);
+      matrix(i, i) += -1 / f;
+      matrix(i, j) += -1 / f * ar;
+      rhs(i) += ar * ar / (1 + ar * ar) * devReciprocity(i, j);
+    }
+
+    // contributions from the lower diagonal
+    for (unsigned int j = 0; j < i; ++j)
+    {
+      Real ar = _areas[j] / _areas[i];
+      Real f = 2 * (1 + ar * ar);
+      matrix(i, i) += -1 / f * ar * ar;
+      matrix(i, j) += -1 / f * ar;
+      rhs(i) -= ar * devReciprocity(j, i) * (1 - ar * ar / (1 + ar * ar));
+    }
+  }
+
+  // solve the linear system
+  matrix.lu_solve(rhs, lmults);
+
+  // perform corrections but store view factors to temporary array
+  // because we cannot modify _view_factors as it's used in this calc
+  std::vector<std::vector<Real>> vf_temp = _view_factors;
+  for (unsigned int i = 0; i < _n_sides; ++i)
+    for (unsigned int j = 0; j < _n_sides; ++j)
+    {
+      Real correction;
+      if (i == j)
+        correction = -0.5 * lmults(i);
+      else
+      {
+        Real ar = _areas[i] / _areas[j];
+        Real f = 2 * (1 + ar * ar);
+        correction = -(lmults(i) + lmults(j) * ar + 2 * ar * ar * devReciprocity(i, j)) / f;
+      }
+
+      // update the temporary view factor
+      vf_temp[i][j] += correction;
+
+      if (correction < min_correction)
+        min_correction = correction;
+      if (correction > max_correction)
+        max_correction = correction;
+    }
+  _view_factors = vf_temp;
 }
 
 unsigned int
