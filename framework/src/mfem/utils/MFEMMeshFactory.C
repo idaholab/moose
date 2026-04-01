@@ -111,14 +111,13 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
   // this function. I guess a benefit to doing that is it makes it
   // clear what can be achieved with public methods and what still
   // requires access to protected members.
-  //
-  // If I do that then I should probably move the logic into separate
-  // functions, to keep this one from getting too big. Arguably I
-  // should do that already. (E.g., go back to separate functions for
-  // mfem::ParMesh and mfem::Mesh.)
 
   // 11.
   // Call the correct initializer.
+
+  // Construct maps between libMesh and MFEM node IDs. These aren't
+  // currently used for anything, but will be needed when we implement
+  // transfers between libMesh and MFEM meshes.
   std::map<int, int> _libmesh_global_node_id_for_mfem_local_node_id,
       _mfem_local_node_id_for_libmesh_global_node_id;
 
@@ -189,12 +188,6 @@ buildMFEMMesh(MooseMesh & mesh, bool fallback, bool first_order)
                                        _libmesh_global_node_id_for_mfem_local_node_id,
                                        _mfem_local_node_id_for_libmesh_global_node_id);
   }
-
-  // FIXME: What are _libmesh_global_node_id_for_mfem_local_node_id
-  // and _mfem_local_node_id_for_libmesh_global_node_ID actually used
-  // for? They don't ever seem to be accessed. Perhaps they will need
-  // to be returned and used once we do transfers between libmesh and
-  // mfem objects?
 
   _mfem_mesh.reset(); // Lower reference count of serial mesh since no longer needed.
   return _mfem_par_mesh;
