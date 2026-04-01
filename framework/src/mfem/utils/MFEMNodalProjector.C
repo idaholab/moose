@@ -136,7 +136,7 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
       gridfunction.SetSubVector(vdofs, vals);
     }
   }
-  gridfunction.SetFromTrueVector();
+  gridfunction.SetTrueVector();
 }
 
 #endif
