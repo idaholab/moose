@@ -17,32 +17,24 @@
 
 #ifdef MFEM_USE_PETSC
 
-namespace Moose::MFEM
-{
 /**
- * Nonlinear solver wrapper backed by mfem::PetscNonlinearSolver.
+ * MooseObject wrapper for mfem::PetscNonlinearSolver-backed nonlinear solves.
  */
-class PetscNonlinearSolver : public NonlinearSolverBase
+class MFEMPetscNonlinearSolver : public Moose::MFEM::NonlinearSolverBase
 {
 public:
-  PetscNonlinearSolver(MPI_Comm comm,
-                       unsigned int max_its,
-                       mfem::real_t abs_tol,
-                       mfem::real_t rel_tol,
-                       unsigned int print_level,
-                       const std::string & options_prefix,
-                       bool use_initial_guess);
+  static InputParameters validParams();
+
+  MFEMPetscNonlinearSolver(const InputParameters & parameters);
+
+  void constructSolver(const InputParameters & parameters) override;
 
   void SetOperator(const mfem::Operator & op) override;
-  void SetPreconditioner(mfem::Solver & solver) override;
+  void SetLinearSolver(mfem::Solver & solver) override;
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) override;
   bool requiresGradient() const override { return true; }
   bool usesExternalLinearSolver() const override { return false; }
-
-private:
-  mfem::PetscNonlinearSolver _solver;
 };
-} // namespace Moose::MFEM
 
 #endif
 

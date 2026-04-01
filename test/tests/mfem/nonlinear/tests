@@ -1,9 +1,26 @@
-[MFEMPetscNonLinearDiffusion]
-  type = CSVDiff
-  input = petsc_nldiffusion.i
-  csvdiff = 'gold/petsc_nldiffusion_out_point_sample_0001.csv'
-  requirement = 'The system shall have the ability to solve a nonlinear diffusion problem using the MFEM PETSc nonlinear solver.'
-  capabilities = 'mfem'
-  compute_devices = 'cpu'
-  recover = false
+[Tests]
+  issues = '#31772'
+  [nl_solvers]
+    requirement = 'The system shall have the ability to solve a nonlinear diffusion problem using the'
+    [MFEMPetscNonLinearDiffusion]
+      type = CSVDiff
+      input = petsc_nldiffusion.i
+      csvdiff = 'petsc_nldiffusion_out_point_sample_0001.csv'
+      detail = 'MFEM PETSc nonlinear solver, and the'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      design = MFEMPetscNonlinearSolver.md
+    []
+    [MFEMNewtonNonLinearDiffusion]
+      type = CSVDiff
+      input = newton_nldiffusion.i
+      csvdiff = 'newton_nldiffusion_out_point_sample_0001.csv'
+      detail = 'native MFEM Newton solver. Additionally the system shall support nesting both nonlinear and linear solvers under a common solvers syntax block.'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      design = MFEMNewtonNonlinearSolver.md
+    []
+  []
 []

@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMCGSolver);
 InputParameters
 MFEMCGSolver::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the conjugate gradient method.");
 
@@ -30,7 +30,7 @@ MFEMCGSolver::validParams()
   return params;
 }
 
-MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

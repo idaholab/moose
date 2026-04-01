@@ -55,11 +55,13 @@
   []
 []
 
-[Solver]
-  type = MFEMHyprePCG
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 100
+[Solvers]
+  [main]
+    type = MFEMHyprePCG
+    preconditioner = boomeramg
+    l_tol = 1e-8
+    l_max_its = 100
+  []
 []
 
 [Executioner]

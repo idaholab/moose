@@ -11,13 +11,14 @@
 
 #include "MFEMHypreGMRES.h"
 #include "MFEMProblem.h"
+#include "MFEMHyprePatch.h"
 
 registerMooseObject("MooseApp", MFEMHypreGMRES);
 
 InputParameters
 MFEMHypreGMRES::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the generalized minimal residual method.");
 
@@ -31,7 +32,8 @@ MFEMHypreGMRES::validParams()
   return params;
 }
 
-MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

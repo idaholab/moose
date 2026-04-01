@@ -18,26 +18,6 @@ MFEMProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
-  params.addParam<unsigned int>("nl_max_its", 1, "Max Nonlinear Iterations");
-#ifdef MFEM_USE_PETSC
-  MooseEnum nonlinear_solvers("newton petsc", "newton");
-#else
-  MooseEnum nonlinear_solvers("newton", "newton");
-#endif
-  params.addParam<MooseEnum>("nonlinear_solver",
-                             nonlinear_solvers,
-                             "Nonlinear solver used for MFEM solves.");
-  params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
-  params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<bool>("use_nonlinear_initial_guess",
-                        true,
-                        "Whether to preserve the current MFEM solution vector as the initial guess "
-                        "for the nonlinear solver.");
-  params.addParam<std::string>(
-      "petsc_options_prefix",
-      "mfem_",
-      "PETSc options prefix used when nonlinear_solver = petsc.");
-  params.addParam<unsigned int>("print_level", 1, "Print level");
   params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>("assembly_level", assembly_levels, "Matrix assembly level.");
@@ -49,11 +29,7 @@ MFEMProblemSolve::MFEMProblemSolve(
     std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators)
   : SolveObject(ex),
     _mfem_problem(dynamic_cast<MFEMProblem &>(_problem)),
-    _problem_operators(problem_operators),
-    _nl_max_its(getParam<unsigned int>("nl_max_its")),
-    _nl_abs_tol(getParam<mfem::real_t>("nl_abs_tol")),
-    _nl_rel_tol(getParam<mfem::real_t>("nl_rel_tol")),
-    _print_level(getParam<unsigned int>("print_level"))
+    _problem_operators(problem_operators)
 {
   if (const auto compute_device = _app.getComputeDevice())
     _app.setMFEMDevice(*compute_device, Moose::PassKey<MFEMProblemSolve>());
@@ -62,13 +38,6 @@ MFEMProblemSolve::MFEMProblemSolve(
                        : _app.isUltimateMaster() ? "cpu"
                                                  : "",
                        Moose::PassKey<MFEMProblemSolve>());
-  _mfem_problem.addMFEMNonlinearSolver(_nl_max_its,
-                                       getParam<MooseEnum>("nonlinear_solver"),
-                                       _nl_abs_tol,
-                                       _nl_rel_tol,
-                                       _print_level,
-                                       getParam<std::string>("petsc_options_prefix"),
-                                       getParam<bool>("use_nonlinear_initial_guess"));
 }
 
 bool
@@ -114,7 +83,8 @@ MFEMProblemSolve::solve()
       _mfem_problem.getProblemData().eqn_system->BuildEquationSystem();
 
       // Remove me: reconstruct the solver due to possible mfem/hypre bug
-      _mfem_problem.getProblemData().jacobian_solver->constructSolver();
+      if (_mfem_problem.getProblemData().jacobian_solver)
+        _mfem_problem.getProblemData().jacobian_solver->constructSolver();
 
       // Reset gridfunctions
       for (const auto & problem_operator : _problem_operators)

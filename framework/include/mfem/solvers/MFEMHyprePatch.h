@@ -11,6 +11,10 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
+#pragma once
+
+#include "mfem/linalg/hypre.hpp"
+
 namespace mfem
 {
 namespace patched

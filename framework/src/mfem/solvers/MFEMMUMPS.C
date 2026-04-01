@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMMUMPS);
 InputParameters
 MFEMMUMPS::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the MUMPS library.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
@@ -25,7 +25,7 @@ MFEMMUMPS::validParams()
   return params;
 }
 
-MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

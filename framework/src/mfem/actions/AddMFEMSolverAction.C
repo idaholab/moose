@@ -18,7 +18,7 @@ InputParameters
 AddMFEMSolverAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Set the Moose::MFEM solver and the solver options.");
+  params.addClassDescription("Add a Moose::MFEM linear or nonlinear solver object.");
   return params;
 }
 

@@ -13,33 +13,23 @@
 
 #include "MFEMNonlinearSolverBase.h"
 
-namespace Moose::MFEM
-{
 /**
- * Nonlinear solver wrapper backed by mfem::NewtonSolver.
+ * MooseObject wrapper for mfem::NewtonSolver-backed nonlinear solves.
  */
-class NewtonNonlinearSolver : public NonlinearSolverBase
+class MFEMNewtonNonlinearSolver : public Moose::MFEM::NonlinearSolverBase
 {
 public:
-  NewtonNonlinearSolver(MPI_Comm comm,
-                        unsigned int max_its,
-                        mfem::real_t abs_tol,
-                        mfem::real_t rel_tol,
-                        unsigned int print_level,
-                        bool use_initial_guess);
+  static InputParameters validParams();
+
+  MFEMNewtonNonlinearSolver(const InputParameters & parameters);
+
+  void constructSolver(const InputParameters & parameters) override;
 
   void SetOperator(const mfem::Operator & op) override;
-  void SetPreconditioner(mfem::Solver & solver) override;
+  void SetLinearSolver(mfem::Solver & solver) override;
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) override;
   bool requiresGradient() const override { return true; }
   bool usesExternalLinearSolver() const override { return true; }
-
-  /// Access the wrapped MFEM Newton solver.
-  mfem::NewtonSolver & getSolver() { return _solver; }
-
-private:
-  mfem::NewtonSolver _solver;
 };
-} // namespace Moose::MFEM
 
 #endif

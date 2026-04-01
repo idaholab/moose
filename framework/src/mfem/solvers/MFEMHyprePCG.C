@@ -11,13 +11,14 @@
 
 #include "MFEMHyprePCG.h"
 #include "MFEMProblem.h"
+#include "MFEMHyprePatch.h"
 
 registerMooseObject("MooseApp", MFEMHyprePCG);
 
 InputParameters
 MFEMHyprePCG::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the preconditioned conjugate gradient method.");
 
@@ -30,7 +31,7 @@ MFEMHyprePCG::validParams()
   return params;
 }
 
-MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

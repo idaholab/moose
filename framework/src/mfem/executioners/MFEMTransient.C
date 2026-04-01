@@ -47,8 +47,9 @@ MFEMTransient::init()
 {
   TransientBase::init();
 
-  _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
-      _mfem_problem_data.nonlinear_solver->requiresGradient());
+  if (_mfem_problem_data.nonlinear_solver)
+    _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
+        _mfem_problem_data.nonlinear_solver->requiresGradient());
 
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(

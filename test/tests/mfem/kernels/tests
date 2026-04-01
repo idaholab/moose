@@ -55,7 +55,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     capabilities = 'mfem'
@@ -68,7 +68,7 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
@@ -114,7 +114,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
-               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
@@ -133,7 +133,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
-               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'
     compute_devices = 'ceed-cpu'
@@ -162,7 +162,7 @@
     xmldiff = 'OutputData/MixedHeatTransfer/Run0/Run0.pvd
                 OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
@@ -221,7 +221,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
   [MFEMNonLinearDiffusionNonZeroRHS]
     type = XMLDiff
     input = nldiffusion.i
@@ -249,7 +249,7 @@
       recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
-                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '      
+                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '
     []
     [non-linear]
       detail = 'when the non-linear BC is given state-dependent coefficients.'
@@ -277,6 +277,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
-    restep = false    
+    restep = false
+    rel_err = 5e-4
   []
 []

@@ -11,40 +11,49 @@
 
 #include "MFEMNewtonNonlinearSolver.h"
 
-namespace Moose::MFEM
+registerMooseObject("MooseApp", MFEMNewtonNonlinearSolver);
+
+InputParameters
+MFEMNewtonNonlinearSolver::validParams()
 {
-NewtonNonlinearSolver::NewtonNonlinearSolver(MPI_Comm comm,
-                                             unsigned int max_its,
-                                             mfem::real_t abs_tol,
-                                             mfem::real_t rel_tol,
-                                             unsigned int print_level,
-                                             bool use_initial_guess)
-  : _solver(comm)
+  InputParameters params = Moose::MFEM::NonlinearSolverBase::validParams();
+  params.addClassDescription("MFEM native nonlinear solver using Newton's method.");
+  return params;
+}
+
+MFEMNewtonNonlinearSolver::MFEMNewtonNonlinearSolver(const InputParameters & parameters)
+  : Moose::MFEM::NonlinearSolverBase(parameters)
 {
-  _solver.iterative_mode = use_initial_guess;
-  _solver.SetRelTol(rel_tol);
-  _solver.SetAbsTol(abs_tol);
-  _solver.SetMaxIter(max_its);
-  _solver.SetPrintLevel(print_level);
+  constructSolver(parameters);
 }
 
 void
-NewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
+MFEMNewtonNonlinearSolver::constructSolver(const InputParameters & parameters)
 {
-  _solver.SetOperator(op);
+  auto solver = std::make_unique<mfem::NewtonSolver>(getMFEMProblem().getComm());
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
+  solver->SetRelTol(getParam<mfem::real_t>("rel_tol"));
+  solver->SetAbsTol(getParam<mfem::real_t>("abs_tol"));
+  solver->SetMaxIter(getParam<unsigned int>("max_its"));
+  solver->SetPrintLevel(getParam<unsigned int>("print_level"));
+  _solver = std::move(solver);
 }
 
 void
-NewtonNonlinearSolver::SetPreconditioner(mfem::Solver & solver)
+MFEMNewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
-  _solver.SetSolver(solver);
+  static_cast<mfem::NewtonSolver &>(getSolver()).SetOperator(op);
 }
 
 void
-NewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
-  _solver.Mult(rhs, x);
+  static_cast<mfem::NewtonSolver &>(getSolver()).SetSolver(solver);
 }
-} // namespace Moose::MFEM
 
+void
+MFEMNewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+{
+  getSolver().Mult(rhs, x);
+}
 #endif

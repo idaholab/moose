@@ -11,49 +11,87 @@
 
 #include "MFEMPetscNonlinearSolver.h"
 #include "MooseError.h"
+#include "PetscSupport.h"
 
 #ifdef MFEM_USE_PETSC
 
-namespace Moose::MFEM
+registerMooseObject("MooseApp", MFEMPetscNonlinearSolver);
+
+InputParameters
+MFEMPetscNonlinearSolver::validParams()
 {
-PetscNonlinearSolver::PetscNonlinearSolver(MPI_Comm comm,
-                                           unsigned int max_its,
-                                           mfem::real_t abs_tol,
-                                           mfem::real_t rel_tol,
-                                           unsigned int print_level,
-                                           const std::string & options_prefix,
-                                           bool use_initial_guess)
-  : _solver(comm,
-            !options_prefix.empty() && options_prefix.back() != '_'
-                ? options_prefix + "_"
-                : options_prefix)
+  InputParameters params = Moose::MFEM::NonlinearSolverBase::validParams();
+  params.addClassDescription("MFEM PETSc-backed nonlinear solver using SNES.");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string>>(
+      "petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\")");
+  params.addParam<std::string>(
+      "petsc_options_prefix", "", "PETSc options prefix used for this nonlinear solver.");
+  return params;
+}
+
+MFEMPetscNonlinearSolver::MFEMPetscNonlinearSolver(const InputParameters & parameters)
+  : Moose::MFEM::NonlinearSolverBase(parameters)
 {
-  _solver.iterative_mode = use_initial_guess;
-  _solver.SetRelTol(rel_tol);
-  _solver.SetAbsTol(abs_tol);
-  _solver.SetMaxIter(max_its);
-  _solver.SetPrintLevel(print_level);
-  _solver.SetJacobianType(mfem::Operator::PETSC_MATAIJ);
+  constructSolver(parameters);
 }
 
 void
-PetscNonlinearSolver::SetOperator(const mfem::Operator & op)
+MFEMPetscNonlinearSolver::constructSolver(const InputParameters & parameters)
 {
-  _solver.SetOperator(op);
+  const auto & prefix = getParam<std::string>("petsc_options_prefix");
+  const auto normalized_prefix = !prefix.empty() && prefix.back() != '_' ? prefix + "_" : prefix;
+
+  Moose::PetscSupport::PetscOptions petsc_options;
+  Moose::PetscSupport::addPetscFlagsToPetscOptions(
+      getParam<MultiMooseEnum>("petsc_options"), normalized_prefix, *this, petsc_options);
+  Moose::PetscSupport::addPetscPairsToPetscOptions(
+      getParam<MooseEnumItem, std::string>("petsc_options_iname", "petsc_options_value"),
+      getMFEMProblem().mesh().dimension(),
+      normalized_prefix,
+      *this,
+      petsc_options);
+
+  for (const auto & flag : petsc_options.flags)
+    Moose::PetscSupport::setSinglePetscOption(flag.rawName().c_str());
+  for (const auto & option : petsc_options.pairs)
+    Moose::PetscSupport::setSinglePetscOption(option.first, option.second);
+
+  auto solver =
+      std::make_unique<mfem::PetscNonlinearSolver>(getMFEMProblem().getComm(), normalized_prefix);
+  solver->iterative_mode = getParam<bool>("use_initial_guess");
+  solver->SetRelTol(getParam<mfem::real_t>("rel_tol"));
+  solver->SetAbsTol(getParam<mfem::real_t>("abs_tol"));
+  solver->SetMaxIter(getParam<unsigned int>("max_its"));
+  solver->SetPrintLevel(getParam<unsigned int>("print_level"));
+  solver->SetJacobianType(mfem::Operator::PETSC_MATAIJ);
+  _solver = std::move(solver);
 }
 
 void
-PetscNonlinearSolver::SetPreconditioner(mfem::Solver &)
+MFEMPetscNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
+  static_cast<mfem::PetscNonlinearSolver &>(getSolver()).SetOperator(op);
 }
 
 void
-PetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+MFEMPetscNonlinearSolver::SetLinearSolver(mfem::Solver &)
 {
-  _solver.Mult(rhs, x);
+  // mfem::PetscNonlinearSolver owns its internal SNES/KSP stack and does not expose
+  // an API for injecting an external mfem::Solver-backed linear solver.
 }
-} // namespace Moose::MFEM
 
+void
+MFEMPetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+{
+  getSolver().Mult(rhs, x);
+}
 #endif
 
 #endif

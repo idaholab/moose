@@ -9,14 +9,14 @@ Defines and builds an `mfem::HyprePCG` solver to use as an iterative solver to s
 Not compatible with use on partially assembled equation systems.
 
 A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
-[!param](/Solver/MFEMHyprePCG/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
+[!param](/Solvers/MFEMHyprePCG/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
 order systems.
 
-!syntax parameters /Solver/MFEMHyprePCG
+!syntax parameters /Solvers/MFEMHyprePCG
 
-!syntax inputs /Solver/MFEMHyprePCG
+!syntax inputs /Solvers/MFEMHyprePCG
 
-!syntax children /Solver/MFEMHyprePCG
+!syntax children /Solvers/MFEMHyprePCG
 
 !if-end!
 

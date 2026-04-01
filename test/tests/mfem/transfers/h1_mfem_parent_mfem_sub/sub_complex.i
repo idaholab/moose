@@ -51,8 +51,10 @@
   []
 []
 
-[Solver]
-  type = MFEMSuperLU
+[Solvers]
+  [main]
+    type = MFEMSuperLU
+  []
 []
 
 [Executioner]

@@ -17,14 +17,14 @@ registerMooseObject("MooseApp", MFEMSuperLU);
 InputParameters
 MFEMSuperLU::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
 
   return params;
 }
 
-MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

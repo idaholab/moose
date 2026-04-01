@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "MFEMSolverBase.h"
+
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
@@ -18,21 +20,24 @@
 namespace Moose::MFEM
 {
 /**
- * Base interface for nonlinear MFEM solve strategies.
- *
- * This intentionally models nonlinear solve semantics rather than exposing a generic MFEM
- * iterative solver type, since not all nonlinear methods require the same operator capabilities.
+ * MooseObject base for nonlinear MFEM solve strategies configured in the input file.
  */
-class NonlinearSolverBase
+class NonlinearSolverBase : public SolverBase
 {
 public:
   virtual ~NonlinearSolverBase() = default;
 
+  static InputParameters validParams();
+
+  NonlinearSolverBase(const InputParameters & parameters);
+
+  void constructSolver(const InputParameters & parameters) override = 0;
+
   /// Configure the nonlinear solver with the residual/Jacobian operator.
   virtual void SetOperator(const mfem::Operator & op) = 0;
 
-  /// Configure the linear solver or preconditioner used inside the nonlinear solve.
-  virtual void SetPreconditioner(mfem::Solver & solver) = 0;
+  /// Configure the linear solver used inside the nonlinear solve.
+  virtual void SetLinearSolver(mfem::Solver & solver) = 0;
 
   /// Solve the nonlinear system for the provided right-hand side and solution vector.
   virtual void Mult(const mfem::Vector & rhs, mfem::Vector & x) = 0;

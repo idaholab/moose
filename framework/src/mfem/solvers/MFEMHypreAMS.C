@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", MFEMHypreAMS);
 InputParameters
 MFEMHypreAMS::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
   params.addParam<UserObjectName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
@@ -30,7 +30,7 @@ MFEMHypreAMS::validParams()
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
+  : Moose::MFEM::LinearSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
   constructSolver();
 }

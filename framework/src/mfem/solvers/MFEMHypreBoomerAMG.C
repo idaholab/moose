@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 InputParameters
 MFEMHypreBoomerAMG::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
                              "of MFEM equation systems.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
@@ -33,7 +33,7 @@ MFEMHypreBoomerAMG::validParams()
 }
 
 MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
+  : Moose::MFEM::LinearSolverBase(parameters),
     _mfem_fespace(isParamSetByUser("fespace") ? getUserObject<MFEMFESpace>("fespace").getFESpace()
                                               : nullptr)
 {

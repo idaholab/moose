@@ -14,10 +14,12 @@
 #include "MooseObjectAction.h"
 
 /**
- * This class allows us to have a section of the input file like the following
- * specifying the solver to use and the solve options.
+ * This class allows us to configure MFEM solver objects in the input file.
  *
- * [Solver]
+ * [Solvers]
+ *   [nl]
+ *     type = MFEMNewtonNonlinearSolver
+ *   []
  * []
  */
 class AddMFEMSolverAction : public MooseObjectAction
