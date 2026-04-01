@@ -115,7 +115,7 @@ CSGCell::updateCellFill(const CSGLattice * lattice)
 }
 
 void
-CSGCell::updateCellRegionReferences(
+CSGCell::updateCellRegionSurfaces(
     std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs)
 {
   _region.updateSurfaceReferences(identical_surface_refs);

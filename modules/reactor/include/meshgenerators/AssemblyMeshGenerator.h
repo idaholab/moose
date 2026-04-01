@@ -42,7 +42,7 @@ protected:
    * Create CSG cell with lattice fill for region within first duct boundary
    * @param assembly_lattice reference to assembly lattice object
    * @param surfaces_by_axial_region list of surfaces corresponding to each axial plane in assembly
-   * @param csg_obj reference to CSGBase object
+   * @param csg_obj reference to CSGBase object, the output of this generator from generateCSG()
    */
   void setAssemblyLatticeOuter(
       const CSG::CSGLattice & assembly_lattice,
@@ -51,8 +51,8 @@ protected:
 
   /**
    * Create fill universe for ducted regions. For the innermost duct region, this will be the outer
-   * fill universe of the lattice. For all other ducted regions, this will be the universe that
-   * contains the region IDs of each axial layer.
+   * fill universe of the lattice. For all other ducted regions, this will be a universe that
+   * contains cells with a material fill defined by the region IDs of each axial layer.
    *
    * @param name_prefix prefix for all names of CSG universes and cells created
    * @param surfaces_by_axial_region list of surfaces corresponding to each axial plane in assembly

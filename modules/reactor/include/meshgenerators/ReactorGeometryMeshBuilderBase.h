@@ -282,14 +282,15 @@ protected:
                       const bool extrude);
 
   /**
-   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch
+   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch and centered
+   * around (0, 0, 0)
    * @param radial_index Radial index of hex / square region, for surface naming
    * @param halfpitch Halfpitch of square or hexagon
    * @param csg_obj Reference to CSGBase object for adding defined surfaces to
    * @return vector of surfaces that correspond to hexagonal or square region
    */
-  std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-  getOuterRadialSurfaces(unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> getOuterRadialSurfacesForUnitCell(
+      unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
 
   /**
    * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh

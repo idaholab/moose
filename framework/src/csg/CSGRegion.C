@@ -53,7 +53,7 @@ CSGRegion::halfspaceSymbol(const CSGSurface::Halfspace halfspace)
 bool
 CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const
 {
-  const auto tokens = getPostfixTokens();
+  const auto & tokens = getPostfixTokens();
   if (tokens.size() != other_tokens.size())
     return false;
 
@@ -75,6 +75,9 @@ CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_to
     else
     {
       // For region types and halfspaces, compare based on string representations
+      mooseAssert(std::holds_alternative<RegionType>(token) ||
+                      std::holds_alternative<CSGSurface::Halfspace>(token),
+                  "Unexpected token type");
       if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(other_token))
         return false;
       if (postfixTokenToString(token) != postfixTokenToString(other_token))

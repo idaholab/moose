@@ -718,7 +718,7 @@ CSGBase::updateIncomingCellRegions(CSGSurfaceList & surf_list, CSGCellList & cel
   {
     auto & cell_list_map = cell_list.getCellListMap();
     for (auto & c : cell_list_map)
-      c.second->updateCellRegionReferences(identical_surface_refs);
+      c.second->updateCellRegionSurfaces(identical_surface_refs);
   }
 }
 
