@@ -14,6 +14,10 @@
 #include "KokkosMatrix.h"
 #include "KokkosAssembly.h"
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+#include "KokkosFEReinit.h"
+#endif
+
 #include "SystemBase.h"
 
 #include "libmesh/communicator.h"
@@ -518,12 +522,27 @@ System::getVectorQpValueFace(
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
 
   Real value = 0;
 
-  for (unsigned int i = 0; i < n_dofs; ++i)
-    value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * phi(i, qp);
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+  if (kokkosAssembly().isOnDemandFEType(info.type, fe))
+  {
+    const auto topo = kokkosAssembly().getElemTopology(info.type);
+    const auto ref = kokkosAssembly().getQPointRefFace(info.subdomain, info.type, side, qp);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
+               nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+  }
+  else
+#endif
+  {
+    auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * phi(i, qp);
+  }
 
   return value;
 }
@@ -537,13 +556,28 @@ System::getVectorQpGradFace(ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
 
   Real3 grad = 0;
 
-  for (unsigned int i = 0; i < n_dofs; ++i)
-    grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-            (jacobian * grad_phi(i, qp));
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+  if (kokkosAssembly().isOnDemandFEType(info.type, fe))
+  {
+    const auto topo = kokkosAssembly().getElemTopology(info.type);
+    const auto ref = kokkosAssembly().getQPointRefFace(info.subdomain, info.type, side, qp);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
+              (jacobian * nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]));
+  }
+  else
+#endif
+  {
+    auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
+
+    for (unsigned int i = 0; i < n_dofs; ++i)
+      grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
+              (jacobian * grad_phi(i, qp));
+  }
 
   return grad;
 }
