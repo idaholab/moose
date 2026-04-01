@@ -55,8 +55,9 @@ protected:
   const std::vector<ExtraElementIDName> _extra_id;
   /// Number of extra IDs in use
   const unsigned int _n_extra_id;
-  /// Map of element ids to parsed vpp ids
+  /// Map of element IDs to parsed vpp ids
   std::unordered_map<dof_id_type, dof_id_type> _unique_vpp_id_map;
+  /// Map of contiguous element IDs to parsed vpp ids for device
   Array<Array<dof_id_type>> _unique_vpp_ids;
   /// Quadrature point values of coupled MOOSE variables
   VariableValue _var_values;
@@ -68,7 +69,7 @@ protected:
   Array<Array<Real>> _integrals;
   /// Vectors holding extra IDs
   std::vector<VectorPostprocessorValue *> _extra_ids;
-  /// Size of each vector
+  /// Size of the vector
   dof_id_type _vector_size;
   /// Sum cache size
   static constexpr unsigned int _cache_size = 10;
