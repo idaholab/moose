@@ -39,6 +39,9 @@ public:
 
   /// Return whether this nonlinear solver requires Jacobian/gradient information from the operator.
   virtual bool requiresGradient() const = 0;
+
+  /// Return whether this nonlinear solver uses the externally configured MFEM linear solver.
+  virtual bool usesExternalLinearSolver() const = 0;
 };
 } // namespace Moose::MFEM
 

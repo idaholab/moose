@@ -1,0 +1,9 @@
+[MFEMPetscNonLinearDiffusion]
+  type = CSVDiff
+  input = petsc_nldiffusion.i
+  csvdiff = 'gold/petsc_nldiffusion_out_point_sample_0001.csv'
+  requirement = 'The system shall have the ability to solve a nonlinear diffusion problem using the MFEM PETSc nonlinear solver.'
+  capabilities = 'mfem'
+  compute_devices = 'cpu'
+  recover = false
+[]

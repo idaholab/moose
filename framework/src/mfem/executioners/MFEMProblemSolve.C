@@ -19,13 +19,24 @@ MFEMProblemSolve::validParams()
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
   params.addParam<unsigned int>("nl_max_its", 1, "Max Nonlinear Iterations");
-  MooseEnum nonlinear_solvers("newton picard", "newton");
+#ifdef MFEM_USE_PETSC
+  MooseEnum nonlinear_solvers("newton petsc", "newton");
+#else
+  MooseEnum nonlinear_solvers("newton", "newton");
+#endif
   params.addParam<MooseEnum>("nonlinear_solver",
                              nonlinear_solvers,
                              "Nonlinear solver used for MFEM solves.");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
-  params.addParam<Real>("picard_damping", 1.0, "Picard fixed-point damping factor.");
+  params.addParam<bool>("use_nonlinear_initial_guess",
+                        true,
+                        "Whether to preserve the current MFEM solution vector as the initial guess "
+                        "for the nonlinear solver.");
+  params.addParam<std::string>(
+      "petsc_options_prefix",
+      "mfem_",
+      "PETSc options prefix used when nonlinear_solver = petsc.");
   params.addParam<unsigned int>("print_level", 1, "Print level");
   params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
@@ -56,7 +67,8 @@ MFEMProblemSolve::MFEMProblemSolve(
                                        _nl_abs_tol,
                                        _nl_rel_tol,
                                        _print_level,
-                                       getParam<Real>("picard_damping"));
+                                       getParam<std::string>("petsc_options_prefix"),
+                                       getParam<bool>("use_nonlinear_initial_guess"));
 }
 
 bool

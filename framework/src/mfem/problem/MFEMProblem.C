@@ -16,7 +16,7 @@
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "MFEMNewtonNonlinearSolver.h"
-#include "MFEMPicardNonlinearSolver.h"
+#include "MFEMPetscNonlinearSolver.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -111,14 +111,28 @@ MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
                                     mfem::real_t nl_abs_tol,
                                     mfem::real_t nl_rel_tol,
                                     unsigned int print_level,
-                                    mfem::real_t picard_damping)
+                                    const std::string & petsc_options_prefix,
+                                    bool use_initial_guess)
 {
   if (nonlinear_solver_type == "newton")
     getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::NewtonNonlinearSolver>(
-        getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level);
-  else if (nonlinear_solver_type == "picard")
-    getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::PicardNonlinearSolver>(
-        getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level, picard_damping);
+        getComm(), nl_max_its, nl_abs_tol, nl_rel_tol, print_level, use_initial_guess);
+  else if (nonlinear_solver_type == "petsc")
+  {
+#ifdef MFEM_USE_PETSC
+    getProblemData().nonlinear_solver = std::make_shared<Moose::MFEM::PetscNonlinearSolver>(
+        getComm(),
+        nl_max_its,
+        nl_abs_tol,
+        nl_rel_tol,
+        print_level,
+        petsc_options_prefix,
+        use_initial_guess);
+#else
+    mooseError("MFEM was built without PETSc support, so nonlinear_solver = petsc is "
+               "unavailable.");
+#endif
+  }
   else
     mooseError("Unsupported MFEM nonlinear solver type '", nonlinear_solver_type, "'.");
 }

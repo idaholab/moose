@@ -70,13 +70,15 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
-  if (_problem_data.nonlinear_solver->requiresGradient() && !_problem_data.jacobian_solver)
-    mooseError("The configured MFEM nonlinear solver requires a Jacobian solver, but none was "
+  if (_problem_data.nonlinear_solver->usesExternalLinearSolver() && !_problem_data.jacobian_solver)
+    mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
+               "none was "
                "provided.");
 
-  if (_problem_data.nonlinear_solver->requiresGradient())
+  if (_problem_data.nonlinear_solver->usesExternalLinearSolver())
   {
-    if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
+    if (_problem_data.jacobian_solver->isLOR() &&
+        GetEquationSystem()->GetTestVarNames().size() > 1)
       mooseError("LOR solve is only supported for single-variable systems");
     _problem_data.jacobian_solver->updateSolver(
         *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),

@@ -13,33 +13,37 @@
 
 #include "MFEMNonlinearSolverBase.h"
 
+#include <string>
+
+#ifdef MFEM_USE_PETSC
+
 namespace Moose::MFEM
 {
 /**
- * Nonlinear solver wrapper backed by mfem::NewtonSolver.
+ * Nonlinear solver wrapper backed by mfem::PetscNonlinearSolver.
  */
-class NewtonNonlinearSolver : public NonlinearSolverBase
+class PetscNonlinearSolver : public NonlinearSolverBase
 {
 public:
-  NewtonNonlinearSolver(MPI_Comm comm,
-                        unsigned int max_its,
-                        mfem::real_t abs_tol,
-                        mfem::real_t rel_tol,
-                        unsigned int print_level,
-                        bool use_initial_guess);
+  PetscNonlinearSolver(MPI_Comm comm,
+                       unsigned int max_its,
+                       mfem::real_t abs_tol,
+                       mfem::real_t rel_tol,
+                       unsigned int print_level,
+                       const std::string & options_prefix,
+                       bool use_initial_guess);
 
   void SetOperator(const mfem::Operator & op) override;
   void SetPreconditioner(mfem::Solver & solver) override;
   void Mult(const mfem::Vector & rhs, mfem::Vector & x) override;
   bool requiresGradient() const override { return true; }
-  bool usesExternalLinearSolver() const override { return true; }
-
-  /// Access the wrapped MFEM Newton solver.
-  mfem::NewtonSolver & getSolver() { return _solver; }
+  bool usesExternalLinearSolver() const override { return false; }
 
 private:
-  mfem::NewtonSolver _solver;
+  mfem::PetscNonlinearSolver _solver;
 };
 } // namespace Moose::MFEM
+
+#endif
 
 #endif

@@ -17,9 +17,11 @@ NewtonNonlinearSolver::NewtonNonlinearSolver(MPI_Comm comm,
                                              unsigned int max_its,
                                              mfem::real_t abs_tol,
                                              mfem::real_t rel_tol,
-                                             unsigned int print_level)
+                                             unsigned int print_level,
+                                             bool use_initial_guess)
   : _solver(comm)
 {
+  _solver.iterative_mode = use_initial_guess;
   _solver.SetRelTol(rel_tol);
   _solver.SetAbsTol(abs_tol);
   _solver.SetMaxIter(max_its);

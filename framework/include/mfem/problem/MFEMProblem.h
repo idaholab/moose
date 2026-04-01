@@ -225,7 +225,8 @@ public:
                               mfem::real_t nl_abs_tol,
                               mfem::real_t nl_rel_tol,
                               unsigned int print_level,
-                              mfem::real_t picard_damping);
+                              const std::string & petsc_options_prefix,
+                              bool use_initial_guess);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
