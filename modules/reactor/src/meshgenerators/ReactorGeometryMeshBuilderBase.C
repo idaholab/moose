@@ -233,22 +233,22 @@ ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
 }
 
 std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-ReactorGeometryMeshBuilderBase::getOuterRadialSurfaces(unsigned int radial_index,
-                                                       Real halfpitch,
-                                                       CSG::CSGBase & csg_obj)
+ReactorGeometryMeshBuilderBase::getOuterRadialSurfacesForUnitCell(unsigned int radial_index,
+                                                                  Real halfpitch,
+                                                                  CSG::CSGBase & csg_obj)
 {
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
   const auto mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
-  auto n_surfaces = mesh_geometry == "Square" ? 4 : 6;
+  const auto n_azim_surfaces = mesh_geometry == "Square" ? 4 : 6;
 
   // Convert halfpitch to radius (distance from vertex to center)
-  Real angle_offset_degrees = mesh_geometry == "Square" ? 45 : 30;
-  Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
+  const Real angle_offset_degrees = mesh_geometry == "Square" ? 45. : 30.;
+  const Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
   const auto radius = halfpitch / std::cos(angle_offset_radians);
 
-  Real angle_increment_radians = 360. / n_surfaces * (M_PI / 180.);
+  Real angle_increment_radians = 360. / n_azim_surfaces * (M_PI / 180.);
 
-  for (const auto i : make_range(n_surfaces))
+  for (const auto i : make_range(n_azim_surfaces))
   {
     const auto surf_name =
         name() + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);

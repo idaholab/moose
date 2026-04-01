@@ -726,7 +726,8 @@ AssemblyMeshGenerator::generateCSG()
       std::string lat_cell_name = name() + "_lattice_cell";
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
+        const auto & duct_surfaces =
+            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
         inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
       }
       csg_obj->createCell(lat_cell_name, assembly_lattice, inner_region, &assembly_univ);
@@ -737,7 +738,8 @@ AssemblyMeshGenerator::generateCSG()
       CSG::CSGRegion radial_region = ~inner_region;
       if (!is_last_radial_region)
       {
-        const auto & duct_surfaces = getOuterRadialSurfaces(i, duct_boundaries[i], *csg_obj);
+        const auto & duct_surfaces =
+            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
         inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
         radial_region &= inner_region;
       }
@@ -766,8 +768,8 @@ AssemblyMeshGenerator::generateCSG()
 
   // Create new cell to bound universe based on assembly outer boundaries, and add this cell
   // to the root universe
-  const auto & duct_surfaces =
-      getOuterRadialSurfaces(duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
+  const auto & duct_surfaces = getOuterRadialSurfacesForUnitCell(
+      duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
   auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
   if (extruded_assembly)
     assembly_region &= axial_extent;
@@ -827,6 +829,8 @@ AssemblyMeshGenerator::createDuctFillUniverse(
     const std::vector<subdomain_id_type> & region_ids,
     CSG::CSGBase & csg_obj)
 {
+  mooseAssert(surfaces_by_axial_region.size() - region_ids.size() == 1,
+              "Incorrect length of axial data vectors");
   auto & fill_univ = csg_obj.createUniverse(name_prefix + "_univ");
   for (const auto i : make_range(surfaces_by_axial_region.size() - 1))
   {

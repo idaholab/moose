@@ -57,8 +57,8 @@ CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf, const bool ignore_i
       else
         mooseError("Surface with name ",
                    surf_name,
-                   " cannot be discarded as it is not identical to surface that exists in CSGBase "
-                   "instance.");
+                   " has the same name as an existing surface in CSGBase instance but cannot be "
+                   "discarded as it is not an identical surface.");
     }
 
   // Otherwise, add the surface to the surface list. At this point, we don't expect the surface

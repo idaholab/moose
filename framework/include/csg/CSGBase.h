@@ -82,7 +82,8 @@ public:
   }
 
   /**
-   * @brief Remove a Surface object passed in by reference from the stored surface list
+   * @brief Remove a Surface object passed in by reference from the stored surface list. Any CSG
+   * components connected to surface will not be recursively removed.
    *
    * @param surface reference to surface to delete
    */
@@ -187,7 +188,8 @@ public:
                              const CSGUniverse * add_to_univ = nullptr);
 
   /**
-   * @brief Remove a Cell object passed in by reference from the stored cell list
+   * @brief Remove a Cell object passed in by reference from the stored cell list. Any CSG
+   * components connected to cell will not be recursively removed.
    *
    * @param cell reference to cell to delete
    */
@@ -319,7 +321,8 @@ public:
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
-   * @brief Remove a Universe object passed in by reference from the stored universe list
+   * @brief Remove a Universe object passed in by reference from the stored universe list. Any CSG
+   * components connected to universe will not be recursively removed.
    *
    * @param univ reference to universe to delete
    */
@@ -420,7 +423,8 @@ public:
   }
 
   /**
-   * @brief Remove a Lattice object passed in by reference from the stored lattice list
+   * @brief Remove a Lattice object passed in by reference from the stored lattice list. Any CSG
+   * components connected to lattice will not be recursively removed.
    *
    * @param lattice reference to lattice to delete
    */

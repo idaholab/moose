@@ -723,13 +723,15 @@ PinMeshGenerator::generateCSG()
   // Add surfaces corresponding to pin ducts
   for (const auto & duct_halfpitch : _duct_halfpitch)
   {
-    const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, duct_halfpitch, *csg_obj);
+    const auto & duct_surfaces =
+        getOuterRadialSurfacesForUnitCell(radial_index, duct_halfpitch, *csg_obj);
     surfaces_by_radial_region.push_back(duct_surfaces);
     ++radial_index;
   }
 
   // Add surfaces corresponding to outer pin boundary
-  const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, _pitch / 2., *csg_obj);
+  const auto & duct_surfaces =
+      getOuterRadialSurfacesForUnitCell(radial_index, _pitch / 2., *csg_obj);
   surfaces_by_radial_region.push_back(duct_surfaces);
 
   // Define all radial regions

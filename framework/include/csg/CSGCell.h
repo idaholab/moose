@@ -158,7 +158,7 @@ protected:
    * @param identical_surface_refs map of surface name to surface references that region should be
    *                               defined with
    */
-  void updateCellRegionReferences(
+  void updateCellRegionSurfaces(
       std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs);
 
   // set the name of the cell - intentionally not public because
