@@ -16,16 +16,8 @@
 class InputParameters;
 class EigenProblem;
 
-template <typename T>
-InputParameters validParams();
-
 /**
- * EigenProblemSolve is used to drive the eigenvalue calculations. At the end,
- * SLEPc will be involved.
- * We derive from Executioner instead of Steady because 1) we want to have a fine-grain
- * control such as recovering; 2) Conceptually, Steady is very different from Eigenvalue,
- * where the former handles a nonlinear system of equations while the later targets
- * at an eigenvalue problem.
+ * EigenProblemSolve is used to solve an eigenvalue problem interfacing SLEPc.
  */
 class EigenProblemSolve : public FEProblemSolve
 {

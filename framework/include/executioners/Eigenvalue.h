@@ -17,9 +17,6 @@
 class InputParameters;
 class EigenProblem;
 
-template <typename T>
-InputParameters validParams();
-
 /**
  * Eigenvalue executioner is used to drive the eigenvalue calculations. At the end,
  * SLEPc will be involved.
@@ -55,14 +52,14 @@ public:
   /**
    * Get the number of grid sequencing steps
    */
-  unsigned int numGridSteps() const { return _feproblem_solve.numGridSteps(); }
+  unsigned int numGridSteps() const { return _eigen_problem_solve.numGridSteps(); }
 #endif
 
 protected:
   EigenProblem & _eigen_problem;
 
   /// inner-most solve object to perform Newton solve with SLEPc
-  EigenProblemSolve _feproblem_solve;
+  EigenProblemSolve _eigen_problem_solve;
 
   Real _system_time;
   int & _time_step;

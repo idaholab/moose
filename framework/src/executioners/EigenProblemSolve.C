@@ -31,9 +31,6 @@ EigenProblemSolve::validParams()
 
   params += FEProblemSolve::validParams();
 
-  // matrix_free will be an invalid for griffin once the integration is done.
-  // In this PR, we can not change it. It will still be a valid option when users
-  // use non-Newton algorithms
   params.addParam<bool>(
       "matrix_free",
       false,
@@ -53,10 +50,13 @@ EigenProblemSolve::validParams()
                         "residuals on both linear and "
                         "nonlinear iterations");
 
-  params.addParam<bool>("precond_matrix_includes_eigen",
-                        false,
-                        "Whether or not to include eigen kernels in the preconditioning matrix. "
-                        "If true, the preconditioning matrix will include eigen kernels.");
+  params.addParam<bool>(
+      "precond_matrix_includes_eigen",
+      false,
+      "Whether or not to include eigen kernels in the preconditioning matrix. "
+      "If true, the preconditioning matrix could be singular with the converged eigenvalue if the "
+      "full matrix is assembled and the derivative of eigenvalue with respect to the solution "
+      "vector is not considered.");
 
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
@@ -69,7 +69,7 @@ EigenProblemSolve::validParams()
   params.addParam<bool>("auto_initialization",
                         true,
                         "If true, we will set an initial eigen vector in moose, otherwise EPS "
-                        "solver will initial eigen vector");
+                        "solver will initialize eigen vector");
 
   params.addParamNamesToGroup("matrix_free precond_matrix_free constant_matrices "
                               "precond_matrix_includes_eigen",
@@ -140,7 +140,7 @@ EigenProblemSolve::EigenProblemSolve(Executioner & ex)
   // SLEPc older than 3.13.0 can not take initial guess from moose
   // It may generate converge issues
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  mooseDeprecated(
+  mooseError(
       "Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad convergence");
 #endif
 
@@ -167,11 +167,6 @@ EigenProblemSolve::initialSetup()
   }
 
 #ifdef LIBMESH_HAVE_SLEPC
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Make sure the SLEPc options are setup for this app
-  Moose::SlepcSupport::slepcSetOptions(
-      _eigen_problem, _eigen_problem.solverParams(/*eigen_sys_num=*/0), _pars);
-#else
   // Options need to be setup once only
   if (!_eigen_problem.petscOptionsInserted())
   {
@@ -184,6 +179,5 @@ EigenProblemSolve::initialSetup()
       LibmeshPetscCall(PetscOptionsPop());
     _eigen_problem.petscOptionsInserted() = true;
   }
-#endif
 #endif
 }

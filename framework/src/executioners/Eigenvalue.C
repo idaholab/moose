@@ -34,13 +34,13 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Executioner(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh")),
-    _feproblem_solve(*this),
+    _eigen_problem_solve(*this),
     _system_time(getParam<Real>("time")),
     _time_step(_eigen_problem.timeStep()),
     _time(_eigen_problem.time()),
     _final_timer(registerTimedSection("final", 1))
 {
-  _fixed_point_solve->setInnerSolve(_feproblem_solve);
+  _fixed_point_solve->setInnerSolve(_eigen_problem_solve);
   _time = _system_time;
 }
 
@@ -65,7 +65,7 @@ Eigenvalue::init()
   _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _eigen_problem.initialSetup();
   _fixed_point_solve->initialSetup();
-  _feproblem_solve.initialSetup();
+  _eigen_problem_solve.initialSetup();
 }
 
 void
@@ -75,7 +75,6 @@ Eigenvalue::checkIntegrity()
   if (_eigen_problem.getNonlinearSystemBase(/*nl_sys=*/0).containsTimeKernel())
     mooseError("You have specified time kernels in your eigenvalue simulation");
 }
-
 #endif
 
 void
