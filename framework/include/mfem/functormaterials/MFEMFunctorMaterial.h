@@ -13,9 +13,12 @@
 
 #include "MFEMGeneralUserObject.h"
 #include "MFEMBlockRestrictable.h"
+#include "MFEMBoundaryRestrictable.h"
 #include "CoefficientManager.h"
 
-class MFEMFunctorMaterial : public MFEMGeneralUserObject, public MFEMBlockRestrictable
+class MFEMFunctorMaterial : public MFEMGeneralUserObject,
+                            public MFEMBlockRestrictable,
+                            public MFEMBoundaryRestrictable
 {
 public:
   static InputParameters validParams();
