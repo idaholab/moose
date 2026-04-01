@@ -102,5 +102,7 @@ private:
   using RealParentVectorType = RealVectorValueParent<is_ad>;
 };
 
-using ComputeCrackTipEnrichmentIncrementalStrain = ComputeCrackTipEnrichmentIncrementalStrainTempl<false>;
-using ADComputeCrackTipEnrichmentIncrementalStrain = ComputeCrackTipEnrichmentIncrementalStrainTempl<true>;
+using ComputeCrackTipEnrichmentIncrementalStrain =
+    ComputeCrackTipEnrichmentIncrementalStrainTempl<false>;
+using ADComputeCrackTipEnrichmentIncrementalStrain =
+    ComputeCrackTipEnrichmentIncrementalStrainTempl<true>;

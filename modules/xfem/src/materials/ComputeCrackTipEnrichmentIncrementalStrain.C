@@ -34,17 +34,19 @@ ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::ComputeCrackTipEnrichmentIncrementalStrainTempl(
-    const InputParameters & parameters)
+ComputeCrackTipEnrichmentIncrementalStrainTempl<
+    is_ad>::ComputeCrackTipEnrichmentIncrementalStrainTempl(const InputParameters & parameters)
   : ComputeIncrementalStrainBaseParent<is_ad>(parameters),
-    EnrichmentFunctionCalculation(&this->template getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    EnrichmentFunctionCalculation(
+        &this->template getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _enrich_disp(3),
     _grad_enrich_disp(3),
     _grad_enrich_disp_old(3),
     _enrich_variable(4),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-    _mechanical_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>("mechanical_strain")),
+    _mechanical_strain_old(
+        this->template getMaterialPropertyOld<RankTwoTensor>("mechanical_strain")),
     _total_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>("total_strain")),
     _B(4),
     _dBX(4),
@@ -54,7 +56,7 @@ ComputeCrackTipEnrichmentIncrementalStrainTempl<is_ad>::ComputeCrackTipEnrichmen
     _enrich_variable[i].resize(_ndisp);
 
   const std::vector<NonlinearVariableName> & nl_vnames =
-      this->template  getParam<std::vector<NonlinearVariableName>>("enrichment_displacements");
+      this->template getParam<std::vector<NonlinearVariableName>>("enrichment_displacements");
 
   if (_ndisp == 2 && nl_vnames.size() != 8)
     mooseError("The number of enrichment displacements should be total 8 for 2D.");
