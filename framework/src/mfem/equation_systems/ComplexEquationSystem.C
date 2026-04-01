@@ -44,6 +44,9 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
   for (auto & eliminated_var_name : _eliminated_var_names)
     _cmplx_eliminated_variables.Register(eliminated_var_name,
                                          cmplx_gridfunctions.GetShared(eliminated_var_name));
+
+  // Get a reference to the complex GridFunctions
+  _complex_gfuncs = &cmplx_gridfunctions;
 }
 
 void
@@ -273,14 +276,24 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
+// Equation system Mult
 void
-ComplexEquationSystem::RecoverComplexFEMSolution(
-    mfem::BlockVector & trueX,
-    Moose::MFEM::GridFunctions & /*gridfunctions*/,
-    Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions)
+ComplexEquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+{
+  _linear_operator->Mult(x, residual);
+  x.HostRead();
+  residual.HostRead();
+}
+
+void
+ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const
 {
   for (const auto i : index_range(_trial_var_names))
-    cmplx_gridfunctions.Get(_trial_var_names.at(i))->Distribute(&(trueX.GetBlock(i)));
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+  }
 }
 
 }

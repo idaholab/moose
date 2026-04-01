@@ -28,6 +28,9 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
+  ///Nonlinear Mult (Used by Newton-solver not necessarily nonlinear)
+  virtual void Mult(const mfem::Vector & x, mfem::Vector & y) const override;
+
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem() override;
 
@@ -67,9 +70,7 @@ public:
                                 mfem::BlockVector & trueRHS) override;
 
   /// Update variable from solution vector after solve
-  void RecoverComplexFEMSolution(mfem::BlockVector & trueX,
-                                 Moose::MFEM::GridFunctions & gridfunctions,
-                                 Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions);
+  virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const override;
 
   /// Template method for applying BilinearFormIntegrators on domains from kernels to a SesquilinearForm
   template <class FormType>
@@ -121,6 +122,9 @@ public:
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cmplx_var_ess_constraints;
+
+  // Pointer to complex GridFunctions to enable updates during nonlinear iterations
+  Moose::MFEM::ComplexGridFunctions * _complex_gfuncs;
 };
 
 template <class FormType>

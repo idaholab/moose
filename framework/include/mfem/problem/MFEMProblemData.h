@@ -33,7 +33,7 @@ public:
   mfem::BlockVector f;
 
   std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
-  std::shared_ptr<mfem::NewtonSolver> nonlinear_solver{nullptr};
+  std::shared_ptr<mfem::IterativeSolver> nonlinear_solver{nullptr};
 
   std::shared_ptr<MFEMSolverBase> jacobian_solver{nullptr};
 
