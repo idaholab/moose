@@ -1,0 +1,72 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "ADKernel.h"
+// #include "ALEKernel.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+#include "CrackFrontDefinition.h"
+#include "EnrichmentFunctionCalculation.h"
+
+// Forward Declarations
+
+/**
+ * CrackTipEnrichmentStressDivergenceTensors implements the residual and jacobian for enrichement
+ * displacement variables.
+ *
+ */
+class ADCrackTipEnrichmentStressDivergenceTensors : public ADKernel,
+                                                  public EnrichmentFunctionCalculation
+{
+public:
+  static InputParameters validParams();
+
+  ADCrackTipEnrichmentStressDivergenceTensors(const InputParameters & parameters);
+
+protected:
+  virtual ADReal computeQpResidual() override;
+  // virtual Real computeQpJacobian() override;
+  // virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  const std::string _base_name;
+
+  const ADMaterialProperty<RankTwoTensor> & _stress;
+  // const ADMaterialProperty<RankFourTensor> & _Jacobian_mult;
+
+  const ADMaterialProperty<RankTwoTensor> * _deformation_gradient;
+  const MaterialProperty<RankTwoTensor> * _deformation_gradient_old;
+  const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
+
+  /// displacement components
+  const unsigned int _component;
+  /// enrichment function components
+  const unsigned int _enrichment_component;
+
+  /// Coupled enrichment displacement variables
+  unsigned int _nenrich_disp;
+  std::vector<unsigned int> _enrich_disp_var;
+
+  /// Coupled displacement variables
+  unsigned int _ndisp;
+  std::vector<unsigned int> _disp_var;
+
+private:
+  /// enrichment function value
+  std::vector<Real> _B;
+  /// derivatives of enrichment function respect to global cooridnate
+  std::vector<RealVectorValue> _dBX;
+  /// derivatives of enrichment function respect to crack front cooridnate
+  std::vector<RealVectorValue> _dBx;
+  /// enrichment function at node I
+  std::vector<Real> _BI;
+  /// enrichment function at node J
+  std::vector<Real> _BJ;
+};
