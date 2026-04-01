@@ -10,7 +10,6 @@
 #pragma once
 
 #include "ADKernel.h"
-// #include "ALEKernel.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "CrackFrontDefinition.h"
@@ -24,7 +23,7 @@
  *
  */
 class ADCrackTipEnrichmentStressDivergenceTensors : public ADKernel,
-                                                  public EnrichmentFunctionCalculation
+                                                    public EnrichmentFunctionCalculation
 {
 public:
   static InputParameters validParams();
@@ -33,14 +32,10 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  // virtual Real computeQpJacobian() override;
-  // virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const std::string _base_name;
 
   const ADMaterialProperty<RankTwoTensor> & _stress;
-  // const ADMaterialProperty<RankFourTensor> & _Jacobian_mult;
-
   const ADMaterialProperty<RankTwoTensor> * _deformation_gradient;
   const MaterialProperty<RankTwoTensor> * _deformation_gradient_old;
   const ADMaterialProperty<RankTwoTensor> * _rotation_increment;
