@@ -15,6 +15,7 @@
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
+#include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
@@ -56,6 +57,7 @@
 
 // Standard includes
 #include <ostream>
+#include <cctype>
 #include <fstream>
 #include <optional>
 #include <string>
@@ -101,23 +103,85 @@ namespace
 {
 
 void
+applySystemVectorTypeOptions(FEProblemBase & problem, libMesh::System & lm_sys)
+{
+  for (auto & [_, vec] : as_range(lm_sys.vectors_begin(), lm_sys.vectors_end()))
+  {
+    auto * const petsc_vec = cast_ptr<PetscVector<Number> *>(vec.get());
+    LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
+  }
+
+  // The solution vectors aren't included in the system vectors storage.
+  auto * petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.solution.get());
+  LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
+  petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.current_local_solution.get());
+  LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
+}
+
+void
 applyVectorTypeOptions(FEProblemBase & problem)
 {
   for (const auto sys_index : make_range(problem.numSolverSystems()))
-  {
-    auto & lm_sys = problem.getSolverSystem(sys_index).system();
-    for (auto & [_, vec] : as_range(lm_sys.vectors_begin(), lm_sys.vectors_end()))
-    {
-      auto * const petsc_vec = cast_ptr<PetscVector<Number> *>(vec.get());
-      LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
-    }
+    applySystemVectorTypeOptions(problem, problem.getSolverSystem(sys_index).system());
 
-    // The solution vectors aren't included in the system vectors storage.
-    auto * petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.solution.get());
-    LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
-    petsc_vec = cast_ptr<PetscVector<Number> *>(lm_sys.current_local_solution.get());
-    LibmeshPetscCallA(problem.comm().get(), VecSetFromOptions(petsc_vec->vec()));
-  }
+  applySystemVectorTypeOptions(problem, problem.getAuxiliarySystem().system());
+}
+
+bool
+petscOptionsHasName(::PetscOptions options,
+                    const std::string & name,
+                    const std::string & prefix = "")
+{
+  PetscBool found = PETSC_FALSE;
+  const char * const prefix_ptr = prefix.empty() ? nullptr : prefix.c_str();
+  LibmeshPetscCallA(PETSC_COMM_WORLD,
+                    PetscOptionsHasName(options, prefix_ptr, name.c_str(), &found));
+  return found;
+}
+
+bool
+hasMatrixFreeSolveType(const FEProblemBase & problem)
+{
+  for (const auto sys_index : make_range(problem.numSolverSystems()))
+    if (const auto solve_type = problem.solverParams(sys_index)._type;
+        solve_type == Moose::ST_JFNK || solve_type == Moose::ST_PJFNK)
+      return true;
+
+  return false;
+}
+
+bool
+mightBeMatTypeOption(const std::string & name)
+{
+  static constexpr std::string_view mat_type_suffix = "mat_type";
+  return name.size() >= mat_type_suffix.size() &&
+         std::equal(mat_type_suffix.rbegin(),
+                    mat_type_suffix.rend(),
+                    name.rbegin(),
+                    [](const char left, const char right)
+                    // tolower requires representability by unsigned char
+                    {
+                      return static_cast<int>(left) ==
+                             std::tolower(libMesh::cast_int<unsigned char>(right));
+                    });
+}
+
+void
+errorOnUnprefixedMatTypeOption(::PetscOptions options, FEProblemBase & problem)
+{
+  if (!petscOptionsHasName(options, "-mat_type"))
+    return;
+
+  std::string error_string =
+      "Setting option '-mat_type' is not supported without a solver-system prefix. Use an option "
+      "such as '-" +
+      problem.getSolverSystem(0).name() + "_mat_type' for assembled libMesh matrices.";
+  if (hasMatrixFreeSolveType(problem))
+    error_string +=
+        " Attempting to change the matrix "
+        "type for the MFFD matrix type used to represent the Jacobian for (P)JFNK solve "
+        "types is not supported.";
+  mooseError(error_string);
 }
 
 // Allow iterating over all systems or allowing caller to specify a specific system for which to
@@ -266,22 +330,19 @@ addPetscOptionsFromCommandline(FEProblemBase * const problem)
     return;
   }
 
+  errorOnUnprefixedMatTypeOption(command_line_options, *problem);
+
   // Some vector/matrix-type options may have been consumed before the PETSc database rebuild.
   // Replay only the command-line-controlled applications so input-file options handled through
   // setSinglePetscOption() do not pay the cost twice.
   PetscBool have_vec_type = PETSC_FALSE;
-  PetscBool have_mat_type = PETSC_FALSE;
-  LibmeshPetscCallA(
-      PETSC_COMM_WORLD,
-      PetscOptionsHasName(command_line_options, nullptr, "-vec_type", &have_vec_type));
+  bool have_mat_type = false;
+  have_vec_type = petscOptionsHasName(command_line_options, "-vec_type");
 
   for (const auto sys_index : make_range(problem->numSolverSystems()))
   {
-    const auto mat_type_name =
-        "-" + MooseUtils::toLower(problem->getSolverSystem(sys_index).name()) + "_mat_type";
-    LibmeshPetscCallA(
-        PETSC_COMM_WORLD,
-        PetscOptionsHasName(command_line_options, nullptr, mat_type_name.c_str(), &have_mat_type));
+    have_mat_type = petscOptionsHasName(
+        command_line_options, "-mat_type", problem->getSolverSystem(sys_index).name() + "_");
     if (have_mat_type)
       break;
   }
@@ -1088,51 +1149,54 @@ setSinglePetscOption(const std::string & name,
                     PetscOptionsSetValue(LIBMESH_PETSC_NULLPTR,
                                          name.c_str(),
                                          value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str()));
-  const auto lower_case_name = MooseUtils::toLower(name);
-  auto check_problem = [problem, &lower_case_name]()
+  // Create a single option data base so that we can use PETSC's internal option checking which
+  // is case insensitive. This is better than re-implementing case-insensitive checks here in this
+  // TU
+  ::PetscOptions single_option;
+  LibmeshPetscCallA(comm.get(), PetscOptionsCreate(&single_option));
+  LibmeshPetscCallA(comm.get(),
+                    PetscOptionsSetValue(single_option,
+                                         name.c_str(),
+                                         value == "" ? LIBMESH_PETSC_NULLPTR : value.c_str()));
+  auto check_problem = [problem, &name]()
   {
     if (!problem)
       mooseError(
           "Setting the option '",
-          lower_case_name,
+          name,
           "' requires passing a 'problem' parameter. Contact a developer of your application "
           "to have them update their code. If in doubt, reach out to the MOOSE team on Github "
           "discussions");
   };
 
   // Select vector type from user-passed PETSc options
-  if (lower_case_name.find("-vec_type") != std::string::npos)
+  if (petscOptionsHasName(single_option, "-vec_type"))
   {
     check_problem();
     applyVectorTypeOptions(*problem);
   }
-  // Select matrix type from user-passed PETSc options
-  else if (lower_case_name.find("mat_type") != std::string::npos)
+  // First do a cheap suffix check so unrelated PETSc options do not pay for looping over every
+  // solver system. Once we know the name looks like a matrix-type option, rely on PETSc's
+  // option lookup for the actual case-insensitive and prefix-aware matching.
+  else if (problem && mightBeMatTypeOption(name))
   {
-    check_problem();
+    errorOnUnprefixedMatTypeOption(single_option, *problem);
 
-    bool found_matching_prefix = false;
     for (const auto i : index_range(problem->_solver_systems))
     {
       const auto & solver_sys_name = problem->_solver_sys_names[i];
-      if (lower_case_name.find("-" + MooseUtils::toLower(solver_sys_name) + "_mat_type") ==
-          std::string::npos)
+      if (!petscOptionsHasName(single_option, "-mat_type", solver_sys_name + "_"))
         continue;
 
       if (problem->solverParams(i)._type == Moose::ST_JFNK)
-        mooseError(
-            "Setting option '", lower_case_name, "' is incompatible with a JFNK 'solve_type'");
+        mooseError("Setting option '", name, "' is incompatible with a JFNK 'solve_type'");
 
       applyMatrixTypeOptions(*problem, i);
-      found_matching_prefix = true;
       break;
     }
-
-    if (!found_matching_prefix)
-      mooseError("We did not find a matching solver system name for the petsc option '",
-                 lower_case_name,
-                 "'");
   }
+
+  LibmeshPetscCallA(comm.get(), PetscOptionsDestroy(&single_option));
 }
 
 void
