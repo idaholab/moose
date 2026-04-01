@@ -11,6 +11,7 @@
       compute_devices = 'cpu'
       recover = false
       design = MFEMPetscNonlinearSolver.md
+      skip = 'mfem/mfem#5291'
     []
     [MFEMNewtonNonLinearDiffusion]
       type = CSVDiff
