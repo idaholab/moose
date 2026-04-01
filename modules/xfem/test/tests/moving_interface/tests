@@ -121,7 +121,6 @@
     exodiff = 'moving_diffusion_out.e moving_diffusion_out.e-s002'
     map = false
     capabilities = 'unique_id'
-    installation_type = in_tree
     requirement = 'The XFEM module shall provide an ability to solve bi-material diffusion problems '
                   'where a moving material interface is defined by an XFEM surface, which is defined '
                   'by a prescribed level set field.'
@@ -209,7 +208,6 @@
     map = false
     capabilities = 'unique_id'
     abs_zero = 1e-5
-    installation_type = in_tree
     requirement = 'The XFEM module shall provide an ability to cut one block with a moving cylinder surface mesh in 3D.'
     design = 'InterfaceMeshCut3DUserObject.md'
     issues = '#17797'

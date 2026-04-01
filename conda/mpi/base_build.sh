@@ -64,11 +64,11 @@ function baked_flags()
 
     # Remove orphaned -Wl, flags
     # Note we cannot use variable replacement here as it will not work with spaces in zsh
-    b_CXXFLAGS=$(echo "\$b_CXXFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_CPPFLAGS=$(echo "\$b_CPPFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_CFLAGS=$(echo "\$b_CFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_FFLAGS=$(echo "\$b_FFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_LDFLAGS=$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')
+    b_CXXFLAGS="\$(echo "\$b_CXXFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_CPPFLAGS="\$(echo "\$b_CPPFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_CFLAGS="\$(echo "\$b_CFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_FFLAGS="\$(echo "\$b_FFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_LDFLAGS="\$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')"
 
     # append necessary std c library
     export CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
@@ -105,9 +105,11 @@ EOF
 if [[ "${mpi}" == 'mpich' ]]; then
     cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_zzz_${PKG_NAME}.sh"
 export FI_PROVIDER=tcp
+export MPICH_CH4_NETMOD=ofi
 EOF
     cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_zzz_${PKG_NAME}.sh"
 unset FI_PROVIDER
+unset MPICH_CH4_NETMOD
 EOF
 elif [[ "${mpi}" == 'openmpi' ]]; then
     cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_zzz_${PKG_NAME}.sh"

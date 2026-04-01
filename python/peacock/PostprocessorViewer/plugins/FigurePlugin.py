@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import matplotlib.pyplot as plt
@@ -13,6 +13,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5 import QtCore, QtWidgets
 
 from .PostprocessorPlugin import PostprocessorPlugin
+
 
 class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
     """
@@ -29,10 +30,10 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         super(FigurePlugin, self).__init__()
 
         # Create the figure
-        self._figure = plt.Figure(facecolor='white')
+        self._figure = plt.Figure(facecolor="white")
         self._axes = self._figure.add_subplot(111)
         self._axes2 = self._axes.twinx()
-        self.setMainLayoutName('RightLayout') # used by plugin system to place widget
+        self.setMainLayoutName("RightLayout")  # used by plugin system to place widget
 
         # The 'main' layout
         self.MainLayout = QtWidgets.QVBoxLayout()
@@ -40,13 +41,19 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         self.MainLayout.setSpacing(5)
         self.MainLayout.setAlignment(QtCore.Qt.AlignRight)
         self.setLayout(self.MainLayout)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
 
         self.FigureCanvas = FigureCanvasQTAgg(self._figure)
-        self.FigureCanvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.FigureCanvas.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+        )
 
         self.MainLayout.addWidget(self.FigureCanvas)
-        self.setFixedWidth(QtWidgets.QWIDGETSIZE_MAX) # reset the fixed width so it can be resized
+        self.setFixedWidth(
+            QtWidgets.QWIDGETSIZE_MAX
+        )  # reset the fixed width so it can be resized
 
         self.setup()
 
@@ -81,7 +88,9 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
             ax.get_yaxis().set_visible(len(ax.lines) > 0)
 
         # Set x-axis visibility
-        if (not self._axes.get_yaxis().get_visible()) and (not self._axes2.get_yaxis().get_visible()):
+        if (not self._axes.get_yaxis().get_visible()) and (
+            not self._axes2.get_yaxis().get_visible()
+        ):
             self._axes.get_xaxis().set_visible(False)
         else:
             self._axes.get_xaxis().set_visible(True)
@@ -100,15 +109,15 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         Return the matplotlib script for reproducing the figure and axes.
         """
 
-        imports = ['import matplotlib.pyplot as plt']
+        imports = ["import matplotlib.pyplot as plt"]
 
         output = []
         output += ["# Create Figure and Axes"]
         output += ["figure = plt.figure(facecolor='white')"]
-        output += ['axes0 = figure.add_subplot(111)']
+        output += ["axes0 = figure.add_subplot(111)"]
 
         if self._axes2.has_data():
-            output += ['axes1 = axes0.twinx()']
+            output += ["axes1 = axes0.twinx()"]
 
         return output, imports
 
@@ -119,10 +128,11 @@ class FigurePlugin(QtWidgets.QWidget, PostprocessorPlugin):
         Args:
             filenmae[str]: A pdf/png/py file to export.
         """
-        if filename.endswith('.py'):
+        if filename.endswith(".py"):
             self.parent().write(filename)
         else:
             self._figure.savefig(filename)
+
 
 def main():
     """
@@ -132,18 +142,22 @@ def main():
     import mooseutils
 
     import matplotlib
-    matplotlib.rcParams["figure.figsize"] = (3.75, 3.75)
-    matplotlib.rcParams["figure.dpi"] = (100)
 
-    widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin])
+    matplotlib.rcParams["figure.figsize"] = (3.75, 3.75)
+    matplotlib.rcParams["figure.dpi"] = 100
+
+    widget = PostprocessorViewer(
+        mooseutils.VectorPostprocessorReader, plugins=[FigurePlugin]
+    )
     widget.onSetFilenames([])
     widget.currentWidget().FigurePlugin.setFixedSize(QtCore.QSize(375, 375))
     widget.show()
     return widget
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     widget = main()
-    widget.currentWidget().Figure.axes(0).plot([1,2], [3,4], '--b')
+    widget.currentWidget().Figure.axes(0).plot([1, 2], [3, 4], "--b")
     widget.currentWidget().Figure.onAxesModified()
     sys.exit(app.exec_())

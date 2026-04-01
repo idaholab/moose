@@ -13,6 +13,7 @@
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMComplexVariable.h"
+#include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "libmesh/string_to_enum.h"
@@ -67,6 +68,30 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
+}
+
+void
+MFEMProblem::addIndicator(const std::string & user_object_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+  auto object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
+  auto estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
+
+  // construct the estimator itself
+  estimator->createEstimator();
+}
+
+void
+MFEMProblem::addMarker(const std::string & user_object_name,
+                       const std::string & name,
+                       InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+  auto object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
+
+  getProblemData().refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 }
 
 void
@@ -437,7 +462,6 @@ const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction
                                                "MultiControlDrumFunction",
                                                "Grad2ParsedFunction",
                                                "GradParsedFunction",
-                                               "RichardsExcavGeom",
                                                "ScaledAbsDifferenceDRLRewardFunction",
                                                "CircularAreaHydraulicDiameterFunction",
                                                "CosineHumpFunction",
@@ -579,6 +603,31 @@ MFEMProblem::getMeshDisplacementGridFunction()
   {
     return std::nullopt;
   }
+}
+
+void
+MFEMProblem::rebalanceMesh(mfem::ParMesh & pmesh)
+{
+  if (pmesh.Nonconforming())
+  {
+    pmesh.Rebalance();
+    updateFESpaces();
+    updateGridFunctions();
+  }
+}
+
+void
+MFEMProblem::updateFESpaces()
+{
+  for (const auto & fe_space_pair : _problem_data.fespaces)
+    fe_space_pair.second->Update();
+}
+
+void
+MFEMProblem::updateGridFunctions()
+{
+  for (const auto & gridfunction_pair : _problem_data.gridfunctions)
+    gridfunction_pair.second->Update();
 }
 
 std::vector<VariableName>

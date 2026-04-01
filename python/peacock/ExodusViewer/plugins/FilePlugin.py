@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import sys
@@ -14,6 +14,7 @@ from PyQt5 import QtCore, QtWidgets
 import peacock
 from .ExodusPlugin import ExodusPlugin
 from peacock.ExodusViewer.plugins.ExodusFilterProxyModel import ExodusFilterProxyModel
+
 
 class ExodusComboBox(QtWidgets.QComboBox):
     """
@@ -42,8 +43,8 @@ class ExodusComboBox(QtWidgets.QComboBox):
         """
         return [self.itemData(i) for i in range(self.count())].index(full_file)
 
-class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
+class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     The plugin provides an interface for selecting the file, variable, and component to render.
 
@@ -135,9 +136,13 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Check that the variable names have not changed, update if they have.
         """
-        variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
+        variables = reader.getVariableInformation(
+            var_types=[reader.NODAL, reader.ELEMENTAL]
+        )
         names = [var.name for var in variables.values()]
-        current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
+        current = [
+            self.VariableList.itemText(i) for i in range(self.VariableList.count())
+        ]
         if names != current:
             self._initVariableList(reader)
 
@@ -145,7 +150,9 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Initialize the variable list from the supplied reader.
         """
-        variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
+        variables = reader.getVariableInformation(
+            var_types=[reader.NODAL, reader.ELEMENTAL]
+        )
         self.VariableList.blockSignals(True)
         self.VariableList.clear()
         for vinfo in variables.values():
@@ -237,10 +244,10 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Setup for component selection.
         """
-        qobject.addItem('Magnitude', -1)
-        qobject.addItem('x', 0)
-        qobject.addItem('y', 1)
-        qobject.addItem('z', 2)
+        qobject.addItem("Magnitude", -1)
+        qobject.addItem("x", 0)
+        qobject.addItem("y", 1)
+        qobject.addItem("z", 2)
         qobject.setEnabled(False)
         self.ComponentList.currentIndexChanged.connect(self._callbackComponentList)
 
@@ -262,7 +269,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setEnabled(True)
         qobject.clicked.connect(self._callbackOpenFiles)
-        qobject.setIcon(peacock.utils.WidgetUtils.createIcon('open_file.ico'))
+        qobject.setIcon(peacock.utils.WidgetUtils.createIcon("open_file.ico"))
         qobject.setIconSize(QtCore.QSize(16, 16))
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Select Exodus file(s) to open.")
@@ -273,8 +280,8 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Callback for opening an additional file.
         """
         fd = QtWidgets.QFileDialog()
-        fd.setWindowTitle('Select ExodusII File(s)')
-        fd.setNameFilter('ExodusII Files (*.e)')
+        fd.setWindowTitle("Select ExodusII File(s)")
+        fd.setNameFilter("ExodusII Files (*.e)")
         fd.setDirectory(os.getcwd())
 
         fd.setFileMode(QtWidgets.QFileDialog.ExistingFiles)
@@ -308,22 +315,30 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if index != self.FileList.currentIndex():
             self.FileList.setCurrentIndex(index)
 
+
 def main(size=None):
     """
     Run the FilePlugin all by its lonesome.
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin])
+
+    widget = ExodusPluginManager(
+        plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin]
+    )
     widget.show()
 
     return widget, widget.VTKWindowPlugin
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
-    #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-    widget, _ = main(size=[600,600])
+    filenames = Testing.get_chigger_input_list(
+        "mug_blocks_out.e", "vector_out.e", "displace.e", "foo.e"
+    )
+    # filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
+    widget, _ = main(size=[600, 600])
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

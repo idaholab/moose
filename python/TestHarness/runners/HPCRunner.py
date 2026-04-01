@@ -1,34 +1,48 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, time, os, subprocess, yaml
+import os
+import re
+import subprocess
+import time
+from typing import TYPE_CHECKING, Optional
+
+import yaml
+from TestHarness.mpi_config import MPIType
 from TestHarness.runners.Runner import Runner
-from TestHarness import util
+
+if TYPE_CHECKING:
+    from TestHarness.schedulers.RunHPC import HPCJob, RunHPC
+    from TestHarness.schedulers.Scheduler import SchedulerOptions
+
 
 class HPCRunner(Runner):
     """
     Base Runner to be used with HPC schedulers (PBS, slurm)
     """
-    def __init__(self, job, options, run_hpc):
-        super().__init__(job, options)
 
-        # The RunHPC object
+    def __init__(
+        self, job, options, scheduler_options: "SchedulerOptions", run_hpc: "RunHPC"
+    ):
+        super().__init__(job, options, scheduler_options)
+
         self.run_hpc = run_hpc
+        """The RunHPC object."""
 
-        # The HPC job, set during spawn()
-        self.hpc_job = None
+        self.hpc_job: Optional["HPCJob"] = None
+        """The HPCJob, set during spawn()."""
 
-        # Interval in seconds for polling for job status
         self.job_status_poll_time = 0.1
+        """The interval in seconds for polling for job status."""
 
-        # Interval in seconds for polling for file completion
         self.file_completion_poll_time = 0.1
+        """The interval in seconds for polling for file completion"""
 
     def spawn(self, timer):
         # The runner_run output, which is the output from what we're
@@ -44,14 +58,16 @@ class HPCRunner(Runner):
     def wait(self, timer):
         # Sanity check on having a job
         if self.hpc_job is None:
-            self.job.setStatus(self.job.error, 'HPCRUNNER MISSING HPCJOB')
+            self.job.setStatus(self.job.error, "HPCRUNNER MISSING HPCJOB")
             return
 
         # The states that we should wait on. Anything else should
         # be an invalid state for waiting
-        wait_states = [self.hpc_job.State.held,
-                       self.hpc_job.State.queued,
-                       self.hpc_job.State.running]
+        wait_states = [
+            self.hpc_job.State.held,
+            self.hpc_job.State.queued,
+            self.hpc_job.State.running,
+        ]
 
         # Poll loop waiting for the job to be finished
         # This gets a structure that represents the job, and the
@@ -84,7 +100,7 @@ class HPCRunner(Runner):
         incomplete_files = set()
 
         # Wait for all of the files to be available
-        timer.start('hpc_wait_output')
+        timer.start("hpc_wait_output")
         waited_time = 0
         walltime = None
         while wait_files or incomplete_files:
@@ -104,12 +120,12 @@ class HPCRunner(Runner):
                     # Store the result
                     if file == result_file:
                         try:
-                            with open(file, 'r') as f:
+                            with open(file, "r") as f:
                                 result = yaml.safe_load(f)
                         except:
                             continue
-                        self.exit_code = result['exit_code']
-                        walltime = result['walltime']
+                        self.exit_code = result["exit_code"]
+                        walltime = result["walltime"]
 
                         # Delete this, we don't really need it to hang around
                         try:
@@ -121,29 +137,33 @@ class HPCRunner(Runner):
                     incomplete_files.discard(file)
 
             # We've waited for files for too long
-            if (wait_files or incomplete_files) and waited_time >= self.options.hpc_file_timeout:
-                self.job.setStatus(self.job.timeout, 'FILE TIMEOUT')
+            if (
+                wait_files or incomplete_files
+            ) and waited_time >= self.options.hpc_file_timeout:
+                self.job.setStatus(self.job.timeout, "FILE TIMEOUT")
+
                 def print_files(files, type):
                     if files:
-                        self.appendOutput(f'{type} output file(s)\n')
-                        self.appendOutput('\n'.join(files) + '\n')
-                print_files(wait_files, 'Unavailable')
-                print_files(incomplete_files, 'Incomplete')
+                        self.appendOutput(f"{type} output file(s)\n")
+                        self.appendOutput("\n".join(files) + "\n")
+
+                print_files(wait_files, "Unavailable")
+                print_files(incomplete_files, "Incomplete")
                 break
 
             waited_time += self.file_completion_poll_time
             time.sleep(self.file_completion_poll_time)
-        timer.stop('hpc_wait_output')
+        timer.stop("hpc_wait_output")
 
         # If we have a walltime from output, use it instead as it'll be
         # more accurate for the real runtime
         if walltime:
             timer = self.job.timer
-            start_time = timer.startTime('runner_run')
+            start_time = timer.startTime("runner_run")
             end_time = start_time + walltime
-            timer.reset('runner_run')
-            timer.start('runner_run', start_time)
-            timer.stop('runner_run', end_time)
+            timer.reset("runner_run")
+            timer.start("runner_run", start_time)
+            timer.stop("runner_run", end_time)
 
         # Handle openmpi appending a null character at the end of jobs
         # that return a nonzero exit code. An example of this is:
@@ -166,20 +186,22 @@ class HPCRunner(Runner):
         #
         # Where <NULL> is there the null character ends up. Thus, in cases
         # where we have a nonzero exit code and a MPI_ABORT, we'll try to remove these.
-        if self.exit_code != 0 and self.job.getTester().hasOpenMPI():
+        if (
+            self.exit_code != 0
+            and self.scheduler_options.mpi_config.mpi_type == MPIType.OPENMPI
+        ):
             output = self.getRunOutput().getOutput(sanitize=False)
-            if 'MPI_ABORT' in output:
+            if "MPI_ABORT" in output:
                 output_changed = False
                 if output:
-                    for null in ['\0', '\x00']:
-                        prefix = '-'*74 + '\n'
+                    for null in ["\0", "\x00"]:
+                        prefix = "-" * 74 + "\n"
                         prefix_with_null = prefix + null
                         if prefix_with_null in output:
                             output = output.replace(prefix_with_null, prefix, 1)
                             output_changed = True
                 if output_changed:
                     self.getRunOutput().setOutput(output)
-
 
     def kill(self):
         if self.hpc_job:
@@ -227,7 +249,7 @@ class HPCRunner(Runner):
                 # We try here in the event that we're loading
                 # an earlier part of the file and we can't decode
                 try:
-                    contents = file.read(len_comment).decode('utf-8')
+                    contents = file.read(len_comment).decode("utf-8")
                 except:
                     return False
 
@@ -259,13 +281,15 @@ class HPCRunner(Runner):
         If None, a failure was encountered when checking the file type.
         """
         try:
-            call_file = subprocess.check_output(['file', '--mime-encoding', file], text=True)
+            call_file = subprocess.check_output(
+                ["file", "--mime-encoding", file], text=True
+            )
         except:
             return None
 
         # Will return something like "<filename>: <encoding>",
         # where <encoding>=binary when the file is binary
-        find_binary = re.search('binary$', call_file)
+        find_binary = re.search("binary$", call_file)
         return find_binary is not None
 
     @staticmethod
@@ -274,13 +298,13 @@ class HPCRunner(Runner):
         Gets the last line of a text file and the position
         in the file at which that last line is.
         """
-        with open(file, 'rb') as f:
+        with open(file, "rb") as f:
             try:
                 f.seek(-2, os.SEEK_END)
-                while f.read(1) != b'\n':
+                while f.read(1) != b"\n":
                     f.seek(-2, os.SEEK_CUR)
-            except OSError: # one line filecd
+            except OSError:  # one line filecd
                 f.seek(0)
             pos = f.tell()
-            line = f.readline().decode('utf-8')
+            line = f.readline().decode("utf-8")
             return line, pos

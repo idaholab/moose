@@ -77,7 +77,7 @@ ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
   KOKKOS_CXXFLAGS   += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
   KOKKOS_CPPFLAGS    = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS})
-  KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler
+  KOKKOS_LDFLAGS     = --forward-unknown-to-host-compiler -arch=sm_$(CUDA_ARCH)
 else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
   KOKKOS_DEVICE     := HIP
   KOKKOS_ARCH       :=

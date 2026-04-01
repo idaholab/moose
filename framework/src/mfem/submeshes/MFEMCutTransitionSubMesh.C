@@ -61,6 +61,10 @@ MFEMCutTransitionSubMesh::buildSubMesh()
       getMesh(), getMesh().attribute_sets.GetAttributeSet(_transition_subdomain)));
   _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
   _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
+  // Create boundary attribute set labelling the exterior of the newly created
+  // transition region, excluding the cut
+  _submesh->bdr_attribute_sets.SetAttributeSet(
+      _transition_subdomain_boundary, mfem::Array<int>({getMesh().bdr_attributes.Max() + 1}));
 }
 
 void
@@ -228,7 +232,6 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
       MPI_IN_PLACE, new_attrs, old_max_attr, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
 
   mfem::AttributeSets & attr_sets = parent_mesh.attribute_sets;
-  mfem::AttributeSets & bdr_attr_sets = parent_mesh.bdr_attribute_sets;
   // Create attribute set labelling the newly created transition region on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
   // Create attribute set labelling the entire closed geometry
@@ -251,11 +254,6 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
       }
     }
   }
-
-  // Create boundary attribute set labelling the exterior of the newly created
-  // transition region, excluding the cut
-  bdr_attr_sets.SetAttributeSet(_transition_subdomain_boundary,
-                                mfem::Array<int>({parent_mesh.bdr_attributes.Max() + 1}));
 
   parent_mesh.SetAttributes();
 }

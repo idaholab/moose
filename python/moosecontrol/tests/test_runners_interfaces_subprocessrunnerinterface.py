@@ -146,10 +146,10 @@ class TestSubprocessRunnerInterface(MooseControlTestCase):
                 name="SubprocessReader",
             )
         # Process started
-        self.assert_log_message(
-            2 if use_subprocess_reader else 1,
+        self.assert_in_log(
             f"MOOSE process started with pid {pid}",
             name="SubprocessRunnerInterface",
+            after_index=1 if use_subprocess_reader else 0,
         )
         # Process output should be in the log
         if use_subprocess_reader:

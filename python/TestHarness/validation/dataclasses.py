@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from dataclasses import dataclass
 from typing import Any, Optional, Tuple, Union
@@ -21,12 +21,14 @@ ValidationNumericVectorType = Union[NDArray[float64], list[float]]
 # Input type for addVectorData
 ValidationVectorDataInputType = Tuple[ValidationNumericVectorType, str, Optional[str]]
 
+
 @dataclass(kw_only=True)
 class ValidationResult:
     """
     Data structure that stores the information
     about a single validation result.
     """
+
     # The status
     status: None
     # A human readable message
@@ -41,12 +43,14 @@ class ValidationResult:
     # if any
     data_key: Optional[str] = None
 
+
 @dataclass(kw_only=True)
 class ValidationData:
     """
     Base data structure that stores the information
     about a piece of validation data to be stored
     """
+
     def __post_init__(self):
         assert isinstance(self.key, str)
         assert isinstance(self.description, str)
@@ -56,7 +60,9 @@ class ValidationData:
         try:
             json.dumps(self.value)
         except (TypeError, OverflowError) as e:
-            raise TypeError(f'Data type "{type(self.value)}" is not JSON serializable') from e
+            raise TypeError(
+                f'Data type "{type(self.value)}" is not JSON serializable'
+            ) from e
 
     # The data key
     key: str
@@ -71,12 +77,14 @@ class ValidationData:
     # cases but not storing them in a database)
     validation: bool = True
 
+
 @dataclass(kw_only=True)
 class ValidationNumericData(ValidationData):
     """
     Data structure that stores the information about
     a piece of numeric validation data that can be checked
     """
+
     def __post_init__(self):
         super().__post_init__()
         assert isinstance(self.units, (str, type(None)))
@@ -104,6 +112,7 @@ class ValidationNumericData(ValidationData):
     # Allowed absolute zero for the data
     abs_zero: Optional[float] = None
 
+
 @dataclass(kw_only=True)
 class ValidationScalarData(ValidationNumericData):
     """
@@ -111,12 +120,14 @@ class ValidationScalarData(ValidationNumericData):
     a piece of scalar numeric data that can be checked
     """
 
+
 @dataclass(kw_only=True)
 class ValidationVectorData(ValidationNumericData):
     """
     Data structure that stores the information about
     a piece of array numeric validation data that can be checked
     """
+
     def __post_init__(self):
         super().__post_init__()
         if self.nominal is not None:
@@ -136,6 +147,7 @@ class ValidationVectorData(ValidationNumericData):
     x_description: str
     # Units for the x data, if any
     x_units: Optional[str]
+
 
 # The valid data types that can be stored
 ValidationDataTypes = [ValidationData, ValidationScalarData, ValidationVectorData]

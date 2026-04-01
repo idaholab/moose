@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import shutil
 import unittest
@@ -16,7 +16,8 @@ import subprocess
 import platform
 import mooseutils
 
-#from mooseutils.gitutils import git_submodule_info
+# from mooseutils.gitutils import git_submodule_info
+
 
 class Test(unittest.TestCase):
     def testIsGitRepo(self):
@@ -34,9 +35,9 @@ class Test(unittest.TestCase):
 
     @unittest.skipIf(not mooseutils.git_is_repo(), "Not a Git repository")
     def testGitCommitMessage(self):
-        c = 'b863a496dbf1449853be6978c8ac1a9c242d389b' # beautiful commit
+        c = "b863a496dbf1449853be6978c8ac1a9c242d389b"  # beautiful commit
         msg = mooseutils.git_commit_message(c)
-        self.assertIn('The name is, just so long', msg)
+        self.assertIn("The name is, just so long", msg)
 
     @unittest.skipIf(not mooseutils.git_is_repo(), "Not a Git repository")
     def testGitMergeCommits(self):
@@ -51,37 +52,44 @@ class Test(unittest.TestCase):
     @unittest.skipIf(not mooseutils.git_is_repo(), "Not a Git repository")
     def testGitRootDir(self):
         root = mooseutils.git_root_dir()
-        self.assertEqual(root, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+        self.assertEqual(
+            root,
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),
+        )
 
     @unittest.skipIf(not mooseutils.git_is_repo(), "Not a Git repository")
     def testGitSubmoduleInfo(self):
         root = mooseutils.git_root_dir()
         status = mooseutils.git_submodule_info(root)
-        self.assertIn('large_media', status)
-        self.assertIn('libmesh', status)
-        self.assertIn('petsc', status)
-        self.assertEqual(len(status['large_media']), 3)
-        self.assertEqual(len(status['libmesh']), 3)
-        self.assertEqual(len(status['petsc']), 3)
+        self.assertIn("large_media", status)
+        self.assertIn("libmesh", status)
+        self.assertIn("petsc", status)
+        self.assertEqual(len(status["large_media"]), 3)
+        self.assertEqual(len(status["libmesh"]), 3)
+        self.assertEqual(len(status["petsc"]), 3)
 
-    @mock.patch('subprocess.call')
-    @mock.patch('mooseutils.gitutils.git_submodule_info')
+    @mock.patch("subprocess.call")
+    @mock.patch("mooseutils.gitutils.git_submodule_info")
     @unittest.skipIf(not mooseutils.git_is_repo(), "Not a Git repository")
     def testGitInitSubmodule(self, status_func, call_func):
-        status_func.return_value = {'test':'-'}
+        status_func.return_value = {"test": "-"}
 
         root = mooseutils.git_root_dir()
         # Test default (without progress output)
-        mooseutils.git_init_submodule('test', root)
+        mooseutils.git_init_submodule("test", root)
 
         status_func.assert_called_with(root)
-        call_func.assert_called_with(['git', 'submodule', 'update', '--init', 'test'], cwd=root)
+        call_func.assert_called_with(
+            ["git", "submodule", "update", "--init", "test"], cwd=root
+        )
 
         # Test with progress output
-        mooseutils.git_init_submodule('test', root, True)
+        mooseutils.git_init_submodule("test", root, True)
 
         status_func.assert_called_with(root)
-        call_func.assert_called_with(['git', 'submodule', 'update', '--init', '--progress', 'test'], cwd=root)
+        call_func.assert_called_with(
+            ["git", "submodule", "update", "--init", "--progress", "test"], cwd=root
+        )
 
     def testGitVersion(self):
         ver = mooseutils.git_version()
@@ -90,7 +98,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(ver[1], int)
         self.assertIsInstance(ver[2], int)
 
-    @mock.patch('re.search')
+    @mock.patch("re.search")
     def testGitVersion2(self, re_func):
         re_func.return_value = None
         with self.assertRaises(SystemError):
@@ -99,77 +107,96 @@ class Test(unittest.TestCase):
     @unittest.skip("Fails on CIVET and I can't reproduce it")
     def testGitAuthors(self):
         names = mooseutils.git_authors(mooseutils.__file__)
-        self.assertIn('Andrew E. Slaughter', names)
+        self.assertIn("Andrew E. Slaughter", names)
 
         with self.assertRaises(OSError) as e:
-            mooseutils.git_authors('wrong')
+            mooseutils.git_authors("wrong")
 
     @unittest.skip("Fails on CIVET and I can't reproduce it")
     def testCommitters(self):
         names = mooseutils.git_committers(mooseutils.__file__)
-        self.assertIn('Andrew E. Slaughter', names)
+        self.assertIn("Andrew E. Slaughter", names)
         with self.assertRaises(OSError) as e:
-            mooseutils.git_authors('wrong')
+            mooseutils.git_authors("wrong")
 
-        names = mooseutils.git_committers(mooseutils.__file__, '--merges')
-        self.assertIn('Logan Harbour', names)
+        names = mooseutils.git_committers(mooseutils.__file__, "--merges")
+        self.assertIn("Logan Harbour", names)
 
     def testGitLines(self):
-        with open(__file__, 'r') as fid:
+        with open(__file__, "r") as fid:
             lines = fid.readlines()
 
         n_with_blank = len(lines)
         n_no_blank = n_with_blank - len([l for l in lines if not l.strip()])
 
         counts = mooseutils.git_lines(__file__)
-        self.assertIn('Andrew E. Slaughter', counts)
-        self.assertTrue(counts['Andrew E. Slaughter'] > 0)
+        self.assertIn("Andrew E. Slaughter", counts)
+        self.assertTrue(counts["Andrew E. Slaughter"] > 0)
         self.assertEqual(n_no_blank, sum(list(counts.values())))
 
         counts = mooseutils.git_lines(__file__, blank=True)
-        self.assertIn('Andrew E. Slaughter', counts)
-        self.assertTrue(counts['Andrew E. Slaughter'] > 0)
+        self.assertIn("Andrew E. Slaughter", counts)
+        self.assertTrue(counts["Andrew E. Slaughter"] > 0)
         self.assertEqual(n_with_blank, sum(list(counts.values())))
 
     def testGitLocalPath(self):
         filename = os.path.abspath(__file__)
         local = mooseutils.git_localpath(filename)
-        self.assertEqual(local, 'python/mooseutils/tests/test_gitutils.py')
+        self.assertEqual(local, "python/mooseutils/tests/test_gitutils.py")
 
-    @mock.patch('subprocess.run')
+    @mock.patch("subprocess.run")
     def testGitRepo(self, mock_out):
-        mock_out.return_value.stdout = 'origin git@github.com:aeslaughter/moose.git (fetch)\n' \
-                                       'origin git@github.com:aeslaughter/moose.git (push)\n' \
-                                       'upstream git@github.com:idaholab/moose.git (fetch)' \
-                                       'upstream git@github.com:idaholab/moose.git (push)'
+        mock_out.return_value.stdout = (
+            "origin git@github.com:aeslaughter/moose.git (fetch)\n"
+            "origin git@github.com:aeslaughter/moose.git (push)\n"
+            "upstream git@github.com:idaholab/moose.git (fetch)"
+            "upstream git@github.com:idaholab/moose.git (push)"
+        )
 
         url = mooseutils.git_repo(os.path.dirname(__file__))
-        self.assertEqual(url, 'https://github.com/idaholab/moose')
+        self.assertEqual(url, "https://github.com/idaholab/moose")
 
-        url = mooseutils.git_repo(os.path.dirname(__file__), remotes=['origin'])
-        self.assertEqual(url, 'https://github.com/aeslaughter/moose')
-
-        with self.assertRaises(OSError) as e:
-            mooseutils.git_repo('wrong')
-        self.assertEqual(str(e.exception), "The supplied location must be a directory: wrong")
+        url = mooseutils.git_repo(os.path.dirname(__file__), remotes=["origin"])
+        self.assertEqual(url, "https://github.com/aeslaughter/moose")
 
         with self.assertRaises(OSError) as e:
-            mooseutils.git_repo(os.path.dirname(__file__), remotes=['wrong'])
-        self.assertEqual(str(e.exception), "Unable to locate a remote with the name(s): wrong")
+            mooseutils.git_repo("wrong")
+        self.assertEqual(
+            str(e.exception), "The supplied location must be a directory: wrong"
+        )
+
+        with self.assertRaises(OSError) as e:
+            mooseutils.git_repo(os.path.dirname(__file__), remotes=["wrong"])
+        self.assertEqual(
+            str(e.exception), "Unable to locate a remote with the name(s): wrong"
+        )
 
     def testGitIsConfig(self):
-        with mock.patch('mooseutils.check_output', return_value='moosetest') as mock_check_output:
-            self.assertTrue(mooseutils.git_is_config('user.name', 'moosetest', '/working/dir'))
-        mock_check_output.assert_called_with(['git', 'config', '--get', 'user.name'], cwd='/working/dir')
+        with mock.patch(
+            "mooseutils.check_output", return_value="moosetest"
+        ) as mock_check_output:
+            self.assertTrue(
+                mooseutils.git_is_config("user.name", "moosetest", "/working/dir")
+            )
+        mock_check_output.assert_called_with(
+            ["git", "config", "--get", "user.name"], cwd="/working/dir"
+        )
 
     def testGitIsBranch(self):
-        with mock.patch('mooseutils.check_output', side_effect=['true', 'main']) as mock_check_output:
-            self.assertTrue(mooseutils.git_is_branch('main', '/working/dir'))
-        mock_check_output.assert_called_with(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd='/working/dir')
+        with mock.patch(
+            "mooseutils.check_output", side_effect=["true", "main"]
+        ) as mock_check_output:
+            self.assertTrue(mooseutils.git_is_branch("main", "/working/dir"))
+        mock_check_output.assert_called_with(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd="/working/dir"
+        )
 
-        with mock.patch('mooseutils.check_output', side_effect=['false']) as mock_check_output:
-            self.assertFalse(mooseutils.git_is_branch('main', '/working/dir'))
+        with mock.patch(
+            "mooseutils.check_output", side_effect=["false"]
+        ) as mock_check_output:
+            self.assertFalse(mooseutils.git_is_branch("main", "/working/dir"))
         mock_check_output.assert_called_once()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2, buffer=True)

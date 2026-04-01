@@ -13,7 +13,7 @@
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVTwoPhaseMixturePhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVTwoPhaseMixturePhysics);
-registerMooseAction("NavierStokesApp", WCNSFVTwoPhaseMixturePhysics, "add_material");
+registerMooseAction("NavierStokesApp", WCNSFVTwoPhaseMixturePhysics, "add_functor_material");
 
 InputParameters
 WCNSFVTwoPhaseMixturePhysics::validParams()
@@ -381,7 +381,7 @@ WCNSFVTwoPhaseMixturePhysics::addAdvectionSlipTerm()
 }
 
 void
-WCNSFVTwoPhaseMixturePhysics::addMaterials()
+WCNSFVTwoPhaseMixturePhysics::addFunctorMaterials()
 {
   // Add the phase fraction variable, for output purposes mostly
   if (!getProblem().hasFunctor(_phase_1_fraction_name, /*thread_id=*/0))

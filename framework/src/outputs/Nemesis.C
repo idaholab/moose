@@ -220,9 +220,9 @@ Nemesis::output()
 std::string
 Nemesis::filename()
 {
-  // Append the .e extension on the base file name
+  // Append the .n extension on the base file name
   std::ostringstream output;
-  output << _file_base << ".e";
+  output << _file_base << ".n";
 
   // Add the _000x extension to the file
   if (_file_num > 1)

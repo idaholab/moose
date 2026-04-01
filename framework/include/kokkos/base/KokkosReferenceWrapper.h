@@ -9,15 +9,11 @@
 
 #pragma once
 
-#ifdef MOOSE_KOKKOS_SCOPE
-#include "KokkosHeader.h"
-#endif
+#include "KokkosArray.h"
 
 #include "MooseTypes.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -156,5 +152,10 @@ protected:
   const T _copy;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+template <typename T>
+struct ArrayDeepCopy<ReferenceWrapper<T>>
+{
+  static constexpr bool value = true;
+};
+
+} // namespace Moose::Kokkos

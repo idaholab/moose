@@ -20,12 +20,16 @@ namespace Moose::DataFileUtils
  */
 enum class Context
 {
-  // Relative to the base (typically an input file)
+  /// Relative to the base (typically an input file)
   RELATIVE,
-  // An absolute path
+  /// An absolute path
   ABSOLUTE,
-  // From installed/in-tree data
+  /// From installed/in-tree data
   DATA,
+  /// Relative to the base, but not found
+  RELATIVE_NOT_FOUND,
+  /// Absolute, but not found
+  ABSOLUTE_NOT_FOUND,
   /// Unused for default
   INVALID
 };
@@ -51,13 +55,30 @@ struct Path
 };
 
 /**
+ * Options to be passed to getPath().
+ */
+struct GetPathOptions
+{
+  /// The base path by which to search for relative paths. This is usually
+  /// the folder that an input file is in so that paths are searched relative
+  /// to where that input file is.
+  std::optional<std::string> base;
+  /// Whether or not to search all registered data.
+  bool search_all_data = true;
+  /// Whether or not to error whenever a path is not found. If this is true,
+  /// the only time an error is emitted is when an explicit data name is
+  /// specified and not registered or when an explicit data name is specified
+  /// and the file was not found within that registered data folder.
+  bool graceful = false;
+};
+
+/**
  * Get the data path for a given path, searching the registered data
  *
- * @param path - The path; can be prefixed with <name>: to search only data from <name>
- * @param base - The base by which to search for the file relative to (optional)
+ * @param path The path; can be prefixed with <name>: to search only data from <name>
+ * @param options Search options; see docstring for GetPathOptions for more info
  */
-Path getPath(std::string path,
-             const std::optional<std::string> & base = std::optional<std::string>());
+Path getPath(std::string path, const GetPathOptions & options = {});
 
 /**
  * Get the data path for a given path, searching the registered data given an explicit

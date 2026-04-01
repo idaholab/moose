@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import unittest
 import mooseutils
@@ -15,10 +15,12 @@ from MooseDocs import base
 from MooseDocs.tree import pages, html, latex
 from MooseDocs.extensions import command
 
+
 class MooseDocsTestCase(unittest.TestCase):
     """
     A class to aid in creating unit tests for MOOSEDocs.
     """
+
     EXTENSIONS = []
     READER = base.MarkdownReader
     RENDERER = base.HTMLRenderer
@@ -55,7 +57,7 @@ class MooseDocsTestCase(unittest.TestCase):
         ext = load_extensions(extensions, config)
         self.__translator = base.Translator(content, reader, renderer, ext, executioner)
         self.__translator.init()
-        self.__translator.execute() # This is required to setup the meta data
+        self.__translator.execute()  # This is required to setup the meta data
 
     def setUp(self):
         # Wrap mooseutils.runExe so that we don't call the application
@@ -63,13 +65,14 @@ class MooseDocsTestCase(unittest.TestCase):
         # a given set of arguments, it'll run the app. Every time after
         # that, it'll use the cache
         def run_exe_cached(app_path, args):
-            key = app_path + ''.join(args)
+            key = app_path + "".join(args)
             cache = MooseDocsTestCase.RUN_EXE_CACHE
             if key not in cache:
                 result = MooseDocsTestCase.ORIG_RUN_EXE(app_path, args)
                 cache[key] = result
             return cache[key]
-        patcher = patch.object(mooseutils, 'runExe', wraps=run_exe_cached)
+
+        patcher = patch.object(mooseutils, "runExe", wraps=run_exe_cached)
         self.addCleanup(patcher.stop)
         self.mock_run_cmd = patcher.start()
 
@@ -86,7 +89,9 @@ class MooseDocsTestCase(unittest.TestCase):
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
 
-        self.__translator.executioner.read(self.__text) # runs pre- and post-read methods
+        self.__translator.executioner.read(
+            self.__text
+        )  # runs pre- and post-read methods
         self.__ast = self.__translator.executioner.tokenize(self.__text, text)
         return self.__ast
 
@@ -94,7 +99,7 @@ class MooseDocsTestCase(unittest.TestCase):
         """Helper for rendering AST"""
         if args or kwargs or (self.__translator is None):
             self.__setup(*args, **kwargs)
-            self.tokenize('')
+            self.tokenize("")
         self.__result = self.__translator.executioner.render(self.__text, ast)
         return self.__result
 
@@ -113,7 +118,7 @@ class MooseDocsTestCase(unittest.TestCase):
             self.assertSize(token, size)
         if string is not None:
             self.assertSize(token, 1)
-            self.assertToken(token(0), 'String', content=string)
+            self.assertToken(token(0), "String", content=string)
 
     def assertHTMLTag(self, tag, tname, string=None, size=None, **kwargs):
         """Helper for checking HTML tree nodes"""
@@ -129,10 +134,12 @@ class MooseDocsTestCase(unittest.TestCase):
 
     def assertHTMLString(self, node, content, **kwargs):
         self.assertIsInstance(node, html.String)
-        self.assertEqual(node.get('content'), content)
+        self.assertEqual(node.get("content"), content)
         self.assertAttributes(node, **kwargs)
 
-    def assertLatex(self, node, tname, name, string=None, size=None, nargs=None, **kwargs):
+    def assertLatex(
+        self, node, tname, name, string=None, size=None, nargs=None, **kwargs
+    ):
         self.assertEqual(node.__class__.__name__, tname)
         self.assertEqual(node.name, name)
         self.assertAttributes(node, **kwargs)
@@ -143,26 +150,26 @@ class MooseDocsTestCase(unittest.TestCase):
             self.assertSize(node, 1)
             self.assertLatexString(node(0), string)
         if nargs is not None:
-            self.assertEqual(len(node['args']), nargs)
+            self.assertEqual(len(node["args"]), nargs)
 
     def assertLatexCommand(self, *args, **kwargs):
-        self.assertLatex(args[0], 'Command', *args[1:], **kwargs)
+        self.assertLatex(args[0], "Command", *args[1:], **kwargs)
 
     def assertLatexEnvironment(self, *args, **kwargs):
-        self.assertLatex(args[0], 'Environment', *args[1:], **kwargs)
+        self.assertLatex(args[0], "Environment", *args[1:], **kwargs)
 
     def assertLatexString(self, node, content, **kwargs):
         self.assertIsInstance(node, latex.String)
-        self.assertEqual(node.get('content'), content)
+        self.assertEqual(node.get("content"), content)
         self.assertAttributes(node, **kwargs)
 
     def assertLatexArg(self, node, index, tname, string=None, size=None, **kwargs):
-        arg = node['args'][index]
+        arg = node["args"][index]
         self.assertLatex(arg, tname, tname, string, size, **kwargs)
 
     def assertAttributes(self, node, **kwargs):
         for key, value in kwargs.items():
-            key = key.rstrip('_')
+            key = key.rstrip("_")
             self.assertEqual(node[key], value)
 
     def assertSize(self, node, num):

@@ -97,6 +97,13 @@ public:
    */
   static InputParameters validParams();
 
+  /**
+   * Default value for the automatically detected paired boundaries for
+   * each unit dimension, in which the value for each unit dimension is
+   * false (not detected).
+   */
+  static const std::array<bool, 3> periodic_dim_default;
+
   MooseMesh(const InputParameters & parameters);
   MooseMesh(const MooseMesh & other_mesh);
   MooseMesh() = delete;
@@ -203,6 +210,11 @@ public:
    */
   std::vector<BoundaryID> getBoundaryIDs(const Elem * const elem,
                                          const unsigned short int side) const;
+
+  /**
+   * Returns a vector of vector of boundary IDs for the requested element on each of its sides
+   */
+  std::vector<std::vector<BoundaryID>> getBoundaryIDs(const Elem * const elem) const;
 
   /**
    * Returns a const pointer to a lower dimensional element that
@@ -320,6 +332,7 @@ public:
   virtual dof_id_type nLocalNodes() const { return _mesh->n_local_nodes(); }
   virtual dof_id_type nActiveElem() const { return _mesh->n_active_elem(); }
   virtual dof_id_type nActiveLocalElem() const { return _mesh->n_active_local_elem(); }
+  // NOTE: Expensive operation (iterates through all elements to gather subdomains)
   virtual SubdomainID nSubdomains() const { return _mesh->n_subdomains(); }
   virtual unsigned int nPartitions() const { return _mesh->n_partitions(); }
   virtual bool skipPartitioning() const { return _mesh->skip_partitioning(); }
@@ -792,7 +805,13 @@ public:
   /**
    * Return the name of the boundary given the id.
    */
-  const std::string & getBoundaryName(BoundaryID boundary_id) const;
+  const std::string & getBoundaryName(const BoundaryID boundary_id) const;
+
+  /**
+   * Return the name of the boundary given the id, if it exists. Otherwise, return
+   * the id as a string.
+   */
+  std::string getBoundaryString(const BoundaryID boundary_id) const;
 
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic
@@ -839,40 +858,154 @@ public:
    * For "regular orthogonal" meshes, determine if variable var_num is periodic with respect to the
    * primary and secondary BoundaryIDs, record this fact in the _periodic_dim data structure.
    */
-  void addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary);
+  void addPeriodicVariable(const unsigned int sys_num,
+                           const unsigned int var_num,
+                           const BoundaryID primary,
+                           const BoundaryID secondary);
+
+  /**
+   * Query the translated periodic dimension flags for the given variable on the given system.
+   *
+   * Query here means that it will not error if a variable isn't found to be periodic, instead
+   * the default value is returned (false for each dimension)
+   *
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
+   */
+  const std::array<bool, 3> & queryPeriodicDimensions(const unsigned int sys_num,
+                                                      const unsigned int var_num) const;
+  /**
+   * Query the translated periodic dimension flags for the given variable.\
+   *
+   * Query here means that it will not error if a variable isn't found to be periodic, instead
+   * the default value is returned (false for each dimension)
+   *
+   * @param var - The variable
+   */
+  const std::array<bool, 3> & queryPeriodicDimensions(const MooseVariableBase & var) const;
+
+  /**
+   * Returns whether this generated mesh is periodic in the given dimension for the given variable
+   * on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
+   * @param component - An integer representing the desired component (dimension)
+   */
+  bool isTranslatedPeriodic(const unsigned int sys_num,
+                            const unsigned int var_num,
+                            const unsigned int component) const;
 
   /**
    * Returns whether this generated mesh is periodic in the given dimension for the given variable.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * @param var - The variable
    * @param component - An integer representing the desired component (dimension)
    */
-  bool isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const;
+  bool isTranslatedPeriodic(const MooseVariableBase & var, const unsigned int component) const;
 
   /**
-   * This function returns the minimum vector between two points on the mesh taking into account
-   * periodicity for the given variable number.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * Returns whether this generated mesh is periodic in the given dimension for the given variable.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param component - An integer representing the desired component (dimension)
+   */
+  bool isTranslatedPeriodic(const unsigned int var_num, const unsigned int component) const;
+
+  /**
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
    * @param p, q - The points between which to compute a minimum vector
    * @return RealVectorValue - The vector pointing from p to q
    */
-  RealVectorValue minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const;
+  RealVectorValue
+  minPeriodicVector(const unsigned int sys_num, const unsigned int var_num, Point p, Point q) const;
 
   /**
-   * This function returns the distance between two points on the mesh taking into account
-   * periodicity for the given variable number.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable.
+   * @param var - The variable
+   * @param p, q - The points between which to compute a minimum vector
+   * @return RealVectorValue - The vector pointing from p to q
+   */
+  RealVectorValue
+  minPeriodicVector(const MooseVariableBase & var, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param p, q - The points between which to compute a minimum vector
+   * @return RealVectorValue - The vector pointing from p to q
+   */
+  RealVectorValue
+  minPeriodicVector(const unsigned int var_num, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
    * @param p, q - The points for which to compute a minimum distance
    * @return Real - The L2 distance between p and q
    */
-  Real minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const;
+  Real minPeriodicDistance(const unsigned int sys_num,
+                           const unsigned int var_num,
+                           const Point & p,
+                           const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable.
+   * @param var - The variable
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(const MooseVariableBase & var, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable.
+   *
+   * Deprecated method; assumes the system number is 0. Use the method that
+   * additionally takes the system number or the MooseVariableBase instead.
+   *
+   * @param var_num - The variable number
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(const unsigned int var_num, const Point & p, const Point & q) const;
+
+  /**
+   * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets
+   * "across" from one and other).
+   *
+   * The _paired_boundary datastructure is populated with this information.
+   */
+  void detectPairedSidesets();
+
+  /**
+   * Whether or not detectedPairedSidesets() has been called.
+   */
+  bool hasDetectedPairedSidesets() const { return _paired_boundary.has_value(); }
 
   /**
    * This function attempts to return the paired boundary ids for the given component.  For example,
    * in a generated 2D mesh, passing 0 for the "x" component will return (3, 1).
+   *
+   * Must have called detectPairedSidesets() prior to using.
+   *
    * @param component - An integer representing the desired component (dimension)
    * @return std::pair pointer - The matching boundary pairs for the passed component
    */
-  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component);
+  const std::pair<BoundaryID, BoundaryID> * getPairedBoundaryMapping(unsigned int component) const;
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material
@@ -1530,8 +1663,8 @@ protected:
   bool _node_to_active_semilocal_elem_map_built;
 
   /**
-   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes subdomains
-   * defined on other processors as well.
+   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
+   * subdomains defined on other processors as well.
    */
   std::set<SubdomainID> _mesh_subdomains;
 
@@ -1600,7 +1733,7 @@ protected:
   std::vector<std::vector<Real>> _bounds;
 
   /// A vector holding the paired boundaries for a regular orthogonal mesh
-  std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
+  std::optional<std::vector<std::pair<BoundaryID, BoundaryID>>> _paired_boundary;
 
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _is_split;
@@ -1640,10 +1773,12 @@ private:
   mutable bool _linear_finite_volume_dofs_cached = false;
 
   /**
-   * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
-   * the specified variable numbers.  This data structure is populated by addPeriodicVariable.
+   * A map from (system number, vector number) to which dimensions are periodic in a regular
+   * orthogonal mesh.
+   *
+   * This data structure is populated by addPeriodicVariable.
    */
-  std::map<unsigned int, std::vector<bool>> _periodic_dim;
+  std::map<std::pair<unsigned int, unsigned int>, std::array<bool, 3>> _periodic_dim;
 
   /**
    * A convenience vector used to hold values in each dimension representing half of the range.
@@ -1652,13 +1787,6 @@ private:
 
   /// A vector containing the nodes at the corners of a regular orthogonal mesh
   std::vector<Node *> _extreme_nodes;
-
-  /**
-   * This routine detects paired sidesets of a regular orthogonal mesh (.i.e. parallel sidesets
-   * "across" from one and other).
-   * The _paired_boundary datastructure is populated with this information.
-   */
-  void detectPairedSidesets();
 
   /**
    * Build the refinement map for a given element type.  This will tell you what quadrature points

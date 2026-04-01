@@ -1,4 +1,4 @@
-# The PorousFlowElementNormal is used to calculate normal directions
+# The ElementNormalAux is used to calculate normal directions
 [Mesh]
   [base]
     type = AnnularMeshGenerator
@@ -57,19 +57,19 @@
 
 [AuxKernels]
   [nx]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = nx
     component = x
     1D_perp = '0 1 0'
   []
   [ny]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = ny
     component = y
     1D_perp = '0 1 0'
   []
   [nz]
-    type = PorousFlowElementNormal
+    type = ElementNormalAux
     variable = nz
     component = z
     1D_perp = '0 1 0'

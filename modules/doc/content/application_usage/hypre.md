@@ -113,7 +113,7 @@ Here is the full list of Hypre options present in PETSc 3.7.6 (found using `-hel
 
 ```
 HYPRE preconditioner options
-  -pc_hypre_type <boomeramg> (choose one of) pilut parasails boomeramg ams (PCHYPRESetType)
+  -pc_hypre_type <boomeramg> (choose one of) euclid ilu pilut parasails boomeramg ams ads (PCHYPRESetType)
 HYPRE BoomerAMG Options
   -pc_hypre_boomeramg_cycle_type <V> (choose one of) V W (None)
   -pc_hypre_boomeramg_max_levels <25>: Number of levels (of grids) allowed (None)

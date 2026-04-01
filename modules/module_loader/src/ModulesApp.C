@@ -67,9 +67,6 @@
 #ifdef REACTOR_ENABLED
 #include "ReactorApp.h"
 #endif
-#ifdef RICHARDS_ENABLED
-#include "RichardsApp.h"
-#endif
 #ifdef SCALAR_TRANSPORT_ENABLED
 #include "ScalarTransportApp.h"
 #endif
@@ -186,10 +183,6 @@ ModulesApp::registerApps()
   ReactorApp::registerApps();
 #endif
 
-#ifdef RICHARDS_ENABLED
-  RichardsApp::registerApps();
-#endif
-
 #ifdef SCALAR_TRANSPORT_ENABLED
   ScalarTransportApp::registerApps();
 #endif
@@ -296,10 +289,6 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef REACTOR_ENABLED
   ReactorApp::registerAll(f, af, s);
-#endif
-
-#ifdef RICHARDS_ENABLED
-  RichardsApp::registerAll(f, af, s);
 #endif
 
 #ifdef SCALAR_TRANSPORT_ENABLED

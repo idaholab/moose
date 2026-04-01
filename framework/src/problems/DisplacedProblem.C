@@ -980,6 +980,21 @@ DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, co
         Assembly::GlobalDataKey{},
         getVectorTag(_displaced_solver_systems[currentNlSysNum()]->nonTimeVectorTag()));
 
+  std::vector<VectorTag> extra_residual_vector_tags;
+  extra_residual_vector_tags.reserve(currentResidualVectorTags().size());
+  const auto time_tag = _displaced_solver_systems[currentNlSysNum()]->timeVectorTag();
+  const auto non_time_tag = _displaced_solver_systems[currentNlSysNum()]->nonTimeVectorTag();
+  for (const auto & vector_tag : currentResidualVectorTags())
+    if (vector_tag._id != time_tag && vector_tag._id != non_time_tag)
+      extra_residual_vector_tags.push_back(vector_tag);
+
+  // Flush extra vector tag caches (e.g. from extra_vector_tags on NodalConstraints)
+  // to their respective system vectors after the standard TIME/NONTIME caches above.
+  // Without this, NodalConstraint contributions to extra vector tags are silently
+  // discarded by the blanket clearCachedResiduals.
+  _assembly[tid][currentNlSysNum()]->addCachedResiduals(Assembly::GlobalDataKey{},
+                                                        extra_residual_vector_tags);
+
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
   _assembly[tid][currentNlSysNum()]->clearCachedResiduals(Assembly::GlobalDataKey{});

@@ -104,19 +104,19 @@ c ======================================================================
       CALL FLUSH()
 
 
-130   FORMAT ( 1X 'PROPS_', I2, :, 3X, 4F10.7 )
-131   FORMAT ( 1X 'MCRD_', :,  2I2 )
-132   FORMAT ( 1X 'COORDS_', I2, I2,:, 3X, 4F10.7 )
-133   FORMAT ( 1X 'NNODE_', :,  2I2 )
-134   FORMAT ( 1X 'NDOFEL_', :,  2I2 )
-135   FORMAT ( 1X 'MLVARX_', :,  2I2 )
-136   FORMAT ( 1X 'U_', I2, :, 3X, 4F10.7 )
-137   FORMAT ( 1X 'DU_', I2, I2,:, 3X, 4F10.7 )
-138   FORMAT ( 1X 'V_', I2, :, 3X, 4F10.7 )
-139   FORMAT ( 1X 'A_', I2, :, 3X, 4F10.7 )
-140   FORMAT ( 1X 'NSVARS_', :,  2I2 )
-141   FORMAT ( 1X 'SVARS_', I2, :, 3X, 4F10.7 )
-142   FORMAT ( 1X 'Nrhs_', :,  2I2 )
+130   FORMAT ( 1X, 'PROPS_', I2, :, 3X, 4F10.7 )
+131   FORMAT ( 1X, 'MCRD_', :,  2I2 )
+132   FORMAT ( 1X, 'COORDS_', I2, I2,:, 3X, 4F10.7 )
+133   FORMAT ( 1X, 'NNODE_', :,  2I2 )
+134   FORMAT ( 1X, 'NDOFEL_', :,  2I2 )
+135   FORMAT ( 1X, 'MLVARX_', :,  2I2 )
+136   FORMAT ( 1X, 'U_', I2, :, 3X, 4F10.7 )
+137   FORMAT ( 1X, 'DU_', I2, I2,:, 3X, 4F10.7 )
+138   FORMAT ( 1X, 'V_', I2, :, 3X, 4F10.7 )
+139   FORMAT ( 1X, 'A_', I2, :, 3X, 4F10.7 )
+140   FORMAT ( 1X, 'NSVARS_', :,  2I2 )
+141   FORMAT ( 1X, 'SVARS_', I2, :, 3X, 4F10.7 )
+142   FORMAT ( 1X, 'Nrhs_', :,  2I2 )
 
       return
       end

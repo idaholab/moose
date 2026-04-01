@@ -158,6 +158,12 @@ MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> &
   return false;
 }
 
+unsigned int
+MeshCut2DUserObjectBase::getNumberOfCrackFrontPoints() const
+{
+  return _original_and_current_front_node_ids.size();
+}
+
 const std::vector<Point>
 MeshCut2DUserObjectBase::getCrackFrontPoints(unsigned int number_crack_front_points) const
 {

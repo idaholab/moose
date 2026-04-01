@@ -16,9 +16,7 @@
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -84,7 +82,7 @@ protected:
   /**
    * Kokkos thread object
    */
-  Thread _thread;
+  Thread<> _thread;
   /**
    * Kokkos functor dispatchers
    */
@@ -194,13 +192,6 @@ private:
   Array<TagID> _vector_tags;
   Array<TagID> _matrix_tags;
   ///@}
-  /**
-   * Flag whether each tag
-   */
-  ///@{
-  Array<bool> _is_extra_vector_tag;
-  Array<bool> _is_extra_matrix_tag;
-  ///@}
 };
 
 KOKKOS_FUNCTION inline void
@@ -220,13 +211,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
     auto tag = _vector_tags[t];
 
     if (sys.isResidualTagActive(tag))
-    {
-      bool has_nodal_bc =
-          _is_extra_vector_tag[t] ? sys.hasNodalBCResidualTag(dof, tag) : sys.hasNodalBC(dof);
-
-      if (!has_nodal_bc)
-        ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
-    }
+      ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
   }
 }
 
@@ -236,7 +221,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
                                               const ContiguousNodeID node,
                                               const unsigned int comp) const
 {
-  if (!local_re)
+  if (!local_re && add)
     return;
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
@@ -275,14 +260,8 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   {
     auto tag = _matrix_tags[t];
 
-    if (sys.isMatrixTagActive(tag))
-    {
-      bool has_nodal_bc =
-          _is_extra_matrix_tag[t] ? sys.hasNodalBCMatrixTag(row, tag) : sys.hasNodalBC(row);
-
-      if (!has_nodal_bc)
-        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke);
-    }
+    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+      ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke);
   }
 }
 
@@ -293,7 +272,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
                                             const unsigned int jvar,
                                             const unsigned int comp) const
 {
-  if (!local_ke)
+  if (!local_ke && add)
     return;
 
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
@@ -376,5 +355,4 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -9,9 +9,7 @@
 
 #include "KokkosNodalBC.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -53,7 +51,9 @@ NodalBC::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes()});
+    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes());
+
+    Policy policy(0, _thread.size());
 
     if (!_offdiag_jacobian_dispatcher)
       _offdiag_jacobian_dispatcher = DispatcherRegistry::build<OffDiagJacobianLoop>(this, type());
@@ -62,5 +62,4 @@ NodalBC::computeJacobian()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

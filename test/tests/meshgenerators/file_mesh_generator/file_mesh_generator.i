@@ -1,7 +1,7 @@
 [Mesh]
   [fmg]
     type = FileMeshGenerator
-    file = square.e
+    file = square.exo
   []
 []
 

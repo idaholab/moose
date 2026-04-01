@@ -9,6 +9,7 @@
 
 #include "FlowBoundary1Phase.h"
 #include "FlowChannel1Phase.h"
+#include "FlowModelSinglePhase.h"
 #include "THMNames.h"
 
 InputParameters
@@ -24,11 +25,27 @@ FlowBoundary1Phase::FlowBoundary1Phase(const InputParameters & params)
 }
 
 void
+FlowBoundary1Phase::init()
+{
+  FlowBoundary1PhaseBase::init();
+
+  if (hasComponentByName<FlowChannel1Phase>(_connected_component_name))
+  {
+    auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+    mooseAssert(flow_model_1phase, "Incompatible flow model");
+    _passives_times_area = flow_model_1phase->passiveTransportSolutionVariableNames();
+  }
+}
+
+void
 FlowBoundary1Phase::check() const
 {
   FlowBoundary1PhaseBase::check();
 
   checkComponentOfTypeExistsByName<FlowChannel1Phase>(_connected_component_name);
+
+  if (_passives_times_area.size() > 0 && !supportsPassiveTransport())
+    logError("Passive transport has not been implemented for this Component type.");
 }
 
 void
@@ -43,11 +60,11 @@ FlowBoundary1Phase::addWeakBCs()
   params.set<std::vector<VariableName>>("rhoA") = {THM::RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {THM::RHOUA};
   params.set<std::vector<VariableName>>("rhoEA") = {THM::RHOEA};
+  params.set<std::vector<VariableName>>("passives_times_area") = _passives_times_area;
   params.set<bool>("implicit") = getTHMProblem().getImplicitTimeIntegrationFlag();
 
-  const std::vector<NonlinearVariableName> variables{THM::RHOA, THM::RHOUA, THM::RHOEA};
-
-  for (const auto & var : variables)
+  auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+  for (const auto & var : flow_model_1phase->solutionVariableNames())
   {
     params.set<NonlinearVariableName>("variable") = var;
     getTHMProblem().addBoundaryCondition(

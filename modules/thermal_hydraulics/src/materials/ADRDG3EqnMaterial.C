@@ -28,6 +28,7 @@ ADRDG3EqnMaterial::validParams()
   params.addRequiredCoupledVar("rhoA", "Conserved variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Conserved variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Conserved variable: rho*E*A");
+  params.addCoupledVar("passives_times_area", "Passive transport solution variables");
 
   params.addRequiredParam<MaterialPropertyName>("direction",
                                                 "Flow channel direction material property name");
@@ -53,19 +54,27 @@ ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
     _rhouA_var(getVar("rhouA", 0)),
     _rhoEA_var(getVar("rhoEA", 0)),
 
+    _n_passives(isParamValid("passives_times_area") ? coupledComponents("passives_times_area") : 0),
+
     _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _rhoA(declareADProperty<Real>("rhoA")),
     _rhouA(declareADProperty<Real>("rhouA")),
     _rhoEA(declareADProperty<Real>("rhoEA")),
+    _passives_times_area(declareADProperty<std::vector<Real>>("passives_times_area")),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
-  _U_vars.resize(THMVACE1D::N_FLUX_INPUTS);
+  _U_vars.resize(THMVACE1D::N_FLUX_INPUTS + _n_passives);
   _U_vars[THMVACE1D::RHOA] = _rhoA_var;
   _U_vars[THMVACE1D::RHOUA] = _rhouA_var;
   _U_vars[THMVACE1D::RHOEA] = _rhoEA_var;
   _U_vars[THMVACE1D::AREA] = _A_var;
+  for (const auto i : make_range(_n_passives))
+  {
+    _U_vars[THMVACE1D::N_FLUX_INPUTS + i] = getVar("passives_times_area", i);
+    _passives_times_area_avg.push_back(&adCoupledValue("passives_times_area", i));
+  }
 }
 
 void
@@ -77,21 +86,27 @@ ADRDG3EqnMaterial::computeQpProperties()
     _rhoA[_qp] = _rhoA_avg[_qp] * A_ratio;
     _rhouA[_qp] = _rhouA_avg[_qp] * A_ratio;
     _rhoEA[_qp] = _rhoEA_avg[_qp] * A_ratio;
+
+    _passives_times_area[_qp].resize(_n_passives);
+    for (const auto i : make_range(_n_passives))
+      _passives_times_area[_qp][i] = (*_passives_times_area_avg[i])[_qp] * A_ratio;
   }
   else
   {
     // compute primitive variables from the cell-average solution
-    std::vector<ADReal> U_avg(THMVACE1D::N_FLUX_INPUTS, 0.0);
+    std::vector<ADReal> U_avg(THMVACE1D::N_FLUX_INPUTS + _n_passives, 0.0);
     U_avg[THMVACE1D::RHOA] = _rhoA_avg[_qp];
     U_avg[THMVACE1D::RHOUA] = _rhouA_avg[_qp];
     U_avg[THMVACE1D::RHOEA] = _rhoEA_avg[_qp];
     U_avg[THMVACE1D::AREA] = _A_avg[_qp];
+    for (const auto i : make_range(_n_passives))
+      U_avg[THMVACE1D::N_FLUX_INPUTS + i] = (*_passives_times_area_avg[i])[_qp];
     auto W = FlowModel1PhaseUtils::computePrimitiveSolutionVector<true>(U_avg, _fp);
 
     // compute and apply slopes to primitive variables
     const auto slopes = getElementSlopes(_current_elem);
     const auto delta_x = (_q_point[_qp] - _current_elem->vertex_average()) * _dir[_qp];
-    for (unsigned int m = 0; m < THMVACE1D::N_PRIM_VARS; m++)
+    for (const auto m : make_range(W.size()))
       W[m] = W[m] + slopes[m] * delta_x;
 
     // compute reconstructed conservative variables
@@ -100,6 +115,8 @@ ADRDG3EqnMaterial::computeQpProperties()
     _rhoA[_qp] = U[THMVACE1D::RHOA];
     _rhouA[_qp] = U[THMVACE1D::RHOUA];
     _rhoEA[_qp] = U[THMVACE1D::RHOEA];
+    for (const auto i : make_range(_n_passives))
+      _passives_times_area[_qp][i] = U[THMVACE1D::N_FLUX_INPUTS + i];
   }
 }
 

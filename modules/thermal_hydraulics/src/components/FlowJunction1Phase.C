@@ -24,15 +24,20 @@ FlowJunction1Phase::init()
 {
   FlowJunction::init();
 
-  for (const auto & connection : _connections)
+  for (const auto i : index_range(_connections))
   {
-    const std::string comp_name = connection._component_name;
+    const std::string comp_name = _connections[i]._component_name;
     if (hasComponentByName<FlowChannel1Phase>(comp_name))
     {
       const FlowChannel1Phase & comp =
           getTHMProblem().getComponentByName<FlowChannel1Phase>(comp_name);
 
       _numerical_flux_names.push_back(comp.getNumericalFluxUserObjectName());
+
+      if (i == 0)
+        _passives_names = comp.getParam<std::vector<VariableName>>("passives_names");
+      else if (comp.getParam<std::vector<VariableName>>("passives_names") != _passives_names)
+        logError("All connected channels must have the same 'passives_names' parameter.");
     }
   }
 }
@@ -44,4 +49,7 @@ FlowJunction1Phase::check() const
 
   for (const auto & comp_name : _connected_component_names)
     checkComponentOfTypeExistsByName<FlowChannel1Phase>(comp_name);
+
+  if (_passives_names.size() > 0 && !supportsPassiveTransport())
+    logError("This Component type does not support passive transport.");
 }

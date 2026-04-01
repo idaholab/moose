@@ -371,15 +371,17 @@ where $\hat{n}$ is the outward normal vector for surface $s$. Combining [integra
 
 !equation
 \int_\Omega\nabla\psi\cdot k\nabla u -
-\int_{\partial\Omega} \psi \left(k\nabla u \cdot \hat{n}\right) +
-\int_\Omega\psi\left(\vec{\beta} \cdot \nabla u\right) - \int_\Omega\psi f = 0
+\int_{\partial\Omega} \psi \left(k\nabla u \cdot \hat{n}\right) -
+\int_\Omega\nabla\psi\left(\vec{\beta} \cdot u\right) +
+\int_{\partial\Omega} \psi \left(\vec{\beta} \cdot u \right) - \int_\Omega\psi f = 0
 
 Write in inner product notation. Each term of the equation will inherit from an existing MOOSE type as shown below.
 
 !equation id=example_weak_form
 \underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
-\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
-\underbrace{\left(\psi, \vec{\beta} \cdot \nabla u\right)}_{Kernel} -
+\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} -
+\underbrace{\left(\nabla \psi, \vec{\beta} \cdot u\right)}_{Kernel} +
+\underbrace{\langle\psi, \vec{\beta} \cdot u \rangle}_{BoundaryCondition} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
 
 !---
@@ -391,30 +393,19 @@ Write in inner product notation. Each term of the equation will inherit from an 
 !equation
 \underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
 \underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
-\underbrace{\left(\psi, \vec{\beta} \cdot \nabla u\right)}_{Kernel} -
+\underbrace{\langle\psi, \vec{\beta} \cdot u \rangle}_{BoundaryCondition} -
+\underbrace{\left(\nabla \psi, \vec{\beta} \cdot u\right)}_{Kernel} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
 
 !style-end!
 
-!style! fontsize=40%
+!style! fontsize=70%
 
 !row!
 
-!col! width=10%
+!col! width=20%
 
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=Kernels link=False
-
-!col-end!
-
-!col! width=1%
-
-$\quad$
-
-!col-end!
-
-!col! width=10%
-
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=BCs BCs/left link=False
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/force link=False
 
 !col-end!
 
@@ -424,9 +415,9 @@ $\quad$
 
 !col-end!
 
-!col! width=10%
+!col! width=20%
 
-!listing test/tests/dgkernels/1d_advection_dg/1d_advection_dg.i block=Kernels remove=Kernels/time_u link=False
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=BCs link=False
 
 !col-end!
 
@@ -436,9 +427,21 @@ $\quad$
 
 !col-end!
 
-!col! width=10%
+!col! width=20%
 
-!listing test/tests/bcs/nodal_normals/circle_tris.i block=Kernels remove=Kernels/diff link=False
+!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/diffusion Kernels/force link=False
+
+!col-end!
+
+!col! width=1%
+
+$\quad$
+
+!col-end!
+
+!col! width=20%
+
+!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/diffusion link=False
 
 !col-end!
 

@@ -27,8 +27,6 @@ public:
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
 
 protected:
-  /// Set trial variable names from subset of coupled variables that have an associated test variable.
-  virtual void SetTrialVariableNames() override;
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;
   virtual void EliminateCoupledVariables() override;

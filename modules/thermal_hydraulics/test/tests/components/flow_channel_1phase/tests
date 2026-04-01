@@ -36,6 +36,12 @@
       exodiff = 'steady_out.e'
       detail = 'in a steady problem.'
     []
+    [passive_transport]
+      type = Exodiff
+      input = 'passive_transport.i'
+      exodiff = 'passive_transport_out.e'
+      detail = 'with passive transport variables.'
+    []
   []
 
   [output_vpps]

@@ -9,15 +9,16 @@
 
 #include "KokkosNodalBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
 NodalBCBase::validParams()
 {
   auto params = BoundaryCondition::validParams();
+
+  params.set<MultiMooseEnum>("vector_tags") = "residual";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
 
   return params;
 }
@@ -44,5 +45,4 @@ NodalBCBase::getContiguousNodes() const
   return nodes;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

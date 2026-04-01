@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
 from peacock.utils.TextSubWindow import TextSubWindow
 from peacock.utils import WidgetUtils
+
 
 class OutputWidgetBase(QtWidgets.QWidget):
     """
@@ -56,7 +57,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Setup method for python script output button.
         """
         qobject.clicked.connect(self._callbackPythonButton)
-        qobject.setIcon(WidgetUtils.createIcon('py.svg'))
+        qobject.setIcon(WidgetUtils.createIcon("py.svg"))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Create python script to reproduce this figure.")
@@ -67,8 +68,8 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Open dialog and write script.
         """
         dialog = QtWidgets.QFileDialog()
-        dialog.setWindowTitle('Write Python Script')
-        dialog.setNameFilter('Python Files (*.py)')
+        dialog.setWindowTitle("Write Python Script")
+        dialog.setNameFilter("Python Files (*.py)")
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -82,7 +83,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Setup method pdf image output.
         """
         qobject.clicked.connect(self._callbackPDFButton)
-        qobject.setIcon(WidgetUtils.createIcon('pdf.svg'))
+        qobject.setIcon(WidgetUtils.createIcon("pdf.svg"))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Create a pdf file of the current figure.")
@@ -93,8 +94,8 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Write a PDF file of figure.
         """
         dialog = QtWidgets.QFileDialog()
-        dialog.setWindowTitle('Write *.pdf of figure')
-        dialog.setNameFilter('PDF files (*.pdf)')
+        dialog.setWindowTitle("Write *.pdf of figure")
+        dialog.setNameFilter("PDF files (*.pdf)")
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -108,7 +109,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Setup method png image output.
         """
         qobject.clicked.connect(self._callbackPNGButton)
-        qobject.setIcon(WidgetUtils.createIcon('png.svg'))
+        qobject.setIcon(WidgetUtils.createIcon("png.svg"))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Create a png file of the current figure.")
@@ -119,8 +120,8 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Write a png file of figure.
         """
         dialog = QtWidgets.QFileDialog()
-        dialog.setWindowTitle('Write *.png of figure')
-        dialog.setNameFilter('PNG files (*.png)')
+        dialog.setWindowTitle("Write *.png of figure")
+        dialog.setNameFilter("PNG files (*.png)")
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -135,7 +136,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         Setup method png image output.
         """
         qobject.clicked.connect(self._callbackLiveScriptButton)
-        qobject.setIcon(WidgetUtils.createIcon('script.svg'))
+        qobject.setIcon(WidgetUtils.createIcon("script.svg"))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Show the current python script.")
@@ -152,5 +153,7 @@ class OutputWidgetBase(QtWidgets.QWidget):
         """
         Setup for the script text window.
         """
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         qobject.setReadOnly(True)

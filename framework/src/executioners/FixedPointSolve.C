@@ -85,7 +85,7 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
       "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
       "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
       "fixed_point_force_norms custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
-      "Fixed point iterations");
+      "MultiApp fixed point iterations");
 
   return params;
 }
@@ -148,10 +148,12 @@ FixedPointSolve::validParams()
 FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
     _has_fixed_point_its(getParam<unsigned int>("fixed_point_max_its") > 1 ||
+                         getParam<unsigned int>("fixed_point_min_its") > 1 ||
                          isParamSetByUser("multiapp_fixed_point_convergence")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
+    _transformed_sys(nullptr),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
@@ -173,12 +175,41 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     mooseWarning(
         "Both variable and postprocessor transformation are active. If the two share dofs, the "
         "transformation will not be correct.");
+  if (_relax_factor != 1 && _transformed_vars.empty() && _transformed_pps.empty())
+    paramError("relaxation_factor",
+               "Relaxation factor must act on at least one 'transformed_variables' or one "
+               "'transformed_postprocessors'");
+
+  // Fixed point was not detected, and yet some parameters are passed
+  if (!_has_fixed_point_its &&
+      (getParam<Real>("relaxation_factor") != 1 ||
+       getParam<std::vector<std::string>>("transformed_variables").size() ||
+       getParam<std::vector<PostprocessorName>>("transformed_postprocessors").size()))
+    paramError("fixed_point_min_its",
+               std::string("Parameter(s) ") +
+                   ((getParam<Real>("relaxation_factor") != 1) ? "'relaxation_factor', " : "") +
+                   (getParam<std::vector<std::string>>("transformed_variables").size()
+                        ? "'transformed_variables', "
+                        : "") +
+                   (getParam<std::vector<std::string>>("transformed_postprocessors").size()
+                        ? "'transformed_postprocessors', "
+                        : "") +
+                   " were passed to the Executioner for multiapp fixed point iterations, but fixed "
+                   "point iterations are only activiated if 'fixed_point_min_its', "
+                   "'fixed_point_max_its' or 'multiapp_fixed_point_convergence' are passed");
 
   if (!_app.isUltimateMaster())
   {
     _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
     _secondary_transformed_variables = _app.fixedPointConfig().sub_transformed_vars;
     _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
+    // TODO: use paramError by retrieving parent app's MultiApp
+    if (_secondary_relaxation_factor != 1 && _secondary_transformed_variables.empty() &&
+        _secondary_transformed_pps.empty())
+      mooseError(
+          "Secondary relaxation factor, specified in the MultiApps block, must act on at least one "
+          "'secondary_transformed_variables' or one 'secondary_transformed_postprocessors'. "
+          "See parent application MultiApp parameters");
   }
 
   if (isParamValid("multiapp_fixed_point_convergence"))
@@ -194,6 +225,13 @@ FixedPointSolve::initialSetup()
   SolveObject::initialSetup();
 
   allocateStorage(true);
+
+  // Add to the systems to copy if requested in the Problem
+  for (const auto i : make_range(_problem.numSolverSystems()))
+    if (_problem.needsPreviousMultiAppFixedPointIterationSolution(i))
+      _systems_to_copy_previous_solutions_for.insert(&_problem.getSolverSystem(i));
+  if (_problem.needsPreviousMultiAppFixedPointIterationAuxiliary())
+    _systems_to_copy_previous_solutions_for.insert(&_aux);
 
   if (_has_fixed_point_its)
   {
@@ -252,7 +290,7 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      if (!_app.isUltimateMaster())
+      if (!_app.isUltimateMaster() && _transformed_sys)
         saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
@@ -366,7 +404,8 @@ FixedPointSolve::solve()
 void
 FixedPointSolve::saveAllValues(const bool primary)
 {
-  saveVariableValues(primary);
+  if (_transformed_sys)
+    saveVariableValues(primary);
   savePostprocessorValues(primary);
 }
 
@@ -374,6 +413,10 @@ bool
 FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
+
+  // Start new TIMESTEP_BEGIN section for solution invalidity
+  _app.solutionInvalidity().resetIterationOccurences();
+  _app.solutionInvalidity().resetTimeStepOccurences();
 
   _executioner.preSolve();
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
@@ -415,6 +458,12 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     convergence.preExecute();
   }
 
+  // Keep track of the solution warnings from the TIMESTEP_BEGIN phase before:
+  // - the count reset at the beginning of each iteration of the solve
+  // - the output on TIMESTEP_BEGIN
+  _app.solutionInvalidity().syncIteration();
+  _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
+
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
@@ -424,15 +473,18 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   // Save the current values of variables and postprocessors, before the solve
   saveAllValues(true);
 
-  // Save the previous fixed point iteration solution and aux variables
-  _solver_sys.copyPreviousFixedPointSolutions();
-  _aux.copyPreviousFixedPointSolutions();
+  // Save the previous fixed point iteration solution and aux variables if requested
+  for (auto * sys : _systems_to_copy_previous_solutions_for)
+    sys->copyPreviousFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
   if (!_inner_solve->solve())
   {
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
+
+    // Keep track of the solution warnings from the solve
+    _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
@@ -459,17 +511,25 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
       _xfem_update_count = 0;
     }
 
+    // Start new TIMESTEP_END section for solution invalidity
+    // We have to restart the current iteration count to avoid double counting
+    _app.solutionInvalidity().resetIterationOccurences();
+
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
-    {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-      return false;
-    }
+
+    // Keep track of the solution warnings from the TIMESTEP_END phase
+    _app.solutionInvalidity().syncIteration();
+    _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
+    _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
   }
 
+  if (_fixed_point_status == MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP)
+    return false;
   if (_fail_step)
   {
     _fail_step = false;
@@ -567,4 +627,37 @@ FixedPointSolve::performingRelaxation(const bool primary) const
     return !MooseUtils::absoluteFuzzyEqual(_relax_factor, 1.0);
   else
     return !MooseUtils::absoluteFuzzyEqual(_secondary_relaxation_factor, 1.0);
+}
+
+void
+FixedPointSolve::findTransformedSystem(const bool primary)
+{
+  // Find the system for the transformed variables. They must all belong to the same system
+  const auto & transformed_vars = primary ? _transformed_vars : _secondary_transformed_variables;
+  if (!transformed_vars.empty())
+  {
+    if (_problem.hasAuxiliaryVariable(transformed_vars[0]))
+      _transformed_sys = &_aux;
+    else
+      _transformed_sys = &_solver_sys;
+  }
+
+  for (const auto & var_name : transformed_vars)
+    if (!_transformed_sys->hasVariable(var_name))
+    {
+      if (primary)
+        paramError("transformed_variables",
+                   "Transformed variables must all belong to the same system. Auxiliary and each "
+                   "solver system cannot be mixed");
+      else
+        mooseError("Secondary transformed variables must all belong to the same system. Auxiliary "
+                   "and each solver system cannot be mixed");
+    }
+
+  if (primary && _transformed_sys == &_aux)
+    mooseInfo("Transformation of auxiliary variables is only supported for auxiliary variables "
+              "that are only transferred from the child application");
+
+  if (_transformed_sys)
+    _systems_to_copy_previous_solutions_for.insert(_transformed_sys);
 }

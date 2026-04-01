@@ -13,48 +13,52 @@
 
 #include "gtest_include.h"
 
-template <unsigned int dimension, Moose::Kokkos::LayoutType layout>
+template <unsigned int dimension, typename index_type, Moose::Kokkos::LayoutType layout>
 class KokkosArrayTestObjectBase
 {
 public:
-  KokkosArrayTestObjectBase(Moose::Kokkos::Array<unsigned int, dimension, layout> array)
+  KokkosArrayTestObjectBase(Moose::Kokkos::Array<unsigned int, dimension, index_type, layout> array)
     : _array(array)
   {
   }
 
 protected:
-  Moose::Kokkos::Array<unsigned int, dimension, layout> _array;
+  Moose::Kokkos::Array<unsigned int, dimension, index_type, layout> _array;
 };
 
-class KokkosArrayTestObject1D : public KokkosArrayTestObjectBase<1, Moose::Kokkos::LayoutType::LEFT>
+template <typename index_type = dof_id_type>
+class KokkosArrayTestObject1D
+  : public KokkosArrayTestObjectBase<1, index_type, Moose::Kokkos::LayoutType::LEFT>
 {
 public:
-  KokkosArrayTestObject1D(Moose::Kokkos::Array<unsigned int, 1> array)
-    : KokkosArrayTestObjectBase<1, Moose::Kokkos::LayoutType::LEFT>(array)
+  KokkosArrayTestObject1D(Moose::Kokkos::Array<unsigned int, 1, index_type> array)
+    : KokkosArrayTestObjectBase<1, index_type, Moose::Kokkos::LayoutType::LEFT>(array)
   {
   }
 
   KOKKOS_FUNCTION void operator()(const int i) const { this->_array(i) = i; }
 };
 
-template <Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosArrayTestObject2D : public KokkosArrayTestObjectBase<2, layout>
+template <typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosArrayTestObject2D : public KokkosArrayTestObjectBase<2, index_type, layout>
 {
 public:
-  KokkosArrayTestObject2D(Moose::Kokkos::Array<unsigned int, 2, layout> array)
-    : KokkosArrayTestObjectBase<2, layout>(array)
+  KokkosArrayTestObject2D(Moose::Kokkos::Array<unsigned int, 2, index_type, layout> array)
+    : KokkosArrayTestObjectBase<2, index_type, layout>(array)
   {
   }
 
   KOKKOS_FUNCTION void operator()(const int i, const int j) const { this->_array(i, j) = i + j; }
 };
 
-template <Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosArrayTestObject3D : public KokkosArrayTestObjectBase<3, layout>
+template <typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosArrayTestObject3D : public KokkosArrayTestObjectBase<3, index_type, layout>
 {
 public:
-  KokkosArrayTestObject3D(Moose::Kokkos::Array<unsigned int, 3, layout> array)
-    : KokkosArrayTestObjectBase<3, layout>(array)
+  KokkosArrayTestObject3D(Moose::Kokkos::Array<unsigned int, 3, index_type, layout> array)
+    : KokkosArrayTestObjectBase<3, index_type, layout>(array)
   {
   }
 
@@ -64,12 +68,13 @@ public:
   }
 };
 
-template <Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosArrayTestObject4D : public KokkosArrayTestObjectBase<4, layout>
+template <typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosArrayTestObject4D : public KokkosArrayTestObjectBase<4, index_type, layout>
 {
 public:
-  KokkosArrayTestObject4D(Moose::Kokkos::Array<unsigned int, 4, layout> array)
-    : KokkosArrayTestObjectBase<4, layout>(array)
+  KokkosArrayTestObject4D(Moose::Kokkos::Array<unsigned int, 4, index_type, layout> array)
+    : KokkosArrayTestObjectBase<4, index_type, layout>(array)
   {
   }
 
@@ -79,12 +84,13 @@ public:
   }
 };
 
-template <Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosArrayTestObject5D : public KokkosArrayTestObjectBase<5, layout>
+template <typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosArrayTestObject5D : public KokkosArrayTestObjectBase<5, index_type, layout>
 {
 public:
-  KokkosArrayTestObject5D(Moose::Kokkos::Array<unsigned int, 5, layout> array)
-    : KokkosArrayTestObjectBase<5, layout>(array)
+  KokkosArrayTestObject5D(Moose::Kokkos::Array<unsigned int, 5, index_type, layout> array)
+    : KokkosArrayTestObjectBase<5, index_type, layout>(array)
   {
   }
 
@@ -95,19 +101,22 @@ public:
   }
 };
 
-template <unsigned int inner, unsigned int outer, Moose::Kokkos::LayoutType layout>
+template <unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          Moose::Kokkos::LayoutType layout>
 class KokkosJaggedArrayTestObjectBase
 {
 public:
   KokkosJaggedArrayTestObjectBase(
-      Moose::Kokkos::JaggedArray<unsigned int, inner, outer, layout> array)
+      Moose::Kokkos::JaggedArray<unsigned int, inner, outer, index_type, layout> array)
     : _array(array)
   {
   }
 
 protected:
   KOKKOS_FUNCTION void
-  fillInner(const Moose::Kokkos::JaggedArrayInnerData<unsigned int, inner> data) const
+  fillInner(const Moose::Kokkos::JaggedArrayInnerData<unsigned int, inner, layout> data) const
   {
     if constexpr (inner == 1)
       for (dof_id_type i = 0; i < data.n(0); ++i)
@@ -125,27 +134,35 @@ protected:
             data(i, j, k) = i + j + k;
   }
 
-  Moose::Kokkos::JaggedArray<unsigned int, inner, outer, layout> _array;
+  Moose::Kokkos::JaggedArray<unsigned int, inner, outer, index_type, layout> _array;
 };
 
-template <unsigned int inner, Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosJaggedArrayTestObject1D : public KokkosJaggedArrayTestObjectBase<inner, 1, layout>
+template <unsigned int inner,
+          typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosJaggedArrayTestObject1D
+  : public KokkosJaggedArrayTestObjectBase<inner, 1, index_type, layout>
 {
 public:
-  KokkosJaggedArrayTestObject1D(Moose::Kokkos::JaggedArray<unsigned int, inner, 1, layout> array)
-    : KokkosJaggedArrayTestObjectBase<inner, 1, layout>(array)
+  KokkosJaggedArrayTestObject1D(
+      Moose::Kokkos::JaggedArray<unsigned int, inner, 1, index_type, layout> array)
+    : KokkosJaggedArrayTestObjectBase<inner, 1, index_type, layout>(array)
   {
   }
 
   KOKKOS_FUNCTION void operator()(const int i) const { this->fillInner(this->_array(i)); }
 };
 
-template <unsigned int inner, Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosJaggedArrayTestObject2D : public KokkosJaggedArrayTestObjectBase<inner, 2, layout>
+template <unsigned int inner,
+          typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosJaggedArrayTestObject2D
+  : public KokkosJaggedArrayTestObjectBase<inner, 2, index_type, layout>
 {
 public:
-  KokkosJaggedArrayTestObject2D(Moose::Kokkos::JaggedArray<unsigned int, inner, 2, layout> array)
-    : KokkosJaggedArrayTestObjectBase<inner, 2, layout>(array)
+  KokkosJaggedArrayTestObject2D(
+      Moose::Kokkos::JaggedArray<unsigned int, inner, 2, index_type, layout> array)
+    : KokkosJaggedArrayTestObjectBase<inner, 2, index_type, layout>(array)
   {
   }
 
@@ -155,12 +172,16 @@ public:
   }
 };
 
-template <unsigned int inner, Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
-class KokkosJaggedArrayTestObject3D : public KokkosJaggedArrayTestObjectBase<inner, 3, layout>
+template <unsigned int inner,
+          typename index_type = dof_id_type,
+          Moose::Kokkos::LayoutType layout = Moose::Kokkos::LayoutType::LEFT>
+class KokkosJaggedArrayTestObject3D
+  : public KokkosJaggedArrayTestObjectBase<inner, 3, index_type, layout>
 {
 public:
-  KokkosJaggedArrayTestObject3D(Moose::Kokkos::JaggedArray<unsigned int, inner, 3, layout> array)
-    : KokkosJaggedArrayTestObjectBase<inner, 3, layout>(array)
+  KokkosJaggedArrayTestObject3D(
+      Moose::Kokkos::JaggedArray<unsigned int, inner, 3, index_type, layout> array)
+    : KokkosJaggedArrayTestObjectBase<inner, 3, index_type, layout>(array)
   {
   }
 

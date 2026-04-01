@@ -5,13 +5,9 @@
     type = 'Exodiff'
     input = 'elastic_timestep.i'
     exodiff = 'elastic_timestep_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    requirement = 'The system shall provide an interface to use Abaqus UMAT materials that allows '
-                  'the user to control the time step increment within the UMAT routine and combine '
-                  'it with MOOSE native time step controls, including cutback and growth factors, '
-                  'and soft terminations.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials that allows the user to control the time step increment within the UMAT routine and combine it with MOOSE native time step controls, including cutback and growth factors, and soft terminations.'
   []
 []

@@ -13,6 +13,8 @@
 #include "CSGRegion.h"
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
+#include "CSGLatticeList.h"
+#include "CSGTransformationHelper.h"
 #include "nlohmann/json.h"
 
 #ifdef MOOSE_UNIT_TEST
@@ -21,6 +23,26 @@
 
 namespace CSG
 {
+
+/**
+ * Enumeration of axis types for rotations
+ */
+enum class RotationAxisType
+{
+  X = 0, // X axis
+  Y = 1, // Y axis
+  Z = 2  // Z axis
+};
+
+/**
+ * Define a variant type that can hold references to different CSG object types
+ */
+typedef std::variant<std::reference_wrapper<const CSGSurface>,
+                     std::reference_wrapper<const CSGCell>,
+                     std::reference_wrapper<const CSGUniverse>,
+                     std::reference_wrapper<const CSGRegion>,
+                     std::reference_wrapper<const CSGLattice>>
+    CSGObjectVariant;
 
 /**
  * CSGBase creates an internal representation of a Constructive Solid Geometry (CSG)
@@ -60,6 +82,13 @@ public:
   }
 
   /**
+   * @brief Remove a Surface object passed in by reference from the stored surface list
+   *
+   * @param surface reference to surface to delete
+   */
+  void deleteSurface(const CSGSurface & surface);
+
+  /**
    * @brief Get all surface objects
    *
    * @return list of references to all CSGSurface objects in CSGBase
@@ -79,6 +108,14 @@ public:
   {
     return _surface_list.getSurface(name);
   }
+
+  /**
+   * @brief Check if a surface with given name exists in CSGBase object
+   *
+   * @param name surface name
+   * @return true if surface with given name exists in CSGBase
+   */
+  bool hasSurface(const std::string & name) const { return _surface_list.hasSurface(name); }
 
   /**
    * @brief rename the specified surface
@@ -135,6 +172,28 @@ public:
                              const CSGUniverse * add_to_univ = nullptr);
 
   /**
+   * @brief Create a Lattice Cell object
+   *
+   * @param name unique cell name
+   * @param fill_lattice lattice that will fill the cell
+   * @param region cell region
+   * @param add_to_univ (optional) universe to which this cell will be added (default is root
+   * universe)
+   * @return reference to cell that is created
+   */
+  const CSGCell & createCell(const std::string & name,
+                             const CSGLattice & fill_lattice,
+                             const CSGRegion & region,
+                             const CSGUniverse * add_to_univ = nullptr);
+
+  /**
+   * @brief Remove a Cell object passed in by reference from the stored cell list
+   *
+   * @param cell reference to cell to delete
+   */
+  void deleteCell(const CSGCell & cell);
+
+  /**
    * @brief Get all cell objects
    *
    * @return list of references to all CSGCell objects in CSGBase
@@ -151,6 +210,14 @@ public:
    * @return reference to CSGCell object
    */
   const CSGCell & getCellByName(const std::string & name) const { return _cell_list.getCell(name); }
+
+  /**
+   * @brief Check if a cell with given name exists in CSGBase object
+   *
+   * @param name cell name
+   * @return true if cell with given name exists in CSGBase
+   */
+  bool hasCell(const std::string & name) const { return _cell_list.hasCell(name); }
 
   /**
    * @brief rename the specified cell
@@ -170,6 +237,37 @@ public:
    * @param region new region to assign to cell
    */
   void updateCellRegion(const CSGCell & cell, const CSGRegion & region);
+
+  /**
+   * @brief reset the fill of the specified cell to void
+   *
+   * @param cell cell to update the fill for
+   */
+  void resetCellFill(const CSGCell & cell);
+
+  /**
+   * @brief change the fill of the specified cell to a material fill
+   *
+   * @param cell cell to update the fill for
+   * @param mat_name name of material fill
+   */
+  void updateCellFill(const CSGCell & cell, const std::string & mat_name);
+
+  /**
+   * @brief change the fill of the specified cell to a universe fill
+   *
+   * @param cell cell to update the fill for
+   * @param univ pointer to universe fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGUniverse * univ);
+
+  /**
+   * @brief change the fill of the specified cell to a lattice fill
+   *
+   * @param cell cell to update the fill for
+   * @param lattice pointer to lattice fill
+   */
+  void updateCellFill(const CSGCell & cell, const CSGLattice * lattice);
 
   /**
    * @brief Get the Root Universe object
@@ -219,6 +317,13 @@ public:
    */
   const CSGUniverse & createUniverse(const std::string & name,
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);
+
+  /**
+   * @brief Remove a Universe object passed in by reference from the stored universe list
+   *
+   * @param univ reference to universe to delete
+   */
+  void deleteUniverse(const CSGUniverse & univ);
 
   /**
    * @brief Add a cell to an existing universe
@@ -276,6 +381,150 @@ public:
   }
 
   /**
+   * @brief Check if a universe with given name exists in CSGBase object
+   *
+   * @param name universe name
+   * @return true if universe with given name exists in CSGBase
+   */
+  bool hasUniverse(const std::string & name) const { return _universe_list.hasUniverse(name); }
+
+  /**
+   * @brief add a unique lattice pointer to this base instance; universes that make the lattice
+   * must already be a part of this CSGBase instance.
+   *
+   * @param lattice pointer to lattice to add
+   *
+   * @return reference to CSGLattice that was added
+   */
+  template <typename LatticeType = CSGLattice>
+  const LatticeType & addLattice(std::unique_ptr<LatticeType> lattice)
+  {
+    static_assert(std::is_base_of_v<CSGLattice, LatticeType>, "Is not a CSGLattice");
+    // make sure all universes are a part of this base instance
+    auto universes = lattice->getUniverses();
+    for (auto univ_list : universes)
+      for (const CSGUniverse & univ : univ_list)
+        if (!checkUniverseInBase(univ))
+          mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
+                     ". Universe " + univ.getName() + " is not in the CSGBase instance.");
+
+    if (lattice->getOuterType() == "UNIVERSE")
+    {
+      const CSGUniverse & outer_univ = lattice->getOuterUniverse();
+      if (!checkUniverseInBase(outer_univ))
+        mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
+                   ". Outer universe " + outer_univ.getName() + " is not in the CSGBase instance.");
+    }
+    auto & lat_ref = _lattice_list.addLattice(std::move(lattice));
+    return dynamic_cast<LatticeType &>(lat_ref);
+  }
+
+  /**
+   * @brief Remove a Lattice object passed in by reference from the stored lattice list
+   *
+   * @param lattice reference to lattice to delete
+   */
+  void deleteLattice(const CSGLattice & lattice);
+
+  /**
+   * @brief set location in the lattice to be the provided universe
+   *
+   * @param lattice lattice to update
+   * @param universe universe to set at the location
+   * @param index index of the lattice element (int, int)
+   */
+  void setUniverseAtLatticeIndex(const CSGLattice & lattice,
+                                 const CSGUniverse & universe,
+                                 std::pair<int, int> index);
+
+  /**
+   * @brief Set provided universes as the layout of the lattice.
+   *
+   * @param lattice lattice to add universes to
+   * @param universes list of list of universes in the proper layout for the lattice type and
+   * dimensions
+   */
+  void setLatticeUniverses(
+      const CSGLattice & lattice,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes);
+
+  /**
+   * @brief rename the lattice
+   *
+   * @param lattice lattice to rename
+   * @param name new name
+   */
+  void renameLattice(const CSGLattice & lattice, const std::string & name)
+  {
+    _lattice_list.renameLattice(lattice, name);
+  }
+
+  /**
+   * @brief Set the outer fill for the lattice to the material name provided. This will set the
+   * outer type to CSG_MATERIAL regardless of its previous outer type.
+   *
+   * @param lattice lattice to update
+   * @param outer_name name of material to use as outer fill between lattice elements
+   */
+  void setLatticeOuter(const CSGLattice & lattice, const std::string & outer_name);
+
+  /**
+   * @brief Set the outer fill for the lattice to the universe provided. This will set the outer
+   * type to UNIVERSE regardless of its previous outer type.
+   *
+   * @param lattice lattice to update
+   * @param outer_univ universe to use as outer fill between lattice elements
+   */
+  void setLatticeOuter(const CSGLattice & lattice, const CSGUniverse & outer_univ);
+
+  /**
+   * @brief reset the outer fill for the lattice to VOID
+   *
+   * @param lattice lattice to update
+   */
+  void resetLatticeOuter(const CSGLattice & lattice);
+
+  /**
+   * @brief Get all lattice objects
+   *
+   * @return list of references to CSGLattice objects in this CSGBase instance
+   */
+  std::vector<std::reference_wrapper<const CSGLattice>> getAllLattices() const
+  {
+    return _lattice_list.getAllLattices();
+  }
+
+  /**
+   * @brief Get a lattice object of the specified type by name
+   * This is a templated method with a default type of CSGLattice. If a specific lattice type
+   * is needed, it can be specified when calling. If the type is unknown or not specified,
+   * it will default to CSGLattice to get the base class reference.
+   * NOTE: if CSGLattice is used as the template type, any lattice type-specific attributes or
+   * methods may not be accessible, except using a reference cast.
+   *
+   * @param name lattice name
+   * @return reference to CSGLattice object
+   */
+  template <typename LatticeType = CSGLattice>
+  const LatticeType & getLatticeByName(const std::string & name)
+  {
+    const CSGLattice & lattice = _lattice_list.getLattice(name);
+    const LatticeType * typed_lattice = dynamic_cast<const LatticeType *>(&lattice);
+    if (!typed_lattice)
+      mooseError("Cannot get lattice " + name + ". Lattice is not of specified type " +
+                 MooseUtils::prettyCppType<LatticeType>());
+    return *typed_lattice;
+  }
+
+  /**
+   * @brief Check if a lattice with given name exists in CSGBase object
+   *
+   * @param name lattice name
+   * @return true if lattice with given name exists in CSGBase
+   */
+  bool hasLattice(const std::string & name) const { return _lattice_list.hasLattice(name); }
+
+  /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
    * of the incoming CSGBase will be added to the existing root universe of this
    * CSGBase.
@@ -315,6 +564,7 @@ public:
   /**
    * @brief generate the JSON representation output for the CSG object
    *
+   * @return nlohmann::json JSON object representing the CSG model
    */
   nlohmann::json generateOutput() const;
 
@@ -323,6 +573,63 @@ public:
 
   /// Operator overload for checking if two CSGBase objects are not equal
   bool operator!=(const CSGBase & other) const;
+
+  /**
+   * @brief Apply a transformation to a CSG object
+   *
+   * @param csg_object The CSG object to transform (Surface, Cell, Universe, Region, or Lattice)
+   * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
+   * @param values tuple of transformation values (3 values for any transformation type)
+   */
+  void addTransformation(const CSGObjectVariant & csg_object,
+                         TransformationType type,
+                         const std::tuple<Real, Real, Real> & values);
+
+  /**
+   * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
+   * @param distances size 3 tuple with translation distances in x, y, and z directions {x, y, z}
+   */
+  void applyTranslation(const CSGObjectVariant & csg_object,
+                        const std::tuple<Real, Real, Real> & distances)
+  {
+    addTransformation(csg_object, TransformationType::TRANSLATION, distances);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param angles size 3 tuple {phi, theta, psi} with rotation angles in degrees
+   */
+  void applyRotation(const CSGObjectVariant & csg_object,
+                     const std::tuple<Real, Real, Real> & angles)
+  {
+    addTransformation(csg_object, TransformationType::ROTATION, angles);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object about a specified axis (X, Y, Z).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param axis Axis type (X, Y, or Z) about which to rotate
+   * @param angle angle in degrees to rotate about the specified axis
+   */
+  void
+  applyAxisRotation(const CSGObjectVariant & csg_object, RotationAxisType axis, const Real angle);
+
+  /**
+   * @brief Scale a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to scale (Surface, Cell, Universe, Region, or Lattice)
+   * @param values size 3 tuple with scaling values in x, y, and z directions {x, y, z}
+   */
+  void applyScaling(const CSGObjectVariant & csg_object,
+                    const std::tuple<Real, Real, Real> & values)
+  {
+    addTransformation(csg_object, TransformationType::SCALE, values);
+  }
 
 private:
   /**
@@ -391,6 +698,20 @@ private:
   CSGUniverseList & getUniverseList() { return _universe_list; }
 
   /**
+   * @brief Get a const reference to the CSGLatticeList object
+   *
+   * @return CSGLatticeList
+   */
+  const CSGLatticeList & getLatticeList() const { return _lattice_list; }
+
+  /**
+   * @brief Get the CSGLatticeList object
+   *
+   * @return CSGLatticeList
+   */
+  CSGLatticeList & getLatticeList() { return _lattice_list; }
+
+  /**
    * @brief join a separate CSGSurfaceList object to this one
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
@@ -403,6 +724,13 @@ private:
    * @param cell_list CSGCellList from a separate CSGBase object
    */
   void joinCellList(CSGCellList & cell_list);
+
+  /**
+   * @brief join a separate CSGLatticeList object to this one
+   *
+   * @param lattice_list CSGLatticeList from a separate CSGBase object
+   */
+  void joinLatticeList(CSGLatticeList & lattice_list);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
@@ -441,11 +769,17 @@ private:
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
 
+  // check that surface being accessed is a part of this CSGBase instance
+  bool checkSurfaceInBase(const CSGSurface & surface) const;
+
   // check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;
 
   // check that universe being accessed is a part of this CSGBase instance
   bool checkUniverseInBase(const CSGUniverse & universe) const;
+
+  // check that lattice being accessed is a part of this CSGBase instance
+  bool checkLatticeInBase(const CSGLattice & lattice) const;
 
   /**
    * @brief Add a new cell to the cell list based on a cell reference.
@@ -463,6 +797,14 @@ private:
    */
   const CSGUniverse & addUniverseToList(const CSGUniverse & univ);
 
+  /**
+   * @brief Add a new lattice to the lattice list based on a lattice reference.
+   * This method is called by the copy constructor of CSGBase
+   *
+   * @param lattice reference to CSGLattice that should be added to universe list
+   */
+  const CSGLattice & addLatticeToList(const CSGLattice & lattice);
+
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
 
@@ -471,6 +813,9 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
+
+  /// List of lattices associated with CSG object
+  CSGLatticeList _lattice_list;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing

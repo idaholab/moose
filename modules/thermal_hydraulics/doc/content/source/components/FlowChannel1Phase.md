@@ -1,6 +1,7 @@
 # FlowChannel1Phase
 
-This component is a single-phase [flow channel](component_groups/flow_channel.md).
+This component is a single-phase [flow channel](component_groups/flow_channel.md),
+which implements the [single-phase flow model](theory_manual/vace_model/index.md).
 
 ## Usage
 
@@ -23,6 +24,8 @@ the following parameters:
 - [!param](/Components/FlowChannel1Phase/initial_p)
 - [!param](/Components/FlowChannel1Phase/initial_T)
 - [!param](/Components/FlowChannel1Phase/initial_vel)
+
+If passive transport variables should be modeled, then [!param](/Components/FlowChannel1Phase/passives_names) provides the names of these variables $y$, and [!param](/Components/FlowChannel1Phase/initial_passives) provides the initial values. Note that the corresponding solution variables are $y A$, which appends `_times_area` to each of the provided names.
 
 This component offers options to output quantities via vector post-processors:
 
@@ -50,6 +53,7 @@ The following solution variables are created on the flow channel:
 | `rhoA` | $\rho A$ | Mass per unit length \[kg/m\] |
 | `rhouA` | $\rho u A$ | Momentum per unit length; mass flow rate \[kg/s\] |
 | `rhoEA` | $\rho E A$ | Energy per unit length \[J/m\] |
+| `<passive_i>_times_area` | $y A$ | Passive transport variable $i$, if provided \[amount/m$^3$\] |
 
 The following auxiliary variables are created on the flow channel:
 

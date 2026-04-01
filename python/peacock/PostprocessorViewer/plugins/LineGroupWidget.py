@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
 from PyQt5 import QtCore, QtWidgets
@@ -47,10 +47,12 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         # Store the data and initialize the storage of the toggles to be created.
         self._axes = axes
         self._data = data
-        self._toggles = collections.OrderedDict() # maintains order with widget creation, so variable labels remain in order
-        self._artists = dict() # artist storage to allow removing lines
+        self._toggles = (
+            collections.OrderedDict()
+        )  # maintains order with widget creation, so variable labels remain in order
+        self._artists = dict()  # artist storage to allow removing lines
         self._initialized = False
-        self._time = None # The time index to extract
+        self._time = None  # The time index to extract
 
         # Setup this QGroupBox
         self.setTitle(data.filename())
@@ -64,13 +66,15 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.setLayout(self.MainLayout)
 
         # No data moose
-        self.NoDataMessage = QtWidgets.QLabel('\nNo data currently available, this will update automatically.\n')
+        self.NoDataMessage = QtWidgets.QLabel(
+            "\nNo data currently available, this will update automatically.\n"
+        )
 
         # Builds the primary axis/variable controls
         self.AxisSelectLayout = QtWidgets.QHBoxLayout()
         self.AxisSelectLayout.setSpacing(10)
         self.AxisSelectLayout.setContentsMargins(0, 0, 0, 0)
-        self.AxisVariableLabel = QtWidgets.QLabel('Primary Variable:')
+        self.AxisVariableLabel = QtWidgets.QLabel("Primary Variable:")
         self.AxisVariable = QtWidgets.QComboBox()
         self.AxisVariable.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -157,7 +161,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
             for variable, toggle in self._toggles.items():
                 if toggle.isValid():
                     settings = toggle.settings()
-                    i = settings.pop('axis')
+                    i = settings.pop("axis")
                     y_vars[i].append(variable)
                     y = self._data(variable, time=self._time)
                     if self._axes[i]:
@@ -181,7 +185,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         y2_vars = []
         for variable, toggle in self._toggles.items():
             if toggle.isValid():
-                if toggle.axis() == 'right':
+                if toggle.axis() == "right":
                     y2_vars.append(variable)
                 else:
                     y_vars.append(variable)
@@ -210,15 +214,21 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
         # Get x-axis data
         if self._time:
-            output += ['x = data({}, time={})'.format(repr(str(self.AxisVariable.currentText())), repr(self._time))]
+            output += [
+                "x = data({}, time={})".format(
+                    repr(str(self.AxisVariable.currentText())), repr(self._time)
+                )
+            ]
         else:
-            output += ['x = data({})'.format(repr(str(self.AxisVariable.currentText())))]
+            output += [
+                "x = data({})".format(repr(str(self.AxisVariable.currentText())))
+            ]
 
         # Plot the results
         for toggle in self._toggles.values():
             if toggle.isValid():
                 out, imp = toggle.repr(time=self._time)
-                output += ['']
+                output += [""]
                 output += out
                 imports += imp
 
@@ -233,7 +243,9 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
 
         # Clear the widgets
         for toggle in self._toggles.values():
-            toggle.setVisible(False) # If I don't do this, there is a ghosted image of the widget hanging around
+            toggle.setVisible(
+                False
+            )  # If I don't do this, there is a ghosted image of the widget hanging around
             self.MainLayout.removeWidget(toggle)
             toggle.setParent(None)
         self._toggles.clear()
@@ -262,7 +274,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         if create:
             # Create a toggle control for each piece of data
             for var in self._data.variables():
-                style, color = next(self._cycle, ('-', [0, 0, 0]))
+                style, color = next(self._cycle, ("-", [0, 0, 0]))
                 toggle = LineSettingsWidget(var, linestyle=style, color=color)
                 toggle.clicked.connect(self.plot)
                 self.MainLayout.addWidget(toggle)
@@ -280,7 +292,6 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         Setup method for no data label.
         """
         qobject.setText()
-
 
     def _setupAxisVariable(self, qobject):
         """
@@ -328,6 +339,7 @@ class LineGroupWidget(peacock.base.MooseWidget, QtWidgets.QGroupBox):
         self.axesModified.emit()
         self.plot()
 
+
 def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     """
     Create widgets for running LineGroupWidget
@@ -339,18 +351,21 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     import itertools
 
     import matplotlib
+
     matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
-    matplotlib.rcParams["figure.dpi"] = (100)
+    matplotlib.rcParams["figure.dpi"] = 100
 
     # Create main widget
     widget = PostprocessorViewer(plugins=[FigurePlugin])
-    widget.onSetFilenames(['empty_file'])
+    widget.onSetFilenames(["empty_file"])
     layout = widget.currentWidget().LeftLayout
     window = widget.currentWidget().FigurePlugin
     window.setFixedSize(QtCore.QSize(625, 625))
 
     # Create LineGroupWidget
-    cycle = itertools.product(['-', '--', '-.', ':'], plt.cm.Paired(np.linspace(0, 1, 11)))
+    cycle = itertools.product(
+        ["-", "--", "-.", ":"], plt.cm.Paired(np.linspace(0, 1, 11))
+    )
     control = LineGroupWidget(window.axes(), data, cycle)
     layout.addWidget(control)
     control.axesModified.connect(window.onAxesModified)
@@ -359,10 +374,10 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
         """
         A labeling function for setting axis labels.
         """
-        x,y,y2 = control.getAxisLabels()
+        x, y, y2 = control.getAxisLabels()
         control._axes[0].set_xlabel(x)
-        control._axes[0].set_ylabel('; '.join(y))
-        control._axes[1].set_ylabel('; '.join(y2))
+        control._axes[0].set_ylabel("; ".join(y))
+        control._axes[1].set_ylabel("; ".join(y2))
 
     control.variablesChanged.connect(axis_label)
 
@@ -371,13 +386,13 @@ def main(data, pp_class=mooseutils.VectorPostprocessorReader):
     return control, widget, window
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     import mooseutils
     from ..PostprocessorDataWidget import PostprocessorDataWidget
 
     app = QtWidgets.QApplication(sys.argv)
-    filename = '../../../tests/input/white_elephant_jan_2016.csv'
+    filename = "../../../tests/input/white_elephant_jan_2016.csv"
     reader = mooseutils.PostprocessorReader(filename)
     data = PostprocessorDataWidget(reader)
     control, widget, window = main(data)

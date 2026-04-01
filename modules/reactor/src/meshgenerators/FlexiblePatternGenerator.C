@@ -648,6 +648,6 @@ FlexiblePatternGenerator::generate()
         _external_boundary_name;
   }
   (*_build_mesh)->find_neighbors();
-  (*_build_mesh)->set_isnt_prepared();
+  (*_build_mesh)->unset_is_prepared();
   return std::move(*_build_mesh);
 }

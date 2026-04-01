@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import subprocess, os, platform, re, sys, traceback
 from datetime import date
+
 
 class PreMake:
     def __init__(self):
@@ -19,29 +20,29 @@ class PreMake:
         try:
             from versioner import Versioner
         except Exception as e:
-            warning = 'Failed to initialize PreMake for version checking; '
-            warning += 'this may be ignored but may suggest an environment issue.'
-            warning += f'\n\n{traceback.format_exc()}'
+            warning = "Failed to initialize PreMake for version checking; "
+            warning += "this may be ignored but may suggest an environment issue."
+            warning += f"\n\n{traceback.format_exc()}"
             self.warn(warning)
 
-        self.packages = Versioner().get_packages('HEAD')
+        self.packages = Versioner().get_packages("HEAD")
 
     @staticmethod
     def printColored(msg, color, **kwargs):
         """
         Prints a colored message
         """
-        color_vals = {'red': 31, 'green': 32, 'yellow': 33}
+        color_vals = {"red": 31, "green": 32, "yellow": 33}
         if color not in color_vals:
-            raise Exception('Unknown prefix color {}'.format(color))
-        print(f'\033[{color_vals[color]}m{msg}\033[0m', **kwargs)
+            raise Exception("Unknown prefix color {}".format(color))
+        print(f"\033[{color_vals[color]}m{msg}\033[0m", **kwargs)
 
     @staticmethod
     def warn(msg):
         """
         Prints a warning in yellow
         """
-        PreMake.printColored(f'WARNING: {msg}', 'yellow', file=sys.stderr)
+        PreMake.printColored(f"WARNING: {msg}", "yellow", file=sys.stderr)
 
     @staticmethod
     def condaList():
@@ -51,12 +52,14 @@ class PreMake:
         Separated out on purpose so that we can mock it in unit tests,
         running tests even when conda doesn't exist.
         """
-        cmd = ['conda', 'list', '--json']
-        process = subprocess.run(cmd, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    encoding='utf-8')
+        cmd = ["conda", "list", "--json"]
+        process = subprocess.run(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8"
+        )
         if process.returncode != 0:
-            raise Exception(f"Failed to get conda env: '{' '.join(cmd)}'\n{process.stdout}")
+            raise Exception(
+                f"Failed to get conda env: '{' '.join(cmd)}'\n{process.stdout}"
+            )
 
         try:
             import json
@@ -78,17 +81,19 @@ class PreMake:
         """
         conda_env = None
 
-        if os.environ.get('CONDA_PREFIX') is not None:
+        if os.environ.get("CONDA_PREFIX") is not None:
             conda_list = PreMake.condaList()
 
             conda_env = {}
             for entry in conda_list:
-                conda_env[entry['name']] = entry
+                conda_env[entry["name"]] = entry
 
                 # Make sure the keys exist that we expect to be there
-                for key in ['base_url', 'build_string', 'version']:
+                for key in ["base_url", "build_string", "version"]:
                     if key not in entry:
-                        raise Exception(f'Missing expected key {key} in conda package list')
+                        raise Exception(
+                            f"Missing expected key {key} in conda package list"
+                        )
 
         return conda_env
 
@@ -98,11 +103,11 @@ class PreMake:
         Gets the apptainer generator generated apptainer environment
         information if it exists.
         """
-        prefix = 'MOOSE_APPTAINER_GENERATOR_'
+        prefix = "MOOSE_APPTAINER_GENERATOR_"
         apptainer_env = {}
         for key, value in os.environ.items():
             if key.startswith(prefix):
-                apptainer_env[key.replace(prefix, '')] = value
+                apptainer_env[key.replace(prefix, "")] = value
         return apptainer_env if apptainer_env else None
 
     class VersionMismatch(Exception):
@@ -113,19 +118,22 @@ class PreMake:
         Exception that denotes the mismatch of a version or build
         in a conda packages
         """
-        def __init__(self, package, version, build, required_version, required_build, msg=None):
+
+        def __init__(
+            self, package, version, build, required_version, required_build, msg=None
+        ):
             self.package = package
             self.version = version
             self.required_version = required_version
             self.build = build
             self.required_build = required_build
 
-            current = f'{version}'
-            required = f'{required_version}'
+            current = f"{version}"
+            required = f"{required_version}"
             # Same version, different build, include build string
             if version == required_version:
-                current += f'={build}'
-                required += f'={required_build}'
+                current += f"={build}"
+                required += f"={required_build}"
 
             full_message = f"Conda package '{package}' is currently at version "
             full_message += f"'{current}' and the required version is '{required}'.\n"
@@ -146,7 +154,7 @@ class PreMake:
                 full_message += f"    conda install {package}={required}"
 
             if msg:
-                full_message += f'\n{msg}'
+                full_message += f"\n{msg}"
             super().__init__(full_message)
 
         @staticmethod
@@ -154,42 +162,45 @@ class PreMake:
             """
             Helper for parsing a date from a version if the version is a date
             """
-            version_date_re = re.search(r'(\d{4}).(\d{2}).(\d{2})', version)
+            version_date_re = re.search(r"(\d{4}).(\d{2}).(\d{2})", version)
             if version_date_re is None:
                 return None
-            return date(int(version_date_re.group(1)),
-                        int(version_date_re.group(2)),
-                        int(version_date_re.group(3)))
+            return date(
+                int(version_date_re.group(1)),
+                int(version_date_re.group(2)),
+                int(version_date_re.group(3)),
+            )
 
     class ApptainerVersionMismatch(VersionMismatch):
         """
         Exception that denotes the mismatch of an apptainer
         container version
         """
+
         def __init__(self, name, name_base, current_version, required_version):
             self.name = name
             self.name_base = name_base
             self.current_version = current_version
             self.required_version = required_version
 
-            message = f'Container {name} is currently at version {current_version} '
-            message += f'and the required version is {required_version}.\n'
-            message += f'Before updating the container, make sure that your version '
-            message += f'of MOOSE is up to date.\n\n'
+            message = f"Container {name} is currently at version {current_version} "
+            message += f"and the required version is {required_version}.\n"
+            message += f"Before updating the container, make sure that your version "
+            message += f"of MOOSE is up to date.\n\n"
 
             # Using a loaded module on INL HPC
-            CONTAINER_MODULE_NAME = os.environ.get('CONTAINER_MODULE_NAME')
-            if CONTAINER_MODULE_NAME == name.replace(f'-{platform.machine()}', ''):
-                message += 'You can obtain the correct container via the module '
-                message += f'{CONTAINER_MODULE_NAME}/{required_version}.'
+            CONTAINER_MODULE_NAME = os.environ.get("CONTAINER_MODULE_NAME")
+            if CONTAINER_MODULE_NAME == name.replace(f"-{platform.machine()}", ""):
+                message += "You can obtain the correct container via the module "
+                message += f"{CONTAINER_MODULE_NAME}/{required_version}."
             # Not using a loaded module on INL HPC
             else:
-                message += 'You can obtain the correct container at '
-                if name_base == 'moose-dev':
-                    harbor = 'harbor.hpc.inl.gov'
+                message += "You can obtain the correct container at "
+                if name_base == "moose-dev":
+                    harbor = "harbor.hpc.inl.gov"
                 else:
-                    harbor = 'mooseharbor.hpc.inl.gov'
-                message += f'oras://{harbor}/{name_base}/{name}:{required_version}.'
+                    harbor = "mooseharbor.hpc.inl.gov"
+                message += f"oras://{harbor}/{name_base}/{name}:{required_version}."
 
             super().__init__(message)
 
@@ -202,8 +213,8 @@ class PreMake:
         except self.VersionMismatch as e:
             self.warn(str(e))
         except Exception as e:
-            warning = 'PreMake check failed; this may be ignored but may suggest an environment issue'
-            warning += f'\n\n{traceback.format_exc()}'
+            warning = "PreMake check failed; this may be ignored but may suggest an environment issue"
+            warning += f"\n\n{traceback.format_exc()}"
             self.warn(warning)
 
     def _checkCondaPackage(self, package_name, versioner_name=None):
@@ -215,28 +226,31 @@ class PreMake:
             if versioner_name is None:
                 versioner_name = package_name
             versioner_package = self.packages[versioner_name]
-            package_tuple = (package['version'], package['build_number'])
-            version_tuple = (versioner_package.conda.version,
-                             versioner_package.conda.build_number)
+            package_tuple = (package["version"], package["build_number"])
+            version_tuple = (
+                versioner_package.conda.version,
+                versioner_package.conda.build_number,
+            )
             if package_tuple != version_tuple:
-                raise self.CondaVersionMismatch(package_name,
-                                                *package_tuple,
-                                                *version_tuple,
-                                                version_tuple[1])
+                raise self.CondaVersionMismatch(
+                    package_name, *package_tuple, *version_tuple, version_tuple[1]
+                )
 
     def _checkApptainer(self):
-        library = self.apptainer_env['LIBRARY']
+        library = self.apptainer_env["LIBRARY"]
 
         package = self.packages.get(library)
         if not package or not package.apptainer:
             return
 
         required_version = package.apptainer.tag
-        current_version = self.apptainer_env['VERSION']
+        current_version = self.apptainer_env["VERSION"]
         if required_version != current_version:
-            name = self.apptainer_env['NAME']
+            name = self.apptainer_env["NAME"]
             name_base = package.apptainer.name_base
-            raise self.ApptainerVersionMismatch(name, name_base, current_version, required_version)
+            raise self.ApptainerVersionMismatch(
+                name, name_base, current_version, required_version
+            )
 
     def _check(self):
         """
@@ -248,11 +262,12 @@ class PreMake:
 
         # We have conda available, check those environments
         if self.conda_env:
-            self._checkCondaPackage('moose-dev')
-            self._checkCondaPackage('moose-libmesh', 'libmesh')
-            self._checkCondaPackage('moose-petsc', 'petsc')
-            self._checkCondaPackage('moose-mpi', 'mpi')
-            self._checkCondaPackage('moose-wasp', 'wasp')
+            self._checkCondaPackage("moose-dev")
+            self._checkCondaPackage("moose-libmesh", "libmesh")
+            self._checkCondaPackage("moose-petsc", "petsc")
+            self._checkCondaPackage("moose-mpi", "mpi")
+            self._checkCondaPackage("moose-wasp", "wasp")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     PreMake().check()

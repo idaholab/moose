@@ -7,122 +7,146 @@
     [core]
       type = PythonUnitTest
       input = test_core.py
+      min_slots = 2 # uses threads
       detail = "markdown-like syntax,"
     []
     [special]
       type = PythonUnitTest
       input = test_special.py
+      min_slots = 2 # uses threads
       detail = "special characters,"
     []
     [comment]
       type = PythonUnitTest
       input = test_comment.py
+      min_slots = 2 # uses threads
       detail = "comments within markdown syntax,"
     []
     [acronym]
       type = PythonUnitTest
       input = test_acronym.py
+      min_slots = 2 # uses threads
       detail = "acronyms within markdown syntax,"
     []
     [sqa]
       type = PythonUnitTest
       input = test_sqa.py
+      min_slots = 2 # uses threads
       detail = "building software quality documents,"
     []
     [autolink]
       type = PythonUnitTest
       input = test_autolink.py
+      min_slots = 2 # uses threads
       detail = "automatically cross-linking files,"
     []
     [civet]
       type = PythonUnitTest
       input = test_civet.py
+      min_slots = 2 # uses threads
       detail = "linking to continuous integration testing results,"
     []
     [content]
       type = PythonUnitTest
       input = test_content.py
+      min_slots = 2 # uses threads
       detail = "listing and linking to content within and across documents,"
     []
     [appsyntax]
       type = PythonUnitTest
       input = test_appsyntax.py
+      min_slots = 4 # uses threads and is heavy
       detail = "automatically retrieving application syntax,"
       max_time = 400
     []
     [alert]
       type = PythonUnitTest
       input = test_alert.py
+      min_slots = 2 # uses threads
       detail = "creating alert text boxes,"
     []
     [media]
       type = PythonUnitTest
       input = test_media.py
+      min_slots = 2 # uses threads
       detail = "displaying images and videos,"
     []
     [listing]
       type = PythonUnitTest
       input = test_listing.py
+      min_slots = 4 # uses threads
       detail = "creating source code listings,"
     []
     [gallery]
       type = PythonUnitTest
       input = test_gallery.py
+      min_slots = 2 # uses threads
       detail = "displaying image galleries,"
     []
     [template]
       type = PythonUnitTest
       input = test_template.py
+      min_slots = 2 # uses threads
       detail = "template files,"
     []
     [devel]
       type = PythonUnitTest
       input = test_devel.py
+      min_slots = 2 # uses threads
       detail = "creating syntax examples,"
     []
     [ifelse]
       type = PythonUnitTest
       input = test_ifelse.py
+      min_slots = 2 # uses threads
       detail = "conditional operations, "
     []
     [pysyntax]
       type = PythonUnitTest
       input = test_pysyntax.py
+      min_slots = 2 # uses threads
       detail = "automatically retrieving python syntax,"
     []
     [modal]
       type = PythonUnitTest
       input = test_modal.py
+      min_slots = 2 # uses threads
       detail = "create modal website content,"
     []
     [katex]
       type = PythonUnitTest
       input = test_katex.py
+      min_slots = 2 # uses threads
       detail = "support equations,"
     []
     [algorithm]
       type = PythonUnitTest
       input = test_algorithm.py
+      min_slots = 2 # uses threads
       detail = "displaying algorithmic pseudo-code,"
     []
     [datetime]
       type = PythonUnitTest
       input = test_datetime.py
+      min_slots = 2 # uses threads
       detail = "include date/time operations,"
     []
     [gitutils]
       type = PythonUnitTest
       input = test_gitutils.py
+      min_slots = 2 # uses threads
       detail = "include git repository information,"
     []
     [tagging]
       type = PythonUnitTest
       input = test_tagging.py
+      min_slots = 2 # uses threads
       detail = "support documentation tags for filtering, and"
     []
     [versioner]
       type = PythonUnitTest
       input = test_versioner.py
+      min_slots = 4 # uses threads
       detail = "reporting versions of systematically tracked packages."
     []
   []

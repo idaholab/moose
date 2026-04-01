@@ -1,0 +1,3 @@
+time,average1,average2,kokkos_average1,kokkos_average2,kokkos_sum
+0,1,2,1,2,0
+1,1,2,1,2,3

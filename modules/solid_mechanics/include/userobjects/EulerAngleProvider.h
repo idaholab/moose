@@ -21,8 +21,20 @@ class EulerAngleProvider : public GeneralUserObject
 public:
   static InputParameters validParams();
 
-  EulerAngleProvider(const InputParameters & parameters) : GeneralUserObject(parameters) {}
+  EulerAngleProvider(const InputParameters & parameters)
+    : GeneralUserObject(parameters),
+      _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles"))
+  {
+  }
 
-  virtual const EulerAngles & getEulerAngles(unsigned int) const = 0;
-  virtual unsigned int getGrainNum() const = 0;
+  virtual const EulerAngles & getEulerAngles(unsigned int i) const
+  {
+    mooseAssert(i < getGrainNum(), "Requesting Euler angles for an invalid grain id");
+    return _angles[i];
+  };
+
+  virtual unsigned int getGrainNum() const { return _angles.size(); };
+
+protected:
+  std::vector<EulerAngles> & _angles;
 };

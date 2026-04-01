@@ -40,9 +40,10 @@ Same applies to a class with in-class member initialization, which is equivalent
 Using a class with dynamic allocations will [incur a significant performance hit](syntax/Kokkos/index.md#kokkos_dynamic_allocation) and will break when it is used for stateful material properties.
 
 Instead, the material properties in Kokkos-MOOSE can be multi-dimensional to partially support the needs for dynamically-sized material properties.
-The dimension is provided as the second template argument `dimension`, which has the default value of 0 (scalar) and can be up to 4.
+The dimension is provided as the second template argument `dimension`, which has the default value of 0 (scalar).
 The size of each dimension is provied as a vector as the function argument `dims`.
-It requires a material property to have the same dimension and size at every quadrature point.
+When a material property is declared by multiple materials, it should have the same dimension over the entire domain, while the size of each dimension can be different between non-overlapping subdomains.
+However, a material property declared by boundary-restricted materials should have identical dimension sizes over the entire domain, even though the materials do not have overlapping boundaries.
 
 The material properties are stored as an object of type `Moose::Kokkos::MaterialProperty<type, dimension>`.
 Note that any material property object [should be stored as a concrete instance](syntax/Kokkos/index.md#kokkos_value_binding).
@@ -110,10 +111,20 @@ See the following source codes of `KokkosStatefulTest` for an example of statefu
 !listing test/src/kokkos/materials/KokkosStatefulTest.K id=kokkos-stateful-mat-source language=cpp
          caption=The `KokkosStatefulTest` source file.
 
+## On-Demand Properties
+
+In Kokkos-MOOSE, all material property data are stored for each quadrature point, regardless of whether the material properties are stateful or not.
+This is due to the massive parallelization of GPU that prevents storing material properties only for a single element or face.
+If you are unsure whether a material property will be actually requested by another object, you can declare the property as an on-demand property with `declareKokkosOnDemandProperty<type, dimension>(name, dims)`.
+The storage of an on-demand property is only allocated when there is any object consuming the property, aiding in reducing the memory usage and computational cost for unused material properties.
+When accessing an on-demand property in its declaring material, you should always check the validity of the property.
+See the following section on optional properties for more details.
+
 ## Optional Properties
 
 There is no special method and object for weakly coupled material properties in Kokkos-MOOSE.
-Instead, if a material property object is left uninitialized, it will simply evaluate to `false`.
+Instead, a material property object will simply evaluate to `false` when it is uninitialized or when it holds an on-demand material property not requested by any object.
+Namely, `if (property)` will evaluate to `false` for the above conditions.
 You can query the existence of a material property with `hasKokkosMaterialProperty<type, dimension>(name)` and optionally initialize the material property object to reproduce the same behavior with the optional material properties in the original MOOSE.
 
 See the following source codes of `KokkosVarCouplingMaterial` for an example of optional material properties:
@@ -124,6 +135,13 @@ See the following source codes of `KokkosVarCouplingMaterial` for an example of 
 !listing test/src/kokkos/materials/KokkosVarCouplingMaterial.K id=kokkos-var-coupling-mat-source language=cpp
          caption=The `KokkosVarCouplingMaterial` source file.
 
+## Constant Properties
+
+By default, material properties are computed and stored for each quadrature point.
+However, material properties are often constant within an element or subdomain, or vary little in space so that they can be approximated as constant without significant loss of accuracy.
+In this case, you can set the `constant_on` parameter of a material to `ELEMENT` or `SUBDOMAIN`, which makes the material properties declared by the material only computed and stored on per-element or per-subdomain basis.
+This can help save both computational cost and memory usage.
+
 ## Material Property Output
 
 Material property output is not supported by Kokkos-MOOSE yet.
@@ -132,11 +150,10 @@ Material property output is not supported by Kokkos-MOOSE yet.
 
 ### Evaluation of Material Properties on Element Faces
 
-Likewise the original MOOSE, Kokkos-MOOSE also creates three copies of materials for element and face material properties, which are distinguished by the combination of boolean flags `_bnd` and `_neighbor`.
-And it is crucial to optimize your material by switching off the declaration and evaluation of material properties that are not used on faces.
-In Kokkos-MOOSE, all material property data are stored for each quadrature point, regardless of whether the material properties are stateful or not.
-This is due to the massive parallelization of GPU that prevents evaluating materials element-by-element or face-by-face.
-Therefore, you can save a considerable amount of memory as well as computing time by switching off unused material properties.
+Analogously to the original MOOSE, Kokkos-MOOSE also creates three copies of materials for element and face material properties, which are distinguished by the combination of boolean flags `_bnd` and `_neighbor`.
+For Kokkos-MOOSE, it is crucial to optimize your material by switching off the declaration and evaluation of material properties that are not used on faces, because of the full storage of material properties.
+You can save a considerable amount of memory as well as computing time by switching off unused material properties.
+You can also leverage on-demand material properties to achieve the same effect.
 
 ### Unsupported Material Types
 

@@ -4,40 +4,76 @@
   [geometry]
     requirement = "The system shall support the generation of Constructive Solid Geometry (CSG) representations by correctly constructing a CSG object that "
     [csg_only]
-        type = 'JSONDiff'
-        input = 'csg_only_inf_planes.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_only_inf_planes_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'is uniquely generated from a single mesh generator input.'
+      type = 'JSONDiff'
+      input = 'csg_only_inf_planes.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_only_inf_planes_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'is uniquely generated from a single mesh generator input.'
     []
     [csg_only_chained]
-        type = 'JSONDiff'
-        input = 'csg_only_chained.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_only_chained_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'updates an existing CSG representation from another mesh generator.'
+      type = 'JSONDiff'
+      input = 'csg_only_chained.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_only_chained_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'updates an existing CSG representation from another mesh generator.'
+    []
+    [csg_only_chained_with_universe_cell_deletion]
+      type = 'JSONDiff'
+      input = 'csg_only_chained_with_universe_cell_deletion.i'
+      cli_args = '--csg-only csg_only_chained_out_csg.json'
+      jsondiff = 'csg_only_chained_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'that properly handles cell and universe deletion from CSGBase.'
     []
     [csg_only_one_to_many_dependencies]
-        type = 'JSONDiff'
-        input = 'csg_only_one_to_many_deps.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_only_one_to_many_deps_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'has a single mesh generator depend on multiple downstream mesh generators.'
+      type = 'JSONDiff'
+      input = 'csg_only_one_to_many_deps.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_only_one_to_many_deps_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'has a single mesh generator depend on multiple downstream mesh generators.'
+    []
+    [csg_only_cart_lattice]
+      type = 'JSONDiff'
+      input = 'csg_lattice_cart.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_lattice_cart_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'uses multiple existing CSG representations from other mesh generators to create a Cartesian lattice.'
+    []
+    [csg_only_hex_lattice]
+      type = 'JSONDiff'
+      input = 'csg_lattice_hex.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_lattice_hex_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'uses multiple existing CSG representations from other mesh generators to create a hexagonal lattice.'
+    []
+    [csg_only_nested_lattices]
+      type = 'JSONDiff'
+      input = 'csg_lattice_nested.i'
+      cli_args = '--csg-only'
+      jsondiff = 'csg_lattice_nested_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'has nested lattice structures built from existing CSG representations.'
     []
     [csg_only_final_generator]
-        type = 'JSONDiff'
-        input = 'csg_only_chained.i'
-        cli_args = 'Mesh/final_generator=inf_square --csg-only csg_only_inf_planes_out_csg.json'
-        jsondiff = 'csg_only_inf_planes_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
+      type = 'JSONDiff'
+      input = 'csg_only_chained.i'
+      cli_args = 'Mesh/final_generator=inf_square --csg-only csg_only_inf_planes_out_csg.json'
+      jsondiff = 'csg_only_inf_planes_out_csg.json'
+      recover = false
+      mesh_mode = REPLICATED
+      detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
     []
   []
   [errors]

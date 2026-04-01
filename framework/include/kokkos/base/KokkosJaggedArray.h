@@ -11,9 +11,7 @@
 
 #include "KokkosArray.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -26,11 +24,11 @@ struct JaggedArrayInnerDim
   /**
    * Size of each dimension
    */
-  dof_id_type dim[inner] = {0};
+  unsigned int dim[inner] = {0};
   /**
    * Stride of each dimension
    */
-  dof_id_type stride[inner + 1] = {0};
+  unsigned int stride[inner + 1] = {0};
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -38,19 +36,20 @@ struct JaggedArrayInnerDim
    * @param i The dimension index
    * @returns The size of the dimension
    */
-  KOKKOS_FUNCTION dof_id_type operator[](unsigned int i) const { return dim[i]; }
+  KOKKOS_FUNCTION unsigned int operator[](unsigned int i) const { return dim[i]; }
 #endif
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
 /**
- * The base class of the inner array wrapper. This object provides access to an inner array with
+ * The inner array wrapper class. This object provides access to an inner array with
  * local multi-dimensional indexing and is created as a temporary object by the jagged array class.
  * @tparam T The data type
  * @tparam inner The inner array dimension size
+ * @tparam layout The memory layout type
  */
-template <typename T, unsigned int inner>
-class JaggedArrayInnerDataBase
+template <typename T, unsigned int inner, LayoutType layout>
+class JaggedArrayInnerData
 {
 public:
   /**
@@ -58,7 +57,7 @@ public:
    * @param data The pointer to the inner array data
    * @param dim The inner array dimension information
    */
-  KOKKOS_FUNCTION JaggedArrayInnerDataBase(T * data, JaggedArrayInnerDim<inner> dim)
+  KOKKOS_FUNCTION JaggedArrayInnerData(T * data, JaggedArrayInnerDim<inner> dim)
     : _data(data), _dim(dim)
   {
   }
@@ -67,23 +66,29 @@ public:
    * Get the total inner array size
    * @returns The total inner array size
    */
-  KOKKOS_FUNCTION dof_id_type size() const { return _dim.stride[inner]; }
+  KOKKOS_FUNCTION unsigned int size() const { return _dim.stride[inner]; }
   /**
    * Get the size of a dimension of the inner array
    * @param dim The dimension index
    * @returns The size of the dimension of the inner array
    */
-  KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _dim[dim]; }
+  KOKKOS_FUNCTION unsigned int n(unsigned int dim) const { return _dim[dim]; }
   /**
    * Get an array entry
    * @param i The dimensionless inner array index
    */
-  KOKKOS_FUNCTION T & operator[](dof_id_type i) const
+  KOKKOS_FUNCTION T & operator[](unsigned int i) const
   {
     KOKKOS_ASSERT(i < _dim.stride[inner]);
 
     return _data[i];
   }
+  /**
+   * Get an array entry
+   * @param i The inner array index of each dimension
+   */
+  template <typename... indices>
+  KOKKOS_FUNCTION T & operator()(indices... i) const;
 
 protected:
   /**
@@ -96,112 +101,44 @@ protected:
   JaggedArrayInnerDim<inner> _dim;
 };
 
-#define usingKokkosJaggedArrayInnerDataBaseMembers(T, inner)                                       \
-private:                                                                                           \
-  using JaggedArrayInnerDataBase<T, inner>::_data;                                                 \
-  using JaggedArrayInnerDataBase<T, inner>::_dim
-
-/**
- * The specialization of the inner array wrapper class for each dimension.
- */
-///{@
-template <typename T, unsigned int inner>
-class JaggedArrayInnerData;
-
-template <typename T>
-class JaggedArrayInnerData<T, 1> : public JaggedArrayInnerDataBase<T, 1>
+template <typename T, unsigned int inner, LayoutType layout>
+template <typename... indices>
+KOKKOS_FUNCTION T &
+JaggedArrayInnerData<T, inner, layout>::operator()(indices... i) const
 {
-  usingKokkosJaggedArrayInnerDataBaseMembers(T, 1);
+  static_assert((std::is_convertible<indices, unsigned int>::value && ...),
+                "All arguments must be convertible to unsigned int");
+  static_assert(sizeof...(i) == inner, "Number of arguments should match array dimension");
 
-public:
-  /**
-   * Constructor
-   * @param data The pointer to the inner array data
-   * @param dim The inner array dimension information
-   */
-  KOKKOS_FUNCTION JaggedArrayInnerData(T * data, JaggedArrayInnerDim<1> dim)
-    : JaggedArrayInnerDataBase<T, 1>(data, dim)
+#ifdef DEBUG
   {
+    unsigned int idx[inner] = {static_cast<unsigned int>(i)...};
+
+    for (unsigned int d = 0; d < sizeof...(i); ++d)
+      KOKKOS_ASSERT(idx[d] < _dim[d]);
   }
+#endif
 
-  /**
-   * Get an array entry
-   * @param i0 The first dimension inner array index
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_type i0) const
-  {
-    KOKKOS_ASSERT(i0 < _dim[0]);
+  unsigned int idx = 0;
+  unsigned int d = 0;
 
-    return _data[i0];
-  }
-};
+  if constexpr (layout == LayoutType::LEFT)
+    (((idx +=
+       (d == 0 ? static_cast<unsigned int>(i) : static_cast<unsigned int>(i) * _dim.stride[d])),
+      ++d),
+     ...);
+  else
+    (((idx += (d == inner - 1 ? static_cast<unsigned int>(i)
+                              : static_cast<unsigned int>(i) * _dim.stride[d])),
+      ++d),
+     ...);
 
-template <typename T>
-class JaggedArrayInnerData<T, 2> : public JaggedArrayInnerDataBase<T, 2>
-{
-  usingKokkosJaggedArrayInnerDataBaseMembers(T, 2);
-
-public:
-  /**
-   * Constructor
-   * @param data The pointer to the inner array data
-   * @param dim The inner array dimension information
-   */
-  KOKKOS_FUNCTION JaggedArrayInnerData(T * data, JaggedArrayInnerDim<2> dim)
-    : JaggedArrayInnerDataBase<T, 2>(data, dim)
-  {
-  }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension inner array index
-   * @param i1 The second dimension inner array index
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_type i0, dof_id_type i1) const
-  {
-    KOKKOS_ASSERT(i0 < _dim[0]);
-    KOKKOS_ASSERT(i1 < _dim[1]);
-
-    return _data[_dim.stride[0] * i0 + _dim.stride[1] * i1];
-  }
-};
-
-template <typename T>
-class JaggedArrayInnerData<T, 3> : public JaggedArrayInnerDataBase<T, 3>
-{
-  usingKokkosJaggedArrayInnerDataBaseMembers(T, 3);
-
-public:
-  /**
-   * Constructor
-   * @param data The pointer to the inner array data
-   * @param dim The inner array dimension information
-   */
-  KOKKOS_FUNCTION JaggedArrayInnerData(T * data, JaggedArrayInnerDim<3> dim)
-    : JaggedArrayInnerDataBase<T, 3>(data, dim)
-  {
-  }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension inner array index
-   * @param i1 The second dimension inner array index
-   * @param i2 The third dimension inner array index
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_type i0, dof_id_type i1, dof_id_type i2) const
-  {
-    KOKKOS_ASSERT(i0 < _dim[0]);
-    KOKKOS_ASSERT(i1 < _dim[1]);
-    KOKKOS_ASSERT(i2 < _dim[2]);
-
-    return _data[_dim.stride[0] * i0 + _dim.stride[1] * i1 + _dim.stride[2] * i2];
-  }
-};
-///@}
+  return _data[idx];
+}
 #endif
 
 /**
- * The base class for Kokkos jagged arrays.
+ * The Kokkos jagged array class.
  * A Kokkos jagged array aids in treating jagged arrays conveniently and efficiently by using a
  * sequential data storage and providing multi-dimensional indexing using internal dope vectors.
  * A jagged array is divided into the inner and outer arrays. The outer array is the regular part of
@@ -216,30 +153,50 @@ public:
  * @tparam T The data type
  * @tparam inner The inner array dimension size
  * @tparam outer The outer array dimension size
+ * @tparam index_type The array index type
+ * @tparam layout The memory layout type
  */
-template <typename T, unsigned int inner, unsigned int outer>
-class JaggedArrayBase
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type = dof_id_type,
+          LayoutType layout = LayoutType::LEFT>
+class JaggedArray
 {
 public:
   /**
-   * Constructor
-   * @param layout The memory layout type
+   * Default constructor
    */
-  JaggedArrayBase(const LayoutType layout) : _layout(layout) {}
+  JaggedArray() = default;
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Constructor
+   */
+  template <typename... size_type>
+  JaggedArray(size_type... n)
+  {
+    create(n...);
+  }
+
   /**
    * Allocate outer array
    * @param n The vector containing the size of each dimension for the outer array
    */
-  void create(const std::vector<dof_id_type> & n);
+  void create(const std::vector<index_type> & n);
+  /**
+   * Allocate outer array
+   * @param n The size of each dimension for the outer array
+   */
+  template <typename... size_type>
+  void create(size_type... n);
   /**
    * Reserve inner array for an outer array entry
    * @param index The array containing the index for the outer array
    * @param dimension The array containing the size of each dimension for the inner array
    */
-  void reserve(const std::array<dof_id_type, outer> & index,
-               const std::array<dof_id_type, inner> & dimension);
+  void reserve(const std::array<uint64_t, outer> & index,
+               const std::array<uint64_t, inner> & dimension);
   /**
    * Setup array structure
    */
@@ -263,6 +220,28 @@ public:
     _data.copyToHost();
   }
   /**
+   * Copy data from host to device and deallocate host
+   */
+  void moveToDevice()
+  {
+    mooseAssert(_finalized, "KokkosJaggedArray not finalized.");
+
+    _dims.moveToDevice();
+    _offsets.moveToDevice();
+    _data.moveToDevice();
+  }
+  /**
+   * Copy data from device to host and deallocate device
+   */
+  void moveToHost()
+  {
+    mooseAssert(_finalized, "KokkosJaggedArray not finalized.");
+
+    _dims.moveToHost();
+    _offsets.moveToHost();
+    _data.moveToHost();
+  }
+  /**
    * Get the underlying data array
    * @returns The data array
    */
@@ -274,68 +253,73 @@ public:
    */
   KOKKOS_FUNCTION bool isFinalized() const { return _finalized; }
   /**
+   * Get whether the array was allocated on host
+   * @returns Whether the array was allocated on host
+   */
+  KOKKOS_FUNCTION bool isHostAlloc() const { return _data.isHostAlloc(); }
+  /**
+   * Get whether the array was allocated on device
+   * @returns Whether the array was allocated on device
+   */
+  KOKKOS_FUNCTION bool isDeviceAlloc() const { return _data.isDeviceAlloc(); }
+  /**
    * Get the total data array size
    * @returns The total data array size
    */
-  KOKKOS_FUNCTION dof_id_type size() const { return _data.size(); }
+  KOKKOS_FUNCTION index_type size() const { return _data.size(); }
   /**
    * Get the total outer array size
    * @returns The total outer array size
    */
-  KOKKOS_FUNCTION dof_id_type n() const { return _offsets.size(); }
+  KOKKOS_FUNCTION index_type n() const { return _offsets.size(); }
   /**
    * Get the size of a dimension of the outer array
    * @param dim The dimension index
    * @returns The size of the dimension of the outer array
    */
-  KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _offsets.n(dim); }
+  KOKKOS_FUNCTION index_type n(unsigned int dim) const { return _offsets.n(dim); }
   /**
    * Get an inner array
    * @param i The dimensionless outer array index
    * @returns The inner array wrapper object
    */
-  KOKKOS_FUNCTION auto operator[](dof_id_type i) const
-  {
-    auto data = &_data[_offsets[i]];
-    const auto & dim = _dims[i];
-
-    return JaggedArrayInnerData<T, inner>(data, dim);
-  }
+  KOKKOS_FUNCTION auto operator[](index_type i) const;
+  /**
+   * Get an inner array
+   * @param i The index of each dimension
+   * @returns The inner array wrapper object
+   */
+  template <typename... indices>
+  KOKKOS_FUNCTION auto operator()(indices... i) const;
 #endif
 
 protected:
   /**
    * Sequential data array
    */
-  Array<T> _data;
+  Array1D<T, index_type> _data;
   /**
    * Dimension information of each inner array
    */
-  Array<JaggedArrayInnerDim<inner>, outer> _dims;
+  Array<JaggedArrayInnerDim<inner>, outer, index_type> _dims;
   /**
    * Starting offset of each inner array into the sequential data array
    */
-  Array<dof_id_type, outer> _offsets;
-  /**
-   * Inner array memory layout type
-   */
-  const LayoutType _layout;
+  Array<index_type, outer, index_type> _offsets;
   /**
    * Whether the array was finalized
    */
   bool _finalized = false;
 };
 
-#define usingKokkosJaggedArrayBaseMembers(T, inner, outer)                                         \
-private:                                                                                           \
-  using JaggedArrayBase<T, inner, outer>::_data;                                                   \
-  using JaggedArrayBase<T, inner, outer>::_dims;                                                   \
-  using JaggedArrayBase<T, inner, outer>::_offsets
-
 #ifdef MOOSE_KOKKOS_SCOPE
-template <typename T, unsigned int inner, unsigned int outer>
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
 void
-JaggedArrayBase<T, inner, outer>::create(const std::vector<dof_id_type> & n)
+JaggedArray<T, inner, outer, index_type, layout>::create(const std::vector<index_type> & n)
 {
   _data.destroy();
   _offsets.create(n);
@@ -344,15 +328,35 @@ JaggedArrayBase<T, inner, outer>::create(const std::vector<dof_id_type> & n)
   _finalized = false;
 }
 
-template <typename T, unsigned int inner, unsigned int outer>
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
+template <typename... size_type>
 void
-JaggedArrayBase<T, inner, outer>::reserve(const std::array<dof_id_type, outer> & index,
-                                          const std::array<dof_id_type, inner> & dimension)
+JaggedArray<T, inner, outer, index_type, layout>::create(size_type... n)
+{
+  _data.destroy();
+  _offsets.create(n...);
+  _dims.create(n...);
+
+  _finalized = false;
+}
+
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
+void
+JaggedArray<T, inner, outer, index_type, layout>::reserve(
+    const std::array<uint64_t, outer> & index, const std::array<uint64_t, inner> & dimension)
 {
   mooseAssert(!_finalized, "KokkosJaggedArray already finalized.");
 
-  dof_id_type idx = 0;
-  dof_id_type stride = 1;
+  index_type idx = 0;
+  index_type stride = 1;
 
   for (unsigned int o = 0; o < outer; ++o)
   {
@@ -365,7 +369,7 @@ JaggedArrayBase<T, inner, outer>::reserve(const std::array<dof_id_type, outer> &
 
   stride = 1;
 
-  if (_layout == LayoutType::LEFT)
+  if constexpr (layout == LayoutType::LEFT)
     for (unsigned int i = 0; i < inner; ++i)
     {
       _dims[idx].stride[i] = stride;
@@ -381,15 +385,19 @@ JaggedArrayBase<T, inner, outer>::reserve(const std::array<dof_id_type, outer> &
   _dims[idx].stride[inner] = stride;
 }
 
-template <typename T, unsigned int inner, unsigned int outer>
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
 void
-JaggedArrayBase<T, inner, outer>::finalize()
+JaggedArray<T, inner, outer, index_type, layout>::finalize()
 {
   mooseAssert(!_finalized, "KokkosJaggedArray already finalized.");
 
-  dof_id_type stride = 1;
+  index_type stride = 1;
 
-  for (dof_id_type o = 0; o < _offsets.size(); ++o)
+  for (index_type o = 0; o < _offsets.size(); ++o)
   {
     stride = 1;
 
@@ -407,151 +415,35 @@ JaggedArrayBase<T, inner, outer>::finalize()
 
   _finalized = true;
 }
-#endif
 
-/**
- * The specialization of the Kokkos jagged array class for each dimension.
- * @tparam layout The inner array memory layout type
- */
-///{@
-template <typename T, unsigned int inner, unsigned int outer, LayoutType layout = LayoutType::LEFT>
-class JaggedArray;
-
-template <typename T, unsigned int inner, LayoutType layout>
-class JaggedArray<T, inner, 1, layout> : public JaggedArrayBase<T, inner, 1>
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
+KOKKOS_FUNCTION auto
+JaggedArray<T, inner, outer, index_type, layout>::operator[](index_type i) const
 {
-  usingKokkosJaggedArrayBaseMembers(T, inner, 1);
+  auto data = &_data[_offsets[i]];
+  const auto & dim = _dims[i];
 
-public:
-  /**
-   * Default constructor
-   */
-  JaggedArray() : JaggedArrayBase<T, inner, 1>(layout) {}
+  return JaggedArrayInnerData<T, inner, layout>(data, dim);
+}
 
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   */
-  JaggedArray(dof_id_type n0) : JaggedArrayBase<T, inner, 1>(layout) { create(n0); }
-  /**
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   */
-  void create(dof_id_type n0) { JaggedArrayBase<T, inner, 1>::create({n0}); }
-
-  /**
-   * Get an inner array
-   * @param i0 The first dimension outer array index
-   * @returns The inner array wrapper object
-   */
-  KOKKOS_FUNCTION auto operator()(dof_id_type i0) const
-  {
-    auto data = &_data[_offsets(i0)];
-    const auto & dim = _dims(i0);
-
-    return JaggedArrayInnerData<T, inner>(data, dim);
-  }
-#endif
-};
-
-template <typename T, unsigned int inner, LayoutType layout>
-class JaggedArray<T, inner, 2, layout> : public JaggedArrayBase<T, inner, 2>
+template <typename T,
+          unsigned int inner,
+          unsigned int outer,
+          typename index_type,
+          LayoutType layout>
+template <typename... indices>
+KOKKOS_FUNCTION auto
+JaggedArray<T, inner, outer, index_type, layout>::operator()(indices... i) const
 {
-  usingKokkosJaggedArrayBaseMembers(T, inner, 2);
+  auto data = &_data[_offsets(i...)];
+  const auto & dim = _dims(i...);
 
-public:
-  /**
-   * Default constructor
-   */
-  JaggedArray() : JaggedArrayBase<T, inner, 2>(layout) {}
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   * @param n1 The second dimension size for the outer array
-   */
-  JaggedArray(dof_id_type n0, dof_id_type n1) : JaggedArrayBase<T, inner, 2>(layout)
-  {
-    create(n0, n1);
-  }
-  /**
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   * @param n1 The second dimension size for the outer array
-   */
-  void create(dof_id_type n0, dof_id_type n1) { JaggedArrayBase<T, inner, 2>::create({n0, n1}); }
-
-  /**
-   * Get an inner array
-   * @param i0 The first dimension outer array index
-   * @param i1 The second dimension outer array index
-   * @returns The inner array wrapper object
-   */
-  KOKKOS_FUNCTION auto operator()(dof_id_type i0, dof_id_type i1) const
-  {
-    auto data = &_data[_offsets(i0, i1)];
-    const auto & dim = _dims(i0, i1);
-
-    return JaggedArrayInnerData<T, inner>(data, dim);
-  }
+  return JaggedArrayInnerData<T, inner, layout>(data, dim);
+}
 #endif
-};
 
-template <typename T, unsigned int inner, LayoutType layout>
-class JaggedArray<T, inner, 3, layout> : public JaggedArrayBase<T, inner, 3>
-{
-  usingKokkosJaggedArrayBaseMembers(T, inner, 3);
-
-public:
-  /**
-   * Default constructor
-   */
-  JaggedArray() : JaggedArrayBase<T, inner, 3>(layout) {}
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   * @param n1 The second dimension size for the outer array
-   * @param n2 The third dimension size for the outer array
-   */
-  JaggedArray(dof_id_type n0, dof_id_type n1, dof_id_type n2) : JaggedArrayBase<T, inner, 3>(layout)
-  {
-    create(n0, n1, n2);
-  }
-  /**
-   * Allocate outer array with given dimensions
-   * @param n0 The first dimension size for the outer array
-   * @param n1 The second dimension size for the outer array
-   * @param n2 The third dimension size for the outer array
-   */
-  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2)
-  {
-    JaggedArrayBase<T, inner, 3>::create({n0, n1, n2});
-  }
-
-  /**
-   * Get an inner array
-   * @param i0 The first dimension outer array index
-   * @param i1 The second dimension outer array index
-   * @param i2 The third dimension outer array index
-   * @returns The inner array wrapper object
-   */
-  KOKKOS_FUNCTION auto operator()(dof_id_type i0, dof_id_type i1, dof_id_type i2) const
-  {
-    auto data = &_data[_offsets(i0, i1, i2)];
-    const auto & dim = _dims(i0, i1, i2);
-
-    return JaggedArrayInnerData<T, inner>(data, dim);
-  }
-#endif
-};
-///@}
-
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

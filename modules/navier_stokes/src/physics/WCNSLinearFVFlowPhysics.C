@@ -325,7 +325,7 @@ WCNSLinearFVFlowPhysics::addMomentumFrictionKernels()
           params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
         }
         else
-          paramError("momentum_friction_types",
+          paramError("friction_types",
                      "Friction type '",
                      _friction_types[block_i][type_i],
                      "' is not implemented");
@@ -528,6 +528,7 @@ void
 WCNSLinearFVFlowPhysics::addWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
+  bool has_symmetry_bc = false;
 
   for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
   {
@@ -548,19 +549,61 @@ WCNSLinearFVFlowPhysics::addWallsBC()
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
       }
     }
+    else if (momentum_wall_type == "symmetry")
+    {
+      has_symmetry_bc = true;
+      {
+        const std::string bc_type = "LinearFVVelocitySymmetryBC";
+        InputParameters params = getFactory().getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
+        for (unsigned int d = 0; d < dimension(); ++d)
+          params.set<SolverVariableName>(u_names[d]) = _velocity_names[d];
+
+        for (const auto d : make_range(dimension()))
+        {
+          params.set<LinearVariableName>("variable") = _velocity_names[d];
+          params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+          getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + boundary_name, params);
+        }
+      }
+      {
+        const std::string bc_type = "LinearFVPressureSymmetryBC";
+        InputParameters params = getFactory().getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
+        params.set<LinearVariableName>("variable") = _pressure_name;
+        params.set<MooseFunctorName>("HbyA_flux") = "HbyA";
+        getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
+      }
+    }
     else
       mooseError("Unsupported wall boundary condition type: " + std::string(momentum_wall_type));
   }
 
   if (getParam<bool>("pressure_two_term_bc_expansion"))
   {
-    const std::string bc_type = "LinearFVExtrapolatedPressureBC";
-    InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<std::vector<BoundaryName>>("boundary") = _wall_boundaries;
-    params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<bool>("use_two_term_expansion") = true;
-    getProblem().addLinearFVBC(
-        bc_type, _pressure_name + "_extrapolation_" + Moose::stringify(_wall_boundaries), params);
+    if (!has_symmetry_bc)
+    {
+      const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = _wall_boundaries;
+      params.set<LinearVariableName>("variable") = _pressure_name;
+      params.set<bool>("use_two_term_expansion") = true;
+      getProblem().addLinearFVBC(
+          bc_type, _pressure_name + "_extrapolation_" + Moose::stringify(_wall_boundaries), params);
+    }
+    else
+      for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
+        if (momentum_wall_type != "symmetry")
+        {
+          const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+          InputParameters params = getFactory().getValidParams(bc_type);
+          params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
+          params.set<LinearVariableName>("variable") = _pressure_name;
+          params.set<bool>("use_two_term_expansion") = true;
+          getProblem().addLinearFVBC(
+              bc_type, _pressure_name + "_extrapolation_" + boundary_name, params);
+        }
   }
 }
 

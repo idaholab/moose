@@ -10,4 +10,6 @@ These objects are documented here.
 
 [MathUtils.md]
 
+[MooseEnum](MooseEnum.md)
+
 [MooseUtils namespace](/MooseUtils.md)

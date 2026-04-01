@@ -34,6 +34,7 @@
   crack_direction_vector = '1 0 0'
   2d = true
   axis_2d = 2
+  output_q = true
   radius_inner = '60.0 80.0 100.0 120.0'
   radius_outer = '80.0 100.0 120.0 140.0'
   temperature = temp

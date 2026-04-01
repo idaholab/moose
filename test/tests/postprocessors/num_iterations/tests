@@ -1,8 +1,8 @@
 [Tests]
-  design = 'TimeIntegrator/index.md'
-  issues = '#11444'
+  design = 'NumNonlinearIterations.md NumLinearIterations.md'
+  issues = '#11444 #32505'
 
-  [methods]
+  [time_integrators]
     requirement = "The system shall support time integration schemes that compute a consistent "
                   "number of nonlinear and linear iterations for"
 
@@ -179,5 +179,12 @@
 
       detail = 'and Ralston methods.'
     []
+  []
+  [eigen_problem]
+    type = CSVDiff
+    input = 'eigen_problem.i'
+    csvdiff = 'eigen_problem_out.csv'
+    max_parallel = 1 # Need results to be very consistent since we count iterations
+    requirement = 'The system shall report the correct number of nonlinear and linear iterations for a nonlinear eigenvalue problem.'
   []
 []

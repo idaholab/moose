@@ -58,7 +58,11 @@ CappedMohrCoulombStressUpdate::CappedMohrCoulombStressUpdate(const InputParamete
     _perfect_guess(getParam<bool>("perfect_guess")),
     _poissons_ratio(0.0),
     _shifter(_f_tol),
-    _eigvecs(RankTwoTensor())
+    _eigvecs(RankTwoTensor()),
+    _dsp_trial_scratch(3),
+    _eigvals_scratch(_tensor_dimensionality),
+    _dga_shear_scratch(3),
+    _dshear_correction_scratch(3)
 {
   if (_psi.value(0.0) <= 0.0 || _psi.value(0.0) > _phi.value(0.0))
     mooseWarning("Usually the Mohr-Coulomb dilation angle is positive and not greater than the "
@@ -73,21 +77,29 @@ CappedMohrCoulombStressUpdate::computeStressParams(const RankTwoTensor & stress,
   stress.symmetricEigenvalues(stress_params);
 }
 
-std::vector<RankTwoTensor>
-CappedMohrCoulombStressUpdate::dstress_param_dstress(const RankTwoTensor & stress) const
+void
+CappedMohrCoulombStressUpdate::dstressparam_dstress(const RankTwoTensor & stress,
+                                                    std::vector<RankTwoTensor> & dsp) const
 {
-  std::vector<Real> sp;
-  std::vector<RankTwoTensor> dsp;
-  stress.dsymmetricEigenvalues(sp, dsp);
-  return dsp;
+  mooseAssert(dsp.size() == 3,
+              "CappedMohrCoulombStressUpdate: dsp incorrectly sized in dstressparam_dstress");
+  mooseAssert(
+      _eigvals_scratch.size() == _tensor_dimensionality,
+      "_eigvals_scratch incorrectly sized in CappedMohrCoulombStressUpdate:dstressparam_dstress");
+  stress.dsymmetricEigenvalues(_eigvals_scratch, dsp);
 }
 
-std::vector<RankFourTensor>
-CappedMohrCoulombStressUpdate::d2stress_param_dstress(const RankTwoTensor & stress) const
+void
+CappedMohrCoulombStressUpdate::d2stressparam_dstress(const RankTwoTensor & stress,
+                                                     std::vector<RankFourTensor> & d2sp) const
 {
-  std::vector<RankFourTensor> d2;
-  stress.d2symmetricEigenvalues(d2);
-  return d2;
+  /*
+   * This function is not used but is included here in case a derived class needs it.
+   * The reason it is unused is because consistentTangentOperatorV is optimised
+   */
+  mooseAssert(d2sp.size() == 3,
+              "CappedMohrCoulombStressUpdate: d2sp incorrectly sized in d2stressparam_dstress");
+  stress.d2symmetricEigenvalues(d2sp);
 }
 
 void
@@ -97,8 +109,9 @@ CappedMohrCoulombStressUpdate::preReturnMapV(const std::vector<Real> & /*trial_s
                                              const std::vector<Real> & /*yf*/,
                                              const RankFourTensor & Eijkl)
 {
-  std::vector<Real> eigvals;
-  stress_trial.symmetricEigenvaluesEigenvectors(eigvals, _eigvecs);
+  mooseAssert(_eigvals_scratch.size() == _tensor_dimensionality,
+              "_eigvals_scratch incorrectly sized in CappedMohrCoulombStressUpdate:preReturnMapV");
+  stress_trial.symmetricEigenvaluesEigenvectors(_eigvals_scratch, _eigvecs);
   _poissons_ratio = ElasticityTensorTools::getIsotropicPoissonsRatio(Eijkl);
 }
 
@@ -767,11 +780,15 @@ CappedMohrCoulombStressUpdate::setIntnlDerivativesV(const std::vector<Real> & tr
   const Real trial_smax = trial_stress_params[2]; // largest eigenvalue
   const Real trial_smin = trial_stress_params[0]; // smallest eigenvalue
   const Real ga_shear = ((trial_smax - trial_smin) - (smax - smin)) / (_Eij[2][2] - _Eij[0][2]);
-  const std::vector<Real> dga_shear = {
-      1.0 / (_Eij[2][2] - _Eij[0][2]), 0.0, -1.0 / (_Eij[2][2] - _Eij[0][2])};
+  mooseAssert(
+      _dga_shear_scratch.size() == 3,
+      "_dga_shear_scratch incorrectly sized in CappedMohrCoulombStressUpdate:setIntnlDerivativesV");
+  _dga_shear_scratch[0] = 1.0 / (_Eij[2][2] - _Eij[0][2]);
+  _dga_shear_scratch[1] = 0.0;
+  _dga_shear_scratch[2] = -1.0 / (_Eij[2][2] - _Eij[0][2]);
   // intnl[0] = intnl_old[0] + ga_shear;
   for (std::size_t i = 0; i < _num_sp; ++i)
-    dintnl[0][i] = dga_shear[i];
+    dintnl[0][i] = _dga_shear_scratch[i];
 
   const Real sinpsi = std::sin(_psi.value(intnl[0]));
   const Real dsinpsi_di0 = _psi.derivative(intnl[0]) * std::cos(_psi.value(intnl[0]));
@@ -779,15 +796,18 @@ CappedMohrCoulombStressUpdate::setIntnlDerivativesV(const std::vector<Real> & tr
   const Real prefactor = (_Eij[2][2] + _Eij[0][2]) * sinpsi;
   const Real dprefactor_di0 = (_Eij[2][2] + _Eij[0][2]) * dsinpsi_di0;
   // const Real shear_correction = prefactor * ga_shear;
-  std::vector<Real> dshear_correction(_num_sp);
+  mooseAssert(_dshear_correction_scratch.size() == 3,
+              "_dshear_correction_scratch incorrectly sized in "
+              "CappedMohrCoulombStressUpdate:setIntnlDerivativesV");
   for (std::size_t i = 0; i < _num_sp; ++i)
-    dshear_correction[i] = prefactor * dga_shear[i] + dprefactor_di0 * dintnl[0][i] * ga_shear;
+    _dshear_correction_scratch[i] =
+        prefactor * _dga_shear_scratch[i] + dprefactor_di0 * dintnl[0][i] * ga_shear;
   // const Real ga_tensile = (1 - _poissons_ratio) * ((trial_smax + trial_smin) - (smax + smin) -
   // shear_correction) /
   // _Eij[2][2];
   // intnl[1] = intnl_old[1] + ga_tensile;
   for (std::size_t i = 0; i < _num_sp; ++i)
-    dintnl[1][i] = -(1.0 - _poissons_ratio) * dshear_correction[i] / _Eij[2][2];
+    dintnl[1][i] = -(1.0 - _poissons_ratio) * _dshear_correction_scratch[i] / _Eij[2][2];
   dintnl[1][2] += -(1.0 - _poissons_ratio) / _Eij[2][2];
   dintnl[1][0] += -(1.0 - _poissons_ratio) / _Eij[2][2];
 }
@@ -842,7 +862,7 @@ CappedMohrCoulombStressUpdate::consistentTangentOperatorV(
                 drot_dstress(i, a, k, l) * stress_params[a] * eT(a, j) +
                 _eigvecs(i, a) * stress_params[a] * drot_dstress(j, a, k, l);
 
-  const std::vector<RankTwoTensor> dsp_trial = dstress_param_dstress(stress_trial);
+  dstressparam_dstress(stress_trial, _dsp_trial_scratch);
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)
       for (unsigned k = 0; k < _tensor_dimensionality; ++k)
@@ -850,7 +870,7 @@ CappedMohrCoulombStressUpdate::consistentTangentOperatorV(
           for (unsigned a = 0; a < _num_sp; ++a)
             for (unsigned b = 0; b < _num_sp; ++b)
               dstress_dtrial(i, j, k, l) +=
-                  _eigvecs(i, a) * dvar_dtrial[a][b] * dsp_trial[b](k, l) * eT(a, j);
+                  _eigvecs(i, a) * dvar_dtrial[a][b] * _dsp_trial_scratch[b](k, l) * eT(a, j);
 
   cto = dstress_dtrial * elasticity_tensor;
 }

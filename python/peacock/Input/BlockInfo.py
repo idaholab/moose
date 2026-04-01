@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import copy
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -16,10 +17,12 @@ except ImportError:
 import mooseutils
 from .ParameterInfo import ParameterInfo
 
+
 class BlockInfo(object):
     """
     Holds information about a block.
     """
+
     def __init__(self, parent, path, hard=False, description=""):
         """
         Input:
@@ -52,7 +55,12 @@ class BlockInfo(object):
         return not self.included and self.wantsToSave()
 
     def wantsToSave(self):
-        return self.changed_by_user or self.user_added or self.included or self.childrenWantToSave()
+        return (
+            self.changed_by_user
+            or self.user_added
+            or self.included
+            or self.childrenWantToSave()
+        )
 
     def childrenWantToSave(self):
         for key in self.children_list:
@@ -186,7 +194,10 @@ class BlockInfo(object):
         """
         tmp_child = self.children.get(newname)
         if tmp_child:
-            mooseutils.mooseWarning("Tried to rename %s to %s but %s already exists." % (oldname, newname, newname))
+            mooseutils.mooseWarning(
+                "Tried to rename %s to %s but %s already exists."
+                % (oldname, newname, newname)
+            )
             return
 
         child = self.children.get(oldname)
@@ -221,7 +232,10 @@ class BlockInfo(object):
         """
         pinfo = self.getParamInfo(param)
         if pinfo:
-            mooseutils.mooseWarning("Tried to add a user parameter when that name already exists: %s:%s" % (self.path, param))
+            mooseutils.mooseWarning(
+                "Tried to add a user parameter when that name already exists: %s:%s"
+                % (self.path, param)
+            )
             return
         pinfo = ParameterInfo(self, param)
         pinfo.user_added = True
@@ -356,7 +370,7 @@ class BlockInfo(object):
             if name not in self.children_list:
                 return name
 
-    def dump(self, indent=0, sep='  '):
+    def dump(self, indent=0, sep="  "):
         """
         Provides a description of this block with all of its children, types, etc.
         Input:
@@ -366,7 +380,7 @@ class BlockInfo(object):
             str: The dump of this block.
         """
         o = StringIO()
-        i_str = sep*indent
+        i_str = sep * indent
         o.write("%sPath: %s\n" % (i_str, self.path))
         indent += 1
         if self.parent:
@@ -380,19 +394,19 @@ class BlockInfo(object):
         o.write("%sDescription: %s\n" % (i_str, self.description))
         o.write("%sParameters:\n" % i_str)
         for p in self.parameters.values():
-            o.write("%s%s:\n" % ((indent+1)*sep, p.name))
-            p.dump(o, indent+2, sep)
+            o.write("%s%s:\n" % ((indent + 1) * sep, p.name))
+            p.dump(o, indent + 2, sep)
 
-        o.write("%sChildren:\n" % (indent*sep))
+        o.write("%sChildren:\n" % (indent * sep))
         for name in self.children_list:
             c = self.children[name]
-            o.write(c.dump(indent+1, sep))
-        o.write("%sStar node:\n" % (indent*sep))
+            o.write(c.dump(indent + 1, sep))
+        o.write("%sStar node:\n" % (indent * sep))
         if self.star_node:
-            o.write(self.star_node.dump(indent+1, sep))
-        o.write("%sType nodes:\n" % (indent*sep))
+            o.write(self.star_node.dump(indent + 1, sep))
+        o.write("%sType nodes:\n" % (indent * sep))
         for t in self.types.values():
-            o.write(t.dump(indent+1, sep))
+            o.write(t.dump(indent + 1, sep))
         return o.getvalue()
 
     def getParamNames(self):

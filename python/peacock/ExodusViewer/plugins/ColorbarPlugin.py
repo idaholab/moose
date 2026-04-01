@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
 import os
@@ -13,6 +13,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 import glob
 from .ExodusPlugin import ExodusPlugin
+
 
 class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -33,12 +34,13 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # Cache for auto limits
         self._auto = [True, True]
 
-        self._preferences.addCombo("exodus/defaultColorMap",
-                "Default colormap",
-                "default",
-                sorted(self._availableColorMaps().keys()),
-                "Set the default colormap to use",
-                )
+        self._preferences.addCombo(
+            "exodus/defaultColorMap",
+            "Default colormap",
+            "default",
+            sorted(self._availableColorMaps().keys()),
+            "Set the default colormap to use",
+        )
 
         # Min. value selection
         self.RangeMinimumLabel = QtWidgets.QLabel("Min:")
@@ -89,9 +91,9 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # The ExodusColorbar object is added by this plugin, so it needs
         # to do a few things with the core chigger objects.
-        self._window = None   # RenderWindow (from VTKWindowPlugin)
-        self._result = None   # ExodusResult (from VTKWindowPlugin)
-        self._colorbar = None # Colorbar (created by this plugin)
+        self._window = None  # RenderWindow (from VTKWindowPlugin)
+        self._result = None  # ExodusResult (from VTKWindowPlugin)
+        self._colorbar = None  # Colorbar (created by this plugin)
 
         # Call widget setup methods
         self.setup()
@@ -179,7 +181,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Update the ExodusResult options.
         """
-        if (self._variable is None):# or (self._result is None):
+        if self._variable is None:  # or (self._result is None):
             self.setEnabled(False)
             return
         else:
@@ -189,16 +191,20 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         result_options = dict()
 
         # Min./Max. range
-        result_options['min'] = self._setLimitHelper(self.RangeMinimumMode, self.RangeMinimum)
-        result_options['max'] = self._setLimitHelper(self.RangeMaximumMode, self.RangeMaximum)
+        result_options["min"] = self._setLimitHelper(
+            self.RangeMinimumMode, self.RangeMinimum
+        )
+        result_options["max"] = self._setLimitHelper(
+            self.RangeMaximumMode, self.RangeMaximum
+        )
 
         # Colormap
-        result_options['cmap'] = str(self.ColorMapList.currentText())
-        result_options['cmap_reverse'] = self.ColorMapReverse.isChecked()
-        result_options['local_range'] = self.ColorBarRangeType.isChecked()
+        result_options["cmap"] = str(self.ColorMapList.currentText())
+        result_options["cmap_reverse"] = self.ColorMapReverse.isChecked()
+        result_options["local_range"] = self.ColorBarRangeType.isChecked()
 
         # Components
-        result_options['component'] = self._component
+        result_options["component"] = self._component
 
         # Colorbar options
         self.resultOptionsChanged.emit(result_options)
@@ -214,7 +220,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if visible:
             if self._colorbar is None:
                 self._colorbar = chigger.exodus.ExodusColorBar(self._result, layer=3)
-                self._colorbar.setOptions('primary', font_size=16)
+                self._colorbar.setOptions("primary", font_size=16)
 
             if self._colorbar not in self._window:
                 self._window.append(self._colorbar)
@@ -230,12 +236,12 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         if mode.isChecked():
             qobject.setEnabled(True)
-            qobject.setStyleSheet('color:#000000')
+            qobject.setStyleSheet("color:#000000")
             try:
                 value = float(qobject.text())
                 return value
             except ValueError:
-                qobject.setStyleSheet('color:#ff0000')
+                qobject.setStyleSheet("color:#ff0000")
         return None
 
     @staticmethod
@@ -246,7 +252,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if not mode.isChecked():
             qobject.setEnabled(False)
             qobject.setText(str(default))
-            qobject.setStyleSheet('color:#8C8C8C')
+            qobject.setStyleSheet("color:#8C8C8C")
 
     def _setupRangeMinimumMode(self, qobject):
         """
@@ -305,7 +311,13 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.windowRequiresUpdate.emit()
 
     def _availableColorMaps(self):
-        filenames = glob.glob(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'icons', 'colormaps', '*.png')))
+        filenames = glob.glob(
+            os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__), "..", "..", "icons", "colormaps", "*.png"
+                )
+            )
+        )
         colormaps = {}
         for i in range(len(filenames)):
             name = os.path.basename(filenames[i])[0:-4]
@@ -376,7 +388,9 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
     def _setupColorBarRangeType(self, qobject):
         qobject.setChecked(True)
-        qobject.setToolTip("Toggle to use the visible data or all data for computing default range.")
+        qobject.setToolTip(
+            "Toggle to use the visible data or all data for computing default range."
+        )
         qobject.stateChanged.connect(self._callbackColorBarRangeType)
 
     def _callbackColorBarRangeType(self, value):
@@ -386,12 +400,19 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
     def repr(self):
         output = dict()
-        colorbar_options, colorbar_sub_options = self._colorbar.options().toScriptString()
-        output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
-        output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(colorbar_options))]
+        colorbar_options, colorbar_sub_options = (
+            self._colorbar.options().toScriptString()
+        )
+        output["colorbar"] = ["cbar = chigger.exodus.ExodusColorBar(result)"]
+        output["colorbar"] += [
+            "cbar.setOptions({})".format(", ".join(colorbar_options))
+        ]
         for key, value in colorbar_sub_options.items():
-            output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+            output["colorbar"] += [
+                "cbar.setOptions({}, {})".format(repr(key), ", ".join(value))
+            ]
         return output
+
 
 def main(size=None):
     """
@@ -400,15 +421,22 @@ def main(size=None):
     from ..ExodusPluginManager import ExodusPluginManager
     from .VTKWindowPlugin import VTKWindowPlugin
     from .FilePlugin import FilePlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ColorbarPlugin])
+
+    widget = ExodusPluginManager(
+        plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ColorbarPlugin]
+    )
     widget.show()
 
     return widget, widget.VTKWindowPlugin
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e')
+    filenames = Testing.get_chigger_input_list(
+        "mug_blocks_out.e", "vector_out.e", "displace.e"
+    )
     widget, _ = main()
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

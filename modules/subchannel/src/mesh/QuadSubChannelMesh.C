@@ -8,9 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "QuadSubChannelMesh.h"
-
 #include <cmath>
-
+#include <limits>
 #include "libmesh/edge_edge2.h"
 #include "libmesh/unstructured_mesh.h"
 
@@ -25,10 +24,7 @@ QuadSubChannelMesh::validParams()
   return params;
 }
 
-QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
-  : SubChannelMesh(params), _pin_mesh_exist(false)
-{
-}
+QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params) : SubChannelMesh(params) {}
 
 QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
@@ -39,6 +35,7 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _n_pins(other_mesh._n_pins),
     _side_gap(other_mesh._side_gap),
     _nodes(other_mesh._nodes),
+    _pin_nodes(other_mesh._pin_nodes),
     _gapnodes(other_mesh._gapnodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _gap_to_pin_map(other_mesh._gap_to_pin_map),
@@ -47,9 +44,8 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _pin_to_chan_map(other_mesh._pin_to_chan_map),
     _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
     _gij_map(other_mesh._gij_map),
-    _pin_mesh_exist(other_mesh._pin_mesh_exist)
+    _subch_type(other_mesh._subch_type)
 {
-  _subchannel_position = other_mesh._subchannel_position;
   if (_nx < 2 && _ny < 2)
     mooseError(name(),
                ": The number of subchannels cannot be less than 2 in both directions (x and y). "

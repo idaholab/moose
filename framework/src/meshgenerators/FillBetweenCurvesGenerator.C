@@ -196,7 +196,7 @@ FillBetweenCurvesGenerator::generate()
   for (const auto & [bnd_id, bnd_name] : input_bdy_2.get_nodeset_name_map())
     boundary.set_nodeset_name_map()[bnd_id + offset] = bnd_name;
   if (node_list_mesh1.size() + node_list_mesh2.size())
-    mesh->set_isnt_prepared();
+    mesh->unset_is_prepared();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

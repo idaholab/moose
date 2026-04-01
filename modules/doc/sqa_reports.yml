@@ -406,11 +406,6 @@ Requirements:
         directories:
             - modules/reactor
 
-    richards:
-        directories:
-            - modules/richards
-        log_missing: NONE # deprecated module
-
     scalar_transport:
         directories:
             - modules/scalar_transport

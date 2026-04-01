@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16427 #16429 #30988'
+  issues = '#16427 #16429 #30988 #32482'
   design = 'transfers/MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [2d_overlay]
@@ -45,6 +45,15 @@
       # only the (nearest) node values matter. Hence the checkerboards.
     []
 
+    [second_order_source_mesh]
+      type = 'Exodiff'
+      input = 'main.i'
+      cli_args = 'Mesh/second_order=true'
+      exodiff = 'main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      prereq = '2d_overlay/same_var_type'
+      detail = "for variables of the same first order type, but with a second order source mesh,"
+    []
+
     [array_variables]
       type = Exodiff
       input = main_array.i
@@ -63,6 +72,8 @@
                   Transfers/from_sub/fixed_bounding_box_size='0.2 0.2 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.2 0.2 1'
                   Transfers/to_sub/fixed_bounding_box_size='1 1 0.3' Transfers/to_sub_elem/fixed_bounding_box_size='1 1 0.3'"
       detail = "while allowing for an user to set the size of the application bounding box directly"
+      # for recover, using the same file_base
+      prereq = '2d_overlay/second_order_source_mesh'
     []
   []
 
@@ -87,10 +98,10 @@
       detail = 'the furthest of the nearest nodes desired being equidistant to the target point as the next furthest'
     []
   []
-  
+
   [block_boundaries_ids]
   requirement = "The system shall report an error if a variable is required to be transferred"
-  
+
     [bad_from_block_to_multiapp]
       type = RunException
       input = main.i

@@ -200,11 +200,18 @@ WCNSFVFluidHeatTransferPhysicsBase::processThermalConductivity()
         if (getProblem().hasFunctorWithType<ADRealVectorValue>(_thermal_conductivity_name[i],
                                                                /*thread_id=*/0))
           have_vector = true;
-        else
+        else if (getProblem().hasFunctor(_thermal_conductivity_name[i],
+                                         /*thread_id=*/0))
           paramError("thermal_conductivity",
                      "We only allow functor of type Real/ADReal or ADRealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
+        else
+          // If another Physics is creating this functor, we could be running into an order of
+          // creation problem
+          paramWarning("thermal_conductivity",
+                       "Functor '" + _thermal_conductivity_name[i] +
+                           "' was not found in the Problem. Did you mispell it?");
       }
     }
   }
@@ -212,7 +219,7 @@ WCNSFVFluidHeatTransferPhysicsBase::processThermalConductivity()
   if (have_vector && !_porous_medium_treatment)
     paramError("thermal_conductivity", "Cannot use anisotropic diffusion with non-porous flows!");
 
-  if (have_vector == have_scalar)
+  if (have_vector && (have_vector == have_scalar))
     paramError("thermal_conductivity",
                "The entries on thermal conductivity shall either be scalars of vectors, mixing "
                "them is not supported!");

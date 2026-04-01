@@ -77,7 +77,7 @@ TEST(MeshTests, triRodCoordinates)
   std::sort(positions.begin(), positions.end(), pointLess);
 
   std::vector<Point> positions2;
-  TriSubChannelMesh::rodPositions(positions2, nrings, pitch, center);
+  TriSubChannelMesh::pinPositions(positions2, nrings, pitch, center);
   std::sort(positions2.begin(), positions2.end(), pointLess);
 
   ASSERT_EQ(positions.size(), positions2.size());

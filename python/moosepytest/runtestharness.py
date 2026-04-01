@@ -19,7 +19,6 @@ from io import StringIO
 
 from TestHarness import TestHarness
 
-
 MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
@@ -43,7 +42,7 @@ def run_test_harness(
     spec_file: str,
     harness_args: Optional[Iterable[str]] = None,
     # tmp_output: bool = True,
-    no_capabilities: bool = True,
+    minimal_capabilities: bool = True,
     # capture_results: bool = True,
     exit_code: int = 0,
     run: bool = True,
@@ -56,7 +55,7 @@ def run_test_harness(
         Command line arguments to pass to the test harness
     Keyword arguments:
         tmp_output: Set to store output separately using the -o option in a temp directory
-        no_capabilities: Set to run without capabilities (--no-capabilities)
+        minimal_capabilities: Set to run with minimal capabilities (--minimal-capabilities)
         capture_results: Set to capture on-screen results
         exit_code: Exit code to check against
         tests: Test spec (dict of str -> params) to run instead
@@ -73,8 +72,8 @@ def run_test_harness(
         + (list(harness_args) if harness_args else [])
         + ["--term-format", "njCst", "-i", spec_file]
     )
-    if no_capabilities:
-        argv += ["--no-capabilities"]
+    if minimal_capabilities:
+        argv += ["--minimal-capabilities"]
 
     with TemporaryDirectory() as dir:
         # Copy test contents into directory

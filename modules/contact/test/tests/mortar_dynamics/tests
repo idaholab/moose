@@ -93,7 +93,6 @@
     input = 'block-dynamics-friction-creep.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
     capabilities = 'ad_size>=50'
     requirement = 'The system shall simulate mortar frictional contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry with a creep material '

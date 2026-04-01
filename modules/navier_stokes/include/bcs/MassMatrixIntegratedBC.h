@@ -26,8 +26,11 @@ public:
   virtual void computeResidual() override {}
 
 protected:
+  void precalculateJacobian() override;
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
   const Real _density;
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };

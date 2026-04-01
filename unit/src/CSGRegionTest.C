@@ -16,6 +16,21 @@
 
 using namespace CSG;
 
+// helper function to convert infix JSON object to string representation
+std::string
+infixJSONToString(nlohmann::json infix_json)
+{
+  auto json_string = infix_json.dump();
+  // Remove quotation marks from string
+  json_string.erase(std::remove(json_string.begin(), json_string.end(), '\"'), json_string.end());
+  // Replace commas with a space
+  std::replace(json_string.begin(), json_string.end(), ',', ' ');
+  // Replace square brackets with parentheses
+  std::replace(json_string.begin(), json_string.end(), '[', '(');
+  std::replace(json_string.begin(), json_string.end(), ']', ')');
+  return json_string;
+}
+
 // Test each type of CSGRegion operator
 TEST(CSGRegionTest, testRegionOperators)
 {
@@ -45,28 +60,38 @@ TEST(CSGRegionTest, testRegionOperators)
 
   // halfspaces
   {
-    std::string pos_string = "+s1";
-    std::string neg_string = "-s2";
+    std::string pos_string_infix = "(+s1)";
+    std::string neg_string_infix = "(-s2)";
+    std::vector<std::string> pos_string_postfix{"s1", "+"};
+    std::vector<std::string> neg_string_postfix{"s2", "-"};
     ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, pos_half.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, neg_half.getRegionType());
-    ASSERT_EQ(pos_string, pos_half.toString());
-    ASSERT_EQ(neg_string, neg_half.toString());
+    ASSERT_EQ(pos_string_infix, infixJSONToString(pos_half.toInfixJSON()));
+    ASSERT_EQ(pos_string_postfix, pos_half.toPostfixStringList());
+    ASSERT_EQ(neg_string_infix, infixJSONToString(neg_half.toInfixJSON()));
+    ASSERT_EQ(neg_string_postfix, neg_half.toPostfixStringList());
   }
   // intersections
   {
-    std::string inter_string = "(+s1 & -s2)";
+    std::string inter_string_infix = "(+s1 & -s2)";
+    std::vector<std::string> inter_string_postfix = {"s1", "+", "s2", "-", "&"};
     ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, inter.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, new_reg_int.getRegionType());
-    ASSERT_EQ(inter_string, inter.toString());
-    ASSERT_EQ(inter_string, new_reg_int.toString());
+    ASSERT_EQ(inter_string_infix, infixJSONToString(inter.toInfixJSON()));
+    ASSERT_EQ(inter_string_postfix, inter.toPostfixStringList());
+    ASSERT_EQ(inter_string_infix, infixJSONToString(new_reg_int.toInfixJSON()));
+    ASSERT_EQ(inter_string_postfix, new_reg_int.toPostfixStringList());
   }
   // unions
   {
-    std::string union_string = "(+s1 | -s2)";
+    std::string union_string_infix = "(+s1 | -s2)";
+    std::vector<std::string> union_string_postfix = {"s1", "+", "s2", "-", "|"};
     ASSERT_EQ(CSGRegion::RegionType::UNION, uni.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::UNION, new_reg_uni.getRegionType());
-    ASSERT_EQ(union_string, uni.toString());
-    ASSERT_EQ(union_string, new_reg_uni.toString());
+    ASSERT_EQ(union_string_infix, infixJSONToString(uni.toInfixJSON()));
+    ASSERT_EQ(union_string_postfix, uni.toPostfixStringList());
+    ASSERT_EQ(union_string_infix, infixJSONToString(new_reg_uni.toInfixJSON()));
+    ASSERT_EQ(union_string_postfix, new_reg_uni.toPostfixStringList());
   }
   // initialized but empty
   {
@@ -74,9 +99,11 @@ TEST(CSGRegionTest, testRegionOperators)
   }
   // complement
   {
-    std::string comp_string = "~(+s1 & -s2)";
+    std::string comp_string_infix = "(~ (+s1 & -s2))";
+    std::vector<std::string> comp_string_postfix = {"s1", "+", "s2", "-", "&", "~"};
     ASSERT_EQ(CSGRegion::RegionType::COMPLEMENT, complement.getRegionType());
-    ASSERT_EQ(comp_string, complement.toString());
+    ASSERT_EQ(comp_string_infix, infixJSONToString(complement.toInfixJSON()));
+    ASSERT_EQ(comp_string_postfix, complement.toPostfixStringList());
   }
 }
 
@@ -113,30 +140,6 @@ TEST(CSGRegionTest, testRegionErrors)
     Moose::UnitUtils::assertThrows(
         [&reg1]() { CSGRegion(reg1, "INTERSECTION"); },
         "Region type INTERSECTION is not supported for a single region.");
-  }
-}
-
-// Tests stripRegionString function
-TEST(CSGRegionTest, testStripRegionString)
-{
-  // strip - single operator intersection (with and without white space padding)
-  {
-    std::string reg_str_valid = "((s1 & s2) & s3)";
-    std::string exp_str_strip = "s1 & s2 & s3";
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " & "));
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "&"));
-  }
-  // strip - single operator union (with and without white space padding)
-  {
-    std::string reg_str_valid = "((s1 | s2) | s3)";
-    std::string exp_str_strip = "s1 | s2 | s3";
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " | "));
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "|"));
-  }
-  // strip - mixed operators (won't strip)
-  {
-    std::string reg_str_valid = "(s1 & s2 & (s3 | s4))";
-    ASSERT_EQ(reg_str_valid, stripRegionString(reg_str_valid, " & "));
   }
 }
 

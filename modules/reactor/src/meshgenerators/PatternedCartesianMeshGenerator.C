@@ -1023,7 +1023,7 @@ PatternedCartesianMeshGenerator::generate()
     setMeshProperty("interface_boundary_ids", interface_boundary_ids);
   }
 
-  out_mesh->set_isnt_prepared();
+  out_mesh->unset_is_prepared();
   auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
   return mesh;
 }

@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .MooseDataFrame import MooseDataFrame
 from . import message
+
 
 class PostprocessorReader(MooseDataFrame):
     """
@@ -49,7 +50,9 @@ class PostprocessorReader(MooseDataFrame):
            (output, imports) The necessary script and include statements to re-create data load.
         """
 
-        imports = ['import mooseutils']
-        output = ['\n# Read Postprocessor Data']
-        output += ['data = mooseutils.PostprocessorReader({})'.format(repr(self.filename))]
+        imports = ["import mooseutils"]
+        output = ["\n# Read Postprocessor Data"]
+        output += [
+            "data = mooseutils.PostprocessorReader({})".format(repr(self.filename))
+        ]
         return output, imports

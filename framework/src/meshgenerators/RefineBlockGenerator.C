@@ -110,7 +110,7 @@ RefineBlockGenerator::generate()
   }
 
   if (refined_on_size || max > 0)
-    mesh_ptr->set_isnt_prepared();
+    mesh_ptr->unset_is_prepared();
 
   return mesh_ptr;
 }

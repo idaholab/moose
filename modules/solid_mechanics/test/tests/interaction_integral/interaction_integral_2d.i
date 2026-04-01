@@ -35,7 +35,6 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  output_q = false
   incremental = true
   equivalent_k = true
 []

@@ -1,12 +1,12 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import collections
@@ -19,16 +19,18 @@ import mooseutils
 from .. import utils
 from .. import base
 
+
 @contextlib.contextmanager
 def lock_file(filename):
     """
     Locks a file so that the exodus reader can safely read
     a file without MOOSE writing to it while we do it.
     """
-    with open(filename, "a+") as f: # "a+" to make sure it gets created
+    with open(filename, "a+") as f:  # "a+" to make sure it gets created
         fcntl.flock(f, fcntl.LOCK_SH)
         yield
         fcntl.flock(f, fcntl.LOCK_UN)
+
 
 class ExodusReaderErrorObserver(object):
     """
@@ -36,6 +38,7 @@ class ExodusReaderErrorObserver(object):
 
     see peacock.ExodusViewer.plugins.VTKWindowPlugin
     """
+
     def __init__(self):
         self._errors = []
 
@@ -75,14 +78,16 @@ class ExodusReader(base.ChiggerObject):
     #
     # vtkThe MultiBlockDataSet (vtkExodusIIReader::GetOutput()) is ordered according to
     # vtkExodusIIReader::cont_types, which is the order used here.
-    MULTIBLOCK_INDEX_TO_OBJECTTYPE = [vtk.vtkExodusIIReader.ELEM_BLOCK, # 0 (MOOSE Subdomains)
-                                      vtk.vtkExodusIIReader.FACE_BLOCK, # 1
-                                      vtk.vtkExodusIIReader.EDGE_BLOCK, # 2
-                                      vtk.vtkExodusIIReader.ELEM_SET,   # 3
-                                      vtk.vtkExodusIIReader.SIDE_SET,   # 4 (MOOSE Boundaries)
-                                      vtk.vtkExodusIIReader.FACE_SET,   # 5
-                                      vtk.vtkExodusIIReader.EDGE_SET,   # 6
-                                      vtk.vtkExodusIIReader.NODE_SET]   # 7 (MOOSE Nodesets)
+    MULTIBLOCK_INDEX_TO_OBJECTTYPE = [
+        vtk.vtkExodusIIReader.ELEM_BLOCK,  # 0 (MOOSE Subdomains)
+        vtk.vtkExodusIIReader.FACE_BLOCK,  # 1
+        vtk.vtkExodusIIReader.EDGE_BLOCK,  # 2
+        vtk.vtkExodusIIReader.ELEM_SET,  # 3
+        vtk.vtkExodusIIReader.SIDE_SET,  # 4 (MOOSE Boundaries)
+        vtk.vtkExodusIIReader.FACE_SET,  # 5
+        vtk.vtkExodusIIReader.EDGE_SET,  # 6
+        vtk.vtkExodusIIReader.NODE_SET,
+    ]  # 7 (MOOSE Nodesets)
 
     # "Enum" values for Subdomains, Sidesets, and Nodesets
     BLOCK = vtk.vtkExodusIIReader.ELEM_BLOCK
@@ -98,34 +103,67 @@ class ExodusReader(base.ChiggerObject):
     VARIABLE_TYPES = [ELEMENTAL, NODAL, GLOBAL]
 
     # Information data structures
-    BlockInformation = collections.namedtuple('BlockInformation', ['name', 'object_type',
-                                                                   'object_index', 'number',
-                                                                   'multiblock_index'])
-    VariableInformation = collections.namedtuple('VariableInformation', ['name', 'object_type',
-                                                                         'num_components'])
-    FileInformation = collections.namedtuple('FileInformation', ['filename', 'times', 'modified'])
-    TimeData = collections.namedtuple('TimeData', ['timestep', 'time', 'filename', 'index'])
+    BlockInformation = collections.namedtuple(
+        "BlockInformation",
+        ["name", "object_type", "object_index", "number", "multiblock_index"],
+    )
+    VariableInformation = collections.namedtuple(
+        "VariableInformation", ["name", "object_type", "num_components"]
+    )
+    FileInformation = collections.namedtuple(
+        "FileInformation", ["filename", "times", "modified"]
+    )
+    TimeData = collections.namedtuple(
+        "TimeData", ["timestep", "time", "filename", "index"]
+    )
 
     @staticmethod
     def getOptions():
         opt = base.ChiggerObject.getOptions()
-        opt.add('time', "The time to view, if not specified the last timestep is displayed.",
-                vtype=float)
-        opt.add("timestep", -1, "The simulation timestep. (Use -1 for latest.)", vtype=int)
+        opt.add(
+            "time",
+            "The time to view, if not specified the last timestep is displayed.",
+            vtype=float,
+        )
+        opt.add(
+            "timestep", -1, "The simulation timestep. (Use -1 for latest.)", vtype=int
+        )
         opt.add("adaptive", True, "Load adaptive files (*.e-s* files).")
-        opt.add('displacements', True, "Enable the viewing of displacements.")
-        opt.add('displacement_magnitude', 1.0, "The displacement magnitude vector.")
-        opt.add('variables', "A list of  active variables, if not specified all variables are "
-                             "loaded.", vtype=list)
-        opt.add('nodeset', None, "A list of nodeset ids or names to display, use [] to display all "
-                                 "nodesets.", vtype=list)
-        opt.add('boundary', None, "A list of boundary ids (sideset) ids or names to display, use "
-                                  "[] to display all sidesets", vtype=list)
-        opt.add('block', None, "A list of subdomain (block) ids or names to display, by default if "
-                               "'nodeset' and 'sideset' are not specified all blocks are shown.",
-                vtype=list)
-        opt.add('squeeze', False, "Calls SetSqueezePoints on vtkExodusIIReader, according to the "
-                                  "VTK documentation setting this to False should be faster.")
+        opt.add("displacements", True, "Enable the viewing of displacements.")
+        opt.add("displacement_magnitude", 1.0, "The displacement magnitude vector.")
+        opt.add(
+            "variables",
+            "A list of  active variables, if not specified all variables are "
+            "loaded.",
+            vtype=list,
+        )
+        opt.add(
+            "nodeset",
+            None,
+            "A list of nodeset ids or names to display, use [] to display all "
+            "nodesets.",
+            vtype=list,
+        )
+        opt.add(
+            "boundary",
+            None,
+            "A list of boundary ids (sideset) ids or names to display, use "
+            "[] to display all sidesets",
+            vtype=list,
+        )
+        opt.add(
+            "block",
+            None,
+            "A list of subdomain (block) ids or names to display, by default if "
+            "'nodeset' and 'sideset' are not specified all blocks are shown.",
+            vtype=list,
+        )
+        opt.add(
+            "squeeze",
+            False,
+            "Calls SetSqueezePoints on vtkExodusIIReader, according to the "
+            "VTK documentation setting this to False should be faster.",
+        )
         return opt
 
     def __init__(self, filename, **kwargs):
@@ -134,19 +172,21 @@ class ExodusReader(base.ChiggerObject):
         # Set the filename for the reader.
         self.__filename = filename
         if not os.path.isfile(self.__filename):
-            raise IOError("The file {} is not a valid filename.".format(self.__filename))
+            raise IOError(
+                "The file {} is not a valid filename.".format(self.__filename)
+            )
 
         self.__vtkreader = vtk.vtkExodusIIReader()
-        self.__active = None # see utils.get_active_filenames
-        self.__current = None # current TimeData object
-        self.__timedata = [] # all the TimeData objects
-        self.__fileinfo = collections.OrderedDict() # sorted FileInformation objects
-        self.__blockinfo = dict() # BlockInformation objects
-        self.__variableinfo = collections.OrderedDict() # VariableInformation objects
+        self.__active = None  # see utils.get_active_filenames
+        self.__current = None  # current TimeData object
+        self.__timedata = []  # all the TimeData objects
+        self.__fileinfo = collections.OrderedDict()  # sorted FileInformation objects
+        self.__blockinfo = dict()  # BlockInformation objects
+        self.__variableinfo = collections.OrderedDict()  # VariableInformation objects
 
         # Error handling
         self._error_observer = ExodusReaderErrorObserver()
-        self.__vtkreader.AddObserver('ErrorEvent', self._error_observer)
+        self.__vtkreader.AddObserver("ErrorEvent", self._error_observer)
 
     def update(self, **kwargs):
         """
@@ -166,7 +206,9 @@ class ExodusReader(base.ChiggerObject):
         # Initialize the current time data
         self.__initializeTimeInformation()
         self.__current = self.__getTimeInformation()
-        self.__vtkreader.SetFileName(None) # http://vtk.1045678.n5.nabble.com/How-to-re-load-time-information-in-ExodusIIReader-tp5741615.html pylint: disable=line-too-long
+        self.__vtkreader.SetFileName(
+            None
+        )  # http://vtk.1045678.n5.nabble.com/How-to-re-load-time-information-in-ExodusIIReader-tp5741615.html pylint: disable=line-too-long
         with lock_file(self.__current.filename):
             self.__vtkreader.SetFileName(self.__current.filename)
             self.__vtkreader.SetTimeStep(self.__current.index)
@@ -174,9 +216,11 @@ class ExodusReader(base.ChiggerObject):
             self.__vtkreader.Modified()
 
             # Displacement Settings
-            if self.getOption('displacements'):
+            if self.getOption("displacements"):
                 self.__vtkreader.ApplyDisplacementsOn()
-                self.__vtkreader.SetDisplacementMagnitude(self.getOption('displacement_magnitude'))
+                self.__vtkreader.SetDisplacementMagnitude(
+                    self.getOption("displacement_magnitude")
+                )
             else:
                 self.__vtkreader.ApplyDisplacementsOff()
 
@@ -186,15 +230,19 @@ class ExodusReader(base.ChiggerObject):
             for object_type in ExodusReader.BLOCK_TYPES:
                 for data in blockinfo[object_type].values():
                     if (not active_blockinfo) or (data in active_blockinfo):
-                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 1)
+                        self.__vtkreader.SetObjectStatus(
+                            data.object_type, data.object_index, 1
+                        )
                     else:
-                        self.__vtkreader.SetObjectStatus(data.object_type, data.object_index, 0)
+                        self.__vtkreader.SetObjectStatus(
+                            data.object_type, data.object_index, 0
+                        )
 
             # According to the VTK documentation setting this to False (not the default) speeds
             # up data loading. In my testing I was seeing load times cut in half or more with
             # "squeezing" disabled. I am leaving this as an option just in case we discover some
             # reason it shouldn't be disabled.
-            self.__vtkreader.SetSqueezePoints(self.getOption('squeeze'))
+            self.__vtkreader.SetSqueezePoints(self.getOption("squeeze"))
 
             # Set the data arrays to load
             #
@@ -202,22 +250,26 @@ class ExodusReader(base.ChiggerObject):
             # so that the block and variable information are complete when populated. After this
             # only the variables listed in the 'variables' options, if any, are activated, which
             # reduces loading times. If 'variables' is not given, all the variables are loaded.
-            variables = self.getOption('variables')
+            variables = self.getOption("variables")
             variable_info = self.getVariableInformation()
             for vinfo in variable_info.values():
                 if (not variables) or (vinfo.name in variables):
-                    self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 1)
+                    self.__vtkreader.SetObjectArrayStatus(
+                        vinfo.object_type, vinfo.name, 1
+                    )
                 else:
-                    self.__vtkreader.SetObjectArrayStatus(vinfo.object_type, vinfo.name, 0)
+                    self.__vtkreader.SetObjectArrayStatus(
+                        vinfo.object_type, vinfo.name, 0
+                    )
 
             self.__vtkreader.Update()
 
     def needsUpdate(self):
-        """ Determine the status of the object to indicate if the "update" method should be called.
+        """Determine the status of the object to indicate if the "update" method should be called.
         (public)
 
         Returns: bool: True when the settings and/or file(s) have been changed and the reader needs
-        to be updated. """
+        to be updated."""
         active = self.__getActiveFilenames()
         if self.__active != active:
             self.setNeedsUpdate(True)
@@ -244,7 +296,7 @@ class ExodusReader(base.ChiggerObject):
 
         Note: This function can also return the "Info_Records", which in MOOSE contains input file
         and other information from MOOSE, in this case a list of strings is returned.
-        reader.GetFieldData('Info_Records') """
+        reader.GetFieldData('Info_Records')"""
         self.checkUpdateState()
 
         field_data = self.__vtkreader.GetOutput().GetBlock(0).GetBlock(0).GetFieldData()
@@ -335,33 +387,37 @@ class ExodusReader(base.ChiggerObject):
         """
 
         # Time/timestep both set, unset 'time' and use 'timestep'
-        if self.isOptionValid('timestep') and self.isOptionValid('time'):
-            time = self.getOption('time')
-            timestep = self.getOption('timestep')
-            self._options.raw('time').unset()
+        if self.isOptionValid("timestep") and self.isOptionValid("time"):
+            time = self.getOption("time")
+            timestep = self.getOption("timestep")
+            self._options.raw("time").unset()
             msg = "Both 'time' ({}) and 'timestep' ({}) are set, 'timestep' is being used."
             mooseutils.mooseWarning(msg.format(time, timestep))
 
         # Timestep
         timestep = -1
-        n = len(self.__timedata)-1
-        if self.isOptionValid('timestep'):
-            timestep = self.getOption('timestep')
+        n = len(self.__timedata) - 1
+        if self.isOptionValid("timestep"):
+            timestep = self.getOption("timestep")
 
             # Account for out-of-range timesteps
             if (timestep < 0) and (timestep != -1):
-                mooseutils.mooseWarning("Timestep out of range:", timestep, 'not in', repr([0, n]))
-                self.setOption('timestep', 0)
+                mooseutils.mooseWarning(
+                    "Timestep out of range:", timestep, "not in", repr([0, n])
+                )
+                self.setOption("timestep", 0)
                 timestep = 0
             elif timestep > n:
-                mooseutils.mooseWarning("Timestep out of range:", timestep, 'not in', repr([0, n]))
-                self.setOption('timestep', n)
+                mooseutils.mooseWarning(
+                    "Timestep out of range:", timestep, "not in", repr([0, n])
+                )
+                self.setOption("timestep", n)
                 timestep = n
 
         # Time
-        elif self.isOptionValid('time'):
+        elif self.isOptionValid("time"):
             times = [t.time for t in self.__timedata]
-            idx = bisect.bisect_right(times, self.getOption('time')) - 1
+            idx = bisect.bisect_right(times, self.getOption("time")) - 1
             if idx < 0:
                 idx = 0
             elif idx > n:
@@ -369,9 +425,11 @@ class ExodusReader(base.ChiggerObject):
             timestep = idx
 
         else:
-            t = self.getOption('time')
-            ts = self.getOption('timestep')
-            mooseutils.mooseError('Invalid time ({}) and timestep({}) options.'.format(t, ts))
+            t = self.getOption("time")
+            ts = self.getOption("timestep")
+            mooseutils.mooseError(
+                "Invalid time ({}) and timestep({}) options.".format(t, ts)
+            )
 
         return self.__timedata[timestep]
 
@@ -382,8 +440,8 @@ class ExodusReader(base.ChiggerObject):
         Returns:
             list: Contains tuples (filename, modified time) of active file(s).
         """
-        if self.isOptionValid('adaptive'):
-            return utils.get_active_filenames(self.__filename, self.__filename + '-s*')
+        if self.isOptionValid("adaptive"):
+            return utils.get_active_filenames(self.__filename, self.__filename + "-s*")
         else:
             return utils.get_active_filenames(self.__filename)
 
@@ -395,8 +453,9 @@ class ExodusReader(base.ChiggerObject):
         """
         blockinfo = self.getBlockInformation()
         output = []
-        for param, object_type in zip(['block', 'boundary', 'nodeset'],
-                                      [self.BLOCK, self.SIDESET, self.NODESET]):
+        for param, object_type in zip(
+            ["block", "boundary", "nodeset"], [self.BLOCK, self.SIDESET, self.NODESET]
+        ):
             if self.isOptionValid(param):
                 blocks = self.getOption(param)
                 for data in blockinfo[object_type].values():
@@ -436,18 +495,21 @@ class ExodusReader(base.ChiggerObject):
                 times = [vtkinfo.Get(key, i) for i in steps]
 
                 if not times:
-                    times = [None] # When --mesh-only is used, not time information is written
-                self.__fileinfo[filename] = ExodusReader.FileInformation(filename=filename,
-                                                                         times=times,
-                                                                         modified=current_modified)
+                    times = [
+                        None
+                    ]  # When --mesh-only is used, not time information is written
+                self.__fileinfo[filename] = ExodusReader.FileInformation(
+                    filename=filename, times=times, modified=current_modified
+                )
 
         # Re-populate the time data
         self.__timedata = []
         timestep = 0
         for tinfo in self.__fileinfo.values():
             for i, t in enumerate(tinfo.times):
-                tdata = ExodusReader.TimeData(timestep=timestep, time=t, filename=tinfo.filename,
-                                              index=i)
+                tdata = ExodusReader.TimeData(
+                    timestep=timestep, time=t, filename=tinfo.filename, index=i
+                )
                 self.__timedata.append(tdata)
                 timestep += 1
 
@@ -469,11 +531,16 @@ class ExodusReader(base.ChiggerObject):
                 index += 1
                 name = self.__vtkreader.GetObjectName(obj_type, j)
                 vtkid = str(self.__vtkreader.GetObjectId(obj_type, j))
-                if name.startswith('Unnamed'):
+                if name.startswith("Unnamed"):
                     name = vtkid
 
-                binfo = ExodusReader.BlockInformation(object_type=obj_type, name=name, number=vtkid,
-                                                      object_index=j, multiblock_index=index)
+                binfo = ExodusReader.BlockInformation(
+                    object_type=obj_type,
+                    name=name,
+                    number=vtkid,
+                    object_index=j,
+                    multiblock_index=index,
+                )
                 self.__blockinfo[obj_type][vtkid] = binfo
 
     def __initializeVariableInformation(self):
@@ -485,14 +552,17 @@ class ExodusReader(base.ChiggerObject):
             for i in range(self.__vtkreader.GetNumberOfObjectArrays(variable_type)):
                 var_name = self.__vtkreader.GetObjectArrayName(variable_type, i)
                 if var_name is not None:
-                    num = self.__vtkreader.GetNumberOfObjectArrayComponents(variable_type, i)
-                    vinfo = ExodusReader.VariableInformation(name=var_name,
-                                                             object_type=variable_type,
-                                                             num_components=num)
+                    num = self.__vtkreader.GetNumberOfObjectArrayComponents(
+                        variable_type, i
+                    )
+                    vinfo = ExodusReader.VariableInformation(
+                        name=var_name, object_type=variable_type, num_components=num
+                    )
                     unsorted[var_name] = vinfo
 
-        self.__variableinfo = collections.OrderedDict(sorted(unsorted.items(),
-                                                             key=lambda x: x[0].lower()))
+        self.__variableinfo = collections.OrderedDict(
+            sorted(unsorted.items(), key=lambda x: x[0].lower())
+        )
 
     def __str__(self):
         """
@@ -501,15 +571,17 @@ class ExodusReader(base.ChiggerObject):
         self.checkUpdateState()
 
         # The string to return
-        out = ''
+        out = ""
 
         # Variables
-        variables = [(ExodusReader.NODAL, 'NODAL VARIABLES'),
-                     (ExodusReader.ELEMENTAL, 'ELEMENTAL VARIABLES'),
-                     (ExodusReader.GLOBAL, 'POSTPROCESSORS')]
+        variables = [
+            (ExodusReader.NODAL, "NODAL VARIABLES"),
+            (ExodusReader.ELEMENTAL, "ELEMENTAL VARIABLES"),
+            (ExodusReader.GLOBAL, "POSTPROCESSORS"),
+        ]
         for vartype, vartitle in variables:
-            out += '\n{}:\n'.format(mooseutils.colorText(vartitle, 'GREEN'))
+            out += "\n{}:\n".format(mooseutils.colorText(vartitle, "GREEN"))
             for varinfo in self.getVariableInformation([vartype]).values():
-                out += '  {}\n'.format(mooseutils.colorText(varinfo.name, 'CYAN'))
-                out += '{:>16}: {}\n'.format('components', varinfo.num_components)
+                out += "  {}\n".format(mooseutils.colorText(varinfo.name, "CYAN"))
+                out += "{:>16}: {}\n".format("components", varinfo.num_components)
         return out

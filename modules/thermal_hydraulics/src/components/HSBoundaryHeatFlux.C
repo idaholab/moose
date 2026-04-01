@@ -20,12 +20,6 @@ HSBoundaryHeatFlux::validParams()
   InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<FunctionName>("q", "Heat flux [W/m^2]");
-  params.addDeprecatedParam<PostprocessorName>(
-      "scale_pp",
-      "Post-processor by which to scale boundary condition",
-      "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
-      "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
-      "value, use a PostprocessorFunction.");
   params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the boundary condition");
   params.addParam<bool>(
       "scale_heat_rate_pp",
@@ -64,8 +58,6 @@ HSBoundaryHeatFlux::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     }
     pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
-    if (isParamValid("scale_pp"))
-      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }

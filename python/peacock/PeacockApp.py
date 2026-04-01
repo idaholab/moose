@@ -1,23 +1,25 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
-from . PeacockMainWindow import PeacockMainWindow
+from .PeacockMainWindow import PeacockMainWindow
 import argparse, os, sys
 from .utils import qtutils
+
 
 class PeacockApp(object):
     """
     Main Peacock application.
     Builds the Qt main window and processes any command line arguments.
     """
+
     def __init__(self, args, qapp=None, **kwds):
         """
         Constructor.
@@ -29,7 +31,7 @@ class PeacockApp(object):
         """
         super(PeacockApp, self).__init__(**kwds)
         # don't include args[0] since that is the executable name
-        parser = argparse.ArgumentParser(description='MOOSE GUI Application')
+        parser = argparse.ArgumentParser(description="MOOSE GUI Application")
         PeacockMainWindow.commandLineArgs(parser)
         parsed_args = parser.parse_args(args)
 
@@ -41,7 +43,11 @@ class PeacockApp(object):
 
         qtutils.setAppInformation("peacock_peacockapp")
 
-        if parsed_args.exodus or parsed_args.postprocessors or parsed_args.vectorpostprocessors:
+        if (
+            parsed_args.exodus
+            or parsed_args.postprocessors
+            or parsed_args.vectorpostprocessors
+        ):
             # If the user wants to view files then don't try to automatically find an executable.
             # This should help speed up startup times.
             parsed_args.exe_search = False
@@ -68,7 +74,7 @@ class PeacockApp(object):
         # tab is removed, it works. So there is some resizing issue
         # or something.
         # This ugly hack seems to fix the immediate problem.
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
             for idx in range(self.main_widget.tab_plugin.count()):
                 self.main_widget.tab_plugin.setCurrentIndex(idx)
 

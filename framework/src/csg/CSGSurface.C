@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGSurface.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -15,6 +16,7 @@ namespace CSG
 CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
   : _name(name), _surface_type(surf_type)
 {
+  CSGUtils::checkValidCSGName(name);
 }
 
 CSGSurface::Halfspace
@@ -38,7 +40,8 @@ CSGSurface::operator==(const CSGSurface & other) const
 {
   return (this->getName() == other.getName()) &&
          (this->getSurfaceType() == other.getSurfaceType()) &&
-         (this->getCoeffs() == other.getCoeffs());
+         (this->getCoeffs() == other.getCoeffs()) &&
+         (this->getTransformations() == other.getTransformations());
 }
 
 bool

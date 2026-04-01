@@ -1,12 +1,12 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import glob
@@ -20,6 +20,7 @@ from . import AxisOptions
 from . import FontOptions
 from . import LegendOptions
 
+
 def get_active_filenames(basename, pattern=None):
     """
     Return a list of tuples containing 'active' filenames and modified times.
@@ -28,9 +29,10 @@ def get_active_filenames(basename, pattern=None):
         basename[str]: The base filename (e.g., file_out.e)
         pattern[str]: (Optional) Additional files to consider via glob pattern (e.g., file_out.e-s*)
     """
+
     def file_number(fname):
-        idx = fname.find('.e-s')
-        return int(fname[idx+4:]) if idx > 0 else 0
+        idx = fname.find(".e-s")
+        return int(fname[idx + 4 :]) if idx > 0 else 0
 
     # List of all matching filenames
     filenames = [basename]
@@ -50,13 +52,17 @@ def get_active_filenames(basename, pattern=None):
 
     return output
 
+
 def copy_adaptive_exodus_test_files(testbase):
     """
     A helper for copying test Exodus files.
     """
-    basename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'input',
-                                            'step10_micro_out.e'))
-    pattern = basename + '-s*'
+    basename = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "..", "tests", "input", "step10_micro_out.e"
+        )
+    )
+    pattern = basename + "-s*"
 
     testfiles = []
     for src in [basename] + glob.glob(pattern):
@@ -66,12 +72,13 @@ def copy_adaptive_exodus_test_files(testbase):
         shutil.copy(src, dst)
     return sorted(testfiles)
 
+
 def get_bounds_min_max(*all_bounds):
     """
     Returns min,max bounds arrays provided a list of bounds sets.
     """
-    xmin = [float('inf'), float('inf'), float('inf')]
-    xmax = [float('-inf'), float('-inf'), float('-inf')]
+    xmin = [float("inf"), float("inf"), float("inf")]
+    xmax = [float("-inf"), float("-inf"), float("-inf")]
 
     for bounds in all_bounds:
         for i, j in enumerate([0, 2, 4]):
@@ -79,6 +86,7 @@ def get_bounds_min_max(*all_bounds):
         for i, j in enumerate([1, 3, 5]):
             xmax[i] = max(xmax[i], bounds[j])
     return xmin, xmax
+
 
 def get_bounds(*sources):
     """
@@ -89,6 +97,7 @@ def get_bounds(*sources):
         bnds.append(src.getVTKMapper().GetBounds())
     return get_bounds_min_max(*bnds)
 
+
 def compute_distance(*sources):
     """
     Returns the distance across the bounding box for all supplied sources.
@@ -96,18 +105,20 @@ def compute_distance(*sources):
     xmin, xmax = get_bounds(*sources)
     return np.linalg.norm(np.array(xmax) - np.array(xmin))
 
+
 def get_min_max(*pairs):
     """
     Retuns the min/max from a set of min/max pairs.
     """
-    xmin = float('inf')
-    xmax = float('-inf')
+    xmin = float("inf")
+    xmax = float("-inf")
     for x0, x1 in pairs:
         xmin = min(xmin, x0)
         xmax = max(xmax, x1)
     return xmin, xmax
 
-def print_camera(camera, prefix='camera', precision=10):
+
+def print_camera(camera, prefix="camera", precision=10):
     """
     Prints vtkCamera object to screen.
     """
@@ -124,32 +135,47 @@ def print_camera(camera, prefix='camera', precision=10):
         Helper for dumping settings.
         """
         p = str(precision)
-        frmt = ''.join(['{:', p, '.', p, 'f}'])
+        frmt = "".join(["{:", p, ".", p, "f}"])
 
-        d = ''.join(['(', frmt, ', ', frmt, ', ', frmt, ')'])
+        d = "".join(["(", frmt, ", ", frmt, ", ", frmt, ")"])
         return d.format(*vec)
 
-    return [prefix + '.SetViewUp' + dump(precision, view_up), prefix + '.SetPosition' + \
-                                         dump(precision, position), prefix + '.SetFocalPoint' + \
-                                         dump(precision, focal)]
+    return [
+        prefix + ".SetViewUp" + dump(precision, view_up),
+        prefix + ".SetPosition" + dump(precision, position),
+        prefix + ".SetFocalPoint" + dump(precision, focal),
+    ]
+
 
 def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     """
     Runs ImageMagic convert to create an animate gif from a series of images.
     """
     filenames = sorted(glob.glob(pattern))
-    delay = [delay]*len(filenames)
+    delay = [delay] * len(filenames)
     delay[-1] = restart_delay
-    cmd = ['convert']
+    cmd = ["convert"]
     for d, f in zip(delay, filenames):
-        cmd += ['-delay', str(d), f]
+        cmd += ["-delay", str(d), f]
     if loop:
-        cmd += ['-loop', '0']
+        cmd += ["-loop", "0"]
     cmd += [output]
     subprocess.call(cmd)
 
-def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitrate='10M',
-            num_threads=1, quality=1, dry_run=False, output_framerate_increase=0, overwrite=False):
+
+def img2mov(
+    pattern,
+    output,
+    ffmpeg="ffmpeg",
+    duration=60,
+    framerate=None,
+    bitrate="10M",
+    num_threads=1,
+    quality=1,
+    dry_run=False,
+    output_framerate_increase=0,
+    overwrite=False,
+):
     """
     Use ffmpeg to convert a series of images to a movie.
 
@@ -170,23 +196,23 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
     # Compute framerate from the duration if framerate is not given
     if not framerate:
         n = len(glob.glob(pattern))
-        framerate = int(n/duration)
+        framerate = int(n / duration)
 
     # Build the command
     cmd = [ffmpeg]
-    cmd += ['-pattern_type', 'glob']
-    cmd += ['-framerate', str(framerate)]
-    cmd += ['-i', pattern]
-    cmd += ['-b:v', bitrate]
-    cmd += ['-pix_fmt', 'yuv420p']
-    cmd += ['-q:v', str(quality)]
-    cmd += ['-threads', str(num_threads)]
-    cmd += ['-framerate', str(framerate + output_framerate_increase)]
+    cmd += ["-pattern_type", "glob"]
+    cmd += ["-framerate", str(framerate)]
+    cmd += ["-i", pattern]
+    cmd += ["-b:v", bitrate]
+    cmd += ["-pix_fmt", "yuv420p"]
+    cmd += ["-q:v", str(quality)]
+    cmd += ["-threads", str(num_threads)]
+    cmd += ["-framerate", str(framerate + output_framerate_increase)]
     if overwrite:
-        cmd += ['-y']
+        cmd += ["-y"]
     cmd += [output]
 
-    c = ' '.join(cmd)
-    print('{0}\n{1}\n{0}'.format('-'*(len(c)), c))
+    c = " ".join(cmd)
+    print("{0}\n{1}\n{0}".format("-" * (len(c)), c))
     if not dry_run:
         subprocess.call(cmd)

@@ -15,6 +15,7 @@
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/fe_type.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/petsc_vector.h"
@@ -63,6 +64,31 @@ void
 dataStore(std::ostream & stream, bool & v, void * /*context*/)
 {
   stream.write((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, FEType & v, void * context)
+{
+  auto order = v.order.get_order();
+  dataStore(stream, order, context);
+
+  auto family = v.family;
+  dataStore(stream, family, context);
+
+#ifdef LIBMESH_ENABLE_INFINITE_ELEMENTS
+  auto radial_order = v.radial_order.get_order();
+  dataStore(stream, radial_order, context);
+
+  auto radial_family = v.radial_family;
+  dataStore(stream, radial_family, context);
+
+  auto inf_map = v.inf_map;
+  dataStore(stream, inf_map, context);
+#endif
+
+  auto p_refinement = v.p_refinement;
+  dataStore(stream, p_refinement, context);
 }
 
 template <>
@@ -381,6 +407,28 @@ void
 dataLoad(std::istream & stream, bool & v, void * /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataLoad(std::istream & stream, FEType & v, void * context)
+{
+  int order = 0;
+  dataLoad(stream, order, context);
+  v.order = order;
+
+  dataLoad(stream, v.family, context);
+
+#ifdef LIBMESH_ENABLE_INFINITE_ELEMENTS
+  int radial_order = 0;
+  dataLoad(stream, radial_order, context);
+  v.radial_order = radial_order;
+
+  dataLoad(stream, v.radial_family, context);
+  dataLoad(stream, v.inf_map, context);
+#endif
+
+  dataLoad(stream, v.p_refinement, context);
 }
 
 template <>

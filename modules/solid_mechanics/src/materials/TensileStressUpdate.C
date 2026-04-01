@@ -34,7 +34,9 @@ TensileStressUpdate::TensileStressUpdate(const InputParameters & parameters)
   : MultiParameterPlasticityStressUpdate(parameters, 3, 3, 1),
     _strength(getUserObject<SolidMechanicsHardeningModel>("tensile_strength")),
     _perfect_guess(getParam<bool>("perfect_guess")),
-    _eigvecs(RankTwoTensor())
+    _eigvecs(RankTwoTensor()),
+    _dsp_trial_scratch(3),
+    _eigvals_scratch(_tensor_dimensionality)
 {
 }
 
@@ -46,21 +48,28 @@ TensileStressUpdate::computeStressParams(const RankTwoTensor & stress,
   stress.symmetricEigenvalues(stress_params);
 }
 
-std::vector<RankTwoTensor>
-TensileStressUpdate::dstress_param_dstress(const RankTwoTensor & stress) const
+void
+TensileStressUpdate::dstressparam_dstress(const RankTwoTensor & stress,
+                                          std::vector<RankTwoTensor> & dsp) const
 {
-  std::vector<Real> sp;
-  std::vector<RankTwoTensor> dsp;
-  stress.dsymmetricEigenvalues(sp, dsp);
-  return dsp;
+  mooseAssert(dsp.size() == 3,
+              "TensileStressUpdate: dsp incorrectly sized in dstressparam_dstress");
+  mooseAssert(_eigvals_scratch.size() == _tensor_dimensionality,
+              "_eigvals_scratch incorrectly sized in TensileStressUpdate:dstressparam_dstress");
+  stress.dsymmetricEigenvalues(_eigvals_scratch, dsp);
 }
 
-std::vector<RankFourTensor>
-TensileStressUpdate::d2stress_param_dstress(const RankTwoTensor & stress) const
+void
+TensileStressUpdate::d2stressparam_dstress(const RankTwoTensor & stress,
+                                           std::vector<RankFourTensor> & d2sp) const
 {
-  std::vector<RankFourTensor> d2;
-  stress.d2symmetricEigenvalues(d2);
-  return d2;
+  /*
+   * This function is not used but is included here in case a derived class needs it.
+   * The reason it is unused is because consistentTangentOperatorV is optimised
+   */
+  mooseAssert(d2sp.size() == 3,
+              "TensileStressUpdate: d2sp incorrectly sized in d2stressparam_dstress");
+  stress.d2symmetricEigenvalues(d2sp);
 }
 
 void
@@ -70,8 +79,9 @@ TensileStressUpdate::preReturnMapV(const std::vector<Real> & /*trial_stress_para
                                    const std::vector<Real> & /*yf*/,
                                    const RankFourTensor & /*Eijkl*/)
 {
-  std::vector<Real> eigvals;
-  stress_trial.symmetricEigenvaluesEigenvectors(eigvals, _eigvecs);
+  mooseAssert(_eigvals_scratch.size() == _tensor_dimensionality,
+              "_eigvals_scratch incorrectly sized in TensileStressUpdate:preReturnMapV");
+  stress_trial.symmetricEigenvaluesEigenvectors(_eigvals_scratch, _eigvecs);
 }
 
 void
@@ -270,7 +280,7 @@ TensileStressUpdate::consistentTangentOperatorV(const RankTwoTensor & stress_tri
                 drot_dstress(i, a, k, l) * stress_params[a] * eT(a, j) +
                 _eigvecs(i, a) * stress_params[a] * drot_dstress(j, a, k, l);
 
-  const std::vector<RankTwoTensor> dsp_trial = dstress_param_dstress(stress_trial);
+  dstressparam_dstress(stress_trial, _dsp_trial_scratch);
   for (unsigned i = 0; i < _tensor_dimensionality; ++i)
     for (unsigned j = 0; j < _tensor_dimensionality; ++j)
       for (unsigned k = 0; k < _tensor_dimensionality; ++k)
@@ -278,7 +288,7 @@ TensileStressUpdate::consistentTangentOperatorV(const RankTwoTensor & stress_tri
           for (unsigned a = 0; a < _num_sp; ++a)
             for (unsigned b = 0; b < _num_sp; ++b)
               dstress_dtrial(i, j, k, l) +=
-                  _eigvecs(i, a) * dvar_dtrial[a][b] * dsp_trial[b](k, l) * eT(a, j);
+                  _eigvecs(i, a) * dvar_dtrial[a][b] * _dsp_trial_scratch[b](k, l) * eT(a, j);
 
   cto = dstress_dtrial * elasticity_tensor;
 }

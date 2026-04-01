@@ -9,7 +9,7 @@ function set_libmesh_env(){
           FORTRANFLAGS DEBUG_FFLAGS DEBUG_FORTRANFLAGS
 
     if [[ "$(uname)" == Darwin ]]; then
-        if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        if [[ $HOST == arm64-apple-darwin* ]]; then
             CTUNING="-march=armv8.3-a -I${PREFIX:?}/include"
             export LIBRARY_PATH="${PREFIX:?}/lib"
         else
@@ -33,21 +33,22 @@ function set_libmesh_env(){
     export HYDRA_LAUNCHER=fork
     export INSTALL_BINARY="${SRC_DIR:?}/build-aux/install-sh -C"
 
-    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-        LDFLAGS="-L${PREFIX:?}/lib -Wl,-S,-rpath,${PREFIX:?}/lib"
-    else
-        export LDFLAGS="-Wl,-S"
+    if [[ $HOST == arm64-apple-darwin* ]]; then
+        export LDFLAGS="-L${PREFIX:?}/lib -Wl,-rpath,${PREFIX:?}/lib"
     fi
 }
 
 function do_build(){
     rm -rf "${LIBMESH_DIR:?}"
-    mkdir -p "${SRC_DIR:?}/build"; cd "${SRC_DIR:?}/build"
+    mkdir -p "${LIBMESH_DIR:?}/logs" "${SRC_DIR:?}/build"
+    cd "${SRC_DIR:?}/build"
     configure_libmesh --with-vtk-lib="${BUILD_PREFIX}"/libmesh-vtk/lib \
                       --with-vtk-include="${BUILD_PREFIX}"/libmesh-vtk/include/vtk-"${VTK_VERSION}"
+    cp "${SRC_DIR:?}/build/config.log" "${LIBMESH_DIR:?}/logs/"
     CORES=${MOOSE_JOBS:-6}
-    make -j "$CORES"
-    make install -j "$CORES"
+    set -o pipefail
+    make -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make.log"
+    make install -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make_install.log"
 }
 
 function sed_replace(){

@@ -25,8 +25,8 @@ public:
   MFEMAuxKernel(const InputParameters & parameters);
   virtual ~MFEMAuxKernel() = default;
 
-  /// Method called to update any owned objects upon a mesh update.
-  virtual void update(){};
+  /// Method called to update any owned objects upon an FE space update
+  virtual void update() {};
 
 protected:
   /// Name of auxvariable to store the result of the auxkernel in.
@@ -34,6 +34,9 @@ protected:
 
   /// Reference to result gridfunction.
   mfem::ParGridFunction & _result_var;
+
+  /// Counter to keep track of FE space updates
+  long _sequence{0};
 };
 
 #endif

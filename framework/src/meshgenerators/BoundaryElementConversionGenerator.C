@@ -113,7 +113,7 @@ BoundaryElementConversionGenerator::generate()
   if (!mesh.is_replicated())
     mesh.prepare_for_use();
   else
-    mesh.set_isnt_prepared();
+    mesh.unset_is_prepared();
 
   return std::move(_input);
 }

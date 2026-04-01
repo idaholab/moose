@@ -5,9 +5,8 @@
     type = CSVDiff
     input = 'multiple_contact_pairs.i'
     csvdiff = 'multiple_contact_pairs_out.csv'
-    abs_zero = 1.0e-6
+    abs_zero = 5.0e-6 # zero on mac is ~2.0e-6
     rel_err = 1.0e-5
-    installation_type = in_tree
     requirement = 'Heat transfer module action shall allow for providing multiple contact pairs.'
   []
 []

@@ -14,9 +14,7 @@
 #include <memory>
 #include <map>
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -115,6 +113,10 @@ public:
 
     return *_map_host;
   }
+  /**
+   * Clear the underlying data
+   */
+  void clear();
   /**
    * Call host map's operator[]
    * @param key The key
@@ -237,6 +239,17 @@ private:
   friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, void *);
 };
 
+template <typename T1, typename T2>
+void
+Map<T1, T2>::clear()
+{
+  get().clear();
+
+  _keys.destroy();
+  _values.destroy();
+  _offset.destroy();
+}
+
 #ifdef MOOSE_KOKKOS_SCOPE
 template <typename T1, typename T2>
 void
@@ -343,5 +356,4 @@ dataLoad(std::istream & stream, Map<T1, T2> & map, void * context)
 }
 #endif
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

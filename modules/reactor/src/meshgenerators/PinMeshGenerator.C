@@ -693,7 +693,7 @@ PinMeshGenerator::generate()
   }
 
   // Mark mesh as not prepared, as block IDs were re-assigned in this method
-  (*_build_mesh)->set_isnt_prepared();
+  (*_build_mesh)->unset_is_prepared();
 
   return std::move(*_build_mesh);
 }

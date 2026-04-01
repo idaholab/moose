@@ -15,6 +15,7 @@
 #include "InputParameterWarehouse.h"
 
 #ifdef NEML2_ENABLED
+#include "neml2/neml2.h"
 #include "neml2/base/Parser.h"
 #endif
 

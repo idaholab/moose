@@ -1,17 +1,18 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import copy
 import vtk
 import mooseutils
 from .ChiggerSourceBase import ChiggerSourceBase
+
 
 class ChiggerFilterSourceBase(ChiggerSourceBase):
     """
@@ -30,6 +31,7 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
         vtkmapper_type: The VTK mapper type to build, must be an instance of VTKMAPPER_TYPE
         **kwargs: The key, value options for this object.
     """
+
     # The base class actor/mapper that this object to which ownership is restricted
     VTKACTOR_TYPE = vtk.vtkProp
     VTKMAPPER_TYPE = vtk.vtkAbstractMapper
@@ -40,7 +42,7 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
     @staticmethod
     def getOptions():
         opt = ChiggerSourceBase.getOptions()
-        opt.add('filters', [], "A list of Filter objects to apply to this mapper.")
+        opt.add("filters", [], "A list of Filter objects to apply to this mapper.")
         return opt
 
     def __init__(self, *args, **kwargs):
@@ -55,9 +57,11 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
         be connected to the first filter, if then exist, or the vtkAbstractMapper object. See the
         'update' method for this class for how the connections are made.
         """
-        raise mooseutils.MooseException('The {}."getSource()" method must be overridden by your '
-                                        'mapper object and return the source vtk object to connect '
-                                        'to the filers and mapper.'.format(self.__class__.__name__))
+        raise mooseutils.MooseException(
+            'The {}."getSource()" method must be overridden by your '
+            "mapper object and return the source vtk object to connect "
+            "to the filers and mapper.".format(self.__class__.__name__)
+        )
 
     def getFilters(self):
         """
@@ -101,16 +105,20 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
             """
             Inline function for debug messages.
             """
-            mooseutils.mooseDebug('{} --> {}'.format(type(src).__name__, type(fltr).__name__),
-                                  color='GREEN')
+            mooseutils.mooseDebug(
+                "{} --> {}".format(type(src).__name__, type(fltr).__name__),
+                color="GREEN",
+            )
 
         # Create a list of filters to apply to the VTK pipeline, this is done by
         # combining the required filters with the 'filters' options. This combined list
         # is then sorted based on the list provided in FILTER_TYPES.
         filters = []
-        filters_in = copy.copy(self._required_filters) # shallow copy (don't modify require list)
-        if self.isOptionValid('filters'):
-            filters_in += self.getOption('filters')
+        filters_in = copy.copy(
+            self._required_filters
+        )  # shallow copy (don't modify require list)
+        if self.isOptionValid("filters"):
+            filters_in += self.getOption("filters")
 
         for f in filters_in:
             for i, order in enumerate(self.FILTER_TYPES):
@@ -121,16 +129,22 @@ class ChiggerFilterSourceBase(ChiggerSourceBase):
         # Connect the filters, if any exist
         if self._filters:
             debug(self.getVTKSource(), self._filters[0].getVTKFilter())
-            self._filters[0].getVTKFilter().SetInputConnection(self.getVTKSource().GetOutputPort())
+            self._filters[0].getVTKFilter().SetInputConnection(
+                self.getVTKSource().GetOutputPort()
+            )
 
             for i in range(1, len(self._filters)):
-                debug(self._filters[i-1].getVTKFilter(), self._filters[i].getVTKFilter())
-                f = self._filters[i-1].getVTKFilter().GetOutputPort()
+                debug(
+                    self._filters[i - 1].getVTKFilter(), self._filters[i].getVTKFilter()
+                )
+                f = self._filters[i - 1].getVTKFilter().GetOutputPort()
                 self._filters[i].getVTKFilter().SetInputConnection(f)
 
             if self._vtkmapper:
                 debug(self._filters[-1].getVTKFilter(), self._vtkmapper)
-                self._vtkmapper.SetInputConnection(self._filters[-1].getVTKFilter().GetOutputPort())
+                self._vtkmapper.SetInputConnection(
+                    self._filters[-1].getVTKFilter().GetOutputPort()
+                )
 
         elif self._vtkmapper:
             debug(self.getVTKSource(), self._vtkmapper)

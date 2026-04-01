@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://www.mooseframework.org
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import shutil
@@ -14,14 +14,16 @@ import mooseutils
 
 import plotly.graph_objects as go
 
+
 def run():
     exec = shutil.which("moose-opt") or mooseutils.find_moose_executable_recursive()
     if not exec:
         raise AssertionError("Cannot find a valid MOOSE executable.")
     mooseutils.run_executable(exec, ["-i", "step9.i"])
 
+
 def plot():
-    pp_data = mooseutils.PostprocessorReader('step9_out.csv')
+    pp_data = mooseutils.PostprocessorReader("step9_out.csv")
     times = pp_data["time"]
     time_hrs = times / 3600
 
@@ -49,8 +51,12 @@ def plot():
     )
     fig.show()
 
-    vpp_data_x = mooseutils.VectorPostprocessorReader('step9_out_temperature_sample_x_*.csv')
-    vpp_data_y = mooseutils.VectorPostprocessorReader('step9_out_temperature_sample_y_*.csv')
+    vpp_data_x = mooseutils.VectorPostprocessorReader(
+        "step9_out_temperature_sample_x_*.csv"
+    )
+    vpp_data_y = mooseutils.VectorPostprocessorReader(
+        "step9_out_temperature_sample_y_*.csv"
+    )
 
     figx = go.Figure()
     figy = go.Figure()
@@ -59,8 +65,12 @@ def plot():
         vpp_data_y.update(it)
 
         label = f"Time = {int(time_hrs[it] / 24)} days"
-        figx.add_trace(go.Scatter(x=vpp_data_x["x"], y=vpp_data_x["T"] - 273, name=label))
-        figy.add_trace(go.Scatter(x=vpp_data_y["y"], y=vpp_data_y["T"] - 273, name=label))
+        figx.add_trace(
+            go.Scatter(x=vpp_data_x["x"], y=vpp_data_x["T"] - 273, name=label)
+        )
+        figy.add_trace(
+            go.Scatter(x=vpp_data_y["y"], y=vpp_data_y["T"] - 273, name=label)
+        )
 
     figx.update_layout(
         xaxis=dict(title=dict(text="x (m)")),
@@ -75,7 +85,7 @@ def plot():
     figy.show()
 
 
-if __name__ == '__main__':
-    if not os.path.exists('step9_out.csv'):
+if __name__ == "__main__":
+    if not os.path.exists("step9_out.csv"):
         run()
     plot()

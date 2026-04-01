@@ -34,6 +34,7 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
   _curl.Assemble();
   _curl.Finalize();
 }
@@ -42,7 +43,20 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
 void
 MFEMCurlAux::execute()
 {
+  update();
   _curl.AddMult(_source_var, _result_var = 0, _scale_factor);
+}
+
+void
+MFEMCurlAux::update()
+{
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _curl.Update();
+    _curl.Assemble();
+    _curl.Finalize();
+  }
 }
 
 #endif

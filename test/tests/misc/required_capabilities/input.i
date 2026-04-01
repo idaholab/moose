@@ -17,6 +17,10 @@
   []
 []
 
+[Problem]
+  solve = False
+[]
+
 [Executioner]
   type = Steady
 []

@@ -21,12 +21,20 @@ public:
 
   FlowModelSinglePhase(const InputParameters & params);
 
+  virtual void addVariables() override;
+  virtual void addInitialConditions() override;
+  virtual void addKernels() override;
+
+  virtual std::vector<VariableName> solutionVariableNames() const override;
+  const std::vector<VariableName> & passiveTransportSolutionVariableNames() const
+  {
+    return _passives_times_area_names;
+  }
+
 protected:
   virtual Real getScalingFactorRhoA() const override;
   virtual Real getScalingFactorRhoUA() const override;
   virtual Real getScalingFactorRhoEA() const override;
-
-  virtual std::vector<VariableName> solutionVariableNames() const override;
 
   virtual void addRhoEAIC() override;
   virtual void addDensityIC() override;
@@ -40,8 +48,14 @@ protected:
   virtual void addSlopeReconstructionMaterial() override;
   virtual void addRDGAdvectionDGKernels() override;
 
+  /// Adds IC for a passive transport variable
+  void addPassiveTransportIC(const VariableName & var, const FunctionName & ic_fn);
+
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;
+
+  /// Names of the passive transport solution variables, if any [amount/m]
+  std::vector<VariableName> _passives_times_area_names;
 
 public:
   static const std::string DENSITY;

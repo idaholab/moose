@@ -104,7 +104,6 @@
   []
   [updated_euler_angle]
     type = ComputeUpdatedEulerAngle
-    radian_to_degree = true
   []
 []
 

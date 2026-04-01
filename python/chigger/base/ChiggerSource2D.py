@@ -1,15 +1,16 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 from .ChiggerFilterSourceBase import ChiggerFilterSourceBase
+
 
 class ChiggerSource2D(ChiggerFilterSourceBase):
     """
@@ -29,12 +30,16 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
     @staticmethod
     def getOptions():
         opt = ChiggerFilterSourceBase.getOptions()
-        opt.add('opacity', 1, "The object opacity.", vtype=float)
-        opt.add('color', "The color of the object.", vtype=list)
+        opt.add("opacity", 1, "The object opacity.", vtype=float)
+        opt.add("color", "The color of the object.", vtype=list)
         return opt
 
-    def __init__(self, vtkactor_type=vtk.vtkActor2D, vtkmapper_type=vtk.vtkPolyDataMapper2D,
-                 **kwargs):
+    def __init__(
+        self,
+        vtkactor_type=vtk.vtkActor2D,
+        vtkmapper_type=vtk.vtkPolyDataMapper2D,
+        **kwargs,
+    ):
         super(ChiggerSource2D, self).__init__(vtkactor_type, vtkmapper_type, **kwargs)
 
     def update(self, **kwargs):
@@ -46,8 +51,8 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
         """
         super(ChiggerSource2D, self).update(**kwargs)
 
-        if self.isOptionValid('opacity'):
-            self._vtkactor.GetProperty().SetOpacity(self.getOption('opacity'))
+        if self.isOptionValid("opacity"):
+            self._vtkactor.GetProperty().SetOpacity(self.getOption("opacity"))
 
-        if self.isOptionValid('color'):
-            self._vtkactor.GetProperty().SetColor(self.getOption('color'))
+        if self.isOptionValid("color"):
+            self._vtkactor.GetProperty().SetColor(self.getOption("color"))

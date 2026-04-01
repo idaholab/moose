@@ -14,6 +14,7 @@
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
+#include <limits>
 #include <memory>
 #include <set>
 #include <string>
@@ -160,6 +161,9 @@ static_assert(LIBMESH_DIM == 3,
  * Note that lower dimensional simulations embedded in 3D space can always be requested at runtime.
  */
 static constexpr std::size_t dim = LIBMESH_DIM;
+
+/// Value for invalid size_t indices
+inline constexpr std::size_t invalid_size_t = std::numeric_limits<std::size_t>::max();
 
 /**
  * Used by the signal handler to determine if we should write a checkpoint file out at any point
@@ -317,6 +321,36 @@ public:
 private:
   /// The value of Moose::_throw_on_error at construction
   const bool _throw_on_error_before;
+};
+
+/**
+ * Scoped helper for setting Moose::_deprecated_is_error during this scope.
+ *
+ * Cannot be used within threads.
+ */
+class ScopedDeprecatedIsError
+{
+public:
+  /**
+   * Default constructor, which sets Moose::_deprecated_is_error = true
+   */
+  ScopedDeprecatedIsError();
+
+  /**
+   * Specialized constructor, which sets Moose::_deprecated_is_error
+   * based on the argument \p deprecated_is_error
+   */
+  ScopedDeprecatedIsError(const bool deprecated_is_error);
+
+  /**
+   * Destructor, which sets Moose::_deprecated_is_error to what it
+   * was upon construction
+   */
+  ~ScopedDeprecatedIsError();
+
+private:
+  /// The value of Moose::_throw_on_error at construction
+  const bool _deprecated_is_error_before;
 };
 
 /**

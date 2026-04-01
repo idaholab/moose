@@ -96,6 +96,7 @@ input files using VSCode
   indentation, document outlines, mouse hover info, formatting, and auto-completion for MOOSE input files, C++ code snippets for all MOOSE systems, and
   highlighting of select MOOSE C++ types.
 - [C/C++ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack) installs a set of extensions to support C++ code navigation, syntax highlighting, etc.
+- [Black Formatter](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter): Automatic formatting for Python files (when the `black` package is installed, which is available within the `moose-tools` Conda package).
 
 ## Recommended settings
 

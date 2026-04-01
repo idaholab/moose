@@ -1,22 +1,24 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from code import InteractiveConsole
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QEvent, Qt, QSettings
 from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QSizePolicy
 import sys
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 from peacock.utils import WidgetUtils
 from peacock.base import MooseWidget
+
 
 class QPythonConsole(QObject, MooseWidget):
     """
@@ -26,6 +28,7 @@ class QPythonConsole(QObject, MooseWidget):
         write_output: Some output was written to the console. Argument is the output.
         prompt_changed: The prompt needs to be changed. This is for line continuation.
     """
+
     write_output = pyqtSignal(str)
     prompt_changed = pyqtSignal(str)
 
@@ -95,6 +98,7 @@ class QPythonConsole(QObject, MooseWidget):
             self.write_output.emit(str(output.getvalue().rstrip()))
         self._setPrompt()
 
+
 class PythonConsoleWidget(QWidget, MooseWidget):
     """
     Widget holding the input/output of a python console.
@@ -108,6 +112,7 @@ class PythonConsoleWidget(QWidget, MooseWidget):
     Signals:
         new_line: A new line of input. Argument is the input.
     """
+
     new_line = pyqtSignal(str)
 
     def __init__(self, **kwds):
@@ -120,14 +125,21 @@ class PythonConsoleWidget(QWidget, MooseWidget):
         self.output.setReadOnly(False)
         self.output.setFocusPolicy(Qt.ClickFocus)
         self.output.setStyleSheet("QPlainTextEdit { background: black; color: white;}")
-        self.output.setTextInteractionFlags(Qt.TextSelectableByMouse|Qt.TextSelectableByKeyboard|Qt.LinksAccessibleByMouse|Qt.LinksAccessibleByKeyboard)
+        self.output.setTextInteractionFlags(
+            Qt.TextSelectableByMouse
+            | Qt.TextSelectableByKeyboard
+            | Qt.LinksAccessibleByMouse
+            | Qt.LinksAccessibleByKeyboard
+        )
         self.top_layout.addWidget(self.output)
 
         self.input_layout = WidgetUtils.addLayout()
         self.top_layout.addLayout(self.input_layout)
         self.prompt = WidgetUtils.addLabel(self.input_layout, self, ">>>")
 
-        self.input_line = WidgetUtils.addLineEdit(self.input_layout, self, self._returnPressed)
+        self.input_line = WidgetUtils.addLineEdit(
+            self.input_layout, self, self._returnPressed
+        )
         self.input_line.setFocusPolicy(Qt.StrongFocus)
         self.input_line.installEventFilter(self)
 
@@ -135,8 +147,8 @@ class PythonConsoleWidget(QWidget, MooseWidget):
         self.current_index = -1
         # get a list of globals and locals from the callstack
         self._global_data = {}
-        self._global_data['global_vars'] = globals()
-        self._global_data['peacock'] = {}
+        self._global_data["global_vars"] = globals()
+        self._global_data["peacock"] = {}
         self.console = QPythonConsole(self._global_data, parent=self)
         self.console.write_output.connect(self.output.appendPlainText)
         self.output.appendPlainText("Peaock variables are in the dict 'peacock'")
@@ -205,7 +217,7 @@ class PythonConsoleWidget(QWidget, MooseWidget):
         elif self.current_index >= len(self.user_inputs):
             self.current_index = len(self.user_inputs)
         if self.current_index >= 0 and self.current_index < len(self.user_inputs):
-            self.input_line.setText(self.user_inputs[self.current_index ])
+            self.input_line.setText(self.user_inputs[self.current_index])
 
     def setVariable(self, name, value):
         """

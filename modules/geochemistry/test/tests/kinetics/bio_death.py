@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Plotting the results of bio_death.i
 
@@ -22,8 +22,13 @@ tim = [0] + [x[0] for x in data]
 biomass = [1] + [x[1] for x in data]
 
 plt.figure(0)
-plt.scatter(tim, biomass, label = 'MOOSE')
-plt.plot([0.1 * i for i in range(100)], [math.exp(-0.5 * 0.1 * i) for i in range(100)], 'k', label = 'Exponential')
+plt.scatter(tim, biomass, label="MOOSE")
+plt.plot(
+    [0.1 * i for i in range(100)],
+    [math.exp(-0.5 * 0.1 * i) for i in range(100)],
+    "k",
+    label="Exponential",
+)
 plt.legend()
 plt.grid()
 plt.xlabel("Time")

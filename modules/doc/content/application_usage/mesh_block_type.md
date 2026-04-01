@@ -17,7 +17,7 @@
 | Extension   | Description                              |
 | :-          | :-                                       |
 | .dat        | [Tecplot ASCII file](https://people.sc.fsu.edu/~jburkardt/data/tec/tec.html)                       |
-| .e, .exd    | [Sandia's ExodusII format](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodus-library)                 |
+| .e, .exo    | [Sandia's ExodusII format](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodus-library)                 |
 | .fro        | [ACDL's surface triangulation file](https://www.reviversoft.com/file-extensions/fro)        |
 | .gmv        | [LANL's GMV (General Mesh Viewer) format](https://github.com/CPFDSoftware/gmv)  |
 | .mat        | [Matlab triangular ASCII file](https://www.reviversoft.com/file-extensions/mat) (read only) |
@@ -31,7 +31,7 @@
 | .xda, .xdr  | [libMesh formats](https://sourceforge.net/p/libmesh/mailman/attachment/AD00A4C1B366594CB4B07B0A970306A90990AF91%40jsc-mail03.jsc.nasa.gov/1/)                          |
 | .vtk, .pvtu | [Visualization Toolkit](https://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf)                    |
 
-[](---)
+
 
 ### GeneratedMesh
 
@@ -71,7 +71,7 @@
   []
   ```
 
-[](---)
+
 
 ## Example Name Support
 
@@ -146,7 +146,7 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
 []
 ```
 
-[](---)
+
 
 ## Parallel Mesh
 

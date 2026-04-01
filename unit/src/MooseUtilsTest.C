@@ -215,6 +215,25 @@ TEST(MooseUtils, convertStringInt)
   EXPECT_EQ(MooseUtils::convert<unsigned long int>("1e10", true), 10000000000ul);
 }
 
+TEST(MooseUtils, prettyCppType)
+{
+  // Vectors
+  std::vector<double> v1;
+  std::vector<std::vector<double>> v2;
+  EXPECT_EQ(MooseUtils::prettyCppType(&v1), "std::vector<double>");
+  EXPECT_EQ(MooseUtils::prettyCppType(&v2), "std::vector<std::vector<double>>");
+
+  // Maps
+  std::map<double, std::string> a1;
+  std::map<std::string, bool> a2;
+  EXPECT_EQ(MooseUtils::prettyCppType(&a1), "std::map<double, std::string>");
+  EXPECT_EQ(MooseUtils::prettyCppType(&a2), "std::map<std::string, bool>");
+  std::unordered_map<double, std::string> b1;
+  std::unordered_map<std::string, bool> b2;
+  EXPECT_EQ(MooseUtils::prettyCppType(&b1), "std::unordered_map<double, std::string>");
+  EXPECT_EQ(MooseUtils::prettyCppType(&b2), "std::unordered_map<std::string, bool>");
+}
+
 struct TestCase
 {
   std::string a;

@@ -11,9 +11,7 @@
 
 #include "KokkosTypes.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 template <typename Object>
@@ -37,7 +35,7 @@ public:
   /**
    * Virtual shims that calls the corresponding methods of the actual stored function
    */
-  ///{@
+  ///@{
   KOKKOS_FUNCTION virtual Real value(Real t, Real3 p) const = 0;
   KOKKOS_FUNCTION virtual Real3 vectorValue(Real t, Real3 p) const = 0;
   KOKKOS_FUNCTION virtual Real3 gradient(Real t, Real3 p) const = 0;
@@ -215,5 +213,4 @@ FunctionWrapperHost<Object>::~FunctionWrapperHost()
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(_function_device);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -11,9 +11,7 @@
 
 #include "KokkosKernelBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -107,7 +105,7 @@ public:
   /**
    * Shims for hook methods that can be leveraged to implement static polymorphism
    */
-  ///{@
+  ///@{
   template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
                                              const unsigned int i,
@@ -322,5 +320,4 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
       });
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

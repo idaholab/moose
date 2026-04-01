@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QApplication
 from PyQt5.QtCore import pyqtSignal, Qt, QFileSystemWatcher
@@ -17,6 +17,7 @@ from peacock.base.Plugin import Plugin
 import mooseutils
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
 
+
 class ExecuteOptionsPlugin(QWidget, Plugin):
     """
     Handles setting the various arguments for running.
@@ -25,6 +26,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         executableInfoChanged(ExecutableInfo): Emitted when the executable path is changed
         workingDirChanged(str): Path of the current directory is changed
     """
+
     executableChanged = pyqtSignal(str)
     executableInfoChanged = pyqtSignal(ExecutableInfo)
     workingDirChanged = pyqtSignal(str)
@@ -33,59 +35,69 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
     def __init__(self, **kwds):
         super(ExecuteOptionsPlugin, self).__init__(**kwds)
 
-        self._preferences.addInt("execute/maxRecentWorkingDirs",
-                "Max recent working directories",
-                10,
-                1,
-                50,
-                "Set the maximum number of recent working directories that have been used.",
-                )
-        self._preferences.addInt("execute/maxRecentExes",
-                "Max recent executables",
-                10,
-                1,
-                50,
-                "Set the maximum number of recent executables that have been used.",
-                )
-        self._preferences.addInt("execute/maxRecentArgs",
-                "Max recent command line arguments",
-                10,
-                1,
-                50,
-                "Set the maximum number of recent command line arguments that have been used.",
-                )
-        self._preferences.addBool("execute/allowTestObjects",
-                "Allow using test objects",
-                False,
-                "Allow using test objects by default",
-                )
-        self._preferences.addBool("execute/mpiEnabled",
-                "Enable MPI by default",
-                False,
-                "Set the MPI checkbox on by default",
-                )
-        self._preferences.addString("execute/mpiArgs",
-                "Default mpi command",
-                "mpiexec -n 2",
-                "Set the default MPI command to run",
-                )
-        self._preferences.addBool("execute/threadsEnabled",
-                "Enable threads by default",
-                False,
-                "Set the threads checkbox on by default",
-                )
-        self._preferences.addString("execute/threadsArgs",
-                "Default threads arguments",
-                "--n-threads=2",
-                "Set the default threads arguments",
-                )
+        self._preferences.addInt(
+            "execute/maxRecentWorkingDirs",
+            "Max recent working directories",
+            10,
+            1,
+            50,
+            "Set the maximum number of recent working directories that have been used.",
+        )
+        self._preferences.addInt(
+            "execute/maxRecentExes",
+            "Max recent executables",
+            10,
+            1,
+            50,
+            "Set the maximum number of recent executables that have been used.",
+        )
+        self._preferences.addInt(
+            "execute/maxRecentArgs",
+            "Max recent command line arguments",
+            10,
+            1,
+            50,
+            "Set the maximum number of recent command line arguments that have been used.",
+        )
+        self._preferences.addBool(
+            "execute/allowTestObjects",
+            "Allow using test objects",
+            False,
+            "Allow using test objects by default",
+        )
+        self._preferences.addBool(
+            "execute/mpiEnabled",
+            "Enable MPI by default",
+            False,
+            "Set the MPI checkbox on by default",
+        )
+        self._preferences.addString(
+            "execute/mpiArgs",
+            "Default mpi command",
+            "mpiexec -n 2",
+            "Set the default MPI command to run",
+        )
+        self._preferences.addBool(
+            "execute/threadsEnabled",
+            "Enable threads by default",
+            False,
+            "Set the threads checkbox on by default",
+        )
+        self._preferences.addString(
+            "execute/threadsArgs",
+            "Default threads arguments",
+            "--n-threads=2",
+            "Set the default threads arguments",
+        )
 
         self.all_exe_layout = WidgetUtils.addLayout(grid=True)
         self.setLayout(self.all_exe_layout)
 
         self.working_label = WidgetUtils.addLabel(None, self, "Working Directory")
         self.all_exe_layout.addWidget(self.working_label, 0, 0)
-        self.choose_working_button = WidgetUtils.addButton(None, self, "Choose", self._chooseWorkingDir)
+        self.choose_working_button = WidgetUtils.addButton(
+            None, self, "Choose", self._chooseWorkingDir
+        )
         self.all_exe_layout.addWidget(self.choose_working_button, 0, 1)
         self.working_line = WidgetUtils.addLineEdit(None, self, None, readonly=True)
         self.working_line.setText(os.getcwd())
@@ -93,7 +105,9 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
 
         self.exe_label = WidgetUtils.addLabel(None, self, "Executable")
         self.all_exe_layout.addWidget(self.exe_label, 1, 0)
-        self.choose_exe_button = WidgetUtils.addButton(None, self, "Choose", self._chooseExecutable)
+        self.choose_exe_button = WidgetUtils.addButton(
+            None, self, "Choose", self._chooseExecutable
+        )
         self.all_exe_layout.addWidget(self.choose_exe_button, 1, 1)
         self.exe_line = WidgetUtils.addLineEdit(None, self, None, readonly=True)
         self.all_exe_layout.addWidget(self.exe_line, 1, 2)
@@ -105,15 +119,23 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
 
         self.test_label = WidgetUtils.addLabel(None, self, "Allow test objects")
         self.all_exe_layout.addWidget(self.test_label, 3, 0)
-        self.test_checkbox = WidgetUtils.addCheckbox(None, self, "", self._allowTestObjects)
-        self.test_checkbox.setChecked(self._preferences.value("execute/allowTestObjects"))
-        self.all_exe_layout.addWidget(self.test_checkbox, 3, 1, alignment=Qt.AlignHCenter)
+        self.test_checkbox = WidgetUtils.addCheckbox(
+            None, self, "", self._allowTestObjects
+        )
+        self.test_checkbox.setChecked(
+            self._preferences.value("execute/allowTestObjects")
+        )
+        self.all_exe_layout.addWidget(
+            self.test_checkbox, 3, 1, alignment=Qt.AlignHCenter
+        )
 
         self.mpi_label = WidgetUtils.addLabel(None, self, "Use MPI")
         self.all_exe_layout.addWidget(self.mpi_label, 4, 0)
         self.mpi_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
         self.mpi_checkbox.setChecked(self._preferences.value("execute/mpiEnabled"))
-        self.all_exe_layout.addWidget(self.mpi_checkbox, 4, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(
+            self.mpi_checkbox, 4, 1, alignment=Qt.AlignHCenter
+        )
         self.mpi_line = WidgetUtils.addLineEdit(None, self, None)
         self.mpi_line.setText(self._preferences.value("execute/mpiArgs"))
         self.mpi_line.cursorPositionChanged.connect(self._mpiLineCursorChanged)
@@ -122,8 +144,12 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self.threads_label = WidgetUtils.addLabel(None, self, "Use Threads")
         self.all_exe_layout.addWidget(self.threads_label, 5, 0)
         self.threads_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
-        self.threads_checkbox.setChecked(self._preferences.value("execute/threadsEnabled"))
-        self.all_exe_layout.addWidget(self.threads_checkbox, 5, 1, alignment=Qt.AlignHCenter)
+        self.threads_checkbox.setChecked(
+            self._preferences.value("execute/threadsEnabled")
+        )
+        self.all_exe_layout.addWidget(
+            self.threads_checkbox, 5, 1, alignment=Qt.AlignHCenter
+        )
         self.threads_line = WidgetUtils.addLineEdit(None, self, None)
         self.threads_line.setText(self._preferences.value("execute/threadsArgs"))
         self.threads_line.cursorPositionChanged.connect(self._threadsLineCursorChanged)
@@ -132,13 +158,17 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self.csv_label = WidgetUtils.addLabel(None, self, "Postprocessor CSV Output")
         self.all_exe_layout.addWidget(self.csv_label, 6, 0)
         self.csv_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
-        self.all_exe_layout.addWidget(self.csv_checkbox, 6, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(
+            self.csv_checkbox, 6, 1, alignment=Qt.AlignHCenter
+        )
         self.csv_checkbox.setCheckState(Qt.Checked)
 
         self.recover_label = WidgetUtils.addLabel(None, self, "Recover")
         self.all_exe_layout.addWidget(self.recover_label, 7, 0)
         self.recover_checkbox = WidgetUtils.addCheckbox(None, self, "", None)
-        self.all_exe_layout.addWidget(self.recover_checkbox, 7, 1, alignment=Qt.AlignHCenter)
+        self.all_exe_layout.addWidget(
+            self.recover_checkbox, 7, 1, alignment=Qt.AlignHCenter
+        )
 
         self._recent_exe_menu = None
         self._recent_working_menu = None
@@ -149,7 +179,9 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
 
         self._loading_dialog = QMessageBox(parent=self)
         self._loading_dialog.setWindowTitle("Loading executable")
-        self._loading_dialog.setStandardButtons(QMessageBox.NoButton) # get rid of the OK button
+        self._loading_dialog.setStandardButtons(
+            QMessageBox.NoButton
+        )  # get rid of the OK button
         self._loading_dialog.setWindowModality(Qt.ApplicationModal)
         self._loading_dialog.setIcon(QMessageBox.Information)
         self._loading_dialog.setText("Loading executable")
@@ -192,7 +224,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         """
         Open a dialog to allow the user to choose an executable.
         """
-        #FIXME: QFileDialog seems to be a bit broken. Using
+        # FIXME: QFileDialog seems to be a bit broken. Using
         # .setFilter() to filter only executable files doesn't
         # seem to work. Setting a QSortFilterProxyModel doesn't
         # seem to work either.
@@ -277,7 +309,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
             args.append("--recover")
 
         if self.csv_checkbox.isChecked():
-            #args.append("--no-color")
+            # args.append("--no-color")
             args.append("Outputs/csv=true")
 
         if self.threads_checkbox.isChecked():
@@ -320,30 +352,35 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         Adds menu entries specific to the Arguments to the menubar.
         """
         workingMenu = menu.addMenu("Recent &working dirs")
-        self._recent_working_menu = RecentlyUsedMenu(workingMenu,
-                "execute/recentWorkingDirs",
-                "execute/maxRecentWorkingDirs",
-                20,
-                )
+        self._recent_working_menu = RecentlyUsedMenu(
+            workingMenu,
+            "execute/recentWorkingDirs",
+            "execute/maxRecentWorkingDirs",
+            20,
+        )
         self._recent_working_menu.selected.connect(self.setWorkingDir)
         self._workingDirChanged()
 
         exeMenu = menu.addMenu("Recent &executables")
-        self._recent_exe_menu = RecentlyUsedMenu(exeMenu,
-                "execute/recentExes",
-                "execute/maxRecentExes",
-                20,
-                )
+        self._recent_exe_menu = RecentlyUsedMenu(
+            exeMenu,
+            "execute/recentExes",
+            "execute/maxRecentExes",
+            20,
+        )
         self._recent_exe_menu.selected.connect(self.setExecutablePath)
 
         argsMenu = menu.addMenu("Recent &arguments")
-        self._recent_args_menu = RecentlyUsedMenu(argsMenu,
-                "execute/recentArgs",
-                "execute/maxRecentArgs",
-                20,
-                )
+        self._recent_args_menu = RecentlyUsedMenu(
+            argsMenu,
+            "execute/recentArgs",
+            "execute/maxRecentArgs",
+            20,
+        )
         self._recent_args_menu.selected.connect(self._setExecutableArgs)
-        self._force_reload_action = WidgetUtils.addAction(menu, "Reload executable syntax", self._reload_syntax)
+        self._force_reload_action = WidgetUtils.addAction(
+            menu, "Reload executable syntax", self._reload_syntax
+        )
         self._force_reload_action.setEnabled(False)
 
     def clearRecentlyUsed(self):
@@ -359,9 +396,11 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
     def _threadsLineCursorChanged(self, old, new):
         self.threads_checkbox.setChecked(True)
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QMainWindow
     import sys
+
     qapp = QApplication(sys.argv)
     main_win = QMainWindow()
     w = ExecuteOptionsPlugin()

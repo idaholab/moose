@@ -1,9 +1,3 @@
-[Solvers]
-  [newton]
-    type = Newton
-  []
-[]
-
 [Models]
   [isoharden]
     type = LinearIsotropicHardening
@@ -90,9 +84,29 @@
               Erate Eerate elasticity
               consistency integrate_ep integrate_X integrate_S'
   []
+[]
+
+[EquationSystems]
+  [eq_sys]
+    type = NonlinearSystem
+    model = 'surface'
+  []
+[]
+
+[Solvers]
+  [newton]
+    type = Newton
+    linear_solver = 'lu'
+  []
+  [lu]
+    type = DenseLU
+  []
+[]
+
+[Models]
   [model]
     type = ImplicitUpdate
-    implicit_model = 'surface'
+    equation_system = 'eq_sys'
     solver = 'newton'
   []
 []

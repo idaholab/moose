@@ -17,9 +17,7 @@
 
 #include "libmesh/petsc_matrix.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class System;
@@ -79,7 +77,7 @@ public:
   {
     auto idx = find(i, j);
 
-    KOKKOS_ASSERT(idx != -1)
+    KOKKOS_ASSERT(idx != -1);
 
     return _val[idx];
   }
@@ -150,5 +148,4 @@ Matrix::find(PetscInt i, PetscInt j) const
 }
 #endif
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

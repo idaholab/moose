@@ -1,21 +1,27 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
+from contextlib import suppress
 from datetime import datetime
-from RunHPC import RunHPC
+
+from RunHPC import CallHPCPoolType, RunHPC
+
 
 ## This Class is responsible for maintaining an interface to the slurm scheduling syntax
 class RunSlurm(RunHPC):
     """
     Scheduler class for the slurm HPC scheduler.
     """
+
+    MONITOR_JOB_MEMORY = True
+
     def __init__(self, harness, params):
         super().__init__(harness, params)
 
@@ -25,10 +31,21 @@ class RunSlurm(RunHPC):
 
     def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
-        active_job_ids = ','.join([x.id for x in hpc_jobs])
-        cmd = ['sacct', '-j', active_job_ids, '--parsable2', '--noheader',
-               '-o', 'jobid,exitcode,state,reason,start,end']
-        exit_code, result, _ = self.callHPC(self.CallHPCPoolType.status, ' '.join(cmd))
+        active_job_ids = ",".join([x.id for x in hpc_jobs])
+        cmd = [
+            "sacct",
+            "-j",
+            active_job_ids,
+            "--parsable2",
+            "--noheader",
+            "--units=K",
+            "-o",
+            "jobid,exitcode,state,reason,start,end",
+        ]
+        if self.scheduler_options.monitor_job_memory:
+            cmd[-1] += ",maxrss"
+
+        exit_code, result, _ = self.callHPC(CallHPCPoolType.status, " ".join(cmd))
         if exit_code != 0:
             return False
 
@@ -36,84 +53,109 @@ class RunSlurm(RunHPC):
         statuses = {}
         for status in result.splitlines():
             # jobid,exitcode,state,reason are split by |
-            status_split = status.split('|')
-            # Slurm has sub jobs under each job, and we only care about the top-level job
+            status_split = status.split("|")
+            # Slurm has sub jobs under each job, and we only care about
+            # the top level job for most things except max memory
             id = status_split[0]
-            if not id.isdigit():
-                continue
+            id_split = id.split(".")
+            id_num = int(id_split[0])
+            id_suffix = id_split[1] if len(id_split) > 1 else None
             # exitcode is <val>:<val>, where the first value is the
             # exit code of the process, the second is a slurm internal code
-            statuses[id] = {'exitcode': int(status_split[1].split(':')[0]),
-                            'state': status_split[2],
-                            'reason': status_split[3],
-                            'start': status_split[4],
-                            'end': status_split[5]}
+            if id_suffix is None:
+                statuses[id_num] = {
+                    "exitcode": int(status_split[1].split(":")[0]),
+                    "state": status_split[2],
+                    "reason": status_split[3],
+                    "start": status_split[4],
+                    "end": status_split[5],
+                    "max_rss": 0,
+                }
+            # Update max memory, across all sub-jobs in a single job
+            if self.scheduler_options.monitor_job_memory and (
+                max_rss := status_split[6]
+            ):
+                with suppress(ValueError):
+                    max_rss_bytes = int(max_rss.split("K")[0]) * 1024
+                    statuses[id_num]["max_rss"] = max(
+                        statuses[id_num]["max_rss"], max_rss_bytes
+                    )
 
         # Update the jobs that we can
         for hpc_job in hpc_jobs:
             # Helper for parsing a time
             def parse_time(time):
                 if time:
-                    return datetime.strptime(time, '%Y-%m-%dT%H:%M:%S').timestamp()
+                    return datetime.strptime(time, "%Y-%m-%dT%H:%M:%S").timestamp()
                 return None
 
             # Slurm jobs are sometimes not immediately available
-            status = statuses.get(hpc_job.id)
+            status = statuses.get(int(hpc_job.id))
             if status is None:
                 continue
 
             # The slurm job state; see slurm.schedmd.com/squeue.html#lbAG
-            state = status['state']
+            state = status["state"]
 
             with hpc_job.getLock():
                 # Job wasn't running and it's no longer pending, so it
                 # is running or has at least ran
-                if state != 'PENDING' and hpc_job.state != hpc_job.State.running:
-                    start_time = parse_time(status['start'])
+                if state != "PENDING" and hpc_job.state != hpc_job.State.running:
+                    start_time = parse_time(status["start"])
                     self.setHPCJobRunning(hpc_job, start_time)
 
                 # Job was running and isn't running anymore, so it's done
-                if hpc_job.state == hpc_job.State.running and state not in ['RUNNING', 'COMPLETING']:
-                    exit_code = int(status['exitcode'])
-                    if state == 'FAILED' and exit_code == 0:
-                        raise Exception(f'Job {hpc_job.id} has unexpected exit code {exit_code} with FAILED state')
-
+                if hpc_job.state == hpc_job.State.running and state not in [
+                    "RUNNING",
+                    "COMPLETING",
+                ]:
                     job = hpc_job.job
+
+                    # Update max memory if available
+                    if max_rss := status["max_rss"]:
+                        job.getRunner().updateMaxMemory(max_rss)
+
+                    exit_code = int(status["exitcode"])
+                    if state == "FAILED" and exit_code == 0:
+                        raise Exception(
+                            f"Job {hpc_job.id} has unexpected exit code {exit_code} with FAILED state"
+                        )
 
                     # Job has timed out; setting a timeout status means that this
                     # state is recoverable
-                    if state == 'TIMEOUT':
-                        job.setStatus(job.timeout, 'SLURM JOB TIMEOUT')
+                    if state == "TIMEOUT":
+                        job.setStatus(job.timeout, "SLURM JOB TIMEOUT")
                     # If a job COMPLETED, it's done with exit code 0 so everything
                     # went well. If it FAILED, it finished but returned with a
                     # non-zero exit code, which will be handled by the Tester.
-                    elif state not in ['FAILED', 'COMPLETED']:
-                        self.setHPCJobError(hpc_job, f'SLURM ERROR: {state}', f'has state "{state}"')
+                    elif state not in ["FAILED", "COMPLETED"]:
+                        self.setHPCJobError(
+                            hpc_job, f"SLURM ERROR: {state}", f'has state "{state}"'
+                        )
 
-                    end_time = parse_time(status['end'])
+                    end_time = parse_time(status["end"])
                     self.setHPCJobDone(hpc_job, exit_code, end_time)
 
         # Success
         return True
 
     def getHPCSchedulerName(self):
-        return 'slurm'
+        return "slurm"
 
     def getHPCSubmissionCommand(self):
-        return 'sbatch'
+        return "sbatch"
 
     def getHPCQueueCommand(self):
-        return 'scontrol release'
+        return "scontrol release"
 
     def getHPCCancelCommand(self):
-        return 'scancel'
+        return "scancel"
 
     def getHPCJobIDVariable(self):
-        return 'SLURM_JOB_ID'
+        return "SLURM_JOB_ID"
 
     def parseHPCSubmissionJobID(self, result):
-        search = re.search('^Submitted batch job ([0-9]+)$', result)
+        search = re.search("^Submitted batch job ([0-9]+)$", result)
         if not search:
             raise Exception(f'Failed to parse job ID from "{result}"')
         return str(search.group(1))
-

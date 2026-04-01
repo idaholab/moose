@@ -1,0 +1,33 @@
+[Tests]
+  issues = '#13484 #13744'
+  [mat_reaction]
+    type = 'Exodiff'
+    input = 'mat_reaction.i'
+    exodiff = 'mat_reaction_out.e'
+    design = 'MatReaction.md'
+    requirement = 'The system shall provide an ability to solve a steady-state diffusion-reaction problem, where the reaction term has a material property reaction rate.'
+  []
+  [mat_reaction_jac]
+    type = 'PetscJacobianTester'
+    input = 'mat_reaction.i'
+    difference_tol = 1e-7
+    design = 'MatReaction.md'
+    requirement = 'The system shall calculate the correct hand-coded Jacobian for a steady-state diffusion-reaction problem.'
+  []
+  [ad_mat_reaction]
+    type = 'Exodiff'
+    input = 'mat_reaction.i'
+    exodiff = 'ADmat_reaction_out.e'
+    cli_args = 'AD=AD'
+    design = 'ADMatReaction.md'
+    requirement = 'The system shall provide an ability to solve a steady-state diffusion-reaction problem, where the reaction term has a material property reaction rate, using automatic differentiation.'
+  []
+  [ad_mat_reaction_jac]
+    type = 'PetscJacobianTester'
+    input = 'mat_reaction.i'
+    difference_tol = 1e-7
+    cli_args = 'AD=AD'
+    design = 'ADMatReaction.md'
+    requirement = 'The system shall calculate the correct Jacobian via automatic differentiation for a steady-state diffusion-reaction problem.'
+  []
+[]

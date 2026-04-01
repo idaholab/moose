@@ -11,9 +11,7 @@
 
 #include "KokkosNodalBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -96,7 +94,7 @@ public:
   /**
    * Shims for hook methods that can be leveraged to implement static polymorphism
    */
-  ///{@
+  ///@{
   template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & bc,
                                              const unsigned int qp,
@@ -194,5 +192,4 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

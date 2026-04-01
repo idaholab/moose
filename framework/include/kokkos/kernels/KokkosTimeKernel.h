@@ -11,9 +11,7 @@
 
 #include "KokkosKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -81,5 +79,4 @@ TimeKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
       });
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

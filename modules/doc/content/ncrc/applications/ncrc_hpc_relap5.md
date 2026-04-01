@@ -39,7 +39,7 @@ Option 3, use Secure Shell rather than OnDemand. To do so use the following step
 
 1. Once you have accessed hpclogin, from there you must SSH login to your machine of choice.
 
-NCRC Application binaries, like RELAP5-3D, are only available on Sawtooth, Bitterroot, and WindRiver.
+RELAP5-3D binaries are only available on Bitterroot and Teton.
 
 
 ## Load Environment
@@ -57,7 +57,7 @@ This will put your terminal inside the RELAP53D container where you will be able
 For this example, RELAP5-3D's `--help` can be displayed by running the following command:
 
 ```bash
-relap53D --help
+relap5.x --help
 ```
 
 ## Create Input File
@@ -132,37 +132,7 @@ rsync /path/to/the/local/input.i <your hpc user id>@hpclogin.inl.gov:~/testing/i
 
 ## Running Simulation
 
-### (1) Start-up an interactive job
-
-!style! halign=left
-For those using an interactive shell, simulations should not be executed on the login nodes (the
-terminal you access via the Clusters menu item). If you are using an Interactive App or Secure Shell
-skip to step 2. While this example is extremely lightweight, we will start an interactive job to get
-you in the habit of doing so.
-!style-end!
-
-Start by requesting a single processor for one hour within the "moose" project queue:
-
-```bash
-qsub -I -l select=1:ncpus=1 -l walltime=01:00:00 -P moose
-```
-
-This command will likely take a few seconds or even minutes to execute depending the activity on the
-machine. When it completes you should see a message similar to the following:
-
-```bash
-qsub: waiting for job 141541.sawtoothpbs to start
-qsub: job 141541.sawtoothpbs ready
-```
-
-This command will place you back in your home directory. When running on an interactive node, you
-will need to load the application environment once more:
-
-```bash
-module load use.exp_ctl relap53D
-```
-
-### (2) Run the simulation
+### (1) Run the simulation
 
 !style! halign=left
 In the previous section a test input file was created in your INL-HPC home directory within the
@@ -207,7 +177,7 @@ application. Please refer to [inl/index.md] for information about requesting acc
 different levels available.
 !alert-end!
 
-### (3) Viewing Results
+### (2) Viewing Results
 
 !style! halign=left
 If using an interactive app, you can view the results in your GUI desktop using AptPlot. To open

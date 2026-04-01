@@ -35,7 +35,7 @@
     requirement = "The system shall treat negative Jacobians encountered during the process of applying dampers as exceptions that can be recovered from by retrying the current time step."
     # exception hit turns into a warning
     allow_warnings = true
-    should_crash = false
+    expect_exit_code = 0
     expect_err = 'negative Jacobian'
   []
 []

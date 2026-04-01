@@ -33,6 +33,7 @@ computePrimitiveSolutionVector(const std::vector<GenericReal<is_ad>> & U,
   const auto & rhouA = U[THMVACE1D::RHOUA];
   const auto & rhoEA = U[THMVACE1D::RHOEA];
   const auto & A = U[THMVACE1D::AREA];
+  const auto n_passives = U.size() - THMVACE1D::N_FLUX_INPUTS;
 
   const auto rho = rhoA / A;
   const auto vel = rhouA / rhoA;
@@ -41,10 +42,12 @@ computePrimitiveSolutionVector(const std::vector<GenericReal<is_ad>> & U,
   const auto p = fp.p_from_v_e(v, e);
   const auto T = fp.T_from_v_e(v, e);
 
-  std::vector<GenericReal<is_ad>> W(THMVACE1D::N_PRIM_VARS);
+  std::vector<GenericReal<is_ad>> W(THMVACE1D::N_PRIM_VARS + n_passives);
   W[THMVACE1D::PRESSURE] = fp.p_from_v_e(v, e);
   W[THMVACE1D::VELOCITY] = vel;
   W[THMVACE1D::TEMPERATURE] = fp.T_from_v_e(v, e);
+  for (const auto i : make_range(n_passives))
+    W[THMVACE1D::N_PRIM_VARS + i] = U[THMVACE1D::N_FLUX_INPUTS + i] / A;
 
   return W;
 }
@@ -65,16 +68,19 @@ computeConservativeSolutionVector(const std::vector<GenericReal<is_ad>> & W,
   const auto & p = W[THMVACE1D::PRESSURE];
   const auto & T = W[THMVACE1D::TEMPERATURE];
   const auto & vel = W[THMVACE1D::VELOCITY];
+  const auto n_passives = W.size() - THMVACE1D::N_PRIM_VARS;
 
   const ADReal rho = fp.rho_from_p_T(p, T);
   const ADReal e = fp.e_from_p_rho(p, rho);
   const ADReal E = e + 0.5 * vel * vel;
 
-  std::vector<GenericReal<is_ad>> U(THMVACE1D::N_FLUX_INPUTS);
+  std::vector<GenericReal<is_ad>> U(THMVACE1D::N_FLUX_INPUTS + n_passives);
   U[THMVACE1D::RHOA] = rho * A;
   U[THMVACE1D::RHOUA] = U[THMVACE1D::RHOA] * vel;
   U[THMVACE1D::RHOEA] = U[THMVACE1D::RHOA] * E;
   U[THMVACE1D::AREA] = A;
+  for (const auto i : make_range(n_passives))
+    U[THMVACE1D::N_FLUX_INPUTS + i] = W[THMVACE1D::N_PRIM_VARS + i] * A;
 
   return U;
 }
@@ -95,15 +101,18 @@ computeFluxFromPrimitive(const std::vector<GenericReal<is_ad>> & W,
   const auto & p = W[THMVACE1D::PRESSURE];
   const auto & T = W[THMVACE1D::TEMPERATURE];
   const auto & vel = W[THMVACE1D::VELOCITY];
+  const auto n_passives = W.size() - THMVACE1D::N_PRIM_VARS;
 
   const auto rho = fp.rho_from_p_T(p, T);
   const auto e = fp.e_from_p_rho(p, rho);
   const auto E = e + 0.5 * vel * vel;
 
-  std::vector<ADReal> F(THMVACE1D::N_FLUX_OUTPUTS, 0.0);
+  std::vector<ADReal> F(THMVACE1D::N_FLUX_OUTPUTS + n_passives, 0.0);
   F[THMVACE1D::MASS] = rho * vel * A;
   F[THMVACE1D::MOMENTUM] = (rho * vel * vel + p) * A;
   F[THMVACE1D::ENERGY] = vel * (rho * E + p) * A;
+  for (const auto i : make_range(n_passives))
+    F[THMVACE1D::N_FLUX_OUTPUTS + i] = vel * W[THMVACE1D::N_PRIM_VARS + i] * A;
 
   return F;
 }
@@ -123,29 +132,26 @@ getElementalSolutionVector(const Elem * elem,
 {
   mooseAssert(elem, "The supplied element is a nullptr.");
 
-  std::vector<GenericReal<is_ad>> U(THMVACE1D::N_FLUX_INPUTS, 0.0);
+  std::vector<GenericReal<is_ad>> U(U_vars.size(), 0.0);
 
   if (is_implicit)
   {
-    for (unsigned int i = 0; i < THMVACE1D::N_FLUX_INPUTS; i++)
+    for (const auto i : make_range(U_vars.size()))
     {
       mooseAssert(U_vars[i], "The supplied variable is a nullptr.");
       U[i] = U_vars[i]->getElementalValue(elem);
-    }
 
-    std::vector<dof_id_type> dof_indices;
-
-    const std::vector<unsigned int> ind = {THMVACE1D::RHOA, THMVACE1D::RHOUA, THMVACE1D::RHOEA};
-    for (unsigned int j = 0; j < ind.size(); j++)
-    {
-      const auto i = ind[j];
-      U_vars[i]->dofMap().dof_indices(elem, dof_indices, U_vars[i]->number());
-      Moose::derivInsert(U[i].derivatives(), dof_indices[0], 1.0);
+      if (i != THMVACE1D::AREA)
+      {
+        std::vector<dof_id_type> dof_indices;
+        U_vars[i]->dofMap().dof_indices(elem, dof_indices, U_vars[i]->number());
+        Moose::derivInsert(U[i].derivatives(), dof_indices[0], 1.0);
+      }
     }
   }
   else
   {
-    for (unsigned int i = 0; i < THMVACE1D::N_FLUX_INPUTS; i++)
+    for (const auto i : make_range(U_vars.size()))
       U[i] = U_vars[i]->getElementalValueOld(elem);
   }
 

@@ -20,12 +20,19 @@ public:
   FlowBoundary1Phase(const InputParameters & params);
 
 protected:
+  virtual void init() override;
   virtual void check() const override;
 
   /**
    * Creates the boundary condition objects for 1-phase flow
    */
   virtual void addWeakBCs();
+
+  /// True if the component supports passive transport variables
+  virtual bool supportsPassiveTransport() const { return false; }
+
+  /// Passive transport variables on the connected flow channel
+  std::vector<VariableName> _passives_times_area;
 
 public:
   static InputParameters validParams();

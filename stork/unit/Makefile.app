@@ -35,7 +35,6 @@ MISC                      := no
 NAVIER_STOKES             := no
 PHASE_FIELD               := no
 RDG                       := no
-RICHARDS                  := no
 STOCHASTIC_TOOLS          := no
 TENSOR_MECHANICS          := no
 XFEM                      := no

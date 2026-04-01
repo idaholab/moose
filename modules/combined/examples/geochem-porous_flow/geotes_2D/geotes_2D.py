@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Plotting the results of the two geotes_2D simulations
 
@@ -26,12 +26,12 @@ f.close()
 quartzunlike = [x[1] for x in data]
 
 plt.figure()
-plt.plot(time, quartzlike, 'k-', linewidth = 2.0, label = 'QuartzLike')
-plt.plot(time, quartzunlike, 'r-', linewidth = 2.0, label = 'QuartzUnlike')
+plt.plot(time, quartzlike, "k-", linewidth=2.0, label="QuartzLike")
+plt.plot(time, quartzunlike, "r-", linewidth=2.0, label="QuartzUnlike")
 plt.legend()
 plt.ylabel("Precipitate (moles)")
 plt.xlabel("Time (days)")
-plt.title("Minerals precipitated in the heat exchanger");
+plt.title("Minerals precipitated in the heat exchanger")
 plt.savefig("../../doc/content/media/geochemistry/geotes_2D.png")
 
 sys.exit(0)

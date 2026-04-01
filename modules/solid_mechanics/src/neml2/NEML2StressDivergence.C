@@ -66,15 +66,16 @@ NEML2StressDivergence::forward()
   auto dphix = neml2::Tensor(*_grad_test_x, 3);
   auto dphiy = _ndisp >= 2 ? neml2::Tensor(*_grad_test_y, 3) : neml2::Tensor::zeros_like(dphix);
   auto dphiz = _ndisp >= 3 ? neml2::Tensor(*_grad_test_z, 3) : neml2::Tensor::zeros_like(dphix);
-  auto dphi = neml2::base_stack({dphix, dphiy, dphiz}, 0);          // (nelem, ndofe, nqp; 3, 3)
-  auto stress = neml2::R2(neml2::SR2(_stress)).batch_unsqueeze(-2); // (nelem, 1,     nqp; 3, 3)
+  auto dphi = neml2::base_stack({dphix, dphiy, dphiz}, 0);            // (nelem, ndofe, nqp; 3, 3)
+  auto stress = neml2::R2(neml2::SR2(_stress)).dynamic_unsqueeze(-2); // (nelem, 1,     nqp; 3, 3)
 
   // weak form
   auto re_qp = neml2::base_sum(dphi * neml2::Tensor(stress), -1); // (nelem, ndofe, nqp; 3)
 
   // element integration
-  auto JxWxT = _neml2_assembly.JxWxT().batch_unsqueeze(-2).base_unsqueeze(0); // (nelem, 1, nqp; 1)
-  auto re = neml2::batch_sum(re_qp * JxWxT, -1)
+  auto JxWxT =
+      _neml2_assembly.JxWxT().dynamic_unsqueeze(-2).base_unsqueeze(0); // (nelem, 1, nqp; 1)
+  auto re = neml2::dynamic_sum(re_qp * JxWxT, -1)
                 .base_index({neml2::indexing::Slice(0, _ndisp)}); // (nelem, ndofe; ndisp)
 
   // assemble residual

@@ -25,6 +25,15 @@ function do_build(){
     cd "${SRC_DIR:?}<IS_MOOSE>"
     make -j <MOOSE_JOBS> || return 1
     make install -j <MOOSE_JOBS> || return 1
+
+    # Strip unneeded symbols from executables and libraries
+    find "${INSTALL_DIR}/bin" -type f -print -exec strip -S {} \;
+    if [[ "$(uname)" == "Darwin" ]]; then
+        LIB_SUFFIX="dylib"
+    else
+        LIB_SUFFIX="so"
+    fi
+    find "${INSTALL_DIR}/lib" -type f -name "*.${LIB_SUFFIX}*" -print -exec strip -S {} \;
 }
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path

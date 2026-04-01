@@ -8,9 +8,9 @@ Base class for declaration of material properties to add to MFEM problems.
 
 ## Overview
 
-`MFEMFunctorMaterial` is the base class for materials defined for MFEM problems. They may be defined on one
-or more subdomains (blocks); if no subdomains are provided, the material will be applied on all
-subdomains in the mesh.
+`MFEMFunctorMaterial` is the base class for materials defined for MFEM problems. They may be defined on either
+(a) one or more subdomains (blocks) or (b) one or more boundaries; if no subdomains or boundaries are provided,
+the material will be applied on all subdomains and boundaries of the main mesh.
 
 `MFEMFunctorMaterial` is intended to allow the specification of `mfem::Coefficient`,
 `mfem::VectorCoefficient`, and `mfem::MatrixCoefficient` objects to add to the MFEM problem in a

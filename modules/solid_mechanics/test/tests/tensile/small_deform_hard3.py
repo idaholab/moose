@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def expected():
     ini = 1.0
     res = 0.5
-    lim = 1E-5
+    lim = 1e-5
     lo2 = 0.5 * lim
     alpha = (ini - res) / 4.0 / lo2**3
     beta = -3.0 * alpha * lo2**2
-    data = [i*1E-5/100 for i in range(100)]
-    data = [(x, alpha * (x - lo2)**3 + beta * (x - lo2) + (ini + res) / 2.0) for x in data]
+    data = [i * 1e-5 / 100 for i in range(100)]
+    data = [
+        (x, alpha * (x - lo2) ** 3 + beta * (x - lo2) + (ini + res) / 2.0) for x in data
+    ]
     return zip(*data)
+
 
 def moose():
     f = open("gold/small_deform_hard3_update_version.csv")
@@ -35,9 +39,9 @@ def moose():
 plt.figure()
 expect = expected()
 m = moose()
-plt.plot(expect[0], expect[1], 'k-', linewidth = 3.0, label = 'expected')
-plt.plot(m[0], m[1], 'k^', label = 'MOOSE')
-plt.legend(loc = 'upper right')
+plt.plot(expect[0], expect[1], "k-", linewidth=3.0, label="expected")
+plt.plot(m[0], m[1], "k^", label="MOOSE")
+plt.legend(loc="upper right")
 plt.xlabel("internal parameter")
 plt.ylabel("Tensile strength")
 plt.title("Tensile yield with softening")

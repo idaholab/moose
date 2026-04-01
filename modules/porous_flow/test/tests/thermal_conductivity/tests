@@ -3,6 +3,5 @@
     type = 'CSVDiff'
     input = 'ThermalCondPorosity01.i'
     csvdiff = 'ThermalCondPorosity01.csv'
-    threading = '!pthreads'
   [../]
 []

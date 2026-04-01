@@ -4,8 +4,14 @@ MOOSE is a dynamic project with changes occurring daily. In order to help users 
 major changes to the project monthly highlights will be produced. These highlights will be posted
 monthly to the [MOOSE discussion forum](contact_us.md) as well as provided below.
 
+## 2026
+
+- [February, 2026](2026_02.md)
+- [January, 2026](2026_01.md)
+
 ## 2025
 
+- [December, 2025](2025_12.md)
 - [November, 2025](2025_11.md)
 - [October, 2025](2025_10.md)
 - [September, 2025](2025_09.md)

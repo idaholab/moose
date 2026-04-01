@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import peacock
 import mooseutils
 from PyQt5 import QtWidgets
+
 
 class PostprocessorPlugin(peacock.base.Plugin):
     """
@@ -27,7 +28,7 @@ class PostprocessorPlugin(peacock.base.Plugin):
         # The default layout name
         self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Maximum)
         self.setFixedWidth(520)
-        self.setMainLayoutName('LeftLayout')
+        self.setMainLayoutName("LeftLayout")
 
     def onFigureCreated(self, figure, axes, axes2):
         """
@@ -59,9 +60,9 @@ class PostprocessorPlugin(peacock.base.Plugin):
         """
         Return the axes object(s).
         """
-        if index in [0, 'x', 'y']:
+        if index in [0, "x", "y"]:
             return self._axes
-        elif index in [1, 'y2']:
+        elif index in [1, "y2"]:
             return self._axes2
         return self._axes, self._axes2
 
@@ -72,10 +73,10 @@ class PostprocessorPlugin(peacock.base.Plugin):
         Args:
             name[str]: 'x', 'y', or 'y2'.
         """
-        if name == 'x':
+        if name == "x":
             return self.axes(0).get_xaxis()
-        elif name == 'y':
+        elif name == "y":
             return self.axes(0).get_yaxis()
-        elif name == 'y2':
+        elif name == "y2":
             return self.axes(1).get_yaxis()
         mooseutils.mooseError("Unknown axis name, must use: 'x', 'y', or 'y2'.")

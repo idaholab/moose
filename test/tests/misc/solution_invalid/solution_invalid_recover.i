@@ -65,7 +65,6 @@
 []
 
 [Reporters]
-
   [solution_invalidity]
     type = SolutionInvalidityReporter
   []
@@ -73,5 +72,8 @@
 
 [Outputs]
   file_base = 'solution_invalid_recover'
-  json = true
+  [out]
+    type = JSON
+    execute_system_information_on = none
+  []
 []

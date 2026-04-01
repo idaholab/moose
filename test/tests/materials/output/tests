@@ -152,7 +152,7 @@
                   Outputs/vtk=true
                   Outputs/file_base=output_vtk"
       detail = "VTK."
-      vtk = true
+      capabilities = 'vtk'
     []
     [nemesis]
       type = RunApp

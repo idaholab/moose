@@ -20,7 +20,7 @@ MFEMSubMeshTransfer::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMSubMeshTransfer");
   params.addClassDescription("Class to transfer MFEM variable data to or from a restricted copy of "
-                             "the variable defined on an "
+                             "the variable defined on "
                              " a subspace of an MFEMMesh, represented as an MFEMSubMesh.");
   params.addRequiredParam<VariableName>("from_variable",
                                         "MFEM variable to transfer data from. Can be defined on "

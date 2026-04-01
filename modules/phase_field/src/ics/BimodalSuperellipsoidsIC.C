@@ -184,7 +184,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
         // randomly positioned one.
         // This uses the equation for a superellipse in polar coordinates and substitutes
         // distances for sin, cos functions.
-        Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], _centers[j]);
+        Point dist_vec = _mesh.minPeriodicVector(_var, _centers[i], _centers[j]);
         const Real dist = dist_vec.norm();
 
         // First calculate rmn1 = r1^(-n), replacing sin, cos functions with distances

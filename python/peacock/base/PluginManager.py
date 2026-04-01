@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
 from PyQt5 import QtWidgets
@@ -13,6 +13,7 @@ import mooseutils
 from .MooseWidget import MooseWidget
 from .Plugin import Plugin
 from .PreferenceWidget import PreferenceWidget
+
 
 class PluginManager(MooseWidget):
     """
@@ -39,7 +40,9 @@ class PluginManager(MooseWidget):
 
         # Check that self is a QWidget
         if not isinstance(self, QtWidgets.QWidget):
-            mooseutils.MooseException("{} objects must also be a QWidget.".format(self.__class__.__name__))
+            mooseutils.MooseException(
+                "{} objects must also be a QWidget.".format(self.__class__.__name__)
+            )
 
         # A list of plugin classes (see setup()), this is private because child classes
         # shouldn't be messing with the classes.
@@ -80,7 +83,11 @@ class PluginManager(MooseWidget):
         NOTE: This method exists so that derived classes can customize how items are added.
         """
         if not hasattr(self, widget.mainLayoutName()):
-            mooseutils.mooseError("Unknown layout name '{}' returned when adding plugin '{}', the plugin is being skipped.".format(widget.mainLayoutName(), widget.__class__.__name__))
+            mooseutils.mooseError(
+                "Unknown layout name '{}' returned when adding plugin '{}', the plugin is being skipped.".format(
+                    widget.mainLayoutName(), widget.__class__.__name__
+                )
+            )
         else:
             layout = getattr(self, widget.mainLayoutName())
             layout.addWidget(widget)
@@ -107,7 +114,11 @@ class PluginManager(MooseWidget):
 
             # Check the type
             if not isinstance(widget, self._plugin_base):
-                mooseutils.MooseException("The supplied widget is of type '{}' but must be a direct child of a '{}'".format(widget.__class__.__name__, self._plugin_base.__name__))
+                mooseutils.MooseException(
+                    "The supplied widget is of type '{}' but must be a direct child of a '{}'".format(
+                        widget.__class__.__name__, self._plugin_base.__name__
+                    )
+                )
 
             # Define the widget name
             name = widget.__class__.__name__
@@ -130,7 +141,7 @@ class PluginManager(MooseWidget):
 
             # Set the class attribute base on plugin name
             setattr(self, name, self._plugins[name])
-            mooseutils.mooseDebug('Adding plugin as member: {}'.format(name))
+            mooseutils.mooseDebug("Adding plugin as member: {}".format(name))
 
             # Store in the temporary flat list
             self._all_plugins.append(widget)
@@ -145,7 +156,7 @@ class PluginManager(MooseWidget):
         """
         Write the python script.
         """
-        with open(filename, 'w') as fid:
+        with open(filename, "w") as fid:
             string = '"""\npython {}\n"""\n'.format(filename)
             string += self.repr()
             fid.write(string)
@@ -154,7 +165,7 @@ class PluginManager(MooseWidget):
         """
         Return a string containing a script to reproduce the plugins.
         """
-        return ''
+        return ""
 
     def call(self, method, *args, **kwargs):
         """

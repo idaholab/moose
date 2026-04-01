@@ -56,7 +56,6 @@ Extensions:
                 Component: Components/*/*
         remove:
             framework: !include framework/doc/remove.yml
-            richards: !include modules/richards/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml

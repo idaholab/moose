@@ -15,12 +15,9 @@
 
 #include <typeindex>
 
-class MooseMesh;
 class MaterialBase;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class MaterialPropertyStorage;
@@ -35,6 +32,17 @@ class MaterialPropertyValue;
 
 class Datum;
 class Assembly;
+class Mesh;
+
+/**
+ * Property constant options
+ */
+enum class PropertyConstantOption
+{
+  NONE,
+  ELEMENT,
+  SUBDOMAIN
+};
 
 /**
  * A structure storing the metadata of Kokkos material properties
@@ -58,13 +66,21 @@ struct PropRecord
    */
   unsigned int id = libMesh::invalid_uint;
   /**
-   * Size of each dimension
+   * Size of each dimension of each subdomain
    */
-  std::vector<unsigned int> dims;
+  std::unordered_map<SubdomainID, std::vector<unsigned int>> dims;
   /**
    * Flag whether this property is a face property
    */
   bool bnd = false;
+  /**
+   * Flag whether this property is an on-demand property
+   */
+  bool on_demand = false;
+  /**
+   * Whether this property is constant over element or subdomain
+   */
+  PropertyConstantOption constant_option = PropertyConstantOption::NONE;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -94,35 +110,24 @@ public:
    * Get the property name
    * @returns The property name
    */
-  std::string name() const { return _record->name; }
+  const std::string & name() const;
   /**
    * Get the data type
    * @returns The demangled data type name
    */
-  std::string type() const { return _record->type; }
+  const std::string & type() const;
   /**
    * Get the dimension
    * @returns The dimension
    */
-  unsigned int dim() const { return _record->dims.size(); }
+  unsigned int dim() const;
   /**
    * Get the size of a dimension
+   * @param subdomain The MOOSE subdomain ID
    * @param i The dimension index
    * @returns The size of the dimension
    */
-  unsigned int dim(unsigned int i) const
-  {
-    if (i >= dim())
-      mooseError("Cannot query the size of ",
-                 i,
-                 "-th dimension for the ",
-                 dim(),
-                 "D material property '",
-                 name(),
-                 "'.");
-
-    return _record->dims.at(i);
-  }
+  unsigned int dimSize(SubdomainID subdomain, unsigned int i) const;
 
   /**
    * Get the property type index for load/store functions
@@ -138,12 +143,12 @@ public:
 
   /**
    * Allocate the data storage
-   * @param mesh The MOOSE mesh
+   * @param mesh The Kokkos mesh
    * @param assembly The Kokkos assembly
    * @param subdomains The MOOSE subdomain IDs
    * @param bnd Whether this property is a face property
    */
-  virtual void allocate(const MooseMesh & mesh,
+  virtual void allocate(const Mesh & mesh,
                         const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,
@@ -159,14 +164,6 @@ public:
    */
   virtual void swap(MaterialPropertyBase & prop, StorageKey) = 0;
 
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Get whether this property is valid
-   * @returns Whether this property is valid
-   */
-  KOKKOS_FUNCTION operator bool() const { return _id != libMesh::invalid_uint || _default; }
-#endif
-
 protected:
   /**
    * Pointer to the record of this property
@@ -180,7 +177,55 @@ protected:
    * Flag whether this property has a default value
    */
   bool _default = false;
+  /**
+   * Whether this property is constant over element or subdomain
+   */
+  PropertyConstantOption _constant_option = PropertyConstantOption::NONE;
 };
+
+inline const std::string &
+MaterialPropertyBase::name() const
+{
+  if (!_record)
+    mooseError("Cannot get the name of an uninitialized or default material property.");
+  else
+    return _record->name;
+}
+
+inline const std::string &
+MaterialPropertyBase::type() const
+{
+  if (!_record)
+    mooseError("Cannot get the type of an uninitialized or default material property.");
+  else
+    return _record->type;
+}
+
+inline unsigned int
+MaterialPropertyBase::dim() const
+{
+  if (!_record || !_record->dims.size())
+    mooseError("Cannot get the dimension of an uninitialized or default material property.");
+  else
+    return _record->dims.begin()->second.size();
+}
+
+inline unsigned int
+MaterialPropertyBase::dimSize(SubdomainID subdomain, unsigned int i) const
+{
+  const unsigned int D = dim();
+
+  if (i >= D)
+    mooseError("Cannot get the size of ",
+               i,
+               "-th dimension for the ",
+               D,
+               "D material property '",
+               name(),
+               "'.");
+
+  return libmesh_map_find(_record->dims, subdomain)[i];
+}
 
 template <typename T, unsigned int dimension>
 void propertyStore(std::ostream & stream, void * prop);
@@ -215,6 +260,11 @@ public:
    * during parallel dispatch.
    */
   MaterialProperty(const MaterialProperty<T, dimension> & property);
+  /**
+   * Prevent initializing with properties of different rank
+   */
+  template <unsigned int D>
+  MaterialProperty(const MaterialProperty<T, D> & other) = delete;
 
   /**
    * Shallow copy another property
@@ -223,6 +273,12 @@ public:
   auto & operator=(const MaterialProperty<T, dimension> & property);
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get whether this property is valid
+   * @returns Whether this property is valid
+   */
+  KOKKOS_FUNCTION operator bool() const { return _data.isAlloc() || _default; }
+
   /**
    * Get the property values of a quadrature point
    * @param datum The Datum object of the current thread
@@ -243,7 +299,7 @@ public:
   virtual void init(const PropRecord & record, const StorageKey & key) override;
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  virtual void allocate(const MooseMesh & mesh,
+  virtual void allocate(const Mesh & mesh,
                         const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,
@@ -286,5 +342,4 @@ struct ArrayDeepCopy<MaterialProperty<T, dimension>>
   static constexpr bool value = true;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

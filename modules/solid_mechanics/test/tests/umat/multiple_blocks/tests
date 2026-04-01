@@ -5,39 +5,34 @@
     type = 'Exodiff'
     input = 'multiple_blocks.i'
     exodiff = 'multiple_blocks_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using the same interface plug-in.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [multiple_blocks_two_materials]
     type = 'Exodiff'
     input = 'multiple_blocks_two_materials.i'
     exodiff = 'multiple_blocks_two_materials_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
-    capabilities = 'method!=dbg'
   []
   [multiple_blocks_two_materials_parallel]
     type = 'Exodiff'
     input = 'multiple_blocks_two_materials_parallel.i'
     exodiff = 'multiple_blocks_two_materials_parallel_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with the ability to provide different parameters for '
                   'different blocks using distinct interface plug-ins in multi processor runs.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
-    capabilities = 'method!=dbg'
   []
   [rve_multimaterial_umat]
     type = 'Exodiff'
@@ -45,14 +40,12 @@
     exodiff = 'rve_multimaterial_umat_out.e'
     cli_args = "Materials/active='umat_1 umat_2' "
                "Outputs/file_base=rve_multimaterial_umat_out"
-    library_mode = 'DYNAMIC'
+    # method=opt: a demonstration test; already tested with a debug executable
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    # A demonstration test, no need run this through a debug executable, which is already tested
-    capabilities = 'method=opt'
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously using the UMAT interface.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [rve_multimaterial_moose]
     type = 'Exodiff'
@@ -60,10 +53,9 @@
     exodiff = 'rve_multimaterial_moose_out.e'
     cli_args = "Materials/active='stress elastic_1 elastic_2' "
                "Outputs/file_base=rve_multimaterial_moose_out"
-    library_mode = 'DYNAMIC'
+    # method=opt: a demonstration test; already tested with a debug executable
+    capabilities = 'method=opt & library_mode=dynamic'
     valgrind = 'NONE'
-    # A demonstration test, no need run this through a debug executable, which is already tested
-    capabilities = 'method=opt'
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously.'
   []

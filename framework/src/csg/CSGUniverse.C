@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverse.h"
+#include "CSGUtils.h"
+#include "MooseError.h"
 
 namespace CSG
 {
@@ -17,6 +19,7 @@ CSGUniverse::CSGUniverse(const std::string & name, bool is_root) : _name(name), 
 CSGUniverse::CSGUniverse(const std::string & name, std::vector<CSGCell *> & cells, bool is_root)
   : _name(name), _is_root(is_root)
 {
+  CSGUtils::checkValidCSGName(name);
   for (auto cell : cells)
     addCell(*cell);
 }
@@ -69,21 +72,18 @@ CSGUniverse::removeCell(const std::string & name)
 bool
 CSGUniverse::operator==(const CSGUniverse & other) const
 {
-  const bool names_eq = this->getName() == other.getName();
-  if (names_eq)
+  if ((this->getName() != other.getName()) ||
+      (this->getTransformations() != other.getTransformations()))
+    return false;
+  const auto & all_cells = getAllCells();
+  const auto & other_cells = other.getAllCells();
+  const bool num_cells_eq = all_cells.size() == other_cells.size();
+  if (num_cells_eq)
   {
-    const auto & all_cells = getAllCells();
-    const auto & other_cells = other.getAllCells();
-    const bool num_cells_eq = all_cells.size() == other_cells.size();
-    if (num_cells_eq)
-    {
-      for (unsigned int i = 0; i < all_cells.size(); ++i)
-        if (all_cells[i].get() != other_cells[i].get())
-          return false;
-      return true;
-    }
-    else
-      return false;
+    for (unsigned int i = 0; i < all_cells.size(); ++i)
+      if (all_cells[i].get() != other_cells[i].get())
+        return false;
+    return true;
   }
   else
     return false;

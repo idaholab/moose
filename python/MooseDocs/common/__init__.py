@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Module for objects and functions that are commonly used throughout the MooseDocs system.
 """
+
 from .storage import Storage
 from .parse_settings import match_settings, parse_settings, get_settings_as_dict
 from .box import box
@@ -25,3 +26,4 @@ from .report_error import report_error
 from .exceptions import MooseDocsException
 from .get_content import get_content, get_files, create_file_page, get_items
 from .has_tokens import has_tokens
+from .find_heading import find_heading

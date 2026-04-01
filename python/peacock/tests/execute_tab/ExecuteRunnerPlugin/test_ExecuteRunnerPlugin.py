@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Execute.ExecuteRunnerPlugin import ExecuteRunnerPlugin
 from PyQt5.QtTest import QTest
@@ -17,8 +17,10 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 from peacock.Input import TimeStepEstimate
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()
@@ -90,5 +92,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(self.total_steps, 8)
         self.assertEqual(self.current_step, 8)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

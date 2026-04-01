@@ -16,22 +16,18 @@
 #include "Conversion.h"
 #include "DataIO.h"
 
-#define usingKokkosArrayBaseMembers(T, dimension)                                                  \
+#define usingKokkosArrayBaseMembers(T, dimension, index_type)                                      \
 private:                                                                                           \
-  using ArrayBase<T, dimension>::_n;                                                               \
-  using ArrayBase<T, dimension>::_s;                                                               \
-  using ArrayBase<T, dimension>::_d;                                                               \
+  using ArrayBase<T, dimension, index_type>::_n;                                                   \
+  using ArrayBase<T, dimension, index_type>::_s;                                                   \
+  using ArrayBase<T, dimension, index_type>::_d;                                                   \
+  using ArrayBase<T, dimension, index_type>::_is_offset;                                           \
                                                                                                    \
 public:                                                                                            \
-  using ArrayBase<T, dimension>::create;                                                           \
-  using ArrayBase<T, dimension>::createHost;                                                       \
-  using ArrayBase<T, dimension>::createDevice;                                                     \
-  using ArrayBase<T, dimension>::offset;                                                           \
-  using ArrayBase<T, dimension>::operator=
+  using typename ArrayBase<T, dimension, index_type>::signed_index_type;                           \
+  using ArrayBase<T, dimension, index_type>::operator=
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 // This function simply calls ::Kokkos::kokkos_free, but it is separately defined in KokkosArray.K
@@ -61,8 +57,26 @@ enum class LayoutType
 /**
  * The Kokkos array class
  */
-template <typename T, unsigned int dimension = 1, LayoutType layout = LayoutType::LEFT>
+template <typename T,
+          unsigned int dimension = 1,
+          typename index_type = dof_id_type,
+          LayoutType layout = LayoutType::LEFT>
 class Array;
+
+/**
+ * The type trait that determines if a template type is Kokkos array
+ */
+///@{
+template <typename>
+struct is_kokkos_array : std::false_type
+{
+};
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+struct is_kokkos_array<Array<T, dimension, index_type, layout>> : std::true_type
+{
+};
+///@}
 
 /**
  * The type trait that determines the default behavior of copy constructor and deepCopy()
@@ -78,14 +92,8 @@ struct ArrayDeepCopy
   static constexpr bool value = false;
 };
 
-template <typename T, unsigned int dimension>
-struct ArrayDeepCopy<Array<T, dimension, LayoutType::LEFT>>
-{
-  static constexpr bool value = ArrayDeepCopy<T>::value;
-};
-
-template <typename T, unsigned int dimension>
-struct ArrayDeepCopy<Array<T, dimension, LayoutType::RIGHT>>
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+struct ArrayDeepCopy<Array<T, dimension, index_type, layout>>
 {
   static constexpr bool value = ArrayDeepCopy<T>::value;
 };
@@ -94,20 +102,41 @@ struct ArrayDeepCopy<Array<T, dimension, LayoutType::RIGHT>>
 /**
  * The base class for Kokkos arrays
  */
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 class ArrayBase
 {
+  static_assert(std::is_integral_v<index_type>, "Kokkos array index type must be an integral type");
+  static_assert(std::is_unsigned_v<index_type>, "Kokkos array index type must be unsigned");
+  static_assert(!std::is_same_v<bool, index_type>, "Kokkos array index type must not be bool");
+
 public:
+  using signed_index_type = typename std::make_signed<index_type>::type;
+
   /**
    * Constructor
    * @param layout The memory layout type
    */
   ArrayBase(const LayoutType layout) : _layout(layout) {}
 
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Constructor
+   * Initialize and allocate array with given dimensions
+   * This allocates both host and device data
+   * @param layout The memory layout type
+   * @param n The size of each dimension
+   */
+  template <typename... size_type>
+  ArrayBase(const LayoutType layout, size_type... n) : _layout(layout)
+  {
+    create(n...);
+  }
+#endif
+
   /**
    * Copy constructor
    */
-  ArrayBase(const ArrayBase<T, dimension> & array) : _layout(array._layout)
+  ArrayBase(const ArrayBase<T, dimension, index_type> & array) : _layout(array._layout)
   {
 #ifndef MOOSE_KOKKOS_SCOPE
     static_assert(!ArrayDeepCopy<T>::value,
@@ -134,7 +163,7 @@ public:
    * Shallow copy another Kokkos array
    * @param array The Kokkos array to be shallow copied
    */
-  void shallowCopy(const ArrayBase<T, dimension> & array);
+  void shallowCopy(const ArrayBase<T, dimension, index_type> & array);
 
   /**
    * Get the reference count
@@ -172,13 +201,13 @@ public:
    * Get the total array size
    * @returns The total array size
    */
-  KOKKOS_FUNCTION dof_id_type size() const { return _size; }
+  KOKKOS_FUNCTION index_type size() const { return _size; }
   /**
    * Get the size of a dimension
    * @param dim The dimension index
    * @returns The size of the dimension
    */
-  KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _n[dim]; }
+  KOKKOS_FUNCTION index_type n(unsigned int dim) const { return _n[dim]; }
   /**
    * Get the data pointer
    * @returns The pointer to the underlying data depending on the architecture this function is
@@ -218,7 +247,7 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being called
    * on
    */
-  KOKKOS_FUNCTION T & operator[](dof_id_type i) const
+  KOKKOS_FUNCTION T & operator[](index_type i) const
   {
     KOKKOS_ASSERT(i < _size);
 
@@ -238,20 +267,86 @@ public:
    */
   T * deviceData() const { return _device_data; }
   /**
+   * Get the host unmanaged view
+   * @returns The host unmanaged view
+   */
+  auto hostView() const
+  {
+    return ::Kokkos::View<T *, ::Kokkos::HostSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(
+        _host_data, _size);
+  }
+  /**
+   * Get the device unmanaged view
+   * @returns The device unmanaged view
+   */
+  auto deviceView() const
+  {
+    return ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>(_device_data,
+                                                                                      _size);
+  }
+  /**
+   * Initialize array with given dimensions but do not allocate
+   * @param n The size of each dimension
+   */
+  template <typename... size_type>
+  void init(size_type... n)
+  {
+    createInternal<false, false, false>(n...);
+  }
+  /**
    * Allocate array on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    */
-  void create(const std::vector<dof_id_type> & n) { createInternal<true, true>(n); }
+  template <bool initialize = true>
+  void create(const std::vector<index_type> & n)
+  {
+    createInternal<true, true, initialize>(n);
+  }
+  /**
+   * Allocate array on host and device
+   * @tparam initialize Whether to initialize host data (calls default constructor)
+   * @param n The size of each dimension
+   */
+  template <bool initialize = true, typename... size_type>
+  void create(size_type... n)
+  {
+    createInternal<true, true, initialize>(n...);
+  }
   /**
    * Allocate array on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    */
-  void createHost(const std::vector<dof_id_type> & n) { createInternal<true, false>(n); }
+  template <bool initialize = true>
+  void createHost(const std::vector<index_type> & n)
+  {
+    createInternal<true, false, initialize>(n);
+  }
+  /**
+   * Allocate array on host only
+   * @tparam initialize Whether to initialize host data (calls default constructor)
+   * @param n The size of each dimension
+   */
+  template <bool initialize = true, typename... size_type>
+  void createHost(size_type... n)
+  {
+    createInternal<true, false, initialize>(n...);
+  }
   /**
    * Allocate array on device only
    * @param n The vector containing the size of each dimension
    */
-  void createDevice(const std::vector<dof_id_type> & n) { createInternal<false, true>(n); }
+  void createDevice(const std::vector<index_type> & n) { createInternal<false, true, false>(n); }
+  /**
+   * Allocate array on device only
+   * @param n The size of each dimension
+   */
+  template <typename... size_type>
+  void createDevice(size_type... n)
+  {
+    createInternal<false, true, false>(n...);
+  }
   /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
@@ -266,7 +361,13 @@ public:
    * Apply starting index offsets to each dimension
    * @param d The vector containing the offset of each dimension
    */
-  void offset(const std::vector<dof_id_signed_type> & d);
+  void offset(const std::vector<signed_index_type> & d);
+  /**
+   * Apply starting index offsets to each dimension
+   * @param d The offset of each dimension
+   */
+  template <typename... offset_type>
+  void offset(offset_type... d);
   /**
    * Copy data from host to device
    */
@@ -282,7 +383,7 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyIn(const T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset = 0);
+  void copyIn(const T * ptr, MemcpyType dir, index_type n, index_type offset = 0);
   /**
    * Copy data to an external data from this array
    * @param ptr The pointer to the external data
@@ -290,23 +391,37 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyOut(T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset = 0);
+  void copyOut(T * ptr, MemcpyType dir, index_type n, index_type offset = 0);
   /**
    * Copy all the nested Kokkos arrays including self from host to device
    */
   void copyToDeviceNested();
+  /**
+   * Copy data from host to device and deallocate host
+   * @param should_free_host Whether the host memory should be freed.
+   * Host memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_host is true, and we cannot free for above reason, it will error.
+   */
+  void moveToDevice(bool should_free_host = true);
+  /**
+   * Copy data from device to host and deallocate device
+   * @param should_free_device Whether the device memory should be freed.
+   * Device memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_device is true, and we cannot free for above reason, it will error.
+   */
+  void moveToHost(bool should_free_device = true);
   /**
    * Deep copy another Kokkos array
    * If ArrayDeepCopy<T>::value is true, it will copy-construct each entry
    * If ArrayDeepCopy<T>::value is false, it will do a memory copy
    * @param array The Kokkos array to be deep copied
    */
-  void deepCopy(const ArrayBase<T, dimension> & array);
+  void deepCopy(const ArrayBase<T, dimension, index_type> & array);
   /**
    * Swap with another Kokkos array
    * @param array The Kokkos array to be swapped
    */
-  void swap(ArrayBase<T, dimension> & array);
+  void swap(ArrayBase<T, dimension, index_type> & array);
 
   /**
    * Assign a scalar value uniformly
@@ -320,11 +435,18 @@ public:
   class iterator
   {
   public:
-    KOKKOS_FUNCTION iterator(T * it) : it(it) {}
-    KOKKOS_FUNCTION bool operator==(const iterator & other) const { return it == other.it; }
-    KOKKOS_FUNCTION bool operator!=(const iterator & other) const { return it != other.it; }
-    KOKKOS_FUNCTION T & operator*() const { return *it; }
-    KOKKOS_FUNCTION T * operator&() const { return it; }
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using reference = T &;
+
+    KOKKOS_FUNCTION iterator() : it(nullptr) {}
+    KOKKOS_FUNCTION explicit iterator(T * p) : it(p) {}
+
+    KOKKOS_FUNCTION reference operator*() const { return *it; }
+    KOKKOS_FUNCTION pointer operator->() const { return it; }
+    KOKKOS_FUNCTION pointer operator&() const { return it; }
     KOKKOS_FUNCTION iterator & operator++()
     {
       ++it;
@@ -336,9 +458,17 @@ public:
       ++it;
       return pre;
     }
+    KOKKOS_FUNCTION friend bool operator==(const iterator & a, const iterator & b)
+    {
+      return a.it == b.it;
+    }
+    KOKKOS_FUNCTION friend bool operator!=(const iterator & a, const iterator & b)
+    {
+      return a.it != b.it;
+    }
 
   private:
-    T * it;
+    pointer it;
   };
 
   /**
@@ -367,32 +497,52 @@ protected:
   /**
    * Size of each dimension
    */
-  dof_id_type _n[dimension] = {0};
+  index_type _n[dimension] = {0};
   /**
    * Stride of each dimension
    */
-  dof_id_type _s[dimension] = {0};
+  index_type _s[dimension] = {0};
   /**
    * Offset of each dimension
    */
-  dof_id_signed_type _d[dimension] = {0};
+  signed_index_type _d[dimension] = {0};
+  /**
+   * Flag whether the array indices are offset
+   */
+  bool _is_offset = false;
+  /**
+   * Flag whether host data was allocated using malloc
+   */
+  bool _is_malloc = false;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * The internal method to initialize and allocate this array
    * @tparam host Whether host data will be allocated
    * @tparam device Whether device data will be allocated
-   * @param n The vector containing the size of each dimension
+   * @tparam initialize Whether to initialize host data (calls default constructor)
+   * @param n The size of each dimension
    */
-  template <bool host, bool device>
-  void createInternal(const std::vector<dof_id_type> & n);
+  template <bool host, bool device, bool initialize, typename... size_type>
+  void createInternal(size_type... n);
   /**
    * The internal method to initialize and allocate this array
+   * @tparam host Whether host data will be allocated
+   * @tparam device Whether device data will be allocated
+   * @tparam initialize Whether to initialize host data (calls default constructor)
+   * @param n The vector containing the size of each dimension
+   */
+  template <bool host, bool device, bool initialize>
+  void createInternal(const std::vector<index_type> & n);
+  /**
+   * The internal method to initialize and allocate this array
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    * @param n The vector containing the size of each dimension
    * @param host The flag whether host data will be allocated
    * @param device The flag whether device data will be allocated
    */
-  void createInternal(const std::vector<dof_id_type> & n, bool host, bool device);
+  template <bool initialize>
+  void createInternal(const std::vector<index_type> & n, bool host, bool device);
   /**
    * The internal method to perform a memory copy
    * @tparam TargetSpace The Kokkos memory space of target data
@@ -402,20 +552,30 @@ protected:
    * @param n The number of entries to copy
    */
   template <typename TargetSpace, typename SourceSpace>
-  void copyInternal(T * target, const T * source, dof_id_type n);
+  void copyInternal(T * target, const T * source, index_type n);
 #endif
 
 private:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Allocate host data for an initialized array that has not allocated host data
+   * @tparam initialize Whether to initialize host data (calls default constructor)
    */
+  template <bool initialize>
   void allocHost();
   /**
    * Allocate device data for an initialized array that has not allocated device data
    */
   void allocDevice();
 #endif
+  /**
+   * Free host data
+   */
+  void freeHost();
+  /**
+   * Free device data
+   */
+  void freeDevice();
 
   /**
    * Reference counter
@@ -452,16 +612,65 @@ private:
   /**
    * Total size
    */
-  dof_id_type _size = 0;
+  index_type _size = 0;
   /**
    * Memory layout type
    */
   const LayoutType _layout;
 };
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::destroy()
+ArrayBase<T, dimension, index_type>::freeHost()
+{
+  if (!_is_host_alloc)
+    return;
+
+  if (_is_host_alias)
+  {
+    _host_data = nullptr;
+    _is_host_alias = false;
+  }
+  else
+  {
+    if (!_is_malloc)
+      // Allocated by new
+      delete[] _host_data;
+    else
+    {
+      // Allocated by malloc
+      for (index_type i = 0; i < _size; ++i)
+        _host_data[i].~T();
+
+      std::free(_host_data);
+    }
+  }
+
+  _is_host_alloc = false;
+  _is_malloc = false;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::freeDevice()
+{
+  if (!_is_device_alloc)
+    return;
+
+  if (_is_device_alias)
+  {
+    _device_data = nullptr;
+    _is_device_alias = false;
+  }
+  else
+    Moose::Kokkos::free(_device_data);
+
+  _is_device_alloc = false;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::destroy()
 {
   if (!_counter)
     return;
@@ -473,23 +682,8 @@ ArrayBase<T, dimension>::destroy()
   }
   else if (_counter.use_count() == 1)
   {
-    if (_is_host_alloc && !_is_host_alias)
-    {
-      if constexpr (std::is_default_constructible<T>::value)
-        // Allocated by new
-        delete[] _host_data;
-      else
-      {
-        // Allocated by malloc
-        for (dof_id_type i = 0; i < _size; ++i)
-          _host_data[i].~T();
-
-        std::free(_host_data);
-      }
-    }
-
-    if (_is_device_alloc && !_is_device_alias)
-      Moose::Kokkos::free(_device_data);
+    freeHost();
+    freeDevice();
   }
 
   _size = 0;
@@ -502,6 +696,8 @@ ArrayBase<T, dimension>::destroy()
   }
 
   _is_init = false;
+  _is_offset = false;
+  _is_malloc = false;
   _is_host_alloc = false;
   _is_device_alloc = false;
   _is_host_alias = false;
@@ -510,9 +706,9 @@ ArrayBase<T, dimension>::destroy()
   _counter.reset();
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
+ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, index_type> & array)
 {
   if (_layout != array._layout)
     mooseError("Kokkos array error: cannot shallow copy arrays with different layouts.");
@@ -531,6 +727,8 @@ ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
   }
 
   _is_init = array._is_init;
+  _is_offset = array._is_offset;
+  _is_malloc = array._is_malloc;
   _is_host_alloc = array._is_host_alloc;
   _is_device_alloc = array._is_device_alloc;
   _is_host_alias = array._is_host_alias;
@@ -541,9 +739,9 @@ ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
 }
 
 #ifdef MOOSE_KOKKOS_SCOPE
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::aliasHost(T * ptr)
+ArrayBase<T, dimension, index_type>::aliasHost(T * ptr)
 {
   if (!_is_init)
     mooseError("Kokkos array error: attempted to alias host data before array initialization.");
@@ -556,9 +754,9 @@ ArrayBase<T, dimension>::aliasHost(T * ptr)
   _is_host_alias = true;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::aliasDevice(T * ptr)
+ArrayBase<T, dimension, index_type>::aliasDevice(T * ptr)
 {
   if (!_is_init)
     mooseError("Kokkos array error: attempted to alias device data before array initialization.");
@@ -571,24 +769,32 @@ ArrayBase<T, dimension>::aliasDevice(T * ptr)
   _is_device_alias = true;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
+template <bool initialize>
 void
-ArrayBase<T, dimension>::allocHost()
+ArrayBase<T, dimension, index_type>::allocHost()
 {
   if (_is_host_alloc)
     return;
 
-  if constexpr (std::is_default_constructible<T>::value)
+  if constexpr (initialize)
+  {
+    static_assert(
+        std::is_default_constructible<T>::value,
+        "Data type is not default-constructible. Initialization argument should be set to false.");
+
     _host_data = new T[_size];
+  }
   else
     _host_data = static_cast<T *>(std::malloc(_size * sizeof(T)));
 
   _is_host_alloc = true;
+  _is_malloc = !initialize;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::allocDevice()
+ArrayBase<T, dimension, index_type>::allocDevice()
 {
   if (_is_device_alloc)
     return;
@@ -599,10 +805,10 @@ ArrayBase<T, dimension>::allocDevice()
   _is_device_alloc = true;
 }
 
-template <typename T, unsigned int dimension>
-template <bool host, bool device>
+template <typename T, unsigned int dimension, typename index_type>
+template <bool host, bool device, bool initialize>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
+ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type> & n)
 {
   if (n.size() != dimension)
     mooseError("Kokkos array error: the number of dimensions provided (",
@@ -616,14 +822,27 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
 
   _counter = std::make_shared<unsigned int>();
 
+  uint64_t overflow_checker = 1;
+
   _size = 1;
   _s[0] = 1;
 
   for (const auto i : make_range(dimension))
   {
+    overflow_checker *= n[i];
+
     _n[i] = n[i];
     _size *= n[i];
   }
+
+  if (overflow_checker > std::numeric_limits<index_type>::max())
+    mooseError("Kokkos array error: the dimensions provided (",
+               Moose::stringify(n),
+               ") has the total size of ",
+               overflow_checker,
+               " which exceeds the limit of ",
+               MooseUtils::prettyCppType<index_type>(),
+               ".");
 
   if (_layout == LayoutType::LEFT)
   {
@@ -641,7 +860,7 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
   }
 
   if constexpr (host)
-    allocHost();
+    allocHost<initialize>();
 
   if constexpr (device)
     allocDevice();
@@ -649,32 +868,50 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
   _is_init = true;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
+template <bool initialize>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n, bool host, bool device)
+ArrayBase<T, dimension, index_type>::createInternal(const std::vector<index_type> & n,
+                                                    bool host,
+                                                    bool device)
 {
   if (host && device)
-    createInternal<true, true>(n);
+    createInternal<true, true, initialize>(n);
   else if (host && !device)
-    createInternal<true, false>(n);
+    createInternal<true, false, initialize>(n);
   else if (!host && device)
-    createInternal<false, true>(n);
+    createInternal<false, true, initialize>(n);
   else
-    createInternal<false, false>(n);
+    createInternal<false, false, initialize>(n);
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
+template <bool host, bool device, bool initialize, typename... size_type>
+void
+ArrayBase<T, dimension, index_type>::createInternal(size_type... n)
+{
+  static_assert((std::is_convertible<size_type, index_type>::value && ...),
+                "All arguments must be convertible to index_type");
+  static_assert(sizeof...(n) == dimension, "Number of arguments should match array dimension");
+
+  std::vector<index_type> dims;
+  (dims.push_back(n), ...);
+
+  createInternal<host, device, initialize>(dims);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
 template <typename TargetSpace, typename SourceSpace>
 void
-ArrayBase<T, dimension>::copyInternal(T * target, const T * source, dof_id_type n)
+ArrayBase<T, dimension, index_type>::copyInternal(T * target, const T * source, index_type n)
 {
   ::Kokkos::Impl::DeepCopy<TargetSpace, SourceSpace>(target, source, n * sizeof(T));
   ::Kokkos::fence();
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> & d)
+ArrayBase<T, dimension, index_type>::offset(const std::vector<signed_index_type> & d)
 {
   if (d.size() > dimension)
     mooseError("Kokkos array error: the number of offsets provided (",
@@ -685,11 +922,28 @@ ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> & d)
 
   for (const auto i : index_range(d))
     _d[i] = d[i];
+
+  _is_offset = true;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
+template <typename... offset_type>
 void
-ArrayBase<T, dimension>::copyToDevice()
+ArrayBase<T, dimension, index_type>::offset(offset_type... d)
+{
+  static_assert((std::is_convertible<offset_type, signed_index_type>::value && ...),
+                "All arguments must be convertible to index_type");
+  static_assert(sizeof...(d) == dimension, "Number of arguments should match array dimension");
+
+  std::vector<signed_index_type> offsets;
+  (offsets.push_back(d), ...);
+
+  offset(offsets);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::copyToDevice()
 {
   // If host side memory is not allocated, do nothing
   if (!_is_host_alloc)
@@ -703,17 +957,18 @@ ArrayBase<T, dimension>::copyToDevice()
       allocDevice();
     else
       // print error if this array is shared with other arrays
-      mooseError("Kokkos array error: cannot copy from host to device because device side memory "
-                 "was not allocated and array is being shared with other arrays.");
+      mooseError("Kokkos array error: cannot copy from host to device because device memory "
+                 "was not allocated. Cannot allocate device memory for copy because the array is "
+                 "being shared.");
   }
 
   // Copy from host to device
   copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data, _host_data, _size);
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::copyToHost()
+ArrayBase<T, dimension, index_type>::copyToHost()
 {
   // If device side memory is not allocated, do nothing
   if (!_is_device_alloc)
@@ -724,107 +979,153 @@ ArrayBase<T, dimension>::copyToHost()
   {
     if (_counter.use_count() == 1)
       // allocate memory if this array is not shared with other arrays
-      allocHost();
+      allocHost<false>();
     else
       // print error if this array is shared with other arrays
-      mooseError("Kokkos array error: cannot copy from device to host because host side memory "
-                 "was not allocated and array is being shared with other arrays.");
+      mooseError("Kokkos array error: cannot copy from device to host because host memory "
+                 "was not allocated. Cannot allocate host memory for copy because the array is "
+                 "being shared.");
   }
 
   // Copy from device to host
   copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset)
+ArrayBase<T, dimension, index_type>::moveToDevice(bool should_free_host)
+{
+  static_assert(!is_kokkos_array<T>::value,
+                "moveToDevice() not allowed for a nested array whose data type is another array.");
+
+  if (should_free_host && _counter.use_count() > 1)
+    mooseError("Kokkos array error: cannot move array from host to device because there is at "
+               "least one shallow copy of this array still alive.");
+
+  copyToDevice();
+
+  if (_counter.use_count() == 1)
+    freeHost();
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::moveToHost(bool should_free_device)
+{
+  if (should_free_device && _counter.use_count() > 1)
+    mooseError("Kokkos array error: cannot move array from device to host because there is at "
+               "least one shallow copy of this array still alive.");
+
+  copyToHost();
+
+  if (_counter.use_count() == 1)
+    freeDevice();
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::copyIn(const T * ptr,
+                                            MemcpyType dir,
+                                            index_type n,
+                                            index_type offset)
 {
   if (n > _size)
-    mooseError("Kokkos array error: cannot copyin data larger than the array size.");
+    mooseError("Kokkos array error: cannot copy in data larger than the array size.");
 
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
   if (dir == MemcpyType::HOST_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError(
+          "Kokkos array error: cannot copy in to the array because host memory was not allocated.");
 
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(_host_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy in to the array because device memory was not "
+                 "allocated.");
 
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError(
+          "Kokkos array error: cannot copy in to the array because host memory was not allocated.");
 
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy in to the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(_device_data + offset, ptr, n);
   }
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset)
+ArrayBase<T, dimension, index_type>::copyOut(T * ptr,
+                                             MemcpyType dir,
+                                             index_type n,
+                                             index_type offset)
 {
   if (n > _size)
-    mooseError("Kokkos array error: cannot copyout data larger than the array size.");
+    mooseError("Kokkos array error: cannot copy out data larger than the array size.");
 
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
   if (dir == MemcpyType::HOST_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because host memory was not "
+                 "allocated.");
 
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
   else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because host memory was not "
+                 "allocated.");
 
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(ptr, _device_data + offset, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(ptr, _device_data + offset, n);
@@ -837,26 +1138,26 @@ copyToDeviceInner(T & /* data */)
 {
 }
 
-template <typename T, unsigned int dimension, LayoutType layout>
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 void
-copyToDeviceInner(Array<T, dimension, layout> & data)
+copyToDeviceInner(Array<T, dimension, index_type, layout> & data)
 {
   data.copyToDeviceNested();
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::copyToDeviceNested()
+ArrayBase<T, dimension, index_type>::copyToDeviceNested()
 {
-  for (unsigned int i = 0; i < _size; ++i)
+  for (index_type i = 0; i < _size; ++i)
     copyToDeviceInner(_host_data[i]);
 
   copyToDevice();
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
+ArrayBase<T, dimension, index_type>::deepCopy(const ArrayBase<T, dimension, index_type> & array)
 {
   if (_layout != array._layout)
     mooseError("Kokkos array error: cannot deep copy arrays with different layouts.");
@@ -865,13 +1166,13 @@ ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
     mooseError(
         "Kokkos array error: cannot deep copy using constructor from array without host data.");
 
-  std::vector<dof_id_type> n(std::begin(array._n), std::end(array._n));
+  std::vector<index_type> n(std::begin(array._n), std::end(array._n));
 
-  createInternal(n, array._is_host_alloc, array._is_device_alloc);
+  createInternal<false>(n, array._is_host_alloc, array._is_device_alloc);
 
   if constexpr (ArrayDeepCopy<T>::value)
   {
-    for (dof_id_type i = 0; i < _size; ++i)
+    for (index_type i = 0; i < _size; ++i)
       new (_host_data + i) T(array._host_data[i]);
 
     copyToDevice();
@@ -890,39 +1191,37 @@ ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
     _d[i] = array._d[i];
     _s[i] = array._s[i];
   }
+
+  _is_offset = array._is_offset;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 void
-ArrayBase<T, dimension>::swap(ArrayBase<T, dimension> & array)
+ArrayBase<T, dimension, index_type>::swap(ArrayBase<T, dimension, index_type> & array)
 {
-  ArrayBase<T, dimension> clone(_layout);
+  ArrayBase<T, dimension, index_type> clone(_layout);
 
   clone.shallowCopy(*this);
   this->shallowCopy(array);
   array.shallowCopy(clone);
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, typename index_type>
 auto &
-ArrayBase<T, dimension>::operator=(const T & scalar)
+ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
 {
   if (_is_host_alloc)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
-  {
-    ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> data(_device_data,
-                                                                                    _size);
-    ::Kokkos::Experimental::fill_n(ExecSpace(), data, _size, scalar);
-  }
+    ::Kokkos::Experimental::fill_n(ExecSpace(), deviceView(), _size, scalar);
 
   return *this;
 }
 
-template <typename T, unsigned int dimension, LayoutType layout>
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 void
-dataStore(std::ostream & stream, Array<T, dimension, layout> & array, void * context)
+dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array, void * context)
 {
   using ::dataStore;
 
@@ -954,7 +1253,7 @@ dataStore(std::ostream & stream, Array<T, dimension, layout> & array, void * con
 
     array.copyOut(data, MemcpyType::DEVICE_TO_HOST, array.size());
 
-    for (dof_id_type i = 0; i < array.size(); ++i)
+    for (index_type i = 0; i < array.size(); ++i)
       dataStore(stream, data[i], context);
 
     std::free(data);
@@ -964,9 +1263,9 @@ dataStore(std::ostream & stream, Array<T, dimension, layout> & array, void * con
       dataStore(stream, value, context);
 }
 
-template <typename T, unsigned int dimension, LayoutType layout>
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 void
-dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * context)
+dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array, void * context)
 {
   using ::dataLoad;
 
@@ -980,7 +1279,7 @@ dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * cont
   dataLoad(stream, from_type_name, nullptr);
 
   if (from_type_name != typeid(T).name())
-    mooseError("Kokkos array error: cannot load an array because the stored array is of type '",
+    mooseError("Kokkos array error: cannot load array because the stored array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(from_type_name.c_str())),
                "' but the loading array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(typeid(T).name())),
@@ -990,14 +1289,14 @@ dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * cont
   dataLoad(stream, from_dimension, nullptr);
 
   if (from_dimension != dimension)
-    mooseError("Kokkos array error: cannot load an array because the stored array is ",
+    mooseError("Kokkos array error: cannot load array because the stored array is ",
                from_dimension,
                "D but the loading array is ",
                dimension,
                "D.");
 
-  std::vector<dof_id_type> from_n(dimension);
-  std::vector<dof_id_type> n(dimension);
+  std::vector<index_type> from_n(dimension);
+  std::vector<index_type> n(dimension);
 
   for (unsigned int dim = 0; dim < dimension; ++dim)
   {
@@ -1006,7 +1305,7 @@ dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * cont
   }
 
   if (from_n != n)
-    mooseError("Kokkos array error: cannot load an array because the stored array has dimensions (",
+    mooseError("Kokkos array error: cannot load array because the stored array has dimensions (",
                Moose::stringify(from_n),
                ") but the loading array has dimensions (",
                Moose::stringify(n),
@@ -1042,30 +1341,49 @@ dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * cont
  * Kokkos object if it is used on device, because the reference refers to a host object and
  * therefore is not accessible on device. If storing it as a reference is required, see
  * ReferenceWrapper.
+ * @tparam T The data type
+ * @tparam dimension The array dimension size
+ * @tparam index_type The array index type
  * @tparam layout The memory layout type
  */
 ///@{
-template <typename T>
-class Array<T, 1, LayoutType::LEFT> : public ArrayBase<T, 1>
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+class Array : public ArrayBase<T, dimension, index_type>
 {
 #ifdef MOOSE_KOKKOS_SCOPE
-  usingKokkosArrayBaseMembers(T, 1);
+  usingKokkosArrayBaseMembers(T, dimension, index_type);
 #endif
 
 public:
   /**
    * Default constructor
    */
-  Array() : ArrayBase<T, 1>(LayoutType::LEFT) {}
+  Array() : ArrayBase<T, dimension, index_type>(layout) {}
   /**
    * Copy constructor
    */
-  Array(const Array<T, 1, LayoutType::LEFT> & array) : ArrayBase<T, 1>(array) {}
+  Array(const Array<T, dimension, index_type, layout> & array)
+    : ArrayBase<T, dimension, index_type>(array)
+  {
+  }
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Constructor
+   * Initialize and allocate array with given dimensions
+   * This allocates both host and device data
+   * @param n The size of each dimension
+   */
+  template <typename... size_type>
+  Array(size_type... n) : ArrayBase<T, dimension, index_type>(layout, n...)
+  {
+  }
+#endif
+
   /**
    * Shallow copy another Kokkos array
    * @param array The Kokkos array to be shallow copied
    */
-  auto & operator=(const Array<T, 1, LayoutType::LEFT> & array)
+  auto & operator=(const Array<T, dimension, index_type, layout> & array)
   {
     this->shallowCopy(array);
 
@@ -1074,46 +1392,143 @@ public:
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Constructor
-   * Initialize and allocate array with given dimensions
-   * This allocates both host and device data
-   * @param n0 The first dimension size
+   * Get an array entry
+   * @param i The index of each dimension
+   * @returns The reference of the entry depending on the architecture this function is being called
+   * on
    */
-  Array(dof_id_type n0) : ArrayBase<T, 1>(LayoutType::LEFT) { create(n0); }
+  template <typename... indices>
+  KOKKOS_FUNCTION T & operator()(indices... i) const;
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[dimension]) const
+  {
+    return operatorInternal(idx, std::make_integer_sequence<unsigned int, dimension>{});
+  }
+#endif
+
+private:
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Internal method for calling operator() with array indices
+   */
+  template <unsigned int... i>
+  KOKKOS_FUNCTION T & operatorInternal(const signed_index_type (&idx)[dimension],
+                                       std::integer_sequence<unsigned int, i...>) const
+  {
+    return operator()(idx[i]...);
+  }
+#endif
+};
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+template <typename... indices>
+KOKKOS_FUNCTION T &
+Array<T, dimension, index_type, layout>::operator()(indices... i) const
+{
+  static_assert((std::is_convertible<indices, signed_index_type>::value && ...),
+                "All arguments must be convertible to signed_index_type");
+  static_assert(sizeof...(i) == dimension, "Number of arguments should match array dimension");
+
+#ifdef DEBUG
+  {
+    signed_index_type idx[dimension] = {static_cast<signed_index_type>(i)...};
+
+    for (unsigned int d = 0; d < sizeof...(i); ++d)
+      KOKKOS_ASSERT(idx[d] - _d[d] >= 0 && static_cast<index_type>(idx[d] - _d[d]) < _n[d]);
+  }
+#endif
+
+  index_type idx = 0;
+  unsigned int d = 0;
+
+  if (_is_offset)
+  {
+    if constexpr (layout == LayoutType::LEFT)
+      (((idx += (d == 0 ? static_cast<signed_index_type>(i) - _d[d]
+                        : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
+        ++d),
+       ...);
+    else
+      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i) - _d[d]
+                                    : (static_cast<signed_index_type>(i) - _d[d]) * _s[d])),
+        ++d),
+       ...);
+  }
+  else
+  {
+    if constexpr (layout == LayoutType::LEFT)
+      (((idx +=
+         (d == 0 ? static_cast<signed_index_type>(i) : static_cast<signed_index_type>(i) * _s[d])),
+        ++d),
+       ...);
+    else
+      (((idx += (d == dimension - 1 ? static_cast<signed_index_type>(i)
+                                    : static_cast<signed_index_type>(i) * _s[d])),
+        ++d),
+       ...);
+  }
+
+  return this->operator[](idx);
+}
+#endif
+
+template <typename T, typename index_type>
+class Array<T, 1, index_type, LayoutType::LEFT> : public ArrayBase<T, 1, index_type>
+{
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 1, index_type);
+#endif
+
+public:
+  /**
+   * Default constructor
+   */
+  Array() : ArrayBase<T, 1, index_type>(LayoutType::LEFT) {}
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 1, index_type, LayoutType::LEFT> & array)
+    : ArrayBase<T, 1, index_type>(array)
+  {
+  }
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Constructor
+   * Initialize and allocate array with given size
+   * This allocates both host and device data
+   * @param n The array size
+   */
+  Array(index_type n) : ArrayBase<T, 1, index_type>(LayoutType::LEFT, n) {}
   /**
    * Constructor
    * Initialize and allocate array by copying a standard vector variable
    * This allocates and copies to both host and device data
    * @param vector The standard vector variable to copy
    */
-  Array(const std::vector<T> & vector) : ArrayBase<T, 1>(LayoutType::LEFT) { *this = vector; }
+  Array(const std::vector<T> & vector) : ArrayBase<T, 1, index_type>(LayoutType::LEFT)
+  {
+    *this = vector;
+  }
+#endif
 
   /**
-   * Initialize array with given dimensions but do not allocate
-   * @param n0 The first dimension size
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
    */
-  void init(dof_id_type n0) { this->template createInternal<false, false>({n0}); }
-  /**
-   * Initialize and allocate array with given dimensions on host and device
-   * @param n0 The first dimension size
-   */
-  void create(dof_id_type n0) { this->template createInternal<true, true>({n0}); }
-  /**
-   * Initialize and allocate array with given dimensions on host only
-   * @param n0 The first dimension size
-   */
-  void createHost(dof_id_type n0) { this->template createInternal<true, false>({n0}); }
-  /**
-   * Initialize and allocate array with given dimensions on device only
-   * @param n0 The first dimension size
-   */
-  void createDevice(dof_id_type n0) { this->template createInternal<false, true>({n0}); }
-  /**
-   * Set starting index offsets
-   * @param d0 The first dimension offset
-   */
-  void offset(dof_id_signed_type d0) { ArrayBase<T, 1>::offset({d0}); }
+  auto & operator=(const Array<T, 1, index_type, LayoutType::LEFT> & array)
+  {
+    this->shallowCopy(array);
 
+    return *this;
+  }
+
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Copy a standard vector variable
    * This re-initializes and re-allocates array with the size of the vector
@@ -1124,7 +1539,7 @@ public:
   template <bool host, bool device>
   void copyVector(const std::vector<T> & vector)
   {
-    this->template createInternal<host, device>({static_cast<dof_id_type>(vector.size())});
+    this->template createInternal<host, device, false>({static_cast<index_type>(vector.size())});
 
     if (host)
       std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
@@ -1170,20 +1585,21 @@ public:
 
     return *this;
   }
-
   /**
    * Get an array entry
-   * @param i0 The first dimension index
+   * @param i The array index
    * @returns The reference of the entry depending on the architecture this function is being
    * called on
    */
-  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0) const
+  KOKKOS_FUNCTION T & operator()(signed_index_type i) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i - _d[0] >= 0 && static_cast<index_type>(i - _d[0]) < _n[0]);
 
-    return this->operator[](i0 - _d[0]);
+    if (_is_offset)
+      return this->operator[](i - _d[0]);
+    else
+      return this->operator[](i);
   }
-
   /**
    * Device BLAS operations
    */
@@ -1192,521 +1608,42 @@ public:
    * Perform \p a * \p x \p op \p b * \p y and write the result to this array
    * @param accumulate Whether to accumulate or overwrite the result
    */
-  template <typename U = T>
-  typename std::enable_if<std::is_same<U, Real>::value, void>::type
-  axby(const U a,
-       const Array<U, 1, LayoutType::LEFT> & x,
-       const char op,
-       const U b,
-       const Array<U, 1, LayoutType::LEFT> & y,
-       const bool accumulate = false);
+  void axby(const T a,
+            const Array<T, 1, index_type, LayoutType::LEFT> & x,
+            const char op,
+            const T b,
+            const Array<T, 1, index_type, LayoutType::LEFT> & y,
+            const bool accumulate = false);
   /**
    * Scale \p x with \p a and write the result to this array
    */
-  template <typename U = T>
-  typename std::enable_if<std::is_same<U, Real>::value, void>::type
-  scal(const U a, const Array<U, 1, LayoutType::LEFT> & x);
+  void scal(const T a, const Array<T, 1, index_type, LayoutType::LEFT> & x);
   /**
    * Scale this array with \p a
    */
-  template <typename U = T>
-  typename std::enable_if<std::is_same<U, Real>::value, void>::type scal(const U a);
+  void scal(const T a);
   /**
    * Perform dot product between this array and \p x
    */
-  template <typename U = T>
-  typename std::enable_if<std::is_same<U, Real>::value, Real>::type
-  dot(const Array<U, 1, LayoutType::LEFT> & x);
+  T dot(const Array<T, 1, index_type, LayoutType::LEFT> & x);
   /**
    * Compute 2-norm of this array
    */
-  template <typename U = T>
-  typename std::enable_if<std::is_same<U, Real>::value, Real>::type nrm2();
+  T nrm2();
   ///}@
-#endif
-};
-
-template <typename T, LayoutType layout>
-class Array<T, 2, layout> : public ArrayBase<T, 2>
-{
-#ifdef MOOSE_KOKKOS_SCOPE
-  usingKokkosArrayBaseMembers(T, 2);
-#endif
-
-public:
-  /**
-   * Default constructor
-   */
-  Array() : ArrayBase<T, 2>(layout) {}
-  /**
-   * Copy constructor
-   */
-  Array(const Array<T, 2, layout> & array) : ArrayBase<T, 2>(array) {}
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  auto & operator=(const Array<T, 2, layout> & array)
-  {
-    this->shallowCopy(array);
-
-    return *this;
-  }
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Initialize and allocate array with given dimensions
-   * This allocates both host and device data
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   */
-  Array(dof_id_type n0, dof_id_type n1) : ArrayBase<T, 2>(layout) { create(n0, n1); }
-
-  /**
-   * Initialize array with given dimensions but do not allocate
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   */
-  void init(dof_id_type n0, dof_id_type n1)
-  {
-    this->template createInternal<false, false>({n0, n1});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host and device
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   */
-  void create(dof_id_type n0, dof_id_type n1)
-  {
-    this->template createInternal<true, true>({n0, n1});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   */
-  void createHost(dof_id_type n0, dof_id_type n1)
-  {
-    this->template createInternal<true, false>({n0, n1});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on device only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   */
-  void createDevice(dof_id_type n0, dof_id_type n1)
-  {
-    this->template createInternal<false, true>({n0, n1});
-  }
-  /**
-   * Set starting index offsets
-   * @param d0 The first dimension offset
-   * @param d1 The second dimension offset
-   */
-  void offset(dof_id_signed_type d0, dof_id_signed_type d1) { ArrayBase<T, 2>::offset({d0, d1}); }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @returns The reference of the entry depending on the architecture this function is being called
-   * on
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0, dof_id_signed_type i1) const
-  {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
-
-    return this->operator[]((i0 - _d[0]) * _s[0] + (i1 - _d[1]) * _s[1]);
-  }
-#endif
-};
-
-template <typename T, LayoutType layout>
-class Array<T, 3, layout> : public ArrayBase<T, 3>
-{
-#ifdef MOOSE_KOKKOS_SCOPE
-  usingKokkosArrayBaseMembers(T, 3);
-#endif
-
-public:
-  /**
-   * Default constructor
-   */
-  Array() : ArrayBase<T, 3>(layout) {}
-  /**
-   * Copy constructor
-   */
-  Array(const Array<T, 3, layout> & array) : ArrayBase<T, 3>(array) {}
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  auto & operator=(const Array<T, 3, layout> & array)
-  {
-    this->shallowCopy(array);
-
-    return *this;
-  }
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Initialize and allocate array with given dimensions
-   * This allocates both host and device data
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   */
-  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2) : ArrayBase<T, 3>(layout)
-  {
-    create(n0, n1, n2);
-  }
-
-  /**
-   * Initialize array with given dimensions but do not allocate
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   */
-  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2)
-  {
-    this->template createInternal<false, false>({n0, n1, n2});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host and device
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   */
-  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2)
-  {
-    this->template createInternal<true, true>({n0, n1, n2});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   */
-  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2)
-  {
-    this->template createInternal<true, false>({n0, n1, n2});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on device only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   */
-  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2)
-  {
-    this->template createInternal<false, true>({n0, n1, n2});
-  }
-  /**
-   * Set starting index offsets
-   * @param d0 The first dimension offset
-   * @param d1 The second dimension offset
-   * @param d2 The third dimension offset
-   */
-  void offset(dof_id_signed_type d0, dof_id_signed_type d1, dof_id_signed_type d2)
-  {
-    ArrayBase<T, 3>::offset({d0, d1, d2});
-  }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @returns The reference of the entry depending on the architecture this function is being
-   * called on
-   */
-  KOKKOS_FUNCTION T &
-  operator()(dof_id_signed_type i0, dof_id_signed_type i1, dof_id_signed_type i2) const
-  {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
-
-    return this->operator[]((i0 - _d[0]) * _s[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2]);
-  }
-#endif
-};
-
-template <typename T, LayoutType layout>
-class Array<T, 4, layout> : public ArrayBase<T, 4>
-{
-#ifdef MOOSE_KOKKOS_SCOPE
-  usingKokkosArrayBaseMembers(T, 4);
-#endif
-
-public:
-  /**
-   * Default constructor
-   */
-  Array() : ArrayBase<T, 4>(layout) {}
-  /**
-   * Copy constructor
-   */
-  Array(const Array<T, 4, layout> & array) : ArrayBase<T, 4>(array) {}
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  auto & operator=(const Array<T, 4, layout> & array)
-  {
-    this->shallowCopy(array);
-
-    return *this;
-  }
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Initialize and allocate array with given dimensions
-   * This allocates both host and device data
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   */
-  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3) : ArrayBase<T, 4>(layout)
-  {
-    create(n0, n1, n2, n3);
-  }
-
-  /**
-   * Initialize array with given dimensions but do not allocate
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   */
-  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
-  {
-    this->template createInternal<false, false>({n0, n1, n2, n3});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host and device
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   */
-  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
-  {
-    this->template createInternal<true, true>({n0, n1, n2, n3});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   */
-  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
-  {
-    this->template createInternal<true, false>({n0, n1, n2, n3});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on device only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   */
-  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
-  {
-    this->template createInternal<false, true>({n0, n1, n2, n3});
-  }
-  /**
-   * Set starting index offsets
-   * @param d0 The first dimension offset
-   * @param d1 The second dimension offset
-   * @param d2 The third dimension offset
-   * @param d3 The fourth dimension offset
-   */
-  void
-  offset(dof_id_signed_type d0, dof_id_signed_type d1, dof_id_signed_type d2, dof_id_signed_type d3)
-  {
-    ArrayBase<T, 4>::offset({d0, d1, d2, d3});
-  }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @param i3 The fourth dimension index
-   * @returns The reference of the entry depending on the architecture this function is being called
-   * on
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0,
-                                 dof_id_signed_type i1,
-                                 dof_id_signed_type i2,
-                                 dof_id_signed_type i3) const
-  {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<dof_id_type>(i3 - _d[3]) < _n[3]);
-
-    return this->operator[]((i0 - _d[0]) * _s[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
-                            (i3 - _d[3]) * _s[3]);
-  }
-#endif
-};
-
-template <typename T, LayoutType layout>
-class Array<T, 5, layout> : public ArrayBase<T, 5>
-{
-#ifdef MOOSE_KOKKOS_SCOPE
-  usingKokkosArrayBaseMembers(T, 5);
-#endif
-
-public:
-  /**
-   * Default constructor
-   */
-  Array() : ArrayBase<T, 5>(layout) {}
-  /**
-   * Copy constructor
-   */
-  Array(const Array<T, 5, layout> & array) : ArrayBase<T, 5>(array) {}
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  auto & operator=(const Array<T, 5, layout> & array)
-  {
-    this->shallowCopy(array);
-
-    return *this;
-  }
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Constructor
-   * Initialize and allocate array with given dimensions
-   * This allocates both host and device data
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   * @param n4 The fifth dimension size
-   */
-  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
-    : ArrayBase<T, 5>(layout)
-  {
-    create(n0, n1, n2, n3, n4);
-  }
-
-  /**
-   * Initialize array with given dimensions but do not allocate
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   * @param n4 The fifth dimension size
-   */
-  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
-  {
-    this->template createInternal<false, false>({n0, n1, n2, n3, n4});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host and device
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   * @param n4 The fifth dimension size
-   */
-  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
-  {
-    this->template createInternal<true, true>({n0, n1, n2, n3, n4});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on host only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   * @param n4 The fifth dimension size
-   */
-  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
-  {
-    this->template createInternal<true, false>({n0, n1, n2, n3, n4});
-  }
-  /**
-   * Initialize and allocate array with given dimensions on device only
-   * @param n0 The first dimension size
-   * @param n1 The second dimension size
-   * @param n2 The third dimension size
-   * @param n3 The fourth dimension size
-   * @param n4 The fifth dimension size
-   */
-  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
-  {
-    this->template createInternal<false, true>({n0, n1, n2, n3, n4});
-  }
-  /**
-   * Set starting index offsets
-   * @param d0 The first dimension offset
-   * @param d1 The second dimension offset
-   * @param d2 The third dimension offset
-   * @param d3 The fourth dimension offset
-   * @param d4 The fifth dimension offset
-   */
-  void offset(dof_id_signed_type d0,
-              dof_id_signed_type d1,
-              dof_id_signed_type d2,
-              dof_id_signed_type d3,
-              dof_id_signed_type d4)
-  {
-    ArrayBase<T, 5>::offset({d0, d1, d2, d3, d4});
-  }
-
-  /**
-   * Get an array entry
-   * @param i0 The first dimension index
-   * @param i1 The second dimension index
-   * @param i2 The third dimension index
-   * @param i3 The fourth dimension index
-   * @param i4 The fifth dimension index
-   * @returns The reference of the entry depending on the architecture this function is being called
-   * on
-   */
-  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0,
-                                 dof_id_signed_type i1,
-                                 dof_id_signed_type i2,
-                                 dof_id_signed_type i3,
-                                 dof_id_signed_type i4) const
-  {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<dof_id_type>(i3 - _d[3]) < _n[3]);
-    KOKKOS_ASSERT(i4 - _d[4] >= 0 && static_cast<dof_id_type>(i4 - _d[4]) < _n[4]);
-
-    return this->operator[]((i0 - _d[0]) * _s[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
-                            (i3 - _d[3]) * _s[3] + (i4 - _d[4]) * _s[4]);
-  }
 #endif
 };
 ///@}
 
-template <typename T>
-using Array1D = Array<T, 1, LayoutType::LEFT>;
-template <typename T, LayoutType layout = LayoutType::LEFT>
-using Array2D = Array<T, 2, layout>;
-template <typename T, LayoutType layout = LayoutType::LEFT>
-using Array3D = Array<T, 3, layout>;
-template <typename T, LayoutType layout = LayoutType::LEFT>
-using Array4D = Array<T, 4, layout>;
-template <typename T, LayoutType layout = LayoutType::LEFT>
-using Array5D = Array<T, 5, layout>;
+template <typename T, typename index_type = dof_id_type>
+using Array1D = Array<T, 1, index_type, LayoutType::LEFT>;
+template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+using Array2D = Array<T, 2, index_type, layout>;
+template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+using Array3D = Array<T, 3, index_type, layout>;
+template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+using Array4D = Array<T, 4, index_type, layout>;
+template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
+using Array5D = Array<T, 5, index_type, layout>;
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

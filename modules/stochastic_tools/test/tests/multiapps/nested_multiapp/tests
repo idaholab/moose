@@ -7,6 +7,7 @@
       type = CSVDiff
       input = stm.i
       csvdiff = stm_out_storage_0001.csv
+      min_slots = 3 # heavy memory usage (200+ multiapps)
       detail = 'normal multiapp mode;'
     []
     [batch]
@@ -25,6 +26,7 @@
       input = stm_batch.i
       cli_args = 'Outputs/file_base=stm_out'
       csvdiff = stm_out_storage_0001.csv
+      min_slots = 3 # heavy memory usage (200+ multiapps)
       detail = 'normal multiapp mode;'
     []
     [batch_reset]

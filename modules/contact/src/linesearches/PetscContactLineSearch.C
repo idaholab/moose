@@ -39,7 +39,6 @@ PetscContactLineSearch::lineSearch()
   Vec X, F, Y, W, G, W1;
   SNESLineSearch line_search;
   PetscReal fnorm, xnorm, ynorm, gnorm;
-  PetscBool domainerror;
   PetscReal ksp_rtol, ksp_abstol, ksp_dtol;
   PetscInt ksp_maxits;
   KSP ksp;
@@ -73,9 +72,17 @@ PetscContactLineSearch::lineSearch()
    * residual evaluation */
   _current_contact_state.clear();
   LibmeshPetscCall(SNESComputeFunction(snes, W, F));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
+  PetscBool domainerror;
   LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
   if (domainerror)
     LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
+#else
+  SNESConvergedReason reason;
+  LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+  if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+    LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+#endif
 
   LibmeshPetscCall(VecNorm(F, NORM_2, &fnorm));
   std::set<dof_id_type> contact_state_stored = _current_contact_state;
@@ -101,9 +108,16 @@ PetscContactLineSearch::lineSearch()
     LibmeshPetscCall(VecWAXPY(W1, -_contact_lambda, Y, X));
 
     LibmeshPetscCall(SNESComputeFunction(snes, W1, G));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
     LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
     if (domainerror)
       LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
+#else
+    LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+    if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+      LibmeshPetscCall(
+          SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+#endif
 
     LibmeshPetscCall(VecNorm(G, NORM_2, &gnorm));
     if (gnorm < fnorm)
@@ -130,10 +144,16 @@ PetscContactLineSearch::lineSearch()
   if (changed_w || changed_y)
   {
     LibmeshPetscCall(SNESComputeFunction(snes, W, F));
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
     LibmeshPetscCall(SNESGetFunctionDomainError(snes, &domainerror));
     if (domainerror)
       LibmeshPetscCall(SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN));
-
+#else
+    LibmeshPetscCall(SNESGetConvergedReason(snes, &reason));
+    if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+      LibmeshPetscCall(
+          SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_FUNCTION_DOMAIN));
+#endif
     contact_state_stored.swap(_current_contact_state);
     _current_contact_state.clear();
     printContactInfo(contact_state_stored);

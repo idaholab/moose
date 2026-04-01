@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import sys
@@ -16,10 +16,13 @@ import io
 from contextlib import redirect_stdout
 import importlib.util
 
-if importlib.util.find_spec('moose_geochemistry') is None:
-    _geochemistry_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if importlib.util.find_spec("moose_geochemistry") is None:
+    _geochemistry_python_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..")
+    )
     sys.path.append(_geochemistry_python_path)
 from moose_geochemistry import dbutils
+
 
 class TestDBUtils(unittest.TestCase):
     """
@@ -30,7 +33,7 @@ class TestDBUtils(unittest.TestCase):
         """
         Read the database
         """
-        with open('./testdata/moose_testdb.json', 'r') as dbfile:
+        with open("./testdata/moose_testdb.json", "r") as dbfile:
             moosedb = json.load(dbfile)
 
         self.db = moosedb
@@ -42,8 +45,10 @@ class TestDBUtils(unittest.TestCase):
 
         self.readJSONDatabase()
 
-        gold = ['CO2(aq)', 'CO3--', 'CaCO3']
-        output = dbutils.secondarySpeciesContainingBasis(self.db, 'secondary species', ['HCO3-'])
+        gold = ["CO2(aq)", "CO3--", "CaCO3"]
+        output = dbutils.secondarySpeciesContainingBasis(
+            self.db, "secondary species", ["HCO3-"]
+        )
         self.assertEqual(output, gold)
 
     def testprintSpeciesInfo(self):
@@ -59,7 +64,7 @@ class TestDBUtils(unittest.TestCase):
         # Capture the information printed out by printSpeciesInfo()
         f = io.StringIO()
         with redirect_stdout(f):
-            dbutils.printSpeciesInfo(self.db, 'Ca++')
+            dbutils.printSpeciesInfo(self.db, "Ca++")
 
         output = f.getvalue()
         self.assertEqual(output, gold)
@@ -70,7 +75,7 @@ class TestDBUtils(unittest.TestCase):
         # Capture the information printed out by printSpeciesInfo()
         f = io.StringIO()
         with redirect_stdout(f):
-            dbutils.printSpeciesInfo(self.db, 'CaCO3')
+            dbutils.printSpeciesInfo(self.db, "CaCO3")
 
         output = f.getvalue()
         self.assertEqual(output, gold)
@@ -86,7 +91,7 @@ class TestDBUtils(unittest.TestCase):
         # Capture the information printed out
         f = io.StringIO()
         with redirect_stdout(f):
-            dbutils.printEquilibriumReaction(self.db, 'CaCO3')
+            dbutils.printEquilibriumReaction(self.db, "CaCO3")
 
         output = f.getvalue()
         self.assertEqual(output, gold)
@@ -102,7 +107,7 @@ class TestDBUtils(unittest.TestCase):
         # Capture the information printed out
         f = io.StringIO()
         with redirect_stdout(f):
-            dbutils.printMineralReaction(self.db, 'Calcite')
+            dbutils.printMineralReaction(self.db, "Calcite")
 
         output = f.getvalue()
         self.assertEqual(output, gold)
@@ -118,10 +123,11 @@ class TestDBUtils(unittest.TestCase):
         # Capture the information printed out
         f = io.StringIO()
         with redirect_stdout(f):
-            dbutils.printGasReaction(self.db, 'CH4(g)')
+            dbutils.printGasReaction(self.db, "CH4(g)")
 
         output = f.getvalue()
         self.assertEqual(output, gold)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

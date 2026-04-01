@@ -27,4 +27,12 @@ public:
 protected:
   /// the side length of the infinite square
   const Real _side_length;
+  /// the optional input fill mesh generator
+  MeshGeneratorName _input_fill_name;
+  /// Pointer to the input mesh generator
+  std::unique_ptr<MeshBase> * _input_fill_mg_ptr;
+  /// pointer to the optional input fill CSGBase
+  std::unique_ptr<CSG::CSGBase> * _input_fill_csg;
+  /// whether or not a fill mesh generator was provided
+  bool _has_fill;
 };

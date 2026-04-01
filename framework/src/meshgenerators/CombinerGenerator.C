@@ -175,7 +175,7 @@ CombinerGenerator::generate()
                                    _communicator);
     }
 
-    mesh->set_isnt_prepared();
+    mesh->unset_is_prepared();
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
@@ -238,7 +238,7 @@ CombinerGenerator::generate()
       }
     }
 
-    final_mesh->set_isnt_prepared();
+    final_mesh->unset_is_prepared();
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }

@@ -33,7 +33,6 @@
     input = 'channel-drift-flux.i'
     exodiff = 'channel-drift-flux_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using the mixture drift flux model.'
-    installation_type = in_tree
     capabilities = 'ad_size>=80'
   []
   [mixture_channel_drift_flux_physics]
@@ -41,7 +40,6 @@
     input = 'channel-drift-flux-physics.i'
     exodiff = 'channel-drift-flux-physics_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using a mixture drift flux model using Navier Stokes physics syntax.'
-    installation_type = in_tree
     # Negative viscosity during solve
     allow_warnings = true
     custom_cmp = 'mixture_physics_diff.cmp'

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.base.PluginManager import PluginManager
 from peacock.base.TabPlugin import TabPlugin
@@ -19,6 +19,7 @@ from .ConsoleOutputViewerPlugin import ConsoleOutputViewerPlugin
 from peacock.Input.ExecutableInfo import ExecutableInfo
 import os
 
+
 class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
     """
     The GUI for running an executable.
@@ -29,6 +30,7 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
         needInputFile: Emitted when this widget needs an input file written to disk. Argument is the path to the file to be written.
         start_job: Emitted when a job is started. Arguments are whether CSV output is enabled, and input filename
     """
+
     needInputFile = pyqtSignal(str)
     executableInfoChanged = pyqtSignal(ExecutableInfo)
     startJob = pyqtSignal(bool, str, float)
@@ -40,23 +42,45 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
         Input:
             parser[argparse.ArgumentParser]: The parse to add options to
         """
-        group = parser.add_argument_group("Executable", "Finding or setting the initial executable")
-        group.add_argument('-e', '--executable', dest='executable', type=str, help='Executable file')
-        group.add_argument('--run', dest='auto_run', action='store_true', help='If an input file and executable are also given on the command line, then immediately run it.')
-        group.add_argument('--no-exe-search', action='store_false', dest='exe_search', help='Do not do an automatic executable search')
-        group.add_argument('-m', '--method',
-                dest='method',
-                choices=('opt', 'dbg', 'oprof', 'devel'),
-                help="Works the same as setting the $METHOD environment variable. This setting will take precedence over $METHOD")
+        group = parser.add_argument_group(
+            "Executable", "Finding or setting the initial executable"
+        )
+        group.add_argument(
+            "-e", "--executable", dest="executable", type=str, help="Executable file"
+        )
+        group.add_argument(
+            "--run",
+            dest="auto_run",
+            action="store_true",
+            help="If an input file and executable are also given on the command line, then immediately run it.",
+        )
+        group.add_argument(
+            "--no-exe-search",
+            action="store_false",
+            dest="exe_search",
+            help="Do not do an automatic executable search",
+        )
+        group.add_argument(
+            "-m",
+            "--method",
+            dest="method",
+            choices=("opt", "dbg", "oprof", "devel"),
+            help="Works the same as setting the $METHOD environment variable. This setting will take precedence over $METHOD",
+        )
 
-    def __init__(self, plugins=[ExecuteOptionsPlugin, ExecuteRunnerPlugin, ConsoleOutputViewerPlugin]):
+    def __init__(
+        self,
+        plugins=[ExecuteOptionsPlugin, ExecuteRunnerPlugin, ConsoleOutputViewerPlugin],
+    ):
         super(ExecuteTabPlugin, self).__init__(plugins=plugins)
         self.MainLayout = QVBoxLayout()
 
         self.setLayout(self.MainLayout)
 
         self.setup()
-        self.ExecuteOptionsPlugin.executableInfoChanged.connect(self.onExecutableInfoChanged)
+        self.ExecuteOptionsPlugin.executableInfoChanged.connect(
+            self.onExecutableInfoChanged
+        )
         self.ExecuteRunnerPlugin.needInputFile.connect(self.needInputFile)
         self.ExecuteRunnerPlugin.needCommand.connect(self.onNeedCommand)
         self.ExecuteRunnerPlugin.startJob.connect(self.startJob)
@@ -100,7 +124,9 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
             options[argparse namespace]: The command line options as returned by ArgumentParser.parse_args()
         """
         if options.executable and not os.path.isabs(options.executable):
-            options.executable = os.path.abspath(os.path.join(options.start_dir, options.executable))
+            options.executable = os.path.abspath(
+                os.path.join(options.start_dir, options.executable)
+            )
         exe_path = ExeFinder.getExecutablePath(options, start_dir=self.search_from_dir)
         if exe_path:
             self.ExecuteOptionsPlugin.setExecutablePath(exe_path)
@@ -136,16 +162,18 @@ class ExecuteTabPlugin(QWidget, PluginManager, TabPlugin):
         """
         self.ExecuteRunnerPlugin.closing()
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from peacock.utils import Testing
     import argparse
     import sys
 
-    parser = argparse.ArgumentParser(description='Execute tab')
+    parser = argparse.ArgumentParser(description="Execute tab")
     main_win = QMainWindow()
     ExecuteTabPlugin.commandLineArgs(parser)
     exe = Testing.find_moose_test_exe()
+
     def needInputFile(input_file):
         this_dir = os.path.dirname(os.path.abspath(__file__))
         peacock_dir = os.path.dirname(this_dir)

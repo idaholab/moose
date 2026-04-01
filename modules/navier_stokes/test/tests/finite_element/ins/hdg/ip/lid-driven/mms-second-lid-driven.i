@@ -81,13 +81,12 @@ rho = 2
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -149,15 +148,13 @@ rho = 2
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_all]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right top'
+    face_velocity_functors = 'exact_u exact_v'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 []
 
@@ -188,9 +185,7 @@ rho = 2
   []
   [forcing_p]
     type = ParsedFunction
-    expression = '(1/2)*pi*rho*sin(x)*sin((1/2)*y*pi) + (1/2)*pi*rho*sin(y)*sin((1/2)*x*pi)'
-    symbol_names = 'rho'
-    symbol_values = '${rho}'
+    expression = '(1/2)*pi*sin(x)*sin((1/2)*y*pi) + (1/2)*pi*sin(y)*sin((1/2)*x*pi)'
   []
 []
 

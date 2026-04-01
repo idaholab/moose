@@ -36,7 +36,7 @@ public:
   const DiscreteNucleationInserterBase & getInserter() const { return _inserter; }
 
   Real getWidth() const { return _int_width; }
-  Real getPeriodic() const { return _periodic; }
+  const MooseVariableFieldBase * getPeriodicVar() const { return _periodic_var; }
 
 protected:
   /// Did the mesh change since the last execution of this PP?
@@ -60,8 +60,8 @@ protected:
   /// UserObject that manages nucleus insertin and deletion
   const DiscreteNucleationInserterBase & _inserter;
 
-  /// variable number to use for minPeriodicDistance calls (i.e. use the periodicity of this variable)
-  int _periodic;
+  /// variable to use for minPeriodicDistance calls (i.e. use the periodicity of this variable)
+  const MooseVariableFieldBase * const _periodic_var;
 
   /// Nucleus interface width
   const Real _int_width;

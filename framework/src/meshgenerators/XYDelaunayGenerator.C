@@ -101,9 +101,6 @@ XYDelaunayGenerator::validParams()
       "interior_point_files", {}, "Text file(s) with the interior points, one per line");
   params.addClassDescription("Triangulates meshes within boundaries defined by input meshes.");
 
-  params.addParamNamesToGroup(
-      "use_auto_area_func auto_area_func_default_size auto_area_func_default_size_dist",
-      "Automatic triangle meshing area control");
   params.addParamNamesToGroup("interior_points interior_point_files",
                               "Mandatory mesh interior nodes");
 
@@ -578,6 +575,6 @@ XYDelaunayGenerator::generate()
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
     paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return mesh;
 }

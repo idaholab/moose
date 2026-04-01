@@ -1,19 +1,22 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 from chigger.base import ChiggerObject
+
+
 class ChiggerObserver(ChiggerObject):
     """
     Base class for definning VTK observer functions.
 
     This object is a base class and not intended for general use, see TimerObserver as an example.
     """
+
     @staticmethod
     def getOptions():
         opt = ChiggerObject.getOptions()
@@ -45,7 +48,9 @@ class ChiggerObserver(ChiggerObject):
         Return True if this observer is already a part of the VTK interactor.
         """
         if self._vtk_command is not None:
-            return self._window.getVTKInteractor().HasObserver(self._event, self._vtk_command)
+            return self._window.getVTKInteractor().HasObserver(
+                self._event, self._vtk_command
+            )
         else:
             return False
 

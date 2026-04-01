@@ -276,6 +276,27 @@ NonlinearEigenSystem::solve()
     ti->postSolve();
   }
 
+  // store solve information
+  if (_eigen_problem.isNonlinearEigenvalueSolver(number()))
+  {
+    auto snes = getSNES();
+
+    // nonlinear iterations
+    PetscInt nl_its;
+    LibmeshPetscCallA(_eigen_problem.comm().get(), SNESGetIterationNumber(snes, &nl_its));
+    _n_iters = nl_its;
+
+    // linear iterations
+    PetscInt l_its;
+    LibmeshPetscCallA(_eigen_problem.comm().get(), SNESGetLinearSolveIterations(snes, &l_its));
+    _n_linear_iters = l_its;
+
+    // final residual
+    PetscReal norm;
+    LibmeshPetscCall(SNESGetFunctionNorm(snes, &norm));
+    _final_residual = norm;
+  }
+
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
 
@@ -294,6 +315,37 @@ NonlinearEigenSystem::solve()
 
   if (_eigen_problem.isNonlinearEigenvalueSolver(number()) && _num_constrained_dofs)
     solution().restore_subvector(std::move(subvec), _eigen_sys.local_non_condensed_dofs_vector);
+}
+
+unsigned int
+NonlinearEigenSystem::nNonlinearIterations() const
+{
+  if (!_time_integrators.empty())
+    mooseError("Not implemented for time integrators.");
+  if (!_eigen_problem.isNonlinearEigenvalueSolver(number()))
+    mooseError("Only implemented for nonlinear eigenvalue solvers.");
+
+  return _n_iters;
+}
+
+unsigned int
+NonlinearEigenSystem::nLinearIterations() const
+{
+  if (!_time_integrators.empty())
+    mooseError("Not implemented for time integrators.");
+  if (!_eigen_problem.isNonlinearEigenvalueSolver(number()))
+    mooseError("Only implemented for nonlinear eigenvalue solvers.");
+
+  return _n_linear_iters;
+}
+
+Real
+NonlinearEigenSystem::finalNonlinearResidual() const
+{
+  if (!_eigen_problem.isNonlinearEigenvalueSolver(number()))
+    mooseError("Only implemented for nonlinear eigenvalue solvers.");
+
+  return _final_residual;
 }
 
 void

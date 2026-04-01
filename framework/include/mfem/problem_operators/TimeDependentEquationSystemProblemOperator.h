@@ -14,7 +14,6 @@
 #include "TimeDependentProblemOperator.h"
 #include "EquationSystemInterface.h"
 #include "TimeDependentEquationSystem.h"
-#include "MFEMBackwardEulerStateSolver.h"
 
 namespace Moose::MFEM
 {

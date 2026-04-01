@@ -1,0 +1,462 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "CapabilityRegistry.h"
+
+#include "CapabilityException.h"
+#include "MooseStringUtils.h"
+
+#include "peglib.h"
+
+#include <regex>
+#include <set>
+#include <utility>
+
+namespace Moose::internal
+{
+
+const std::set<std::string, std::less<>> CapabilityRegistry::augmented_capability_names{
+    // TestHarness.getCapabilities()
+    "hpc",
+    "machine",
+    "library_mode",
+    // TestHarness.testers.RunApp.getAugmentedCapabilities()
+    "mpi_procs",
+    "num_threads"};
+
+Capability &
+CapabilityRegistry::add(const std::string_view name,
+                        const Capability::Value & value,
+                        const std::string_view doc)
+{
+  auto it_pair = _registry.lower_bound(name);
+  if (it_pair != _registry.end() && it_pair->first == name)
+  {
+    auto & capability = it_pair->second;
+    if (capability.getValue() != value || capability.getDoc() != doc)
+      throw CapabilityException("Capability '" + std::string(name) +
+                                "' already exists and is not equal");
+    return capability;
+  }
+
+  return _registry
+      .emplace_hint(it_pair,
+                    std::piecewise_construct,
+                    std::forward_as_tuple(name),
+                    std::forward_as_tuple(name, value, doc))
+      ->second;
+}
+
+const Capability *
+CapabilityRegistry::query(std::string capability) const
+{
+  capability = MooseUtils::toLower(capability);
+  if (const auto it = _registry.find(capability); it != _registry.end())
+    return &it->second;
+  return nullptr;
+}
+
+const Capability &
+CapabilityRegistry::get(const std::string & capability) const
+{
+  if (const auto capability_ptr = query(capability))
+    return *capability_ptr;
+  throw CapabilityException("Capability '" + capability + "' not registered");
+}
+
+[[noreturn]] void
+checkException(const peg::SemanticValues & vs,
+               const std::string & message,
+               const std::optional<Capability> capability = {})
+{
+  std::string msg = "Capability statement '" + vs.token_to_string() + "': ";
+  if (capability)
+    msg += "capability '" + capability->toString() + "' ";
+  msg += message;
+  throw CapabilityException(msg);
+}
+
+CapabilityRegistry::CheckResult
+CapabilityRegistry::check(std::string requirements,
+                          const CapabilityRegistry::CheckOptions &
+                              options /* = CapabilityRegistry::CheckOptions() */) const
+{
+  using namespace peg;
+
+  // unquote
+  while (true)
+  {
+    const auto len = requirements.length();
+    if (len >= 2 && ((requirements[0] == '\'' && requirements[len - 1] == '\'') ||
+                     (requirements[0] == '"' && requirements[len - 1] == '"')))
+      requirements = requirements.substr(1, len - 2);
+    else
+      break;
+  }
+
+  CheckResult result;
+  result.state = CheckState::CERTAIN_FAIL;
+
+  if (requirements.length() == 0)
+  {
+    result.state = CheckState::CERTAIN_PASS;
+    return result;
+  }
+
+  static parser parser(R"(
+    Expression    <-  _ Bool _ LogicOperator _ Expression / Bool _
+    Bool          <-  Comparison / '!' Bool / '!' Identifier / Identifier / '(' _ Expression _ ')'
+    Comparison    <-  Identifier _ Operator _ Version / Identifier _ Operator _ String
+    String        <-  [a-zA-Z0-9_-]+
+    Identifier    <-  [a-zA-Z][a-zA-Z0-9_]*
+    Operator      <-  [<>=!]+
+    LogicOperator <-  [&|]
+    Version       <-  Number '.' Version  / Number
+    Number        <-  [0-9]+
+    ~_            <-  [ \t]*
+  )");
+
+  if (!static_cast<bool>(parser))
+    throw CapabilityException("Capabilities parser build failure.");
+
+  // Keep track of unknown capabilities in the event that
+  // the check must be certain
+  std::set<std::string> unknown_capabilities;
+  const auto add_unknown_capability = [&unknown_capabilities](const auto & name)
+  { unknown_capabilities.insert(MooseUtils::toLower(name)); };
+
+  // Make sure that the capabilities to ignore are valid capabilities
+  for (const auto & name : options.ignore_capabilities)
+    if (!_registry.count(name))
+      throw CapabilityException("Capability to ignore '" + name + "' is not known");
+
+  parser["Number"] = [](const SemanticValues & vs) { return vs.token_to_number<int>(); };
+
+  parser["Version"] = [](const SemanticValues & vs)
+  {
+    switch (vs.choice())
+    {
+      case 0: // Number '.' Version
+      {
+        std::vector<int> ret{std::any_cast<int>(vs[0])};
+        const auto & vs1 = std::any_cast<std::vector<int>>(vs[1]);
+        ret.insert(ret.end(), vs1.begin(), vs1.end());
+        return ret;
+      }
+
+      case 1: // Number
+        return std::vector<int>{std::any_cast<int>(vs[0])};
+    }
+
+    checkException(vs, "unknown number match.");
+  };
+
+  enum LogicOperator
+  {
+    OP_AND,
+    OP_OR
+  };
+
+  parser["LogicOperator"] = [](const SemanticValues & vs)
+  {
+    const auto op = vs.token();
+    if (op == "&")
+      return OP_AND;
+    if (op == "|")
+      return OP_OR;
+    checkException(vs, "unknown logic operator.");
+  };
+
+  enum Operator
+  {
+    OP_LESS_EQ,
+    OP_GREATER_EQ,
+    OP_LESS,
+    OP_GREATER,
+    OP_NOT_EQ,
+    OP_EQ
+  };
+
+  parser["Operator"] = [](const SemanticValues & vs)
+  {
+    const auto op = vs.token();
+    if (op == "<=")
+      return OP_LESS_EQ;
+    if (op == ">=")
+      return OP_GREATER_EQ;
+    if (op == "<")
+      return OP_LESS;
+    if (op == ">")
+      return OP_GREATER;
+    if (op == "!=")
+      return OP_NOT_EQ;
+    if (op == "=" || op == "==")
+      return OP_EQ;
+    checkException(vs, "unknown operator.");
+  };
+
+  parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
+  parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
+
+  parser["Comparison"] =
+      [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
+  {
+    const auto left = std::any_cast<std::string>(vs[0]);
+    const auto op = std::any_cast<Operator>(vs[1]);
+
+    // check existence
+    const auto capability_ptr = query(left);
+    if (!capability_ptr)
+    {
+      // return an unknown if the capability does not exist, this is important as it
+      // stays unknown upon negation
+      add_unknown_capability(left);
+      return CheckState::UNKNOWN;
+    }
+
+    // capability is registered by the app
+    const auto & capability = *capability_ptr;
+    const auto & name = capability.getName();
+
+    // register capability as seen
+    result.capability_names.insert(name);
+
+    // whether or not the capability is ignored
+    const auto is_ignored = [&name, &options]() { return options.ignore_capabilities.count(name); };
+
+    // explicitly false causes any comparison to fail unless ignored
+    if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
+      return is_ignored() ? CheckState::IGNORE : CheckState::CERTAIN_FAIL;
+
+    // comparator
+    auto comp = [&is_ignored](const int i, const auto & a, const auto & b)
+    {
+      // early exit for ignored capabilities
+      if (is_ignored())
+        return CheckState::IGNORE;
+
+      // do the comparison
+      const auto do_comp = [&i, &a, &b]()
+      {
+        switch (i)
+        {
+          case OP_LESS_EQ:
+            return a <= b;
+          case OP_GREATER_EQ:
+            return a >= b;
+          case OP_LESS:
+            return a < b;
+          case OP_GREATER:
+            return a > b;
+          case OP_NOT_EQ:
+            return a != b;
+          case OP_EQ:
+            return a == b;
+        }
+        return false;
+      };
+      return do_comp() ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+    };
+
+    // version comparison
+    std::vector<int> app_value_version;
+
+    switch (vs.choice())
+    {
+      case 0: // Identifier _ Operator _ Version
+      {
+        // int comparison
+        const auto right = std::any_cast<std::vector<int>>(vs[2]);
+        if (const auto int_ptr = capability.queryIntValue())
+        {
+          if (right.size() != 1)
+            checkException(vs, "cannot be compared to a version.", capability);
+
+          return comp(op, *int_ptr, right[0]);
+        }
+
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs,
+                         "cannot be compared to a " +
+                             std::string(right.size() == 1 ? "number" : "version number") + ".",
+                         capability);
+
+        if (!MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a version.", capability);
+
+        // compare versions
+        return comp(op, app_value_version, right);
+      }
+
+      case 1: // Identifier _ Operator _ String
+      {
+        // here we would check for valid options and throw if not valid
+        const auto right = MooseUtils::toLower(std::any_cast<std::string>(vs[2]));
+        // the capability value has to be a string
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs, "cannot be compared to a string.", capability);
+
+        // If this capability has an enumeration, make sure a valid
+        // choice is used
+        if (!capability.hasEnumeration(right))
+          checkException(vs,
+                         "'" + right + "' invalid for capability '" + left +
+                             "'; valid values: " + capability.enumerationToString());
+
+        // Capability is a version
+        if (MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a string.", capability);
+
+        return comp(op, *string_ptr, right);
+      }
+    }
+
+    checkException(vs, "failed comparison.", capability);
+  };
+
+  parser["Bool"] = [this, &add_unknown_capability, &options, &result](const SemanticValues & vs)
+  {
+    switch (vs.choice())
+    {
+      case 0: // Comparison
+      case 4: // '(' _ Expression _ ')'
+        return std::any_cast<CheckState>(vs[0]);
+
+      case 1: // '!' Bool
+        switch (std::any_cast<CheckState>(vs[0]))
+        {
+          case CheckState::CERTAIN_FAIL:
+            return CheckState::CERTAIN_PASS;
+          case CheckState::CERTAIN_PASS:
+            return CheckState::CERTAIN_FAIL;
+          case CheckState::POSSIBLE_FAIL:
+            return CheckState::POSSIBLE_PASS;
+          case CheckState::POSSIBLE_PASS:
+            return CheckState::POSSIBLE_FAIL;
+          case CheckState::IGNORE:
+            return CheckState::IGNORE;
+          default:
+            return CheckState::UNKNOWN;
+        }
+
+      case 2: // '!' Identifier
+      case 3: // Identifier
+      {
+        const bool negated = vs.choice() == 2;
+        const auto identifier = std::any_cast<std::string>(vs[0]);
+        if (const auto capability_ptr = query(identifier))
+        {
+          const auto & capability = *capability_ptr;
+          const auto & name = capability.getName();
+
+          // explicit; cannot be a bool expression
+          if (capability.getExplicit())
+          {
+            std::string message = "capability '" + name +
+                                  "' requires a value and cannot be used in a boolean expression";
+            if (capability.queryEnumeration())
+              message += "; valid values: " + capability.enumerationToString();
+            checkException(vs, message);
+          }
+
+          // mark as used
+          result.capability_names.insert(name);
+          // is ignored
+          if (options.ignore_capabilities.count(name))
+            return CheckState::IGNORE;
+
+          // helper for negating a passing value if needed
+          const auto bool_to_pass = [&negated](const bool val)
+          { return (val ^ negated) ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS; };
+          // has a boolean value, so use it
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return bool_to_pass(!*bool_ptr);
+          // not ignored and doesn't have a boolean value
+          return bool_to_pass(false);
+        }
+
+        add_unknown_capability(identifier);
+        return negated ? CheckState::POSSIBLE_PASS : CheckState::POSSIBLE_FAIL;
+      }
+
+      default:
+        throw CapabilityException("Unknown choice in Bool non-terminal");
+    }
+  };
+
+  parser["Expression"] = [](const SemanticValues & vs)
+  {
+    switch (vs.choice())
+    {
+      case 0: // Bool _ LogicOperator _ Expression
+      {
+        const auto left = std::any_cast<CheckState>(vs[0]);
+        const auto right = std::any_cast<CheckState>(vs[2]);
+        const auto op = std::any_cast<LogicOperator>(vs[1]);
+
+        switch (op)
+        {
+          case OP_AND:
+            if (left == CheckState::IGNORE)
+              return right;
+            if (right == CheckState::IGNORE)
+              return left;
+            for (const auto state : {CheckState::CERTAIN_FAIL,
+                                     CheckState::POSSIBLE_FAIL,
+                                     CheckState::UNKNOWN,
+                                     CheckState::POSSIBLE_PASS,
+                                     CheckState::CERTAIN_PASS})
+              if (left == state || right == state)
+                return state;
+            throw CapabilityException("Conjunction failure");
+
+          case OP_OR:
+            if (left == CheckState::IGNORE || right == CheckState::IGNORE)
+              return CheckState::IGNORE;
+            for (const auto state : {CheckState::CERTAIN_PASS,
+                                     CheckState::POSSIBLE_PASS,
+                                     CheckState::UNKNOWN,
+                                     CheckState::POSSIBLE_FAIL,
+                                     CheckState::CERTAIN_FAIL})
+              if (left == state || right == state)
+                return state;
+            throw CapabilityException("Conjunction failure");
+
+          default:
+            throw CapabilityException("Unknown logic operator");
+        }
+      }
+
+      case 1: // Bool
+        return std::any_cast<CheckState>(vs[0]);
+
+      default:
+        throw CapabilityException("Unknown choice in Expression non-terminal");
+    }
+  };
+
+  // (4) Parse
+  parser.enable_packrat_parsing(); // Enable packrat parsing.
+
+  if (!parser.parse(requirements, result.state))
+    throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
+
+  // If certain and unknown capabilities were found, throw accordingly
+  if (options.certain && unknown_capabilities.size())
+    throw UnknownCapabilitiesException({unknown_capabilities.begin(), unknown_capabilities.end()});
+
+  // Consider an ignored state to be a pass
+  if (result.state == CheckState::IGNORE)
+    result.state = CheckState::CERTAIN_PASS;
+
+  return result;
+}
+} // namespace CapabilityUtils

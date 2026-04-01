@@ -76,8 +76,17 @@
   []
 []
 
+[Preconditioner]
+  [ams]
+    type = MFEMHypreAMS
+    fespace = HCurlFESpace
+    singular = true
+  []
+[]
+
 [Solver]
   type = MFEMHypreGMRES
+  preconditioner = ams
   l_tol = 1e-12
 []
 

@@ -557,12 +557,12 @@ public:
   /**
    * Return the number of non-linear iterations
    */
-  unsigned int nNonlinearIterations() const { return _n_iters; }
+  virtual unsigned int nNonlinearIterations() const { return _n_iters; }
 
   /**
    * Return the number of linear iterations
    */
-  unsigned int nLinearIterations() const { return _n_linear_iters; }
+  virtual unsigned int nLinearIterations() const { return _n_linear_iters; }
 
   /**
    * Return the total number of residual evaluations done so far in this calculation
@@ -572,7 +572,7 @@ public:
   /**
    * Return the final nonlinear residual
    */
-  Real finalNonlinearResidual() const { return _final_residual; }
+  virtual Real finalNonlinearResidual() const { return _final_residual; }
 
   /**
    * Return the last nonlinear norm
@@ -780,6 +780,7 @@ protected:
    */
 #ifdef MOOSE_KOKKOS_ENABLED
   void computeKokkosResidual(const std::set<TagID> & tags);
+  void computeKokkosNodalBCs(const std::set<TagID> & tags);
 #endif
 
   /**

@@ -49,6 +49,9 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
+
+  // Physics syntax
+  registerSyntax("AqueousReactionsEquilibriumPhysics", "Physics/AqueousReactionsEquilibrium/*");
 }
 
 void
@@ -56,9 +59,9 @@ ChemicalReactionsApp::registerApps()
 {
   const std::string doc = "Thermochimica Gibbs energy minimization library support ";
 #ifdef THERMOCHIMICA_ENABLED
-  addCapability("thermochimica", true, doc + "is available.");
+  addBoolCapability("thermochimica", true, doc + "is available.");
 #else
-  addCapability("thermochimica", false, doc + "is not available.");
+  addBoolCapability("thermochimica", false, doc + "is not available.");
 #endif
 
   registerApp(ChemicalReactionsApp);

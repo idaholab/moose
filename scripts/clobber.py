@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import argparse
 import shutil
+
 
 class Clobber(object):
     """
@@ -23,6 +24,7 @@ class Clobber(object):
         .git  (don't accidentally delete any of git's metadata)
         .svn  (don't accidentally delete any of svn's metadata)
     """
+
     def __init__(self, top_dir, verbose, dry_run):
         self.top_dir = top_dir
         self.verbose = verbose
@@ -62,35 +64,36 @@ class Clobber(object):
         Walks the directories and removes unwanted files and directories.
         """
         self.message("Clobbering in %s" % self.top_dir)
-        remove_file_ext = ("~",
-                ".o",
-                ".lo",
-                ".la",
-                ".dylib",
-                ".a",
-                "-opt",
-                "-dbg",
-                "-oprof",
-                "-devel",
-                ".d",
-                ".pyc",
-                ".plugin",
-                ".mod",
-                ".gcda",
-                ".gcno",
-                ".gcov",
-                ".gch",
-                ".so",
-                ".so.0",
-                ".so.0.0.0",
-                )
+        remove_file_ext = (
+            "~",
+            ".o",
+            ".lo",
+            ".la",
+            ".dylib",
+            ".a",
+            "-opt",
+            "-dbg",
+            "-oprof",
+            "-devel",
+            ".d",
+            ".pyc",
+            ".plugin",
+            ".mod",
+            ".gcda",
+            ".gcno",
+            ".gcov",
+            ".gch",
+            ".so",
+            ".so.0",
+            ".so.0.0.0",
+        )
 
         for root, subdirs, files in os.walk(self.top_dir, topdown=True):
             self.ignore_dir(root, subdirs, "moose")
             for subdir in subdirs:
                 subdir_path = os.path.join(root, subdir)
                 dir_list = os.listdir(subdir_path)
-                if '.git' in dir_list or '.svn' in dir_list:
+                if ".git" in dir_list or ".svn" in dir_list:
                     self.ignore_dir(root, subdirs, subdir)
             # Need these for when our Makefile is in the root directory
             self.ignore_dir(root, subdirs, ".git")
@@ -113,11 +116,19 @@ class Clobber(object):
                 if d.endswith(".dSYM"):
                     self.remove_dir(root, subdirs, d)
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Remove compile artifacts.')
-    parser.add_argument('-v', action='store_true', dest='verbose', help='Print what is happening.')
-    parser.add_argument('-n', action='store_true', dest='dry_run', help="Dry run. Don't actually remove anything.")
-    parser.add_argument('top_directory', help='Top directory to start with.')
+    parser = argparse.ArgumentParser(description="Remove compile artifacts.")
+    parser.add_argument(
+        "-v", action="store_true", dest="verbose", help="Print what is happening."
+    )
+    parser.add_argument(
+        "-n",
+        action="store_true",
+        dest="dry_run",
+        help="Dry run. Don't actually remove anything.",
+    )
+    parser.add_argument("top_directory", help="Top directory to start with.")
     parsed = parser.parse_args()
     c = Clobber(parsed.top_directory, parsed.verbose, parsed.dry_run)
     c.clobber()

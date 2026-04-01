@@ -29,7 +29,7 @@ public:
 
 private:
   virtual void addFVKernels() override;
-  virtual void addMaterials() override;
+  virtual void addFunctorMaterials() override;
 
   /// Adds the slip velocity parameters
   virtual void setSlipVelocityParams(InputParameters & params) const override;

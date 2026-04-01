@@ -669,6 +669,14 @@ public:
    */
   bool isParamDeprecated(const std::string & name) const;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Returns whether this InputParameters belongs to a Kokkos object
+   * Checks whether MooseBase::kokkos_object_param is valid
+   */
+  bool isKokkosObject() const;
+#endif
+
   /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)
@@ -1034,6 +1042,17 @@ public:
    * @param name The parameter name
    */
   bool isParamDefined(const std::string & name) const;
+
+  /**
+   * Query a parameter
+   *
+   * If the parameter is not valid, nullptr will be returned
+   *
+   * @param name The name of the parameter
+   * @return A pointer to the parameter value, if it exists
+   */
+  template <typename T>
+  const T * queryParam(const std::string & name) const;
 
   ///@{
   /*
@@ -2240,6 +2259,13 @@ template <>
 void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*name*/,
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
+
+template <typename T>
+const T *
+InputParameters::queryParam(const std::string & name) const
+{
+  return isParamValid(name) ? &getParamHelper<T>(name, *this) : nullptr;
+}
 
 template <typename T>
 const T &

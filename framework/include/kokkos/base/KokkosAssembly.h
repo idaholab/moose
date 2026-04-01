@@ -19,9 +19,7 @@
 
 class FEProblemBase;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -74,8 +72,8 @@ public:
   KOKKOS_FUNCTION unsigned int getNumQps(ElementInfo info) const { return _n_qps[info.id]; }
   /**
    * Get the total number of facial quadrature points in a subdomain
-   * Note: this number does not represent the real number of facial quadrature points but only
-   * counts the facial quadrature points that need global caching, such as face material properties
+   * NOTE: This number does not represent the real number of facial quadrature points but only
+   * the facial quadrature points that need global caching, such as face material properties
    * @param subdomain The contiguous subdomain ID
    * @returns The number of quadrature points
    */
@@ -110,6 +108,25 @@ public:
   KOKKOS_FUNCTION dof_id_type getQpFaceOffset(ElementInfo info, unsigned int side) const
   {
     return _qp_offset_face(side, info.id);
+  }
+  /**
+   * Get the index of a side of an element into the element-constant face material property data
+   * @param info The element information object
+   * @param side The side index
+   * @returns The index
+   */
+  KOKKOS_FUNCTION dof_id_type getElemFacePropertyIndex(ElementInfo info, unsigned int side) const
+  {
+    return _elem_face_property_idx(side, info.id);
+  }
+  /**
+   * Get the size of element-constant face material property data storage of a subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @returns The storage size
+   */
+  KOKKOS_FUNCTION dof_id_type getElemFacePropertySize(ContiguousSubdomainID subdomain) const
+  {
+    return _n_elem_face_properties[subdomain];
   }
   /**
    * Get the number of DOFs of a FE type for an element type
@@ -230,13 +247,15 @@ public:
    * @param jacobian The pointer to store the inverse of Jacobian matrix
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
+   * @param normal The pointer to store normal vector
    */
   KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
                                           const unsigned int side,
                                           const unsigned int qp,
                                           Real33 * const jacobian,
                                           Real * const JxW,
-                                          Real3 * const q_points) const;
+                                          Real3 * const q_points,
+                                          Real3 * const normal) const;
 
   /**
    * Kokkos function for caching physical maps on element quadrature points
@@ -296,6 +315,7 @@ private:
 
   /**
    * Starting offset into the global quadrature point index
+   * NOTE: The global quadrature point index is subdomain-wise
    */
   ///@{
   Array<dof_id_type> _qp_offset;
@@ -312,6 +332,13 @@ private:
 
   Array<dof_id_type> _n_subdomain_qps;
   Array<dof_id_type> _n_subdomain_qps_face;
+  ///@}
+  /**
+   * Index into the element-constant face material property data
+   */
+  ///@{
+  Array2D<dof_id_type> _elem_face_property_idx;
+  Array<dof_id_type> _n_elem_face_properties;
   ///@}
   /**
    * Quadrature points and weights for reference elements
@@ -342,6 +369,13 @@ private:
   Array2D<Array2D<Real3>> _map_grad_phi;
   Array2D<Array<Array2D<Real3>>> _map_grad_phi_face;
   Array2D<Array<Array2D<Real3>>> _map_grad_psi_face;
+  ///@}
+  /**
+   * Shape functions for computing normal vectors
+   */
+  ///@{
+  Array2D<Array<Array2D<Real>>> _normal_dx_dxi;
+  Array2D<Array<Array2D<Real>>> _normal_dx_deta;
   ///@}
   /**
    * Cached physical maps on element quadrature points
@@ -409,9 +443,11 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
   if (jacobian)
     *jacobian = J.inverse(_dimension);
+
   if (JxW)
     *JxW =
         J.determinant(_dimension) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
+
   if (q_points)
     *q_points = xyz;
 }
@@ -422,7 +458,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
                              const unsigned int qp,
                              Real33 * const jacobian,
                              Real * const JxW,
-                             Real3 * const q_points) const
+                             Real3 * const q_points,
+                             Real3 * const normal) const
 {
   auto sid = info.subdomain;
   auto eid = info.id;
@@ -433,8 +470,14 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto & phi = _map_phi_face(sid, elem_type)(side);
   auto & grad_phi = _map_grad_phi_face(sid, elem_type)(side);
 
+  auto & normal_dx_dxi = _normal_dx_dxi(sid, elem_type)(side);
+  auto & normal_dx_deta = _normal_dx_deta(sid, elem_type)(side);
+
   Real33 J;
   Real3 xyz;
+
+  Real3 dxyz_dxi;
+  Real3 dxyz_deta;
 
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
@@ -445,28 +488,50 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     if (JxW || q_points)
       xyz += phi(node, qp) * points;
+
+    if (normal)
+    {
+      if (_dimension < 3)
+        dxyz_dxi += normal_dx_dxi(node, qp) * points;
+      if (_dimension == 2)
+        dxyz_deta += normal_dx_deta(node, qp) * points;
+    }
   }
 
   if (jacobian)
     *jacobian = J.inverse(_dimension);
+
   if (q_points)
     *q_points = xyz;
 
-  if (JxW)
+  if (JxW || (normal && _dimension > 1))
   {
-    Real33 J;
+    J = 0;
 
     auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
 
     for (unsigned int node = 0; node < num_side_nodes; ++node)
     {
-      auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, side, node));
+      auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(info, side, node));
 
       J += grad_psi(node, qp).cartesian_product(points);
     }
+  }
 
+  if (JxW)
     *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
            _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
+
+  if (normal)
+  {
+    if (_dimension == 3)
+      *normal = J.row(0).cross_product(J.row(1));
+    else if (_dimension == 2)
+      *normal = J.row(0).cross_product(dxyz_dxi.cross_product(dxyz_deta));
+    else
+      *normal = side ? dxyz_dxi : -dxyz_dxi;
+
+    *normal *= 1.0 / normal->norm();
   }
 }
 #endif
@@ -520,5 +585,4 @@ private:
   const Assembly _assembly_device;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

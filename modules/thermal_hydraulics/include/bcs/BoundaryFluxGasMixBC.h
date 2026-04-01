@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ADBoundaryFlux3EqnBC.h"
+#include "BoundaryFlux1PhaseBaseBC.h"
 
 /**
  * Boundary conditions for a FlowChannelGasMix using a boundary flux object.
  */
-class BoundaryFluxGasMixBC : public ADBoundaryFlux3EqnBC
+class BoundaryFluxGasMixBC : public BoundaryFlux1PhaseBaseBC
 {
 public:
   static InputParameters validParams();

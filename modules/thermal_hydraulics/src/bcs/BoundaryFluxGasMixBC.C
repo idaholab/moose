@@ -16,7 +16,7 @@ registerMooseObject("ThermalHydraulicsApp", BoundaryFluxGasMixBC);
 InputParameters
 BoundaryFluxGasMixBC::validParams()
 {
-  InputParameters params = ADBoundaryFlux3EqnBC::validParams();
+  InputParameters params = BoundaryFlux1PhaseBaseBC::validParams();
 
   params.addClassDescription(
       "Boundary conditions for a FlowChannelGasMix using a boundary flux object.");
@@ -27,7 +27,7 @@ BoundaryFluxGasMixBC::validParams()
 }
 
 BoundaryFluxGasMixBC::BoundaryFluxGasMixBC(const InputParameters & parameters)
-  : ADBoundaryFlux3EqnBC(parameters),
+  : BoundaryFlux1PhaseBaseBC(parameters),
     _xirhoA(getADMaterialProperty<Real>(THM::XIRHOA)),
     _xirhoA_var(coupled("xirhoA"))
 {

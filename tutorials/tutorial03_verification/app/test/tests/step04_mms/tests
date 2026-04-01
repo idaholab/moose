@@ -52,6 +52,7 @@
       required_python_packages = 'matplotlib numpy sympy'
       capabilities = 'method=opt'
       recover = false
+      min_slots = 2 # uses chigger
 
       detail = "a spatial and temporal convergence study."
     []

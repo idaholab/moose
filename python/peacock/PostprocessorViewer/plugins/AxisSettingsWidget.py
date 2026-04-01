@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
 import peacock
 import mooseutils
+
 
 class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
     """
@@ -23,8 +24,8 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         self._name = name
         self._axes = None
-        self._index = index # used for repr()
-        self._default_label = ''
+        self._index = index  # used for repr()
+        self._default_label = ""
         self._auto = [True, True]
 
         self.MainLayout = QtWidgets.QVBoxLayout()
@@ -54,11 +55,11 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Grid lines
         self.GridLayout = QtWidgets.QHBoxLayout()
-        self.GridToggle = QtWidgets.QCheckBox('Grid')
+        self.GridToggle = QtWidgets.QCheckBox("Grid")
         self.GridLayout.addWidget(self.GridToggle)
 
         # Scale selection
-        self.Scale = QtWidgets.QCheckBox('Log Scale')
+        self.Scale = QtWidgets.QCheckBox("Log Scale")
         self.GridLayout.addWidget(self.Scale)
         self.GridLayout.addStretch()
 
@@ -76,7 +77,7 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         """
         Receives the default axis label.
         """
-        self._default_label = '; '.join(default)
+        self._default_label = "; ".join(default)
 
     def onFigureCreated(self, axes):
         """
@@ -89,7 +90,9 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         Helper method for calling set methods containing the 'x' or 'y' (e.g., "set_xscale")
         """
         if self._axes == None:
-            import traceback; traceback.print_stack()
+            import traceback
+
+            traceback.print_stack()
 
         func = getattr(self._axes, function.format(self._name))
         func(*args, **kwargs)
@@ -110,22 +113,30 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         if not self._axes.has_data():
             return [], []
 
-        output = ['', '# {}{}-axis Settings'.format(self._name, self._index)]
+        output = ["", "# {}{}-axis Settings".format(self._name, self._index)]
 
         # Label
-        output += ["axes{}.set_{}label({})".format(self._index, self._name, repr(str(self.get('get_{}label'))))]
+        output += [
+            "axes{}.set_{}label({})".format(
+                self._index, self._name, repr(str(self.get("get_{}label")))
+            )
+        ]
 
         # Grid
         if self.GridToggle.isChecked():
-            output += ["axes{}.grid(True, axis={})".format(self._index, repr(self._name))]
+            output += [
+                "axes{}.grid(True, axis={})".format(self._index, repr(self._name))
+            ]
 
         # Scale
         if self.Scale.isChecked():
             output += ["axes{}.set_{}scale('log')".format(self._index, self._name)]
 
         # Limits
-        lims = self.get('get_{}lim')
-        output += ["axes{}.set_{}lim({})".format(self._index, self._name, repr(list(lims)))]
+        lims = self.get("get_{}lim")
+        output += [
+            "axes{}.set_{}lim({})".format(self._index, self._name, repr(list(lims)))
+        ]
 
         return output, []
 
@@ -142,23 +153,23 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Empty: Display the limits in grey
         if (self._auto[index] == True) and (not self._axes.has_data()):
-            qobject.setText('')
+            qobject.setText("")
 
-        elif (text == '') or (self._auto[index] == True):
-            self.set('set_{}lim', auto=True)
-            lim = self.get('get_{}lim')
+        elif (text == "") or (self._auto[index] == True):
+            self.set("set_{}lim", auto=True)
+            lim = self.get("get_{}lim")
             qobject.setText(str(lim[index]))
-            qobject.setStyleSheet('color:#8C8C8C')
+            qobject.setStyleSheet("color:#8C8C8C")
             self._auto[index] = True
         else:
             try:
                 key = "{}{}".format(self._name, ["min", "max"][index])
                 num = float(text)
-                options = {key:num}
-                self.set('set_{}lim', **options)
+                options = {key: num}
+                self.set("set_{}lim", **options)
                 self._auto[index] = False
             except:
-                qobject.setStyleSheet('color:#ff0000')
+                qobject.setStyleSheet("color:#ff0000")
 
         self.axesModified.emit()
 
@@ -175,7 +186,7 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         label = self.Label.text()
         if not label:
             label = self._default_label
-        self.set('set_{}label', label)
+        self.set("set_{}label", label)
         self.axesModified.emit()
 
     def _setupRangeMinimum(self, qobject):
@@ -196,7 +207,7 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         """
         Set the min/max text to black when it is being editted.
         """
-        qobject.setStyleSheet('color:#000000')
+        qobject.setStyleSheet("color:#000000")
         self._auto[index] = False
 
     def _setupGridToggle(self, qobject):
@@ -224,11 +235,13 @@ class AxisSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         """
         if value:
             try:
-                self.set('set_{}scale', 'log')
+                self.set("set_{}scale", "log")
             except:
-                mooseutils.mooseError('Failed to set log axis limits, your data likely crosses zero.')
+                mooseutils.mooseError(
+                    "Failed to set log axis limits, your data likely crosses zero."
+                )
                 self.Scale.setCheckState(QtCore.Qt.Unchecked)
-                self.set('set_{}scale', 'linear')
+                self.set("set_{}scale", "linear")
         else:
-            self.set('set_{}scale', 'linear')
+            self.set("set_{}scale", "linear")
         self.axesModified.emit()

@@ -125,26 +125,34 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
-    CODE_SERVER_VERSION=4.104.0
+    CODE_SERVER_VERSION=4.109.5
 {% if PROFILING is defined %}
-    GPERFTOOLS_VERSION=2.15
-    GO_VERSION=1.23.1
+    GPERFTOOLS_VERSION=2.18
+    GO_VERSION=1.26.0
 {%- endif %}
-    MINIFORGE_VERSION=25.3.1-0
-    PYTHON_VERSION=3.13
-    PYTORCH_VERSION=2.7.1
+    MINIFORGE_VERSION=26.1.0-0
+    PYTHON_VERSION=3.14
+    PYTORCH_VERSION=2.10.0
 
-    # Special runtime setup for OpenMPI
-    if which ompi_info &> /dev/null; then
+    # Special setup for OpenMPI
+    if [ -d "$MOOSE_OPENMPI_DIR" ]; then
         # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
         # we need to have a clean tmpdir for it to store state (which,
         # for some reason, /tmp doesn't work for this in fakeroot?)
         export TMPDIR=${ROOT_BUILD_DIR}/tmpdir
         mkdir $TMPDIR
-    # Special runtime setup for MPICH
-    else
+    # Special setup for MPICH
+    elif [ -d "$MOOSE_MPICH_DIR" ]; then
         # Required at configure time for MFEM checking petsc
         export MPIR_CVAR_ENABLE_GPU=0
+
+        # When using mpich with hwloc, install hwloc-gui to
+        # get "lstopo-no-graphics", which can be used to
+        # prebuild a topology file to avoid hwloc reading
+        # topology for every run
+        if mpiexec --version | grep -q hwloc; then
+            dnf install -y hwloc-gui
+        fi
     fi
 
     # Install code-server
@@ -206,12 +214,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     BUILD_PYTORCH_FLAGS=()
     if [ "$COMPILER" == "g++" ]; then
         BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
-        if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
-            GCC_VERSION="${BASH_REMATCH[0]}"
-        else
-            echo "Failed to parse GCC version"
-            exit 1
-        fi
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
@@ -228,20 +230,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Create a temporary python environment for building pytorch
     PYTORCH_CONDA_ENV=pytorch_build
-    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
+    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
     source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
-
-    # Need BLAS and LAPACK libs for torch in neml2
-    dnf install -y openblas-devel
 
     # Require CUDA if we have cuda available
     if [ -n "$CUDA_DIR" ]; then
         # 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
         export TORCH_CUDA_ARCH_LIST="7.0;8.0;8.6;8.9"
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
+        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
     else
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
+        BUILD_PYTORCH_FLAGS+=("-DUSE_CUDA:BOOL=OFF")
     fi
     # Build and install pytorch
     mkdir -p $LIBTORCH_DIR/logs
@@ -253,6 +252,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         -DCMAKE_BUILD_TYPE:STRING=Release \
         -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
         -DBUILD_PYTHON:BOOL=OFF \
+        -DCMAKE_INCLUDE_PATH:PATH=${PETSC_DIR}/include \
+        -DCMAKE_LIBRARY_PATH:PATH=${PETSC_DIR}/lib \
         -DUSE_BLAS:BOOL=ON \
         -DBLAS:STRING=OpenBLAS \
         -DUSE_LAPACK:BOOL=ON \

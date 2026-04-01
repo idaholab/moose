@@ -23,13 +23,12 @@ public:
 
   virtual void addVariables() override;
   virtual void addInitialConditions() override;
+  virtual std::vector<VariableName> solutionVariableNames() const override;
 
 protected:
   virtual Real getScalingFactorRhoA() const override;
   virtual Real getScalingFactorRhoUA() const override;
   virtual Real getScalingFactorRhoEA() const override;
-
-  virtual std::vector<VariableName> solutionVariableNames() const override;
 
   virtual void addXiRhoAIC();
   virtual void addRhoEAIC() override;

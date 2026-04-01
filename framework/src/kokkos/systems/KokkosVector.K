@@ -12,9 +12,7 @@
 
 // #define DEVICE_ASSEMBLY
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 #ifdef DEVICE_ASSEMBLY
@@ -187,11 +185,11 @@ Vector::destroy()
 void
 Vector::copyToDevice()
 {
-  if (_assemble)
-    mooseError("Kokkos vector error: copyToDevice() should not be called for an assembled vector.");
-
   if (_is_alloc && _is_host)
     _local.copyToDevice();
+
+  if (_assemble)
+    _ghost = 0;
 }
 
 void
@@ -282,5 +280,4 @@ Vector::close()
 #endif
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

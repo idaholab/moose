@@ -82,7 +82,7 @@
 
 [Postprocessors]
   [coef]
-    type = ElementIntegralVariablePostprocessor
+    type = KokkosElementIntegralVariablePostprocessor
     variable = coef
   []
 []

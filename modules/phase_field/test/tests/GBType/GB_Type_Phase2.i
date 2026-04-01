@@ -62,9 +62,9 @@
 
 [BCs]
   [./Periodic]
-    [./all]
+    [./gr]
       auto_direction = 'x y'
-      variable = 'cx_AEH'
+      variable = 'gr0 gr1 gr2 gr3 gr4 gr5'
     [../]
   [../]
 []

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGCellList.h"
+#include "CSGTransformationHelper.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -23,7 +24,7 @@ namespace CSG
  * universe, which represents a collection of cells that can be defined repeatedly within a separate
  * container of cells
  */
-class CSGUniverse
+class CSGUniverse : public CSGTransformationHelper
 {
 public:
   /**
@@ -138,6 +139,7 @@ protected:
   FRIEND_TEST(CSGUniverseTest, testRemoveCell);
   FRIEND_TEST(CSGUniverseTest, testRemoveAllCells);
   FRIEND_TEST(CSGUniverseTest, testSetName);
+  FRIEND_TEST(CSGUniverseTest, testUniverseEquality);
   ///@}
 #endif
 };

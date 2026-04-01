@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import pandas
 
 from . import message
+
 
 class MooseDataFrame(object):
     """
@@ -19,12 +20,20 @@ class MooseDataFrame(object):
     This utilizes a pandas.DataFrame for storing and accessing CSV data, while
     allowing for the file to exist/not-exist.
     """
+
     NOCHANGE = 0
     UPDATED = 1
     INVALID = 2
     OLDFILE = 3
 
-    def __init__(self, filename, index=None, run_start_time=None, update=True, peacock_index=False):
+    def __init__(
+        self,
+        filename,
+        index=None,
+        run_start_time=None,
+        update=True,
+        peacock_index=False,
+    ):
         self._filename = filename
         self._data = pandas.DataFrame()
         self._modified = None
@@ -71,7 +80,7 @@ class MooseDataFrame(object):
         """
         Test if a key is stored in the data.
         """
-        return (key in self.data)
+        return key in self.data
 
     def __bool__(self):
         """
@@ -99,9 +108,20 @@ class MooseDataFrame(object):
         retcode = MooseDataFrame.NOCHANGE
 
         file_exists = self.exists
-        if file_exists and (self._run_start_time is not None) and (os.path.getmtime(self._filename) < self._run_start_time):
+        if (
+            file_exists
+            and (self._run_start_time is not None)
+            and (os.path.getmtime(self._filename) < self._run_start_time)
+        ):
             self.clear()
-            message.mooseDebug("The csv file {} exists but is old ({}) compared to the run start time ({}).".format(self.filename, os.path.getmtime(self._filename), self._run_start_time), debug=True)
+            message.mooseDebug(
+                "The csv file {} exists but is old ({}) compared to the run start time ({}).".format(
+                    self.filename,
+                    os.path.getmtime(self._filename),
+                    self._run_start_time,
+                ),
+                debug=True,
+            )
             retcode = MooseDataFrame.OLDFILE
 
         elif not file_exists:
@@ -120,11 +140,18 @@ class MooseDataFrame(object):
                         self._data.set_index(self._index, inplace=True)
 
                     if self._add_peacock_index:
-                        self._data.insert(0, 'index (Peacock)',
-                                          pandas.Series(self._data.index, index=self._data.index))
+                        self._data.insert(
+                            0,
+                            "index (Peacock)",
+                            pandas.Series(self._data.index, index=self._data.index),
+                        )
                     message.mooseDebug("Reading csv file: {}".format(self._filename))
                 except:
                     self.clear()
-                    message.mooseDebug("Unable to read file {} it likely does not contain data.".format(self._filename))
+                    message.mooseDebug(
+                        "Unable to read file {} it likely does not contain data.".format(
+                            self._filename
+                        )
+                    )
 
         return retcode

@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets
 import mooseutils
 from .TabPlugin import TabPlugin
 from .ViewerCornerWidget import ViewerCornerWidget
+
 
 class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
     """
@@ -30,10 +31,12 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
             mooseutils.mooseError("The type of manager to create must be supplied.")
 
         # Member variables and class settings
-        self._manager = manager # the manager class to create
-        self._plugins = plugins # the plugin classes (not instances) to created
-        self._count = 0         # the number of tabs created
-        self._data = None       # data to pass to PluginManager::initialize (see 'initialize')
+        self._manager = manager  # the manager class to create
+        self._plugins = plugins  # the plugin classes (not instances) to created
+        self._count = 0  # the number of tabs created
+        self._data = (
+            None  # data to pass to PluginManager::initialize (see 'initialize')
+        )
 
         # Add the corner close/clone buttons
         self.setCornerWidget(ViewerCornerWidget())

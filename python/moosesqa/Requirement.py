@@ -1,27 +1,28 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import enum
 import mooseutils
+
 
 class TestSpecification(object):
     """Object for storing Test specification information w/r/t SQA"""
 
     def __init__(self, *args, **kwargs):
-        self.name = kwargs.pop('name', None)
-        self.filename = kwargs.pop('filename', None)
-        self.local = kwargs.pop('local', None)
-        self.line = kwargs.pop('line', None)
-        self.type = kwargs.pop('type', None)
-        self.prerequisites = kwargs.pop('prerequisites', set())
-        self.skip = kwargs.pop('skip', False)
-        self.deleted = kwargs.pop('deleted', False)
-        self.text = kwargs.pop('text', None)
+        self.name = kwargs.pop("name", None)
+        self.filename = kwargs.pop("filename", None)
+        self.local = kwargs.pop("local", None)
+        self.line = kwargs.pop("line", None)
+        self.type = kwargs.pop("type", None)
+        self.prerequisites = kwargs.pop("prerequisites", set())
+        self.skip = kwargs.pop("skip", False)
+        self.deleted = kwargs.pop("deleted", False)
+        self.text = kwargs.pop("text", None)
 
     @property
     def testable(self):
@@ -29,36 +30,37 @@ class TestSpecification(object):
         return not any([v for v in out])
 
     def __str__(self):
-        return 'Specification: {}'.format(self.name)
+        return "Specification: {}".format(self.name)
+
 
 class Requirement(object):
     """struct for storing Requirement information."""
 
     def __init__(self, *args, **kwargs):
-        self.name = kwargs.pop('name', None)
-        self.filename = kwargs.pop('filename', None)
-        self.line = kwargs.pop('line', None)
-        self.specification = kwargs.pop('specification', None)
-        self.details = kwargs.pop('details', list())
-        self.requirement = kwargs.pop('requirement', None)
-        self.requirement_line = kwargs.pop('requirement_line', None)
-        self.issues = kwargs.pop('issues', None)
-        self.issues_line = kwargs.pop('issues_line', None)
-        self.design = kwargs.pop('design', None)
-        self.design_line = kwargs.pop('design_line', None)
-        self.collections = kwargs.pop('collections', None)
-        self.collections_line = kwargs.pop('collections_line', None)
-        self.classification = kwargs.pop('classification', None)
-        self.classification_line = kwargs.pop('classification_line', None)
-        self.deprecated = kwargs.pop('deprecated', False)
-        self.deprecated_line = kwargs.pop('deprecated_line', None)
-        self.verification = kwargs.pop('verification', None)
-        self.verification_line = kwargs.pop('verification_line', None)
-        self.validation = kwargs.pop('validation', None)
-        self.validation_line = kwargs.pop('validation_line', None)
-        self.label = kwargs.pop('label', None)
-        self.duplicate = kwargs.pop('duplicate', False)
-        self.prefix = kwargs.pop('prefix', None)
+        self.name = kwargs.pop("name", None)
+        self.filename = kwargs.pop("filename", None)
+        self.line = kwargs.pop("line", None)
+        self.specification = kwargs.pop("specification", None)
+        self.details = kwargs.pop("details", list())
+        self.requirement = kwargs.pop("requirement", None)
+        self.requirement_line = kwargs.pop("requirement_line", None)
+        self.issues = kwargs.pop("issues", None)
+        self.issues_line = kwargs.pop("issues_line", None)
+        self.design = kwargs.pop("design", None)
+        self.design_line = kwargs.pop("design_line", None)
+        self.collections = kwargs.pop("collections", None)
+        self.collections_line = kwargs.pop("collections_line", None)
+        self.classification = kwargs.pop("classification", None)
+        self.classification_line = kwargs.pop("classification_line", None)
+        self.deprecated = kwargs.pop("deprecated", False)
+        self.deprecated_line = kwargs.pop("deprecated_line", None)
+        self.verification = kwargs.pop("verification", None)
+        self.verification_line = kwargs.pop("verification_line", None)
+        self.validation = kwargs.pop("validation", None)
+        self.validation_line = kwargs.pop("validation_line", None)
+        self.label = kwargs.pop("label", None)
+        self.duplicate = kwargs.pop("duplicate", False)
+        self.prefix = kwargs.pop("prefix", None)
 
     @property
     def names(self):
@@ -77,7 +79,13 @@ class Requirement(object):
         if self.specification is not None:
             return self.specification.testable
         elif self.details:
-            return all([d.specification.testable for d in self.details if d.specification is not None])
+            return all(
+                [
+                    d.specification.testable
+                    for d in self.details
+                    if d.specification is not None
+                ]
+            )
         return False
 
     @property
@@ -112,26 +120,29 @@ class Requirement(object):
                     yield d.specification
 
     def __str__(self):
-        out = 'Requirement: {}; requirement = {}; design = {}; issues = {}'
+        out = "Requirement: {}; requirement = {}; design = {}; issues = {}"
 
         if self.specification:
-            out += '; specification = ' + str(self.specification)
+            out += "; specification = " + str(self.specification)
         elif self.details:
             for d in self.details:
-                out += '\n  ' + str(d)
-        return out.format(self.name, repr(self.requirement), repr(self.design), repr(self.issues))
+                out += "\n  " + str(d)
+        return out.format(
+            self.name, repr(self.requirement), repr(self.design), repr(self.issues)
+        )
+
 
 class Detail(object):
     """struct for storing Detail information of a Requirement."""
 
     def __init__(self, *args, **kwargs):
-        self.name = kwargs.pop('name', None)
-        self.filename = kwargs.pop('filename', None)
-        self.line = kwargs.pop('line', None)
-        self.detail = kwargs.pop('detail', None)
-        self.detail_line = kwargs.pop('detail_line', None)
-        self.specification = kwargs.pop('specification', None)
-        self.duplicate = kwargs.pop('duplicate', False)
+        self.name = kwargs.pop("name", None)
+        self.filename = kwargs.pop("filename", None)
+        self.line = kwargs.pop("line", None)
+        self.detail = kwargs.pop("detail", None)
+        self.detail_line = kwargs.pop("detail_line", None)
+        self.specification = kwargs.pop("specification", None)
+        self.duplicate = kwargs.pop("duplicate", False)
 
     @property
     def testable(self):
@@ -141,4 +152,6 @@ class Detail(object):
         return False
 
     def __str__(self):
-        return 'Detail: {}; specification = {}'.format(self.name, self.specification.name)
+        return "Detail: {}; specification = {}".format(
+            self.name, self.specification.name
+        )

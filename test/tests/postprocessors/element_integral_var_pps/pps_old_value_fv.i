@@ -27,7 +27,7 @@
 
   [./exact_fn]
     type = ParsedFunction
-    expression = 't'
+    expression = '0'
   [../]
 []
 
@@ -66,12 +66,14 @@
     type = TimeIntegratedPostprocessor
     value = a
     execute_on = 'initial timestep_end'
+    time_integration_scheme = 'implicit-euler'
   [../]
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'PJFNK'
+  end_time = 1
 []
 
 [Outputs]

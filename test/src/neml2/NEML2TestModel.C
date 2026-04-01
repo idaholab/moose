@@ -65,8 +65,8 @@ void
 NEML2TestModel::set_value(bool out, bool dout_din, bool /*d2out_din2*/)
 {
   neml_assert(!_error, "Error flag set!");
-  neml_assert(_input_a.value().numel() > 0, "Input A is empty!");
-  neml_assert(_input_b.value().numel() > 0, "Input B is empty!");
+  neml_assert(_input_a.tensor().numel() > 0, "Input A is empty!");
+  neml_assert(_input_b.tensor().numel() > 0, "Input B is empty!");
 
   if (out)
   {

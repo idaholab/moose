@@ -17,9 +17,7 @@
 
 #include "libmesh/system.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 System::System(SystemBase & system)
@@ -39,7 +37,7 @@ System::System(SystemBase & system)
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
   {
     setupSparsity();
-    checkNodalBCs();
+    setupNodalBCDofs();
   }
 
   _qp_solutions.create(MAX_TAG);
@@ -52,7 +50,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
-  _var_subdomain_active.create(_num_vars, _mesh.meshSubdomains().size());
+  _var_subdomain_active.create(_num_vars, kokkosMesh().getNumSubdomains());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
@@ -94,8 +92,8 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  auto num_elems = kokkosMesh().getContiguousElementMap().size();
-  auto num_nodes = kokkosMesh().getContiguousNodeMap().size();
+  auto num_elems = kokkosMesh().getNumLocalElements();
+  auto num_nodes = kokkosMesh().getNumLocalNodes();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -115,11 +113,15 @@ System::setupDofs()
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
-  std::vector<dof_id_type> dof_indices;
-
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  // Kokkos array thinks OpenMP clause is device code when using OpenMP backend
+#pragma omp parallel for
+#endif
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
-    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
+    std::vector<dof_id_type> dof_indices;
+
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       _dof_map.dof_indices(elem, dof_indices, var);
 
@@ -133,8 +135,10 @@ System::setupDofs()
     _local_node_dof_index[var].create(num_nodes);
     _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
-    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
+    for (const auto elem : _mesh.getMesh().active_local_element_ptr_range())
     {
+      const auto id = kokkosMesh().getContiguousElementID(elem);
+
       _dof_map.dof_indices(elem, dof_indices, var);
 
       for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
@@ -144,9 +148,11 @@ System::setupDofs()
       }
     }
 
-    for (auto & [node, id] : kokkosMesh().getContiguousNodeMap())
+    for (const auto node : kokkosMesh().getLocalNodes())
       if (node->processor_id() == _comm.rank())
       {
+        const auto id = kokkosMesh().getContiguousNodeID(node);
+
         _dof_map.dof_indices(node, dof_indices, var);
 
         if (dof_indices.size())
@@ -203,6 +209,9 @@ void
 System::setupSparsity()
 {
   auto pattern = _dof_map.get_sparsity_pattern();
+
+  if (!pattern)
+    return;
 
   std::vector<PetscInt> col_idx;
   std::vector<PetscInt> row_idx;
@@ -263,39 +272,22 @@ System::setupSparsity()
 }
 
 void
-System::checkNodalBCs()
+System::setupNodalBCDofs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
 
-  _nbc_residual_tag_dof.create(MAX_TAG);
   _nbc_matrix_tag_dof.create(MAX_TAG);
 
   for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
     auto nbc = static_cast<NodalBCBase *>(bc.get());
 
-    std::set<TagID> extra_vector_tags;
-    std::set<TagID> extra_matrix_tags;
+    auto matrix_tags = nbc->getMatrixTags({});
 
-    if (nbc->isParamValid("extra_vector_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_vector_tags"))
-        extra_vector_tags.insert(_system.feProblem().getVectorTagID(tag));
-
-    if (nbc->isParamValid("extra_matrix_tags"))
-      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_matrix_tags"))
-        extra_matrix_tags.insert(_system.feProblem().getMatrixTagID(tag));
-
-    getNodalBCDofs(nbc, _nbc_dof);
-
-    for (auto tag : extra_vector_tags)
-      getNodalBCDofs(nbc, _nbc_residual_tag_dof[tag]);
-
-    for (auto tag : extra_matrix_tags)
+    for (auto tag : matrix_tags)
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
   }
 
-  _nbc_dof.copyToDevice();
-  _nbc_residual_tag_dof.copyToDeviceNested();
   _nbc_matrix_tag_dof.copyToDeviceNested();
 }
 
@@ -350,7 +342,7 @@ System::sync(const MemcpyType dir)
       auto & vector = _system.getVector(tag);
 
       _vectors[tag].create(vector, *this, true);
-      _vectors[tag] = 0;
+      _vectors[tag].copyToDevice();
     }
 
     for (auto tag : _active_matrix_tags)
@@ -436,9 +428,6 @@ System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 void
 System::setActiveSolutionTags(const std::set<TagID> & tags)
 {
-  if (!_active_variables.size())
-    return;
-
   std::set<TagID> active_solution_tags;
 
   for (auto tag : tags)
@@ -488,10 +477,10 @@ System::reinit()
   for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _num_vars);
+      _qp_solutions[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _num_vars);
+      _qp_solutions_grad[tag].create(kokkosMesh().getNumSubdomains(), _num_vars);
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
@@ -517,12 +506,12 @@ System::reinit()
   _qp_solutions.copyToDevice();
   _qp_solutions_grad.copyToDevice();
 
-  dof_id_type num_elems = kokkosMesh().getContiguousElementMap().size();
+  dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
-  _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
-                  num_elems,
-                  _active_variables.size(),
-                  _active_solution_tags.size()});
+  _thread.resize(kokkosAssembly().getMaxQpsPerElem(),
+                 num_elems,
+                 _active_variables.size(),
+                 _active_solution_tags.size());
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
@@ -571,5 +560,4 @@ System::operator()(const ThreadID tid) const
   getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

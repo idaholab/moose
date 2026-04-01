@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import unittest
 from mooseutils import message
+
 
 class TestMooseMessage(unittest.TestCase):
     """
@@ -25,12 +26,12 @@ class TestMooseMessage(unittest.TestCase):
         output = sys.stdout.getvalue()
         self.assertIn("The default message with a number 1.0", output)
 
-    @unittest.skip('Breaks with current package')
+    @unittest.skip("Breaks with current package")
     def testMooseMessageTraceback(self):
         """
         Test that the traceback argument is operational.
         """
-        message.mooseMessage("A message", "with a traceback!", traceback = True)
+        message.mooseMessage("A message", "with a traceback!", traceback=True)
         output = sys.stdout.getvalue()
         err = sys.stderr.getvalue()
         self.assertIn("A message with a traceback!", output)
@@ -40,9 +41,9 @@ class TestMooseMessage(unittest.TestCase):
         """
         Test that the color flag is working.
         """
-        message.mooseMessage("This should be RED.", color = 'RED')
+        message.mooseMessage("This should be RED.", color="RED")
         output = sys.stdout.getvalue()
-        self.assertIn('\033[31m', output)
+        self.assertIn("\033[31m", output)
 
     def testMooseMessageDebugOn(self):
         """
@@ -62,7 +63,7 @@ class TestMooseMessage(unittest.TestCase):
         output = sys.stdout.getvalue()
         self.assertIn("You should see this!", output)
 
-    @unittest.skip('Breaks with current package')
+    @unittest.skip("Breaks with current package")
     def testMooseError(self):
         """
         Tests mooseError function.
@@ -70,10 +71,10 @@ class TestMooseMessage(unittest.TestCase):
         message.mooseError("Don't do it!")
         output = sys.stdout.getvalue()
         err = sys.stderr.getvalue()
-        self.assertIn('ERROR', output)
+        self.assertIn("ERROR", output)
         self.assertIn("Don't do it!", output)
         self.assertIn("in mooseError", err)
-        self.assertIn('\033[31m', output)
+        self.assertIn("\033[31m", output)
 
     def testMooseWarning(self):
         """
@@ -81,9 +82,9 @@ class TestMooseMessage(unittest.TestCase):
         """
         message.mooseWarning("Just a little warning")
         output = sys.stdout.getvalue()
-        self.assertIn('WARNING', output)
+        self.assertIn("WARNING", output)
         self.assertIn("Just a little warning", output)
-        self.assertIn('\033[33m', output)
+        self.assertIn("\033[33m", output)
 
     def testDebugMessageOn(self):
         """
@@ -104,6 +105,5 @@ class TestMooseMessage(unittest.TestCase):
         self.assertNotIn("You should NOT see this!", output)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

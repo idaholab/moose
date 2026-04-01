@@ -1493,7 +1493,7 @@ RevolveGenerator::generate()
 
   mesh->remove_orphaned_nodes();
   mesh->renumber_nodes_and_elements();
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
 
   return mesh;
 }

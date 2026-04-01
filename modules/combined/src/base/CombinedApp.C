@@ -33,7 +33,6 @@
 #include "RayTracingApp.h"
 #include "RdgApp.h"
 #include "ReactorApp.h"
-#include "RichardsApp.h"
 #include "ScalarTransportApp.h"
 #include "SolidMechanicsApp.h"
 #include "SolidPropertiesApp.h"
@@ -88,7 +87,6 @@ CombinedApp::registerApps()
   RayTracingApp::registerApps();
   RdgApp::registerApps();
   ReactorApp::registerApps();
-  RichardsApp::registerApps();
   ScalarTransportApp::registerApps();
   SolidMechanicsApp::registerApps();
   SolidPropertiesApp::registerApps();
@@ -123,7 +121,6 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   RayTracingApp::registerAll(f, af, s);
   RdgApp::registerAll(f, af, s);
   ReactorApp::registerAll(f, af, s);
-  RichardsApp::registerAll(f, af, s);
   ScalarTransportApp::registerAll(f, af, s);
   SolidMechanicsApp::registerAll(f, af, s);
   SolidPropertiesApp::registerAll(f, af, s);

@@ -2,7 +2,7 @@
   [./bulk_constraints]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'bulk_constraints.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.508kg
@@ -29,7 +29,7 @@ NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  a
   [./ph_constraint]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'ph_constraint.i'
     expect_out = 'H+;  bulk_moles = 0.03522mol;  bulk_conc = 35.39mg/kg(soln);  molality = 1.175e-06mol/kg(solvent water);  free_conc = 0.00118mg/kg(soln);  act_coeff = 0.8513;  log10(a) = -6
 
@@ -46,7 +46,7 @@ CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln
   [./seawater_no_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'seawater_no_precip.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.036345kg
@@ -120,7 +120,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7276767V
   [./seawater_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'seawater_precip.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.036kg
@@ -167,7 +167,7 @@ CaHCO3+;  molality = 2.69e-05mol/kg(solvent water);  free_conc = 2.624mg/kg(soln
   [./amazon]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'amazon.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1kg
@@ -231,7 +231,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
   [./amazon_with_minerals]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'amazon_with_minerals.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.008kg
@@ -288,7 +288,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
   [./red_sea_no_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'red_sea_no_precip.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.345kg
@@ -374,7 +374,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./red_sea_precip]
     type = 'RunApp'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'red_sea_precip.i'
     expect_out = 'Mass of solvent water = 1kg
 Total mass = 1.345kg
@@ -458,7 +458,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./HCl]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     csvdiff = 'HCl_out.csv'
     rel_err = 1.0E-5
@@ -469,7 +469,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./HCl_no_action]
     type = 'CSVDiff'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     csvdiff = 'HCl_out.csv'
     prereq = 'HCl'
@@ -481,7 +481,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except1]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_solvent_kg=false'
@@ -493,7 +493,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except2]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_pH=false'
@@ -505,7 +505,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except3]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_molal=false'
@@ -517,7 +517,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except4]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_mg_per_kg=false'
@@ -529,7 +529,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except5]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_activity=false'
@@ -541,7 +541,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except6]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_bulk_moles=false'
@@ -553,7 +553,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = -0.1107V
   [./except7]
     type = RunException
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     input = 'HCl.i'
     prereq = 'HCl'
     cli_args = 'TimeIndependentReactionSolver/add_aux_temperature=false'

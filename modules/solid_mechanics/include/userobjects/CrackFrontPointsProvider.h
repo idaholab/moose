@@ -21,6 +21,11 @@ public:
 
   CrackFrontPointsProvider(const InputParameters & parameters, const bool uses_mesh = false);
 
+  /** Get the current number of crack front points
+   * @return The current number of crack front points
+   */
+  virtual unsigned int getNumberOfCrackFrontPoints() const = 0;
+
   /** get a set of points along a crack front from a XFEM GeometricCutUserObject
    * @return A vector which contains all crack front points
    */

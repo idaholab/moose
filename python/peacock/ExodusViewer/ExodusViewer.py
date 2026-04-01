@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import peacock
 from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
@@ -23,6 +23,7 @@ from peacock.ExodusViewer.plugins.CameraPlugin import CameraPlugin
 from peacock.ExodusViewer.plugins.MediaControlPlugin import MediaControlPlugin
 from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
 
+
 class ExodusViewer(peacock.base.ViewerBase):
     """
     Widget for viewing ExodusII results.
@@ -30,11 +31,31 @@ class ExodusViewer(peacock.base.ViewerBase):
 
     @staticmethod
     def commandLineArgs(parser):
-        parser.add_argument('--exodus', '-r', nargs='*', default=[], help="A list of ExodusII files to open.")
+        parser.add_argument(
+            "--exodus",
+            "-r",
+            nargs="*",
+            default=[],
+            help="A list of ExodusII files to open.",
+        )
 
-    def __init__(self, plugins = [VTKWindowPlugin, FilePlugin, BlockPlugin, MediaControlPlugin, GoldDiffPlugin,
-                                  ColorbarPlugin, MeshPlugin, ClipPlugin, ContourPlugin, CameraPlugin,
-                                  BackgroundPlugin, OutputPlugin]):
+    def __init__(
+        self,
+        plugins=[
+            VTKWindowPlugin,
+            FilePlugin,
+            BlockPlugin,
+            MediaControlPlugin,
+            GoldDiffPlugin,
+            ColorbarPlugin,
+            MeshPlugin,
+            ClipPlugin,
+            ContourPlugin,
+            CameraPlugin,
+            BackgroundPlugin,
+            OutputPlugin,
+        ],
+    ):
         self._exodus_menu = None
         super(ExodusViewer, self).__init__(manager=ExodusPluginManager, plugins=plugins)
 
@@ -45,7 +66,9 @@ class ExodusViewer(peacock.base.ViewerBase):
         Args:
             options: Complete parsed command line parameters from argparse.
         """
-        filenames = peacock.utils.getOptionFilenames(options, 'exodus', ['.*\.e', '.*\.e-s[0-9]+'])
+        filenames = peacock.utils.getOptionFilenames(
+            options, "exodus", [".*\.e", ".*\.e-s[0-9]+"]
+        )
         self.onSetFilenames(filenames)
 
     def onClone(self):
@@ -53,32 +76,32 @@ class ExodusViewer(peacock.base.ViewerBase):
         Clones the current Exodus view.
         """
         filenames = []
-        if 'FilePlugin' in self.currentWidget():
-            filenames = self.currentWidget()['FilePlugin'].getFilenames()
+        if "FilePlugin" in self.currentWidget():
+            filenames = self.currentWidget()["FilePlugin"].getFilenames()
 
         super(ExodusViewer, self).onClone()
-        self.currentWidget().call('onSetFilenames', filenames)
+        self.currentWidget().call("onSetFilenames", filenames)
 
     def onSetFilenames(self, *args):
         """
         Call the child onSetFilenames.
         """
         for i in range(self.count()):
-            self.widget(i).call('onSetFilenames', *args)
+            self.widget(i).call("onSetFilenames", *args)
 
     def onInputFileChanged(self, *args):
         """
         Call the child onInputFileChanged methods.
         """
         for i in range(self.count()):
-            self.widget(i).call('onInputFileChanged', *args)
+            self.widget(i).call("onInputFileChanged", *args)
 
     def onStartJob(self, *args):
         """
         Call the child onJobStart methods.
         """
         for i in range(self.count()):
-            self.widget(i).call('onJobStart', *args)
+            self.widget(i).call("onJobStart", *args)
 
     def onCurrentChanged(self, index):
         """
@@ -103,8 +126,20 @@ def main(size=None):
     """
     from PyQt5 import QtWidgets
 
-    plugins = [lambda: VTKWindowPlugin(size=size), FilePlugin, BlockPlugin, MediaControlPlugin, GoldDiffPlugin,
-               ColorbarPlugin, MeshPlugin, ClipPlugin, ContourPlugin, CameraPlugin, BackgroundPlugin, OutputPlugin]
+    plugins = [
+        lambda: VTKWindowPlugin(size=size),
+        FilePlugin,
+        BlockPlugin,
+        MediaControlPlugin,
+        GoldDiffPlugin,
+        ColorbarPlugin,
+        MeshPlugin,
+        ClipPlugin,
+        ContourPlugin,
+        CameraPlugin,
+        BackgroundPlugin,
+        OutputPlugin,
+    ]
     widget = ExodusViewer(plugins=plugins)
     main_window = QtWidgets.QMainWindow()
     main_window.setCentralWidget(widget)
@@ -114,12 +149,14 @@ def main(size=None):
     main_window.show()
     return widget, main_window
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
     from PyQt5 import QtWidgets
     from peacock.utils import Testing
-    #filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
-    filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
+
+    # filenames = Testing.get_chigger_input_list('mesh_only.e', 'mug_blocks_out.e', 'vector_out.e', 'displace.e')
+    filenames = Testing.get_chigger_input_list("diffusion_1.e", "diffusion_2.e")
     app = QtWidgets.QApplication(sys.argv)
     widget, main_window = main()
     widget.onSetFilenames(filenames)

@@ -2,8 +2,6 @@
 
 !syntax description /Mesh/SideSetsFromNormalsGenerator
 
-See also: [AllSideSetsByNormalsGenerator](/AllSideSetsByNormalsGenerator.md)
-
 !alert note
 If the mesh contains multiple disjoint faces with the same normal, they will all be added to the sideset.
 

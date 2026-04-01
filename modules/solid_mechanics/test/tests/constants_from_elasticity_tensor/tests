@@ -1,0 +1,26 @@
+[Tests]
+  [constants_from_elasticity_tensor]
+    type = CSVDiff
+    input = 'constants_from_elasticity_tensor.i'
+    csvdiff = 'constants_from_elasticity_tensor_out.csv'
+    issues = '#32399'
+    design = 'ConstantsFromElasticityTensor.md'
+    requirement = 'The system shall allow for elastic constants to be computed from an isotropic elasticity tensor as scalar material properties'
+  []
+  [ad_constants_from_elasticity_tensor]
+    type = CSVDiff
+    input = 'ad_constants_from_elasticity_tensor.i'
+    csvdiff = 'ad_constants_from_elasticity_tensor_out.csv'
+    issues = '#32399'
+    design = 'ConstantsFromElasticityTensor.md'
+    requirement = 'The system shall allow for elastic constants to be computed from an isotropic elasticity tensor as scalar material properties when using AD material properties'
+  []
+  [constants_from_anisotropic_elasticity_tensor_error]
+    type = RunException
+    input = 'anisotropic_elasticity_tensor_error.i'
+    expect_err = 'ConstantsFromElasticityTensor requires that the elasticity tensor be guaranteed isotropic'
+    issues = '#32399'
+    design = 'ConstantsFromElasticityTensor.md'
+    requirement = 'The system shall produce an error if elastic constants are requested from an elasticity tensor that is not guaranteed isotropic'
+  []
+[]

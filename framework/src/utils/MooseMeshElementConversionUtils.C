@@ -1228,7 +1228,7 @@ transitionLayerGenerator(MeshBase & mesh,
   mesh.get_boundary_info().remove_id(uniform_tmp_bid);
 
   mesh.contract();
-  mesh.set_isnt_prepared();
+  mesh.unset_is_prepared();
 }
 
 void

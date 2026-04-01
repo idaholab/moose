@@ -36,19 +36,15 @@ GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameter
     _dstress_dstrain(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _dim(_mesh.dimension()),
-    _ndisp(coupledComponents("displacements")),
-    _disp_var(_ndisp),
+    _disp_var(getFieldVars("displacements")),
     _periodic_dir()
 {
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var[i] = coupled("displacements", i);
-
   for (unsigned int dir = 0; dir < _dim; ++dir)
   {
-    _periodic_dir(dir) = _mesh.isTranslatedPeriodic(_disp_var[0], dir);
+    _periodic_dir(dir) = _mesh.isTranslatedPeriodic(*_disp_var[0], dir);
 
-    for (unsigned int i = 1; i < _ndisp; ++i)
-      if (_mesh.isTranslatedPeriodic(_disp_var[i], dir) != _periodic_dir(dir))
+    for (unsigned int i = 1; i < _disp_var.size(); ++i)
+      if (_mesh.isTranslatedPeriodic(*_disp_var[i], dir) != _periodic_dir(dir))
         mooseError("All the displacement components in a particular direction should have same "
                    "periodicity.");
   }

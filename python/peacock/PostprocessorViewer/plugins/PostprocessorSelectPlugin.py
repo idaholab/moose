@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import os
@@ -17,6 +17,7 @@ from PyQt5 import QtCore, QtWidgets
 import mooseutils
 from .PostprocessorPlugin import PostprocessorPlugin
 from .LineGroupWidget import LineGroupWidget
+
 
 class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
     """
@@ -36,8 +37,12 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         super(PostprocessorSelectPlugin, self).__init__()
 
         # Setup this widget
-        policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding)
-        policy.setVerticalStretch(100) # We want this widget to be as big as possible vertically
+        policy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.MinimumExpanding
+        )
+        policy.setVerticalStretch(
+            100
+        )  # We want this widget to be as big as possible vertically
         self.setSizePolicy(policy)
 
         # An iteratable color cycle for setting the default line style and color
@@ -49,8 +54,8 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         # The box and layout that will contain the line toggles
         self.LineGroups = QtWidgets.QFrame()
         self.LineGroupsLayout = QtWidgets.QVBoxLayout()
-        self.LineGroupsLayout.setSpacing(10);
-        self.LineGroupsLayout.setContentsMargins(0, 10, 10, 0);
+        self.LineGroupsLayout.setSpacing(10)
+        self.LineGroupsLayout.setContentsMargins(0, 10, 10, 0)
         self.LineGroups.setLayout(self.LineGroupsLayout)
 
         # Creates the area that will be scrollable
@@ -86,11 +91,15 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
                 current_groups[group.filename()] = group
         self._groups = []
 
-        self.color_cycle = itertools.product(['-', '--', '-.', ':'], plt.cm.Paired(np.linspace(0, 1, 11)))
+        self.color_cycle = itertools.product(
+            ["-", "--", "-.", ":"], plt.cm.Paired(np.linspace(0, 1, 11))
+        )
 
         # Create the group widgets for each available variable
         for d in data:
-            if d.filename() in current_groups and not current_groups[d.filename()].sameData(d):
+            if d.filename() in current_groups and not current_groups[
+                d.filename()
+            ].sameData(d):
                 group = current_groups[d.filename()]
                 self.LineGroupsLayout.removeWidget(group)
                 group.setParent(None)
@@ -136,9 +145,9 @@ class PostprocessorSelectPlugin(QtWidgets.QWidget, PostprocessorPlugin):
         """
 
         n = len(self._groups)
-        x_vars = [[]]*n
-        y_vars = [[]]*n
-        y2_vars = [[]]*n
+        x_vars = [[]] * n
+        y_vars = [[]] * n
+        y2_vars = [[]] * n
         for i in range(n):
             group = self._groups[i]
             if group.isValid():
@@ -189,10 +198,13 @@ def main(filenames, reader=mooseutils.VectorPostprocessorReader):
     from .FigurePlugin import FigurePlugin
 
     import matplotlib
-    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
-    matplotlib.rcParams["figure.dpi"] = (100)
 
-    widget = PostprocessorViewer(reader, timeout=None, plugins=[FigurePlugin, PostprocessorSelectPlugin])
+    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
+    matplotlib.rcParams["figure.dpi"] = 100
+
+    widget = PostprocessorViewer(
+        reader, timeout=None, plugins=[FigurePlugin, PostprocessorSelectPlugin]
+    )
     widget.onSetFilenames(filenames)
     control = widget.currentWidget().PostprocessorSelectPlugin
     window = widget.currentWidget().FigurePlugin
@@ -202,9 +214,9 @@ def main(filenames, reader=mooseutils.VectorPostprocessorReader):
     return control, widget, window
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../tests/input/vpp_*.csv']
+    filenames = ["../../tests/input/vpp_*.csv"]
     _, widget, _ = main(filenames)
     app.exec_()
-    os.remove('tmp_001.csv')
+    os.remove("tmp_001.csv")

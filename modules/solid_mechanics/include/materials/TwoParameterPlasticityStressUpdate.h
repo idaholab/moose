@@ -248,13 +248,12 @@ protected:
                              const RankFourTensor & Eijkl,
                              RankTwoTensor & stress) const override;
 
-  void
-  setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
-                                         Real gaE,
-                                         const yieldAndFlow & smoothed_q,
-                                         const RankFourTensor & elasticity_tensor,
-                                         const RankTwoTensor & returned_stress,
-                                         RankTwoTensor & inelastic_strain_increment) const override;
+  void setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
+                                              Real gaE,
+                                              const yieldAndFlow & smoothed_q,
+                                              const RankFourTensor & elasticity_tensor,
+                                              const RankTwoTensor & returned_stress,
+                                              RankTwoTensor & inelastic_strain_increment) override;
 
   /**
    * Calculates the consistent tangent operator.
@@ -298,10 +297,10 @@ protected:
                                   const std::vector<std::vector<Real>> & dvar_dtrial,
                                   RankFourTensor & cto) override;
 
-  virtual std::vector<RankTwoTensor>
-  dstress_param_dstress(const RankTwoTensor & stress) const override;
-  virtual std::vector<RankFourTensor>
-  d2stress_param_dstress(const RankTwoTensor & stress) const override;
+  virtual void dstressparam_dstress(const RankTwoTensor & stress,
+                                    std::vector<RankTwoTensor> & dsp) const override;
+  virtual void d2stressparam_dstress(const RankTwoTensor & stress,
+                                     std::vector<RankFourTensor> & d2sp) const override;
   /**
    * d(p)/d(stress)
    * Derived classes must override this
@@ -333,4 +332,23 @@ protected:
    * @return d2(q)/d(stress)/d(stress)
    */
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
+
+private:
+  /**
+   * d(stress_param[:])/d(stress) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_scratch;
+
+  /**
+   * d(stress_param[:])/d(stress_trial) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_trial_scratch;
+
+  /**
+   * d2(stress_param[:])/d(stress)/d(stress)  used in d2stressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankFourTensor> _d2sp_scratch;
 };

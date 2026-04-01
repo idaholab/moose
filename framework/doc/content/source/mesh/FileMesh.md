@@ -10,7 +10,7 @@ supports reading and writing a large number of formats and could be extended to 
 
 | Extension   | Description |
 | :-          | :- |
-| .e, .exd    | Sandia's ExodusII format |
+| .e, .exo    | Sandia's ExodusII format |
 | .dat        | Tecplot ASCII file |
 | .fro        | ACDL's surface triangulation file |
 | .gmv        | LANL's GMV (General Mesh Viewer) format |

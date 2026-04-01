@@ -39,12 +39,16 @@ protected:
   const ADVariableValue & _rhoA_avg;
   const ADVariableValue & _rhouA_avg;
   const ADVariableValue & _rhoEA_avg;
+  std::vector<const ADVariableValue *> _passives_times_area_avg;
 
   // piecewise constant conserved variables
   MooseVariable * _A_var;
   MooseVariable * _rhoA_var;
   MooseVariable * _rhouA_var;
   MooseVariable * _rhoEA_var;
+
+  /// Number of passive transport variables
+  const unsigned int _n_passives;
 
   /// Flow channel direction
   const MaterialProperty<RealVectorValue> & _dir;
@@ -53,6 +57,7 @@ protected:
   ADMaterialProperty<Real> & _rhoA;
   ADMaterialProperty<Real> & _rhouA;
   ADMaterialProperty<Real> & _rhoEA;
+  ADMaterialProperty<std::vector<Real>> & _passives_times_area;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;

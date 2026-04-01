@@ -61,22 +61,29 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
   }
 }
 
-//
 void
 MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_problem)
 {
-  // Redundant as source name is required?
-  if (!numToVar())
-    mooseError("No transferred variables were specified, neither programmatically or through the "
-               "'source_variable' parameter");
   if (numToVar() != numFromVar())
     mooseError("Number of variables transferred must be same in both systems.");
-  for (unsigned v = 0; v < numToVar(); ++v)
+
+  auto getGF = [&](MFEMProblem & problem, const std::string & name) -> mfem::Vector &
   {
-    auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getToVarName(v));
-    auto & from_var = from_problem.getProblemData().gridfunctions.GetRef(getFromVarName(v));
-    // TODO: Probably need more checking here to make sure the variables are
-    // copyable - as per the MultiAppDofCopyTransfer
+    if (problem.getProblemData().gridfunctions.Has(name))
+      return *problem.getProblemData().gridfunctions.Get(name);
+    if (problem.getProblemData().cmplx_gridfunctions.Has(name))
+      return *problem.getProblemData().cmplx_gridfunctions.Get(name);
+    mooseError("No real or complex variable named '", name, "' found.");
+  };
+
+  for (const auto v : make_range(numToVar()))
+  {
+    mfem::Vector & from_var = getGF(from_problem, getFromVarName(v));
+    mfem::Vector & to_var = getGF(to_problem, getToVarName(v));
+
+    if (from_var.Size() != to_var.Size())
+      mooseError("'", getFromVarName(v), "' and '", getToVarName(v), "' differ in no. of DoFs.");
+
     to_var = from_var;
   }
 }

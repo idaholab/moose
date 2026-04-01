@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.BlockEditor import BlockEditor
 from PyQt5.QtWidgets import QMessageBox, QApplication
@@ -91,19 +91,20 @@ class Tests(Testing.PeacockTester):
         if button:
             self.assertEqual(button.isEnabled(), enabled)
 
-    def checkWidget(self,
-            e,
-            apply_button=True,
-            apply_enabled=False,
-            user_block=False,
-            reset_button=True,
-            reset_enabled=False,
-            new_param_button=True,
-            new_param_enabled=True,
-            has_params=False,
-            has_types=False,
-            comments=""
-            ):
+    def checkWidget(
+        self,
+        e,
+        apply_button=True,
+        apply_enabled=False,
+        user_block=False,
+        reset_button=True,
+        reset_enabled=False,
+        new_param_button=True,
+        new_param_enabled=True,
+        has_params=False,
+        has_types=False,
+        comments="",
+    ):
         self.checkParamEditor(e, has_params, has_types)
         self.checkButton(e.clone_button, user_block, True)
         self.checkButton(e.apply_button, apply_button, apply_enabled)
@@ -135,7 +136,6 @@ class Tests(Testing.PeacockTester):
         e.resetChanges()
         self.checkWidget(e, comments=c)
         self.assertEqual(b.comments, c)
-
 
     def testUserParams(self):
         b = BlockInfo(None, "/Foo", True, "")
@@ -186,23 +186,37 @@ class Tests(Testing.PeacockTester):
         num_params = len(b.parameters_list)
         self.checkWidget(e, has_types=has_types, has_params=has_params, user_block=user)
         e.addUserParamPressed()
-        self.checkWidget(e, apply_enabled=True, reset_enabled=True, has_types=has_types, has_params=has_params, user_block=user)
+        self.checkWidget(
+            e,
+            apply_enabled=True,
+            reset_enabled=True,
+            has_types=has_types,
+            has_params=has_params,
+            user_block=user,
+        )
         self.assertEqual(len(b.parameters_list), num_params)
 
         e.applyChanges()
         self.checkWidget(e, has_types=has_types, has_params=has_params, user_block=user)
-        self.assertEqual(len(b.parameters_list), num_params+1)
+        self.assertEqual(len(b.parameters_list), num_params + 1)
         p = b.getParamInfo(b.parameters_list[-1])
         self.assertNotEqual(p, None)
         self.assertEqual(p.value, "")
 
         e.addUserParamPressed()
-        self.checkWidget(e, apply_enabled=True, reset_enabled=True, has_types=has_types, has_params=has_params, user_block=user)
-        self.assertEqual(len(b.parameters_list), num_params+1)
+        self.checkWidget(
+            e,
+            apply_enabled=True,
+            reset_enabled=True,
+            has_types=has_types,
+            has_params=has_params,
+            user_block=user,
+        )
+        self.assertEqual(len(b.parameters_list), num_params + 1)
 
         e.resetChanges()
         self.checkWidget(e, has_types=has_types, has_params=has_params, user_block=user)
-        self.assertEqual(len(b.parameters_list), num_params+1)
+        self.assertEqual(len(b.parameters_list), num_params + 1)
 
         self.assertEqual(self.editing_finished, False)
         e.close()
@@ -218,5 +232,6 @@ class Tests(Testing.PeacockTester):
         # Is user block
         self.checkAddParam("/Kernels/diff_u", True, True, True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

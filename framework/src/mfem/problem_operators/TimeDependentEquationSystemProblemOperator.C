@@ -17,6 +17,7 @@ void
 TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->GetTrialVarNames();
+  _test_var_names = GetEquationSystem()->GetTestVarNames();
   TimeDependentProblemOperator::SetGridFunctions();
 }
 
@@ -27,9 +28,10 @@ TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
   GetEquationSystem()->BuildEquationSystem();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
-  ode_solver = std::make_unique<MFEMBackwardEulerStateSolver>();
+  ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
   ode_solver->Init(*(this));
   SetTime(_problem.time());
+  SetImplicitVariableType(STATE);
 }
 
 void

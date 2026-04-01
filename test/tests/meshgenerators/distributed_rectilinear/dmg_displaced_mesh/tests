@@ -17,12 +17,9 @@
     cli_args = 'Outputs/hide="pid" Outputs/console/type=Console '
                'Outputs/console/system_info="framework mesh aux nonlinear execution relationship"'
     expect_out = '  Default:                 libMesh::DefaultCoupling x 2
-  Default:                 '
-                 'libMesh::GhostPointNeighbors
-  Default:                 libMesh::DefaultCoupling x '
-                 '2 for DisplacedMesh
-  Default:                 libMesh::GhostPointNeighbors for '
-                 'DisplacedMesh'
+  Default:                 libMesh::GhostPointNeighbors x 3
+  Default:                 libMesh::DefaultCoupling x 2 for DisplacedMesh
+  Default:                 libMesh::GhostPointNeighbors x 3 for DisplacedMesh'
     abs_zero = 1e-7
     rel_err = 1e-4
     requirement = "The system shall support mesh adaptivity with periodic boundary conditions on a "
@@ -38,16 +35,16 @@
     [adaptivity_nemesis]
       type = 'Exodiff'
       input = 'pbc_adaptivity.i'
-      exodiff = 'pbc_adaptivity_out.e.4.0 pbc_adaptivity_out.e.4.1 pbc_adaptivity_out.e.4.2 '
-                'pbc_adaptivity_out.e.4.3 pbc_adaptivity_out.e-s0002.4.0 '
-                'pbc_adaptivity_out.e-s0002.4.1 pbc_adaptivity_out.e-s0002.4.2 '
-                'pbc_adaptivity_out.e-s0002.4.3 pbc_adaptivity_out.e-s0003.4.0 '
-                'pbc_adaptivity_out.e-s0003.4.1 pbc_adaptivity_out.e-s0003.4.2 '
-                'pbc_adaptivity_out.e-s0003.4.3 pbc_adaptivity_out.e-s0004.4.0 '
-                'pbc_adaptivity_out.e-s0004.4.1 pbc_adaptivity_out.e-s0004.4.2 '
-                'pbc_adaptivity_out.e-s0004.4.3 pbc_adaptivity_out.e-s0005.4.0 '
-                'pbc_adaptivity_out.e-s0005.4.1 pbc_adaptivity_out.e-s0005.4.2 '
-                'pbc_adaptivity_out.e-s0005.4.3'
+      exodiff = 'pbc_adaptivity_out.n.4.0 pbc_adaptivity_out.n.4.1 pbc_adaptivity_out.n.4.2 '
+                'pbc_adaptivity_out.n.4.3 pbc_adaptivity_out.n-s0002.4.0 '
+                'pbc_adaptivity_out.n-s0002.4.1 pbc_adaptivity_out.n-s0002.4.2 '
+                'pbc_adaptivity_out.n-s0002.4.3 pbc_adaptivity_out.n-s0003.4.0 '
+                'pbc_adaptivity_out.n-s0003.4.1 pbc_adaptivity_out.n-s0003.4.2 '
+                'pbc_adaptivity_out.n-s0003.4.3 pbc_adaptivity_out.n-s0004.4.0 '
+                'pbc_adaptivity_out.n-s0004.4.1 pbc_adaptivity_out.n-s0004.4.2 '
+                'pbc_adaptivity_out.n-s0004.4.3 pbc_adaptivity_out.n-s0005.4.0 '
+                'pbc_adaptivity_out.n-s0005.4.1 pbc_adaptivity_out.n-s0005.4.2 '
+                'pbc_adaptivity_out.n-s0005.4.3'
       # We use 'partition=linear' here, so that the tests are platform independent
       cli_args = 'Outputs/hide="pid" Outputs/nemesis=true Outputs/exodus=false '
                  'Mesh/dmg/partition="linear"'

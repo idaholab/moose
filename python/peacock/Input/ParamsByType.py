@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QWidget, QComboBox, QStackedWidget
 from PyQt5.QtCore import pyqtSignal
@@ -13,11 +13,13 @@ from peacock.base.MooseWidget import MooseWidget
 from peacock.utils import WidgetUtils
 from .ParamsByGroup import ParamsByGroup
 
+
 class ParamsByType(QWidget, MooseWidget):
     """
     Has a QComboBox for the different allowed types.
     On switching type a new ParamsByGroup is shown.
     """
+
     needBlockList = pyqtSignal(list)
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
@@ -112,7 +114,11 @@ class ParamsByType(QWidget, MooseWidget):
         t = self.type_table_map.get(type_name)
         if t:
             return t
-        t = ParamsByGroup(self.block, self.type_params_map.get(type_name, self.block.orderedParameters()), self.type_block_map)
+        t = ParamsByGroup(
+            self.block,
+            self.type_params_map.get(type_name, self.block.orderedParameters()),
+            self.type_block_map,
+        )
         t.needBlockList.connect(self.needBlockList)
         t.blockRenamed.connect(self.blockRenamed)
         t.changed.connect(self.changed)

@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import importlib
 import uuid
@@ -14,10 +14,12 @@ from ..common import exceptions
 from ..tree import tokens, latex, html
 from . import core, floats, command, table
 
+
 def make_extension(**kwargs):
     return DevelExtension(**kwargs)
 
-Example = tokens.newToken('Example')
+
+Example = tokens.newToken("Example")
 
 EXAMPLE_LATEX = """
 \\newtcolorbox
@@ -26,14 +28,19 @@ skin=bicolor,colback=black!10,colbacklower=white,colframe=black!90,fonttitle=\\b
 title=Example~\\thetcbcounter: #2,#1}
 """
 
+
 class DevelExtension(command.CommandExtension):
     """
     Adds features useful for MooseDocs developers such as example blocks and settings tables.
     """
+
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['test'] = (None, "A configuration item for testing purposes, it does nothing.")
+        config["test"] = (
+            None,
+            "A configuration item for testing purposes, it does nothing.",
+        )
         return config
 
     def extend(self, reader, renderer):
@@ -41,89 +48,105 @@ class DevelExtension(command.CommandExtension):
         self.addCommand(reader, ExampleCommand())
         self.addCommand(reader, SettingsCommand())
 
-        renderer.add('Example', RenderExample())
+        renderer.add("Example", RenderExample())
 
         if isinstance(renderer, LatexRenderer):
-            renderer.addPackage('tcolorbox')
-            renderer.addPreamble('\\tcbuselibrary{skins}')
+            renderer.addPackage("tcolorbox")
+            renderer.addPreamble("\\tcbuselibrary{skins}")
             renderer.addPreamble(EXAMPLE_LATEX)
         elif isinstance(renderer, HTMLRenderer):
-            renderer.addCSS('devel_moose', "css/devel_moose.css")
+            renderer.addCSS("devel_moose", "css/devel_moose.css")
+
 
 class ExampleCommand(command.CommandComponent):
-    COMMAND = 'devel'
-    SUBCOMMAND = 'example'
+    COMMAND = "devel"
+    SUBCOMMAND = "example"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings.update(floats.caption_settings())
-        settings['prefix'] = ('Example', settings['prefix'][1])
+        settings["prefix"] = ("Example", settings["prefix"][1])
         return settings
 
     def createToken(self, parent, info, page, settings):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings)
         ex = Example(flt)
 
-        data = info['block'] if 'block' in info else info['inline']
+        data = info["block"] if "block" in info else info["inline"]
         code = core.Code(ex, content=data)
         if flt is parent:
             ex.attributes.update(**self.attributes(settings))
 
         return ex
 
+
 class SettingsCommand(command.CommandComponent):
-    COMMAND = 'devel'
-    SUBCOMMAND = 'settings'
+    COMMAND = "devel"
+    SUBCOMMAND = "settings"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['module'] = (None, "The name of the module containing the object.")
-        settings['object'] = (None, "The name of the object to import from the 'module'.")
+        settings["module"] = (None, "The name of the module containing the object.")
+        settings["object"] = (
+            None,
+            "The name of the object to import from the 'module'.",
+        )
         settings.update(floats.caption_settings())
-        settings['prefix'] = ('Table', settings['prefix'][1])
+        settings["prefix"] = ("Table", settings["prefix"][1])
 
         return settings
 
     def createToken(self, parent, info, page, settings):
-        if settings['module'] is None:
+        if settings["module"] is None:
             raise exceptions.MooseDocsException("The 'module' setting is required.")
 
-        if settings['object'] is None:
+        if settings["object"] is None:
             raise exceptions.MooseDocsException("The 'object' setting is required.")
 
-        primary = floats.create_float(parent, self.extension, self.reader, page, settings,
-                                     token_type=table.TableFloat)
+        primary = floats.create_float(
+            parent,
+            self.extension,
+            self.reader,
+            page,
+            settings,
+            token_type=table.TableFloat,
+        )
         try:
-            mod = importlib.import_module(settings['module'])
+            mod = importlib.import_module(settings["module"])
         except ImportError:
             msg = "Unable to load the '{}' module."
-            raise exceptions.MooseDocsException(msg, settings['module'])
+            raise exceptions.MooseDocsException(msg, settings["module"])
 
         try:
-            obj = getattr(mod, settings['object'])
+            obj = getattr(mod, settings["object"])
         except AttributeError:
             msg = "Unable to load the '{}' attribute from the '{}' module."
-            raise exceptions.MooseDocsException(msg, settings['object'], settings['module'])
+            raise exceptions.MooseDocsException(
+                msg, settings["object"], settings["module"]
+            )
 
-        if hasattr(obj, 'defaultSettings'):
+        if hasattr(obj, "defaultSettings"):
             obj_settings = obj.defaultSettings()
-        elif hasattr(obj, 'defaultConfig'):
+        elif hasattr(obj, "defaultConfig"):
             obj_settings = obj.defaultConfig()
         else:
-            msg = "The '{}' object in the '{}' module does not have a 'defaultSettings' or "\
-                  "'defaultConfig' method."
+            msg = (
+                "The '{}' object in the '{}' module does not have a 'defaultSettings' or "
+                "'defaultConfig' method."
+            )
             raise exceptions.MooseDocsException(msg, mod, obj)
 
         rows = [[key, value[0], value[1]] for key, value in obj_settings.items()]
-        tbl = table.builder(rows, headings=['Key', 'Default', 'Description'])
+        tbl = table.builder(rows, headings=["Key", "Default", "Description"])
         tbl.parent = primary
 
         if primary is parent:
             tbl.attributes.update(**self.attributes(settings))
 
         return primary
+
 
 class RenderExample(components.RenderComponent):
 
@@ -133,29 +156,39 @@ class RenderExample(components.RenderComponent):
     def createMaterialize(self, parent, token, page):
 
         # Builds the tabs
-        div = html.Tag(parent, 'div', class_='moose-devel-example')
-        ul = html.Tag(div, 'ul', class_='tabs')
+        div = html.Tag(parent, "div", class_="moose-devel-example")
+        ul = html.Tag(div, "ul", class_="tabs")
         cid = str(uuid.uuid4())
-        html.Tag(html.Tag(ul, 'li', class_='tab'), 'a', href='#{}'.format(cid), string='Markdown')
+        html.Tag(
+            html.Tag(ul, "li", class_="tab"),
+            "a",
+            href="#{}".format(cid),
+            string="Markdown",
+        )
         oid = str(uuid.uuid4())
-        html.Tag(html.Tag(ul, 'li', class_='tab'), 'a', href='#{}'.format(oid), string='HTML')
+        html.Tag(
+            html.Tag(ul, "li", class_="tab"), "a", href="#{}".format(oid), string="HTML"
+        )
 
         # Render the content within the tabs
-        div_code = html.Tag(div, 'div', id_=cid, class_='moose-devel-example-code')
-        self.translator.renderer.render(html.Tag(div_code, 'pre'),
-                                        tokens.String(None, content=token(0)['content']), page)
+        div_code = html.Tag(div, "div", id_=cid, class_="moose-devel-example-code")
+        self.translator.renderer.render(
+            html.Tag(div_code, "pre"),
+            tokens.String(None, content=token(0)["content"]),
+            page,
+        )
 
-        div_out = html.Tag(div, 'div', id_=oid, class_='moose-devel-example-html')
+        div_out = html.Tag(div, "div", id_=oid, class_="moose-devel-example-html")
         for child in [c for c in token.children[1:]] if len(token) > 1 else list():
             self.translator.renderer.render(div_out, child, page)
 
         return None
 
     def createLatex(self, parent, token, page):
-        example = latex.Environment(parent, 'example')
+        example = latex.Environment(parent, "example")
 
-        self.translator.renderer.render(example, token(0), page) # upper
-        latex.Command(example, 'tcblower', start='\n')
+        self.translator.renderer.render(example, token(0), page)  # upper
+        latex.Command(example, "tcblower", start="\n")
         for child in [c for c in token.children[1:]] if len(token) > 1 else list():
             self.translator.renderer.render(example, child, page)
         return None

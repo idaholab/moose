@@ -36,45 +36,21 @@ CoupledHeatTransferAction::validParams()
       "Variable(s) on the solid side into which to transfer the heat transfer coefficient(s)");
   params.addParam<std::vector<VariableName>>(
       "kappa", "Variables on the solid side into which to transfer the wall contact fractions");
-  params.addParam<std::vector<UserObjectName>>(
+  params.addRequiredParam<std::vector<UserObjectName>>(
       "T_fluid_user_objects", "Spatial user object(s) holding the fluid temperature values");
-  params.addParam<std::vector<UserObjectName>>(
+  params.addRequiredParam<std::vector<UserObjectName>>(
       "htc_user_objects", "Spatial user object(s) holding the heat transfer coefficient values");
-  params.addDeprecatedParam<UserObjectName>(
-      "T_fluid_user_object",
-      "Spatial user object holding the fluid temperature values",
-      "This parameter is deprecated in favor of 'T_fluid_user_objects' (just add an 's' to "
-      "parameter name).");
-  params.addDeprecatedParam<UserObjectName>(
-      "htc_user_object",
-      "Spatial user object holding the heat transfer coefficient values",
-      "This parameter is deprecated in favor of 'htc_user_objects' (just add an 's' to parameter "
-      "name).");
   params.addParam<std::vector<UserObjectName>>(
       "kappa_user_objects", "Spatial user object(s) holding the wall contact fraction values");
 
-  MooseEnum directions("x y z");
-  params.addDeprecatedParam<MooseEnum>(
-      "direction",
-      directions,
-      "The direction of the layers.",
-      "The usage of 'direction' and 'num_layers' is deprecated. Use 'position', 'orientation', "
-      "'rotation', 'length', and 'n_elems' instead. The latter parameters correspond to the "
-      "parameters of the same names in the coupled flow channel component.");
-  params.addDeprecatedParam<unsigned int>(
-      "num_layers",
-      "The number of layers.",
-      "The usage of 'direction' and 'num_layers' is deprecated. Use 'position', 'orientation', "
-      "'rotation', 'length', and 'n_elems' instead. The latter parameters correspond to the "
-      "parameters of the same names in the coupled flow channel component.");
-
-  params.addParam<Point>("position", "Start position of axis in 3-D space [m]");
-  params.addParam<RealVectorValue>(
+  params.addRequiredParam<Point>("position", "Start position of axis in 3-D space [m]");
+  params.addRequiredParam<RealVectorValue>(
       "orientation",
       "Direction of axis from start position to end position (no need to normalize)");
   params.addParam<Real>("rotation", 0.0, "Angle of rotation about the x-axis [degrees]");
-  params.addParam<std::vector<Real>>("length", "Length of each axial section [m]");
-  params.addParam<std::vector<unsigned int>>("n_elems", "Number of elements in each axial section");
+  params.addRequiredParam<std::vector<Real>>("length", "Length of each axial section [m]");
+  params.addRequiredParam<std::vector<unsigned int>>("n_elems",
+                                                     "Number of elements in each axial section");
 
   params.addRequiredParam<std::string>("multi_app", "The name of the multi-app.");
 
@@ -107,23 +83,11 @@ CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & par
     _n_phases(_T_fluid_var_names.size()),
 
     _T_wall_user_object_name(name() + "_T_avg_uo"),
+    _T_fluid_user_object_names(getParam<std::vector<UserObjectName>>("T_fluid_user_objects")),
+    _htc_user_object_names(getParam<std::vector<UserObjectName>>("htc_user_objects")),
 
     _multi_app_name(getParam<std::string>("multi_app"))
 {
-  if (isParamValid("T_fluid_user_objects"))
-    _T_fluid_user_object_names = getParam<std::vector<UserObjectName>>("T_fluid_user_objects");
-  else if (isParamValid("T_fluid_user_object"))
-    _T_fluid_user_object_names = {getParam<UserObjectName>("T_fluid_user_object")};
-  else
-    mooseError("The parameter 'T_fluid_user_objects' must be specified.");
-
-  if (isParamValid("htc_user_objects"))
-    _htc_user_object_names = getParam<std::vector<UserObjectName>>("htc_user_objects");
-  else if (isParamValid("htc_user_object"))
-    _htc_user_object_names = {getParam<UserObjectName>("htc_user_object")};
-  else
-    mooseError("The parameter 'htc_user_objects' must be specified.");
-
   if (_htc_var_names.size() != _n_phases || _T_fluid_user_object_names.size() != _n_phases ||
       _htc_user_object_names.size() != _n_phases)
     mooseError("The parameters 'T_fluid', 'htc', 'T_fluid_user_objects', and 'htc_user_objects' "
@@ -150,13 +114,10 @@ CoupledHeatTransferAction::CoupledHeatTransferAction(const InputParameters & par
     }
   }
 
-  if (isParamValid("orientation"))
-  {
     const auto & orientation = getParam<RealVectorValue>("orientation");
     if (!DiscreteLineSegmentInterface::getAlignmentAxis(orientation).isValid())
       mooseError("The direction given by the parameter 'orientation' must be aligned with the x, "
                  "y, or z axis.");
-  }
 }
 
 void
@@ -205,30 +166,17 @@ CoupledHeatTransferAction::addUserObjects()
     else
       params.set<std::vector<Point>>("points") = {Point(0, 0, 0)};
 
-    // set layers
-    if (isParamValid("direction") && isParamValid("num_layers"))
-    {
-      params.set<MooseEnum>("direction") = getParam<MooseEnum>("direction");
-      params.set<unsigned int>("num_layers") = getParam<unsigned int>("num_layers");
-    }
-    else if (isParamValid("position") && isParamValid("orientation") && isParamValid("length") &&
-             isParamValid("n_elems"))
-    {
-      const auto & position = getParam<Point>("position");
-      const auto & orientation = getParam<RealVectorValue>("orientation");
-      const auto & rotation = getParam<Real>("rotation");
-      const auto & lengths = getParam<std::vector<Real>>("length");
-      const auto & n_elems = getParam<std::vector<unsigned int>>("n_elems");
+    const auto & position = getParam<Point>("position");
+    const auto & orientation = getParam<RealVectorValue>("orientation");
+    const auto & rotation = getParam<Real>("rotation");
+    const auto & lengths = getParam<std::vector<Real>>("length");
+    const auto & n_elems = getParam<std::vector<unsigned int>>("n_elems");
 
-      params.set<MooseEnum>("direction") =
-          DiscreteLineSegmentInterface::getAlignmentAxis(orientation);
-      params.set<std::vector<Real>>("bounds") =
-          DiscreteLineSegmentInterface::getElementBoundaryCoordinates(
-              position, orientation, rotation, lengths, n_elems);
-    }
-    else
-      mooseError(
-          "The parameters 'position', 'orientation', 'length', and 'n_elems' must be provided.");
+    params.set<MooseEnum>("direction") =
+        DiscreteLineSegmentInterface::getAlignmentAxis(orientation);
+    params.set<std::vector<Real>>("bounds") =
+        DiscreteLineSegmentInterface::getElementBoundaryCoordinates(
+            position, orientation, rotation, lengths, n_elems);
 
     _problem->addUserObject(class_name, _T_wall_user_object_name, params);
   }

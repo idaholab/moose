@@ -9,9 +9,7 @@
 
 #include "KokkosKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -61,7 +59,7 @@ Kernel::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements()});
+    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
 
@@ -72,5 +70,4 @@ Kernel::computeJacobian()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

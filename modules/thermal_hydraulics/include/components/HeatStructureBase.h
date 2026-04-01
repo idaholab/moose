@@ -76,8 +76,6 @@ protected:
 
   /// Map from block name to block index
   std::map<std::string, unsigned int> _name_index;
-  /// Material names
-  std::vector<std::string> _material_names;
   /// The number of rods represented by this heat structure
   Real _num_rods;
 

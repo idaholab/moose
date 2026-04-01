@@ -1,0 +1,58 @@
+[Tests]
+    design = 'SurfaceSubdomainsDelaunayRemesher.md'
+    issues = '#32396'
+    [base]
+        type = Exodiff
+        input = 'remesh_sphere.i'
+        cli_args = "Mesh/remesh/subdomain_names='2; 3'
+                    --mesh-only"
+        exodiff = 'remesh_sphere_in.e'
+        requirement = 'The system shall be able to remesh subdomains of a surface mesh.'
+        recover = false
+        mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
+    []
+    [level_set_correction]
+        type = Exodiff
+        input = 'remesh_sphere.i'
+        cli_args = "Mesh/remesh/exclude_subdomain_names='4'
+                    Mesh/remesh/level_set='x*x+y*y+z*z-4'
+                    --mesh-only sphere_levelset.e"
+        exodiff = 'sphere_levelset.e'
+        requirement = 'The system shall be able to remesh subdomains of a surface mesh, and correct the output using projection to a level set surface.'
+        recover = false
+        mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
+    []
+    [refine_patch_edge_factor]
+        type = Exodiff
+        input = 'remesh_sphere.i'
+        # turn on level set correction and desired areas to have a nicer mesh
+        cli_args = "Mesh/remesh/interpolate_boundaries=2
+                    Mesh/remesh/level_set='x*x+y*y+z*z-4'
+                    Mesh/remesh/desired_areas=0.4
+                    --mesh-only sphere_refined_factor.e"
+        exodiff = 'sphere_refined_factor.e'
+        requirement = 'The system shall be able to remesh subdomains of a surface mesh and refine the subdomain edges by a fixed factor.'
+        recover = false
+        mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
+    []
+    [refine_patch_edge_max_edge]
+        type = Exodiff
+        input = 'remesh_sphere.i'
+        cli_args = "Mesh/remesh/max_edge_length=1
+                    Mesh/remesh/level_set='x*x+y*y+z*z-4'
+                    Mesh/remesh/desired_areas=0.4
+                    --mesh-only sphere_refined_max_edge.e"
+        exodiff = 'sphere_refined_max_edge.e'
+        requirement = 'The system shall be able to remesh subdomains of a surface mesh and refine the subdomain edges by imposing a maximum edge length between consecutive nodes.'
+        recover = false
+        mesh_mode = replicated
+        # Non planar element in mesh
+        allow_warnings = true
+    []
+[]

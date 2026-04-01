@@ -28,3 +28,9 @@ AdvectionIPHDGPrescribedFluxBC::AdvectionIPHDGPrescribedFluxBC(const InputParame
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))
 {
 }
+
+IPHDGAssemblyHelper &
+AdvectionIPHDGPrescribedFluxBC::iphdgHelper()
+{
+  return *_iphdg_helper;
+}

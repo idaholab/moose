@@ -40,7 +40,8 @@ ADBoundaryFlux3EqnGhostPressure::ADBoundaryFlux3EqnGhostPressure(const InputPara
 }
 
 std::vector<ADReal>
-ADBoundaryFlux3EqnGhostPressure::getGhostCellSolution(const std::vector<ADReal> & U) const
+ADBoundaryFlux3EqnGhostPressure::getGhostCellSolution(const std::vector<ADReal> & U,
+                                                      const Point & /*point*/) const
 {
   const ADReal rhoA = U[THMVACE1D::RHOA];
   const ADReal rhouA = U[THMVACE1D::RHOUA];
@@ -50,11 +51,8 @@ ADBoundaryFlux3EqnGhostPressure::getGhostCellSolution(const std::vector<ADReal> 
   const ADReal vel = rhouA / rhoA;
   const ADReal E = _fp.e_from_p_rho(_p, rho) + 0.5 * vel * vel;
 
-  std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS);
-  U_ghost[THMVACE1D::RHOA] = rhoA;
-  U_ghost[THMVACE1D::RHOUA] = rhouA;
+  auto U_ghost = U;
   U_ghost[THMVACE1D::RHOEA] = rhoA * E;
-  U_ghost[THMVACE1D::AREA] = A;
 
   return U_ghost;
 }

@@ -10,6 +10,7 @@
 #include "SideSetsFromNormalsGenerator.h"
 #include "Parser.h"
 #include "InputParameters.h"
+#include "MeshTraversingUtils.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "MooseApp.h"
@@ -106,7 +107,7 @@ SideSetsFromNormalsGenerator::generate()
 
       for (const auto i : make_range(boundary_ids.size()))
       {
-        if (normalsWithinTol(_normals[i], face_normal, _normal_tol))
+        if (MeshTraversingUtils::normalsWithinTol(_normals[i], face_normal, _normal_tol))
           flood(elem, _normals[i], boundary_ids[i], *mesh);
       }
     }
@@ -120,8 +121,6 @@ SideSetsFromNormalsGenerator::generate()
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];
   }
 
-  // This is a terrible hack that we'll want to remove once BMBBG isn't terrible
-  if (!_app.getMeshGeneratorSystem().hasBreakMeshByBlockGenerator())
-    mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

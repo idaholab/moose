@@ -184,17 +184,6 @@ public:
                      const std::string & obj_param) const;
 
   /**
-   * Makes a function controllable if it is constant
-   *
-   * @param[in] fn_name  name of the function
-   * @param[in] control_name  name of control parameter
-   * @param[in] param  name of controlled parameter
-   */
-  void makeFunctionControllableIfConstant(const FunctionName & fn_name,
-                                          const std::string & control_name,
-                                          const std::string & param = "value") const;
-
-  /**
    * Throws an error if the supplied setup status of this component has not been reached
    *
    * This is useful for getter functions that rely on data initialized after the

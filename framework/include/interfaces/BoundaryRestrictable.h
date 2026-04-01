@@ -261,7 +261,7 @@ protected:
    * @param tid The thread ID
    * @returns The contiguous node ID
    */
-  KOKKOS_FUNCTION ContiguousNodeID kokkosBoundaryNodeID(ThreadID tid) const
+  KOKKOS_FUNCTION ContiguousNodeID kokkosBoundaryNodeID(Moose::Kokkos::ThreadID tid) const
   {
     return _kokkos_node_ids[tid];
   }
@@ -270,7 +270,7 @@ protected:
    * @param tid The thread ID
    * @returns The contiguous element ID - side index pair
    */
-  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(ThreadID tid) const
+  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(Moose::Kokkos::ThreadID tid) const
   {
     return _kokkos_element_side_ids[tid];
   }

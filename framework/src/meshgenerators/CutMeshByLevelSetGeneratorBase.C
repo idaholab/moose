@@ -281,7 +281,7 @@ CutMeshByLevelSetGeneratorBase::generate()
     mesh.delete_elem(*elem_it);
 
   mesh.contract();
-  mesh.set_isnt_prepared();
+  mesh.unset_is_prepared();
   return std::move(_input);
 }
 

@@ -91,7 +91,7 @@ std::vector<BoundaryID> getBoundaryIDs(const libMesh::MeshBase & mesh,
  * Gets the boundary IDs into a set with their names.
  *
  * Because libMesh allows the same boundary to have multiple different boundary names,
- * the size of the returned boundary ID set may be smaller than the size of the bounndary
+ * the size of the returned boundary ID set may be smaller than the size of the boundary
  * name vector.
  * When a boundary name is not available in the mesh, if \p generate_unknown is true
  * a non-existant boundary ID will be returned, otherwise a BoundaryInfo::invalid_id
@@ -137,7 +137,7 @@ std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
 Point meshCentroidCalculator(const MeshBase & mesh);
 
 /**
- * compute a coordinate transformation factor
+ * Compute a coordinate transformation volume integration factor
  * @param point The libMesh \p Point in space where we are evaluating the factor
  * @param factor The output of this function. Would be 1 for cartesian coordinate systems, 2*pi*r
  * for cylindrical coordinate systems, and 4*pi*r^2 for spherical coordinate systems
@@ -213,7 +213,7 @@ computeFiniteVolumeCoords(FaceInfo & fi,
 }
 
 /**
- * Crate a new set of element-wise IDs by finding unique combinations of existing extra ID values
+ * Create a new set of element-wise IDs by finding unique combinations of existing extra ID values
  *
  * This function finds the unique combinations by recursively calling itself for extra ID inputs. In
  * the recursive calling, the new unique combinations is determined by combining the extra ID value
@@ -239,7 +239,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
  * @param fixed_pt a Point in the plane
  * @return whether all the Points are in the given plane
  */
-bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const Point fixed_pt);
+bool isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec, const Point fixed_pt);
 
 /**
  * Decides whether all the Points of a vector of Points are in a plane with a given normal vector
@@ -247,14 +247,14 @@ bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec, const 
  * @param plane_nvec normal vector of the plane
  * @return whether all the Points are in the same plane with the given normal vector
  */
-bool isCoPlanar(const std::vector<Point> vec_pts, const Point plane_nvec);
+bool isCoPlanar(const std::vector<Point> & vec_pts, const Point plane_nvec);
 
 /**
  * Decides whether all the Points of a vector of Points are coplanar
  * @param vec_pts vector of points to be examined
  * @return whether all the Points are in a same plane
  */
-bool isCoPlanar(const std::vector<Point> vec_pts);
+bool isCoPlanar(const std::vector<Point> & vec_pts);
 
 /**
  * Checks input mesh and returns max(block ID) + 1, which represents
@@ -268,8 +268,8 @@ SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
  * a boundary ID in the mesh that is not currently in use
  * @param input mesh over which to compute the next free boundary ID
  */
-
 BoundaryID getNextFreeBoundaryID(MeshBase & input_mesh);
+
 /**
  * Whether a particular subdomain ID exists in the mesh
  * @param input mesh over which to determine subdomain IDs
@@ -425,8 +425,37 @@ void extraElemIntegerSwapParametersProcessor(
  * @param input_mesh  The input mesh
  * @param boundary_id The boundary id
  */
-std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_mesh,
+std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const MeshBase & input_mesh,
                                                   const boundary_id_type boundary_id);
+
+/**
+ * Build a loop mesh of edges from the contiguous 2D boundary of 2D input mesh
+ * Note: The lower-dimensional mesh will only have one subdomain.
+ *       An error will be thrown if the mesh does not have the boundary.
+ * Note: currently, the boundary_id must be a nodeset!
+ * @param input_mesh  The input mesh
+ * @param boundary_id The boundary id
+ */
+std::unique_ptr<ReplicatedMesh> buildLoopBoundaryOf2DMesh(const MeshBase & input_mesh,
+                                                          const boundary_id_type boundary_id);
+
+/**
+ * Build a map from the node ids to all element ids they are part of for the nodes on a particular
+ * nodeset
+ * @param input_mesh  The input mesh to get the map for
+ * @param boundary_id The boundary id of interest
+ */
+std::unordered_map<dof_id_type, std::unordered_set<dof_id_type>>
+buildBoundaryNodeToElemMap(const MeshBase & input_mesh, const boundary_id_type boundary_id);
+
+/**
+ * Get all the nodes on that particular boundary, whether a nodeset or a sideset.
+ * Note: if the mesh has both a nodeset and a sideset with the same ID, they will both be considered
+ *       If this is undesirable, renumber one of them prior to calling this routine
+ * @param input_mesh  The input mesh to get the map for
+ * @param boundary_id The boundary id of interest
+ */
+std::set<dof_id_type> getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id);
 
 /**
  * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
@@ -437,7 +466,7 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
  * @param type_name The type of the mesh generator that is calling this method, used for error
  *                  messages and debugging purposes.
  */
-void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+void createSubdomainFromSidesets(MeshBase & mesh,
                                  std::vector<BoundaryName> boundary_names,
                                  const SubdomainID new_subdomain_id,
                                  const SubdomainName new_subdomain_name,
@@ -449,8 +478,8 @@ void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
  * @param target_mesh The target mesh to which the blocks will be converted
  * @param target_blocks The names of the blocks to be converted to the target mesh
  */
-void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
-                        std::unique_ptr<MeshBase> & target_mesh,
+void convertBlockToMesh(MeshBase & source_mesh,
+                        MeshBase & target_mesh,
                         const std::vector<SubdomainName> & target_blocks);
 
 /**
@@ -507,4 +536,13 @@ void buildPolyLineMesh(MeshBase & mesh,
                        const BoundaryName & start_boundary,
                        const BoundaryName & end_boundary,
                        const Real max_elem_size);
+
+/**
+ * Adds a sideset for the external boundary of the mesh (e.g. all element sides with no neighbors)
+ * @param mesh the mesh to modify
+ * @param extern_bid the ID to assign to the external boundary
+ * @param has_external_bid false if all elements of the mesh are internal (for example a sphere
+ * shell)
+ */
+void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
 }

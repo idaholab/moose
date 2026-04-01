@@ -314,6 +314,12 @@ Coupleable::getFieldVar(const std::string & var_name, unsigned int comp) const
   return getVarHelper<MooseVariableFieldBase>(var_name, comp);
 }
 
+std::vector<const MooseVariableFieldBase *>
+Coupleable::getFieldVars(const std::string & var_name) const
+{
+  return getVarsHelper<MooseVariableFieldBase>(var_name);
+}
+
 MooseVariable *
 Coupleable::getVar(const std::string & var_name, unsigned int comp)
 {
@@ -2070,6 +2076,7 @@ std::vector<const VariableValue *>
 Coupleable::coupledAllDofValues(const std::string & var_name) const
 {
   auto func = [this, &var_name](unsigned int comp) { return &coupledDofValues(var_name, comp); };
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
   return coupledVectorHelper<const VariableValue *>(var_name, func);
 }
 

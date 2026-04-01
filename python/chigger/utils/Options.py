@@ -1,24 +1,27 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 #!/usr/bin/env python3
 import sys
 import textwrap
 from collections import OrderedDict
 import traceback
+
 try:
     import terminaltables
+
     HAS_TERMINAL_TABLES = True
 except ImportError:
     HAS_TERMINAL_TABLES = False
 import mooseutils
+
 
 class Option(object):
     """
@@ -43,29 +46,40 @@ class Option(object):
             self.doc = args[2]
             self.__default = self.__value
         else:
-            raise Exception("Wrong number of arguments, must supply 2 or 3 input arguments.")
+            raise Exception(
+                "Wrong number of arguments, must supply 2 or 3 input arguments."
+            )
 
         # Extract optional settings
-        self.vtype = kwargs.pop('vtype', type(self.__value))
-        self.allow = kwargs.pop('allow', [])
+        self.vtype = kwargs.pop("vtype", type(self.__value))
+        self.allow = kwargs.pop("allow", [])
 
         # Check that allow is correct type
         if not isinstance(self.allow, list):
-            mooseutils.mooseWarning('The allow option must be supplied as a list.')
+            mooseutils.mooseWarning("The allow option must be supplied as a list.")
 
         # Check the allowed list contains the correct types
         else:
             for i in range(len(self.allow)):
                 try:
-                    if not isinstance(self.allow[i], self.vtype) and self.vtype != Option.ANY:
-                        self.allow[i] = eval('{}({})'.format(self.vtype.__name__,
-                                                             str(self.allow[i])))
+                    if (
+                        not isinstance(self.allow[i], self.vtype)
+                        and self.vtype != Option.ANY
+                    ):
+                        self.allow[i] = eval(
+                            "{}({})".format(self.vtype.__name__, str(self.allow[i]))
+                        )
 
-                except: #pylint: disable=bare-except
-                    msg = 'The type provided, {}, does not match the type of the allowed ' + \
-                          'values, {} for the {} option.'
-                    mooseutils.mooseWarning(msg.format(self.vtype.__name__,
-                                                       type(self.allow[i]).__name__, self.name))
+                except:  # pylint: disable=bare-except
+                    msg = (
+                        "The type provided, {}, does not match the type of the allowed "
+                        + "values, {} for the {} option."
+                    )
+                    mooseutils.mooseWarning(
+                        msg.format(
+                            self.vtype.__name__, type(self.allow[i]).__name__, self.name
+                        )
+                    )
                     return
 
         # Try to set the value using the set method to test the type and if it is allowed
@@ -133,16 +147,17 @@ class Option(object):
 
                 # Check if we can convert (e.g., int->float)
                 try:
-                    value = eval(self.vtype.__name__ + '(' + str(value) +')')
-                except: #pylint: disable=bare-except
-                    msg = '{} must be of type {} but {} provided.'
-                    mooseutils.mooseWarning(msg.format(self.name, self.vtype.__name__,
-                                                       type(value).__name__))
+                    value = eval(self.vtype.__name__ + "(" + str(value) + ")")
+                except:  # pylint: disable=bare-except
+                    msg = "{} must be of type {} but {} provided."
+                    mooseutils.mooseWarning(
+                        msg.format(self.name, self.vtype.__name__, type(value).__name__)
+                    )
                     value = None
 
             # Check that the value is allowed
             if self.allow and (value != None) and (value not in self.allow):
-                msg = 'Attempting to set {} to a value of {} but only the following are allowed: {}'
+                msg = "Attempting to set {} to a value of {} but only the following are allowed: {}"
                 mooseutils.mooseWarning(msg.format(self.name, value, self.allow))
                 value = None
 
@@ -150,7 +165,6 @@ class Option(object):
 
             if set_default:
                 self.__default = value
-
 
 
 class Options(object):
@@ -187,7 +201,7 @@ class Options(object):
             return default
         else:
             option = self.__options.pop(name)
-            return option.get() #pylint: disable=no-member
+            return option.get()  # pylint: disable=no-member
 
     def hasValidOption(self):
         """
@@ -214,8 +228,9 @@ class Options(object):
         Inputs:
             name[str]: The name of the Option to retrieve
         """
-        return self.hasOption(name) and \
-               (self.__options[name].get() == self.__options[name].getDefault())
+        return self.hasOption(name) and (
+            self.__options[name].get() == self.__options[name].getDefault()
+        )
 
     def setDefault(self, name, value):
         """
@@ -239,7 +254,7 @@ class Options(object):
 
         # Check that the option exists
         if not self.hasOption(name):
-            mooseutils.mooseWarning('No option with the name:', name)
+            mooseutils.mooseWarning("No option with the name:", name)
 
         # Set option to the given value, type checking occurs in the Option object
         else:
@@ -252,9 +267,9 @@ class Options(object):
         Inputs:
             name[str]: The name of the Option to retrieve
         """
-        #@todo warning
+        # @todo warning
         if name not in self.__options:
-            print('No option with the name:', name)
+            print("No option with the name:", name)
             print(self.__options.keys())
             traceback.print_stack()
             sys.exit()
@@ -289,13 +304,15 @@ class Options(object):
             allowed[list]: The allowed values
         """
         if args[0] in self.__options:
-            mooseutils.mooseWarning('A parameter with the name', args[0], 'already exists.')
+            mooseutils.mooseWarning(
+                "A parameter with the name", args[0], "already exists."
+            )
             return
 
         self.__options[args[0]] = Option(*args, **kwargs)
 
     def update(self, options=None, **kwargs):
-        """"
+        """ "
         Update the options given key, value pairs
 
         To enable unused warning, include 'warn_unused=True'
@@ -304,7 +321,7 @@ class Options(object):
         # Unused options
         changed = False
         unused = set()
-        warn = kwargs.pop('allow_unused', False)
+        warn = kwargs.pop("allow_unused", False)
 
         # Update from Options object
         if isinstance(options, Options):
@@ -326,9 +343,9 @@ class Options(object):
 
         # Warning for unused @todo warning
         if warn and len(unused) > 0:
-            msg = 'The following settings where not recognized:'
+            msg = "The following settings where not recognized:"
             for key in unused:
-                msg += ' '*4 + key
+                msg += " " * 4 + key
             mooseutils.mooseWarning(msg)
 
         return changed
@@ -357,13 +374,13 @@ class Options(object):
         if not HAS_TERMINAL_TABLES:
             return self.__class__.__name__
 
-        width = kwargs.pop('width', 120)
+        width = kwargs.pop("width", 120)
 
         def build(options, tables, title=None):
             """
             Helper for building terminal table
             """
-            data = [['Option', 'Value', 'Type', 'Allowed', 'Description']]
+            data = [["Option", "Value", "Type", "Allowed", "Description"]]
             for key in options.keys():
                 opt = options.raw(key)
                 if isinstance(opt.vtype, tuple):
@@ -371,22 +388,27 @@ class Options(object):
                 else:
                     vtype = opt.vtype.__name__
                 if not isinstance(opt.get(), Options):
-                    data.append([opt.name, repr(opt.get()), vtype, repr(opt.allow), opt.doc])
+                    data.append(
+                        [opt.name, repr(opt.get()), vtype, repr(opt.allow), opt.doc]
+                    )
                 else:
-                    data.append([opt.name, 'Options', vtype, repr(opt.allow), opt.doc])
+                    data.append([opt.name, "Options", vtype, repr(opt.allow), opt.doc])
                     build(opt.get(), tables, title=opt.name)
 
             table = terminaltables.SingleTable(data, title=title)
             n = sum(table.column_widths[:-2])
             for i in range(len(table.table_data)):
-                table.table_data[i][-2] = '\n'.join(textwrap.wrap(table.table_data[i][-2], 24))
-                table.table_data[i][-1] = '\n'.join(textwrap.wrap(table.table_data[i][-1],
-                                                                  width-(n+24)))
+                table.table_data[i][-2] = "\n".join(
+                    textwrap.wrap(table.table_data[i][-2], 24)
+                )
+                table.table_data[i][-1] = "\n".join(
+                    textwrap.wrap(table.table_data[i][-1], width - (n + 24))
+                )
             tables.append(table.table)
 
         tables = []
         build(self, tables)
-        return '\n\n'.join(reversed(tables))
+        return "\n\n".join(reversed(tables))
 
     def toScriptString(self, **kwargs):
         """
@@ -411,6 +433,6 @@ class Options(object):
                     r = kwargs[key]
                 else:
                     r = repr(opt)
-                output.append('{}={}'.format(key, r))
+                output.append("{}={}".format(key, r))
 
         return output, sub_output

@@ -125,7 +125,7 @@ elec_cond_air = 1e-323
 []
 
 [Solver]
-  type = MFEMSuperLU
+  type = MFEMMUMPS
 []
 
 [Executioner]

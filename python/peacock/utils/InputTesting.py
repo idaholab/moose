@@ -1,41 +1,49 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import functools
 from . import Testing
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 
-PROCESS_EVENT_TIME = .2
+PROCESS_EVENT_TIME = 0.2
+
 
 def changeTableCell(t, param, col, text):
     row = t.findRow(param)
     item = t.item(row, col)
     item.setText(text)
 
+
 def changeTableCombo(t, param, col, text):
     row = t.findRow(param)
     combo = t.cellWidget(row, col)
     combo.setCurrentText(text)
+
 
 def clickTableButton(t, param, col):
     row = t.findRow(param)
     button = t.cellWidget(row, col)
     button.click()
 
+
 class InputTreeTester(object):
     def getTreeWidget(self, w):
-        objects = Testing.findQObjectsByType(w, "peacock.Input.InputPathTreeWidget.InputPathTreeWidget")
+        objects = Testing.findQObjectsByType(
+            w, "peacock.Input.InputPathTreeWidget.InputPathTreeWidget"
+        )
         self.assertEqual(len(objects), 1)
         return objects[0]
 
     def clickTab(self, app, tab_name):
-        peacock_tab_widgets = Testing.findQObjectsByName(app, "PeacockMainWindow/tab_plugin")
+        peacock_tab_widgets = Testing.findQObjectsByName(
+            app, "PeacockMainWindow/tab_plugin"
+        )
         self.assertEqual(len(peacock_tab_widgets), 1)
         tabs = peacock_tab_widgets[0]
         for i in range(tabs.count()):
@@ -166,7 +174,7 @@ class InputTreeTester(object):
         pos = rect.center()
         if expand or include:
             pos = rect.bottomLeft()
-            pos.setY(pos.y() - rect.height()/2)
+            pos.setY(pos.y() - rect.height() / 2)
         if include:
             pos.setX(pos.x() + 10)
 
@@ -185,7 +193,9 @@ class InputTreeTester(object):
         self.saveNodeWidget(w, path)
         Testing.process_events(self.qapp, t=PROCESS_EVENT_TIME)
 
-    def addVariable(self, w, var_name, include_vars=False, expand_vars=False, include=True):
+    def addVariable(
+        self, w, var_name, include_vars=False, expand_vars=False, include=True
+    ):
         self.addToNode(w, "/Variables", expand=expand_vars, include=include_vars)
         new_path = "/Variables/New0"
         if include:
@@ -196,7 +206,18 @@ class InputTreeTester(object):
         self.saveNodeWidget(w, name_path, new_path)
         Testing.process_events(self.qapp, t=PROCESS_EVENT_TIME)
 
-    def addBC(self, w, name, variable, boundary, bc_type="DirichletBC", value="0", include_bc=False, expand_bc=False, include=True):
+    def addBC(
+        self,
+        w,
+        name,
+        variable,
+        boundary,
+        bc_type="DirichletBC",
+        value="0",
+        include_bc=False,
+        expand_bc=False,
+        include=True,
+    ):
         self.addToNode(w, "/BCs", expand=expand_bc, include=include_bc)
         new_path = "/BCs/New0"
         if include:
@@ -210,7 +231,15 @@ class InputTreeTester(object):
         self.saveNodeWidget(w, name_path, new_path)
         Testing.process_events(self.qapp, t=PROCESS_EVENT_TIME)
 
-    def addKernel(self, w, name, kernel_type, variable, include_kernels=False, expand_kernels=False):
+    def addKernel(
+        self,
+        w,
+        name,
+        kernel_type,
+        variable,
+        include_kernels=False,
+        expand_kernels=False,
+    ):
         self.addToNode(w, "/Kernels", expand=expand_kernels, include=include_kernels)
         new_path = "/Kernels/New0"
         if include_kernels:
@@ -223,7 +252,16 @@ class InputTreeTester(object):
         self.saveNodeWidget(w, name_path, new_path)
         Testing.process_events(self.qapp, t=PROCESS_EVENT_TIME)
 
-    def setExecutioner(self, w, exe_type, solve_type=None, petsc_iname=None, petsc_value=None, include_exe=False, expand_exe=False):
+    def setExecutioner(
+        self,
+        w,
+        exe_type,
+        solve_type=None,
+        petsc_iname=None,
+        petsc_value=None,
+        include_exe=False,
+        expand_exe=False,
+    ):
         path = "/Executioner"
         self.clickOnTree(w, path, expand=expand_exe, include=include_exe)
         self.changeParamTypeCombo(w, path, exe_type)
@@ -262,6 +300,16 @@ class InputTreeTester(object):
         self.selectMesh(w, "GeneratedMesh")
         self.addBC(w, "left", "u", "left", include_bc=True, expand_bc=True)
         self.addBC(w, "right", "u", "right", value="1")
-        self.addKernel(w, "diff", "Diffusion", "u", include_kernels=True, expand_kernels=True)
-        self.setExecutioner(w, "Steady", solve_type="PJFNK", petsc_iname="-pc_type -pc_hypre_type", petsc_value="hypre boomeramg", include_exe=True, expand_exe=True)
+        self.addKernel(
+            w, "diff", "Diffusion", "u", include_kernels=True, expand_kernels=True
+        )
+        self.setExecutioner(
+            w,
+            "Steady",
+            solve_type="PJFNK",
+            petsc_iname="-pc_type -pc_hypre_type",
+            petsc_value="hypre boomeramg",
+            include_exe=True,
+            expand_exe=True,
+        )
         self.setOutput(w, exodus=True)

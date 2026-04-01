@@ -37,7 +37,7 @@ protected:
   const RadialAverage::Result & _average;
   RadialAverage::Result::const_iterator _average_damage;
 
-  ///{@ Local damage model needed for updating
+  ///@{ Local damage model needed for updating
   MaterialName _local_damage_model_name;
   ScalarDamageBaseTempl<is_ad> * _local_damage_model;
   ///@}

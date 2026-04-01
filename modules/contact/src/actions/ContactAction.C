@@ -278,6 +278,7 @@ ContactAction::validParams()
       false,
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
+  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "segment_quadrature");
   return params;
 }
 
@@ -393,6 +394,10 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("mortar_dynamics",
                  "The 'mortar_dynamics' constraint option can only be used with the 'mortar' "
                  "formulation and in dynamic simulations using Newmark-beta");
+    else if (params.isParamSetByUser("segment_quadrature"))
+      paramError("segment_quadrature",
+                 "The 'segment_quadrature' option can only be used with the "
+                 "'mortar' formulation.");
   }
 
   if (_formulation == ContactFormulation::RANFS)
@@ -1116,6 +1121,8 @@ ContactAction::addMortarContact()
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<bool>("compute_primal_residuals") = false;
 
+      params.set<MooseEnum>("segment_quadrature") = getParam<MooseEnum>("segment_quadrature");
+
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
 
       if (ndisp > 1)
@@ -1157,6 +1164,7 @@ ContactAction::addMortarContact()
       if (_formulation == ContactFormulation::MORTAR)
         params.set<NonlinearVariableName>("variable") = variable_name;
 
+      params.set<MooseEnum>("segment_quadrature") = getParam<MooseEnum>("segment_quadrature");
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
 
@@ -1570,21 +1578,19 @@ ContactAction::createSidesetPairsFromGeometry()
 MooseEnum
 ContactAction::getModelEnum()
 {
-  return MooseEnum("frictionless glued coulomb", "frictionless");
+  return MooseEnum(getContactModelOptions(), "frictionless");
 }
 
 MooseEnum
 ContactAction::getProximityMethod()
 {
-  return MooseEnum("node centroid");
+  return MooseEnum(getProximityMethodOptions());
 }
 
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  auto formulations = MooseEnum(
-      "ranfs kinematic penalty augmented_lagrange tangential_penalty mortar mortar_penalty",
-      "kinematic");
+  auto formulations = MooseEnum(getContactFormulationOptions(), "kinematic");
 
   formulations.addDocumentation(
       "ranfs",

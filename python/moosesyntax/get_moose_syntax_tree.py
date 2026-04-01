@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import sys
 import collections
 import logging
@@ -14,6 +14,7 @@ import json
 import moosetree
 import mooseutils
 from .nodes import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
+
 
 def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdown=None):
     """
@@ -33,16 +34,18 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
     if isinstance(exe, dict):
         tree = exe
     else:
-        raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
-        if (len(raw.split('**START JSON DATA**\n')) == 1):
-            logging.getLogger('MooseSyntax.GetSyntaxTree').error("JSON syntax file creation failed. Do you have a working executable built?")
-        raw = raw.split('**START JSON DATA**\n')[1]
-        raw = raw.split('**END JSON DATA**')[0]
+        raw = mooseutils.runExe(exe, ["--json", "--allow-test-objects"])
+        if len(raw.split("**START JSON DATA**\n")) == 1:
+            logging.getLogger("MooseSyntax.GetSyntaxTree").error(
+                "JSON syntax file creation failed. Do you have a working executable built?"
+            )
+        raw = raw.split("**START JSON DATA**\n")[1]
+        raw = raw.split("**END JSON DATA**")[0]
         tree = mooseutils.json_parse(raw)
 
     # Build the complete syntax tree
-    root = SyntaxNode(None, '')
-    for key, value in tree['blocks'].items():
+    root = SyntaxNode(None, "")
+    for key, value in tree["blocks"].items():
         node = SyntaxNode(root, key)
         __syntax_tree_helper(node, value)
 
@@ -56,15 +59,19 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
     for node in moosetree.iterate(root):
 
         # Removed
-        if (node.fullpath() in removed) or ((node.parent is not None) and node.parent.removed):
+        if (node.fullpath() in removed) or (
+            (node.parent is not None) and node.parent.removed
+        ):
             node.removed = True
 
         # Remove unregistered items
         for base, parent_syntax in unregister.items():
-            if (node.name == base) and (node.get('action_path') == parent_syntax):
+            if (node.name == base) and (node.get("action_path") == parent_syntax):
                 node.removed = True
 
-            if (node.get('moose_base') == base) and (node.get('parent_syntax') == parent_syntax):
+            if (node.get("moose_base") == base) and (
+                node.get("parent_syntax") == parent_syntax
+            ):
                 node.removed = True
 
         # Apply alias
@@ -73,14 +80,15 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdow
                 node.alias = str(alt)
 
         # Mark 'Test' objects
-        if node.groups() and all(grp.endswith('TestApp') for grp in node.groups()):
-            node.test =  True
+        if node.groups() and all(grp.endswith("TestApp") for grp in node.groups()):
+            node.test = True
 
         # Explicitly set markdown files
-        if (node.fullpath() in markdown):
+        if node.fullpath() in markdown:
             node.markdown = markdown[node.fullpath()]
 
     return root
+
 
 def __build_set_from_yaml(item):
     """Helper for converting list/dict structure from YAML file to single set."""
@@ -92,6 +100,7 @@ def __build_set_from_yaml(item):
         out.update(item)
     return out
 
+
 def __build_dict_from_yaml(item):
     """Helper for converting dict of dict structure from YAML file to single dict."""
     out = dict()
@@ -102,33 +111,37 @@ def __build_dict_from_yaml(item):
             out[key] = value
     return out
 
+
 def __syntax_tree_helper(parent, item):
     """Helper to build the proper node from the supplied JSON item."""
 
     if item is None:
         return
 
-    if 'actions' in item:
-        for key, action in item['actions'].items():
-            action['tasks'] = set(action['tasks'])
-            if ('parameters' in action) and action['parameters'] and \
-            ('isObjectAction' in action['parameters']):
+    if "actions" in item:
+        for key, action in item["actions"].items():
+            action["tasks"] = set(action["tasks"])
+            if (
+                ("parameters" in action)
+                and action["parameters"]
+                and ("isObjectAction" in action["parameters"])
+            ):
                 MooseObjectActionNode(parent, key, **action)
             else:
                 ActionNode(parent, key, **action)
 
-    if 'star' in item:
-        __syntax_tree_helper(parent, item['star'])
+    if "star" in item:
+        __syntax_tree_helper(parent, item["star"])
 
-    if ('types' in item) and item['types']:
-        for key, obj in item['types'].items():
+    if ("types" in item) and item["types"]:
+        for key, obj in item["types"].items():
             MooseObjectNode(parent, key, **obj)
 
-    if ('subblocks' in item) and item['subblocks']:
-        for k, v in item['subblocks'].items():
+    if ("subblocks" in item) and item["subblocks"]:
+        for k, v in item["subblocks"].items():
             node = SyntaxNode(parent, k)
             __syntax_tree_helper(node, v)
 
-    if ('subblock_types' in item) and item['subblock_types']:
-        for k, v in item['subblock_types'].items():
+    if ("subblock_types" in item) and item["subblock_types"]:
+        for k, v in item["subblock_types"].items():
             MooseObjectNode(parent, k, **v)

@@ -365,6 +365,26 @@ doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
 }
 
 /**
+ * Function to check whether two points are the same for each component
+ * @param var1 The first variable to be checked
+ * @param var2 The second variable to be checked
+ * @param tol The tolerance to be used
+ * @return true if var1 and var2 are equal within tol for each component
+ * TODO: make this a template to make it work for all vector types
+ * Notably figure out the component access differences
+ */
+inline bool
+absoluteFuzzyEqual(const Point & v1,
+                   const Point & v2,
+                   const Real tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
+{
+  for (const auto i : make_range(LIBMESH_DIM))
+    if (std::abs(v1(i) - v2(i)) > tol)
+      return false;
+  return true;
+}
+
+/**
  * Function to check whether two variables are equal within an absolute tolerance
  * @param var1 The first variable to be checked
  * @param var2 The second variable to be checked
@@ -648,14 +668,10 @@ getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::ve
 {
   std::unordered_set<T> unique_elements;
   unique_elements.reserve(vector1.size() + vector2.size());
-
-  for (const T & entry : vector1)
-    unique_elements.insert(entry);
-  for (const T & entry : vector2)
-    unique_elements.insert(entry);
+  unique_elements.insert(vector1.begin(), vector1.end());
+  unique_elements.insert(vector2.begin(), vector2.end());
 
   // Now populate the common vector with the union
-  common.clear();
   common.assign(unique_elements.begin(), unique_elements.end());
 }
 
@@ -903,12 +919,6 @@ concatenate(std::vector<T> c1, const T & item)
   c1.push_back(item);
   return c1;
 }
-
-/**
- * Concatenates \p value into a single string separated by \p separator
- */
-std::string stringJoin(const std::vector<std::string> & values,
-                       const std::string & separator = " ");
 
 /**
  * @return Whether or not \p value begins with \p begin_value

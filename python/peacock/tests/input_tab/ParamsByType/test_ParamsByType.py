@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.ParamsByType import ParamsByType
 from peacock.utils import Testing, InputTesting
 from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -22,7 +23,16 @@ class Tests(Testing.PeacockTester):
         self.block_list_requested = 0
         self.block_children = ["child0", "child1", "child2"]
 
-    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False, group="Main"):
+    def createParam(
+        self,
+        name,
+        value="",
+        cpp_type="string",
+        options=[],
+        required=False,
+        user_added=False,
+        group="Main",
+    ):
         p = ParameterInfo(None, name)
         p.value = value
         p.cpp_type = cpp_type
@@ -167,5 +177,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(data[p1_name]["comments"], p1_comment)
         self.assertEqual(data[p1_name]["changed"], True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

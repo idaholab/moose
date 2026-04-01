@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from .ExodusPlugin import ExodusPlugin
+
 
 class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -36,11 +37,11 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self):
         super(ContourPlugin, self).__init__()
 
-        self.setTitle('Contours')
+        self.setTitle("Contours")
         self.setCheckable(True)
         self.setChecked(False)
         self.MainLayout = QtWidgets.QHBoxLayout(self)
-        #self.MainLayout.setSpacing(0)
+        # self.MainLayout.setSpacing(0)
 
         self.ContourCountLabel = QtWidgets.QLabel("Count:")
         self.ContourCount = QtWidgets.QSpinBox()
@@ -57,14 +58,18 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.clicked.connect(self._callbackClicked)
 
         self.setup()
-        self.store(key='default')
+        self.store(key="default")
         self._varinfo = None
 
     def onSetupResult(self, result):
         """
         Store variable information when the reader is created.
         """
-        self._varinfo = result[0].getExodusReader().getVariableInformation([chigger.exodus.ExodusReader.NODAL])
+        self._varinfo = (
+            result[0]
+            .getExodusReader()
+            .getVariableInformation([chigger.exodus.ExodusReader.NODAL])
+        )
 
     def onWindowReset(self):
         """
@@ -106,17 +111,19 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             text = self.ContourLevels.text()
             if len(text) > 0:
                 try:
-                    options['levels'] = [float(item) for item in re.split('[;,\s]', str(text))]
+                    options["levels"] = [
+                        float(item) for item in re.split("[;,\s]", str(text))
+                    ]
                     self.ContourCount.setEnabled(False)
                 except:
                     self.ContourCount.setEnabled(False)
-                    self.ContourLevels.setStyleSheet('color:#ff0000')
-                    options['levels'] = None
-                    options['count'] = int(self.ContourCount.value())
+                    self.ContourLevels.setStyleSheet("color:#ff0000")
+                    options["levels"] = None
+                    options["count"] = int(self.ContourCount.value())
             else:
                 self.ContourCount.setEnabled(True)
-                options['levels'] = None
-                options['count'] = int(self.ContourCount.value())
+                options["levels"] = None
+                options["count"] = int(self.ContourCount.value())
 
             self._contour.setOptions(**options)
             self.addFilter.emit(self._contour)
@@ -131,10 +138,12 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         output = dict()
         if self.isChecked():
             options, sub_options = self._contour.options().toScriptString()
-            output['filters'] = ['contour = chigger.filters.ContourFilter()']
-            output['filters'] += ['contour.setOptions({})'.format(', '.join(options))]
+            output["filters"] = ["contour = chigger.filters.ContourFilter()"]
+            output["filters"] += ["contour.setOptions({})".format(", ".join(options))]
             for key, value in sub_options.items():
-                output['filters'] += ['contour.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+                output["filters"] += [
+                    "contour.setOptions({}, {})".format(repr(key), ", ".join(value))
+                ]
 
         return output
 
@@ -169,7 +178,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         qobject.setEnabled(True)
         qobject.editingFinished.connect(self._callbackContourLevels)
-        qobject.textEdited.connect(lambda: qobject.setStyleSheet('color:#000000'))
+        qobject.textEdited.connect(lambda: qobject.setStyleSheet("color:#000000"))
 
     def _callbackContourLevels(self):
         """
@@ -179,6 +188,7 @@ class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
+
 def main(size=None):
     """
     Run the ContourPlugin all by its lonesome.
@@ -187,15 +197,25 @@ def main(size=None):
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
     from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
     from peacock.ExodusViewer.plugins.BlockPlugin import BlockPlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, ContourPlugin, BlockPlugin])
+
+    widget = ExodusPluginManager(
+        plugins=[
+            lambda: VTKWindowPlugin(size=size),
+            FilePlugin,
+            ContourPlugin,
+            BlockPlugin,
+        ]
+    )
     widget.show()
 
     return widget, widget.VTKWindowPlugin
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e')
-    widget, window = main(size=[600,600])
+    filenames = Testing.get_chigger_input_list("mug_blocks_out.e")
+    widget, window = main(size=[600, 600])
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

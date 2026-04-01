@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Plotting the results of changing_fugacity_calcite and the equivalent GWB simulation
 
@@ -32,34 +32,34 @@ gwb_ca = [0.4874, 3.398, 4.317, 5.494, 6.329, 6.999, 7.569]
 gwb_hco3 = [0.9767, 7.158, 9.165, 11.77, 13.65, 15.17, 16.47]
 
 plt.figure(0)
-plt.plot([3.1622777e-4] + fug, [0.5] + calcite, 'k-', linewidth = 2.0, label = 'MOOSE')
-plt.plot(gwb_tim, gwb_calcite, 'ks', label = 'GWB')
+plt.plot([3.1622777e-4] + fug, [0.5] + calcite, "k-", linewidth=2.0, label="MOOSE")
+plt.plot(gwb_tim, gwb_calcite, "ks", label="GWB")
 plt.legend()
-plt.xlabel("CO$_{2}$ fugacity");
+plt.xlabel("CO$_{2}$ fugacity")
 plt.ylabel("Calcite volume (cm$^{3}$)")
-plt.title("Calcite volume as CO$_{2}$ fugacity is varied");
+plt.title("Calcite volume as CO$_{2}$ fugacity is varied")
 plt.savefig("../../../doc/content/media/geochemistry/changing_fugacity_calcite_1.png")
 
 plt.figure(1)
-plt.plot([3.1622777e-4] + fug, [8.262] + ph, 'k-', linewidth = 2.0, label = 'MOOSE')
-plt.plot(gwb_tim, gwb_pH, 'ks', label = 'GWB')
+plt.plot([3.1622777e-4] + fug, [8.262] + ph, "k-", linewidth=2.0, label="MOOSE")
+plt.plot(gwb_tim, gwb_pH, "ks", label="GWB")
 plt.legend()
-plt.xlabel("CO$_{2}$ fugacity");
+plt.xlabel("CO$_{2}$ fugacity")
 plt.ylabel("pH")
-plt.title("pH as CO$_{2}$ fugacity is varied");
+plt.title("pH as CO$_{2}$ fugacity is varied")
 plt.savefig("../../../doc/content/media/geochemistry/changing_fugacity_calcite_2.png")
 
 plt.figure(2)
-plt.plot(fug, co2aq, 'k-', linewidth = 2.0, label = 'CO2(aq) (MOOSE)')
-plt.plot(fug, ca, 'r-', linewidth = 2.0, label = 'Ca$^{2+}$ (MOOSE)')
-plt.plot(fug, hco3, 'g-', linewidth = 2.0, label = 'HCO3$^{-}$ (MOOSE)')
-plt.plot(gwb_tim, gwb_co2aq, 'ks', linewidth = 2.0, label = 'CO2(aq) (GWB)')
-plt.plot(gwb_tim, gwb_ca, 'rs', linewidth = 2.0, label = 'Ca$^{2+}$ (GWB)')
-plt.plot(gwb_tim, gwb_hco3, 'gs', linewidth = 2.0, label = 'HCO3$^{-}$ (GWB)')
+plt.plot(fug, co2aq, "k-", linewidth=2.0, label="CO2(aq) (MOOSE)")
+plt.plot(fug, ca, "r-", linewidth=2.0, label="Ca$^{2+}$ (MOOSE)")
+plt.plot(fug, hco3, "g-", linewidth=2.0, label="HCO3$^{-}$ (MOOSE)")
+plt.plot(gwb_tim, gwb_co2aq, "ks", linewidth=2.0, label="CO2(aq) (GWB)")
+plt.plot(gwb_tim, gwb_ca, "rs", linewidth=2.0, label="Ca$^{2+}$ (GWB)")
+plt.plot(gwb_tim, gwb_hco3, "gs", linewidth=2.0, label="HCO3$^{-}$ (GWB)")
 plt.legend()
-plt.xlabel("CO$_{2}$ fugacity");
+plt.xlabel("CO$_{2}$ fugacity")
 plt.ylabel("Species concentration (mmolal)")
-plt.title("Species concentrations as CO$_{2}$ fugacity is varied");
+plt.title("Species concentrations as CO$_{2}$ fugacity is varied")
 plt.savefig("../../../doc/content/media/geochemistry/changing_fugacity_calcite_3.png")
 
 sys.exit(0)

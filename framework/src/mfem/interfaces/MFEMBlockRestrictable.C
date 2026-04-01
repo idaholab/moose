@@ -30,21 +30,20 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
                                              const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _subdomain_names(parameters.get<std::vector<SubdomainName>>("block")),
-    _subdomain_attributes(_subdomain_names.size())
+    _subdomain_attributes(subdomainsToAttributes())
 {
-  _subdomain_attributes = subdomainsToAttributes(_subdomain_names);
   if (!_subdomain_attributes.IsEmpty())
     mfem::common::AttrToMarker(
         _mfem_mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
 mfem::Array<int>
-MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> & subdomain_names)
+MFEMBlockRestrictable::subdomainsToAttributes()
 {
   mfem::Array<int> attributes;
   auto & mesh = getMesh();
 
-  for (const SubdomainName & subdomain_name : subdomain_names)
+  for (const SubdomainName & subdomain_name : _subdomain_names)
   {
     try
     {
@@ -64,13 +63,12 @@ MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> &
 }
 
 std::vector<std::string>
-MFEMBlockRestrictable::subdomainsToStrings(const std::vector<SubdomainName> & subdomain_names)
+MFEMBlockRestrictable::subdomainsToStrings()
 {
-  auto attributes = subdomainsToAttributes(subdomain_names);
-  std::vector<std::string> subdomain_attr_strings(subdomain_names.size());
-  for (const auto i : index_range(subdomain_names))
-    subdomain_attr_strings[i] = std::to_string(attributes[i]);
-  return subdomain_attr_strings;
+  const auto & attrs = _subdomain_attributes;
+  std::vector<std::string> strs(attrs.Size());
+  std::transform(attrs.begin(), attrs.end(), strs.begin(), [](int n) { return std::to_string(n); });
+  return strs;
 }
 
 #endif

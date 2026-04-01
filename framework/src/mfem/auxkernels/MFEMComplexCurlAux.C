@@ -38,6 +38,7 @@ MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
                   getParam<mfem::real_t>("scale_factor_imag")),
     _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
+  _sequence = _source_var.GetSequence() + _result_var.GetSequence();
   _curl.Assemble();
   _curl.Finalize();
 }
@@ -46,10 +47,23 @@ MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
 void
 MFEMComplexCurlAux::execute()
 {
+  update();
   _curl.AddMult(_source_var.real(), _result_var.real() = 0);
   _curl.AddMult(_source_var.imag(), _result_var.imag() = 0);
 
   complexScale(_result_var, _scale_factor);
+}
+
+void
+MFEMComplexCurlAux::update()
+{
+  if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
+  {
+    _sequence = sequence;
+    _curl.Update();
+    _curl.Assemble();
+    _curl.Finalize();
+  }
 }
 
 #endif

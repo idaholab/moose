@@ -9,9 +9,7 @@
 
 #include "KokkosMaterial.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -50,7 +48,7 @@ Material::Material(const Material & object)
 void
 Material::initStatefulProperties(unsigned int)
 {
-  if (!_bnd && !_neighbor)
+  if ((!_bnd && !_neighbor) || _constant_option == PropertyConstantOption::SUBDOMAIN)
   {
     if (!DispatcherRegistry::hasUserMethod<ElementInit>(type()))
       return;
@@ -91,7 +89,7 @@ Material::initStatefulProperties(unsigned int)
 void
 Material::computeProperties()
 {
-  if (!_bnd && !_neighbor)
+  if ((!_bnd && !_neighbor) || _constant_option == PropertyConstantOption::SUBDOMAIN)
   {
     Policy policy(0, numKokkosElements());
 
@@ -136,5 +134,4 @@ Material::getKokkosMaterialPropertyHook(const std::string & prop_name_in, const 
   registerPropName(prop_name, true, state);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

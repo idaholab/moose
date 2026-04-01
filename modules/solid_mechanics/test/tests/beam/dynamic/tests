@@ -115,15 +115,14 @@
     type = 'Exodiff'
     input = 'dyn_euler_small_added_mass_inertia_damping_ti.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
-    capabilities = 'superlu'
+    # machine=x86_64: see #26848
+    capabilities = 'superlu & machine=x86_64'
     requirement = "The mechanics system shall correctly model the response of a beam"
                   " modeled using beam elements in the presence of nodal mass,"
                   " nodal inertia and Rayleigh damping when using the velocity and"
                   " accelerations computed by the Newmark-Beta time integrator."
     issues = "#12185"
     prereq = "dyn_euler_added_mass_inertia_damping_action"
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   [../]
   [./dyn_euler_rayleigh_hht_action]
     type = 'Exodiff'

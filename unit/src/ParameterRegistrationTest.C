@@ -72,7 +72,7 @@ template <typename T, class ExceptionType = std::invalid_argument>
 void
 testValueError(const std::string & hit_value, const std::string & error)
 {
-  Moose::UnitUtils::assertThrows<ExceptionType>([&hit_value]() { testValue<T>(hit_value); }, error);
+  EXPECT_THROW_MSG(testValue<T>(hit_value), ExceptionType, error);
 }
 
 TEST(ParameterRegistrationTest, setScalarValue)
@@ -90,10 +90,9 @@ TEST(ParameterRegistrationTest, setScalarValue)
     const std::string hit_value = "a";
     const auto test_field = buildTestField(hit_value);
     int value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setScalarValue(value, *test_field.field); },
-        "invalid syntax for int parameter: " + param_name + "='" + hit_value + "'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setScalarValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid syntax for int parameter: " + param_name + "='" + hit_value + "'");
   }
 }
 
@@ -113,10 +112,9 @@ TEST(ParameterRegistrationTest, setVectorValue)
     const std::string hit_value = "\"1 a \"";
     const auto test_field = buildTestField(hit_value);
     std::vector<int> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setVectorValue(value, *test_field.field); },
-        "invalid syntax for int vector parameter: " + param_name + "[1]='a'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setVectorValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid syntax for int vector parameter: " + param_name + "[1]='a'");
   }
 }
 
@@ -144,10 +142,10 @@ TEST(ParameterRegistrationTest, setDoubleVectorValue)
     const std::string hit_value = "\"1; a b c   \"";
     const auto test_field = buildTestField(hit_value);
     std::vector<std::vector<int>> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setDoubleVectorValue(value, *test_field.field); },
-        "invalid syntax for int double vector parameter: " + param_name + "[1]='a b c'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setDoubleVectorValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid syntax for int double vector parameter: " + param_name +
+                         "[1]='a b c'");
   }
 }
 
@@ -175,10 +173,10 @@ TEST(ParameterRegistrationTest, setTripleVectorValue)
   {
     const auto test_field = buildTestField("\"1 | 2; 3 a \"");
     std::vector<std::vector<std::vector<int>>> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setTripleVectorValue(value, *test_field.field); },
-        "invalid syntax for int triple vector parameter: " + param_name + "[1][1]='3 a'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setTripleVectorValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid syntax for int triple vector parameter: " + param_name +
+                         "[1][1]='3 a'");
   }
 }
 
@@ -197,40 +195,39 @@ TEST(ParameterRegistrationTest, setMapValue)
   {
     const auto test_field = buildTestField("1");
     std::map<unsigned int, double> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setMapValue(value, *test_field.field); },
-        "odd number of entries for map parameter '" + param_name + "'");
+    EXPECT_THROW_MSG(
+        Moose::ParameterRegistration::setMapValue(value, *test_field.field),
+        std::invalid_argument,
+        "odd number of entries for map parameter '" + param_name +
+            "'; there must be an even number or else you will end up with a key without a value");
   }
 
   // key conversion failed
   {
     const auto test_field = buildTestField("\"a 1\"");
     std::map<unsigned int, double> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setMapValue(value, *test_field.field); },
-        "invalid unsigned int syntax for map parameter '" + param_name + "' key: 'a'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setMapValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid unsigned int syntax for map parameter '" + param_name + "' key: 'a'");
   }
 
   // value conversion failed
   {
     const auto test_field = buildTestField("\"1 a\"");
     std::map<unsigned int, double> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setMapValue(value, *test_field.field); },
-        "invalid double syntax for map parameter '" + param_name + "' value: 'a'");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setMapValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "invalid double syntax for map parameter '" + param_name + "' value: 'a'");
   }
 
   // duplicate keys
   {
     const auto test_field = buildTestField("\"1 2 1 2\"");
     std::map<unsigned int, double> value;
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&value, &test_field]()
-        { Moose::ParameterRegistration::setMapValue(value, *test_field.field); },
-        "duplicate entry for map parameter: '" + param_name + "'; key '1' appears multiple times");
+    EXPECT_THROW_MSG(Moose::ParameterRegistration::setMapValue(value, *test_field.field),
+                     std::invalid_argument,
+                     "duplicate entry for map parameter: '" + param_name +
+                         "'; key '1' appears multiple times");
   }
 }
 
@@ -340,7 +337,8 @@ TEST(ParameterRegistrationTest, testRealEigenVector)
   testValue<RealEigenVector>("\" 1\n2.0\"", expected_value);
 
   // conversion failed
-  testValueError<RealEigenVector, hit::Error>("a", "cannot convert field 'key' value 'a' to float");
+  testValueError<RealEigenVector, hit::Error>(
+      "a", "file:1.1: cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testRealEigenMatrix)
@@ -354,7 +352,7 @@ TEST(ParameterRegistrationTest, testRealEigenMatrix)
   testValue<RealEigenMatrix>("\"1.0 2; 3 4.0\"", expected_value);
 
   // not square
-  testValueError<RealEigenMatrix>("\"3; 1 2\"", "matrix is not square");
+  testValueError<RealEigenMatrix>("\"3; 1 2\"", "matrix is not square for parameter key");
 
   // invalid syntax
   testValueError<RealEigenMatrix>("\"1 2.0; a 1\"",
@@ -404,7 +402,8 @@ TEST(ParameterRegistrationTest, testRealTensorValue)
       "\"1\"", "invalid RealTensorValue parameter '" + param_name + "': size is 1 but should be 9");
 
   // conversion failed
-  testValueError<RealTensorValue, hit::Error>("a", "cannot convert field 'key' value 'a' to float");
+  testValueError<RealTensorValue, hit::Error>(
+      "a", "file:1.1: cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testReporterName)
@@ -431,8 +430,8 @@ TEST(ParameterRegistrationTest, testVectorComponentValue)
                                          "': size 1 is not a multiple of 3");
 
   // conversion failed
-  testValueError<std::vector<Point>, hit::Error>("a",
-                                                 "cannot convert field 'key' value 'a' to float");
+  testValueError<std::vector<Point>, hit::Error>(
+      "a", "file:1.1: cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testVectorMooseEnum)

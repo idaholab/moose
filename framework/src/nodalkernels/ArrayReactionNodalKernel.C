@@ -43,10 +43,11 @@ ArrayReactionNodalKernelTempl<is_ad>::computeQpResidual(GenericRealEigenVector<i
 }
 
 template <bool is_ad>
-RealEigenVector
+void
 ArrayReactionNodalKernelTempl<is_ad>::computeQpJacobian()
 {
-  return _coeff;
+  for (const auto i : index_range(_coeff))
+    setJacobian(i, i, _coeff(i));
 }
 
 template class ArrayReactionNodalKernelTempl<false>;

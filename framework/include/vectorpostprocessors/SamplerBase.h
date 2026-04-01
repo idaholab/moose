@@ -115,8 +115,8 @@ protected:
   /// The variable names
   std::vector<std::string> _variable_names;
 
-  /// What to sort by
-  const unsigned int _sort_by;
+  /// The index for what to sort by: x=0, y=1, z=2, then sampled variables in ordered specified in the parameter
+  unsigned int _sort_by_index;
 
   /// x coordinate of the points
   VectorPostprocessorValue & _x;
@@ -131,6 +131,8 @@ protected:
   std::vector<VectorPostprocessorValue *> _values;
 
 private:
+  /// What to sort by
+  const std::string _sort_by;
   /// The number of samples added in the last execution
   std::size_t _curr_num_samples = 0;
   /// The indices of the samples in the last execution

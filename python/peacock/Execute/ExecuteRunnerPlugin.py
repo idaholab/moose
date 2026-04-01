@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import pyqtSignal
@@ -19,10 +19,12 @@ import math
 import os
 import sys
 
+
 class ExecuteRunnerPlugin(QWidget, Plugin):
     """
     Provides the run button to start execution. While running it shows the progress bar and a kill button.
     """
+
     needInputFile = pyqtSignal(str)
     needCommand = pyqtSignal()
     outputAdded = pyqtSignal(str)
@@ -42,26 +44,37 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
     def __init__(self):
         super(ExecuteRunnerPlugin, self).__init__()
 
-        self._preferences.addBool("execute/clearLog",
-                "Clear log before running",
-                False,
-                "Clear the output from previous runs before starting a new run",
-                )
+        self._preferences.addBool(
+            "execute/clearLog",
+            "Clear log before running",
+            False,
+            "Clear the output from previous runs before starting a new run",
+        )
 
         self.top_layout = WidgetUtils.addLayout(vertical=True)
 
         self.run_layout = WidgetUtils.addLayout()
         self.run_layout.addStretch()
 
-        self.run_button = WidgetUtils.addButton(self.run_layout, None, "Run", self.runClicked, enabled=False)
-        self.kill_button = WidgetUtils.addButton(self.run_layout, None, "Kill", self.killClicked, enabled=False)
-        self.clear_button = WidgetUtils.addButton(self.run_layout, None, "Clear log", self.clearLog, enabled=True)
-        self.save_button = WidgetUtils.addButton(self.run_layout, None, "Save log", self.saveLog, enabled=True)
+        self.run_button = WidgetUtils.addButton(
+            self.run_layout, None, "Run", self.runClicked, enabled=False
+        )
+        self.kill_button = WidgetUtils.addButton(
+            self.run_layout, None, "Kill", self.killClicked, enabled=False
+        )
+        self.clear_button = WidgetUtils.addButton(
+            self.run_layout, None, "Clear log", self.clearLog, enabled=True
+        )
+        self.save_button = WidgetUtils.addButton(
+            self.run_layout, None, "Save log", self.saveLog, enabled=True
+        )
 
         self.run_layout.addStretch()
 
         self.progress_layout = WidgetUtils.addLayout()
-        self.progress_label = WidgetUtils.addLabel(self.progress_layout, None, "Progress: ")
+        self.progress_label = WidgetUtils.addLabel(
+            self.progress_layout, None, "Progress: "
+        )
         self.progress_bar = WidgetUtils.addProgressBar(self.progress_layout, None)
         self._showProgressBar(False)
 
@@ -74,8 +87,10 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
         self._total_steps = 0
         self.runner.finished.connect(self.runFinished)
         self.runner.outputAdded.connect(self.outputAdded)
-        self.runner.timeStepUpdated.connect(lambda t: self.runProgress.emit(t, self._total_steps))
-        self.runner.started.connect(lambda : self.runProgress.emit(0, self._total_steps))
+        self.runner.timeStepUpdated.connect(
+            lambda t: self.runProgress.emit(t, self._total_steps)
+        )
+        self.runner.started.connect(lambda: self.runProgress.emit(0, self._total_steps))
         self.runner.timeStepUpdated.connect(self._updateProgressBar)
         self.exe_path = None
         self.exe_args = []
@@ -117,7 +132,7 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
             val: int of current progress
         """
         # add 1 so the first time step is progress
-        self.progress_bar.setValue(val+1)
+        self.progress_bar.setValue(val + 1)
 
     def onNumTimeStepsChanged(self, num_steps):
         """
@@ -149,9 +164,13 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
         if self._preferences.value("execute/clearLog"):
             self.clearLog.emit()
 
-        start_time = math.floor(time.time()) if sys.platform == 'darwin' else time.time()
+        start_time = (
+            math.floor(time.time()) if sys.platform == "darwin" else time.time()
+        )
         self.startJob.emit(self.has_csv, input_file, start_time)
-        self.runner.run(self.exe_path, self.exe_args + ["-i", os.path.relpath(input_file)])
+        self.runner.run(
+            self.exe_path, self.exe_args + ["-i", os.path.relpath(input_file)]
+        )
 
     def setCommand(self, exe, args, csv_enabled):
         self.exe_path = exe
@@ -162,7 +181,13 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
         """
         Kill button clicked
         """
-        button = QMessageBox.question(self, "Kill process?", "Terminate current run?", QMessageBox.Yes, QMessageBox.No)
+        button = QMessageBox.question(
+            self,
+            "Kill process?",
+            "Terminate current run?",
+            QMessageBox.Yes,
+            QMessageBox.No,
+        )
         if button == QMessageBox.Yes:
             self.runner.kill()
 
@@ -187,13 +212,16 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
     def runEnabled(self, val):
         self.run_button.setEnabled(val)
 
+
 if __name__ == "__main__":
     from peacock.utils import Testing
     from PyQt5.QtWidgets import QApplication
+
     qapp = QApplication(sys.argv)
     exe = Testing.find_moose_test_exe()
     w = ExecuteRunnerPlugin()
     w.setCommand(exe, [], False)
+
     def needInputFile(input_file):
         this_dir = os.path.dirname(os.path.abspath(__file__))
         peacock_dir = os.path.dirname(this_dir)
@@ -202,9 +230,12 @@ if __name__ == "__main__":
             data = fin.read()
             with open(input_file, "w") as fout:
                 fout.write(data)
+
     w.needInputFile.connect(needInputFile)
+
     def print_out(t):
         print(t)
+
     w.outputAdded.connect(print_out)
     w.show()
     w.setEnabled(True)

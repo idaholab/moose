@@ -17,6 +17,7 @@ void
 EquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->GetTrialVarNames();
+  _test_var_names = GetEquationSystem()->GetTestVarNames();
   ProblemOperator::SetGridFunctions();
 }
 

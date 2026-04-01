@@ -162,24 +162,24 @@ LAROMANCE6DInterpolation::findLeftIndexAndFraction(const Scalar & grid,
 {
   // idx is for the left grid point.
   // searchsorted returns the right idx so -1 makes it the left
-  auto left_idx = Scalar(torch::searchsorted(grid, interp_points) - 1);
+  auto left_idx = Scalar(torch::searchsorted(grid, interp_points) - 1, 0);
 
   // this allows us to extrapolate
-  left_idx = Scalar(torch::clamp(left_idx, 0, grid.sizes()[0] - 2));
+  left_idx = Scalar(torch::clamp(left_idx, 0, grid.sizes()[0] - 2), 0);
 
-  auto left_coord = grid.batch_index({left_idx});
+  auto left_coord = grid.dynamic_index({left_idx});
   auto right_coord =
-      grid.batch_index({left_idx + torch::tensor(1, default_integer_tensor_options())});
+      grid.dynamic_index({left_idx + torch::tensor(1, default_integer_tensor_options())});
   auto left_fraction = (right_coord - interp_points) / (right_coord - left_coord);
 
-  return {left_idx, neml2::batch_stack({left_fraction, 1 - left_fraction}, -1)};
+  return {left_idx, neml2::dynamic_stack({left_fraction, 1 - left_fraction}, -1)};
 }
 
 Scalar
 LAROMANCE6DInterpolation::compute_interpolation(
     const std::vector<std::pair<Scalar, Scalar>> index_and_fraction, const Scalar grid_values) const
 {
-  Scalar result = Scalar::zeros_like(_temperature);
+  Scalar result = Scalar::zeros_like(_temperature());
   for (const auto i : {0, 1})
     for (const auto j : {0, 1})
       for (const auto k : {0, 1})
@@ -217,17 +217,17 @@ LAROMANCE6DInterpolation::interpolate_and_transform() const
 {
   // These transform constants should be given in the json file.
   const auto cell_dd_transformed =
-      transform_data(_cell_dd, _cell_transform_values, _cell_transform_enum);
+      transform_data(_cell_dd(), _cell_transform_values, _cell_transform_enum);
   const auto wall_dd_transformed =
-      transform_data(_wall_dd, _wall_transform_values, _wall_transform_enum);
+      transform_data(_wall_dd(), _wall_transform_values, _wall_transform_enum);
   const auto vm_stress_transformed =
-      transform_data(_vm_stress, _stress_transform_values, _stress_transform_enum);
-  const auto ep_strain_transformed =
-      transform_data(_ep_strain, _plastic_strain_transform_values, _plastic_strain_transform_enum);
+      transform_data(_vm_stress(), _stress_transform_values, _stress_transform_enum);
+  const auto ep_strain_transformed = transform_data(
+      _ep_strain(), _plastic_strain_transform_values, _plastic_strain_transform_enum);
   const auto temperature_transformed =
-      transform_data(_temperature, _temperature_transform_values, _temperature_transform_enum);
+      transform_data(_temperature(), _temperature_transform_values, _temperature_transform_enum);
   const auto env_fac_transformed =
-      transform_data(_env_fac, _env_transform_values, _env_transform_enum);
+      transform_data(_env_fac(), _env_transform_values, _env_transform_enum);
 
   std::vector<std::pair<Scalar, Scalar>> left_index_weight;
   left_index_weight.push_back(findLeftIndexAndFraction(_stress_grid, vm_stress_transformed));
@@ -418,7 +418,7 @@ LAROMANCE6DInterpolation::json_6Dvector_to_torch(const std::string & key) const
   }
 
   return Scalar::create(linearize_values)
-      .batch_reshape({sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
+      .dynamic_reshape({sz_l0, sz_l1, sz_l2, sz_l3, sz_l4, sz_l5})
       .clone();
 }
 

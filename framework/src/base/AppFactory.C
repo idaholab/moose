@@ -13,6 +13,8 @@
 #include "MooseApp.h"
 #include "Parser.h"
 #include "MooseMain.h"
+#include "Capabilities.h"
+#include "MooseStringUtils.h"
 
 AppFactory &
 AppFactory::instance()
@@ -217,4 +219,13 @@ AppFactory::getAppParamsID(const InputParameters & params) const
     mooseError("AppFactory::getAppParamsID(): Invalid application parameters (missing "
                "'_app_params_id')");
   return params.get<std::size_t>("_app_params_id");
+}
+
+void
+AppFactory::registerAppCapability(const std::string & app_name)
+{
+  auto & capabilities = Moose::internal::Capabilities::getCapabilities({});
+  capabilities.add(MooseUtils::toLower(app_name),
+                   bool(true),
+                   "MOOSE application " + app_name + " is available.");
 }

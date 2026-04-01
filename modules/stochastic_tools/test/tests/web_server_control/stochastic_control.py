@@ -30,7 +30,8 @@ from scipy.optimize import rosen  # Exact match to Rosenbrock::rosen
 StochasticControl = None
 StochasticRunOptions = None
 
-def tryImportStochasticControl(path = None):
+
+def tryImportStochasticControl(path=None):
     global StochasticControl
     global StochasticRunOptions
 
@@ -49,6 +50,7 @@ def tryImportStochasticControl(path = None):
         return False
     else:
         from moose_stochastic_tools import StochasticControl, StochasticRunOptions
+
         return True
 
 
@@ -60,6 +62,7 @@ if not tryImportStochasticControl():
         os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
     tryImportStochasticControl(_stm_python_path)
+
 
 def eggholder(x):
     """Exact match to Eggholder::eggholder"""
@@ -128,7 +131,9 @@ if __name__ == "__main__":
         _share_dir = os.path.abspath(os.path.join(_exec_dir, "..", "share"))
         _moose_stm_python = os.path.join(_share_dir, "stochastic_tools", "python")
         if not tryImportStochasticControl(_moose_stm_python):
-            raise ModuleNotFoundError("Could not find MOOSE stochastic tools module python utilities.")
+            raise ModuleNotFoundError(
+                "Could not find MOOSE stochastic tools module python utilities."
+            )
 
     # Arguments from cli
     cli_args = test_options()

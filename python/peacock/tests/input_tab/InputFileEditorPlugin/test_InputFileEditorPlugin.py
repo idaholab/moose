@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.InputFileEditorPlugin import InputFileEditorPlugin
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
@@ -15,6 +15,7 @@ from peacock.utils import Testing
 import os
 from mock import patch
 from PyQt5.QtCore import QSettings
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -130,5 +131,6 @@ class Tests(Testing.PeacockTester):
         val = settings.value(key, type=int)
         self.assertEqual(val, 15)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

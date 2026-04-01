@@ -1,13 +1,14 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from pyhit import hit
+
 
 def addInactive(hit_parent, parent, children):
     """
@@ -19,7 +20,10 @@ def addInactive(hit_parent, parent, children):
         if entry and entry.checkInactive():
             inactive.append(entry.name)
     if inactive:
-        hit_parent.addChild(hit.NewField("inactive", "String", "'%s'" % ' '.join(inactive)))
+        hit_parent.addChild(
+            hit.NewField("inactive", "String", "'%s'" % " ".join(inactive))
+        )
+
 
 def inputTreeToString(root):
     """
@@ -44,6 +48,7 @@ def inputTreeToString(root):
 
     return hit_node.render()
 
+
 def addNode(parent_hit_node, entry):
     """
     Adds a node and its children to the HIT tree.
@@ -64,6 +69,7 @@ def addNode(parent_hit_node, entry):
         if child_entry and child_entry.wantsToSave():
             addNode(hit_node, child_entry)
 
+
 def nodeParamsString(hit_parent, entry, ignore_type=False):
     params = entry.getParamNames()
     for name in params:
@@ -71,7 +77,9 @@ def nodeParamsString(hit_parent, entry, ignore_type=False):
             continue
         info = entry.parameters[name]
         val = info.inputFileValue()
-        if not val and name != 'active': # we generally don't want to write out empty strings
+        if (
+            not val and name != "active"
+        ):  # we generally don't want to write out empty strings
             continue
         comments = info.comments
         if info.hasChanged() or info.user_added or info.set_in_input_file:
@@ -86,6 +94,7 @@ def nodeParamsString(hit_parent, entry, ignore_type=False):
         type_entry = entry.types.get(type_name)
         if type_entry:
             nodeParamsString(hit_parent, type_entry, ignore_type=True)
+
 
 def commentNode(hit_parent, comments, is_inline):
     c_list = comments

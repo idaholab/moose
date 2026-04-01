@@ -191,6 +191,6 @@ SideSetsFromBoundingBoxGenerator::generate()
       mooseError("No nodes found within the bounding box");
   }
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -59,6 +59,11 @@ FlowModelSinglePhase::FlowModelSinglePhase(const InputParameters & params)
   : FlowModel1PhaseBase(params),
     _scaling_factors(getParam<std::vector<Real>>("scaling_factor_1phase"))
 {
+  // create passive transport solution variables, if any
+  const auto & passives_names = _flow_channel.getParam<std::vector<VariableName>>("passives_names");
+  _passives_times_area_names.resize(passives_names.size());
+  for (const auto i : index_range(passives_names))
+    _passives_times_area_names[i] = passives_names[i] + "_times_area";
 }
 
 Real
@@ -79,10 +84,66 @@ FlowModelSinglePhase::getScalingFactorRhoEA() const
   return _scaling_factors[2];
 }
 
+void
+FlowModelSinglePhase::addVariables()
+{
+  FlowModel1PhaseBase::addVariables();
+
+  // Add passive transport variables
+  const auto scaling_factor_passives =
+      _flow_channel.isParamSetByUser("scaling_factor_passives")
+          ? _flow_channel.getParam<std::vector<Real>>("scaling_factor_passives")
+          : std::vector<Real>(_passives_times_area_names.size(), 1.0);
+  mooseAssert(scaling_factor_passives.size() == _passives_times_area_names.size(),
+              "'scaling_factor_passives' size must match number of passives.");
+  for (const auto i : index_range(_passives_times_area_names))
+    _sim.addSimVariable(true,
+                        _passives_times_area_names[i],
+                        _fe_type,
+                        _flow_channel.getSubdomainNames(),
+                        scaling_factor_passives[i]);
+}
+
 std::vector<VariableName>
 FlowModelSinglePhase::solutionVariableNames() const
 {
-  return {RHOA, RHOUA, RHOEA};
+  std::vector<VariableName> vars = {RHOA, RHOUA, RHOEA};
+  vars.insert(vars.end(), _passives_times_area_names.begin(), _passives_times_area_names.end());
+  return vars;
+}
+
+void
+FlowModelSinglePhase::addInitialConditions()
+{
+  FlowModel1PhaseBase::addInitialConditions();
+
+  // passive transport variables
+  const auto & passives_ic_fn_names =
+      _flow_channel.getParam<std::vector<FunctionName>>("initial_passives");
+  for (const auto i : index_range(_passives_times_area_names))
+    addPassiveTransportIC(_passives_times_area_names[i], passives_ic_fn_names[i]);
+}
+
+void
+FlowModelSinglePhase::addKernels()
+{
+  FlowModel1PhaseBase::addKernels();
+
+  // time derivatives for passive transport variables
+  for (const auto & var : _passives_times_area_names)
+    addTimeDerivativeKernelIfTransient(var);
+}
+
+void
+FlowModelSinglePhase::addPassiveTransportIC(const VariableName & var, const FunctionName & ic_fn)
+{
+  const std::string class_name = "VariableFunctionProductIC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<VariableName>("variable") = var;
+  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  params.set<FunctionName>("fn") = ic_fn;
+  params.set<std::vector<VariableName>>("var") = {THM::AREA};
+  _sim.addSimInitialCondition(class_name, genName(_comp_name, var + "_ic"), params);
 }
 
 void
@@ -189,6 +250,7 @@ FlowModelSinglePhase::addSlopeReconstructionMaterial()
   params.set<std::vector<VariableName>>("rhoA") = {RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
   params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+  params.set<std::vector<VariableName>>("passives_times_area") = _passives_times_area_names;
   params.set<MaterialPropertyName>("direction") = DIRECTION;
   params.set<UserObjectName>("fluid_properties") = _fp_name;
   params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
@@ -198,24 +260,19 @@ FlowModelSinglePhase::addSlopeReconstructionMaterial()
 void
 FlowModelSinglePhase::addRDGAdvectionDGKernels()
 {
-  // mass
-  const std::string class_name = "ADNumericalFlux3EqnDGKernel";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<NonlinearVariableName>("variable") = RHOA;
-  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-  params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
-  params.set<std::vector<VariableName>>("rhoA") = {RHOA};
-  params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
-  params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
-  params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-  _sim.addDGKernel(class_name, genName(_comp_name, "mass_advection"), params);
-
-  // momentum
-  params.set<NonlinearVariableName>("variable") = RHOUA;
-  _sim.addDGKernel(class_name, genName(_comp_name, "momentum_advection"), params);
-
-  // energy
-  params.set<NonlinearVariableName>("variable") = RHOEA;
-  _sim.addDGKernel(class_name, genName(_comp_name, "energy_advection"), params);
+  for (const auto & var : solutionVariableNames())
+  {
+    const std::string class_name = "ADNumericalFlux3EqnDGKernel";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<NonlinearVariableName>("variable") = var;
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+    params.set<std::vector<VariableName>>("A_linear") = {AREA_LINEAR};
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<std::vector<VariableName>>("passives_times_area") = _passives_times_area_names;
+    params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+    params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
+    _sim.addDGKernel(class_name, genName(_comp_name, "flux_kernel_" + var), params);
+  }
 }

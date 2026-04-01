@@ -28,6 +28,8 @@ The final mesh output is:
        style=width:75%;display:block;margin:auto
        alt=A mesh with 3 subdomains, produced from the configurations given above.
 
+Aside from ecluding some subdomains using [!param](/Mesh/ParsedSubdomainMeshGenerator/excluded_subdomains), users can also include only some subdomains using [!param](/Mesh/ParsedSubdomainMeshGenerator/included_subdomains). The two options are mutually exclusive.
+
 !syntax parameters /Mesh/ParsedSubdomainMeshGenerator
 
 !syntax inputs /Mesh/ParsedSubdomainMeshGenerator

@@ -6,13 +6,12 @@
     input = 'predef.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'predef_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) affecting material behavior '
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [predef_reference]
     type = 'Exodiff'
@@ -30,14 +29,13 @@
     input = 'dpredef.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'dpredef_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'an external field (not temperature) step increment affecting material behavior '
     rel_err = 5.0e-5
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [dpredef_reference]
     type = 'Exodiff'
@@ -55,14 +53,12 @@
     input = 'predef_multiple.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'predef_multiple_out.e'
-    library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external fields (not temperature) affecting material behavior '
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & library_mode=dynamic & installation_type=in_tree'
   []
   [predef_multiple_reference]
     type = 'Exodiff'
@@ -80,14 +76,12 @@
     input = 'predef_multiple_mat.i'
     cli_args = "Materials/active='umat strain_xx strain_yy'"
     exodiff = 'predef_multiple_mat_out.e'
-    library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
                   'displacements) as the built-in MOOSE capabilities for a mechanical problem with '
                   'two external material properties affecting material behavior '
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & library_mode=dynamic & installation_type=in_tree'
   []
   [predef_multiple_reference_mat]
     type = 'Exodiff'

@@ -110,7 +110,7 @@ MeshExtruderGenerator::generate()
   if (isParamValid("top_sideset"))
     changeID(*dest_mesh, getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
-  dest_mesh->set_isnt_prepared();
+  dest_mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(dest_mesh);
 }
 

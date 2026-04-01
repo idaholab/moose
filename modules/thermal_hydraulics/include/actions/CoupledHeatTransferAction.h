@@ -55,10 +55,10 @@ protected:
   const UserObjectName _T_wall_user_object_name;
 
   /// Spatial user object(s) holding the fluid temperature values
-  std::vector<UserObjectName> _T_fluid_user_object_names;
+  const std::vector<UserObjectName> _T_fluid_user_object_names;
 
   /// Spatial user object(s) holding the heat transfer coefficient values
-  std::vector<UserObjectName> _htc_user_object_names;
+  const std::vector<UserObjectName> _htc_user_object_names;
 
   /// Spatial user objects holding the wall contact fraction values
   std::vector<UserObjectName> _kappa_user_object_names;

@@ -11,7 +11,7 @@ if [ $# -lt 2 ]; then
 fi
 
 base=`basename "$2" .e`
-base=`basename "$base" .exd`
+base=`basename "$base" .exo`
 
 ext=${2##*.}
 

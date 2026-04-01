@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, sys
 import subprocess
@@ -16,19 +16,23 @@ from FactorySystem import Parser
 import pyhit
 import mooseutils
 
+
 def run_app(args=[]):
     """
     Run the app and return the output.
     Exits if the app failed to run for any reason.
     """
     proc = None
-    app_name = mooseutils.find_moose_executable_recursive()
-    args.insert(0, app_name)
+    exe = os.environ.get("MOOSE_PYTHONUNITTEST_EXECUTABLE")
+    if exe is None:
+        print("ERROR: MOOSE_PYTHONUNITTEST_EXECUTABLE not set")
+        sys.exit(1)
+    args.insert(0, exe)
     #  "-options_left 0" is used to stop the debug version of PETSc from printing
     # out WARNING messages that sometime confuse the json parser
     args.insert(1, "-options_left")
     args.insert(2, "0")
-    cmd_line = ' '.join(args)
+    cmd_line = " ".join(args)
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except OSError as e:
@@ -42,30 +46,32 @@ def run_app(args=[]):
         sys.exit(proc.returncode)
     return stdout_data
 
+
 class TestJSONBase(unittest.TestCase):
     """
     Make sure the Json dump produces valid Json
     and has the expected structure
     """
+
     def getJsonData(self, search=None, extra=[]):
         if search:
-            args = ['--json-search', search]
+            args = ["--json-search", search]
         else:
-            args = ['--json']
+            args = ["--json"]
         args.extend(extra)
         output = run_app(args)
         self.assertIn("**START JSON DATA**\n", output)
         self.assertIn("**END JSON DATA**\n", output)
 
-        start_json_string = '**START JSON DATA**\n'
+        start_json_string = "**START JSON DATA**\n"
 
-        start_pos = output.find('**START JSON DATA**\n')
+        start_pos = output.find("**START JSON DATA**\n")
         self.assertGreater(start_pos, -1)
 
-        end_pos = output.find('**END JSON DATA**')
+        end_pos = output.find("**END JSON DATA**")
         self.assertGreater(end_pos, -1)
 
-        output = output[start_pos + len(start_json_string):end_pos]
+        output = output[start_pos + len(start_json_string) : end_pos]
         data = json.loads(output)
         return data
 
@@ -90,6 +96,16 @@ class TestJSONBase(unittest.TestCase):
         self.assertEqual(params["type"]["cpp_type"], "std::string")
         self.assertEqual(params["type"]["basic_type"], "String")
 
+        exe = data["Materials"]["star"]
+        params = exe["subblock_types"]["PiecewiseConstantByBlockMaterial"]["parameters"]
+        self.assertEqual(
+            params["subdomain_to_prop_value"]["cpp_type"],
+            "std::map<std::string, double>",
+        )
+        self.assertEqual(
+            params["subdomain_to_prop_value"]["basic_type"], "Map:std::string->double"
+        )
+
         # Preconditioning has a Preconditioning/*/* syntax which is unusual
         self.assertIn("Preconditioning", data)
         p = data["Preconditioning"]
@@ -100,27 +116,37 @@ class TestJSONBase(unittest.TestCase):
         f = data["Functions"]["star"]
         self.assertIn("associated_types", f)
         self.assertEqual(["FunctionName"], f["associated_types"])
-        self.assertEqual(f["subblock_types"]["ParsedFunction"]["class"], "MooseParsedFunction")
+        self.assertEqual(
+            f["subblock_types"]["ParsedFunction"]["class"], "MooseParsedFunction"
+        )
         self.assertEqual(f["subblock_types"]["ParsedFunction"]["label"], "MooseApp")
 
         a = data["Adaptivity"]
-        i = a["subblocks"]["Indicators"]["star"]["subblock_types"]["AnalyticalIndicator"]
+        i = a["subblocks"]["Indicators"]["star"]["subblock_types"][
+            "AnalyticalIndicator"
+        ]
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
 
+
 class TestFull(TestJSONBase):
     def testFullJson(self):
-         """
-         Some basic checks to see if some data
-         is there and is in the right location.
-         """
-         all_data = self.getJsonData()
-         self.assertIn("active", all_data["global"]["parameters"])
-         data = all_data["blocks"]
-         self.check_basic_json(data)
-         # Make sure the default dump has test objects
-         self.assertIn("ApplyInputParametersTest", data)
-         self.assertEqual(data["Functions"]["star"]["subblock_types"]["PostprocessorFunction"]["label"], "MooseTestApp")
+        """
+        Some basic checks to see if some data
+        is there and is in the right location.
+        """
+        all_data = self.getJsonData()
+        self.assertIn("active", all_data["global"]["parameters"])
+        data = all_data["blocks"]
+        self.check_basic_json(data)
+        # Make sure the default dump has test objects
+        self.assertIn("ApplyInputParametersTest", data)
+        self.assertEqual(
+            data["Functions"]["star"]["subblock_types"]["PostprocessorFunction"][
+                "label"
+            ],
+            "MooseTestApp",
+        )
 
 
 class TestNoTestObjects(TestJSONBase):
@@ -145,7 +171,9 @@ class TestSearch(TestJSONBase):
         self.assertNotIn("BCs", data)
         self.assertIn("Adaptivity", data)
         self.assertEqual(len(data.keys()), 1)
-        params = data["Adaptivity"]["actions"]["SetAdaptivityOptionsAction"]["parameters"]
+        params = data["Adaptivity"]["actions"]["SetAdaptivityOptionsAction"][
+            "parameters"
+        ]
         self.assertIn("initial_marker", params)
         self.assertEqual(len(params.keys()), 1)
 
@@ -163,20 +191,29 @@ class TestLineInfo(TestJSONBase):
         fname = list(fi)[0]
         # Clang seems to have the full path name for __FILE__
         # gcc seems to just use the path that is given on the command line, which won't include "framework"
-        self.assertTrue(fname.endswith(os.path.join("src", "base", "Moose.C")), 'file "{}" found instead'.format(fname))
+        self.assertTrue(
+            fname.endswith(os.path.join("src", "base", "Moose.C")),
+            'file "{}" found instead'.format(fname),
+        )
         self.assertGreater(fi[fname], 0)
 
         fi = adapt["tasks"]["set_adaptivity_options"]["file_info"]
         self.assertEqual(len(fi.keys()), 1)
         fname = list(fi)[0]
-        self.assertTrue(fname.endswith(os.path.join("src", "actions", "SetAdaptivityOptionsAction.C")))
+        self.assertTrue(
+            fname.endswith(
+                os.path.join("src", "actions", "SetAdaptivityOptionsAction.C")
+            )
+        )
         self.assertGreater(fi[fname], 0)
+
 
 class TestNoTemplate(unittest.TestCase):
     def test(self):
-        output = run_app(['--json'])
-        self.assertNotIn('<RESIDUAL>', output)
-        self.assertNotIn('<JACOBIAN>', output)
+        output = run_app(["--json"])
+        self.assertNotIn("<RESIDUAL>", output)
+        self.assertNotIn("<JACOBIAN>", output)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(__name__, verbosity=2)

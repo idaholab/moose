@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import sys
@@ -14,8 +14,9 @@ import unittest
 import mooseutils
 
 ROOT_DIR = mooseutils.git_root_dir()
-sys.path.insert(0, os.path.join(ROOT_DIR, 'scripts'))
+sys.path.insert(0, os.path.join(ROOT_DIR, "scripts"))
 from git_news import main
+
 
 class Test(unittest.TestCase):
 
@@ -24,5 +25,6 @@ class Test(unittest.TestCase):
         proc = main()
         self.assertFalse(proc.returncode)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2, buffer=True)

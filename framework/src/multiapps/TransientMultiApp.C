@@ -377,13 +377,14 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         if ((!at_steady && _detect_steady_state) || !_output_sub_cycles)
           problem.outputStep(EXEC_FORCED);
 
-      } // sub_cycling
+      } // end of sub_cycling
       else if (_tolerate_failure)
       {
         ex->takeStep(dt);
         ex->endStep(target_time - app_time_offset);
         ex->postStep();
       }
+      // matched time steps (no subcycling)
       else
       {
         // ADL: During restart, there is already an FEProblemBase::advanceState that occurs at the

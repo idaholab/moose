@@ -543,7 +543,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  // Nodal KokkosAuxKernels
+  // Kokkos NodalAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_nodal_aux_storage[type].getActiveObjects();
@@ -554,7 +554,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
-  // Nodal ElementalAuxKernels
+  // Kokkos ElementalAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_elemental_aux_storage[type].getActiveObjects();
@@ -1018,7 +1018,7 @@ AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
     _communicator.sum(norm_n);
     diff_norm_n = sqrt(diff_norm_n);
     norm_n = sqrt(norm_n);
-    rel_diff_norms[n] = diff_norm_n / norm_n;
+    rel_diff_norms[n] = diff_norm_n > 0 ? diff_norm_n / norm_n : 0.0;
   }
 }
 

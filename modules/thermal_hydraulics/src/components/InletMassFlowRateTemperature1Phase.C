@@ -18,6 +18,8 @@ InletMassFlowRateTemperature1Phase::validParams()
   InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
   params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
+  params.addParam<std::vector<FunctionName>>(
+      "passives", {}, "Prescribed passive transport functions [amount/m^3]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
   params.declareControllable("m_dot T");
   params.addClassDescription("Boundary condition with prescribed mass flow rate and temperature "
@@ -27,7 +29,7 @@ InletMassFlowRateTemperature1Phase::validParams()
 
 InletMassFlowRateTemperature1Phase::InletMassFlowRateTemperature1Phase(
     const InputParameters & params)
-  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
+  : FlowBoundary1Phase(params)
 {
 }
 
@@ -37,7 +39,14 @@ InletMassFlowRateTemperature1Phase::check() const
   FlowBoundary1Phase::check();
 
   auto fm = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
-  if (fm == nullptr)
+  if (fm)
+  {
+    const auto n_passives = getParam<std::vector<FunctionName>>("passives").size();
+    if (n_passives != fm->passiveTransportSolutionVariableNames().size())
+      logError("The number of entries in 'passives' must match the number of passive transport "
+               "variables provided in the connected flow channel.");
+  }
+  else
     logError("Incompatible flow model. Make sure you use this component with single phase flow "
              "channel.");
 }
@@ -52,10 +61,9 @@ InletMassFlowRateTemperature1Phase::addMooseObjects()
   {
     const std::string class_name = "ADBoundaryFlux3EqnGhostMassFlowRateTemperature";
     InputParameters params = _factory.getValidParams(class_name);
+    params.applyParameters(parameters());
     params.set<Real>("mass_flow_rate") = getParam<Real>("m_dot");
-    params.set<Real>("T") = getParam<Real>("T");
     params.set<Real>("normal") = _normal;
-    params.set<bool>("reversible") = _reversible;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;

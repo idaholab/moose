@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.utils import ExeLauncher
 import json
 import mooseutils
 from PyQt5.QtWidgets import QApplication
+
 
 class JsonData(object):
     """
@@ -65,18 +66,21 @@ class JsonData(object):
         """
         #  "-options_left 0" is used to stop the debug version of PETSc from printing
         # out WARNING messages that sometime confuse the json parser
-        data = ExeLauncher.runExe(app_path, ["-options_left", "0", "--json"] + self.extra_args)
-        data = data.split('**START JSON DATA**\n')[1]
-        data = data.split('**END JSON DATA**')[0]
+        data = ExeLauncher.runExe(
+            app_path, ["-options_left", "0", "--json"] + self.extra_args
+        )
+        data = data.split("**START JSON DATA**\n")[1]
+        data = data.split("**END JSON DATA**")[0]
         return data
 
     def toPickle(self):
         """
         Return a dict that can be pickled
         """
-        return {"app_path": self.app_path,
-                "json_data": self.json_data,
-                }
+        return {
+            "app_path": self.app_path,
+            "json_data": self.json_data,
+        }
 
     def fromPickle(self, data):
         """
@@ -87,8 +91,10 @@ class JsonData(object):
         self.app_path = data["app_path"]
         self.json_data = data["json_data"]
 
+
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) != 2:
         print("Usage: %s <exe path>" % sys.argv[0])
         sys.exit(1)

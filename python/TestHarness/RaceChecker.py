@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys, itertools
 from .StatusSystem import StatusSystem  # for proper error code
+
 
 class RaceChecker(object):
     """
@@ -17,12 +18,12 @@ class RaceChecker(object):
     """
 
     def __init__(self, all_jobs):
-        """ Create a RaceChecker object that has all the jobs"""
+        """Create a RaceChecker object that has all the jobs"""
         self.all_jobs = all_jobs
         self.racer_lists = []
 
     def findRacePartners(self):
-        """ Collect all the jobs that have race conditions """
+        """Collect all the jobs that have race conditions"""
         raceConditionsExist = False
         for job_group in self.all_jobs:
             _jobs = set([])
@@ -31,9 +32,13 @@ class RaceChecker(object):
                 if job_a.isSkip() or job_b.isSkip():
                     continue
 
-                _matching = list(set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles)))
-                if _matching and not ((job_a in job_b.getDownstreams()) \
-                                      or (job_b in job_a.getDownstreams())):
+                _matching = list(
+                    set(job_a.modifiedFiles).intersection(set(job_b.modifiedFiles))
+                )
+                if _matching and not (
+                    (job_a in job_b.getDownstreams())
+                    or (job_b in job_a.getDownstreams())
+                ):
                     _jobs.update([job_a, job_b])
                     _files.update(_matching)
                     raceConditionsExist = True
@@ -42,7 +47,7 @@ class RaceChecker(object):
         return raceConditionsExist
 
     def printRaceConditionsByPrereq(self):
-        """ Print jobs with race conditions that share a prereq """
+        """Print jobs with race conditions that share a prereq"""
 
         collisions = dict()
         for job in self.all_jobs:
@@ -64,21 +69,26 @@ class RaceChecker(object):
         return
 
     def printUniqueRacerSets(self):
-        """ Print the jobs that share race conditions within unique sets """
+        """Print the jobs that share race conditions within unique sets"""
         status = StatusSystem()
         exit_code = 0x0
         if self.racer_lists:
             output = "\nDiagnostic analysis shows that the members of the following unique sets exhibit race conditions:"
             for i, racers in enumerate(self.racer_lists):
                 job_list, file_matches = racers
-                output += "\n Set %d\n" % (i+1)
-                output += "- "*5 + "\n  --%s" % ('\n  --'.join([x.getTestName() for x in job_list]))
+                output += "\n Set %d\n" % (i + 1)
+                output += "- " * 5 + "\n  --%s" % (
+                    "\n  --".join([x.getTestName() for x in job_list])
+                )
                 output += "\n\n   Each of the tests in this set create or modify each of the following files:"
-                output += "\n    -->%s" % ('\n    -->'.join(file_matches))
-                output += "\n" + "- "*5
+                output += "\n    -->%s" % ("\n    -->".join(file_matches))
+                output += "\n" + "- " * 5
             exit_code = status.race.code
         if output:
-            output += "\n\n\nA total of %d sets of tests with unique race conditions." % (i+1)
+            output += (
+                "\n\n\nA total of %d sets of tests with unique race conditions."
+                % (i + 1)
+            )
             output += "\nPlease review the tests and either add any necessary prereqs, or create unique filenames for the outputs of each test."
             print(output)
         return exit_code

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import copy
 import pyhit
@@ -19,17 +19,19 @@ from .check_requirements import check_requirements, RequirementLogHelper
 from .SQAReport import SQAReport
 from .LogHelper import LogHelper
 
+
 class SQARequirementReport(SQAReport):
     """
     Data wrapper for SQA requirement/design/issue information.
     """
+
     def __init__(self, **kwargs):
-        self.working_dirs = kwargs.pop('working_dirs', None)
-        self.directories = kwargs.pop('directories', None)
-        self.specs = kwargs.pop('specs', None)
-        self.test_names = kwargs.pop('test_names', None)
-        self.global_report = kwargs.pop('global_report', False)
-        self.include_non_testable = kwargs.pop('include_non_testable', False)
+        self.working_dirs = kwargs.pop("working_dirs", None)
+        self.directories = kwargs.pop("directories", None)
+        self.specs = kwargs.pop("specs", None)
+        self.test_names = kwargs.pop("test_names", None)
+        self.global_report = kwargs.pop("global_report", False)
+        self.include_non_testable = kwargs.pop("include_non_testable", False)
         SQAReport.__init__(self, **kwargs)
 
     def execute(self, **kwargs):
@@ -38,26 +40,34 @@ class SQARequirementReport(SQAReport):
         """
 
         # Extract configuration parameters
-        specs = self.specs or 'tests'
+        specs = self.specs or "tests"
 
         # Get complete directory paths
         root_dir = mooseutils.git_root_dir()
-        directories = [mooseutils.eval_path(d) for d in (self.directories or [root_dir])]
+        directories = [
+            mooseutils.eval_path(d) for d in (self.directories or [root_dir])
+        ]
         for i, d in enumerate(directories):
             if not os.path.isdir(d):
                 directories[i] = os.path.join(root_dir, d)
             if not os.path.isdir(directories[i]):
-                raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
+                raise NotADirectoryError(
+                    "Supplied directory does not exist: {}".format(d)
+                )
 
         # Build Requirement objects and remove directory based dict
         requirements = []
         if not isinstance(specs, str):
             for s in specs:
-                req_dict = get_requirements_from_tests(directories, s.split(), self.include_non_testable)
+                req_dict = get_requirements_from_tests(
+                    directories, s.split(), self.include_non_testable
+                )
                 for values in req_dict.values():
                     requirements += values
         else:
-            req_dict = get_requirements_from_tests(directories, specs, self.include_non_testable)
+            req_dict = get_requirements_from_tests(
+                directories, specs, self.include_non_testable
+            )
             for values in req_dict.values():
                 requirements += values
 
@@ -67,19 +77,24 @@ class SQARequirementReport(SQAReport):
             self.test_names.add((req.filename, req.name, req.line))
 
         # Get list of files to search
-        if self.working_dirs is None: self.working_dirs = [mooseutils.git_root_dir()]
+        if self.working_dirs is None:
+            self.working_dirs = [mooseutils.git_root_dir()]
         file_list = SQAReport._getFiles(self.working_dirs)
 
         # Check the requirements
-        logger = check_requirements(requirements, color_text=self.color_text, file_list=file_list, **kwargs)
+        logger = check_requirements(
+            requirements, color_text=self.color_text, file_list=file_list, **kwargs
+        )
         return logger
+
 
 class SQARequirementDiffReport(SQAReport):
     """
     Report for SQA missing requirement/design/issue information.
     """
+
     def __init__(self, **kwargs):
-        self.reports = kwargs.pop('reports', None)
+        self.reports = kwargs.pop("reports", None)
         SQAReport.__init__(self, **kwargs)
 
     def execute(self, **kwargs):
@@ -89,7 +104,7 @@ class SQARequirementDiffReport(SQAReport):
         global_report.getReport()
 
         # Create the LogHelper for the diff report
-        kwargs.setdefault('log_missing_test', logging.ERROR)
+        kwargs.setdefault("log_missing_test", logging.ERROR)
         logger = LogHelper(__name__, **kwargs)
 
         # Tests form local reports
@@ -103,7 +118,9 @@ class SQARequirementDiffReport(SQAReport):
         missing_tests = global_report.test_names.difference(local_names)
         for filename, name, line in missing_tests:
             msg = RequirementLogHelper._colorTestInfo(None, filename, name, line)
-            logger.log('log_missing_test', msg.strip('\n'))
+            logger.log("log_missing_test", msg.strip("\n"))
 
-        self.number_of_newlines_after_log = 1 # print all the missing tests without extra space
+        self.number_of_newlines_after_log = (
+            1  # print all the missing tests without extra space
+        )
         return logger

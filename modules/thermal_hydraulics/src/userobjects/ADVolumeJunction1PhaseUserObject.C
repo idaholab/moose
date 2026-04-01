@@ -293,3 +293,27 @@ ADVolumeJunction1PhaseUserObject::finalize()
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
     comm().sum(_residual[i]);
 }
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunction1PhaseUserObject::getFlowChannelVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(THMVACE1D::N_FLUX_OUTPUTS);
+  vars[THMVACE1D::RHOA] = getVar("rhoA", 0);
+  vars[THMVACE1D::RHOUA] = getVar("rhouA", 0);
+  vars[THMVACE1D::RHOEA] = getVar("rhoEA", 0);
+
+  return vars;
+}
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunction1PhaseUserObject::getJunctionVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(VolumeJunction1Phase::N_EQ);
+  vars[VolumeJunction1Phase::RHOV_INDEX] = getJunctionVar("rhoV");
+  vars[VolumeJunction1Phase::RHOUV_INDEX] = getJunctionVar("rhouV");
+  vars[VolumeJunction1Phase::RHOVV_INDEX] = getJunctionVar("rhovV");
+  vars[VolumeJunction1Phase::RHOWV_INDEX] = getJunctionVar("rhowV");
+  vars[VolumeJunction1Phase::RHOEV_INDEX] = getJunctionVar("rhoEV");
+
+  return vars;
+}

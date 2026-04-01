@@ -296,12 +296,42 @@ HeliumFluidProperties::mu_from_v_e(Real v, Real e) const
   return 3.674e-7 * std::pow(T_from_v_e(v, e), 0.7);
 }
 
+void
+HeliumFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  mu = mu_from_v_e(v, e);
+  const Real dmu_dT = 0.7 * 3.674e-7 * std::pow(T_from_v_e(v, e), -0.3);
+  dmu_dv = 0.0;          // dmu_dp = 0, dT_dv is zero
+  dmu_de = dmu_dT / _cv; // dmu_dp = 0
+}
+
 Real
 HeliumFluidProperties::k_from_v_e(Real v, Real e) const
 {
   Real p_in_bar = p_from_v_e(v, e) * 1.0e-5;
   Real T = T_from_v_e(v, e);
   return 2.682e-3 * (1.0 + 1.123e-3 * p_in_bar) * std::pow(T, 0.71 * (1.0 - 2.0e-4 * p_in_bar));
+}
+
+void
+HeliumFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
+{
+  Real T = 0., p = 0., dT_dv = 0., dT_de = 0., dp_dv = 0., dp_de = 0.;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+
+  // b and d scaled by 1e-5 to account for conversion to bar
+  constexpr Real a = 2.682e-3;
+  constexpr Real b = 1.123e-8;
+  constexpr Real c = 0.71;
+  constexpr Real d = 2.0e-9;
+
+  k = a * (1.0 + b * p) * std::pow(T, c * (1.0 - d * p));
+  Real dk_dT = a * c * (1.0 + b * p) * (1.0 - d * p) * std::pow(T, c * (1.0 - d * p) - 1.0);
+  Real dk_dp = a * std::pow(T, c * (1.0 - d * p)) * (b - c * d * (1 + b * p) * std::log(T));
+
+  dk_dv = dk_dp * dp_dv; // dT_dv is zero
+  dk_de = dk_dT * dT_de + dk_dp * dp_de;
 }
 
 Real
@@ -361,6 +391,20 @@ HeliumFluidProperties::e_from_p_T(
   e = e_from_p_T(pressure, temperature);
   de_dp = 0.0;
   de_dT = _cv;
+}
+
+Real
+HeliumFluidProperties::e_from_v_h(Real /*v*/, Real h) const
+{
+  return _cv * (h / _cp);
+}
+
+void
+HeliumFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
+{
+  e = e_from_v_h(v, h);
+  de_dv = 0.;
+  de_dh = _cv / _cp;
 }
 
 Real
