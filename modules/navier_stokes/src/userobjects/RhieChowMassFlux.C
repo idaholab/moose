@@ -597,35 +597,37 @@ RhieChowMassFlux::populateCouplingFunctors(
       const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      // if (_vel[0]->isDirichletBoundaryFace(*fi))
-      // {
-      //   const Moose::FaceArg boundary_face{
-      //       fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(),
-      //       nullptr};
-      //   const Real face_rho = _rho(boundary_face, Moose::currentState());
-
-      //   for (const auto dim_i : make_range(_dim))
-      //   {
-      //     Real face_hbya =
-      //         -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
-
-      //     if (!_body_force_kernel_names.empty())
-      //       for (const auto & force_kernel : _body_force_kernels[dim_i])
-      //       {
-      //         force_kernel->setCurrentElemInfo(&elem_info);
-      //         face_hbya -=
-      //             force_kernel->computeRightHandSideContribution() * ainv_reader[dim_i](elem_dof)
-      //             / (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
-      //       }
-      //     face_rho_hbya(dim_i) = face_rho * face_hbya * boundary_normal_multiplier;
-      //   }
-      // }
-      // else
-      // {
       const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
-      for (const auto dim_i : make_range(_dim))
-        face_rho_hbya(dim_i) = boundary_normal_multiplier * elem_rho * hbya_reader[dim_i](elem_dof);
-      // }
+      if (_vel[0]->isDirichletBoundaryFace(*fi))
+      {
+
+        const Moose::FaceArg boundary_face{
+            fi, Moose::FV::LimiterType::CentralDifference, true, false, elem_info.elem(), nullptr};
+        const Real face_rho = _rho(boundary_face, Moose::currentState());
+
+        for (const auto dim_i : make_range(_dim))
+        {
+          Real face_hbya =
+              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+
+          if (!_body_force_kernel_names.empty())
+            for (const auto & force_kernel : _body_force_kernels[dim_i])
+            {
+              force_kernel->setCurrentElemInfo(&elem_info);
+              face_hbya -= force_kernel->computeRightHandSideContribution() *
+                           ainv_reader[dim_i](elem_dof) /
+                           (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
+            }
+          face_rho_hbya(dim_i) = face_rho * face_hbya * boundary_normal_multiplier;
+        }
+      }
+      else
+      {
+        const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
+        for (const auto dim_i : make_range(_dim))
+          face_rho_hbya(dim_i) =
+              boundary_normal_multiplier * elem_rho * hbya_reader[dim_i](elem_dof);
+      }
 
       // We just do a one-term expansion for 1/A no matter what
       // const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
