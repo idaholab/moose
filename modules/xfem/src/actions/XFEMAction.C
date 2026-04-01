@@ -66,6 +66,7 @@ XFEMAction::validParams()
   params.addParam<bool>("use_crack_growth_increment", false, "Use fixed crack growth increment");
   params.addParam<Real>("crack_growth_increment", 0.1, "Crack growth increment");
   params.addParam<bool>("use_crack_tip_enrichment", false, "Use crack tip enrichment functions");
+  params.addParam<bool>("use_AD", false, "Use AD");
   params.addParam<UserObjectName>("crack_front_definition",
                                   "The CrackFrontDefinition user object name (only "
                                   "needed if 'use_crack_tip_enrichment=true')");
@@ -94,7 +95,8 @@ XFEMAction::XFEMAction(const InputParameters & params)
     _xfem_cut_plane(false),
     _xfem_use_crack_growth_increment(getParam<bool>("use_crack_growth_increment")),
     _xfem_crack_growth_increment(getParam<Real>("crack_growth_increment")),
-    _use_crack_tip_enrichment(getParam<bool>("use_crack_tip_enrichment"))
+    _use_crack_tip_enrichment(getParam<bool>("use_crack_tip_enrichment")),
+    _use_AD(getParam<bool>("use_AD"))
 {
   _order = "CONSTANT";
   _family = "MONOMIAL";
@@ -176,15 +178,32 @@ XFEMAction::act()
   {
     for (unsigned int i = 0; i < _enrich_displacements.size(); ++i)
     {
-      InputParameters params = _factory.getValidParams("CrackTipEnrichmentStressDivergenceTensors");
-      params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
-      params.set<unsigned int>("component") = i / 4;
-      params.set<unsigned int>("enrichment_component") = i % 4;
-      params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
-      params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
-      params.set<std::vector<VariableName>>("displacements") = _displacements;
-      _problem->addKernel(
-          "CrackTipEnrichmentStressDivergenceTensors", _enrich_displacements[i], params);
+      if (!_use_AD)
+      {
+        InputParameters params =
+            _factory.getValidParams("CrackTipEnrichmentStressDivergenceTensors");
+        params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
+        params.set<unsigned int>("component") = i / 4;
+        params.set<unsigned int>("enrichment_component") = i % 4;
+        params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
+        params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
+        params.set<std::vector<VariableName>>("displacements") = _displacements;
+        _problem->addKernel(
+            "CrackTipEnrichmentStressDivergenceTensors", _enrich_displacements[i], params);
+      }
+      else
+      {
+        InputParameters params =
+            _factory.getValidParams("ADCrackTipEnrichmentStressDivergenceTensors");
+        params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
+        params.set<unsigned int>("component") = i / 4;
+        params.set<unsigned int>("enrichment_component") = i % 4;
+        params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
+        params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
+        params.set<std::vector<VariableName>>("displacements") = _displacements;
+        _problem->addKernel(
+            "ADCrackTipEnrichmentStressDivergenceTensors", _enrich_displacements[i], params);
+      }
     }
   }
   else if (_current_task == "add_bc" && _use_crack_tip_enrichment)
