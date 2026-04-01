@@ -166,12 +166,6 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 void
 TimeDependentEquationSystem::BuildNonlinearForms()
 {
-  if (_solver_requires_gradient)
-  {
-    ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
-    ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
-  }
-
   // Register non-linear Action forms
   for (const auto i : index_range(_test_var_names))
   {
@@ -180,9 +174,8 @@ TimeDependentEquationSystem::BuildNonlinearForms()
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt, !_solver_requires_gradient);
-    ApplyBoundaryNLFIntegrators(
-        test_var_name, nlf, _integrated_bc_map, _dt, !_solver_requires_gradient);
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, _dt);
+    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, _dt);
   }
 }
 

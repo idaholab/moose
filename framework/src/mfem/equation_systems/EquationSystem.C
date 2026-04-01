@@ -512,12 +512,6 @@ EquationSystem::BuildLinearForms()
 void
 EquationSystem::BuildNonlinearForms()
 {
-  if (_solver_requires_gradient)
-  {
-    ValidateNoOffDiagonalDomainNLFIntegrators(_kernels_map);
-    ValidateNoOffDiagonalBoundaryNLFIntegrators(_integrated_bc_map);
-  }
-
   // Register non-linear Action forms
   for (const auto i : index_range(_test_var_names))
   {
@@ -526,56 +520,9 @@ EquationSystem::BuildNonlinearForms()
     // Apply kernels
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->SetEssentialTrueDofs(_ess_tdof_lists.at(i));
-    ApplyDomainNLFIntegrators(
-        test_var_name, nlf, _kernels_map, std::nullopt, !_solver_requires_gradient);
-    ApplyBoundaryNLFIntegrators(
-        test_var_name, nlf, _integrated_bc_map, std::nullopt, !_solver_requires_gradient);
+    ApplyDomainNLFIntegrators(test_var_name, nlf, _kernels_map, std::nullopt);
+    ApplyBoundaryNLFIntegrators(test_var_name, nlf, _integrated_bc_map, std::nullopt);
   }
-}
-
-void
-EquationSystem::ValidateNoOffDiagonalDomainNLFIntegrators(
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map) const
-{
-  for (const auto & [test_var_name, test_var_kernels] : kernels_map)
-    for (const auto & [trial_var_name, kernels] : *test_var_kernels)
-      if (trial_var_name != test_var_name)
-        for (const auto & kernel : *kernels)
-        {
-          std::unique_ptr<mfem::NonlinearFormIntegrator> integ(kernel->createNLIntegrator());
-          if (integ)
-            mooseError("Off-diagonal MFEM nonlinear domain integrators are not currently "
-                       "implemented. Kernel '",
-                       kernel->name(),
-                       "' contributes to test variable '",
-                       test_var_name,
-                       "' from trial variable '",
-                       trial_var_name,
-                       "'.");
-        }
-}
-
-void
-EquationSystem::ValidateNoOffDiagonalBoundaryNLFIntegrators(
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map) const
-{
-  for (const auto & [test_var_name, test_var_bcs] : integrated_bc_map)
-    for (const auto & [trial_var_name, bcs] : *test_var_bcs)
-      if (trial_var_name != test_var_name)
-        for (const auto & bc : *bcs)
-        {
-          std::unique_ptr<mfem::NonlinearFormIntegrator> integ(bc->createNLIntegrator());
-          if (integ)
-            mooseError("Off-diagonal MFEM nonlinear boundary integrators are not currently "
-                       "implemented. Boundary condition '",
-                       bc->name(),
-                       "' contributes to test variable '",
-                       test_var_name,
-                       "' from trial variable '",
-                       trial_var_name,
-                       "'.");
-        }
 }
 
 void
@@ -645,6 +592,120 @@ EquationSystem::BuildEquationSystem()
   BuildMixedBilinearForms();
   BuildLinearForms();
   BuildNonlinearForms();
+}
+
+inline void
+EquationSystem::ApplyDomainLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+{
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
+
+      if (integ)
+      {
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+inline void
+EquationSystem::ApplyDomainNLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParNonlinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    std::optional<mfem::real_t> scale_factor)
+{
+  if (kernels_map.Has(test_var_name))
+    for (const auto & [trial_var_name, kernels] : kernels_map.GetRef(test_var_name))
+      for (auto & kernel : *kernels)
+        if (auto * integ = kernel->createNLIntegrator())
+        {
+          if (_solver_requires_gradient && (trial_var_name != test_var_name))
+            mooseError("Support for off-diagonal MFEM nonlinear domain integrators in conjunction "
+                       "with a nonlinear solver that requires a gradient is not currently "
+                       "implemented. Kernel '",
+                       kernel->name(),
+                       "' contributes to test variable '",
+                       test_var_name,
+                       "' from trial variable '",
+                       trial_var_name,
+                       "'.");
+
+          _non_linear = true;
+          if (scale_factor.has_value())
+            integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+          kernel->isSubdomainRestricted()
+              ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+              : form->AddDomainIntegrator(std::move(integ));
+        }
+}
+
+void
+EquationSystem::ApplyBoundaryLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map)
+{
+  if (integrated_bc_map.Has(test_var_name) &&
+      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
+
+      if (integ)
+      {
+        bc->isBoundaryRestricted()
+            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+            : form->AddBoundaryIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+void
+EquationSystem::ApplyBoundaryNLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParNonlinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map,
+    std::optional<mfem::real_t> scale_factor)
+{
+  if (integrated_bc_map.Has(test_var_name))
+    for (const auto & [trial_var_name, bcs] : integrated_bc_map.GetRef(test_var_name))
+      for (auto & bc : *bcs)
+        if (auto * integ = bc->createNLIntegrator())
+        {
+          if (_solver_requires_gradient && (test_var_name != trial_var_name))
+            mooseError(
+                "Support for Off-diagonal MFEM nonlinear boundary integrators in conjunction with "
+                "a nonlinear solver that requires a gradient is not currently "
+                "implemented. Boundary condition '",
+                bc->name(),
+                "' contributes to test variable '",
+                test_var_name,
+                "' from trial variable '",
+                trial_var_name,
+                "'.");
+
+          _non_linear = true;
+          if (scale_factor.has_value())
+            integ = new NLScaleIntegrator(integ, scale_factor.value(), true);
+          bc->isBoundaryRestricted()
+              ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+              : form->AddBoundaryIntegrator(std::move(integ));
+        }
 }
 
 } // namespace Moose::MFEM
