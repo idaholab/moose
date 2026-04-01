@@ -272,7 +272,7 @@ FEProblemBase::initKokkos()
 
   // Kokkos system does not have a default constructor, so this simply allocates buffer to which we
   // should do placement new later
-  _kokkos_systems.create(max_system_number + 1);
+  _kokkos_systems.create<false>(max_system_number + 1);
 
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)
   {

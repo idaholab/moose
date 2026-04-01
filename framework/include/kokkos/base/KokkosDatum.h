@@ -40,13 +40,10 @@ public:
       _mesh(assembly.kokkosMesh()),
       _elem(_mesh.getElementInfo(elem)),
       _side(side),
-      _neighbor(_side == libMesh::invalid_uint ? libMesh::DofObject::invalid_id
-                                               : _mesh.getNeighbor(_elem.id, side)),
-      _n_qps(side == libMesh::invalid_uint ? assembly.getNumQps(_elem)
-                                           : assembly.getNumFaceQps(_elem, side)),
-      _qp_offset(side == libMesh::invalid_uint ? assembly.getQpOffset(_elem)
-                                               : assembly.getQpFaceOffset(_elem, side)),
-      _elem_property_idx(_side == libMesh::invalid_uint
+      _neighbor(!isSide() ? libMesh::DofObject::invalid_id : _mesh.getNeighbor(_elem.id, side)),
+      _n_qps(!isSide() ? assembly.getNumQps(_elem) : assembly.getNumFaceQps(_elem, side)),
+      _qp_offset(!isSide() ? assembly.getQpOffset(_elem) : assembly.getQpFaceOffset(_elem, side)),
+      _elem_property_idx(!isSide()
                              ? _elem.id - _mesh.getStartingContiguousElementID(_elem.subdomain)
                              : assembly.getElemFacePropertyIndex(_elem, _side))
   {
@@ -138,6 +135,11 @@ public:
    */
   KOKKOS_FUNCTION bool hasNeighbor() const { return _neighbor != libMesh::DofObject::invalid_id; }
   /**
+   * Get whether the current datum is on a side
+   * @returns Whether the current datum is on a side
+   */
+  KOKKOS_FUNCTION bool isSide() const { return _side != libMesh::invalid_uint; }
+  /**
    * Get whether the current datum is on a node
    * @returns Whether the current datum is on a node
    */
@@ -170,6 +172,12 @@ public:
    * @returns The physical quadrature point coordinate
    */
   KOKKOS_FUNCTION Real3 q_point(const unsigned int qp);
+  /**
+   * Get the normal vector on surface
+   * @param qp The local quadrature point index
+   * @returns The normal vector
+   */
+  KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
 
   /**
    * Reset the reinit flag
@@ -236,6 +244,7 @@ private:
   Real33 _J;
   Real _JxW;
   Real3 _xyz;
+  Real3 _normal;
   ///@}
 };
 
@@ -294,20 +303,31 @@ Datum::q_point(const unsigned int qp)
   return _xyz;
 }
 
+KOKKOS_FUNCTION inline Real3
+Datum::normals(const unsigned int qp)
+{
+  KOKKOS_ASSERT(isSide());
+
+  if (isSide())
+    reinitTransform(qp);
+
+  return _normal;
+}
+
 KOKKOS_FUNCTION inline void
 Datum::reinitTransform(const unsigned int qp)
 {
   if (_transform_reinit)
     return;
 
-  if (_side == libMesh::invalid_uint)
+  if (!isSide())
   {
     _J = _assembly.getJacobian(_elem, qp);
     _JxW = _assembly.getJxW(_elem, qp);
     _xyz = _assembly.getQPoint(_elem, qp);
   }
   else
-    _assembly.computePhysicalMap(_elem, _side, qp, &_J, &_JxW, &_xyz);
+    _assembly.computePhysicalMap(_elem, _side, qp, &_J, &_JxW, &_xyz, &_normal);
 
   _transform_reinit = true;
 }

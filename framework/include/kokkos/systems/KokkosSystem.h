@@ -402,7 +402,7 @@ private:
   /**
    * Kokkos thread object
    */
-  Thread _thread;
+  Thread<> _thread;
   /**
    * Reference of the MOOSE system
    */

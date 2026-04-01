@@ -28,7 +28,7 @@ public:
   };
 
   KOKKOS_FUNCTION void
-  operator()(TestLoop, const ThreadID tid, const KokkosDispatcherTestObject &) const
+  operator()(TestLoop, const Moose::Kokkos::ThreadID tid, const KokkosDispatcherTestObject &) const
   {
     _array[tid] = tid;
   }
@@ -46,8 +46,10 @@ public:
   {
   };
 
-  KOKKOS_FUNCTION void
-  operator()(TestLoop, const ThreadID tid, const KokkosReducerTestObject &, Real * result) const
+  KOKKOS_FUNCTION void operator()(TestLoop,
+                                  const Moose::Kokkos::ThreadID tid,
+                                  const KokkosReducerTestObject &,
+                                  Real * result) const
   {
     for (unsigned int i = 0; i < _n; ++i)
       result[i] += (i + 1) * tid;

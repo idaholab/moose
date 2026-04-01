@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FVReaction.md INSFVScalarFieldVariable.md'
+  issues = '#32556'
+  [test]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall be able to use a reaction kernel with a scalar field variable designed for use in the Navier-Stokes equations.'
+  []
+[]
