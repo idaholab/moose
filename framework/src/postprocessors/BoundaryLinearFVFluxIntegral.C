@@ -112,7 +112,7 @@ BoundaryLinearFVFluxIntegral::initialSetup()
                  _variable_name,
                  "' has multiple LinearFVBoundaryCondition objects on boundary '",
                  _mesh.getBoundaryName(boundary_id),
-                 "'.");
+                 "', which is not currently supported.");
 
     _boundary_bcs.emplace(boundary_id, bcs[0]);
   }

@@ -5,7 +5,7 @@ Computes the boundary integral of boundary flux contributions from one or more
 Let $F_k(u)$ denote the boundary flux computed by kernel $k$. This postprocessor computes
 
 \begin{equation}
-\int_S \sum_i^{N} F_k(u)\, dS,
+\int_S \sum_k^{N} F_k(u)\, dS,
 \end{equation}
 
 where $N$ is the number of kernels listed in [!param](/Postprocessors/BoundaryLinearFVFluxIntegral/linearfvkernels)
@@ -18,7 +18,7 @@ variable must have a [LinearFVBoundaryCondition](syntax/LinearFVBCs/index.md) on
 This is a requirement at the moment because we would like to avoid summing fluxes from different variables/equations.
 
 !alert note
-Furthermore, we don't support flux evaluation for internal sidesets at the moment. This kernel is
+Furthermore, we don't support flux evaluation for internal sidesets (internal to the domain of definition of the linearFV kernels) at the moment. This kernel is
 supposed to serve as a boundary flux evaluator.
 
 ## Example Input Syntax
