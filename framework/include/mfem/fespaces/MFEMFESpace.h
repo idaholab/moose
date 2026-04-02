@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 
 /**
  * Constructs and stores an mfem::ParFiniteElementSpace object. Access using the
  * getFESpace() accessor.
  */
-class MFEMFESpace : public MFEMGeneralUserObject
+class MFEMFESpace : public MFEMObject
 {
 public:
   static InputParameters validParams();

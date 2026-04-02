@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"

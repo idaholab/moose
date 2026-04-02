@@ -18,7 +18,7 @@ registerMooseObject("MooseApp", MFEMVariable);
 InputParameters
 MFEMVariable::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
@@ -27,6 +27,7 @@ MFEMVariable::validParams()
   params.addClassDescription(
       "Class for adding MFEM variables to the problem (`mfem::ParGridFunction`s).");
   params.registerBase("MooseVariableBase");
+  params.registerSystemAttributeName("MooseVariableBase");
   params.addParam<VariableName>(
       "time_derivative",
       "Optional name to assign to the time derivative of the variable in transient problems.");
@@ -34,7 +35,7 @@ MFEMVariable::validParams()
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMObject(parameters),
     _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
                                                          getParam<UserObjectName>("fespace"))),
     _gridfunction(buildGridFunction()),

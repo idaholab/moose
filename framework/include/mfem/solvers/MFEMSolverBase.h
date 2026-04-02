@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 #include "MFEMHyprePatch.h"
 
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */
-class MFEMSolverBase : public MFEMGeneralUserObject
+class MFEMSolverBase : public MFEMObject
 {
 public:
   static InputParameters validParams();

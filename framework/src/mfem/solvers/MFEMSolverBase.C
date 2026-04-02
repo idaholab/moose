@@ -14,16 +14,17 @@
 InputParameters
 MFEMSolverBase::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params.addClassDescription("Base class for defining mfem::Solver derived classes for Moose.");
   params.registerBase("MFEMSolverBase");
+  params.registerSystemAttributeName("MFEMSolverBase");
   params.addParam<bool>("low_order_refined", false, "Set usage of Low-Order Refined solver.");
 
   return params;
 }
 
 MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMObject(parameters),
     _lor{getParam<bool>("low_order_refined")},
     _solver{nullptr},
     _preconditioner{nullptr}

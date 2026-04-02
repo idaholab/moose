@@ -10,14 +10,14 @@
 #ifdef MOOSE_MFEM_ENABLED
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 #include "MFEMIndicator.h"
 
 /**
  * Class to construct threshold refiner.
  * The underlying mfem::ThresholdRefiner needs to be initialised with a reference to the estimator.
  */
-class MFEMRefinementMarker : public MFEMGeneralUserObject
+class MFEMRefinementMarker : public MFEMObject
 {
 public:
   static InputParameters validParams();
