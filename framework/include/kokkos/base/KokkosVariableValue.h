@@ -109,34 +109,43 @@ public:
                 : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
   }
 };
+
+using ADVariablePhiValue = VariablePhiValue;
+using ADVariablePhiGradient = VariablePhiGradient;
+using ADVariableTestValue = VariableTestValue;
+using ADVariableTestGradient = VariableTestGradient;
+
 ///@}
 
 /**
  * The Kokkos wrapper classes for MOOSE-like variable value access
  */
 ///@{
-class VariableValue
+template <bool is_ad>
+class VariableValueTempl
 {
+  using data_type = std::conditional_t<is_ad, ADReal, Real>;
+
 public:
   /**
    * Default constructor
    */
-  VariableValue() = default;
+  VariableValueTempl() = default;
   /**
    * Constructor
    * @param var The Kokkos variable
    * @param dof Whether to get DOF values
    */
-  VariableValue(Variable var, bool dof = false) : _var(var), _dof(dof) {}
+  VariableValueTempl(Variable var, bool dof = false) : _var(var), _dof(dof) {}
   /**
    * Constructor
    * @param var The MOOSE variable
    * @param tag The vector tag name
    * @param dof Whether to get DOF values
    */
-  VariableValue(const MooseVariableBase & var,
-                const TagName & tag = Moose::SOLUTION_TAG,
-                bool dof = false)
+  VariableValueTempl(const MooseVariableBase & var,
+                     const TagName & tag = Moose::SOLUTION_TAG,
+                     bool dof = false)
     : _var(var, tag), _dof(dof)
   {
   }
@@ -152,9 +161,26 @@ public:
    * @param datum The Datum object of the current thread
    * @param qp The local quadrature point index
    * @param comp The variable component
+   * @param do_derivatives Whether to compute derivatives (only meaningful for AD)
    * @returns The variable value
    */
-  KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
+  KOKKOS_FUNCTION auto operator()(Datum & datum,
+                                  unsigned int qp,
+                                  unsigned int comp = 0,
+                                  bool do_derivatives = false) const;
+
+  /**
+   * Get the current variable value
+   * @param datum The AssemblyDatum object of the current thread
+   * @param qp The local quadrature point index
+   * @param comp The variable component
+   * @returns The variable value
+   */
+  KOKKOS_FUNCTION auto
+  operator()(AssemblyDatum & datum, unsigned int qp, unsigned int comp = 0) const
+  {
+    return operator()(datum, qp, comp, _var.coupled() ? _var.sys(comp) == datum.sys() : false);
+  }
 
   /**
    * Get the Kokkos variable
@@ -173,61 +199,16 @@ private:
   bool _dof = false;
 };
 
-class VariableGradient
-{
-public:
-  /**
-   * Default constructor
-   */
-  VariableGradient() = default;
-  /**
-   * Constructor
-   * @param var The Kokkos variable
-   */
-  VariableGradient(Variable var) : _var(var) {}
-  /**
-   * Constructor
-   * @param var The MOOSE variable
-   * @param tag The vector tag name
-   */
-  VariableGradient(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
-    : _var(var, tag)
-  {
-  }
-
-  /**
-   * Get whether the variable was coupled
-   * @returns Whether the variable was coupled
-   */
-  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
-
-  /**
-   * Get the current variable gradient
-   * @param datum The Datum object of the current thread
-   * @param idx The local quadrature point or DOF index
-   * @param comp The variable component
-   * @returns The variable gradient
-   */
-  KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const;
-
-  /**
-   * Get the Kokkos variable
-   * @returns The Kokkos variable
-   */
-  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
-
-private:
-  /**
-   * Coupled Kokkos variable
-   */
-  Variable _var;
-};
-///@}
-
-KOKKOS_FUNCTION inline Real
-VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) const
+template <bool is_ad>
+KOKKOS_FUNCTION auto
+VariableValueTempl<is_ad>::operator()(Datum & datum,
+                                      unsigned int idx,
+                                      unsigned int comp,
+                                      [[maybe_unused]] bool do_derivatives) const
 {
   KOKKOS_ASSERT(_var.initialized());
+
+  data_type value;
 
   if (_var.coupled())
   {
@@ -250,26 +231,112 @@ VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) co
         dof = sys.getElemLocalDofIndex(elem, idx, var);
       }
 
-      return sys.getVectorDofValue(dof, tag);
+      value = sys.getVectorDofValue(dof, tag);
     }
     else
     {
       auto & elem = datum.elem();
       auto side = datum.side();
-      auto offset = datum.qpOffset();
 
-      return side == libMesh::invalid_uint ? sys.getVectorQpValue(elem, offset + idx, var, tag)
-                                           : sys.getVectorQpValueFace(elem, side, idx, var, tag);
+      if constexpr (is_ad)
+        value = side == libMesh::invalid_uint
+                    ? sys.getVectorQpADValue(elem, datum.qpOffset() + idx, var, tag, do_derivatives)
+                    : sys.getVectorQpADValueFace(elem, side, idx, var, tag, do_derivatives);
+      else
+        value = side == libMesh::invalid_uint
+                    ? sys.getVectorQpValue(elem, datum.qpOffset() + idx, var, tag)
+                    : sys.getVectorQpValueFace(elem, side, idx, var, tag);
     }
   }
   else
-    return _var.value(comp);
+    value = _var.value(comp);
+
+  return value;
 }
 
-KOKKOS_FUNCTION inline Real3
-VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) const
+using VariableValue = VariableValueTempl<false>;
+using ADVariableValue = VariableValueTempl<true>;
+
+template <bool is_ad>
+class VariableGradientTempl
+{
+  using data_type = std::conditional_t<is_ad, ADReal3, Real3>;
+
+public:
+  /**
+   * Default constructor
+   */
+  VariableGradientTempl() = default;
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VariableGradientTempl(Variable var) : _var(var) {}
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VariableGradientTempl(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
+  {
+  }
+
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
+  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
+
+  /**
+   * Get the current variable gradient
+   * @param datum The Datum object of the current thread
+   * @param idx The local quadrature point or DOF index
+   * @param comp The variable component
+   * @param do_derivatives Whether to compute derivatives (only meaningful for AD)
+   * @returns The variable gradient
+   */
+  KOKKOS_FUNCTION auto operator()(Datum & datum,
+                                  unsigned int idx,
+                                  unsigned int comp = 0,
+                                  bool do_derivatives = false) const;
+
+  /**
+   * Get the current variable gradient
+   * @param datum The AssemblyDatum object of the current thread
+   * @param idx The local quadrature point or DOF index
+   * @param comp The variable component
+   * @returns The variable gradient
+   */
+  KOKKOS_FUNCTION auto
+  operator()(AssemblyDatum & datum, unsigned int idx, unsigned int comp = 0) const
+  {
+    return operator()(datum, idx, comp, _var.coupled() ? _var.sys(comp) == datum.sys() : false);
+  }
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
+};
+
+template <bool is_ad>
+KOKKOS_FUNCTION auto
+VariableGradientTempl<is_ad>::operator()(Datum & datum,
+                                         unsigned int qp,
+                                         unsigned int comp,
+                                         [[maybe_unused]] bool do_derivatives) const
 {
   KOKKOS_ASSERT(_var.initialized());
+
+  data_type grad;
 
   if (_var.coupled())
   {
@@ -277,16 +344,29 @@ VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) 
 
     auto & elem = datum.elem();
     auto side = datum.side();
-    auto offset = datum.qpOffset();
 
-    return side == libMesh::invalid_uint
-               ? datum.system(_var.sys(comp))
-                     .getVectorQpGrad(elem, offset + qp, _var.var(comp), _var.tag())
-               : datum.system(_var.sys(comp))
-                     .getVectorQpGradFace(elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
+    if constexpr (is_ad)
+      grad = side == libMesh::invalid_uint
+                 ? datum.system(_var.sys(comp))
+                       .getVectorQpADGrad(
+                           elem, datum.J(qp), qp, _var.var(comp), _var.tag(), do_derivatives)
+                 : datum.system(_var.sys(comp))
+                       .getVectorQpADGradFace(
+                           elem, side, datum.J(qp), qp, _var.var(comp), _var.tag(), do_derivatives);
+    else
+      grad =
+          side == libMesh::invalid_uint
+              ? datum.system(_var.sys(comp))
+                    .getVectorQpGrad(elem, datum.qpOffset() + qp, _var.var(comp), _var.tag())
+              : datum.system(_var.sys(comp))
+                    .getVectorQpGradFace(elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
   }
-  else
-    return Real3(0);
+
+  return grad;
 }
+
+using VariableGradient = VariableGradientTempl<false>;
+using ADVariableGradient = VariableGradientTempl<true>;
+///@}
 
 } // namespace Moose::Kokkos

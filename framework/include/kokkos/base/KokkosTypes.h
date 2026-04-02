@@ -13,6 +13,10 @@
 #include "KokkosScalar.h"
 #include "KokkosJaggedArray.h"
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosADReal.h"
+#endif
+
 #include "MooseError.h"
 #include "MooseUtils.h"
 
@@ -21,32 +25,44 @@
 namespace Moose::Kokkos
 {
 
+template <typename T>
+struct Vector3;
+
+using Real3 = Vector3<Real>;
+using ADReal3 = Vector3<ADReal>;
+
 struct Real33;
 
-struct Real3
+template <typename T>
+struct Vector3
 {
-  Real v[3];
+  T v[3];
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  Real3(const libMesh::TypeVector<Real> & vector);
-  KOKKOS_INLINE_FUNCTION Real3() { *this = 0; }
-  KOKKOS_INLINE_FUNCTION Real3(const Real scalar) { *this = scalar; }
-  KOKKOS_INLINE_FUNCTION Real3(const Real3 & vector) { *this = vector; }
-  KOKKOS_INLINE_FUNCTION Real3(const Real x, const Real y, const Real z);
+  Vector3(const libMesh::TypeVector<T> & vector);
+  KOKKOS_INLINE_FUNCTION Vector3() { *this = T(0); }
+  KOKKOS_INLINE_FUNCTION Vector3(const T & scalar) { *this = scalar; }
+  KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) { *this = vector; }
+  KOKKOS_INLINE_FUNCTION Vector3(const T & x, const T & y, const T & z);
 
-  KOKKOS_INLINE_FUNCTION Real3 operator-() const;
-  KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i) { return v[i]; }
-  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i) const { return v[i]; }
+  KOKKOS_INLINE_FUNCTION Vector3<T> operator-() const;
+  KOKKOS_INLINE_FUNCTION T & operator()(unsigned int i) { return v[i]; }
+  KOKKOS_INLINE_FUNCTION const T & operator()(unsigned int i) const { return v[i]; }
 
-  Real3 & operator=(const libMesh::TypeVector<Real> & vector);
-  KOKKOS_INLINE_FUNCTION Real3 & operator=(const Real3 & vector);
-  KOKKOS_INLINE_FUNCTION Real3 & operator=(const Real scalar);
+  Vector3<T> & operator=(const libMesh::TypeVector<T> & vector);
 
-  KOKKOS_INLINE_FUNCTION void operator+=(const Real scalar);
-  KOKKOS_INLINE_FUNCTION void operator+=(const Real3 vector);
-  KOKKOS_INLINE_FUNCTION void operator-=(const Real scalar);
-  KOKKOS_INLINE_FUNCTION void operator-=(const Real3 vector);
-  KOKKOS_INLINE_FUNCTION void operator*=(const Real scalar);
+  template <typename U>
+  KOKKOS_INLINE_FUNCTION Vector3<T> & operator=(const Vector3<U> & vector);
+  KOKKOS_INLINE_FUNCTION Vector3<T> & operator=(const Vector3<T> & vector);
+  KOKKOS_INLINE_FUNCTION Vector3<T> & operator=(const T & scalar);
+
+  template <typename U>
+  KOKKOS_INLINE_FUNCTION void operator+=(const Vector3<U> & vector);
+  KOKKOS_INLINE_FUNCTION void operator+=(const T & scalar);
+  template <typename U>
+  KOKKOS_INLINE_FUNCTION void operator-=(const Vector3<U> & vector);
+  KOKKOS_INLINE_FUNCTION void operator-=(const T & scalar);
+  KOKKOS_INLINE_FUNCTION void operator*=(const T & scalar);
 
   KOKKOS_INLINE_FUNCTION Real norm() const;
   KOKKOS_INLINE_FUNCTION Real dot_product(const Real3 vector) const;
@@ -82,32 +98,26 @@ struct Real33
 
 #ifdef MOOSE_KOKKOS_SCOPE
 
-inline Real3::Real3(const libMesh::TypeVector<Real> & vector)
+template <typename T>
+Vector3<T>::Vector3(const libMesh::TypeVector<T> & vector)
 {
   v[0] = vector(0);
   v[1] = vector(1);
   v[2] = vector(2);
 }
 
+template <typename T>
 KOKKOS_INLINE_FUNCTION
-Real3::Real3(const Real x, const Real y, const Real z)
+Vector3<T>::Vector3(const T & x, const T & y, const T & z)
 {
   v[0] = x;
   v[1] = y;
   v[2] = z;
 }
 
-KOKKOS_INLINE_FUNCTION Real3
-Real3::operator-() const
-{
-  Real3 vector(*this);
-  vector *= -1;
-
-  return vector;
-}
-
-inline Real3 &
-Real3::operator=(const libMesh::TypeVector<Real> & vector)
+template <typename T>
+Vector3<T> &
+Vector3<T>::operator=(const libMesh::TypeVector<T> & vector)
 {
   v[0] = vector(0);
   v[1] = vector(1);
@@ -116,8 +126,19 @@ Real3::operator=(const libMesh::TypeVector<Real> & vector)
   return *this;
 }
 
-KOKKOS_INLINE_FUNCTION Real3 &
-Real3::operator=(const Real3 & vector)
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+Vector3<T>::operator-() const
+{
+  Vector3<T> vector(*this);
+  vector *= -1;
+
+  return vector;
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T> &
+Vector3<T>::operator=(const Vector3<T> & vector)
 {
   v[0] = vector.v[0];
   v[1] = vector.v[1];
@@ -126,8 +147,21 @@ Real3::operator=(const Real3 & vector)
   return *this;
 }
 
-KOKKOS_INLINE_FUNCTION Real3 &
-Real3::operator=(const Real scalar)
+template <typename T>
+template <typename U>
+KOKKOS_INLINE_FUNCTION Vector3<T> &
+Vector3<T>::operator=(const Vector3<U> & vector)
+{
+  v[0] = vector.v[0];
+  v[1] = vector.v[1];
+  v[2] = vector.v[2];
+
+  return *this;
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T> &
+Vector3<T>::operator=(const T & scalar)
 {
   v[0] = scalar;
   v[1] = scalar;
@@ -136,60 +170,133 @@ Real3::operator=(const Real scalar)
   return *this;
 }
 
+template <typename T>
+template <typename U>
 KOKKOS_INLINE_FUNCTION void
-Real3::operator+=(const Real scalar)
-{
-  v[0] += scalar;
-  v[1] += scalar;
-  v[2] += scalar;
-}
-
-KOKKOS_INLINE_FUNCTION void
-Real3::operator+=(const Real3 vector)
+Vector3<T>::operator+=(const Vector3<U> & vector)
 {
   v[0] += vector.v[0];
   v[1] += vector.v[1];
   v[2] += vector.v[2];
 }
 
+template <typename T>
 KOKKOS_INLINE_FUNCTION void
-Real3::operator-=(const Real scalar)
+Vector3<T>::operator+=(const T & scalar)
 {
-  v[0] -= scalar;
-  v[1] -= scalar;
-  v[2] -= scalar;
+  v[0] += scalar;
+  v[1] += scalar;
+  v[2] += scalar;
 }
 
+template <typename T>
+template <typename U>
 KOKKOS_INLINE_FUNCTION void
-Real3::operator-=(const Real3 vector)
+Vector3<T>::operator-=(const Vector3<U> & vector)
 {
   v[0] -= vector.v[0];
   v[1] -= vector.v[1];
   v[2] -= vector.v[2];
 }
 
+template <typename T>
 KOKKOS_INLINE_FUNCTION void
-Real3::operator*=(const Real scalar)
+Vector3<T>::operator-=(const T & scalar)
+{
+  v[0] -= scalar;
+  v[1] -= scalar;
+  v[2] -= scalar;
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION void
+Vector3<T>::operator*=(const T & scalar)
 {
   v[0] *= scalar;
   v[1] *= scalar;
   v[2] *= scalar;
 }
 
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator+(const T & left, const Vector3<T> & right)
+{
+  return {left + right.v[0], left + right.v[1], left + right.v[2]};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator+(const Vector3<T> & left, const T & right)
+{
+  return {left.v[0] + right, left.v[1] + right, left.v[2] + right};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator+(const Vector3<T> & left, const Vector3<T> & right)
+{
+  return {left.v[0] + right.v[0], left.v[1] + right.v[1], left.v[2] + right.v[2]};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator-(const T & left, const Vector3<T> & right)
+{
+  return {left - right.v[0], left - right.v[1], left - right.v[2]};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator-(const Vector3<T> & left, const T & right)
+{
+  return {left.v[0] - right, left.v[1] - right, left.v[2] - right};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator-(const Vector3<T> & left, const Vector3<T> & right)
+{
+  return {left.v[0] - right.v[0], left.v[1] - right.v[1], left.v[2] - right.v[2]};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator*(const T & left, const Vector3<T> & right)
+{
+  return {left * right.v[0], left * right.v[1], left * right.v[2]};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION Vector3<T>
+operator*(const Vector3<T> & left, const T & right)
+{
+  return {left.v[0] * right, left.v[1] * right, left.v[2] * right};
+}
+
+template <typename T>
+KOKKOS_INLINE_FUNCTION T
+operator*(const Vector3<T> & left, const Vector3<T> & right)
+{
+  return left.v[0] * right.v[0] + left.v[1] * right.v[1] + left.v[2] * right.v[2];
+}
+
+template <>
 KOKKOS_INLINE_FUNCTION Real
-Real3::norm() const
+Vector3<Real>::norm() const
 {
   return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
+template <>
 KOKKOS_INLINE_FUNCTION Real
-Real3::dot_product(const Real3 vector) const
+Vector3<Real>::dot_product(const Real3 vector) const
 {
   return v[0] * vector.v[0] + v[1] * vector.v[1] + v[2] * vector.v[2];
 }
 
+template <>
 KOKKOS_INLINE_FUNCTION Real3
-Real3::cross_product(const Real3 vector) const
+Vector3<Real>::cross_product(const Real3 vector) const
 {
   Real3 cross;
 
@@ -200,8 +307,9 @@ Real3::cross_product(const Real3 vector) const
   return cross;
 }
 
+template <>
 KOKKOS_INLINE_FUNCTION Real33
-Real3::cartesian_product(const Real3 vector) const
+Vector3<Real>::cartesian_product(const Real3 vector) const
 {
   Real33 tensor;
 
@@ -326,24 +434,6 @@ Real33::col(const unsigned int j) const
 }
 
 KOKKOS_INLINE_FUNCTION Real3
-operator*(const Real left, const Real3 right)
-{
-  return {left * right.v[0], left * right.v[1], left * right.v[2]};
-}
-
-KOKKOS_INLINE_FUNCTION Real3
-operator*(const Real3 left, const Real right)
-{
-  return {left.v[0] * right, left.v[1] * right, left.v[2] * right};
-}
-
-KOKKOS_INLINE_FUNCTION Real
-operator*(const Real3 left, const Real3 right)
-{
-  return left.v[0] * right.v[0] + left.v[1] * right.v[1] + left.v[2] * right.v[2];
-}
-
-KOKKOS_INLINE_FUNCTION Real3
 operator*(const Real33 left, const Real3 right)
 {
   return {left(0, 0) * right.v[0] + left(0, 1) * right.v[1] + left(0, 2) * right.v[2],
@@ -377,12 +467,6 @@ operator+(const Real3 left, const Real right)
 }
 
 KOKKOS_INLINE_FUNCTION Real3
-operator+(const Real3 left, const Real3 right)
-{
-  return {left.v[0] + right.v[0], left.v[1] + right.v[1], left.v[2] + right.v[2]};
-}
-
-KOKKOS_INLINE_FUNCTION Real3
 operator-(const Real left, const Real3 right)
 {
   return {left - right.v[0], left - right.v[1], left - right.v[2]};
@@ -395,9 +479,45 @@ operator-(const Real3 left, const Real right)
 }
 
 KOKKOS_INLINE_FUNCTION Real3
-operator-(const Real3 left, const Real3 right)
+operator*(const Real left, const Real3 right)
 {
-  return {left.v[0] - right.v[0], left.v[1] - right.v[1], left.v[2] - right.v[2]};
+  return {left * right.v[0], left * right.v[1], left * right.v[2]};
+}
+
+KOKKOS_INLINE_FUNCTION Real3
+operator*(const Real3 left, const Real right)
+{
+  return {left.v[0] * right, left.v[1] * right, left.v[2] * right};
+}
+
+template <typename T,
+          typename = typename std::enable_if<
+              std::is_same<typename std::decay<T>::type, ADReal>::value>::type>
+KOKKOS_INLINE_FUNCTION ADReal3
+operator*(const Real3 left, const T & right)
+{
+  return {left(0) * right, left(1) * right, left(2) * right};
+}
+
+template <typename T,
+          typename = typename std::enable_if<
+              std::is_same<typename std::decay<T>::type, ADReal>::value>::type>
+KOKKOS_INLINE_FUNCTION ADReal3
+operator*(const T & left, const Real3 right)
+{
+  return {left * right(0), left * right(1), left * right(2)};
+}
+
+KOKKOS_INLINE_FUNCTION ADReal
+operator*(const Real3 left, const ADReal3 & right)
+{
+  return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
+}
+
+KOKKOS_INLINE_FUNCTION ADReal
+operator*(const ADReal3 & left, const Real3 right)
+{
+  return left(0) * right(0) + left(1) * right(1) + left(2) * right(2);
 }
 
 #endif

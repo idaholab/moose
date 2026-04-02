@@ -673,21 +673,3 @@ TaggingInterface::setResidual(SystemBase & sys, const SetResidualFunctor set_res
     if (sys.hasVector(tag_id))
       set_residual_functor(sys.getVector(tag_id));
 }
-
-inline void
-TaggingInterface::addResiduals(Assembly & assembly, const ADResidualsPacket & packet)
-{
-  addResiduals(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
-}
-
-inline void
-TaggingInterface::addResidualsAndJacobian(Assembly & assembly, const ADResidualsPacket & packet)
-{
-  addResidualsAndJacobian(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
-}
-
-inline void
-TaggingInterface::addJacobian(Assembly & assembly, const ADResidualsPacket & packet)
-{
-  addJacobian(assembly, packet.residuals, packet.dof_indices, packet.scaling_factor);
-}
