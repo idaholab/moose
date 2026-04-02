@@ -4,7 +4,7 @@
 
 ## Description
 
-`RayTracingViewFactor` uses the ray tracing module to compute view factors for general cavities.
+This [ViewFactorBase.md] object uses the ray tracing module to compute view factors for general cavities.
 `RayTracingViewFactor` does not require the faces of the cavity to be planar and it allows obstruction.
 Obstruction refers to the situation of boundary `a`'s line of sight to boundary `b` being obstructed
 by boundary `c`, where `a`, `b`, and `c` are boundaries participating in the radiative heat exchange.

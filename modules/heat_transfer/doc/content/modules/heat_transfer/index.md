@@ -181,14 +181,15 @@ The implementation of the net radiation method in MOOSE relies on the following 
   These objects differ in how they are provided with view factors:
 
   - [ConstantViewFactorSurfaceRadiation.md], for providing view factors manually
-  - [ViewFactorObjectSurfaceRadiation.md], for providing view factors via an object deriving from `ViewFactorBase`
+  - [ViewFactorObjectSurfaceRadiation.md], for providing view factors via an object deriving from [ViewFactorBase.md]
 
   Note that a temperature variable must be available on sidesets that are not marked as isothermal or adiabatic.
 
-- Objects inheriting from `ViewFactorBase`, such as the following:
+- Objects inheriting from [ViewFactorBase.md], such as the following:
 
   - [UnobstructedPlanarViewFactor.md]
   - [RayTracingViewFactor.md]
+  - [SpecifiedViewFactor.md]
 
   compute view factors and provide them via the `getViewFactor` public interface. These objects are used by [ViewFactorObjectSurfaceRadiation.md], which inherits from  `GrayLambertSurfaceRadiationBase`.
 
@@ -198,13 +199,13 @@ The implementation of the net radiation method in MOOSE relies on the following 
 - [GrayLambertSurfaceRadiationPP.md] is a post-processor that retrieves the radiosity, heat flux, or temperature
   for a boundary used in a `GrayLambertSurfaceRadiationBase` object.
 
-- [ViewFactorPP.md] is a post-processor that can retrieve a view factor from a `ViewFactorBase` for output purposes.
+- [ViewFactorPP.md] is a post-processor that can retrieve a view factor from a [ViewFactorBase.md] for output purposes.
 
 - [SurfaceRadiationVectorPostprocessor.md] is a vector post-processor that retrieves one or more of the following
   for all surfaces for a given `GrayLambertSurfaceRadiationBase` object: emissivity, radiosity, temperature, and heat flux.
 
 - [ViewfactorVectorPostprocessor.md] is a vector post-processor that retrieves the view factors
-  between all boundaries for a given `GrayLambertSurfaceRadiationBase` object.
+  between all boundaries for a given [ViewFactorBase.md] object.
 
 - Future plans include the addition of an action to set up view-factor net radiation transfer using only a single syntax block.
 
