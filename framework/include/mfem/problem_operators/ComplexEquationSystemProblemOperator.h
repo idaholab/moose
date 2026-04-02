@@ -27,11 +27,11 @@ public:
   {
   }
 
-  void SetGridFunctions() override;
-  void Init(mfem::BlockVector & X) override;
+  virtual void SetGridFunctions() override;
+  virtual void Init(mfem::BlockVector & X) override;
   virtual void Solve() override;
 
-  [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] virtual Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
   {
     mooseAssert(_equation_system,
                 "No ComplexEquationSystem in ComplexEquationSystemProblemOperator.");

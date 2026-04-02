@@ -30,12 +30,13 @@ public:
   {
   }
 
-  void SetGridFunctions() override;
-  void Init(mfem::BlockVector & X) override;
-  void ImplicitSolve(const mfem::real_t dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
-  void Solve() override;
+  virtual void SetGridFunctions() override;
+  virtual void Init(mfem::BlockVector & X) override;
+  virtual void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override;
+  virtual void Solve() override;
 
-  [[nodiscard]] Moose::MFEM::TimeDependentEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] virtual Moose::MFEM::TimeDependentEquationSystem *
+  GetEquationSystem() const override
   {
     mooseAssert(_equation_system,
                 "No TimeDependentEquationSystem in TimeDependentEquationSystemProblemOperator.");
