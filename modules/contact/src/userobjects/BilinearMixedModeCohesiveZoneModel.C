@@ -20,6 +20,7 @@
 #include "ADReal.h"
 #include "CohesiveZoneModelTools.h"
 #include <Eigen/Core>
+#include <cmath>
 
 registerMooseObject("ContactApp", BilinearMixedModeCohesiveZoneModel);
 
@@ -135,6 +136,7 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   _dof_to_delta_initial.clear();
   _dof_to_delta_final.clear();
   _dof_to_delta_max.clear();
+  _dof_to_local_czm_traction.clear();
 }
 
 void
@@ -167,6 +169,10 @@ BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
       -(1.0 - libmesh_map_find(_dof_to_damage, node->id()).first) * _penalty_stiffness_czm *
           delta_active -
       _penalty_stiffness_czm * (_set_compressive_traction_to_zero ? 0.0 : delta_inactive);
+
+  // Save local-frame traction before the base class overwrites the map with the global-frame value.
+  // Strip AD here — this map is only read by output-only getters that return Real.
+  _dof_to_local_czm_traction[node] = MetaPhysicL::raw_value(_dof_to_czm_traction[node]);
 }
 
 void
@@ -360,4 +366,44 @@ BilinearMixedModeCohesiveZoneModel::getLocalDisplacementTangential(const Node * 
     return MetaPhysicL::raw_value(it->second(1) / it2->second.second);
   else
     return 0.0;
+}
+
+RealVectorValue
+BilinearMixedModeCohesiveZoneModel::getLocalCzmTraction(const Node * const node) const
+{
+  const auto it = _dof_to_local_czm_traction.find(_subproblem.mesh().nodePtr(node->id()));
+  if (it != _dof_to_local_czm_traction.end())
+    return it->second;
+  return RealVectorValue(0.0, 0.0, 0.0);
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionNormal(const Node * const node) const
+{
+  return getLocalCzmTraction(node)(0);
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialOne(const Node * const node) const
+{
+  return getLocalCzmTraction(node)(1);
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialTwo(const Node * const node) const
+{
+  return getLocalCzmTraction(node)(2);
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionTangentialMagnitude(const Node * const node) const
+{
+  const auto t = getLocalCzmTraction(node);
+  return std::sqrt(t(1) * t(1) + t(2) * t(2));
+}
+
+Real
+BilinearMixedModeCohesiveZoneModel::getCohesiveTractionEffective(const Node * const node) const
+{
+  return getLocalCzmTraction(node).norm();
 }

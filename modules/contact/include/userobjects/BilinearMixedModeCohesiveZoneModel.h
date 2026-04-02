@@ -30,6 +30,11 @@ public:
   Real getCohesiveDamage(const Node * const node) const;
   Real getLocalDisplacementNormal(const Node * const node) const;
   Real getLocalDisplacementTangential(const Node * const node) const;
+  Real getCohesiveTractionNormal(const Node * const node) const;
+  Real getCohesiveTractionTangentialMagnitude(const Node * const node) const;
+  Real getCohesiveTractionTangentialOne(const Node * const node) const;
+  Real getCohesiveTractionTangentialTwo(const Node * const node) const;
+  Real getCohesiveTractionEffective(const Node * const node) const;
 
 protected:
   virtual void computeQpProperties() override;
@@ -116,4 +121,11 @@ protected:
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_final;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_max;
   // @}
+
+  /// Local-frame CZM traction, saved before computeGlobalTraction overwrites the base-class map.
+  /// Stored as RealVectorValue — AD derivatives are not needed for output-only getters.
+  std::unordered_map<const DofObject *, RealVectorValue> _dof_to_local_czm_traction;
+
+  /// Returns the local-frame CZM traction vector (avoids re-rotating the global map).
+  RealVectorValue getLocalCzmTraction(const Node * const node) const;
 };
