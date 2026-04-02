@@ -12,6 +12,7 @@
 #include "MFEMPetscNonlinearSolver.h"
 #include "MooseError.h"
 #include "PetscSupport.h"
+#include "MFEMProblem.h"
 
 #ifdef MFEM_USE_PETSC
 
