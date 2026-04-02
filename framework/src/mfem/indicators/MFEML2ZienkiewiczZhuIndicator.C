@@ -31,10 +31,10 @@ MFEML2ZienkiewiczZhuIndicator::MFEML2ZienkiewiczZhuIndicator(const InputParamete
   if (isParamSetByUser("flux_fespace"))
   {
     // fetch the flux_fespace from the object system
-    auto object_ptr = getMFEMProblem()
-                          .getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                      getParam<UserObjectName>("flux_fespace"))
-                          .getSharedPtr();
+    auto object_ptr =
+        getMFEMProblem()
+            .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<UserObjectName>("flux_fespace"))
+            .getSharedPtr();
     auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
     _flux_fes = fespace_ptr->getFESpace();
   }
@@ -43,8 +43,8 @@ MFEML2ZienkiewiczZhuIndicator::MFEML2ZienkiewiczZhuIndicator(const InputParamete
   {
     // fetch the smooth_flux_fespace from the object system
     auto object_ptr = getMFEMProblem()
-                          .getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                      getParam<UserObjectName>("smooth_flux_fespace"))
+                          .getMFEMObject<MFEMFESpace>(
+                              "MFEMFESpace", getParam<UserObjectName>("smooth_flux_fespace"))
                           .getSharedPtr();
     auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
     _smooth_flux_fes = fespace_ptr->getFESpace();

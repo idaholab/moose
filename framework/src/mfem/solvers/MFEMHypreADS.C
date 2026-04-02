@@ -27,9 +27,8 @@ MFEMHypreADS::validParams()
 
 MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _mfem_fespace(
-        getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                    getParam<UserObjectName>("fespace")))
+    _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
+                                                              getParam<UserObjectName>("fespace")))
 {
   constructSolver();
 }

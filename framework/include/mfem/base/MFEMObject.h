@@ -46,10 +46,10 @@ public:
 protected:
   usingFunctionInterfaceMembers;
   usingPostprocessorInterfaceMembers;
-  using VectorPostprocessorInterface::getVectorPostprocessorValue;
-  using VectorPostprocessorInterface::getVectorPostprocessorValueByName;
   using ReporterInterface::getReporterValue;
   using ReporterInterface::getReporterValueByName;
+  using VectorPostprocessorInterface::getVectorPostprocessorValue;
+  using VectorPostprocessorInterface::getVectorPostprocessorValueByName;
 
 private:
   MFEMProblem & _mfem_problem;
