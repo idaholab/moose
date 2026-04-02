@@ -29,8 +29,7 @@ KokkosParsedFunction::KokkosParsedFunction(const InputParameters & parameters)
   : FunctionBase(parameters),
     MooseParsedFunctionBase(parameters),
     _expression(verifyFunction(getParam<std::string>("expression"))),
-    _builder(std::make_unique<Moose::Kokkos::RPNBuilder>(_expression, &_console)),
-    _evaluator(*_builder)
+    _builder(std::make_unique<Moose::Kokkos::RPNBuilder>(_expression, &_console))
 {
   _builder->addDefaultVariables();
 
@@ -48,11 +47,6 @@ KokkosParsedFunction::KokkosParsedFunction(const InputParameters & parameters)
              << std::endl;
     _builder->printRPN(_console);
   }
-
-  _evaluator.init();
-
-  // Dry-run for checking whether pre-allocated stack size is sufficient
-  _evaluator.eval(0, Real3(0));
 }
 
 KokkosParsedFunction::KokkosParsedFunction(const KokkosParsedFunction & function)
@@ -81,4 +75,12 @@ KokkosParsedFunction::initialSetup()
     else
       paramError("symbol_values", "Symbols can only be constants or postprocessors for now.");
   }
+
+  _builder->finalize();
+
+  // Should be called after finalization
+  _evaluator.init(*_builder);
+
+  // Dry-run for checking whether pre-allocated stack size is sufficient
+  _evaluator.eval(0, Real3(0));
 }
