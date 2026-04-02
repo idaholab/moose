@@ -112,9 +112,13 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
 {
   mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
-  // To know the dimension of the mesh
-  if (!mesh.is_prepared())
-    mesh.prepare_for_use();
+  // To know the dimension, boundaries, and subdomains of the mesh
+  const auto & prep = mesh.preparation();
+  if (!prep.has_cached_elem_data)
+    mesh.cache_elem_data();
+  if (!prep.has_boundary_id_sets)
+    mesh.get_boundary_info().regenerate_id_sets();
+
   const auto dim = mesh.mesh_dimension();
 
   // Setup the FE Object so we can calculate normals
@@ -208,13 +212,12 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
     _included_neighbor_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
   }
 
-  // We will want to Change the below code when we have more fine-grained control over advertising
-  // what we need and how we satisfy those needs. For now we know we need to have neighbors per
-  // #15823...and we do have an explicit `find_neighbors` call...but we don't have a
-  // `neighbors_found` API and it seems off to do:
-  //
-  // if (!mesh.is_prepared())
-  //   mesh.find_neighbors()
+  // Every one of our subclasses right now needs neighbor pointers,
+  // either via direct neighbor_ptr() calls, or indirectly via
+  // elemSideSatisfiesRequirements() or flood() calls, so we'll just
+  // make sure they're prepped in setup().
+  if (!mesh.preparation().has_neighbor_ptrs)
+    mesh.find_neighbors();
 }
 
 void
