@@ -305,8 +305,7 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
   for (auto node : nbc->getContiguousNodes())
     dofs[_local_node_dof_index[var][node]] = true;
 
-  // Let remote processes know about ghost DOFs associated with nodal BCs not to compute
-  // residual on them
+  // Let remote processes know about ghost DOFs associated with nodal BCs not to contribute on them
 
   auto num_procs = _comm.size();
 
