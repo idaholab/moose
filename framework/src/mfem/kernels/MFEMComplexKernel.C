@@ -18,23 +18,13 @@ registerMooseObject("MooseApp", MFEMComplexKernel);
 InputParameters
 MFEMComplexKernel::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
-  params += MFEMBlockRestrictable::validParams();
-  params.registerBase("Kernel");
-  params.addParam<VariableName>("variable",
-                                "Variable labelling the weak form this kernel is added to");
+  InputParameters params = MFEMKernel::validParams();
   params.addClassDescription(
       "Holds MFEMKernel objects for the real and imaginary parts of a complex kernel.");
 
   return params;
 }
 
-MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
-    MFEMBlockRestrictable(parameters,
-                          getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
-    _test_var_name(getParam<VariableName>("variable"))
-{
-}
+MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters) : MFEMKernel(parameters) {}
 
 #endif

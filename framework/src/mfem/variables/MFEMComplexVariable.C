@@ -21,7 +21,8 @@ MFEMComplexVariable::validParams()
 
 MFEMComplexVariable::MFEMComplexVariable(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    _fespace(getUserObject<MFEMFESpace>("fespace")),
+    _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
+                                                         getParam<UserObjectName>("fespace"))),
     _cmplx_gridfunction(buildComplexGridFunction())
 {
   *_cmplx_gridfunction = 0.0;

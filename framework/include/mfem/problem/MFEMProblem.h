@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
@@ -58,9 +59,7 @@ public:
   /**
    * Add an MFEM FESpace to the problem.
    */
-  void addFESpace(const std::string & user_object_name,
-                  const std::string & name,
-                  InputParameters & parameters);
+  void addFESpace(const std::string & type, const std::string & name, InputParameters & parameters);
   /**
    * Set the device to use to solve the FE problem.
    */
@@ -74,9 +73,7 @@ public:
   /**
    * Add an MFEM SubMesh to the problem.
    */
-  void addSubMesh(const std::string & user_object_name,
-                  const std::string & name,
-                  InputParameters & parameters);
+  void addSubMesh(const std::string & type, const std::string & name, InputParameters & parameters);
 
   /**
    * Add transfers between MultiApps and/or MFEM SubMeshes.
@@ -321,6 +318,13 @@ public:
     return _problem_data.cmplx_gridfunctions.GetShared(name);
   }
 
+  template <typename T>
+  T & getMFEMObject(const std::string & system,
+                    const std::string & name,
+                    const THREAD_ID tid = 0) const;
+
+  bool hasMFEMObject(const std::string & system, const std::string & name) const;
+
   enum class NumericType
   {
     REAL,
@@ -332,5 +336,23 @@ public:
 protected:
   MFEMProblemData _problem_data;
 };
+
+template <typename T>
+T &
+MFEMProblem::getMFEMObject(const std::string & system,
+                           const std::string & name,
+                           const THREAD_ID tid = 0) const
+{
+  std::vector<T *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>(system)
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find MFEM object with system '" + system + "' and name '" + name + "'");
+  return *(objs[0]);
+}
 
 #endif

@@ -37,8 +37,9 @@ MFEMSolverBase::setPreconditioner(T & solver)
   if (isParamSetByUser("preconditioner"))
   {
     if (!_preconditioner)
-      _preconditioner =
-          &const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
+      _preconditioner = &const_cast<MFEMSolverBase &>(
+          getMFEMProblem().getMFEMObject<MFEMSolverBase>("MFEMSolverBase",
+                                                         getParam<UserObjectName>("preconditioner")));
 
     auto & mfem_pre = _preconditioner->getSolver();
     if constexpr (std::is_base_of_v<mfem::HypreSolver, T>)
