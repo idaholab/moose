@@ -14,6 +14,8 @@
 #include "MooseTypes.h"
 #include "UserObject.h"
 
+#include <algorithm>
+
 InputParameters
 VectorPostprocessorInterface::validParams()
 {
@@ -168,9 +170,7 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostproce
       VectorPostprocessorReporterName(name, vector_name));
 
   if (has_vpp)
-    mooseAssert(_vpi_feproblem.hasUserObject(name) && dynamic_cast<const VectorPostprocessor *>(
-                                                          &_vpi_feproblem.getUserObjectBase(name)),
-                "Has reporter VectorPostprocessor Reporter value but not VectorPostprocessor UO");
+    (void)_vpi_feproblem.getVectorPostprocessorObjectByName(name);
 
   return has_vpp;
 }
@@ -193,8 +193,23 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(
     _vpi_feproblem.mooseError("Cannot call hasVectorPostprocessorByName() until all "
                               "VectorPostprocessors have been constructed.");
 
-  return _vpi_feproblem.hasUserObject(name) &&
-         dynamic_cast<const VectorPostprocessor *>(&_vpi_feproblem.getUserObjectBase(name));
+  std::vector<VectorPostprocessor *> objs;
+  _vpi_feproblem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(0)
+      .queryInto(objs);
+
+  std::vector<VectorPostprocessor *> mfem_objs;
+  _vpi_feproblem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMVectorPostprocessor")
+      .condition<AttribThread>(0)
+      .queryInto(mfem_objs);
+  objs.insert(objs.end(), mfem_objs.begin(), mfem_objs.end());
+
+  return std::any_of(
+      objs.begin(), objs.end(), [&name](const auto * const obj) { return obj->PPName() == name; });
 }
 
 bool

@@ -14,23 +14,30 @@
 InputParameters
 MFEMInitialCondition::validParams()
 {
-  auto params = MFEMGeneralUserObject::validParams();
+  auto params = MFEMExecutedObject::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The variable to apply the initial condition on.");
   params.registerBase("InitialCondition");
+  params.registerSystemAttributeName("MFEMInitialCondition");
   params.addClassDescription(
       "Base class for objects that set the initial condition on an MFEM variable.");
   // We cannot generally execute this at construction time since the coefficient may be based on a
-  // MOOSE function which is not itself setup until its initialSetup is called. UserObject initial
-  // execution occurs after function initialSetup
+  // MOOSE function which is not itself setup until its initialSetup is called. MFEM initial
+  // conditions therefore run in the explicit executed-object pass on EXEC_INITIAL.
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
 MFEMInitialCondition::MFEMInitialCondition(const InputParameters & params)
-  : MFEMGeneralUserObject(params)
+  : MFEMExecutedObject(params)
 {
+}
+
+std::set<std::string>
+MFEMInitialCondition::producedVariableNames() const
+{
+  return {getParam<VariableName>("variable")};
 }
 
 #endif

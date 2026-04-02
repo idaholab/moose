@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMPostprocessor.h"
-#include "MFEMGeneralUserObject.h"
 
 /**
  * Compute the L2 error for a vector variable.

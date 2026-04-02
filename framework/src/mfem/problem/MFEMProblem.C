@@ -16,10 +16,17 @@
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "MFEMSubMeshTransfer.h"
+#include "MFEMExecutedObject.h"
+#include "Postprocessor.h"
+#include "VectorPostprocessor.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
 #include <algorithm>
+#include <map>
+#include <set>
+#include <deque>
+#include <sstream>
 
 registerMooseObject("MooseApp", MFEMProblem);
 
@@ -51,11 +58,20 @@ MFEMProblem::initialSetup()
   FEProblemBase::initialSetup();
 
   // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
-  // setup pass because they no longer inherit the UserObject initialSetup path.
+  // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
   std::vector<MFEMRefinementMarker *> markers;
   theWarehouse().query().condition<AttribSystem>("Marker").queryInto(markers);
   for (auto marker : markers)
     marker->initialSetup();
+}
+
+void
+MFEMProblem::execute(const ExecFlagType & exec_type)
+{
+  setCurrentExecuteOnFlag(exec_type);
+  executeMFEMObjects(exec_type);
+
+  FEProblemBase::execute(exec_type);
 }
 
 void
@@ -309,7 +325,7 @@ MFEMProblem::addAuxKernel(const std::string & kernel_name,
                           const std::string & name,
                           InputParameters & parameters)
 {
-  FEProblemBase::addUserObject(kernel_name, name, parameters);
+  addObject<MFEMExecutedObject>(kernel_name, name, parameters);
 }
 
 void
@@ -524,10 +540,30 @@ MFEMProblem::addPostprocessor(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters)
 {
-  ExternalProblem::addPostprocessor(type, name, parameters);
-  const PostprocessorValue & val = getPostprocessorValueByName(name);
-  getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-      name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
+  if (parameters.getSystemAttributeName() == "MFEMPostprocessor")
+  {
+    checkUserObjectNameCollision(name, "Postprocessor");
+    addObject<MFEMExecutedObject>(type, name, parameters);
+    const PostprocessorValue & val = getPostprocessorValueByName(name);
+    getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+        name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
+  }
+  else
+    ExternalProblem::addPostprocessor(type, name, parameters);
+}
+
+void
+MFEMProblem::addVectorPostprocessor(const std::string & type,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  if (parameters.getSystemAttributeName() == "MFEMVectorPostprocessor")
+  {
+    checkUserObjectNameCollision(name, "VectorPostprocessor");
+    addObject<MFEMExecutedObject>(type, name, parameters);
+  }
+  else
+    FEProblemBase::addVectorPostprocessor(type, name, parameters);
 }
 
 InputParameters
@@ -675,7 +711,7 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
                          InputParameters & parameters)
 {
   if (parameters.getBase() == "MFEMSubMeshTransfer")
-    addObject<MFEMSubMeshTransfer>(transfer_name, name, parameters);
+    addObject<MFEMExecutedObject>(transfer_name, name, parameters);
   else
     FEProblemBase::addTransfer(transfer_name, name, parameters);
 }
@@ -685,8 +721,141 @@ MFEMProblem::addInitialCondition(const std::string & ic_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  FEProblemBase::addUserObject(ic_name, name, parameters);
-  getUserObject<MFEMInitialCondition>(name); // error check
+  addObject<MFEMExecutedObject>(ic_name, name, parameters);
+}
+
+void
+MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
+{
+  auto append_objects = [this, &exec_type](const std::string & system,
+                                           std::vector<MFEMExecutedObject *> & objects)
+  {
+    std::vector<MFEMExecutedObject *> system_objects;
+    theWarehouse()
+        .query()
+        .condition<AttribSystem>(system)
+        .condition<AttribExecOns>(exec_type)
+        .condition<AttribThread>(0)
+        .queryInto(system_objects);
+    objects.insert(objects.end(), system_objects.begin(), system_objects.end());
+  };
+
+  std::vector<MFEMExecutedObject *> objects;
+  append_objects("MFEMInitialCondition", objects);
+  append_objects("MFEMSubMeshTransfer", objects);
+  append_objects("MFEMAuxKernel", objects);
+  append_objects("MFEMPostprocessor", objects);
+  append_objects("MFEMVectorPostprocessor", objects);
+
+  std::map<std::string, unsigned int> variable_producers;
+  std::map<std::string, unsigned int> postprocessor_producers;
+  std::map<std::string, unsigned int> vector_postprocessor_producers;
+
+  auto register_producer = [this, &exec_type, &objects](const auto & names,
+                                                        auto & producers,
+                                                        const MFEMExecutedObject & object,
+                                                        const unsigned int i,
+                                                        const std::string & resource_type)
+  {
+    for (const auto & name : names)
+    {
+      const auto [it, inserted] = producers.emplace(name, i);
+      if (!inserted)
+        mooseError("MFEM executed-object dependency ambiguity on ",
+                   exec_type,
+                   ": both '",
+                   objects[it->second]->name(),
+                   "' and '",
+                   object.name(),
+                   "' produce ",
+                   resource_type,
+                   " '",
+                   name,
+                   "'.");
+    }
+  };
+
+  for (const auto i : index_range(objects))
+  {
+    const auto & object = *objects[i];
+    register_producer(object.producedVariableNames(), variable_producers, object, i, "variable");
+    register_producer(
+        object.producedPostprocessorNames(), postprocessor_producers, object, i, "postprocessor");
+    register_producer(object.producedVectorPostprocessorNames(),
+                      vector_postprocessor_producers,
+                      object,
+                      i,
+                      "vector postprocessor");
+  }
+
+  std::vector<std::vector<unsigned int>> adj(objects.size());
+  std::vector<unsigned int> indegree(objects.size(), 0);
+
+  auto add_dependencies = [&adj, &indegree](const auto & names,
+                                            const auto & producers,
+                                            const unsigned int consumer)
+  {
+    for (const auto & name : names)
+      if (const auto it = producers.find(name); it != producers.end() && it->second != consumer)
+      {
+        adj[it->second].push_back(consumer);
+        indegree[consumer]++;
+      }
+  };
+
+  for (const auto i : index_range(objects))
+  {
+    const auto & object = *objects[i];
+    add_dependencies(object.consumedVariableNames(), variable_producers, i);
+    add_dependencies(object.consumedPostprocessorNames(), postprocessor_producers, i);
+    add_dependencies(object.consumedVectorPostprocessorNames(), vector_postprocessor_producers, i);
+  }
+
+  std::deque<unsigned int> ready;
+  for (const auto i : index_range(objects))
+    if (!indegree[i])
+      ready.push_back(i);
+
+  std::vector<unsigned int> order;
+  order.reserve(objects.size());
+  while (!ready.empty())
+  {
+    const auto i = ready.front();
+    ready.pop_front();
+    order.push_back(i);
+    for (const auto next : adj[i])
+      if (--indegree[next] == 0)
+        ready.push_back(next);
+  }
+
+  if (order.size() != objects.size())
+  {
+    std::ostringstream oss;
+    for (const auto i : index_range(objects))
+      if (indegree[i])
+        oss << "  " << objects[i]->name() << "\n";
+    mooseError("Cyclic MFEM executed-object dependency detected on ",
+               exec_type,
+               ". Remaining objects:\n",
+               oss.str());
+  }
+
+  for (const auto i : order)
+  {
+    auto * const object = objects[i];
+    object->initialize();
+    object->execute();
+    object->finalize();
+
+    if (auto * const pp = dynamic_cast<const Postprocessor *>(object))
+    {
+      _reporter_data.finalize(pp->PPName());
+      setPostprocessorValueByName(pp->PPName(), pp->getValue());
+    }
+
+    if (auto * const vpp = dynamic_cast<VectorPostprocessor *>(object))
+      _reporter_data.finalize(vpp->PPName());
+  }
 }
 
 std::string

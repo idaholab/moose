@@ -21,7 +21,7 @@ MFEMObject::validParams()
   params += PostprocessorInterface::validParams();
   params += VectorPostprocessorInterface::validParams();
   params += ReporterInterface::validParams();
-  params.addClassDescription("Base class for non-executed MFEM objects.");
+  params.addClassDescription("Base class for MFEM objects backed directly by MooseObject.");
   return params;
 }
 

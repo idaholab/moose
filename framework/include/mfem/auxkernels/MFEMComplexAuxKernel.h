@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 #include "MFEMContainers.h"
 
 /**
  * Class to construct an auxiliary solver used to update a complex auxvariable.
  */
-class MFEMComplexAuxKernel : public MFEMGeneralUserObject
+class MFEMComplexAuxKernel : public MFEMExecutedObject
 {
 public:
   static InputParameters validParams();
@@ -27,6 +27,9 @@ public:
 
   /// Method called to update any owned objects upon an FE space update
   virtual void update() {};
+
+  virtual std::set<std::string> consumedVariableNames() const override;
+  virtual std::set<std::string> producedVariableNames() const override;
 
   /// Method to add a scaled complex variable to another complex variable.
   void complexAdd(mfem::ParComplexGridFunction & a,

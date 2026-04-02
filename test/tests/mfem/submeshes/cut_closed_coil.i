@@ -142,7 +142,6 @@ coil_conductivity = 1.0
     variable = e_field
     source_variables = 'induced_e_field external_e_field'
     execute_on = TIMESTEP_END
-    execution_order_group = 3
   []
 []
 
@@ -187,7 +186,6 @@ coil_conductivity = 1.0
     from_variable = transition_external_e_field
     to_variable = external_e_field
     execute_on = TIMESTEP_END
-    execution_order_group = 2
   []
 []
 

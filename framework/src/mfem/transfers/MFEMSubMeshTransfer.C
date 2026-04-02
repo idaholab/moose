@@ -17,8 +17,9 @@ registerMooseObject("MooseApp", MFEMSubMeshTransfer);
 InputParameters
 MFEMSubMeshTransfer::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMExecutedObject::validParams();
   params.registerBase("MFEMSubMeshTransfer");
+  params.registerSystemAttributeName("MFEMSubMeshTransfer");
   params.addClassDescription("Class to transfer MFEM variable data to or from a restricted copy of "
                              "the variable defined on "
                              " a subspace of an MFEMMesh, represented as an MFEMSubMesh.");
@@ -32,12 +33,24 @@ MFEMSubMeshTransfer::validParams()
 }
 
 MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMExecutedObject(parameters),
     _source_var_name(getParam<VariableName>("from_variable")),
     _source_var(*getMFEMProblem().getGridFunction(_source_var_name)),
     _result_var_name(getParam<VariableName>("to_variable")),
     _result_var(*getMFEMProblem().getGridFunction(_result_var_name))
 {
+}
+
+std::set<std::string>
+MFEMSubMeshTransfer::consumedVariableNames() const
+{
+  return {_source_var_name};
+}
+
+std::set<std::string>
+MFEMSubMeshTransfer::producedVariableNames() const
+{
+  return {_result_var_name};
 }
 
 void
