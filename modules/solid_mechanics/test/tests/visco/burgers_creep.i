@@ -36,13 +36,21 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./creep_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
   [SolidMechanics]
     displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
@@ -68,6 +76,22 @@
     rank_two_tensor = creep_strain
     index_j = 0
     index_i = 0
+    execute_on = timestep_end
+  [../]
+  [./strain_yy]
+    type = RankTwoAux
+    variable = strain_yy
+    rank_two_tensor = total_strain
+    index_j = 1
+    index_i = 1
+    execute_on = timestep_end
+  [../]
+  [./creep_strain_yy]
+    type = RankTwoAux
+    variable = creep_strain_yy
+    rank_two_tensor = creep_strain
+    index_j = 1
+    index_i = 1
     execute_on = timestep_end
   [../]
 []
@@ -130,21 +154,26 @@
 []
 
 [Postprocessors]
-  [./stress_xx]
+  [strain_yy]
+    type = ElementAverageValue
+    variable = strain_yy
+  []
+  [creep_strain_yy]
+    type = ElementAverageValue
+    variable = creep_strain_yy
+  []
+  [stress_xx]
     type = ElementAverageValue
     variable = stress_xx
-    block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./strain_xx]
+  []
+  [strain_xx]
     type = ElementAverageValue
     variable = strain_xx
-    block = 'ANY_BLOCK_ID 0'
-  [../]
-  [./creep_strain_xx]
+  []
+  [creep_strain_xx]
     type = ElementAverageValue
     variable = creep_strain_xx
-    block = 'ANY_BLOCK_ID 0'
-  [../]
+  []
 []
 
 [Preconditioning]
@@ -175,5 +204,5 @@
 
 [Outputs]
   file_base = burgers_creep_out
-  exodus = true
+  csv = true
 []

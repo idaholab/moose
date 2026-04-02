@@ -153,12 +153,12 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   _apparent_elasticity_tensor_inv[_qp].zero();
   _elasticity_tensor_inv[_qp].zero();
   _first_elasticity_tensor[_qp].zero();
-  if (_need_viscoelastic_properties_inverse)
-  {
+  if (_longterm_elasticity_tensor)
+    (*_longterm_elasticity_tensor)[_qp].zero();
+  if (_first_elasticity_tensor_inv)
     (*_first_elasticity_tensor_inv)[_qp].zero();
-    if (_longterm_elasticity_tensor)
-      (*_longterm_elasticity_tensor_inv)[_qp].zero();
-  }
+  if (_longterm_elasticity_tensor_inv)
+    (*_longterm_elasticity_tensor_inv)[_qp].zero();
 
   for (unsigned int i = 0; i < _components; ++i)
   {
@@ -186,9 +186,10 @@ LinearViscoelasticityBase::recomputeQpApparentProperties(unsigned int qp)
   // 1. we get the viscoelastic properties and their inverse if needed
   computeQpViscoelasticProperties();
 
-  // This is a temporary fix to allow downstream app tests to pass. Delete these two lines
+  // This is a temporary fix to allow downstream app tests to pass. Delete these three lines
   // once the apps are updated.
-  if (MooseUtils::absoluteFuzzyEqual((*_longterm_elasticity_tensor)[_qp].L2norm(), 0.0))
+  if (_longterm_elasticity_tensor &&
+      MooseUtils::absoluteFuzzyEqual((*_longterm_elasticity_tensor)[_qp].L2norm(), 0.0))
     (*_longterm_elasticity_tensor)[_qp] = _first_elasticity_tensor[_qp];
 
   if (_need_viscoelastic_properties_inverse)
