@@ -30,9 +30,11 @@ requirements:
     - {{ compiler("c") }}
     - {{ compiler("cxx") }}
     - {{ compiler("fortran") }}
+    - gfortran
     - xorg-libx11 1.8.9
     - cmake
     - make
+    - ninja
     - automake
   run:
     - xorg-libx11
