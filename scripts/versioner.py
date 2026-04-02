@@ -521,8 +521,8 @@ class Versioner:
         print(f"ERROR: {message}")
         sys.exit(1)
 
-    @staticmethod
-    def get_packages(ref: str) -> dict[str, Package]:
+    @classmethod
+    def get_packages(cls, ref: str) -> dict[str, Package]:
         """
         Gets the versioned packages for the given git
         reference (typically a commit)
@@ -576,9 +576,15 @@ class Versioner:
             # they have templated variables)
             conda_dir = package["conda"]
             if conda_dir:
-                package["all_influential"].extend(
-                    Versioner.conda_influential(conda_dir)
-                )
+                # meta.yaml, required
+                package["all_influential"].append(cls.conda_meta_path(conda_dir))
+                # conda_build_config.yaml, not required
+                build_config_path = cls.conda_build_config_path(conda_dir)
+                if (
+                    cls.git_file(build_config_path, commit, allow_missing=True)
+                    is not None
+                ):
+                    package["all_influential"].append(build_config_path)
 
             # Make sure dependencies exist
             for dep in package["dependencies"]:
@@ -763,16 +769,6 @@ class Versioner:
         Path to the conda build config file given a conda directory
         """
         return os.path.join(conda_dir, "conda_build_config.yaml")
-
-    @staticmethod
-    def conda_influential(conda_dir: os.PathLike) -> list[str]:
-        """
-        Path to the assumed influential files for a conda package
-        """
-        return [
-            Versioner.conda_meta_path(conda_dir),
-            Versioner.conda_build_config_path(conda_dir),
-        ]
 
     @staticmethod
     def get_template_config() -> TemplateConfig:
