@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#32700'
+  design = 'ArrayMooseVariable.md'
+  [run_with_nodal_constraints]
+    type = RunApp
+    input = 'MWE_array_aux.i'
+    requirement = 'The system shall be able to use nodal constraints in the presence of array variables.'
+  []
+[]
