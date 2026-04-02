@@ -32,11 +32,11 @@ MFEMHypreAMS::validParams()
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
   : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreAMS::constructSolver(const InputParameters &)
+MFEMHypreAMS::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))

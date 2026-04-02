@@ -74,7 +74,12 @@ protected:
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.
-  void DeleteAllBlocks();
+  void DeleteHBlocks();
+
+  /// Deletes the HypreParMatrix associated with any pointer stored in _jacobian_blocks,
+  /// and then proceeds to delete all dynamically allocated memory for _jacobian_blocks
+  /// itself, resetting all dimensions to zero.
+  void DeleteJacobianBlocks();
 
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;

@@ -37,11 +37,8 @@ public:
 
   [[nodiscard]] Moose::MFEM::TimeDependentEquationSystem * GetEquationSystem() const override
   {
-    if (!_equation_system)
-    {
-      MFEM_ABORT("No equation system has been added.");
-    }
-
+    mooseAssert(_equation_system,
+                "No TimeDependentEquationSystem in TimeDependentEquationSystemProblemOperator.");
     return _equation_system.get();
   }
 

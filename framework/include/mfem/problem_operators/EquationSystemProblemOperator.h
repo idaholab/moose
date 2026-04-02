@@ -31,11 +31,7 @@ public:
 
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {
-    if (!_equation_system)
-    {
-      MFEM_ABORT("No equation system has been added to ProblemOperator.");
-    }
-
+    mooseAssert(_equation_system, "No EquationSystem in EquationSystemProblemOperator.");
     return _equation_system.get();
   }
 

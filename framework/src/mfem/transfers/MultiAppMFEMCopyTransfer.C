@@ -70,9 +70,9 @@ MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_
   auto getGF = [&](MFEMProblem & problem, const std::string & name) -> mfem::Vector &
   {
     if (problem.getProblemData().gridfunctions.Has(name))
-      return *problem.getProblemData().gridfunctions.Get(name);
+      return *problem.getGridFunction(name);
     if (problem.getProblemData().cmplx_gridfunctions.Has(name))
-      return *problem.getProblemData().cmplx_gridfunctions.Get(name);
+      return *problem.getComplexGridFunction(name);
     mooseError("No real or complex variable named '", name, "' found.");
   };
 
@@ -119,14 +119,11 @@ MultiAppMFEMCopyTransfer::execute()
     int transfers_done = 0;
     for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
     {
-      if (getFromMultiApp()->hasLocalApp(i))
+      if (getFromMultiApp()->hasLocalApp(i) && getToMultiApp()->hasLocalApp(i))
       {
-        if (getToMultiApp()->hasLocalApp(i))
-        {
-          transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
-                   static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
-          transfers_done++;
-        }
+        transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
+                 static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
+        ++transfers_done;
       }
     }
     if (!transfers_done)

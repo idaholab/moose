@@ -27,7 +27,7 @@ public:
   void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
 protected:
-  void constructSolver(const InputParameters & parameters) override;
+  void constructSolver() override;
 };
 
 #endif

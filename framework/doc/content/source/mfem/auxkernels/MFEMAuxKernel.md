@@ -15,7 +15,7 @@ An `MFEMAuxKernel` is derived from `MFEMGeneralUserObject`, and thus the order o
 can be controlled similar to other MOOSE UserObjects using the `execution_order_group` input
 parameter.
 
-`MFEMAuxKernel` is a purely virtual base class. Derived classes should override the `execute`
+`MFEMAuxKernel` is a base class. Derived classes should override the `execute`
  method to update the `_result_var` during execution.
 
 !if-end!

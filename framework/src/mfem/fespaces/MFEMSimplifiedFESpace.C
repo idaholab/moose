@@ -33,7 +33,7 @@ MFEMSimplifiedFESpace::MFEMSimplifiedFESpace(const InputParameters & parameters)
 int
 MFEMSimplifiedFESpace::getProblemDim() const
 {
-  return getMFEMProblem().mesh().getMFEMParMesh().Dimension();
+  return _pmesh.Dimension();
 }
 
 #endif

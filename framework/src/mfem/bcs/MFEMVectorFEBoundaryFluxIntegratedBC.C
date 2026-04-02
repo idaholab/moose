@@ -37,11 +37,4 @@ MFEMVectorFEBoundaryFluxIntegratedBC::createLFIntegrator()
   return new mfem::VectorFEBoundaryFluxLFIntegrator(_coef);
 }
 
-// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
-mfem::BilinearFormIntegrator *
-MFEMVectorFEBoundaryFluxIntegratedBC::createBFIntegrator()
-{
-  return nullptr;
-}
-
 #endif

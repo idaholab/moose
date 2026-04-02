@@ -34,20 +34,25 @@ MFEMComplexVectorPeriodAveragedPostprocessor::validParams()
 MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    _primal_var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
-        getParam<VariableName>("primal_variable"))),
-    _dual_var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
-        getParam<VariableName>("dual_variable"))),
-    _l2_fec(_primal_var.ParFESpace()->GetMaxElementOrder(),
-            getMFEMProblem().mesh().getMFEMParMesh().Dimension()),
-    _scalar_test_fespace(&getMFEMProblem().mesh().getMFEMParMesh(), &_l2_fec),
+    MFEMBlockRestrictable(
+        parameters,
+        getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("primal_variable"))),
+    _l2_fec(getMFEMProblem()
+                .getComplexGridFunction(getParam<VariableName>("primal_variable"))
+                ->ParFESpace()
+                ->GetMaxElementOrder(),
+            getMesh().Dimension()),
+    _scalar_test_fespace(const_cast<mfem::ParMesh *>(&getMesh()), &_l2_fec),
     _scalar_var(&_scalar_test_fespace),
     _scalar_coef(getScalarCoefficient("coefficient")),
-    _primal_var_real_coef(&_primal_var.real()),
-    _primal_var_imag_coef(&_primal_var.imag()),
-    _dual_var_real_coef(&_dual_var.real()),
-    _dual_var_imag_coef(&_dual_var.imag()),
+    _primal_var_real_coef(
+        getVectorCoefficientByName(getParam<VariableName>("primal_variable") + "_real")),
+    _primal_var_imag_coef(
+        getVectorCoefficientByName(getParam<VariableName>("primal_variable") + "_imag")),
+    _dual_var_real_coef(
+        getVectorCoefficientByName(getParam<VariableName>("dual_variable") + "_real")),
+    _dual_var_imag_coef(
+        getVectorCoefficientByName(getParam<VariableName>("dual_variable") + "_imag")),
     _real_inner_product_coef(_primal_var_real_coef, _dual_var_real_coef),
     _imag_inner_product_coef(_primal_var_imag_coef, _dual_var_imag_coef),
     _sum_coef(_real_inner_product_coef, _imag_inner_product_coef, 0.5, 0.5),

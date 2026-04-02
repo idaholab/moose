@@ -4,7 +4,7 @@
 
 ## Overview
 
-AuxKernel for calculating the divegence of an $H(\mathrm{div})$ conforming source variable defined
+AuxKernel for calculating the divergence of an $H(\mathrm{div})$ conforming source variable defined
 on a 3D Raviart-Thomas finite element space and storing it in a scalar elemental result variable
 defined on an $L^2$ FE space.
 

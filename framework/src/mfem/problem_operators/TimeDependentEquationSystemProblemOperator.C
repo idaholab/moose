@@ -25,7 +25,6 @@ void
 TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   TimeDependentProblemOperator::Init(X);
-  GetEquationSystem()->BuildEquationSystem();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
   ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
@@ -37,36 +36,24 @@ TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 TimeDependentEquationSystemProblemOperator::Solve()
 {
-  // Initialise time derivative
-  for (const auto i : index_range(_trial_var_names))
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    auto & time_derivative_name =
-        _problem_data.time_derivative_map.getTimeDerivativeName(trial_var_name);
-    auto * trial_var = _problem_data.gridfunctions.Get(trial_var_name);
-    auto * trial_var_time_derivative = _problem_data.gridfunctions.Get(time_derivative_name);
+  auto & dt = _problem.dt();
+  auto & gfs = _problem_data.gridfunctions;
+  auto & tdm = _problem_data.time_derivative_map;
 
-    *trial_var_time_derivative = *trial_var;
-  }
+  // Initialise time derivative
+  for (const auto & trial_var_name : _trial_var_names)
+    gfs.GetRef(tdm.getTimeDerivativeName(trial_var_name)) = gfs.GetRef(trial_var_name);
+
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
-  _problem_data.ode_solver->Step(*_trial_true_vector, _problem.time(), _problem.dt());
+  _problem_data.ode_solver->Step(*_trial_true_vector, _problem.time(), dt);
   // Synchonise time dependent GridFunctions with updated DoF data.
   SetTrialVariablesFromTrueVectors();
 
   // Set time derivatives
-  for (const auto i : index_range(_trial_var_names))
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    auto & time_derivative_name =
-        _problem_data.time_derivative_map.getTimeDerivativeName(trial_var_name);
-    auto * trial_var = _problem_data.gridfunctions.Get(trial_var_name);
-    auto * trial_var_time_derivative = _problem_data.gridfunctions.Get(time_derivative_name);
-
-    *trial_var_time_derivative -= *trial_var;
-    *trial_var_time_derivative /= -_problem.dt();
-  }
+  for (const auto & trial_var_name : _trial_var_names)
+    (gfs.GetRef(tdm.getTimeDerivativeName(trial_var_name)) -= gfs.GetRef(trial_var_name)) /= -dt;
 }
 
 void
@@ -75,7 +62,6 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                           mfem::Vector & X_new)
 {
   X_new = X_old;
-  SetTrialVariablesFromTrueVectors();
 
   if ((GetEquationSystem()->_non_linear))
     for (const auto i : index_range(_trial_variables))
@@ -93,7 +79,6 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, X_new);
-  SetTrialVariablesFromTrueVectors();
 }
 
 void

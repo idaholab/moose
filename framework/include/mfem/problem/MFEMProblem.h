@@ -15,6 +15,7 @@
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
+#include "MFEMComplexVariable.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -307,7 +308,18 @@ public:
   /**
    * @returns a shared pointer to an MFEM parallel grid function
    */
-  std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
+  std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name)
+  {
+    return _problem_data.gridfunctions.GetShared(name);
+  }
+
+  /**
+   * @returns a shared pointer to an MFEM parallel complex grid function
+   */
+  std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction(const std::string & name)
+  {
+    return _problem_data.cmplx_gridfunctions.GetShared(name);
+  }
 
   enum class NumericType
   {

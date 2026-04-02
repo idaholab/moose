@@ -27,7 +27,7 @@ MFEMIndicator::MFEMIndicator(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _var_name(getParam<VariableName>("variable")),
     _kernel_name(getParam<std::string>("kernel")),
-    _fespace(*getMFEMProblem().getProblemData().gridfunctions.Get(_var_name)->ParFESpace())
+    _fespace(*getMFEMProblem().getGridFunction(_var_name)->ParFESpace())
 {
 }
 

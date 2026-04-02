@@ -37,7 +37,7 @@ MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
     _dk_du_coef(getScalarCoefficient("dk_du_coefficient")),
-    _trial_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(getTrialVariableName()))
+    _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
 {
 }
 
