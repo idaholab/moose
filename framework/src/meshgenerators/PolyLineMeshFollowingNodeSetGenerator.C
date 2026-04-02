@@ -98,6 +98,10 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
   if (!base_mesh->is_serial())
     paramError("input", "Input mesh must not be distributed");
 
+  // We may rely on boundary info caches later
+  if (!base_mesh->preparation().has_boundary_id_sets)
+    base_mesh->get_boundary_info().regenerate_id_sets();
+
   // Get nodeset ID in input mesh
   const auto nodeset_id =
       MooseMeshUtils::getBoundaryID(getParam<BoundaryName>("nodeset"), *base_mesh);
