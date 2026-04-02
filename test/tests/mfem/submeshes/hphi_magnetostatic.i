@@ -44,7 +44,6 @@ vacuum_permeability = 1.0
   [vacuum]
     type = MFEMDomainSubMesh
     block = vacuum_dom
-    execution_order_group = 2
   []
 []
 

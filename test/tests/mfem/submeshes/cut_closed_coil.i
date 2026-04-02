@@ -44,7 +44,6 @@ coil_conductivity = 1.0
   [coil]
     type = MFEMDomainSubMesh
     block = coil_dom
-    execution_order_group = 2
   []
 []
 
