@@ -50,6 +50,34 @@ public:
 
   InputParameters getValidParams() { return _factory->getValidParams(_mesh_type); }
 
+  std::shared_ptr<M> buildMooseMeshOnly(InputParameters & mesh_params,
+                                        std::string generator_class,
+                                        InputParameters generator_params,
+                                        const std::string & mesh_name = "moose_mesh",
+                                        const std::string & generator_name = "mesh_generator")
+  {
+    // If the parameters were created without using the factory
+    // object, we need to set the app parameter ourselves.
+    mesh_params.addPrivateParam(MooseBase::app_param, _app.get());
+    generator_params.addPrivateParam(MooseBase::app_param, _app.get());
+    auto moose_mesh = _factory->create<M>(_mesh_type, mesh_name, mesh_params);
+    _app->actionWarehouse().mesh() = moose_mesh;
+    if (generator_class != "")
+    {
+      std::unique_ptr<MeshBase> libmesh =
+          _factory->create<MeshGenerator>(generator_class, generator_name, generator_params)
+              ->generate();
+      libmesh->prepare_for_use();
+      moose_mesh->setMeshBase(std::move(libmesh));
+    }
+    else
+    {
+      moose_mesh->setMeshBase(moose_mesh->buildMeshBaseObject());
+    }
+    moose_mesh->buildMesh();
+    return moose_mesh;
+  }
+
   void buildMesh(InputParameters & mesh_params, bool fallback = false, bool first_order = false)
   {
     // The input parameters in the third argument won't be used, but
@@ -63,25 +91,7 @@ public:
                  bool fallback = false,
                  bool first_order = false)
   {
-    // If the parameters were created without using the factory
-    // object, we need to set the app parameter ourselves.
-    mesh_params.addPrivateParam(MooseBase::app_param, _app.get());
-    generator_params.addPrivateParam(MooseBase::app_param, _app.get());
-    _moose_mesh_ptr = _factory->create<M>(_mesh_type, "moose_mesh", mesh_params);
-    _app->actionWarehouse().mesh() = _moose_mesh_ptr;
-    if (generator_class != "")
-    {
-      std::unique_ptr<MeshBase> libmesh =
-          _factory->create<MeshGenerator>(generator_class, "mesh_generator", generator_params)
-              ->generate();
-      libmesh->prepare_for_use();
-      _moose_mesh_ptr->setMeshBase(std::move(libmesh));
-    }
-    else
-    {
-      _moose_mesh_ptr->setMeshBase(_moose_mesh_ptr->buildMeshBaseObject());
-    }
-    _moose_mesh_ptr->buildMesh();
+    _moose_mesh_ptr = buildMooseMeshOnly(mesh_params, generator_class, generator_params);
     _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, fallback, first_order);
   }
 
@@ -113,6 +123,7 @@ public:
 };
 
 using Coord = std::vector<mfem::real_t>;
+using Connectivity = std::vector<dof_id_type>;
 
 std::set<std::set<Coord>>
 getElementSet(std::shared_ptr<mfem::ParMesh> mesh, mfem::Element::Type elem_type)
@@ -396,13 +407,202 @@ struct ElementTestData
   mfem::Element::Type type;
 };
 
+ElementTestData edge2Data();
+ElementTestData edge3Data();
+ElementTestData edge4Data();
+ElementTestData tri3Data();
+ElementTestData tri6Data();
+ElementTestData tri7Data();
+ElementTestData quad4Data();
+ElementTestData quad8Data();
+ElementTestData quad9Data();
+ElementTestData tet4Data();
+ElementTestData tet10Data();
+ElementTestData tet14Data();
+ElementTestData pyr5Data();
+ElementTestData pyr13Data();
+ElementTestData pyr14Data();
+ElementTestData prism6Data();
+ElementTestData prism15Data();
+ElementTestData prism18Data();
+ElementTestData hex8Data();
+ElementTestData hex20Data();
+ElementTestData hex27Data();
+
+enum class ElementCase
+{
+  Edge2,
+  Edge3,
+  Edge4,
+  Tri3,
+  Tri6,
+  Tri7,
+  Quad4,
+  Quad8,
+  Quad9,
+  Tet4,
+  Tet10,
+  Tet14,
+  Pyr5,
+  Pyr13,
+  Pyr14,
+  Prism6,
+  Prism15,
+  Prism18,
+  Hex8,
+  Hex20,
+  Hex27
+};
+
+ElementTestData
+elementData(ElementCase elem_case)
+{
+  switch (elem_case)
+  {
+    case ElementCase::Edge2:
+      return edge2Data();
+    case ElementCase::Edge3:
+      return edge3Data();
+    case ElementCase::Edge4:
+      return edge4Data();
+    case ElementCase::Tri3:
+      return tri3Data();
+    case ElementCase::Tri6:
+      return tri6Data();
+    case ElementCase::Tri7:
+      return tri7Data();
+    case ElementCase::Quad4:
+      return quad4Data();
+    case ElementCase::Quad8:
+      return quad8Data();
+    case ElementCase::Quad9:
+      return quad9Data();
+    case ElementCase::Tet4:
+      return tet4Data();
+    case ElementCase::Tet10:
+      return tet10Data();
+    case ElementCase::Tet14:
+      return tet14Data();
+    case ElementCase::Pyr5:
+      return pyr5Data();
+    case ElementCase::Pyr13:
+      return pyr13Data();
+    case ElementCase::Pyr14:
+      return pyr14Data();
+    case ElementCase::Prism6:
+      return prism6Data();
+    case ElementCase::Prism15:
+      return prism15Data();
+    case ElementCase::Prism18:
+      return prism18Data();
+    case ElementCase::Hex8:
+      return hex8Data();
+    case ElementCase::Hex20:
+      return hex20Data();
+    case ElementCase::Hex27:
+      return hex27Data();
+  }
+
+  mooseError("Unhandled element test case.");
+}
+
+std::string
+elementCaseName(ElementCase elem_case)
+{
+  switch (elem_case)
+  {
+    case ElementCase::Edge2:
+      return "EDGE2";
+    case ElementCase::Edge3:
+      return "EDGE3";
+    case ElementCase::Edge4:
+      return "EDGE4";
+    case ElementCase::Tri3:
+      return "TRI3";
+    case ElementCase::Tri6:
+      return "TRI6";
+    case ElementCase::Tri7:
+      return "TRI7";
+    case ElementCase::Quad4:
+      return "QUAD4";
+    case ElementCase::Quad8:
+      return "QUAD8";
+    case ElementCase::Quad9:
+      return "QUAD9";
+    case ElementCase::Tet4:
+      return "TET4";
+    case ElementCase::Tet10:
+      return "TET10";
+    case ElementCase::Tet14:
+      return "TET14";
+    case ElementCase::Pyr5:
+      return "PYRAMID5";
+    case ElementCase::Pyr13:
+      return "PYRAMID13";
+    case ElementCase::Pyr14:
+      return "PYRAMID14";
+    case ElementCase::Prism6:
+      return "PRISM6";
+    case ElementCase::Prism15:
+      return "PRISM15";
+    case ElementCase::Prism18:
+      return "PRISM18";
+    case ElementCase::Hex8:
+      return "HEX8";
+    case ElementCase::Hex20:
+      return "HEX20";
+    case ElementCase::Hex27:
+      return "HEX27";
+  }
+
+  mooseError("Unhandled element test case.");
+}
+
+std::pair<std::string, int>
+firstOrderElementInfo(ElementCase elem_case)
+{
+  switch (elem_case)
+  {
+    case ElementCase::Edge2:
+    case ElementCase::Edge3:
+    case ElementCase::Edge4:
+      return {"EDGE2", 2};
+    case ElementCase::Tri3:
+    case ElementCase::Tri6:
+    case ElementCase::Tri7:
+      return {"TRI3", 3};
+    case ElementCase::Quad4:
+    case ElementCase::Quad8:
+    case ElementCase::Quad9:
+      return {"QUAD4", 4};
+    case ElementCase::Tet4:
+    case ElementCase::Tet10:
+    case ElementCase::Tet14:
+      return {"TET4", 4};
+    case ElementCase::Pyr5:
+    case ElementCase::Pyr13:
+    case ElementCase::Pyr14:
+      return {"PYRAMID5", 5};
+    case ElementCase::Prism6:
+    case ElementCase::Prism15:
+    case ElementCase::Prism18:
+      return {"PRISM6", 6};
+    case ElementCase::Hex8:
+    case ElementCase::Hex20:
+    case ElementCase::Hex27:
+      return {"HEX8", 8};
+  }
+
+  mooseError("Unhandled element test case.");
+}
+
 ElementTestData
 edge2Data()
 {
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE2";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{1., 0., 0.}, {2., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   return {mesh_params,
@@ -419,7 +619,7 @@ edge3Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE3";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {4., 0., 0.}, {1., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   return {mesh_params,
@@ -436,7 +636,7 @@ edge4Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "EDGE4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., 0., 0.}, {26., 0., 0.}, {0., 0., 0.}, {7., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -454,7 +654,7 @@ tri3Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TRI3";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {2., 0., 0.}, {0., 2., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   return {mesh_params,
@@ -471,7 +671,7 @@ tri6Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TRI6";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.}, {1., 0., 0.}, {0., 1., 0.}, {.5, 0.1, 0.0}, {0.5, 0.5, 0.0}, {0., .5, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -489,7 +689,7 @@ tri7Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TRI7";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
                                                           {1., 0., 0.},
                                                           {0., 1., 0.},
@@ -512,7 +712,7 @@ quad4Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.}, {1., 0., 0.}, {2., 2., 0.}, {0.5, 1.0, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -530,7 +730,7 @@ quad8Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD8";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
                                                           {1., 0., 0.},
                                                           {1., 1., 0.},
@@ -554,7 +754,7 @@ quad9Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "QUAD9";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7, 8};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
                                                           {1., 0., 0.},
                                                           {1., 1., 0.},
@@ -579,7 +779,7 @@ tet4Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0.0, -1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -597,7 +797,7 @@ tet10Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET10";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -624,7 +824,7 @@ tet14Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET14";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -655,7 +855,7 @@ pyr5Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID5";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1.0, 0.}, {1.5, 0., 2.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -673,7 +873,7 @@ pyr13Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID13";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -703,7 +903,7 @@ pyr14Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID14";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -734,7 +934,7 @@ prism6Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM6";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
@@ -757,7 +957,7 @@ prism15Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM15";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -794,7 +994,7 @@ prism18Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PRISM18";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
@@ -834,7 +1034,7 @@ hex8Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX8";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
                                                           {1., 0., 0.},
                                                           {2., 1., 1.},
@@ -865,7 +1065,7 @@ hex20Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX20";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.},  {1., 0., 0.},  {1., 1., 0.},   {0., 1., 0.},   {0., 0., 1.},
@@ -895,7 +1095,7 @@ hex27Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX27";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {
+  mg_params.set<Connectivity>("element_connectivity") = {
       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
       14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
@@ -924,19 +1124,18 @@ hex27Data()
 }
 
 class ElementGeneratorMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
-                                 public testing::WithParamInterface<ElementTestData>
+                                 public testing::WithParamInterface<ElementCase>
 {
 public:
-  static std::string testParamName(const testing::TestParamInfo<ElementTestData> & info)
+  static std::string testParamName(const testing::TestParamInfo<ElementCase> & info)
   {
-    auto & params = info.param.mg_params;
-    return params.template get<MooseEnum>("elem_type");
+    return elementCaseName(info.param);
   }
 };
 
 TEST_P(ElementGeneratorMFEMTest, CheckElem)
 {
-  auto data = GetParam();
+  auto data = elementData(GetParam());
   buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
@@ -959,35 +1158,35 @@ TEST_P(ElementGeneratorMFEMTest, CheckElem)
 
 INSTANTIATE_TEST_SUITE_P(SingleElement,
                          ElementGeneratorMFEMTest,
-                         testing::Values(edge2Data(),
-                                         edge3Data(),
-                                         edge4Data(),
-                                         tri3Data(),
-                                         tri6Data(),
-                                         quad4Data(),
-                                         quad8Data(),
-                                         quad9Data(),
-                                         tet4Data(),
-                                         tet10Data(),
-                                         pyr5Data(),
+                         testing::Values(ElementCase::Edge2,
+                                         ElementCase::Edge3,
+                                         ElementCase::Edge4,
+                                         ElementCase::Tri3,
+                                         ElementCase::Tri6,
+                                         ElementCase::Quad4,
+                                         ElementCase::Quad8,
+                                         ElementCase::Quad9,
+                                         ElementCase::Tet4,
+                                         ElementCase::Tet10,
+                                         ElementCase::Pyr5,
                                          // A bug in MFEM currently means we can't support
                                          // higher-order libmesh pyramids. Once that is fixed
                                          // these cases should be uncommented.
-                                         // pyr13Data(),
-                                         // pyr14Data(),
-                                         prism6Data(),
-                                         prism15Data(),
-                                         prism18Data(),
-                                         hex8Data(),
-                                         hex20Data(),
-                                         hex27Data()),
+                                         // ElementCase::Pyr13,
+                                         // ElementCase::Pyr14,
+                                         ElementCase::Prism6,
+                                         ElementCase::Prism15,
+                                         ElementCase::Prism18,
+                                         ElementCase::Hex8,
+                                         ElementCase::Hex20,
+                                         ElementCase::Hex27),
                          ElementGeneratorMFEMTest::testParamName);
 
 using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest;
 
 TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
 {
-  auto data = GetParam();
+  auto data = elementData(GetParam());
   EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
 }
 
@@ -995,19 +1194,45 @@ TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
 // libmesh pyramids. Once that is fixed this test should be removed.
 INSTANTIATE_TEST_SUITE_P(SingleElement,
                          UnsupportedElementGeneratorMFEMTest,
-                         testing::Values(pyr13Data(), pyr14Data()),
+                         testing::Values(ElementCase::Pyr13, ElementCase::Pyr14),
                          UnsupportedElementGeneratorMFEMTest::testParamName);
+
+enum class FallbackElementCase
+{
+  Tri7,
+  Tet14
+};
+
+std::pair<ElementTestData, ElementTestData>
+fallbackElementData(FallbackElementCase fallback_case)
+{
+  switch (fallback_case)
+  {
+    case FallbackElementCase::Tri7:
+      return {tri7Data(), tri6Data()};
+    case FallbackElementCase::Tet14:
+      return {tet14Data(), tet10Data()};
+  }
+
+  mooseError("Unhandled fallback element test case.");
+}
 
 class ElementComparisonMFEMTest
   : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
-    public testing::WithParamInterface<std::pair<ElementTestData, ElementTestData>>
+    public testing::WithParamInterface<FallbackElementCase>
 {
 public:
-  static std::string
-  testParamName(const testing::TestParamInfo<std::pair<ElementTestData, ElementTestData>> & info)
+  static std::string testParamName(const testing::TestParamInfo<FallbackElementCase> & info)
   {
-    auto & params = info.param.first.mg_params;
-    return params.template get<MooseEnum>("elem_type");
+    switch (info.param)
+    {
+      case FallbackElementCase::Tri7:
+        return "TRI7";
+      case FallbackElementCase::Tet14:
+        return "TET14";
+    }
+
+    mooseError("Unhandled fallback element test case.");
   }
 };
 
@@ -1015,15 +1240,44 @@ using LibMeshToMFEMMeshFallbackTest = ElementComparisonMFEMTest;
 
 TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
 {
-  auto data = GetParam().first;
+  auto [data, expected_data] = fallbackElementData(GetParam());
   // A warning should be emitted when converting from TRI7 to TRI6
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false),
-               std::runtime_error);
+  {
+    const char * argv[2] = {"foo", "\0"};
+    auto warning_app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
+    auto * warning_factory = &warning_app->getFactory();
+    auto warning_mesh_type = Registry::getClassName<MeshGeneratorMesh>();
+    auto warning_mesh_params = data.mesh_params;
+    auto warning_generator_params = data.mg_params;
+    warning_mesh_params.addPrivateParam(MooseBase::app_param, warning_app.get());
+    warning_generator_params.addPrivateParam(MooseBase::app_param, warning_app.get());
+    auto warning_mesh =
+        warning_factory->create<MeshGeneratorMesh>(warning_mesh_type, "warning_mesh", warning_mesh_params);
+    warning_app->actionWarehouse().mesh() = warning_mesh;
+    std::unique_ptr<MeshBase> libmesh =
+        warning_factory
+            ->create<MeshGenerator>("ElementGenerator", "warning_mesh_generator", warning_generator_params)
+            ->generate();
+    libmesh->prepare_for_use();
+    warning_mesh->setMeshBase(std::move(libmesh));
+    warning_mesh->buildMesh();
+    EXPECT_THROW(buildMFEMMesh(*warning_mesh, true, false), std::runtime_error);
+  }
+
   // Temporarily allow warnings to be emitted, so we can test the
   // conversion actually works properly.
+  const auto throw_on_warning = Moose::_throw_on_warning;
   Moose::_throw_on_warning = false;
-  _mfem_mesh_ptr = buildMFEMMesh(*_moose_mesh_ptr, true, false);
-  Moose::_throw_on_warning = true;
+  try
+  {
+    buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false);
+  }
+  catch (...)
+  {
+    Moose::_throw_on_warning = throw_on_warning;
+    throw;
+  }
+  Moose::_throw_on_warning = throw_on_warning;
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
   EXPECT_EQ(data.expected_element, actual_elements);
@@ -1033,41 +1287,37 @@ TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
 
-  auto data2 = GetParam().second;
   std::shared_ptr<MeshGeneratorMesh> expected_mesh =
-      buildAdditionalMesh(data2.mesh_params, "ElementGenerator", data2.mg_params);
+      buildAdditionalMesh(expected_data.mesh_params, "ElementGenerator", expected_data.mg_params);
   checkTransform(
       expected_mesh->elemPtr(0), *_mfem_mesh_ptr->GetElementTransformation(0), data.test_coords);
 }
 
 TEST_P(LibMeshToMFEMMeshFallbackTest, CheckError)
 {
-  auto data = GetParam().first;
+  auto data = fallbackElementData(GetParam()).first;
   EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
 }
 
 INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
                          LibMeshToMFEMMeshFallbackTest,
-                         testing::Values(std::make_pair(tri7Data(), tri6Data()),
-                                         std::make_pair(tet14Data(), tet10Data())),
+                         testing::Values(FallbackElementCase::Tri7, FallbackElementCase::Tet14),
                          ElementComparisonMFEMTest::testParamName);
 
 class LibMeshToMFEMMeshFirstOrderTest
   : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
-    public testing::WithParamInterface<std::tuple<ElementTestData, std::string, int>>
+    public testing::WithParamInterface<ElementCase>
 {
 public:
-  static std::string
-  testParamName(const testing::TestParamInfo<std::tuple<ElementTestData, std::string, int>> & info)
+  static std::string testParamName(const testing::TestParamInfo<ElementCase> & info)
   {
-    auto & params = std::get<0>(info.param).mg_params;
-    return params.template get<MooseEnum>("elem_type");
+    return elementCaseName(info.param);
   }
 };
 
 TEST_P(LibMeshToMFEMMeshFirstOrderTest, CheckConversion)
 {
-  auto data = std::get<0>(GetParam());
+  auto data = elementData(GetParam());
   buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, false, true);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
@@ -1078,9 +1328,9 @@ TEST_P(LibMeshToMFEMMeshFirstOrderTest, CheckConversion)
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
 
-  const int M = std::get<2>(GetParam());
-  data.mg_params.set<MooseEnum>("elem_type") = std::get<1>(GetParam());
-  data.mg_params.set<std::vector<unsigned long>>("element_connectivity").resize(M);
+  const auto [first_order_elem_type, M] = firstOrderElementInfo(GetParam());
+  data.mg_params.set<MooseEnum>("elem_type") = first_order_elem_type;
+  data.mg_params.set<Connectivity>("element_connectivity").resize(M);
   data.mg_params.set<std::vector<Point>>("nodal_positions").resize(M);
   std::shared_ptr<MeshGeneratorMesh> expected_mesh =
       buildAdditionalMesh(data.mesh_params, "ElementGenerator", data.mg_params);
@@ -1090,27 +1340,27 @@ TEST_P(LibMeshToMFEMMeshFirstOrderTest, CheckConversion)
 
 INSTANTIATE_TEST_SUITE_P(ConvertToFirstOrder,
                          LibMeshToMFEMMeshFirstOrderTest,
-                         testing::Values(std::make_tuple(edge2Data(), std::string("EDGE2"), 2),
-                                         std::make_tuple(edge3Data(), std::string("EDGE2"), 2),
-                                         std::make_tuple(edge4Data(), std::string("EDGE2"), 2),
-                                         std::make_tuple(tri3Data(), std::string("TRI3"), 3),
-                                         std::make_tuple(tri6Data(), std::string("TRI3"), 3),
-                                         std::make_tuple(tri7Data(), std::string("TRI3"), 3),
-                                         std::make_tuple(quad4Data(), std::string("QUAD4"), 4),
-                                         std::make_tuple(quad8Data(), std::string("QUAD4"), 4),
-                                         std::make_tuple(quad9Data(), std::string("QUAD4"), 4),
-                                         std::make_tuple(tet4Data(), std::string("TET4"), 4),
-                                         std::make_tuple(tet10Data(), std::string("TET4"), 4),
-                                         std::make_tuple(tet14Data(), std::string("TET4"), 4),
-                                         std::make_tuple(pyr5Data(), std::string("PYRAMID5"), 5),
-                                         std::make_tuple(pyr13Data(), std::string("PYRAMID5"), 5),
-                                         std::make_tuple(pyr14Data(), std::string("PYRAMID5"), 5),
-                                         std::make_tuple(prism6Data(), std::string("PRISM6"), 6),
-                                         std::make_tuple(prism15Data(), std::string("PRISM6"), 6),
-                                         std::make_tuple(prism18Data(), std::string("PRISM6"), 6),
-                                         std::make_tuple(hex8Data(), std::string("HEX8"), 8),
-                                         std::make_tuple(hex20Data(), std::string("HEX8"), 8),
-                                         std::make_tuple(hex27Data(), std::string("HEX8"), 8)),
+                         testing::Values(ElementCase::Edge2,
+                                         ElementCase::Edge3,
+                                         ElementCase::Edge4,
+                                         ElementCase::Tri3,
+                                         ElementCase::Tri6,
+                                         ElementCase::Tri7,
+                                         ElementCase::Quad4,
+                                         ElementCase::Quad8,
+                                         ElementCase::Quad9,
+                                         ElementCase::Tet4,
+                                         ElementCase::Tet10,
+                                         ElementCase::Tet14,
+                                         ElementCase::Pyr5,
+                                         ElementCase::Pyr13,
+                                         ElementCase::Pyr14,
+                                         ElementCase::Prism6,
+                                         ElementCase::Prism15,
+                                         ElementCase::Prism18,
+                                         ElementCase::Hex8,
+                                         ElementCase::Hex20,
+                                         ElementCase::Hex27),
                          LibMeshToMFEMMeshFirstOrderTest::testParamName);
 
 #endif
