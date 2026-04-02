@@ -67,6 +67,10 @@ std::unique_ptr<MeshBase>
 MeshRepairGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // We're trying to repair a potentially broken mesh; we'll just
+  // start with a full prepare rather than trying to be efficient and
+  // risking missing something.
   mesh->prepare_for_use();
 
   // Blanket ban on distributed. This can be relaxed for some operations if needed
