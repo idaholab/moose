@@ -41,6 +41,7 @@
     add_variables = true
     strain = FINITE
     generate_output = 'vonmises_stress effective_alt_total_strain'
+    incremental = true
   []
 []
 

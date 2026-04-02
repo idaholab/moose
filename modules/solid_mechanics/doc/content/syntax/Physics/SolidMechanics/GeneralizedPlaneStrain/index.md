@@ -31,15 +31,13 @@ The `GeneralizedPlaneStrain` Action is used to construct the kernels, user objec
 ### Subblocks
 
 The subblocks of the GeneralizedPlaneStrain action are what triggers MOOSE objects to be built.
-If a generalized plane strain model is applied for the whole simulation domain, a single subblock should be used
-
-!listing modules/solid_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
-
-if different mesh subdomain has different generalized plane strain model, multiple subblocks with subdomain restrictions can be used.
+If a generalized plane strain model is applied for the whole simulation domain, a single subblock should be used.
+If different mesh subdomain has different generalized plane strain model, multiple subblocks with subdomain restrictions can be used.
+This syntax is paired with the `[Kernels/SolidMechanics]` syntax which is deprecated.
 
 !listing modules/solid_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_squares.i block=Physics/SolidMechanics/GeneralizedPlaneStrain
 
-An example of using generalized plane strain action through the Solid Mechanics quasi-static physics block with a different `out_of_plane_direction` than the default of $z$  is given by:
+The non-deprecated syntax is to use the generalized plane strain action through the Solid Mechanics quasi-static physics block with a different `out_of_plane_direction` than the default of $z$ is given by:
 
 !listing modules/solid_mechanics/test/tests/2D_different_planes/gps_xz.i block=Physics/SolidMechanics/QuasiStatic/generalized_plane_strain
 

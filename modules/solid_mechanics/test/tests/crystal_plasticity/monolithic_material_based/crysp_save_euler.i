@@ -2,21 +2,12 @@
   type = GeneratedMesh
   dim = 2
   elem_type = QUAD4
-  displacements = 'disp_x disp_y'
   nx = 2
   ny = 2
 []
 
-[Variables]
-  [./disp_x]
-    block = 0
-  [../]
-  [./disp_y]
-    block = 0
-  [../]
-[]
-
 [GlobalParams]
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
@@ -176,11 +167,6 @@
     gprops = '1 4 60.8 5 8 60.8 9 12 60.8'
     tan_mod_type = exact
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y'
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensorCP
     block = 0
@@ -244,9 +230,11 @@
   exodus = true
 []
 
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = finite
+    incremental = true
   [../]
 []
+

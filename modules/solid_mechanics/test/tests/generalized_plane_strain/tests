@@ -83,7 +83,7 @@
     type = 'Exodiff'
     input = 'out_of_plane_pressure.i'
     exodiff = 'out_of_plane_pressure_out.e'
-    cli_args = 'Physics/SolidMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_function=0 Physics/SolidMechanics/GeneralizedPlaneStrain/gps/out_of_plane_pressure_material=traction_material'
+    cli_args = 'Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_function=0 Physics/SolidMechanics/QuasiStatic/gps/out_of_plane_pressure_material=traction_material'
     abs_zero = 1e-9
     requirement = 'The system shall support setting the out-of-plane pressure using a material property for generalized plane strain problems'
     design = 'GeneralizedPlaneStrainAction.md'

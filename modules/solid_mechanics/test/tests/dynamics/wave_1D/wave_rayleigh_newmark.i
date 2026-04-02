@@ -14,6 +14,23 @@
 # The displacement at the second, third and fourth node at t = 0.1 are
 # -7.776268399030435152e-02, 1.949967184623528985e-02 and -4.615737877580032046e-03, respectively
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    newmark_beta = 0.3025
+    newmark_gamma = 0.6
+    mass_damping_coefficient = 0.1
+    strain = SMALL
+    incremental = false
+    stiffness_damping_coefficient = 0.1
+  [../]
+[]
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -29,28 +46,7 @@
 []
 
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./accel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./accel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_z]
-  [../]
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -62,87 +58,8 @@
 
 []
 
-[Kernels]
-  [./DynamicSolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    stiffness_damping_coefficient = 0.1
-  [../]
-  [./inertia_x]
-    type = InertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    beta = 0.3025
-    gamma = 0.6
-    eta=0.1
-  [../]
-  [./inertia_y]
-    type = InertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    beta = 0.3025
-    gamma = 0.6
-    eta=0.1
-  [../]
-  [./inertia_z]
-    type = InertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-    beta = 0.3025
-    gamma = 0.6
-    eta = 0.1
-  [../]
-
-[]
 
 [AuxKernels]
-  [./accel_x]
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_x]
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
-  [./accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
-  [./accel_z]
-    type = NewmarkAccelAux
-    variable = accel_z
-    displacement = disp_z
-    velocity = vel_z
-    beta = 0.3025
-    execute_on = timestep_end
-  [../]
-  [./vel_z]
-    type = NewmarkVelAux
-    variable = vel_z
-    acceleration = accel_z
-    gamma = 0.6
-    execute_on = timestep_end
-  [../]
   [./stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -256,11 +173,6 @@
     C_ijkl = '1 0'
   [../]
 
-  [./strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
 
   [./stress]
     type = ComputeLinearElasticStress

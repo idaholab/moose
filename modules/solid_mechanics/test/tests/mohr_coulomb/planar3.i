@@ -16,22 +16,9 @@
   zmax = 0.5
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
-
-[Kernels]
-  [SolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-  [../]
-[]
-
 
 [BCs]
   [./x]
@@ -219,11 +206,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -240,6 +222,14 @@
     debug_stress_change = 1E-5
     debug_pm_change = '1E-6 1E-6 1E-6 1E-6 1E-6 1E-6'
     debug_intnl_change = 1E-6
+  [../]
+[]
+
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    incremental = true
+    strain = finite
   [../]
 []
 

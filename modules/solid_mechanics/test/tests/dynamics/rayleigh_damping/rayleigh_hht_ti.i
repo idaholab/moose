@@ -25,6 +25,21 @@
 # The system will come to steady state slowly after the pressure becomes constant.
 # Alpha equal to zero will result in Newmark integration.
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
+[Physics/SolidMechanics/Dynamic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = false
+    stiffness_damping_coefficient = 0.1
+    hht_alpha = 0.11
+  [../]
+[]
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -39,28 +54,7 @@
   zmax = 0.1
 []
 
-[Variables]
-  [disp_x]
-  []
-  [disp_y]
-  []
-  [disp_z]
-  []
-[]
-
 [AuxVariables]
-  [vel_x]
-  []
-  [accel_x]
-  []
-  [vel_y]
-  []
-  [accel_y]
-  []
-  [vel_z]
-  []
-  [accel_z]
-  []
   [stress_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -72,67 +66,8 @@
 
 []
 
-[Kernels]
-  [DynamicSolidMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    stiffness_damping_coefficient = 0.1
-    hht_alpha = 0.11
-  []
-  [inertia_x]
-    type = InertialForce
-    variable = disp_x
-    eta = 0.1
-    alpha = 0.11
-  []
-  [inertia_y]
-    type = InertialForce
-    variable = disp_y
-    eta = 0.1
-    alpha = 0.11
-  []
-  [inertia_z]
-    type = InertialForce
-    variable = disp_z
-    eta = 0.1
-    alpha = 0.11
-  []
-
-[]
 
 [AuxKernels]
-  [accel_x] # These auxkernels are only to check output
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = accel_x
-    first = false
-  []
-  [accel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = accel_y
-    first = false
-  []
-  [accel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = accel_z
-    first = false
-  []
-  [vel_x]
-    type = TestNewmarkTI
-    displacement = disp_x
-    variable = vel_x
-  []
-  [vel_y]
-    type = TestNewmarkTI
-    displacement = disp_y
-    variable = vel_y
-  []
-  [vel_z]
-    type = TestNewmarkTI
-    displacement = disp_z
-    variable = vel_z
-  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -200,11 +135,6 @@
     C_ijkl = '210e9 0'
   []
 
-  [strain]
-    type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  []
 
   [stress]
     type = ComputeLinearElasticStress

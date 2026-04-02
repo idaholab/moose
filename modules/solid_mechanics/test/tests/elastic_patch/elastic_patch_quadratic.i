@@ -58,21 +58,6 @@
   [../]
 [] # Functions
 
-[Variables]
-  [./disp_x]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-[] # Variables
-
 [AuxVariables]
   [./stress_xx]
     order = CONSTANT
@@ -124,11 +109,14 @@
   [../]
 [] # AuxVariables
 
-[Kernels]
-  [SolidMechanics]
-    use_displaced_mesh = true
+[Physics/SolidMechanics/QuasiStatic]
+  [./all]
+    add_variables = true
+    strain = SMALL
+    incremental = false
   [../]
 []
+
 
 [AuxKernels]
   [./stress_xx]
@@ -235,9 +223,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
