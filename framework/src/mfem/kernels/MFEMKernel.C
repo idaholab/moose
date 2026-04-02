@@ -18,16 +18,17 @@
 InputParameters
 MFEMKernel::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params += MFEMBlockRestrictable::validParams();
   params.registerBase("Kernel");
+  params.registerSystemAttributeName("Kernel");
   params.addParam<VariableName>("variable",
                                 "Variable labelling the weak form this kernel is added to");
   return params;
 }
 
 MFEMKernel::MFEMKernel(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMObject(parameters),
     MFEMBlockRestrictable(parameters,
                           getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _test_var_name(getParam<VariableName>("variable"))

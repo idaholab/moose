@@ -15,6 +15,7 @@
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
+#include "MFEMSubMeshTransfer.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -48,6 +49,13 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
+
+  // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
+  // setup pass because they no longer inherit the UserObject initialSetup path.
+  std::vector<MFEMRefinementMarker *> markers;
+  theWarehouse().query().condition<AttribSystem>("Marker").queryInto(markers);
+  for (auto marker : markers)
+    marker->initialSetup();
 }
 
 void
