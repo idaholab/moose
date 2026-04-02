@@ -199,14 +199,16 @@ BlockRestrictionDebugOutput::printBlockRestrictionMap() const
     {
 
       {
-        const auto & wh = auxSystem.nodalAuxWarehouse();
+        std::vector<AuxKernel *> aux_kernels;
+        _problem_ptr->theWarehouse()
+            .query()
+            .condition<AttribSystem>("AuxKernel")
+            .condition<AttribThread>(0)
+            .condition<AttribSubdomains>(subdomain_id)
+            .queryIntoUnsorted(aux_kernels);
         std::set<std::string> names;
-        if (wh.hasActiveBlockObjects(subdomain_id))
-        {
-          const auto & auxkernels = wh.getActiveBlockObjects(subdomain_id);
-          for (auto & auxkernel : auxkernels)
-            names.insert(auxkernel->name());
-        }
+        for (auto & auxkernel : aux_kernels)
+          names.insert(auxkernel->name());
         objectsFound = printCategoryAndNames("AuxKernels[nodal]", names) || objectsFound;
       }
 
