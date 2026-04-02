@@ -1557,7 +1557,12 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         if (GeneralFieldTransfer::isOutOfMeshValue(val))
         {
           if (!GeneralFieldTransfer::isOutOfMeshValue(_default_extrapolation_value))
-            to_sys->solution->set(dof, _default_extrapolation_value);
+          {
+            const auto missing_value = _post_transfer_extrapolation == "nearest-valid-target"
+                                           ? GeneralFieldTransfer::OutOfMeshValue
+                                           : _default_extrapolation_value;
+            to_sys->solution->set(dof, missing_value);
+          }
           continue;
         }
         to_sys->solution->set(dof, val);
@@ -1734,9 +1739,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                     try
                     {
                       if (!GeneralFieldTransfer::isOutOfMeshValue(
-                              (*to_sys->current_local_solution)(other_dof)) &&
-                          (*to_sys->current_local_solution)(other_dof) !=
-                              _default_extrapolation_value)
+                              (*to_sys->current_local_solution)(other_dof)))
                       {
                         min_distance_sq = distance_sq;
                         min_dist_id = elem_node.id();
@@ -1778,9 +1781,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                   try
                   {
                     if (!GeneralFieldTransfer::isOutOfMeshValue(
-                            (*to_sys->current_local_solution)(other_dof)) &&
-                        (*to_sys->current_local_solution)(other_dof) !=
-                            _default_extrapolation_value)
+                            (*to_sys->current_local_solution)(other_dof)))
                     {
                       nearest_value = (*to_sys->current_local_solution)(other_dof);
                       min_distance_sq = distance_sq;
@@ -1802,10 +1803,13 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
           if (min_dist_id != std::numeric_limits<dof_id_type>::max())
             to_sys->solution->set(dof, nearest_value);
           else
+          {
+            to_sys->solution->set(dof, _default_extrapolation_value);
             flagSolutionWarning(
                 "Search for the valid target nearest from a target point for which no "
                 "values were found (and thus extrapolation is required) failed. This warning will "
                 "not be repeated for further failures.");
+          }
         }
       }
       to_sys->solution->close();

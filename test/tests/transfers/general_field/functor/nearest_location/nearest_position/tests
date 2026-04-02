@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#13754 #19451'
+  design = 'transfers/MultiAppGeneralFieldFunctorTransfer.md'
+
+  [between_subapps]
+    type = Exodiff
+    input = main_between_multiapp.i
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    requirement = 'The system shall support variable-backed functor transfers through nearest-position partitioning between sibling multiapps.'
+  []
+[]

@@ -102,7 +102,7 @@ MultiAppGeneralFieldFunctorTransfer::initialSetup()
     // NOTE: we don't really expect the functor type to vary between problems
     for (const auto i_from : index_range(_from_problems))
       _functor_is_variable[i_functor] =
-          _functor_is_variable[i_from] || _from_problems[i_from]->hasVariable(fname);
+          _functor_is_variable[i_functor] || _from_problems[i_from]->hasVariable(fname);
   }
 }
 
@@ -136,11 +136,10 @@ MultiAppGeneralFieldFunctorTransfer::prepareEvaluationOfInterpValues(const unsig
   MultiAppGeneralFieldKDTreeTransferBase::prepareEvaluationOfInterpValues(var_index);
 
   // Get the point locators
-  // Should be done after we know the number of sources
-  _point_locators.resize(_num_sources);
-  for (const auto i_from : make_range(_num_sources))
-    _point_locators[i_from] =
-        _from_problems[i_from]->mesh(_displaced_source_mesh).getPointLocator();
+  _point_locators.resize(_from_problems.size());
+  for (const auto app_index : index_range(_from_problems))
+    _point_locators[app_index] =
+        _from_problems[app_index]->mesh(_displaced_source_mesh).getPointLocator();
 }
 
 void
@@ -383,22 +382,24 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
     bool point_found = false;
 
     // Loop on all sources
-    for (const auto i_from : make_range(_num_sources))
+    for (const auto i_source : make_range(_num_sources))
     {
       // Examine all restrictions for the point. This source (KDTree+values) could be ruled out
-      if (!checkRestrictionsForSource(pt, mesh_div, i_from))
+      if (!checkRestrictionsForSource(pt, mesh_div, i_source))
         continue;
       // Note: because this transfer is intended for extrapolation,
       // this will usually not restrict the source. The distance comparisons will be crucial
 
+      const auto app_index = getAppIndex(i_source, i_source / getNumDivisions());
+
       // Retrieve the functor
-      const auto & functor = *_functors[i_from][var_index];
+      const auto & functor = *_functors[app_index][var_index];
 
       // Get the intersection of the functor and transfer source block restrictions
       std::set<SubdomainID> from_blocks;
       for (const auto bl : _from_blocks.size()
                                ? _from_blocks
-                               : _from_problems[i_from]->mesh().getMesh().get_mesh_subdomains())
+                               : _from_problems[app_index]->mesh().getMesh().get_mesh_subdomains())
         if (functor.hasBlocks(bl))
           from_blocks.insert(bl);
 
@@ -406,11 +407,11 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Locate the point and an element
       // Clear the nearest candidates
       elem_candidates.clear();
-      const auto transformed_pt = getPointInLocalSourceFrame(i_from, pt);
+      const auto transformed_pt = getPointInLocalSourceFrame(i_source, pt);
       if (from_blocks.size())
-        (*_point_locators[i_from])(transformed_pt, elem_candidates, &from_blocks);
+        (*_point_locators[app_index])(transformed_pt, elem_candidates, &from_blocks);
       else
-        (*_point_locators[i_from])(transformed_pt, elem_candidates);
+        (*_point_locators[app_index])(transformed_pt, elem_candidates);
       if (elem_candidates.size())
       {
         // Register conflict if any
@@ -418,9 +419,9 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         {
           // In the nearest-position/app mode, we save conflicts in the reference frame
           if (_nearest_positions_obj)
-            registerConflict(i_from, /*dof*/ 0, pt, 0, true);
+            registerConflict(i_source, /*dof*/ 0, pt, 0, true);
           else
-            registerConflict(i_from, 0, transformed_pt, 0, true);
+            registerConflict(i_source, 0, transformed_pt, 0, true);
         }
 
         // Average the result for now
@@ -463,18 +464,18 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       std::vector<Real> return_dist_sqr(_num_nearest_points);
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
-      if (_local_kdtrees[i_from]->numberCandidatePoints())
+      if (_local_kdtrees[i_source]->numberCandidatePoints())
       {
         point_found = true;
         // Note that we do not need to use the transformed_pt (in the source app frame)
         // because the KDTree has been created in the reference frame
-        _local_kdtrees[i_from]->neighborSearch(
+        _local_kdtrees[i_source]->neighborSearch(
             pt, _num_nearest_points, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
         for (const auto index : return_index)
         {
-          val_sum += _local_values[i_from][index];
-          dist_sum += (_local_points[i_from][index] - pt).norm();
+          val_sum += _local_values[i_source][index];
+          dist_sum += (_local_points[i_source][index] - pt).norm();
         }
 
         // If the new value found is closer than for other sources, use it
