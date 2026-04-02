@@ -88,17 +88,21 @@ MFEMExecutedObject::appendTypedVectorParamIfValid(std::set<std::string> & names,
       names.insert(name);
 }
 
-template void MFEMExecutedObject::appendTypedParamIfValid<PostprocessorName>(
-    std::set<std::string> &, const std::string &) const;
-template void MFEMExecutedObject::appendTypedParamIfValid<VectorPostprocessorName>(
-    std::set<std::string> &, const std::string &) const;
-template void MFEMExecutedObject::appendTypedParamIfValid<VariableName>(
-    std::set<std::string> &, const std::string &) const;
-template void MFEMExecutedObject::appendTypedVectorParamIfValid<PostprocessorName>(
-    std::set<std::string> &, const std::string &) const;
+template void
+MFEMExecutedObject::appendTypedParamIfValid<PostprocessorName>(std::set<std::string> &,
+                                                               const std::string &) const;
+template void
+MFEMExecutedObject::appendTypedParamIfValid<VectorPostprocessorName>(std::set<std::string> &,
+                                                                     const std::string &) const;
+template void MFEMExecutedObject::appendTypedParamIfValid<VariableName>(std::set<std::string> &,
+                                                                        const std::string &) const;
+template void
+MFEMExecutedObject::appendTypedVectorParamIfValid<PostprocessorName>(std::set<std::string> &,
+                                                                     const std::string &) const;
 template void MFEMExecutedObject::appendTypedVectorParamIfValid<VectorPostprocessorName>(
     std::set<std::string> &, const std::string &) const;
-template void MFEMExecutedObject::appendTypedVectorParamIfValid<VariableName>(
-    std::set<std::string> &, const std::string &) const;
+template void
+MFEMExecutedObject::appendTypedVectorParamIfValid<VariableName>(std::set<std::string> &,
+                                                                const std::string &) const;
 
 #endif
