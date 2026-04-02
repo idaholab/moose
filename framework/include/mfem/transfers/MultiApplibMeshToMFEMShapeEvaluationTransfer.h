@@ -11,33 +11,32 @@
 
 #pragma once
 
+#include "MFEMNodalProjector.h"
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
 /**
- * Transfer to copy MFEMVariables between multiapps.
- * The variables must be of the same type and dimension
- * and the MFEMMesh must be identical in both multiapps
+ * MultiApp transfer from libMesh to MFEM variables, performed via evaluation of
+ * shape functions. Meshes can differ between source and destination variables.
  */
-class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
+class MultiApplibMeshToMFEMShapeEvaluationTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMCopyTransfer(InputParameters const & params);
+  MultiApplibMeshToMFEMShapeEvaluationTransfer(InputParameters const & params);
 
 protected:
+  /// Object to extract node positions and perform projections on MFEM GridFunctions.
+  MFEMNodalProjector _mfem_projector;
+
   /// Transfer all variables from active source problem to active destination problem.
   virtual void transferVariables() override;
 
-  /// Set current MFEM problem to fetch source variables from
-  virtual MFEMProblem & getActiveFromProblem() override
-  {
-    MFEMProblem * mfem_from_problem =
-        dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
-    if (!mfem_from_problem)
-      mooseError("Transfer source problem is not an MFEM problem");
-    return *mfem_from_problem;
-  }
+  /// Interpolate libMesh variable corresponding to var_index at target points for DoF evaluation
+  void interpolatelibMeshVariable(std::map<processor_id_type, std::vector<Point>> & outgoing_points,
+                                  const unsigned int var_index,
+                                  mfem::Vector & interp_vals);
+
   /// Set current MFEM problem to fetch destination variables from
   virtual MFEMProblem & getActiveToProblem() override
   {

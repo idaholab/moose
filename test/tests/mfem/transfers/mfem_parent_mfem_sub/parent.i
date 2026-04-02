@@ -6,7 +6,6 @@
 [Problem]
   type = MFEMProblem
   solve = false
-  numeric_type = complex
 []
 
 [FESpaces]
@@ -19,7 +18,7 @@
 
 [AuxVariables]
   [u]
-    type = MFEMComplexVariable
+    type = MFEMVariable
     fespace = H1FESpace
   []
 []
@@ -31,14 +30,21 @@
 [MultiApps]
   [subapp]
     type = FullSolveMultiApp
-    input_files = sub_complex.i
+    input_files = sub.i
     execute_on = INITIAL
   []
 []
 
 [Transfers]
-  [from_sub]
+  active = 'copy_from_sub'
+  [copy_from_sub]
     type = MultiAppMFEMCopyTransfer
+    source_variable = u
+    variable = u
+    from_multi_app = subapp
+  []
+  [general_transfer_from_sub]
+    type = MultiAppMFEMShapeEvaluationTransfer
     source_variable = u
     variable = u
     from_multi_app = subapp
@@ -48,7 +54,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionComplex
+    file_base = OutputData/Diffusion
     vtk_format = ASCII
   []
 []
