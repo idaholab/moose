@@ -41,7 +41,6 @@ CoupledValueFunctionTensorMaterial::CoupledValueFunctionTensorMaterial(
   {
     char * end;
     double val = std::strtod(vals[i].c_str(), &end);
-    
 
     if (end != vals[i].c_str() && *end == '\0')
     {
