@@ -32,7 +32,6 @@ requirements:
     - {{ compiler("cxx") }}
     - cmake
     - ninja
-    - pkg-config
 
 about:
   home: https://code.ornl.gov/neams-workbench/wasp
