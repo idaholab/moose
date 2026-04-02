@@ -31,7 +31,6 @@ public:
    * Class constructor.
    * @param fe_problem Reference to the problem
    * @param linear_system_num The number of the linear system which is assembled by this thread
-   * @param mode Computation mode (rhs, matrix or both)
    * @param vector_tags The vector tags this thread should contribute to. These are used to
    * query the warehouse for the objects that should contribute to the right hand side.
    * @param matrix_tags The matrix tags this thread should contribute to. These are used to

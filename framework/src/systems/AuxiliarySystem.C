@@ -41,6 +41,7 @@ using namespace libMesh;
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
+    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
@@ -76,6 +77,8 @@ AuxiliarySystem::initialSetup()
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
+  _current_solution = _sys.current_local_solution.get();
+  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -111,6 +114,13 @@ AuxiliarySystem::initialSetup()
   _kokkos_elemental_aux_storage.sort(/*tid=*/0);
   _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
 #endif
+}
+
+void
+AuxiliarySystem::reinit()
+{
+  _current_solution = _sys.current_local_solution.get();
+  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 }
 
 void
@@ -449,6 +459,13 @@ AuxiliarySystem::compute(ExecFlagType type)
 #ifdef MOOSE_KOKKOS_ENABLED
     kokkosCompute(type);
 #endif
+
+    if (!_raw_grad_container.empty())
+    {
+      solution().close();
+      _sys.update();
+      computeGradients();
+    }
 
     // compute time derivatives of nodal aux variables _after_ the values were updated
     if (_fe_problem.dt() > 0.)

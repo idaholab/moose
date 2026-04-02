@@ -11,6 +11,7 @@
 #include "SolutionInvalidity.h"
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
+#include "MooseUtils.h"
 
 using namespace libMesh;
 
@@ -72,6 +73,60 @@ SolverSystem::setSolution(const NumericVector<Number> & soln)
 
   if (_serialized_solution.get())
     serializeSolution();
+}
+
+void
+SolverSystem::setFixedPointRelaxationFactor(const Real relaxation_factor)
+{
+  _fixed_point_relaxation_factor = relaxation_factor;
+}
+
+void
+SolverSystem::clearFixedPointRelaxation()
+{
+  _fixed_point_relaxation_factor = 1.0;
+}
+
+void
+SolverSystem::saveOldSolutionForFixedPointRelaxation()
+{
+  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
+    return;
+
+  if (!hasSolutionState(1, Moose::SolutionIterationType::FixedPoint))
+    needSolutionState(1, Moose::SolutionIterationType::FixedPoint, solution().type());
+
+  // Just in case checking if someone already allocated one which does not match
+  mooseAssert(solutionStateParallelType(1, Moose::SolutionIterationType::FixedPoint) ==
+                  solution().type(),
+              "Fixed point relaxation requires the previous fixed point solution state to have "
+              "the same parallel type as the system solution.");
+
+  solutionState(1, Moose::SolutionIterationType::FixedPoint) = solution();
+}
+
+void
+SolverSystem::applyFixedPointRelaxation()
+{
+  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
+    return;
+
+  mooseAssert(hasSolutionState(1, Moose::SolutionIterationType::FixedPoint),
+              "Fixed point relaxation was requested but the old fixed point solution was not "
+              "saved.");
+
+  // This might be paranoid but who knows, maybe someone requests nonghosted
+  mooseAssert(solutionStateParallelType(1, Moose::SolutionIterationType::FixedPoint) ==
+                  solution().type(),
+              "Fixed point relaxation requires the previous fixed point solution state to have "
+              "the same parallel type as the system solution.");
+
+  auto & sol = solution();
+  sol.scale(_fixed_point_relaxation_factor);
+  sol.add(1.0 - _fixed_point_relaxation_factor,
+          solutionState(1, Moose::SolutionIterationType::FixedPoint));
+  sol.close();
+  update();
 }
 
 void

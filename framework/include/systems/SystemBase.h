@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include <map>
+#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "DataIO.h"
@@ -17,7 +20,6 @@
 #include "InputParameters.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
-
 // libMesh
 #include "libmesh/exodusII_io.h"
 #include "libmesh/parallel_object.h"
@@ -753,6 +755,8 @@ public:
     return _vars[tid].fieldVariables();
   }
 
+  const VariableWarehouse & variableWarehouse(THREAD_ID tid = 0) const { return _vars[tid]; }
+
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid)
   {
     return _vars[tid].scalars();
@@ -924,15 +928,6 @@ public:
   Moose::VarKindType varKind() const { return _var_kind; }
 
   /**
-   * Reference to the container vector which hold gradients at dofs (if it can be interpreted).
-   * Mainly used for finite volume systems.
-   */
-  const std::vector<std::unique_ptr<NumericVector<Number>>> & gradientContainer() const
-  {
-    return _raw_grad_container;
-  }
-
-  /**
    * Compute time derivatives, auxiliary variables, etc.
    * @param type Our current execution stage
    */
@@ -1072,11 +1067,6 @@ protected:
   /// Serialized version of the solution vector, or nullptr if a
   /// serialized solution is not needed
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
-
-  /// A cache for storing gradients at dof locations. We store it on the system
-  /// because we create copies of variables on each thread and that would
-  /// lead to increased data duplication when using threading-based parallelism.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
 
 private:
   /**

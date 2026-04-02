@@ -26,6 +26,12 @@ two_term_bc=true
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [Functions]
   [u_exact]
     type = ParsedFunction
@@ -42,7 +48,7 @@ two_term_bc=true
     type = LinearFVAdvection
     variable = u
     velocity = "${vel_x} 0 0"
-    advected_interp_method = average
+    advected_interp_method_name = average
   []
   [source]
     type = LinearFVSource

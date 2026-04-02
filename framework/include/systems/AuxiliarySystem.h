@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "SystemBase.h"
+#include "LinearFVGradientInterface.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "PerfGraphInterface.h"
 
@@ -39,13 +40,16 @@ class NumericVector;
  * A system that holds auxiliary variables
  *
  */
-class AuxiliarySystem : public SystemBase, public PerfGraphInterface
+class AuxiliarySystem : public SystemBase,
+                        public PerfGraphInterface,
+                        public LinearFVGradientInterface
 {
 public:
   AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
   virtual void initialSetup() override;
+  virtual void reinit() override;
   virtual void timestepSetup() override;
   virtual void customSetup(const ExecFlagType & exec_type) override;
   virtual void subdomainSetup() override;
@@ -131,6 +135,9 @@ public:
 
   virtual libMesh::System & system() override { return _sys; }
   virtual const libMesh::System & system() const override { return _sys; }
+
+  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
+  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
 
   /// Copies the current solution into the previous nonlinear iteration solution
   virtual void copyCurrentIntoPreviousNL();

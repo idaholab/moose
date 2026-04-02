@@ -34,10 +34,7 @@ LinearFVMomentumPressure::validParams()
 LinearFVMomentumPressure::LinearFVMomentumPressure(const InputParameters & params)
   : LinearFVElementalKernel(params),
     _index(getParam<MooseEnum>("momentum_component")),
-    _pressure_var(getPressureVariable(NS::pressure)),
-    _pressure_gradient(_pressure_var.sys().gradientContainer()),
-    _pressure_var_num(_pressure_var.number()),
-    _pressure_sys_num(_pressure_var.sys().number())
+    _pressure_var(getPressureVariable(NS::pressure))
 {
   _pressure_var.computeCellGradients();
 }
@@ -63,6 +60,5 @@ LinearFVMomentumPressure::computeMatrixContribution()
 Real
 LinearFVMomentumPressure::computeRightHandSideContribution()
 {
-  const auto dof_value = _current_elem_info->dofIndices()[_pressure_sys_num][_pressure_var_num];
-  return -(*_pressure_gradient[_index])(dof_value)*_current_elem_volume;
+  return -_pressure_var.gradSlnComponent(*_current_elem_info, _index) * _current_elem_volume;
 }
