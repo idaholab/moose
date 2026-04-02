@@ -11,6 +11,8 @@
 
 #include "MooseUtils.h"
 #include "ElementFragmentAlgorithm.h"
+#include "EFAEdge.h"
+#include "EFANode.h"
 
 // set this global to true to enable a lot of mesh data output to the console
 const bool debug_print_mesh = false;
@@ -3368,4 +3370,45 @@ TEST(ElementFragmentAlgorithm, test7a)
   std::map<unsigned int, EFANode *> embedded_nodes = MyMesh.getEmbeddedNodes();
   std::vector<unsigned int> en_gold = {0, 1, 2, 3, 4, 5};
   CheckNodes(embedded_nodes, en_gold);
+}
+
+// Test that EFAEdge::hasIntersection() does not dereference a dangling parent pointer.
+// This reproduces the scenario where an embedded permanent node is deleted by
+// removeInvalidEmbeddedNodes but edge endpoint nodes on non-neighboring elements
+// still reference it as their parent. The fix caches the parent's category on the
+// child node (parentCategory()) so the parent pointer is never dereferenced.
+TEST(ElementFragmentAlgorithm, hasIntersectionDanglingParent)
+{
+  // Create an embedded permanent node (simulates a cut point on an edge)
+  EFANode * emb_perm = new EFANode(100, EFANode::N_CATEGORY_EMBEDDED_PERMANENT);
+
+  // Create edge endpoint nodes whose parent is the embedded permanent node.
+  // This happens during updateTopology when child nodes are created at split points.
+  EFANode node1(0, EFANode::N_CATEGORY_PERMANENT, emb_perm);
+  EFANode node2(1, EFANode::N_CATEGORY_PERMANENT);
+
+  // Verify the cached parent category
+  EXPECT_EQ(node1.parentCategory(), EFANode::N_CATEGORY_EMBEDDED_PERMANENT);
+  EXPECT_NE(node1.parent(), nullptr);
+
+  // Build an edge with these nodes
+  EFAEdge edge(&node1, &node2);
+
+  // hasIntersection should return true (node1's parent is EMBEDDED_PERMANENT)
+  EXPECT_TRUE(edge.hasIntersection());
+
+  // Now delete the parent node, simulating what removeInvalidEmbeddedNodes does
+  // via Efa::deleteFromMap. This frees the memory but leaves node1._parent dangling.
+  delete emb_perm;
+  emb_perm = nullptr;
+
+  // With the fix, hasIntersection() uses parentCategory() (cached value) instead of
+  // parent()->category() (dangling dereference). This call would segfault without the fix.
+  EXPECT_TRUE(edge.hasIntersection());
+
+  // Also verify that removeParent() properly clears the cached category
+  node1.removeParent();
+  EXPECT_EQ(node1.parent(), nullptr);
+  EXPECT_EQ(node1.parentCategory(), EFANode::N_CATEGORY_PERMANENT);
+  EXPECT_FALSE(edge.hasIntersection());
 }
