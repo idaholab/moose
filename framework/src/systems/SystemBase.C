@@ -426,7 +426,8 @@ SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
   for (const auto & var : vars)
   {
     var->reinitNodes(nodes);
-    var->computeNodalValues();
+    if (var->isNodalDefined())
+      var->computeNodalValues();
   }
 }
 
