@@ -9,8 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, re, time
-import moosetree
-import pyhit
+from moosetools import hit, tree
 
 """
 Parser object for reading HIT formatted files
@@ -24,7 +23,7 @@ class Parser:
         """Check for duplicate blocks and/or parameters"""
         paths = set()
 
-        for node in moosetree.iterate(root, method=moosetree.IterMethod.PRE_ORDER):
+        for node in tree.iterate(root, method=tree.IterMethod.PRE_ORDER):
             if node.fullpath in paths:
                 yield ('duplicate section "{}"'.format(node.fullpath), node)
             else:
@@ -50,9 +49,9 @@ class Parser:
         self.fname = os.path.abspath(filename)
 
         try:
-            root = pyhit.load(self.fname)
+            root = hit.load(self.fname)
         except Exception as err:
-            # Syntax errors from pyhit come with file context
+            # Syntax errors from hit come with file context
             self.errors.extend(str(err).splitlines())
             return
         self.root = root(0)  # make the [Tests] block the root

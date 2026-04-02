@@ -10,11 +10,9 @@
 
 import os, sys
 import subprocess
-import json
 import unittest
 from FactorySystem import Parser
-import pyhit
-import mooseutils
+from moosetools import hit
 
 
 def run_app(args=[]):
@@ -71,7 +69,7 @@ class TestHITBase(unittest.TestCase):
         output = output.split("### END DUMP DATA ###")[0]
 
         self.assertNotEqual(len(output), 0)
-        root = pyhit.parse(output)
+        root = hit.parse(output)
         errors = list(Parser.checkDuplicates(root))
         self.assertEqual(errors, [])
         return root

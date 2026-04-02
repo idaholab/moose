@@ -16,8 +16,8 @@ from typing import Optional, Callable, Iterable, Generator
 
 import numpy as np
 
-import pyhit
-from moosecontrol import MooseControl, SubprocessPortRunner
+from moosetools import hit
+from moosetools.control import MooseControl, SubprocessPortRunner
 
 logger = getLogger("StochasticControl")
 
@@ -141,7 +141,7 @@ class StochasticControl(MooseControl):
         """
         Initialize the StochasticControl object with executable, input and control options.
 
-        1. Builds a pyhit.Node ready to be written to a file once sampling starts
+        1. Builds a hit.Node ready to be written to a file once sampling starts
         2. Constructs MOOSE command to be sent to base class so server will start.
 
         Parameters:
@@ -167,7 +167,7 @@ class StochasticControl(MooseControl):
         self._keep_input: bool = keep_input
 
         # Build stochastic input
-        self._root: pyhit.Node = self._buildStochasticInput()
+        self._root: hit.Node = self._buildStochasticInput()
 
         # Determine command
         moose_command: list[str] = []
@@ -253,7 +253,7 @@ class StochasticControl(MooseControl):
             logger.debug(
                 f"Writing input file: {os.path.abspath(self._input_file)}\n{self._root.render()}"
             )
-            pyhit.write(self._input_file, self._root)
+            hit.write(self._input_file, self._root)
 
             self.initialize()
         else:
@@ -274,7 +274,7 @@ class StochasticControl(MooseControl):
             y.append(self.get_reporter(rep))
         return np.array(y).T
 
-    def _buildStochasticInput(self) -> pyhit.Node:
+    def _buildStochasticInput(self) -> hit.Node:
         """
         Constructs the input file tree for a stochastic MOOSE run.
 
@@ -282,10 +282,10 @@ class StochasticControl(MooseControl):
         in.
 
         Returns:
-            Root pyhit.Node representing the full input file structure.
+            Root hit.Node representing the full input file structure.
         """
         # Build root node
-        root = pyhit.Node()
+        root = hit.Node()
 
         # Add [StochasticTools]
         self._getSyntaxBlockHelper(root, "StochasticTools")
@@ -305,15 +305,15 @@ class StochasticControl(MooseControl):
 
         return root
 
-    def _addDynamicSampler(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addDynamicSampler(self, parent: hit.Node) -> hit.Node:
         """
         Adds the InputMatrix sampler object.
 
         Parameters:
-            parent (pyhit.Node): The parent pyhit node to add block to (usually root node of input).
+            parent (hit.Node): The parent hit node to add block to (usually root node of input).
 
         Returns:
-            child (pyhit.Node): Pyhit node of the action block.
+            child (hit.Node): Hit node of the action block.
         """
         # Get the [Samplers] block if one exists, otherwise create one
         samplers = self._getSyntaxBlockHelper(parent, "Samplers")
@@ -336,16 +336,16 @@ class StochasticControl(MooseControl):
         # Build sampler and return
         return samplers.append(self.sampler_name, **sampler_params)
 
-    def _addWebServerControl(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addWebServerControl(self, parent: hit.Node) -> hit.Node:
         """Add WebServerControl."""
-        controls: pyhit.Node = self._getSyntaxBlockHelper(parent, "Controls")
+        controls: hit.Node = self._getSyntaxBlockHelper(parent, "Controls")
         return controls.append(
             self.web_server_control_name,
             type="WebServerControl",
             execute_on="'TIMESTEP_END'",
         )
 
-    def _addMultiApp(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addMultiApp(self, parent: hit.Node) -> hit.Node:
         """Adds MultiApp for the physics input."""
         multiapps = self._getSyntaxBlockHelper(parent, "MultiApps")
         multiapp_params = {
@@ -381,7 +381,7 @@ class StochasticControl(MooseControl):
 
         return multiapps.append(self.multiapp_name, **multiapp_params)
 
-    def _addParameterTransfer(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addParameterTransfer(self, parent: hit.Node) -> hit.Node:
         """Add parameter transfer."""
         transfers = self._getSyntaxBlockHelper(parent, "Transfers")
         return transfers.append(
@@ -392,9 +392,9 @@ class StochasticControl(MooseControl):
             parameters="'" + " ".join(self._parameters) + "'",
         )
 
-    def _addParameterControl(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addParameterControl(self, parent: hit.Node) -> hit.Node:
         """Add multiapp command-line control."""
-        controls: pyhit.Node = self._getSyntaxBlockHelper(parent, "Controls")
+        controls: hit.Node = self._getSyntaxBlockHelper(parent, "Controls")
         return controls.append(
             self.parameter_transfer_name,
             type="MultiAppSamplerControl",
@@ -403,7 +403,7 @@ class StochasticControl(MooseControl):
             param_names="'" + " ".join(self._parameters) + "'",
         )
 
-    def _addStochasticMatrix(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addStochasticMatrix(self, parent: hit.Node) -> hit.Node:
         """
         Add StochasticMatrix reporter object for output of sampling matrix
         and quantities of interest.
@@ -420,7 +420,7 @@ class StochasticControl(MooseControl):
             **reporter_params,
         )
 
-    def _addQoiTransfer(self, parent: pyhit.Node) -> pyhit.Node:
+    def _addQoiTransfer(self, parent: hit.Node) -> hit.Node:
         """Add SamplerReporterTransfer for QoIs."""
         transfers = self._getSyntaxBlockHelper(parent, "Transfers")
         return transfers.append(
@@ -434,7 +434,7 @@ class StochasticControl(MooseControl):
         )
 
     @staticmethod
-    def _getSyntaxBlockHelper(parent: pyhit.Node, syntax: str) -> pyhit.Node:
+    def _getSyntaxBlockHelper(parent: hit.Node, syntax: str) -> hit.Node:
         """Get a node with inputted syntax, if exists. Otherwise add one."""
         for child in parent:
             if child.name == syntax:

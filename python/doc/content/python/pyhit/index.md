@@ -27,7 +27,7 @@ the load function, which returns the root `pyhit.Node` to the tree.
 !listing pyhit/tests/test_examples.py id=pyhit-example caption=Example use of "pyhit" package to read, modify, and write MOOSE a moose input file.
          start=MOOSEDOCS:example-begin end=MOOSEDOCS:example-end include-start=False
 
-Once the content is loaded the tree can be search using the `moosetree.find` function. This
+Once the content is loaded the tree can be search using the `tree.find` function. This
 function requires the node to search from and a function used for searching. For this example that
 function is a simple [lambda expression](https://docs.python.org/3/tutorial/controlflow.html?highlight=lambda#lambda-expressions)
 that looks for a node named "gen" that is a child of a node "Mesh".
@@ -39,7 +39,7 @@ the "Mesh" node is unnamed, which is typical of root nodes.
 After this node is located it is modified in two ways: the "x_max" parameter is altered and
 the comment for this parameter is changed to note the alteration.
 
-Finally, the modified output is written to a new file using the `pyhit.write` function. The
+Finally, the modified output is written to a new file using the `hit.write` function. The
 modified content (the "Mesh" block) is shown in [pyhit-output].
 
 

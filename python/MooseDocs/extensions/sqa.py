@@ -10,21 +10,18 @@
 import os
 import re
 import copy
-import codecs
 import logging
 import collections
 import traceback
-import moosetree
 import uuid
-import json
 import time
 import itertools
-import pyhit
 
 import MooseDocs
 import mooseutils
 import moosesqa
 
+from moosetools import tree
 from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
@@ -257,7 +254,7 @@ class SQAExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         """Remove empty SQARequirementMatrix tokens"""
-        for node in moosetree.findall(
+        for node in tree.findall(
             ast.root, func=lambda n: n.name == "SQARequirementMatrix"
         ):
             if not any(n.name == "SQARequirementMatrixItem" for n in node.children):
@@ -470,7 +467,7 @@ class SQARequirementsCommand(command.CommandComponent):
                 info.line,
                 report=False,
             )
-            for t in moosetree.iterate(item):
+            for t in tree.iterate(item):
                 if t.name == "ErrorToken":
                     msg = common.report_error(
                         "Failed to tokenize SQA requirement.",
@@ -495,7 +492,7 @@ class SQARequirementsCommand(command.CommandComponent):
                     info.line,
                     report=False,
                 )
-                for t in moosetree.iterate(ditem):
+                for t in tree.iterate(ditem):
                     if t.name == "ErrorToken":
                         msg = common.report_error(
                             "Failed to tokenize SQA requirement detail.",
@@ -758,7 +755,7 @@ class SQAReportCommand(command.CommandComponent):
                 token.info.line,
                 report=False,
             )
-            for t in moosetree.iterate(item):
+            for t in tree.iterate(item):
                 if t.name == "ErrorToken":
                     msg = common.report_error(
                         "Failed to tokenize SQA requirement.",
@@ -783,7 +780,7 @@ class SQAReportCommand(command.CommandComponent):
                     token.info.line,
                     report=False,
                 )
-                for t in moosetree.iterate(ditem):
+                for t in tree.iterate(ditem):
                     if t.name == "ErrorToken":
                         msg = common.report_error(
                             "Failed to tokenize SQA requirement detail.",

@@ -100,11 +100,11 @@ public:
    */
   Capability & setEnumeration(const std::set<std::string> & enumeration);
 
-#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_MOOSETOOLS)
   /**
    * Negate a Capability value.
    *
-   * This should only be used by pycapabilities via the
+   * This should only be used by moosecapabilities via the
    * TestHarness when it needs to augment capabilities
    * to check on if a check depeneds on a capability or not.
    */
@@ -194,7 +194,7 @@ private:
   std::optional<std::set<std::string>> _enumeration;
 };
 
-#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_MOOSETOOLS)
 void
 Capability::negateValue()
 {

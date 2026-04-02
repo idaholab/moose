@@ -7,8 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
 from TestHarness import util
+from TestHarness.testers.RunApp import RunApp
 
 
 # Classes that derive from this class are expected to write

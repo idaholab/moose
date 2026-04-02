@@ -1,0 +1,56 @@
+[tool.black]
+target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
+
+[tool.ruff]
+include = [
+    "*.py",
+    "*.pyi"
+]
+exclude = [
+    "src/moosetools/control/requests_unixsocket/*.py",
+    "src/moosetools/hit/*",
+    "src/moosetools/tree/*",
+    "tests/tree/*.py",
+    "tests/hit/*.py",
+]
+
+[tool.ruff.lint]
+# Enable pycodestyle (E) and Pyflakes (F) codes by default.
+# D - NumPy docstring rules
+# I - Sorting imports
+# N801 - Class name should use CapWords convention
+# SIM - code simplification rules
+# TID - tidy imports
+select = ["D", "E", "F", "I", "N801", "SIM", "TID"]
+ignore = ["D203", "D212"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "-vvv",
+    "--cov=src/moosetools",
+    "--durations=20"
+]
+log_cli = "true"
+log_cli_level = "DEBUG"
+markers = [
+    "moose: marks tests as requiring moose (use --no-moose to skip)"
+]
+pythonpath = [
+    "src",
+    "../python"
+]
+testpaths = "tests"
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "src/moosetools/_internal/setup_external.py",
+    "src/moosetools/_internal/testing/plugins/mooseexe.py",
+    "src/moosetools/capabilities/_setup_external.py",
+    "src/moosetools/control/requests_unixsocket/*",
+    "src/moosetools/hit/_setup_external.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 94

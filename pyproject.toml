@@ -1,5 +1,5 @@
 [tool.black]
-target-version = ['py310', 'py311', 'py312', 'py313']
+target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
 extend-exclude = '''
 /(
     submodules
@@ -22,16 +22,12 @@ extend-exclude = '''
 /test/tests/test_harness/validation_badpython.py
 '''
 
+# Ruff formatting for moosetools/ and python/ is handled
+# by pyproject.toml within those respective directories
 [tool.ruff]
 include = [
-  "python/moosecontrol/**/*.py",
-  "python/moosepy/**/*.py",
-  "python/TestHarness/resultsstore/**/*.py",
-  "python/TestHarness/resultssummary/**/*.py",
-  "python/TestHarness/tests/resultsstore/**/*.py",
-  "python/TestHarness/tests/resultssummary/**/*.py"
+    "scripts/moose_test_runner"
 ]
-exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
 
 [tool.ruff.lint]
 # Enable pycodestyle (E) and Pyflakes (F) codes by default.

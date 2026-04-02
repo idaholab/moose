@@ -5,8 +5,8 @@ MOOSE.
 
 !pysyntax class name=pyhit.Node heading-level=2
 
-!pysyntax function name=pyhit.load
+!pysyntax function name=hit.load
 
-!pysyntax function name=pyhit.write
+!pysyntax function name=hit.write
 
 !pysyntax function name=pyhit.parse

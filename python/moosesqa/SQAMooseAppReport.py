@@ -9,16 +9,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import re
-import logging
 import subprocess
-import traceback
 import mooseutils
-import moosetree
 import moosesyntax
 from mooseutils.yaml_load import yaml_load
 from .check_syntax import check_syntax
 from .SQAReport import SQAReport
-from .LogHelper import LogHelper
 
 
 class SQAMooseAppReport(SQAReport):

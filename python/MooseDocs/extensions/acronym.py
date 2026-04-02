@@ -9,11 +9,13 @@
 
 import collections
 import logging
-import moosetree
+
+from moosetools import tree
+
 from ..base import components, renderers
 from ..common import exceptions
-from ..tree import pages, tokens, html, latex
-from . import command, table, floats
+from ..tree import html, latex, pages, tokens
+from . import command, floats, table
 
 LOG = logging.getLogger(__name__)
 
@@ -68,7 +70,7 @@ class AcronymExtension(command.CommandExtension):
         Adds a list of valid acronyms to the page attributes.
         """
         func = lambda n: (n.name == "AcronymToken")
-        for node in moosetree.iterate(ast.root, func):
+        for node in tree.iterate(ast.root, func):
             acro = node.get("acronym")
             if acro in self.__acronyms.keys() and acro not in page["acronyms"].keys():
                 page["acronyms"][acro] = self.__acronyms.get(acro)

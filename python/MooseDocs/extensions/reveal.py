@@ -8,7 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import re
 import logging
-import moosetree
+from moosetools import tree
 from ..base import renderers, components
 from ..tree import html, tokens
 from . import core, command
@@ -114,7 +114,7 @@ class RevealExtension(command.CommandExtension):
                 thesubsection += 1
             thesection += 1
 
-        for a in moosetree.iterate(result, lambda n: n.name == "a"):
+        for a in tree.iterate(result, lambda n: n.name == "a"):
             href = a.get("href", "")
             if href.startswith("#"):
                 key = lookup[href[1:]]
@@ -126,7 +126,7 @@ class RevealExtension(command.CommandExtension):
             img = str(node.relativeSource(page))
 
         if img is not None:
-            for sec in moosetree.iterate(result, lambda n: n.name == "section"):
+            for sec in tree.iterate(result, lambda n: n.name == "section"):
                 sec["data-background"] = img
                 position = self.get("background_position")
                 if position is not None:
@@ -143,7 +143,7 @@ class RevealExtension(command.CommandExtension):
         if id_:
             keys.append(id_)
 
-        for node in moosetree.iterate(root, method=moosetree.IterMethod.PRE_ORDER):
+        for node in tree.iterate(root, method=tree.IterMethod.PRE_ORDER):
             id_ = node.get("id", None)
             if id_:
                 keys.append(id_)

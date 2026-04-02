@@ -288,6 +288,8 @@ peacock_tmp_diff.exo
 
 # Python
 .coverage
+.pytest_cache
+.ruff_cache
 
 # configure
 _configs.sed

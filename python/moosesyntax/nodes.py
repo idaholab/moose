@@ -8,14 +8,13 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
-import copy
-import moosetree
 import mooseutils
+from moosetools import tree
 
 LOG = logging.getLogger(__name__)
 
 
-class NodeBase(moosetree.Node):
+class NodeBase(tree.Node):
     """
     Node for MOOSE syntax that serves as the parent for actions/objects.
     """
@@ -28,7 +27,7 @@ class NodeBase(moosetree.Node):
         self.group = kwargs.pop("group", None)
         self.markdown = kwargs.pop("markdown", None)
         self.color = kwargs.pop("color", "RED")
-        moosetree.Node.__init__(self, *args, **kwargs)
+        tree.Node.__init__(self, *args, **kwargs)
 
     def fullpath(self):
         """
@@ -145,7 +144,7 @@ class SyntaxNode(NodeBase):
                 and isinstance(node, node_type)
                 and (group is None or group in node.groups())
             )
-            return moosetree.findall(self, filter_)
+            return tree.findall(self, filter_)
 
         else:
             return [

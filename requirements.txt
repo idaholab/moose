@@ -1,0 +1,51 @@
+# NOTE: When updating this at all, update conda/tools/meta.yaml.template
+
+jinja2
+matplotlib
+numpy
+pandas
+plotly
+pylint
+pyyaml
+scikit-image
+sympy
+
+# Python utilities
+packaging
+setuptools
+
+# Cardinal
+uncertainties
+# CI/CD
+gitpython
+paramiko
+psycopg2-binary
+pycobertura
+# Formatting and linting
+black==26.1.0
+clang-format==19.1.7
+ruff==0.15.7
+# Testing
+coverage
+mock
+pytest
+pytest-cov
+
+# python/moosecontrol
+requests
+# python/MooseDocs.commands
+beautifulsoup4
+livereload
+lxml
+# python/MooseDocs.extensions
+pybtex
+pylatexenc
+# python/TestHarness.testers
+deepdiff
+xmltodict<0.14
+# python/TestHarness.resultssummary
+tabulate
+# python/TestHarness.resultsstore
+pymongo
+# python/TestHarness.schedulers
+psutil

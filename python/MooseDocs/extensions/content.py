@@ -7,18 +7,21 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+import collections
+import logging
 import os
 import re
 import uuid
-import collections
-import logging
-import moosetree
+
+from moosetools import tree
+
 import mooseutils
+
 from .. import common
+from ..base import LatexRenderer, components, renderers
 from ..common import exceptions
-from ..base import components, renderers, LatexRenderer
-from ..tree import pages, tokens, html, latex
-from . import core, command, heading
+from ..tree import html, latex, pages, tokens
+from . import command, core, heading
 
 LOG = logging.getLogger(__name__)
 
@@ -98,7 +101,6 @@ class ContentExtension(command.CommandExtension):
             location[str]: The content page local path must begin with the given string.
             method[LETTER|FOLDER]: Method for bin assignment.
         """
-
         location = location
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
         nodes = self.translator.findPages(func)
@@ -431,7 +433,7 @@ class RenderTableOfContents(components.RenderComponent):
             and (n is not token)
             and (n["id"] not in hide)
         )
-        toks = moosetree.findall(token.root, func)
+        toks = tree.findall(token.root, func)
 
         div = html.Tag(parent, "div", class_="moose-table-of-contents")
         div.addStyle("column-count:{}".format(token["columns"]))

@@ -22,11 +22,12 @@ class TestRequireCapability(TestHarnessTestCase):
 
     def getAugmentedCapabilityNames(self) -> list[str]:
         """
-        Get pycapabilities.AUGMENTED_CAPABILITY_NAMES.
+        Get moosetools.capabilities.AUGMENTED_CAPABILITY_NAMES.
 
         Done here instead of at file level to avoid pycapabilites build.
         """
-        from pycapabilities import AUGMENTED_CAPABILITY_NAMES
+
+        from moosetools.capabilities import AUGMENTED_CAPABILITY_NAMES
 
         names = list(AUGMENTED_CAPABILITY_NAMES)
         self.assertGreater(len(names), 1)
@@ -34,7 +35,7 @@ class TestRequireCapability(TestHarnessTestCase):
 
     def testParseRequiredCapabilities(self):
         """Test TestHarness.capability_util.parseRequiredCapabilities()."""
-        from pycapabilities import Capabilities
+        from moosetools.capabilities import Capabilities
 
         names = self.getAugmentedCapabilityNames()
         name1 = names[0]

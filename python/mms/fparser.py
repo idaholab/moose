@@ -208,7 +208,7 @@ def build_hit(expr, name, **kwargs):
         name[str]: The name of the input file block to create
         kwargs: Key, value pairs for val, vals input parameters (defaults to 1.0) if not provided
     """
-    import pyhit
+    from moosetools import hit
 
     if hasattr(expr, "free_symbols"):
         symbols = set([str(s) for s in expr.free_symbols]).difference(
@@ -219,7 +219,7 @@ def build_hit(expr, name, **kwargs):
     for symbol in symbols:
         kwargs.setdefault(symbol, 1.0)
 
-    root = pyhit.Node(None, name)
+    root = hit.Node(None, name)
     root["type"] = "ParsedFunction"
     root["expression"] = "'{}'".format(str(fparser(expr)))
 

@@ -96,7 +96,7 @@ First, you must create a runner object that defines how the `MooseControl` conne
 Assume that you have an input file with a [WebServerControl.md] named `web_server`. Create a `SubprocessPortRunner` and initialize the `MooseControl` with this runner as follows:
 
 ```language=python
-from moosecontrol.runners import SubprocessPortRunner
+from moosetools.control.runners import SubprocessPortRunner
 
 # Define the runner that will spawn MOOSE over a port
 # with the input file "input.i"

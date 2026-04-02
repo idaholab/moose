@@ -7,9 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
 import os
+
+from TestHarness import util
+from TestHarness.testers.FileTester import FileTester
+from mooseutils import csvdiff
 
 
 class CSVDiff(FileTester):
@@ -95,54 +97,52 @@ class CSVDiff(FileTester):
         commands = []
 
         for file in self.specs["csvdiff"]:
-            csvdiff = [
-                os.path.join(self.specs["moose_python_dir"], "mooseutils", "csvdiff.py")
-            ]
+            cmd = [csvdiff.__file__]
 
             # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
-            csvdiff.append(
+            cmd.append(
                 os.path.join(self.getTestDir(), self.specs["gold_dir"], file)
                 + " "
                 + os.path.join(self.getTestDir(), file)
             )
 
             if self.specs.isValid("rel_err"):
-                csvdiff.append("--relative-tolerance %s" % (self.specs["rel_err"]))
+                cmd.append("--relative-tolerance %s" % (self.specs["rel_err"]))
 
             if self.specs.isValid("abs_zero"):
-                csvdiff.append("--abs-zero %s" % (self.specs["abs_zero"]))
+                cmd.append("--abs-zero %s" % (self.specs["abs_zero"]))
 
             if self.specs.isValid("comparison_file"):
                 comparison_file = os.path.join(
                     self.getTestDir(), self.specs["comparison_file"]
                 )
                 if os.path.exists(comparison_file):
-                    csvdiff.append("--comparison-file %s" % (comparison_file))
+                    cmd.append("--comparison-file %s" % (comparison_file))
                 else:
                     self.setStatus(self.fail, "MISSING COMPARISON FILE")
                     return commands
 
             if self.specs.isValid("override_columns"):
-                csvdiff.append(
+                cmd.append(
                     "--custom-columns %s" % (" ".join(self.specs["override_columns"]))
                 )
 
             if self.specs.isValid("override_rel_err"):
-                csvdiff.append(
+                cmd.append(
                     "--custom-rel-err %s" % (" ".join(self.specs["override_rel_err"]))
                 )
 
             if self.specs.isValid("override_abs_zero"):
-                csvdiff.append(
+                cmd.append(
                     "--custom-abs-zero %s" % (" ".join(self.specs["override_abs_zero"]))
                 )
 
             if self.specs.isValid("ignore_columns"):
-                csvdiff.append(
+                cmd.append(
                     "--ignore-fields %s" % (" ".join(self.specs["ignore_columns"]))
                 )
 
-            commands.append(" ".join(csvdiff))
+            commands.append(" ".join(cmd))
 
         return commands
 
@@ -174,7 +174,7 @@ class CSVDiff(FileTester):
             for command in commands:
                 exo_output = util.runCommand(command)
                 output += "Running csvdiff: " + command + "\n" + exo_output
-                if not "Files are the same" in exo_output:
+                if "Files are the same" not in exo_output:
                     self.setStatus(self.diff, "CSVDIFF")
                     break
 

@@ -1,7 +1,7 @@
 # moosetree.search
 
-!pysyntax function name=moosetree.findall
+!pysyntax function name=tree.findall
 
-!pysyntax function name=moosetree.find
+!pysyntax function name=tree.find
 
 !pysyntax function name=moosetree.iterate

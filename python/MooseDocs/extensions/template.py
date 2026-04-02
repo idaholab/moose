@@ -6,13 +6,10 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import re
-import codecs
 import logging
-import moosetree
 import mooseutils
 
-import MooseDocs
+from moosetools import tree
 from .. import common
 from ..common import exceptions
 from ..base import components, Executioner, MarkdownReader
@@ -69,7 +66,7 @@ class TemplateExtension(include.IncludeExtension):
         items = set()
         fields = set()
 
-        for node in moosetree.iterate(ast):
+        for node in tree.iterate(ast):
             if node.name == "TemplateItem":
                 items.add(node["key"])
             elif node.name == "TemplateField":
@@ -190,7 +187,7 @@ class RenderTemplateField(components.RenderComponent):
         # Locate the replacement
         key = token["key"]
         func = lambda n: (n.name == "TemplateItem") and (n["key"] == key)
-        replacement = moosetree.find(token.root, func)
+        replacement = tree.find(token.root, func)
 
         if replacement:
             # Render TemplateItem
