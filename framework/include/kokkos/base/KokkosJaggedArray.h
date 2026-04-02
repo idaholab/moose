@@ -110,7 +110,7 @@ JaggedArrayInnerData<T, inner, layout>::operator()(indices... i) const
                 "All arguments must be convertible to unsigned int");
   static_assert(sizeof...(i) == inner, "Number of arguments should match array dimension");
 
-#ifdef DEBUG
+#ifndef NDEBUG
   {
     unsigned int idx[inner] = {static_cast<unsigned int>(i)...};
 
