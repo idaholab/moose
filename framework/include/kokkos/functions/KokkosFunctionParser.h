@@ -170,7 +170,7 @@ public:
    * Print RPN sequence for debugging
    * @param console The console object
    */
-  void printRPN(const ConsoleStream & console);
+  void printRPN(const ConsoleStream & console) const;
   /**
    * Get RPN sequence
    * @returns The RPN sequence
@@ -216,6 +216,16 @@ public:
    * @returns The variables
    */
   const auto & getVariables() const { return _variables; }
+
+  /**
+   * Finalize the builder and prevent further changes
+   */
+  void finalize() { _finalized = true; }
+  /**
+   * Get whether the builder was finalized
+   * @returns Whether the builder was finalized
+   */
+  bool finalized() const { return _finalized; }
 
 private:
   /**
@@ -277,6 +287,10 @@ private:
    * Whether default variables were added
    */
   bool _has_default_variables = false;
+  /**
+   * Whether builder was finalized
+   */
+  bool _finalized = false;
 
   /**
    * Find node excluding whitespaces
@@ -284,21 +298,26 @@ private:
    * @param i The node index to find
    * @return The node
    */
-  const peg::Ast & getNode(const peg::Ast & ast, const unsigned int i);
+  const peg::Ast & getNode(const peg::Ast & ast, const unsigned int i) const;
 
   /**
    * Count the number of nodes excluding whitespaces
    * @param ast The root node
    * @return The number of nodes
    */
-  unsigned int getNumNodes(const peg::Ast & ast);
+  unsigned int getNumNodes(const peg::Ast & ast) const;
 
   /**
    * Print a pretty error showing the position of error
    * @param ast The erroneous AST node
    * @param message The error message
    */
-  [[noreturn]] void builderError(const peg::Ast & ast, const std::string & message);
+  [[noreturn]] void builderError(const peg::Ast & ast, const std::string & message) const;
+
+  /**
+   * Error on attempts to update the builder after finalization
+   */
+  void finalizedError();
 };
 
 /**
@@ -310,19 +329,19 @@ class RPNEvaluator
 
 public:
   /**
-   * Constructor
-   * @param builder The RPN builder
+   * Default constructor
    */
-  RPNEvaluator(const RPNBuilder & builder) : _builder(builder) {}
+  RPNEvaluator() = default;
   /**
    * Copy constructor for parallel dispatch
    */
   RPNEvaluator(const RPNEvaluator & evaluator);
 
   /**
-   * Initialize RPN evaluator
+   * Initialize RPN evaluator from an RPN builder
+   * @param builder The RPN builder
    */
-  void init();
+  void init(const RPNBuilder & builder);
 
   /**
    * Evaluate RPN at point (t,x,y,z)
@@ -345,10 +364,6 @@ private:
   };
 
   /**
-   * RPN builder
-   */
-  const RPNBuilder & _builder;
-  /**
    * RPN sequence
    */
   Array<Instruction> _rpn;
@@ -359,7 +374,7 @@ private:
   /**
    * Variables used in the function
    */
-  Array<Real> _variables;
+  Array<::Kokkos::pair<const Real *, Real>> _variables;
 
   /**
    * Fixed stack size
@@ -414,6 +429,8 @@ RPNEvaluator::eval(const Real t, const Real3 p) const
                                      _stack_size,
                                      ") is insufficient.");)
 
+    KOKKOS_ASSERT(head < _stack_size);
+
     const auto inst = _rpn[pos];
 
     switch (_rpn[pos].op)
@@ -428,7 +445,7 @@ RPNEvaluator::eval(const Real t, const Real3 p) const
         else if (inst.arg == 3)
           stack[head] = t;
         else
-          stack[head] = _variables[inst.arg];
+          stack[head] = _variables[inst.arg].second;
         ++head;
         break;
       case Opcode::NEG:

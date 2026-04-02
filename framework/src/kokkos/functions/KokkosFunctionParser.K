@@ -93,6 +93,8 @@ PEGParser::PEGParser(const std::string & expression, const ConsoleStream * conso
 void
 RPNBuilder::build(const peg::Ast & ast)
 {
+  finalizedError();
+
   if (ast.name == "Start" || ast.name == "Primary" || ast.name == "ArgList")
     for (const auto & node : ast.nodes)
       build(*node);
@@ -168,7 +170,7 @@ RPNBuilder::build(const peg::Ast & ast)
 }
 
 void
-RPNBuilder::printRPN(const ConsoleStream & console)
+RPNBuilder::printRPN(const ConsoleStream & console) const
 {
   console << std::endl;
 
@@ -181,6 +183,8 @@ RPNBuilder::printRPN(const ConsoleStream & console)
 void
 RPNBuilder::addDefaultVariables()
 {
+  finalizedError();
+
   _has_default_variables = true;
 
   addVariable("x");
@@ -192,6 +196,8 @@ RPNBuilder::addDefaultVariables()
 unsigned int
 RPNBuilder::addNumber(Real number)
 {
+  finalizedError();
+
   _numbers.push_back(number);
   return _numbers.size() - 1;
 }
@@ -199,6 +205,8 @@ RPNBuilder::addNumber(Real number)
 unsigned int
 RPNBuilder::addVariable(const std::string & name)
 {
+  finalizedError();
+
   auto it = _variables.find(name);
   if (it != _variables.end())
     return it->second.idx;
@@ -213,6 +221,8 @@ RPNBuilder::addVariable(const std::string & name)
 void
 RPNBuilder::associateValue(const std::string & name, const Real * value)
 {
+  finalizedError();
+
   auto it = _variables.find(name);
   if (it == _variables.end())
     mooseError("Kokkos parsed function error: variable ",
@@ -223,7 +233,7 @@ RPNBuilder::associateValue(const std::string & name, const Real * value)
 }
 
 const peg::Ast &
-RPNBuilder::getNode(const peg::Ast & ast, const unsigned int i)
+RPNBuilder::getNode(const peg::Ast & ast, const unsigned int i) const
 {
   unsigned int n = 0;
 
@@ -242,7 +252,7 @@ RPNBuilder::getNode(const peg::Ast & ast, const unsigned int i)
 }
 
 unsigned int
-RPNBuilder::getNumNodes(const peg::Ast & ast)
+RPNBuilder::getNumNodes(const peg::Ast & ast) const
 {
   unsigned int n = 0;
 
@@ -254,7 +264,7 @@ RPNBuilder::getNumNodes(const peg::Ast & ast)
 }
 
 void
-RPNBuilder::builderError(const peg::Ast & ast, const std::string & message)
+RPNBuilder::builderError(const peg::Ast & ast, const std::string & message) const
 {
   std::string arrow(ast.column, ' ');
   arrow.back() = '^';
@@ -262,30 +272,42 @@ RPNBuilder::builderError(const peg::Ast & ast, const std::string & message)
   mooseError("Kokkos parsed function error: ", message, "\n", _parser.expression(), "\n", arrow);
 }
 
-RPNEvaluator::RPNEvaluator(const RPNEvaluator & evaluator)
-  : _builder(evaluator._builder),
-    _rpn(evaluator._rpn),
-    _numbers(evaluator._numbers),
-    _variables(evaluator._variables)
+void
+RPNBuilder::finalizedError()
 {
-  const auto & variables = _builder.getVariables();
+  if (_finalized)
+    mooseError("Kokkos parsed function error: cannot update builder after finalization.");
+}
 
-  for (const auto & [_, var] : variables)
-    if (var.value)
-      _variables[var.idx] = *var.value;
+RPNEvaluator::RPNEvaluator(const RPNEvaluator & evaluator)
+  : _rpn(evaluator._rpn), _numbers(evaluator._numbers), _variables(evaluator._variables)
+{
+  for (const auto i : make_range(_variables.size()))
+    if (_variables[i].first)
+      _variables[i].second = *_variables[i].first;
 
   _variables.copyToDevice();
 }
 
 void
-RPNEvaluator::init()
+RPNEvaluator::init(const RPNBuilder & builder)
 {
-  const auto & numbers = _builder.getNumbers();
-  const auto & variables = _builder.getVariables();
-  const auto & rpn = _builder.getRPN();
+  if (!builder.finalized())
+    mooseError("Kokkos parsed function error: attempted to initialize evaluator with a builder "
+               "which was not finalized.");
+
+  const auto & numbers = builder.getNumbers();
+  const auto & variables = builder.getVariables();
+  const auto & rpn = builder.getRPN();
 
   _numbers = numbers;
-  _variables.create(variables.size() + (_builder.hasDefaultVariables() ? 0 : 4));
+
+  _variables.create(variables.size() + (builder.hasDefaultVariables() ? 0 : 4));
+  _variables = {nullptr, 0};
+
+  for (const auto & [_, var] : variables)
+    _variables[var.idx].first = var.value;
+
   _rpn.create(rpn.size());
 
   for (const auto i : make_range(rpn.size()))

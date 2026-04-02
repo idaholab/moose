@@ -18,7 +18,7 @@ class KokkosParsedFunctionTestObject
 public:
   KokkosParsedFunctionTestObject(const std::map<std::string, Real> & constants,
                                  const std::string & expression)
-    : _builder(expression), _evaluator(_builder)
+    : _builder(expression)
   {
     _result.create(1);
 
@@ -30,7 +30,9 @@ public:
 
     _builder.build();
 
-    _evaluator.init();
+    _builder.finalize();
+
+    _evaluator.init(_builder);
   }
 
   KOKKOS_FUNCTION void operator()(const int) const
