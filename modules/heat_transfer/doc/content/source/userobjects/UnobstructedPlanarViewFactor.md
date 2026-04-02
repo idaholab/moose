@@ -65,6 +65,8 @@ parameter `normalize_view_factor`.
 
 It is stressed that this UserObject may give wrong results if obstruction is present
 
+!template load file=ViewFactorBase_normalization.md.template name=UnobstructedPlanarViewFactor
+
 ## Example Input syntax
 
 !listing modules/heat_transfer/test/tests/view_factors/view_factor_2d.i

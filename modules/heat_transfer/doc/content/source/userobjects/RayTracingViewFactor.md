@@ -38,7 +38,7 @@ heat equation solved on block `b1`. In this case, the boundary that we apply bou
 must be composed of element faces belonging to `b1`. Going back to our two neighboring example elements, the face `(e1,s1)`
 must be added to the boundary because it belongs to element `e1` which belongs to block `b1` which defines the temperature.
 If the user tries to impose the boundary condition on element face `(e2,s1)` MOOSE will segfault. This distinction between
-internal and external boundaries is important to understand how to define boundaries around radiation cavities.  
+internal and external boundaries is important to understand how to define boundaries around radiation cavities.
 
 Boundaries enclosing a cavity are either external or internal boundaries. External boundaries
 do not have a neighbor on the other side of the face, while internal boundaries have valid elements on
@@ -55,6 +55,8 @@ The [SideSetsBetweenSubdomainsGenerator.md] mesh generator can be used for setti
 cavity boundaries. In this mesh generator, the sidesets will belong to the "primary" side. Returning to the example,
 if [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/primary_block) is `b1` and [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/paired_block) is `b2`, then `(e1,s1)` will be the element faces used in the new sideset.
 Specifically, the [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/primary_block) are the blocks around the cavity, while [!param](/Mesh/SideSetsBetweenSubdomainsGenerator/paired_block) are the blocks inside the cavity.
+
+!template load file=ViewFactorBase_normalization.md.template name=RayTracingViewFactor
 
 ## Example Input syntax
 

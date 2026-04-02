@@ -1,0 +1,54 @@
+## Normalization
+
+The normalization options below are provided via [!param](/UserObjects/{{name}}/normalization_method). Denoting the original, unormalized view factors as $\tilde{F}_{i,j}$,
+
+- `lagrange_multiplier`:
+
+  First the following linear system is solved:
+
+  !equation
+  \mathbf{A} \mathbf{x} = \mathbf{b}
+
+  !equation
+  A_{i,j} = \left\{\begin{array}{l l}
+  -\frac{\gamma_{j,i}}{C_{j,i}}& j < i\\
+  -\frac{1}{2} - \sum\limits_{j=1}^{i-1} \frac{\gamma_{j,i}^2}{C_{j,i}} - \sum\limits_{j=i+1}^N \frac{1}{C_{i,j}} & j = i\\
+  -\frac{\gamma_{i,j}}{C_{i,j}} & j > i\\
+  \end{array}\right.
+
+  !equation
+  b_i = 1 - \sum\limits_j \tilde{F}_{i,j} - \sum\limits_{j=1}^{i-1} \gamma_{j,i} e_{j,i} \left(1 - \frac{\gamma_{j,i}^2}{1 + \gamma_{j,i}^2}\right) + \sum\limits_{j=i+1}^N \frac{\gamma_{i,j}^2 e_{i,j}}{1 + \gamma_{i,j}^2}
+
+  The area ratio is defined as
+
+  !equation
+  \gamma_{i,j} = \frac{A_i}{A_j}
+
+  The reciprocity deviation is defined as
+
+  !equation
+  e_{i,j} = \tilde{F}_{i,j} - \frac{A_j}{A_i} \tilde{F}_{j,i}
+
+  The quantity $C_{i,j}$ is defined as
+
+  !equation
+  C_{i,j} = 2 (1 + \gamma_{i,j}^2)
+
+  Then the following corrections are applied:
+
+  !equation
+  \delta_{i,j} = \left\{\begin{array}{l l}
+  -\frac{1}{2} x_i & j = i\\
+  -\frac{\left(x_i + x_j \gamma_{i,j} + 2 \gamma_{i,j}^2 e_{i,j}\right)}{C_{i,j}} & j \ne i\\
+  \end{array}\right.
+
+  !equation
+  F_{i,j} = \tilde{F}_{i,j} + \delta_{i,j}
+
+- `inverse_row_sum`:
+
+  This method enforces the *summation rule* without consideration of the *reciprocity rule* for enclosures:
+
+  !equation
+  F_{i,j} = \frac{\tilde{F}_{i,j}}{\sum\limits_k \tilde{F}_{k,j}}
+

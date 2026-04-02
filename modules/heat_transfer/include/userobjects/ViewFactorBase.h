@@ -23,6 +23,13 @@ public:
 
   ViewFactorBase(const InputParameters & parameters);
 
+  /// How to normalize view factors
+  enum class NormalizationMethod
+  {
+    LAGRANGE_MULTIPLIER = 0,
+    INVERSE_ROW_SUM = 1
+  };
+
   ///@{ public interface for obtaining view factors
   Real getViewFactor(BoundaryID from_id, BoundaryID to_id) const;
   Real getViewFactor(BoundaryName from_name, BoundaryName to_name) const;
@@ -47,6 +54,9 @@ protected:
 
   /// normalizes view factors by Lagrange multiplier method
   void normalizeUsingLagrangeMultiplier();
+
+  /// normalizes view factors by inverse row sum
+  void normalizeUsingInverseRowSum();
 
   /// helper for finding index of correction for i,j-th entry
   unsigned int indexHelper(unsigned int i, unsigned int j) const;
@@ -74,6 +84,9 @@ protected:
 
   /// whether to normalize view factors so vf[from][:] sums to one
   const bool _normalize_view_factor;
+
+  /// How to normalize view factors
+  const NormalizationMethod _normalization_method;
 
   // whether to print view factor information
   const bool _print_view_factor_info;

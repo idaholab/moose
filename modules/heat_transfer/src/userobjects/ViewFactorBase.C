@@ -25,6 +25,15 @@ ViewFactorBase::validParams()
                         true,
                         "Determines if view factors are normalized to sum to one (consistent with "
                         "their definition).");
+
+  MooseEnum normalization_method("lagrange_multiplier inverse_row_sum", "lagrange_multiplier");
+  normalization_method.addDocumentation("lagrange_multiplier", "Uses Lagrange multiplier method");
+  normalization_method.addDocumentation("inverse_row_sum",
+                                        "Divides each view factor by its row sum");
+  params.addParam<MooseEnum>("normalization_method",
+                             normalization_method,
+                             "Normalization method to use if 'normalize_view_factor' is 'true'.");
+
   params.addClassDescription(
       "A base class for automatic computation of view factors between sidesets.");
   return params;
@@ -36,6 +45,8 @@ ViewFactorBase::ViewFactorBase(const InputParameters & parameters)
     _areas(_n_sides),
     _view_factor_tol(getParam<Real>("view_factor_tol")),
     _normalize_view_factor(getParam<bool>("normalize_view_factor")),
+    _normalization_method(
+        getParam<MooseEnum>("normalization_method").getEnum<NormalizationMethod>()),
     _print_view_factor_info(getParam<bool>("print_view_factor_info"))
 {
   // sizing the view factor array
@@ -185,7 +196,28 @@ ViewFactorBase::checkAndNormalizeViewFactor()
     if (_print_view_factor_info)
       _console << "\nNormalizing view factors.\n" << std::endl;
 
-    normalizeUsingLagrangeMultiplier();
+    const auto view_factors_original = _view_factors;
+
+    switch (_normalization_method)
+    {
+      case NormalizationMethod::LAGRANGE_MULTIPLIER:
+        normalizeUsingLagrangeMultiplier();
+        break;
+      case NormalizationMethod::INVERSE_ROW_SUM:
+        normalizeUsingInverseRowSum();
+        break;
+      default:
+        mooseError("Invalid normalization method.");
+    }
+
+    // compute max and min correction for reporting
+    for (const auto i : make_range(_n_sides))
+      for (const auto j : make_range(_n_sides))
+      {
+        const Real correction = _view_factors[i][j] - view_factors_original[i][j];
+        min_correction = std::min(correction, min_correction);
+        max_correction = std::max(correction, max_correction);
+      }
   }
 
   if (_print_view_factor_info)
@@ -302,13 +334,19 @@ ViewFactorBase::normalizeUsingLagrangeMultiplier()
 
       // update the temporary view factor
       vf_temp[i][j] += correction;
-
-      if (correction < min_correction)
-        min_correction = correction;
-      if (correction > max_correction)
-        max_correction = correction;
     }
   _view_factors = vf_temp;
+}
+
+void
+ViewFactorBase::normalizeUsingInverseRowSum()
+{
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    const Real row_sum = viewFactorRowSum(i);
+    for (auto & v : _view_factors[i])
+      v /= row_sum;
+  }
 }
 
 unsigned int
