@@ -25,7 +25,7 @@ public:
   virtual void initialize() override;
 
 protected:
-  virtual void threadJoinViewFactor(const UserObject & y) override;
+  virtual void threadJoinViewFactor(const UserObject & /*y*/) override {};
   virtual void finalizeViewFactor() override;
 
   /// helper function that reinits an element face

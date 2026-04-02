@@ -101,11 +101,35 @@ ViewFactorBase::getViewFactor(BoundaryName from_name, BoundaryName to_name) cons
 }
 
 void
+ViewFactorBase::initialize()
+{
+  std::fill(_areas.begin(), _areas.end(), 0);
+}
+
+void
+ViewFactorBase::execute()
+{
+  // compute areas
+  auto current_boundary_name = _mesh.getBoundaryName(_current_boundary_id);
+  auto it = _side_name_index.find(current_boundary_name);
+  if (it == _side_name_index.end())
+    mooseError("Current boundary name: ",
+               current_boundary_name,
+               " with id ",
+               _current_boundary_id,
+               " not in boundary parameter.");
+
+  _areas[it->second] += _current_side_volume;
+}
+
+void
 ViewFactorBase::finalize()
 {
   // do some communication before finalizing view_factors
   for (unsigned int i = 0; i < _n_sides; ++i)
     gatherSum(_view_factors[i]);
+
+  gatherSum(_areas);
 
   finalizeViewFactor();
   checkAndNormalizeViewFactor();
@@ -119,6 +143,8 @@ ViewFactorBase::threadJoin(const UserObject & y)
   {
     for (unsigned int j = 0; j < _n_sides; ++j)
       _view_factors[i][j] += pps._view_factors[i][j];
+
+    _areas[i] += pps._areas[i];
   }
   threadJoinViewFactor(y);
 }

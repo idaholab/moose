@@ -59,6 +59,8 @@ UnobstructedPlanarViewFactor::UnobstructedPlanarViewFactor(const InputParameters
 void
 UnobstructedPlanarViewFactor::execute()
 {
+  ViewFactorBase::execute();
+
   auto current_boundary_name = _mesh.getBoundaryName(_current_boundary_id);
   if (_side_name_index.find(current_boundary_name) == _side_name_index.end())
     mooseError("Current boundary name: ",
@@ -67,8 +69,6 @@ UnobstructedPlanarViewFactor::execute()
                _current_boundary_id,
                " not in boundary parameter.");
   unsigned int index = _side_name_index.find(current_boundary_name)->second;
-
-  _areas[index] += _current_side_volume;
 
   for (auto & side : _side_list)
   {
@@ -105,6 +105,8 @@ UnobstructedPlanarViewFactor::execute()
 void
 UnobstructedPlanarViewFactor::initialize()
 {
+  ViewFactorBase::initialize();
+
   // get boundary info from the mesh
   _boundary_info = &_mesh.getMesh().get_boundary_info();
 
@@ -114,7 +116,6 @@ UnobstructedPlanarViewFactor::initialize()
   // set view_factors to zero
   for (unsigned int j = 0; j < _n_sides; ++j)
   {
-    _areas[j] = 0;
     for (auto & vf : _view_factors[j])
       vf = 0;
   }
@@ -123,20 +124,10 @@ UnobstructedPlanarViewFactor::initialize()
 void
 UnobstructedPlanarViewFactor::finalizeViewFactor()
 {
-  gatherSum(_areas);
-
   // divide view_factor Fij by Ai and pi
   for (unsigned int i = 0; i < _n_sides; ++i)
     for (auto & vf : _view_factors[i])
       vf /= (_areas[i] * _divisor);
-}
-
-void
-UnobstructedPlanarViewFactor::threadJoinViewFactor(const UserObject & y)
-{
-  const auto & pps = static_cast<const UnobstructedPlanarViewFactor &>(y);
-  for (unsigned int i = 0; i < _n_sides; ++i)
-    _areas[i] += pps._areas[i];
 }
 
 void

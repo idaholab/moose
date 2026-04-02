@@ -30,42 +30,6 @@ SpecifiedViewFactor::SpecifiedViewFactor(const InputParameters & parameters)
 }
 
 void
-SpecifiedViewFactor::initialize()
-{
-  for (const auto j : make_range(_n_sides))
-    _areas[j] = 0;
-}
-
-void
-SpecifiedViewFactor::execute()
-{
-  auto current_boundary_name = _mesh.getBoundaryName(_current_boundary_id);
-  if (_side_name_index.find(current_boundary_name) == _side_name_index.end())
-    mooseError("Current boundary name: ",
-               current_boundary_name,
-               " with id ",
-               _current_boundary_id,
-               " not in boundary parameter.");
-  const unsigned int index = _side_name_index.find(current_boundary_name)->second;
-
-  _areas[index] += _current_side_volume;
-}
-
-void
-SpecifiedViewFactor::threadJoinViewFactor(const UserObject & y)
-{
-  const auto & uo = static_cast<const SpecifiedViewFactor &>(y);
-  for (unsigned int i = 0; i < _n_sides; ++i)
-    _areas[i] += uo._areas[i];
-}
-
-void
-SpecifiedViewFactor::finalizeViewFactor()
-{
-  gatherSum(_areas);
-}
-
-void
 SpecifiedViewFactor::checkViewFactors() const
 {
   // check that the input has the right format

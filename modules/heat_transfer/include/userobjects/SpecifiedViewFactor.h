@@ -21,12 +21,9 @@ public:
 
   SpecifiedViewFactor(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-
 protected:
-  virtual void threadJoinViewFactor(const UserObject & y) override;
-  virtual void finalizeViewFactor() override;
+  virtual void threadJoinViewFactor(const UserObject & /*y*/) override {};
+  virtual void finalizeViewFactor() override {};
 
   virtual void checkViewFactors() const;
 };

@@ -31,33 +31,8 @@ RayTracingViewFactor::RayTracingViewFactor(const InputParameters & parameters)
 }
 
 void
-RayTracingViewFactor::execute()
-{
-  // compute areas
-  auto current_boundary_name = _mesh.getBoundaryName(_current_boundary_id);
-  auto it = _side_name_index.find(current_boundary_name);
-  if (it == _side_name_index.end())
-    mooseError("Current boundary name: ",
-               current_boundary_name,
-               " with id ",
-               _current_boundary_id,
-               " not in boundary parameter.");
-
-  _areas[it->second] += _current_side_volume;
-}
-
-void
-RayTracingViewFactor::initialize()
-{
-  // set view_factors to zero
-  std::fill(_areas.begin(), _areas.end(), 0);
-}
-
-void
 RayTracingViewFactor::finalizeViewFactor()
 {
-  gatherSum(_areas);
-
   // get the _view_factors from ray study
   for (const auto & from_name : boundaryNames())
     for (const auto & to_name : boundaryNames())
@@ -77,12 +52,4 @@ RayTracingViewFactor::finalizeViewFactor()
     for (auto & vf : _view_factors[i])
       vf *= factor;
   }
-}
-
-void
-RayTracingViewFactor::threadJoinViewFactor(const UserObject & y)
-{
-  const auto & pps = static_cast<const RayTracingViewFactor &>(y);
-  for (unsigned int i = 0; i < _n_sides; ++i)
-    _areas[i] += pps._areas[i];
 }

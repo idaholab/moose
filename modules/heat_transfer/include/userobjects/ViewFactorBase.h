@@ -35,6 +35,8 @@ public:
   Real getViewFactor(BoundaryName from_name, BoundaryName to_name) const;
   ///@}
 
+  virtual void initialize() override;
+  virtual void execute() override;
   virtual void finalize() override final;
 
 protected:
