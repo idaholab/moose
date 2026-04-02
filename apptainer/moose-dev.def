@@ -106,11 +106,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export METHOD=oprof
 {%- endif %}
 
-%post
+%post -c /bin/bash
     umask 022
+    set -xeo pipefail
 
-    # So that piping things to tee fails
-    set -o pipefail
+    # Determine OS
+    grep -q "rhel" /etc/os-release && IS_RHEL=1
+    grep -q "debian" /etc/os-release && IS_DEBIAN=1
+
+    # Get packages for ubuntu
+    if [ -n "$IS_DEBIAN" ]; then
+        apt-get update
+    fi
 
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
@@ -146,20 +153,31 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # Required at configure time for MFEM checking petsc
         export MPIR_CVAR_ENABLE_GPU=0
 
-        # When using mpich with hwloc, install hwloc-gui to
-        # get "lstopo-no-graphics", which can be used to
-        # prebuild a topology file to avoid hwloc reading
-        # topology for every run
+        # When using mpich with hwloc, get "lstopo-no-graphics",
+        # which can be used to prebuild a topology file to avoid
+        # hwloc building a topology for every run
         if mpiexec --version | grep -q hwloc; then
-            dnf install -y hwloc-gui
+            if [ -n "$IS_RHEL" ]; then
+                dnf install -y hwloc-gui
+            elif [ -n "$IS_DEBIAN" ]; then
+                apt-get install -y --no-install-recommends hwloc-nox
+            fi
         fi
     fi
 
     # Install code-server
-    CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
     cd ${ROOT_BUILD_DIR}
+    if [ -n "$IS_RHEL" ]; then
+        CODE_SERVER_FILE="code-server-${CODE_SERVER_VERSION}-amd64.rpm"
+    elif [ -n "$IS_DEBIAN" ]; then
+        CODE_SERVER_FILE="code-server_${CODE_SERVER_VERSION}_amd64.deb"
+    fi
     curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
-    rpm -i ${CODE_SERVER_FILE}
+    if [ -n "$IS_RHEL" ]; then
+        rpm -i ${CODE_SERVER_FILE}
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt install -y ./${CODE_SERVER_FILE}
+    fi
     rm ${CODE_SERVER_FILE}
 
     # Setup directory for code-server extensions. The extensions folder can be
@@ -205,7 +223,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 {% if WITHOUT_PYTORCH is not defined %}
     # Make ninja available for neml2 and libtorch builds
-    dnf install -y ninja-build
+    if [ -n "$IS_RHEL" ]; then
+        dnf install -y ninja-build
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get install -y --no-install-recommends ninja-build
+    fi
 
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
@@ -361,7 +383,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     pip3 --no-cache install lcov-cobertura
 
     # Install node.js. Requested by dschwen for bison
-    dnf install -y nodejs npm
+    if [ -n "$IS_RHEL" ]; then
+        dnf install -y nodejs npm
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get install -y --no-install-recommends nodejs npm
+    fi
 
 {% if PROFILING is defined %}
     # Install gperftools
@@ -411,7 +437,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Clean up
     conda clean -ya
-    dnf clean all
+    if [ -n "$IS_RHEL" ]; then
+        dnf clean all
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get autoremove -y
+        apt-get clean
+        rm -rf /var/lib/apt/lists/*
+    fi
     rm -rf ${ROOT_BUILD_DIR}
 
 %files

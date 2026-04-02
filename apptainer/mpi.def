@@ -21,6 +21,10 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.0_2026.03.09
 From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich4.3.2_2026.03.09
 {%- elif ALTERNATE_FROM == "rocky9" %}
 From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10_2026.03.09
+{%- elif ALTERNATE_FROM == "ubuntu" %}
+From: ghcr.io/idaholab/moose-mpibase/ubuntu:24.04-gcc14.2.0-mpich5.0.0-openmpi5.0.10_2026.03.24
+{%- elif ALTERNATE_FROM == "ubuntu_cuda" %}
+From: ghcr.io/idaholab/moose-mpibase/ubuntu:24.04-cuda12.9.1-gcc13.3.0-mpich5.0.0-openmpi5.0.10_2026.03.24
 {%- else %}
 From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.10_2026.03.09
 {%- endif %}
@@ -31,42 +35,71 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.
 
     # Environment from underyling docker image
     if [ -f "/moose_env.sh" ]; then
-        source /moose_env.sh
+        . /moose_env.sh
     fi
 
-%post
+%post -c /bin/bash
     umask 022
+    set -xeo pipefail
 
-    # Determine rocky version
-    grep -q "Rocky" /etc/os-release && IS_ROCKY=1
-    if [ -n "$IS_ROCKY" ]; then
-        grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
-        grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
+    # Determine OS
+    grep -q "rhel" /etc/os-release && IS_RHEL=1
+    if [ -n "$IS_RHEL" ]; then
+        grep 'VERSION=\"8.' /etc/os-release && IS_RHEL_8=1
+        grep 'VERSION=\"9.' /etc/os-release && IS_RHEL_9=1
+        if [ -z "$IS_RHEL_8" ] && [ -z "$IS_RHEL_9" ]; then
+            echo "Unknown rhel version"
+            exit 1
+        fi
+    fi
+    grep -q "debian" /etc/os-release && IS_DEBIAN=1
+    if [ -z "$IS_RHEL" ] && [ -z "$IS_DEBIAN" ]; then
+        echo "Unknown OS"
+        exit 1
     fi
 
     # Remove apptainer if it's installed
-    if dnf list installed apptainer &> /dev/null; then
-        dnf remove -y apptainer
+    if [ -n "$IS_RHEL" ]; then
+        if dnf list installed apptainer &> /dev/null; then
+            dnf remove -y apptainer
+        fi
     fi
 
-    # Enable additional repos
-    dnf install -y dnf-plugins-core
-    if [ -n "$IS_ROCKY_8" ]; then
-        dnf config-manager --set-enabled powertools
-        dnf install -y redhat-lsb-core.x86_64
-    elif [ -n "$IS_ROCKY_9" ]; then
-        dnf config-manager --set-enabled crb
+    # Enable additional repos for rhel
+    if [ -n "$IS_RHEL" ]; then
+        dnf install -y dnf-plugins-core
+        if [ -n "$IS_RHEL_8" ]; then
+            dnf config-manager --set-enabled powertools
+            dnf install -y redhat-lsb-core.x86_64
+        elif [ -n "$IS_RHEL_9" ]; then
+            dnf config-manager --set-enabled crb
+        fi
+        dnf install -y epel-release
     fi
-    dnf install -y epel-release
 
     # Additional installs
-    dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
-        perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
-        libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov bash-completion
+    if [ -n "$IS_RHEL" ]; then
+        dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
+            perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
+            libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
+            automake cppunit-devel glpk-devel patchelf lcov bash-completion
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get update
+        apt-get install -y --no-install-recommends \
+            emacs make cmake diffutils bison flex libio-compress-perl libjson-perl \
+            libjson-pp-perl libtirpc3 libtirpc-dev zlib1g-dev patch patchutils libpng16-16 \
+            libpng-dev valgrind libcppunit-1.15-0 doxygen libfftw3-dev libgsl-dev libtool autoconf \
+            automake libcppunit-dev libglpk-dev patchelf lcov bash-completion
+    fi
 
     # Clean after install
-    dnf clean all
+    if [ -n "$IS_RHEL" ]; then
+        dnf clean all
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get autoremove -y
+        apt-get clean
+        rm -rf /var/lib/apt/lists/*
+    fi
 
 %test
     if [ -n "$MOOSE_MPICH_DIR" ]; then

@@ -103,7 +103,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     {{ SECTION_ENVIRONMENT }}
 {%- endif %}
 
-%post
+%post -c /bin/bash
+    umask 022
+    set -xeo pipefail
+
 {%- if SECTION_POST_BEGIN is defined %}
     {{ SECTION_POST_BEGIN }}
 {%- endif %}
