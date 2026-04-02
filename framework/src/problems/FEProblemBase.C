@@ -4736,7 +4736,28 @@ const VectorPostprocessor &
 FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_name,
                                                   const THREAD_ID tid) const
 {
-  return getUserObject<VectorPostprocessor>(object_name, tid);
+  std::vector<VectorPostprocessor *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribThread>(tid)
+      .queryInto(objs);
+
+  std::vector<VectorPostprocessor *> mfem_objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMVectorPostprocessor")
+      .condition<AttribThread>(tid)
+      .queryInto(mfem_objs);
+  objs.insert(objs.end(), mfem_objs.begin(), mfem_objs.end());
+
+  for (const auto * const obj : objs)
+    if (obj->PPName() == object_name)
+      return *obj;
+
+  if (objs.empty())
+    mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
+  mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
 }
 
 void

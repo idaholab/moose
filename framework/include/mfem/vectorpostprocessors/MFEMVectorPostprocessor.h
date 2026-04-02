@@ -11,19 +11,22 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 #include "VectorPostprocessor.h"
 
 /*
  * Vector postprocessor for MFEM results. Must inherit from VectorPostprocessor
  * in order for MOOSE to call it.
  */
-class MFEMVectorPostprocessor : public MFEMGeneralUserObject, public VectorPostprocessor
+class MFEMVectorPostprocessor : public MFEMExecutedObject, public VectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
   MFEMVectorPostprocessor(const InputParameters & parameters);
+
+  virtual std::set<std::string> consumedVariableNames() const override;
+  virtual std::set<std::string> producedVectorPostprocessorNames() const override;
 };
 
 #endif // MOOSE_MFEM_ENABLED

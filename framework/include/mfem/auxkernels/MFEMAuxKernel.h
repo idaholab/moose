@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 #include "MFEMContainers.h"
 
 /**
  * Class to construct an auxiliary solver used to update a real auxvariable.
  */
-class MFEMAuxKernel : public MFEMGeneralUserObject
+class MFEMAuxKernel : public MFEMExecutedObject
 {
 public:
   static InputParameters validParams();
@@ -26,7 +26,10 @@ public:
   virtual ~MFEMAuxKernel() = default;
 
   /// Method called to update any owned objects upon an FE space update
-  virtual void update() {};
+  virtual void update() {}
+
+  virtual std::set<std::string> consumedVariableNames() const override;
+  virtual std::set<std::string> producedVariableNames() const override;
 
 protected:
   /// Name of auxvariable to store the result of the auxkernel in.
