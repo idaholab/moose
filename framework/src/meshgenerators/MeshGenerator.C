@@ -331,8 +331,7 @@ MeshGenerator::generateInternal()
 
   if (getParam<bool>("show_info"))
   {
-    if (!mesh->is_prepared())
-      mesh->prepare_for_use();
+    mesh->complete_preparation();
 
     const auto mesh_info = mesh->get_info(/* verbosity = */ 2);
 
@@ -350,8 +349,7 @@ MeshGenerator::generateInternal()
   // output the current mesh block to file
   if (hasOutput())
   {
-    if (!mesh->is_prepared())
-      mesh->prepare_for_use();
+    mesh->complete_preparation();
 
     if (!getParam<bool>("nemesis"))
     {
