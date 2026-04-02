@@ -162,7 +162,7 @@
     xmldiff = 'OutputData/MixedHeatTransfer/Run0/Run0.pvd
                 OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
@@ -221,7 +221,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
   [MFEMNonLinearDiffusionNonZeroRHS]
     type = XMLDiff
     input = nldiffusion.i
@@ -249,7 +249,7 @@
       recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
-                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '      
+                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '
     []
     [non-linear]
       detail = 'when the non-linear BC is given state-dependent coefficients.'
@@ -277,6 +277,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
-    restep = false    
+    restep = false
   []
 []
