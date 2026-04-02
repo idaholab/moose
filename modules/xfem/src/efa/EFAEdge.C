@@ -201,10 +201,10 @@ EFAEdge::hasIntersection() const
 {
   bool has = false;
   if (_edge_node1->parent() != nullptr)
-    has = has || _edge_node1->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
+    has = has || _edge_node1->parentCategory() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
 
   if (_edge_node2->parent() != nullptr)
-    has = has || _edge_node2->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
+    has = has || _edge_node2->parentCategory() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT;
 
   return has || _embedded_nodes.size() > 0;
 }

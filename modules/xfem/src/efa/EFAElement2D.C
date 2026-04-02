@@ -1308,7 +1308,7 @@ EFAElement2D::updateFragmentNode()
   for (unsigned int j = 0; j < _num_nodes; ++j)
   {
     if (_nodes[j]->parent() != nullptr &&
-        _nodes[j]->parent()->category() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
+        _nodes[j]->parentCategory() == EFANode::N_CATEGORY_EMBEDDED_PERMANENT)
       switchNode(_nodes[j], _nodes[j]->parent(), false);
   }
 }

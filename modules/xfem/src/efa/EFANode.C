@@ -12,7 +12,10 @@
 #include <sstream>
 
 EFANode::EFANode(unsigned int nid, N_CATEGORY ncat, EFANode * nparent)
-  : _category(ncat), _id(nid), _parent(nparent)
+  : _category(ncat),
+    _id(nid),
+    _parent(nparent),
+    _parent_category(nparent ? nparent->category() : N_CATEGORY_PERMANENT)
 {
 }
 
@@ -50,10 +53,17 @@ EFANode::parent() const
   return _parent;
 }
 
+EFANode::N_CATEGORY
+EFANode::parentCategory() const
+{
+  return _parent_category;
+}
+
 void
 EFANode::removeParent()
 {
   _parent = nullptr;
+  _parent_category = N_CATEGORY_PERMANENT;
 }
 
 void

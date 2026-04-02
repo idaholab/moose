@@ -29,6 +29,7 @@ private:
   N_CATEGORY _category;
   unsigned int _id;
   EFANode * _parent;
+  N_CATEGORY _parent_category;
 
 public:
   std::string idCatString();
@@ -36,5 +37,6 @@ public:
   N_CATEGORY category() const;
   void setCategory(EFANode::N_CATEGORY category);
   EFANode * parent() const;
+  N_CATEGORY parentCategory() const;
   void removeParent();
 };
