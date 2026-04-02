@@ -48,6 +48,13 @@
   []
 []
 
+[Functions]
+  [exact_solution]
+    type = ParsedFunction
+    expression = 'x + 2*(-sin(pi*x)*exp(-pi^2*t) + sin(2*pi*x)*exp(-4*pi^2*t)/2 - sin(3*pi*x)*exp(-9*pi^2*t)/3 + sin(4*pi*x)*exp(-16*pi^2*t)/4 - sin(5*pi*x)*exp(-25*pi^2*t)/5)/pi'
+  []
+[]
+
 [Preconditioner]
   [boomeramg]
     type = MFEMHypreBoomerAMG
@@ -70,11 +77,24 @@
   dt = 0.2
 []
 
+[Postprocessors]
+  [dt]
+    type = TimestepSize
+    execute_on = TIMESTEP_END
+  []
+  [error]
+    type = MFEML2Error
+    variable = u
+    function = exact_solution
+    execute_on = TIMESTEP_END
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/dt_from_parent
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = TIMESTEP_END
+    file_base = dt_from_parent
   []
 []
 
