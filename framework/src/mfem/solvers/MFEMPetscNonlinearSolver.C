@@ -38,11 +38,11 @@ MFEMPetscNonlinearSolver::validParams()
 MFEMPetscNonlinearSolver::MFEMPetscNonlinearSolver(const InputParameters & parameters)
   : Moose::MFEM::NonlinearSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMPetscNonlinearSolver::constructSolver(const InputParameters & parameters)
+MFEMPetscNonlinearSolver::constructSolver()
 {
   const auto & prefix = getParam<std::string>("petsc_options_prefix");
   const auto normalized_prefix = !prefix.empty() && prefix.back() != '_' ? prefix + "_" : prefix;

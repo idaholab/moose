@@ -31,7 +31,7 @@ public:
 
   NonlinearSolverBase(const InputParameters & parameters);
 
-  void constructSolver(const InputParameters & parameters) override = 0;
+  void constructSolver() override = 0;
 
   /// Configure the nonlinear solver with the residual/Jacobian operator.
   virtual void SetOperator(const mfem::Operator & op) = 0;

@@ -23,7 +23,7 @@ public:
 
   MFEMNewtonNonlinearSolver(const InputParameters & parameters);
 
-  void constructSolver(const InputParameters & parameters) override;
+  void constructSolver() override;
 
   void SetOperator(const mfem::Operator & op) override;
   void SetLinearSolver(mfem::Solver & solver) override;
