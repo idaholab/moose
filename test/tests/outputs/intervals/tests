@@ -37,6 +37,14 @@
 
     requirement = "The system shall support output at specific simulation times."
   []
+  [sync_times_unsorted]
+    type = 'Exodiff'
+    input = 'sync_times.i'
+    cli_args = "Outputs/out/sync_times='0.375 0.15 0.892'"
+    exodiff = 'sync_times_out.e'
+
+    requirement = "The system shall support output at specific simulation times that are not sorted."
+  []
   [output_limiting_function]
     type = 'Exodiff'
     input = 'output_limiting_function.i'

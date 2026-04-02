@@ -22,18 +22,23 @@ public:
 
   TimeSequenceStepperBase(const InputParameters & parameters);
 
-  void setupSequence(const std::vector<Real> & times);
-  void updateSequence(const std::vector<Real> & times);
-
-  // Clear the time sequence array, usually use when time sequence need to be updated during the
-  // simulation
+  /// Clear the time sequence array, usually use when time sequence need to be updated during the
+  /// simulation
   void resetSequence();
 
-  // Increase the current step count by one
+  /// Increase the current step count by one
   void increaseCurrentStep() { _current_step++; };
 
-  // Get the time of the current step from input time sequence
-  virtual Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
+  /// Get the time of the current step from input time sequence
+  /// If already at the end, returns a very large number
+  virtual Real getNextTimeInSequence()
+  {
+    if (_current_step < _time_sequence.size())
+      return _time_sequence[_current_step];
+    else
+      // Some consumer could add to this number, avoid overflow
+      return std::numeric_limits<Real>::max() / 2;
+  };
 
   virtual void init() override {}
   virtual void acceptStep() override;
@@ -42,6 +47,13 @@ protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
   virtual Real computeFailedDT() override;
+
+  /// Callback used to update the sequence in time steppers that might have a dynamic sequence
+  virtual void updateSequence() {}
+  /// Used for both updating and setting up the sequence: selects different behaviors depending on whether the app is restarting, restoring, initializing, etc
+  void setupSequence(const std::vector<Real> & times);
+  /// Simply overrites the sequence with the input sequence, with some checks
+  void updateSequence(const std::vector<Real> & times);
 
   /// Whether to use the final dt past the last t in sequence
   const bool _use_last_dt_after_last_t;
@@ -53,5 +65,5 @@ protected:
   std::vector<Real> & _time_sequence;
 
   /// Whether to use the last t in sequence as Executioner end_time
-  const bool _set_end_time;
+  const bool _use_last_t_for_end_time;
 };
