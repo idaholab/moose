@@ -97,23 +97,20 @@ SUPPORTED_METHODS="oprof devel dbg opt"
 : ${METHODS:=${METHOD:-$SUPPORTED_METHODS}}
 
 # Map from the supported libMesh-like methods to CMake's build types
-build_type_pairs=(
-  "oprof=PROFILE"
-  "devel=RELWITHDEBINFO"
-  "dbg=DEBUG"
-  "opt=RELEASE"
-)
+build_type_pairs=("oprof=PROFILE" "devel=RELWITHDEBINFO" "dbg=DEBUG" "opt=RELEASE")
 
 get_build_type() {
-  local key="$1"
-  local pair
-  for pair in "${build_type_pairs[@]}"; do
-    case "$pair" in
-      "$key="*) echo "${pair#*=}"; return 0 ;;
-    esac
+  for build_type_pair in "${build_type_pairs[@]}"; do
+    [[ $build_type_pair =~ $1 ]] && echo "${build_type_pair#*=}" && return;
   done
-  return 1
 }
+
+# Determine shared library extension
+[[ "$(uname)" == "Darwin" ]] && SHLIB_EXT=dylib || SHLIB_EXT=so
+
+# Define OpenBLAS library name and check existence as CMake's error is unclear
+OPENBLAS_LIB="$PETSC_DIR/$PETSC_ARCH/lib/libopenblas.$SHLIB_EXT"
+[[ -f "$OPENBLAS_LIB" ]] || { echo "Error: $OPENBLAS_LIB not found."; exit 1; }
 
 # The order here, i.e. in METHODS, _is_ important: the libraries for the last
 # of the requested methods will be available for external use (see below)
@@ -122,7 +119,6 @@ do
   [[ $SUPPORTED_METHODS =~ $METHOD ]] ||
   { echo "Error: Build method $METHOD is not recognised, choose from $SUPPORTED_METHODS."; exit 1; }
 
-
   CMAKE_BUILD_TYPE="$(get_build_type "$METHOD")"
 
   # If we're not going fast, remove the build directory and reconfigure
@@ -130,19 +126,6 @@ do
     rm -rf "$MFEM_BUILD_DIR_BASE-$METHOD"
     mkdir -p "$MFEM_BUILD_DIR_BASE-$METHOD"
     cd "$MFEM_BUILD_DIR_BASE-$METHOD"
-
-    # Determine shared library extension
-    case "$(uname)" in
-      Darwin) SHLIB_EXT=dylib ;;
-      *)      SHLIB_EXT=so ;;
-    esac
-
-    OPENBLAS_LIB="$PETSC_DIR/$PETSC_ARCH/lib/libopenblas.$SHLIB_EXT"
-
-    if [ ! -f "$OPENBLAS_LIB" ]; then
-      echo "Error: $OPENBLAS_LIB not found"
-      exit 1
-    fi
 
     cmake .. \
       -DBUILD_SHARED_LIBS=YES \
