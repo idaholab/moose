@@ -2,10 +2,10 @@
   design = 'syntax/Problem/index.md'
   issues = '#30806'
   [MFEMScalarIC]
-    type = XMLDiff
+    type = CSVDiff
     input = scalar_ic.i
-    xmldiff = 'OutputData/ScalarIC/Run0/Run0.pvd
-                OutputData/ScalarIC/Run0/Cycle000000/proc000000.vtu'
+    csvdiff = 'OutputData/ScalarIC/scalar_ic_line_sample_h1_scalar_0001.csv '
+              'OutputData/ScalarIC/scalar_ic_line_sample_l2_scalar_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -13,10 +13,12 @@
     recover = false
   []
   [MFEMVectorIC]
-    type = XMLDiff
+    type = CSVDiff
     input = vector_ic.i
-    xmldiff = 'OutputData/VectorIC/Run0/Run0.pvd
-                OutputData/VectorIC/Run0/Cycle000000/proc000000.vtu'
+    csvdiff = 'OutputData/VectorIC/vector_ic_line_sample_h1_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_nd_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_rt_vector_0001.csv '
+              'OutputData/VectorIC/vector_ic_line_sample_l2_vector_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a vector MFEM variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -24,11 +26,10 @@
     recover = false
   []
   [MFEMTransientScalarIC]
-    type = XMLDiff
+    type = CSVDiff
     input = transient_scalar_ic.i
-    xmldiff = 'OutputData/TransientScalarIC/Run0/Run0.pvd
-                OutputData/TransientScalarIC/Run0/Cycle000000/proc000000.vtu
-                OutputData/TransientScalarIC/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/TransientScalarIC/transient_scalar_ic_line_sample_h1_scalar_0001.csv '
+              'OutputData/TransientScalarIC/transient_scalar_ic_line_sample_l2_scalar_0001.csv'
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'

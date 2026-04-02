@@ -67,10 +67,20 @@
   dt = 1 # This will be constrained by the parent solve
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'u'
+    start_point = '0 0 0'
+    end_point = '1 1 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/dt_from_parent_sub
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/dt_from_parent_sub/dt_from_parent_sub
   []
 []

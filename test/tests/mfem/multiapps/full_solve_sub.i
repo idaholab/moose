@@ -70,10 +70,20 @@
   dt = 0.01
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'u'
+    start_point = '0 0 0'
+    end_point = '1 1 0'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/full_solve_sub
-    vtk_format = ASCII
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/full_solve_sub/full_solve_sub
   []
 []
