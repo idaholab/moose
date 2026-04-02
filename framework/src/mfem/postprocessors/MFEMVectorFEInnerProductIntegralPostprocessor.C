@@ -33,7 +33,7 @@ MFEMVectorFEInnerProductIntegralPostprocessor::validParams()
 MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mfemParMesh()),
     _primal_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
         getParam<VariableName>("primal_variable"))),
     _dual_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(

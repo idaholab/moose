@@ -16,6 +16,7 @@
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
+#include "MFEMMeshFactory.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -31,12 +32,26 @@ MFEMProblem::validParams()
                              "using the MFEM finite element library.");
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem");
+  params.addParam<bool>(
+      "fallback_elements",
+      false,
+      "Whether to fall back to using simpler elements when the element types in a libMesh mesh "
+      "(e.g., TRI7, TET14) can not be represented in an MFEM mesh.");
+  params.addParam<bool>(
+      "first_order_mesh",
+      false,
+      "Whether to force a higher-order libMesh mesh to be represented as a first-order mesh in "
+      "MFEM. This can be useful if the higher order was only needed in libMesh for the basis "
+      "functions, rather than to represent curvature in the elements.");
 
   return params;
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))}
+  : ExternalProblem(params),
+    num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
+    _fallback_elements(getParam<bool>("fallback_elements")),
+    _first_order_mesh(getParam<bool>("first_order_mesh"))
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
@@ -54,7 +69,7 @@ MFEMProblem::initialSetup()
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = mesh().getMFEMParMeshPtr();
+  auto pmesh = buildMFEMMesh(_mesh, _fallback_elements, _first_order_mesh);
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();
@@ -564,9 +579,8 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 
   // Create fespace name. If this already exists, we will reuse this for
   // the mfem variable ("gridfunction").
-  const std::string fespace_name = mfem_family + "_" +
-                                   std::to_string(mesh().getMFEMParMesh().Dimension()) + "D_P" +
-                                   std::to_string(moose_fe_type.order.get_order());
+  const std::string fespace_name = mfem_family + "_" + std::to_string(mfemParMesh().Dimension()) +
+                                   "D_P" + std::to_string(moose_fe_type.order.get_order());
 
   // Set all fespace parameters.
   fespace_params.set<std::string>("fec_name") = fespace_name;
@@ -585,27 +599,32 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 void
 MFEMProblem::displaceMesh()
 {
-  // Displace mesh
-  if (mesh().shouldDisplace())
+  if (ExternalProblem::mesh().type() == "MFEMMesh")
   {
-    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
-    // TODO: update FESpaces GridFunctions etc for transient solves
+    auto & mesh = static_cast<MFEMMesh &>(_mesh);
+    // Displace mesh
+    if (mesh.shouldDisplace())
+    {
+      mesh.displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+      // TODO: update FESpaces GridFunctions etc for transient solves
+    }
   }
 }
 
 std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
 MFEMProblem::getMeshDisplacementGridFunction()
 {
-  // If C++23 transform were available this would be easier
-  auto const displacement_variable = mesh().getMeshDisplacementVariable();
-  if (displacement_variable)
+  if (ExternalProblem::mesh().type() == "MFEMMesh")
   {
-    return *_problem_data.gridfunctions.Get(displacement_variable.value());
+    auto & mesh = static_cast<MFEMMesh &>(_mesh);
+    // If C++23 transform were available this would be easier
+    auto const displacement_variable = mesh.getMeshDisplacementVariable();
+    if (displacement_variable)
+    {
+      return *_problem_data.gridfunctions.Get(displacement_variable.value());
+    }
   }
-  else
-  {
-    return std::nullopt;
-  }
+  return std::nullopt;
 }
 
 void
@@ -637,20 +656,6 @@ std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {
   return systemBaseAuxiliary().getVariableNames();
-}
-
-MFEMMesh &
-MFEMProblem::mesh()
-{
-  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
-              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  return static_cast<MFEMMesh &>(_mesh);
-}
-
-const MFEMMesh &
-MFEMProblem::mesh() const
-{
-  return const_cast<MFEMProblem *>(this)->mesh();
 }
 
 void

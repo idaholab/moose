@@ -1,0 +1,108 @@
+[Tests]
+  design = 'source/mfem/utils/BuildMFEMMesh.md'
+  issues = '#32520'
+  [LibMeshToMFEMMesh]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones, including on meshes made from '
+    [H1Quad]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_quads.csv'
+      detail = 'first order quads, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+    []
+    [H1Hex]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_hexes.csv'
+      detail = 'first order hexes, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../hex-8.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_hexes '
+                'mfem_app0:Mesh/file=../hex-8.e '
+    []
+    [H1Hex2]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_hexes2.csv'
+      detail = 'second order hexes, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../hex-27.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_hexes2 '
+                'mfem_app0:Mesh/file=../hex-27.e '
+    []
+    [H1Tet]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_tets.csv'
+      detail = 'first order tetrahedra, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../tet-4.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_tets '
+                'mfem_app0:Mesh/file=../tet-4.e '
+    []
+    [H1Tet2]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_tets2.csv'
+      detail = 'second order tetrahedra, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../tet-10.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_tets2 '
+                'mfem_app0:Mesh/file=../tet-10.e '
+    []
+    [H1Pyr]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_pyramids.csv'
+      detail = 'first order pyramids, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../pyramid-5.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_pyramids '
+                'mfem_app0:Mesh/file=../pyramid-5.e '
+    []
+    [H1Wedge]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_wedges.csv'
+      detail = 'first order wedges, '
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../wedge-6.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_wedges '
+                'mfem_app0:Mesh/file=../wedge-6.e '
+    []
+    [H1Wedge2]
+      type = CSVDiff
+      input = libmesh_parent.i
+      csvdiff = 'libmesh_to_mfem_mesh_wedges2.csv'
+      detail = 'and second order wdges.'
+      abs_zero = 1e-8
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'Mesh/file=../wedge-18.e '
+                'Outputs/file_base=libmesh_to_mfem_mesh_wedges2 '
+                'mfem_app0:Mesh/file=../wedge-18.e '
+    []
+  []
+[]
