@@ -15,6 +15,8 @@
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
 
+#include "MooseError.h"
+
 namespace Moose::MFEM
 {
 
