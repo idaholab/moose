@@ -375,6 +375,9 @@ CartesianMeshGenerator::generate()
     }
   }
 
-  mesh->prepare_for_use();
+  // We just created this mesh from scratch, so nothing about it is
+  // prepared, but it also isn't marked as prepared, so we can just
+  // let the mesh generator system prepare it later.
+  // mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
