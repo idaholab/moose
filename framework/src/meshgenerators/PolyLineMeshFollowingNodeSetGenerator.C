@@ -209,7 +209,10 @@ done_drawing:
     bi.add_side(mesh.elem_ptr(n_elem - 1), 1, ids[1]);
   }
 
-  mesh.prepare_for_use();
+  // We just created this mesh from scratch, so nothing about it is
+  // prepared, but it also isn't marked as prepared, so we can just
+  // let the mesh generator system prepare it later.
+  // mesh->prepare_for_use();
 
   return uptr_mesh;
 }
