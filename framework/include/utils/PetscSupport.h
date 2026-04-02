@@ -255,7 +255,14 @@ void setSinglePetscOptionIfAppropriate(const MultiMooseEnum & dont_add_these_opt
                                        const std::string & value = "",
                                        FEProblemBase * const problem = nullptr);
 
-void addPetscOptionsFromCommandline();
+/**
+ * Insert command-line PETSc options into the active PETSc options database.
+ *
+ * When \p problem is provided, this also reapplies vector and matrix type options that may have
+ * been consumed before the options database was rebuilt, which preserves PETSc's used-option
+ * bookkeeping for command-line '-vec_type' and '*mat_type' options.
+ */
+void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
 
 /**
  * Setup which side we want to apply preconditioner
