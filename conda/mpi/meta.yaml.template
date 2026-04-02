@@ -42,7 +42,7 @@ outputs:
         - {{ compiler("c") }}
         - {{ compiler("cxx") }}
         - {{ compiler("fortran") }}
-        - {{ stdlib("c) }}
+        - {{ stdlib("c") }}
         - gfortran {{ fortran_compiler_version }}
         - icu {{ icu }}
         - krb5 {{ krb5 }}
@@ -55,7 +55,7 @@ outputs:
         - {{ compiler("c") }}
         - {{ compiler("cxx") }}
         - {{ compiler("fortran") }}
-        - {{ stdlib("c) }}
+        - {{ stdlib("c") }}
         - gfortran {{ fortran_compiler_version }}
         - icu {{ icu }}
         - krb5 {{ krb5 }}
