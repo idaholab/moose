@@ -68,8 +68,9 @@ NEML2ModelExecutor::validParams()
       "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
-  // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
-  // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
+  // want to execute this user object only at execute_on = LINEAR (i.e. during residual
+  // evaluation). The NONLINEAR exec flag below is for computing Jacobian during automatic
+  // scaling.
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
   execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
   params.set<ExecFlagEnum>("execute_on") = execute_options;
@@ -198,6 +199,19 @@ std::size_t
 NEML2ModelExecutor::getBatchIndex(dof_id_type elem_id) const
 {
   return _batch_index_generator.getBatchIndex(elem_id);
+}
+
+std::size_t
+NEML2ModelExecutor::getSideBatchIndex(const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.getSideBatchIndex(elem_side);
+}
+
+bool
+NEML2ModelExecutor::isSideBatchIndexExist(
+    const NEML2BatchIndexGenerator::ElemSide & elem_side) const
+{
+  return _batch_index_generator.isSideBatchIndexExist(elem_side);
 }
 
 void
@@ -584,6 +598,10 @@ NEML2ModelExecutor::extractOutputs()
                e.what(),
                NEML2Utils::NEML2_help_message);
   }
+
+  // Mark outputs ready as soon as the tensors are populated so downstream material retrieval
+  // during the same execute phase can see the fresh values.
+  _output_ready = true;
 }
 
 void

@@ -144,6 +144,9 @@ protected:
   /// Blocks this sub-block action applies to
   const std::vector<SubdomainName> _block;
 
+  /// Interfaces this sub-block action applies to
+  const std::vector<BoundaryName> _interface;
+
   /// Material property initial conditions
   std::map<MaterialPropertyName, MaterialPropertyName> _initialize_output_values;
 

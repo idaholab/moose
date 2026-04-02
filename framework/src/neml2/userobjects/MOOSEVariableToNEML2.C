@@ -23,24 +23,19 @@ MOOSEVariableToNEML2Templ<state>::validParams()
   return params;
 }
 
-template <>
-MOOSEVariableToNEML2Templ<0>::MOOSEVariableToNEML2Templ(const InputParameters & params)
-  : MOOSEToNEML2Batched(params)
+template <unsigned int state>
+MOOSEVariableToNEML2Templ<state>::MOOSEVariableToNEML2Templ(const InputParameters & params)
+  : MOOSEToNEML2Batched<Real>(params)
 #ifdef NEML2_ENABLED
     ,
-    _moose_variable(coupledValue("from_moose"))
+    _moose_variable(state == 0 ? this->coupledValue("from_moose")
+                               : this->coupledValueOld("from_moose")),
+    _moose_variable_neighbor(state == 0 ? this->coupledNeighborValue("from_moose")
+                                        : this->coupledNeighborValueOld("from_moose"))
 #endif
 {
-}
-
-template <>
-MOOSEVariableToNEML2Templ<1>::MOOSEVariableToNEML2Templ(const InputParameters & params)
-  : MOOSEToNEML2Batched(params)
-#ifdef NEML2_ENABLED
-    ,
-    _moose_variable(coupledValueOld("from_moose"))
-#endif
-{
+  static_assert(state < 2,
+                "MOOSEVariableToNEML2Tmpl supports only state=0 (current) or state=1 (old)");
 }
 
 template class MOOSEVariableToNEML2Templ<0>;
