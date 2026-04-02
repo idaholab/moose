@@ -31,8 +31,20 @@ RayTracingViewFactor::RayTracingViewFactor(const InputParameters & parameters)
 }
 
 void
+RayTracingViewFactor::threadJoinViewFactor(const UserObject & y)
+{
+  const auto & vf = static_cast<const RayTracingViewFactor &>(y);
+  for (unsigned int i = 0; i < _n_sides; ++i)
+    for (unsigned int j = 0; j < _n_sides; ++j)
+      _view_factors[i][j] += vf._view_factors[i][j];
+}
+
+void
 RayTracingViewFactor::finalizeViewFactor()
 {
+  for (unsigned int i = 0; i < _n_sides; ++i)
+    gatherSum(_view_factors[i]);
+
   // get the _view_factors from ray study
   for (const auto & from_name : boundaryNames())
     for (const auto & to_name : boundaryNames())

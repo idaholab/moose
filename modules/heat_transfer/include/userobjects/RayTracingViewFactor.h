@@ -25,7 +25,7 @@ public:
   RayTracingViewFactor(const InputParameters & parameters);
 
 protected:
-  virtual void threadJoinViewFactor(const UserObject & /*y*/) override {};
+  virtual void threadJoinViewFactor(const UserObject & y) override;
   virtual void finalizeViewFactor() override;
 
   const ViewFactorRayStudy & _ray_study;

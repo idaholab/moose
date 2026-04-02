@@ -122,12 +122,25 @@ UnobstructedPlanarViewFactor::initialize()
 }
 
 void
+UnobstructedPlanarViewFactor::threadJoinViewFactor(const UserObject & y)
+{
+  const auto & vf = static_cast<const UnobstructedPlanarViewFactor &>(y);
+  for (unsigned int i = 0; i < _n_sides; ++i)
+    for (unsigned int j = 0; j < _n_sides; ++j)
+      _view_factors[i][j] += vf._view_factors[i][j];
+}
+
+void
 UnobstructedPlanarViewFactor::finalizeViewFactor()
 {
-  // divide view_factor Fij by Ai and pi
   for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    gatherSum(_view_factors[i]);
+
+    // divide view_factor Fij by Ai and pi
     for (auto & vf : _view_factors[i])
       vf /= (_areas[i] * _divisor);
+  }
 }
 
 void

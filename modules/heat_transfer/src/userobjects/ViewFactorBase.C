@@ -125,10 +125,6 @@ ViewFactorBase::execute()
 void
 ViewFactorBase::finalize()
 {
-  // do some communication before finalizing view_factors
-  for (unsigned int i = 0; i < _n_sides; ++i)
-    gatherSum(_view_factors[i]);
-
   gatherSum(_areas);
 
   finalizeViewFactor();
@@ -140,12 +136,8 @@ ViewFactorBase::threadJoin(const UserObject & y)
 {
   const auto & pps = static_cast<const ViewFactorBase &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
-  {
-    for (unsigned int j = 0; j < _n_sides; ++j)
-      _view_factors[i][j] += pps._view_factors[i][j];
-
     _areas[i] += pps._areas[i];
-  }
+
   threadJoinViewFactor(y);
 }
 
