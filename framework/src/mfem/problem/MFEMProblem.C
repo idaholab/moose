@@ -727,8 +727,8 @@ MFEMProblem::addInitialCondition(const std::string & ic_name,
 void
 MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
 {
-  auto append_objects = [this, &exec_type](const std::string & system,
-                                           std::vector<MFEMExecutedObject *> & objects)
+  auto append_objects =
+      [this, &exec_type](const std::string & system, std::vector<MFEMExecutedObject *> & objects)
   {
     std::vector<MFEMExecutedObject *> system_objects;
     theWarehouse()
@@ -791,9 +791,8 @@ MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
   std::vector<std::vector<unsigned int>> adj(objects.size());
   std::vector<unsigned int> indegree(objects.size(), 0);
 
-  auto add_dependencies = [&adj, &indegree](const auto & names,
-                                            const auto & producers,
-                                            const unsigned int consumer)
+  auto add_dependencies =
+      [&adj, &indegree](const auto & names, const auto & producers, const unsigned int consumer)
   {
     for (const auto & name : names)
       if (const auto it = producers.find(name); it != producers.end() && it->second != consumer)
