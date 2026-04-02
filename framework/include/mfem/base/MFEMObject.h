@@ -20,7 +20,7 @@
 class MFEMProblem;
 
 /**
- * Thin base for non-executed MFEM objects backed directly by MooseObject instead of UserObject.
+ * Thin base for MFEM objects backed directly by MooseObject instead of UserObject.
  */
 class MFEMObject : public MooseObject,
                    protected FunctionInterface,

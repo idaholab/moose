@@ -27,6 +27,7 @@ public:
   virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
+  virtual void execute(const ExecFlagType & exec_type) override;
   virtual void externalSolve() override {}
   virtual void syncSolutions(Direction) override {}
 
@@ -178,6 +179,10 @@ public:
                         const std::string & name,
                         InputParameters & parameters) override;
 
+  void addVectorPostprocessor(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters) override;
+
   /**
    * Method called in AddMFEMPreconditionerAction which will create the solver.
    */
@@ -215,6 +220,8 @@ public:
                               mfem::real_t nl_abs_tol,
                               mfem::real_t nl_rel_tol,
                               unsigned int print_level);
+
+  void executeMFEMObjects(const ExecFlagType & exec_type);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.

@@ -12,18 +12,21 @@
 #pragma once
 
 #include "Postprocessor.h"
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 
 /**
  * Postprocessor for MFEM results. Must inherit from Postprocessor in
  * order for MOOSE to call it.
  */
-class MFEMPostprocessor : public MFEMGeneralUserObject, public Postprocessor
+class MFEMPostprocessor : public MFEMExecutedObject, public Postprocessor
 {
 public:
   static InputParameters validParams();
 
   MFEMPostprocessor(const InputParameters & parameters);
+
+  virtual std::set<std::string> consumedVariableNames() const override;
+  virtual std::set<std::string> producedPostprocessorNames() const override;
 
   /**
    * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to

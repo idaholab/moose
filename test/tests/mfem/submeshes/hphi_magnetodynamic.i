@@ -89,7 +89,6 @@ vacuum_permeability = 1.0
     source = h_field
     scale_factor = 1.0
     execute_on = TIMESTEP_END
-    execution_order_group = 4
   []
 []
 
@@ -171,7 +170,6 @@ vacuum_permeability = 1.0
     coefficient = resistivity
     dual_variable = j_field
     primal_variable = j_field
-    execution_order_group = 5
     block = 'TorusCore TorusSheath'
   []
 []

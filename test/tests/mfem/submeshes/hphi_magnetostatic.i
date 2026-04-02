@@ -137,7 +137,6 @@ vacuum_permeability = 1.0
     variable = vacuum_h_field
     source_variables = 'background_h_field cut_function_field'
     execute_on = TIMESTEP_END
-    execution_order_group = 3
   []
 []
 
@@ -195,14 +194,12 @@ vacuum_permeability = 1.0
     from_variable = transition_cut_function_field
     to_variable = cut_function_field
     execute_on = TIMESTEP_END
-    execution_order_group = 2
   []
   [submesh_transfer_from_vacuum]
     type = MFEMSubMeshTransfer
     from_variable = vacuum_h_field
     to_variable = h_field
     execute_on = TIMESTEP_END
-    execution_order_group = 4
   []
 []
 
@@ -212,7 +209,6 @@ vacuum_permeability = 1.0
     coefficient = ${fparse 0.5*vacuum_permeability}
     dual_variable = vacuum_h_field
     primal_variable = vacuum_h_field
-    execution_order_group = 4
     block = 'Exterior'
   []
 []
