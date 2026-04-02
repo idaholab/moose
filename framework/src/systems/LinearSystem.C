@@ -104,6 +104,17 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
 LinearSystem::~LinearSystem() = default;
 
 void
+LinearSystem::preInit()
+{
+  SolverSystem::preInit();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosObjects())
+    _sys.get_dof_map().full_sparsity_pattern_needed();
+#endif
+}
+
+void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
@@ -121,7 +132,9 @@ LinearSystem::initialSetup()
     std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_elemental_kernels);
 
@@ -131,7 +144,9 @@ LinearSystem::initialSetup()
     std::vector<LinearFVFluxKernel *> fv_flux_kernels;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_flux_kernels);
 
@@ -141,13 +156,19 @@ LinearSystem::initialSetup()
     std::vector<LinearFVBoundaryCondition *> fv_bcs;
     _fe_problem.theWarehouse()
         .query()
+        .template condition<AttribSysNum>(number())
         .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribKokkos>(false)
         .template condition<AttribThread>(tid)
         .queryInto(fv_bcs);
 
     for (auto * fv_bc : fv_bcs)
       fv_bc->initialSetup();
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  initialSetupKokkosLinearFV();
+#endif
 }
 
 void
@@ -250,6 +271,11 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 
   if (compute_gradients)
     computeGradients();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosLinearSystem(vector_tags, matrix_tags);
+#endif
 
   // linear contributions from the domain
   PARALLEL_TRY

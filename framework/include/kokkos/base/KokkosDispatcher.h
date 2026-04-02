@@ -403,6 +403,32 @@ private:
 #define registerKokkosBoundaryConditionAliased(app, classname, alias)                              \
   registerKokkosResidualObjectAliased(app, classname, alias)
 
+#define callRegisterKokkosLinearFVKernelFunction(classname, objectname)                            \
+  static char registerKokkosLinearFVKernel##classname()                                            \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::RightHandSideLoop, classname>(objectname);        \
+    DispatcherRegistry::addDispatcher<classname::MatrixLoop, classname>(objectname);               \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_linearfvkernel_##classname, __COUNTER__) =            \
+      registerKokkosLinearFVKernel##classname()
+
+#define registerKokkosLinearFVKernel(app, classname)                                               \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosLinearFVKernelFunction(classname, #classname)
+
+#define registerKokkosLinearFVKernelAliased(app, classname, alias)                                 \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosLinearFVKernelFunction(classname, alias)
+
+#define registerKokkosLinearFVBoundaryCondition(app, classname) registerMooseObject(app, classname)
+#define registerKokkosLinearFVBoundaryConditionAliased(app, classname, alias)                      \
+  registerMooseObjectAliased(app, classname, alias)
+
 // Material
 
 #define callRegisterKokkosMaterialFunction(classname, objectname)                                  \

@@ -1317,9 +1317,12 @@ namespace Kokkos
 class FunctorCopy
 {
   friend class ResidualObject;
+  friend class LinearSystemContributionObject;
   friend class KernelBase;
   friend class NodalKernelBase;
   friend class BoundaryCondition;
+  friend class LinearFVKernel;
+  friend class LinearFVBoundaryCondition;
   friend class IntegratedBCBase;
   friend class NodalBCBase;
   friend class MaterialBase;

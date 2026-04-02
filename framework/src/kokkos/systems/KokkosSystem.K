@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
+#include "LinearSystem.h"
 #include "FEProblemBase.h"
 
 #include "libmesh/system.h"
@@ -34,9 +35,11 @@ System::System(SystemBase & system)
   setupVariables();
   setupDofs();
 
+  if (dynamic_cast<NonlinearSystemBase *>(&_system) || dynamic_cast<LinearSystem *>(&_system))
+    setupSparsity();
+
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
   {
-    setupSparsity();
     setupNodalBCDofs();
   }
 

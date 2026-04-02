@@ -431,6 +431,30 @@ AttribSystem::isEqual(const Attribute & other) const
 }
 
 void
+AttribKokkos::initFrom(const MooseObject * obj)
+{
+#ifdef MOOSE_KOKKOS_ENABLED
+  _val = obj->isKokkosObject();
+#else
+  static_cast<void>(obj);
+  _val = false;
+#endif
+}
+
+bool
+AttribKokkos::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribKokkos *>(&other);
+  return a && (a->_val == _val);
+}
+
+bool
+AttribKokkos::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
 AttribResidualObject::initFrom(const MooseObject * obj)
 {
   _val = obj->getParam<bool>("_residual_object");

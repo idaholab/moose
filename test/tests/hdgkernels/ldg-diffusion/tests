@@ -32,6 +32,7 @@
       input = test.py
       test_case = TestLagrangeQuad
       detail = 'tensor-product elements.'
+      min_slots = 2 # Memory greedy
     []
   []
   [rt_mms]

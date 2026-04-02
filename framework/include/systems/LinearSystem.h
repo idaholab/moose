@@ -17,6 +17,14 @@
 #include "libmesh/linear_solver.h"
 
 class LinearFVKernel;
+class InputParameters;
+namespace Moose::Kokkos
+{
+class LinearFVKernel;
+class LinearFVElementalKernel;
+class LinearFVFluxKernel;
+class LinearFVBoundaryCondition;
+}
 
 // libMesh forward declarations
 namespace libMesh
@@ -39,6 +47,7 @@ public:
   virtual ~LinearSystem();
 
   virtual void solve() override;
+  virtual void preInit() override;
 
   /**
    * At the moment, this is only used for the multi-system fixed point
@@ -48,6 +57,16 @@ public:
   virtual bool converged() override { return _converged; }
 
   virtual void initialSetup() override;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  void addKokkosKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters & parameters);
+
+  void addKokkosBoundaryCondition(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+#endif
 
   // Overriding these to make sure the linear systems don't do anything during
   // residual/jacobian setup
@@ -152,6 +171,13 @@ protected:
   void computeLinearSystemInternal(const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags,
                                    const bool compute_gradients = true);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  void initialSetupKokkosLinearFV();
+
+  void computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
+                                 const std::set<TagID> & matrix_tags);
+#endif
 
   /// Base class reference to the libmesh system
   System & _sys;
