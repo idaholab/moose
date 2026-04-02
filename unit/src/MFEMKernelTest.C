@@ -345,6 +345,7 @@ TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSyst
   TestEquationSystem eqn_system;
   eqn_system.AddKernel(diag_test);
   eqn_system.AddKernel(nonlinear);
+  eqn_system.SetSolverRequiresGradient(true);
 
   try
   {
@@ -355,7 +356,10 @@ TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSyst
   }
   catch (const std::runtime_error & error)
   {
-    EXPECT_TRUE(std::string(error.what()).find("not currently implemented") != std::string::npos);
+    const std::string message(error.what());
+    EXPECT_TRUE(message.find("off-diagonal MFEM nonlinear domain integrators") !=
+                std::string::npos);
+    EXPECT_TRUE(message.find("requires a gradient") != std::string::npos);
   }
 }
 

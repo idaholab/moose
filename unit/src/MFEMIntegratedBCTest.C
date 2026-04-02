@@ -338,6 +338,7 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
   TestEquationSystem eqn_system;
   eqn_system.AddKernel(diag_test);
   eqn_system.AddIntegratedBC(nonlinear);
+  eqn_system.SetSolverRequiresGradient(true);
 
   try
   {
@@ -348,7 +349,10 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
   }
   catch (const std::runtime_error & error)
   {
-    EXPECT_TRUE(std::string(error.what()).find("not currently implemented") != std::string::npos);
+    const std::string message(error.what());
+    EXPECT_TRUE(message.find("Off-diagonal MFEM nonlinear boundary integrators") !=
+                std::string::npos);
+    EXPECT_TRUE(message.find("requires a gradient") != std::string::npos);
   }
 }
 
