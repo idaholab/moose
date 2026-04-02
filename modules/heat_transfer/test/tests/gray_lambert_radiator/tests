@@ -14,7 +14,8 @@
   [./inconsistent_bnd_view_factors]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
-    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+    cli_args = 'UserObjects/view_factors_uo/boundary="top bottom"
+                UserObjects/gray_lambert/boundary="top bottom"
                 UserObjects/gray_lambert/adiabatic_boundary="bottom"
                 UserObjects/gray_lambert/fixed_temperature_boundary="top"
                 UserObjects/gray_lambert/fixed_boundary_temperatures="550"
@@ -27,10 +28,11 @@
   [./inconsistent_iso_temperature]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
-    cli_args = 'UserObjects/gray_lambert/boundary="top bottom"
+    cli_args = 'UserObjects/view_factors_uo/boundary="top bottom"
+                UserObjects/view_factors_uo/view_factors="0.5 0.5 ; 0.5 0.5"
+                UserObjects/gray_lambert/boundary="top bottom"
                 UserObjects/gray_lambert/fixed_temperature_boundary="top"
-                UserObjects/gray_lambert/emissivity="1 1"
-                UserObjects/gray_lambert/view_factors="0.5 0.5 ; 0.5 0.5"'
+                UserObjects/gray_lambert/emissivity="1 1"'
     expect_err = 'fixed_boundary_temperatures and fixed_temperature_boundary must have the same length.'
     requirement = 'The system shall check consistency of fixed_boundary_temperatures and fixed_temperature_boundary entries.'
     design = 'ConstantViewFactorSurfaceRadiation.md'
@@ -87,7 +89,7 @@
     csvdiff = 'gray_lambert_cavity_out.csv gray_lambert_cavity_out_lambert_vpp_0001.csv gray_lambert_cavity_out_view_factors_0001.csv'
     cli_args = 'Outputs/csv=true'
     requirement = 'The system shall compute radiative transfer between gray Lambert surfaces.'
-    design = 'ConstantViewFactorSurfaceRadiation.md SurfaceRadiationVectorPostprocessor.md ViewfactorVectorPostprocessor.md'
+    design = 'ConstantViewFactorSurfaceRadiation.md SurfaceRadiationVectorPostprocessor.md ViewFactorVectorPostprocessor.md'
   [../]
 
   [./coupled_heat_conduction]

@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ViewfactorVectorPostprocessor.h"
+#include "ViewFactorVectorPostprocessor.h"
 #include "ViewFactorBase.h"
 #include "GrayLambertSurfaceRadiationBase.h"
 
-registerMooseObject("HeatTransferApp", ViewfactorVectorPostprocessor);
+registerMooseObject("HeatTransferApp", ViewFactorVectorPostprocessor);
+registerMooseObjectRenamed("HeatTransferApp",
+                           ViewfactorVectorPostprocessor,
+                           "08/30/2026 24:00",
+                           ViewFactorVectorPostprocessor);
 
 InputParameters
-ViewfactorVectorPostprocessor::validParams()
+ViewFactorVectorPostprocessor::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -28,7 +32,7 @@ ViewfactorVectorPostprocessor::validParams()
   return params;
 }
 
-ViewfactorVectorPostprocessor::ViewfactorVectorPostprocessor(const InputParameters & parameters)
+ViewFactorVectorPostprocessor::ViewFactorVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _view_factor_uo(isParamValid("view_factor_object_name")
                         ? &getUserObject<ViewFactorBase>("view_factor_object_name")
@@ -46,7 +50,7 @@ ViewfactorVectorPostprocessor::ViewfactorVectorPostprocessor(const InputParamete
 }
 
 void
-ViewfactorVectorPostprocessor::initialize()
+ViewFactorVectorPostprocessor::initialize()
 {
   // setup of surface_id arrays
   std::set<BoundaryID> bids;
@@ -77,7 +81,7 @@ ViewfactorVectorPostprocessor::initialize()
 }
 
 void
-ViewfactorVectorPostprocessor::execute()
+ViewFactorVectorPostprocessor::execute()
 {
   if (_view_factor_uo)
   {

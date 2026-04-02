@@ -204,7 +204,7 @@ The implementation of the net radiation method in MOOSE relies on the following 
 - [SurfaceRadiationVectorPostprocessor.md] is a vector post-processor that retrieves one or more of the following
   for all surfaces for a given `GrayLambertSurfaceRadiationBase` object: emissivity, radiosity, temperature, and heat flux.
 
-- [ViewfactorVectorPostprocessor.md] is a vector post-processor that retrieves the view factors
+- [ViewFactorVectorPostprocessor.md] is a vector post-processor that retrieves the view factors
   between all boundaries for a given [ViewFactorBase.md] object.
 
 - Future plans include the addition of an action to set up view-factor net radiation transfer using only a single syntax block.

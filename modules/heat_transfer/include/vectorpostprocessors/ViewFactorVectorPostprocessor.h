@@ -14,10 +14,10 @@
 class ViewFactorBase;
 class GrayLambertSurfaceRadiationBase;
 
-class ViewfactorVectorPostprocessor : public GeneralVectorPostprocessor
+class ViewFactorVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
-  ViewfactorVectorPostprocessor(const InputParameters & parameters);
+  ViewFactorVectorPostprocessor(const InputParameters & parameters);
 
   static InputParameters validParams();
 
