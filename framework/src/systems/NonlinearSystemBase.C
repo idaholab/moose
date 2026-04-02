@@ -932,7 +932,7 @@ NonlinearSystemBase::computeResidualAndJacobianTags(const std::set<TagID> & vect
       residual.close();
     }
 
-    computeNodalBCsResidualAndJacobian();
+    computeNodalBCsResidualAndJacobian(vector_tags, matrix_tags);
     closeTaggedVectors(vector_tags);
     closeTaggedMatrices(matrix_tags);
   }
@@ -1774,13 +1774,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   residualSetup();
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosResidualObjects())
-    computeKokkosResidual(tags);
-#endif
-
-  const auto vector_tag_data = _fe_problem.getVectorTags(tags);
-
   // Residual contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the residual (think line sources)
   std::vector<UserObject *> uos;
@@ -1801,6 +1794,11 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosResidual(tags);
+#endif
 
   // residual contributions from the domain
   PARALLEL_TRY
@@ -2044,6 +2042,11 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosResidualAndJacobian(vector_tags, matrix_tags);
+#endif
+
   // residual contributions from the domain
   PARALLEL_TRY
   {
@@ -2171,8 +2174,18 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 }
 
 void
-NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
+NonlinearSystemBase::computeNodalBCsResidualAndJacobian(
+    [[maybe_unused]] const std::set<TagID> & vector_tags, const std::set<TagID> &)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosNodalBCs(vector_tags);
+#endif
+
+  // Return early if there is no nodal kernel
+  if (!_nodal_bcs.size())
+    return;
+
   PARALLEL_TRY
   {
     const ConstBndNodeRange & bnd_nodes = _fe_problem.getCurrentAlgebraicBndNodeRange();
@@ -2883,11 +2896,6 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   jacobianSetup();
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosResidualObjects())
-    computeKokkosJacobian(tags);
-#endif
-
   // Jacobian contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the Jacobian (think line sources)
   std::vector<UserObject *> uos;
@@ -2908,6 +2916,11 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
     _fe_problem.reinitScalars(tid);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_fe_problem.hasKokkosResidualObjects())
+    computeKokkosJacobian(tags);
+#endif
 
   PARALLEL_TRY
   {
