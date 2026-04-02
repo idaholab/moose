@@ -45,7 +45,7 @@ test:
   script: test_pyhit.py
 
 about:
-  home: https://github.com/idaholab/moose/framework/contrib/hit
+  home: https://github.com/idaholab/moose
   license: OPEN SOURCE LICENSE (Permissive)
   summary: >
     A python interface to the MOOSE Hierarchical Input Text (HIT) syntax.
