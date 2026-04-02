@@ -225,6 +225,7 @@ JINJA_CONFIG = {
     "moose_petsc": undefined("moose-petsc"),
     "moose_libmesh_vtk": undefined("moose-libmesh-vtk"),
     "moose_libmesh": undefined("moose-libmesh"),
+    "stdlib": undefined,
 }
 
 
