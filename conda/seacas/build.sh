@@ -23,19 +23,19 @@ function do_build(){
     fi
 
     # Install third party libraries
-    ./install-tpl.sh
+    CPPFLAGS="${CPPFLAGS} -I${PREFIX}/include" FLAGS="${CFLAGS} -I${PREFIX}/include" ./install-tpl.sh
 
     # Setup build location and configure there.
     mkdir -p "${SRC_DIR:?}/build" || exit 1
     cd "${SRC_DIR:?}/build" || exit 1
     ../cmake-config \
+        $CMAKE_ARGS \
+        -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" \
         -DTPL_X11_LIBRARIES="${BUILD_PREFIX:?}"/lib/libX11."${BUILD_LD_EXT:?}" \
-        -DTPL_X11_INCLUDE_DIRS="${BUILD_PREFIX:?}"/include \
-        -DCMAKE_INSTALL_LIBDIR='lib' || return 1
-
+        -DTPL_X11_INCLUDE_DIRS="${BUILD_PREFIX:?}"/include || return 1
     # Make and install
-    make -j "${JOBS:?}" || return 1
-    make install || return 1
+    cmake --build . --parallel "$JOBS" || return 1
+    cmake --install . || return 1
 }
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path
