@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [Reaction](Reaction.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/kernels/material_coupled_force/kokkos_material_coupled_force.i start=[reaction] end=[] include-end=true
 

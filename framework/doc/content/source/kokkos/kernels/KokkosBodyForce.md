@@ -7,7 +7,7 @@ This is the Kokkos version of [BodyForce](BodyForce.md). See the original docume
 !alert note
 Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/Kernels/BodyForce/function) is not available.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/kernels/2d_diffusion/kokkos_2d_diffusion_bodyforce_test.i start=[bf] end=[] include-end=true
 

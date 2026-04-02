@@ -9,4 +9,4 @@
 
 #include "KokkosElementIntegralMaterialProperty.h"
 
-registerKokkosPostprocessor("MooseApp", KokkosElementIntegralMaterialProperty);
+registerKokkosUserObject("MooseApp", KokkosElementIntegralMaterialProperty);

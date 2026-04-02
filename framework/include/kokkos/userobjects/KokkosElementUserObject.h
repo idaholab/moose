@@ -10,8 +10,8 @@
 #pragma once
 
 #include "KokkosUserObject.h"
+#include "KokkosElementReducer.h"
 
-#include "BlockRestrictable.h"
 #include "MaterialPropertyInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
@@ -22,7 +22,7 @@ namespace Moose::Kokkos
 {
 
 class ElementUserObject : public UserObject,
-                          public ::BlockRestrictable,
+                          public ElementReducer,
                           public ::MaterialPropertyInterface,
                           public ::CoupleableMooseVariableDependencyIntermediateInterface,
                           public ::TransientInterface,
@@ -40,6 +40,28 @@ public:
   ElementUserObject(const ElementUserObject & object);
 
   virtual void compute() override;
+
+  /**
+   * The parallel computation entry function called by Kokkos
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(DefaultLoop, const ThreadID tid, const Derived & object) const;
+
+  using ElementReducer::operator();
+
+protected:
+  virtual void computeUserObject();
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+ElementUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & object) const
+{
+  auto elem = kokkosBlockElementID(tid);
+
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
+
+  object.executeShim(object, datum);
+}
 
 } // namespace Moose::Kokkos

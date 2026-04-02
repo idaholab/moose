@@ -10,12 +10,12 @@
 #pragma once
 
 #include "KokkosPostprocessor.h"
-#include "KokkosSideReducer.h"
+#include "KokkosSideUserObject.h"
 
 namespace Moose::Kokkos
 {
 
-class SidePostprocessor : public SideReducer, public Postprocessor
+class SidePostprocessor : public SideUserObject, public Postprocessor
 {
 public:
   static InputParameters validParams();
@@ -31,7 +31,7 @@ public:
   virtual void finalize() override {}
 
   // Disambiguation with FunctorBase::operator()
-  using SideReducer::operator();
+  using SideUserObject::operator();
 };
 
 } // namespace Moose::Kokkos

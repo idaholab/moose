@@ -11,7 +11,7 @@ Before reading this documentation, consider reading the following materials firs
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE,
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE.
 
-Currently, the following types of user objects (and their derivatives such as postprocessors) are supported in Kokkos-MOOSE, which all should be registered with `registerKokkosUserObject()`:
+Currently, the following types of user objects are supported in Kokkos-MOOSE including their derivatives (postprocessors, vector postprocessors, and reporters), which all should be registered with `registerKokkosUserObject()`:
 
 - `Moose::Kokkos::ElementUserObject`
 - `Moose::Kokkos::SideUserObject`
@@ -36,44 +36,30 @@ A Kokkos-MOOSE general user object should be registered with the standard `regis
 !alert note
 Different types of Kokkos-MOOSE user objects are executed without any predefined order (dependencies are still respected).
 
-## User-defined APIs and Virtual Functions
-
-While user objects are intended to embrace user-defined APIs, Kokkos-MOOSE user objects currently require GPU APIs to not rely on virtual dispatch.
-Namely, you should always retrieve your user objects in their concrete types if you intend to use your own GPU APIs.
-Using virtual functions on GPU has two prerequisites: enabling the relocatable device code (RDC) option and constructing objects on GPU.
-The RDC is option is currently disabled in Kokkos-MOOSE due to the restrictions imposed by upstream packages (see [the discussions on this page](syntax/KokkosFunctions/index.md#kokkos_rdc)), and its resolution is being actively worked on.
-Even with the RDC option, however, the object vtables are populated with CPU function pointers as all objects in MOOSE are constructed on CPU.
-As a result, you still cannot call virtual functions of your user objects on GPU unless you directly construct them on GPU (see [this page](syntax/Kokkos/index.md#kokkos_crtp)).
-
-In order to realize virtual dispatch with your user objects, therefore, you need to implement a wrapper with virtual functions that can be easily constructed on GPU, and call your own APIs through the wrapper.
-This wrapper will hold the GPU copy of your user object in its concrete type and the virtual functions that call the corresponding user object functions statically.
-This approach is implemented in `Moose::Kokkos::Function` using a registry design pattern and can be found across framework source files such as [KokkosFunctionWrapper.h](include/kokkos/functions/KokkosFunctionWrapper.h) and [KokkosFunction.h](include/kokkos/functions/KokkosFunction.h), but it requires a deep understanding of dynamic polymorphism and GPU backends.
-Therefore, we plan to explore developing base classes for the wrapper that the users can easily derive from and providing programming guidelines, once the RDC option is in place.
-
 ## Reducers id=reducers
 
-`Postprocessor`, `VectorPostprocessor`, and `Reporter` are common in that they derive from user objects and perform aggregate calculations.
-In Kokkos-MOOSE, they are implemented under a common concept called `Reducer` and share the same GPU interface, and each of them has the identical CPU interface with its corresponding original MOOSE object.
-Each reducer should be registered with either `registerKokkosReducer()` or the alias for each type (`registerKokkosPostprocessor()`, `registerKokkosVectorPostprocessor()`, `registerKokkosReporter()`).
+Postprocessors, vector postprocessors, and reporters often perform calculations that aggregate data.
+Such aggregation calculation is also known as reduction operation.
+If your calculation is considered more suitable for a reduction operation than an ordinary parallel operation, you can make your user object a `Reducer` object by defining different hook methods, which will use a different parallelization scheme from regular parallel objects.
 
-The aggregate calculations, also known as reduction operations, are not trivial on GPU which performs a massively parallel computation, as the data race should be carefully managed.
+Reduction operations are not trivial on GPU due to its massively parallel nature that requires the data race to be carefully managed.
 Therefore, you cannot directly perform reduction operations on your own variables.
-Instead, the redcution operations should be performed on a preallocated buffer defined by the reducer.
+Instead, the reduction operations should be performed on a preallocated buffer defined by the reducer.
 Every reducer should allocate the buffer with the desired size by calling `allocateReductionBuffer()` prior to the calculation, which can be done either in the constructor or in the `initialize()` hook.
 It allocates `_reduction_buffer`, which is a one-dimensional `Kokkos::View` defined in the CPU space.
-And the `execute()` hook method now receives an additional argument `result` that points to a buffer where you need to perform your reduction operations.
+The hook method is now named as `reduce()` and receives an additional argument `result` that points to a buffer where you need to perform your reduction operations.
 This buffer has the same size with `_reduction_buffer`, but it is a buffer internally defined by Kokkos and is different from `_reduction_buffer`:
 
 ```cpp
-KOKKOS_FUNCTION void execute(Datum & datum, Real * result) const;
+KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 ```
 
 A reducer also requires two more hook methods to be defined in your derived object, which are `join()` and `init()`.
 They have the following signatures:
 
 ```cpp
-KOKKOS_FUNCTION void join(DefaultLoop, Real * result, const Real * source) const;
-KOKKOS_FUNCTION void init(DefaultLoop, Real * result) const;
+KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
+KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
 ```
 
 `join()` can be considered as a replacement of `threadJoin()` in the original MOOSE objects.
@@ -99,12 +85,9 @@ See the following source codes of `KokkosIntegralPostprocessor` for an example o
          caption=The `KokkosIntegralPostprocessor` source file.
 
 !alert note
-Kokkos-MOOSE vector postprocessors and reporters are comming soon.
+The reporter values defined by Kokkos-MOOSE postprocessors, vector postprocessors, and reporters are stored in the same database with the original MOOSE objects, so they can be retrieved through the existing interfaces and their names cannot overlap.
 
-!alert note
-The reporter values defined by Kokkos-MOOSE postprocessors, vector postprocessors, and reporters are stored in the same database with the original MOOSE objects, so they can be retrieved through ordinary interfaces and their names cannot overlap.
-
-### Performance Considerations
+### Performance Considerations id=reducer_atomic
 
 The [Kokkos Reducer concept](https://kokkos.org/kokkos-core-wiki/API/core/builtinreducers/ReducerConcept.html) leveraged to implement Kokkos-MOOSE reducers is suitable for small arrays and "dense" reduction operations.
 Assume you are reducing a large array, where a single call to `execute()` only accumulates values to one or a few entries of the array at most.
@@ -112,12 +95,38 @@ This can be considered as a "sparse" reduction operation and is not suitable for
 A massively-parallel reduction is implemented by many partial reductions where many temporary buffers are internally created and initialized.
 Even though most of the entries of a temporary buffer are unused in each partial reduction, it still has to initialize and join all the entries.
 As a result, the cost of initialization and join can overwhelm the gain from parallelization.
-In addition, the temporary buffers are typically allocated in user-managed caches with limited sizes like shared memory in CUDA, so small arrays are desired.
-Such type of reduction operation is therefore better be implemented using [atomic operations](https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Atomic-Operations.html) in a regular parallel loop by deriving a user object instead.
+In addition, the temporary buffers are typically allocated in configurable caches with limited sizes like shared memory in CUDA, so small arrays are desired.
+If the array being reduced is too large, you will likely get an error like `Kokkos::Impl::ParallelReduce<Cuda> requested too much L0 scratch memory`.
+Such type of reduction operation is therefore better be implemented using [atomic operations](https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Atomic-Operations.html) in an ordinary parallel loop instead of a reduction loop.
+See the following example of `KokkosExtraIDIntegralVectorPostprocessor`, which implements both atomic addition and reduction algorithms and provides users an option to choose the calculation mode:
+
+!listing framework/include/kokkos/vectorpostprocessors/KokkosExtraIDIntegralVectorPostprocessor.h id=kokkos-extra-id-vpp-header
+         caption=The `KokkosExtraIDIntegralVectorPostprocessor` header file.
+
+!listing framework/src/kokkos/vectorpostprocessors/KokkosExtraIDIntegralVectorPostprocessor.K id=kokkos-extra-id-vpp-source language=cpp
+         caption=The `KokkosExtraIDIntegralVectorPostprocessor` source file.
+
+## User-defined APIs and Virtual Functions
+
+While user objects are intended to embrace user-defined APIs, Kokkos-MOOSE user objects currently require GPU APIs to not rely on virtual dispatch.
+Namely, you should always retrieve your user objects in their concrete types if you intend to use your own GPU APIs.
+Using virtual functions on GPU has two prerequisites: enabling the relocatable device code (RDC) option and constructing objects on GPU.
+The RDC option is currently disabled in Kokkos-MOOSE due to the restrictions imposed by upstream packages (see [the discussions on this page](syntax/KokkosFunctions/index.md#kokkos_rdc)), and its resolution is being actively worked on.
+Even with the RDC option, however, the object vtables are populated with CPU function pointers as all objects in MOOSE are constructed on CPU.
+As a result, you still cannot call virtual functions of your user objects on GPU unless you directly construct them on GPU (see [this page](syntax/Kokkos/index.md#kokkos_crtp)).
+
+In order to realize virtual dispatch with your user objects, therefore, you need to implement a wrapper with virtual functions that can be easily constructed on GPU, and call your own APIs through the wrapper.
+This wrapper will hold the GPU copy of your user object in its concrete type and the virtual functions that call the corresponding user object functions statically.
+This approach is implemented in `Moose::Kokkos::Function` using a registry design pattern and can be found across framework source files such as [KokkosFunctionWrapper.h](include/kokkos/functions/KokkosFunctionWrapper.h) and [KokkosFunction.h](include/kokkos/functions/KokkosFunction.h), but it requires a deep understanding of dynamic polymorphism and GPU backends.
+Therefore, we plan to explore developing base classes for the wrapper that the users can easily derive from and providing programming guidelines, once the RDC option is in place.
 
 !syntax list /UserObjects objects=True actions=False subsystems=False
 
 !syntax list /Postprocessors objects=True actions=False subsystems=False
+
+!syntax list /VectorPostprocessors objects=True actions=False subsystems=False
+
+!syntax list /Reporters objects=True actions=False subsystems=False
 
 !if-end!
 

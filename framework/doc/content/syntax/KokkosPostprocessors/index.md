@@ -2,7 +2,7 @@
 
 !if! function=hasCapability('kokkos')
 
-See the [Reducers section](syntax/KokkosUserObjects/index.md#reducers) of the Kokkos UserObjects system documentation for details.
+See the [Kokkos UserObjects System](syntax/KokkosUserObjects/index.md) documentation for details.
 
 !if-end!
 

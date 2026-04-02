@@ -24,7 +24,7 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
 protected:
   const Moose::Kokkos::VariableValue _proxy_variable;
@@ -38,9 +38,9 @@ KokkosSideExtremeValue::getProxyValuePair(const unsigned int qp, Datum & datum) 
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosSideExtremeValue::executeShim(const Derived & postprocessor,
-                                    Datum & datum,
-                                    Real * result) const
+KokkosSideExtremeValue::reduceShim(const Derived & postprocessor,
+                                   Datum & datum,
+                                   Real * result) const
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     postprocessor.computeExtremeValue(postprocessor, qp, datum, result);

@@ -19,10 +19,7 @@
 namespace Moose::Kokkos
 {
 
-class UserObject : public ::UserObjectBase,
-                   public MeshHolder,
-                   public AssemblyHolder,
-                   public SystemHolder
+class UserObject : public ::UserObjectBase
 {
 public:
   static InputParameters validParams();
@@ -53,16 +50,34 @@ public:
    * Shim for hook method that can be leveraged to implement static polymorphism
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void executeShim(const Derived & userobject, Datum & datum) const
+  KOKKOS_FUNCTION void executeShim(const Derived & object, Datum & datum) const
   {
-    userobject.execute(datum);
+    object.execute(datum);
   }
 
-protected:
   /**
-   * Kokkos functor dispatcher
+   * Default method to prevent compile errors even when this method was not defined in the derived
+   * class
    */
-  std::unique_ptr<DispatcherBase> _dispatcher;
+  KOKKOS_FUNCTION void execute(Datum & /* datum */) const
+  {
+    ::Kokkos::abort("Default execute() should never be called. Make sure you properly redefined "
+                    "this method in your class without typos.");
+  }
+
+  /**
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
+   */
+  ///@{
+  template <typename Derived>
+  static auto defaultExecuteShim()
+  {
+    return &UserObject::executeShim<Derived>;
+  }
+  static auto defaultExecute() { return &UserObject::execute; }
+  ///@}
 };
 
 } // namespace Moose::Kokkos

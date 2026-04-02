@@ -24,15 +24,15 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, Datum & datum) const
   {
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
 
 protected:
   dof_id_type _node_id = libMesh::DofObject::invalid_id;
@@ -40,9 +40,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosNodalMaxValueId::executeShim(const Derived & postprocessor,
-                                   Datum & datum,
-                                   Real * result) const
+KokkosNodalMaxValueId::reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const
 {
   if (datum.isNodalDefined(_u.variable()))
   {
@@ -57,7 +55,7 @@ KokkosNodalMaxValueId::executeShim(const Derived & postprocessor,
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::join(DefaultLoop, Real * result, const Real * source) const
+KokkosNodalMaxValueId::join(ReducerLoop, Real * result, const Real * source) const
 {
   if (source[0] > result[0])
   {
@@ -67,7 +65,7 @@ KokkosNodalMaxValueId::join(DefaultLoop, Real * result, const Real * source) con
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalMaxValueId::init(DefaultLoop, Real * result) const
+KokkosNodalMaxValueId::init(ReducerLoop, Real * result) const
 {
-  result[0] = -std::numeric_limits<Real>::max();
+  result[0] = Kokkos::Experimental::finite_min_v<Real>;
 }

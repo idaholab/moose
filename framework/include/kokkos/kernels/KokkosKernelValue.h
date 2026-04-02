@@ -62,13 +62,11 @@ public:
                                          const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+                    "redefined this method in your class without typos.");
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
   ///@}
 
   /**
@@ -90,6 +88,20 @@ public:
   {
     return kernel.computeQpJacobian(j, qp, datum);
   }
+  ///@}
+
+  /**
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
+   */
+  ///@{
+  template <typename Derived>
+  static auto defaultJacobianShim()
+  {
+    return &KernelValue::computeQpJacobianShim<Derived>;
+  }
+  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
   ///@}
 
   /**

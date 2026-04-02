@@ -16,7 +16,7 @@ InputParameters
 ElementUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::BlockRestrictable::validParams();
+  params += ElementReducer::validParams();
   params += ::MaterialPropertyInterface::validParams();
   params += ::TransientInterface::validParams();
   params += ::RandomInterface::validParams();
@@ -25,7 +25,7 @@ ElementUserObject::validParams()
 
 ElementUserObject::ElementUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    ::BlockRestrictable(this),
+    ElementReducer(this),
     ::MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     ::CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     ::TransientInterface(this),
@@ -36,7 +36,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters)
 
 ElementUserObject::ElementUserObject(const ElementUserObject & object)
   : UserObject(object),
-    ::BlockRestrictable(object, {}),
+    ElementReducer(object),
     ::MaterialPropertyInterface(object, {}),
     ::CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
     ::TransientInterface(object, {}),
@@ -47,6 +47,23 @@ ElementUserObject::ElementUserObject(const ElementUserObject & object)
 
 void
 ElementUserObject::compute()
+{
+  if (DispatcherRegistry::hasUserMethod<DefaultLoop>(type()) ==
+      DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    mooseError("Cannot determine whether '",
+               name(),
+               "' is a regular user object or a reducer object. Either none or both of the "
+               "execute() and reduce() methods were specified. Check if they were defined properly "
+               "and override compute() if you want to manually choose the behavior.");
+
+  if (DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    computeReducer();
+  else
+    computeUserObject();
+}
+
+void
+ElementUserObject::computeUserObject()
 {
   Policy policy(0, numKokkosBlockElements());
 

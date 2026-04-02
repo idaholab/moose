@@ -31,8 +31,8 @@ public:
                                            const unsigned int qp,
                                            Datum & datum,
                                            Real * result) const;
-  KOKKOS_FUNCTION void join(typename Base::DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(typename Base::DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
 
 protected:
   /**
@@ -71,7 +71,7 @@ KokkosExtremeValueBase<Base>::computeExtremeValue(const Derived & postprocessor,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::join(typename Base::DefaultLoop,
+KokkosExtremeValueBase<Base>::join(typename Base::ReducerLoop,
                                    Real * result,
                                    const Real * source) const
 {
@@ -92,16 +92,16 @@ KokkosExtremeValueBase<Base>::join(typename Base::DefaultLoop,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::init(typename Base::DefaultLoop, Real * result) const
+KokkosExtremeValueBase<Base>::init(typename Base::ReducerLoop, Real * result) const
 {
   if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
   {
-    result[0] = -std::numeric_limits<Real>::max();
-    result[1] = -std::numeric_limits<Real>::max();
+    result[0] = Kokkos::Experimental::finite_min_v<Real>;
+    result[1] = Kokkos::Experimental::finite_min_v<Real>;
   }
   else if (_type == ExtremeType::MIN)
   {
-    result[0] = std::numeric_limits<Real>::max();
-    result[1] = std::numeric_limits<Real>::max();
+    result[0] = Kokkos::Experimental::finite_max_v<Real>;
+    result[1] = Kokkos::Experimental::finite_max_v<Real>;
   }
 }

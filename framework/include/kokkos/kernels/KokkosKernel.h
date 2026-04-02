@@ -71,6 +71,9 @@ public:
                                          const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+                    "redefined this method in your class without typos.");
+
     return 0;
   }
   /**
@@ -88,18 +91,12 @@ public:
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &Kernel::computeQpJacobian; }
-  /**
-   * Get the function pointer of the default computeQpOffDiagJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultOffDiagJacobian() { return &Kernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
@@ -133,6 +130,26 @@ public:
   {
     return kernel.computeQpOffDiagJacobian(i, j, jvar, qp, datum);
   }
+  ///@}
+
+  /**
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
+   */
+  ///@{
+  template <typename Derived>
+  static auto defaultJacobianShim()
+  {
+    return &Kernel::computeQpJacobianShim<Derived>;
+  }
+  static auto defaultJacobian() { return &Kernel::computeQpJacobian; }
+  template <typename Derived>
+  static auto defaultOffDiagJacobianShim()
+  {
+    return &Kernel::computeQpOffDiagJacobianShim<Derived>;
+  }
+  static auto defaultOffDiagJacobian() { return &Kernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**

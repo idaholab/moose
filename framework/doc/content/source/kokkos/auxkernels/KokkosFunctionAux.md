@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [FunctionAux](FunctionAux.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/functions/piecewise_constant/kokkos_piecewise_constant.i block=AuxKernels
 

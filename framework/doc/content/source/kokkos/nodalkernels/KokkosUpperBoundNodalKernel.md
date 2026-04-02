@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [UpperBoundNodalKernel](UpperBoundNodalKernel.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/nodalkernels/constraint_enforcement/kokkos_upper_bound.i start=[positive_constraint] end=[] include-end=true
 

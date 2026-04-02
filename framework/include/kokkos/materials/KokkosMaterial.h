@@ -82,12 +82,10 @@ public:
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int /* qp */,
                                                 Datum & /* datum */) const
   {
+    ::Kokkos::abort(
+        "Default initQpStatefulProperties() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
   }
-  /**
-   * Get the function pointer of the default initQpStatefulProperties()
-   * @returns The function pointer
-   */
-  static auto defaultInitStateful() { return &Material::initQpStatefulProperties; }
   ///@}
 
   /**
@@ -107,6 +105,21 @@ public:
     material.computeQpProperties(qp, datum);
   }
   ///@}
+
+  /**
+   * Get the function pointer of the default initQpStatefulPropertiesShim()
+   * @returns The function pointer
+   */
+  template <typename Derived>
+  static auto defaultInitStatefulShim()
+  {
+    return &Material::initQpStatefulPropertiesShim<Derived>;
+  }
+  /**
+   * Get the function pointer of the default initQpStatefulProperties()
+   * @returns The function pointer
+   */
+  static auto defaultInitStateful() { return &Material::initQpStatefulProperties; }
 
   /**
    * The parallel computation entry functions called by Kokkos
