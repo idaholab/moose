@@ -65,7 +65,7 @@ MFEMMultiAppTransfer::execute()
       {
         setActiveToProblem(getToMultiApp()->appProblemBase(i));
         setActiveFromProblem(getFromMultiApp()->appProblemBase(i));
-        transferVariables();            
+        transferVariables();
         ++transfers_done;
       }
     if (!transfers_done)
