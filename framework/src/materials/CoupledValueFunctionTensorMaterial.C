@@ -16,11 +16,11 @@ InputParameters
 CoupledValueFunctionTensorMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Assembles a RankTwoTensor from scalar material properties or constants");
+  params.addClassDescription(
+      "Assembles a RankTwoTensor from scalar material properties or constants");
   params.addParam<MaterialPropertyName>("tensor_name", "Name of output tensor");
   params.addRequiredParam<std::vector<std::string>>(
-      "tensor_values",
-      "9 tensor components (row-major) as material property names or constants");
+      "tensor_values", "9 tensor components (row-major) as material property names or constants");
   return params;
 }
 
