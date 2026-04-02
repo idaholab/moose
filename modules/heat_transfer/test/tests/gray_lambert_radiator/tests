@@ -67,20 +67,20 @@
   [./incorrect_view_factor_shape]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
-    cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.5 0.5 ; 1 1 1 1; 1 1 1 1"'
+    cli_args = 'UserObjects/view_factors_uo/view_factors="0.25 0.25 0.25 0.25; 0.5 0.5 ; 1 1 1 1; 1 1 1 1"'
     expect_err = 'view_factors must be provided as square array. Row 1 has 2 entries.'
     requirement = 'The system shall check consistency of the view_factors entry shape.'
-    design = 'ConstantViewFactorSurfaceRadiation.md'
+    design = 'SpecifiedViewFactor.md'
   [../]
 
   [./bad_rowsum]
     type = 'RunException'
     input = 'gray_lambert_cavity.i'
-    cli_args = 'UserObjects/gray_lambert/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
-    expect_err = 'view_factors row 1 sums to 0.95.'
+    cli_args = 'UserObjects/view_factors_uo/view_factors="0.25 0.25 0.25 0.25; 0.2 0.25 0.25 0.25 ; 0.25 0.25 0.25 0.25; 0.25 0.25 0.25 0.25"'
+    expect_err = 'Maximum deviation of view factor row sum is 0.05 exceeding the set tolerance of 0.05'
     capabilities = 'compiler!=gcc'
     requirement = 'The system shall check consistency of the view_factors entry norm.'
-    design = 'ConstantViewFactorSurfaceRadiation.md'
+    design = 'SpecifiedViewFactor.md'
   [../]
 
   [./gray_lambert_cavity]
