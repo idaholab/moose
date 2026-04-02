@@ -1,0 +1,15 @@
+[Tests]
+  [per-block-type]
+    type = CSVDiff input = 'block-type.i' csvdiff = 'block-type_out.csv' requirement = "The 
+    system shall support the ability to manually specify the quadrature type "
+                  "used for numerical integration on a per-block basis."
+    issues = '#32522' design = 'Quadrature/index.md'
+  [] [per-block-type-error]
+    type = RunException input = 'block-type.i' cli_args = 
+    "Executioner/Quadrature/custom_types='GAUSS_LOBATTO'" expect_err = "'custom_types' must have 
+    the same number of entries as 'custom_blocks'" requirement = "The system shall report an 
+    error when the number of entries in 'custom_types' "
+                  "does not match the number of entries in 'custom_blocks'."
+    issues = '#32522' design = 'Quadrature/index.md'
+  []
+[]

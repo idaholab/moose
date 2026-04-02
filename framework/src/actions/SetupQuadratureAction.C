@@ -32,6 +32,11 @@ SetupQuadratureAction::validParams()
       "custom_orders",
       getQuadratureOrdersMultiEnum(),
       "list of quadrature orders for the blocks specified in `custom_blocks`");
+  params.addParam<MultiMooseEnum>(
+      "custom_types",
+      getQuadratureTypesMultiEnum(),
+      "list of quadrature types for the blocks specified in `custom_blocks` "
+      "(must match length of custom_blocks; omit to use global type for all custom blocks)");
   params.addParam<bool>(
       "allow_negative_qweights", true, "Whether or not allow negative quadrature weights");
 
@@ -47,6 +52,18 @@ SetupQuadratureAction::SetupQuadratureAction(const InputParameters & parameters)
     _custom_block_orders(getParam<SubdomainID, MooseEnumItem>("custom_blocks", "custom_orders")),
     _allow_negative_qweights(getParam<bool>("allow_negative_qweights"))
 {
+  for (const auto & t : getParam<MultiMooseEnum>("custom_types"))
+    _custom_block_types.push_back(
+        Moose::stringToEnum<libMesh::QuadratureType>(std::string(t)));
+
+  if (!_custom_block_types.empty() &&
+      _custom_block_types.size() != _custom_block_orders.size())
+    paramError("custom_types",
+              "Must have the same number of entries as 'custom_blocks' (got ",
+              _custom_block_types.size(),
+              " types for ",
+              _custom_block_orders.size(),
+              " blocks)");
 }
 
 void
@@ -60,11 +77,15 @@ SetupQuadratureAction::act()
       _type, _order, _element_order, _side_order, Moose::ANY_BLOCK_ID, _allow_negative_qweights);
 
   // add custom block-specific quadrature rules
-  for (const auto & [block, order] : _custom_block_orders)
-    _problem->createQRules(_type,
+  for (const auto i : index_range(_custom_block_orders))
+  {
+    const auto & [block, order] = _custom_block_orders[i];
+    const auto qtype = (i < _custom_block_types.size()) ? _custom_block_types[i] : _type;
+    _problem->createQRules(qtype,
                            _order,
                            Moose::stringToEnum<Order>(order),
                            Moose::stringToEnum<Order>(order),
                            block,
                            _allow_negative_qweights);
+  }
 }

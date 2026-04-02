@@ -50,6 +50,11 @@ public:
         "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH "
         "EIGHTTEENTH NINTEENTH TWENTIETH");
   }
+  /// A MultiMooseEnum for selecting multiple quadrature types (one per custom block)
+  static MultiMooseEnum getQuadratureTypesMultiEnum()
+  {
+    return MultiMooseEnum("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP GAUSS_LOBATTO");
+  }
 
 protected:
   libMesh::QuadratureType _type;
@@ -57,5 +62,7 @@ protected:
   Order _element_order;
   Order _side_order;
   const std::vector<std::pair<SubdomainID, MooseEnumItem>> _custom_block_orders;
+  /// Per-block quadrature types, parallel to _custom_block_orders. Falls back to _type if empty.
+  std::vector<libMesh::QuadratureType> _custom_block_types;
   const bool _allow_negative_qweights;
 };
