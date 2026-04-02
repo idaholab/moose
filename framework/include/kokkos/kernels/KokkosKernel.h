@@ -21,11 +21,13 @@ namespace Moose::Kokkos
  * as inlined public methods in their derived class (not virtual override). The signature of
  * computeQpResidual() expected to be defined in the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
  * @param datum The AssemblyDatum object of the current thread
  * @returns The residual contribution
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
  *                                        const unsigned int qp,
  *                                        AssemblyDatum & datum) const;
@@ -60,12 +62,14 @@ public:
   ///@{
   /**
    * Compute diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
    * @param datum The AssemblyDatum object of the current thread
    * @returns The diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
                                          const unsigned int /* j */,
                                          const unsigned int /* qp */,
@@ -78,6 +82,7 @@ public:
   }
   /**
    * Compute off-diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param jvar The variable number for column
@@ -85,6 +90,7 @@ public:
    * @param datum The AssemblyDatum object of the current thread
    * @returns The off-diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
                                                 const unsigned int /* j */,
                                                 const unsigned int /* jvar */,
@@ -100,56 +106,21 @@ public:
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
-   */
-  ///@{
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
-                                             const unsigned int i,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
-  {
-    return kernel.computeQpResidual(i, qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & kernel,
-                                             const unsigned int i,
-                                             const unsigned int j,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
-  {
-    return kernel.computeQpJacobian(i, j, qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & kernel,
-                                                    const unsigned int i,
-                                                    const unsigned int j,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const
-  {
-    return kernel.computeQpOffDiagJacobian(i, j, jvar, qp, datum);
-  }
-  ///@}
-
-  /**
    * Functions used to check if users have overriden the hook methods, whose calculations can be
    * skipped when not overriden
    * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  static auto defaultJacobianShim()
+  static auto defaultJacobian()
   {
-    return &Kernel::computeQpJacobianShim<Derived>;
+    return &Kernel::computeQpJacobian<Derived>;
   }
-  static auto defaultJacobian() { return &Kernel::computeQpJacobian; }
   template <typename Derived>
-  static auto defaultOffDiagJacobianShim()
+  static auto defaultOffDiagJacobian()
   {
-    return &Kernel::computeQpOffDiagJacobianShim<Derived>;
+    return &Kernel::computeQpOffDiagJacobian<Derived>;
   }
-  static auto defaultOffDiagJacobian() { return &Kernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
@@ -285,7 +256,7 @@ Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) c
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel.computeQpResidualShim(kernel, i, qp, datum);
+            local_re[i] += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
         }
       });
 }
@@ -307,7 +278,8 @@ Kernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) c
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, i, j, qp, datum);
+            local_ke[ij] +=
+                datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(i, j, qp, datum);
           }
         }
       });
@@ -330,8 +302,8 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * kernel.computeQpOffDiagJacobianShim(
-                                                kernel, i, j, datum.jvar(), qp, datum);
+            local_ke[ij] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
+                                                i, j, datum.jvar(), qp, datum);
           }
         }
       });

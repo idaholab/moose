@@ -22,6 +22,7 @@ virtual void computeQpProperties() override;
 in the original MOOSE materials, is now defined as a +*inlined public*+ method with the following signature:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
 ```
 
@@ -100,6 +101,7 @@ Stateful material properties can be obtained by `getKokkosMaterialPropertyOld<ty
 Stateful material properties can be optionally initialized by defining the following +*inlined public*+ hook method:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
 ```
 

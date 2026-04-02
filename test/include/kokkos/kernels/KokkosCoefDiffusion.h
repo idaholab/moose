@@ -18,9 +18,11 @@ public:
 
   KokkosCoefDiffusion(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -30,7 +32,8 @@ protected:
   const Moose::Kokkos::Scalar<const Real> _coef;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoefDiffusion::computeQpResidual(const unsigned int i,
                                        const unsigned int qp,
                                        AssemblyDatum & datum) const
@@ -38,7 +41,8 @@ KokkosCoefDiffusion::computeQpResidual(const unsigned int i,
   return _coef * _grad_test(datum, i, qp) * _grad_u(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoefDiffusion::computeQpJacobian(const unsigned int i,
                                        const unsigned int j,
                                        const unsigned int qp,

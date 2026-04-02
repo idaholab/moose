@@ -25,8 +25,7 @@ public:
   virtual void finalize() override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  reduceShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
@@ -38,9 +37,7 @@ protected:
 template <typename Base>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosIntegralPostprocessor<Base>::reduceShim(const Derived & postprocessor,
-                                              Datum & datum,
-                                              Real * result) const
+KokkosIntegralPostprocessor<Base>::reduce(Datum & datum, Real * result) const
 {
   Real sum = 0;
   Real vol = 0;
@@ -49,7 +46,7 @@ KokkosIntegralPostprocessor<Base>::reduceShim(const Derived & postprocessor,
   {
     datum.reinit();
 
-    sum += datum.JxW(qp) * postprocessor.computeQpIntegral(qp, datum);
+    sum += datum.JxW(qp) * static_cast<const Derived *>(this)->computeQpIntegral(qp, datum);
     vol += datum.JxW(qp);
   }
 

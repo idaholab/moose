@@ -24,9 +24,11 @@ public:
 
   KokkosVacuumBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -37,7 +39,8 @@ private:
   const Real _alpha;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosVacuumBC::computeQpResidual(const unsigned int i,
                                   const unsigned int qp,
                                   AssemblyDatum & datum) const
@@ -45,7 +48,8 @@ KokkosVacuumBC::computeQpResidual(const unsigned int i,
   return _test(datum, i, qp) * _alpha * _u(datum, qp) / 2.;
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosVacuumBC::computeQpJacobian(const unsigned int i,
                                   const unsigned int j,
                                   const unsigned int qp,

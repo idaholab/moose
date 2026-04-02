@@ -16,6 +16,7 @@ There is no vector or array version at this moment.
 The signature of the `computeValue()` hook method is now as follows:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 ```
 

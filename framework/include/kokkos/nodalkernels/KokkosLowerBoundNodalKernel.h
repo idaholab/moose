@@ -14,7 +14,7 @@
 /**
  * Class used to enforce a lower bound on a coupled variable
  */
-class KokkosLowerBoundNodalKernel final : public KokkosBoundNodalKernel<KokkosLowerBoundNodalKernel>
+class KokkosLowerBoundNodalKernel final : public KokkosBoundNodalKernel
 {
 public:
   static InputParameters validParams();

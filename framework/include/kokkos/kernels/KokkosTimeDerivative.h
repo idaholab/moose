@@ -21,9 +21,11 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -63,7 +65,8 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
         unsigned int i = ij % datum.n_jdofs();
         unsigned int j = ij / datum.n_jdofs();
 
-        local_ke[ij - ijb] += datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, i, j, qp, datum);
+        local_ke[ij - ijb] +=
+            datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(i, j, qp, datum);
       }
     }
 
@@ -78,7 +81,8 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
   }
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosTimeDerivative::computeQpResidual(const unsigned int i,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
@@ -86,7 +90,8 @@ KokkosTimeDerivative::computeQpResidual(const unsigned int i,
   return _test(datum, i, qp) * _u_dot(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosTimeDerivative::computeQpJacobian(const unsigned int i,
                                         const unsigned int j,
                                         const unsigned int qp,

@@ -18,6 +18,7 @@ public:
 
   KokkosCoupledAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, Datum & datum) const;
 
 protected:
@@ -29,7 +30,8 @@ protected:
   const Moose::Kokkos::VariableValue _coupled_val;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledAux::computeValue(const unsigned int qp, Datum & datum) const
 {
   if (_operator == 0)

@@ -22,6 +22,7 @@ public:
    */
   KokkosMaterialRealAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
@@ -35,7 +36,8 @@ private:
   const Real _offset;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMaterialRealAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _prop(datum, qp) * _factor + _offset;

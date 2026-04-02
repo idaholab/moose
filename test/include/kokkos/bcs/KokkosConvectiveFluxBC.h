@@ -18,9 +18,11 @@ public:
 
   KokkosConvectiveFluxBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -33,7 +35,8 @@ private:
   const Real _duration;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosConvectiveFluxBC::computeQpResidual(const unsigned int i,
                                           const unsigned int qp,
                                           AssemblyDatum & datum) const
@@ -48,7 +51,8 @@ KokkosConvectiveFluxBC::computeQpResidual(const unsigned int i,
   return -(_test(datum, i, qp) * _rate * (value - _u(datum, qp)));
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosConvectiveFluxBC::computeQpJacobian(const unsigned int i,
                                           const unsigned int j,
                                           const unsigned int qp,

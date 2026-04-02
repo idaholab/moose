@@ -43,19 +43,11 @@ public:
   };
 
   /**
-   * Shim for hook method that can be leveraged to implement static polymorphism
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void reduceShim(const Derived & reducer, Datum & datum, Real * result) const
-  {
-    reducer.reduce(datum, result);
-  }
-
-  /**
    * Default methods to prevent compile errors even when these methods were not defined in the
    * derived class
    */
   ///@{
+  template <typename Derived>
   KOKKOS_FUNCTION void reduce(Datum & /* datum */, Real * /* result */) const
   {
     ::Kokkos::abort("Default reduce() should never be called. Make sure you properly redefined "
@@ -74,17 +66,14 @@ public:
   ///@}
 
   /**
-   * Functions used to check if users have overriden the hook methods, whose calculations can be
-   * skipped when not overriden
+   * Function used to check if users have overriden the hook method
    * @returns The function pointer of the default hook method
    */
-  ///@{
   template <typename Derived>
-  static auto defaultReduceShim()
+  static auto defaultReduce()
   {
-    return &ReducerBase::reduceShim<Derived>;
+    return &ReducerBase::reduce<Derived>;
   }
-  static auto defaultReduce() { return &ReducerBase::reduce; }
   ///@}
 
 protected:

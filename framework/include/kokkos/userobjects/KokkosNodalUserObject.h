@@ -57,7 +57,7 @@ NodalUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & obj
 
   Datum datum(node, kokkosAssembly(), kokkosSystems());
 
-  object.executeShim(object, datum);
+  object.template execute<Derived>(datum);
 }
 
 } // namespace Moose::Kokkos

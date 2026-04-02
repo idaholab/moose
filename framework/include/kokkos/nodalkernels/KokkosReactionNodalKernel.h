@@ -18,20 +18,24 @@ public:
 
   KokkosReactionNodalKernel(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const Real _coeff;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosReactionNodalKernel::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _coeff * _u(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosReactionNodalKernel::computeQpJacobian(const unsigned int /* qp */,
                                              AssemblyDatum & /* datum */) const
 {

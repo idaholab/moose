@@ -49,7 +49,7 @@ SideReducer::operator()(ReducerLoop,
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  reducer.reduceShim(reducer, datum, result);
+  reducer.template reduce<Derived>(datum, result);
 }
 
 } // namespace Moose::Kokkos

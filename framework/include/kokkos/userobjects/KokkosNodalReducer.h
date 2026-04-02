@@ -60,7 +60,7 @@ NodalReducer::operator()(ReducerLoop,
 
   Datum datum(node, kokkosAssembly(), kokkosSystems());
 
-  reducer.reduceShim(reducer, datum, result);
+  reducer.template reduce<Derived>(datum, result);
 }
 
 } // namespace Moose::Kokkos

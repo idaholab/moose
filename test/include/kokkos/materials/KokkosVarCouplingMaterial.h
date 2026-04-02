@@ -21,10 +21,12 @@ public:
 
   KokkosVarCouplingMaterial(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
     _coupled_prop(datum, qp) = _var(datum, qp);
   }
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     // If "declare_old" is set, then just use it. The test associated is checking that

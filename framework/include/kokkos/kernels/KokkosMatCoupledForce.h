@@ -25,9 +25,11 @@ public:
 
   KokkosMatCoupledForce(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
@@ -44,7 +46,8 @@ private:
   Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _mat_props;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMatCoupledForce::computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const
@@ -59,7 +62,8 @@ KokkosMatCoupledForce::computeQpResidual(const unsigned int i,
   return r * _test(datum, i, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,

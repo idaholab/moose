@@ -22,6 +22,7 @@ public:
 
   KokkosTagVectorAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
@@ -33,7 +34,8 @@ protected:
   const Moose::Kokkos::Scalar<const Real> _scaling_factor;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosTagVectorAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _remove_variable_scaling ? _v(datum, qp) / _scaling_factor : _v(datum, qp);

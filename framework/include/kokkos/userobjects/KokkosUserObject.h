@@ -47,18 +47,10 @@ public:
   };
 
   /**
-   * Shim for hook method that can be leveraged to implement static polymorphism
-   */
-  template <typename Derived>
-  KOKKOS_FUNCTION void executeShim(const Derived & object, Datum & datum) const
-  {
-    object.execute(datum);
-  }
-
-  /**
    * Default method to prevent compile errors even when this method was not defined in the derived
    * class
    */
+  template <typename Derived>
   KOKKOS_FUNCTION void execute(Datum & /* datum */) const
   {
     ::Kokkos::abort("Default execute() should never be called. Make sure you properly redefined "
@@ -66,18 +58,14 @@ public:
   }
 
   /**
-   * Functions used to check if users have overriden the hook methods, whose calculations can be
-   * skipped when not overriden
+   * Function used to check if users have overriden the hook method
    * @returns The function pointer of the default hook method
    */
-  ///@{
   template <typename Derived>
-  static auto defaultExecuteShim()
+  static auto defaultExecute()
   {
-    return &UserObject::executeShim<Derived>;
+    return &UserObject::execute<Derived>;
   }
-  static auto defaultExecute() { return &UserObject::execute; }
-  ///@}
 };
 
 } // namespace Moose::Kokkos

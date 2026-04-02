@@ -21,7 +21,9 @@ public:
 
   KokkosMatchedValueBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const;
@@ -37,13 +39,15 @@ protected:
   const Real _v_coeff;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMatchedValueBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _u_coeff * _u(datum, qp) - _v_coeff * _v(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosMatchedValueBC::computeQpOffDiagJacobian(const unsigned int jvar,
                                                const unsigned int /* qp */,
                                                AssemblyDatum & /* datum */) const

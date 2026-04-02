@@ -19,7 +19,7 @@ public:
   KokkosElementStatistics(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION void reduceShim(const Derived & reducer, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
@@ -38,11 +38,11 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION inline void
-KokkosElementStatistics::reduceShim(const Derived & reducer, Datum & datum, Real * result) const
+KOKKOS_FUNCTION void
+KokkosElementStatistics::reduce(Datum & datum, Real * result) const
 {
   // Get value to to update statistics
-  auto [value, volume] = reducer.computeValue(datum);
+  auto [value, volume] = static_cast<const Derived *>(this)->computeValue(datum);
 
   if (result[0] < value)
     result[0] = value;

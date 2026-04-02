@@ -23,6 +23,7 @@ public:
   virtual void initialize() override;
   virtual void finalize() override;
 
+  template <typename Derived>
   KOKKOS_FUNCTION void execute(Datum & datum) const;
 
 private:
@@ -35,7 +36,8 @@ private:
   std::vector<Real> & _solution_vec;
 };
 
-KOKKOS_FUNCTION inline void
+template <typename Derived>
+KOKKOS_FUNCTION void
 KokkosNodalSolutionOutput::execute(Datum & datum) const
 {
   _solution[datum.node()] = _var(datum, 0);

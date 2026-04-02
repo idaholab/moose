@@ -20,6 +20,7 @@ Currently, the following types of user objects are supported in Kokkos-MOOSE inc
 The hook method `execute()` is now defined as an +*inlined public*+ method with the following signature:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION void execute(Datum & datum) const;
 ```
 
@@ -51,6 +52,7 @@ The hook method is now named as `reduce()` and receives an additional argument `
 This buffer has the same size with `_reduction_buffer`, but it is a buffer internally defined by Kokkos and is different from `_reduction_buffer`:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 ```
 
@@ -76,7 +78,7 @@ Typically, the data types used for reductions other than `Real` are boolean and 
 Boolean operations can be performed with `Real`, and the integers in the range $[−2^{53}, 2^{53}]$ can be exactly represented by `Real`.
 Therefore, the need for a bit-level manipulation will be highly unlikely.
 
-See the following source codes of `KokkosIntegralPostprocessor` for an example of a postprocessor (note that the example is [defining the shim](syntax/Kokkos/index.md#kokkos_shim) of `execute()` instead and changing the hook method to `computeQpIntegral()`):
+See the following source codes of `KokkosIntegralPostprocessor` for an example of a postprocessor:
 
 !listing framework/include/kokkos/postprocessors/KokkosIntegralPostprocessor.h id=kokkos-integral-postprocessor-header
          caption=The `KokkosIntegralPostprocessor` header file.

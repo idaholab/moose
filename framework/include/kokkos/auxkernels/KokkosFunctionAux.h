@@ -19,6 +19,7 @@ public:
 
   KokkosFunctionAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const
   {
     return _func.value(_t, datum.q_point(qp));

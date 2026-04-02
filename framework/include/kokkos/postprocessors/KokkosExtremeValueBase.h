@@ -27,10 +27,8 @@ public:
   virtual Real getValue() const override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void computeExtremeValue(const Derived & postprocessor,
-                                           const unsigned int qp,
-                                           Datum & datum,
-                                           Real * result) const;
+  KOKKOS_FUNCTION void
+  computeExtremeValue(const unsigned int qp, Datum & datum, Real * result) const;
   KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
   KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
 
@@ -49,12 +47,11 @@ protected:
 template <typename Base>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::computeExtremeValue(const Derived & postprocessor,
-                                                  const unsigned int qp,
+KokkosExtremeValueBase<Base>::computeExtremeValue(const unsigned int qp,
                                                   Datum & datum,
                                                   Real * result) const
 {
-  auto pv = postprocessor.getProxyValuePair(qp, datum);
+  auto pv = static_cast<const Derived *>(this)->getProxyValuePair(qp, datum);
   auto rpv = Kokkos::make_pair(result[0], result[1]);
 
   if ((_type == ExtremeType::MAX && pv > rpv) || (_type == ExtremeType::MIN && pv < rpv))

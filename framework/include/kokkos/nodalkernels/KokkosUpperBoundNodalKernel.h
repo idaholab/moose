@@ -14,7 +14,7 @@
 /**
  * Class used to enforce a upper bound on a coupled variable
  */
-class KokkosUpperBoundNodalKernel final : public KokkosBoundNodalKernel<KokkosUpperBoundNodalKernel>
+class KokkosUpperBoundNodalKernel final : public KokkosBoundNodalKernel
 {
 public:
   static InputParameters validParams();

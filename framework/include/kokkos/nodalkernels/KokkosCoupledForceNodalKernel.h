@@ -18,7 +18,9 @@ public:
 
   KokkosCoupledForceNodalKernel(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const;
@@ -34,13 +36,15 @@ private:
   const Real _coef;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledForceNodalKernel::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return -_coef * _v(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledForceNodalKernel::computeQpOffDiagJacobian(const unsigned int jvar,
                                                         const unsigned int /* qp */,
                                                         AssemblyDatum & /* datum */) const

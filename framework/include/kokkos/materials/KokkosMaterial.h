@@ -36,9 +36,11 @@ namespace Moose::Kokkos
  * methods in their derived class (not virtual override). The signature of computeQpProperties()
  * expected to be defined in the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param qp The local quadrature point index
  * @param datum The Datum object of the current thread
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
  *
  * The signature of initQpStatefulProperties() can be found in the code below, and its definition in
@@ -76,9 +78,11 @@ public:
   ///@{
   /**
    * Initialize stateful material properties on a quadrature point
+   * @tparam Derived The object type
    * @param qp The local quadrature point index
    * @param datum The Datum object of the current thread
    */
+  template <typename Derived>
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int /* qp */,
                                                 Datum & /* datum */) const
   {
@@ -89,37 +93,17 @@ public:
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  initQpStatefulPropertiesShim(const Derived & material, const unsigned int qp, Datum & datum) const
+  static auto defaultInitStateful()
   {
-    material.initQpStatefulProperties(qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  computeQpPropertiesShim(const Derived & material, const unsigned int qp, Datum & datum) const
-  {
-    material.computeQpProperties(qp, datum);
+    return &Material::initQpStatefulProperties<Derived>;
   }
   ///@}
-
-  /**
-   * Get the function pointer of the default initQpStatefulPropertiesShim()
-   * @returns The function pointer
-   */
-  template <typename Derived>
-  static auto defaultInitStatefulShim()
-  {
-    return &Material::initQpStatefulPropertiesShim<Derived>;
-  }
-  /**
-   * Get the function pointer of the default initQpStatefulProperties()
-   * @returns The function pointer
-   */
-  static auto defaultInitStateful() { return &Material::initQpStatefulProperties; }
 
   /**
    * The parallel computation entry functions called by Kokkos
@@ -201,7 +185,7 @@ Material::operator()(ElementInit, const ThreadID tid, const Derived & material) 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.initQpStatefulPropertiesShim(material, qp, datum);
+    material.template initQpStatefulProperties<Derived>(qp, datum);
   }
 }
 
@@ -218,7 +202,7 @@ Material::operator()(SideInit, const ThreadID tid, const Derived & material) con
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.initQpStatefulPropertiesShim(material, qp, datum);
+    material.template initQpStatefulProperties<Derived>(qp, datum);
   }
 }
 
@@ -235,7 +219,7 @@ Material::operator()(NeighborInit, const ThreadID tid, const Derived & material)
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.initQpStatefulPropertiesShim(material, qp, datum);
+    material.template initQpStatefulProperties<Derived>(qp, datum);
   }
 }
 
@@ -254,7 +238,7 @@ Material::operator()(ElementCompute, const ThreadID tid, const Derived & materia
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.computeQpPropertiesShim(material, qp, datum);
+    material.template computeQpProperties<Derived>(qp, datum);
   }
 }
 
@@ -271,7 +255,7 @@ Material::operator()(SideCompute, const ThreadID tid, const Derived & material) 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.computeQpPropertiesShim(material, qp, datum);
+    material.template computeQpProperties<Derived>(qp, datum);
   }
 }
 
@@ -288,7 +272,7 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
   for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
-    material.computeQpPropertiesShim(material, qp, datum);
+    material.template computeQpProperties<Derived>(qp, datum);
   }
 }
 
