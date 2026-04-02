@@ -167,8 +167,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 mfem::Vector
 MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
 {
-  mooseAssert(mesh.SpaceDimension() == 3,
-              "MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
+  if (mesh.SpaceDimension() != 3)
+    mooseError("MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
   mfem::Vector normal;
   mfem::Array<int> face_verts;
   std::vector<mfem::Vector> v;

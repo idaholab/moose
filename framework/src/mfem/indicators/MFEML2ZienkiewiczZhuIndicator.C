@@ -62,9 +62,9 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   // Check it correctly casts into ElasticityIntegrator
   is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()) != nullptr);
 
-  mooseAssert(is_supported,
-              "MFEML2ZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
-              "and MFEMLinearElasticityKernel");
+  if (!is_supported)
+    mooseError("MFEML2ZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, "
+               "MFEMCurlCurlKernel and MFEMLinearElasticityKernel");
 
   int order = getFESpace().GetMaxElementOrder();
   int dim = getParMesh().Dimension();
