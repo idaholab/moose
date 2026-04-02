@@ -15,19 +15,32 @@
 namespace Moose::MFEM
 {
 
-EquationSystem::~EquationSystem() { DeleteAllBlocks(); }
+EquationSystem::~EquationSystem()
+{
+  DeleteHBlocks();
+  DeleteJacobianBlocks();
+}
 
 void
-EquationSystem::DeleteAllBlocks()
+EquationSystem::DeleteHBlocks()
 {
   for (const auto i : make_range(_h_blocks.NumRows()))
     for (const auto j : make_range(_h_blocks.NumCols()))
+    {
+      if (_jacobian_blocks.NumRows() && _jacobian_blocks(i, j) == _h_blocks(i, j))
+        _jacobian_blocks(i, j) = nullptr;
       delete _h_blocks(i, j);
+    }
   _h_blocks.DeleteAll();
+}
 
+void
+EquationSystem::DeleteJacobianBlocks()
+{
   for (const auto i : make_range(_jacobian_blocks.NumRows()))
     for (const auto j : make_range(_jacobian_blocks.NumCols()))
-      delete _jacobian_blocks(i, j);
+      if (!_h_blocks.NumRows() || _jacobian_blocks(i, j) != _h_blocks(i, j))
+        delete _jacobian_blocks(i, j);
   _jacobian_blocks.DeleteAll();
 }
 
@@ -303,7 +316,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueRHS)
 {
   // Allocate block operator
-  DeleteAllBlocks();
+  DeleteHBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
   // Zero out RHS and sync memory
@@ -407,10 +420,11 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 void
 EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
 {
-  const mfem::BlockVector update_vector(const_cast<mfem::Vector &>(u), _block_true_offsets);
+  DeleteJacobianBlocks();
   _jacobian_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _jacobian_blocks = nullptr;
 
+  const mfem::BlockVector update_vector(const_cast<mfem::Vector &>(u), _block_true_offsets);
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
@@ -419,12 +433,13 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
       auto nlf = _nlfs.Get(test_var_name);
       mfem::HypreParMatrix * nlf_jac =
           dynamic_cast<mfem::HypreParMatrix *>(&nlf->GetGradient(update_vector.GetBlock(i)));
-      if (!nlf_jac)
-        mooseError("Jacobian contribution of nonlinear form associated with ",
-                   test_var_name,
-                   " is not castable into a HypreParMatrix");
+      mooseAssert(nlf_jac,
+                  "Jacobian contribution of nonlinear form associated with " + test_var_name +
+                      " is not castable into a HypreParMatrix");
       _jacobian_blocks(i, i) = mfem::ParAdd(_h_blocks(i, i), nlf_jac);
     }
+    else
+      _jacobian_blocks(i, i) = _h_blocks(i, i);
     for (const auto j : index_range(_trial_var_names))
       if (i != j) // nlf->GetGradient only contributes to on-diagonal blocks
         _jacobian_blocks(i, j) = _h_blocks(i, j);

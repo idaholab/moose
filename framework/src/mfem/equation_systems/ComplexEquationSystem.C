@@ -241,7 +241,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 {
 
   // Allocate block operator
-  DeleteAllBlocks();
+  DeleteHBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
   // Zero out RHS and sync memory
