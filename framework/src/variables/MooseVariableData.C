@@ -1476,8 +1476,18 @@ MooseVariableData<OutputType>::reinitNodes(const std::vector<dof_id_type> & node
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
       {
-        dof_id_type dof = nd->dof_number(_sys.number(), _var_num, 0);
-        _dof_indices.push_back(dof);
+        if constexpr (std::is_same<RealEigenVector, OutputType>::value)
+        {
+          static thread_local std::vector<dof_id_type> dof_indices;
+          _dof_map.array_dof_indices(nd, dof_indices, _var_num);
+          for (const auto dof : dof_indices)
+            _dof_indices.push_back(dof);
+        }
+        else
+        {
+          dof_id_type dof = nd->dof_number(_sys.number(), _var_num, 0);
+          _dof_indices.push_back(dof);
+        }
       }
     }
   }
