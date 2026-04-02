@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -eux
 export PATH=/bin:$PATH
 export PKG_CONFIG_PATH=${BUILD_PREFIX:?}/lib/pkgconfig:${PKG_CONFIG_PATH}
 

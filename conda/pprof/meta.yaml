@@ -11,7 +11,6 @@ source:
 build:
   number: 0
   string: build_0
-  skip: true  # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
