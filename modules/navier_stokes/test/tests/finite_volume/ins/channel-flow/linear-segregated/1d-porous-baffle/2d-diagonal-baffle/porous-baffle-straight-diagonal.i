@@ -9,14 +9,14 @@ mu = 2e-3
 # eps_zone_1 = 0.82
 # eps_zone_2 = 0.68
 eps_zone_1 = 0.5
-eps_zone_2 = 0.5
-forch_zone_1 = 10
-forch_zone_2 = 10
+eps_zone_2 = 0.7
+forch_zone_1 = 100
+forch_zone_2 = 100
 # forch_zone_1 = 0
 # forch_zone_2 = 0
-# entry_form_loss = 20
-# corner_form_loss = 20
-# exit_form_loss = 20
+entry_form_loss = 0
+corner_form_loss = 20
+exit_form_loss = 0
 advected_interp_method = 'upwind'
 
 [Mesh]
@@ -51,8 +51,8 @@ advected_interp_method = 'upwind'
   [porous_1_patch]
     type = TransfiniteMeshGenerator
     corners = '1 0 0
-               2.0 0 0
-               2.0 1 0
+               1.7 0 0
+               2.3 1 0
                1 1 0'
     nx = 14
     ny = 14
@@ -81,8 +81,8 @@ advected_interp_method = 'upwind'
 
   [porous_2_patch]
     type = TransfiniteMeshGenerator
-    corners = '2.0 1 0
-               2.0 0 0
+    corners = '2.3 1 0
+               1.7 0 0
                3 0 0
                3 1 0'
     nx = 14
@@ -190,10 +190,10 @@ advected_interp_method = 'upwind'
     p_diffusion_kernel = p_diffusion
     pressure_baffle_sidesets = 'clean_to_porous diagonal_baffle porous_to_clean'
     # pressure_gradient_limiter = 'clean_to_porous diagonal_baffle porous_to_clean'
-    # baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
-    # velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
+    baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
+    velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
     # pressure_gradient_limiter_blend = 0.5
-    # pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.1
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
@@ -236,6 +236,7 @@ advected_interp_method = 'upwind'
     use_nonorthogonal_correction = false
     porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
+    # use_baffle_velocity_break = true
   []
   [v_advection]
     type = PorousLinearWCNSFVMomentumFlux
@@ -249,6 +250,7 @@ advected_interp_method = 'upwind'
     use_nonorthogonal_correction = false
     porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
+    # use_baffle_velocity_break = true
   []
   [u_pressure]
     type = LinearFVMomentumPressureUO
@@ -275,7 +277,7 @@ advected_interp_method = 'upwind'
     u = superficial_u
     v = superficial_v
     momentum_component = 'x'
-    block = 'porous_zone_1 porous_zone_2 clean_outlet'
+    block = 'porous_zone_1 porous_zone_2'
   []
   [v_friction]
     type = LinearFVMomentumPorousFriction
@@ -293,7 +295,7 @@ advected_interp_method = 'upwind'
     variable = pressure
     diffusion_tensor = Ainv
     rhie_chow_user_object = rc
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     debug_baffle_jump = false
   []
   [HbyA_divergence]
@@ -429,59 +431,6 @@ advected_interp_method = 'upwind'
   []
 []
 
-[Postprocessors]
-  [p_inlet]
-    type = SideAverageValue
-    variable = pressure
-    boundary = inlet
-  []
-  [p_outlet]
-    type = SideAverageValue
-    variable = pressure
-    boundary = outlet
-  []
-  [p_total_drop]
-    type = ParsedPostprocessor
-    expression = 'p_inlet - p_outlet'
-    pp_names = 'p_inlet p_outlet'
-  []
-  [p_clean_in]
-    type = ElementAverageValue
-    variable = pressure
-    block = 'clean_inlet'
-  []
-  [p_porous_1]
-    type = ElementAverageValue
-    variable = pressure
-    block = 'porous_zone_1'
-  []
-  [p_porous_2]
-    type = ElementAverageValue
-    variable = pressure
-    block = 'porous_zone_2'
-  []
-  [p_clean_out]
-    type = ElementAverageValue
-    variable = pressure
-    block = 'clean_outlet'
-  []
-  [p_entry_drop]
-    type = ParsedPostprocessor
-    expression = 'p_clean_in - p_porous_1'
-    pp_names = 'p_clean_in p_porous_1'
-  []
-  [p_baffle_drop]
-    type = ParsedPostprocessor
-    expression = 'p_porous_1 - p_porous_2'
-    pp_names = 'p_porous_1 p_porous_2'
-  []
-  [p_exit_drop]
-    type = ParsedPostprocessor
-    expression = 'p_porous_2 - p_clean_out'
-    pp_names = 'p_porous_2 p_clean_out'
-  []
-[]
-
 [VectorPostprocessors]
   [p_inlet_to_diag]
     type = LineValueSampler
@@ -574,6 +523,9 @@ advected_interp_method = 'upwind'
   [porosity_aux]
     type = MooseLinearVariableFVReal
   []
+  [superficial_w]
+    type = MooseLinearVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -594,7 +546,7 @@ advected_interp_method = 'upwind'
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.5
+  momentum_equation_relaxation = 0.3
   pressure_variable_relaxation = 0.1
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
