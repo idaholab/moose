@@ -62,6 +62,7 @@ class MeshChangedInterface;
 class MeshDisplacedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
+class MaterialPropertyStorageRemapKey;
 class MaterialData;
 class MooseEnum;
 class MortarInterfaceWarehouse;
@@ -1950,6 +1951,13 @@ public:
   ///@{
   const MaterialPropertyStorage & getMaterialPropertyStorage() { return _material_props; }
   const MaterialPropertyStorage & getBndMaterialPropertyStorage() { return _bnd_material_props; }
+
+  /**
+   * Return a non-const reference to the material property storage for remap.
+   * Access is restricted via the RemapKey friend class pattern.
+   */
+  MaterialPropertyStorage & getMaterialPropertyStorageForRemap(
+      const MaterialPropertyStorageRemapKey key);
   const MaterialPropertyStorage & getNeighborMaterialPropertyStorage()
   {
     return _neighbor_material_props;

@@ -5327,7 +5327,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       joinAndFinalize(q);
     }
 
-      // Execute general user objects
+    // Execute general user objects
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
   }
   catch (...)
@@ -9866,4 +9866,10 @@ const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
 FEProblemBase::getMortarInterfaces(bool on_displaced) const
 {
   return _mortar_data->getMortarInterfaces(on_displaced);
+}
+
+MaterialPropertyStorage &
+FEProblemBase::getMaterialPropertyStorageForRemap(const MaterialPropertyStorageRemapKey /* key */)
+{
+  return _material_props;
 }

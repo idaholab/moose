@@ -80,6 +80,20 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 }
 
 void
+MaterialPropertyStorage::addToRestartableMap(const RemapKey,
+                                             const Elem * elem,
+                                             unsigned int side,
+                                             unsigned int stateful_id,
+                                             unsigned int state,
+                                             std::stringstream data)
+{
+  auto & mat_entry = _restartable_map[std::make_pair(elem, side)][stateful_id];
+  if (state >= mat_entry.size())
+    mat_entry.resize(state + 1);
+  mat_entry[state] = std::move(data);
+}
+
+void
 MaterialPropertyStorage::setRestartInPlace()
 {
   _restart_in_place = true;
@@ -516,7 +530,7 @@ MaterialPropertyStorage::addProperty(const std::string & prop_name,
 
   // Fill the record
   auto & record = *_prop_records[prop_id];
-  record.type = type.name();
+  record.type = MooseUtils::prettyCppType(libMesh::demangle(type.name()));
   if (declarer)
     record.declarers.emplace(declarer->typeAndName());
   record.state = std::max(state, record.state);
