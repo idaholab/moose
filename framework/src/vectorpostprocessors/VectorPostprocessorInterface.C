@@ -166,13 +166,9 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(const VectorPostproce
     _vpi_feproblem.mooseError("Cannot call hasVectorPostprocessorByName() until all "
                               "VectorPostprocessors have been constructed.");
 
-  const bool has_vpp = _vpi_feproblem.getReporterData().hasReporterValue<VectorPostprocessorValue>(
-      VectorPostprocessorReporterName(name, vector_name));
-
-  if (has_vpp)
-    (void)_vpi_feproblem.getVectorPostprocessorObjectByName(name);
-
-  return has_vpp;
+  return _vpi_feproblem.getReporterData().hasReporterValue<VectorPostprocessorValue>(
+             VectorPostprocessorReporterName(name, vector_name)) &&
+         hasVectorPostprocessorByName(name);
 }
 
 bool
@@ -196,20 +192,11 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(
   std::vector<VectorPostprocessor *> objs;
   _vpi_feproblem.theWarehouse()
       .query()
-      .condition<AttribSystem>("UserObject")
+      .condition<AttribInterfaces>(Interfaces::VectorPostprocessor)
       .condition<AttribThread>(0)
+      .condition<AttribName>(name)
       .queryInto(objs);
-
-  std::vector<VectorPostprocessor *> mfem_objs;
-  _vpi_feproblem.theWarehouse()
-      .query()
-      .condition<AttribSystem>("MFEMVectorPostprocessor")
-      .condition<AttribThread>(0)
-      .queryInto(mfem_objs);
-  objs.insert(objs.end(), mfem_objs.begin(), mfem_objs.end());
-
-  return std::any_of(
-      objs.begin(), objs.end(), [&name](const auto * const obj) { return obj->PPName() == name; });
+  return !objs.empty();
 }
 
 bool
