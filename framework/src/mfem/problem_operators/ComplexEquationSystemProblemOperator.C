@@ -62,12 +62,36 @@ ComplexEquationSystemProblemOperator::Solve()
 {
   GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
 
-  if (_problem_data.jacobian_solver->isLOR())
-    mooseError("LOR solve is not supported for complex equation systems.");
+  if (GetEquationSystem()->nonlinear())
+  {
+    if (!_problem_data.nonlinear_solver)
+      mooseError("A nonlinear MFEM solve requires a nonlinear solver, but none was provided.");
 
-  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
-  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+    if (_problem_data.nonlinear_solver->usesExternalLinearSolver() &&
+        !_problem_data.jacobian_solver)
+      mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
+                 "none was provided.");
+
+    if (_problem_data.nonlinear_solver->usesExternalLinearSolver())
+    {
+      if (_problem_data.jacobian_solver->isLOR())
+        mooseError("LOR solve is not supported for complex equation systems.");
+      _problem_data.nonlinear_solver->SetLinearSolver(_problem_data.jacobian_solver->getSolver());
+    }
+    _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
+    _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+  }
+  else
+  {
+    if (!_problem_data.jacobian_solver)
+      mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
+
+    if (_problem_data.jacobian_solver->isLOR())
+      mooseError("LOR solve is not supported for complex equation systems.");
+    _problem_data.jacobian_solver->getSolver().SetOperator(
+        GetEquationSystem()->GetLinearOperator());
+    _problem_data.jacobian_solver->getSolver().Mult(_true_rhs, _true_x);
+  }
 
   GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }

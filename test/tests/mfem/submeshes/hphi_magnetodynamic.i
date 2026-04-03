@@ -122,11 +122,13 @@ vacuum_permeability = 1.0
   []
 []
 
-[Solver]
-  type = MFEMHyprePCG
-  preconditioner = ams
-  l_tol = 1e-9
-  l_max_its = 100
+[Solvers]
+  [main]
+    type = MFEMHyprePCG
+    preconditioner = ams
+    l_tol = 1e-9
+    l_max_its = 100
+  []
 []
 
 [Executioner]

@@ -15,7 +15,8 @@
 #include "ComplexEquationSystem.h"
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
+#include "MFEMNonlinearSolverBase.h"
 #include "MFEMRefinementMarker.h"
 
 /// Base problem data struct.
@@ -33,9 +34,9 @@ public:
   mfem::BlockVector f;
 
   std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
-  std::shared_ptr<mfem::IterativeSolver> nonlinear_solver{nullptr};
+  std::shared_ptr<Moose::MFEM::NonlinearSolverBase> nonlinear_solver{nullptr};
 
-  std::shared_ptr<MFEMSolverBase> jacobian_solver{nullptr};
+  std::shared_ptr<Moose::MFEM::LinearSolverBase> jacobian_solver{nullptr};
 
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;

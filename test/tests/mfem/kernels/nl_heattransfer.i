@@ -51,6 +51,20 @@
   []
 []
 
+[Solvers]
+  [nl]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 150
+    abs_tol = 1e-12
+    rel_tol = 1.0e-8
+    print_level = 1
+  []
+  [linear]
+     type = MFEMMUMPS
+     print_level = 0
+  []
+[]
+
 [Kernels]
   [dT_dt]
     type = MFEMTimeDerivativeMassKernel
@@ -93,21 +107,12 @@
   []
 []
 
-[Solver]
-   type = MFEMMUMPS
-   print_level = 0
-[]
-
 [Executioner]
   type = MFEMTransient
   device = cpu
   assembly_level = legacy
   dt = 1
   num_steps = 3
-  nl_max_its = 150
-
-  nl_abs_tol = 1e-12
-  print_level = 1
 []
 
 [Outputs]

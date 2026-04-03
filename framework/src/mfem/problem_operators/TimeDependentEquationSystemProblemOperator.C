@@ -63,22 +63,50 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
 {
   X_new = X_old;
 
-  if ((GetEquationSystem()->_non_linear))
+  if ((GetEquationSystem()->nonlinear()))
     for (const auto i : index_range(_trial_variables))
       *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
 
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
-  if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
-    mooseError("LOR solve is only supported for single-variable systems");
-  _problem_data.jacobian_solver->updateSolver(
-      *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
-      GetEquationSystem()->_ess_tdof_lists.at(0));
+  if (GetEquationSystem()->nonlinear())
+  {
+    if (!_problem_data.nonlinear_solver)
+      mooseError("A nonlinear MFEM solve requires a nonlinear solver, but none was provided.");
 
-  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
-  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, X_new);
+    if (_problem_data.nonlinear_solver->usesExternalLinearSolver() &&
+        !_problem_data.jacobian_solver)
+      mooseError("The configured MFEM nonlinear solver requires an external linear solver, but "
+                 "none was provided.");
+
+    if (_problem_data.nonlinear_solver->usesExternalLinearSolver())
+    {
+      if (_problem_data.jacobian_solver->isLOR() &&
+          GetEquationSystem()->GetTestVarNames().size() > 1)
+        mooseError("LOR solve is only supported for single-variable systems");
+      _problem_data.jacobian_solver->updateSolver(
+          *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
+          GetEquationSystem()->_ess_tdof_lists.at(0));
+      _problem_data.nonlinear_solver->SetLinearSolver(_problem_data.jacobian_solver->getSolver());
+    }
+    _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
+    _problem_data.nonlinear_solver->Mult(_true_rhs, X_new);
+  }
+  else
+  {
+    if (!_problem_data.jacobian_solver)
+      mooseError("A linear MFEM solve requires a linear solver, but none was provided.");
+
+    if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
+      mooseError("LOR solve is only supported for single-variable systems");
+    _problem_data.jacobian_solver->updateSolver(
+        *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
+        GetEquationSystem()->_ess_tdof_lists.at(0));
+    _problem_data.jacobian_solver->getSolver().SetOperator(
+        GetEquationSystem()->GetLinearOperator());
+    _problem_data.jacobian_solver->getSolver().Mult(_true_rhs, X_new);
+  }
 }
 
 void

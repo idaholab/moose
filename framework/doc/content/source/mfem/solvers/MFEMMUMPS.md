@@ -6,11 +6,11 @@
 
 Defines and builds an `mfem::MUMPSSolver` to use as a direct solver to solve the MFEM equation system.
 
-!syntax parameters /Solver/MFEMMUMPS
+!syntax parameters /Solvers/MFEMMUMPS
 
-!syntax inputs /Solver/MFEMMUMPS
+!syntax inputs /Solvers/MFEMMUMPS
 
-!syntax children /Solver/MFEMMUMPS
+!syntax children /Solvers/MFEMMUMPS
 
 !if-end!
 

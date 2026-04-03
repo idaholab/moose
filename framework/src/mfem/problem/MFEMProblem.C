@@ -15,6 +15,8 @@
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
+#include "MFEMNonlinearSolverBase.h"
+
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -98,26 +100,23 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
+  const auto * object = &getUserObjectBase(name);
 
-  getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
-}
-
-void
-MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
-                                    mfem::real_t nl_abs_tol,
-                                    mfem::real_t nl_rel_tol,
-                                    unsigned int print_level)
-{
-  // TODO: allow users to specify other mfem::IterativeSolvers
-  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
-
-  // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(nl_rel_tol);
-  nl_solver->SetAbsTol(nl_abs_tol);
-  nl_solver->SetMaxIter(nl_max_its);
-  nl_solver->SetPrintLevel(print_level);
-  getProblemData().nonlinear_solver = nl_solver;
+  if (dynamic_cast<const Moose::MFEM::LinearSolverBase *>(object))
+  {
+    auto object_ptr = getUserObject<Moose::MFEM::LinearSolverBase>(name).getSharedPtr();
+    getProblemData().jacobian_solver =
+        std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(object_ptr);
+  }
+  else if (dynamic_cast<const Moose::MFEM::NonlinearSolverBase *>(object))
+  {
+    auto object_ptr = getUserObject<Moose::MFEM::NonlinearSolverBase>(name).getSharedPtr();
+    getProblemData().nonlinear_solver =
+        std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(object_ptr);
+  }
+  else
+    mooseError(
+        "Unsupported MFEM solver object type '", user_object_name, "' for solver '", name, "'.");
 }
 
 void

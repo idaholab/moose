@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 
 /**
  * Wrapper for mfem::GMRESSolver.
  */
-class MFEMGMRESSolver : public MFEMSolverBase
+class MFEMGMRESSolver : public Moose::MFEM::LinearSolverBase
 {
 public:
   static InputParameters validParams();

@@ -64,6 +64,10 @@ MFEMSteady::init()
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
+  if (_mfem_problem_data.nonlinear_solver)
+    _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
+        _mfem_problem_data.nonlinear_solver->requiresGradient());
+
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(
       _mfem_problem_data.gridfunctions,

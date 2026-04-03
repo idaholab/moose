@@ -12,51 +12,33 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
-#include "MFEMHyprePatch.h"
 
+namespace Moose::MFEM
+{
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */
-class MFEMSolverBase : public MFEMGeneralUserObject
+class SolverBase : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMSolverBase(const InputParameters & parameters);
-
-  /// Retrieves the preconditioner userobject if present, sets the member pointer to
-  /// said object if still unset, and sets the solver to use this preconditioner.
-  template <typename T>
-  void setPreconditioner(T & solver);
+  SolverBase(const InputParameters & parameters);
 
   /// Returns the wrapped MFEM solver
   mfem::Solver & getSolver();
-
-  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
-
-  /// Returns whether or not this solver (or its preconditioner) uses LOR
-  bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
   /// Override in derived classes to construct and set the solver options.
   virtual void constructSolver() = 0;
 
 protected:
-  /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
-  virtual void checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
-
-  /// Variable defining whether to use LOR solver
-  bool _lor;
-
   /// Solver to be used for the problem
   std::unique_ptr<mfem::Solver> _solver;
-
-  /// Preconditioner to be used for the problem
-  MFEMSolverBase * _preconditioner;
 };
+} // namespace Moose::MFEM
 
 inline mfem::Solver &
-MFEMSolverBase::getSolver()
+Moose::MFEM::SolverBase::getSolver()
 {
   mooseAssert(_solver, "Attempting to retrieve solver before it's been constructed");
   return *_solver;

@@ -17,7 +17,7 @@ registerMooseObject("MooseApp", MFEMHypreFGMRES);
 InputParameters
 MFEMHypreFGMRES::validParams()
 {
-  InputParameters params = MFEMSolverBase::validParams();
+  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the flexible generalized minimal residual method.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
@@ -29,7 +29,8 @@ MFEMHypreFGMRES::validParams()
   return params;
 }
 
-MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
+  : Moose::MFEM::LinearSolverBase(parameters)
 {
   constructSolver();
 }

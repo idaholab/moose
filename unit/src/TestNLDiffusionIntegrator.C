@@ -1,6 +1,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "gtest/gtest.h"
+#include "NLDiffusionIntegrator.h"
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
@@ -80,6 +81,83 @@ public:
     integ.AssembleElementMatrix(el, Tr, elmat);
   }
 };
+
+TEST(CheckData, NLDiffusionIntegratorJacobianMatchesAnalyticLinearization)
+{
+  mfem::Mesh mesh = mfem::Mesh::MakeCartesian2D(1, 1, mfem::Element::TRIANGLE, true, 1.0, 1.0);
+  mfem::H1_FECollection fec(1, mesh.Dimension());
+  mfem::FiniteElementSpace fespace(&mesh, &fec);
+
+  ASSERT_EQ(fespace.GetNE(), 2);
+
+  mfem::GridFunction gf(&fespace);
+  gf = 0.0;
+
+  mfem::Array<int> vdofs;
+  fespace.GetElementVDofs(0, vdofs);
+
+  mfem::Vector elfun(vdofs.Size());
+  elfun(0) = 1.0;
+  elfun(1) = 1.5;
+  elfun(2) = 2.0;
+  gf.SetSubVector(vdofs, elfun);
+
+  NonlinearGridFunctionCoefficient k_coeff(gf, [](double u) { return u * u; });
+  NonlinearGridFunctionCoefficient dk_du_coeff(gf, [](double u) { return 2.0 * u; });
+
+  const auto & ir = mfem::IntRules.Get(fespace.GetFE(0)->GetGeomType(), 2);
+
+  Moose::MFEM::NLDiffusionIntegrator integ(k_coeff, dk_du_coeff, &gf, &ir);
+
+  const auto & el = *fespace.GetFE(0);
+  auto & T = *mesh.GetElementTransformation(0);
+
+  mfem::DenseMatrix jacobian_numeric;
+  integ.AssembleElementGrad(el, T, elfun, jacobian_numeric);
+
+  mfem::DenseMatrix jacobian_expected(el.GetDof());
+  jacobian_expected = 0.0;
+
+  mfem::Vector shape(el.GetDof());
+  mfem::DenseMatrix dshape(el.GetDof(), mesh.Dimension());
+  mfem::Vector grad_u(mesh.Dimension());
+
+  for (int qp = 0; qp < ir.GetNPoints(); ++qp)
+  {
+    const auto & ip = ir.IntPoint(qp);
+    T.SetIntPoint(&ip);
+
+    el.CalcShape(ip, shape);
+    el.CalcPhysDShape(T, dshape);
+
+    dshape.MultTranspose(elfun, grad_u);
+
+    const double u = elfun * shape;
+    const double weight = ip.weight * T.Weight();
+    const double k = u * u;
+    const double dk_du = 2.0 * u;
+
+    for (int i = 0; i < el.GetDof(); ++i)
+    {
+      double grad_u_dot_grad_test = 0.0;
+      for (int d = 0; d < mesh.Dimension(); ++d)
+        grad_u_dot_grad_test += grad_u(d) * dshape(i, d);
+
+      for (int j = 0; j < el.GetDof(); ++j)
+      {
+        double grad_trial_dot_grad_test = 0.0;
+        for (int d = 0; d < mesh.Dimension(); ++d)
+          grad_trial_dot_grad_test += dshape(j, d) * dshape(i, d);
+
+        jacobian_expected(i, j) +=
+            weight * (k * grad_trial_dot_grad_test + dk_du * shape(j) * grad_u_dot_grad_test);
+      }
+    }
+  }
+
+  jacobian_numeric -= jacobian_expected;
+  EXPECT_NEAR(jacobian_numeric.MaxMaxNorm(), 0.0, 1e-12);
+}
 
 TEST(CheckData, NLDiffusionTest)
 {
