@@ -35,12 +35,13 @@ public:
   GeneralizedKelvinVoigtBase(const InputParameters & parameters);
 
 protected:
+  virtual void declareViscoelasticProperties() override;
   virtual void computeQpApparentElasticityTensors() final;
   virtual void computeQpApparentCreepStrain() final;
   virtual void updateQpViscousStrains() final;
 
   ///@{ old material properties required for the update of the viscoelastic strain
   const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_old;
-  const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_inv_old;
+  const MaterialProperty<RankFourTensor> * _longterm_elasticity_tensor_inv_old;
   ///@}
 };

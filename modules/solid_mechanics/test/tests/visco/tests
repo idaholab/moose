@@ -1,39 +1,70 @@
 [Tests]
-  [./burgers]
-    type = 'Exodiff'
+  issues = '#9412'
+  design = '/GeneralizedKelvinVoigtModel.md'
+  [burgers]
+    type = 'CSVDiff'
     input = 'burgers_creep.i'
-    exodiff = 'burgers_creep_out.e'
-  [../]
-  [./generalized_kelvin_voigt]
+    csvdiff = 'burgers_creep_out.csv'
+    requirement = "The system shall represent a Burgers viscoelastic model using the generalized "
+                  "Kelvin-Voigt viscoelastic modeling framework."
+  []
+  [burgers_dashpot_set_poissons_ratio]
+    issues = '#32508'
+    type = 'CSVDiff'
+    input = 'burgers_creep.i'
+    cli_args = "Materials/burgers/creep_modulus='' Materials/burgers/creep_viscosity='10' "
+               "Materials/burgers/longterm_poissons_ratio=0.3 "
+               "Materials/burgers/longterm_youngs_modulus=10e9 "
+               "Outputs/file_base=burgers_creep_dashpot_set_poissons_ratio_out"
+    csvdiff = 'burgers_creep_dashpot_set_poissons_ratio_out.csv'
+    requirement = "The system shall permit specifying the Poisson's ratio associated with the "
+                  "dashpot in a Burgers model, and permit assessing that effect in isolation by "
+                  "including damping from only the longterm dashpot element"
+  []
+  [generalized_kelvin_voigt]
+    requirement = "The system shall model a generalized Kelvin-Voigt viscoelastic system with "
+                  "multiple spring/dashpot elements."
     type = 'Exodiff'
     input = 'gen_kv_creep.i'
     exodiff = 'gen_kv_creep_out.e'
-  [../]
-  [./generalized_maxwell]
+  []
+  [generalized_maxwell]
+    requirement = "The system shall model the relaxation response of a generalized Maxwell "
+                  "viscoelastic system with multiple spring/dashpot elements."
     type = 'Exodiff'
     input = 'gen_maxwell_relax.i'
     exodiff = 'gen_maxwell_relax_out.e'
-  [../]
-  [./generalized_kelvin_voigt_w_driving]
+  []
+  [generalized_kelvin_voigt_w_driving]
+    requirement = "The system shall model a generalized Kelvin-Voigt viscoelastic system with "
+                  "multiple spring/dashpot elements with a driving eigenstrain."
     type = 'Exodiff'
     input = 'gen_kv_driving.i'
     exodiff = 'gen_kv_driving_out.e'
     custom_cmp = 'visco_driving.cmd'
-  [../]
-  [./generalized_maxwell_w_driving]
+  []
+  [generalized_maxwell_w_driving]
+    requirement = "The system shall model the relaxation response of a generalized Maxwell "
+                  "viscoelastic system with multiple spring/dashpot elements with a driving "
+                  "eigenstrain."
     type = 'Exodiff'
     input = 'gen_maxwell_driving.i'
     exodiff = 'gen_maxwell_driving_out.e'
     custom_cmp = 'visco_driving.cmd'
-  [../]
-  [./generalized_kelvin_voigt_finite_strain]
+  []
+  [generalized_kelvin_voigt_finite_strain]
+    requirement = "The system shall model a generalized Kelvin-Voigt viscoelastic system under "
+                  "finite strain conditions."
     type = 'Exodiff'
     input = 'visco_finite_strain.i'
     exodiff = 'visco_finite_strain_out.e'
-  [../]
-  [./generalized_kelvin_voigt_small_strain]
+  []
+  [generalized_kelvin_voigt_small_strain]
+    requirement = "The system shall model a generalized Kelvin-Voigt viscoelastic system under small "
+                  "strain conditions with incremental strain, capturing the creep strain through "
+                  "ComputeMultipleInelasticStress."
     type = 'Exodiff'
     input = 'visco_small_strain.i'
     exodiff = 'visco_small_strain_out.e'
-  [../]
+  []
 []

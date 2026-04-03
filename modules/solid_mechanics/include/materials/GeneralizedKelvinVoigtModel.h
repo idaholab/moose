@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralizedKelvinVoigtBase.h"
+#include <optional>
 
 /**
  * This class is an implementation of a generalized Kelvin-Voigt model
@@ -42,4 +43,9 @@ protected:
   RankFourTensor _S0;
   /// The inverse of each subsequent spring elasticity tensor
   std::vector<RankFourTensor> _Si;
+
+  /// The elasticity tensor associated with the long-term dashpot, if applicable
+  std::optional<RankFourTensor> _C_longterm;
+  /// The inverse of the elasticity tensor associated with the long-term dashpot, if applicable
+  std::optional<RankFourTensor> _S_longterm;
 };
