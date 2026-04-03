@@ -82,7 +82,8 @@ public:
   }
 
   /**
-   * @brief Remove a Surface object passed in by reference from the stored surface list
+   * @brief Remove a Surface object passed in by reference from the stored surface list. Any CSG
+   * components connected to surface will not be recursively removed.
    *
    * @param surface reference to surface to delete
    */
@@ -187,7 +188,8 @@ public:
                              const CSGUniverse * add_to_univ = nullptr);
 
   /**
-   * @brief Remove a Cell object passed in by reference from the stored cell list
+   * @brief Remove a Cell object passed in by reference from the stored cell list. Any CSG
+   * components connected to cell will not be recursively removed.
    *
    * @param cell reference to cell to delete
    */
@@ -319,7 +321,8 @@ public:
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
-   * @brief Remove a Universe object passed in by reference from the stored universe list
+   * @brief Remove a Universe object passed in by reference from the stored universe list. Any CSG
+   * components connected to universe will not be recursively removed.
    *
    * @param univ reference to universe to delete
    */
@@ -420,7 +423,8 @@ public:
   }
 
   /**
-   * @brief Remove a Lattice object passed in by reference from the stored lattice list
+   * @brief Remove a Lattice object passed in by reference from the stored lattice list. Any CSG
+   * components connected to lattice will not be recursively removed.
    *
    * @param lattice reference to lattice to delete
    */
@@ -530,8 +534,10 @@ public:
    * CSGBase.
    *
    * @param base pointer to a different CSGBase object
+   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
+   *                                  object
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> base);
+  void joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identical_surfaces);
 
   /**
    * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
@@ -541,9 +547,13 @@ public:
    * of this CSGBase object by default.
    *
    * @param base pointer to a different CSGBase object
+   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
+   *                                  object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join);
+  void joinOtherBase(std::unique_ptr<CSGBase> base,
+                     const bool ignore_identical_surfaces,
+                     const std::string & new_root_name_join);
 
   /**
    * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
@@ -554,10 +564,13 @@ public:
    * new root universe by default.
    *
    * @param base pointer to a different CSGBase object
+   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
+   *                                  object
    * @param new_root_name_base new name for universe generated from this root universe
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
   void joinOtherBase(std::unique_ptr<CSGBase> base,
+                     const bool ignore_identical_surfaces,
                      const std::string & new_root_name_base,
                      const std::string & new_root_name_join);
 
@@ -712,11 +725,22 @@ private:
   CSGLatticeList & getLatticeList() { return _lattice_list; }
 
   /**
+   * @brief update cell regions of incoming CSGBase to point to surfaces contained within existing
+   *        CSGBase object
+   *
+   * @param surf_list CSGSurfaceList from a separate CSGBase object
+   * @param cell_list CSGCellList from a separate CSGBase object
+   */
+  void updateIncomingCellRegions(CSGSurfaceList & surf_list, CSGCellList & cell_list);
+
+  /**
    * @brief join a separate CSGSurfaceList object to this one
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
+   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
+   * object
    */
-  void joinSurfaceList(CSGSurfaceList & surf_list);
+  void joinSurfaceList(CSGSurfaceList & surf_list, const bool ignore_identical_surfaces);
 
   /**
    * @brief join a separate CSGCellList object to this one

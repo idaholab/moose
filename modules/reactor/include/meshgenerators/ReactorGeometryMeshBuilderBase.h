@@ -99,6 +99,9 @@ static constexpr boundary_id_type ASSEMBLY_BOUNDARY_ID_START = 2000;
 const BoundaryName PIN_BOUNDARY_NAME_PREFIX = "outer_pin_";
 const BoundaryName ASSEMBLY_BOUNDARY_NAME_PREFIX = "outer_assembly_";
 const BoundaryName CORE_BOUNDARY_NAME = "outer_core";
+
+// Default values for setting names of CSG surfaces
+static const std::string CSG_AXIAL_PLANE_PREFIX = "rgmb_axial_plane_";
 }
 
 /**
@@ -277,6 +280,25 @@ protected:
                       const MooseEnum & option,
                       const DepletionIDGenerationLevel generation_level,
                       const bool extrude);
+
+  /**
+   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch and centered
+   * around (0, 0, 0)
+   * @param radial_index Radial index of hex / square region, for surface naming
+   * @param halfpitch Halfpitch of square or hexagon
+   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
+   * @return vector of surfaces that correspond to hexagonal or square region
+   */
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> getOuterRadialSurfacesForUnitCell(
+      unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
+
+  /**
+   * Get CSGSurfaces corresponding to axial planes of the extruded RGMB mesh
+   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
+   * @return vector of surfaces that correspond to axial planes of extruded RGMB mesh
+   */
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+  getAxialPlaneSurfaces(CSG::CSGBase & csg_obj);
 
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)

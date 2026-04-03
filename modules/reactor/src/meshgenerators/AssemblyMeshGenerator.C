@@ -14,6 +14,9 @@
 #include "Factory.h"
 #include "libmesh/elem.h"
 #include "MooseMeshUtils.h"
+#include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
+#include "CSGUtils.h"
 
 registerMooseObject("ReactorApp", AssemblyMeshGenerator);
 
@@ -82,6 +85,9 @@ AssemblyMeshGenerator::validParams()
                              " duct regions.");
   // depletion id generation params are added
   addDepletionIDParams(params);
+
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
 
   return params;
 }
@@ -397,6 +403,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   else
     auto input_meshes = getMeshes("inputs");
 
+  // If we are in CSG only mode, store the CSGBase objects associated with input MG's
+  if (_app.getMeshGeneratorSystem().getCSGOnly())
+    _input_csg_bases = getCSGBases("inputs");
+
   generateMetadata();
 }
 
@@ -629,4 +639,217 @@ AssemblyMeshGenerator::generate()
   (*_build_mesh)->unset_is_prepared();
 
   return std::move(*_build_mesh);
+}
+
+std::unique_ptr<CSG::CSGBase>
+AssemblyMeshGenerator::generateCSG()
+{
+  // Must be called to free the ReactorMeshParams CSGBase object
+  freeReactorParamsCSG();
+
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // Combine all bases from PinMG inputs into this base. Root universes from
+  // inputs are renamed to a new universe name. These universes and their
+  // cells will be discarded, so that only the infinite pin universe is retained
+  std::unordered_map<unsigned int, std::string> univ_id_names;
+  std::vector<std::string> univs_to_discard;
+  for (const auto i : index_range(_inputs))
+  {
+    const auto input_univ_name_discard = _inputs[i] + "_root_univ";
+    const auto input_univ_name = _inputs[i] + "_univ";
+    csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
+    univs_to_discard.push_back(input_univ_name_discard);
+    univ_id_names[i] = input_univ_name;
+
+    if (_geom_type == "Hex")
+    {
+      // For hex lattices, apply a 30 degree rotation to each of the constitutent pins
+      // before they are placed into a lattice
+      const auto & csg_univ = csg_obj->getUniverseByName(input_univ_name);
+      csg_obj->applyAxisRotation(csg_univ, CSG::RotationAxisType::Z, 30.);
+    }
+  }
+
+  // Discard root universes of the input pins and their cells
+  for (const auto & univ_name : univs_to_discard)
+  {
+    const auto & universe_to_delete = csg_obj->getUniverseByName(univ_name);
+    const auto cells_to_delete = universe_to_delete.getAllCells();
+    csg_obj->deleteUniverse(universe_to_delete);
+    for (const auto & cell : cells_to_delete)
+      csg_obj->deleteCell(cell.get());
+  }
+
+  // Build the universe pattern for the assembly lattice from the input pattern
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> universe_pattern;
+  for (const auto & row : _pattern)
+  {
+    std::vector<std::reference_wrapper<const CSG::CSGUniverse>> universe_row;
+    for (const auto & univ_id : row)
+    {
+      const auto & lattice_univ = csg_obj->getUniverseByName(univ_id_names[univ_id]);
+      universe_row.push_back(lattice_univ);
+    }
+    universe_pattern.push_back(universe_row);
+  }
+
+  // Define axial boundaries for problem
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
+  CSG::CSGRegion axial_extent;
+  const auto extruded_assembly = _mesh_dimensions == 3;
+  if (extruded_assembly)
+  {
+    surfaces_by_axial_region = getAxialPlaneSurfaces(*csg_obj);
+    const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
+    const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
+    axial_extent = +lowest_axial_surf & -highest_axial_surf;
+  }
+
+  // Define all duct boundaries and create the appropriate cell to fill each duct region.
+  // Add these cells to a separate universe
+  std::vector<Real> duct_boundaries = _duct_sizes;
+  duct_boundaries.push_back(getReactorParam<Real>(RGMB::assembly_pitch) / 2.);
+  CSG::CSGRegion inner_region;
+  const auto & assembly_univ = csg_obj->createUniverse(name() + "_univ");
+  for (const auto i : index_range(duct_boundaries))
+  {
+    bool is_last_radial_region = i == duct_boundaries.size() - 1;
+    if (i == 0)
+    {
+      // For innermost duct region, we create a lattice cell as the fill
+      const auto pin_pitch = getMeshProperty<Real>(RGMB::pitch, _inputs[0]);
+      auto & assembly_lattice = createAssemblyLattice(pin_pitch, universe_pattern, *csg_obj);
+      setAssemblyLatticeOuter(assembly_lattice, surfaces_by_axial_region, *csg_obj);
+
+      // Define lattice cell
+      std::string lat_cell_name = name() + "_lattice_cell";
+      if (!is_last_radial_region)
+      {
+        const auto & duct_surfaces =
+            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
+        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+      }
+      csg_obj->createCell(lat_cell_name, assembly_lattice, inner_region, &assembly_univ);
+    }
+    else
+    {
+      // Update ducted region
+      CSG::CSGRegion radial_region = ~inner_region;
+      if (!is_last_radial_region)
+      {
+        const auto & duct_surfaces =
+            getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
+        inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+        radial_region &= inner_region;
+      }
+
+      // Define cell fill of lattice
+      std::string duct_cell_name = name() + "_duct_cell_radial_" + std::to_string(i - 1);
+      if (!extruded_assembly)
+      {
+        // In 2D, the cell fill will be a material
+        std::string region_name = "rgmb_region_" + std::to_string(_duct_region_ids[0][i - 1]);
+        csg_obj->createCell(duct_cell_name, region_name, radial_region, &assembly_univ);
+      }
+      else
+      {
+        // In 3D, the cell fill will be a universe
+        const auto & name_prefix = name() + "_duct_radial_" + std::to_string(i - 1);
+        std::vector<subdomain_id_type> duct_region_ids;
+        for (const auto j : make_range(_duct_region_ids.size()))
+          duct_region_ids.push_back(_duct_region_ids[j][i - 1]);
+        auto & fill_univ = createDuctFillUniverse(
+            name_prefix, surfaces_by_axial_region, duct_region_ids, *csg_obj);
+        csg_obj->createCell(duct_cell_name, fill_univ, radial_region, &assembly_univ);
+      }
+    }
+  }
+
+  // Create new cell to bound universe based on assembly outer boundaries, and add this cell
+  // to the root universe
+  const auto & duct_surfaces = getOuterRadialSurfacesForUnitCell(
+      duct_boundaries.size() - 1, duct_boundaries.back(), *csg_obj);
+  auto assembly_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+  if (extruded_assembly)
+    assembly_region &= axial_extent;
+  csg_obj->createCell(name() + "_root_cell", assembly_univ, assembly_region);
+
+  return csg_obj;
+}
+
+const CSG::CSGLattice &
+AssemblyMeshGenerator::createAssemblyLattice(
+    const Real pitch,
+    const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
+    CSG::CSGBase & csg_obj)
+{
+  // Create lattice based on whether it is hexagonal or Cartesian
+  std::string lat_name = name() + "_lattice";
+  std::unique_ptr<CSG::CSGLattice> lat_ptr;
+  if (_geom_type == "Square")
+    lat_ptr = std::make_unique<CSG::CSGCartesianLattice>(lat_name, pitch, pattern);
+  else // _geom_type == "Hex"
+    lat_ptr = std::make_unique<CSG::CSGHexagonalLattice>(lat_name, pitch, pattern);
+
+  auto & assembly_lattice = csg_obj.addLattice(std::move(lat_ptr));
+  return assembly_lattice;
+}
+
+void
+AssemblyMeshGenerator::setAssemblyLatticeOuter(
+    const CSG::CSGLattice & assembly_lattice,
+    const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & surfaces_by_axial_region,
+    CSG::CSGBase & csg_obj)
+{
+  if (_background_region_id.size() == 0)
+    // Cartesian lattices may not have a background region. In this case, the outer is left as void
+    return;
+
+  // Define outer fill of lattice
+  if (_mesh_dimensions == 2)
+  {
+    // In 2D, the outer fill will be a material fill
+    std::string region_name = "rgmb_region_" + std::to_string(_background_region_id[0]);
+    csg_obj.setLatticeOuter(assembly_lattice, region_name);
+  }
+  else // _mesh_dimension == 3
+  {
+    // In 3D, we define the outer fill as a universe
+    auto & outer_univ = createDuctFillUniverse(
+        name() + "_lattice_outer", surfaces_by_axial_region, _background_region_id, csg_obj);
+    csg_obj.setLatticeOuter(assembly_lattice, outer_univ);
+  }
+}
+
+const CSG::CSGUniverse &
+AssemblyMeshGenerator::createDuctFillUniverse(
+    const std::string & name_prefix,
+    const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & surfaces_by_axial_region,
+    const std::vector<subdomain_id_type> & region_ids,
+    CSG::CSGBase & csg_obj)
+{
+  mooseAssert(surfaces_by_axial_region.size() - region_ids.size() == 1,
+              "Incorrect length of axial data vectors");
+  auto & fill_univ = csg_obj.createUniverse(name_prefix + "_univ");
+  for (const auto i : make_range(surfaces_by_axial_region.size() - 1))
+  {
+    CSG::CSGRegion axial_region;
+    const auto & lower_surf = surfaces_by_axial_region[i].get();
+    if (lower_surf != surfaces_by_axial_region.front())
+      axial_region = +lower_surf;
+    const auto & upper_surf = surfaces_by_axial_region[i + 1].get();
+    if (upper_surf != surfaces_by_axial_region.back())
+    {
+      if (axial_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+        axial_region = -upper_surf;
+      else
+        axial_region &= -upper_surf;
+    }
+    auto cell_name = name_prefix + "_axial_" + std::to_string(i);
+    const auto mat_name = "rgmb_region_" + std::to_string(region_ids[i]);
+    csg_obj.createCell(cell_name, mat_name, axial_region, &fill_univ);
+  }
+
+  return fill_univ;
 }

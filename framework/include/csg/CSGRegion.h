@@ -126,12 +126,18 @@ public:
   /**
    * @brief Get the list of surfaces associated with the region
    *
-   * @return list of pointers to surfaces that define the region
+   * @return list of references to surfaces that define the region
    */
-  const std::vector<std::reference_wrapper<const CSGSurface>> & getSurfaces() const
-  {
-    return _surfaces;
-  }
+  std::vector<std::reference_wrapper<const CSGSurface>> getSurfaces() const;
+
+  /**
+   * @brief Update surface references of region based on map of input surface references
+   *
+   * @param identical_surface_refs map of surface name to surface references that region should be
+   *                               defined with
+   */
+  void updateSurfaceReferences(
+      std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs);
 
   /// Operator overload for &= which creates an intersection between the current region and the other_region
   CSGRegion & operator&=(const CSGRegion & other_region);
@@ -165,14 +171,16 @@ protected:
   bool nextRegionOpIsIdentical(const RegionType region,
                                const std::size_t postfix_token_index) const;
 
-  /// String representation of region - defaults to empty string
-  std::string _region_str;
+  /**
+   * @brief Loop through postfix tokens and check equality with another list of postfix tokens
+   *
+   * @param other_tokens list of postfix tokens to compare to
+   * @return true if postfix token lists are equal, false otherwise
+   */
+  bool checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const;
 
   /// An enum for type of type of operation that defines region
   MooseEnum _region_type{"EMPTY=0 HALFSPACE=1 COMPLEMENT=2 INTERSECTION=3 UNION=4"};
-
-  /// Surface list associated with the region
-  std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;
 
   /// List of tokens representing the region in postfix notation
   std::vector<PostfixTokenVariant> _postfix_tokens;

@@ -50,10 +50,46 @@ CSGRegion::halfspaceSymbol(const CSGSurface::Halfspace halfspace)
   return symbols[static_cast<std::size_t>(halfspace)];
 }
 
+bool
+CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const
+{
+  const auto & tokens = getPostfixTokens();
+  if (tokens.size() != other_tokens.size())
+    return false;
+
+  // Loop through all tokens and check equality
+  for (const auto i : make_range(tokens.size()))
+  {
+    const auto & token = tokens[i];
+    const auto & other_token = other_tokens[i];
+    if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(token))
+    {
+      // For surface references, compare references themselves for equality
+      if (!std::holds_alternative<std::reference_wrapper<const CSGSurface>>(other_token))
+        return false;
+      const auto & surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(token);
+      const auto & other_surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(other_token);
+      if (surf_ref.get() != other_surf_ref.get())
+        return false;
+    }
+    else
+    {
+      // For region types and halfspaces, compare based on string representations
+      mooseAssert(std::holds_alternative<RegionType>(token) ||
+                      std::holds_alternative<CSGSurface::Halfspace>(token),
+                  "Unexpected token type");
+      if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(other_token))
+        return false;
+      if (postfixTokenToString(token) != postfixTokenToString(other_token))
+        return false;
+    }
+  }
+  return true;
+}
+
 CSGRegion::CSGRegion()
 {
   _region_type = "EMPTY";
-  _surfaces.clear();
   _postfix_tokens.clear();
 }
 
@@ -61,7 +97,6 @@ CSGRegion::CSGRegion()
 CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Halfspace halfspace)
 {
   _region_type = "HALFSPACE";
-  _surfaces.push_back(surf);
 
   // (halfspace surf) in postfix is represented as (surf halfspace)
   _postfix_tokens.push_back(surf);
@@ -89,10 +124,6 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
                          region_b.getPostfixTokens().begin(),
                          region_b.getPostfixTokens().end());
   _postfix_tokens.push_back(getRegionType());
-  const auto & a_surfs = region_a.getSurfaces();
-  const auto & b_surfs = region_b.getSurfaces();
-  _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
-  _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
 }
 
 // complement or explicitly empty constructor
@@ -104,16 +135,12 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
 
   if (getRegionType() == RegionType::COMPLEMENT)
   {
-    _surfaces = region.getSurfaces();
     // (complement region) in postfix is represented as (region complement)
     _postfix_tokens = region.getPostfixTokens();
     _postfix_tokens.push_back(getRegionType());
   }
   else if (getRegionType() == RegionType::EMPTY)
-  {
-    _surfaces.clear();
     _postfix_tokens.clear();
-  }
 }
 
 nlohmann::json
@@ -221,6 +248,31 @@ CSGRegion::nextRegionOpIsIdentical(const RegionType region,
   return false;
 }
 
+void
+CSGRegion::updateSurfaceReferences(
+    std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs)
+{
+  for (auto & token : _postfix_tokens)
+    if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(token))
+    {
+      const auto & surf_ref = std::get<std::reference_wrapper<const CSGSurface>>(token);
+      const auto & surf_name = surf_ref.get().getName();
+      if (identical_surface_refs.find(surf_name) != identical_surface_refs.end())
+        token = identical_surface_refs.at(surf_name);
+    }
+}
+
+std::vector<std::reference_wrapper<const CSGSurface>>
+CSGRegion::getSurfaces() const
+{
+  std::vector<std::reference_wrapper<const CSGSurface>> surface_references;
+  for (auto & token : _postfix_tokens)
+    if (std::holds_alternative<std::reference_wrapper<const CSGSurface>>(token))
+      surface_references.push_back(std::get<std::reference_wrapper<const CSGSurface>>(token));
+
+  return surface_references;
+}
+
 CSGRegion &
 CSGRegion::operator&=(const CSGRegion & other_region)
 {
@@ -278,24 +330,7 @@ bool
 CSGRegion::operator==(const CSGRegion & other) const
 {
   const bool region_type_eq = this->getRegionType() == other.getRegionType();
-  const bool region_eq = this->toPostfixStringList() == other.toPostfixStringList();
-  if (region_type_eq && region_eq)
-  {
-    const auto & all_surfs = getSurfaces();
-    const auto & other_surfs = other.getSurfaces();
-    const bool num_cells_eq = all_surfs.size() == other_surfs.size();
-    if (num_cells_eq)
-    {
-      for (const auto i : index_range(all_surfs))
-        if (all_surfs[i].get() != other_surfs[i].get())
-          return false;
-      return true;
-    }
-    else
-      return false;
-  }
-  else
-    return false;
+  return (region_type_eq && checkRegionEquality(other.getPostfixTokens()));
 }
 
 bool

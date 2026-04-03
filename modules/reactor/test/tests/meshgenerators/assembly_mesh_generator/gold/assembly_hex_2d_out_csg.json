@@ -1,0 +1,498 @@
+{
+  "cells": {
+    "amg_duct_cell_radial_0": {
+      "fill": "rgmb_region_5",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "~",
+        [
+          "+amg_radial_duct_0_surf_0",
+          "&",
+          "+amg_radial_duct_0_surf_1",
+          "&",
+          "+amg_radial_duct_0_surf_2",
+          "&",
+          "+amg_radial_duct_0_surf_3",
+          "&",
+          "+amg_radial_duct_0_surf_4",
+          "&",
+          "+amg_radial_duct_0_surf_5"
+        ]
+      ],
+      "region_postfix": [
+        "amg_radial_duct_0_surf_0",
+        "+",
+        "amg_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_3",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_4",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_5",
+        "+",
+        "&",
+        "~"
+      ]
+    },
+    "amg_lattice_cell": {
+      "fill": "amg_lattice",
+      "filltype": "LATTICE",
+      "region_infix": [
+        "+amg_radial_duct_0_surf_0",
+        "&",
+        "+amg_radial_duct_0_surf_1",
+        "&",
+        "+amg_radial_duct_0_surf_2",
+        "&",
+        "+amg_radial_duct_0_surf_3",
+        "&",
+        "+amg_radial_duct_0_surf_4",
+        "&",
+        "+amg_radial_duct_0_surf_5"
+      ],
+      "region_postfix": [
+        "amg_radial_duct_0_surf_0",
+        "+",
+        "amg_radial_duct_0_surf_1",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_2",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_3",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_4",
+        "+",
+        "&",
+        "amg_radial_duct_0_surf_5",
+        "+",
+        "&"
+      ]
+    },
+    "amg_root_cell": {
+      "fill": "amg_univ",
+      "filltype": "UNIVERSE",
+      "region_infix": [
+        "+amg_radial_duct_1_surf_0",
+        "&",
+        "+amg_radial_duct_1_surf_1",
+        "&",
+        "+amg_radial_duct_1_surf_2",
+        "&",
+        "+amg_radial_duct_1_surf_3",
+        "&",
+        "+amg_radial_duct_1_surf_4",
+        "&",
+        "+amg_radial_duct_1_surf_5"
+      ],
+      "region_postfix": [
+        "amg_radial_duct_1_surf_0",
+        "+",
+        "amg_radial_duct_1_surf_1",
+        "+",
+        "&",
+        "amg_radial_duct_1_surf_2",
+        "+",
+        "&",
+        "amg_radial_duct_1_surf_3",
+        "+",
+        "&",
+        "amg_radial_duct_1_surf_4",
+        "+",
+        "&",
+        "amg_radial_duct_1_surf_5",
+        "+",
+        "&"
+      ]
+    },
+    "pin1_cell_radial_0": {
+      "fill": "rgmb_region_1",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "-pin1_radial_ring_0"
+      ],
+      "region_postfix": [
+        "pin1_radial_ring_0",
+        "-"
+      ]
+    },
+    "pin1_cell_radial_1": {
+      "fill": "rgmb_region_2",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        [
+          "+pin1_radial_duct_1_surf_0",
+          "&",
+          "+pin1_radial_duct_1_surf_1",
+          "&",
+          "+pin1_radial_duct_1_surf_2",
+          "&",
+          "+pin1_radial_duct_1_surf_3",
+          "&",
+          "+pin1_radial_duct_1_surf_4",
+          "&",
+          "+pin1_radial_duct_1_surf_5"
+        ],
+        "&",
+        "~",
+        [
+          "-pin1_radial_ring_0"
+        ]
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_1_surf_0",
+        "+",
+        "pin1_radial_duct_1_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_3",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_4",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_5",
+        "+",
+        "&",
+        "pin1_radial_ring_0",
+        "-",
+        "~",
+        "&"
+      ]
+    },
+    "pin1_cell_radial_2": {
+      "fill": "rgmb_region_3",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "~",
+        [
+          "+pin1_radial_duct_1_surf_0",
+          "&",
+          "+pin1_radial_duct_1_surf_1",
+          "&",
+          "+pin1_radial_duct_1_surf_2",
+          "&",
+          "+pin1_radial_duct_1_surf_3",
+          "&",
+          "+pin1_radial_duct_1_surf_4",
+          "&",
+          "+pin1_radial_duct_1_surf_5"
+        ]
+      ],
+      "region_postfix": [
+        "pin1_radial_duct_1_surf_0",
+        "+",
+        "pin1_radial_duct_1_surf_1",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_2",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_3",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_4",
+        "+",
+        "&",
+        "pin1_radial_duct_1_surf_5",
+        "+",
+        "&",
+        "~"
+      ]
+    }
+  },
+  "lattices": {
+    "amg_lattice": {
+      "attributes": {
+        "nring": 2,
+        "nrow": 3,
+        "pitch": 0.7
+      },
+      "outer": "rgmb_region_4",
+      "outertype": "CSG_MATERIAL",
+      "type": "CSG::CSGHexagonalLattice",
+      "universes": [
+        [
+          "pin1_univ",
+          "pin1_univ"
+        ],
+        [
+          "pin1_univ",
+          "pin1_univ",
+          "pin1_univ"
+        ],
+        [
+          "pin1_univ",
+          "pin1_univ"
+        ]
+      ]
+    }
+  },
+  "surfaces": {
+    "amg_radial_duct_0_surf_0": {
+      "coefficients": {
+        "a": -0.5000000000000001,
+        "b": -0.8660254037844386,
+        "c": -8.794841336747485e-19,
+        "d": -1.7703
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_1": {
+      "coefficients": {
+        "a": 0.4999999999999998,
+        "b": -0.8660254037844388,
+        "c": -1.1178914435609904e-18,
+        "d": -1.7703000000000002
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_2": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -3.258706467350557e-16,
+        "c": -3.7007434154171884e-18,
+        "d": -1.7703
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_3": {
+      "coefficients": {
+        "a": 0.5000000000000001,
+        "b": 0.8660254037844385,
+        "c": -4.084421944314021e-18,
+        "d": -1.7702999999999998
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_4": {
+      "coefficients": {
+        "a": -0.49999999999999967,
+        "b": 0.8660254037844388,
+        "c": 1.1083481913840002e-18,
+        "d": -1.7703
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_0_surf_5": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 6.517412934701117e-16,
+        "c": 0.0,
+        "d": -1.7703
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_0": {
+      "coefficients": {
+        "a": -0.5000000000000002,
+        "b": -0.8660254037844387,
+        "c": 1.8198543644311193e-18,
+        "d": -1.8942000000000003
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_1": {
+      "coefficients": {
+        "a": 0.4999999999999999,
+        "b": -0.8660254037844388,
+        "c": 4.297661687752327e-19,
+        "d": -1.8942000000000005
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_2": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -3.0455538270249666e-16,
+        "c": 3.7007434154171884e-18,
+        "d": -1.8941999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_3": {
+      "coefficients": {
+        "a": 0.5000000000000002,
+        "b": 0.8660254037844385,
+        "c": -1.3850834462081538e-18,
+        "d": -1.8941999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_4": {
+      "coefficients": {
+        "a": -0.4999999999999998,
+        "b": 0.8660254037844388,
+        "c": -9.247999341554476e-19,
+        "d": -1.8942000000000003
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "amg_radial_duct_1_surf_5": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 7.106292263058258e-16,
+        "c": -3.70074341541719e-18,
+        "d": -1.8942
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_0": {
+      "coefficients": {
+        "a": -0.5,
+        "b": -0.8660254037844386,
+        "c": 3.11238534839326e-19,
+        "d": -0.30039999999999994
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_1": {
+      "coefficients": {
+        "a": 0.49999999999999983,
+        "b": -0.8660254037844388,
+        "c": 5.5711391731891e-19,
+        "d": -0.3004
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_2": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -3.2006702503055326e-16,
+        "c": 0.0,
+        "d": -0.30039999999999994
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_3": {
+      "coefficients": {
+        "a": 0.5000000000000001,
+        "b": 0.8660254037844385,
+        "c": -3.608061419668365e-19,
+        "d": -0.30039999999999994
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_4": {
+      "coefficients": {
+        "a": -0.49999999999999967,
+        "b": 0.8660254037844389,
+        "c": 7.560889178795709e-19,
+        "d": -0.3004
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_5": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 6.401340500611068e-16,
+        "c": 0.0,
+        "d": -0.3004
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_0": {
+      "coefficients": {
+        "a": -0.5000000000000001,
+        "b": -0.8660254037844386,
+        "c": -4.3886958560517225e-20,
+        "d": -0.35
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_1": {
+      "coefficients": {
+        "a": 0.4999999999999998,
+        "b": -0.8660254037844388,
+        "c": -7.057510610517097e-20,
+        "d": -0.35000000000000003
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_2": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -2.7470895519765193e-16,
+        "c": 0.0,
+        "d": -0.3499999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_3": {
+      "coefficients": {
+        "a": 0.5,
+        "b": 0.8660254037844385,
+        "c": -8.451214112203354e-19,
+        "d": -0.3499999999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_4": {
+      "coefficients": {
+        "a": -0.4999999999999997,
+        "b": 0.8660254037844388,
+        "c": 6.734283142218034e-19,
+        "d": -0.35
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_5": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 6.867723879941303e-16,
+        "c": -9.251858538542965e-19,
+        "d": -0.35000000000000003
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_ring_0": {
+      "coefficients": {
+        "r": 0.1404,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "amg_root_cell"
+      ],
+      "root": true
+    },
+    "amg_univ": {
+      "cells": [
+        "amg_lattice_cell",
+        "amg_duct_cell_radial_0"
+      ]
+    },
+    "pin1_univ": {
+      "cells": [
+        "pin1_cell_radial_0",
+        "pin1_cell_radial_1",
+        "pin1_cell_radial_2"
+      ],
+      "transformations": [
+        [
+          "ROTATION",
+          [
+            30.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ]
+    }
+  }
+}
