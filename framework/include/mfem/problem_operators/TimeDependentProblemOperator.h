@@ -23,9 +23,9 @@ class TimeDependentProblemOperator : public mfem::TimeDependentOperator, public 
 public:
   TimeDependentProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
-  void SetGridFunctions() override;
-  void Solve() override {}
-  void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override {}
+  virtual void SetGridFunctions() override;
+  virtual void Solve() override {}
+  virtual void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override {}
 };
 
 } // namespace Moose::MFEM

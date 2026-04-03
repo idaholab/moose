@@ -50,17 +50,9 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 }
 
 void
-ComplexEquationSystemProblemOperator::Init(mfem::BlockVector & X)
-{
-  X.Update(_block_true_offsets_trial);
-  X = 0.0;
-  GetEquationSystem()->BuildEquationSystem();
-}
-
-void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
+  BuildEquationSystemOperator();
 
   if (_problem_data.jacobian_solver->isLOR())
     mooseError("LOR solve is not supported for complex equation systems.");
