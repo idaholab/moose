@@ -1,17 +1,12 @@
-# L-shaped hydraulic-only porous-baffle showcase.
-# Flow enters from the left, turns the corner, crosses a diagonal corner baffle,
-# and exits at the top. The wall treatment is split so that porous-adjacent walls
-# use slip while the clean-fluid walls remain no-slip.
-
 inlet_velocity = 0.1
 rho = 998.2
-mu = 5.0e-3
-eps_zone_1 = 0.82
-eps_zone_2 = 0.68
+mu = 2e-3
+eps_zone_1 = 0.8
+eps_zone_2 = 0.6
 # eps_zone_1 = 1.0
 # eps_zone_2 = 1.0
 forch_zone_1 = 30
-forch_zone_2 = 40
+forch_zone_2 = 30
 # forch_zone_1 = 0
 # forch_zone_2 = 0
 # entry_form_loss = 0 # 20
@@ -26,9 +21,9 @@ advected_interp_method = 'upwind'
   [clean_inlet_gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 20
+    nx = 12
     ny = 12
-    xmin = -1
+    xmin = 0
     xmax = 1
     ymin = 0
     ymax = 1
@@ -57,7 +52,7 @@ advected_interp_method = 'upwind'
                3 0 0
                2 1 0
                1 1 0'
-    nx = 13
+    nx = 17
     ny = 13
     bottom_type = LINE
     top_type = LINE
@@ -89,7 +84,7 @@ advected_interp_method = 'upwind'
                3 2 0
                2 2 0'
     nx = 13
-    ny = 13
+    ny = 17
     bottom_type = LINE
     top_type = LINE
     right_type = LINE
@@ -117,11 +112,11 @@ advected_interp_method = 'upwind'
     type = GeneratedMeshGenerator
     dim = 2
     nx = 12
-    ny = 20
+    ny = 12
     xmin = 2
     xmax = 3
     ymin = 2
-    ymax = 4
+    ymax = 3
   []
   [clean_outlet_id]
     type = SubdomainIDGenerator
@@ -194,14 +189,14 @@ advected_interp_method = 'upwind'
     pressure_baffle_sidesets = 'clean_to_porous diagonal_baffle porous_to_clean'
     # pressure_gradient_limiter = 'clean_to_porous diagonal_baffle porous_to_clean'
     baffle_form_loss = '${entry_form_loss} ${corner_form_loss} ${exit_form_loss}'
-    # velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
-    velocity_form_loss = 'face_interpolated face_interpolated face_interpolated'
+    velocity_form_loss = 'lower_epsilon lower_epsilon lower_epsilon'
     # pressure_gradient_limiter_blend = 0.5
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.2
     debug_baffle = false
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
+    reconstructed_pressure_gradient_feedback_relaxation = 0.2
     flux_velocity_reconstruction_zero_flux_sidesets = 'bottom_porous inner_horizontal_porous right_porous inner_vertical_porous'
     use_corrected_pressure_gradient = true
   []
@@ -235,7 +230,7 @@ advected_interp_method = 'upwind'
     v = superficial_v
     momentum_component = 'x'
     rhie_chow_user_object = rc
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
   []
@@ -248,7 +243,7 @@ advected_interp_method = 'upwind'
     v = superficial_v
     momentum_component = 'y'
     rhie_chow_user_object = rc
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     porosity_outside_divergence = true
     use_two_point_stress_transmissibility = true
   []
@@ -505,6 +500,9 @@ advected_interp_method = 'upwind'
   [porosity_aux]
     type = MooseLinearVariableFVReal
   []
+    [superficial_w]
+    type = MooseLinearVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -525,9 +523,9 @@ advected_interp_method = 'upwind'
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.2
-  pressure_variable_relaxation = 0.1
-  num_iterations = 1000
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.2
+  num_iterations = 2000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'

@@ -27,6 +27,9 @@ public:
   virtual Real computeNeighborRightHandSideContribution() override;
 
 protected:
+  /// Compute the internal-face RHS using jump-corrected pressure gradients
+  Real computeJumpAwareInternalFluxRHSContribution();
+
   const RhieChowMassFlux & _rc_uo;
   const bool _debug_baffle_jump;
 };
