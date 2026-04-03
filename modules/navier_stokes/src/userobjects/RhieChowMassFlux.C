@@ -883,6 +883,13 @@ RhieChowMassFlux::pressureGradient(const ElemInfo & elem_info, unsigned int comp
 }
 
 Real
+RhieChowMassFlux::correctedPressureGradient(const ElemInfo & elem_info,
+                                            unsigned int component) const
+{
+  return rawPressureGradient(elem_info, component);
+}
+
+Real
 RhieChowMassFlux::rawPressureGradient(const ElemInfo & elem_info, unsigned int component) const
 {
   if (component >= _dim)
