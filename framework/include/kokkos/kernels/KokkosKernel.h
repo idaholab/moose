@@ -32,7 +32,7 @@ namespace Moose::Kokkos
  *                                        const unsigned int qp,
  *                                        AssemblyDatum & datum) const;
  *
- * The signatures of computeQpJacobian() and computeOffDiagQpJacobian() can be found in the code
+ * The signatures of computeQpJacobian() and computeQpOffDiagJacobian() can be found in the code
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */

@@ -347,6 +347,11 @@ public:
   void computeResidualAndJacobianInternal(const std::set<TagID> & vector_tags,
                                           const std::set<TagID> & matrix_tags);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void computeKokkosResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                        const std::set<TagID> & matrix_tags);
+#endif
+
   /**
    * Form a residual vector for a given tag
    */
@@ -802,7 +807,8 @@ protected:
   /**
    * compute the residual and Jacobian for nodal boundary conditions
    */
-  void computeNodalBCsResidualAndJacobian();
+  void computeNodalBCsResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags);
 
   /**
    * Form multiple matrices for all the tags. Users should not call this func directly.

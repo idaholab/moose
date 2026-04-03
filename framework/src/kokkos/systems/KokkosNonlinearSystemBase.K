@@ -416,3 +416,157 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     system.clearActiveSolutionTags();
   }
 }
+
+void
+NonlinearSystemBase::computeKokkosResidualAndJacobian(const std::set<TagID> & vector_tags,
+                                                      const std::set<TagID> & matrix_tags)
+{
+  TIME_SECTION("computeKokkosResidualAndJacobian", 1);
+
+  // Get warehouses
+
+  const auto & res_kernels = _kokkos_kernels.getVectorTagsObjectWarehouse(vector_tags, 0);
+  const auto & jac_kernels = _kokkos_kernels.getMatrixTagsObjectWarehouse(matrix_tags, 0);
+
+  const auto & res_nodal_kernels =
+      _kokkos_nodal_kernels.getVectorTagsObjectWarehouse(vector_tags, 0);
+  const auto & jac_nodal_kernels =
+      _kokkos_nodal_kernels.getMatrixTagsObjectWarehouse(matrix_tags, 0);
+
+  const auto & res_integrated_bcs =
+      _kokkos_integrated_bcs.getVectorTagsObjectWarehouse(vector_tags, 0);
+  const auto & jac_integrated_bcs =
+      _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(matrix_tags, 0);
+
+  const auto & jac_nodal_bcs = _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(matrix_tags, 0);
+
+  if (!res_kernels.size() && !jac_kernels.size() && !res_nodal_kernels.size() &&
+      !jac_nodal_kernels.size() && !res_integrated_bcs.size() && !jac_integrated_bcs.size() &&
+      !jac_nodal_bcs.size())
+    return;
+
+  // Resolve dependencies
+
+  auto & systems = _fe_problem.getKokkosSystems();
+
+  systems[number()].setActiveResidualTags(vector_tags);
+  systems[number()].setActiveMatrixTags(matrix_tags);
+
+  std::set<MooseVariableFieldBase *> needed_moose_vars;
+  std::set<TagID> needed_fe_var_vector_tags;
+  std::unordered_set<unsigned int> needed_mat_props;
+
+  for (auto tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
+    needed_fe_var_vector_tags.insert(tag._id);
+
+  res_kernels.updateVariableDependency(needed_moose_vars);
+  res_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  res_kernels.updateMatPropDependency(needed_mat_props);
+
+  jac_kernels.updateVariableDependency(needed_moose_vars);
+  jac_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  jac_kernels.updateMatPropDependency(needed_mat_props);
+
+  res_nodal_kernels.updateVariableDependency(needed_moose_vars);
+  res_nodal_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  jac_nodal_kernels.updateVariableDependency(needed_moose_vars);
+  jac_nodal_kernels.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  res_integrated_bcs.updateVariableDependency(needed_moose_vars);
+  res_integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  res_integrated_bcs.updateMatPropDependency(needed_mat_props);
+
+  jac_integrated_bcs.updateVariableDependency(needed_moose_vars);
+  jac_integrated_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+  jac_integrated_bcs.updateMatPropDependency(needed_mat_props);
+
+  jac_nodal_bcs.updateVariableDependency(needed_moose_vars);
+  jac_nodal_bcs.updateFEVariableCoupledVectorTagDependency(needed_fe_var_vector_tags);
+
+  if (needed_mat_props.size())
+  {
+    _fe_problem.getKokkosMaterialsWarehouse().updateVariableDependency(needed_moose_vars);
+    _fe_problem.getKokkosMaterialsWarehouse().updateFEVariableCoupledVectorTagDependency(
+        needed_fe_var_vector_tags);
+  }
+
+  // Copy vectors and cache variable values at element quadature points
+
+  for (auto & system : systems)
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+
+    {
+      TIME_SECTION("KokkosPreallocateAndCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
+    }
+  }
+
+  systems.copyToDevice();
+
+  {
+    TIME_SECTION("KokkosMaterial", 1);
+
+    // Compute material properties
+
+    if (needed_mat_props.size())
+    {
+      _fe_problem.prepareKokkosMaterials(needed_mat_props);
+      _fe_problem.reinitKokkosMaterials();
+    }
+  }
+
+  {
+    TIME_SECTION("KokkosKernel", 1);
+
+    // Compute kernels
+
+    for (auto kernel : res_kernels.getActiveObjects())
+      kernel->computeResidual();
+
+    for (auto kernel : jac_kernels.getActiveObjects())
+      kernel->computeJacobian();
+
+    for (auto nodal_kernel : res_nodal_kernels.getActiveObjects())
+      nodal_kernel->computeResidual();
+
+    for (auto nodal_kernel : jac_nodal_kernels.getActiveObjects())
+      nodal_kernel->computeJacobian();
+
+    for (auto ibc : res_integrated_bcs.getActiveObjects())
+      ibc->computeResidual();
+
+    for (auto ibc : jac_integrated_bcs.getActiveObjects())
+      ibc->computeJacobian();
+
+    /// Nodal BC residuals are computed separately
+    for (auto nbc : jac_nodal_bcs.getActiveObjects())
+      nbc->computeJacobian();
+  }
+
+  // Close and restore vectors and matrices
+
+  {
+    TIME_SECTION("KokkosCopy", 1);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  }
+
+  // Clear
+
+  systems[number()].clearActiveResidualTags();
+  systems[number()].clearActiveMatrixTags();
+
+  for (auto & system : systems)
+  {
+    system.clearActiveVariables();
+    system.clearActiveSolutionTags();
+  }
+}

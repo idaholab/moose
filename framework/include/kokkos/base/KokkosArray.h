@@ -932,7 +932,7 @@ void
 ArrayBase<T, dimension, index_type>::offset(offset_type... d)
 {
   static_assert((std::is_convertible<offset_type, signed_index_type>::value && ...),
-                "All arguments must be convertible to index_type");
+                "All arguments must be convertible to signed_index_type");
   static_assert(sizeof...(d) == dimension, "Number of arguments should match array dimension");
 
   std::vector<signed_index_type> offsets;
@@ -1435,7 +1435,7 @@ Array<T, dimension, index_type, layout>::operator()(indices... i) const
                 "All arguments must be convertible to signed_index_type");
   static_assert(sizeof...(i) == dimension, "Number of arguments should match array dimension");
 
-#ifdef DEBUG
+#ifndef NDEBUG
   {
     signed_index_type idx[dimension] = {static_cast<signed_index_type>(i)...};
 

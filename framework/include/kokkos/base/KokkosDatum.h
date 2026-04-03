@@ -358,6 +358,7 @@ public:
                 const unsigned int comp = 0)
     : Datum(elem, side, assembly, systems),
       _tag(ivar.tag()),
+      _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
@@ -384,6 +385,7 @@ public:
                 const unsigned int comp = 0)
     : Datum(node, assembly, systems),
       _tag(ivar.tag()),
+      _sys(ivar.sys(comp)),
       _ivar(ivar.var(comp)),
       _jvar(jvar),
       _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
@@ -406,6 +408,11 @@ public:
    * @returns The number of local DOFs
    */
   KOKKOS_FUNCTION unsigned int n_jdofs() const { return _n_jdofs; }
+  /**
+   * Get the system number of variable
+   * @returns The system number of variable
+   */
+  KOKKOS_FUNCTION unsigned int sys() const { return _sys; }
   /**
    * Get the variable number
    * @returns The variable number
@@ -442,6 +449,10 @@ protected:
    * Solution tag ID
    */
   const TagID _tag;
+  /**
+   * System number
+   */
+  const unsigned int _sys;
   /**
    * Variable numbers
    */
