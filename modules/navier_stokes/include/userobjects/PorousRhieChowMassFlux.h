@@ -35,6 +35,8 @@ public:
   Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const override;
   bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const override;
   Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const override;
+  Real correctedPressureGradient(const ElemInfo & elem_info,
+                                 unsigned int component) const override;
 
   void initFaceMassFlux() override;
   void initCouplingField() override;
@@ -77,6 +79,7 @@ private:
   const bool _debug_baffle;
   const bool _use_flux_velocity_reconstruction;
   const Real _flux_velocity_reconstruction_relaxation;
+  const Real _reconstructed_pressure_gradient_feedback_relaxation;
   const bool _use_corrected_pressure_gradient;
   const bool _use_reconstructed_pressure_gradient;
   const Real _pressure_gradient_limiter_blend;
@@ -85,6 +88,7 @@ private:
   std::unique_ptr<NumericVector<Number>> _cell_porosity;
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_corrected;
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_reconstructed;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_feedback_state;
   std::vector<std::vector<std::unique_ptr<NumericVector<Number>>>> _grad_w_prev;
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _p_grad_flux;
