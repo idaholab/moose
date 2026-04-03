@@ -18,17 +18,18 @@
 InputParameters
 MFEMBoundaryCondition::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params += MFEMBoundaryRestrictable::validParams();
 
   params.addClassDescription("Base class for applying boundary conditions to MFEM problems.");
   params.registerBase("BoundaryCondition");
+  params.registerSystemAttributeName("BoundaryCondition");
   params.addParam<VariableName>("variable", "Variable on which to apply the boundary condition");
   return params;
 }
 
 MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMObject(parameters),
     MFEMBoundaryRestrictable(
         parameters, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _test_var_name(getParam<VariableName>("variable"))

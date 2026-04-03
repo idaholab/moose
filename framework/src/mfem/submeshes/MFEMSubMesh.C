@@ -15,11 +15,12 @@
 InputParameters
 MFEMSubMesh::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params.registerBase("MFEMSubMesh");
+  params.registerSystemAttributeName("MFEMSubMesh");
   return params;
 }
 
-MFEMSubMesh::MFEMSubMesh(const InputParameters & parameters) : MFEMGeneralUserObject(parameters) {}
+MFEMSubMesh::MFEMSubMesh(const InputParameters & parameters) : MFEMObject(parameters) {}
 
 #endif

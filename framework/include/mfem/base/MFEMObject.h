@@ -11,26 +11,31 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MooseObject.h"
+#include "FunctionInterface.h"
+#include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
+#include "ReporterInterface.h"
 
-// Forwards declaration.
 class MFEMProblem;
 
 /**
- * This class adds a getMFEMProblem method.
+ * Thin base for MFEM objects backed directly by MooseObject instead of UserObject.
  */
-class MFEMGeneralUserObject : public GeneralUserObject
+class MFEMObject : public MooseObject,
+                   protected FunctionInterface,
+                   protected PostprocessorInterface,
+                   protected VectorPostprocessorInterface,
+                   protected ReporterInterface
 {
 public:
   static InputParameters validParams();
 
-  MFEMGeneralUserObject(const InputParameters & parameters);
+  MFEMObject(const InputParameters & parameters);
 
-  /// Returns a reference to the MFEMProblem instance.
   MFEMProblem & getMFEMProblem() { return _mfem_problem; }
   const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
 
-  /// Returns references to coefficients stored in the MFEMProblem PropertiesManager.
   mfem::Coefficient & getScalarCoefficientByName(const MFEMScalarCoefficientName & name);
   mfem::VectorCoefficient & getVectorCoefficientByName(const MFEMVectorCoefficientName & name);
   mfem::MatrixCoefficient & getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name);
@@ -38,11 +43,13 @@ public:
   mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
 
-  void execute() override {}
-
-  void initialize() override {}
-
-  void finalize() override {}
+protected:
+  usingFunctionInterfaceMembers;
+  usingPostprocessorInterfaceMembers;
+  using ReporterInterface::getReporterValue;
+  using ReporterInterface::getReporterValueByName;
+  using VectorPostprocessorInterface::getVectorPostprocessorValue;
+  using VectorPostprocessorInterface::getVectorPostprocessorValueByName;
 
 private:
   MFEMProblem & _mfem_problem;

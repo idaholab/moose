@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "Attributes.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
@@ -26,6 +27,7 @@ public:
   virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
+  virtual void execute(const ExecFlagType & exec_type) override;
   virtual void externalSolve() override {}
   virtual void syncSolutions(Direction) override {}
 
@@ -58,9 +60,7 @@ public:
   /**
    * Add an MFEM FESpace to the problem.
    */
-  void addFESpace(const std::string & user_object_name,
-                  const std::string & name,
-                  InputParameters & parameters);
+  void addFESpace(const std::string & type, const std::string & name, InputParameters & parameters);
   /**
    * Set the device to use to solve the FE problem.
    */
@@ -74,9 +74,7 @@ public:
   /**
    * Add an MFEM SubMesh to the problem.
    */
-  void addSubMesh(const std::string & user_object_name,
-                  const std::string & name,
-                  InputParameters & parameters);
+  void addSubMesh(const std::string & type, const std::string & name, InputParameters & parameters);
 
   /**
    * Add transfers between MultiApps and/or MFEM SubMeshes.
@@ -118,9 +116,8 @@ public:
   }
 
   /**
-   * Override of ExternalProblem::addKernel. Uses ExternalProblem::addKernel to create a
-   * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
-   * to be used in the MFEM solve.
+   * Override of ExternalProblem::addKernel. Creates the MOOSE-side MFEM kernel wrapper and the
+   * corresponding MFEM kernel to be used in the MFEM solve.
    */
   void addKernel(const std::string & kernel_name,
                  const std::string & name,
@@ -155,18 +152,15 @@ public:
                             InputParameters & parameters);
 
   /**
-   * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
-   * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
-   * to be used in the MFEM solve.
+   * Override of ExternalProblem::addAuxKernel. Creates the MOOSE-side MFEM auxkernel wrapper.
    */
   void addAuxKernel(const std::string & kernel_name,
                     const std::string & name,
                     InputParameters & parameters) override;
 
   /**
-   * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
-   * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
-   * MFEM Coefficient or VectorCoefficient object.
+   * Override of ExternalProblem::addFunction. Creates a corresponding MFEM Coefficient or
+   * VectorCoefficient object for the added MOOSE function.
    */
   void addFunction(const std::string & type,
                    const std::string & name,
@@ -185,6 +179,10 @@ public:
                         const std::string & name,
                         InputParameters & parameters) override;
 
+  void addVectorPostprocessor(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters) override;
+
   /**
    * Method called in AddMFEMPreconditionerAction which will create the solver.
    */
@@ -192,18 +190,16 @@ public:
                              const std::string & name,
                              InputParameters & parameters);
   /**
-   * Override of FEProblemBase::addIndicator. Uses FEProblemBase::addIndicator to create an
-   * MFEMGeneralUserObject representing the error estimator in MOOSE, i.e. an
-   * MFEMIndicator to be used when setting up adaptive mesh refinement later.
+   * Override of FEProblemBase::addIndicator. Creates the MFEMIndicator used when setting up
+   * adaptive mesh refinement later.
    */
   void addIndicator(const std::string & type,
                     const std::string & name,
                     InputParameters & parameters) override;
 
   /**
-   * Override of FEProblemBase::addMarker. Uses FEProblemBase::addMarker to create an
-   * MFEMGeneralUserObject representing the refinement marker in MOOSE, i.e. an
-   * MFEMRefinementMarker to be used for adaptive mesh refinement.
+   * Override of FEProblemBase::addMarker. Creates the MFEMRefinementMarker used for adaptive mesh
+   * refinement.
    */
   void addMarker(const std::string & type,
                  const std::string & name,
@@ -224,6 +220,8 @@ public:
                               mfem::real_t nl_abs_tol,
                               mfem::real_t nl_rel_tol,
                               unsigned int print_level);
+
+  void executeMFEMObjects(const ExecFlagType & exec_type);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
@@ -321,6 +319,13 @@ public:
     return _problem_data.cmplx_gridfunctions.GetShared(name);
   }
 
+  template <typename T>
+  T & getMFEMObject(const std::string & system,
+                    const std::string & name,
+                    const THREAD_ID tid = 0) const;
+
+  bool hasMFEMObject(const std::string & system, const std::string & name) const;
+
   enum class NumericType
   {
     REAL,
@@ -332,5 +337,23 @@ public:
 protected:
   MFEMProblemData _problem_data;
 };
+
+template <typename T>
+T &
+MFEMProblem::getMFEMObject(const std::string & system,
+                           const std::string & name,
+                           const THREAD_ID tid) const
+{
+  std::vector<T *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>(system)
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find MFEM object with system '" + system + "' and name '" + name + "'");
+  return *(objs[0]);
+}
 
 #endif

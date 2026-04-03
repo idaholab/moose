@@ -4736,7 +4736,17 @@ const VectorPostprocessor &
 FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_name,
                                                   const THREAD_ID tid) const
 {
-  return getUserObject<VectorPostprocessor>(object_name, tid);
+  std::vector<VectorPostprocessor *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribInterfaces>(Interfaces::VectorPostprocessor)
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(object_name)
+      .queryInto(objs);
+
+  if (objs.empty())
+    mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
+  return *(objs[0]);
 }
 
 void

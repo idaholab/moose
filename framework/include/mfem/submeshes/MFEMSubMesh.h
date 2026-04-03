@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 
 /**
  * Base class for construction of a mfem::ParSubMesh object. Access using the
  * getSubMesh() accessor.
  */
-class MFEMSubMesh : public MFEMGeneralUserObject
+class MFEMSubMesh : public MFEMObject
 {
 public:
   static InputParameters validParams();

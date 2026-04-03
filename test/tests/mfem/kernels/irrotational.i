@@ -115,7 +115,6 @@ centre_y = 0.1
     type = MFEMVectorL2Error
     variable = velocity
     function = exact_velocity
-    execution_order_group = 1
   []
 []
 

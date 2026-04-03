@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 #include "MFEMBoundaryRestrictable.h"
 #include "MFEMContainers.h"
 #include "Function.h"
 
-class MFEMBoundaryCondition : public MFEMGeneralUserObject, public MFEMBoundaryRestrictable
+class MFEMBoundaryCondition : public MFEMObject, public MFEMBoundaryRestrictable
 {
 public:
   static InputParameters validParams();

@@ -11,16 +11,18 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 
 /**
  * Base class used to set the initial value(s) on an MFEMVariable.
  */
-class MFEMInitialCondition : public MFEMGeneralUserObject
+class MFEMInitialCondition : public MFEMExecutedObject
 {
 public:
   static InputParameters validParams();
   MFEMInitialCondition(const InputParameters & params);
+
+  virtual std::set<std::string> producedVariableNames() const override;
 };
 
 #endif
