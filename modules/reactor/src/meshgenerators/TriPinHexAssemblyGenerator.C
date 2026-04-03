@@ -298,6 +298,13 @@ TriPinHexAssemblyGenerator::generate()
                                OUTER_SIDESET_ID,
                                TOLERANCE,
                                /*clear_stitched_boundary_ids=*/true);
+
+      // We're missing neighbor pointers after the stitching?  This
+      // may be a libMesh bug, but we'll work around it here.  We'll
+      // actually call find_neighbors(), not just mark neighbors
+      // unprepared, because the stitcher wants valid neighbor
+      // pointers.
+      meshes[0]->find_neighbors();
     }
   }
 
@@ -319,7 +326,10 @@ TriPinHexAssemblyGenerator::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-  meshes[0]->unset_is_prepared();
+
+  // Everything unprepared by this generation should have been marked
+  // so by helper functions
+
   return dynamic_pointer_cast<MeshBase>(meshes[0]);
 }
 
@@ -500,6 +510,7 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
 
   for (const auto & elem : mesh0->element_ptr_range())
     elem->subdomain_id() = block_ids_new[elem->subdomain_id() - 1];
+  mesh0->unset_has_cached_elem_data();
 
   return mesh0;
 }

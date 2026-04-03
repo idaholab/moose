@@ -214,6 +214,10 @@ XYDelaunayGenerator::generate()
   {
     const auto & subdomain_names = getParam<std::vector<SubdomainName>>("input_subdomain_names");
 
+    // Make sure subdomain info caches are up to date
+    if (!mesh->preparation().has_cached_elem_data)
+      mesh->cache_elem_data();
+
     const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomain_names);
 
     // Check that the requested subdomains exist in the mesh
@@ -575,6 +579,6 @@ XYDelaunayGenerator::generate()
   if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
     paramError("holes", "The hole meshes contain subdomain name maps with conflicts.");
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_boundary_id_sets();
   return mesh;
 }

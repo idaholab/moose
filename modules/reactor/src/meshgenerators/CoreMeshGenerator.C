@@ -876,8 +876,9 @@ CoreMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Core, _extrude);
   }
 
-  // Mark mesh as not prepared, as block ID's were re-assigned in this method
-  (*_build_mesh)->unset_is_prepared();
+  // Our cached elem data should have been marked unprepared by our
+  // helper functions, but at the end we also added boundary ids
+  (*_build_mesh)->unset_has_boundary_id_sets();
 
   return std::move(*_build_mesh);
 }

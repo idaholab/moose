@@ -112,9 +112,13 @@ SideSetsGeneratorBase::setup(MeshBase & mesh)
 {
   mooseAssert(_fe_face == nullptr, "FE Face has already been initialized");
 
-  // To know the dimension of the mesh
-  if (!mesh.is_prepared())
-    mesh.prepare_for_use();
+  // To know the dimension, boundaries, and subdomains of the mesh
+  const auto & prep = mesh.preparation();
+  if (!prep.has_cached_elem_data)
+    mesh.cache_elem_data();
+  if (!prep.has_boundary_id_sets)
+    mesh.get_boundary_info().regenerate_id_sets();
+
   const auto dim = mesh.mesh_dimension();
 
   // Setup the FE Object so we can calculate normals

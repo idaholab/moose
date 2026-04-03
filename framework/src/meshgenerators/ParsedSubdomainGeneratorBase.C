@@ -74,6 +74,10 @@ ParsedSubdomainGeneratorBase::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  // Make sure subdomain caches are up to date
+  if (!mesh->preparation().has_cached_elem_data)
+    mesh->cache_elem_data();
+
   // the extra element ids would not have existed at construction so we only do this now
   for (const auto & eeid_name : _eeid_names)
     _eeid_indices.push_back(mesh->get_elem_integer_index(eeid_name));
@@ -117,7 +121,7 @@ ParsedSubdomainGeneratorBase::generate()
   // Assign block name, if applicable
   setBlockName(mesh);
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 

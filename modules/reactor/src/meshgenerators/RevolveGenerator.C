@@ -253,6 +253,10 @@ RevolveGenerator::generate()
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
+  // Subdomain IDs for on-axis elements must be new
+  if (!input->preparation().has_cached_elem_data)
+    input->cache_elem_data();
+
   // check that subdomain swap sources exist in the mesh
   std::set<subdomain_id_type> blocks;
   input->subdomain_ids(blocks, true);
@@ -265,7 +269,6 @@ RevolveGenerator::generate()
                    "Source subdomain " + std::to_string(bid) + " was not found in the mesh");
     }
 
-  // Subdomain IDs for on-axis elements must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   input->subdomain_ids(subdomain_ids_set);
   const subdomain_id_type max_subdomain_id = *subdomain_ids_set.rbegin();
@@ -1491,9 +1494,19 @@ RevolveGenerator::generate()
     mesh->get_boundary_info().set_nodeset_name_map().insert(input_nodeset_map.begin(),
                                                             input_nodeset_map.end());
 
-  mesh->remove_orphaned_nodes();
-  mesh->renumber_nodes_and_elements();
-  mesh->unset_is_prepared();
+  // Our new mesh is still unprepared in most ways.  We don't need to
+  // repartition, since we just revolved our partitioning, but
+  // depending on our ghosting functors we might even have built some
+  // elements that can go remote!
+  mesh->unset_has_removed_orphaned_nodes();
+  mesh->unset_has_synched_id_counts();
+  mesh->unset_has_neighbor_ptrs();
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_interior_parent_ptrs();
+  mesh->unset_has_removed_remote_elements();
+  mesh->unset_has_reinit_ghosting_functors();
+  mesh->unset_has_boundary_id_sets();
+  mesh->clear_point_locator();
 
   return mesh;
 }

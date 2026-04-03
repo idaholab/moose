@@ -33,12 +33,12 @@ through dependencies so that complex meshes may be built up from a series of sim
 
 ### Mesh Generator development
 
-Mesh generator developers should call `mesh->unset_is_prepared()` at the end of
-the `generate` routine unless they are confident that their mesh is indeed
-prepared. Examples of actions that render the mesh unprepared are
+Mesh generator developers should set the preparation state of their
+mesh at the end of the `generate` routine.  A previously prepared
+input mesh may have been rendered unprepared by actions such as:
 
 - Translating, rotating, or scaling the mesh. This will conceptually change the
-  mesh bounding box, invalidate the point locator, and potentially change the
+  mesh bounding box, invalidate a point locator, and potentially change the
   spatial dimension of the mesh (e.g. rotating a line from the x-axis into the
   xy plane, etc.)
 - Adding elements. These elements will need their neighbor links set in order
@@ -48,10 +48,69 @@ prepared. Examples of actions that render the mesh unprepared are
 - Changing boundary IDs. This invalidates global data (e.g. data aggregated
   across all processes) in the `libMesh::BoundaryInfo` object
 
-When in doubt, the mesh is likely not prepared. Calling `unset_is_prepared` is a
-defensive action that at worst will incur an unnecessary `prepare_for_use`,
-which may slow down the simulation setup, and at best may save follow-on mesh
-generators or simulation execution from undesirable behavior.
+When in doubt, the mesh is likely not prepared. Calling
+`mesh.unset_is_prepared()` to let the mesh object know that
+preparation needs to be done is a defensive action that at worst will
+incur an unnecessary `prepare_for_use`, which may slow down the
+simulation setup, and at best may save follow-on mesh generators or
+simulation execution from incorrect behavior.  Follow-on mesh
+generators can test `mesh.is_prepared()` to see if the cached or
+derived data they need is ready yet.
+
+For more efficient simulation setup, mesh generator developers can
+carefully mark a mesh as unprepared in only specific ways, or can test
+`mesh.preparation()` data members to verify that the specific
+preparation that they need is ready.  `Preparation` data currently
+includes the `bool` values:
+
+- `has_synched_id_counts` - when adding or removing elements or nodes
+  in an unsynchronized way on a distributed mesh, counts like
+  `n_elem()` or `next_unique_id()` can be outdated.  Flagged by
+  `mesh.unset_has_synched_id_counts()`; corrected by
+  `mesh.update_parallel_id_counts()`.
+- `has_neighbor_ptrs` - when adding or removing mesh elements,
+  `Elem::neighbor_ptr()` links are not generated immediately.
+  Flagged by `mesh.unset_has_neighbor_ptrs()`; corrected by
+  `mesh.find_neighbors()`.
+- `has_cached_elem_data` - when modifying the mesh, cached data like
+  `get_mesh_subdomains()`, `elem_dimensions()`, etc. is not
+  immediately updated.  Flagged by
+  `mesh.unset_has_cached_elem_data()`; corrected by
+  `mesh.cache_elem_data()`.
+- `has_boundary_id_sets` - when adding, removing, or modifying
+  individual entries in the `BoundaryInfo`, the cached summaries of
+  that boundary data are not immediately updated.  Flagged by
+  `mesh.unset_has_boundary_id_sets()`; corrected by
+  `mesh.get_boundary_info().regenerate_id_sets()`.
+- `has_reinit_ghosting_functors` - when modifying the mesh, custom
+  `GhostingFunctor` subclasses (including `RelationshipManager`
+  objects in MOOSE) may require the opportunity to cache data about
+  the modifications.  Flagged by
+  `unset_has_reinit_ghosting_functors()`; corrected by
+  `mesh.reinit_ghosting_functors()`;
+- `is_partitioned` - whether mesh elements and nodes all already
+  have been assigned a `processor_id()`, in an adequately
+  load-balanced way.  Flagged by `mesh.unset_is_partitioned()`;
+  corrected by `mesh.partition()`.
+- `has_interior_parent_ptrs` - when manually creating lower-dimensional
+  elements to add to a higher-dimensional mesh, their
+  `interior_parent()` links are absent until added.  Flagged by
+  `mesh.unset_has_interior_parent_ptrs()`; corrected manually or by
+  `mesh.detect_interior_parents()`.
+- `has_removed_remote_elements` - after partitioning or reducing the
+  ghosting required in a distributed mesh, elements and nodes not
+  required by the ghosting are not immediately removed.  Flagged by
+  `mesh.unset_has_removed_remote_elements()`; corrected by
+  `mesh.delete_remote_elements()`.
+- `has_removed_orphaned_nodes` - after deleting elements, nodes only
+  used by deleted elements should be removed.  Flagged by
+  `mesh.unset_has_removed_orphaned_nodes()`; corrected by
+  `mesh.remove_orphaned_nodes()`.
+- Because clearing a point locator is as efficient as flagging it
+  outdated, and because point locators are generated on the fly,
+  a call to `mesh.clear_point_locator()` is sufficient to flag a mesh
+  geometry change that would have left a cached locator invalid.
+
 
 ### DAG and final mesh selection id=final
 

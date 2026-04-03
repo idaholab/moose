@@ -129,13 +129,22 @@ ProjectSideSetOntoLevelSetGenerator::generate()
       new_elem->set_node(i, new_nodes[i]);
 
     // User-selected block name: same for all element types for now
-    new_elem->subdomain_id() = projection_block_id;
+    new_elem->inherit_data_from(*side_elem);
 
     new_mesh->add_elem(std::move(new_elem));
   }
 
   new_mesh->subdomain_name(projection_block_id) = getParam<SubdomainName>("subdomain_name");
-  new_mesh->unset_is_prepared();
+
+  // We haven't built up any caches, but we are building in
+  // serial so at least we don't have to worry about id count sync or
+  // remote elements, and we don't have any boundary info or orphaned
+  // nodes or outdated point-locator on this new mesh.
+  new_mesh->unset_has_neighbor_ptrs();
+  new_mesh->unset_has_cached_elem_data();
+  new_mesh->unset_has_interior_parent_ptrs();
+  new_mesh->unset_has_reinit_ghosting_functors();
+
   return dynamic_pointer_cast<MeshBase>(new_mesh);
 }
 

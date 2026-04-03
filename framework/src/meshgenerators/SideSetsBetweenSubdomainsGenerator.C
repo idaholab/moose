@@ -188,6 +188,6 @@ SideSetsBetweenSubdomainsGenerator::generate()
   for (const auto & i : make_range(boundary_ids.size()))
     boundary_info.sideset_name(boundary_ids[i]) = _boundary_names[i];
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

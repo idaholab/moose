@@ -292,5 +292,8 @@ AnnularMesh::buildMesh()
     }
   }
 
+  // We just created this mesh from scratch, and we're not in the mesh
+  // generator system that will handle flagged preparation
+  // requirements later, so we need a full prepare_for_use() here.
   mesh.prepare_for_use();
 }

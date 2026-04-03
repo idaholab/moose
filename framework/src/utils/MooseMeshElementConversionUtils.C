@@ -69,7 +69,10 @@ hexElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -131,7 +134,10 @@ prismElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -191,7 +197,10 @@ pyramidElemSplitter(MeshBase & mesh,
     new_elem->set_node(1, const_cast<Node *>(optimized_node_list[i][1]));
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
-    new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id();
+
+    // Copy subdomain id, processor_id, mapping, etc.
+    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
@@ -735,6 +744,10 @@ convertHex8Elem(MeshBase & mesh,
   // elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
+
+  // Don't force us to repartition later
+  new_node->processor_id() = mesh.elem_ptr(elem_id)->processor_id();
+
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))
   {
     if (std::find(side_indices.begin(), side_indices.end(), i_side) != side_indices.end())
@@ -760,7 +773,13 @@ createUnitPyramid5FromHex8(MeshBase & mesh,
   new_elem->set_node(2, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(1));
   new_elem->set_node(3, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(0));
   new_elem->set_node(4, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base * 2;
+
   auto new_elem_ptr = mesh.add_elem(std::move(new_elem));
   retainEEID(mesh, elem_id, new_elem_ptr);
   for (const auto & bid : side_info)
@@ -799,7 +818,13 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -817,7 +842,13 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
@@ -840,6 +871,10 @@ convertPrism6Elem(MeshBase & mesh,
   // For the PYRAMID5 element, it can further be converted into 2 TET3 elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
+
+  // Don't force us to repartition later
+  new_node->processor_id() = mesh.elem_ptr(elem_id)->processor_id();
+
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))
   {
     if (i_side % 4 == 0 ||
@@ -888,7 +923,13 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                            ->side_ptr(side_index)
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -909,7 +950,13 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                              ->side_ptr(side_index)
                              ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
     new_elem_1->set_node(3, const_cast<Node *>(new_node));
+
+    // Copy processor_id, mapping, etc.
+    new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+    // But override subdomain_id to get a new block
     new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
     new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
     retainEEID(mesh, elem_id, new_elem_ptr_1);
   }
@@ -960,7 +1007,13 @@ convertPyramid5Elem(MeshBase & mesh,
       2,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
@@ -975,7 +1028,13 @@ convertPyramid5Elem(MeshBase & mesh,
       2,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
+
+  // Copy processor_id, mapping, etc.
+  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+
+  // But override subdomain_id to get a new block
   new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+
   auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
@@ -1239,6 +1298,11 @@ assignConvertedElementsSubdomainNameSuffix(
     const SubdomainName & tet_suffix,
     const SubdomainName & pyramid_suffix)
 {
+  // If we have an unprepared mesh, we at least need its element
+  // caches prepared for subdomain_ids
+  if (!mesh.preparation().has_cached_elem_data)
+    mesh.cache_elem_data();
+
   for (const auto & subdomain_id : original_subdomain_ids)
   {
     if (MooseMeshUtils::hasSubdomainID(mesh, subdomain_id + sid_shift_base))

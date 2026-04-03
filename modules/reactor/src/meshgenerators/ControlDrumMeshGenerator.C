@@ -459,8 +459,7 @@ ControlDrumMeshGenerator::generate()
     addDepletionId(*(*_build_mesh), option, DepletionIDGenerationLevel::Drum, _extrude);
   }
 
-  // Mark mesh as not prepared, as block ID's were re-assigned in this method
-  (*_build_mesh)->unset_is_prepared();
+  // updateElementBlockNameId should already have marked our cache unprepared
 
   return std::move(*_build_mesh);
 }

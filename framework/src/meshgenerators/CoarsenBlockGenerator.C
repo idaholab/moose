@@ -75,6 +75,8 @@ CoarsenBlockGenerator::generate()
   const std::set<SubdomainID> block_ids_set(block_ids.begin(), block_ids.end());
 
   // Check that the block ids/names exist in the mesh
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
   std::set<SubdomainID> mesh_blocks;
   _input->subdomain_ids(mesh_blocks);
 
@@ -116,16 +118,21 @@ CoarsenBlockGenerator::generate()
                  " times but the max coarsening required is ",
                  max_c);
 
-  // Determine how many times the coarsening will be used
-  if (max_c > 0 && !mesh->is_prepared())
-    // we prepare for use to make sure the neighbors have been found
-    mesh->prepare_for_use();
-
   auto mesh_ptr = recursiveCoarsen(block_ids, mesh, _coarsening, max_c, /*step=*/0);
 
-  // element neighbors are not valid
+  // A lot of our cached data is invalid now.  Copying processor ids
+  // means we can get away without repartitioning yet, though, and in
+  // serial we don't have sync or remote elements to worry about.
   if (max_c > 0)
-    mesh_ptr->unset_is_prepared();
+  {
+    mesh_ptr->unset_has_neighbor_ptrs();
+    mesh_ptr->unset_has_cached_elem_data();
+    mesh_ptr->unset_has_interior_parent_ptrs();
+    mesh_ptr->unset_has_removed_orphaned_nodes();
+    mesh_ptr->unset_has_reinit_ghosting_functors();
+    mesh_ptr->unset_has_boundary_id_sets();
+    mesh_ptr->clear_point_locator();
+  }
 
   // flip elements as we were not careful to build them with a positive volume
   MeshTools::Modification::orient_elements(*mesh_ptr);
@@ -133,7 +140,7 @@ CoarsenBlockGenerator::generate()
   // check that we are not returning a non-conformal mesh
   if (_check_output_mesh_for_nonconformality)
   {
-    mesh_ptr->prepare_for_use();
+    mesh_ptr->complete_preparation();
     unsigned int num_nonconformal_nodes = 0;
     MeshBaseDiagnosticsUtils::checkNonConformalMesh(
         mesh_ptr, _console, 10, TOLERANCE, num_nonconformal_nodes);
@@ -155,9 +162,9 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
   if (coarse_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);
 
-  // Elements should know their neighbors
-  if (!mesh->is_prepared())
-    mesh->prepare_for_use();
+  // We need elements to know their neighbors
+  if (!mesh->preparation().has_neighbor_ptrs)
+    mesh->find_neighbors();
 
   // We wont be modifying the starting mesh for simplicity, we will make a copy and return that
   std::unique_ptr<MeshBase> mesh_return;
@@ -277,7 +284,10 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
 
       // Form a parent, of a low order type as we only have the extreme vertex nodes
       std::unique_ptr<Elem> parent = Elem::build(Elem::first_order_equivalent_type(elem_type));
-      parent->subdomain_id() = common_subdomain_id;
+
+      // Get subdomain id, mapping, p_level, etc.
+      parent->inherit_data_from(*current_elem);
+
       auto parent_ptr = mesh_copy->add_elem(parent.release());
       coarse_elems.insert(parent_ptr);
 
@@ -427,8 +437,8 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
 
       // Contract to remove the elements that were marked for deletion
       mesh_copy->contract();
-      // Prepare for use to refresh the element neighbors
-      mesh_copy->prepare_for_use();
+      // Refresh the element neighbors
+      mesh_copy->find_neighbors();
     }
 
     // We pick the configuration (eg starting node) for which we managed to coarsen the most
