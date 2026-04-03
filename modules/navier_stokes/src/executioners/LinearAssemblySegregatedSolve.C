@@ -519,8 +519,7 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // Solve the pressure corrector
   const auto residuals = solvePressureCorrector();
 
-  // Compute the face velocity which is used in the advection terms. In certain
-  // segregated solver algorithms (like PISO) this is only done on the last iteration.
+  // Update face fluxes using the pressure-correction solution (before pressure relaxation)
   if (recompute_face_mass_flux)
     _rc_uo->computeFaceMassFlux();
 
@@ -538,8 +537,15 @@ LinearAssemblySegregatedSolve::correctVelocity(const bool subtract_updated_press
   // We recompute the updated pressure gradient
   _pressure_system.computeGradients();
 
+  // Recompute corrected gradients after relaxation so velocity correction uses the
+  // current pressure field (important for porous/baffle cases).
+  _rc_uo->recomputeCorrectedPressureGradient();
+
   // Reconstruct the cell velocity as well to accelerate convergence
   _rc_uo->computeCellVelocity();
+
+  for (const auto system_i : index_range(_momentum_systems))
+    _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
 
   return residuals;
 }
