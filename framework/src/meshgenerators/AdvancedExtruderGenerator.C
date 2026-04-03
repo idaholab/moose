@@ -1195,13 +1195,15 @@ AdvancedExtruderGenerator::generate()
   // Creating the layered meshes with non-full-order elements creates
   // a lot of leftover nodes, notably in the boundary_info, which will
   // crash both paraview and trigger exodiff.
-  if (extruding_quad_eights)
-    mesh->unset_has_removed_orphaned_nodes();
-
-  // We used to force orphaned node removal *here*, but we should be
-  // getting it downstream with the proper settings above.
   // if (extruding_quad_eights)
-  //   mesh->prepare_for_use();
+  // mesh->unset_has_removed_orphaned_nodes();
+
+  // Somehow just setting the flags above isn't sufficient to handle
+  // the leftover nodes when extruding from a Quad8; this may be a
+  // libMesh bug but for now we'll work around it by forcing a full
+  // re-prepare.
+  if (extruding_quad_eights)
+    mesh->prepare_for_use();
 
   return mesh;
 }
