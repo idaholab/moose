@@ -69,6 +69,14 @@ PorousRhieChowMassFlux::validParams()
       1.0,
       "0.0<flux_velocity_reconstruction_relaxation<=1.0",
       "Under-relaxation factor for flux-based velocity reconstruction.");
+  params.addRangeCheckedParam<Real>(
+      "reconstructed_pressure_gradient_feedback_relaxation",
+      1.0,
+      "0.0<reconstructed_pressure_gradient_feedback_relaxation<=1.0",
+      "Under-relaxation factor applied when feeding the reconstructed pressure gradient back "
+      "into the next momentum predictor. This does not change the face-flux velocity "
+      "reconstruction itself. If omitted, it inherits "
+      "flux_velocity_reconstruction_relaxation for backward-compatible behavior.");
   params.addParam<std::vector<BoundaryName>>(
       "flux_velocity_reconstruction_zero_flux_sidesets",
       {},
@@ -107,6 +115,10 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
     _use_flux_velocity_reconstruction(getParam<bool>("use_flux_velocity_reconstruction")),
     _flux_velocity_reconstruction_relaxation(
         getParam<Real>("flux_velocity_reconstruction_relaxation")),
+    _reconstructed_pressure_gradient_feedback_relaxation(
+        params.isParamSetByUser("reconstructed_pressure_gradient_feedback_relaxation")
+            ? getParam<Real>("reconstructed_pressure_gradient_feedback_relaxation")
+            : getParam<Real>("flux_velocity_reconstruction_relaxation")),
     _use_corrected_pressure_gradient(getParam<bool>("use_corrected_pressure_gradient")),
     _use_reconstructed_pressure_gradient(getParam<bool>("use_reconstructed_pressure_gradient")),
     _pressure_gradient_limiter_blend(getParam<Real>("pressure_gradient_limiter_blend")),
@@ -176,6 +188,7 @@ PorousRhieChowMassFlux::meshChanged()
   _p_grad_flux.clear();
   _grad_p_corrected.clear();
   _grad_p_reconstructed.clear();
+  _grad_p_feedback_state.clear();
   _grad_w_prev.clear();
 }
 
@@ -495,6 +508,20 @@ PorousRhieChowMassFlux::pressureGradient(const ElemInfo & elem_info, unsigned in
 
   const auto & grads = _pressure_system->gradientContainer();
   return (*grads[component])(dof);
+}
+
+Real
+PorousRhieChowMassFlux::correctedPressureGradient(const ElemInfo & elem_info,
+                                                  unsigned int component) const
+{
+  if (component >= _dim)
+    return 0.0;
+
+  const auto dof = elem_info.dofIndices()[_global_pressure_system_number][0];
+  if (!_grad_p_corrected.empty())
+    return (*_grad_p_corrected[component])(dof);
+
+  return rawPressureGradient(elem_info, component);
 }
 
 void
@@ -970,15 +997,26 @@ PorousRhieChowMassFlux::computeCellVelocity()
       _grad_p_reconstructed[comp_index] =
           _momentum_implicit_systems[comp_index]->current_local_solution->zero_clone();
   }
-  std::vector<std::unique_ptr<NumericVector<Number>>> grad_p_old;
-  if (!_grad_p_reconstructed.empty())
+
+  const bool have_feedback_state = !_grad_p_feedback_state.empty();
+  if (_grad_p_feedback_state.empty())
   {
-    grad_p_old.reserve(_dim);
-    for (const auto & grad_vec : _grad_p_reconstructed)
-      grad_p_old.push_back(grad_vec->clone());
+    _grad_p_feedback_state.resize(_dim);
+    for (const auto comp_index : make_range(_dim))
+      _grad_p_feedback_state[comp_index] =
+          _momentum_implicit_systems[comp_index]->current_local_solution->zero_clone();
   }
+
   for (auto & grad_vec : _grad_p_reconstructed)
     grad_vec->zero();
+
+  // Blend against the current relaxed pressure gradient from this SIMPLE iteration instead of the
+  // previous reconstructed state. That keeps the momentum predictor tied to the executioner-level
+  // pressure relaxation while still letting the face-flux reconstruction sharpen the gradient.
+  const auto & relaxed_grad_source =
+      (_use_corrected_pressure_gradient && !_grad_p_corrected.empty())
+          ? _grad_p_corrected
+          : _pressure_system->gradientContainer();
 
   std::vector<unsigned int> var_nums;
   for (const auto comp_index : make_range(_dim))
@@ -1129,18 +1167,20 @@ PorousRhieChowMassFlux::computeCellVelocity()
         const auto index = elem.dof_number(system_number, var_nums[comp_index], 0);
         const Real HbyA = (*_HbyA_raw[comp_index])(index);
         const Real Ainv = (*_Ainv_raw[comp_index])(index);
-        const Real grad_tilde =
+        const Real recon_grad =
             Ainv != 0.0 ? (result_h(comp_index) - result_p(comp_index) - HbyA) / Ainv : 0.0;
-        const Real old_grad =
-            grad_p_old.empty() ? grad_tilde : (*grad_p_old[comp_index])(index);
-        const Real old_val =
-            (*_momentum_implicit_systems[comp_index]->current_local_solution)(index);
+        const Real base_grad = (*relaxed_grad_source[comp_index])(index);
+        const Real prev_feedback_grad =
+            have_feedback_state ? (*_grad_p_feedback_state[comp_index])(index) : base_grad;
+        const Real base_val = -HbyA - Ainv * base_grad;
         const Real alpha = _flux_velocity_reconstruction_relaxation;
-        const Real new_grad = (1.0 - alpha) * old_grad + alpha * grad_tilde;
+        const Real beta = _reconstructed_pressure_gradient_feedback_relaxation;
         const Real recon_val = -result_h(comp_index) + result_p(comp_index);
-        const Real new_val = (1.0 - alpha) * old_val + alpha * recon_val;
+        const Real new_grad = (1.0 - beta) * prev_feedback_grad + beta * recon_grad;
+        const Real new_val = (1.0 - alpha) * base_val + alpha * recon_val;
         _momentum_implicit_systems[comp_index]->solution->set(index, new_val);
         _grad_p_reconstructed[comp_index]->set(index, new_grad);
+        _grad_p_feedback_state[comp_index]->set(index, new_grad);
       }
     }
     else
@@ -1158,17 +1198,21 @@ PorousRhieChowMassFlux::computeCellVelocity()
       {
         const unsigned int system_number = _momentum_implicit_systems[comp_index]->number();
         const auto index = elem.dof_number(system_number, var_nums[comp_index], 0);
-        const Real old_grad = grad_p_old.empty() ? grad_result(comp_index)
-                                                 : (*grad_p_old[comp_index])(index);
-        const Real old_val =
-            (*_momentum_implicit_systems[comp_index]->current_local_solution)(index);
+        const Real HbyA = (*_HbyA_raw[comp_index])(index);
+        const Real Ainv = (*_Ainv_raw[comp_index])(index);
+        const Real base_grad = (*relaxed_grad_source[comp_index])(index);
+        const Real recon_grad = grad_result(comp_index);
+        const Real prev_feedback_grad =
+            have_feedback_state ? (*_grad_p_feedback_state[comp_index])(index) : base_grad;
+        const Real base_val = -HbyA - Ainv * base_grad;
         const Real alpha = _flux_velocity_reconstruction_relaxation;
-        const Real new_grad = (1.0 - alpha) * old_grad + alpha * grad_result(comp_index);
-        const Real recon_val =
-            -(*_HbyA_raw[comp_index])(index) - (*_Ainv_raw[comp_index])(index) * new_grad;
-        const Real new_val = (1.0 - alpha) * old_val + alpha * recon_val;
+        const Real beta = _reconstructed_pressure_gradient_feedback_relaxation;
+        const Real new_grad = (1.0 - beta) * prev_feedback_grad + beta * recon_grad;
+        const Real recon_val = -HbyA - Ainv * recon_grad;
+        const Real new_val = (1.0 - alpha) * base_val + alpha * recon_val;
         _momentum_implicit_systems[comp_index]->solution->set(index, new_val);
         _grad_p_reconstructed[comp_index]->set(index, new_grad);
+        _grad_p_feedback_state[comp_index]->set(index, new_grad);
       }
     }
   }
@@ -1182,6 +1226,9 @@ PorousRhieChowMassFlux::computeCellVelocity()
   }
 
   for (auto & grad_vec : _grad_p_reconstructed)
+    grad_vec->close();
+
+  for (auto & grad_vec : _grad_p_feedback_state)
     grad_vec->close();
 
   updateGradPrevFromFaceVelocity();

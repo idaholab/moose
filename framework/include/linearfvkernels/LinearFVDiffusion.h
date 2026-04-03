@@ -63,6 +63,9 @@ protected:
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
 
+  /// Switch to enable/disable projected center-to-center distance in the orthogonal term
+  const bool _use_nonorthogonal_projected_distance;
+
   /// The cached matrix contribution
   Real _flux_matrix_contribution;
 

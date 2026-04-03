@@ -72,8 +72,11 @@ public:
   /// Query whether a face should use one-sided porous reconstruction/treatment
   virtual bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const;
 
-  /// Get the corrected pressure gradient component at an element center
+  /// Get the pressure gradient component used in the momentum equation
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
+  /// Get the jump-corrected pressure gradient component at an element center
+  virtual Real correctedPressureGradient(const ElemInfo & elem_info,
+                                         unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center
   virtual Real rawPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
 
