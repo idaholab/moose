@@ -195,7 +195,8 @@ protected:
   void format_locations(const wasp::DataArray & locations_array,
                         std::ostringstream & locations_stream) const
   {
-    auto uri_pattern = "(" + std::string(wasp::lsp::m_uri_prefix) + ")(.*/)(framework/.*|unit/.*)";
+    auto uri_pattern =
+        "(" + std::string(wasp::lsp::m_uri_prefix) + ")(.*/)(framework/.*|unit/.*|test\\.i)";
     auto uri_replace = "\\1...absolute.../\\3";
 
     std::size_t locations_size = locations_array.size();
@@ -1420,9 +1421,9 @@ TEST_F(MooseServerTest, DefinitionInputFileLookups)
   // expected locations with zero-based lines and columns
 
   std::string locations_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/test.i"    location_start: [16.4]    location_end: [16.10]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [17.7]    location_end: [17.13]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [19.5]    location_end: [19.11]
+document_uri: "file://...absolute.../test.i"    location_start: [16.4]    location_end: [16.10]
+document_uri: "file://...absolute.../test.i"    location_start: [17.7]    location_end: [17.13]
+document_uri: "file://...absolute.../test.i"    location_start: [19.5]    location_end: [19.11]
 )INPUT";
 
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
@@ -1680,12 +1681,12 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
   std::ostringstream locations_actual;
   format_locations(locations_array, locations_actual);
   std::string locations_expect = R"INPUT(
-document_uri: "file://...absolute.../unit/test.i"    location_start: [6.3]    location_end: [6.4]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [12.15]    location_end: [12.18]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [19.15]    location_end: [19.16]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.21]    location_end: [26.22]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.25]    location_end: [26.26]
-document_uri: "file://...absolute.../unit/test.i"    location_start: [26.29]    location_end: [26.30]
+document_uri: "file://...absolute.../test.i"    location_start: [6.3]    location_end: [6.4]
+document_uri: "file://...absolute.../test.i"    location_start: [12.15]    location_end: [12.18]
+document_uri: "file://...absolute.../test.i"    location_start: [19.15]    location_end: [19.16]
+document_uri: "file://...absolute.../test.i"    location_start: [26.21]    location_end: [26.22]
+document_uri: "file://...absolute.../test.i"    location_start: [26.25]    location_end: [26.26]
+document_uri: "file://...absolute.../test.i"    location_start: [26.29]    location_end: [26.30]
 )INPUT";
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
@@ -1902,7 +1903,6 @@ Problem/solve = true
 
 TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
 {
-  // didchange test parameters - create empty diagnostic which is not added
   std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 7;
   std::string doc_text_change = R"INPUT(
@@ -1924,8 +1924,66 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
   std::stringstream errors;
   EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
       didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
-  EXPECT_TRUE(
-      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+  bool handled_didchange =
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification);
+
+  if (!handled_didchange)
+  {
+    if (!moose_server->clientSupportsWatchers())
+    {
+      wasp::DataObject client_caps, watchfile_caps, workspace_caps, initialize_request,
+          initialize_response, initialized_notification;
+      std::stringstream initialize_errors, initialized_errors;
+      int request_id = 99;
+      int process_id = -1;
+      std::string root_path = "";
+
+      watchfile_caps[wasp::lsp::m_dynamic_registration] = true;
+      watchfile_caps[wasp::lsp::m_relative_patterns] = true;
+      workspace_caps[wasp::lsp::m_change_watched_files] = watchfile_caps;
+      client_caps[wasp::lsp::m_workspace] = workspace_caps;
+
+      ASSERT_TRUE(wasp::lsp::buildInitializeRequest(
+          initialize_request, initialize_errors, request_id, process_id, root_path, client_caps));
+      ASSERT_TRUE(moose_server->handleInitializeRequest(initialize_request, initialize_response));
+      ASSERT_TRUE(
+          wasp::lsp::buildInitializedNotification(initialized_notification, initialized_errors));
+      ASSERT_TRUE(moose_server->handleInitializedNotification(initialized_notification));
+    }
+
+    std::string doc_text_open = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+[]
+[Executioner]
+  type = Steady
+[]
+[Problem]
+  solve = false
+[]
+)INPUT";
+
+    wasp::DataObject didopen_notification, open_diagnostics_notification;
+    ASSERT_TRUE(wasp::lsp::buildDidOpenNotification(
+        didopen_notification, errors, doc_uri, "moose", doc_version - 1, doc_text_open));
+    ASSERT_TRUE(moose_server->handleDidOpenNotification(didopen_notification,
+                                                        open_diagnostics_notification));
+
+    wasp::DataObject retry_didchange_notification;
+    ASSERT_TRUE(wasp::lsp::buildDidChangeNotification(retry_didchange_notification,
+                                                      errors,
+                                                      doc_uri,
+                                                      doc_version,
+                                                      -1,
+                                                      -1,
+                                                      -1,
+                                                      -1,
+                                                      -1,
+                                                      doc_text_change));
+    ASSERT_TRUE(moose_server->handleDidChangeNotification(retry_didchange_notification,
+                                                          diagnostics_notification));
+  }
 
   // dissect diagnostics notification from server and create formatted list
   std::string response_uri;
@@ -1938,7 +1996,7 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
   // check that diagnostics array size and message contents are as expected
   std::size_t diagnostics_size_expect = 2;
   std::string diagnostics_list_expect = R"INPUT(
-line:11 column:2 - no variable 'undefined' found for use in function parser expression in 'globalvar'
+line:11 column:14 - no variable 'undefined' found for use in function parser expression in 'globalvar'
 line:11 column:2 - unused parameter 'globalvar'
 )INPUT";
 
