@@ -21,10 +21,12 @@ namespace Moose::Kokkos
  * as inlined public methods in their derived class (not virtual override). The signature of
  * computeQpResidual() expected to be defined in the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param qp The dummy quadrature point index (= 0)
  * @param datum The AssemblyDatum object of the current thread
  * @returns The residual contribution
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
  *
  * The signatures of computeQpJacobian() and computeOffDiagQpJacobian() can be found in the code
@@ -57,65 +59,56 @@ public:
   ///@{
   /**
    * Compute diagonal Jacobian contribution on a node
+   * @tparam Derived The object type
    * @param qp The dummy quadrature point index (= 0)
    * @param datum The AssemblyDatum object of the current thread
    * @returns The diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+                    "redefined this method in your class without typos.");
+
     return 0;
   }
   /**
    * Compute off-diagonal Jacobian contribution on a node
+   * @tparam Derived The object type
    * @param jvar The variable number for column
    * @param qp The dummy quadrature point index (= 0)
    * @param datum The AssemblyDatum object of the current thread
    * @returns The off-diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* jvar */,
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &NodalKernel::computeQpJacobian; }
-  /**
-   * Get the function pointer of the default computeQpOffDiagJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultOffDiagJacobian() { return &NodalKernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+  static auto defaultJacobian()
   {
-    return kernel.computeQpResidual(qp, datum);
+    return &NodalKernel::computeQpJacobian<Derived>;
   }
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & kernel,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+  static auto defaultOffDiagJacobian()
   {
-    return kernel.computeQpJacobian(qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & kernel,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const
-  {
-    return kernel.computeQpOffDiagJacobian(jvar, qp, datum);
+    return &NodalKernel::computeQpOffDiagJacobian<Derived>;
   }
   ///@}
 
@@ -157,7 +150,7 @@ NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  Real local_re = kernel.computeQpResidualShim(kernel, 0, datum);
+  Real local_re = kernel.template computeQpResidual<Derived>(0, datum);
 
   accumulateTaggedNodalResidual(true, local_re, node);
 }
@@ -174,7 +167,7 @@ NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  Real local_ke = kernel.computeQpJacobianShim(kernel, 0, datum);
+  Real local_ke = kernel.template computeQpJacobian<Derived>(0, datum);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, _kokkos_var.var());
 }
@@ -193,7 +186,7 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
-  Real local_ke = kernel.computeQpOffDiagJacobianShim(kernel, jvar, 0, datum);
+  Real local_ke = kernel.template computeQpOffDiagJacobian<Derived>(jvar, 0, datum);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }

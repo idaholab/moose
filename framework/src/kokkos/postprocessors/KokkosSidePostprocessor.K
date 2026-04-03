@@ -15,13 +15,13 @@ namespace Moose::Kokkos
 InputParameters
 SidePostprocessor::validParams()
 {
-  InputParameters params = SideReducer::validParams();
+  InputParameters params = SideUserObject::validParams();
   params += Postprocessor::validParams();
   return params;
 }
 
 SidePostprocessor::SidePostprocessor(const InputParameters & parameters)
-  : SideReducer(parameters), Postprocessor(this)
+  : SideUserObject(parameters), Postprocessor(this)
 {
 }
 

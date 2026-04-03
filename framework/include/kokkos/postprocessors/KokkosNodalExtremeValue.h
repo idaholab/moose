@@ -23,8 +23,7 @@ public:
                                                              Datum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
 protected:
   const Moose::Kokkos::VariableValue _proxy_variable;
@@ -38,14 +37,12 @@ KokkosNodalExtremeValue::getProxyValuePair(const unsigned int qp, Datum & datum)
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosNodalExtremeValue::executeShim(const Derived & postprocessor,
-                                     Datum & datum,
-                                     Real * result) const
+KokkosNodalExtremeValue::reduce(Datum & datum, Real * result) const
 {
   if (datum.isNodalDefined(_u.variable()))
   {
     KOKKOS_ASSERT(datum.isNodalDefined(_proxy_variable.variable()));
 
-    postprocessor.computeExtremeValue(postprocessor, 0, datum, result);
+    static_cast<const Derived *>(this)->template computeExtremeValue<Derived>(0, datum, result);
   }
 }

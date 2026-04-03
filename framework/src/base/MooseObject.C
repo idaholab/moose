@@ -60,10 +60,8 @@ const std::string not_shared_error =
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-MooseObject::MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy &)
-  : ParallelParamObject(object),
-    SolutionInvalidInterface(this, object.parameters()),
-    _enabled(object._enabled)
+MooseObject::MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy & key)
+  : ParallelParamObject(object), SolutionInvalidInterface(object, key), _enabled(object._enabled)
 {
 }
 #endif

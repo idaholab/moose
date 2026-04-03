@@ -13,10 +13,6 @@
 
 #include "MFEMVectorPostprocessor.h"
 
-#include "MooseTypes.h"
-#include "libmesh/point.h"
-#include "mfem.hpp"
-
 /*
  * MFEM Postprocessor which samples values at points.
  *
@@ -38,13 +34,14 @@ public:
   virtual void finalize() override;
 
 private:
+  const VariableName & _var_name;
+  const mfem::GridFunction & _var;
+  mfem::ParMesh & _mesh;
+
   mfem::FindPointsGSLIB _finder;
   mfem::Ordering::Type _points_ordering;
   mfem::Vector _points;
   mfem::Vector _interp_vals;
-
-  const VariableName & _var_name;
-  const mfem::GridFunction & _var;
 
   // VectorPostprocessor declared values - the values written to these are output
   std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_points;

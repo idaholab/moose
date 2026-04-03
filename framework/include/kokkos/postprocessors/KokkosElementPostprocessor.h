@@ -10,12 +10,12 @@
 #pragma once
 
 #include "KokkosPostprocessor.h"
-#include "KokkosElementReducer.h"
+#include "KokkosElementUserObject.h"
 
 namespace Moose::Kokkos
 {
 
-class ElementPostprocessor : public ElementReducer, public Postprocessor
+class ElementPostprocessor : public ElementUserObject, public Postprocessor
 {
 public:
   static InputParameters validParams();
@@ -31,7 +31,7 @@ public:
   virtual void finalize() override {}
 
   // Disambiguation with FunctorBase::operator()
-  using ElementReducer::operator();
+  using ElementUserObject::operator();
 };
 
 } // namespace Moose::Kokkos

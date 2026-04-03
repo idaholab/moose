@@ -16,7 +16,7 @@ InputParameters
 SideUserObject::validParams()
 {
   InputParameters params = UserObject::validParams();
-  params += ::BoundaryRestrictableRequired::validParams();
+  params += SideReducer::validParams();
   params += ::MaterialPropertyInterface::validParams();
   params += ::TransientInterface::validParams();
   params += ::ElementIDInterface::validParams();
@@ -25,7 +25,7 @@ SideUserObject::validParams()
 
 SideUserObject::SideUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    ::BoundaryRestrictableRequired(this, false),
+    SideReducer(this),
     ::MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     ::CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     ::TransientInterface(this),
@@ -35,7 +35,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
 
 SideUserObject::SideUserObject(const SideUserObject & object)
   : UserObject(object),
-    ::BoundaryRestrictableRequired(object, {}),
+    SideReducer(object),
     ::MaterialPropertyInterface(object, {}),
     ::CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
     ::TransientInterface(object, {}),
@@ -45,6 +45,23 @@ SideUserObject::SideUserObject(const SideUserObject & object)
 
 void
 SideUserObject::compute()
+{
+  if (DispatcherRegistry::hasUserMethod<DefaultLoop>(type()) ==
+      DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    mooseError("Cannot determine whether '",
+               name(),
+               "' is a regular user object or a reducer object. Either none or both of the "
+               "execute() and reduce() methods were specified. Check if they were defined properly "
+               "and override compute() if you want to manually choose the behavior.");
+
+  if (DispatcherRegistry::hasUserMethod<ReducerLoop>(type()))
+    computeReducer();
+  else
+    computeUserObject();
+}
+
+void
+SideUserObject::computeUserObject()
 {
   Policy policy(0, numKokkosBoundarySides());
 

@@ -23,6 +23,7 @@ public:
 
   KokkosVariableTimeIntegrationAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
@@ -39,7 +40,8 @@ protected:
   const Moose::Kokkos::VariableValue _u_older;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosVariableTimeIntegrationAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   Real integral = getIntegralValue(qp, datum);

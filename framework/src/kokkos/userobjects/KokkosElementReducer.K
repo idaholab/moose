@@ -15,16 +15,22 @@ namespace Moose::Kokkos
 InputParameters
 ElementReducer::validParams()
 {
-  InputParameters params = ElementUserObject::validParams();
+  InputParameters params = ::BlockRestrictable::validParams();
   return params;
 }
 
-ElementReducer::ElementReducer(const InputParameters & parameters) : ElementUserObject(parameters)
+ElementReducer::ElementReducer(const MooseObject * object)
+  : ReducerBase(object), ::BlockRestrictable(object)
+{
+}
+
+ElementReducer::ElementReducer(const ElementReducer & object)
+  : ReducerBase(object), ::BlockRestrictable(object, {})
 {
 }
 
 void
-ElementReducer::compute()
+ElementReducer::computeReducer()
 {
   if (!_reduction_buffer.is_allocated())
     mooseError("Reduction buffer was not allocated.");
@@ -32,7 +38,7 @@ ElementReducer::compute()
   Policy policy(0, numKokkosBlockElements());
 
   if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
+    _dispatcher = DispatcherRegistry::build<ReducerLoop>(_reducer_object, _reducer_object->type());
 
   _dispatcher->parallelReduce(policy, _reduction_buffer);
 }

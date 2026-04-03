@@ -29,6 +29,7 @@ public:
 protected:
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;
+  virtual void BuildNonlinearForms() override;
   virtual void EliminateCoupledVariables() override;
 
   /// Timestep size

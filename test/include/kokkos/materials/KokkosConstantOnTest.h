@@ -18,6 +18,7 @@ public:
 
   KokkosConstantOnTest(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     _property(datum, qp) = datum.elem().subdomain + 1;

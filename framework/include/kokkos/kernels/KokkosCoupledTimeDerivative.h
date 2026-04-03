@@ -21,9 +21,11 @@ public:
 
   KokkosCoupledTimeDerivative(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
@@ -36,7 +38,8 @@ protected:
   const unsigned int _v_var;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledTimeDerivative::computeQpResidual(const unsigned int i,
                                                const unsigned int qp,
                                                AssemblyDatum & datum) const
@@ -44,7 +47,8 @@ KokkosCoupledTimeDerivative::computeQpResidual(const unsigned int i,
   return _test(datum, i, qp) * _v_dot(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledTimeDerivative::computeQpOffDiagJacobian(const unsigned int i,
                                                       const unsigned int j,
                                                       const unsigned int jvar,

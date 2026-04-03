@@ -1,0 +1,13 @@
+[Tests]
+  design = 'KokkosElementVariableStatistics.md'
+  issues = '#30655'
+
+  [elem_stats]
+    type = 'JSONDiff'
+    input = 'kokkos_elem_stats.i'
+    jsondiff = 'kokkos_elem_stats_stats.json'
+    requirement = 'The Kokkos system shall be able to produce elememental statistics of a variable.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

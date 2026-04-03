@@ -23,34 +23,33 @@ public:
   virtual Real getValue() const override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void
-  executeShim(const Derived & postprocessor, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void reduce(Datum & datum, Real * result) const;
 
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, Datum & datum) const
   {
     return _u(datum, qp);
   }
 
-  KOKKOS_FUNCTION void join(DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void join(ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(ReducerLoop, Real * result) const;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosNodalSum::executeShim(const Derived & postprocessor, Datum & datum, Real * result) const
+KokkosNodalSum::reduce(Datum & datum, Real * result) const
 {
   if (datum.isNodalDefined(_u.variable()))
-    result[0] += postprocessor.computeValue(0, datum);
+    result[0] += static_cast<const Derived *>(this)->computeValue(0, datum);
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalSum::join(DefaultLoop, Real * result, const Real * source) const
+KokkosNodalSum::join(ReducerLoop, Real * result, const Real * source) const
 {
   result[0] += source[0];
 }
 
 KOKKOS_FUNCTION inline void
-KokkosNodalSum::init(DefaultLoop, Real * result) const
+KokkosNodalSum::init(ReducerLoop, Real * result) const
 {
   result[0] = 0;
 }

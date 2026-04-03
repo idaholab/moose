@@ -18,6 +18,7 @@ public:
 
   KokkosNeumannBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
@@ -27,7 +28,8 @@ private:
   const Real _value;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosNeumannBC::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
                                    AssemblyDatum & datum) const

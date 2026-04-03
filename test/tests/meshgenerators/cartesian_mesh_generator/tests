@@ -35,7 +35,18 @@
       recover = false
       mesh_mode = 'REPLICATED'
 
-      detail = "three dimensions."
+      detail = "three dimensions, and"
+    []
+
+    [3D_sizes]
+      type = 'Exodiff'
+      input = 'cartesian_mesh_3D_sizes.i'
+      exodiff = 'cartesian_mesh_3D_sizes_in.e'
+      cli_args = "--mesh-only"
+      recover = false
+      mesh_mode = 'REPLICATED'
+
+      detail = "three dimensions but specifying the element sizes rather than the number of intervals."
     []
   []
 []

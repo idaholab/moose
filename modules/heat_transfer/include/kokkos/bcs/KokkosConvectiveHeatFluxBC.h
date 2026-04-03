@@ -22,9 +22,11 @@ public:
 
   KokkosConvectiveHeatFluxBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -41,7 +43,8 @@ private:
   Moose::Kokkos::MaterialProperty<Real> _htc_dT;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
                                               const unsigned int qp,
                                               AssemblyDatum & datum) const
@@ -49,7 +52,8 @@ KokkosConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
   return -_test(datum, i, qp) * _htc(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp));
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
                                               const unsigned int j,
                                               const unsigned int qp,

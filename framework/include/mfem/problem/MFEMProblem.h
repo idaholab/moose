@@ -15,6 +15,7 @@
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
+#include "MFEMComplexVariable.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -219,7 +220,10 @@ public:
    * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
    * similar to the linear solvers.
    */
-  void addMFEMNonlinearSolver();
+  void addMFEMNonlinearSolver(unsigned int nl_max_its,
+                              mfem::real_t nl_abs_tol,
+                              mfem::real_t nl_rel_tol,
+                              unsigned int print_level);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
@@ -304,7 +308,18 @@ public:
   /**
    * @returns a shared pointer to an MFEM parallel grid function
    */
-  std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
+  std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name)
+  {
+    return _problem_data.gridfunctions.GetShared(name);
+  }
+
+  /**
+   * @returns a shared pointer to an MFEM parallel complex grid function
+   */
+  std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction(const std::string & name)
+  {
+    return _problem_data.cmplx_gridfunctions.GetShared(name);
+  }
 
   enum class NumericType
   {

@@ -17,6 +17,7 @@ MFEMFunctorMaterial::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params += MFEMBlockRestrictable::validParams();
+  params += MFEMBoundaryRestrictable::validParams();
 
   params.addClassDescription(
       "Base class for declaration of material properties to add to MFEM problems.");
@@ -35,8 +36,11 @@ MFEMFunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
 MFEMFunctorMaterial::MFEMFunctorMaterial(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _properties(getMFEMProblem().getCoefficients())
 {
+  if (isSubdomainRestricted() && isBoundaryRestricted())
+    paramError("boundary", "Cannot specify both block and boundary parameters");
 }
 
 MFEMFunctorMaterial::~MFEMFunctorMaterial() {}

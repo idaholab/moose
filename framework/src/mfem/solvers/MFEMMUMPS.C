@@ -27,11 +27,11 @@ MFEMMUMPS::validParams()
 
 MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMMUMPS::constructSolver(const InputParameters &)
+MFEMMUMPS::constructSolver()
 {
   auto solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
   solver->SetPrintLevel(getParam<int>("print_level"));

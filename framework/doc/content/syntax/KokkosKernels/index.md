@@ -30,19 +30,25 @@ Instead, they are (re)defined in the derived class as +*inlined public*+ methods
 Their signatures look like the following:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                        const unsigned int qp,
                                        AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                        const unsigned int j,
                                        const unsigned int qp,
                                        AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                               const unsigned int j,
                                               const unsigned int jvar,
                                               const unsigned int qp,
                                               AssemblyDatum & datum) const;
 ```
+
+The template argument `Derived` corresponds to your object type, and you can safely cast `this` pointer to the `Derived` type statically in your base class.
+It can be useful for implementing polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion, as you can directly call the derived class methods using the cast pointer.
 
 Analogously to the original MOOSE, `computeQpResidual()` must be provided in the derived class, and the definition of `computeQpJacobian()` and `computeQpOffDiagJacobian()` are optional.
 The optional methods have default definitions in the base class, and redefining them in the derived class hides the base class definitions.
@@ -73,6 +79,7 @@ Diffusion::computeQpJacobian()
 will look like the following in `KokkosDiffusion`:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
@@ -81,6 +88,7 @@ KokkosDiffusion::computeQpResidual(const unsigned int i,
   return _grad_u(datum, qp) * _grad_test(datum, i, qp);
 }
 
+template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpJacobian(const unsigned int i,
                                    const unsigned int j,
@@ -111,8 +119,10 @@ The signatures of the hook methods are as follows:
 - For `Moose::Kokkos::KernelValue`,
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
                                        AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                        const unsigned int qp,
                                        AssemblyDatum & datum) const;
@@ -121,8 +131,10 @@ KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
 - For `Moose::Kokkos::KernelGrad`,
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
                                         AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int j,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const;

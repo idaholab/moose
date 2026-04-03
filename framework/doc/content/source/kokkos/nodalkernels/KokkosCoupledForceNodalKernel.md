@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [CoupledForceNodalKernel](CoupledForceNodalKernel.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/nodalkernels/constraint_enforcement/kokkos_lower_bound.i start=[forces] end=[] include-end=true
 

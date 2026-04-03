@@ -27,12 +27,10 @@ public:
   virtual Real getValue() const override;
 
   template <typename Derived>
-  KOKKOS_FUNCTION void computeExtremeValue(const Derived & postprocessor,
-                                           const unsigned int qp,
-                                           Datum & datum,
-                                           Real * result) const;
-  KOKKOS_FUNCTION void join(typename Base::DefaultLoop, Real * result, const Real * source) const;
-  KOKKOS_FUNCTION void init(typename Base::DefaultLoop, Real * result) const;
+  KOKKOS_FUNCTION void
+  computeExtremeValue(const unsigned int qp, Datum & datum, Real * result) const;
+  KOKKOS_FUNCTION void join(typename Base::ReducerLoop, Real * result, const Real * source) const;
+  KOKKOS_FUNCTION void init(typename Base::ReducerLoop, Real * result) const;
 
 protected:
   /**
@@ -49,12 +47,11 @@ protected:
 template <typename Base>
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::computeExtremeValue(const Derived & postprocessor,
-                                                  const unsigned int qp,
+KokkosExtremeValueBase<Base>::computeExtremeValue(const unsigned int qp,
                                                   Datum & datum,
                                                   Real * result) const
 {
-  auto pv = postprocessor.getProxyValuePair(qp, datum);
+  auto pv = static_cast<const Derived *>(this)->getProxyValuePair(qp, datum);
   auto rpv = Kokkos::make_pair(result[0], result[1]);
 
   if ((_type == ExtremeType::MAX && pv > rpv) || (_type == ExtremeType::MIN && pv < rpv))
@@ -71,7 +68,7 @@ KokkosExtremeValueBase<Base>::computeExtremeValue(const Derived & postprocessor,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::join(typename Base::DefaultLoop,
+KokkosExtremeValueBase<Base>::join(typename Base::ReducerLoop,
                                    Real * result,
                                    const Real * source) const
 {
@@ -92,16 +89,16 @@ KokkosExtremeValueBase<Base>::join(typename Base::DefaultLoop,
 
 template <typename Base>
 KOKKOS_FUNCTION void
-KokkosExtremeValueBase<Base>::init(typename Base::DefaultLoop, Real * result) const
+KokkosExtremeValueBase<Base>::init(typename Base::ReducerLoop, Real * result) const
 {
   if (_type == ExtremeType::MAX || _type == ExtremeType::MAX_ABS)
   {
-    result[0] = -std::numeric_limits<Real>::max();
-    result[1] = -std::numeric_limits<Real>::max();
+    result[0] = Kokkos::Experimental::finite_min_v<Real>;
+    result[1] = Kokkos::Experimental::finite_min_v<Real>;
   }
   else if (_type == ExtremeType::MIN)
   {
-    result[0] = std::numeric_limits<Real>::max();
-    result[1] = std::numeric_limits<Real>::max();
+    result[0] = Kokkos::Experimental::finite_max_v<Real>;
+    result[1] = Kokkos::Experimental::finite_max_v<Real>;
   }
 }

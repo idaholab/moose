@@ -23,9 +23,11 @@ public:
 
   KokkosCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -44,7 +46,8 @@ private:
   const Moose::Kokkos::VariableValue _scale_factor;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
                                                      const unsigned int qp,
                                                      AssemblyDatum & datum) const
@@ -56,7 +59,8 @@ KokkosCoupledConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
   return _test(datum, i, qp) * q * _scale_factor(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
                                                      const unsigned int j,
                                                      const unsigned int qp,

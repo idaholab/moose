@@ -23,9 +23,11 @@ public:
 
   KokkosRadiativeHeatFluxBCBase(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
@@ -61,6 +63,7 @@ KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::KokkosRadiativeHeatFluxBCBas
 }
 
 template <typename RadiativeHeatFluxBC>
+template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::computeQpResidual(const unsigned int i,
                                                                       const unsigned int qp,
@@ -75,6 +78,7 @@ KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::computeQpResidual(const unsi
 }
 
 template <typename RadiativeHeatFluxBC>
+template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::computeQpJacobian(const unsigned int i,
                                                                       const unsigned int j,

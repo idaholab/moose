@@ -1,0 +1,13 @@
+[Tests]
+  design = 'KokkosNodalVariableStatistics.md'
+  issues = '#30655'
+
+  [nodal_stats]
+    type = 'JSONDiff'
+    input = 'kokkos_nodal_stats.i'
+    jsondiff = 'kokkos_nodal_stats_stats.json'
+    requirement = 'The Kokkos system shall be able to produce nodal statistics of a variable.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

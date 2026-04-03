@@ -25,5 +25,10 @@ AddReporterAction::AddReporterAction(const InputParameters & params) : MooseObje
 void
 AddReporterAction::act()
 {
-  _problem->addReporter(_type, _name, _moose_object_pars);
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_moose_object_pars.isKokkosObject())
+    _problem->addKokkosReporter(_type, _name, _moose_object_pars);
+  else
+#endif
+    _problem->addReporter(_type, _name, _moose_object_pars);
 }

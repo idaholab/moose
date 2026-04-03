@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledDirichletBC.h"
 
-registerKokkosResidualObject("MooseTestApp", KokkosCoupledDirichletBC);
+registerKokkosDirichletBC("MooseTestApp", KokkosCoupledDirichletBC);
 
 InputParameters
 KokkosCoupledDirichletBC::validParams()

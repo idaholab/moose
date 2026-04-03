@@ -38,11 +38,4 @@ MFEMBoundaryIntegratedBC::createLFIntegrator()
   return new mfem::BoundaryLFIntegrator(_coef);
 }
 
-// Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-mfem::BilinearFormIntegrator *
-MFEMBoundaryIntegratedBC::createBFIntegrator()
-{
-  return nullptr;
-}
-
 #endif

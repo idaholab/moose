@@ -21,11 +21,13 @@ namespace Moose::Kokkos
  * as inlined public methods in their derived class (not virtual override). The signature of
  * computeQpResidual() expected to be defined in the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
  * @param datum The AssemblyDatum object of the current thread
  * @returns The residual contribution
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
  *                                        const unsigned int qp,
  *                                        AssemblyDatum & datum) const;
@@ -60,21 +62,27 @@ public:
   ///@{
   /**
    * Compute diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
    * @param datum The AssemblyDatum object of the current thread
    * @returns The diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
                                          const unsigned int /* j */,
                                          const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+                    "redefined this method in your class without typos.");
+
     return 0;
   }
   /**
    * Compute off-diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param jvar The variable number for column
@@ -82,56 +90,36 @@ public:
    * @param datum The AssemblyDatum object of the current thread
    * @returns The off-diagonal Jacobian contribution
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
                                                 const unsigned int /* j */,
                                                 const unsigned int /* jvar */,
                                                 const unsigned int /* qp */,
                                                 AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &IntegratedBC::computeQpJacobian; }
-  /**
-   * Get the function pointer of the default computeQpOffDiagJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultOffDiagJacobian() { return &IntegratedBC::computeQpOffDiagJacobian; }
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & bc,
-                                             const unsigned int i,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+  static auto defaultJacobian()
   {
-    return bc.computeQpResidual(i, qp, datum);
+    return &IntegratedBC::computeQpJacobian<Derived>;
   }
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & bc,
-                                             const unsigned int i,
-                                             const unsigned int j,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+  static auto defaultOffDiagJacobian()
   {
-    return bc.computeQpJacobian(i, j, qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & bc,
-                                                    const unsigned int i,
-                                                    const unsigned int j,
-                                                    const unsigned int jvar,
-                                                    const unsigned int qp,
-                                                    AssemblyDatum & datum) const
-  {
-    return bc.computeQpOffDiagJacobian(i, j, jvar, qp, datum);
+    return &IntegratedBC::computeQpOffDiagJacobian<Derived>;
   }
   ///@}
 
@@ -259,7 +247,7 @@ IntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum)
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * bc.computeQpResidualShim(bc, i, qp, datum);
+            local_re[i] += datum.JxW(qp) * bc.template computeQpResidual<Derived>(i, qp, datum);
         }
       });
 }
@@ -281,7 +269,7 @@ IntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum)
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * bc.computeQpJacobianShim(bc, i, j, qp, datum);
+            local_ke[ij] += datum.JxW(qp) * bc.template computeQpJacobian<Derived>(i, j, qp, datum);
           }
         }
       });
@@ -304,8 +292,8 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] +=
-                datum.JxW(qp) * bc.computeQpOffDiagJacobianShim(bc, i, j, datum.jvar(), qp, datum);
+            local_ke[ij] += datum.JxW(qp) * bc.template computeQpOffDiagJacobian<Derived>(
+                                                i, j, datum.jvar(), qp, datum);
           }
         }
       });

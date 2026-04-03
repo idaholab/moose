@@ -37,6 +37,7 @@ PIMPLE::PIMPLE(const InputParameters & parameters) : TransientBase(parameters), 
 void
 PIMPLE::init()
 {
+  _pimple_solve.initialSetup();
   TransientBase::init();
   _pimple_solve.linkRhieChowUserObject();
   _pimple_solve.setupPressurePin();

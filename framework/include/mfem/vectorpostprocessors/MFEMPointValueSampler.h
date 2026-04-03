@@ -13,8 +13,6 @@
 
 #include "MFEMValueSamplerBase.h"
 
-#include "mfem.hpp"
-
 /*
  * MFEM Postprocessor which samples values at points.
  */

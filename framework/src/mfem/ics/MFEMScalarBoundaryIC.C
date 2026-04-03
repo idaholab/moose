@@ -27,12 +27,8 @@ MFEMScalarBoundaryIC::validParams()
 
 MFEMScalarBoundaryIC::MFEMScalarBoundaryIC(const InputParameters & params)
   : MFEMInitialCondition(params),
-    MFEMBoundaryRestrictable(params,
-                             *getMFEMProblem()
-                                  .getProblemData()
-                                  .gridfunctions.GetRef(getParam<VariableName>("variable"))
-                                  .ParFESpace()
-                                  ->GetParMesh())
+    MFEMBoundaryRestrictable(
+        params, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable")))
 {
 }
 

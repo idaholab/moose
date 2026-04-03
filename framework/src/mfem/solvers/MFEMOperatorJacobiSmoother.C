@@ -26,11 +26,11 @@ MFEMOperatorJacobiSmoother::validParams()
 MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
   : MFEMSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
+MFEMOperatorJacobiSmoother::constructSolver()
 {
   _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
 }

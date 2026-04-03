@@ -41,7 +41,7 @@ public:
   virtual void setRealBC(std::shared_ptr<MFEMIntegratedBC> bc) { _real_bc = bc; }
   virtual void setImagBC(std::shared_ptr<MFEMIntegratedBC> bc) { _imag_bc = bc; }
 
-  /// Get name of the trial variable (gridfunction) the kernel acts on.
+  /// Get name of the trial variable (gridfunction) the bc acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 

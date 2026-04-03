@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [CoupledForce](CoupledForce.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/bcs/coupled_dirichlet_bc/kokkos_coupled_dirichlet_bc.i start=[coupled_force_u] end=[] include-end=true
 

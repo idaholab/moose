@@ -12,7 +12,6 @@
 #include "MFEMProblem.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
-#include "MFEMComplexVariable.h"
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
@@ -49,7 +48,6 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  addMFEMNonlinearSolver();
 }
 
 void
@@ -106,15 +104,19 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 }
 
 void
-MFEMProblem::addMFEMNonlinearSolver()
+MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
+                                    mfem::real_t nl_abs_tol,
+                                    mfem::real_t nl_rel_tol,
+                                    unsigned int print_level)
 {
+  // TODO: allow users to specify other mfem::IterativeSolvers
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(0.0);
-  nl_solver->SetAbsTol(0.0);
-  nl_solver->SetMaxIter(1);
-
+  nl_solver->SetRelTol(nl_rel_tol);
+  nl_solver->SetAbsTol(nl_abs_tol);
+  nl_solver->SetMaxIter(nl_max_its);
+  nl_solver->SetPrintLevel(print_level);
   getProblemData().nonlinear_solver = nl_solver;
 }
 
@@ -671,12 +673,6 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
     FEProblemBase::addUserObject(transfer_name, name, parameters);
   else
     FEProblemBase::addTransfer(transfer_name, name, parameters);
-}
-
-std::shared_ptr<mfem::ParGridFunction>
-MFEMProblem::getGridFunction(const std::string & name)
-{
-  return getUserObject<MFEMVariable>(name).getGridFunction();
 }
 
 void

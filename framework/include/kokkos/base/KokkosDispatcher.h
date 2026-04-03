@@ -292,7 +292,7 @@ public:
    * @param flag Whether the user has overriden the hook method
    */
   template <typename Operation>
-  static void hasUserMethod(const std::string & name, bool flag)
+  static void hasUserMethod(const std::string & name, const bool flag)
   {
     getDispatcher<Operation>(name)->hasUserMethod(flag);
   }
@@ -370,9 +370,12 @@ private:
     DispatcherRegistry::addDispatcher<classname::JacobianLoop, classname>(objectname);             \
     DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
     DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(                                    \
-        objectname, &classname::computeQpJacobian != classname::defaultJacobian());                \
+        objectname,                                                                                \
+        &classname::computeQpJacobian<classname> != classname::defaultJacobian<classname>());      \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
-        objectname, &classname::computeQpOffDiagJacobian != classname::defaultOffDiagJacobian());  \
+        objectname,                                                                                \
+        &classname::computeQpOffDiagJacobian<classname> !=                                         \
+            classname::defaultOffDiagJacobian<classname>());                                       \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -414,11 +417,17 @@ private:
     DispatcherRegistry::addDispatcher<classname::SideCompute, classname>(objectname);              \
     DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
     DispatcherRegistry::hasUserMethod<classname::SideInit>(                                        \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
     DispatcherRegistry::hasUserMethod<classname::NeighborInit>(                                    \
-        objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
+        objectname,                                                                                \
+        &classname::initQpStatefulProperties<classname> !=                                         \
+            classname::defaultInitStateful<classname>());                                          \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -466,6 +475,11 @@ private:
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
     DispatcherRegistry::addDispatcher<classname::DefaultLoop, classname>(objectname);              \
+    DispatcherRegistry::addReducer<classname::ReducerLoop, classname>(objectname);                 \
+    DispatcherRegistry::hasUserMethod<classname::DefaultLoop>(                                     \
+        objectname, &classname::execute<classname> != classname::defaultExecute<classname>());     \
+    DispatcherRegistry::hasUserMethod<classname::ReducerLoop>(                                     \
+        objectname, &classname::reduce<classname> != classname::defaultReduce<classname>());       \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
@@ -480,33 +494,6 @@ private:
 #define registerKokkosUserObjectAliased(app, classname, alias)                                     \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosUserObjectFunction(classname, alias)
-
-// Postprocessor, VectorPostprocessor, Reporter
-
-#define callRegisterKokkosReducerFunction(classname, objectname)                                   \
-  static char registerKokkosReducer##classname()                                                   \
-  {                                                                                                \
-    using namespace Moose::Kokkos;                                                                 \
-                                                                                                   \
-    DispatcherRegistry::addReducer<classname::DefaultLoop, classname>(objectname);                 \
-                                                                                                   \
-    return 0;                                                                                      \
-  }                                                                                                \
-                                                                                                   \
-  static char combineNames(kokkos_reducer_##classname, __COUNTER__) =                              \
-      registerKokkosReducer##classname()
-
-#define registerKokkosReducer(app, classname)                                                      \
-  registerMooseObject(app, classname);                                                             \
-  callRegisterKokkosReducerFunction(classname, #classname)
-
-#define registerKokkosReducerAliased(app, classname, alias)                                        \
-  registerMooseObjectAliased(app, classname, alias);                                               \
-  callRegisterKokkosReducerFunction(classname, alias)
-
-#define registerKokkosPostprocessor(app, classname) registerKokkosReducer(app, classname)
-#define registerKokkosPostprocessorAliased(app, classname, alias)                                  \
-  registerKokkosReducerAliased(app, classname, alias)
 
 // User-defined parallel operation registry
 

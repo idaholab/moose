@@ -20,9 +20,11 @@ forms, the trial variable that the integrator acts on is the variable returned f
 equations (labeled by test variable) with the trial variable solved using them, the set of test
 variable names is the same as the set of trial variable names for a square system.
 
-`MFEMKernel` is a purely virtual base class. Derived classes should override the `createBFIntegrator`
+`MFEMKernel` is a base class. Derived classes should override the `createBFIntegrator`
 and/or the `createLFIntegrator` methods to return a `BilinearFormIntegrator` and/or a
-`LinearFormIntegrator` (respectively) to add to the `EquationSystem`.
+`LinearFormIntegrator` (respectively) to add to the `EquationSystem`. Derived classes could also 
+override `createNLIntegrator` to solve non-linear problems using 
+[EquationSystem](source/mfem/equation_systems/EquationSystem.md).
 
 !if-end!
 

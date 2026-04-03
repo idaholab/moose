@@ -22,11 +22,13 @@ public:
 
   KokkosEigenDirichletBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
     return 0;
   }
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {

@@ -18,15 +18,18 @@
  * Note: without the constant term, a zero initial guess gives you a
  * zero row in the Jacobian, which is a bad thing.
  */
-class KokkosCoupledDirichletBC final : public KokkosDirichletBC<KokkosCoupledDirichletBC>
+class KokkosCoupledDirichletBC : public KokkosDirichletBC
 {
 public:
   static InputParameters validParams();
 
   KokkosCoupledDirichletBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const;
@@ -42,20 +45,23 @@ protected:
   const Real _c;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledDirichletBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _c * _u(datum, qp) + _u(datum, qp) * _u(datum, qp) + _v(datum, qp) * _v(datum, qp) -
          _value;
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledDirichletBC::computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _c + 2 * _u(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledDirichletBC::computeQpOffDiagJacobian(const unsigned int jvar,
                                                    const unsigned int qp,
                                                    AssemblyDatum & datum) const

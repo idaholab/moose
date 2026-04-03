@@ -37,11 +37,11 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
     _mfem_fespace(isParamSetByUser("fespace") ? getUserObject<MFEMFESpace>("fespace").getFESpace()
                                               : nullptr)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
+MFEMHypreBoomerAMG::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 

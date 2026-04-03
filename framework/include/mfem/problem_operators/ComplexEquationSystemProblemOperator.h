@@ -33,12 +33,8 @@ public:
 
   [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
   {
-    if (!_equation_system)
-    {
-      mooseError(
-          "No ComplexEquationSystem has been added to ComplexEquationSystemProblemOperator.");
-    }
-
+    mooseAssert(_equation_system,
+                "No ComplexEquationSystem in ComplexEquationSystemProblemOperator.");
     return _equation_system.get();
   }
 

@@ -18,6 +18,9 @@ namespace Moose::Kokkos
 {
 
 class GeneralUserObject : public UserObject,
+                          public MeshHolder,
+                          public AssemblyHolder,
+                          public SystemHolder,
                           public ::MaterialPropertyInterface,
                           public ::TransientInterface
 {

@@ -26,8 +26,11 @@ On the other hand, nodal boundary conditions have slightly different interfaces.
 The hook methods for a nodal boundary condition have the following signatures:
 
 ```cpp
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
+template <typename Derived>
 KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                               const unsigned int qp,
                                               AssemblyDatum & datum) const;
@@ -54,7 +57,7 @@ becomes the following in `Moose::Kokkos::DirichletBCBase`:
 ```cpp
 template <typename Derived>
 KOKKOS_FUNCTION Real
-DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
+DirichletBCBase::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 
@@ -62,7 +65,7 @@ DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, AssemblyDatum
 }
 ```
 
-Also note here the static implementation of `computeValue` using the [Curiously Recurring Template Pattern (CRTP)](syntax/Kokkos/index.md#kokkos_crtp) which is originally a virtual function.
+Also note here the static implementation of `computeValue` which is originally a virtual function.
 
 See the following source codes of `KokkosMatchedValueBC` for another example of a nodal boundary condition:
 

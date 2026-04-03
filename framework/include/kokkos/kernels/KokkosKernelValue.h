@@ -25,10 +25,12 @@ namespace Moose::Kokkos
  * are different from the base class. The signature of computeQpResidual() expected to be defined in
  * the derived class is as follows:
  *
+ * @tparam Derived The object type
  * @param qp The local quadrature point index
  * @param datum The AssemblyDatum object of the current thread
  * @returns The component of the residual contribution that will be multiplied by the test function
  *
+ * template <typename Derived>
  * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
  *                                        AssemblyDatum & datum) const;
  *
@@ -52,43 +54,35 @@ public:
   ///@{
   /**
    * Compute diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
    * @param datum The AssemblyDatum object of the current thread
    * @returns The component of the Jacobian contribution that will be multiplied by the test
    * function
    */
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* j */,
                                          const unsigned int /* qp */,
                                          AssemblyDatum & /* datum */) const
   {
+    ::Kokkos::abort("Default computeQpJacobian() should never be called. Make sure you properly "
+                    "redefined this method in your class without typos.");
+
     return 0;
   }
-  /**
-   * Get the function pointer of the default computeQpJacobian()
-   * @returns The function pointer
-   */
-  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
   ///@}
 
   /**
-   * Shims for hook methods that can be leveraged to implement static polymorphism
+   * Functions used to check if users have overriden the hook methods, whose calculations can be
+   * skipped when not overriden
+   * @returns The function pointer of the default hook method
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+  static auto defaultJacobian()
   {
-    return kernel.computeQpResidual(qp, datum);
-  }
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & kernel,
-                                             const unsigned int j,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
-  {
-    return kernel.computeQpJacobian(j, qp, datum);
+    return &KernelValue::computeQpJacobian<Derived>;
   }
   ///@}
 
@@ -116,7 +110,7 @@ KernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum & dat
         {
           datum.reinit();
 
-          Real value = datum.JxW(qp) * kernel.computeQpResidualShim(kernel, qp, datum);
+          Real value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _test(datum, i, qp);
@@ -147,7 +141,7 @@ KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & dat
 
             if (j != j_old)
             {
-              value = datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, j, qp, datum);
+              value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
               j_old = j;
             }
 

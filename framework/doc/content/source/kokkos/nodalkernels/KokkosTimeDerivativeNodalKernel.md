@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [TimeDerivativeNodalKernel](TimeDerivativeNodalKernel.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/nodalkernels/constant_rate/kokkos_constant_rate.i start=[td] end=[] include-end=true
 

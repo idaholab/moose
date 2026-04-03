@@ -18,13 +18,15 @@ public:
 
   KokkosExtraElementIDAux(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const unsigned int _index;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosExtraElementIDAux::computeValue(const unsigned int, AssemblyDatum & datum) const
 {
   const dof_id_type id = datum.extraElemID(_index);

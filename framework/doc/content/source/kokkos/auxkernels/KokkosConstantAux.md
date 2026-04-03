@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [ConstantAux](ConstantAux.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/bcs/coupled_var_neumann/kokkos_on_off.i start=[active_right] end=[] include-end=true
 

@@ -1331,6 +1331,9 @@ class FunctorCopy
   friend class NodalUserObject;
   friend class SideUserObject;
   friend class GeneralUserObject;
+  friend class ElementReducer;
+  friend class NodalReducer;
+  friend class SideReducer;
   friend class Postprocessor;
   friend class VectorPostprocessor;
   friend class Reporter;

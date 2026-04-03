@@ -10,31 +10,48 @@
 #pragma once
 
 #include "KokkosReducerBase.h"
-#include "KokkosNodalUserObject.h"
+
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 namespace Moose::Kokkos
 {
 
-class NodalReducer : public ReducerBase, public NodalUserObject
+class NodalReducer : public ReducerBase, public ::BlockRestrictable, public ::BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
 
-  NodalReducer(const InputParameters & parameters);
+  NodalReducer(const MooseObject * object);
 
-  virtual void compute() override;
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  NodalReducer(const NodalReducer & object);
+
+  virtual void computeReducer() override;
 
   /**
    * The parallel computation entry function called by Kokkos
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
-  operator()(DefaultLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
+  operator()(ReducerLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
+
+protected:
+  /**
+   * Flag whether this object is boundary-restricted
+   */
+  const bool _bnd;
+  /**
+   * Flag for enable/disabling multiple execute calls on nodes that share block ids
+   */
+  const bool _unique_node_execute;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalReducer::operator()(DefaultLoop,
+NodalReducer::operator()(ReducerLoop,
                          const ThreadID tid,
                          const Derived & reducer,
                          Real * result) const
@@ -43,7 +60,7 @@ NodalReducer::operator()(DefaultLoop,
 
   Datum datum(node, kokkosAssembly(), kokkosSystems());
 
-  reducer.executeShim(reducer, datum, result);
+  reducer.template reduce<Derived>(datum, result);
 }
 
 } // namespace Moose::Kokkos

@@ -22,9 +22,11 @@ public:
 
   KokkosCoupledVarNeumannBC(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
@@ -45,7 +47,8 @@ protected:
   const Moose::Kokkos::VariableValue _scale_factor;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
                                              const unsigned int qp,
                                              AssemblyDatum & datum) const
@@ -53,7 +56,8 @@ KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
   return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _coupled_var(datum, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int i,
                                                     const unsigned int j,
                                                     const unsigned int jvar,

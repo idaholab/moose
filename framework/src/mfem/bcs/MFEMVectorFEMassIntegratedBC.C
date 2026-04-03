@@ -29,13 +29,6 @@ MFEMVectorFEMassIntegratedBC::MFEMVectorFEMassIntegratedBC(const InputParameters
 {
 }
 
-// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
-mfem::LinearFormIntegrator *
-MFEMVectorFEMassIntegratedBC::createLFIntegrator()
-{
-  return nullptr;
-}
-
 // Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
 MFEMVectorFEMassIntegratedBC::createBFIntegrator()

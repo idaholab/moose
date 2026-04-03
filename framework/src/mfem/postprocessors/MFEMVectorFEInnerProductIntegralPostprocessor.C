@@ -33,26 +33,20 @@ MFEMVectorFEInnerProductIntegralPostprocessor::validParams()
 MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    _primal_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
-        getParam<VariableName>("primal_variable"))),
-    _dual_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
-        getParam<VariableName>("dual_variable"))),
-    _scalar_coef(getScalarCoefficient("coefficient")),
-    _dual_var_coef(&_dual_var),
-    _scaled_dual_var_coef(_scalar_coef, _dual_var_coef),
+    MFEMBlockRestrictable(
+        parameters,
+        getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("primal_variable"))),
+    _primal_var(*getMFEMProblem().getGridFunction(getParam<VariableName>("primal_variable"))),
+    _scaled_dual_var_coef(getScalarCoefficient("coefficient"),
+                          getVectorCoefficientByName(getParam<VariableName>("dual_variable"))),
     _subdomain_integrator(_primal_var.ParFESpace())
 {
   if (isSubdomainRestricted())
-  {
     _subdomain_integrator.AddDomainIntegrator(
         new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef), getSubdomainMarkers());
-  }
   else
-  {
     _subdomain_integrator.AddDomainIntegrator(
         new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef));
-  }
 }
 
 void

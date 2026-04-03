@@ -60,17 +60,16 @@ ComplexEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 ComplexEquationSystemProblemOperator::Solve()
 {
-  GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
+  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR())
     mooseError("LOR solve is not supported for complex equation systems.");
 
-  _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
+  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  GetEquationSystem()->RecoverComplexFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
+  GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
 } // namespace Moose::MFEM

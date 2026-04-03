@@ -11,6 +11,7 @@
 #include "libMeshReducedNamespace.h"
 #include "MooseError.h"
 #include "SplineUtils.h"
+#include "Conversion.h"
 
 using namespace libMesh;
 

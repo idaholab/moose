@@ -31,11 +31,11 @@ MFEMHypreFGMRES::validParams()
 
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreFGMRES::constructSolver(const InputParameters &)
+MFEMHypreFGMRES::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreFGMRES>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));

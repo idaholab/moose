@@ -22,16 +22,19 @@ public:
 
   KokkosDiffusion(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
 };
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
                                    AssemblyDatum & datum) const
@@ -39,7 +42,8 @@ KokkosDiffusion::computeQpResidual(const unsigned int i,
   return _grad_u(datum, qp) * _grad_test(datum, i, qp);
 }
 
-KOKKOS_FUNCTION inline Real
+template <typename Derived>
+KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpJacobian(const unsigned int i,
                                    const unsigned int j,
                                    const unsigned int qp,

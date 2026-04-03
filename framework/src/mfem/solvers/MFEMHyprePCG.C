@@ -32,11 +32,11 @@ MFEMHyprePCG::validParams()
 
 MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHyprePCG::constructSolver(const InputParameters &)
+MFEMHyprePCG::constructSolver()
 {
   auto solver = std::make_unique<mfem::patched::HyprePCG>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));

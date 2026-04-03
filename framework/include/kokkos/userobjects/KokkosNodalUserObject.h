@@ -10,9 +10,8 @@
 #pragma once
 
 #include "KokkosUserObject.h"
+#include "KokkosNodalReducer.h"
 
-#include "BlockRestrictable.h"
-#include "BoundaryRestrictable.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "RandomInterface.h"
@@ -21,8 +20,7 @@ namespace Moose::Kokkos
 {
 
 class NodalUserObject : public UserObject,
-                        public ::BlockRestrictable,
-                        public ::BoundaryRestrictable,
+                        public NodalReducer,
                         public ::CoupleableMooseVariableDependencyIntermediateInterface,
                         public ::TransientInterface,
                         public ::RandomInterface
@@ -39,15 +37,27 @@ public:
 
   virtual void compute() override;
 
+  /**
+   * The parallel computation entry function called by Kokkos
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(DefaultLoop, const ThreadID tid, const Derived & object) const;
+
+  using NodalReducer::operator();
+
 protected:
-  /**
-   * Flag whether this object is boundary-restricted
-   */
-  const bool _bnd;
-  /**
-   * Flag for enable/disabling multiple execute calls on nodes that share block ids
-   */
-  const bool _unique_node_execute;
+  virtual void computeUserObject();
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+NodalUserObject::operator()(DefaultLoop, const ThreadID tid, const Derived & object) const
+{
+  auto node = _bnd ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
+
+  Datum datum(node, kokkosAssembly(), kokkosSystems());
+
+  object.template execute<Derived>(datum);
+}
 
 } // namespace Moose::Kokkos

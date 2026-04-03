@@ -18,6 +18,7 @@ public:
 
   KokkosStatefulTest(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
     if (_coupled_val)
@@ -27,7 +28,7 @@ public:
       for (unsigned int i = 0; i < _num_props; ++i)
         _properties[i](datum, qp) = _prop_values[i];
   }
-
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     // Really Expensive Fibonacci sequence generator!

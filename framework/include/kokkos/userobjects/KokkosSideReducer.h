@@ -10,31 +10,37 @@
 #pragma once
 
 #include "KokkosReducerBase.h"
-#include "KokkosSideUserObject.h"
+
+#include "BoundaryRestrictableRequired.h"
 
 namespace Moose::Kokkos
 {
 
-class SideReducer : public ReducerBase, public SideUserObject
+class SideReducer : public ReducerBase, public ::BoundaryRestrictableRequired
 {
 public:
   static InputParameters validParams();
 
-  SideReducer(const InputParameters & parameters);
+  SideReducer(const MooseObject * moose_object);
 
-  virtual void compute() override;
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  SideReducer(const SideReducer & object);
+
+  virtual void computeReducer() override;
 
   /**
    * The parallel computation entry function called by Kokkos
    */
   template <typename Derived>
   KOKKOS_FUNCTION void
-  operator()(DefaultLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
+  operator()(ReducerLoop, const ThreadID tid, const Derived & reducer, Real * result) const;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-SideReducer::operator()(DefaultLoop,
+SideReducer::operator()(ReducerLoop,
                         const ThreadID tid,
                         const Derived & reducer,
                         Real * result) const
@@ -43,7 +49,7 @@ SideReducer::operator()(DefaultLoop,
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  reducer.executeShim(reducer, datum, result);
+  reducer.template reduce<Derived>(datum, result);
 }
 
 } // namespace Moose::Kokkos

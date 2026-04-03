@@ -9,4 +9,4 @@
 
 #include "KokkosSideAverageMaterialProperty.h"
 
-registerKokkosPostprocessor("MooseApp", KokkosSideAverageMaterialProperty);
+registerKokkosUserObject("MooseApp", KokkosSideAverageMaterialProperty);

@@ -15,13 +15,13 @@ namespace Moose::Kokkos
 InputParameters
 ElementPostprocessor::validParams()
 {
-  InputParameters params = ElementReducer::validParams();
+  InputParameters params = ElementUserObject::validParams();
   params += Postprocessor::validParams();
   return params;
 }
 
 ElementPostprocessor::ElementPostprocessor(const InputParameters & parameters)
-  : ElementReducer(parameters), Postprocessor(this)
+  : ElementUserObject(parameters), Postprocessor(this)
 {
 }
 

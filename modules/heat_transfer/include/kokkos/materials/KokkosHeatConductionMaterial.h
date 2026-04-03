@@ -21,6 +21,7 @@ public:
 
   KokkosHeatConductionMaterial(const InputParameters & parameters);
 
+  template <typename Derived>
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
     _thermal_conductivity(datum, qp) = _my_thermal_conductivity;

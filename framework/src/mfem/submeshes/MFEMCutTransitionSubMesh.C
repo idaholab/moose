@@ -44,8 +44,7 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
     _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
-        getMFEMProblem().mesh().getMFEMParMesh(),
-        getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
+        getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
@@ -56,11 +55,15 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
 void
 MFEMCutTransitionSubMesh::buildSubMesh()
 {
-  labelMesh(getMFEMProblem().mesh().getMFEMParMesh());
+  labelMesh(const_cast<mfem::ParMesh &>(getMesh()));
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
       getMesh(), getMesh().attribute_sets.GetAttributeSet(_transition_subdomain)));
   _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
   _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
+  // Create boundary attribute set labelling the exterior of the newly created
+  // transition region, excluding the cut
+  _submesh->bdr_attribute_sets.SetAttributeSet(
+      _transition_subdomain_boundary, mfem::Array<int>({getMesh().bdr_attributes.Max() + 1}));
 }
 
 void
@@ -110,25 +113,22 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 
   // share cut verts coords or global ids across all procs
   int n_cut_vertices = global_cut_vert_ids.size();
-  std::vector<int> cut_vert_sizes(mpi_comm_size, 0);
+  std::vector<int> cut_vert_sizes(mpi_comm_size);
   MPI_Allgather(
-      &n_cut_vertices, 1, MPI_INT, &cut_vert_sizes[0], 1, MPI_INT, getMFEMProblem().getComm());
+      &n_cut_vertices, 1, MPI_INT, cut_vert_sizes.data(), 1, MPI_INT, getMFEMProblem().getComm());
   // Make an offset array and total the sizes.
-  std::vector<int> n_vert_offset(mpi_comm_size, 0);
-  for (int i = 1; i < mpi_comm_size; i++)
-    n_vert_offset[i] = n_vert_offset[i - 1] + cut_vert_sizes[i - 1];
-  int global_n_cut_vertices = 0;
-  for (int i = 0; i < mpi_comm_size; i++)
-    global_n_cut_vertices += cut_vert_sizes[i];
+  std::vector<int> n_vert_offset(mpi_comm_size);
+  std::exclusive_scan(cut_vert_sizes.begin(), cut_vert_sizes.end(), n_vert_offset.begin(), 0);
+  int global_n_cut_vertices = std::accumulate(cut_vert_sizes.begin(), cut_vert_sizes.end(), 0);
 
   // Gather the queries to all ranks.
-  std::vector<HYPRE_BigInt> all_cut_verts(global_n_cut_vertices, 0);
-  MPI_Allgatherv(&global_cut_vert_ids[0],
+  std::vector<HYPRE_BigInt> all_cut_verts(global_n_cut_vertices);
+  MPI_Allgatherv(global_cut_vert_ids.data(),
                  n_cut_vertices,
                  HYPRE_MPI_BIG_INT,
-                 &all_cut_verts[0],
-                 &cut_vert_sizes[0],
-                 &n_vert_offset[0],
+                 all_cut_verts.data(),
+                 cut_vert_sizes.data(),
+                 n_vert_offset.data(),
                  HYPRE_MPI_BIG_INT,
                  getMFEMProblem().getComm());
 
@@ -167,8 +167,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 mfem::Vector
 MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
 {
-  mooseAssert(mesh.SpaceDimension() == 3,
-              "MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
+  if (mesh.SpaceDimension() != 3)
+    mooseError("MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
   mfem::Vector normal;
   mfem::Array<int> face_verts;
   std::vector<mfem::Vector> v;
@@ -228,7 +228,6 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
       MPI_IN_PLACE, new_attrs, old_max_attr, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
 
   mfem::AttributeSets & attr_sets = parent_mesh.attribute_sets;
-  mfem::AttributeSets & bdr_attr_sets = parent_mesh.bdr_attribute_sets;
   // Create attribute set labelling the newly created transition region on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
   // Create attribute set labelling the entire closed geometry
@@ -251,11 +250,6 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
       }
     }
   }
-
-  // Create boundary attribute set labelling the exterior of the newly created
-  // transition region, excluding the cut
-  bdr_attr_sets.SetAttributeSet(_transition_subdomain_boundary,
-                                mfem::Array<int>({parent_mesh.bdr_attributes.Max() + 1}));
 
   parent_mesh.SetAttributes();
 }

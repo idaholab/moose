@@ -9,4 +9,4 @@
 
 #include "KokkosElementIntegralVariablePostprocessor.h"
 
-registerKokkosPostprocessor("MooseApp", KokkosElementIntegralVariablePostprocessor);
+registerKokkosUserObject("MooseApp", KokkosElementIntegralVariablePostprocessor);
