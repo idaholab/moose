@@ -1,7 +1,6 @@
 [Tests]
   issues = '#21885'
   design = 'InvOptTheory.md'
-  requirement = "The system shall invert for a Youngs modulus using a gradient based optimization, where the gradient is calculated from a NEML2 material model."
   [elasticity_inversion_neml2]
     type = CSVDiff
     rel_err = 1e-3
@@ -13,5 +12,13 @@
     recover = false
     capabilities = 'neml2'
     issues = '#26920'
+    requirement = 'The system shall use a NEML2 material model to compute the parameter gradient and invert for the Youngs modulus using gradient based optimization.'
+  []
+  [grad_check_neml2]
+    type = TaoGradientTester
+    input = main.i
+    capabilities = 'neml2'
+    issues = '#32496'
+    requirement = 'The system shall use a NEML2 material model and verify the accuracy of the gradient against a finite difference gradient.' 
   []
 []

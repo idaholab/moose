@@ -13,3 +13,4 @@ heat conduction:
 - [Example 2: Neumann Boundary Condition](forceInv_NeumannBC.md)
 - [Example 3: Distributed Body Load](forceInv_BodyLoad.md)
 - [debuggingHelp.md]
+- [TaoGradientTester.md]

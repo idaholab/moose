@@ -8,3 +8,4 @@ In a material inversion problem, inverse optimization is used to control materia
 - [Example 3: Transient Solve with Automatic Adjoint](material_transient.md)
 - [Example 4: Nonlinear Material Inversion](materialInv_diffusion_reaction.md)
 - [debuggingHelp.md]
+- [TaoGradientTester.md]

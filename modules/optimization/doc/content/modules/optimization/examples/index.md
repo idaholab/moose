@@ -8,6 +8,7 @@ The following pages provide examples on how to use the optimization module to so
 - [examples/materialInv_main.md]
 - [examples/constraintOptimization.md]
 - [debuggingHelp.md]
+- [TaoGradientTester.md]
 
 In this section, we explore optimization techniques with a particular focus on
 two main types: inverse optimization and design optimization. Inverse

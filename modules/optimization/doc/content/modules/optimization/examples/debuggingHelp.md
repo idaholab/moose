@@ -27,3 +27,7 @@ A failed optimization solve will also provide a reason the optimization solver t
 And finally, an example for a failed line search which is usually caused by an inaccurate gradient or from making the optimization convergence tolerance too small:
 
 !listing executioners/basic_optimize/gold/failed_ls.out start=Solver terminated
+
+## Automated Gradient Testing
+
+Every new optimization algorithm or gradient computation should include a gradient test to verify correctness. The [TaoGradientTester.md] automates the gradient comparison described above as a TestHarness tester, so that gradient accuracy is checked as part of the regular test suite. See the [TaoGradientTester.md] page for details on how to add a gradient test to your tests file.
