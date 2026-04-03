@@ -130,6 +130,7 @@ static const std::string mu_eff = "mu_eff";
 static const std::string k = "k";
 // Turbulence 'conductivity'
 static const std::string k_t = "k_t";
+static const std::string k_eff_t = "k_eff_t";
 static const std::string thermal_diffusivity = "thermal_diffusivity";
 static const std::string alpha = "alpha";
 static const std::string alpha_wall = "alpha_wall";

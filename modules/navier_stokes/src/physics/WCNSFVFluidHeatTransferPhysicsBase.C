@@ -311,6 +311,9 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 void
 WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(const bool use_ad)
 {
+  // No longer needed as the linearFV use a custom auxkernel for k_eff_t
+  if (!use_ad)
+    return;
   // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
