@@ -327,8 +327,13 @@ SurfaceSubdomainsDelaunayRemesher::General2DDelaunay(
     // Re-create the 1D mesh with a polyline with a maximum edge length
     mesh_1d->clear();
     // we add a tiny offset to avoid roundoff differences
-    MooseMeshUtils::buildPolyLineMesh(
-        *mesh_1d, mesh_1d_points, true, "", "", getParam<Real>("max_edge_length") + 1e-8);
+    MooseMeshUtils::buildPolyLineMesh(*mesh_1d,
+                                      mesh_1d_points,
+                                      std::vector<Point>(),
+                                      true,
+                                      "",
+                                      "",
+                                      getParam<Real>("max_edge_length") + 1e-8);
   }
 
   // Find centroid of the 2D mesh

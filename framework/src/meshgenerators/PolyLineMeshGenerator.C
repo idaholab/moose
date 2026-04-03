@@ -80,8 +80,13 @@ PolyLineMeshGenerator::generate()
   auto uptr_mesh = buildMeshBaseObject();
   MeshBase & mesh = *uptr_mesh;
 
-  MooseMeshUtils::buildPolyLineMesh(
-      mesh, _points, _loop, _start_boundary, _end_boundary, _nums_edges_between_points);
+  MooseMeshUtils::buildPolyLineMesh(mesh,
+                                    _points,
+                                    std::vector<Point>(),
+                                    _loop,
+                                    _start_boundary,
+                                    _end_boundary,
+                                    _nums_edges_between_points);
 
   return uptr_mesh;
 }

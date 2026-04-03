@@ -504,6 +504,8 @@ void copyIntoMesh(MeshGenerator & mg,
  * Generates meshes from edges connecting a list of points.
  * @param mesh The mesh to be built
  * @param points The list of points defining the polyline
+ * @param mid_points The list of midpoints corresponding to the points for quadratic elements. If
+ * the list is empty, linear elements will be generated.
  * @param loop Whether the polyline is a closed loop
  * @param start_boundary The boundary name to assign to the start of the polyline (if
  * not a loop)
@@ -514,6 +516,7 @@ void copyIntoMesh(MeshGenerator & mg,
  */
 void buildPolyLineMesh(MeshBase & mesh,
                        const std::vector<Point> & points,
+                       const std::vector<Point> & mid_points,
                        const bool loop,
                        const BoundaryName & start_boundary,
                        const BoundaryName & end_boundary,
@@ -523,6 +526,8 @@ void buildPolyLineMesh(MeshBase & mesh,
  * Generates meshes from edges connecting a list of points.
  * @param mesh The mesh to be built
  * @param points The list of points defining the polyline
+ * @param mid_points The list of midpoints corresponding to the points for quadratic elements. If
+ * the list is empty, linear elements will be generated.
  * @param loop Whether the polyline is a closed loop
  * @param start_boundary The boundary name to assign to the start of the polyline (if
  * not a loop)
@@ -532,6 +537,7 @@ void buildPolyLineMesh(MeshBase & mesh,
  */
 void buildPolyLineMesh(MeshBase & mesh,
                        const std::vector<Point> & points,
+                       const std::vector<Point> & mid_points,
                        const bool loop,
                        const BoundaryName & start_boundary,
                        const BoundaryName & end_boundary,
@@ -545,4 +551,37 @@ void buildPolyLineMesh(MeshBase & mesh,
  * shell)
  */
 void addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid);
+
+/**
+ * Generates a list of points that are offset from the original points by a given thickness in
+ * either the outward or inward direction.
+ * @param mg The mesh generator calling this function, used for error messages and debugging
+ * purposes
+ * @param ply_mesh_u The 1D polyline mesh generated from the original points, used to determine the
+ * normal direction for the offset points
+ * @param points The original list of points to be offset
+ * @param mid_points The list of midpoints corresponding to the points for quadratic elements.
+ * @param outward_direction Whether to offset the points in the outward direction (true) or inward
+ * direction (false)
+ * @param thickness The thickness by which to offset the points
+ * @return A new list of points that are offset from the original points by the given thickness in
+ * either the outward or inward direction. For quadratic elements, the midpoints will be the second
+ * half of the returned vector.
+ */
+std::vector<Point> generateLayerPoints(MeshGenerator * mg,
+                                       std::unique_ptr<UnstructuredMesh> & ply_mesh_u,
+                                       const std::vector<Point> & points,
+                                       const std::vector<Point> & mid_points,
+                                       const bool outward_direction,
+                                       const Real thickness);
+
+/**
+ * Get the normal vector of the quadratic side of a quadratic 2D element. It is necessary to specify
+ * the node index as a quadratic side has variable normal vector along the side.
+ * @param elem The element whose side normal is being queried
+ * @param s The side index of the element for which the normal is being queried
+ * @param key_node_index The index of the node on the side for which the normal is being queried
+ * @return The normal vector of the side of the element at the given node index
+ */
+Point get_key_normal(const Elem * elem, const unsigned int s, const unsigned int key_node_index);
 }

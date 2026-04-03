@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "LayerDelaunayBase.h"
 
 /**
  * Base class for Delaunay mesh generators applied to a surface.
  */
-class SurfaceDelaunayGeneratorBase : public MeshGenerator
+class SurfaceDelaunayGeneratorBase : public LayerDelaunayBase
 {
 public:
   static InputParameters validParams();

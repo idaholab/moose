@@ -24,7 +24,7 @@
               0.5 0.1 0.0
               0.3 0.1 0.0'
     loop = true
-    num_edges_between_points = 3
+    nums_edges_between_points = 3
   []
   [triang]
     type = XYDelaunayGenerator

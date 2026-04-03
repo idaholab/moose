@@ -9,19 +9,19 @@
 
 #pragma once
 
-#include "PolygonMeshGeneratorBase.h"
+#include "MeshGenerator.h"
 
 /**
  * Generate a polyline mesh that is based on an input 2D-XY mesh. The 2D-XY mesh needs to be a
  * connected mesh with only one outer boundary manifold. The polyline mesh generated along with the
  * boundary of the input mesh form a gap with a specified thickness.
  */
-class GapLineMeshGenerator : public PolygonMeshGeneratorBase
+class PolyLineMeshWithFixedDistanceFromSidesetGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  GapLineMeshGenerator(const InputParameters & parameters);
+  PolyLineMeshWithFixedDistanceFromSidesetGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -35,6 +35,9 @@ protected:
   /// The direction in which the gap is created with respect to the boundary of the input mesh
   const enum class GapDirection { OUTWARD, INWARD } _gap_direction;
 
-  /// The boundary IDs around which the gap will be created
-  const std::vector<boundary_id_type> _boundary_ids;
+  /// The boundary names around which the gap will be created
+  const std::vector<BoundaryName> _boundary_names;
+
+  /// Whether to skip the node reduction step after generating the gap mesh
+  const bool _skip_node_reduction;
 };

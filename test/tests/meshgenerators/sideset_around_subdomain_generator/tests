@@ -76,4 +76,20 @@
     expect_err = "The block 'missing' was not found in the mesh"
     requirement = "The system shall report an error if the subdomain to create sidesets around does not exist in the mesh"
   []
+
+  [conflicting_blocks]
+    type = RunException
+    input = around.i
+    cli_args = 'Mesh/block_2/apply_to_all_blocks=true'
+    expect_err = "this parameter should not be specified"
+    requirement = "The system shall report an error if the applied blocks are specified when all the blocks are set to be included"
+  []
+
+  [no_blocks]
+    type = RunException
+    input = around.i
+    cli_args = 'Mesh/block_2/block=""'
+    expect_err = "this parameter must be specified"
+    requirement = "The system shall report an error if neither the applied blocks are specified nor the all blocks option is chosen"
+  []
 []

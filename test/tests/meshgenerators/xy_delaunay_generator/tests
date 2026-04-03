@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776 #27545 #27828 #27722'
+  issues = '#20192 #26776 #27545 #27828 #27722 #32515'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -113,6 +113,13 @@
       exodiff = 'xydelaunay_area_func_in.e'
       recover = false
       detail = "with optional non-uniform refinement based on a custom function."
+    []
+    [bdry_layer]
+      type = 'CSVDiff'
+      input = 'xydelaunay_bdry_layer.i'
+      csvdiff = 'xydelaunay_bdry_layer.csv'
+      recover = false
+      detail = "with optional non-uniform refinement based on a custom function and boundary layer."
     []
     [auto_area_func]
       type = 'CSVDiff'
