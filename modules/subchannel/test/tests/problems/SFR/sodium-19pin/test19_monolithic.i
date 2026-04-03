@@ -81,18 +81,6 @@ P_out = 2.0e5 # Pa
     value = ${T_in}
   []
 
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
-
   [Viscosity_ic]
     type = ViscosityIC
     variable = mu

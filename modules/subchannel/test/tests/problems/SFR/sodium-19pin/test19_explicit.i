@@ -45,6 +45,7 @@ P_out = 2.0e5 # Pa
   verbose_subchannel = true
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

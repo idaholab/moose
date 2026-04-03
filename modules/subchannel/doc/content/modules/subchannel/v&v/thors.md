@@ -99,7 +99,7 @@ The input file to run the central blockage case is presented below:
 
 The file that creates the detailed mesh that subchannel solution gets projected on is presented below:
 
-!listing /validation/Blockage/THORS/FFM-3Adetailed.i language=moose
+!listing /validation/Blockage/THORS/FFM-3A_viz.i language=moose
 
 ## Edge blockage of 14 channels in 19-pin sodium-cooled bundles
 

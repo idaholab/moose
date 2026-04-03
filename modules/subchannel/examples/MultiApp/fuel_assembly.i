@@ -162,6 +162,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   compute_power = true
   verbose_multiapps = true
   verbose_subchannel = false
+
+  full_output = true
 []
 
 [SCMClosures]

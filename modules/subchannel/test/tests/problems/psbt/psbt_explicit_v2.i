@@ -49,6 +49,7 @@ pin_diameter = 0.00950
   constant_beta = false
   friction_closure = 'Cheng'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]

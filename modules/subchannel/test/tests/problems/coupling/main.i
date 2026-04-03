@@ -56,6 +56,8 @@ heated_length = 1.0
   # Heat Transfer Correlations
   pin_HTC_closure = 'dittus-boelter'
   friction_closure = 'MATRA'
+
+  full_output = true
 []
 
 [SCMClosures]

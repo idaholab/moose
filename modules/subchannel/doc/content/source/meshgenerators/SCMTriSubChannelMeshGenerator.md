@@ -13,6 +13,10 @@ The fuel pin diameter is given by [!param](/Mesh/SCMTriSubChannelMeshGenerator/p
 by defining their axial location [!param](/Mesh/SCMTriSubChannelMeshGenerator/spacer_z) and a local presure from loss [!param](/Mesh/SCMTriSubChannelMeshGenerator/spacer_k). [!param](/Mesh/SCMTriSubChannelMeshGenerator/flat_to_flat) is the size of the hexagonal duct that encloses the sub-assembly. If the pins are wire wrapped then the parameters: [!param](/Mesh/SCMTriSubChannelMeshGenerator/dwire) [!param](/Mesh/SCMTriSubChannelMeshGenerator/hwire) have non zero values that describe the geometry of the wire-wrap.
 The center of the mesh is the origin.
 
+## AuxVariables
+
+Defining this mesh automatically creates the auxvariables detailed [here](SCMAuxVariables.md).
+
 ## Example Input File Syntax
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=TriSubChannelMesh language=moose

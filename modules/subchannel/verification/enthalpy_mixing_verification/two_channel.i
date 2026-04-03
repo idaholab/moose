@@ -42,6 +42,7 @@ P_out = 155e+5 # Pa
   compute_power = true
   P_out = ${P_out}
   friction_closure = 'MATRA'
+  full_output = true
 []
 
 [SCMClosures]

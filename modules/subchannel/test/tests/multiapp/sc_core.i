@@ -152,6 +152,8 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
   friction_closure = 'Cheng'
+
+  full_output = true
 []
 
 [SCMClosures]

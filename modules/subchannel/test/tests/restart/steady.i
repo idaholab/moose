@@ -35,6 +35,7 @@ P_out = 4.923e6 # Pa
   compute_power = true
   P_out = ${P_out}
   friction_closure = 'MATRA'
+  full_output = true
 []
 
 [SCMClosures]
@@ -65,18 +66,6 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
-  []
-
-  [P_ic]
-    type = ConstantIC
-    variable = P
-    value = 0.0
-  []
-
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
   []
 
   [rho_ic]

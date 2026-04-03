@@ -100,6 +100,7 @@ unheated_length_exit = 0.855 #m
   pin_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

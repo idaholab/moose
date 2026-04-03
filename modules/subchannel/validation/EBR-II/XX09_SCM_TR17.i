@@ -50,6 +50,12 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
+[FluidProperties]
+  [sodium]
+    type = PBSodiumFluidProperties
+  []
+[]
+
 [AuxVariables]
   [mdot]
     block = subchannel
@@ -104,13 +110,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
-[FluidProperties]
-  [sodium]
-    type = PBSodiumFluidProperties
-  []
-[]
-
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
@@ -129,6 +129,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
+
+  full_output = true
 []
 
 [SCMClosures]

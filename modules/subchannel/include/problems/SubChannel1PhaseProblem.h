@@ -176,6 +176,7 @@ protected:
   SubChannelMesh & _subchannel_mesh;
   /// number of axial blocks
   unsigned int _n_blocks;
+  libMesh::DenseMatrix<Real> _DP;
   libMesh::DenseMatrix<Real> & _Wij;
   libMesh::DenseMatrix<Real> _Wij_old;
   libMesh::DenseMatrix<Real> _WijPrime;
@@ -266,6 +267,7 @@ protected:
   std::unique_ptr<SolutionHandle> _Tduct_soln;          // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _displacement_soln;
   std::unique_ptr<SolutionHandle> _ff_soln;
+  std::unique_ptr<SolutionHandle> _HTC_soln;
 
   /// Petsc Functions
   inline PetscErrorCode createPetscVector(Vec & v, PetscInt n)

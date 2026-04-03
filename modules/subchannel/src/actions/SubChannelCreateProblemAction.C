@@ -11,6 +11,8 @@
 #include "ActionFactory.h"
 #include "SubChannelApp.h"
 #include "FEProblemBase.h"
+#include "SCM.h"
+#include "SubChannelMesh.h"
 
 registerMooseAction("SubChannelApp", SubChannelCreateProblemAction, "create_problem");
 
@@ -42,6 +44,10 @@ SubChannelCreateProblemAction::act()
 
     _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
     _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
+
+    const auto & subchannel_mesh = SCM::getMesh<SubChannelMesh>(*_mesh);
+    _moose_object_pars.set<bool>("pin_mesh_exist") = subchannel_mesh.pinMeshExist();
+    _moose_object_pars.set<bool>("duct_mesh_exist") = subchannel_mesh.ductMeshExist();
 
     _problem =
         _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);

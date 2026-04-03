@@ -94,6 +94,7 @@ P_out = 14.72e6 # Pa
   deformation = true # this flag allows the re-calculation of subchannel geometric parameters based on the dpin value
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]

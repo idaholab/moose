@@ -60,6 +60,7 @@ P_out = 2.0e5 # Pa
   interpolation_scheme = exponential
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]
@@ -237,6 +238,6 @@ P_out = 2.0e5 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S displacement w_perim'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S w_perim'
   []
 []
