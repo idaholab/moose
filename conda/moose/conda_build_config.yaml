@@ -2,4 +2,4 @@ mpi:
   - mpich
 
 moose_dev:
-  - moose-dev 2026.04.02
+  - moose-dev 2026.04.05
