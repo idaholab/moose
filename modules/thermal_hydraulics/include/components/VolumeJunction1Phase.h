@@ -39,7 +39,9 @@ public:
 
 protected:
   virtual void setupMesh() override;
+  virtual void init() override;
   virtual void check() const override;
+  virtual bool supportsPassiveTransport() const override { return true; }
 
   /**
    * Builds user object for computing and storing the fluxes
@@ -77,6 +79,9 @@ protected:
    * @param[in] quantity  Quantity to compute
    */
   void addVolumeJunctionIC(const VariableName & var, const std::string & quantity);
+
+  /// Adds initial conditions for a passive transport variable
+  void addPassiveTransportIC(const VariableName & var, const FunctionName & function_name);
 
   /// Volume of the junction
   const Real _volume;
@@ -116,6 +121,9 @@ protected:
   const Real & _K;
   /// Reference area
   const Real & _A_ref;
+
+  /// Names of the passive transport solution variables, if any
+  std::vector<VariableName> _passives_times_V;
 
 public:
   static InputParameters validParams();
