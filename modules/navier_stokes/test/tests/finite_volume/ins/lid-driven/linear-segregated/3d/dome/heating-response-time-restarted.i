@@ -4,37 +4,8 @@ T_cooling_trigger = ${units 100 degC -> K}
 
 !include dome.i
 
-[AuxVariables]
-  [mu_t]
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-  []
-  [k_t]
-    initial_condition = 1.
-  []
-[]
-
-[Variables]
-  [vel_x]
-    initial_condition = 0.0
-  []
-  [vel_y]
-    initial_condition = 0.0
-  []
-  [vel_z]
-    initial_condition = 0.0
-  []
-  [pressure]
-    initial_condition = 0
-  []
-  [TKE]
-    initial_condition = ${k_init}
-  []
-  [TKED]
-    initial_condition = ${eps_init}
-  []
-  [T_fluid]
-    initial_condition = ${T_0}
-  []
+[Problem]
+  restart_file_base = test_cp/LATEST
 []
 
 [UserObjects]

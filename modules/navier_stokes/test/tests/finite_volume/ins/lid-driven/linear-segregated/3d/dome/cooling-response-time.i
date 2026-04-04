@@ -6,7 +6,7 @@ T_cool_terminate = ${units 60 degF -> K}
 !include dome.i
 
 [Problem]
-  restart_file_base = test_out_cp/LATEST
+  restart_file_base = heating-response-time_cp/LATEST
 []
 
 [UserObjects]
