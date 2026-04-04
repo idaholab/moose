@@ -255,8 +255,6 @@ AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & dat
   {
     const auto value = auxkernel.template computeValue<Derived>(qp, datum);
 
-    datum.reinit();
-
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
     {
       const auto t = datum.JxW(qp) * _test(datum, i, qp);

@@ -243,12 +243,8 @@ IntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum)
       [&](Real * local_re, const unsigned int ib, const unsigned int ie)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += datum.JxW(qp) * bc.template computeQpResidual<Derived>(i, qp, datum);
-        }
       });
 }
 
@@ -261,9 +257,6 @@ IntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum)
       [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int ij = ijb; ij < ije; ++ij)
           {
             unsigned int i = ij % datum.n_jdofs();
@@ -271,7 +264,6 @@ IntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum)
 
             local_ke[ij] += datum.JxW(qp) * bc.template computeQpJacobian<Derived>(i, j, qp, datum);
           }
-        }
       });
 }
 
@@ -284,9 +276,6 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
       [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int ij = ijb; ij < ije; ++ij)
           {
             unsigned int i = ij % datum.n_jdofs();
@@ -295,7 +284,6 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
             local_ke[ij] += datum.JxW(qp) * bc.template computeQpOffDiagJacobian<Derived>(
                                                 i, j, datum.jvar(), qp, datum);
           }
-        }
       });
 }
 
