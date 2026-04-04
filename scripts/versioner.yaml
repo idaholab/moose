@@ -7,7 +7,7 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.04.02
+    version: 2026.04.05
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
@@ -15,7 +15,7 @@ packages:
       - conda/conda_build_config.yaml
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
-    version: 2026.04.02
+    version: 2026.04.05
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -91,7 +91,7 @@ packages:
       - conda/wasp/build.sh
   # dependers: none
   pyhit:
-    version: 2026.04.02
+    version: 2026.04.05
     conda: conda/pyhit
     dependencies:
       - wasp
@@ -108,7 +108,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.04.02
+    version: 2026.04.05
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
