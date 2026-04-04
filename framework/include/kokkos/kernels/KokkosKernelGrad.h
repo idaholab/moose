@@ -109,8 +109,6 @@ KernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          datum.reinit();
-
           Real3 value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
@@ -131,8 +129,6 @@ KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datu
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          datum.reinit();
-
           unsigned int j_old = libMesh::invalid_uint;
 
           for (unsigned int ij = ijb; ij < ije; ++ij)

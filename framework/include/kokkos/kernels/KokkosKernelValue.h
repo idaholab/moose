@@ -108,8 +108,6 @@ KernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum & dat
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          datum.reinit();
-
           Real value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
@@ -130,8 +128,6 @@ KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & dat
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          datum.reinit();
-
           unsigned int j_old = libMesh::invalid_uint;
 
           for (unsigned int ij = ijb; ij < ije; ++ij)

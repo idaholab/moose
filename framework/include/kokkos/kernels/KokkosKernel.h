@@ -252,12 +252,8 @@ Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) c
       [&](Real * local_re, const unsigned int ib, const unsigned int ie)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += datum.JxW(qp) * kernel.template computeQpResidual<Derived>(i, qp, datum);
-        }
       });
 }
 
@@ -270,9 +266,6 @@ Kernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) c
       [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int ij = ijb; ij < ije; ++ij)
           {
             unsigned int i = ij % datum.n_jdofs();
@@ -281,7 +274,6 @@ Kernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) c
             local_ke[ij] +=
                 datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(i, j, qp, datum);
           }
-        }
       });
 }
 
@@ -294,9 +286,6 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
       [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-        {
-          datum.reinit();
-
           for (unsigned int ij = ijb; ij < ije; ++ij)
           {
             unsigned int i = ij % datum.n_jdofs();
@@ -305,7 +294,6 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
             local_ke[ij] += datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
                                                 i, j, datum.jvar(), qp, datum);
           }
-        }
       });
 }
 

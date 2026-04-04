@@ -33,8 +33,6 @@ KokkosElementVariableStatistics::computeValue(Datum & datum) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit();
-
     val += _v(datum, qp) * datum.JxW(qp);
     vol += datum.JxW(qp);
   }

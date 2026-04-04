@@ -58,8 +58,6 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
 
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
-      datum.reinit();
-
       for (unsigned int ij = ijb; ij < ije; ++ij)
       {
         unsigned int i = ij % datum.n_jdofs();
