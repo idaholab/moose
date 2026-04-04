@@ -75,6 +75,13 @@ SetupDebugAction::validParams()
       "show_block_restriction",
       BlockRestrictionDebugOutput::getScopes("none"),
       "Print out active objects like variables supplied for each block.");
+  params.addParam<bool>(
+      "throw_on_residual_nan",
+      false,
+      "This option applies only to dbg and , check if residual contributions NaN or Inf.print out "
+      "when a NaN or Inf value is detected in the residual, including the name "
+      "of the residual object and the element ID/position. This may only be used in dbg and devel "
+      "modes; otherwise a warning is issued.");
 
   params.addClassDescription("Adds various debugging type output to the simulation system.");
 

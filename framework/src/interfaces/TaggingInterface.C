@@ -376,6 +376,10 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
 void
 TaggingInterface::accumulateTaggedLocalResidual()
 {
+#ifndef NDEBUG
+  checkForNans();
+#endif
+
   for (auto & re : _re_blocks)
     *re += _local_re;
   for (auto & absre : _absre_blocks)
@@ -448,6 +452,18 @@ TaggingInterface::assignTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke = _local_ke;
+}
+
+void
+TaggingInterface::checkForNans() const
+{
+  for (const auto i : index_range(_local_re))
+    if (!std::isfinite(_local_re(i)))
+    {
+      std::stringstream ss;
+      ss << "NaN or Inf detected in '" << _moose_object.name() << "'.\n";
+      mooseException(ss.str());
+    }
 }
 
 TaggingInterface::~TaggingInterface() {}
