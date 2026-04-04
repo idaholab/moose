@@ -26,3 +26,28 @@ zip_keys:
   - mpi_friendly_name
   - mpi_website
   - mpi_dev_website
+
+##
+## Compiler versions
+##
+## Used for the build time environment for moose-[petsc,libmesh-libmesh-vtk]
+## and the runtime environment for moose-dev
+##
+## Should near-mirror the versions from conda-forge-pinning-feedstock,
+## but with a slightly stricter pinning
+##
+
+moose_c_compiler:
+  - gcc_linux-64 14.3.*                                     # [linux]
+  - clang_osx-64 19.1.*                                     # [osx and x86_64]
+  - clang_osx-arm64 19.1.*                                  # [osx and arm64]
+
+moose_cxx_compiler:
+  - gxx_linux-64 14.3.*                                     # [linux]
+  - clangxx_osx-64 19.1.*                                   # [osx and x86_64]
+  - clangxx_osx-arm64 19.1.*                                # [osx and arm64]
+
+moose_fortran_compiler:
+  - gfortran_linux-64 14.3.*                                # [linux]
+  - gfortran_osx-64 14.3.*                                  # [osx and x86_64]
+  - gfortran_osx-arm64 14.3.*                               # [osx and arm64]
