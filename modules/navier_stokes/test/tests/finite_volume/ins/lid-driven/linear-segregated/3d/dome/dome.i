@@ -786,7 +786,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
   energy_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
   print_fields = false
 
-  num_steps = 5000
+  num_steps = 10000
   num_piso_iterations = 0
 
   [TimeStepper]
@@ -800,13 +800,13 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
 []
 
 [Outputs]
-  [nemesis]
-    type = Nemesis
-    time_step_interval = 1
-  []
   [console]
     type = Console
     hide = 'floor_area floor_heat_density avg_elem_size t_diff dt area_fan1 area_fan2 area_fan3'
+  []
+  [nemesis]
+    type = Nemesis
+    time_step_interval = 100
   []
   csv = true
   checkpoint = true
@@ -1030,6 +1030,14 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     expression = '-${ahu_vfr} / area_ahu_exhaust' # negative sign to denote direction with respect to boundary normal
     pp_names = 'area_ahu_exhaust'
     execute_on = 'initial'
+  []
+  [vfr_in]
+    type = VolumetricFlowRate
+    boundary = ahu_intake_2
+    vel_x = vel_x
+    vel_y = vel_y
+    vel_z = vel_z
+    advected_quantity = 1
   []
   [ahu_heat_in]
     type = VolumetricFlowRate
