@@ -1267,7 +1267,9 @@ TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
   // Temporarily allow warnings to be emitted, so we can test the
   // conversion actually works properly.
   const auto throw_on_warning = Moose::_throw_on_warning;
+  const auto warnings_are_errors = Moose::_warnings_are_errors;
   Moose::_throw_on_warning = false;
+  Moose::_warnings_are_errors = false;
   try
   {
     buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false);
@@ -1275,9 +1277,11 @@ TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
   catch (...)
   {
     Moose::_throw_on_warning = throw_on_warning;
+    Moose::_warnings_are_errors = warnings_are_errors;
     throw;
   }
   Moose::_throw_on_warning = throw_on_warning;
+  Moose::_warnings_are_errors = warnings_are_errors;
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord>> actual_elements = getElementSet(_mfem_mesh_ptr, data.type);
   EXPECT_EQ(data.expected_element, actual_elements);
