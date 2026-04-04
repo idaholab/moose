@@ -51,3 +51,21 @@ moose_fortran_compiler:
   - gfortran_linux-64 14.3.*                                # [linux]
   - gfortran_osx-64 14.3.*                                  # [osx and x86_64]
   - gfortran_osx-arm64 14.3.*                               # [osx and arm64]
+
+##
+## Compiler symlink packages
+##
+## Used for the runtime environment so that the clang compilers are presented
+## as the simple known compilers; for example: x86_64-conda-linux-gnu-gcc -> gcc
+##
+
+moose_c_compiler_symlink:
+  - gcc                                                     # [linux]
+  - clang                                                   # [osx]
+
+moose_cxx_compiler_symlink:
+  - gxx                                                     # [linux]
+  - clangxx                                                 # [osx]
+
+moose_fortran_compiler_symlink:
+  - gfortran
