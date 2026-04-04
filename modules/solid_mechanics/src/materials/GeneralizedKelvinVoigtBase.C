@@ -22,9 +22,19 @@ GeneralizedKelvinVoigtBase::GeneralizedKelvinVoigtBase(const InputParameters & p
   : LinearViscoelasticityBase(parameters),
     _first_elasticity_tensor_old(
         getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_0")),
-    _first_elasticity_tensor_inv_old(
-        getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_0_inv"))
+    _longterm_elasticity_tensor_inv_old(nullptr)
 {
+}
+
+void
+GeneralizedKelvinVoigtBase::declareViscoelasticProperties()
+{
+  if (_has_longterm_dashpot && _need_viscoelastic_properties_inverse)
+  {
+    _longterm_elasticity_tensor_inv_old =
+        &getMaterialPropertyOld<RankFourTensor>(_base_name + "longterm_elasticity_tensor_inv");
+  }
+  LinearViscoelasticityBase::declareViscoelasticProperties();
 }
 
 void
@@ -51,8 +61,9 @@ GeneralizedKelvinVoigtBase::updateQpViscousStrains()
 
   if (_has_longterm_dashpot)
   {
-    (*_viscous_strains.back())[_qp] = (_first_elasticity_tensor_inv_old[_qp] * effective_stress) *
-                                      (_dt_old / (*_dashpot_viscosities_old.back())[_qp]);
+    (*_viscous_strains.back())[_qp] =
+        ((*_longterm_elasticity_tensor_inv_old)[_qp] * effective_stress) *
+        (_dt_old / (*_dashpot_viscosities_old.back())[_qp]);
     (*_viscous_strains.back())[_qp] += (*_viscous_strains_old.back())[_qp];
   }
 }
@@ -76,7 +87,7 @@ GeneralizedKelvinVoigtBase::computeQpApparentElasticityTensors()
   {
     Real theta_i = computeTheta(_dt, (*_dashpot_viscosities.back())[_qp]);
     Real gamma = (*_dashpot_viscosities.back())[_qp] / (_dt * theta_i);
-    _apparent_elasticity_tensor_inv[_qp] += (*_first_elasticity_tensor_inv)[_qp] / gamma;
+    _apparent_elasticity_tensor_inv[_qp] += (*_longterm_elasticity_tensor_inv)[_qp] / gamma;
   }
 
   _apparent_elasticity_tensor[_qp] = _apparent_elasticity_tensor_inv[_qp].invSymm();

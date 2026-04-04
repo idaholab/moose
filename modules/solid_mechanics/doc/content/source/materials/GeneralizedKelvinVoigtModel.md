@@ -5,7 +5,7 @@
 ## Description
 
 The `GeneralizedKelvinVoigtModel` material represents a generalized Kelvin-Voigt model, that is, a
-material composed of $N$ Kelvin-Voigt units assembled in series.  The material obeys to the following
+material composed of $N$ Kelvin-Voigt units assembled in series.  The material obeys the following
 constitutive equation:
 \begin{equation}
 \sigma_{ij} = C_{ijkl} \left( \epsilon^{mech}_{kl} - \sum\limits_{n=1}^{N} \alpha^{n}_{kl} \right)
@@ -17,8 +17,10 @@ time-dependent differential equation:
 \forall n \in [1, N]: \sigma_{ij} = C^{n}_{ijkl} \left( \alpha^{n} + \eta^{n} \dot{\alpha}^{n} \right)
 \end{equation}
 $C^{n}$ is the stiffness of the $n^{th}$ spring in the chain (a fourth-order tensor, identical in
-symmetry and dimensions to a standard elasticity tensor), while $\eta^{n}$ is the viscosity of the
-associated dashpot (a scalar with the dimension of time).
+symmetry and dimensions to a standard elasticity tensor, with elastic modulus and Poisson's ratio specified by the [!param](/Materials/GeneralizedKelvinVoigtModel/creep_modulus) and [!param](/Materials/GeneralizedKelvinVoigtModel/poisson_ratio) parameters, respectively), while $\eta^{n}$ is the viscosity of the
+associated dashpot (a scalar with the dimension of time, specified with the [!param](/Materials/GeneralizedKelvinVoigtModel/creep_viscosity) parameter).
+
+An isolated dashpot element is optionally added in series with the Kelvin-Voigt units if the length of the viscosities prescribed in [!param](/Materials/GeneralizedKelvinVoigtModel/creep_viscosity) is greater by one than [!param](/Materials/GeneralizedKelvinVoigtModel/creep_modulus). In this case, the last viscosity entry is assigned to the dashpot element. This additional dashpot element is used to define long-term creep. If a single Kelvin-Voigt unit is used with a long-term dashpot, a Burgers model is represented. An elasticity tensor is associated with all units, including the long-term dashpot, to define the three-dimensional response. By default, the properties of that long-term dashpot are defined by [!param](/Materials/GeneralizedKelvinVoigtModel/young_modulus) and [!param](/Materials/GeneralizedKelvinVoigtModel/poisson_ratio). However, these can optionally be defined to differ from the elastic properties through the [!param](/Materials/GeneralizedKelvinVoigtModel/longterm_youngs_modulus) and [!param](/Materials/GeneralizedKelvinVoigtModel/longterm_poissons_ratio) parameters.
 
 ## Internal Time-Stepping Scheme
 
