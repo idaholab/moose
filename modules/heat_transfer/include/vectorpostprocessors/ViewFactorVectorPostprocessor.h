@@ -11,13 +11,13 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-// Forward Declarations
+class ViewFactorBase;
 class GrayLambertSurfaceRadiationBase;
 
-class ViewfactorVectorPostprocessor : public GeneralVectorPostprocessor
+class ViewFactorVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
-  ViewfactorVectorPostprocessor(const InputParameters & parameters);
+  ViewFactorVectorPostprocessor(const InputParameters & parameters);
 
   static InputParameters validParams();
 
@@ -25,8 +25,11 @@ public:
   void initialize() override;
 
 protected:
+  /// The view factor user object
+  const ViewFactorBase * const _view_factor_uo;
+
   /// the surface radiation user object
-  const GrayLambertSurfaceRadiationBase & _glsr_uo;
+  const GrayLambertSurfaceRadiationBase * const _glsr_uo;
 
   /// The surface ids of the data
   VectorPostprocessorValue & _surface_ids;

@@ -2,7 +2,7 @@
 
 ## Description
 
-`UnobstructedPlanarViewFactor` computes the view factors between `n` planar sides in radiative heat exchange.
+This [ViewFactorBase.md] object computes the view factors between `n` planar sides in radiative heat exchange.
 These sides need to be such that they do not obstruct each other. This is in particular true if the sides fully enclose
 a convex volume. This is the intended purpose of this UserObject.
 
@@ -64,6 +64,8 @@ This can be checked by setting the parameter `view_factor_tol` and it can be enf
 parameter `normalize_view_factor`.
 
 It is stressed that this UserObject may give wrong results if obstruction is present
+
+!template load file=ViewFactorBase_normalization.md.template name=UnobstructedPlanarViewFactor
 
 ## Example Input syntax
 
