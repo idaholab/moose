@@ -59,3 +59,7 @@ CONDA_BUILD_SYSROOT:                                        # [osx]
 c_stdlib:
   - sysroot                                                 # [linux]
   - macosx_deployment_target                                # [osx]
+
+c_stdlib_version:
+  - 2.17                                                    # [linux]
+  - 13.3                                                    # [osx]
