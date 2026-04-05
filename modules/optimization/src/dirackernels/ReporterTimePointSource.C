@@ -21,6 +21,8 @@ ReporterTimePointSource::validParams()
                                 "Name of vector-postprocessor or reporter vector containing time, "
                                 "default is assumed to be all 0s.");
   params.addParam<Real>("reverse_time_end", 0.0, "End time used for reversing the time values.");
+  params.set<bool>("allow_moving_sources") = true;
+  params.suppressParameter<bool>("allow_moving_sources");
   return params;
 }
 
@@ -53,7 +55,8 @@ ReporterTimePointSource::addPoints()
   errorCheck("point_name", _point.size());
   errorCheck("time_name", _coordt.size());
 
-  _point_to_weightedValue.clear();
+  _point_to_id.clear();
+  _id_to_weighted_value.clear();
   const Real at =
       MooseUtils::absoluteFuzzyEqual(_reverse_time_end, 0.0) ? _t : _reverse_time_end - _t + _dt;
   for (const auto & i : make_range(nval))
