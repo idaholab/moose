@@ -27,8 +27,8 @@ packages:
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.6.0
-    build_number: 2
+    version: 9.6.1
+    build_number: 0
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
