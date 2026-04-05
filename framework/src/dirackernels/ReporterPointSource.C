@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReporterPointSource.h"
-#include "MooseUtils.h"
-
 registerMooseObject("MooseApp", ReporterPointSource);
 
 InputParameters
@@ -81,10 +79,21 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
     paramError("Either supply x,y, and z reporters or a point reporter.");
 }
 
+unsigned
+ReporterPointSource::findMatchingID(const Point & point) const
+{
+  for (const auto & [stored_point, stored_id] : _point_to_id)
+    if ((stored_point - point).norm_sq() < libMesh::TOLERANCE * libMesh::TOLERANCE)
+      return stored_id;
+
+  return libMesh::invalid_uint;
+}
+
 void
 ReporterPointSource::addPoints()
 {
-  _point_to_weightedValue.clear();
+  _point_to_id.clear();
+  _id_to_weighted_value.clear();
 
   const auto nval = _values.size();
   if (nval == 0)
@@ -109,7 +118,6 @@ ReporterPointSource::addPoints()
   }
   else
   {
-    std::vector<Point> points(_coordx.size());
     for (const auto i : index_range(_values))
     {
       const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
@@ -122,17 +130,27 @@ Real
 ReporterPointSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp] * libmesh_map_find(_point_to_weightedValue, _current_point);
+  const auto current_id = currentPointCachedID();
+  if (current_id == libMesh::invalid_uint)
+    mooseError("Point ",
+               _current_point,
+               " was activated for ReporterPointSource '",
+               name(),
+               "' but no cached Dirac point id was found for it.");
+
+  return -_test[_i][_qp] * libmesh_map_find(_id_to_weighted_value, current_id);
 }
 
 void
 ReporterPointSource::fillPoint(const Point & point, const dof_id_type id)
 {
-  auto it = _point_to_weightedValue.find(point);
-  if (it == _point_to_weightedValue.end())
+  auto matched_id = findMatchingID(point);
+  if (matched_id == libMesh::invalid_uint)
   {
     addPoint(point, id);
-    it = _point_to_weightedValue.emplace(point, 0).first;
+    _point_to_id.emplace_back(point, id);
+    matched_id = id;
+    _id_to_weighted_value.emplace(matched_id, 0.0);
   }
   else if (!_combine_duplicates)
     paramError("combine_duplicates",
@@ -141,8 +159,7 @@ ReporterPointSource::fillPoint(const Point & point, const dof_id_type id)
                point,
                ").");
 
-  auto & value = it->second;
-  value += _values[id] * _weight[id];
+  _id_to_weighted_value[matched_id] += _values[id] * _weight[id];
 }
 
 void

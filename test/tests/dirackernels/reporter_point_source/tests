@@ -50,5 +50,10 @@
       expect_err = "combine_duplicates must be true if reporter has duplicate points"
       detail = "shall report an error if the input arrays have duplicated values."
     []
+    [TwoReportersClosePoints]
+      type = 'RunApp'
+      input = 'two_reporters_close_points.i'
+      detail = 'in a steady state problem with two seperate reporter points sources at nearly the same location.'
+    []
   []
 []
