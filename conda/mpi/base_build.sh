@@ -133,7 +133,7 @@ function baked_flags()
         fi
     fi
 
-    export CXXFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS SDKROOT
+    export CPPFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS
 }
 
 export CC=mpicc \
@@ -150,7 +150,7 @@ baked_flags
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_zzz_${PKG_NAME}.sh"
 unset CC CXX FC F90 F77 MOOSE_NO_CODESIGN MPIHOME HDF5_DIR
-unset C_INCLUDE_PATH CXXFLAGS CPPFLAGS CFLAGS FFLAGS LDFLAGS
+unset C_INCLUDE_PATH CPPFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS
 EOF
 
 # shellcheck disable=SC2154
