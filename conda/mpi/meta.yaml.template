@@ -14,6 +14,7 @@ package:
 
 source:
   - path: .
+  - path: ../../scripts/get_mac_sdk.sh
 
 build:
   number: 0

@@ -1,5 +1,12 @@
 #!/bin/bash
-set -eu
+set -eux
+
+# Install get_mac_sdk.sh script for getting the SDK on Macs
+GET_MAC_SDK_PATH="share/moose-mpi/scripts/get_mac_sdk.sh"
+if [[ "$(uname)" == "Darwin" ]]; then
+    mkdir -p "${PREFIX}/$(dirname $GET_MAC_SDK_PATH)"
+    cp "${SRC_DIR}/$(basename "$GET_MAC_SDK_PATH")" "${PREFIX}/${GET_MAC_SDK_PATH}"
+fi
 
 # Set MPI environment variables for those that need it, and set CXXFLAGS using our
 # ACTIVATION_CXXFLAGS variable
@@ -100,11 +107,21 @@ function baked_flags()
                 fi
             done
             if [ -z "\$SDKROOT" ]; then
+                local use_color=
+                [ -z "\$TERM" ] || [ "\$TERM" == "dumb" ] || [ -n "\$NO_COLOR" ] || use_color=1
+                if [ -n "\$use_color" ]; then
+                    printf "\e[31m" >&2
+                fi
                 echo "ERROR: Mac SDK not found!" >&2
                 echo "" >&2
                 echo "This environment will not work properly without the SDK downloaded." >&2
                 echo "" >&2
-                echo "Run ./scripts/extract_mac_sdk.sh in the MOOSE directory to obtain it." >&2
+                echo "Run the following script to obtain it:" >&2
+                echo "" >&2
+                echo "\${CONDA_PREFIX}/${GET_MAC_SDK_PATH}" >&2
+                if [ -n "\$use_color" ]; then
+                    printf "\e[0m" >&2
+                fi
             fi
 
             if [ -z "\$CMAKE_ARGS" ]; then
