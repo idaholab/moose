@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2026.02.16" %}
+{% set version = "2026.04.05" %}
 
 package:
   name: moose-tools
@@ -21,7 +21,7 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   build:
-    - {{ moose_python }}
+    - python {{ python }}
     - setuptools
   run:
     # NOTE: If you are here to add a Python package in order to make the TestHarness or
@@ -29,10 +29,10 @@ requirements:
     #       moose-python. This allows folks that build their own PETSc, libMesh, WASP,
     #       etc combos, to continue to do so with only needing the moose-mpi package.
     - beautifulsoup4
-    - {{ black }}
-    - {{ clang_format }}
-    - {{ clang_tools }}
-    - coverage 7.13.2
+    - black {{ black }}
+    - clang-format {{ clang_format }}
+    - clang-tools {{ clang_tools }}
+    - coverage {{ coverage }}
     - deepdiff
     - git-lfs
     - gitpython
@@ -63,13 +63,13 @@ requirements:
     - python
     - pyyaml
     - requests
-    - {{ ruff }}
+    - ruff {{ ruff }}
     - scikit-image
     - setuptools
     - sympy
     - tabulate
     - uncertainties
-    - xmltodict <0.14
+    - xmltodict {{ xmltodict }}
     - yaml
 test:
   commands:

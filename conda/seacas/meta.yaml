@@ -1,5 +1,5 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "2" %}
+{% set build = "3" %}
 {% set seacas_version = "2025.10.14" %}
 {% set seacas_git_rev = "v" ~ seacas_version.replace(".", "-") %}
 {% set strbuild = "build_" + build|string %}
@@ -27,21 +27,18 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   build:
-    - {{ moose_cc }}
-    - {{ moose_cxx }}
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - {{ compiler("fortran") }}
+    - gfortran
     - xorg-libx11 1.8.9
-    - {{ moose_cmake }}
+    - cmake
     - make
+    - ninja
     - automake
   run:
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
     - xorg-libx11
-    - python 3
+    - python
 
 test:
   commands:

@@ -1,0 +1,65 @@
+automake:
+  - 1.16.5
+
+black:
+  - 26.1.0
+
+bison:
+  - 3.4
+
+clang_format:
+  - 19
+
+clang_tools:
+  - 19
+
+coverage:
+  - 7.13.2
+
+cmake:
+  - 4
+
+# Needed for psycopg2 2.9.11
+icu:
+  - 75.1
+
+# Needed for psycopg2 2.9.11
+krb5:
+  - 1.21.3
+
+libexpat:
+  - 2.7.1
+
+python:
+  - 3.14
+  - 3.13
+  - 3.12
+  - 3.11
+  - 3.10
+
+moose_python_constrained:
+  - python >=3.10,<3.15
+
+moose_hdf5:
+  - hdf5 1.14.6
+
+ruff:
+  - 0.15.1
+
+xmltodict:
+  - <0.14
+
+##
+## System root
+##
+
+CONDA_BUILD_SYSROOT:                                        # [osx]
+  - /opt/conda-sdks/MacOSX13.3.sdk                          # [osx]
+
+c_stdlib:
+  - sysroot                                                 # [linux]
+  - macosx_deployment_target                                # [osx]
+
+c_stdlib_version:
+  - 2.17                                                    # [linux]
+  - 13.3                                                    # [osx]

@@ -27,21 +27,18 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   build:
-    - {{ moose_cc }}
-    - {{ moose_cxx }}
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - {{ compiler("fortran") }}
+    - gfortran
     - xorg-libx11 1.8.9
-    - {{ moose_cmake }}
+    - cmake
     - make
+    - ninja
     - automake
   run:
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
     - xorg-libx11
-    - python 3
+    - python
 
 test:
   commands:

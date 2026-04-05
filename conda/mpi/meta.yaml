@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2026.03.19" %}
+{% set version = "2026.04.05" %}
 
 package:
   name: moose-mpi
@@ -14,6 +14,7 @@ package:
 
 source:
   - path: .
+  - path: ../../scripts/get_mac_sdk.sh
 
 build:
   number: 0
@@ -39,68 +40,40 @@ outputs:
         - {{ mpi }}-mpicc
         - {{ mpi }}-mpicxx
         - {{ mpi }}-mpifort
-        - {{ moose_libgfortran5 }}
-        - {{ moose_gfortran }}
-        - {{ moose_libzlib }}
-        - {{ moose_libcxx }}
-        - {{ moose_cc }}
-        - {{ moose_cxx }}
-        - {{ moose_ccompiler }}
-        - {{ moose_cxxcompiler }}
-        - {{ moose_clang_osx }}                   # [osx]
-        - {{ moose_compiler_rt }}                 # [osx]
-        - {{ moose_libclang }}                    # [osx]
-        - {{ moose_cctools }}                     # [osx]
-        - {{ moose_llvm_tools }}                  # [osx]
-        - {{ moose_llvm_openmp }}                 # [osx]
-        - {{ moose_gcc_impl }}                    # [linux]
-        - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_libstdcxx }}                   # [linux]
-        - {{ moose_libstdcxx_devel }}             # [linux]
-        - {{ moose_icu }}
-        - {{ moose_krb5 }}
+        - {{ moose_c_compiler }}
+        - {{ moose_cxx_compiler }}
+        - {{ moose_fortran_compiler }}
+        - icu {{ icu }}
+        - krb5 {{ krb5 }}
         - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
       run:
         - {{ mpi }} {{ mpi_version }}
         - {{ mpi }}-mpicc
         - {{ mpi }}-mpicxx
         - {{ mpi }}-mpifort
-        - {{ moose_libgfortran5 }}
-        - {{ moose_gfortran }}
-        - {{ moose_libzlib }}
-        - {{ moose_libcxx }}
-        - {{ moose_cc }}
-        - {{ moose_cxx }}
-        - {{ moose_ccompiler }}
-        - {{ moose_cxxcompiler }}
-        - {{ moose_clang_osx }}                   # [osx]
-        - {{ moose_compiler_rt }}                 # [osx]
-        - {{ moose_libclang }}                    # [osx]
-        - {{ moose_cctools }}                     # [osx]
-        - {{ moose_llvm_tools }}                  # [osx]
-        - {{ moose_llvm_openmp }}                 # [osx]
-        - {{ moose_gcc_impl }}                    # [linux]
-        - {{ moose_gfortran_impl }}               # [linux]
-        - {{ moose_libstdcxx }}                   # [linux]
-        - {{ moose_libstdcxx_devel }}             # [linux]
-        - {{ moose_icu }}
-        - {{ moose_krb5 }}
+        - {{ moose_c_compiler }}
+        - {{ moose_cxx_compiler }}
+        - {{ moose_fortran_compiler }}
+        - {{ moose_c_compiler_symlink }}
+        - {{ moose_cxx_compiler_symlink }}
+        - {{ moose_fortran_compiler_symlink }}
+        - icu {{ icu }}
+        - krb5 {{ krb5 }}
         - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
-        - {{ moose_libexpat }}
+        - libexpat {{ libexpat }}
         - libtirpc                                # [linux]
-        - automake 1.16.5
-        - bison 3.4
+        - automake {{ automake }}
+        - bison {{ bison }}
         - zfp
         - autoconf
         - libtool
-        - {{ moose_cmake }}
+        - cmake
         - make
         - zlib
         - m4
+        - perl
       run_constrained:
-        # If modified, also update conda/tools/conda_build_config.yaml
-        # and conda/wasp/conda_build_config.yaml
-        - python >=3.10,<3.15
+        - {{ moose_python_constrained }}
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -113,9 +86,7 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        # If modified, also update conda/tools/conda_build_config.yaml
-        # and conda/wasp/conda_build_config.yaml
-        - python >=3.10,<3.15
+        - {{ moose_python_constrained }}
         - packaging
         - paramiko
         - requests
@@ -160,4 +131,3 @@ extra:
   recipe-maintainers:
     - cticenhour
     - loganharbour
-

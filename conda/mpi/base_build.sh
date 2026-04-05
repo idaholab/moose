@@ -1,5 +1,12 @@
 #!/bin/bash
-set -eu
+set -eux
+
+# Install get_mac_sdk.sh script for getting the SDK on Macs
+GET_MAC_SDK_PATH="share/moose-mpi/scripts/get_mac_sdk.sh"
+if [[ "$(uname)" == "Darwin" ]]; then
+    mkdir -p "${PREFIX}/$(dirname $GET_MAC_SDK_PATH)"
+    cp "${SRC_DIR}/$(basename "$GET_MAC_SDK_PATH")" "${PREFIX}/${GET_MAC_SDK_PATH}"
+fi
 
 # Set MPI environment variables for those that need it, and set CXXFLAGS using our
 # ACTIVATION_CXXFLAGS variable
@@ -71,17 +78,62 @@ function baked_flags()
     b_LDFLAGS="\$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')"
 
     # append necessary std c library
-    export CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
-    export CPPFLAGS=\${b_CPPFLAGS}
-    export CFLAGS=\${b_CFLAGS}
-    export FFLAGS=\${b_FFLAGS}
-
-    # specific OS linker flags
+    CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
+    CPPFLAGS=\${b_CPPFLAGS}
+    CFLAGS=\${b_CFLAGS}
+    FFLAGS=\${b_FFLAGS}
     LDFLAGS=\${b_LDFLAGS}
+
+    # special case for mac
     if [[ "\$(uname)" == 'Darwin' ]]; then
+        # Specific OS linker flags
         LDFLAGS+=" -Wl,-ld64 -Wl,-commons,use_dylibs"
+
+        # Make sure sdkroot is available when not building
+        if [ "\${CONDA_BUILD:-0}" = "0" ]; then
+            SDK_VERSIONS=("26.2" "15.5" "15.4" "15.2" "14.5" "14.2" "13.3")
+            SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
+            SDKROOT=
+            for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
+                SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
+                for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
+                    if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
+                        SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+                        break
+                    fi
+                done
+                if [ -n "\$SDKROOT" ]; then
+                    break
+                fi
+            done
+            if [ -z "\$SDKROOT" ]; then
+                local use_color=
+                [ -z "\$TERM" ] || [ "\$TERM" == "dumb" ] || [ -n "\$NO_COLOR" ] || use_color=1
+                if [ -n "\$use_color" ]; then
+                    printf "\e[31m" >&2
+                fi
+                echo "ERROR: Mac SDK not found!" >&2
+                echo "" >&2
+                echo "This environment will not work properly without the SDK downloaded." >&2
+                echo "" >&2
+                echo "Run the following script to obtain it:" >&2
+                echo "" >&2
+                echo "\${CONDA_PREFIX}/${GET_MAC_SDK_PATH}" >&2
+                if [ -n "\$use_color" ]; then
+                    printf "\e[0m" >&2
+                fi
+            fi
+
+            if [ -z "\$CMAKE_ARGS" ]; then
+                CMAKE_ARGS="-DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+            else
+                CMAKE_ARGS+=" -DCMAKE_OSX_SDKROOT=\${SDKROOT}"
+            fi
+            export CMAKE_ARGS SDKROOT
+        fi
     fi
-    export LDFLAGS
+
+    export CPPFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS
 }
 
 export CC=mpicc \
@@ -98,7 +150,7 @@ baked_flags
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_zzz_${PKG_NAME}.sh"
 unset CC CXX FC F90 F77 MOOSE_NO_CODESIGN MPIHOME HDF5_DIR
-unset C_INCLUDE_PATH CXXFLAGS CPPFLAGS CFLAGS FFLAGS LDFLAGS
+unset C_INCLUDE_PATH CPPFLAGS CXXFLAGS CFLAGS FFLAGS LDFLAGS
 EOF
 
 # shellcheck disable=SC2154

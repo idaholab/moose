@@ -225,6 +225,7 @@ JINJA_CONFIG = {
     "moose_petsc": undefined("moose-petsc"),
     "moose_libmesh_vtk": undefined("moose-libmesh-vtk"),
     "moose_libmesh": undefined("moose-libmesh"),
+    "stdlib": undefined,
 }
 
 
@@ -346,11 +347,6 @@ class Versioner:
             if head_package.is_app or not head_package.conda:
                 continue
 
-            num_packages += 1
-            head_conda = head_package.conda
-            base_package = base[name]
-            base_conda = base_package.conda
-
             status = "OK"
             status_color = "GREEN"
             package = name
@@ -359,8 +355,22 @@ class Versioner:
             version_color = None
             build_color = None
 
-            # Hashes are different, something changed
-            if base_package.hash != head_package.hash:
+            num_packages += 1
+            head_conda = head_package.conda
+            base_package = base.get(name)
+            base_conda = None
+
+            if base_package is None:
+                status = "NEW"
+                status_color = "GREEN"
+                hash_color = "YELLOW"
+                version_color = "GREEN"
+                build_color = "GREEN"
+            else:
+                base_conda = base_package.conda
+
+            if base_package is not None and base_package.hash != head_package.hash:
+                base_conda = base_package.conda
                 num_packages_changed += 1
                 hash_color = "YELLOW"
 
@@ -372,7 +382,7 @@ class Versioner:
                     build_color = "YELLOW"
 
                 # Full version is different, which means it was bumped
-                if base_conda.install != head_conda.install:
+                if base_conda is not None and base_conda.install != head_conda.install:
                     status = "CHANGE"
                     if different_version:
                         base_date = self.match_date(base_package.version)
@@ -408,25 +418,32 @@ class Versioner:
                     build_color = "RED"
 
             # Something went wrong, make status and package red
-            if status not in ["OK", "CHANGE"]:
+            if status not in ["OK", "CHANGE", "NEW"]:
                 package_color = "RED"
                 status_color = "RED"
                 num_packages_failed += 1
 
             if not brief or status != "OK":
-                base_version = base_conda.version
-                if base_package.build_number is not None:
-                    base_version += f" build {base_package.build_number}"
+                base_version = ""
+                base_hash = ""
+
+                if base_package is not None and base_conda is not None:
+                    base_version = base_conda.version
+                    base_hash = base_package.hash
+                    if base_package.build_number is not None:
+                        base_version += f" build {base_package.build_number}"
+
                 head_version = colorize(head_conda.version, version_color)
                 if head_package.build_number is not None:
                     head_version += colorize(
                         f" build {head_package.build_number}", build_color
                     )
+
                 entries.append(
                     [
                         colorize(name, package_color),
                         colorize(status, status_color),
-                        base_package.hash,
+                        base_hash,
                         colorize(head_package.hash, hash_color),
                         base_version,
                         head_version,
@@ -521,8 +538,8 @@ class Versioner:
         print(f"ERROR: {message}")
         sys.exit(1)
 
-    @staticmethod
-    def get_packages(ref: str) -> dict[str, Package]:
+    @classmethod
+    def get_packages(cls, ref: str) -> dict[str, Package]:
         """
         Gets the versioned packages for the given git
         reference (typically a commit)
@@ -576,9 +593,15 @@ class Versioner:
             # they have templated variables)
             conda_dir = package["conda"]
             if conda_dir:
-                package["all_influential"].extend(
-                    Versioner.conda_influential(conda_dir)
-                )
+                # meta.yaml, required
+                package["all_influential"].append(cls.conda_meta_path(conda_dir))
+                # conda_build_config.yaml, not required
+                build_config_path = cls.conda_build_config_path(conda_dir)
+                if (
+                    cls.git_file(build_config_path, commit, allow_missing=True)
+                    is not None
+                ):
+                    package["all_influential"].append(build_config_path)
 
             # Make sure dependencies exist
             for dep in package["dependencies"]:
@@ -763,16 +786,6 @@ class Versioner:
         Path to the conda build config file given a conda directory
         """
         return os.path.join(conda_dir, "conda_build_config.yaml")
-
-    @staticmethod
-    def conda_influential(conda_dir: os.PathLike) -> list[str]:
-        """
-        Path to the assumed influential files for a conda package
-        """
-        return [
-            Versioner.conda_meta_path(conda_dir),
-            Versioner.conda_build_config_path(conda_dir),
-        ]
 
     @staticmethod
     def get_template_config() -> TemplateConfig:

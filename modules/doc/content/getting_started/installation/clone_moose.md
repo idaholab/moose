@@ -17,5 +17,9 @@ git checkout master
 ```
 
 !alert note
-The master branch of MOOSE is the stable branch that will only be updated after all tests are
-passing. This protects you from the day-to-day changes in the MOOSE repository.
+The `master` branch of `idaholab/moose` is the stable branch that will only be updated after all tests are
+passing. This protects you from the day-to-day changes in the MOOSE repository. MOOSE-based applications
+should typically use this branch.
+
+For the development of MOOSE (contributing changes to MOOSE), you should use the
+`devel` branch of `idaholab/moose` as the base for a change.

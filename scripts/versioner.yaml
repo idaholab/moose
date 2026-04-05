@@ -7,25 +7,28 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.02.16
+    version: 2026.04.05
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
+    influential:
+      - conda/conda_build_config.yaml
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
-    version: 2026.03.19
+    version: 2026.04.05
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
     influential:
       - apptainer/mpi.def
       - apptainer/files/mpi
+      - conda/conda_build_config.yaml
       - conda/mpi/base_build.sh
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.6.0
-    build_number: 1
+    version: 9.6.1
+    build_number: 0
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -33,10 +36,11 @@ packages:
     dependencies:
       - mpi
     influential:
+      - conda/conda_build_config.yaml
       - conda/libmesh-vtk/build.sh
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.24.5
+    version: 3.25.0
     build_number: 0
     conda: conda/petsc
     templates:
@@ -49,13 +53,14 @@ packages:
     influential:
       - petsc
       - apptainer/petsc.def
+      - conda/conda_build_config.yaml
       - conda/petsc/build.sh
       - scripts/configure_petsc.sh
       - scripts/update_and_rebuild_petsc.sh
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2026.03.17_3463d95
+    version: 2026.04.02_d452ed8
     build_number: 0
     conda: conda/libmesh
     templates:
@@ -69,30 +74,41 @@ packages:
     influential:
       - libmesh
       - apptainer/libmesh.def
+      - conda/conda_build_config.yaml
       - conda/libmesh/build.sh
       - scripts/configure_libmesh.sh
       - scripts/update_and_rebuild_libmesh.sh
-  # dependers: moose-dev
+  # dependers: pyhit, moose-dev
   wasp:
     version: 2025.09.19_02960f1
-    build_number: 5
+    build_number: 6
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
     influential:
       - scripts/update_and_rebuild_wasp.sh
       - framework/contrib/wasp
-      - conda/wasp/build_wasp.sh
-      - conda/wasp/pyhit
-      - conda/wasp/build_pyhit.sh
-      - conda/wasp/pyhit.patch
+      - conda/wasp/build.sh
+  # dependers: none
+  pyhit:
+    version: 2026.04.05
+    conda: conda/pyhit
+    dependencies:
+      - wasp
+    influential:
+      - conda/conda_build_config.yaml
+      - conda/pyhit/pyhit
+      - conda/pyhit/build.sh
+      - conda/pyhit/pyhit.patch
       - python/moosetree
       - python/mooseutils/message.py
       - python/mooseutils/mooseutils.py
       - python/pyhit/pyhit.py
+    templates:
+      conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.03.19
+    version: 2026.04.05
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -104,6 +120,7 @@ packages:
     apptainer:
       from: libmesh
     influential:
+      - conda/conda_build_config.yaml
       # container build definitions
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
@@ -126,19 +143,22 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2026.01.11_71be6bf
+    version: 2026.03.01_a15ffb7
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
     influential:
+      - conda/conda_build_config.yaml
       - conda/pprof/build.sh
   # dependers: none
   seacas:
     version: 2025.10.14
-    build_number: 2
+    build_number: 3
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
+    influential:
+      - conda/conda_build_config.yaml
   # dependers: none
   app:
     templates:

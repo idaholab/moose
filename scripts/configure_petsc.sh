@@ -35,7 +35,7 @@ function configure_petsc()
   EXTRA_CONFIGURE_OPTIONS=()
 
   # Use --with-make-np if MOOSE_JOBS is given
-  if [ -n "$MOOSE_JOBS" ]; then
+  if [ -n "${MOOSE_JOBS-}" ]; then
     EXTRA_CONFIGURE_OPTIONS+=("--with-make-np=$MOOSE_JOBS")
   fi
 

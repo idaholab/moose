@@ -3,10 +3,10 @@
 #   libmesh/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set build = 1 %}
-{% set vtk_version = "9.6.0" %}
+{% set build = 0 %}
+{% set vtk_version = "9.6.1" %}
 {% set vtk_friendly_version = vtk_version.split('.')[:2] | join('.') %}
-{% set sha256 = "d77d180694faafdc816578b9a53651f6790e799615811bfbb91018661a3bb8f2" %}
+{% set sha256 = "47ca9af899165a33b935533046acce7c0aa3c007f0b57880665bb89d9986543f" %}
 
 package:
   name: moose-libmesh-vtk
