@@ -338,7 +338,7 @@ SIMPLESolveBase::validParams()
       "pm_radiation_petsc_options_value pm_radiation_petsc_options_value "
       "pm_radiation_absolute_tolerance "
       "pm_radiation_l_tol pm_radiation_l_abs_tol pm_radiation_l_max_its",
-      "pm_radiation Equation");
+      "Participating Medium Radiation Equation");
 
   /*
    * Parameters to control the solution of each turbulence system
