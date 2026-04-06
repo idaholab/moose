@@ -127,24 +127,24 @@ public:
 
 TEST_F(MFEMExecutedObjectDependencyTest, PostprocessorAuxKernelDependencyChain)
 {
-  InputParameters aux0_params = _factory.getValidParams("TestMFEMDependencyAux");
-  aux0_params.set<AuxVariableName>("variable") = "aux0_var";
-  addObject<TestMFEMDependencyAux>("TestMFEMDependencyAux", "aux0", aux0_params);
-
-  InputParameters pp0_params = _factory.getValidParams("TestMFEMDependencyPostprocessor");
-  pp0_params.set<VariableName>("variable") = "aux0_var";
-  auto & pp0 = addObject<TestMFEMDependencyPostprocessor>(
-      "TestMFEMDependencyPostprocessor", "pp0", pp0_params);
+  InputParameters pp1_params = _factory.getValidParams("TestMFEMDependencyPostprocessor");
+  pp1_params.set<VariableName>("variable") = "aux1_var";
+  auto & pp1 = addObject<TestMFEMDependencyPostprocessor>(
+      "TestMFEMDependencyPostprocessor", "pp1", pp1_params);
 
   InputParameters aux1_params = _factory.getValidParams("TestMFEMDependencyAux");
   aux1_params.set<AuxVariableName>("variable") = "aux1_var";
   aux1_params.set<PostprocessorName>("postprocessor") = "pp0";
   addObject<TestMFEMDependencyAux>("TestMFEMDependencyAux", "aux1", aux1_params);
 
-  InputParameters pp1_params = _factory.getValidParams("TestMFEMDependencyPostprocessor");
-  pp1_params.set<VariableName>("variable") = "aux1_var";
-  auto & pp1 = addObject<TestMFEMDependencyPostprocessor>(
-      "TestMFEMDependencyPostprocessor", "pp1", pp1_params);
+  InputParameters pp0_params = _factory.getValidParams("TestMFEMDependencyPostprocessor");
+  pp0_params.set<VariableName>("variable") = "aux0_var";
+  auto & pp0 = addObject<TestMFEMDependencyPostprocessor>(
+      "TestMFEMDependencyPostprocessor", "pp0", pp0_params);
+
+  InputParameters aux0_params = _factory.getValidParams("TestMFEMDependencyAux");
+  aux0_params.set<AuxVariableName>("variable") = "aux0_var";
+  addObject<TestMFEMDependencyAux>("TestMFEMDependencyAux", "aux0", aux0_params);
 
   _mfem_problem->executeMFEMObjects(EXEC_TIMESTEP_END);
 
