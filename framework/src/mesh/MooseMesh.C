@@ -633,11 +633,9 @@ MooseMesh::update()
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
 
-  // Update the node to elem map
+  // Clear the node to elem maps
   _node_to_elem_map.clear();
-  _node_to_elem_map_built = false;
   _node_to_active_semilocal_elem_map.clear();
-  _node_to_active_semilocal_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -670,6 +668,20 @@ MooseMesh::update()
 #endif
 
   _finite_volume_info_dirty = true;
+
+  // Rebuild the node to elem maps, in case the object(s) who got references to the maps
+  // actually do need to use them
+  if (_node_to_elem_map_built)
+  {
+    // it won't stay false
+    _node_to_elem_map_built = false;
+    nodeToElemMap();
+  }
+  if (_node_to_active_semilocal_elem_map_built)
+  {
+    _node_to_active_semilocal_elem_map_built = false;
+    nodeToActiveSemilocalElemMap();
+  }
 }
 
 void
@@ -1673,6 +1685,8 @@ MooseMesh::addQuadratureNode(const Elem * elem,
     // Keep track of this new node in two different ways for easy lookup
     _quadrature_nodes[new_id] = qnode;
     _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
+    mooseAssert(_node_to_elem_map_built, "Should have been built");
+    mooseAssert(_node_to_active_semilocal_elem_map_built, "Should have been built");
 
     if (elem->active())
     {
