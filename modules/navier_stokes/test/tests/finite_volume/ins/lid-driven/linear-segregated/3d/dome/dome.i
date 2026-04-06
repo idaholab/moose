@@ -30,12 +30,12 @@ Re_crit = 5e5
 Nu_in = '${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}'
 h_in = '${fparse Nu_in * k / L}'
 
-T_0 = ${units 60 degF -> K}
+T_0 = '${units 60 degF -> K}'
 # mau stands for Makeup-Air-Unit, e.g. the thing that brings in air from outside the dome
-T_mau = ${units 68 degF -> K}
+T_mau = '${units 68 degF -> K}'
 reactor_load = 300e3 # W
 # Parameter range from 45F to 68F
-T_outside_air = ${units 45 degF -> K}
+T_outside_air = '${units 45 degF -> K}'
 
 # Driver inputs define the thermostat logic with these symbols:
 # T_heat_trigger
@@ -78,8 +78,8 @@ floor_heat = 3.12e3 # W
 # AHU parameters
 # Combined volumetric flow rate (from the two units)
 ahu_vfr = 23.5973725 # m3/s
-ahu_cooling = ${fparse 2*275 * 10^3} # Watts
-ahu_heating = ${fparse 2*450 * 10^3} # Watts
+ahu_cooling = '${fparse 2*275 * 10^3}' # Watts
+ahu_heating = '${fparse 2*450 * 10^3}' # Watts
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -614,7 +614,7 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
 
   [pressure-flux]
     type = LinearFVPressureFluxBC
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary inlet_1 inlet_2 inlet_3 ahu_intake_1 ahu_exhaust_1 ahu_intake_2 ahu_exhaust_2'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary air_ahu_boundary inlet_1 inlet_2 inlet_3 ahu_intake_1 ahu_exhaust_1'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
@@ -661,6 +661,18 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     variable = vel_z
     boundary = 'ahu_intake_2 ahu_exhaust_2'
     functor = 0
+    enable = true
+  []
+  # This BC is only correct when the AHU is off (boundaries acting as walls).
+  # When the AHU is on, LinearFVPressureFluxBC cancels the HbyA face flux, making
+  # the Rhie-Chow face mass flux ~0 and breaking VolumetricFlowRate diagnostics
+  # and any postprocessors that depend on them (e.g. ahu_heat_in → ahu_T_out).
+  [ahu_pressure_flux_ahu_off]
+    type = LinearFVPressureFluxBC
+    boundary = 'ahu_intake_2 ahu_exhaust_2'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
     enable = true
   []
   # ahu on. Note that this is outflow from the simulation boundary so sign should be positive
@@ -1115,6 +1127,6 @@ ahu_heating = ${fparse 2*450 * 10^3} # Watts
     type = ConditionalFunctionEnableControl
     conditional_function = ahu_on_function
     enable_objects = 'LinearFVBCs::ahu_inlet_x LinearFVBCs::ahu_inlet_y LinearFVBCs::ahu_inlet_z LinearFVBCs::ahu_inlet_TKE LinearFVBCs::ahu_inlet_TKED LinearFVBCs::ahu_inlet_T LinearFVBCs::ahu_exhaust_x LinearFVBCs::ahu_exhaust_y LinearFVBCs::ahu_exhaust_z LinearFVBCs::ahu_exhaust_TKE LinearFVBCs::ahu_exhaust_TKED LinearFVBCs::ahu_exhaust_T'
-    disable_objects = 'LinearFVBCs::no_slip_x_ahu LinearFVBCs::no_slip_y_ahu LinearFVBCs::no_slip_z_ahu'
+    disable_objects = 'LinearFVBCs::no_slip_x_ahu LinearFVBCs::no_slip_y_ahu LinearFVBCs::no_slip_z_ahu LinearFVBCs::ahu_pressure_flux_ahu_off'
   []
 []
