@@ -78,9 +78,9 @@ struct PropRecord
    */
   bool on_demand = false;
   /**
-   * Whether this property is constant over element or subdomain
+   * Whether this property is constant over element or subdomain in each subdomain
    */
-  PropertyConstantOption constant_option = PropertyConstantOption::NONE;
+  std::unordered_map<SubdomainID, PropertyConstantOption> constant_option;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -178,9 +178,9 @@ protected:
    */
   bool _default = false;
   /**
-   * Whether this property is constant over element or subdomain
+   * Whether this property is constant over element or subdomain in each subdomain
    */
-  PropertyConstantOption _constant_option = PropertyConstantOption::NONE;
+  Array<PropertyConstantOption> _constant_option;
 };
 
 inline const std::string &
