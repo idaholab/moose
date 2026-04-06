@@ -18,6 +18,11 @@
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
 
+namespace Moose::MFEM
+{
+struct SolutionState;
+}
+
 class MFEMProblem : public ExternalProblem
 {
 public:
@@ -374,6 +379,7 @@ protected:
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
   MFEMProblemData _problem_data;
+  Moose::MFEM::SolutionState & _solution_state_data;
 };
 
 template <typename T>
