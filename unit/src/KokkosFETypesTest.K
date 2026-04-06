@@ -114,6 +114,113 @@ TEST(KokkosFETypesTest, NDofs_Lagrange_3D)
   EXPECT_EQ(nDofs(FEFamily::LAGRANGE, FEElemTopology::HEX27), 27u);
 }
 
+// ── toKokkosFamily — MONOMIAL and UNKNOWN sentinel ────────────────────────────
+
+TEST(KokkosFETypesTest, ToKokkosFamily_Monomial)
+{
+  EXPECT_EQ(toKokkosFamily(libMesh::MONOMIAL),     FEFamily::MONOMIAL);
+  EXPECT_EQ(toKokkosFamily(libMesh::MONOMIAL_VEC), FEFamily::MONOMIAL_VEC);
+}
+
+TEST(KokkosFETypesTest, ToKokkosFamily_UnknownReturnsUnknownSentinel)
+{
+  // Unrecognized libMesh families must return UNKNOWN rather than abort.
+  // HIERARCHIC is a well-known alternative that we do not natively support.
+  EXPECT_EQ(toKokkosFamily(libMesh::HIERARCHIC), FEFamily::UNKNOWN);
+  // UNKNOWN must not equal any real family
+  EXPECT_NE(toKokkosFamily(libMesh::HIERARCHIC), FEFamily::LAGRANGE);
+  EXPECT_NE(toKokkosFamily(libMesh::HIERARCHIC), FEFamily::MONOMIAL);
+}
+
+// ── classFromTopology ─────────────────────────────────────────────────────────
+
+TEST(KokkosFETypesTest, ClassFromTopology_1D)
+{
+  EXPECT_EQ(classFromTopology(FEElemTopology::EDGE2), FEElemClass::EDGE);
+  EXPECT_EQ(classFromTopology(FEElemTopology::EDGE3), FEElemClass::EDGE);
+}
+
+TEST(KokkosFETypesTest, ClassFromTopology_2D)
+{
+  EXPECT_EQ(classFromTopology(FEElemTopology::TRI3),  FEElemClass::TRI);
+  EXPECT_EQ(classFromTopology(FEElemTopology::TRI6),  FEElemClass::TRI);
+  EXPECT_EQ(classFromTopology(FEElemTopology::QUAD4), FEElemClass::QUAD);
+  EXPECT_EQ(classFromTopology(FEElemTopology::QUAD8), FEElemClass::QUAD);
+  EXPECT_EQ(classFromTopology(FEElemTopology::QUAD9), FEElemClass::QUAD);
+}
+
+TEST(KokkosFETypesTest, ClassFromTopology_3D)
+{
+  EXPECT_EQ(classFromTopology(FEElemTopology::TET4),  FEElemClass::TET);
+  EXPECT_EQ(classFromTopology(FEElemTopology::TET10), FEElemClass::TET);
+  EXPECT_EQ(classFromTopology(FEElemTopology::HEX8),  FEElemClass::HEX);
+  EXPECT_EQ(classFromTopology(FEElemTopology::HEX20), FEElemClass::HEX);
+  EXPECT_EQ(classFromTopology(FEElemTopology::HEX27), FEElemClass::HEX);
+}
+
+// ── nDofs(FEShapeKey) — LAGRANGE ─────────────────────────────────────────────
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Lagrange_1D)
+{
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::EDGE, 1}), 2u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::EDGE, 2}), 3u);
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Lagrange_2D)
+{
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::TRI,  1}),  3u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::TRI,  2}),  6u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::QUAD, 1}),  4u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::QUAD, 2}),  9u);
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Lagrange_3D)
+{
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::TET, 1}),  4u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::TET, 2}), 10u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::HEX, 1}),  8u);
+  EXPECT_EQ(nDofs(FEShapeKey{FEFamily::LAGRANGE, FEElemClass::HEX, 2}), 27u);
+}
+
+// ── nDofs(FEShapeKey) — MONOMIAL ─────────────────────────────────────────────
+// 1D: p+1  |  2D: (p+1)(p+2)/2  |  3D: (p+1)(p+2)(p+3)/6
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Monomial_1D)
+{
+  for (unsigned int p = 0; p <= 5; ++p)
+    EXPECT_EQ(nDofs(FEShapeKey{FEFamily::MONOMIAL, FEElemClass::EDGE, p}), p + 1) << "p=" << p;
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Monomial_2D_TRI)
+{
+  for (unsigned int p = 0; p <= 5; ++p)
+    EXPECT_EQ(nDofs(FEShapeKey{FEFamily::MONOMIAL, FEElemClass::TRI, p}),
+              (p + 1) * (p + 2) / 2) << "p=" << p;
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Monomial_2D_QUAD)
+{
+  // TRI and QUAD share the same Dim2 formula (total-degree polynomial space)
+  for (unsigned int p = 0; p <= 5; ++p)
+    EXPECT_EQ(nDofs(FEShapeKey{FEFamily::MONOMIAL, FEElemClass::QUAD, p}),
+              (p + 1) * (p + 2) / 2) << "p=" << p;
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Monomial_3D_TET)
+{
+  for (unsigned int p = 0; p <= 5; ++p)
+    EXPECT_EQ(nDofs(FEShapeKey{FEFamily::MONOMIAL, FEElemClass::TET, p}),
+              (p + 1) * (p + 2) * (p + 3) / 6) << "p=" << p;
+}
+
+TEST(KokkosFETypesTest, NDofs_FEShapeKey_Monomial_3D_HEX)
+{
+  // TET and HEX share the same Dim3 formula
+  for (unsigned int p = 0; p <= 5; ++p)
+    EXPECT_EQ(nDofs(FEShapeKey{FEFamily::MONOMIAL, FEElemClass::HEX, p}),
+              (p + 1) * (p + 2) * (p + 3) / 6) << "p=" << p;
+}
+
 // ── Enum values are contiguous and usable as array indices ───────────────────
 
 TEST(KokkosFETypesTest, EnumValuesAreContiguous)

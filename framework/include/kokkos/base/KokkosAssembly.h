@@ -150,12 +150,25 @@ public:
   }
   /**
    * Return whether a given FE type uses the on-demand shape evaluation path.
-   * True only for LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE; always false otherwise.
+   * True for LAGRANGE and MONOMIAL when nDofs matches libMesh under MOOSE_KOKKOS_ONDEMAND_FE;
+   * always false otherwise.
+   * @param elem_type_id The contiguous element type ID
    * @param fe_type_id The contiguous FE type ID
    */
   KOKKOS_FUNCTION bool isOnDemandFEType(unsigned int elem_type_id, unsigned int fe_type_id) const
   {
     return _is_ondemand_fe_type(elem_type_id, fe_type_id);
+  }
+  /**
+   * Return the FEShapeKey for a given (element type, FE type) pair.
+   * The key encodes the FE family, element base class, and polynomial order.
+   * @param elem_type_id The contiguous element type ID
+   * @param fe_type_id The contiguous FE type ID
+   * @returns The FEShapeKey for on-device shape dispatch
+   */
+  KOKKOS_FUNCTION FEShapeKey getShapeKey(unsigned int elem_type_id, unsigned int fe_type_id) const
+  {
+    return _shape_keys(elem_type_id, fe_type_id);
   }
   /**
    * Get the reference-element coordinate of a volume quadrature point
@@ -327,12 +340,15 @@ private:
    * CPU-only native path: fill _phi/_grad_phi/_phi_face/_grad_phi_face for one
    * (fe_type, elem_type) pair using FEEvaluator directly, without FEBase::reinit().
    * Called from initShape() when MOOSE_KOKKOS_NATIVE_FE is defined and the FE
-   * family is LAGRANGE.
+   * family is LAGRANGE or MONOMIAL.
+   * @param key    Physics FE space key (family + base class + order)
+   * @param geom_topo  Geometric element topology (used for side topology lookup)
    */
   void initShapeNative(unsigned int sid,
                        unsigned int etid,
                        unsigned int ftid,
-                       FEElemTopology topo,
+                       FEShapeKey key,
+                       FEElemTopology geom_topo,
                        unsigned int n_vol_qps,
                        unsigned int n_face_qps,
                        const libMesh::Elem & ref_elem);
@@ -424,10 +440,16 @@ private:
   Array<FEElemTopology> _elem_topologies;
   /**
    * Per-FE-type flag: true if this FE type uses the on-demand shape evaluation path
-   * (LAGRANGE under MOOSE_KOKKOS_ONDEMAND_FE). Non-Lagrange types fall back to phi tables.
-   * Indexed by contiguous FE type ID.
+   * (LAGRANGE or MONOMIAL under MOOSE_KOKKOS_ONDEMAND_FE). Other types fall back to phi tables.
+   * Indexed by (elem_type_id, fe_type_id).
    */
   Array2D<bool> _is_ondemand_fe_type;
+  /**
+   * Per-(elem_type, fe_type) shape key: encodes the FE family, element base class, and
+   * polynomial order for on-device shape function dispatch.
+   * Built on CPU during initShape(), copied to device before kernel launch.
+   */
+  Array2D<FEShapeKey> _shape_keys;
   /**
    * Face quadrature points mapped into the parent reference coordinate system
    * (for on-demand FE, Phase 6).  Indexed as _q_points_face_parent(subdomain, elem_type)[side][qp].

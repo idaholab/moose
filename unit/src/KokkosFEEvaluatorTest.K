@@ -23,6 +23,7 @@
 #include "KokkosFELagrange1D.h"
 #include "KokkosFELagrange2D.h"
 #include "KokkosFELagrange3D.h"
+#include "KokkosFEMonomial.h"
 
 using namespace Moose::Kokkos;
 
@@ -543,4 +544,161 @@ TEST(KokkosFEEvaluatorTest, GradSumZero_Hex8)
     EXPECT_NEAR(geta,  0.0, TOL);
     EXPECT_NEAR(gzeta, 0.0, TOL);
   }
+}
+
+// ── MONOMIAL Dim1 (EDGE elements) ────────────────────────────────────────────
+// Basis: {1, xi, xi², xi³, ...}  (NOT a partition of unity)
+
+TEST(KokkosFEEvaluatorTest, MonomialDim1_Order0_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim1Tag, 0>;
+  EXPECT_EQ(FE::n_dofs(), 1u);
+  // phi_0 = 1 everywhere; grad = 0
+  for (double xi : {-1.0, -0.5, 0.0, 0.5, 1.0})
+  {
+    EXPECT_NEAR(FE::shape(0, xi, 0.0, 0.0), 1.0, TOL) << "xi=" << xi;
+    auto g = FE::grad_shape(0, xi, 0.0, 0.0);
+    EXPECT_NEAR(g.v[0], 0.0, TOL);
+  }
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim1_Order1_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim1Tag, 1>;
+  EXPECT_EQ(FE::n_dofs(), 2u);
+  // phi_0 = 1, phi_1 = xi
+  for (double xi : {-0.7, 0.0, 0.3, 1.0})
+  {
+    EXPECT_NEAR(FE::shape(0, xi, 0.0, 0.0), 1.0, TOL) << "xi=" << xi;
+    EXPECT_NEAR(FE::shape(1, xi, 0.0, 0.0), xi,  TOL) << "xi=" << xi;
+    auto g1 = FE::grad_shape(1, xi, 0.0, 0.0);
+    EXPECT_NEAR(g1.v[0], 1.0, TOL);
+  }
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim1_Order2_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim1Tag, 2>;
+  EXPECT_EQ(FE::n_dofs(), 3u);
+  // phi_0 = 1, phi_1 = xi, phi_2 = xi²
+  for (double xi : {-0.5, 0.0, 0.4})
+  {
+    EXPECT_NEAR(FE::shape(0, xi, 0.0, 0.0), 1.0,    TOL) << "xi=" << xi;
+    EXPECT_NEAR(FE::shape(1, xi, 0.0, 0.0), xi,     TOL) << "xi=" << xi;
+    EXPECT_NEAR(FE::shape(2, xi, 0.0, 0.0), xi * xi, TOL) << "xi=" << xi;
+    auto g2 = FE::grad_shape(2, xi, 0.0, 0.0);
+    EXPECT_NEAR(g2.v[0], 2.0 * xi, TOL);
+    EXPECT_NEAR(g2.v[1], 0.0,      TOL);
+  }
+}
+
+// ── MONOMIAL Dim2 (TRI and QUAD share this evaluator) ────────────────────────
+// Graded-lex: {1, xi, eta, xi², xi·eta, eta², xi³, ...}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim2_Order0_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim2Tag, 0>;
+  EXPECT_EQ(FE::n_dofs(), 1u);
+  for (auto [xi, eta] : std::initializer_list<std::pair<double,double>>{
+      {0.0,0.0},{0.3,0.4},{-0.5,0.5}})
+  {
+    EXPECT_NEAR(FE::shape(0, xi, eta, 0.0), 1.0, TOL) << "xi=" << xi << " eta=" << eta;
+    auto g = FE::grad_shape(0, xi, eta, 0.0);
+    EXPECT_NEAR(g.v[0], 0.0, TOL);
+    EXPECT_NEAR(g.v[1], 0.0, TOL);
+  }
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim2_Order1_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim2Tag, 1>;
+  EXPECT_EQ(FE::n_dofs(), 3u);
+  // i=0:1, i=1:xi, i=2:eta
+  const double xi = 0.3, eta = -0.4;
+  EXPECT_NEAR(FE::shape(0, xi, eta, 0.0), 1.0, TOL);
+  EXPECT_NEAR(FE::shape(1, xi, eta, 0.0), xi,  TOL);
+  EXPECT_NEAR(FE::shape(2, xi, eta, 0.0), eta, TOL);
+  auto g1 = FE::grad_shape(1, xi, eta, 0.0);
+  EXPECT_NEAR(g1.v[0], 1.0, TOL); EXPECT_NEAR(g1.v[1], 0.0, TOL);
+  auto g2 = FE::grad_shape(2, xi, eta, 0.0);
+  EXPECT_NEAR(g2.v[0], 0.0, TOL); EXPECT_NEAR(g2.v[1], 1.0, TOL);
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim2_Order2_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim2Tag, 2>;
+  EXPECT_EQ(FE::n_dofs(), 6u);
+  // i: 0→1, 1→xi, 2→eta, 3→xi², 4→xi·eta, 5→eta²
+  const double xi = 0.3, eta = 0.5;
+  EXPECT_NEAR(FE::shape(0, xi, eta, 0.0), 1.0,      TOL);
+  EXPECT_NEAR(FE::shape(1, xi, eta, 0.0), xi,       TOL);
+  EXPECT_NEAR(FE::shape(2, xi, eta, 0.0), eta,      TOL);
+  EXPECT_NEAR(FE::shape(3, xi, eta, 0.0), xi * xi,  TOL);
+  EXPECT_NEAR(FE::shape(4, xi, eta, 0.0), xi * eta, TOL);
+  EXPECT_NEAR(FE::shape(5, xi, eta, 0.0), eta * eta, TOL);
+  // grad(xi·eta) = {eta, xi, 0}
+  auto g4 = FE::grad_shape(4, xi, eta, 0.0);
+  EXPECT_NEAR(g4.v[0], eta, TOL);
+  EXPECT_NEAR(g4.v[1], xi,  TOL);
+  EXPECT_NEAR(g4.v[2], 0.0, TOL);
+  // grad(eta²) = {0, 2·eta, 0}
+  auto g5 = FE::grad_shape(5, xi, eta, 0.0);
+  EXPECT_NEAR(g5.v[0], 0.0,       TOL);
+  EXPECT_NEAR(g5.v[1], 2.0 * eta, TOL);
+}
+
+// ── MONOMIAL Dim3 (TET/HEX/PRISM/PYRAMID share this evaluator) ───────────────
+// Graded-lex: {1, xi, eta, zeta, xi², xi·eta, xi·zeta, eta², eta·zeta, zeta², ...}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim3_Order0_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim3Tag, 0>;
+  EXPECT_EQ(FE::n_dofs(), 1u);
+  EXPECT_NEAR(FE::shape(0, 0.1, 0.2, 0.3), 1.0, TOL);
+  auto g = FE::grad_shape(0, 0.1, 0.2, 0.3);
+  EXPECT_NEAR(g.v[0], 0.0, TOL);
+  EXPECT_NEAR(g.v[1], 0.0, TOL);
+  EXPECT_NEAR(g.v[2], 0.0, TOL);
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim3_Order1_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim3Tag, 1>;
+  EXPECT_EQ(FE::n_dofs(), 4u);
+  // i=0:1, i=1:xi, i=2:eta, i=3:zeta
+  const double xi = 0.2, eta = 0.3, zeta = 0.1;
+  EXPECT_NEAR(FE::shape(0, xi, eta, zeta), 1.0,  TOL);
+  EXPECT_NEAR(FE::shape(1, xi, eta, zeta), xi,   TOL);
+  EXPECT_NEAR(FE::shape(2, xi, eta, zeta), eta,  TOL);
+  EXPECT_NEAR(FE::shape(3, xi, eta, zeta), zeta, TOL);
+  auto g3 = FE::grad_shape(3, xi, eta, zeta);
+  EXPECT_NEAR(g3.v[0], 0.0, TOL);
+  EXPECT_NEAR(g3.v[1], 0.0, TOL);
+  EXPECT_NEAR(g3.v[2], 1.0, TOL);
+}
+
+TEST(KokkosFEEvaluatorTest, MonomialDim3_Order2_Basis)
+{
+  using FE = FEEvaluator<MonomialTag, Dim3Tag, 2>;
+  EXPECT_EQ(FE::n_dofs(), 10u);
+  // i: 0→1, 1→xi, 2→eta, 3→zeta, 4→xi², 5→xi·eta, 6→xi·zeta,
+  //    7→eta², 8→eta·zeta, 9→zeta²
+  const double xi = 0.2, eta = 0.3, zeta = -0.4;
+  EXPECT_NEAR(FE::shape(0, xi, eta, zeta), 1.0,        TOL);
+  EXPECT_NEAR(FE::shape(4, xi, eta, zeta), xi * xi,    TOL);
+  EXPECT_NEAR(FE::shape(5, xi, eta, zeta), xi * eta,   TOL);
+  EXPECT_NEAR(FE::shape(6, xi, eta, zeta), xi * zeta,  TOL);
+  EXPECT_NEAR(FE::shape(7, xi, eta, zeta), eta * eta,  TOL);
+  EXPECT_NEAR(FE::shape(8, xi, eta, zeta), eta * zeta, TOL);
+  EXPECT_NEAR(FE::shape(9, xi, eta, zeta), zeta * zeta, TOL);
+  // grad(eta·zeta) = {0, zeta, eta}
+  auto g8 = FE::grad_shape(8, xi, eta, zeta);
+  EXPECT_NEAR(g8.v[0], 0.0,  TOL);
+  EXPECT_NEAR(g8.v[1], zeta, TOL);
+  EXPECT_NEAR(g8.v[2], eta,  TOL);
+  // grad(xi·zeta) = {zeta, 0, xi}
+  auto g6 = FE::grad_shape(6, xi, eta, zeta);
+  EXPECT_NEAR(g6.v[0], zeta, TOL);
+  EXPECT_NEAR(g6.v[1], 0.0,  TOL);
+  EXPECT_NEAR(g6.v[2], xi,   TOL);
 }

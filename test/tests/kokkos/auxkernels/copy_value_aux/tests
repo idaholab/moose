@@ -17,4 +17,31 @@
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
+
+  # ── MONOMIAL FIRST — native FE and on-demand FE paths ───────────────────────
+  # Exercise the Phase 5 (initShapeNative) and Phase 6 (nativeShape(FEShapeKey))
+  # code paths for MONOMIAL order > 0.  Both tests compare against the same
+  # pre-generated gold CSV file.
+
+  [native_fe_copy_monomial_first]
+    type = 'CSVDiff'
+    input = 'kokkos_copy_monomial_first_aux.i'
+    csvdiff = 'kokkos_copy_monomial_first_aux_out_results_0001.csv'
+    requirement = 'The Kokkos native FE path (MOOSE_KOKKOS_NATIVE_FE) shall produce '
+                  'correct results when evaluating MONOMIAL FIRST shape functions, '
+                  'exercising initShapeNative with a MONOMIAL FEShapeKey.'
+    capabilities = 'kokkos & kokkos_native_fe'
+    compute_devices = 'cpu cuda'
+  []
+
+  [ondemand_fe_copy_monomial_first]
+    type = 'CSVDiff'
+    input = 'kokkos_copy_monomial_first_aux.i'
+    csvdiff = 'kokkos_copy_monomial_first_aux_out_results_0001.csv'
+    requirement = 'The Kokkos on-demand FE path (MOOSE_KOKKOS_ONDEMAND_FE) shall produce '
+                  'correct results for MONOMIAL FIRST variables, exercising on-device '
+                  'nativeShape dispatch via FEShapeKey.'
+    capabilities = 'kokkos & kokkos_ondemand_fe'
+    compute_devices = 'cpu cuda'
+  []
 []

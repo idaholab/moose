@@ -37,6 +37,17 @@ struct Hex27Tag  {}; // 3D, 27-node triquadratic hexahedron
 struct LagrangeTag    {};
 struct LagrangeVecTag {};
 struct HermiteTag     {};
+struct MonomialTag    {};
+struct MonomialVecTag {};
+
+// ── Spatial dimension tags (for MONOMIAL) ─────────────────────────────────────
+// MONOMIAL uses complete total-degree polynomials parameterised by spatial
+// dimension, not element class: TRI and QUAD share Dim2Tag; TET/HEX/PRISM/
+// PYRAMID share Dim3Tag.  This matches libMesh's FE<Dim, MONOMIAL> design.
+
+struct Dim1Tag {};  // 1-D elements (EDGE)
+struct Dim2Tag {};  // 2-D elements (TRI, QUAD)
+struct Dim3Tag {};  // 3-D elements (TET, HEX, PRISM, PYRAMID)
 
 // ── Primary FEEvaluator template ─────────────────────────────────────────────
 //
@@ -60,7 +71,10 @@ struct HermiteTag     {};
 // Unused coordinate arguments (e.g. zeta on a 2D element) are accepted but
 // ignored, so call sites can always pass all three without special-casing.
 
-template <typename FamilyTag, typename ElemTag>
+// Order is only meaningful for MONOMIAL specializations (FEEvaluator<MonomialTag, DimNTag, p>).
+// Lagrange specializations always use Order = 0 (the default) because the
+// element tag (e.g. Quad9Tag) already encodes the polynomial order.
+template <typename FamilyTag, typename ElemTag, unsigned int Order = 0>
 struct FEEvaluator; // forward declaration only; instantiation requires a specialization
 
 } // namespace Moose::Kokkos

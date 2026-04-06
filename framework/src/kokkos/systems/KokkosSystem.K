@@ -553,21 +553,21 @@ System::operator()(const ThreadID tid) const
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
   if (kokkosAssembly().isOnDemandFEType(elem_type, fe_type))
   {
-    // LAGRANGE: evaluate shape functions on-device.
-    const auto topo = kokkosAssembly().getElemTopology(elem_type);
+    // On-demand: evaluate shape functions on-device (LAGRANGE or MONOMIAL).
+    const auto key = kokkosAssembly().getShapeKey(elem_type, fe_type);
     const auto ref = kokkosAssembly().getQPointRef(sid, elem_type, qp);
 
     for (unsigned int i = 0; i < num_dofs; ++i)
     {
       auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
 
-      value += vector * nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
-      grad += vector * (jacobian * nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]));
+      value += vector * nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
+      grad += vector * (jacobian * nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]));
     }
   }
   else
   {
-    // Non-LAGRANGE (e.g. MONOMIAL): fall back to precomputed phi tables.
+    // Fall back to precomputed phi tables (unsupported family, order mismatch, etc.).
     auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
     auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
 

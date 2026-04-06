@@ -528,12 +528,12 @@ System::getVectorQpValueFace(
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
   if (kokkosAssembly().isOnDemandFEType(info.type, fe))
   {
-    const auto topo = kokkosAssembly().getElemTopology(info.type);
+    const auto key = kokkosAssembly().getShapeKey(info.type, fe);
     const auto ref = kokkosAssembly().getQPointRefFace(info.subdomain, info.type, side, qp);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-               nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+               nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
   }
   else
 #endif
@@ -562,12 +562,12 @@ System::getVectorQpGradFace(ElementInfo info,
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
   if (kokkosAssembly().isOnDemandFEType(info.type, fe))
   {
-    const auto topo = kokkosAssembly().getElemTopology(info.type);
+    const auto key = kokkosAssembly().getShapeKey(info.type, fe);
     const auto ref = kokkosAssembly().getQPointRefFace(info.subdomain, info.type, side, qp);
 
     for (unsigned int i = 0; i < n_dofs; ++i)
       grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-              (jacobian * nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]));
+              (jacobian * nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]));
   }
   else
 #endif
