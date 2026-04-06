@@ -36,7 +36,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
@@ -54,7 +54,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     unheated_length_entry = '${fparse length_entry_fuel}'
@@ -78,22 +78,22 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [AuxVariables]
   [mdot]
-    block = subchannel
+    block = sub_channel
   []
   [SumWij]
-    block = subchannel
+    block = sub_channel
   []
   [P]
-    block = subchannel
+    block = sub_channel
   []
   [DP]
-    block = subchannel
+    block = sub_channel
   []
   [h]
-    block = subchannel
+    block = sub_channel
   []
   [T]
-    block = subchannel
+    block = sub_channel
   []
   [Tpin]
     block = fuel_pins
@@ -102,22 +102,22 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = fuel_pins
   []
   [rho]
-    block = subchannel
+    block = sub_channel
   []
   [S]
-    block = subchannel
+    block = sub_channel
   []
   [w_perim]
-    block = subchannel
+    block = sub_channel
   []
   [displacement]
-    block = subchannel
+    block = sub_channel
   []
   [q_prime]
     block = fuel_pins
   []
   [mu]
-    block = subchannel
+    block = sub_channel
   []
   [duct_heat_flux]
     block = duct
@@ -134,7 +134,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 []
 
-[SubChannel]
+[sub_channel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   P_out = ${P_out}
@@ -255,7 +255,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -264,7 +264,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
 []
 

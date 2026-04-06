@@ -24,7 +24,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 50
@@ -41,7 +41,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 50
     unheated_length_exit = ${unheated_length_exit}
@@ -166,7 +166,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

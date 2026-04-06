@@ -90,10 +90,6 @@ SubChannel1PhaseProblem::validParams()
       "segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>(
       "verbose_subchannel", false, "Boolean to print out information related to subchannel solve.");
-  params.addParam<bool>(
-      "deformation",
-      false,
-      "Boolean that activates the deformation effect based on values for: displacement, Dpin");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -150,7 +146,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
-    _deformation(getParam<bool>("deformation")),
     _fp(nullptr),
     _Tpin_soln(nullptr),
     _duct_heat_flux_soln(nullptr),
@@ -294,9 +289,8 @@ SubChannel1PhaseProblem::initialSetup()
   _S_flow_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SURFACE_AREA));
   _w_perim_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::WETTED_PERIMETER));
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
-  if (_deformation)
-    _displacement_soln =
-        std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
+  _displacement_soln =
+      std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =

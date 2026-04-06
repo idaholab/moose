@@ -16,7 +16,7 @@ inner_duct_in = 3.41e-2
 heated_length = 1.0
 ###################################################
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = ${n_cells}
@@ -32,7 +32,7 @@ heated_length = 1.0
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = ${n_cells}
     heated_length = ${heated_length}
@@ -42,37 +42,37 @@ heated_length = 1.0
 
 [AuxVariables]
   [mdot]
-    block = subchannel
+    block = sub_channel
   []
   [SumWij]
-    block = subchannel
+    block = sub_channel
   []
   [P]
-    block = subchannel
+    block = sub_channel
   []
   [DP]
-    block = subchannel
+    block = sub_channel
   []
   [h]
-    block = subchannel
+    block = sub_channel
   []
   [T]
-    block = subchannel
+    block = sub_channel
   []
   [rho]
-    block = subchannel
+    block = sub_channel
   []
   [S]
-    block = subchannel
+    block = sub_channel
   []
   [w_perim]
-    block = subchannel
+    block = sub_channel
   []
   [mu]
-    block = subchannel
+    block = sub_channel
   []
   [displacement]
-    block = subchannel
+    block = sub_channel
   []
   [q_prime]
     block = fuel_pins
@@ -201,7 +201,7 @@ heated_length = 1.0
     variable = T
     boundary = inlet
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -210,7 +210,7 @@ heated_length = 1.0
     area = S
     mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
 []
 

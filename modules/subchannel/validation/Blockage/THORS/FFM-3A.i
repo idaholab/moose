@@ -18,7 +18,7 @@ vol_flow = 3.4E-03 #m3/s
 mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 36

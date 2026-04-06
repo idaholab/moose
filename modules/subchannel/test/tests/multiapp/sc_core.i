@@ -26,7 +26,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = 10
@@ -42,7 +42,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = '${fparse n_rings}'
     n_cells = 10
     heated_length = '${fparse length_heated_fuel}'
@@ -250,7 +250,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMFlatMassFlowRateAux
@@ -258,7 +258,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
     boundary = inlet
     mass_flow = ${mass_flow}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
 []
 

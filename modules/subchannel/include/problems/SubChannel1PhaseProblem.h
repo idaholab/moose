@@ -239,7 +239,7 @@ protected:
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin
-  const bool _deformation;
+  bool _deformation = false;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties * _fp;

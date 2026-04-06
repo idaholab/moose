@@ -37,7 +37,7 @@ unheated_length_exit = 0.855 #m
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 65
@@ -55,7 +55,7 @@ unheated_length_exit = 0.855 #m
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 65
     unheated_length_entry = ${unheated_length_entry}
@@ -198,7 +198,7 @@ unheated_length_exit = 0.855 #m
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

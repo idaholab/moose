@@ -11,7 +11,7 @@ P_out = 2.0e5 # Pa
 []
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
@@ -21,7 +21,7 @@ P_out = 2.0e5 # Pa
   []
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = subchannel
+    input = sub_channel
   []
 []
 
@@ -219,7 +219,7 @@ P_out = 2.0e5 # Pa
   [Total_power]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
-    block = subchannel
+    block = sub_channel
   []
   [mdot-8]
     type = SubChannelPointValue

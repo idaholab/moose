@@ -67,6 +67,22 @@ TriSubChannel1PhaseProblem::cleanUp()
 void
 TriSubChannel1PhaseProblem::initializeSolution()
 {
+  auto pin_diameter = _subchannel_mesh.getPinDiameter();
+  for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+  {
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      if (_pin_mesh_exist)
+      {
+        if (_Dpin_soln(node) != pin_diameter)
+          _deformation = true;
+      }
+      if (_displacement_soln(node) != 0.0)
+        _deformation = true;
+    }
+  }
+
   if (_deformation)
   {
     // update surface area, wetted perimeter based on: Dpin, displacement

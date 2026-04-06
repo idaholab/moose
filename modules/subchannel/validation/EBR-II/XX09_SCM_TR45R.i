@@ -1,6 +1,6 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-# Transient Subchannel calculation
+# Transient sub_channel calculation
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################
@@ -24,7 +24,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 50
@@ -41,7 +41,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 50
     unheated_length_exit = ${unheated_length_exit}
@@ -50,36 +50,42 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
+[FluidProperties]
+  [sodium]
+    type = PBSodiumFluidProperties
+  []
+[]
+
 [AuxVariables]
   [mdot]
-    block = subchannel
+    block = sub_channel
   []
   [SumWij]
-    block = subchannel
+    block = sub_channel
   []
   [P]
-    block = subchannel
+    block = sub_channel
   []
   [DP]
-    block = subchannel
+    block = sub_channel
   []
   [h]
-    block = subchannel
+    block = sub_channel
   []
   [T]
-    block = subchannel
+    block = sub_channel
   []
   [rho]
-    block = subchannel
+    block = sub_channel
   []
   [S]
-    block = subchannel
+    block = sub_channel
   []
   [w_perim]
-    block = subchannel
+    block = sub_channel
   []
   [mu]
-    block = subchannel
+    block = sub_channel
   []
   [q_prime_init]
     block = fuel_pins
@@ -97,16 +103,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     block = fuel_pins
   []
   [displacement]
-    block = subchannel
+    block = sub_channel
   []
   [ff]
-    block = subchannel
-  []
-[]
-
-[FluidProperties]
-  [sodium]
-    type = PBSodiumFluidProperties
+    block = sub_channel
   []
 []
 
@@ -254,7 +254,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
