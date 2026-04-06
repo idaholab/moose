@@ -266,8 +266,7 @@ Assembly::initQuadrature()
 }
 
 #ifdef MOOSE_KOKKOS_NATIVE_FE
-static Real3 mapFaceQpToParent(const libMesh::Elem & parent,
-                                unsigned int side,
+static Real3 mapFaceQpToParent(const libMesh::Elem & side_in_parent,
                                 FEElemTopology side_topo,
                                 Real3 face_qpt);
 #endif
@@ -515,9 +514,10 @@ Assembly::initShape()
           const unsigned int n_face_qps = face_qpts.size();
           _q_points_face_parent(sid, elem_type_id)[side].create(n_face_qps);
 
+          auto side_elem = elem->build_side_ptr(side);
           for (unsigned int qp = 0; qp < n_face_qps; ++qp)
             _q_points_face_parent(sid, elem_type_id)[side][qp] =
-                mapFaceQpToParent(*elem, side, side_topo, face_qpts[qp]);
+                mapFaceQpToParent(*side_elem, side_topo, face_qpts[qp]);
         }
       }
 #endif
@@ -626,44 +626,40 @@ Assembly::initShape()
 // Map a face quadrature point from the side element's reference coordinate
 // system to the parent element's reference coordinate system.
 //
-// parent     — the parent reference element (e.g. reference QUAD9)
-// side       — local side index on the parent
-// side_topo  — Kokkos topology of the side element
-// face_qpt   — quadrature point in the side element's reference system
+// side_in_parent — side element obtained via parent.build_side_ptr(side) (const
+//                  version).  For second-order parents (e.g. QUAD9) this is the
+//                  full EDGE3, not the primitive EDGE2 returned by side_ptr().
+// side_topo      — Kokkos topology of the side element
+// face_qpt       — quadrature point in the side element's reference system
 //
 // The mapping is the isoparametric one:
-//   x_parent = sum_k  psi_k(face_qpt)  *  master_point_k_in_parent
+//   x_parent = sum_k  psi_k(face_qpt)  *  x_node_k_in_parent
 //
-// where psi_k are the LAGRANGE shape functions of the side element.
+// where psi_k are the LAGRANGE shape functions of the side element and
+// x_node_k_in_parent are the parent reference coordinates of each side node.
 //
-// NOTE: We deliberately avoid Elem::side_ptr() here.  The Quad base class
-// marks side_ptr() as 'override final' and it always returns a primitive
-// EDGE2, even for second-order quads (QUAD9).  Using that 2-node element
-// for the isoparametric mapping silently drops the midpoint contribution,
-// yielding wrong parent reference coordinates.  Instead we query the full
-// set of side nodes via nodes_on_side() and look up their positions through
-// master_point(), which always returns the correct reference coordinates for
-// the complete (possibly second-order) side.
+// NOTE: Call sites must use build_side_ptr() (the const-qualified overload),
+// NOT side_ptr().  Quad::side_ptr() is 'override final' and always returns a
+// primitive EDGE2, silently dropping the midpoint node for second-order quads.
+// build_side_ptr() dispatches to Quad9::build_side_ptr() and returns the
+// correct EDGE3 with all three nodes.
 static Real3
-mapFaceQpToParent(const libMesh::Elem & parent,
-                  unsigned int side,
+mapFaceQpToParent(const libMesh::Elem & side_in_parent,
                   FEElemTopology side_topo,
                   Real3 face_qpt)
 {
-  // Full node list for this side (vertices + midpoints for second-order elems).
-  auto side_nodes = parent.nodes_on_side(side);
-  const unsigned int n = side_nodes.size();
-
+  const unsigned int n = side_in_parent.n_nodes();
   Real3 parent_pt;
 
-  // 1-D elements: sides are single vertex nodes.  No reference coordinate
-  // on a point element — just return the node's master-element position.
+  // 1-D elements: the "side" is a single vertex node.  There are no reference
+  // coordinates on a point element, so the parent reference coordinate is
+  // simply the node's own position in the parent reference element.
   if (n == 1)
   {
-    const auto master = parent.master_point(side_nodes[0]);
-    parent_pt.v[0] = master(0);
-    parent_pt.v[1] = master(1);
-    parent_pt.v[2] = master(2);
+    const auto & pt = side_in_parent.point(0);
+    parent_pt.v[0] = pt(0);
+    parent_pt.v[1] = pt(1);
+    parent_pt.v[2] = pt(2);
     return parent_pt;
   }
 
@@ -701,10 +697,10 @@ mapFaceQpToParent(const libMesh::Elem & parent,
         break;
     }
 
-    const auto master = parent.master_point(side_nodes[k]);
-    parent_pt.v[0] += psi * master(0);
-    parent_pt.v[1] += psi * master(1);
-    parent_pt.v[2] += psi * master(2);
+    const auto & pt = side_in_parent.point(k);
+    parent_pt.v[0] += psi * pt(0);
+    parent_pt.v[1] += psi * pt(1);
+    parent_pt.v[2] += psi * pt(2);
   }
 
   return parent_pt;
@@ -815,11 +811,12 @@ Assembly::initShapeNative(unsigned int sid,
     _phi_face(sid, etid, ftid)(side).create(n, n_face_qps);
     _grad_phi_face(sid, etid, ftid)(side).create(n, n_face_qps);
 
+    auto side_elem = ref_elem.build_side_ptr(side);
     for (unsigned int i = 0; i < n; ++i)
       for (unsigned int qp = 0; qp < n_face_qps; ++qp)
       {
         const Real3 par = mapFaceQpToParent(
-            ref_elem, side, side_topo, _q_points_face(sid, etid)[side][qp]);
+            *side_elem, side_topo, _q_points_face(sid, etid)[side][qp]);
         evalShapeAtQp(key, i, qp, par.v[0], par.v[1], par.v[2],
                       _phi_face(sid, etid, ftid)(side),
                       _grad_phi_face(sid, etid, ftid)(side));
@@ -865,10 +862,11 @@ Assembly::initMapNative(unsigned int sid,
     _map_phi_face(sid, etid)(side).create(n_map, n_face_qps);
     _map_grad_phi_face(sid, etid)(side).create(n_map, n_face_qps);
 
+    auto side_elem = ref_elem.build_side_ptr(side);
     for (unsigned int i = 0; i < n_map; ++i)
       for (unsigned int qp = 0; qp < n_face_qps; ++qp)
       {
-        const Real3 par = mapFaceQpToParent(ref_elem, side, side_topo, face_qpts[qp]);
+        const Real3 par = mapFaceQpToParent(*side_elem, side_topo, face_qpts[qp]);
         evalShapeAtQp(topo, i, qp, par.v[0], par.v[1], par.v[2],
                       _map_phi_face(sid, etid)(side),
                       _map_grad_phi_face(sid, etid)(side));

@@ -12,6 +12,10 @@
 #include "KokkosTypes.h"
 #include "KokkosFETypes.h"
 
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+#include "KokkosFEReinit.h"
+#endif
+
 #include "MooseMesh.h"
 
 #include "libmesh/elem_range.h"
@@ -246,6 +250,109 @@ public:
                                               unsigned int fe_type) const
   {
     return _grad_phi_face(subdomain, elem_type, fe_type);
+  }
+  /**
+   * Evaluate a single shape function value, dispatching across all evaluation paths
+   * (on-demand native, precomputed table).
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param i The shape function index
+   * @param qp The local quadrature point index
+   * @returns The shape function value
+   */
+  KOKKOS_FUNCTION Real getPhi(ContiguousSubdomainID subdomain,
+                               unsigned int elem_type,
+                               unsigned int fe_type,
+                               unsigned int i,
+                               unsigned int qp) const
+  {
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    if (_is_ondemand_fe_type(elem_type, fe_type))
+    {
+      const auto ref = _q_points(subdomain, elem_type)[qp];
+      return nativeShape(_shape_keys(elem_type, fe_type), i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#endif
+    return _phi(subdomain, elem_type, fe_type)(i, qp);
+  }
+  /**
+   * Evaluate a single face shape function value, dispatching across all evaluation paths.
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param side The side index
+   * @param i The shape function index
+   * @param qp The local face quadrature point index
+   * @returns The shape function value
+   */
+  KOKKOS_FUNCTION Real getPhiFace(ContiguousSubdomainID subdomain,
+                                   unsigned int elem_type,
+                                   unsigned int fe_type,
+                                   unsigned int side,
+                                   unsigned int i,
+                                   unsigned int qp) const
+  {
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    if (_is_ondemand_fe_type(elem_type, fe_type))
+    {
+      const auto ref = _q_points_face_parent(subdomain, elem_type)[side][qp];
+      return nativeShape(_shape_keys(elem_type, fe_type), i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#endif
+    return _phi_face(subdomain, elem_type, fe_type)(side)(i, qp);
+  }
+  /**
+   * Evaluate a single shape function reference gradient, dispatching across all evaluation paths.
+   * The caller is responsible for applying the Jacobian to obtain the physical gradient.
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param i The shape function index
+   * @param qp The local quadrature point index
+   * @returns The reference-space shape function gradient
+   */
+  KOKKOS_FUNCTION Real3 getGradPhi(ContiguousSubdomainID subdomain,
+                                    unsigned int elem_type,
+                                    unsigned int fe_type,
+                                    unsigned int i,
+                                    unsigned int qp) const
+  {
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    if (_is_ondemand_fe_type(elem_type, fe_type))
+    {
+      const auto ref = _q_points(subdomain, elem_type)[qp];
+      return nativeGradShape(_shape_keys(elem_type, fe_type), i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#endif
+    return _grad_phi(subdomain, elem_type, fe_type)(i, qp);
+  }
+  /**
+   * Evaluate a single face shape function reference gradient, dispatching across all evaluation
+   * paths. The caller is responsible for applying the Jacobian to obtain the physical gradient.
+   * @param subdomain The contiguous subdomain ID
+   * @param elem_type The element type ID
+   * @param fe_type The FE type ID
+   * @param side The side index
+   * @param i The shape function index
+   * @param qp The local face quadrature point index
+   * @returns The reference-space shape function gradient
+   */
+  KOKKOS_FUNCTION Real3 getGradPhiFace(ContiguousSubdomainID subdomain,
+                                        unsigned int elem_type,
+                                        unsigned int fe_type,
+                                        unsigned int side,
+                                        unsigned int i,
+                                        unsigned int qp) const
+  {
+#ifdef MOOSE_KOKKOS_ONDEMAND_FE
+    if (_is_ondemand_fe_type(elem_type, fe_type))
+    {
+      const auto ref = _q_points_face_parent(subdomain, elem_type)[side][qp];
+      return nativeGradShape(_shape_keys(elem_type, fe_type), i, ref.v[0], ref.v[1], ref.v[2]);
+    }
+#endif
+    return _grad_phi_face(subdomain, elem_type, fe_type)(side)(i, qp);
   }
   /**
    * Get the inverse of Jacobian matrix of an element quadrature point
