@@ -4688,6 +4688,25 @@ FEProblemBase::hasPostprocessorValueByName(const PostprocessorName & name) const
   return _reporter_data.hasReporterValue<PostprocessorValue>(PostprocessorReporterName(name));
 }
 
+const Postprocessor &
+FEProblemBase::getPostprocessorObjectByName(const PostprocessorName & object_name,
+                                            const THREAD_ID tid) const
+{
+  std::vector<Postprocessor *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribInterfaces>(Interfaces::Postprocessor)
+      .condition<AttribThread>(tid)
+      .condition<AttribName>(object_name)
+      .queryInto(objs);
+
+  if (objs.empty())
+    mooseError("Unable to find Postprocessor with name '", object_name, "'");
+  mooseAssert(objs.size() == 1,
+              "We shouldn't find more than one postprocessor object for a given name");
+  return *(objs[0]);
+}
+
 const PostprocessorValue &
 FEProblemBase::getPostprocessorValueByName(const PostprocessorName & name,
                                            std::size_t t_index) const
@@ -5337,7 +5356,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type, TheWarehous
       joinAndFinalize(q);
     }
 
-      // Execute general user objects
+    // Execute general user objects
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
   }
   catch (...)
