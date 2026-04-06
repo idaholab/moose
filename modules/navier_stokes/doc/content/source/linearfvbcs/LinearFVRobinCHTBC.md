@@ -26,8 +26,7 @@ The interface temperatures are also tracked in fuctors and are created within th
 - interface_temperature_solid_* (where * is the interface boundary name)
 - interface_temperature_fluid_* (where * is the interface boundary name)
 
-The sidedness used for the incoming-flux and surface-temperature functors is inferred
-automatically from the supplied functors during evaluation.
+The element side to use for the incoming-flux and surface-temperature functor is inferred.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_rob-rob.i block=fluid_solid solid_fluid
 

@@ -173,27 +173,3 @@ LinearFVBoundaryCondition::setupFaceData(const FaceInfo * face_info,
   _current_face_info = face_info;
   _current_face_type = face_type;
 }
-
-template <typename FunctorType>
-inline Moose::FaceArg
-LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
-                                          const FaceInfo * fi,
-                                          const Moose::FV::LimiterType limiter_type,
-                                          const bool correct_skewness) const
-{
-  auto face = singleSidedFaceArg(fi, limiter_type, correct_skewness);
-  const auto on_elem = functor.hasFaceSide(*fi, true);
-  const auto on_neighbor = functor.hasFaceSide(*fi, false);
-
-  if (on_elem && on_neighbor)
-    face.face_side = nullptr;
-  else if (on_elem)
-    face.face_side = fi->elemPtr();
-  else if (on_neighbor)
-    face.face_side = fi->neighborPtr();
-  else
-    mooseError(
-        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
-
-  return face;
-}
