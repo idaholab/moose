@@ -34,6 +34,7 @@
 #include "KokkosFELagrange1D.h"
 #include "KokkosFELagrange2D.h"
 #include "KokkosFELagrange3D.h"
+#include "KokkosFEMonomial.h"
 #include "KokkosFEReinit.h"
 #include "KokkosQuadrature.h"
 #include "KokkosFETypes.h"
@@ -399,4 +400,149 @@ TEST(KokkosNativeFETest, NativeShape_NoUnhandledTopology)
                            centroids[e].v[0], centroids[e].v[1], centroids[e].v[2]);
     EXPECT_TRUE(std::isfinite(val)) << ELEMS[e].name << " returned non-finite";
   }
+}
+
+// ── F. nativeShape(FEShapeKey{MONOMIAL,...}) parity with libMesh ──────────────
+//
+// For each (dim, order, representative element type) combination, compare our
+// nativeShape/nativeGradShape dispatched via FEShapeKey against libMesh
+// FEBase with MONOMIAL family reinitialised on the reference element.
+// Quadrature points are used as test coordinates so no additional sampling
+// infrastructure is required.
+
+struct MonomialParityParam
+{
+  FEElemClass          kk_cls;
+  unsigned int         order;
+  libMesh::ElemType    lm_type;  // representative reference element
+  unsigned int         dim;
+  const char *         name;
+};
+
+static std::vector<MonomialParityParam> monomialParityParams()
+{
+  return {
+    // 1-D
+    { FEElemClass::EDGE, 0, libMesh::EDGE2, 1, "EDGE_p0" },
+    { FEElemClass::EDGE, 1, libMesh::EDGE2, 1, "EDGE_p1" },
+    { FEElemClass::EDGE, 2, libMesh::EDGE2, 1, "EDGE_p2" },
+    { FEElemClass::EDGE, 3, libMesh::EDGE2, 1, "EDGE_p3" },
+    // 2-D — QUAD reference element (xi,eta ∈ [-1,1]²)
+    { FEElemClass::QUAD, 0, libMesh::QUAD4, 2, "QUAD_p0" },
+    { FEElemClass::QUAD, 1, libMesh::QUAD4, 2, "QUAD_p1" },
+    { FEElemClass::QUAD, 2, libMesh::QUAD4, 2, "QUAD_p2" },
+    { FEElemClass::QUAD, 3, libMesh::QUAD4, 2, "QUAD_p3" },
+    // 2-D — TRI reference element (xi,eta on unit simplex)
+    { FEElemClass::TRI,  1, libMesh::TRI3,  2, "TRI_p1"  },
+    { FEElemClass::TRI,  2, libMesh::TRI3,  2, "TRI_p2"  },
+    // 3-D — HEX reference element
+    { FEElemClass::HEX,  0, libMesh::HEX8,  3, "HEX_p0"  },
+    { FEElemClass::HEX,  1, libMesh::HEX8,  3, "HEX_p1"  },
+    { FEElemClass::HEX,  2, libMesh::HEX8,  3, "HEX_p2"  },
+    { FEElemClass::HEX,  3, libMesh::HEX8,  3, "HEX_p3"  },
+    // 3-D — TET reference element
+    { FEElemClass::TET,  1, libMesh::TET4,  3, "TET_p1"  },
+    { FEElemClass::TET,  2, libMesh::TET4,  3, "TET_p2"  },
+  };
+}
+
+class KokkosMonomialParityTest
+  : public ::testing::TestWithParam<MonomialParityParam> {};
+
+TEST_P(KokkosMonomialParityTest, PhiMatchesLibMesh)
+{
+  auto p = GetParam();
+
+  // Build native quadrature points (order p+1 is exact for P_p)
+  const unsigned int quad_order = p.order + 1;
+  FEElemTopology ref_topo = toKokkosTopology(p.lm_type);
+  Array<Real3> q_pts; Array<Real> wts;
+  fillQuadrature(ref_topo, quad_order, q_pts, wts);
+  const unsigned int nqp = q_pts.size();
+
+  // Build libMesh MONOMIAL FE at the same polynomial order
+  libMesh::QGauss qrule(p.dim, static_cast<libMesh::Order>(quad_order));
+  qrule.allow_rules_with_negative_weights = true;
+  auto fe = libMesh::FEBase::build(
+      p.dim, libMesh::FEType(static_cast<libMesh::Order>(p.order), libMesh::MONOMIAL));
+  fe->attach_quadrature_rule(&qrule);
+
+  const auto & phi_lm  = fe->get_phi();
+  const auto & dphi_lm = fe->get_dphi();
+  const libMesh::Elem * ref = &libMesh::ReferenceElem::get(p.lm_type);
+  fe->reinit(ref);
+
+  ASSERT_EQ(qrule.n_points(), nqp) << p.name << ": qp count mismatch";
+
+  const unsigned int n = nDofs(FEShapeKey{FEFamily::MONOMIAL, p.kk_cls, p.order});
+  ASSERT_EQ(phi_lm.size(), n) << p.name << ": DOF count mismatch with libMesh";
+
+  const FEShapeKey key{FEFamily::MONOMIAL, p.kk_cls, p.order};
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int q = 0; q < nqp; ++q)
+    {
+      Real xi   = q_pts[q].v[0];
+      Real eta  = q_pts[q].v[1];
+      Real zeta = q_pts[q].v[2];
+
+      EXPECT_NEAR(nativeShape(key, i, xi, eta, zeta), phi_lm[i][q], TOL)
+          << p.name << " phi i=" << i << " q=" << q;
+
+      Real3 ng = nativeGradShape(key, i, xi, eta, zeta);
+      EXPECT_NEAR(ng.v[0], dphi_lm[i][q](0), TOL)
+          << p.name << " dphi/dxi i=" << i << " q=" << q;
+      if (p.dim >= 2)
+        EXPECT_NEAR(ng.v[1], dphi_lm[i][q](1), TOL)
+            << p.name << " dphi/deta i=" << i << " q=" << q;
+      if (p.dim >= 3)
+        EXPECT_NEAR(ng.v[2], dphi_lm[i][q](2), TOL)
+            << p.name << " dphi/dzeta i=" << i << " q=" << q;
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(MonomialAllCases,
+                         KokkosMonomialParityTest,
+                         ::testing::ValuesIn(monomialParityParams()),
+                         [](const auto & info) { return info.param.name; });
+
+// ── G. nativeShape(FEShapeKey) dispatch is bit-identical to direct calls ─────
+//
+// The key-based dispatch must call the same inline function at the same
+// coordinates — results must be bit-identical, not just within tolerance.
+
+TEST(KokkosNativeFETest, MonomialKeyDispatch_BitIdentical_Dim2_Order2_Quad)
+{
+  Array<Real3> q_pts; Array<Real> wts;
+  fillQuadrature(FEElemTopology::QUAD4, 3, q_pts, wts);
+  const FEShapeKey key{FEFamily::MONOMIAL, FEElemClass::QUAD, 2};
+  const unsigned int n = FEEvaluator<MonomialTag, Dim2Tag, 2>::n_dofs();
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int q = 0; q < q_pts.size(); ++q)
+    {
+      Real xi = q_pts[q].v[0], eta = q_pts[q].v[1];
+      Real direct   = FEEvaluator<MonomialTag, Dim2Tag, 2>::shape(i, xi, eta, 0.0);
+      Real dispatch = nativeShape(key, i, xi, eta, 0.0);
+      EXPECT_EQ(direct, dispatch) << "i=" << i << " q=" << q;
+    }
+}
+
+TEST(KokkosNativeFETest, MonomialKeyDispatch_BitIdentical_Dim3_Order1_Hex)
+{
+  Array<Real3> q_pts; Array<Real> wts;
+  fillQuadrature(FEElemTopology::HEX8, 2, q_pts, wts);
+  const FEShapeKey key{FEFamily::MONOMIAL, FEElemClass::HEX, 1};
+  const unsigned int n = FEEvaluator<MonomialTag, Dim3Tag, 1>::n_dofs();
+
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int q = 0; q < q_pts.size(); ++q)
+    {
+      Real xi = q_pts[q].v[0], eta = q_pts[q].v[1], zeta = q_pts[q].v[2];
+      Real3 direct   = FEEvaluator<MonomialTag, Dim3Tag, 1>::grad_shape(i, xi, eta, zeta);
+      Real3 dispatch = nativeGradShape(key, i, xi, eta, zeta);
+      EXPECT_EQ(direct.v[0], dispatch.v[0]) << "v[0] i=" << i << " q=" << q;
+      EXPECT_EQ(direct.v[1], dispatch.v[1]) << "v[1] i=" << i << " q=" << q;
+      EXPECT_EQ(direct.v[2], dispatch.v[2]) << "v[2] i=" << i << " q=" << q;
+    }
 }

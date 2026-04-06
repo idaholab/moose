@@ -42,16 +42,16 @@ public:
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
     if (datum.assembly().isOnDemandFEType(elem.type, datum.jfe()))
     {
-      const auto topo = datum.assembly().getElemTopology(elem.type);
+      const auto key = datum.assembly().getShapeKey(elem.type, datum.jfe());
       if (side == libMesh::invalid_uint)
       {
         const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
-        return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        return nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       else
       {
         const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
-        return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        return nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
     }
 #endif
@@ -80,17 +80,17 @@ public:
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
     if (datum.assembly().isOnDemandFEType(elem.type, datum.jfe()))
     {
-      const auto topo = datum.assembly().getElemTopology(elem.type);
+      const auto key = datum.assembly().getShapeKey(elem.type, datum.jfe());
       Real3 ref_grad;
       if (side == libMesh::invalid_uint)
       {
         const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
-        ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        ref_grad = nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       else
       {
         const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
-        ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        ref_grad = nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       return datum.J(qp) * ref_grad;
     }
@@ -121,16 +121,16 @@ public:
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
     if (datum.assembly().isOnDemandFEType(elem.type, datum.ife()))
     {
-      const auto topo = datum.assembly().getElemTopology(elem.type);
+      const auto key = datum.assembly().getShapeKey(elem.type, datum.ife());
       if (side == libMesh::invalid_uint)
       {
         const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
-        return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        return nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       else
       {
         const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
-        return nativeShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        return nativeShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
     }
 #endif
@@ -159,17 +159,17 @@ public:
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
     if (datum.assembly().isOnDemandFEType(elem.type, datum.ife()))
     {
-      const auto topo = datum.assembly().getElemTopology(elem.type);
+      const auto key = datum.assembly().getShapeKey(elem.type, datum.ife());
       Real3 ref_grad;
       if (side == libMesh::invalid_uint)
       {
         const auto ref = datum.assembly().getQPointRef(elem.subdomain, elem.type, qp);
-        ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        ref_grad = nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       else
       {
         const auto ref = datum.assembly().getQPointRefFace(elem.subdomain, elem.type, side, qp);
-        ref_grad = nativeGradShape(topo, i, ref.v[0], ref.v[1], ref.v[2]);
+        ref_grad = nativeGradShape(key, i, ref.v[0], ref.v[1], ref.v[2]);
       }
       return datum.J(qp) * ref_grad;
     }
@@ -339,8 +339,9 @@ VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) co
       auto side = datum.side();
       auto offset = datum.qpOffset();
 
-      return side == libMesh::invalid_uint ? sys.getVectorQpValue(elem, offset + idx, var, tag)
-                                           : sys.getVectorQpValueFace(elem, side, idx, var, tag);
+      return side == libMesh::invalid_uint
+                 ? sys.getVectorQpValue(elem, offset + idx, var, tag)
+                 : sys.getVectorQpValueFace(elem, side, idx, var, tag);
     }
   }
   else

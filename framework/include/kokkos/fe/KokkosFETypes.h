@@ -44,7 +44,38 @@ enum class FEFamily : unsigned int
   LAGRANGE     = 0,
   LAGRANGE_VEC = 1,
   HERMITE      = 2,
+  MONOMIAL     = 3,
+  MONOMIAL_VEC = 4,
+  UNKNOWN      = 5, // sentinel returned by toKokkosFamily for unrecognised libMesh families
   N_FAMILIES
+};
+
+// ── Element base-class enum ───────────────────────────────────────────────────
+// Collapses all topology variants that share the same geometric shape.
+// QUAD4 / QUAD8 / QUAD9 all map to QUAD; TRI3 / TRI6 / TRI7 all map to TRI;
+// etc.  Used together with FEFamily and order to identify a physics FE space.
+
+enum class FEElemClass : unsigned int
+{
+  EDGE    = 0,
+  TRI     = 1,
+  QUAD    = 2,
+  TET     = 3,
+  HEX     = 4,
+  PRISM   = 5,
+  PYRAMID = 6,
+  N_CLASSES
+};
+
+// ── Shape function space key ──────────────────────────────────────────────────
+// Uniquely identifies a physics FE space independent of the geometric topology.
+// Trivially copyable; fits in a register (three small integers, no heap).
+
+struct FEShapeKey
+{
+  FEFamily     family;
+  FEElemClass  cls;
+  unsigned int order;
 };
 
 // ── CPU-only conversion helpers ───────────────────────────────────────────────
@@ -67,5 +98,14 @@ FEElemTopology getSideTopology(FEElemTopology parent);
 /// Return the number of DOFs for a (family, topology) pair.
 /// Used by initShapeNative() to size Array2D objects before filling them.
 unsigned int nDofs(FEFamily family, FEElemTopology topo);
+
+/// Map an element topology to its base geometric class (order-independent).
+/// e.g. QUAD4 / QUAD8 / QUAD9 all return FEElemClass::QUAD.
+FEElemClass classFromTopology(FEElemTopology topo);
+
+/// Return the number of DOFs for a physics FE space described by \p key.
+/// Supports LAGRANGE (topology-based count) and MONOMIAL (dimension-based
+/// total-degree polynomial count).
+unsigned int nDofs(FEShapeKey key);
 
 } // namespace Moose::Kokkos
