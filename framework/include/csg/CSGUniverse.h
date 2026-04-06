@@ -45,6 +45,20 @@ public:
   CSGUniverse(const std::string & name, std::vector<CSGCell *> & cells, bool is_root = false);
 
   /**
+   * @brief Construct a new CSGUniverse object from a list of const cell pointers
+   *
+   * Const-pointer overload that accepts cells obtained from CSGBase::createCell()
+   * (which returns const CSGCell &) without requiring const_cast.
+   *
+   * @param name unique name of universe
+   * @param cells list of const cell pointers to add to universe
+   * @param is_root true to set universe as the root universe (default false)
+   */
+  CSGUniverse(const std::string & name,
+              const std::vector<const CSGCell *> & cells,
+              bool is_root = false);
+
+  /**
    * Destructor
    */
   virtual ~CSGUniverse() = default;
@@ -127,6 +141,7 @@ protected:
 
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;
+  friend class CSGEngUnitList; // needed for renameEngUnit() access
 
   // CSGUniverseList needs to be friend to access addCell()
   friend class CSGBase;
