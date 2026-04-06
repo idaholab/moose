@@ -511,11 +511,29 @@ class Versioner:
                 }
         return yaml.dump(output)
 
+    def changed_summary(self, base: str) -> str:
+        packages = self.get_packages("HEAD")
+        base_packages = self.get_packages(base)
+
+        changed_summary = {}
+        for name, package in packages.items():
+            base_package = base_packages.get(name)
+            if (
+                base_package is None
+                or base_package.hash != package.hash
+                or base_package.full_version != package.full_version
+            ):
+                changed_summary[name] = package.full_version
+            else:
+                changed_summary[name] = None
+
+        return json.dumps(changed_summary)
+
     def output_cli(self, args) -> str:
         """performs command line actions"""
         args = self.parse_args(args, self.entities)
         self.check_args(args)
-        if args.summary or args.verify or args.build_templates:
+        if args.summary or args.changed_summary or args.verify or args.build_templates:
             if self.git_is_diff():
                 print(
                     "\033[91mWARNING\033[0m: You have changes not yet committed. Information"
@@ -523,6 +541,8 @@ class Versioner:
                 )
             if args.summary:
                 return self.output_summary()
+            if args.changed_summary:
+                return self.changed_summary(args.changed_summary)
             if args.verify:
                 return self.verify_recipes(args)
             if args.build_templates:
@@ -898,6 +918,11 @@ class Versioner:
             action="store_true",
             default=False,
             help="Output summary as should be entered in versioner_hashes.yaml",
+        )
+        parser.add_argument(
+            "--changed-summary",
+            type=str,
+            help="foo"
         )
         parser.add_argument(
             "-v",
