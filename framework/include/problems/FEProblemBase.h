@@ -1472,9 +1472,8 @@ public:
    */
   bool hasPostprocessorValueByName(const PostprocessorName & name) const;
 
-  const Postprocessor &
-  getPostprocessorObjectByName(const PostprocessorName & object_name,
-                               const THREAD_ID tid = 0) const;
+  const Postprocessor & getPostprocessorObjectByName(const PostprocessorName & object_name,
+                                                     const THREAD_ID tid = 0) const;
 
   /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
