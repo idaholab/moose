@@ -15,6 +15,7 @@
 #include "CSGUniverseList.h"
 #include "CSGLatticeList.h"
 #include "CSGTransformationHelper.h"
+#include "CSGEngUnitList.h"
 #include "nlohmann/json.h"
 
 #ifdef MOOSE_UNIT_TEST
@@ -41,7 +42,10 @@ typedef std::variant<std::reference_wrapper<const CSGSurface>,
                      std::reference_wrapper<const CSGCell>,
                      std::reference_wrapper<const CSGUniverse>,
                      std::reference_wrapper<const CSGRegion>,
-                     std::reference_wrapper<const CSGLattice>>
+                     std::reference_wrapper<const CSGLattice>,
+                     std::reference_wrapper<const CSGSurfaceEngUnit>,
+                     std::reference_wrapper<const CSGCellEngUnit>,
+                     std::reference_wrapper<const CSGUniverseEngUnit>>
     CSGObjectVariant;
 
 /**
@@ -114,7 +118,7 @@ public:
    * @brief Check if a surface with given name exists in CSGBase object
    *
    * @param name surface name
-   * @return true if surface with given name exists in CSGBase
+   * @return Check if a surface with given name exists in CSGBase object
    */
   bool hasSurface(const std::string & name) const { return _surface_list.hasSurface(name); }
 
@@ -500,6 +504,7 @@ public:
 
   /**
    * @brief Get a lattice object of the specified type by name
+   *
    * This is a templated method with a default type of CSGLattice. If a specific lattice type
    * is needed, it can be specified when calling. If the type is unknown or not specified,
    * it will default to CSGLattice to get the base class reference.
@@ -527,6 +532,159 @@ public:
    * @return true if lattice with given name exists in CSGBase
    */
   bool hasLattice(const std::string & name) const { return _lattice_list.hasLattice(name); }
+
+  /**
+   * @brief Add an engineering unit (surface-, cell-, or universe-like object) to this CSGBase.
+   *
+   * @tparam T a type derived from CSGSurfaceEngUnit, CSGCellEngUnit, or CSGUniverseEngUnit
+   * @param unit unique_ptr to the engineering unit to register
+   * @return const reference to the stored engineering unit
+   */
+  template <typename T>
+  const T & addEngUnit(std::unique_ptr<T> unit)
+  {
+    static_assert(std::is_base_of_v<CSGEngUnit, T>, "T must derive from CSGEngUnit");
+    T * raw = unit.get();
+    _eng_unit_list.addEngUnit(std::move(unit));
+    return *raw;
+  }
+
+  /**
+   * @brief Remove an engineering unit passed in by reference from the stored engineering unit list
+   *
+   * @param unit reference to the engineering unit to delete
+   */
+  void deleteEngUnit(const CSGEngUnit & unit);
+
+  /**
+   * @brief Get a engineering unit object of the specified type by name
+   *
+   * This is a templated method with a default type of CSGEngUnit. If a specific unit type
+   * is needed, it can be specified when calling. If the type is unknown or not specified,
+   * it will default to CSGEngUnit to get the base class reference.
+   * NOTE: if CSGEngUnit is used as the template type, any type-specific attributes or
+   * methods may not be accessible, except using a reference cast.
+   *
+   * @param name engineering unit name
+   * @return const reference to the engineering unit
+   */
+  template <typename EngUnitType = CSGEngUnit>
+  const EngUnitType & getEngUnitByName(const std::string & name) const
+  {
+    const CSGEngUnit & unit = _eng_unit_list.getEngUnit(name);
+    const EngUnitType * typed_unit = dynamic_cast<const EngUnitType *>(&unit);
+    if (!typed_unit)
+      mooseError("Cannot get engineering unit " + name +
+                 ". Engineering unit is not of specified type " +
+                 MooseUtils::prettyCppType<EngUnitType>());
+    return *typed_unit;
+  }
+
+  /**
+   * @brief Check if an engineeering unit with given name exists in CSGBase object
+   *
+   * @param name engineering unit name
+   * @return Check if an engineering unit with given name exists in CSGBase object
+   */
+  bool hasEngUnit(const std::string & name) const { return _eng_unit_list.hasEngUnit(name); }
+
+  /**
+   * @brief Rename the specified engineering unit.
+   *
+   * @param unit reference to engineering unit to rename
+   * @param name new name
+   */
+  void renameEngUnit(const CSGEngUnit & unit, const std::string & name)
+  {
+    _eng_unit_list.renameEngUnit(unit, name);
+  }
+
+  /**
+   * @brief Get all engineering units of all types in CSGBase
+   *
+   * @return list of const references to all CSGEngUnit objects
+   */
+  std::vector<std::reference_wrapper<const CSGEngUnit>> getAllEngUnits() const
+  {
+    return _eng_unit_list.getAllEngUnits();
+  }
+
+  /**
+   * @brief Get all surface-like engineering units in CSGBase
+   *
+   * @return list of const references to all CSGSurfaceEngUnit objects
+   */
+  std::vector<std::reference_wrapper<const CSGSurfaceEngUnit>> getAllSurfaceEngUnits() const
+  {
+    return _eng_unit_list.getAllSurfaceEngUnits();
+  }
+
+  /**
+   * @brief Get all cell-like engineering units in CSGBase
+   *
+   * @return list of const references to all CSGCellEngUnit objects
+   */
+  std::vector<std::reference_wrapper<const CSGCellEngUnit>> getAllCellEngUnits() const
+  {
+    return _eng_unit_list.getAllCellEngUnits();
+  }
+
+  /**
+   * @brief Get all universe-like engineering units
+   *
+   * @return list of const references to all CSGUniverseEngUnit objects
+   */
+  std::vector<std::reference_wrapper<const CSGUniverseEngUnit>> getAllUniverseEngUnits() const
+  {
+    return _eng_unit_list.getAllUniverseEngUnits();
+  }
+
+  /**
+   * @brief Expand a surface-like engineering unit into basic CSGSurface(s) and return the
+   * CSGRegion representing the EngUnit's geometry.
+   *
+   * Calls expandUnit() then calls getExpansionRegion() to obtain the combined CSGRegion.
+   * Every occurrence of the EngUnit as a surface reference in any existing cell region is replaced
+   * with the sub-region. The EngUnit is then removed from the engineering unit list and destroyed.
+   *
+   * @param unit the CSGSurfaceEngUnit to expand
+   * @return CSGRegion formed by the expanded CSGSurface(s)
+   */
+  CSGRegion expandEngUnit(const CSGSurfaceEngUnit & unit);
+
+  /**
+   * @brief Expand a cell-like engineering unit into a basic CSGCell.
+   *
+   * Calls expandUnit() on the EngUnit to create a basic CSGCell, then replaces every reference to
+   * the EngUnit in every universe with the new expanded CSGCell. The EngUnit is then removed from
+   * the engineering unit list and destroyed.
+   *
+   * @param unit the CSGCellEngUnit to expand into a CSGCell
+   * @return const reference to the expanded CSGCell
+   */
+  const CSGCell & expandEngUnit(const CSGCellEngUnit & unit);
+
+  /**
+   * @brief Expand a universe-like engineering unit into a basic CSGUniverse.
+   *
+   * Calls expandUnit() on the EngUnit to create the equivalent CSGUniverse and any necessary
+   * additional CSG components. All references to the original EngUnit in all cell fills, lattice
+   * universe maps/outers, and the root universe pointer are replaced with new CSGUniverse. The
+   * EngUnit is then removed from the engineering unit list and destroyed.
+   *
+   * @param unit the CSGUniverseEngUnit to expand into a CSGUniverse
+   * @return const reference to the expanded CSGUniverse
+   */
+  const CSGUniverse & expandEngUnit(const CSGUniverseEngUnit & unit);
+
+  /**
+   * @brief Expand all registered engineering units into basic CSG objects.
+   *
+   * Each expanded EngUnit is removed from the engineering unit list and replaced by the
+   * corresponding plain CSG object(s) in the standard lists. After this call, the
+   * engineering unit list is empty.
+   */
+  void expandAllEngUnits();
 
   /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
@@ -784,6 +942,19 @@ private:
       std::map<std::string, std::reference_wrapper<const CSGLattice>> & identical_lattice_refs,
       CSGBase & base);
 
+  /** @brief Get a const reference to the CSGEngUnitList object
+   *
+   * @return CSGEngUnitList
+   */
+  const CSGEngUnitList & getEngUnitList() const { return _eng_unit_list; }
+
+  /**
+   * @brief Get a non-const reference to the CSGEngUnitList object
+   *
+   * @return CSGEngUnitList
+   */
+  CSGEngUnitList & getEngUnitList() { return _eng_unit_list; }
+
   /**
    * @brief join a separate CSGSurfaceList object to this one
    *
@@ -854,6 +1025,22 @@ private:
                         const std::string & new_root_name_base,
                         const std::string & new_root_name_incoming);
 
+  /**
+   * @brief join a separate CSGEngUnitList object to this one
+   *
+   * @param eng_unit_list CSGEngUnitList from a separate CSGBase object
+   */
+  void joinEngUnitList(CSGEngUnitList & eng_unit_list);
+
+  /// Replace all cell fills and lattice elements/outers referencing old_univ with new_univ
+  void replaceUniverseRefs(const CSGUniverse & old_univ, const CSGUniverse & new_univ);
+
+  /// Replace all old_cell references with new_cell across all universes in the base
+  void replaceCellRefs(const CSGCell & old_cell, const CSGCell & new_cell);
+
+  /// Replace all region occurrences of old_surf with the tokens from sub_region across all cells in the base
+  void replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegion & sub_region);
+
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
 
@@ -863,11 +1050,23 @@ private:
   // check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;
 
+  // check that engineering unit being accessed is a part of this CSGBase instance
+  bool checkEngUnitInBase(const CSGEngUnit & unit) const;
+
   // check that universe being accessed is a part of this CSGBase instance
   bool checkUniverseInBase(const CSGUniverse & universe) const;
 
   // check that lattice being accessed is a part of this CSGBase instance
   bool checkLatticeInBase(const CSGLattice & lattice) const;
+
+  // error if surface is referenced in any cell region
+  void prepareSurfaceDeletion(const CSGSurface & surface) const;
+
+  // warn and remove cell from any universe that contains it
+  void prepareCellDeletion(const CSGCell & cell);
+
+  // error if universe is the root, used in any lattice, or used as a cell fill
+  void prepareUniverseDeletion(const CSGUniverse & universe) const;
 
   /**
    * @brief Add a new cell to the cell list based on a cell reference.
@@ -904,6 +1103,9 @@ private:
 
   /// List of lattices associated with CSG object
   CSGLatticeList _lattice_list;
+
+  /// Container for all associated engineering units
+  CSGEngUnitList _eng_unit_list;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing

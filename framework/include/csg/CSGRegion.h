@@ -48,6 +48,10 @@ public:
    * @return The symbol associated with the given halfspace
    */
   static char halfspaceSymbol(const CSGSurface::Halfspace halfspace);
+  /**
+   * @return The string associated with the given region type
+   */
+  static const char * regionTypeName(const RegionType region_type);
 
   /**
    * Default Constructor
@@ -160,6 +164,21 @@ protected:
   const std::vector<PostfixTokenVariant> & getPostfixTokens() const { return _postfix_tokens; }
 
   /**
+   * @brief Replace all occurrences of old_surf in this region's postfix token stream with
+   * the tokens of sub_region.
+   *
+   * Each [old_surf_ref][Halfspace] pair in _postfix_tokens is replaced by sub_region's tokens
+   * (for NEGATIVE halfspace) or sub_region's tokens followed by a COMPLEMENT token (for POSITIVE
+   * halfspace). The flat _surfaces list is rebuilt from the updated token stream.
+   *
+   * Called exclusively by CSGBase::replaceSurfaceRefsWithRegion().
+   *
+   * @param old_surf surface to replace
+   * @param sub_region region to substitute (represents the old surface's "negative" interior)
+   */
+  void replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & sub_region);
+
+  /**
    * @brief Iterate through postfix tokens and check if next region operator matches the given
    * operator
    *
@@ -178,6 +197,9 @@ protected:
    * @return true if postfix token lists are equal, false otherwise
    */
   bool checkRegionEquality(const std::vector<PostfixTokenVariant> & other_tokens) const;
+
+  // Only CSGBase should be calling replaceWithSubRegion()
+  friend class CSGBase;
 
   /// An enum for type of type of operation that defines region
   MooseEnum _region_type{"EMPTY=0 HALFSPACE=1 COMPLEMENT=2 INTERSECTION=3 UNION=4"};

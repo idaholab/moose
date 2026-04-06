@@ -121,6 +121,7 @@ protected:
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;
+  friend class CSGEngUnitList; // needed for renameEngUnit() access
   friend class CSGBase; // needed for addTransformation() access
 
 #ifdef MOOSE_UNIT_TEST
