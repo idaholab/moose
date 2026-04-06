@@ -91,21 +91,36 @@ function baked_flags()
 
         # Make sure sdkroot is available when not building
         if [ "\${CONDA_BUILD:-0}" = "0" ]; then
+            local SDKROOT=
             SDK_VERSIONS=("26.2" "15.5" "15.4" "15.2" "14.5" "14.2" "13.3")
-            SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
-            SDKROOT=
-            for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
-                SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
-                for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
-                    if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
-                        SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+
+            # Check for system SDK first
+            local XCRUN_SDK_VERSION
+            if XCRUN_SDK_VERSION="\$(xcrun --show-sdk-version 2> /dev/null)"; then
+                for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
+                    if [[ "\$XCRUN_SDK_VERSION" == "\$SDK_VERSION" ]]; then
+                        SDKROOT="\$(xcrun --sdk macosx --show-sdk-path)" || break
+                    fi
+                done
+            fi
+
+            # System SDK not available or is a bad version
+            if [ -z "\$SDKROOT" ]; then
+                SDK_SEARCH_DIRS=("/opt/" "/opt/conda-sdks" "/Users/\$(whoami)/sdks")
+                SDKROOT=
+                for SDK_VERSION in "\${SDK_VERSIONS[@]}"; do
+                    SDK_NAME="MacOSX\${SDK_VERSION}.sdk"
+                    for SDK_SEARCH_DIR in "\${SDK_SEARCH_DIRS[@]}"; do
+                        if [ -d "\${SDK_SEARCH_DIR}/\${SDK_NAME}" ]; then
+                            SDKROOT="\${SDK_SEARCH_DIR}/\${SDK_NAME}"
+                            break
+                        fi
+                    done
+                    if [ -n "\$SDKROOT" ]; then
                         break
                     fi
                 done
-                if [ -n "\$SDKROOT" ]; then
-                    break
-                fi
-            done
+            fi
             if [ -z "\$SDKROOT" ]; then
                 local use_color=
                 [ -z "\$TERM" ] || [ "\$TERM" == "dumb" ] || [ -n "\$NO_COLOR" ] || use_color=1
