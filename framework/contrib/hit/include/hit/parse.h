@@ -76,6 +76,7 @@ enum class NodeType
   Section, /// Represents hit sections (i.e. "[pathname]...[../]").
   Comment, /// Represents comments that are not directly part of the actual hit document.
   Field,   /// Represents field-value pairs (i.e. paramname=val).
+  Include, /// Represents !include directives.
   Blank,   /// Represents a blank line
   Other,   /// Represents any other type of node
 };
@@ -89,6 +90,11 @@ enum class TraversalOrder
 };
 
 class Node;
+
+struct ParseOptions
+{
+  bool expand_includes = true;
+};
 
 /**
  * Struct that contains the context for an error message.
@@ -510,6 +516,19 @@ public:
   virtual Node * clone(bool /*absolute_path = false*/) override { return new Blank(); };
 };
 
+/// Include represents a !include directive in the input.
+class Include : public Node
+{
+public:
+  Include(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv);
+
+  virtual std::string render(int indent = 0,
+                             const std::string & indent_text = default_indent,
+                             int maxlen = 0) const override;
+
+  virtual Node * clone(bool absolute_path = false) override;
+};
+
 /// Section represents a hit section including the section header path and all entries inside
 /// the section (e.g. fields/parameters, subsections, etc.).
 class Section : public Node
@@ -597,7 +616,8 @@ private:
 /// on parse failure and the root is returned instead of this function throwing an Error.
 Node * parse(const std::string & fname,
              const std::string & input,
-             std::vector<ErrorMessage> * syntax_errors = nullptr);
+             std::vector<ErrorMessage> * syntax_errors = nullptr,
+             const ParseOptions & options = ParseOptions{});
 
 /// parses the file checking for errors but does not return any node tree.
 inline void
@@ -685,6 +705,8 @@ public:
   /// The text used to represent a single level of nesting indentation.  It must be comprised of
   /// only whitespace characters.
   std::string indent_string;
+  /// Whether !include directives should be expanded before formatting.
+  bool expand_includes;
 
 private:
   struct Pattern

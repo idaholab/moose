@@ -375,6 +375,8 @@ Node::type() const
     return NodeType::Section;
   else if (_hnv.type() == wasp::KEYED_VALUE || _hnv.type() == wasp::ARRAY)
     return NodeType::Field;
+  else if (_hnv.type() == wasp::FILE)
+    return NodeType::Include;
   return NodeType::Other;
 }
 
@@ -552,6 +554,26 @@ void
 Comment::setInline(bool is_inline)
 {
   _isinline = is_inline;
+}
+
+Include::Include(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv)
+  : Node(dhi, hnv)
+{
+}
+
+std::string
+Include::render(int indent, const std::string & indent_text, int /*maxlen*/) const
+{
+  return "\n" + strRepeat(indent_text, indent) + _hnv.data();
+}
+
+Node *
+Include::clone(bool absolute_path)
+{
+  auto n = new Include(_dhi, _hnv);
+  if (absolute_path)
+    n->setOverridePath(fullpath());
+  return n;
 }
 
 Section::Section(const std::string & path) : Node(path) {}
@@ -1024,11 +1046,13 @@ Field::strVal() const
 Node *
 parse(const std::string & fname,
       const std::string & input,
-      std::vector<ErrorMessage> * syntax_errors /* = nullptr */)
+      std::vector<ErrorMessage> * syntax_errors /* = nullptr */,
+      const ParseOptions & options /* = ParseOptions{} */)
 {
   std::stringstream input_errors;
   std::shared_ptr<wasp::DefaultHITInterpreter> interpreter =
       std::make_shared<wasp::DefaultHITInterpreter>(input_errors);
+  interpreter->set_should_load_includes(options.expand_includes);
 
   std::vector<ErrorMessage> errors;
 
@@ -1148,7 +1172,10 @@ matches(const std::string & s, const std::string & regex, bool full = true)
   }
 }
 
-Formatter::Formatter() : canonical_section_markers(true), line_length(100), indent_string("  ") {}
+Formatter::Formatter()
+  : canonical_section_markers(true), line_length(100), indent_string("  "), expand_includes(true)
+{
+}
 
 void
 Formatter::walkPatternConfig(const std::string & prefix, Node * n)
@@ -1170,7 +1197,7 @@ Formatter::walkPatternConfig(const std::string & prefix, Node * n)
 }
 
 Formatter::Formatter(const std::string & fname, const std::string & hit_config)
-  : canonical_section_markers(true), line_length(100), indent_string("  ")
+  : canonical_section_markers(true), line_length(100), indent_string("  "), expand_includes(true)
 {
   std::unique_ptr<hit::Node> root(hit::parse(fname, hit_config));
   if (root->find("format/indent_string"))
@@ -1186,7 +1213,9 @@ Formatter::Formatter(const std::string & fname, const std::string & hit_config)
 std::string
 Formatter::format(const std::string & fname, const std::string & input)
 {
-  std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+  ParseOptions options;
+  options.expand_includes = expand_includes;
+  std::unique_ptr<hit::Node> root(hit::parse(fname, input, nullptr, options));
   format(root.get());
   return root->render(0, indent_string, line_length);
 }
@@ -1389,6 +1418,15 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
         previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.last_line();
       }
+    }
+
+    else if (hnv_child.type() == wasp::FILE)
+    {
+      if (hnv_child.node_pool()->stream_name() == previous_file && hnv_child.line() > previous_line + 1)
+        hit_parent->addChild(new Blank());
+      hit_parent->addChild(new Include(interpreter, hnv_child));
+      previous_file = hnv_child.node_pool()->stream_name();
+      previous_line = hnv_child.last_line();
     }
 
     // create and add section node if not found in tree then recurse children
