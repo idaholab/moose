@@ -34,5 +34,12 @@
       exodiff = nonlinear_diffusion_out.e
       detail = 'have non-linear material properties.'
     []
+    [adjoint_rhs]
+      type = RunApp
+      input = adjoint_rhs.i
+      min_parallel = 2
+      recover = false
+      detail = 'contains two reporter point sources where one reporter point source applies 440 dirac sources and runs in parallel.'
+    []
   []
 []
