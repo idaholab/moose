@@ -74,12 +74,24 @@ TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
   pp_params.set<MFEMScalarCoefficientName>("function") = "scalar_ones";
   pp_params.set<VariableName>("variable") = "scalar_var";
   _mfem_problem->addPostprocessor("MFEML2Error", "ppl2", pp_params);
-  auto & l2_pp = _mfem_problem->getUserObject<MFEML2Error>("ppl2");
-  auto & l2_coef = _mfem_problem->getCoefficients().getScalarCoefficient("ppl2");
+  auto & l2_pp = _mfem_problem->getPostprocessorObjectByName("ppl2");
+  auto & l2_pp_as_coef = _mfem_problem->getCoefficients().getScalarCoefficient("ppl2");
 
   mfem::ConstantCoefficient twos(2.);
   _scalar_var->ProjectCoefficient(twos);
-  l2_pp.getValue();
+  _mfem_problem->executeMFEMObjects(EXEC_TIMESTEP_END);
+  const auto l2_pp_value = l2_pp.getCurrentValue();
+
+  // Compute domain volume
+  mfem::ConstantCoefficient one(1.0);
+  mfem::LinearForm volume_form(_scalar_var->FESpace());
+  volume_form.AddDomainIntegrator(new mfem::DomainLFIntegrator(one));
+  volume_form.Assemble();
+  mfem::Vector ones(volume_form.Size());
+  ones = 1.0;
+  const auto volume = volume_form * ones;
+  using std::sqrt;
+  EXPECT_NEAR(l2_pp_value, sqrt(volume), TOLERANCE * TOLERANCE);
 
   mfem::IsoparametricTransformation fe_transform;
   mfem::IntegrationPoint point;
@@ -87,7 +99,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
   point.Set2(0., 0.);
   fe_transform.SetIdentityTransformation(mfem::Geometry::SQUARE);
 
-  EXPECT_EQ(l2_coef.Eval(fe_transform, point), l2_pp.getCurrentValue());
+  EXPECT_EQ(l2_pp_as_coef.Eval(fe_transform, point), l2_pp_value);
 }
 
 /**
