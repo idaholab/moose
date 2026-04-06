@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#32595'
+  design = 'RankTwoTensorFromComponentProperties.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'basic.i'
+    exodiff = 'basic_out.e'
+    requirement = 'The system shall assemble a RankTwoTensor material property from scalar material properties and numeric constants.'
+  []
+[]

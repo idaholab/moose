@@ -2,35 +2,28 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 20
-    ny = 20
-    nz = 20
+    nx = 2
+    ny = 3
+    nz = 2
     xmax = 0.1
     ymax = 0.1
     zmax = 0.1
   []
 []
-
+[Problem]
+  solve = false
+[]
 [Variables]
   [temperature]
-    initial_condition = 300
   []
 []
-
-[Kernels]
-  [heat_conduction]
-    type = AnisoHeatConduction
+[ICs]
+  [temp_ic]
+    type = FunctionIC
     variable = temperature
-    thermal_conductivity = 'thermal_conductivity'
-  []
-
-  [heat_source]
-    type = HeatSource
-    variable = temperature
-    value = 1000000
+    function = '300 + 1000*z'
   []
 []
-
 [Materials]
 [k_x_property]
   type = ParsedMaterial
@@ -53,6 +46,7 @@
     tensor_values = 'k_x       0.0     0.0
                      0.0       k_y     0.0
                      0.0       0.0     1.0'
+    outputs=exodus
   []
 []
 
