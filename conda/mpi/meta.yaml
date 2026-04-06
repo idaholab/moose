@@ -71,7 +71,6 @@ outputs:
         - make
         - zlib
         - m4
-        - perl
       run_constrained:
         - {{ moose_python_constrained }}
     test:
