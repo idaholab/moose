@@ -43,10 +43,7 @@ KokkosBoundarySolutionOutput::execute(Datum & datum) const
   Real sum = 0;
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-  {
-    datum.reinit();
     sum += datum.JxW(qp) * _var(datum, qp);
-  }
 
   _solution(datum.side(), datum.elemID()) = sum;
 }

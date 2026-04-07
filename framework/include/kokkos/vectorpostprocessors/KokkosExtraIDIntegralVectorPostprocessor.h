@@ -110,8 +110,6 @@ KokkosExtraIDIntegralVectorPostprocessor::reduce(Datum & datum, Real * result) c
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit();
-
     const auto JxW = datum.JxW(qp);
 
     unsigned int i = 0;
@@ -146,8 +144,6 @@ KokkosExtraIDIntegralVectorPostprocessor::execute(Datum & datum) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit();
-
     const auto JxW = datum.JxW(qp);
 
     unsigned int i = 0;

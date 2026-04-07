@@ -44,8 +44,6 @@ KokkosIntegralPostprocessor<Base>::reduce(Datum & datum, Real * result) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit();
-
     sum += datum.JxW(qp) * static_cast<const Derived *>(this)->computeQpIntegral(qp, datum);
     vol += datum.JxW(qp);
   }

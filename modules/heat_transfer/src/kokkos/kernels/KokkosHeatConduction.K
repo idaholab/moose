@@ -14,7 +14,7 @@ registerKokkosResidualObject("HeatTransferApp", KokkosHeatConduction);
 InputParameters
 KokkosHeatConduction::validParams()
 {
-  InputParameters params = KokkosDiffusion::validParams();
+  InputParameters params = KernelGrad::validParams();
   params.addClassDescription("Diffusive heat conduction term $-\\nabla\\cdot(k\\nabla T)$ of the "
                              "thermal energy conservation equation");
   params.addParam<MaterialPropertyName>("diffusion_coefficient",
@@ -29,7 +29,7 @@ KokkosHeatConduction::validParams()
 }
 
 KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
-  : KokkosDiffusion(parameters)
+  : KernelGrad(parameters)
 {
   _diffusion_coefficient = getKokkosMaterialProperty<Real>("diffusion_coefficient");
 
