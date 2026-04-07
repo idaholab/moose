@@ -192,12 +192,12 @@
 
   nl_max_its = 100
 
-  nl_abs_tol = 1e-9
-  nl_rel_tol = 1e-7
+  nl_abs_tol = 1e-6
+  nl_rel_tol = 1e-8
 
   start_time = 0.0
   dt = 0.1
-  end_time = 0.3
+  end_time = 0.2
   max_xfem_update = 1
 []
 
