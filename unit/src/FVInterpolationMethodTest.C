@@ -16,10 +16,150 @@
 #include "FVGeometricAverage.h"
 #include "FVHarmonicAverage.h"
 #include "MathFVUtils.h"
+#include "MooseFunctor.h"
 
 #include "gtest/gtest.h"
 
 #include <cmath>
+
+namespace
+{
+
+// The cellcentered and face centered functors are on the NS module
+// so we create this here.
+class ElemPairFunctor : public Moose::FunctorBase<Real>
+{
+public:
+  using ValueType = Moose::FunctorBase<Real>::ValueType;
+  using GradientType = Moose::FunctorBase<Real>::GradientType;
+
+  ElemPairFunctor(const libMesh::Elem * elem,
+                  const libMesh::Elem * neighbor,
+                  const ValueType elem_value,
+                  const ValueType neighbor_value)
+    : Moose::FunctorBase<Real>("fv_interpolation_method_test_functor"),
+      _elem(elem),
+      _neighbor(neighbor),
+      _elem_value(elem_value),
+      _neighbor_value(neighbor_value)
+  {
+  }
+
+  ElemPairFunctor(const libMesh::Elem * elem,
+                  const libMesh::Elem * neighbor,
+                  const ValueType elem_value,
+                  const ValueType neighbor_value,
+                  const GradientType & elem_grad,
+                  const GradientType & neighbor_grad)
+    : ElemPairFunctor(elem, neighbor, elem_value, neighbor_value)
+  {
+    _has_gradients = true;
+    _elem_grad = elem_grad;
+    _neighbor_grad = neighbor_grad;
+  }
+
+  bool hasBlocks(SubdomainID) const override { return true; }
+  bool supportsFaceArg() const override { return false; }
+  bool supportsElemSideQpArg() const override { return false; }
+
+private:
+  ValueType evaluate(const Moose::ElemArg & elem_arg, const Moose::StateArg &) const override final
+  {
+    return valueFor(elem_arg.elem);
+  }
+
+  ValueType evaluate(const Moose::FaceArg &, const Moose::StateArg &) const override final
+  {
+    mooseError("Unexpected face evaluation in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  ValueType evaluate(const Moose::ElemQpArg &, const Moose::StateArg &) const override final
+  {
+    mooseError("Unexpected element quadrature evaluation in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  ValueType evaluate(const Moose::ElemSideQpArg &, const Moose::StateArg &) const override final
+  {
+    mooseError("Unexpected element-side quadrature evaluation in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  ValueType evaluate(const Moose::ElemPointArg &, const Moose::StateArg &) const override final
+  {
+    mooseError("Unexpected element-point evaluation in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  ValueType evaluate(const Moose::NodeArg &, const Moose::StateArg &) const override final
+  {
+    mooseError("Unexpected nodal evaluation in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
+                                const Moose::StateArg &) const override final
+  {
+    if (!_has_gradients)
+      mooseError("Unexpected gradient evaluation in FVInterpolationMethodTest");
+
+    return gradientFor(elem_arg.elem);
+  }
+
+  ValueType valueFor(const libMesh::Elem * elem) const
+  {
+    if (elem == _elem)
+      return _elem_value;
+
+    if (elem == _neighbor)
+      return _neighbor_value;
+
+    mooseError("Unexpected element in FVInterpolationMethodTest");
+    return 0.0;
+  }
+
+  GradientType gradientFor(const libMesh::Elem * elem) const
+  {
+    if (elem == _elem)
+      return _elem_grad;
+
+    if (elem == _neighbor)
+      return _neighbor_grad;
+
+    mooseError("Unexpected element in FVInterpolationMethodTest");
+    return {};
+  }
+
+  const libMesh::Elem * const _elem;
+  const libMesh::Elem * const _neighbor;
+  const ValueType _elem_value;
+  const ValueType _neighbor_value;
+  bool _has_gradients = false;
+  GradientType _elem_grad;
+  GradientType _neighbor_grad;
+};
+
+Real
+expectedAdvectedFaceValue(
+    const FVAdvectedInterpolationMethod::AdvectedSystemContribution & contribution,
+    const Real elem_value,
+    const Real neighbor_value)
+{
+  return contribution.weights_matrix.first * elem_value +
+         contribution.weights_matrix.second * neighbor_value - contribution.rhs_face_value;
+}
+
+void
+expectContributionNear(const FVAdvectedInterpolationMethod::AdvectedSystemContribution & actual,
+                       const FVAdvectedInterpolationMethod::AdvectedSystemContribution & expected,
+                       const Real tol = 1e-12)
+{
+  EXPECT_NEAR(actual.weights_matrix.first, expected.weights_matrix.first, tol);
+  EXPECT_NEAR(actual.weights_matrix.second, expected.weights_matrix.second, tol);
+  EXPECT_NEAR(actual.rhs_face_value, expected.rhs_face_value, tol);
+}
+}
 
 class FVInterpolationMethodTest : public MooseObjectUnitTest
 {
@@ -98,6 +238,35 @@ TEST_F(FVInterpolationMethodTest, advectedUpwind)
     EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(
                          *_internal_face, elem_value, neighbor_value, nullptr, nullptr, mass_flux),
                      neighbor_value);
+  }
+}
+
+TEST_F(FVInterpolationMethodTest, advectedFunctorOverloadsWithoutGradients)
+{
+  InputParameters params = _factory.getValidParams("FVAdvectedUpwind");
+  auto & method =
+      addObject<FVAdvectedUpwind>("FVAdvectedUpwind", "adv_upwind_functor_method", params);
+
+  const auto & face = *_internal_face;
+  const Real elem_value = 2.0;
+  const Real neighbor_value = 10.0;
+  const ElemPairFunctor functor(face.elemPtr(), face.neighborPtr(), elem_value, neighbor_value);
+  const auto state = Moose::currentState();
+
+  for (const Real mass_flux : {1.0, -1.0})
+  {
+    const auto expected_contribution =
+        method.advectedInterpolate(face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
+    const auto contribution = method.advectedInterpolate(functor, face, state, mass_flux);
+    expectContributionNear(contribution, expected_contribution);
+
+    const Real expected_face_value =
+        expectedAdvectedFaceValue(expected_contribution, elem_value, neighbor_value);
+    EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(
+                         face, elem_value, neighbor_value, nullptr, nullptr, mass_flux),
+                     expected_face_value);
+    EXPECT_DOUBLE_EQ(method.advectedInterpolateValue(functor, face, state, mass_flux),
+                     expected_face_value);
   }
 }
 
@@ -328,6 +497,41 @@ TEST_F(FVInterpolationMethodTest, advectedVenkatakrishnanDeferredCorrection)
     EXPECT_NEAR(method.advectedInterpolateValue(
                     face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux),
                 expected_phi_high,
+                1e-12);
+  }
+}
+
+TEST_F(FVInterpolationMethodTest, advectedFunctorOverloadsWithGradients)
+{
+  InputParameters params = _factory.getValidParams("FVAdvectedVenkatakrishnanDeferredCorrection");
+  params.set<Real>("deferred_correction_factor") = 1.0;
+  auto & method = addObject<FVAdvectedVenkatakrishnanDeferredCorrection>(
+      "FVAdvectedVenkatakrishnanDeferredCorrection", "adv_venkat_functor_method", params);
+
+  const auto & face = *_internal_face;
+  const Real elem_value = 2.0;
+  const Real neighbor_value = 10.0;
+  const VectorValue<Real> elem_grad(0.1, 0.2, 0.0);
+  const VectorValue<Real> neighbor_grad(-0.3, 0.4, 0.0);
+  const ElemPairFunctor functor(
+      face.elemPtr(), face.neighborPtr(), elem_value, neighbor_value, elem_grad, neighbor_grad);
+  const auto state = Moose::currentState();
+
+  for (const Real mass_flux : {1.0, -1.0})
+  {
+    const auto expected_contribution = method.advectedInterpolate(
+        face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux);
+    const auto contribution = method.advectedInterpolate(functor, face, state, mass_flux);
+    expectContributionNear(contribution, expected_contribution);
+
+    const Real expected_face_value =
+        expectedAdvectedFaceValue(expected_contribution, elem_value, neighbor_value);
+    EXPECT_NEAR(method.advectedInterpolateValue(
+                    face, elem_value, neighbor_value, &elem_grad, &neighbor_grad, mass_flux),
+                expected_face_value,
+                1e-12);
+    EXPECT_NEAR(method.advectedInterpolateValue(functor, face, state, mass_flux),
+                expected_face_value,
                 1e-12);
   }
 }

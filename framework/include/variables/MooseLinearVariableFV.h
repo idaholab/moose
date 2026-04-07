@@ -15,7 +15,6 @@
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
 #include "GradientLimiterType.h"
-#include "SystemBase.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -127,7 +126,7 @@ public:
    * Get the variable gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    */
-  const VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
+  VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
 
   /**
    * Get one raw gradient component at a cell center without materializing the full gradient.
@@ -139,16 +138,16 @@ public:
   /**
    * Get either the raw or limited gradient at a cell center.
    */
-  const VectorValue<Real> gradSln(const ElemInfo & elem_info,
-                                  const Moose::FV::GradientLimiterType limiter_type) const;
+  VectorValue<Real> gradSln(const ElemInfo & elem_info,
+                            const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Get the limited gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
    * @param limiter_type The limiter type used to compute/store limited gradients
    */
-  const VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
-                                         const Moose::FV::GradientLimiterType limiter_type) const;
+  VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
+                                   const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Compute interpolated gradient on the provided face.

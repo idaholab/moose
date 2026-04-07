@@ -155,7 +155,7 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo & elem_info,
 }
 
 template <typename OutputType>
-const VectorValue<Real>
+VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
 {
   if (_needs_cell_gradients)
@@ -182,7 +182,7 @@ MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
 }
 
 template <typename OutputType>
-const VectorValue<Real>
+VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
                                            const Moose::FV::GradientLimiterType limiter_type) const
 {
@@ -192,7 +192,7 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
 }
 
 template <typename OutputType>
-const VectorValue<Real>
+VectorValue<Real>
 MooseLinearVariableFV<OutputType>::limitedGradSln(
     const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
 {
