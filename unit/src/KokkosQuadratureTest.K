@@ -26,7 +26,7 @@
 #include "gtest_include.h"
 
 #include "KokkosQuadrature.h"
-#include "KokkosFETypes.h"
+#include "libmesh/kokkos/fe_types.h"
 #include "KokkosTypes.h"
 
 #include "libmesh/quadrature_gauss.h"

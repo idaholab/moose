@@ -7,11 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosFETypes.h"
+#include "libmesh/libmesh_config.h"
 
-#include "MooseError.h"
+// When libMesh is built with Kokkos support these symbols are compiled into
+// libmesh itself (src/kokkos/fe_types.C).  MOOSE must not define them a
+// second time or the linker will see duplicate symbols.
+#ifndef LIBMESH_HAVE_KOKKOS
 
-namespace Moose::Kokkos
+#include "libmesh/kokkos/fe_types.h"
+
+#include "libmesh/libmesh_common.h"
+
+namespace libMesh::Kokkos
 {
 
 FEElemTopology
@@ -32,7 +39,7 @@ toKokkosTopology(libMesh::ElemType t)
     case libMesh::HEX20:  return FEElemTopology::HEX20;
     case libMesh::HEX27:  return FEElemTopology::HEX27;
     default:
-      mooseError("Element type ", t, " is not supported by the Kokkos native FE path");
+      libmesh_error_msg("Element type " << t << " is not supported by the Kokkos native FE path");
   }
 }
 
@@ -91,8 +98,8 @@ getSideTopology(FEElemTopology parent)
       return FEElemTopology::QUAD9;
 
     default:
-      mooseError("getSideTopology: unknown FEElemTopology value ",
-                 static_cast<unsigned int>(parent));
+      libmesh_error_msg("getSideTopology: unknown FEElemTopology value "
+                 << static_cast<unsigned int>(parent));
   }
 }
 
@@ -118,21 +125,21 @@ nDofs(FEFamily family, FEElemTopology topo)
         case FEElemTopology::HEX20:  return 20;
         case FEElemTopology::HEX27:  return 27;
         default:
-          mooseError("nDofs: unsupported topology ", static_cast<unsigned int>(topo),
-                     " for LAGRANGE family");
+          libmesh_error_msg("nDofs: unsupported topology " << static_cast<unsigned int>(topo)
+                     << " for LAGRANGE family");
       }
     }
 
     case FEFamily::HERMITE:
-      mooseError("nDofs: HERMITE family is not supported by the native FE path; "
+      libmesh_error_msg("nDofs: HERMITE family is not supported by the native FE path; "
                  "use the libMesh fallback path instead");
 
     case FEFamily::LAGRANGE_VEC:
-      mooseError("nDofs: LAGRANGE_VEC requires a spatial dimension argument; "
+      libmesh_error_msg("nDofs: LAGRANGE_VEC requires a spatial dimension argument; "
                  "not yet supported by the native FE path");
 
     default:
-      mooseError("nDofs: unsupported FE family ", static_cast<unsigned int>(family));
+      libmesh_error_msg("nDofs: unsupported FE family " << static_cast<unsigned int>(family));
   }
 }
 
@@ -164,8 +171,8 @@ classFromTopology(FEElemTopology topo)
       return FEElemClass::HEX;
 
     default:
-      mooseError("classFromTopology: unsupported FEElemTopology value ",
-                 static_cast<unsigned int>(topo));
+      libmesh_error_msg("classFromTopology: unsupported FEElemTopology value "
+                 << static_cast<unsigned int>(topo));
   }
 }
 
@@ -182,53 +189,53 @@ nDofs(FEShapeKey key)
         {
           case 1: return 2;
           case 2: return 3;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for EDGE");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for EDGE");
         }
       case FEElemClass::TRI:
         switch (key.order)
         {
           case 1: return 3;
           case 2: return 6;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for TRI");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for TRI");
         }
       case FEElemClass::QUAD:
         switch (key.order)
         {
           case 1: return 4;
           case 2: return 9;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for QUAD");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for QUAD");
         }
       case FEElemClass::TET:
         switch (key.order)
         {
           case 1: return 4;
           case 2: return 10;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for TET");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for TET");
         }
       case FEElemClass::HEX:
         switch (key.order)
         {
           case 1: return 8;
           case 2: return 27;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for HEX");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for HEX");
         }
       case FEElemClass::PRISM:
         switch (key.order)
         {
           case 1: return 6;
           case 2: return 21;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for PRISM");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for PRISM");
         }
       case FEElemClass::PYRAMID:
         switch (key.order)
         {
           case 1: return 5;
           case 2: return 14;
-          default: mooseError("nDofs(FEShapeKey): unsupported LAGRANGE order ", key.order, " for PYRAMID");
+          default: libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE order " << key.order << " for PYRAMID");
         }
       default:
-        mooseError("nDofs(FEShapeKey): unsupported LAGRANGE element class ",
-                   static_cast<unsigned int>(key.cls));
+        libmesh_error_msg("nDofs(FEShapeKey): unsupported LAGRANGE element class "
+                   << static_cast<unsigned int>(key.cls));
     }
   }
   else if (key.family == FEFamily::MONOMIAL)
@@ -249,12 +256,14 @@ nDofs(FEShapeKey key)
       case FEElemClass::PYRAMID:
         return (p + 1) * (p + 2) * (p + 3) / 6;
       default:
-        mooseError("nDofs(FEShapeKey): unsupported MONOMIAL element class ",
-                   static_cast<unsigned int>(key.cls));
+        libmesh_error_msg("nDofs(FEShapeKey): unsupported MONOMIAL element class "
+                   << static_cast<unsigned int>(key.cls));
     }
   }
-  mooseError("nDofs(FEShapeKey): unsupported FE family ",
-             static_cast<unsigned int>(key.family));
+  libmesh_error_msg("nDofs(FEShapeKey): unsupported FE family "
+             << static_cast<unsigned int>(key.family));
 }
 
-} // namespace Moose::Kokkos
+} // namespace libMesh::Kokkos
+
+#endif // !LIBMESH_HAVE_KOKKOS

@@ -10,13 +10,14 @@
 #pragma once
 
 #include "KokkosArray.h"
-#include "KokkosFETypes.h"
-#include "KokkosFELagrange1D.h"
-#include "KokkosFELagrange2D.h"
-#include "KokkosFELagrange3D.h"
+#include "libmesh/kokkos/fe_types.h"
+#include "libmesh/kokkos/fe_lagrange_1d.h"
+#include "libmesh/kokkos/fe_lagrange_2d.h"
+#include "libmesh/kokkos/fe_lagrange_3d.h"
 
 namespace Moose::Kokkos
 {
+using namespace libMesh::Kokkos;
 
 /**
  * CPU-side evaluator for geometric map arrays.

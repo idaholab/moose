@@ -18,9 +18,14 @@
 
 #include "libmesh/tensor_tools.h"
 
+// Real3 and Real33 now live in libMesh::Kokkos (libmesh/kokkos/scalar_types.h).
+// Pull them into Moose::Kokkos for backward compatibility with existing MOOSE code.
+#include "libmesh/kokkos/scalar_types.h"
+
 namespace Moose::Kokkos
 {
 
+<<<<<<< HEAD
 struct Real33;
 
 struct Real3
@@ -400,6 +405,15 @@ operator-(const Real3 left, const Real3 right)
   return {left.v[0] - right.v[0], left.v[1] - right.v[1], left.v[2] - right.v[2]};
 }
 
+=======
+using libMesh::Kokkos::Real;
+using libMesh::Kokkos::Real3;
+using libMesh::Kokkos::Real33;
+#ifdef MOOSE_KOKKOS_SCOPE
+using libMesh::Kokkos::operator*;
+using libMesh::Kokkos::operator+;
+using libMesh::Kokkos::operator-;
+>>>>>>> 4dcdf593d5 (Kokkos FE element support moved upstream to libmesh)
 #endif
 
 template <typename T1, typename T2>

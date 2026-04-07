@@ -10,10 +10,11 @@
 #pragma once
 
 #include "KokkosTypes.h"
-#include "KokkosFETypes.h"
+#include "KokkosConfig.h"
+#include "libmesh/kokkos/fe_types.h"
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-#include "KokkosFEReinit.h"
+#include "libmesh/kokkos/fe_evaluator.h"
 #endif
 
 #include "MooseMesh.h"
@@ -26,6 +27,7 @@ class FEProblemBase;
 
 namespace Moose::Kokkos
 {
+using namespace libMesh::Kokkos;
 
 /**
  * The Kokkos assembly class
