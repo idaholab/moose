@@ -60,7 +60,7 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2026.04.02_d452ed8
+    version: 2026.04.07_3ca87a2
     build_number: 0
     conda: conda/libmesh
     templates:
