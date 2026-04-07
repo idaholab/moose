@@ -11,11 +11,12 @@
 
 #include <cmath>
 #include "KokkosArray.h"
-#include "KokkosFETypes.h"
+#include "libmesh/kokkos/fe_types.h"
 #include "KokkosTypes.h"
 
 namespace Moose::Kokkos
 {
+using namespace libMesh::Kokkos;
 
 #ifdef MOOSE_KOKKOS_SCOPE
 

@@ -53,6 +53,17 @@ libmesh_LIBS     := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
 libmesh_HOST     := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
 libmesh_LDFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
 
+# When libMesh is built with Kokkos support, link the pre-built Kokkos FE
+# types library that provides the libMesh::Kokkos type-conversion symbols.
+# The library lives alongside the other libMesh libraries.
+# Derive the libMesh install prefix from the first -I directory in --include.
+libmesh_PREFIX   := $(patsubst %/include,%,$(firstword $(patsubst -I%,%,$(libmesh_INCLUDE))))
+LIBMESH_CONFIG_H := $(libmesh_PREFIX)/include/libmesh/libmesh_config.h
+LIBMESH_HAVE_KOKKOS := $(shell grep -c 'define LIBMESH_HAVE_KOKKOS' $(LIBMESH_CONFIG_H) 2>/dev/null)
+ifeq ($(LIBMESH_HAVE_KOKKOS),1)
+  libmesh_LIBS += $(libmesh_PREFIX)/lib/libkokkos_fe_types.a
+endif
+
 # In the event that we're using something like mpicxx, query it for
 # the underlying compiler (like mpicxx -show); otherwise, fallback to
 # whatever libmesh_CXX is

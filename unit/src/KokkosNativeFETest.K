@@ -31,13 +31,12 @@
 
 #include "gtest_include.h"
 
-#include "KokkosFELagrange1D.h"
-#include "KokkosFELagrange2D.h"
-#include "KokkosFELagrange3D.h"
-#include "KokkosFEMonomial.h"
-#include "KokkosFEReinit.h"
-#include "KokkosQuadrature.h"
-#include "KokkosFETypes.h"
+#include "libmesh/kokkos/fe_lagrange_1d.h"
+#include "libmesh/kokkos/fe_lagrange_2d.h"
+#include "libmesh/kokkos/fe_lagrange_3d.h"
+#include "libmesh/kokkos/fe_monomial.h"
+#include "libmesh/kokkos/fe_evaluator.h"
+#include "libmesh/kokkos/fe_face_map.h"
 #include "KokkosTypes.h"
 
 #include "libmesh/fe_base.h"
@@ -53,7 +52,7 @@
 #include <string>
 #include <vector>
 
-using namespace Moose::Kokkos;
+using namespace libMesh::Kokkos;
 
 static constexpr double TOL = 1.0e-13;
 

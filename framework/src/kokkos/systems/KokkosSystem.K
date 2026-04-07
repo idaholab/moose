@@ -11,7 +11,7 @@
 #include "KokkosNodalBCBase.h"
 
 #ifdef MOOSE_KOKKOS_ONDEMAND_FE
-#include "KokkosFEReinit.h"
+#include "libmesh/kokkos/fe_evaluator.h"
 #endif
 
 #include "MooseMesh.h"

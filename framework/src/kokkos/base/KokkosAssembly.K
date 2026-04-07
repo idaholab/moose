@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosAssembly.h"
+#include "KokkosConfig.h"
 
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
@@ -23,14 +24,15 @@
 // Included only when the native flag is active so that the default build has no
 // new compile-time dependencies.
 #ifdef MOOSE_KOKKOS_NATIVE_FE
-#include "KokkosFELagrange1D.h"
-#include "KokkosFELagrange2D.h"
-#include "KokkosFELagrange3D.h"
-#include "KokkosFEMonomial.h"
+#include "libmesh/kokkos/fe_lagrange_1d.h"
+#include "libmesh/kokkos/fe_lagrange_2d.h"
+#include "libmesh/kokkos/fe_lagrange_3d.h"
+#include "libmesh/kokkos/fe_monomial.h"
+#include "libmesh/kokkos/fe_face_map.h"
 #include "KokkosFEMapEvaluator.h"
-// KokkosFEReinit.h provides nativeShape(FEShapeKey) and nativeGradShape(FEShapeKey)
+// fe_evaluator.h provides nativeShape(FEShapeKey) and nativeGradShape(FEShapeKey)
 // used by the key-based evalShapeAtQp overload below.
-#include "KokkosFEReinit.h"
+#include "libmesh/kokkos/fe_evaluator.h"
 #endif
 
 // MOOSE_KOKKOS_ONDEMAND_FE (Phase 6) requires MOOSE_KOKKOS_NATIVE_FE.
@@ -46,6 +48,7 @@
 
 namespace Moose::Kokkos
 {
+using namespace libMesh::Kokkos;
 
 Assembly::Assembly(FEProblemBase & problem)
   : MeshHolder(*problem.mesh().getKokkosMesh()),
@@ -265,12 +268,6 @@ Assembly::initQuadrature()
   _n_elem_face_properties.copyToDevice();
 }
 
-#ifdef MOOSE_KOKKOS_NATIVE_FE
-static Real3 mapFaceQpToParent(const libMesh::Elem & side_in_parent,
-                                FEElemTopology side_topo,
-                                Real3 face_qpt);
-#endif
-
 void
 Assembly::initShape()
 {
@@ -398,8 +395,8 @@ Assembly::initShape()
           // != native_ndofs and fall back to the phi-table path.  Other families
           // (HERMITE, LAGRANGE_VEC, etc.) also fall back unconditionally.
           const FEShapeKey key = _shape_keys(elem_type_id, fe_type_id);
-          const bool family_supported = (key.family == FEFamily::LAGRANGE ||
-                                         key.family == FEFamily::MONOMIAL);
+          const bool family_supported = (key.family == libMesh::Kokkos::FEFamily::LAGRANGE ||
+                                         key.family == libMesh::Kokkos::FEFamily::MONOMIAL);
 
           if (family_supported)
           {
@@ -428,7 +425,7 @@ Assembly::initShape()
         {
           const auto topo = toKokkosTopology(elem_type);
           const auto fam = toKokkosFamily(fe_type.family);
-          const bool family_supported = (fam == FEFamily::LAGRANGE || fam == FEFamily::MONOMIAL);
+          const bool family_supported = (fam == libMesh::Kokkos::FEFamily::LAGRANGE || fam == libMesh::Kokkos::FEFamily::MONOMIAL);
           if (family_supported)
           {
             const FEShapeKey key{fam, classFromTopology(topo),
@@ -623,89 +620,6 @@ Assembly::initShape()
 
 #ifdef MOOSE_KOKKOS_NATIVE_FE
 
-// Map a face quadrature point from the side element's reference coordinate
-// system to the parent element's reference coordinate system.
-//
-// side_in_parent — side element obtained via parent.build_side_ptr(side) (const
-//                  version).  For second-order parents (e.g. QUAD9) this is the
-//                  full EDGE3, not the primitive EDGE2 returned by side_ptr().
-// side_topo      — Kokkos topology of the side element
-// face_qpt       — quadrature point in the side element's reference system
-//
-// The mapping is the isoparametric one:
-//   x_parent = sum_k  psi_k(face_qpt)  *  x_node_k_in_parent
-//
-// where psi_k are the LAGRANGE shape functions of the side element and
-// x_node_k_in_parent are the parent reference coordinates of each side node.
-//
-// NOTE: Call sites must use build_side_ptr() (the const-qualified overload),
-// NOT side_ptr().  Quad::side_ptr() is 'override final' and always returns a
-// primitive EDGE2, silently dropping the midpoint node for second-order quads.
-// build_side_ptr() dispatches to Quad9::build_side_ptr() and returns the
-// correct EDGE3 with all three nodes.
-static Real3
-mapFaceQpToParent(const libMesh::Elem & side_in_parent,
-                  FEElemTopology side_topo,
-                  Real3 face_qpt)
-{
-  const unsigned int n = side_in_parent.n_nodes();
-  Real3 parent_pt;
-
-  // 1-D elements: the "side" is a single vertex node.  There are no reference
-  // coordinates on a point element, so the parent reference coordinate is
-  // simply the node's own position in the parent reference element.
-  if (n == 1)
-  {
-    const auto & pt = side_in_parent.point(0);
-    parent_pt.v[0] = pt(0);
-    parent_pt.v[1] = pt(1);
-    parent_pt.v[2] = pt(2);
-    return parent_pt;
-  }
-
-  for (unsigned int k = 0; k < n; ++k)
-  {
-    Real psi;
-    const Real s = face_qpt.v[0];
-    const Real t = face_qpt.v[1];
-
-    switch (side_topo)
-    {
-      case FEElemTopology::EDGE2:
-        psi = FEEvaluator<LagrangeTag, Edge2Tag>::shape(k, s, 0.0, 0.0);
-        break;
-      case FEElemTopology::EDGE3:
-        psi = FEEvaluator<LagrangeTag, Edge3Tag>::shape(k, s, 0.0, 0.0);
-        break;
-      case FEElemTopology::TRI3:
-        psi = FEEvaluator<LagrangeTag, Tri3Tag>::shape(k, s, t, 0.0);
-        break;
-      case FEElemTopology::TRI6:
-        psi = FEEvaluator<LagrangeTag, Tri6Tag>::shape(k, s, t, 0.0);
-        break;
-      case FEElemTopology::QUAD4:
-        psi = FEEvaluator<LagrangeTag, Quad4Tag>::shape(k, s, t, 0.0);
-        break;
-      case FEElemTopology::QUAD8:
-        psi = FEEvaluator<LagrangeTag, Quad8Tag>::shape(k, s, t, 0.0);
-        break;
-      case FEElemTopology::QUAD9:
-        psi = FEEvaluator<LagrangeTag, Quad9Tag>::shape(k, s, t, 0.0);
-        break;
-      default:
-        psi = 0.0;
-        break;
-    }
-
-    const auto & pt = side_in_parent.point(k);
-    parent_pt.v[0] += psi * pt(0);
-    parent_pt.v[1] += psi * pt(1);
-    parent_pt.v[2] += psi * pt(2);
-  }
-
-  return parent_pt;
-}
-
 // Evaluate shape(i, xi, eta, zeta) and grad_shape(i, xi, eta, zeta) for the
 // given topology and write results into dest_phi and dest_grad at position
 // (i, qp).  Used by both initShapeNative (physics DOFs) and initMapNative
@@ -849,7 +763,7 @@ Assembly::initMapNative(unsigned int sid,
   _map_grad_psi_face(sid, etid).create(n_sides);
 
   // Number of map nodes equals the Lagrange DOFs of the parent topology
-  const unsigned int n_map = nDofs(FEFamily::LAGRANGE, topo);
+  const unsigned int n_map = nDofs(libMesh::Kokkos::FEFamily::LAGRANGE, topo);
 
   for (unsigned int side = 0; side < n_sides; ++side)
   {

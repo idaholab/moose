@@ -9,12 +9,12 @@
 
 #include "gtest_include.h"
 
-#include "KokkosFETypes.h"
+#include "libmesh/kokkos/fe_types.h"
 
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_fe_family.h"
 
-using namespace Moose::Kokkos;
+using namespace libMesh::Kokkos;
 
 // ── toKokkosTopology ──────────────────────────────────────────────────────────
 

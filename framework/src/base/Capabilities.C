@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "libmesh/libmesh_config.h"
+#include "KokkosConfig.h"
 #include "petscconf.h"
 #include "petscpkg_version.h"
 
