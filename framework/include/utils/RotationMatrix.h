@@ -83,4 +83,38 @@ rotVec2DToX(const GenericRealVectorValue<is_ad> & vec)
   const GenericReal<is_ad> ct = cos(theta);
   return GenericRealTensorValue<is_ad>(ct, st, 0., -st, ct, 0., 0., 0., 1.);
 }
+
+/**
+ * Provides rotatiom matrix for rotating from vec1 to vec2 using Rodrigues' rotation forumula.
+ * See https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula#Matrix_notation
+ * @param vec1 starting vector -- must have 3 components!
+ * @param vec2 ending vector -- must have 3 components!
+ * @return 3x3 rotation tensor (matrix)
+ */
+template <bool is_ad = false>
+GenericRealTensorValue<is_ad>
+rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
+{
+  // normalize input vectors
+  GenericRealVectorValue<is_ad> u = vec1 / vec1.norm();
+  GenericRealVectorValue<is_ad> v = vec2 / vec2.norm();
+
+  if ((u - v).norm() < libMesh::TOLERANCE)
+    return GenericRealTensorValue<is_ad>(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
+
+  GenericRealVectorValue<is_ad> k_vec = u.cross(v); // calculate rotation axis
+  k_vec /= k_vec.norm();                            // normalize
+  Real cos_theta = u * v;
+  Real theta = std::acos(cos_theta);
+  Real sin_theta = std::sin(theta);
+
+  GenericRealTensorValue<is_ad> K_matrix(
+      0, -k_vec(2), k_vec(1), k_vec(2), 0, -k_vec(0), -k_vec(1), k_vec(0), 0);
+  GenericRealTensorValue<is_ad> I(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
+
+  // construct rotation matrix
+  GenericRealTensorValue<is_ad> rot_matrix;
+  rot_matrix = I + sin_theta * K_matrix + (1 - cos_theta) * K_matrix * K_matrix;
+  return rot_matrix;
+}
 }
