@@ -11,10 +11,13 @@
 
 #include "KokkosKernelGrad.h"
 
-using Real3 = Moose::Kokkos::Real3;
-
+/**
+ * Kokkos kernel for a heat conduction term with an isotropic conductivity
+ */
 class KokkosHeatConduction : public Moose::Kokkos::KernelGrad
 {
+  using Real3 = Moose::Kokkos::Real3;
+
 public:
   static InputParameters validParams();
 
@@ -33,14 +36,14 @@ private:
 };
 
 template <typename Derived>
-KOKKOS_FUNCTION Real3
+KOKKOS_FUNCTION Moose::Kokkos::Real3
 KokkosHeatConduction::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _diffusion_coefficient(datum, qp) * _grad_u(datum, qp);
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION Real3
+KOKKOS_FUNCTION Moose::Kokkos::Real3
 KokkosHeatConduction::computeQpJacobian(const unsigned int j,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
