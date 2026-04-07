@@ -118,7 +118,7 @@ public:
    * @brief Check if a surface with given name exists in CSGBase object
    *
    * @param name surface name
-   * @return Check if a surface with given name exists in CSGBase object
+   * @return true if surface with given name exists in CSGBase
    */
   bool hasSurface(const std::string & name) const { return _surface_list.hasSurface(name); }
 

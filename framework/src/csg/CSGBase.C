@@ -630,39 +630,19 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
             addTransformation(surface, type, values);
           }
         }
-        else if constexpr (std::is_same_v<T, CSGSurfaceEngUnit>)
+        else if constexpr (std::is_same_v<T, CSGSurfaceEngUnit> ||
+                           std::is_same_v<T, CSGCellEngUnit> ||
+                           std::is_same_v<T, CSGUniverseEngUnit>)
         {
-          const CSGSurfaceEngUnit & eng_unit = obj.get();
+          const CSGEngUnit & eng_unit = obj.get();
           if (!checkEngUnitInBase(eng_unit))
-            mooseError("Cannot apply transformation to surface engineering unit ",
+            mooseError("Cannot apply transformation to engineering unit ",
                        eng_unit.getName(),
                        " that is not in this CSGBase instance.");
 
-          // Get non-const reference via CSGEngUnit& from the list, downcast to concrete type
-          CSGEngUnit & mutable_eng = _eng_unit_list.getEngUnit(eng_unit.getName());
-          static_cast<CSGSurfaceEngUnit &>(mutable_eng).addTransformation(type, values);
-        }
-        else if constexpr (std::is_same_v<T, CSGCellEngUnit>)
-        {
-          const CSGCellEngUnit & eng_unit = obj.get();
-          if (!checkEngUnitInBase(eng_unit))
-            mooseError("Cannot apply transformation to cell engineering unit ",
-                       eng_unit.getName(),
-                       " that is not in this CSGBase instance.");
-
-          CSGEngUnit & mutable_eng = _eng_unit_list.getEngUnit(eng_unit.getName());
-          static_cast<CSGCellEngUnit &>(mutable_eng).addTransformation(type, values);
-        }
-        else if constexpr (std::is_same_v<T, CSGUniverseEngUnit>)
-        {
-          const CSGUniverseEngUnit & eng_unit = obj.get();
-          if (!checkEngUnitInBase(eng_unit))
-            mooseError("Cannot apply transformation to universe engineering unit ",
-                       eng_unit.getName(),
-                       " that is not in this CSGBase instance.");
-
-          CSGEngUnit & mutable_eng = _eng_unit_list.getEngUnit(eng_unit.getName());
-          static_cast<CSGUniverseEngUnit &>(mutable_eng).addTransformation(type, values);
+          // T is the specific EngUnit type — addTransformation is accessible via its CSG base
+          T & mutable_eng = static_cast<T &>(_eng_unit_list.getEngUnit(eng_unit.getName()));
+          mutable_eng.addTransformation(type, values);
         }
         else
           mooseError("Transformation not implemented for this object type: ", typeid(T).name());
@@ -1050,8 +1030,9 @@ CSGBase::checkUniverseLinking() const
   // Recursively figure out which universe names are linked to root universe
   getLinkedUniverses(getRootUniverse(), linked_universe_names, linked_cell_names);
 
-  // Build a combined list of all plain universes and universe engineering units
-  // (CSGUniverseEngUnit IS-A CSGUniverse, so they share the same base interface)
+  // Iterate through combined list of universes and universe engineering units and check that they
+  // exist in universes linked to root universe list.
+  // (CSGUniverseEngUnit is derived from CSGUniverse, so they share the same base interface)
   auto all_univs = getAllUniverses();
   for (const CSGUniverseEngUnit & eu : getAllUniverseEngUnits())
     all_univs.emplace_back(static_cast<const CSGUniverse &>(eu));

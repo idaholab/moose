@@ -44,10 +44,12 @@ public:
    * @return The symbol associated with the given region type
    */
   static char regionSymbol(const RegionType region_type);
+
   /**
    * @return The symbol associated with the given halfspace
    */
   static char halfspaceSymbol(const CSGSurface::Halfspace halfspace);
+
   /**
    * @return The string associated with the given region type
    */
