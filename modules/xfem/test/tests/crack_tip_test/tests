@@ -6,7 +6,7 @@
   [tip_location]
     type = Exodiff
     input = 'elastic_test.i output_cutter_mesh.i'
-    exodiff = 'output_cutter_mesh_xfemcutter_XFEMCutMeshOutput.e-s0003'
+    exodiff = 'output_cutter_mesh_xfemcutter_XFEMCutMeshOutput.e-s0002'
     abs_zero = 1e-8
     map = false
     capabilities = 'unique_id'
@@ -23,7 +23,7 @@
   [ADtip_location]
     type = Exodiff
     input = 'ADelastic_test.i output_cutter_mesh.i'
-    exodiff = 'output_cutter_mesh_xfemcutter_XFEMCutMeshOutput.e-s0003'
+    exodiff = 'output_cutter_mesh_xfemcutter_XFEMCutMeshOutput.e-s0002'
     abs_zero = 1e-4
     map = false
     capabilities = 'unique_id'
