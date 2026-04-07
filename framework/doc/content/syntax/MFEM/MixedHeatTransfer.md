@@ -41,7 +41,7 @@ T, T' &\in L_2(\Omega)\\
 \end{split}
 \end{equation}
 
-and the polynomial order of the FEs used to represent $\vec h$ and $\vec h'$ is one order higher than $T$ and $T'$.
+and the polynomial order of the FEs used to represent $\vec h$ and $\vec h'$ is the same as $T$ and $T'$.
 
 Notably, in contrast to the primal weak form for the transient heat equation solved [here](syntax/MFEM/HeatTransfer.md), the heat flux on $\Gamma_\mathrm{h}$ is strongly imposed via a Dirichlet condition, and temperatures on boundaries $\Gamma_\mathrm{T}$ are imposed weakly via boundary integrals.
 
