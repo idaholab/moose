@@ -10,8 +10,10 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
+#include "MooseUnitUtils.h"
 #include "MFEMAuxKernel.h"
 #include "MFEMPostprocessor.h"
+#include "MFEMProblem.h"
 
 #include <string>
 #include <vector>
@@ -153,6 +155,21 @@ TEST_F(MFEMExecutedObjectDependencyTest, PostprocessorAuxKernelDependencyChain)
   EXPECT_EQ(pp1.getValue(), 2.0);
   EXPECT_EQ(pp0.getCurrentValue(), 1.0);
   EXPECT_EQ(pp1.getCurrentValue(), 2.0);
+}
+
+TEST_F(MFEMExecutedObjectDependencyTest, DuplicateSupplierError)
+{
+  InputParameters aux0_params = _factory.getValidParams("TestMFEMDependencyAux");
+  aux0_params.set<AuxVariableName>("variable") = "aux0_var";
+  addObject<TestMFEMDependencyAux>("TestMFEMDependencyAux", "aux0", aux0_params);
+
+  InputParameters aux0_dup_params = _factory.getValidParams("TestMFEMDependencyAux");
+  aux0_dup_params.set<AuxVariableName>("variable") = "aux0_var";
+  addObject<TestMFEMDependencyAux>("TestMFEMDependencyAux", "aux0_dup", aux0_dup_params);
+
+  EXPECT_THROW_MSG_CONTAINS(_mfem_problem->executeMFEMObjects(EXEC_TIMESTEP_END),
+                            std::runtime_error,
+                            "both 'aux0' and 'aux0_dup' supply 'variable:aux0_var'");
 }
 
 #endif
