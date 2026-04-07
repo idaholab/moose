@@ -24,15 +24,6 @@ CSGUniverse::CSGUniverse(const std::string & name, std::vector<CSGCell *> & cell
     addCell(*cell);
 }
 
-CSGUniverse::CSGUniverse(const std::string & name,
-                         const std::vector<const CSGCell *> & cells,
-                         bool is_root)
-  : _name(name), _is_root(is_root)
-{
-  CSGUtils::checkValidCSGName(name);
-  for (auto cell : cells)
-    addCell(*cell);
-}
 
 void
 CSGUniverse::addCell(const CSGCell & cell)
