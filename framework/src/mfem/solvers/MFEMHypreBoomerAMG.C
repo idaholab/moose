@@ -11,6 +11,7 @@
 
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMFESpace.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 
