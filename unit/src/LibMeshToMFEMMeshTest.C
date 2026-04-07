@@ -798,8 +798,7 @@ tet10Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "TET10";
-  mg_params.set<Connectivity>("element_connectivity") = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
                                                           {-1., 1., -1.},
@@ -874,8 +873,7 @@ pyr13Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID13";
-  mg_params.set<Connectivity>("element_connectivity") = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+  mg_params.set<Connectivity>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.},
                                                           {1., -1., -1.},
                                                           {1., 1., -1.},
@@ -1066,8 +1064,8 @@ hex20Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX20";
-  mg_params.set<Connectivity>("element_connectivity") = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+  mg_params.set<Connectivity>("element_connectivity") = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                         10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.},  {1., 0., 0.},  {1., 1., 0.},   {0., 1., 0.},   {0., 0., 1.},
       {1., 0., 1.},  {1, 1., 1.},   {0., 1., 1.},   {0.5, 0., 0.},  {1., 0.5, 0.},
@@ -1096,9 +1094,9 @@ hex27Data()
   InputParameters mesh_params = MeshGeneratorMesh::validParams();
   InputParameters mg_params = ElementGenerator::validParams();
   mg_params.set<MooseEnum>("elem_type") = "HEX27";
-  mg_params.set<Connectivity>("element_connectivity") = {
-      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
-      14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
+  mg_params.set<Connectivity>("element_connectivity") = {0,  1,  2,  3,  4,  5,  6,  7,  8,
+                                                         9,  10, 11, 12, 13, 14, 15, 16, 17,
+                                                         18, 19, 20, 21, 22, 23, 24, 25, 26};
   mg_params.set<std::vector<Point>>("nodal_positions") = {
       {0., 0., 0.},   {1., 0., 0.},    {1., 1., 0.},   {0., 1., 0.},   {0., 0., 1.},
       {1., 0., 1.},   {1, 1., 1.},     {0., 1., 1.},   {0.5, 0., 0.},  {1., 0.5, 0.},
@@ -1188,7 +1186,9 @@ using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest;
 TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
 {
   auto data = elementData(GetParam());
-  EXPECT_MOOSEERROR_MSG(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), "Due to bug in MFEM, can not convert higher order libMesh pyramid elements.");
+  EXPECT_MOOSEERROR_MSG(
+      buildMesh(data.mesh_params, "ElementGenerator", data.mg_params),
+      "Due to bug in MFEM, can not convert higher order libMesh pyramid elements.");
 }
 
 // A bug in MFEM currently means we can't support higher-order
@@ -1218,9 +1218,8 @@ fallbackElementData(FallbackElementCase fallback_case)
   mooseError("Unhandled fallback element test case.");
 }
 
-class ElementComparisonMFEMTest
-  : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
-    public testing::WithParamInterface<FallbackElementCase>
+class ElementComparisonMFEMTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+                                  public testing::WithParamInterface<FallbackElementCase>
 {
 public:
   static std::string testParamName(const testing::TestParamInfo<FallbackElementCase> & info)
@@ -1241,13 +1240,14 @@ using LibMeshToMFEMMeshFallbackTest = ElementComparisonMFEMTest;
 
 TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarningThrown)
 {
-  auto data =  fallbackElementData(GetParam()).first;
+  auto data = fallbackElementData(GetParam()).first;
   // A warning should be emitted when converting from TRI7 to TRI6
   EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false),
                std::runtime_error);
 }
 
-TEST_P(LibMeshToMFEMMeshFallbackTest, CheckFallbackCorrect) {
+TEST_P(LibMeshToMFEMMeshFallbackTest, CheckFallbackCorrect)
+{
   auto [data, expected_data] = fallbackElementData(GetParam());
   // Temporarily allow warnings to be emitted, so we can test the
   // conversion actually works properly.
@@ -1285,7 +1285,8 @@ TEST_P(LibMeshToMFEMMeshFallbackTest, CheckFallbackCorrect) {
 TEST_P(LibMeshToMFEMMeshFallbackTest, CheckError)
 {
   auto data = fallbackElementData(GetParam()).first;
-  EXPECT_MOOSEERROR_MSG_CONTAINS(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), "Can not represent libMesh element type ");
+  EXPECT_MOOSEERROR_MSG_CONTAINS(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params),
+                                 "Can not represent libMesh element type ");
 }
 
 INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
@@ -1293,9 +1294,8 @@ INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
                          testing::Values(FallbackElementCase::Tri7, FallbackElementCase::Tet14),
                          ElementComparisonMFEMTest::testParamName);
 
-class LibMeshToMFEMMeshFirstOrderTest
-  : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
-    public testing::WithParamInterface<ElementCase>
+class LibMeshToMFEMMeshFirstOrderTest : public LibMeshToMFEMMeshTest<MeshGeneratorMesh>,
+                                        public testing::WithParamInterface<ElementCase>
 {
 public:
   static std::string testParamName(const testing::TestParamInfo<ElementCase> & info)
