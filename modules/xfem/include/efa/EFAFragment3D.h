@@ -64,7 +64,7 @@ public:
 private:
   EFAFragment3D * connectSubfaces(EFAFace * start_face,
                                   unsigned int startOldFaceID,
-                                  std::vector<std::vector<EFAFace *>> & subfaces);
-  EFAEdge * loneEdgeOnFace(unsigned int face_id) const;
+                                  std::vector<std::vector<EFAFace *>> & subfaces,
+                                  std::vector<bool> & contributed);
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };

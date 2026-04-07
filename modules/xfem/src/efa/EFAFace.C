@@ -318,17 +318,26 @@ EFAFace::sortEdges()
 {
   std::vector<EFAEdge *> ordered_edges(_num_edges, nullptr);
   ordered_edges[0] = _edges[0];
+  std::vector<bool> used_edges(_num_edges, false);
+  used_edges[0] = true;
   for (unsigned int i = 1; i < _num_edges; ++i)
   {
     EFAEdge * last_edge = ordered_edges[i - 1];
+    bool next_edge_found = false;
     for (unsigned int j = 0; j < _num_edges; ++j)
     {
-      if (!_edges[j]->equivalent(*last_edge) && _edges[j]->containsNode(last_edge->getNode(1)))
+      if (!used_edges[j] && _edges[j]->containsNode(last_edge->getNode(1)))
       {
+        if (_edges[j]->getNode(0) != last_edge->getNode(1))
+          _edges[j]->reverseNodes();
         ordered_edges[i] = _edges[j];
+        used_edges[j] = true;
+        next_edge_found = true;
         break;
       }
     } // j
+    if (!next_edge_found)
+      EFAError("EFAFace::sortEdges() failed to build a unique edge ordering");
   }   // i
   _edges = ordered_edges;
 }
