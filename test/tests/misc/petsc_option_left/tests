@@ -7,7 +7,6 @@
     absent_out = "Option left.*value.*hypre"
     requirement = "The system shall use the default PETSc option database in the parent app to handle system-level PETSc parameters"
     issues = '#15129'
-    capabilities = 'petsc>=3.19.2'
   []
 
   [test_missing_time_kernels]
@@ -27,7 +26,6 @@
     absent_out = "Option left:\s+name:--show_input"
     requirement = "The system shall warn the user of unused options if and only if they are not valid moose options."
     issues = '#25577'
-    capabilities = 'petsc>=3.19.2'
   []
 
   [test_user_set_petsc_options_left]
@@ -37,6 +35,32 @@
     expect_out = "Option left:\s+name:-SNES_TYPE\s+value:\s+ksponly"
     requirement = "The system shall warn the user of unused petsc options that are not set programatically."
     issues = '#28053'
-    capabilities = 'petsc>=3.19.2'
+  []
+
+  [test_command_line_mat_type_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = '-nl0_mat_type aij'
+    absent_out = 'Option left.*-nl0_mat_type'
+    requirement = 'The system shall not warn about a nonlinear system matrix type option that was already consumed before the PETSc options database is rebuilt.'
+    issues = '#28053'
+  []
+
+  [test_command_line_system_mat_type_error]
+    type = RunException
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = '-mat_type aij'
+    expect_err = "Setting option '-mat_type' is not supported without a solver-system prefix"
+    requirement = 'The system shall reject non-prefixed matrix type options because MOOSE only supports solver-system-prefixed matrix type control.'
+    issues = '#28053'
+  []
+
+  [test_command_line_vec_type_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    cli_args = '-vec_type standard'
+    absent_out = 'Option left.*-vec_type'
+    requirement = 'The system shall not warn about a vector type option that was already consumed before the PETSc options database is rebuilt.'
+    issues = '#28053'
   []
 []
