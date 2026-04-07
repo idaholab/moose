@@ -21,8 +21,8 @@ MFEMDivAux::validParams()
   params.addClassDescription(
       "Calculates the divergence of an H(div) conforming RT source variable and stores the result"
       " on an L2 conforming result auxvariable");
-  params.addRequiredParam<VariableName>("source",
-                                        "Vector H(div) MFEMVariable to take the divergence of.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(div) MFEMVariable to take the divergence of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }

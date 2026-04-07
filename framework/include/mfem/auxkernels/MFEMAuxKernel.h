@@ -28,7 +28,6 @@ public:
   /// Method called to update any owned objects upon an FE space update
   virtual void update() {}
 
-  virtual std::set<std::string> consumedVariableNames() const override;
   virtual std::set<std::string> producedVariableNames() const override;
 
 protected:

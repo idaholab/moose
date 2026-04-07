@@ -20,8 +20,10 @@ MFEMComplexExteriorProductAux::validParams()
   InputParameters params = MFEMComplexAuxKernel::validParams();
   params.addClassDescription(
       "Projects $s \\vec u \\wedge \\vec v*$ onto a complex vector MFEM auxvariable");
-  params.addRequiredParam<VariableName>("first_source_vec", "Complex vector variable (3D)");
-  params.addRequiredParam<VariableName>("second_source_vec", "Complex vector variable (3D)");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "first_source_vec", "Complex vector variable (3D)");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "second_source_vec", "Complex vector variable (3D)");
   params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of constant multiplier");
   params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of constant multiplier");
 

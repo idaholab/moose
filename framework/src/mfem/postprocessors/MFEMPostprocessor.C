@@ -15,25 +15,14 @@ InputParameters
 MFEMPostprocessor::validParams()
 {
   InputParameters params = MFEMExecutedObject::validParams();
-  params.registerSystemAttributeName("MFEMPostprocessor");
   params += Postprocessor::validParams();
+  params.registerSystemAttributeName("MFEMExecutedObject");
   return params;
 }
 
 MFEMPostprocessor::MFEMPostprocessor(const InputParameters & parameters)
   : MFEMExecutedObject(parameters), Postprocessor(this)
 {
-}
-
-std::set<std::string>
-MFEMPostprocessor::consumedVariableNames() const
-{
-  std::set<std::string> names;
-  appendTypedParamIfValid<VariableName>(names, "variable");
-  appendTypedParamIfValid<VariableName>(names, "primal_variable");
-  appendTypedParamIfValid<VariableName>(names, "dual_variable");
-  appendTypedVectorParamIfValid<VariableName>(names, "variable");
-  return names;
 }
 
 std::set<std::string>

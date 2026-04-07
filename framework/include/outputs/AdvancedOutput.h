@@ -391,13 +391,15 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   if constexpr (std::is_same_v<postprocessor_type, Postprocessor>)
     _problem_ptr->theWarehouse()
         .query()
-        .condition<AttribSystem>("MFEMPostprocessor")
+        .condition<AttribSystem>("MFEMExecutedObject")
+        .condition<AttribInterfaces>(Interfaces::Postprocessor)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(objs);
   else if constexpr (std::is_same_v<postprocessor_type, VectorPostprocessor>)
     _problem_ptr->theWarehouse()
         .query()
-        .condition<AttribSystem>("MFEMVectorPostprocessor")
+        .condition<AttribSystem>("MFEMExecutedObject")
+        .condition<AttribInterfaces>(Interfaces::VectorPostprocessor)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(objs);
 

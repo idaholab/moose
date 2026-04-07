@@ -78,8 +78,8 @@ MFEMValueSamplerBase::validParams()
 {
   InputParameters params = MFEMVectorPostprocessor::validParams();
 
-  params.addRequiredParam<VariableName>(
-      "variable", "The names of the variables that this VectorPostprocessor operates on");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "variable", "The names of the variables that this VectorPostprocessor operates on");
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>(
       "point_ordering", ordering, "Ordering style to use for point vector DoFs.");

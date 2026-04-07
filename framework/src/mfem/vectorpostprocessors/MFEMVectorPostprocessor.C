@@ -16,22 +16,13 @@ MFEMVectorPostprocessor::validParams()
 {
   InputParameters params = MFEMExecutedObject::validParams();
   params += VectorPostprocessor::validParams();
-  params.registerSystemAttributeName("MFEMVectorPostprocessor");
+  params.registerSystemAttributeName("MFEMExecutedObject");
   return params;
 }
 
 MFEMVectorPostprocessor::MFEMVectorPostprocessor(const InputParameters & parameters)
   : MFEMExecutedObject(parameters), VectorPostprocessor(this)
 {
-}
-
-std::set<std::string>
-MFEMVectorPostprocessor::consumedVariableNames() const
-{
-  std::set<std::string> names;
-  appendTypedParamIfValid<VariableName>(names, "variable");
-  appendTypedVectorParamIfValid<VariableName>(names, "variable");
-  return names;
 }
 
 std::set<std::string>

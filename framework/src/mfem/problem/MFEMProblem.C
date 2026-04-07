@@ -540,7 +540,7 @@ MFEMProblem::addPostprocessor(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters)
 {
-  if (parameters.getSystemAttributeName() == "MFEMPostprocessor")
+  if (parameters.getSystemAttributeName() == "MFEMExecutedObject")
   {
     checkUserObjectNameCollision(name, "Postprocessor");
     addObject<MFEMExecutedObject>(type, name, parameters);
@@ -557,7 +557,7 @@ MFEMProblem::addVectorPostprocessor(const std::string & type,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  if (parameters.getSystemAttributeName() == "MFEMVectorPostprocessor")
+  if (parameters.getSystemAttributeName() == "MFEMExecutedObject")
   {
     checkUserObjectNameCollision(name, "VectorPostprocessor");
     addObject<MFEMExecutedObject>(type, name, parameters);
@@ -727,121 +727,33 @@ MFEMProblem::addInitialCondition(const std::string & ic_name,
 void
 MFEMProblem::executeMFEMObjects(const ExecFlagType & exec_type)
 {
-  auto append_objects =
-      [this, &exec_type](const std::string & system, std::vector<MFEMExecutedObject *> & objects)
-  {
-    std::vector<MFEMExecutedObject *> system_objects;
-    theWarehouse()
-        .query()
-        .condition<AttribSystem>(system)
-        .condition<AttribExecOns>(exec_type)
-        .condition<AttribThread>(0)
-        .queryInto(system_objects);
-    objects.insert(objects.end(), system_objects.begin(), system_objects.end());
-  };
-
   std::vector<MFEMExecutedObject *> objects;
-  append_objects("MFEMInitialCondition", objects);
-  append_objects("MFEMSubMeshTransfer", objects);
-  append_objects("MFEMAuxKernel", objects);
-  append_objects("MFEMPostprocessor", objects);
-  append_objects("MFEMVectorPostprocessor", objects);
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("MFEMExecutedObject")
+      .condition<AttribExecOns>(exec_type)
+      .condition<AttribThread>(0)
+      .queryInto(objects);
 
-  std::map<std::string, unsigned int> variable_producers;
-  std::map<std::string, unsigned int> postprocessor_producers;
-  std::map<std::string, unsigned int> vector_postprocessor_producers;
-
-  auto register_producer = [this, &exec_type, &objects](const auto & names,
-                                                        auto & producers,
-                                                        const MFEMExecutedObject & object,
-                                                        const unsigned int i,
-                                                        const std::string & resource_type)
-  {
-    for (const auto & name : names)
+  std::map<std::string, const MFEMExecutedObject *> suppliers;
+  for (auto * const object : objects)
+    for (const auto & item : object->getSuppliedItems())
     {
-      const auto [it, inserted] = producers.emplace(name, i);
-      if (!inserted)
+      const auto [it, inserted] = suppliers.emplace(item, object);
+      if (!inserted && it->second != object)
         mooseError("MFEM executed-object dependency ambiguity on ",
                    exec_type,
                    ": both '",
-                   objects[it->second]->name(),
+                   it->second->name(),
                    "' and '",
-                   object.name(),
-                   "' produce ",
-                   resource_type,
-                   " '",
-                   name,
+                   object->name(),
+                   "' supply '",
+                   item,
                    "'.");
     }
-  };
 
-  for (const auto i : index_range(objects))
+  for (auto * const object : objects)
   {
-    const auto & object = *objects[i];
-    register_producer(object.producedVariableNames(), variable_producers, object, i, "variable");
-    register_producer(
-        object.producedPostprocessorNames(), postprocessor_producers, object, i, "postprocessor");
-    register_producer(object.producedVectorPostprocessorNames(),
-                      vector_postprocessor_producers,
-                      object,
-                      i,
-                      "vector postprocessor");
-  }
-
-  std::vector<std::vector<unsigned int>> adj(objects.size());
-  std::vector<unsigned int> indegree(objects.size(), 0);
-
-  auto add_dependencies =
-      [&adj, &indegree](const auto & names, const auto & producers, const unsigned int consumer)
-  {
-    for (const auto & name : names)
-      if (const auto it = producers.find(name); it != producers.end() && it->second != consumer)
-      {
-        adj[it->second].push_back(consumer);
-        indegree[consumer]++;
-      }
-  };
-
-  for (const auto i : index_range(objects))
-  {
-    const auto & object = *objects[i];
-    add_dependencies(object.consumedVariableNames(), variable_producers, i);
-    add_dependencies(object.consumedPostprocessorNames(), postprocessor_producers, i);
-    add_dependencies(object.consumedVectorPostprocessorNames(), vector_postprocessor_producers, i);
-  }
-
-  std::deque<unsigned int> ready;
-  for (const auto i : index_range(objects))
-    if (!indegree[i])
-      ready.push_back(i);
-
-  std::vector<unsigned int> order;
-  order.reserve(objects.size());
-  while (!ready.empty())
-  {
-    const auto i = ready.front();
-    ready.pop_front();
-    order.push_back(i);
-    for (const auto next : adj[i])
-      if (--indegree[next] == 0)
-        ready.push_back(next);
-  }
-
-  if (order.size() != objects.size())
-  {
-    std::ostringstream oss;
-    for (const auto i : index_range(objects))
-      if (indegree[i])
-        oss << "  " << objects[i]->name() << "\n";
-    mooseError("Cyclic MFEM executed-object dependency detected on ",
-               exec_type,
-               ". Remaining objects:\n",
-               oss.str());
-  }
-
-  for (const auto i : order)
-  {
-    auto * const object = objects[i];
     object->initialize();
     object->execute();
     object->finalize();
