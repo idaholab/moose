@@ -424,6 +424,16 @@
       },
       "outer": "amg_lattice_outer_univ",
       "outertype": "UNIVERSE",
+      "transformations": [
+        [
+          "ROTATION",
+          [
+            90.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ],
       "type": "CSG::CSGHexagonalLattice",
       "universes": [
         [
@@ -782,32 +792,12 @@
         "pin1_cell_radial_1_axial_1",
         "pin1_cell_radial_2_axial_0",
         "pin1_cell_radial_2_axial_1"
-      ],
-      "transformations": [
-        [
-          "ROTATION",
-          [
-            30.0,
-            0.0,
-            0.0
-          ]
-        ]
       ]
     },
     "pin2_univ": {
       "cells": [
         "pin2_cell_radial_0_axial_0",
         "pin2_cell_radial_0_axial_1"
-      ],
-      "transformations": [
-        [
-          "ROTATION",
-          [
-            30.0,
-            0.0,
-            0.0
-          ]
-        ]
       ]
     }
   }

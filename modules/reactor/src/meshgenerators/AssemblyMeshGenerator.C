@@ -661,14 +661,6 @@ AssemblyMeshGenerator::generateCSG()
     csg_obj->joinOtherBase(std::move(*_input_csg_bases[i]), true, input_univ_name_discard);
     univs_to_discard.push_back(input_univ_name_discard);
     univ_id_names[i] = input_univ_name;
-
-    if (_geom_type == "Hex")
-    {
-      // For hex lattices, apply a 30 degree rotation to each of the constitutent pins
-      // before they are placed into a lattice
-      const auto & csg_univ = csg_obj->getUniverseByName(input_univ_name);
-      csg_obj->applyAxisRotation(csg_univ, CSG::RotationAxisType::Z, 30.);
-    }
   }
 
   // Discard root universes of the input pins and their cells
@@ -729,6 +721,12 @@ AssemblyMeshGenerator::generateCSG()
         const auto & duct_surfaces =
             getOuterRadialSurfacesForUnitCell(i, duct_boundaries[i], *csg_obj);
         inner_region = CSGUtils::getInnerRegion(duct_surfaces, Point(0, 0, 0));
+      }
+      if (_geom_type == "Hex")
+      {
+        // For hex lattices, apply a 90 degree rotation to the lattice to match orientation
+        // of FEM mesh
+        csg_obj->applyAxisRotation(assembly_lattice, CSG::RotationAxisType::Z, 90.);
       }
       csg_obj->createCell(lat_cell_name, assembly_lattice, inner_region, &assembly_univ);
     }
