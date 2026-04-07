@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMHypreAMS.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMHypreAMS);
 
