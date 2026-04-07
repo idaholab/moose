@@ -6,6 +6,8 @@ This object is a boundary condition used in the Navier-Stokes module that can be
 Its role is to enforce a fixed Dirichlet value at an interface where heat is exchanged between solid and fluid regions.
 In practice, it is a wrapper around [LinearFVAdvectionDiffusionFunctorDirichletBC.md] with additional content
 allowing error checking in CHT applications. For more information on the design of CHT, see [the CHT capability page](linear_fv_cht.md).
+The inherited functor Dirichlet implementation automatically determines the appropriate interface
+side from the supplied functor during evaluation.
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_neu-dir.i block=fluid_solid solid_fluid
 

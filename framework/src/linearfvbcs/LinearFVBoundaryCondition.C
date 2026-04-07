@@ -101,3 +101,32 @@ LinearFVBoundaryCondition::computeCellToFaceVector() const
                                                     ? _current_face_info->elemCentroid()
                                                     : _current_face_info->neighborCentroid()));
 }
+
+template <typename FunctorType>
+Moose::FaceArg
+LinearFVBoundaryCondition::functorFaceArg(const FunctorType & functor,
+                                          const FaceInfo * fi,
+                                          const Moose::FV::LimiterType limiter_type,
+                                          const bool correct_skewness) const
+{
+  auto face = singleSidedFaceArg(fi, limiter_type, correct_skewness);
+  const auto on_elem = functor.hasFaceSide(*fi, true);
+  const auto on_neighbor = functor.hasFaceSide(*fi, false);
+
+  if (on_elem && on_neighbor)
+    face.face_side = nullptr;
+  else if (on_elem)
+    face.face_side = fi->elemPtr();
+  else if (on_neighbor)
+    face.face_side = fi->neighborPtr();
+  else
+    mooseError(
+        "The functor '", functor.functorName(), "' is not defined on either side of the face.");
+
+  return face;
+}
+
+// For now this assume reals only, considering this system doesn't support AD. If we need
+// vectors/tensors we might add it here later.
+template Moose::FaceArg LinearFVBoundaryCondition::functorFaceArg<Moose::Functor<Real>>(
+    const Moose::Functor<Real> &, const FaceInfo *, Moose::FV::LimiterType, bool) const;
