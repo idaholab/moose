@@ -33,6 +33,9 @@ class CSGBase; // forward declaration
  *     for defining the unit in basic CSG components and add them to CSGBase.
  *   - getExpandedRegion() — return the CSGRegion formed by the surfaces built during
  *     expandUnit().
+ *   - evaluateSurfaceEquationAtPoint() - must implement a method to be able to pass a
+ *     value to CSGSurface::getHalfspaceFromPoint() which will inform wether a point is
+ *     in the positive or negative "half-space" of this "surface."
  *   - clone() — return a deep copy of the derived class.
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
@@ -60,16 +63,17 @@ public:
   std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
-   * @brief Not supported before expansion — throws an error.
+   * @brief Evaluate the surface equation at the given point.
    *
-   * Call CSGBase::addEngUnit() and then CSGBase::expandEngUnit() to expand this unit into
-   * a concrete surface first. Derived classes may override this if pre-expansion querying
-   * is required.
+   * Derived classes must implement this to allow callers to determine whether a point
+   * lies in the negative or positive half-space of the engineering unit without requiring
+   * prior expansion.
    *
    * @param p point to evaluate
-   * @return evaluation result (unreachable before expansion)
+   * @return negative value if the point is in the negative half-space, positive if in the
+   *         positive half-space, zero if on the surface
    */
-  Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
+  Real evaluateSurfaceEquationAtPoint(const Point & p) const override = 0;
 
   /// Satisfy CSGEngUnit::getName() — resolved via CSGSurface::getName()
   const std::string & getName() const override { return CSGSurface::getName(); }

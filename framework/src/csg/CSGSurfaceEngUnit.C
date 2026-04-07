@@ -26,13 +26,4 @@ CSGSurfaceEngUnit::getCoeffs() const
              "' must be expanded via CSGBase::expandEngUnit() before calling getCoeffs().");
 }
 
-Real
-CSGSurfaceEngUnit::evaluateSurfaceEquationAtPoint(const Point & /*p*/) const
-{
-  mooseError("CSGSurfaceEngUnit '",
-             getName(),
-             "' must be expanded via CSGBase::expandEngUnit() before calling "
-             "evaluateSurfaceEquationAtPoint().");
-}
-
 } // namespace CSG
