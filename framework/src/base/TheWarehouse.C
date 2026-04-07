@@ -222,8 +222,15 @@ TheWarehouse::prepare(std::vector<std::unique_ptr<Attribute>> conds)
     }
     catch (CyclicDependencyException<DependencyResolverInterface *> & e)
     {
-      DependencyResolverInterface::cyclicDependencyError<UserObject *>(
-          e, "Cyclic dependency detected in object ordering");
+      DependencyResolverInterface::cyclicDependencyError<MooseObject *>(
+          e,
+          "Cyclic dependency detected in object ordering",
+          [](DependencyResolverInterface * obj)
+          {
+            auto * moose_obj = dynamic_cast<MooseObject *>(obj);
+            mooseAssert(moose_obj, "Failed to cast dependency object to MooseObject");
+            return moose_obj->name();
+          });
     }
 
     mooseAssert(dependers.size() == vec.size(), "Dependency resolution size mismatch");

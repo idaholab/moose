@@ -18,7 +18,6 @@ MFEMInitialCondition::validParams()
   params.addRequiredParam<VariableName>("variable",
                                         "The variable to apply the initial condition on.");
   params.registerBase("InitialCondition");
-  params.registerSystemAttributeName("MFEMInitialCondition");
   params.addClassDescription(
       "Base class for objects that set the initial condition on an MFEM variable.");
   // We cannot generally execute this at construction time since the coefficient may be based on a

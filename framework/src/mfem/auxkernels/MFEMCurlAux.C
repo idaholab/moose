@@ -21,8 +21,8 @@ MFEMCurlAux::validParams()
   params.addClassDescription(
       "Calculates the curl of an H(curl) conforming ND source variable and stores the result"
       " on an H(div) conforming RT result auxvariable");
-  params.addRequiredParam<VariableName>("source",
-                                        "Vector H(curl) MFEMVariable to take the curl of.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(curl) MFEMVariable to take the curl of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }

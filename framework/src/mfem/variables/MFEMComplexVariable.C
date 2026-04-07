@@ -2,6 +2,8 @@
 
 #include "MFEMComplexVariable.h"
 #include "MooseVariableBase.h"
+#include "MFEMProblem.h"
+#include "MFEMFESpace.h"
 
 registerMooseObject("MooseApp", MFEMComplexVariable);
 

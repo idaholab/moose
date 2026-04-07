@@ -40,8 +40,8 @@ InputParameters
 TestMFEMDependencyAux::validParams()
 {
   auto params = MFEMAuxKernel::validParams();
-  params.addParam<PostprocessorName>(
-      "postprocessor", "Optional postprocessor dependency used to set the output value.");
+  MFEMExecutedObject::addDependencyParam<PostprocessorName>(
+      params, "postprocessor", "Optional postprocessor dependency used to set the output value.");
   return params;
 }
 
@@ -82,8 +82,8 @@ InputParameters
 TestMFEMDependencyPostprocessor::validParams()
 {
   auto params = MFEMPostprocessor::validParams();
-  params.addRequiredParam<VariableName>("variable",
-                                        "The MFEM variable this test postprocessor reads.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "variable", "The MFEM variable this test postprocessor reads.");
   return params;
 }
 

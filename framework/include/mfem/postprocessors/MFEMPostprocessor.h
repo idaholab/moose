@@ -25,7 +25,6 @@ public:
 
   MFEMPostprocessor(const InputParameters & parameters);
 
-  virtual std::set<std::string> consumedVariableNames() const override;
   virtual std::set<std::string> producedPostprocessorNames() const override;
 
   /**

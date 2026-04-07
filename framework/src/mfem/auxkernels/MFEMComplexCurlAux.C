@@ -21,8 +21,8 @@ MFEMComplexCurlAux::validParams()
   params.addClassDescription(
       "Calculates the curl of a complex H(curl) conforming ND source variable and stores the result"
       " on an H(div) conforming RT result complex auxvariable");
-  params.addRequiredParam<VariableName>("source",
-                                        "Vector H(curl) MFEMComplexVariable to take the curl of.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(curl) MFEMComplexVariable to take the curl of.");
   params.addParam<mfem::real_t>(
       "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
   params.addParam<mfem::real_t>(

@@ -16,20 +16,31 @@ MFEMExecutedObject::validParams()
 {
   InputParameters params = MFEMObject::validParams();
   params += SetupInterface::validParams();
+  params.registerSystemAttributeName("MFEMExecutedObject");
+  params.addPrivateParam<std::vector<std::string>>("_mfem_dependency_param_names", {});
+  params.addPrivateParam<std::vector<unsigned char>>("_mfem_dependency_param_kinds", {});
+  params.addPrivateParam<std::vector<bool>>("_mfem_dependency_param_is_vector", {});
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
   params.addClassDescription("Base class for executed MFEM objects.");
   return params;
 }
 
 MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
-  : MFEMObject(parameters), SetupInterface(this)
+  : MFEMObject(parameters), SetupInterface(this), DependencyResolverInterface()
 {
-}
+  const auto & param_names =
+      parameters.get<std::vector<std::string>>("_mfem_dependency_param_names");
+  const auto & kinds = parameters.get<std::vector<unsigned char>>("_mfem_dependency_param_kinds");
+  const auto & is_vector_flags =
+      parameters.get<std::vector<bool>>("_mfem_dependency_param_is_vector");
 
-std::set<std::string>
-MFEMExecutedObject::consumedVariableNames() const
-{
-  return {};
+  mooseAssert(param_names.size() == kinds.size() && kinds.size() == is_vector_flags.size(),
+              "MFEM dependency parameter metadata size mismatch");
+
+  _dependency_params.reserve(param_names.size());
+  for (const auto i : index_range(param_names))
+    _dependency_params.push_back(
+        {static_cast<DependencyKind>(kinds[i]), param_names[i], is_vector_flags[i]});
 }
 
 std::set<std::string>
@@ -39,28 +50,9 @@ MFEMExecutedObject::producedVariableNames() const
 }
 
 std::set<std::string>
-MFEMExecutedObject::consumedPostprocessorNames() const
-{
-  std::set<std::string> names;
-  appendTypedParamIfValid<PostprocessorName>(names, "postprocessor");
-  appendTypedVectorParamIfValid<PostprocessorName>(names, "postprocessors");
-  return names;
-}
-
-std::set<std::string>
 MFEMExecutedObject::producedPostprocessorNames() const
 {
   return {};
-}
-
-std::set<std::string>
-MFEMExecutedObject::consumedVectorPostprocessorNames() const
-{
-  std::set<std::string> names;
-  appendTypedParamIfValid<VectorPostprocessorName>(names, "vectorpostprocessor");
-  appendTypedParamIfValid<VectorPostprocessorName>(names, "vpp");
-  appendTypedVectorParamIfValid<VectorPostprocessorName>(names, "vectorpostprocessors");
-  return names;
 }
 
 std::set<std::string>
@@ -69,40 +61,102 @@ MFEMExecutedObject::producedVectorPostprocessorNames() const
   return {};
 }
 
-template <typename T>
-void
-MFEMExecutedObject::appendTypedParamIfValid(std::set<std::string> & names,
-                                            const std::string & param_name) const
+const std::set<std::string> &
+MFEMExecutedObject::getRequestedItems()
 {
-  if (parameters().isParamValid(param_name) && parameters().isType<T>(param_name))
-    names.insert(parameters().get<T>(param_name));
+  _requested_items.clear();
+
+  for (const auto & dep : _dependency_params)
+  {
+    switch (dep.kind)
+    {
+      case DependencyKind::Variable:
+        if (dep.is_vector)
+          for (const auto & name : parameters().get<std::vector<VariableName>>(dep.param_name))
+            _requested_items.insert(variableDependencyKey(name));
+        else
+          _requested_items.insert(
+              variableDependencyKey(parameters().get<VariableName>(dep.param_name)));
+        break;
+      case DependencyKind::Postprocessor:
+        if (dep.is_vector)
+          for (const auto & name : parameters().get<std::vector<PostprocessorName>>(dep.param_name))
+            _requested_items.insert(postprocessorDependencyKey(name));
+        else
+          _requested_items.insert(
+              postprocessorDependencyKey(parameters().get<PostprocessorName>(dep.param_name)));
+        break;
+      case DependencyKind::VectorPostprocessor:
+        if (dep.is_vector)
+          for (const auto & name :
+               parameters().get<std::vector<VectorPostprocessorName>>(dep.param_name))
+            _requested_items.insert(vectorPostprocessorDependencyKey(name));
+        else
+          _requested_items.insert(vectorPostprocessorDependencyKey(
+              parameters().get<VectorPostprocessorName>(dep.param_name)));
+        break;
+    }
+  }
+
+  return _requested_items;
 }
 
-template <typename T>
-void
-MFEMExecutedObject::appendTypedVectorParamIfValid(std::set<std::string> & names,
-                                                  const std::string & param_name) const
+const std::set<std::string> &
+MFEMExecutedObject::getSuppliedItems()
 {
-  if (parameters().isParamValid(param_name) && parameters().isType<std::vector<T>>(param_name))
-    for (const auto & name : parameters().get<std::vector<T>>(param_name))
-      names.insert(name);
+  _supplied_items.clear();
+
+  for (const auto & name : producedVariableNames())
+    _supplied_items.insert(variableDependencyKey(name));
+  for (const auto & name : producedPostprocessorNames())
+    _supplied_items.insert(postprocessorDependencyKey(name));
+  for (const auto & name : producedVectorPostprocessorNames())
+    _supplied_items.insert(vectorPostprocessorDependencyKey(name));
+
+  return _supplied_items;
 }
 
-template void
-MFEMExecutedObject::appendTypedParamIfValid<PostprocessorName>(std::set<std::string> &,
-                                                               const std::string &) const;
-template void
-MFEMExecutedObject::appendTypedParamIfValid<VectorPostprocessorName>(std::set<std::string> &,
-                                                                     const std::string &) const;
-template void MFEMExecutedObject::appendTypedParamIfValid<VariableName>(std::set<std::string> &,
-                                                                        const std::string &) const;
-template void
-MFEMExecutedObject::appendTypedVectorParamIfValid<PostprocessorName>(std::set<std::string> &,
-                                                                     const std::string &) const;
-template void MFEMExecutedObject::appendTypedVectorParamIfValid<VectorPostprocessorName>(
-    std::set<std::string> &, const std::string &) const;
-template void
-MFEMExecutedObject::appendTypedVectorParamIfValid<VariableName>(std::set<std::string> &,
-                                                                const std::string &) const;
+std::string
+MFEMExecutedObject::variableDependencyKey(const std::string & name)
+{
+  return "variable:" + name;
+}
+
+std::string
+MFEMExecutedObject::postprocessorDependencyKey(const std::string & name)
+{
+  return "postprocessor:" + name;
+}
+
+std::string
+MFEMExecutedObject::vectorPostprocessorDependencyKey(const std::string & name)
+{
+  return "vector_postprocessor:" + name;
+}
+
+void
+MFEMExecutedObject::appendDependencyParam(InputParameters & params,
+                                          const std::string & param_name,
+                                          const DependencyKind kind,
+                                          const bool is_vector)
+{
+  auto & param_names = params.set<std::vector<std::string>>("_mfem_dependency_param_names");
+  auto & kinds = params.set<std::vector<unsigned char>>("_mfem_dependency_param_kinds");
+  auto & is_vector_flags = params.set<std::vector<bool>>("_mfem_dependency_param_is_vector");
+
+#ifndef NDEBUG
+  const auto it = std::find(param_names.begin(), param_names.end(), param_name);
+  if (it != param_names.end())
+  {
+    const auto idx = std::distance(param_names.begin(), it);
+    mooseAssert(kinds[idx] == static_cast<unsigned char>(kind) && is_vector_flags[idx] == is_vector,
+                "MFEM dependency parameter metadata mismatch for parameter " + param_name);
+  }
+#endif
+
+  param_names.push_back(param_name);
+  kinds.push_back(static_cast<unsigned char>(kind));
+  is_vector_flags.push_back(is_vector);
+}
 
 #endif

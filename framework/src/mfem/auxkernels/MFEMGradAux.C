@@ -21,8 +21,8 @@ MFEMGradAux::validParams()
   params.addClassDescription(
       "Calculates the gradient of an H1 conforming source variable and stores the result"
       " on an H(curl) conforming ND result auxvariable");
-  params.addRequiredParam<VariableName>("source",
-                                        "Scalar H1 MFEMVariable to take the gradient of.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Scalar H1 MFEMVariable to take the gradient of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }
