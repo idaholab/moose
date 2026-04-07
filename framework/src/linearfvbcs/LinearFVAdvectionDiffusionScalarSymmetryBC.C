@@ -39,15 +39,16 @@ LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValue() const
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
+  const auto state = determineState();
 
   // By default we approximate the boundary value with the neighboring cell value
-  auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  auto boundary_value = _var.getElemValue(*elem_info, state);
 
   // If we request linear extrapolation, we add the gradient term as well. We make sure
   // that the zero normal gradient is respected (by subtracting the normal component).
   if (_two_term_expansion)
   {
-    const auto cell_gradient = _var.gradSln(*elem_info);
+    const auto cell_gradient = _var.gradSln(*elem_info, state);
     const auto & normal = _current_face_info->normal();
     const auto d_cf = computeCellToFaceVector();
 
@@ -84,11 +85,12 @@ LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValueRHSContribution(
     const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                  ? _current_face_info->elemInfo()
                                  : _current_face_info->neighborInfo();
+    const auto state = determineState();
 
     const auto & d_cf = computeCellToFaceVector();
     const auto & normal = _current_face_info->normal();
     const auto correction_vector = (d_cf - (d_cf * normal) * normal);
-    const auto & cell_gradient = _var.gradSln(*elem_info);
+    const auto & cell_gradient = _var.gradSln(*elem_info, state);
 
     return cell_gradient * correction_vector;
   }

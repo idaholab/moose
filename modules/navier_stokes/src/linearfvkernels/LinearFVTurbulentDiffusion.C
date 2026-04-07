@@ -103,13 +103,13 @@ LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundar
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   const auto face_arg = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
   auto grad_contrib = diff_bc->computeBoundaryGradientRHSContribution() * _current_face_area;
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!diff_bc->includesMaterialPropertyMultiplier())
-    grad_contrib *=
-        _diffusion_coeff(face_arg, determineState()) / _scaling_coeff(face_arg, determineState());
+    grad_contrib *= _diffusion_coeff(face_arg, state) / _scaling_coeff(face_arg, state);
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
@@ -119,8 +119,8 @@ LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundar
         _current_face_info->normal() -
         1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
 
-    grad_contrib += _diffusion_coeff(face_arg, determineState()) *
-                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
+    grad_contrib += _diffusion_coeff(face_arg, state) *
+                    _var.gradSln(*_current_face_info->elemInfo(), state) * correction_vector *
                     _current_face_area;
   }
 

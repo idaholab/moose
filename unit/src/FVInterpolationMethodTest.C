@@ -98,6 +98,7 @@ private:
     return 0.0;
   }
 
+  using Moose::FunctorBase<Real>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg,
                                 const Moose::StateArg &) const override final
   {

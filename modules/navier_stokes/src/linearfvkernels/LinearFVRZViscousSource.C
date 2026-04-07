@@ -98,14 +98,14 @@ LinearFVRZViscousSource::computeRightHandSideContribution()
   if (!_use_deviatoric_terms)
     return 0.0;
 
+  const auto state = determineState();
   Real divergence = 0.0;
   for (const auto dir : make_range(_dim))
-    divergence += velocityVar(dir).gradSln(*_current_elem_info)(dir);
+    divergence += velocityVar(dir).gradSln(*_current_elem_info, state)(dir);
 
   const Real r = _current_elem_info->centroid()(_rz_radial_coord);
   mooseAssert(r > 0, "Axisymmetric control volumes should not sit on the axis (r = 0).");
 
-  const auto state = determineState();
   const Real radial_value = velocityVar(_rz_radial_coord).getElemValue(*_current_elem_info, state);
   divergence += radial_value / r;
 

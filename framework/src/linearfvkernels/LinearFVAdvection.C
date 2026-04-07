@@ -59,8 +59,8 @@ LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
   if (_adv_interp_method.needsGradients())
   {
     const auto limiter_type = _adv_interp_method.gradientLimiter();
-    _elem_grad_storage = _var.gradSln(elem_info, limiter_type);
-    _neighbor_grad_storage = _var.gradSln(neighbor_info, limiter_type);
+    _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
+    _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
   }
 
   _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,

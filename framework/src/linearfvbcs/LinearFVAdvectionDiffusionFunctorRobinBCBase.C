@@ -38,7 +38,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryValue() const
   const auto gamma = getGamma(face, state);
 
   const auto phi = _var.getElemValue(*elem_info, state);
-  const auto grad_phi = _var.gradSln(*elem_info);
+  const auto grad_phi = _var.gradSln(*elem_info, state);
 
   const auto & nhat = _current_face_info->normal();
 
@@ -90,7 +90,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryValueRHSContributio
   const auto beta = getBeta(face, state);
   const auto gamma = getGamma(face, state);
 
-  const auto & grad_phi = _var.gradSln(*elem_info);
+  const auto & grad_phi = _var.gradSln(*elem_info, state);
 
   const auto & nhat = _current_face_info->normal();
 
@@ -128,7 +128,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryGradientRHSContribu
                                : _current_face_info->neighborInfo();
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto & grad_phi = _var.gradSln(*elem_info);
+  const auto & grad_phi = _var.gradSln(*elem_info, state);
 
   const auto alpha = getAlpha(face, state);
   const auto beta = getBeta(face, state);

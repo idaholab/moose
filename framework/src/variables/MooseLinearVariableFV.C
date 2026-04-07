@@ -156,8 +156,11 @@ MooseLinearVariableFV<OutputType>::getElemValue(const ElemInfo & elem_info,
 
 template <typename OutputType>
 VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
+MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info, const StateArg & state) const
 {
+  if (state.state != 0)
+    gradientStateError(state);
+
   if (_needs_cell_gradients)
   {
     _cell_gradient.zero();
@@ -184,18 +187,24 @@ MooseLinearVariableFV<OutputType>::gradSlnComponent(const ElemInfo & elem_info,
 template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
+                                           const StateArg & state,
                                            const Moose::FV::GradientLimiterType limiter_type) const
 {
   return (limiter_type == Moose::FV::GradientLimiterType::None)
-             ? gradSln(elem_info)
-             : limitedGradSln(elem_info, limiter_type);
+             ? gradSln(elem_info, state)
+             : limitedGradSln(elem_info, state, limiter_type);
 }
 
 template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::limitedGradSln(
-    const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
+    const ElemInfo & elem_info,
+    const StateArg & state,
+    const Moose::FV::GradientLimiterType limiter_type) const
 {
+  if (state.state != 0)
+    gradientStateError(state);
+
   _cell_gradient.zero();
   const auto & limited_grad_container =
       _linear_system ? _linear_system->linearFVLimitedGradientContainer(limiter_type)
@@ -209,7 +218,7 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
 
 template <typename OutputType>
 VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & /*state*/) const
+MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg & state) const
 {
   const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
@@ -220,13 +229,13 @@ MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg &
   const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
   const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
 
-  const auto elem_one_grad = gradSln(*elem_one);
+  const auto elem_one_grad = gradSln(*elem_one, state);
 
   // If we have a neighbor then we interpolate between the two to the face.
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = gradSln(*elem_two);
+    const auto elem_two_grad = gradSln(*elem_two, state);
     return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
   }
   else
@@ -248,11 +257,9 @@ template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::limitedGradSln(
     const FaceInfo & fi,
-    const StateArg & libmesh_dbg_var(state),
+    const StateArg & state,
     const Moose::FV::GradientLimiterType limiter_type) const
 {
-  mooseAssert(state.state == 0, "Limited gradients are only available for the current state.");
-
   const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
               "Limited gradient requested on a face where the variable is defined on neither "
@@ -263,12 +270,12 @@ MooseLinearVariableFV<OutputType>::limitedGradSln(
   const auto * const elem_one = var_defined_on_elem ? fi.elemInfo() : fi.neighborInfo();
   const auto * const elem_two = var_defined_on_elem ? fi.neighborInfo() : fi.elemInfo();
 
-  const auto elem_one_grad = limitedGradSln(*elem_one, limiter_type);
+  const auto elem_one_grad = limitedGradSln(*elem_one, state, limiter_type);
 
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
-    const auto elem_two_grad = limitedGradSln(*elem_two, limiter_type);
+    const auto elem_two_grad = limitedGradSln(*elem_two, state, limiter_type);
     return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
   }
   else

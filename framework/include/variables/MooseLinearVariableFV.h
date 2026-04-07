@@ -125,8 +125,9 @@ public:
   /**
    * Get the variable gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param state State argument describing which solution state to evaluate
    */
-  VectorValue<Real> gradSln(const ElemInfo & elem_info) const;
+  VectorValue<Real> gradSln(const ElemInfo & elem_info, const StateArg & state) const;
 
   /**
    * Get one raw gradient component at a cell center without materializing the full gradient.
@@ -137,28 +138,36 @@ public:
 
   /**
    * Get either the raw or limited gradient at a cell center.
+   * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param state State argument describing which solution state to evaluate
+   * @param limiter_type The limiter type used to compute/store limited gradients
    */
   VectorValue<Real> gradSln(const ElemInfo & elem_info,
+                            const StateArg & state,
                             const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Get the limited gradient at a cell center.
    * @param elem_info The ElemInfo of the cell where we need the gradient
+   * @param state State argument describing which solution state to evaluate
    * @param limiter_type The limiter type used to compute/store limited gradients
    */
   VectorValue<Real> limitedGradSln(const ElemInfo & elem_info,
+                                   const StateArg & state,
                                    const Moose::FV::GradientLimiterType limiter_type) const;
 
   /**
    * Compute interpolated gradient on the provided face.
-   * @param face The face for which to retrieve the gradient.
-   * @param state State argument which describes at what time / solution iteration state we want to
-   * evaluate the variable
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument describing which solution state to evaluate
    */
   VectorValue<Real> gradSln(const FaceInfo & fi, const StateArg & state) const;
 
   /**
    * Compute interpolated raw/limited gradient on the provided face.
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument describing which solution state to evaluate
+   * @param limiter_type The limiter type used to compute/store limited gradients
    */
   VectorValue<Real> gradSln(const FaceInfo & fi,
                             const StateArg & state,
@@ -166,6 +175,9 @@ public:
 
   /**
    * Compute interpolated limited gradient on the provided face.
+   * @param fi The face for which to retrieve the gradient
+   * @param state State argument describing which solution state to evaluate
+   * @param limiter_type The limiter type used to compute/store limited gradients
    */
   VectorValue<Real> limitedGradSln(const FaceInfo & fi,
                                    const StateArg & state,
@@ -225,6 +237,9 @@ protected:
 
   /// Throw an error when somebody wants to use this variable with automatic differentiation
   [[noreturn]] void adError() const;
+
+  /// Throw an error when somebody requests gradients at a non-current solution state
+  [[noreturn]] void gradientStateError(const StateArg & state) const;
 
   /**
    * Setup the boundary to Dirichlet BC map
@@ -523,19 +538,19 @@ MooseLinearVariableFV<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg,
-                                                    const StateArg & /*state*/) const
+                                                    const StateArg & state) const
 {
   const auto & elem_info = this->_mesh.elemInfo(qp_arg.elem->id());
-  return gradSln(elem_info);
+  return gradSln(elem_info, state);
 }
 
 template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::GradientType
 MooseLinearVariableFV<OutputType>::evaluateGradient(const ElemArg & elem_arg,
-                                                    const StateArg & /*state*/) const
+                                                    const StateArg & state) const
 {
   const auto & elem_info = this->_mesh.elemInfo(elem_arg.elem->id());
-  return gradSln(elem_info);
+  return gradSln(elem_info, state);
 }
 
 template <typename OutputType>
@@ -554,6 +569,18 @@ MooseLinearVariableFV<OutputType>::timeIntegratorError() const
   mooseError("MooseLinearVariableFV does not support time integration at the moment! The variable "
              "which is causing the issue: ",
              this->name());
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::gradientStateError(const StateArg & state) const
+{
+  mooseError("MooseLinearVariableFV does not currently support ElemInfo/FaceInfo gradient "
+             "evaluation for non-current states. Requested state index ",
+             state.state,
+             " for variable '",
+             this->name(),
+             "'. Old-state requests typically use state index 1.");
 }
 
 template <typename OutputType>
