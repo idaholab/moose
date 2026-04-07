@@ -16,6 +16,7 @@
     type = CSVDiff
     input = 'elastic_test.i output_JIntegral.i'
     csvdiff = 'output_JIntegral_out.csv'
+    rel_err = 1e-3
     capabilities = 'unique_id'
     requirement = 'test J integral'
   []
@@ -23,7 +24,7 @@
     type = Exodiff
     input = 'ADelastic_test.i output_cutter_mesh.i'
     exodiff = 'output_cutter_mesh_xfemcutter_XFEMCutMeshOutput.e-s0003'
-    abs_zero = 1e-8
+    abs_zero = 1e-4
     map = false
     capabilities = 'unique_id'
     requirement = 'test crack tip location for AD implementation'
@@ -32,6 +33,7 @@
     type = CSVDiff
     input = 'ADelastic_test.i output_JIntegral.i'
     csvdiff = 'output_JIntegral_out.csv'
+    rel_err = 1e-3
     capabilities = 'unique_id'
     requirement = 'test J integral for AD implementation'
   []

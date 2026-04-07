@@ -178,32 +178,16 @@ XFEMAction::act()
   {
     for (unsigned int i = 0; i < _enrich_displacements.size(); ++i)
     {
-      if (!_use_AD)
-      {
-        InputParameters params =
-            _factory.getValidParams("CrackTipEnrichmentStressDivergenceTensors");
-        params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
-        params.set<unsigned int>("component") = i / 4;
-        params.set<unsigned int>("enrichment_component") = i % 4;
-        params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
-        params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
-        params.set<std::vector<VariableName>>("displacements") = _displacements;
-        _problem->addKernel(
-            "CrackTipEnrichmentStressDivergenceTensors", _enrich_displacements[i], params);
-      }
-      else
-      {
-        InputParameters params =
-            _factory.getValidParams("ADCrackTipEnrichmentStressDivergenceTensors");
-        params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
-        params.set<unsigned int>("component") = i / 4;
-        params.set<unsigned int>("enrichment_component") = i % 4;
-        params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
-        params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
-        params.set<std::vector<VariableName>>("displacements") = _displacements;
-        _problem->addKernel(
-            "ADCrackTipEnrichmentStressDivergenceTensors", _enrich_displacements[i], params);
-      }
+      const std::string kernel_name = _use_AD ? "ADCrackTipEnrichmentStressDivergenceTensors"
+                                              : "CrackTipEnrichmentStressDivergenceTensors";
+      InputParameters params = _factory.getValidParams(kernel_name);
+      params.set<NonlinearVariableName>("variable") = _enrich_displacements[i];
+      params.set<unsigned int>("component") = i / 4;
+      params.set<unsigned int>("enrichment_component") = i % 4;
+      params.set<UserObjectName>("crack_front_definition") = _crack_front_definition;
+      params.set<std::vector<VariableName>>("enrichment_displacements") = _enrich_displacements;
+      params.set<std::vector<VariableName>>("displacements") = _displacements;
+      _problem->addKernel(kernel_name, _enrich_displacements[i], params);
     }
   }
   else if (_current_task == "add_bc" && _use_crack_tip_enrichment)
