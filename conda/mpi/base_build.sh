@@ -87,7 +87,7 @@ function baked_flags()
     # special case for mac
     if [[ "\$(uname)" == 'Darwin' ]]; then
         # Specific OS linker flags
-        LDFLAGS+=" -Wl,-ld64 -Wl,-commons,use_dylibs"
+        LDFLAGS+=" -Wl,-ld_classic -Wl,-commons,use_dylibs"
 
         # Make sure sdkroot is available when not building
         if [ "\${CONDA_BUILD:-0}" = "0" ]; then
