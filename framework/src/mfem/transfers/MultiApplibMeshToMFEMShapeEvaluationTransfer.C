@@ -52,8 +52,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
     const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
     const int dim = to_pfespace.GetParMesh()->Dimension();
     const int nodes_cnt = vxyz.Size() / dim;
-    const int to_gf_ncomp = to_gf.VectorDim();
-    for (int i = 0; i < nodes_cnt * to_gf_ncomp; i++)
+    for (int i = 0; i < nodes_cnt; i++)
     {
       for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
       {
@@ -76,7 +75,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
     }
 
     // Perform interpolation of libMesh variable at specified points
-    mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
+    mfem::Vector interp_vals(nodes_cnt);
     interpolatelibMeshVariable(outgoing_points, var_index, interp_vals);
 
     // Project DoFs to MFEM GridFunction
