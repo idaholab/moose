@@ -1738,6 +1738,8 @@ MooseMesh::clearQuadratureNodes()
   _quadrature_nodes.clear();
   _elem_to_side_to_qp_to_quadrature_nodes.clear();
   _extra_bnd_nodes.clear();
+
+  // NOTE: this does not clear them from the nodeToElem and nodeToActiveSemiLocalElem maps
 }
 
 BoundaryID
