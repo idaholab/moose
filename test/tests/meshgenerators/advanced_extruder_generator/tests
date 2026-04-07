@@ -134,8 +134,8 @@
     issues = '#25486'
   []
 
-  [errors]
-    requirement = 'The system shall error'
+  [general_errors]
+    requirement = 'The system shall error.'
     issues = '#22117'
     design = 'AdvancedExtruderGenerator.md'
     [bad_subdomain_swap]
@@ -165,6 +165,47 @@
       cli_args = "Mesh/extrude/downward_boundary_source_blocks='1234; ; ' Mesh/extrude/downward_boundary_ids='1; ; '"
       detail = 'if the source subdomain for an downward boundary assignment in a layer does not exist in the mesh,'
       expect_err = 'The block \'1234\' was not found within the mesh'
+    []
+  []
+  [parameter_errors]
+    requirement = 'The system shall error.'
+    issues = '#31112'
+    design = 'AdvancedExtruderGenerator.md'
+    [param_heights]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/heights='1 2 3' --mesh-only"
+      expect_err = 'heights cannot be set if extruding along curve!'
+    []
+    [param_biases]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/biases='1 2 3' --mesh-only"
+      expect_err = 'biases cannot be set if extruding along curve!'
+    []
+    [param_num_layers]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/num_layers='1 2 3' --mesh-only"
+      expect_err = 'num_layers cannot be set if extruding along curve!'
+    []
+    [param_direction]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/direction='1 2 3' --mesh-only"
+      expect_err = 'direction cannot be set if extruding along curve!'
+    []
+    [param_start_extrusion_direction]
+      type = RunException
+      input = extrude_along_curve_2D_bare.i
+      cli_args = "Mesh/ext_along_curve/end_extrusion_direction='1 2 3' --mesh-only"
+      expect_err = 'If extruding along curve, start_extrusion_direction must be set!'
+    []
+    [param_end_extrusion_direction]
+      type = RunException
+      input = extrude_along_curve_2D_bare.i
+      cli_args = "Mesh/ext_along_curve/start_extrusion_direction='1 2 3' --mesh-only"
+      expect_err = 'If extruding along curve, end_extrusion_direction must be set!'
     []
   []
   [named_boundaries]
