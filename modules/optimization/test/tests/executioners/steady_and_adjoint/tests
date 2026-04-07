@@ -1,7 +1,6 @@
 [Tests]
   design = 'SteadyAndAdjoint.md'
-  issues = '#23888'
-
+  issues = '#23888 #32714'
   [steady_and_adjoint]
     requirement = 'The system shall by able to solve the adjoint version of steady-state problems that'
     [self_adjoint]
@@ -33,6 +32,13 @@
       input = nonlinear_diffusion.i
       exodiff = nonlinear_diffusion_out.e
       detail = 'have non-linear material properties.'
+    []
+    [adjoint_rhs]
+      type = RunApp
+      input = adjoint_rhs.i
+      min_parallel = 2
+      recover = false
+      detail = 'run in parallel and apply 100s of dirac point sources in the adjoint problem.'
     []
   []
 []

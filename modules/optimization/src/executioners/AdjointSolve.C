@@ -151,7 +151,7 @@ AdjointSolve::assembleAdjointSystem(SparseMatrix<Number> & matrix,
 
   _problem.setCurrentNonlinearSystem(_adjoint_sys_num);
   _problem.computeResidualTag(*_nl_adjoint.currentSolution(), rhs, _nl_adjoint.nonTimeVectorTag());
-
+  rhs.close();
   rhs.scale(-1.0);
 }
 
