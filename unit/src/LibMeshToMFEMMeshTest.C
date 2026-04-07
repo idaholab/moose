@@ -18,6 +18,7 @@
 #include "MooseError.h"
 #include "MooseMain.h"
 #include "MooseTypes.h"
+#include "MooseUnitUtils.h"
 #include "Registry.h"
 #include "MFEMMeshFactory.h"
 #include "libmesh/enum_elem_type.h"
@@ -1187,7 +1188,7 @@ using UnsupportedElementGeneratorMFEMTest = ElementGeneratorMFEMTest;
 TEST_P(UnsupportedElementGeneratorMFEMTest, CheckElem)
 {
   auto data = elementData(GetParam());
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+  EXPECT_MOOSEERROR_MSG(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), "Due to bug in MFEM, can not convert higher order libMesh pyramid elements.");
 }
 
 // A bug in MFEM currently means we can't support higher-order
@@ -1238,32 +1239,16 @@ public:
 
 using LibMeshToMFEMMeshFallbackTest = ElementComparisonMFEMTest;
 
-TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
+TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarningThrown)
 {
-  auto [data, expected_data] = fallbackElementData(GetParam());
+  auto data =  fallbackElementData(GetParam()).first;
   // A warning should be emitted when converting from TRI7 to TRI6
-  {
-    const char * argv[2] = {"foo", "\0"};
-    auto warning_app = Moose::createMooseApp("MooseUnitApp", 1, (char **)argv);
-    auto * warning_factory = &warning_app->getFactory();
-    auto warning_mesh_type = Registry::getClassName<MeshGeneratorMesh>();
-    auto warning_mesh_params = data.mesh_params;
-    auto warning_generator_params = data.mg_params;
-    warning_mesh_params.addPrivateParam(MooseBase::app_param, warning_app.get());
-    warning_generator_params.addPrivateParam(MooseBase::app_param, warning_app.get());
-    auto warning_mesh =
-        warning_factory->create<MeshGeneratorMesh>(warning_mesh_type, "warning_mesh", warning_mesh_params);
-    warning_app->actionWarehouse().mesh() = warning_mesh;
-    std::unique_ptr<MeshBase> libmesh =
-        warning_factory
-            ->create<MeshGenerator>("ElementGenerator", "warning_mesh_generator", warning_generator_params)
-            ->generate();
-    libmesh->prepare_for_use();
-    warning_mesh->setMeshBase(std::move(libmesh));
-    warning_mesh->buildMesh();
-    EXPECT_THROW(buildMFEMMesh(*warning_mesh, true, false), std::runtime_error);
-  }
+  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params, true, false),
+               std::runtime_error);
+}
 
+TEST_P(LibMeshToMFEMMeshFallbackTest, CheckFallbackCorrect) {
+  auto [data, expected_data] = fallbackElementData(GetParam());
   // Temporarily allow warnings to be emitted, so we can test the
   // conversion actually works properly.
   const auto throw_on_warning = Moose::_throw_on_warning;
@@ -1300,7 +1285,7 @@ TEST_P(LibMeshToMFEMMeshFallbackTest, CheckWarning)
 TEST_P(LibMeshToMFEMMeshFallbackTest, CheckError)
 {
   auto data = fallbackElementData(GetParam()).first;
-  EXPECT_THROW(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), MooseRuntimeError);
+  EXPECT_MOOSEERROR_MSG_CONTAINS(buildMesh(data.mesh_params, "ElementGenerator", data.mg_params), "Can not represent libMesh element type ");
 }
 
 INSTANTIATE_TEST_SUITE_P(FallbackElementSupport,
