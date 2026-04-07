@@ -441,9 +441,8 @@ CartesianMeshGenerator::generate()
     }
   }
 
-  // We just created this mesh from scratch, so nothing about it is
-  // prepared, but it also isn't marked as prepared, so we can just
-  // let the mesh generator system prepare it later.
-  // mesh->prepare_for_use();
+  // The build_foo() calls marked this mesh as prepared, but then we
+  // set subdomain ids without updating caches.
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
