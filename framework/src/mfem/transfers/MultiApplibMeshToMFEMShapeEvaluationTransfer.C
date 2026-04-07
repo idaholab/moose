@@ -35,12 +35,15 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
 void
 MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
 {
-  for (unsigned var_index = 0; var_index < numToVar(); ++var_index)
+  for (const auto var_index : make_range(numToVar()))
   {
     // Generate list of points where the grid function will be evaluated
     mfem::ParGridFunction & to_gf =
         *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(var_index));
     mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
+    if (to_gf.VectorDim() > 1)
+      mooseError("MultiApplibMeshToMFEMShapeEvaluationTransfer does not support transfers of "
+                 "vector variables from libMesh to MFEM-based subapps");
     mfem::Vector vxyz;
     mfem::Ordering::Type point_ordering;
     _mfem_projector.extractNodePositions(to_pfespace, vxyz, point_ordering);
@@ -52,9 +55,9 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
     const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
     const int dim = to_pfespace.GetParMesh()->Dimension();
     const int nodes_cnt = vxyz.Size() / dim;
-    for (int i = 0; i < nodes_cnt; i++)
+    for (const auto i : make_range(nodes_cnt))
     {
-      for (processor_id_type i_proc = 0; i_proc < n_processors(); ++i_proc)
+      for (const auto i_proc : make_range(n_processors()))
       {
         if (dim == 3)
         {
@@ -95,7 +98,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   local_meshfuns.clear();
   local_meshfuns.reserve(_from_problems.size());
   // Construct a local mesh function for each origin problem
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  for (const auto i_from : make_range(_from_problems.size()))
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
     MooseVariableFieldBase & from_var =
@@ -147,6 +150,8 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
           case TO_MULTIAPP:
             vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
             break;
+          case BETWEEN_MULTIAPP:
+            break;
           default:
             mooseError("Unsupported direction");
         }
@@ -177,7 +182,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
 
   // Set interpolated field values at points on local processor
   interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
-  for (int i = 0; i < interp_vals.Size(); i++)
+  for (const auto i : make_range(interp_vals.Size()))
   {
     for (auto & group : incoming_vals_ids)
     {

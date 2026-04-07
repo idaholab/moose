@@ -130,7 +130,7 @@ void
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
 {
   // Send from MFEM problem to libMesh problem
-  for (unsigned var_index = 0; var_index < numToVar(); ++var_index)
+  for (const auto var_index : make_range(numToVar()))
   {
     /// Store all target libMesh variables in a vector for convenience
     std::vector<MooseVariableFieldBase *> to_variables;
@@ -164,6 +164,9 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
       mfem::Vector interp_vals;
       auto & from_var =
           getActiveFromProblem().getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
+      if (from_var.VectorDim() > 1)
+        mooseError("MultiAppMFEMTolibMeshShapeEvaluationTransfer does not support transfers of "
+                   "vector variables from MFEM to libMesh-based subapps");
       from_var.ParFESpace()->GetParMesh()->EnsureNodes();
       _mfem_interpolator.SetDefaultInterpolationValue(getMFEMOutOfMeshValue());
       _mfem_interpolator.Interpolate(*from_var.ParFESpace()->GetParMesh(),

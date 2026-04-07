@@ -68,22 +68,32 @@ protected:
           "provided variables.");
     };
 
-    if (hasToMultiApp())
-    {
-      if (!dynamic_cast<FROM_PROBLEM *>(&getToMultiApp()->problemBase()))
-        bad_problem();
-      for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-        if (getToMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
-          bad_problem();
-    }
     if (hasFromMultiApp())
     {
-      if (!dynamic_cast<TO_PROBLEM *>(&getFromMultiApp()->problemBase()))
-        bad_problem();
-      for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
-        if (getFromMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
+      // Check if source sub-apps exist, and if so, if they are of the expected type
+      if (getFromMultiApp()->numGlobalApps())
+      {
+        for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+          if (getFromMultiApp()->hasLocalApp(i) &&
+              !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
+            bad_problem();
+      }
+      else // check source sub-app is of the expected type if it is the transfer source
+        if (!dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->problemBase()))
+          bad_problem();
+    }
+    if (hasToMultiApp())
+    {
+      // Check if destination sub-apps exist, and if so, if they are of the expected type
+      if (getToMultiApp()->numGlobalApps())
+      {
+        for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+          if (getToMultiApp()->hasLocalApp(i) &&
+              !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
+            bad_problem();
+      }
+      else // check destination sub-app is of the expected type if it is the transfer destination
+        if (!dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->problemBase()))
           bad_problem();
     }
   }
