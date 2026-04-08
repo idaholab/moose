@@ -56,8 +56,8 @@ protected:
   /// Preconditioner to be used for the problem
   MFEMSolverBase * _preconditioner;
 
-  private:
-    friend class ::MFEMProblemSolve;
+private:
+  friend class ::MFEMProblemSolve;
 };
 
 inline mfem::Solver &
