@@ -17,22 +17,21 @@ InputParameters
 MFEMMixedSesquilinearFormKernel::validParams()
 {
   InputParameters params = MFEMComplexKernel::validParams();
-  params.addClassDescription("Base class for mixed sesquilinear form kernels, allowing different "
-                             "trial and test variables.");
+  params.addClassDescription(
+      "Base class for mixed sesquilinear form kernels, allowing different trial and test "
+      "variables. Transposition of each component is controlled individually via the `transpose` "
+      "parameter on each `RealComponent`/`ImagComponent` sub-block.");
   params.addParam<VariableName>(
       "trial_variable",
       "The trial variable this kernel is acting on and which will be solved for. If empty "
       "(default), it will be the same as the test variable.");
-  params.addParam<bool>(
-      "transpose", false, "If true, adds the transpose of the integrator to the system instead.");
   return params;
 }
 
 MFEMMixedSesquilinearFormKernel::MFEMMixedSesquilinearFormKernel(const InputParameters & parameters)
   : MFEMComplexKernel(parameters),
     _trial_var_name(isParamValid("trial_variable") ? getParam<VariableName>("trial_variable")
-                                                   : _test_var_name),
-    _transpose(getParam<bool>("transpose"))
+                                                   : _test_var_name)
 {
 }
 
