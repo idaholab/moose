@@ -105,10 +105,10 @@ ADDiracKernel::computeADResiduals()
 
   precalculateResidual();
 
-  const std::vector<unsigned int> * multiplicities =
+  const std::vector<Real> * point_values =
       _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
-  Real multiplicity = 1.0;
+  Real point_value = 1.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -116,10 +116,10 @@ ADDiracKernel::computeADResiduals()
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       if (!_drop_duplicate_points)
-        multiplicity = (*multiplicities)[local_qp++];
+        point_value = (*point_values)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
-        _ad_residuals[_i] += multiplicity * computeQpResidual();
+        _ad_residuals[_i] += point_value * computeQpResidual();
     }
   }
 }

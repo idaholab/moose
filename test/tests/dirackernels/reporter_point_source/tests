@@ -42,19 +42,12 @@
       csvdiff = 'two_reporters_close_points_out.csv'
       detail = 'in a steady state problem with two separate reporter point sources at nearly the same location.'
     []
-    [duplicate_error]
-      type = 'RunException'
-      input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source_err'"
-      expect_err = "combine_duplicates must be true if reporter has duplicate points"
-      detail = "shall report an error if the input arrays have duplicated values."
-    []
   []
   [wrong_size_error]
     type = 'RunException'
     input = '2d_vpp.i'
     cli_args = "DiracKernels/inactive='reporter_point_source_dup_err'"
     expect_err = "Number of x_coord_name entries \(2\) does not match number of entries read for value_name \(3\)"
-    requirement = "The system shall report an error for ReporterPointSource when shall report an error if the input arrays are not the same size."
+    requirement = "The system shall report an error for ReporterPointSource when the input arrays are not the same size."
   []
 []

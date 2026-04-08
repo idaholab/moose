@@ -57,7 +57,6 @@
     y_coord_name = 'reporterData_dup/y'
     z_coord_name = 'reporterData_dup/z'
     weight_name = 'reporterData_dup/weight'
-    combine_duplicates=false
   []
   [reporter_point_source_dup]
     type = ReporterPointSource
@@ -67,7 +66,6 @@
     y_coord_name = 'reporterData_dup/y'
     z_coord_name = 'reporterData_dup/z'
     weight_name = 'reporterData_dup/weight'
-    combine_duplicates=true
   []
 []
 
