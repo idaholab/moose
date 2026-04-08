@@ -117,6 +117,21 @@ protected:
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
 
+  /**
+   * Determine a face argument for evaluating a functor on a face. If the functor is defined on a
+   * single side, that side is selected. If it is defined on both sides, the face is left unsided.
+   * @param functor the functor whose sidedness is queried on the provided face
+   * @param fi the FaceInfo for this face
+   * @param limiter_type the limiter type to use when building the face argument
+   * @param correct_skewness whether to perform skew correction at the face
+   */
+  template <typename FunctorType>
+  Moose::FaceArg
+  functorFaceArg(const FunctorType & functor,
+                 const FaceInfo * fi,
+                 Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+                 bool correct_skewness = false) const;
+
   /// Thread id
   const THREAD_ID _tid;
 

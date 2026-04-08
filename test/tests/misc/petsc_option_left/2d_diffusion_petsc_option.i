@@ -8,10 +8,13 @@
 []
 
 [Variables]
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
+[]
+
+[AuxVariables]
+  [aux]
+  []
 []
 
 [Kernels]
@@ -19,28 +22,28 @@
     type = TimeDerivative
     variable = u
   []
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 1
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -52,9 +55,9 @@
   num_steps = 1
   dt = 0.00005
 
-  [./TimeIntegrator]
+  [TimeIntegrator]
     type = ActuallyExplicitEuler
-  [../]
+  []
 
   petsc_options_iname = "-pc_type"
   petsc_options_value = "hypre"

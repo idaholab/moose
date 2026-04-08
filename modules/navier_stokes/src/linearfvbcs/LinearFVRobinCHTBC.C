@@ -58,13 +58,14 @@ LinearFVRobinCHTBC::computeBoundaryNormalGradient() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
   const auto state = determineState();
-  auto face = singleSidedFaceArg(_current_face_info);
-  face.face_side = elem_info->elem();
+  const auto current_face = singleSidedFaceArg(_current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
 
-  return (_htc(face, state) * (_var.getElemValue(*elem_info, determineState()) -
-                               _surface_temperature(face, state)) +
-          _incoming_flux(face, state)) /
-         _k(face, state);
+  return (_htc(current_face, state) * (_var.getElemValue(*elem_info, determineState()) -
+                                       _surface_temperature(surface_temperature_face, state)) +
+          _incoming_flux(incoming_flux_face, state)) /
+         _k(current_face, state);
 }
 
 Real
@@ -96,15 +97,11 @@ LinearFVRobinCHTBC::computeBoundaryGradientMatrixContribution() const
 Real
 LinearFVRobinCHTBC::computeBoundaryGradientRHSContribution() const
 {
-  // We check where the functor contributing to the right hand side lives. We do this
-  // because this functor lives on the domain where the variable of this kernel doesn't.
-  const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
-
   const auto state = determineState();
-  auto face = singleSidedFaceArg(_current_face_info);
-  face.face_side = elem_info->elem();
+  const auto current_face = singleSidedFaceArg(_current_face_info);
+  const auto surface_temperature_face = functorFaceArg(_surface_temperature, _current_face_info);
+  const auto incoming_flux_face = functorFaceArg(_incoming_flux, _current_face_info);
 
-  return _htc(face, state) * _surface_temperature(face, state) + _incoming_flux(face, state);
+  return _htc(current_face, state) * _surface_temperature(surface_temperature_face, state) +
+         _incoming_flux(incoming_flux_face, state);
 }

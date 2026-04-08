@@ -25,6 +25,23 @@ public:
 
   ComponentMeshTransformHelper(const InputParameters & params);
 
+  /// Return the direction (axis for a cylinder for example) of the component
+  RealVectorValue direction() const
+  {
+    mooseAssert(_direction, "No direction specified");
+    return *_direction;
+  }
+  /// Return the XZX angle rotation for the component
+  /// NOTE: it is often easier to work with the direction instead
+  RealVectorValue rotation() const
+  {
+    mooseAssert(_rotation, "No rotation specified");
+    return *_rotation;
+  }
+  /// Return the translation of the component
+  /// The default translation is the null vector
+  virtual Point translation() const { return _translation; }
+
 protected:
   virtual void addMeshGenerators() override;
 

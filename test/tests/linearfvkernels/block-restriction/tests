@@ -22,4 +22,11 @@
     requirement = 'The system should be able to exactly solve a problem with a constant source and diffusion and reaction kernels restricted to two different subdomains.'
     max_threads = 1 # see libmesh issue #3808
   []
+  [diffusion-variable-functor-bc]
+    type = CSVDiff
+    input = block-restricted-diffusion-variable-functor-bc.i
+    csvdiff = block-restricted-diffusion-variable-functor-bc_out_u_sample_0001.csv
+    requirement = 'The system shall allow a block-restricted linear finite volume diffusion problem to use a block-restricted auxiliary variable defined on the other side of an internal boundary as a Dirichlet boundary functor.'
+    max_threads = 1 # see libmesh issue #3808
+  []
 []

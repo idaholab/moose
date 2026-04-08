@@ -11,15 +11,15 @@
     type = TransformGenerator
     input = 'cylinder_1'
     transform = 'TRANSLATE'
-    vector_value = '0 -11 0'
+    vector_value = '1 -1 0'
   []
   [cmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 1
     ny = 1
-    xmax = 1
-    ymax = 4
+    xmax = 6
+    ymax = 3
     subdomain_name = cyl_2
     save_with_name = 'saved_mesh_0'
 

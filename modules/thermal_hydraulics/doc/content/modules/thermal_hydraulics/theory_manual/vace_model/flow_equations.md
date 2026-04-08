@@ -10,7 +10,7 @@ Euler equations are as follows:
 \pd{\rho u A}{t} + \pd{(\rho u^2 + p) A}{x} = p \pd{A}{x} - F A + \rho g_x A \,,
 
 !equation
-\pd{\rho E A}{t} + \pd{u (\rho E + p) A}{x} = \rho u g_x A + q''' A \,,
+\pd{\rho E A}{t} + \pd{u (\rho E + p) A}{x} - \pd{}{x}\pr{k \pd{T}{x} A} = \rho u g_x A + q''' A \,,
 
 where
 
@@ -21,6 +21,8 @@ where
 - $u$ is the axial velocity,
 - $E$ is the specific total energy,
 - $p$ is the pressure,
+- $T$ is the temperature,
+- $k$ is the thermal conductivity,
 - $F$ is the viscous drag force density,
 - $g_x$ is the component of acceleration due to gravity in the axial direction, and
 - $q'''$ is the heat source rate density.
