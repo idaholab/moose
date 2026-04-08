@@ -17,11 +17,13 @@ namespace
 void
 storeGridFunction(std::ostream & stream, mfem::ParGridFunction & gridfunction, void * context)
 {
-  auto size = gridfunction.Size();
+  const auto size = gridfunction.Size();
   dataStore(stream, size, context);
+
+  const auto * values = gridfunction.HostRead();
   for (int i = 0; i < size; ++i)
   {
-    auto value = gridfunction(i);
+    auto value = values[i];
     dataStore(stream, value, context);
   }
 }
@@ -33,8 +35,10 @@ loadGridFunction(std::istream & stream, mfem::ParGridFunction & gridfunction, vo
   dataLoad(stream, size, context);
   mooseAssert(size == gridfunction.Size(),
               "MFEM restartable GridFunction size mismatch during restore.");
+
+  auto * values = gridfunction.HostWrite();
   for (int i = 0; i < size; ++i)
-    dataLoad(stream, gridfunction(i), context);
+    dataLoad(stream, values[i], context);
 }
 }
 
