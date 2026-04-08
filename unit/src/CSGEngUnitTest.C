@@ -84,4 +84,22 @@ TEST(CSGEngUnitTest, testSurfUnit)
   ASSERT_EQ("INTERSECTION", reg.getRegionTypeString());
 }
 
+/// Test CSGCellEngUnit functionality as CSGEngUnit and CSGCell
+TEST(CSGEngUnitTest, testCellUnit)
+{
+  auto cell_unit_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+
+  /* Test the Engineering Unit related functionality (pre-expansion) */
+  ASSERT_EQ("cell_unit", cell_unit_ptr->getName());
+  ASSERT_EQ("CELL", cell_unit_ptr->getBehavior());
+  ASSERT_EQ("CSG::FakeCellEngUnit", cell_unit_ptr->getUnitType());
+
+  // attributes - should not cause any error (contents don't matter for this unit test)
+  ASSERT_NO_THROW(cell_unit_ptr->getAttributes());
+
+  // calling getExpandedRegion() before expandUnit() should cause error
+  Moose::UnitUtils::assertThrows([&cell_unit_ptr]() { cell_unit_ptr->getExpandedCell(); },
+                                 "getExpandedCell() cannot be called on CSGCellEngUnit");
+}
+
 } // namespace CSG
