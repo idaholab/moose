@@ -1,6 +1,6 @@
 [Tests]
   design = 'ReporterPointSource.md'
-  issues = '#15831 #18528'
+  issues = '#15831 #18528 #32706'
   [reporterPointSource]
     requirement = 'The system shall support point sources with locations and values given by a Reporter '
     [2dConstantReporter]

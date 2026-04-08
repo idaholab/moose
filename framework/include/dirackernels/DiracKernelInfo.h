@@ -62,8 +62,7 @@ public:
    */
   std::set<const Elem *> & getElements() { return _elements; }
 
-  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<Real>>>
-      MultiPointMap;
+  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<Real>>> MultiPointMap;
 
   /**
    * Returns a writeable reference to the _points container.

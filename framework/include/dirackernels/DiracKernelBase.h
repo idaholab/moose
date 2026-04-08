@@ -78,10 +78,7 @@ protected:
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
    */
-  void addPoint(const Elem * elem,
-                Point p,
-                unsigned id = libMesh::invalid_uint,
-                Real value = 1.0);
+  void addPoint(const Elem * elem, Point p, unsigned id = libMesh::invalid_uint, Real value = 1.0);
 
   /**
    * This is a highly inefficient way to add a point where this DiracKernel needs to be

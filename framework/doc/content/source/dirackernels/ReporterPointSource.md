@@ -3,7 +3,7 @@
 A `ReporterPointSource` reads in multiple point sources from a `Reporter`.  The point source values and coordinates are updated as the `Reporter` values are changed.
 
 !alert warning
-Duplicated points, i.e. points with the same xyz coordinates, are dropped by [DiracKernels](/DiracKernels/index.md) and applied as a single point.  The input parameter [!param](/DiracKernels/ReporterPointSource/combine_duplicates) combines the values and weights of duplicated points when set to `True`.  Reporters containing duplicate points will produce an error when set to `False`.  The parameter `drop_duplicate_points` used by other DiracKernels to handle duplicate points is suppressed for the `ReporterPointSource` because it is expected that every duplicate point in a `ReporterPointSource` will have different value and weight and are not just multiples of the sames value.
+Points in `ReporterPointSource` are combined when they are within the Dirac point fuzzy-comparison tolerance. This means two loads at nearly the same coordinates are applied at a single geometric Dirac point. To apply two different reporter loads correctly at that same combined point, `ReporterPointSource` must use `drop_duplicate_points = false` so the stored point values are accumulated and assembled properly. This parameter is therefore suppressed for `ReporterPointSource` and set internally to `false`.
 
 An example of a `ReporterPointSource` using a [ConstantReporter](/ConstantReporter.md)
 and a `VectorPostprocessor` of type [CSVReaderVectorPostprocessor](/CSVReaderVectorPostprocessor.md) is given by:
@@ -22,7 +22,7 @@ reading from the following csv file:
 
 !listing test/tests/dirackernels/reporter_point_source/point_value_file.csv
 
-The `Reporter` and `VectorPostprocessor` for the above example produce the same `ReporterPointSource` (e.g. same magnitude and location).   
+The `Reporter` and `VectorPostprocessor` for the above example produce the same `ReporterPointSource` (e.g. same magnitude and location).
 
 The next example applies a `ReporterPointSource` in a transient simulation given by:
 
