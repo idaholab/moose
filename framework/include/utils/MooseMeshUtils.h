@@ -145,6 +145,14 @@ Point meshCentroidCalculator(const MeshBase & mesh);
 Point boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh);
 
 /**
+ * Calculates the side-volume weighted (side-vertex) average normal of a boundary on a mesh
+ * @param boundary boundary to compute the centroid of
+ * @param mesh input mesh holding the boundary whose averaged normal needs to be calculated
+ * @return a Point for the boundary normal
+ */
+RealVectorValue boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh);
+
+/**
  * Compute a coordinate transformation volume integration factor
  * @param point The libMesh \p Point in space where we are evaluating the factor
  * @param factor The output of this function. Would be 1 for cartesian coordinate systems, 2*pi*r

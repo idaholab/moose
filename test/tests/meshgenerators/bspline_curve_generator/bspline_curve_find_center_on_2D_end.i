@@ -22,7 +22,7 @@
   [bscg]
     type = BSplineCurveGenerator
     start_point = '0.5 1 0'
-    end_boundary = 'top'
+    end_point_at_boundary_centroid = 'top'
     end_mesh = gmg2
     start_direction = '0 1 0'
     end_direction = '-2 1 0'
