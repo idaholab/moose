@@ -671,18 +671,6 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
     ExternalProblem::addTransfer(transfer_name, name, parameters);
 }
 
-std::shared_ptr<mfem::ParGridFunction>
-MFEMProblem::getGridFunction(const std::string & name)
-{
-  return getUserObject<MFEMVariable>(name).getGridFunction();
-}
-
-std::shared_ptr<mfem::ParComplexGridFunction>
-MFEMProblem::getComplexGridFunction(const std::string & name)
-{
-  return getUserObject<MFEMComplexVariable>(name).getComplexGridFunction();
-}
-
 void
 MFEMProblem::addInitialCondition(const std::string & ic_name,
                                  const std::string & name,
