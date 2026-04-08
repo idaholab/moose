@@ -29,29 +29,52 @@ class MFEMObject : public MooseObject,
                    protected ReporterInterface
 {
 public:
+  /**
+   * Declare the common parameters required by MFEM MooseObject-backed classes.
+   */
   static InputParameters validParams();
 
+  /**
+   * Construct an MFEM object backed directly by MooseObject.
+   */
   MFEMObject(const InputParameters & parameters);
 
+  /**
+   * Return the owning MFEM problem.
+   */
   MFEMProblem & getMFEMProblem() { return _mfem_problem; }
+  /**
+   * Return the owning MFEM problem.
+   */
   const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
 
+  /**
+   * Retrieve a scalar MFEM coefficient by its declared name.
+   */
   mfem::Coefficient & getScalarCoefficientByName(const MFEMScalarCoefficientName & name);
+  /**
+   * Retrieve a vector MFEM coefficient by its declared name.
+   */
   mfem::VectorCoefficient & getVectorCoefficientByName(const MFEMVectorCoefficientName & name);
+  /**
+   * Retrieve a matrix MFEM coefficient by its declared name.
+   */
   mfem::MatrixCoefficient & getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name);
+  /**
+   * Retrieve a scalar MFEM coefficient using the value of an input parameter.
+   */
   mfem::Coefficient & getScalarCoefficient(const std::string & name);
+  /**
+   * Retrieve a vector MFEM coefficient using the value of an input parameter.
+   */
   mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
+  /**
+   * Retrieve a matrix MFEM coefficient using the value of an input parameter.
+   */
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
 
-protected:
-  usingFunctionInterfaceMembers;
-  usingPostprocessorInterfaceMembers;
-  using ReporterInterface::getReporterValue;
-  using ReporterInterface::getReporterValueByName;
-  using VectorPostprocessorInterface::getVectorPostprocessorValue;
-  using VectorPostprocessorInterface::getVectorPostprocessorValueByName;
-
 private:
+  /// Owning MFEM problem for this object.
   MFEMProblem & _mfem_problem;
 };
 
