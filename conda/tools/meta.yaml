@@ -51,6 +51,7 @@ requirements:
     - pybtex
     - pycobertura
     - pyflakes
+    - pyfmi
     - pylatexenc
     - pylint
     - pymongo
@@ -78,7 +79,7 @@ test:
   imports:
     - bs4
     - deepdiff
-    - fmpy
+    - pyfmi
     - coverage
     - deepdiff
     - git

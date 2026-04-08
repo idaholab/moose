@@ -13,6 +13,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+from moosefmu import get_float
 from pyfmi import load_fmu
 
 
@@ -48,8 +49,8 @@ def _initialize_moose_fmu(model, t0: float, t1: float, flag: str, cmd: str) -> N
 
 
 def _finalize_moose_fmu(model) -> None:
-     with contextlib.suppress(Exception):
-         model.terminate()
+    with contextlib.suppress(Exception):
+        model.terminate()
 
 
 def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd, *, debug_logging=True):
@@ -64,9 +65,9 @@ def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd, *, debug_logging=T
         while t <= t1:
             model.do_step(current_t=t, step_size=dt)
 
-            moose_time = float(model.get("moose_time"))
-            diffused = float(model.get("diffused"))
-            rep_value = float(model.get("rep_value"))
+            moose_time = get_float(model, "moose_time")
+            diffused = get_float(model, "diffused")
+            rep_value = get_float(model, "rep_value")
             rows.append((t, moose_time, diffused, rep_value))
 
             t = t + dt
@@ -121,12 +122,12 @@ def moose_fmu_step_by_step(
         while t <= t1:
             model.do_step(current_t=t, step_size=dt)
 
-            moose_time = float(model.get("moose_time"))
-            diffused = float(model.get("diffused"))
-            rep_value = float(model.get("rep_value"))
+            moose_time = get_float(model, "moose_time")
+            diffused = get_float(model, "diffused")
+            rep_value = get_float(model, "rep_value")
             print(
                 f"fmu_time={t:.3f} -> moose_time={moose_time:.6f} -> "
-                "diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
+                f"diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
             )
             rows.append((t, moose_time, diffused, rep_value))
 
@@ -177,7 +178,7 @@ def moose_fmu_time(
         while t <= t1:
             model.do_step(current_t=t, step_size=dt)
 
-            moose_time = float(model.get("moose_time"))
+            moose_time = get_float(model, "moose_time")
 
             rows.append((t, moose_time))
 
@@ -207,5 +208,5 @@ def print_result(result):
     for ti, di, diff, rep in zip(fmu_time, dt, diff_u, rep_value):
         print(
             f"fmu_time={ti:.1f} -> moose_time={di:.5f} -> "
-            "diffused={diff:.5f} -> rep_value={rep:.5f} "
+            f"diffused={diff:.5f} -> rep_value={rep:.5f} "
         )

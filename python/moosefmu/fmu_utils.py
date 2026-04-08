@@ -11,12 +11,56 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
+from types import SimpleNamespace
 from typing import Any, Dict, Optional
 
-from fmpy import read_model_description
+try:
+    from pyfmi import load_fmu
+except ModuleNotFoundError:
+    load_fmu = None
 
 logger = logging.getLogger(__name__)
+
+
+def as_scalar(value: Any) -> Any:
+    """Normalize scalar-like FMU values (arrays/lists) into a Python scalar."""
+    if hasattr(value, "ndim") and hasattr(value, "size"):
+        if value.ndim == 0:
+            with contextlib.suppress(Exception):
+                return value.item()
+
+        if value.size == 1:
+            with contextlib.suppress(Exception):
+                return value.reshape(-1)[0].item()
+            with contextlib.suppress(Exception):
+                return value.reshape(-1)[0]
+            with contextlib.suppress(Exception):
+                return value[0]
+
+        raise ValueError(
+            f"Expected scalar FMU value, got array-like shape={getattr(value, 'shape', '?')}"
+        )
+
+    if isinstance(value, (list, tuple)):
+        if len(value) == 1:
+            return as_scalar(value[0])
+        raise ValueError(f"Expected scalar FMU value, got sequence length={len(value)}")
+
+    return value
+
+
+def get_scalar(fmu: Any, name: str) -> Any:
+    """Retrieve a scalar FMU variable by name using ``fmu.get``."""
+    if not hasattr(fmu, "get"):
+        raise AttributeError("FMU object does not expose get()")
+    return as_scalar(fmu.get(name))
+
+
+def get_float(fmu: Any, name: str) -> float:
+    """Retrieve a scalar FMU variable by name and convert it to ``float``."""
+    return float(get_scalar(fmu, name))
 
 
 def configure_fmu_logging(
@@ -77,9 +121,41 @@ def configure_fmu_logging(
 
 
 def fmu_info(fmu_model: str, filename: str):
-    """Read and log the FMI model description for the given FMU archive."""
+    """Read and log FMI model variable metadata for the given FMU archive."""
+    if load_fmu is None:
+        raise ModuleNotFoundError(
+            "fmu_info() requires optional dependency 'pyfmi'. "
+            "Install it (e.g. `pip install pyfmi`) to read FMU model metadata."
+        )
+
     logger.info("Load FMU model description: %s", filename)
-    fmu_description = read_model_description(fmu_model)
+    model = load_fmu(fmu_model)
+
+    try:
+        variables = []
+        for name, variable in model.get_model_variables().items():
+            value_reference = getattr(
+                variable, "value_reference", getattr(variable, "valueReference", None)
+            )
+            start_value = getattr(variable, "start", None)
+            with contextlib.suppress(Exception):
+                start_value = model.get_variable_start(name)
+
+            variables.append(
+                SimpleNamespace(
+                    name=str(name),
+                    causality=str(getattr(variable, "causality", "")),
+                    variability=str(getattr(variable, "variability", "")),
+                    type=str(getattr(variable, "type", type(variable).__name__)),
+                    start=start_value,
+                    valueReference=value_reference,
+                )
+            )
+    finally:
+        with contextlib.suppress(Exception):
+            model.terminate()
+
+    fmu_description = SimpleNamespace(modelVariables=variables)
 
     logger.info("FMU model info:")
     for variable in fmu_description.modelVariables:
@@ -96,37 +172,67 @@ def fmu_info(fmu_model: str, filename: str):
     return fmu_description
 
 
-def get_real(fmu: Any, vr_map: Dict[str, int], name: str) -> float:
+def get_real(fmu: Any, vr_map: Dict[str, Any], name: str) -> float:
     """Retrieve a scalar real variable by name from an instantiated FMU."""
-    value_reference = vr_map[name]
-    return fmu.getReal([value_reference])[0]
+    if hasattr(fmu, "getReal"):
+        value_reference = vr_map[name]
+        return fmu.getReal([value_reference])[0]
+    if hasattr(fmu, "get"):
+        return get_float(fmu, name)
+    raise AttributeError("FMU object does not expose getReal() or get()")
 
 
-def get_string(fmu: Any, vr_map: Dict[str, int], name: str) -> str:
+def get_string(fmu: Any, vr_map: Dict[str, Any], name: str) -> str:
     """Retrieve a scalar string variable by name from an instantiated FMU."""
-    value_reference = vr_map[name]
-    return fmu.getString([value_reference])[0]
+    if hasattr(fmu, "getString"):
+        value_reference = vr_map[name]
+        return fmu.getString([value_reference])[0]
+    if hasattr(fmu, "get"):
+        return str(get_scalar(fmu, name))
+    raise AttributeError("FMU object does not expose getString() or get()")
 
 
-def get_bool(fmu: Any, vr_map: Dict[str, int], name: str) -> bool:
+def get_bool(fmu: Any, vr_map: Dict[str, Any], name: str) -> bool:
     """Retrieve a scalar boolean variable by name from an instantiated FMU."""
-    value_reference = vr_map[name]
-    return fmu.getBoolean([value_reference])[0]
+    if hasattr(fmu, "getBoolean"):
+        value_reference = vr_map[name]
+        return fmu.getBoolean([value_reference])[0]
+    if hasattr(fmu, "get"):
+        return bool(get_scalar(fmu, name))
+    raise AttributeError("FMU object does not expose getBoolean() or get()")
 
 
-def set_string(fmu: Any, vr_map: Dict[str, int], name: str, value: str) -> None:
+def set_string(fmu: Any, vr_map: Dict[str, Any], name: str, value: str) -> None:
     """Assign a scalar string variable by name on an instantiated FMU."""
-    value_reference = vr_map[name]
-    fmu.setString([value_reference], [value])
+    if hasattr(fmu, "setString"):
+        value_reference = vr_map[name]
+        fmu.setString([value_reference], [value])
+        return
+    if hasattr(fmu, "set"):
+        fmu.set(name, value)
+        return
+    raise AttributeError("FMU object does not expose setString() or set()")
 
 
-def set_real(fmu: Any, vr_map: Dict[str, int], name: str, value: float) -> None:
+def set_real(fmu: Any, vr_map: Dict[str, Any], name: str, value: float) -> None:
     """Assign a scalar real variable by name on an instantiated FMU."""
-    value_reference = vr_map[name]
-    fmu.setReal([value_reference], [value])
+    if hasattr(fmu, "setReal"):
+        value_reference = vr_map[name]
+        fmu.setReal([value_reference], [value])
+        return
+    if hasattr(fmu, "set"):
+        fmu.set(name, value)
+        return
+    raise AttributeError("FMU object does not expose setReal() or set()")
 
 
-def set_bool(fmu: Any, vr_map: Dict[str, int], name: str, value: bool) -> None:
+def set_bool(fmu: Any, vr_map: Dict[str, Any], name: str, value: bool) -> None:
     """Assign a scalar boolean variable by name on an instantiated FMU."""
-    value_reference = vr_map[name]
-    fmu.setBoolean([value_reference], [value])
+    if hasattr(fmu, "setBoolean"):
+        value_reference = vr_map[name]
+        fmu.setBoolean([value_reference], [value])
+        return
+    if hasattr(fmu, "set"):
+        fmu.set(name, value)
+        return
+    raise AttributeError("FMU object does not expose setBoolean() or set()")

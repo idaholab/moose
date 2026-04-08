@@ -95,43 +95,49 @@ class TestFmuUtils(unittest.TestCase):
 
     def test_fmu_info_logs_model_variables(self):
         """``fmu_info`` should log details about model variables."""
-        variables = [
-            SimpleNamespace(
-                name="temp",
+        calls = {}
+
+        variables = {
+            "temp": SimpleNamespace(
                 causality="parameter",
                 variability="continuous",
                 type="Real",
+                value_reference=1,
                 start=273.15,
-                valueReference=1,
             ),
-            SimpleNamespace(
-                name="status",
+            "status": SimpleNamespace(
                 causality="output",
                 variability="discrete",
                 type="String",
+                value_reference=2,
                 start="cold",
-                valueReference=2,
             ),
-        ]
+        }
 
-        description = SimpleNamespace(modelVariables=variables)
+        class _DummyModel:
+            def get_model_variables(self):
+                return variables
 
-        calls = {}
+            def get_variable_start(self, name):
+                return variables[name].start
 
-        def fake_read_model_description(path):
+            def terminate(self):
+                calls["terminated"] = True
+
+        def fake_load_fmu(path):
             calls["path"] = path
-            return description
+            return _DummyModel()
 
         with (
-            patch.object(
-                fmu_utils, "read_model_description", new=fake_read_model_description
-            ),
+            patch.object(fmu_utils, "load_fmu", new=fake_load_fmu),
             self.assertLogs(fmu_utils.logger, level=logging.INFO) as logs,
         ):
             result = fmu_utils.fmu_info("model.fmu", "model.fmu")
 
-        self.assertIs(result, description)
         self.assertEqual(calls["path"], "model.fmu")
+        self.assertTrue(calls["terminated"])
+        self.assertEqual(result.modelVariables[0].name, "temp")
+        self.assertEqual(result.modelVariables[1].name, "status")
         log_messages = "\n".join(logs.output)
         self.assertIn("Load FMU model description: model.fmu", log_messages)
         self.assertIn("FMU model info:", log_messages)
@@ -179,6 +185,24 @@ class _DummyFmu:
         self.set_values[refs[0]] = values[0]
 
 
+class _DummyNameAccessFmu:
+    """FMU stand-in exposing pyfmi-style name-based get/set APIs."""
+
+    def __init__(self):
+        self.values = {
+            "temperature": [12.5],
+            "mode": ["ready"],
+            "enabled": [1],
+        }
+        self.set_values = {}
+
+    def get(self, name):
+        return self.values[name]
+
+    def set(self, name, value):
+        self.set_values[name] = value
+
+
 class TestFmuAccessorHelpers(unittest.TestCase):
     """Confirm helper functions map names to value references."""
 
@@ -205,6 +229,32 @@ class TestFmuAccessorHelpers(unittest.TestCase):
         self.assertEqual(fmu.calls["setString"], [((2,), ("active",))])
         self.assertEqual(fmu.calls["setBoolean"], [((3,), (False,))])
         self.assertEqual(fmu.set_values, {1: 98.6, 2: "active", 3: False})
+
+    def test_name_based_helpers_use_shared_scalar_conversion(self):
+        """Helpers should support pyfmi-style name-based get/set APIs."""
+        fmu = _DummyNameAccessFmu()
+
+        self.assertEqual(fmu_utils.as_scalar([12.5]), 12.5)
+        self.assertEqual(fmu_utils.get_scalar(fmu, "mode"), "ready")
+        self.assertEqual(fmu_utils.get_float(fmu, "temperature"), 12.5)
+
+        # No value-reference map is needed for name-based APIs.
+        self.assertEqual(fmu_utils.get_real(fmu, {}, "temperature"), 12.5)
+        self.assertEqual(fmu_utils.get_string(fmu, {}, "mode"), "ready")
+        self.assertTrue(fmu_utils.get_bool(fmu, {}, "enabled"))
+
+        fmu_utils.set_real(fmu, {}, "temperature", 98.6)
+        fmu_utils.set_string(fmu, {}, "mode", "active")
+        fmu_utils.set_bool(fmu, {}, "enabled", False)
+        self.assertEqual(
+            fmu.set_values,
+            {"temperature": 98.6, "mode": "active", "enabled": False},
+        )
+
+    def test_as_scalar_rejects_non_scalar_sequences(self):
+        """as_scalar should raise when a sequence has more than one value."""
+        with self.assertRaises(ValueError):
+            fmu_utils.as_scalar([1, 2])
 
 
 if __name__ == "__main__":

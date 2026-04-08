@@ -42,9 +42,10 @@ def _set_needs_execution_tool(fmu_path: str) -> None:
             tmp_path = tmp_file.name
 
         try:
-            with zipfile.ZipFile(fmu_path, "r") as src, zipfile.ZipFile(
-                tmp_path, "w", compression=zipfile.ZIP_DEFLATED
-            ) as dst:
+            with (
+                zipfile.ZipFile(fmu_path, "r") as src,
+                zipfile.ZipFile(tmp_path, "w", compression=zipfile.ZIP_DEFLATED) as dst,
+            ):
                 for info in src.infolist():
                     if info.filename == "modelDescription.xml":
                         dst.writestr(info, updated_xml)
@@ -58,9 +59,7 @@ def _set_needs_execution_tool(fmu_path: str) -> None:
 
 def main() -> int:
     """Build the FMU, patch modelDescription.xml, and return a process exit code."""
-    result = subprocess.run(
-        ["pythonfmu", "build", "-f", "MooseTest.py"], check=False
-    )
+    result = subprocess.run(["pythonfmu", "build", "-f", "MooseTest.py"], check=False)
     if result.returncode != 0:
         return result.returncode
 
