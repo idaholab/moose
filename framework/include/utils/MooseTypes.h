@@ -1284,6 +1284,8 @@ MooseDerivativeStringClass(CLIArgString);
 MooseDerivativeStringClass(MFEMScalarCoefficientName);
 MooseDerivativeStringClass(MFEMVectorCoefficientName);
 MooseDerivativeStringClass(MFEMMatrixCoefficientName);
+MooseDerivativeStringClass(MFEMFESpaceName);
+MooseDerivativeStringClass(MFEMSolverName);
 ///@}
 #endif
 /**

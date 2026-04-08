@@ -11,8 +11,8 @@ InputParameters
 MFEMComplexVariable::validParams()
 {
   InputParameters params = MFEMObject::validParams();
-  params.addRequiredParam<UserObjectName>("fespace",
-                                          "The finite element space this variable is defined on.");
+  params.addRequiredParam<MFEMFESpaceName>("fespace",
+                                           "The finite element space this variable is defined on.");
   params += MooseVariableBase::validParams();
   params.addClassDescription(
       "Class for adding complex MFEM variables to the problem (`mfem::ParComplexGridFunction`s).");
@@ -25,7 +25,7 @@ MFEMComplexVariable::validParams()
 MFEMComplexVariable::MFEMComplexVariable(const InputParameters & parameters)
   : MFEMObject(parameters),
     _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<UserObjectName>("fespace"))),
+                                                         getParam<MFEMFESpaceName>("fespace"))),
     _cmplx_gridfunction(buildComplexGridFunction())
 {
   *_cmplx_gridfunction = 0.0;

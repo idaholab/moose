@@ -391,39 +391,15 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   if constexpr (std::is_same_v<postprocessor_type, Postprocessor>)
     _problem_ptr->theWarehouse()
         .query()
-        .condition<AttribSystem>("MFEMExecutedObject")
         .condition<AttribInterfaces>(Interfaces::Postprocessor)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(objs);
   else if constexpr (std::is_same_v<postprocessor_type, VectorPostprocessor>)
     _problem_ptr->theWarehouse()
         .query()
-        .condition<AttribSystem>("MFEMExecutedObject")
         .condition<AttribInterfaces>(Interfaces::VectorPostprocessor)
         .condition<AttribThread>(0)
         .queryIntoUnsorted(objs);
-
-  std::vector<UserObjectBase *> user_objects;
-  _problem_ptr->theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
-      .queryIntoUnsorted(user_objects);
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  std::vector<UserObjectBase *> kokkos_objs;
-  _problem_ptr->theWarehouse()
-      .query()
-      .condition<AttribSystem>("KokkosUserObject")
-      .condition<AttribThread>(0)
-      .queryIntoUnsorted(kokkos_objs);
-
-  user_objects.insert(user_objects.end(), kokkos_objs.begin(), kokkos_objs.end());
-#endif
-
-  for (const auto & obj : user_objects)
-    if (auto * const pps = dynamic_cast<postprocessor_type *>(obj))
-      objs.push_back(pps);
 
   for (const auto & obj : objs)
   {

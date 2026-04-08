@@ -4765,6 +4765,8 @@ FEProblemBase::getVectorPostprocessorObjectByName(const std::string & object_nam
 
   if (objs.empty())
     mooseError("Unable to find VectorPostprocessor with name '", object_name, "'");
+  mooseAssert(objs.size() == 1,
+              "We shouldn't find more than one vector postprocessor object for a given name");
   return *(objs[0]);
 }
 

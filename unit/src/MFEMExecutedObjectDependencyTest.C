@@ -119,7 +119,7 @@ public:
     _mfem_problem->addFESpace("MFEMScalarFESpace", "h1", fe_params);
 
     InputParameters variable_params = _factory.getValidParams("MFEMVariable");
-    variable_params.set<UserObjectName>("fespace") = "h1";
+    variable_params.set<MFEMFESpaceName>("fespace") = "h1";
     _mfem_problem->addVariable("MFEMVariable", "aux0_var", variable_params);
     _mfem_problem->addVariable("MFEMVariable", "aux1_var", variable_params);
   }

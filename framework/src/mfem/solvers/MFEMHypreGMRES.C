@@ -26,7 +26,7 @@ MFEMHypreGMRES::validParams()
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<UserObjectName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;
 }

@@ -20,8 +20,8 @@ MFEMVariable::validParams()
 {
   InputParameters params = MFEMObject::validParams();
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
-  params.addRequiredParam<UserObjectName>("fespace",
-                                          "The finite element space this variable is defined on.");
+  params.addRequiredParam<MFEMFESpaceName>("fespace",
+                                           "The finite element space this variable is defined on.");
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
@@ -37,7 +37,7 @@ MFEMVariable::validParams()
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
   : MFEMObject(parameters),
     _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<UserObjectName>("fespace"))),
+                                                         getParam<MFEMFESpaceName>("fespace"))),
     _gridfunction(buildGridFunction()),
     _time_derivative_name(
         isParamValid("time_derivative")
