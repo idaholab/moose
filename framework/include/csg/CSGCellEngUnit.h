@@ -39,6 +39,16 @@ public:
   /// Satisfy CSGEngUnit::getName() — resolved via CSGCell::getName()
   const std::string & getName() const override { return CSGCell::getName(); }
 
+  /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
+  bool operator==(const CSGCellEngUnit & other) const
+  {
+    return CSGEngUnit::operator==(other);
+  }
+  bool operator!=(const CSGCellEngUnit & other) const
+  {
+    return CSGEngUnit::operator!=(other);
+  }
+
   /// Delegate to CSGCell (CSGTransformationHelper)
   const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
   getTransformations() const override

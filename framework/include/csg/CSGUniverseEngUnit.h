@@ -40,6 +40,16 @@ public:
   /// Satisfy CSGEngUnit::getName() — resolved via CSGUniverse::getName()
   const std::string & getName() const override { return CSGUniverse::getName(); }
 
+  /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
+  bool operator==(const CSGUniverseEngUnit & other) const
+  {
+    return CSGEngUnit::operator==(other);
+  }
+  bool operator!=(const CSGUniverseEngUnit & other) const
+  {
+    return CSGEngUnit::operator!=(other);
+  }
+
   /// Delegate to CSGUniverse (CSGTransformationHelper)
   const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
   getTransformations() const override
