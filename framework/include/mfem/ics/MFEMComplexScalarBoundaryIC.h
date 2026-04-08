@@ -15,7 +15,7 @@
 #include "MFEMBoundaryRestrictable.h"
 
 /**
- * Class used to set the initial value(s) on a scalar valued MFEMVariable.
+ * Class used to set the initial value(s) on a complex scalar valued MFEMVariable.
  */
 class MFEMComplexScalarBoundaryIC : public MFEMInitialCondition, public MFEMBoundaryRestrictable
 {

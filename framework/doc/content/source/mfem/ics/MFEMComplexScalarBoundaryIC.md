@@ -8,9 +8,7 @@
 `mfem::Coefficient`s representing its real and imaginary parts. The initial condition will be applied on all boundaries specified by the user
 in the mesh.
 
-## Example Input File Syntax
-
-!listing mfem/submeshes/cut_closed_coil.i block=ICs
+## Input File Syntax
 
 !syntax parameters /ICs/MFEMComplexScalarBoundaryIC
 

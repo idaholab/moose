@@ -20,8 +20,8 @@ MFEMMixedScalarWeakCurlKernel::validParams()
   InputParameters params = MFEMMixedBilinearFormKernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k u, \\vec\\nabla \\times \\vec v)_\\Omega$ "
-                             "arising from the weak form of the scalar curl operator "
-                             "$\\vec\\nabla \\times (k u \\hat z)$. The space must be 2D.");
+                             "arising from the weak form of the curl operator "
+                             "$\\vec\\nabla \\times (k u \\hat z)$. The range space must be 2D.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar property k to multiply the integrator by.");
   return params;

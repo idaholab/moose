@@ -14,7 +14,9 @@ compared to a complex vector function.
 where $\vec{u}_{h} \in H^{1,d} \lor L^{2,d} \lor H(\mathrm{curl}) \lor
 H(\mathrm{div})$ and $\vec{u}_{ex}$ is a vector function.
 
-## Syntax
+## Example Input File Syntax
+
+!listing mfem/complex/mixed_sesquilinear.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MFEMComplexVectorL2Error
 

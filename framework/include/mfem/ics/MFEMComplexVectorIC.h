@@ -14,7 +14,7 @@
 #include "MFEMInitialCondition.h"
 
 /**
- * Class used to set the initial value(s) on a vector valued MFEMVariable.
+ * Class used to set the initial value(s) on a complex vector valued MFEMVariable.
  */
 class MFEMComplexVectorIC : public MFEMInitialCondition
 {

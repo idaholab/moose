@@ -14,7 +14,7 @@
 #include "MFEMInitialCondition.h"
 
 /**
- * Class used to set the initial value(s) on a scalar valued MFEMVariable.
+ * Class used to set the initial value(s) on a complex scalar valued MFEMVariable.
  */
 class MFEMComplexScalarIC : public MFEMInitialCondition
 {

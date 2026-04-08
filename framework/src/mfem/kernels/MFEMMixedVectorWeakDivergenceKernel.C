@@ -19,7 +19,7 @@ MFEMMixedVectorWeakDivergenceKernel::validParams()
   InputParameters params = MFEMMixedBilinearFormKernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
-      "$(-k\\vec u, \\nabla v)_\\Omega$.");
+      "$(-k\\vec u, \\vec \\nabla v)_\\Omega$.");
   params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
   return params;
 }
