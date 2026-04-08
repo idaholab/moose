@@ -25,7 +25,8 @@ build:
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
   run_exports:
-    - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
+    - {{ pin_subpackage('moose-wasp', exact=True) }}
+
 requirements:
   build:
     - {{ compiler("c") }}

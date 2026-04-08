@@ -1,24 +1,22 @@
 #!/bin/bash
 set -eu
 export PATH=/bin:$PATH
-export VTK_PREFIX="${PREFIX:?}/libmesh-vtk"
+VTK_PREFIX="${PREFIX:?}/moose-libmesh-vtk"
 # shellcheck disable=SC2154  # set in meta.yaml env package
-export VTK_VER=${vtk_friendly_version}
+VTK_VER=${vtk_friendly_version}
 
 function do_build(){
-    export HYDRA_LAUNCHER=fork
-    export CC=mpicc CXX=mpicxx
-    rm -rf "${VTK_PREFIX:?}" "${SRC_DIR:?}/build"
+    rm -rf "$VTK_PREFIX" "${SRC_DIR:?}/build"
     mkdir -p "${SRC_DIR:?}/build"; cd "${SRC_DIR:?}/build"
 
     # Settings guide: https://docs.vtk.org/en/latest/build_instructions/build_settings.html
-    cmake .. -G "Ninja" \
+    cmake .. -G "Ninja" ${CMAKE_ARGS} \
       -Wno-dev \
+      -DCMAKE_CXX_COMPILER=mpicxx \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_PREFIX_PATH:PATH="${VTK_PREFIX}" \
       -DCMAKE_INSTALL_PREFIX:PATH="${VTK_PREFIX}" \
       -DCMAKE_INSTALL_RPATH:PATH="${VTK_PREFIX}"/lib \
-      -DCMAKE_OSX_SYSROOT="${CONDA_BUILD_SYSROOT:?}" \
       -DCMAKE_INSTALL_LIBDIR=lib \
       -DBUILD_SHARED_LIBS:BOOL=ON \
       -DVTK_INSTALL_SDK:BOOL=ON \

@@ -1,6 +1,0 @@
-mpi:
-  - mpich
-  - openmpi
-
-moose_mpi:
-  - moose-mpi __VERSIONER_MPI_VERSION__

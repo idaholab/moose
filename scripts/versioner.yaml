@@ -31,7 +31,6 @@ packages:
     build_number: 0
     conda: conda/libmesh-vtk
     templates:
-      conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
       conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
     dependencies:
       - mpi
@@ -44,7 +43,6 @@ packages:
     build_number: 1
     conda: conda/petsc
     templates:
-      conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
       conda/petsc/meta.yaml.template: conda/petsc/meta.yaml
     dependencies:
       - mpi

@@ -1,6 +1,3 @@
 mpi:
   - mpich
   - openmpi
-
-moose_mpi:
-  - moose-mpi 2026.04.07

@@ -24,7 +24,6 @@ source:
 build:
   number: {{ build }}
   string: {{ mpi }}_{{ build }}
-  skip: true  # [win]
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE
@@ -32,32 +31,46 @@ build:
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
   run_exports:
-    - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
+    - {{ pin_subpackage('moose-petsc', exact=True) }}
 
 requirements:
   build:
-    - {{ mpi }}
-    - {{ moose_mpi }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    - bison
+    - diffutils
+    - make
     - pkg-config
-    - liblzma-devel                       # [linux]
-  run:
+    - python 3.12.*
+    - gnuconfig
+  host:
     - {{ mpi }}
-    - {{ moose_mpi }}
-    - pkg-config
+    - bzip2
+    - cmake
+    - hdf5 {{ hdf5 }}
+    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
+    - xz
+    - zlib
 
 test:
   requires:
     - pkg-config
-    - {{ mpi }}
-    - {{ moose_mpi }}
+    - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
   files:
     - tests/ex1.c
-    - tests/ex1f.F90
     - tests/makefile
   commands:
+    - test $PETSC_DIR == ${PREFIX}/moose-petsc
     - pkg-config --validate PETSc
-    - pkg-config --cflags PETSc
+    - pkg-config --cflags PETSc | grep -v isystem
     - pkg-config --libs PETSc
+    - cat ${PETSC_DIR}/lib/petsc/conf/petscvariables
+    - cd tests && make ex1 && make runex1 MPIEXEC=mpiexec
 
 about:
   home: https://petsc.org

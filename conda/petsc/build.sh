@@ -13,7 +13,7 @@ function do_build(){
     export PETSC_DIR=$SRC_DIR
     export PETSC_ARCH=arch-conda-c-opt
 
-    rm -rf "${PREFIX:?}/petsc" "${SRC_DIR:?}/${PETSC_ARCH}"
+    rm -rf "${PREFIX:?}/moose-petsc" "${SRC_DIR:?}/${PETSC_ARCH}"
 
     ## TODO: the following is a partial requirement for the day we introduce pytorch
     # Handle switches created by Conda variants
@@ -33,24 +33,28 @@ function do_build(){
     #fi
     # Now add ADDITIONAL_ARGS to the below configure_petsc arguments
 
+    mpicc -show
+    mpifort -show
+
     # set forth by MPI conda-forge package
     # shellcheck disable=SC2153
-    configure_petsc \
-        --COPTFLAGS=-O3 \
-        --CXXOPTFLAGS=-O3 \
-        --FOPTFLAGS=-O3 \
+    HDF5_DIR=${PREFIX} configure_petsc \
+        AR="${AR:-ar}" \
+        CPP="$CPP" \
+        RANLIB="$RANLIB" \
+        CC="mpicc" \
+        CXX="mpicxx" \
+        FC="mpifort" \
+        CPPFLAGS="$CPPFLAGS" \
+        LDFLAGS="$LDFLAGS" \
+        --COPTFLAGS="$CFLAGS -O3" \
+        --CXXOPTFLAGS="$CXXFLAGS -O3" \
+        --FOPTFLAGS="$FFLAGS -O3" \
+        --with-clib-autodetect=0 \
+        --with-cxxlib-autodetect=0 \
         --with-x=0 \
         --with-ssl=0 \
-        --with-mpi-dir="$PREFIX" \
-        AR="$AR" \
-        RANLIB="$RANLIB" \
-        CFLAGS="$CFLAGS" \
-        CXXFLAGS="$CXXFLAGS" \
-        CPPFLAGS="$CPPFLAGS" \
-        FFLAGS="$FFLAGS" \
-        FCFLAGS="$FFLAGS" \
-        LDFLAGS="$LDFLAGS" \
-        --prefix="$PREFIX"/petsc
+        --prefix="${PREFIX}/moose-petsc"
 
     make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH all
     make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH install
@@ -59,21 +63,17 @@ function do_build(){
     if [[ "$(uname -m)" == 'arm64' ]] || [[ $(uname) == 'linux' ]]; then
         # set forth by MPI conda-forge package
         # shellcheck disable=SC2154
-        make SLEPC_DIR="$PREFIX"/petsc PETSC_DIR="$PREFIX"/petsc PETSC_ARCH="" check
+        make SLEPC_DIR="$PREFIX"/moose-petsc PETSC_DIR="$PREFIX"/moose-petsc PETSC_ARCH="" check
     fi
 }
 
-# Remove std=C++17 from CXXFLAGS as we specify the C++ dialect for PETSc as C++17 in
-# configure_petsc. Specifying both causes an error as of PETSc 3.17.
-CXXFLAGS=${CXXFLAGS//-std=c++[0-9][0-9]}
-
-# This linker argument leads to segmentation faults when testing MUMPS during PETSc
-# make check. We are not the only ones who have had problems with this option. See
-# https://gitlab.c3s.unito.it/enocera/nnpdf/-/issues/307
-LDFLAGS=${LDFLAGS//-Wl,-dead_strip_dylibs}
-
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR}/configure_petsc.sh"
+
+# unexport compiler variables to reduce warnings about config we know isn't used
+# (This doesn't unset variables, just prevents the export for subprocesses)
+export -n AR FC F90 F77 CC CXX CPP RANLIB
+export -n CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR:?}/retry_build.sh"
@@ -82,32 +82,34 @@ source "${SRC_DIR:?}/retry_build.sh"
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
 
+PETSC_DIR="${PREFIX}/moose-petsc"
+
 # Remove unneeded files
-rm -f "${PREFIX}"/petsc/lib/petsc/conf/configure-hash
-find "${PREFIX}"/petsc/lib/petsc -name '*.pyc' -delete
+rm -f "$PETSC_DIR"/lib/petsc/conf/configure-hash
+find "$PETSC_DIR"/lib/petsc -name '*.pyc' -delete
 
 # Replace ${BUILD_PREFIX} after installation
-grep -l "${BUILD_PREFIX}" -R "${PREFIX}/petsc/lib/petsc" | while IFS= read -r line; do
+grep -l "${BUILD_PREFIX}" -R "${PETSC_DIR}/lib/petsc" | while IFS= read -r line; do
   echo "Fixing ${BUILD_PREFIX} in $line"
   sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$line"
 done
 
 echo "Removing example files"
-du -hs "$PREFIX"/petsc/share/petsc/examples/src
-rm -fr "$PREFIX"/petsc/share/petsc/examples/src
+du -hs "$PETSC_DIR"/share/petsc/examples/src
+rm -fr "$PETSC_DIR"/share/petsc/examples/src
 echo "Removing data files"
-du -hs "$PREFIX"/petsc/share/petsc/datafiles/*
-rm -fr "$PREFIX"/petsc/share/petsc/datafiles
+du -hs "$PETSC_DIR"/share/petsc/datafiles/*
+rm -fr "$PETSC_DIR"/share/petsc/datafiles
 
 # Set PETSC_DIR environment variable for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export PETSC_DIR=${PREFIX}/petsc
-export PKG_CONFIG_PATH=${PREFIX}/petsc/lib/pkgconfig:\${PKG_CONFIG_PATH}
+export PETSC_DIR=$PETSC_DIR
+export PKG_CONFIG_PATH=${PETSC_DIR}/lib/pkgconfig:\${PKG_CONFIG_PATH}
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset PETSC_DIR
-export PKG_CONFIG_PATH=\${PKG_CONFIG_PATH%":${PREFIX}/petsc/lib/pkgconfig"}
+export PKG_CONFIG_PATH=\${PKG_CONFIG_PATH%":${PETSC_DIR}/lib/pkgconfig"}
 EOF
 
 ## TODO: the following is a partial requirement for the day we introduce pytorch

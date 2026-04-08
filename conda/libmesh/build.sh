@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eux
 export PATH=/bin:$PATH
-export PKG_CONFIG_PATH=${BUILD_PREFIX:?}/lib/pkgconfig:${PKG_CONFIG_PATH}
+LIBMESH_PREFIX="${PREFIX:?}/moose-libmesh"
 
 function set_libmesh_env(){
     unset LIBMESH_DIR CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS \
@@ -20,9 +20,7 @@ function set_libmesh_env(){
     fi
 
     PETSC_DIR="$(pkg-config PETSc --variable=prefix)"
-    LIBMESH_DIR="${PREFIX:?}/libmesh"
     export PETSC_DIR
-    export LIBMESH_DIR
     export F90=mpifort
     export F77=mpifort
     export FC=mpifort
@@ -39,29 +37,17 @@ function set_libmesh_env(){
 }
 
 function do_build(){
-    rm -rf "${LIBMESH_DIR:?}"
-    mkdir -p "${LIBMESH_DIR:?}/logs" "${SRC_DIR:?}/build"
+    rm -rf "$LIBMESH_PREFIX"
+    mkdir -p "${LIBMESH_PREFIX}/logs" "${SRC_DIR:?}/build"
     cd "${SRC_DIR:?}/build"
-    configure_libmesh --with-vtk-lib="${BUILD_PREFIX}"/libmesh-vtk/lib \
-                      --with-vtk-include="${BUILD_PREFIX}"/libmesh-vtk/include/vtk-"${VTK_VERSION}"
-    cp "${SRC_DIR:?}/build/config.log" "${LIBMESH_DIR:?}/logs/"
+    LIBMESH_DIR="$LIBMESH_PREFIX" configure_libmesh \
+        --with-vtk-lib="$VTKLIB_DIR" \
+        --with-vtk-include="$VTKINCLUDE_DIR"
+    cp "${SRC_DIR:?}/build/config.log" "${LIBMESH_PREFIX}/logs/"
     CORES=${MOOSE_JOBS:-6}
     set -o pipefail
-    make -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make.log"
-    make install -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make_install.log"
-}
-
-function sed_replace(){
-    if [ "$(uname)" = "Darwin" ]; then
-        sed -i '' -e "s|${BUILD_PREFIX}|${PREFIX}|g" "$PREFIX"/libmesh/bin/libmesh-config
-    else
-        sed -i'' -e "s|${BUILD_PREFIX}|${PREFIX}|g" "$PREFIX"/libmesh/bin/libmesh-config
-
-        # Fix hard paths to /usr/bin/ when most operating system want these tools in /bin
-        sed -i'' -e "s|/usr/bin/sed|/bin/sed|g" "$PREFIX"/libmesh/contrib/bin/libtool
-        sed -i'' -e "s|/usr/bin/grep|/bin/grep|g" "$PREFIX"/libmesh/contrib/bin/libtool
-        sed -i'' -e "s|/usr/bin/dd|/bin/dd|g" "$PREFIX"/libmesh/contrib/bin/libtool
-    fi
+    make -j "$CORES" 2>&1 | tee "${LIBMESH_PREFIX}/logs/make.log"
+    make install -j "$CORES" 2>&1 | tee "${LIBMESH_PREFIX}/logs/make_install.log"
 }
 
 # There are enough "things" we are doing to warrant it's own function
@@ -77,13 +63,23 @@ source "${SRC_DIR:?}/retry_build.sh"
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
 
-sed_replace
+# Replace prefix in configs
+if [ "$(uname)" = "Darwin" ]; then
+    sed -i '' -e "s|${BUILD_PREFIX}|${PREFIX}|g" "$LIBMESH_PREFIX"/bin/libmesh-config
+else
+    sed -i'' -e "s|${BUILD_PREFIX}|${PREFIX}|g" "$LIBMESH_PREFIX"/bin/libmesh-config
+
+    # Fix hard paths to /usr/bin/ when most operating system want these tools in /bin
+    sed -i'' -e "s|/usr/bin/sed|/bin/sed|g" "$LIBMESH_PREFIX"/contrib/bin/libtool
+    sed -i'' -e "s|/usr/bin/grep|/bin/grep|g" "$LIBMESH_PREFIX"/contrib/bin/libtool
+    sed -i'' -e "s|/usr/bin/dd|/bin/dd|g" "$LIBMESH_PREFIX"/contrib/bin/libtool
+fi
 
 # Set LIBMESH_DIR, Eigen3_DIR
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export LIBMESH_DIR=${PREFIX}/libmesh
-export Eigen3_DIR=${PREFIX}/libmesh/include/Eigen
+export LIBMESH_DIR=${LIBMESH_PREFIX}
+export Eigen3_DIR=${LIBMESH_PREFIX}/include/Eigen
 EOF
 # Unset previously set variables
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"

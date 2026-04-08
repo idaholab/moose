@@ -29,20 +29,27 @@ build:
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
+  run_exports:
+    - {{ pin_subpackage('moose-libmesh-vtk', exact=True) }}
 
 requirements:
   build:
-    - {{ mpi }}
-    - {{ moose_mpi }}
+    - {{ compiler("cxx") }}
+    - {{ stdlib("c") }}
+    - cmake
     - ninja
-  run:
+  host:
     - {{ mpi }}
-    - {{ moose_mpi }}
 
 test:
   commands:
-    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.dylib   # [osx]
-    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ vtk_friendly_version }}.so      # [linux]
+    - test $VTK_VERSION == {{ vtk_friendly_version }}
+    - test -d $VTKLIB_DIR
+    - test $VTKLIB_DIR == ${PREFIX}/moose-libmesh-vtk/lib
+    - test -d $VTKINCLUDE_DIR
+    - test $VTKINCLUDE_DIR == ${PREFIX}/moose-libmesh-vtk/include/vtk-${VTK_VERSION}
+    - test -f ${VTKLIB_DIR}/libvtkCommonCore-${VTK_VERSION}.dylib # [osx]
+    - test -f ${VTKLIB_DIR}/libvtkCommonCore-${VTK_VERSION}.so    # [linux]
 
 about:
   home: http://www.vtk.org/

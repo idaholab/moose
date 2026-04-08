@@ -29,26 +29,28 @@ build:
 
 requirements:
   build:
-    - {{ moose_petsc }}
-    - {{ moose_libmesh_vtk }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    - autoconf
+    - automake
+    - cmake
+    - make
     - pkg-config
-    - libpng
-    - zlib
-  run:
+  host:
     - {{ mpi }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
-    - pkg-config
-    - packaging
+    - _openmp_mutex
+    - hdf5 {{ hdf5 }}
+    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
+    - zlib
 
 test:
   commands:
-    - test -f $PREFIX/libmesh/lib/libmesh_opt.dylib     # [osx]
-    - test -f $PREFIX/libmesh/lib/libmesh_opt.so        # [linux]
-    - test -f $PREFIX/libmesh/lib/libmetaphysicl.dylib  # [osx]
-    - test -f $PREFIX/libmesh/lib/libmetaphysicl.so     # [linux]
-    - test -f $PREFIX/libmesh/lib/libtimpi_opt.dylib    # [osx]
-    - test -f $PREFIX/libmesh/lib/libtimpi_opt.so       # [linux]
+    - test $LIBMESH_DIR == ${PREFIX}/moose-libmesh
+    - mpiexec -n 1 ${LIBMESH_DIR}/bin/output_libmesh_version-opt
 
 about:
   home: http://libmesh.github.io/
