@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMMixedBilinearFormKernel.h"
 #include "MFEMComplexKernel.h"
 
 /**
@@ -32,29 +31,9 @@ public:
   virtual mfem::LinearFormIntegrator * getRealLFIntegrator() override { return nullptr; }
   virtual mfem::LinearFormIntegrator * getImagLFIntegrator() override { return nullptr; }
 
-  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() override
-  {
-    if (auto real_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(_real_kernel))
-      return _transpose ? new mfem::TransposeIntegrator(real_kernel->createMBFIntegrator())
-                        : real_kernel->createMBFIntegrator();
-    else
-      return nullptr;
-  }
-
-  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() override
-  {
-    if (auto imag_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(_imag_kernel))
-      return _transpose ? new mfem::TransposeIntegrator(imag_kernel->createMBFIntegrator())
-                        : imag_kernel->createMBFIntegrator();
-    else
-      return nullptr;
-  }
-
 protected:
   /// Name of the trial variable that the kernel is applied to.
   const VariableName _trial_var_name;
-  /// Bool controlling whether to add the transpose of the integrator to the system
-  bool _transpose;
 };
 
 #endif
