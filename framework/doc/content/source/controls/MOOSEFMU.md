@@ -128,16 +128,16 @@ The resulting `.fmu` file can then be imported into any standard-compliant co-si
 ### Testing the FMU
 
 Sample helper scripts in `test/tests/controls/moose_fmu` demonstrate how to exercise a
-generated FMU with [`fmpy`](https://github.com/CATIA-Systems/FMPy)and show the
+generated FMU with [`pyfmi`](https://github.com/modelon-community/PyFMI) and show the
 initialization parameters in context:
 
-- `run_fmu.py` runs `MooseTest.fmu` in a stand-alone mode using `simulate_fmu` and
+- `run_fmu.py` runs `MooseTest.fmu` in a stand-alone mode using manual `do_step` calls and
   prints the time, `moose_time` and `diffused` outputs.
 - `run_fmu_connection.py` shows how to couple `MooseTest.fmu` with another FMU (e.g.,
   `Dahlquist.fmu`) and change boundary conditions during the simulation.
 - `run_fmu_step_by_step.py` walks through the FMU initialization sequence
-  (`instantiate → setupExperiment → enterInitializationMode → apply_start_values →
-  exitInitializationMode`), making it clear where each start value is applied.
+  (`load_fmu → setup_experiment → enter_initialization_mode → set(...) →
+  exit_initialization_mode`), making it clear where each start value is applied.
 
 To try the examples:
 
@@ -146,4 +146,3 @@ cd test/tests/controls/moose_fmu
 python run_fmu.py               # stand‑alone Moose FMU
 python run_fmu_connection.py    # coupled FMUs example
 ```
-
