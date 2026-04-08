@@ -22,9 +22,9 @@ MFEMComplexVectorL2Error::validParams()
       "Computes L2 error $\\left\\Vert \\vec u_{ex} - \\vec u_{h}\\right\\Vert_{\\rm L2}$ for "
       "complex vector gridfunctions.");
   params.addParam<MFEMVectorCoefficientName>(
-      "function_real", "The analytic real part of the solution to compare against.");
+      "function_real", "The real part of the analytic solution to compare against.");
   params.addParam<MFEMVectorCoefficientName>(
-      "function_imag", "The analytic imaginary part of the solution to compare against.");
+      "function_imag", "The imaginary part of the analytic solution to compare against.");
   params.addParam<VariableName>(
       "variable", "Name of the vector variable of which to find the norm of the error.");
   return params;

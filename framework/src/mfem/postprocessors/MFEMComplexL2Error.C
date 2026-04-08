@@ -22,9 +22,9 @@ MFEMComplexL2Error::validParams()
       "Computes L2 error $\\left\\Vert u_{ex} - u_{h}\\right\\Vert_{\\rm L2}$ for "
       "complex gridfunctions using H1 or L2 elements.");
   params.addParam<MFEMScalarCoefficientName>(
-      "function_real", "The analytic real part of the solution to compare against.");
+      "function_real", "The real part of the analytic solution to compare against.");
   params.addParam<MFEMScalarCoefficientName>(
-      "function_imag", "The analytic imaginary part of the solution to compare against.");
+      "function_imag", "The imaginary part of the analytic solution to compare against.");
   params.addParam<VariableName>("variable",
                                 "Name of the variable of which to find the norm of the error.");
   return params;

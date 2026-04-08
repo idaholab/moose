@@ -15,7 +15,7 @@
 #include "MFEMGeneralUserObject.h"
 
 /**
- * Compute the L2 error for a variable.
+ * Compute the L2 error for a complex variable.
  */
 class MFEMComplexL2Error : public MFEMPostprocessor
 {
