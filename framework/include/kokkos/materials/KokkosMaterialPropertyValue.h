@@ -20,7 +20,8 @@ template <typename T, unsigned int dimension>
 KOKKOS_FUNCTION
 MaterialPropertyValueBase<T, dimension>::MaterialPropertyValueBase(
     const MaterialProperty<T, dimension> & property, const Datum & datum, const unsigned int qp)
-  : _idx(datum.propertyIdx(property._constant_option, qp)),
+  : _idx(property._default ? libMesh::invalid_uint
+                           : datum.propertyIdx(property._constant_option[datum.subdomain()], qp)),
     _data(property._default ? nullptr : &property._data[datum.subdomain()]),
     _value(property._value)
 {

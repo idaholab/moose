@@ -102,33 +102,50 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
       mooseError(ss.str());
     }
 
+  for (const auto other : record.declarers)
+    if (declarer->boundaryRestricted() && other->boundaryRestricted())
+    {
+      if (auto it = record.dims.begin(); it->second != dims)
+      {
+        std::stringstream ss;
+
+        ss << "The declared boundary-restricted Kokkos material property '" << prop_name << "'";
+        ss << " with dimensions (" << Moose::stringify(dims) << ")";
+        ss << " was already declared as a property";
+        ss << " with dimensions (" << Moose::stringify(it->second) << ").\n";
+        ss << "Currently, boundary-restricted Kokkos material properties should have the same "
+              "dimension size across the entire domain.";
+
+        mooseError(ss.str());
+      }
+
+      if (auto it = record.constant_option.begin(); it->second != constant_option)
+      {
+        static const std::unordered_map<PropertyConstantOption, std::string> option = {
+            {PropertyConstantOption::NONE, "NONE"},
+            {PropertyConstantOption::ELEMENT, "ELEMENT"},
+            {PropertyConstantOption::SUBDOMAIN, "SUBDOMAIN"}};
+
+        std::stringstream ss;
+        std::string adding = option.at(constant_option);
+        std::string existing = option.at(it->second);
+
+        ss << "The declared boundary-restricted Kokkos material property '" << prop_name << "'";
+        ss << " with constant_on = " << adding;
+        ss << " was already declared as a property";
+        ss << " with constant_on = " << existing << ".\n";
+        ss << "Currently, boundary-restricted Kokkos material properties should have the same "
+              "constant_on option across the entire domain.";
+
+        mooseError(ss.str());
+      }
+    }
+
   for (const auto block : blocks)
   {
-    auto it = record.dims.find(block);
-    if (it != record.dims.end() && it->second != dims)
-    {
-      std::stringstream ss;
-
-      ss << "The declared Kokkos material property '" << prop_name << "'";
-      ss << " with dimensions (" << Moose::stringify(dims) << ")";
-      ss << " was already declared as a property";
-      ss << " with dimensions (" << Moose::stringify(it->second) << ")";
-      if (!declarer->boundaryRestricted())
-      {
-        std::string name = _problem.mesh().getSubdomainName(block);
-        if (name.empty())
-          name = std::to_string(block);
-
-        ss << " on subdomain '" << name << "'";
-      }
-      ss << ".";
-
-      mooseError(ss.str());
-    }
-  }
-
-  for (const auto block : blocks)
     record.dims[block] = dims;
+    record.constant_option[block] = constant_option;
+  }
 
   if (record.declarers.size())
   {
@@ -138,18 +155,11 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
           prop_name,
           "' is being declared by multiple materials, and some of them are declaring it as an "
           "on-demand property while others are not.");
-
-    if (record.constant_option != constant_option)
-      mooseError(
-          "The Kokkos material property '",
-          prop_name,
-          "' is being declared by multiple materials with different 'constant_on' parameters.");
   }
   else
   {
     record.bnd = bnd;
     record.on_demand = on_demand;
-    record.constant_option = constant_option;
   }
 
   return addKokkosProperty(prop_name, type, 0, declarer, shell);

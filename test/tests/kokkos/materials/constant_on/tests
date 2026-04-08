@@ -26,7 +26,15 @@
       input = 'kokkos_constant_on_test.i'
       exodiff = 'kokkos_constant_on_test_out.e'
       cli_args = 'Materials/mat/constant_on=SUBDOMAIN'
-      detail = 'subdomains.'
+      detail = 'subdomains;'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [mixed]
+      type = 'Exodiff'
+      input = 'kokkos_mixed_constant_on_test.i'
+      exodiff = 'kokkos_constant_on_test_out.e'
+      detail = 'quadrature points, elements, and subdomains at the same time on different subdomains.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []

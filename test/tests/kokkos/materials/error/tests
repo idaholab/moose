@@ -60,12 +60,20 @@
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
-    [different_dim_size_overlap]
+    [bnd_overlap_different_dim_size]
       type = RunException
-      input = 'kokkos_multid.i'
-      expect_err = 'The declared Kokkos material property \'prop_a\' with dimensions \(2\) was already declared as a property with dimensions \(1\) on subdomain \'10\'.'
-      cli_args = 'Materials/active=\'left_real_1D right_real_1D\' Materials/left_real_1D/block=\'0 10\''
-      detail = 'the same material property was declared by different overlapping materials with different size of dimensions.'
+      input = 'kokkos_overlap_bnd.i'
+      expect_err = 'The declared boundary-restricted Kokkos material property \'prop\' with dimensions \(2\) was already declared as a property with dimensions \(1\).'
+      detail = 'the same material property was declared by different overlapping boundary-restricted materials with different size of dimensions'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [bnd_overlap_different_constant_on]
+      type = RunException
+      input = 'kokkos_overlap_bnd.i'
+      expect_err = 'The declared boundary-restricted Kokkos material property \'prop\' with constant_on = ELEMENT was already declared as a property with constant_on = NONE.'
+      cli_args = 'Materials/mat2/dims=1 Materials/mat2/constant_on=ELEMENT'
+      detail = 'the same material property was declared by different overlapping boundary-restricted materials with different constant_on options'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
