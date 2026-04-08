@@ -24,7 +24,6 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "u_forcing; v_forcing"
   []
 []
 
@@ -141,6 +140,9 @@ advected_interp_method = 'average'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
