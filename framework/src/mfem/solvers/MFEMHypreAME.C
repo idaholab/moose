@@ -28,11 +28,11 @@ MFEMHypreAME::validParams()
 MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
   : MFEMEigensolverBase(parameters), _coef(getScalarCoefficient("coefficient"))
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreAME::constructSolver(const InputParameters &)
+MFEMHypreAME::constructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreAME>(getMFEMProblem().getComm());
 

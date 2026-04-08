@@ -28,11 +28,11 @@ MFEMHypreLOBPCG::validParams()
 MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
   : MFEMEigensolverBase(parameters), _coef(getScalarCoefficient("coefficient"))
 {
-  constructSolver(parameters);
+  constructSolver();
 }
 
 void
-MFEMHypreLOBPCG::constructSolver(const InputParameters &)
+MFEMHypreLOBPCG::constructSolver()
 {
   _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
 
