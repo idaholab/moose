@@ -23,7 +23,7 @@ Common use cases are:
   - Timing information
   - Solver properties
 
-`PostProcessor` values are output in a table to screen and can also be output per timestep and optionally iteration to a CSV file.
+`PostProcessor` values are output in a table to screen and can also be output per timestep (and even per iteration) to a CSV file.
 
 !---
 

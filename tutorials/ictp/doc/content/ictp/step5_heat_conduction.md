@@ -53,8 +53,6 @@ We will also use an [`AuxVariable`](AuxVariables/index.md) named `T_fluid` to de
 
 ## Run: Solid Heat Conduction
 
-!---
-
 ```bash
 $ cd ../step5_heat_conduction
 $ cardinal-opt -i solid.i
@@ -121,6 +119,8 @@ The material properties are as follows:
 ## Input: Fluid Heat Conduction
 
 !listing ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step5_heat_conduction
+
+!---
 
 ## Run: Fluid Heat Conduction
 

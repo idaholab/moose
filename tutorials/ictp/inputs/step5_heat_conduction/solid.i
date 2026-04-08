@@ -40,13 +40,13 @@
   [fuel]
     type = GenericConstantMaterial
     prop_names = 'k cp rho'
-    prop_values = '2 3100 10700' # [W/m*K], [W/K*kg], [kg/m3]
+    prop_values = '2 3100 10700' # [W/(m-K)], [J/(kg-K)], [kg/m^3]
     block = fuel
   []
   [clad]
     type = GenericConstantMaterial
     prop_names = 'k cp rho'
-    prop_values = '10 2800 5400' # [W/m*K], [W/K*kg], [kg/m3]
+    prop_values = '10 2800 5400' # [W/(m-K)], [J/(kg-K)], [kg/m^3]
     block = clad
   []
 []

@@ -18,7 +18,7 @@
   boundary_heat_fluxes = flux_from_solid # [W/m2]
 
   # Evacuate heat at the outer boundary
-  # with a prescribed temperature of 300K
+  # with a prescribed temperature of 300 K
   fixed_temperature_boundaries = outer
   boundary_temperatures = 300 # [K]
 

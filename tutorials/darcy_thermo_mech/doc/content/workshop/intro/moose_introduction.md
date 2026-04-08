@@ -76,8 +76,8 @@
 
 ## Software Quality
 
-- Follows an Nuclear Quality Assurance Level 1 (NQA-1) development process
-- All changes undergo independent review using and must pass regression tests before merge
+- Follows a Nuclear Quality Assurance Level 1 (NQA-1) development process
+- All changes undergo independent review and must pass regression tests before merge
 - Includes a test suite and documentation system to allow for agile development while maintaining a NQA-1 process
 - **External contributions are guided through the process by the team, and are very welcome!**
 
