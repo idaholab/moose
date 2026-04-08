@@ -78,7 +78,6 @@ test:
     - ruff --version
   imports:
     - bs4
-    - deepdiff
     - pyfmi
     - coverage
     - deepdiff
