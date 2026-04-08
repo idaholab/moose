@@ -1,6 +1,6 @@
 [Tests]
   design = 'HSCoupler2D3D.md'
-  issues = '#23059 #27830'
+  issues = '#23059 #27830 #32729'
 
   [check_input_mesh]
     type = RunApp
@@ -43,6 +43,30 @@
       exodiff = convection_only.e
       restep = false # Test is prescribed to abort on failed timestep
       detail = 'using convection only.'
+    []
+  []
+
+  [symmetry_reduction]
+    requirement = 'The system shall correctly scale heat flux when the 3D mesh covers only a '
+                  'fraction of the full azimuthal range'
+    [check_input_mesh_quarter]
+      type = RunApp
+      input = mesh.i
+      cli_args = '--mesh-only mesh_quarter.e
+                  n_elems_azimuthal=5
+                  Mesh/ring/dmax=90'
+      recover = False
+      detail = 'and the quarter-cylinder mesh input is valid.'
+    []
+    [quarter_explicit]
+      type = Exodiff
+      input = hs_coupler_2d3d.i
+      cli_args = "Components/hs3d/file=mesh/mesh_quarter.e
+                  Components/hs_coupler/symmetry_factor=4
+                  Outputs/file_base=quarter_explicit"
+      exodiff = quarter_explicit.e
+      restep = false
+      detail = 'using a quarter-cylinder 3D mesh with explicit symmetry_factor=4.'
     []
   []
 

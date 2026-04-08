@@ -41,6 +41,11 @@ HSCoupler2D3D::validParams()
       "Gap thermal conductivity [W/(m-K)] as a function of temperature [K]");
   params.addParam<FunctionName>(
       "gap_htc", 0, "Gap heat transfer coefficient [W/(m^2-K)] as a function of temperature [K]");
+  params.addRangeCheckedParam<Real>("symmetry_factor",
+                                    1.0,
+                                    "symmetry_factor>=1.0",
+                                    "Azimuthal symmetry correction factor (>= 1.0). Equal to 2*pi "
+                                    "divided by the azimuthal angle covered by the 3D mesh.");
 
   params.addClassDescription("Couples a 2D heat structure boundary to a 3D heat structure boundary "
                              "using gap heat transfer.");
@@ -55,6 +60,7 @@ HSCoupler2D3D::HSCoupler2D3D(const InputParameters & parameters)
     _hs_name_3d(getParam<std::string>("heat_structure_3d")),
     _boundary_2d(getParam<BoundaryName>("boundary_2d")),
     _boundary_3d(getParam<BoundaryName>("boundary_3d")),
+    _symmetry_factor(getParam<Real>("symmetry_factor")),
 
     _mesh_alignment(constMesh())
 {
@@ -177,6 +183,7 @@ HSCoupler2D3D::addMooseObjects()
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary_3d};
     params.set<std::vector<VariableName>>("temperature") = {HeatConductionModel::TEMPERATURE};
     params.set<Real>("radius_2d") = radius_2d;
+    params.set<Real>("symmetry_factor") = _symmetry_factor;
     if (getParam<bool>("include_radiation"))
     {
       params.set<FunctionName>("emissivity_2d") = getParam<FunctionName>("emissivity_2d");

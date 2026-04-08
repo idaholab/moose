@@ -42,6 +42,11 @@ HSCoupler2D3DUserObject::validParams()
       "temperature_2d_uo",
       "StoreVariableByElemIDSideUserObject containing the temperature values on the 2D boundary");
   params.addRequiredParam<MeshAlignment2D3D *>("mesh_alignment", "Mesh alignment object");
+  params.addRangeCheckedParam<Real>("symmetry_factor",
+                                    1.0,
+                                    "symmetry_factor>=1.0",
+                                    "Azimuthal symmetry correction factor (>= 1.0). Equal to 2*pi "
+                                    "divided by the azimuthal angle covered by the 3D mesh.");
 
   params.addClassDescription("Computes heat fluxes for HSCoupler2D3D.");
 
@@ -60,7 +65,8 @@ HSCoupler2D3DUserObject::HSCoupler2D3DUserObject(const InputParameters & paramet
     _k_gap_fn(getFunction("gap_thermal_conductivity")),
     _htc_gap_fn(getFunction("gap_htc")),
     _temperature_2d_uo(getUserObject<StoreVariableByElemIDSideUserObject>("temperature_2d_uo")),
-    _mesh_alignment(*getParam<MeshAlignment2D3D *>("mesh_alignment"))
+    _mesh_alignment(*getParam<MeshAlignment2D3D *>("mesh_alignment")),
+    _symmetry_factor(getParam<Real>("symmetry_factor"))
 {
   _mesh_alignment.buildCoupledElemQpIndexMapSecondary(_assembly);
 }
@@ -118,7 +124,8 @@ HSCoupler2D3DUserObject::execute()
     }
 
     heat_flux_3d[qp_3d] = heat_flux;
-    heat_flux_2d[qp_2d] -= _JxW[qp_3d] * _coord[qp_3d] * heat_flux / area_2d[qp_2d];
+    heat_flux_2d[qp_2d] -=
+        _symmetry_factor * _JxW[qp_3d] * _coord[qp_3d] * heat_flux / area_2d[qp_2d];
   }
 
   // Store values in maps

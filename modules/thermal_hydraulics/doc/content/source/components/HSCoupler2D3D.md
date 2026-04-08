@@ -11,12 +11,14 @@ Heat fluxes are computed at each quadrature point of each face on the 3D heat
 structure boundary. These heat fluxes then make contributions to the 2D heat structure side:
 
 !equation
-q_z = -\frac{1}{A_z} \sum\limits_\theta q_{z,\theta} A_{z,\theta} \,,
+q_z = -\frac{f}{A_z} \sum\limits_\theta q_{z,\theta} A_{z,\theta} \,,
 
 where
 
 - $q_z$ is the heat flux on the 2D heat structure boundary at the
   quadrature point at the axial level $z$,
+- $f$ is the symmetry factor, which is 1 for a full 360 degree 3D mesh
+  and is $2\pi / \Delta \theta$ for a sector model with azimuthal extent $\Delta \theta$,
 - $q_{z,\theta}$ is the heat flux on the 3D heat structure boundary at
   a quadrature point at the same axial level $z$ and having an azimuthal position
   $\theta$,
@@ -144,6 +146,9 @@ The parameters [!param](/Components/HSCoupler2D3D/heat_structure_2d) and
 2D and 3D heat structures, respectively. [!param](/Components/HSCoupler2D3D/boundary_2d)
 and [!param](/Components/HSCoupler2D3D/boundary_3d) specify a single boundary
 corresponding to each heat structure, at which the heat exchange occurs.
+
+The parameter [!param](/Components/HSCoupler2D3D/symmetry_factor) specifies the symmetry
+factor $f$ used in the heat flux calculation.
 
 The parameters [!param](/Components/HSCoupler2D3D/emissivity_2d),
 [!param](/Components/HSCoupler2D3D/emissivity_3d),
