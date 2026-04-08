@@ -19,4 +19,14 @@ CSGUniverseEngUnit::CSGUniverseEngUnit(const std::string & name,
 {
 }
 
+const CSGUniverse &
+CSGUniverseEngUnit::getExpandedUniverse() const
+{
+  if (!_expanded_universe)
+    mooseError("getExpandedUniverse() cannot be called on CSGUniverseEngUnit '",
+               getName(),
+               "' before expandUnit() has been called.");
+  return *_expanded_universe;
+}
+
 } // namespace CSG

@@ -34,7 +34,7 @@ class CSGBase;
  *   - evaluateSurfaceEquationAtPoint() — returns the maximum plane evaluation over
  *     all N sides; negative means the point is inside, positive means outside
  *   - clone() — returns a deep copy
- *   - getAttributes() — returns n_sides, apothem, x_center, y_center, rotation_deg
+ *   - getAttributes() — returns n_sides, apothem
  */
 class CSGNPolygonUnit : public CSGSurfaceEngUnit
 {
@@ -45,11 +45,8 @@ public:
    * @param name unique name of the unit
    * @param n_sides number of sides of the regular polygon (must be >= 3)
    * @param apothem distance from the center to the midpoint of each side
-   * @param x0 x-coordinate of the polygon center (default 0.0)
-   * @param y0 y-coordinate of the polygon center (default 0.0)
    */
-  CSGNPolygonUnit(
-      const std::string & name, unsigned int n_sides, Real apothem, Real x0 = 0.0, Real y0 = 0.0);
+  CSGNPolygonUnit(const std::string & name, unsigned int n_sides, Real apothem);
 
   /**
    * @brief Evaluate the polygon's surface equation at the given point.
@@ -81,7 +78,7 @@ protected:
    */
   std::unique_ptr<CSGSurface> clone() const override
   {
-    return std::make_unique<CSGNPolygonUnit>(_name, _n_sides, _apothem, _x_center, _y_center);
+    return std::make_unique<CSGNPolygonUnit>(_name, _n_sides, _apothem);
   }
 
   /**
@@ -93,28 +90,12 @@ protected:
    */
   void expandUnit(CSGBase & base) override;
 
-  /**
-   * @brief Return the intersection of the N negative half-spaces of the expanded planes.
-   *
-   * Called by CSGBase immediately after expandUnit(). The returned region represents
-   * the interior of the polygon.
-   *
-   * @return CSGRegion representing the polygon interior
-   */
-  CSGRegion getExpandedRegion() const override;
-
 private:
   /// Number of sides of the regular polygon
   const unsigned int _n_sides;
 
   /// Distance from the polygon center to the midpoint of each side
   const Real _apothem;
-
-  /// x-coordinate of the polygon center
-  const Real _x_center;
-
-  /// y-coordinate of the polygon center
-  const Real _y_center;
 
   /// Pointers to the expanded plane surfaces, populated during expandUnit()
   std::vector<const CSGSurface *> _planes;

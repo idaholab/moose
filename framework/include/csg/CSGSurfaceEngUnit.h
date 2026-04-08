@@ -29,10 +29,10 @@ class CSGBase; // forward declaration
  * the basic CSGSurface components.
  *
  * Derived classes must implement:
- *   - expandUnit(CSGBase &) — construct the equivalent CSGSurface(s) that are required
- *     for defining the unit in basic CSG components and add them to CSGBase.
- *   - getExpandedRegion() — return the CSGRegion formed by the surfaces built during
- *     expandUnit().
+ *   - expandUnit(CSGBase &) — construct the equivalent CSGSurface(s) and CSGRegion formed
+ *     by the surfaces that are required for defining the unit in basic CSG components and
+ *     add them to CSGBase. The created CSGRegion should be a non-empty region that is
+ *     assigned to _expanded_region such that it can be returned by getExpandedRegion().
  *   - evaluateSurfaceEquationAtPoint() - must implement a method to be able to pass a
  *     value to CSGSurface::getHalfspaceFromPoint() which will inform wether a point is
  *     in the positive or negative "half-space" of this "surface."
@@ -115,22 +115,31 @@ protected:
   void expandUnit(CSGBase & base) override = 0;
 
   /**
-   * @brief Return the CSGRegion formed by expanded CSGSurfaces. This region should
-   * represent the "NEGATIVE" half-space of the original engineering unit.
+   * @brief Return the CSGRegion formed by the expanded CSGSurfaces.
    *
-   * Called by CSGBase immediately after expandUnit(). The derived class must store any
-   * surface pointers returned by base.addSurface() during expandUnit() and use them here
-   * to build the region.
+   * Checks that expandUnit() has already been called (via _expanded_region)
+   * before returning the stored result. Throws if called before expansion.
    *
    * @return CSGRegion representing the negative halfspace of the surface engineering unit
    */
-  virtual CSGRegion getExpandedRegion() const = 0;
+  CSGRegion getExpandedRegion() const;
 
   /// clone() is pure virtual — derived classes must implement
   std::unique_ptr<CSGSurface> clone() const override = 0;
 
-  // Only CSGBase should be calling expandUnit() and getExpansionRegion()
+  /// Stores the result of expandUnit(); EMPTY until then
+  CSGRegion _expanded_region;
+
+  // Only CSGBase should be calling expandUnit(), doGetExpandedRegion(), and setting
+  // _expanded_region
   friend class CSGBase;
+
+#ifdef MOOSE_UNIT_TEST
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGEngUnitTest, testSurfUnit);
+  ///@}
+#endif
 };
 
 } // namespace CSG
