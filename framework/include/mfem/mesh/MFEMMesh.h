@@ -20,6 +20,8 @@
 class MFEMMesh : public FileMesh
 {
 public:
+  struct RestartableParMeshState;
+
   static InputParameters validParams();
 
   MFEMMesh(const InputParameters & parameters);
@@ -42,7 +44,14 @@ public:
   /**
    * Build MFEM ParMesh and a placeholder MOOSE mesh.
    */
+  void init() override;
   void buildMesh() override;
+
+  /**
+   * Serialize or restore the MFEM parallel mesh through restartable data.
+   */
+  void storeRestartableParMesh(std::ostream & stream) const;
+  void loadRestartableParMesh(std::istream & stream);
 
   /**
    * Clones the mesh.
@@ -96,6 +105,8 @@ private:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
+
+  RestartableParMeshState & _restartable_par_mesh_state;
 };
 
 inline const mfem::ParMesh &

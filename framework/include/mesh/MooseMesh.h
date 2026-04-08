@@ -1557,6 +1557,8 @@ public:
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
 protected:
+  bool recoveryAllowed() const { return _allow_recovery; }
+
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
 

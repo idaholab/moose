@@ -10,9 +10,35 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMesh.h"
+#include "MooseApp.h"
 #include "libmesh/mesh_generation.h"
 
+namespace
+{
+using RestartableParMeshState = MFEMMesh::RestartableParMeshState;
+}
+
+template <>
+void
+dataStore(std::ostream & stream, RestartableParMeshState & /*data*/, void * context)
+{
+  mooseAssert(context, "Missing MFEM mesh context for restartable storage");
+  static_cast<MFEMMesh *>(context)->storeRestartableParMesh(stream);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, RestartableParMeshState & /*data*/, void * context)
+{
+  mooseAssert(context, "Missing MFEM mesh context for restartable loading");
+  static_cast<MFEMMesh *>(context)->loadRestartableParMesh(stream);
+}
+
 registerMooseObject("MooseApp", MFEMMesh);
+
+struct MFEMMesh::RestartableParMeshState
+{
+};
 
 InputParameters
 MFEMMesh::validParams()
@@ -43,9 +69,42 @@ MFEMMesh::validParams()
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters)
+  : FileMesh(parameters),
+    _restartable_par_mesh_state(
+        declareRestartableDataWithContext<RestartableParMeshState>("mfem_par_mesh_state", this))
+{
+}
 
 MFEMMesh::~MFEMMesh() {}
+
+void
+MFEMMesh::init()
+{
+  if (!_mesh)
+    _mesh = buildMeshBaseObject();
+
+  if (_app.isSplitMesh() && _use_distributed_mesh)
+    mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
+
+  TIME_SECTION("init", 2);
+
+  if ((_app.isRecovering() || _app.isRestarting() || _app.hasInitialBackup()) &&
+      recoveryAllowed())
+  {
+    buildDummyMooseMesh();
+
+    if (!_app.restoreRestartableDataEarly(restartableName("mfem_par_mesh_state")))
+      mooseError("Unable to restore MFEM mesh restartable data '",
+                 restartableName("mfem_par_mesh_state"),
+                 "'.");
+
+    if (isParamSetByUser("displacement"))
+      _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+  }
+  else
+    MooseMesh::init();
+}
 
 void
 MFEMMesh::buildMesh()
@@ -93,6 +152,19 @@ MFEMMesh::buildMesh()
 
   if (isParamSetByUser("displacement"))
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+}
+
+void
+MFEMMesh::storeRestartableParMesh(std::ostream & stream) const
+{
+  mooseAssert(_mfem_par_mesh, "MFEM parallel mesh is not initialized");
+  _mfem_par_mesh->ParPrint(stream);
+}
+
+void
+MFEMMesh::loadRestartableParMesh(std::istream & stream)
+{
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), stream);
 }
 
 void
