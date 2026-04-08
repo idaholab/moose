@@ -52,44 +52,40 @@ AdvancedExtruderGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  MooseEnum radial_growth_methods("LINEAR CUBIC", "LINEAR");
-
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
-
   params.addClassDescription(
-      "Extrudes a 1D mesh into 2D, or a 2D mesh into 3D, can have a variable height for each "
+      "Extrudes a 1D mesh into 2D, or a 2D mesh into 3D, and supports a variable height for each "
       "elevation, variable number of layers within each elevation, variable growth factors of "
       "axial element sizes within each elevation and remap subdomain_ids, boundary_ids and element "
       "extra integers within each elevation as well as interface boundaries between neighboring "
-      "elevation layers.");
+      "elevation layers, as well as following a 1D curve and modifying the radial (normal to "
+      "the extrusion axis) extent of the geometry.");
 
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
+
+  // User input of extrusion heights / axial discretization
   params.addParam<std::vector<Real>>("heights", {}, "The height of each elevation");
-
   params.addRangeCheckedParam<std::vector<Real>>(
       "biases", "biases>0.0", "The axial growth factor used for mesh biasing for each elevation.");
-
   params.addParam<std::vector<unsigned int>>(
       "num_layers",
       {},
       "The number of layers for each elevation - must be num_elevations in length!");
 
+  // Swaps on every height
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "subdomain_swaps",
       {},
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the subdomains for that elevation");
-
   params.addParam<std::vector<std::vector<boundary_id_type>>>(
       "boundary_swaps",
       {},
       "For each row, every two entries are interpreted as a pair of "
       "'from' and 'to' to remap the boundaries for that elevation");
-
   params.addParam<std::vector<std::string>>(
       "elem_integer_names_to_swap",
       {},
       "Array of element extra integer names that need to be swapped during extrusion.");
-
   params.addParam<std::vector<std::vector<std::vector<dof_id_type>>>>(
       "elem_integers_swaps",
       {},
@@ -98,6 +94,7 @@ AdvancedExtruderGenerator::validParams()
       "swapped, the enties are stacked based on the order provided in "
       "'elem_integer_names_to_swap' to form the third dimension.");
 
+  // Direction parameter
   params.addParam<Point>("direction",
                          "A vector that points in the direction to extrude (note, this will be "
                          "normalized internally - so don't worry about it here)");
@@ -113,32 +110,24 @@ AdvancedExtruderGenerator::validParams()
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
 
+  // Boundaries and interfaces
   params.addParam<BoundaryName>(
       "top_boundary",
       "The boundary name to set on the top boundary. If omitted an ID will be generated.");
-
   params.addParam<BoundaryName>(
       "bottom_boundary",
       "The boundary name to set on the bottom boundary. If omitted an ID will be generated.");
-
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "upward_boundary_source_blocks", "Block ids used to generate upward interface boundaries.");
-
   params.addParam<std::vector<std::vector<boundary_id_type>>>("upward_boundary_ids",
                                                               "Upward interface boundary ids.");
-
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "downward_boundary_source_blocks",
       "Block ids used to generate downward interface boundaries.");
-
   params.addParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids",
                                                               "Downward interface boundary ids.");
-  params.addParamNamesToGroup(
-      "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
-      "downward_boundary_source_blocks downward_boundary_ids",
-      "Boundary Assignment");
-  params.addParamNamesToGroup(
-      "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
+
+  // Radial transformations
   params.addParam<Real>("twist_pitch",
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
@@ -150,6 +139,18 @@ AdvancedExtruderGenerator::validParams()
                              "Functional form to change radius while extruding along curve.");
   params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
+
+  params.addParamNamesToGroup(
+      "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
+      "downward_boundary_source_blocks downward_boundary_ids",
+      "Boundary Assignment");
+  params.addParamNamesToGroup(
+      "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
+  params.addParamNamesToGroup("extrusion_curve start_extrusion_direction end_extrusion_direction",
+                              "Extrusion along curve");
+  params.addParamNamesToGroup("twist_pitch r_final radial_growth_method "
+                              "start_radial_growth_rate end_radial_growth_rate",
+                              "Radial transformation");
 
   return params;
 }
