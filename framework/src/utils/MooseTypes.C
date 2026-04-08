@@ -85,3 +85,10 @@ DerivativeStringToJSON(NonlinearSystemName);
 DerivativeStringToJSON(LinearSystemName);
 DerivativeStringToJSON(SolverSystemName);
 DerivativeStringToJSON(CLIArgString);
+#ifdef MOOSE_MFEM_ENABLED
+DerivativeStringToJSON(MFEMScalarCoefficientName);
+DerivativeStringToJSON(MFEMVectorCoefficientName);
+DerivativeStringToJSON(MFEMMatrixCoefficientName);
+DerivativeStringToJSON(MFEMFESpaceName);
+DerivativeStringToJSON(MFEMSolverName);
+#endif

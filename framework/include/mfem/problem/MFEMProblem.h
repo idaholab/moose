@@ -21,9 +21,19 @@
 class MFEMProblem : public ExternalProblem
 {
 public:
+  /**
+   * Return the input parameters used to construct an MFEM problem.
+   */
   static InputParameters validParams();
 
+  /**
+   * Construct an MFEM problem from the supplied parameters.
+   */
   MFEMProblem(const InputParameters & params);
+
+  /**
+   * Destroy the MFEM problem.
+   */
   virtual ~MFEMProblem() {}
 
   virtual void initialSetup() override;
@@ -166,6 +176,9 @@ public:
                    const std::string & name,
                    InputParameters & parameters) override;
 
+  /**
+   * Add an MFEM initial condition to the problem.
+   */
   void addInitialCondition(const std::string & ic_name,
                            const std::string & name,
                            InputParameters & parameters) override;
@@ -179,6 +192,9 @@ public:
                         const std::string & name,
                         InputParameters & parameters) override;
 
+  /**
+   * Add a vector postprocessor and register its vectors with the MFEM execution system.
+   */
   void addVectorPostprocessor(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters) override;
@@ -221,6 +237,9 @@ public:
                               mfem::real_t nl_rel_tol,
                               unsigned int print_level);
 
+  /**
+   * Execute MFEM executed objects scheduled on the supplied execute flag.
+   */
   void executeMFEMObjects(const ExecFlagType & exec_type);
 
   /**
@@ -242,6 +261,10 @@ public:
    * current data specifying the FE problem.
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
+
+  /**
+   * Return the current MFEM problem data in a const context.
+   */
   const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
@@ -319,22 +342,37 @@ public:
     return _problem_data.cmplx_gridfunctions.GetShared(name);
   }
 
+  /**
+   * Retrieve an MFEM object from the warehouse by system and name.
+   */
   template <typename T>
   T & getMFEMObject(const std::string & system,
                     const std::string & name,
                     const THREAD_ID tid = 0) const;
 
+  /**
+   * Determine whether an MFEM object with the supplied system and name exists.
+   */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
 
+  /**
+   * Enumerates the supported numeric representations for MFEM variables and operators.
+   */
   enum class NumericType
   {
     REAL,
     COMPLEX
   };
 
+  /**
+   * The numeric representation currently active for this problem.
+   */
   NumericType num_type;
 
 protected:
+  /**
+   * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
+   */
   MFEMProblemData _problem_data;
 };
 
@@ -353,6 +391,7 @@ MFEMProblem::getMFEMObject(const std::string & system,
       .queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find MFEM object with system '" + system + "' and name '" + name + "'");
+  mooseAssert(objs.size() == 1, "Shouldn't find more than one object with given system and name");
   return *(objs[0]);
 }
 

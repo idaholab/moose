@@ -20,7 +20,7 @@ MFEMHypreADS::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space divergence solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
-  params.addParam<UserObjectName>("fespace", "H(div) FESpace to use in HypreADS setup.");
+  params.addParam<MFEMFESpaceName>("fespace", "H(div) FESpace to use in HypreADS setup.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
 
   return params;
@@ -29,7 +29,7 @@ MFEMHypreADS::validParams()
 MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
     _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                              getParam<UserObjectName>("fespace")))
+                                                              getParam<MFEMFESpaceName>("fespace")))
 {
   constructSolver();
 }

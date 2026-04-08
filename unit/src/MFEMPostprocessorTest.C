@@ -36,11 +36,11 @@ public:
     NDFE_params.set<MooseEnum>("fec_type") = "ND";
     _mfem_problem->addFESpace("MFEMVectorFESpace", "ND_vector", NDFE_params);
     InputParameters scalar_params = _factory.getValidParams("MFEMVariable");
-    scalar_params.set<UserObjectName>("fespace") = "H1_scalar";
+    scalar_params.set<MFEMFESpaceName>("fespace") = "H1_scalar";
     _mfem_problem->addVariable("MFEMVariable", "scalar_var", scalar_params);
     _scalar_var = _mfem_problem->getProblemData().gridfunctions.Get("scalar_var");
     InputParameters vector_params = _factory.getValidParams("MFEMVariable");
-    vector_params.set<UserObjectName>("fespace") = "ND_vector";
+    vector_params.set<MFEMFESpaceName>("fespace") = "ND_vector";
     _mfem_problem->addVariable("MFEMVariable", "vector_var", vector_params);
     _vector_var = _mfem_problem->getProblemData().gridfunctions.Get("vector_var");
   }

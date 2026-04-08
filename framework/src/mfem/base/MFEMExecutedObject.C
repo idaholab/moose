@@ -28,11 +28,9 @@ MFEMExecutedObject::validParams()
 MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
   : MFEMObject(parameters), SetupInterface(this), DependencyResolverInterface()
 {
-  const auto & param_names =
-      parameters.get<std::vector<std::string>>("_mfem_dependency_param_names");
-  const auto & kinds = parameters.get<std::vector<unsigned char>>("_mfem_dependency_param_kinds");
-  const auto & is_vector_flags =
-      parameters.get<std::vector<bool>>("_mfem_dependency_param_is_vector");
+  const auto & param_names = getParam<std::vector<std::string>>("_mfem_dependency_param_names");
+  const auto & kinds = getParam<std::vector<unsigned char>>("_mfem_dependency_param_kinds");
+  const auto & is_vector_flags = getParam<std::vector<bool>>("_mfem_dependency_param_is_vector");
 
   mooseAssert(param_names.size() == kinds.size() && kinds.size() == is_vector_flags.size(),
               "MFEM dependency parameter metadata size mismatch");
@@ -64,56 +62,63 @@ MFEMExecutedObject::producedVectorPostprocessorNames() const
 const std::set<std::string> &
 MFEMExecutedObject::getRequestedItems()
 {
-  _requested_items.clear();
+  if (_requested_items)
+    return *_requested_items;
+
+  _requested_items.emplace();
 
   for (const auto & dep : _dependency_params)
   {
+    if (!isParamValid(dep.param_name))
+      continue;
+
     switch (dep.kind)
     {
       case DependencyKind::Variable:
         if (dep.is_vector)
-          for (const auto & name : parameters().get<std::vector<VariableName>>(dep.param_name))
-            _requested_items.insert(variableDependencyKey(name));
+          for (const auto & name : getParam<std::vector<VariableName>>(dep.param_name))
+            _requested_items->insert(variableDependencyKey(name));
         else
-          _requested_items.insert(
-              variableDependencyKey(parameters().get<VariableName>(dep.param_name)));
+          _requested_items->insert(variableDependencyKey(getParam<VariableName>(dep.param_name)));
         break;
       case DependencyKind::Postprocessor:
         if (dep.is_vector)
-          for (const auto & name : parameters().get<std::vector<PostprocessorName>>(dep.param_name))
-            _requested_items.insert(postprocessorDependencyKey(name));
+          for (const auto & name : getParam<std::vector<PostprocessorName>>(dep.param_name))
+            _requested_items->insert(postprocessorDependencyKey(name));
         else
-          _requested_items.insert(
-              postprocessorDependencyKey(parameters().get<PostprocessorName>(dep.param_name)));
+          _requested_items->insert(
+              postprocessorDependencyKey(getParam<PostprocessorName>(dep.param_name)));
         break;
       case DependencyKind::VectorPostprocessor:
         if (dep.is_vector)
-          for (const auto & name :
-               parameters().get<std::vector<VectorPostprocessorName>>(dep.param_name))
-            _requested_items.insert(vectorPostprocessorDependencyKey(name));
+          for (const auto & name : getParam<std::vector<VectorPostprocessorName>>(dep.param_name))
+            _requested_items->insert(vectorPostprocessorDependencyKey(name));
         else
-          _requested_items.insert(vectorPostprocessorDependencyKey(
-              parameters().get<VectorPostprocessorName>(dep.param_name)));
+          _requested_items->insert(
+              vectorPostprocessorDependencyKey(getParam<VectorPostprocessorName>(dep.param_name)));
         break;
     }
   }
 
-  return _requested_items;
+  return *_requested_items;
 }
 
 const std::set<std::string> &
 MFEMExecutedObject::getSuppliedItems()
 {
-  _supplied_items.clear();
+  if (_supplied_items)
+    return *_supplied_items;
+
+  _supplied_items.emplace();
 
   for (const auto & name : producedVariableNames())
-    _supplied_items.insert(variableDependencyKey(name));
+    _supplied_items->insert(variableDependencyKey(name));
   for (const auto & name : producedPostprocessorNames())
-    _supplied_items.insert(postprocessorDependencyKey(name));
+    _supplied_items->insert(postprocessorDependencyKey(name));
   for (const auto & name : producedVectorPostprocessorNames())
-    _supplied_items.insert(vectorPostprocessorDependencyKey(name));
+    _supplied_items->insert(vectorPostprocessorDependencyKey(name));
 
-  return _supplied_items;
+  return *_supplied_items;
 }
 
 std::string

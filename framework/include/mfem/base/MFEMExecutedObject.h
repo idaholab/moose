@@ -16,6 +16,7 @@
 #include "DependencyResolverInterface.h"
 
 #include <algorithm>
+#include <optional>
 #include <set>
 #include <type_traits>
 
@@ -140,10 +141,10 @@ protected:
                                     const bool is_vector);
 
 private:
-  /// Cached requested dependency keys for the most recent scheduler query.
-  mutable std::set<std::string> _requested_items;
-  /// Cached supplied dependency keys for the most recent scheduler query.
-  mutable std::set<std::string> _supplied_items;
+  /// Lazily constructed requested dependency keys for this object's registered dependencies.
+  std::optional<std::set<std::string>> _requested_items;
+  /// Lazily constructed supplied dependency keys for this object's produced resources.
+  std::optional<std::set<std::string>> _supplied_items;
   /// Compact typed metadata describing dependency-bearing parameters on this object.
   std::vector<DependencyParam> _dependency_params;
 };

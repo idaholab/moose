@@ -1472,6 +1472,11 @@ public:
    */
   bool hasPostprocessorValueByName(const PostprocessorName & name) const;
 
+  /**
+   * Return the Postprocessor object registered under the supplied object name.
+   * @param object_name The name of the Postprocessor object
+   * @param tid The thread identifier for thread-local object lookup
+   */
   const Postprocessor & getPostprocessorObjectByName(const PostprocessorName & object_name,
                                                      const THREAD_ID tid = 0) const;
 
