@@ -30,7 +30,10 @@ public:
   virtual void setOperator(mfem::OperatorHandle & op) override { _eigensolver->SetOperator(*op); }
 
   /// Sets the mass matrix for the eigensolver
-  virtual void setMassMatrix(mfem::OperatorHandle & mass) override { _eigensolver->SetMassMatrix(*mass); }
+  virtual void setMassMatrix(mfem::OperatorHandle & mass) override
+  {
+    _eigensolver->SetMassMatrix(*mass);
+  }
 
   /// Solves the eigenvalue problem
   virtual void Solve() override { _eigensolver->Solve(); }
