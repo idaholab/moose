@@ -280,7 +280,6 @@
     recover = false
     restep = false
   []
-  [MFEMEigensolver]
   [MFEMDiffusionEigenproblem]
     type = CSVDiff
     input = diffusion_eigenproblem.i

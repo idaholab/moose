@@ -49,7 +49,7 @@ public:
 
 protected:
   /// Override in derived classes to construct and set the solver options.
-  virtual void constructSolver(const InputParameters &) override;
+  virtual void constructSolver() override;
 
   /// Eigensolver to be used for the problem
   std::unique_ptr<mfem::HypreLOBPCG> _eigensolver;
