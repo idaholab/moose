@@ -143,7 +143,7 @@ AdvancedExtruderGenerator::validParams()
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
-  params.addParam<libMesh::Real>(
+  params.addParam<Real>(
       "r_final", "Final radius to extrude to. Defaults to constant radius if not specified.");
   params.addParam<MooseEnum>("radial_growth_method",
                              radial_growth_methods,
@@ -537,7 +537,7 @@ AdvancedExtruderGenerator::generate()
 
   // the following code looks to systematically find the starting radius by finding the largest
   // distance from the starting point on the curve (this is assumed to be at the center).
-  libMesh::Node * reference_point;
+  libMesh::Node * reference_point = nullptr;
   if (_extrude_along_curve)
     reference_point = extrusion_curve->node_ptr(0);
   libMesh::Real start_radius = 0;
@@ -566,15 +566,15 @@ AdvancedExtruderGenerator::generate()
 
     old_distance.zero();
 
-    libMesh::Real start_node_radius;
+    Real start_node_radius = 0;
     if (_extrude_along_curve)
       start_node_radius = (*node - *reference_point).norm(); // find distance from node to spline
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
     {
-      unsigned int num_layers;
-      Real height, bias;
+      unsigned int num_layers = libMesh::invalid_uint;
+      Real height = std::numeric_limits<Real>::max(), bias = std::numeric_limits<Real>::max();
       if (_extrude_along_curve)
       {
         num_layers = extrusion_curve->n_elem();
@@ -586,7 +586,7 @@ AdvancedExtruderGenerator::generate()
         bias = _biases[e];
       }
 
-      libMesh::Real t; // parameter for radial expansion
+      Real t; // parameter for radial expansion
       unsigned int total_extrap_heights =
           order * num_layers +
           (e == 0 ? 1 : 0); // total number of extrapolations steps to take per node
@@ -603,7 +603,7 @@ AdvancedExtruderGenerator::generate()
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
           // Calculate initial node step
-          libMesh::Real step_size;
+          Real step_size = 0;
           if (_extrude_along_curve)
           {
             libMesh::Node * P_next; // next point along curve (conditionally set)
@@ -615,12 +615,12 @@ AdvancedExtruderGenerator::generate()
                 old_distance + *node; // previous node to extrude from
 
             // define a couple of vectors for convenience
-            libMesh::RealVectorValue a_vec = *P_current - *P_prev;
-            libMesh::RealVectorValue b_vec = P_start - *P_prev;
+            RealVectorValue a_vec = *P_current - *P_prev;
+            RealVectorValue b_vec = P_start - *P_prev;
 
-            libMesh::Real prev_node_distance_to_spline = b_vec.norm();
+            Real prev_node_distance_to_spline = b_vec.norm();
 
-            libMesh::RealVectorValue
+            RealVectorValue
                 intersecting_plane_normal_vec; // normal vector describing plane to extrude to
 
             // handle definition of intersecting plane.
@@ -646,23 +646,23 @@ AdvancedExtruderGenerator::generate()
               t = (double)k /
                   (double)(total_extrap_heights - 1); // parameter for expansion function
 
-              libMesh::RealVectorValue current_plane_normal_vec =
+              RealVectorValue current_plane_normal_vec =
                   a_vec.cross(b_vec); // normal vector that defines the first plane
               current_plane_normal_vec /= current_plane_normal_vec.norm(); // normalize
 
-              libMesh::RealVectorValue dir_along_line = current_plane_normal_vec.cross(
+              RealVectorValue dir_along_line = current_plane_normal_vec.cross(
                   intersecting_plane_normal_vec);      // calculate the line of intersection's slope
               dir_along_line /= dir_along_line.norm(); // normalize
 
-              libMesh::Real node_radius; // allocate some memory
+              Real node_radius; // allocate some memory
 
               // Handle if we are expanding the radius as we extrude.
               if (isParamValid("r_final"))
               {
-                libMesh::Real radius_scaling =
+                Real radius_scaling =
                     start_node_radius /
                     start_radius; // fraction of the total starting radius the node lives in
-                libMesh::Real radial_weight = AdvancedExtruderGenerator::radialWeighting(
+                Real radial_weight = AdvancedExtruderGenerator::radialWeighting(
                     getParam<MooseEnum>("radial_growth_method"),
                     t); // calculate weighting for expansion
                 node_radius = (start_radius * (1 - radial_weight) +
@@ -1458,10 +1458,10 @@ AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const 
   else if (function_type == "CUBIC")
     switch_val = 2;
 
-  libMesh::Real start_growth_rate = getParam<libMesh::Real>("start_radial_growth_rate");
-  libMesh::Real end_growth_rate = getParam<libMesh::Real>("end_radial_growth_rate");
+  Real start_growth_rate = getParam<Real>("start_radial_growth_rate");
+  Real end_growth_rate = getParam<Real>("end_radial_growth_rate");
 
-  libMesh::Real result;
+  Real result;
   switch (switch_val)
   {
     case 1:
