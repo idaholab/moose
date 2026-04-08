@@ -78,6 +78,16 @@ public:
   /// Satisfy CSGEngUnit::getName() — resolved via CSGSurface::getName()
   const std::string & getName() const override { return CSGSurface::getName(); }
 
+  /// Disambiguate == and != by forwarding to CSGEngUnit (name/property-based comparison)
+  bool operator==(const CSGSurfaceEngUnit & other) const
+  {
+    return CSGEngUnit::operator==(other);
+  }
+  bool operator!=(const CSGSurfaceEngUnit & other) const
+  {
+    return CSGEngUnit::operator!=(other);
+  }
+
   /// Delegate to CSGSurface (CSGTransformationHelper)
   const std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> &
   getTransformations() const override
