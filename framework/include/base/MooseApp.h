@@ -769,14 +769,6 @@ public:
   void restore(std::unique_ptr<Backup> backup, const bool for_restart);
 
   /**
-   * Restores one declared restartable value early from the app's configured restore source.
-   *
-   * This is intended for state that must exist before the normal bulk restore in
-   * FEProblemBase::initialSetup().
-   */
-  bool restoreRestartableDataEarly(const std::string & data_name, const THREAD_ID tid = 0);
-
-  /**
    * Insertion point for other apps that is called after restore()
    *
    * @param for_restart Whether this restoration is explicitly for the

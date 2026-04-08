@@ -13,32 +13,9 @@
 #include "MooseApp.h"
 #include "libmesh/mesh_generation.h"
 
-namespace
-{
-using RestartableParMeshState = MFEMMesh::RestartableParMeshState;
-}
-
-template <>
-void
-dataStore(std::ostream & stream, RestartableParMeshState & /*data*/, void * context)
-{
-  mooseAssert(context, "Missing MFEM mesh context for restartable storage");
-  static_cast<MFEMMesh *>(context)->storeRestartableParMesh(stream);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, RestartableParMeshState & /*data*/, void * context)
-{
-  mooseAssert(context, "Missing MFEM mesh context for restartable loading");
-  static_cast<MFEMMesh *>(context)->loadRestartableParMesh(stream);
-}
+#include <fstream>
 
 registerMooseObject("MooseApp", MFEMMesh);
-
-struct MFEMMesh::RestartableParMeshState
-{
-};
 
 InputParameters
 MFEMMesh::validParams()
@@ -69,12 +46,7 @@ MFEMMesh::validParams()
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters)
-  : FileMesh(parameters),
-    _restartable_par_mesh_state(
-        declareRestartableDataWithContext<RestartableParMeshState>("mfem_par_mesh_state", this))
-{
-}
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
 
 MFEMMesh::~MFEMMesh() {}
 
@@ -89,15 +61,17 @@ MFEMMesh::init()
 
   TIME_SECTION("init", 2);
 
-  if ((_app.isRecovering() || _app.isRestarting() || _app.hasInitialBackup()) &&
-      recoveryAllowed())
+  if (_app.isRecovering() && recoveryAllowed() && _app.isUltimateMaster())
   {
     buildDummyMooseMesh();
 
-    if (!_app.restoreRestartableDataEarly(restartableName("mfem_par_mesh_state")))
-      mooseError("Unable to restore MFEM mesh restartable data '",
-                 restartableName("mfem_par_mesh_state"),
-                 "'.");
+    const auto checkpoint_file = _app.getRestartRecoverFileBase() + _app.checkpointSuffix() +
+                                 ".mfem.mesh." + std::to_string(this->processor_id());
+    std::ifstream input(checkpoint_file);
+    if (!input)
+      mooseError("Unable to open MFEM recovery mesh file '", checkpoint_file, "'.");
+
+    _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), input);
 
     if (isParamSetByUser("displacement"))
       _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
@@ -154,17 +128,21 @@ MFEMMesh::buildMesh()
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
 }
 
-void
-MFEMMesh::storeRestartableParMesh(std::ostream & stream) const
+std::vector<std::filesystem::path>
+MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base) const
 {
-  mooseAssert(_mfem_par_mesh, "MFEM parallel mesh is not initialized");
-  _mfem_par_mesh->ParPrint(stream);
-}
+  MooseMesh::writeRecoveryFiles(file_base);
 
-void
-MFEMMesh::loadRestartableParMesh(std::istream & stream)
-{
-  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), stream);
+  mooseAssert(_mfem_par_mesh, "MFEM parallel mesh is not initialized");
+
+  const auto checkpoint_file =
+      file_base.string() + ".mfem.mesh." + std::to_string(this->processor_id());
+  std::ofstream output(checkpoint_file);
+  if (!output)
+    mooseError("Unable to open MFEM recovery mesh file '", checkpoint_file, "' for writing.");
+
+  _mfem_par_mesh->ParPrint(output);
+  return {checkpoint_file};
 }
 
 void

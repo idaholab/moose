@@ -51,6 +51,7 @@
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/edge_edge2.h"
+#include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/boundary_info.h"
@@ -3018,6 +3019,14 @@ MooseMesh::init()
     if (getParam<bool>("build_all_side_lowerd_mesh"))
       buildLowerDMesh();
   }
+}
+
+std::vector<std::filesystem::path>
+MooseMesh::writeRecoveryFiles(const std::filesystem::path & file_base) const
+{
+  CheckpointIO io(const_cast<MeshBase &>(getMesh()), false);
+  io.write(file_base);
+  return {};
 }
 
 unsigned int

@@ -193,9 +193,8 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
     for (auto & value : currentData(tid))
       value.setNotLoaded({});
 
-  // Read the header unless it has already been prepared for an early targeted restore.
-  if (_header.empty())
-    _header = readHeader(*_streams.header);
+  // Read the header
+  _header = readHeader(*_streams.header);
 
   for (const auto tid : index_range(_header))
   {
@@ -220,33 +219,6 @@ RestartableDataReader::restore(const DataNames & filter_names /* = {} */)
         deserializeValue(*_streams.data, value, header_entry);
     }
   }
-}
-
-bool
-RestartableDataReader::restoreDeclaredData(const std::string & data_name, const THREAD_ID tid)
-{
-  if (!_streams.header || !_streams.data)
-    mooseError("RestartableDataReader::restoreDeclaredData(): Cannot restore because an input was "
-               "not set");
-
-  if (_header.empty())
-    _header = readHeader(*_streams.header);
-
-  auto find_header = _header[tid].find(data_name);
-  if (find_header == _header[tid].end())
-    return false;
-
-  auto * value = currentData(tid).findData(data_name);
-  if (!value)
-    mooseError("RestartableDataReader::restoreDeclaredData(): Failed to find declared restartable "
-               "data with name '",
-               data_name,
-               "'");
-
-  deserializeValue(*_streams.data, *value, find_header->second);
-  _header[tid].erase(find_header);
-
-  return true;
 }
 
 bool

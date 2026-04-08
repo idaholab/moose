@@ -1571,8 +1571,7 @@ MooseApp::restore(const std::filesystem::path & folder_base, const bool for_rest
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  if (!_rd_reader.isRestoring())
-    _rd_reader.setInput(folder_base);
+  _rd_reader.setInput(folder_base);
   _rd_reader.restore(filter_names);
 
   postRestore(for_restart);
@@ -1585,47 +1584,19 @@ MooseApp::restore(std::unique_ptr<Backup> backup, const bool for_restart)
 
   const DataNames filter_names = for_restart ? getRecoverableData() : DataNames{};
 
-  if (!_rd_reader.isRestoring() && !backup)
+  if (!backup)
     mooseError("MooseApp::restore(): Provided backup is not initialized");
 
-  if (!_rd_reader.isRestoring())
-  {
-    auto header = std::move(backup->header);
-    mooseAssert(header, "Header not available");
+  auto header = std::move(backup->header);
+  mooseAssert(header, "Header not available");
 
-    auto data = std::move(backup->data);
-    mooseAssert(data, "Data not available");
+  auto data = std::move(backup->data);
+  mooseAssert(data, "Data not available");
 
-    _rd_reader.setInput(std::move(header), std::move(data));
-  }
+  _rd_reader.setInput(std::move(header), std::move(data));
   _rd_reader.restore(filter_names);
 
   postRestore(for_restart);
-}
-
-bool
-MooseApp::restoreRestartableDataEarly(const std::string & data_name, const THREAD_ID tid)
-{
-  if (!_rd_reader.isRestoring())
-  {
-    if (hasInitialBackup())
-    {
-      if (!*_initial_backup)
-        mooseError("MooseApp::restoreRestartableDataEarly(): Initial backup is not initialized");
-
-      auto header = std::move((*_initial_backup)->header);
-      mooseAssert(header, "Header not available");
-
-      auto data = std::move((*_initial_backup)->data);
-      mooseAssert(data, "Data not available");
-
-      _rd_reader.setInput(std::move(header), std::move(data));
-    }
-    else
-      _rd_reader.setInput(restartFolderBase(getRestartRecoverFileBase()));
-  }
-
-  return _rd_reader.restoreDeclaredData(data_name, tid);
 }
 
 void

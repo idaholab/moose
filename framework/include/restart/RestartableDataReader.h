@@ -74,14 +74,6 @@ public:
   void restore(const DataNames & filter_names = {});
 
   /**
-   * Restores an already-declared restartable value and removes it from the pending header so a
-   * later bulk restore will not load it again.
-   *
-   * @returns Whether the value existed in the backup header.
-   */
-  bool restoreDeclaredData(const std::string & data_name, const THREAD_ID tid = 0);
-
-  /**
    * Restores the data with name \p data_name of type T.
    *
    * This is used to restore data that was never declared in the restart,
