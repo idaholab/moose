@@ -9,7 +9,7 @@
       command = 'python build_moose_fmu.py'
       required_python_packages = 'pythonfmu'
       detail = 'creating a MOOSE FMU from the Moose2FMU base class.'
-      platform = 'linux'
+      capabilities = 'platform=linux'
     []
 
     [run_fmu]

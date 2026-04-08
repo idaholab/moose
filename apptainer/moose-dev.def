@@ -236,6 +236,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Make sure that pip matches the python version we requested above
     conda install -yq pip
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+    # Add fmu runner package
+    conda install -y pyfmi
 
     # Require CUDA if we have cuda available
     if [ -n "$CUDA_DIR" ]; then

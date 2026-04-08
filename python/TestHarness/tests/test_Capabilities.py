@@ -335,11 +335,11 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             )
             message = (
                 f"{result.test_spec_file}:2: Failed to create Tester: The following "
-                "parameters are deprecated and should use the 'capability' param "
+                "parameters are deprecated and should use the 'capabilities' param "
                 f"instead; '{param}'"
             )
             if capability:
-                message += f" -> capability '{capability}'"
+                message += f" -> capabilities '{capability}'"
             self.assertIn(message, result.output)
 
     def testRequiredCapabilities(self):
