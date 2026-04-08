@@ -30,7 +30,8 @@ MFEMSubMeshTransfer::validParams()
   params.addRequiredParam<VariableName>("to_variable",
                                         "MFEM variable to transfer data into. Can be defined on "
                                         "either the parent mesh or a submesh of it.");
-  params.addParam<int>("mode", 0, "Eigenmode index to transfer for eigenproblems. Ignored if not an eigenproblem.");
+  params.addParam<int>(
+      "mode", 0, "Eigenmode index to transfer for eigenproblems. Ignored if not an eigenproblem.");
 
   return params;
 }
@@ -38,9 +39,10 @@ MFEMSubMeshTransfer::validParams()
 MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
   : MFEMExecutedObject(parameters),
     _source_var_name(getParam<VariableName>("from_variable")),
-    _source_var(dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()) ? 
-    *getMFEMProblem().getProblemData().eigen_gridfunctions.Get(_source_var_name+"_"+std::to_string(getParam<int>("mode"))) : 
-    *getMFEMProblem().getGridFunction(_source_var_name)),
+    _source_var(dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem())
+                    ? *getMFEMProblem().getProblemData().eigen_gridfunctions.Get(
+                          _source_var_name + "_" + std::to_string(getParam<int>("mode")))
+                    : *getMFEMProblem().getGridFunction(_source_var_name)),
     _result_var_name(getParam<VariableName>("to_variable")),
     _result_var(*getMFEMProblem().getGridFunction(_result_var_name))
 {
