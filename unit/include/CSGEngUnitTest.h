@@ -27,7 +27,7 @@
  *
  *  - FakeCellEngUnit:
  *    - 1 cell
- *    - at least 2 surfaces
+ *    - at least 1 surfaces
  *    - cell is filled with a universe
  *
  *  - FakeUnivEngUnit:
@@ -74,4 +74,31 @@ protected:
 #endif
 };
 
+class FakeCellEngUnit : public CSGCellEngUnit
+{
+public:
+  FakeCellEngUnit(const std::string & name)
+    : CSGCellEngUnit(name, MooseUtils::prettyCppType<FakeCellEngUnit>())
+  {
+  }
+  std::unordered_map<std::string, AttributeVariant> getAttributes() const override
+  {
+    // contents don't matter for this fake class, just need to be able to test that this method is
+    // callable
+    return {};
+  }
+
+protected:
+  void expandUnit(CSGBase & base) override
+  {
+    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>("s1", 3.0);
+    auto & _s1 = base.addSurface(std::move(s1_ptr));
+    auto reg = -_s1;
+    auto & univ = base.createUniverse("fill_univ");
+    _expanded_cell = &base.createCell("real_cell", univ, reg);
+  }
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(CSGEngUnitTest, testCellUnit);
+#endif
+};
 }

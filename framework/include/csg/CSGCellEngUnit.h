@@ -31,7 +31,6 @@ class CSGBase; // forward declaration
  *     CSG components that are required for defining the unit in basic CSG components
  *     and add them to CSGBase. The created CSGCell should set to _expanded_cell once
  *     generated so it can be returned by getExpandedCell().
- *   - getExpandedCell() — return the CSGCell created and stored during expandUnit().
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
 class CSGCellEngUnit : public CSGCell, public CSGEngUnit
