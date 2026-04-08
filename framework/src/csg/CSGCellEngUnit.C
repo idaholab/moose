@@ -18,4 +18,14 @@ CSGCellEngUnit::CSGCellEngUnit(const std::string & name, const std::string & uni
 {
 }
 
+const CSGCell &
+CSGCellEngUnit::getExpandedCell() const
+{
+  if (!_expanded_cell)
+    mooseError("getExpandedCell() cannot be called on CSGCellEngUnit '",
+               getName(),
+               "' before expandUnit() has been called.");
+  return *_expanded_cell;
+}
+
 } // namespace CSG

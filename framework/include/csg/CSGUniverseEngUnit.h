@@ -27,11 +27,10 @@ class CSGBase; // forward declaration
  * equivalent CSGUniverse representation, along with all supporting surfaces and cells.
  *
  * Derived classes must implement:
- *   - expandUnit(CSGBase &) — create supporting surfaces and cells in base, create the plain
- *     universe via base.createUniverse(...), populate it with cells via
- *     base.addCellToUniverse(), and store the returned universe reference for retrieval by
- *     getExpandedUniverse().
- *   - getExpandedUniverse() — return the plain CSGUniverse stored during expandUnit().
+ *   - expandUnit(CSGBase &) — construct the equivalent CSGUniverse and any other necessary
+ *     CSG components that are required for defining the unit in basic CSG components
+ *     and add them to CSGBase. The created CSGUniverse should set to _expanded_universe once
+ *     generated so it can be returned by getExpandedUniverse().
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
 class CSGUniverseEngUnit : public CSGUniverse, public CSGEngUnit
@@ -92,9 +91,16 @@ protected:
   /**
    * @brief Return the CSGUniverse created and stored during expandUnit().
    *
+   * Checks that expandUnit() has already been called before returning.
+   * Throws if called before expansion.
+   *
    * @return const reference to the newly expanded CSGUniverse
    */
-  virtual const CSGUniverse & getExpandedUniverse() const = 0;
+  const CSGUniverse & getExpandedUniverse() const;
+
+  /// Stores a pointer to the plain CSGUniverse registered during expandUnit(); nullptr until then.
+  /// Derived classes must set this (e.g. _expanded_universe = &base.createUniverse(...)) in expandUnit().
+  const CSGUniverse * _expanded_universe = nullptr;
 
   // Only CSGBase should be calling expandUnit() and getExpandedUniverse()
   friend class CSGBase;

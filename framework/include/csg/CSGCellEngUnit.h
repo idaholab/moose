@@ -29,7 +29,8 @@ class CSGBase; // forward declaration
  * Derived classes must implement:
  *   - expandUnit(CSGBase &) — construct the equivalent CSGCell and any other necessary
  *     CSG components that are required for defining the unit in basic CSG components
- *     and add them to CSGBase.
+ *     and add them to CSGBase. The created CSGCell should set to _expanded_cell once
+ *     generated so it can be returned by getExpandedCell().
  *   - getExpandedCell() — return the CSGCell created and stored during expandUnit().
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
@@ -93,9 +94,16 @@ protected:
   /**
    * @brief Return the CSGCell created and stored during expandUnit().
    *
+   * Checks that expandUnit() has already been called before returning.
+   * Throws if called before expansion.
+   *
    * @return const reference to the newly expanded CSGCell
    */
-  virtual const CSGCell & getExpandedCell() const = 0;
+  const CSGCell & getExpandedCell() const;
+
+  /// Stores a pointer to the plain CSGCell registered during expandUnit(); nullptr until then.
+  /// Derived classes must set this (e.g. _expanded_cell = &base.createCell(...)) in expandUnit().
+  const CSGCell * _expanded_cell = nullptr;
 
   // Only CSGBase should be calling expandUnit() and getExpandedCell()
   friend class CSGBase;
