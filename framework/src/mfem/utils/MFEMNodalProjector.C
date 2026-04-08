@@ -51,7 +51,6 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
   mfem::ParFiniteElementSpace & fespace = *gridfunction.ParFESpace();
   const int NE = fespace.GetParMesh()->GetNE();
   const int nsp = fespace.GetTypicalFE()->GetNodes().GetNPoints();
-  const int dim = fespace.GetParMesh()->Dimension();
   const int gf_ncomp = gridfunction.VectorDim();
 
   fespace.GetParMesh()->EnsureNodes();
@@ -65,74 +64,59 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
     const mfem::RT_FECollection * fec_rt = dynamic_cast<const mfem::RT_FECollection *>(fec_in);
     const mfem::ND_FECollection * fec_nd = dynamic_cast<const mfem::ND_FECollection *>(fec_in);
     if (fec_h1)
-    {
       fieldtype = 0;
-    }
     else if (fec_l2)
-    {
       fieldtype = 1;
-    }
     else if (fec_rt)
-    {
       fieldtype = 2;
-    }
     else if (fec_nd)
-    {
       fieldtype = 3;
-    }
     else
-    {
       mooseError("FESpace type not supported yet in transfers.");
-    }
   }
 
   // Project the interpolated values to the target FiniteElementSpace.
+  mfem::Array<int> vdofs;
+  mfem::Vector vals;
+  mfem::Vector elem_dof_vals(nsp * gf_ncomp);
   if (fieldtype <= 1) // H1 or L2
   {
-    mfem::Array<int> vdofs;
-    mfem::Vector vals;
-    mfem::Vector elem_dof_vals(nsp * gf_ncomp);
-    for (int i = 0; i < NE; i++)
+    for (int el = 0; el < NE; el++)
     {
-      fespace.GetElementVDofs(i, vdofs);
-      vals.SetSize(vdofs.Size());
-      for (int j = 0; j < nsp; j++)
-      {
+      fespace.GetElementVDofs(el, vdofs); // Returned vdofs always indexed with ordering byNODES
+      for (int qp = 0; qp < nsp; qp++)
         for (int d = 0; d < gf_ncomp; d++)
-        {
-          int idx;
-          if (gf_ncomp > 1)
-            idx = nodal_val_ordering == mfem::Ordering::Type::byNODES ? d * nsp * NE + i * nsp + j
-                                                                      : i * nsp * dim + d + j * dim;
-          else
-            idx = d * nsp * NE + i * nsp + j;
-          elem_dof_vals(j + d * nsp) = nodal_vals(idx);
-        }
-      }
+          switch (nodal_val_ordering)
+          {
+            case mfem::Ordering::Type::byNODES: // NQPT x VDIM x NE
+              elem_dof_vals(qp + d * nsp) = nodal_vals(qp + nsp * (d + gf_ncomp * el));
+              break;
+            case mfem::Ordering::Type::byVDIM: // VDIM x NQPT x NE
+              elem_dof_vals(qp + d * nsp) = nodal_vals(d + gf_ncomp * (qp + nsp * el));
+              break;
+          }
       gridfunction.SetSubVector(vdofs, elem_dof_vals);
     }
   }
   else // H(div) or H(curl)
   {
-    mfem::Array<int> vdofs;
-    mfem::Vector vals;
-    mfem::Vector elem_dof_vals(nsp * gf_ncomp);
-
-    for (int i = 0; i < NE; i++)
+    for (int el = 0; el < NE; el++)
     {
-      fespace.GetElementVDofs(i, vdofs);
-      vals.SetSize(vdofs.Size());
-      for (int j = 0; j < nsp; j++)
-      {
+      fespace.GetElementVDofs(el, vdofs);
+      for (int qp = 0; qp < nsp; qp++)
         for (int d = 0; d < gf_ncomp; d++)
-        {
-          int idx = nodal_val_ordering == mfem::Ordering::Type::byNODES
-                        ? d * nsp * NE + i * nsp + j
-                        : i * nsp * dim + d + j * dim;
-          elem_dof_vals(j * gf_ncomp + d) = nodal_vals(idx);
-        }
-      }
-      fespace.GetFE(i)->ProjectFromNodes(elem_dof_vals, *fespace.GetElementTransformation(i), vals);
+          switch (nodal_val_ordering) // elem_dof_vals ordering chosen for ProjectFromNodes
+          {
+            case mfem::Ordering::Type::byNODES: // NQPT x VDIM x NE
+              elem_dof_vals(d + gf_ncomp * qp) = nodal_vals(qp + nsp * (d + gf_ncomp * el));
+              break;
+            case mfem::Ordering::Type::byVDIM: // VDIM x NQPT x NE
+              elem_dof_vals(d + gf_ncomp * qp) = nodal_vals(d + gf_ncomp * (qp + nsp * el));
+              break;
+          }
+      vals.SetSize(vdofs.Size());
+      fespace.GetFE(el)->ProjectFromNodes(
+          elem_dof_vals, *fespace.GetElementTransformation(el), vals);
       gridfunction.SetSubVector(vdofs, vals);
     }
   }

@@ -74,12 +74,12 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
     const int dim = to_pfespace.GetParMesh()->Dimension();
     const int nodes_cnt = vxyz.Size() / dim;
     const int to_gf_ncomp = to_gf.VectorDim();
+    mfem::Ordering::Type to_gf_ordering(to_pfespace.GetOrdering());
     mfem::Vector interp_vals(nodes_cnt * to_gf_ncomp);
+    _mfem_interpolator.Setup(*from_gf.ParFESpace()->GetParMesh());
     _mfem_interpolator.SetDefaultInterpolationValue(getMFEMOutOfMeshValue());
-
-    _mfem_interpolator.Interpolate(
-        *from_gf.ParFESpace()->GetParMesh(), vxyz, from_gf, interp_vals, point_ordering);
-    _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf);
+    _mfem_interpolator.Interpolate(vxyz, from_gf, interp_vals, point_ordering, to_gf_ordering);
+    _mfem_projector.projectNodalValues(interp_vals, to_gf_ordering, to_gf);
 
     if (is_to_complex)
     {
@@ -93,7 +93,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
                                                  .cmplx_gridfunctions.Get(getFromVarName(v))
                                                  ->imag();
         _mfem_interpolator.Interpolate(
-            *from_gf_im.ParFESpace()->GetParMesh(), vxyz, from_gf_im, interp_vals, point_ordering);
+            vxyz, from_gf_im, interp_vals, point_ordering, to_pfespace.GetOrdering());
         _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf_im);
       }
       else // Transfer from real variable to complex variable, so imag component zero
