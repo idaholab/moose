@@ -27,6 +27,9 @@ class MFEMExecutedObject : public MFEMObject,
                            public DependencyResolverInterface
 {
 public:
+  /**
+   * Dependency resource categories understood by the MFEM executed-object scheduler.
+   */
   enum class DependencyKind : unsigned char
   {
     Variable = 0,
@@ -34,57 +37,114 @@ public:
     VectorPostprocessor = 2
   };
 
+  /**
+   * Metadata describing one dependency-bearing input parameter on this object.
+   */
   struct DependencyParam
   {
+    /// The resource category requested through this parameter.
     DependencyKind kind;
+    /// The parameter name storing the dependency value(s).
     std::string param_name;
+    /// Whether the parameter stores a vector of dependency names.
     bool is_vector;
   };
 
+  /**
+   * Declare the common parameters used by MFEM executed objects.
+   */
   static InputParameters validParams();
 
+  /**
+   * Construct an executed MFEM object and materialize its dependency metadata.
+   */
   MFEMExecutedObject(const InputParameters & parameters);
 
+  /**
+   * Perform any pre-execution setup for this object.
+   */
   virtual void initialize() {}
+  /**
+   * Perform the main work for this object.
+   */
   virtual void execute() {}
+  /**
+   * Perform any post-execution finalization for this object.
+   */
   virtual void finalize() {}
 
+  /**
+   * Return the variable names produced by this object.
+   */
   virtual std::set<std::string> producedVariableNames() const;
+  /**
+   * Return the postprocessor names produced by this object.
+   */
   virtual std::set<std::string> producedPostprocessorNames() const;
+  /**
+   * Return the vector postprocessor names produced by this object.
+   */
   virtual std::set<std::string> producedVectorPostprocessorNames() const;
 
   virtual const std::set<std::string> & getRequestedItems() override;
   virtual const std::set<std::string> & getSuppliedItems() override;
 
+  /**
+   * Add an optional dependency-bearing parameter and register it with the MFEM scheduler.
+   */
   template <typename T>
   static void addDependencyParam(InputParameters & params,
                                  const std::string & param_name,
                                  const std::string & doc_string);
 
+  /**
+   * Add a required dependency-bearing parameter and register it with the MFEM scheduler.
+   */
   template <typename T>
   static void addRequiredDependencyParam(InputParameters & params,
                                          const std::string & param_name,
                                          const std::string & doc_string);
 
 protected:
+  /**
+   * Build the dependency key used for a produced/requested variable.
+   */
   static std::string variableDependencyKey(const std::string & name);
+  /**
+   * Build the dependency key used for a produced/requested postprocessor.
+   */
   static std::string postprocessorDependencyKey(const std::string & name);
+  /**
+   * Build the dependency key used for a produced/requested vector postprocessor.
+   */
   static std::string vectorPostprocessorDependencyKey(const std::string & name);
 
+  /**
+   * Map a dependency parameter type to its scheduler resource category.
+   */
   template <typename T>
   static constexpr DependencyKind dependencyKind();
 
+  /**
+   * Whether a dependency parameter type stores a vector of dependency names.
+   */
   template <typename T>
   static constexpr bool dependencyIsVector();
 
+  /**
+   * Record one dependency-bearing parameter in the private parameter metadata.
+   */
   static void appendDependencyParam(InputParameters & params,
                                     const std::string & param_name,
                                     const DependencyKind kind,
                                     const bool is_vector);
 
 private:
+  /// Cached requested dependency keys for the most recent scheduler query.
   mutable std::set<std::string> _requested_items;
+  /// Cached supplied dependency keys for the most recent scheduler query.
   mutable std::set<std::string> _supplied_items;
+  /// Compact typed metadata describing dependency-bearing parameters on this object.
   std::vector<DependencyParam> _dependency_params;
 };
 
