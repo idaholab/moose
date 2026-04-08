@@ -974,6 +974,10 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region) const
 bool
 CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
 {
+  // CSGSurfaceEngUnit objects are stored in the eng unit list, not the surface list
+  if (const auto * eng_unit = dynamic_cast<const CSGSurfaceEngUnit *>(&surface))
+    return checkEngUnitInBase(*eng_unit);
+
   auto name = surface.getName();
   // if no surface by this name exists, an error will be produced by getSurface
   auto & list_surf = _surface_list.getSurface(name);
@@ -984,6 +988,10 @@ CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
 bool
 CSGBase::checkCellInBase(const CSGCell & cell) const
 {
+  // CSGCellEngUnit objects are stored in the eng unit list, not the surface list
+  if (const auto * eng_unit = dynamic_cast<const CSGCellEngUnit *>(&cell))
+    return checkEngUnitInBase(*eng_unit);
+
   auto name = cell.getName();
   // if no cell by this name exists, an error will be produced by getCell
   auto & list_cell = _cell_list.getCell(name);
@@ -994,6 +1002,10 @@ CSGBase::checkCellInBase(const CSGCell & cell) const
 bool
 CSGBase::checkUniverseInBase(const CSGUniverse & universe) const
 {
+  // CSGUniverseEngUnit objects are stored in the eng unit list, not the surface list
+  if (const auto * eng_unit = dynamic_cast<const CSGUniverseEngUnit *>(&universe))
+    return checkEngUnitInBase(*eng_unit);
+
   auto name = universe.getName();
   // if no universe by this name exists, an error will be produced by getUniverse
   auto & list_univ = _universe_list.getUniverse(name);
