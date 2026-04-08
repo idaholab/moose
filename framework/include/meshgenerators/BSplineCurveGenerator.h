@@ -24,6 +24,11 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Return the starting point of the spline
+  libMesh::Point startPoint();
+  /// Return the ending point of the spline
+  libMesh::Point endPoint();
+
   /// Subdomain ID for the elements created
   const SubdomainID _new_subdomain_id;
   /// degree of interpolating spline
@@ -45,18 +50,9 @@ protected:
   /// number of edge elements on the curve
   const unsigned int _num_elements;
 
+  // Alternative geometry input: use boundary centroids
+  /// If 'start_mesh' parameter is set, mesh providing the starting boundary, the centroid of which can be the starting point of the spline
   std::unique_ptr<MeshBase> & _start_mesh;
+  /// If 'end_mesh' parameter is set, mesh providing the ending boundary, the centroid of which can be the ending point of the spline
   std::unique_ptr<MeshBase> & _end_mesh;
-
-  libMesh::Point returnStartPoint();
-
-  libMesh::Point returnEndPoint();
-
-  /**
-   * Calculcates the center-of-mass point of a boundary on a mesh.
-   * @param boundary boundary name
-   * @param mesh_name mesh name (getMesh routine is called within the method)
-   */
-  libMesh::Point findCenterPoint(const BoundaryName & boundary,
-                                 const std::unique_ptr<MeshBase> & mesh);
 };

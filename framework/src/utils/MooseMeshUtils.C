@@ -291,6 +291,40 @@ meshCentroidCalculator(const MeshBase & mesh)
   return centroid_pt;
 }
 
+Point
+boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh)
+{
+  libMesh::Point center_point(0, 0, 0);
+
+  BoundaryInfo & mesh_boundary_info = mesh.get_boundary_info();
+  boundary_id_type boundary_id = mesh_boundary_info.get_id_by_name(std::string_view(boundary));
+  const auto side_list = mesh_boundary_info.build_side_list();
+
+  // Initialize sums
+  Real volume_sum = 0;
+  Point volume_weighted_centroid_sum(0, 0, 0);
+
+  for (const auto & bside : side_list)
+  {
+    if (std::get<2>(bside) != boundary_id)
+      continue;
+
+    // Get the side
+    const auto elem = mesh.elem_ptr(std::get<0>(bside));
+    const auto side = elem->side_ptr(std::get<1>(bside));
+
+    volume_sum += side->volume();
+    volume_weighted_centroid_sum += side->volume() * side->true_centroid();
+  }
+  // Sum across processes
+  mesh.comm().sum(volume_weighted_centroid_sum);
+  mesh.comm().sum(volume_sum);
+
+  // Normalize
+  center_point = volume_weighted_centroid_sum / volume_sum;
+  return center_point;
+}
+
 std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
