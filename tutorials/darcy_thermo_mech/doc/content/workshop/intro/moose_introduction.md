@@ -95,7 +95,7 @@
 
 ###### [github.com/idaholab/moose/discussions](https://github.com/idaholab/moose/discussions)
 
-!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block; alt=MOOSE Discussions screenshot
 
 !---
 

@@ -63,7 +63,7 @@ $ cardinal-opt -i basic.i --mesh-only
 ## Result: Basic Mesh Input
 
 !style halign=center
-!media step1-1_mesh.png style=width:40%
+!media step1-1_mesh.png style=width:40% alt=Step 1-1 mesh
 
 !style halign=center
 From `basic_in.e` in Paraview
@@ -265,7 +265,7 @@ $ cardinal-opt -i concentric_circle.i --mesh-only
 ## Result: Concentric Circle Mesh Input
 
 !style halign=center
-!media step1-2_mesh.png style=width:25%
+!media step1-2_mesh.png style=width:25% alt=Step 1-2 mesh
 
 This mesh in `concentric_circle_in.e` has five blocks (also called subdomains):
 
@@ -383,7 +383,7 @@ $ cardinal-opt -i fuel_pin.i --mesh-only
 ## Result: Fuel Mesh
 
 !style halign=center
-!media step1-3_mesh.png style=width:35%
+!media step1-3_mesh.png style=width:35% alt=Step 1-3 mesh
 
 From `fuel_pin_in.e`: The grey elements represent the fuel (block `fuel`), and the red elements represent the cladding (block `clad`). There is a sideset on the outer boundary with name `water_solid_interface` and sideset on the inner boundary with the name `inner`.
 
@@ -476,7 +476,7 @@ $ cardinal-opt -i fluid.i --mesh-only
 ## Result: Fluid Mesh
 
 !style halign=center
-!media step1-4_mesh.png style=width:35%
+!media step1-4_mesh.png style=width:35% alt=Step 1-4 mesh
 
 From `fluid_in.e`: The grey elements represent the water (block `water`). There is a sideset on the inner boundary with the name `water_solid_interface` and a sideset on the outer boundary with the name `outer`.
 

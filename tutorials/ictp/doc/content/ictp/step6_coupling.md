@@ -15,7 +15,7 @@ The two inputs that were created in [#ictp_step5] will be extended in this probl
 ## Problem Definition
 
 !style halign=center
-!media step6_setup.png style=width:50%
+!media step6_setup.png style=width:50% alt=Step 6 setup
 
 !---
 
@@ -76,7 +76,7 @@ There are three common ways a `Transfer` can read information and deposit inform
 ## Problem Definition
 
 !style halign=center
-!media step6_setup.png style=width:50%
+!media step6_setup.png style=width:50% alt=Step 6 setup
 
 !---
 
@@ -127,7 +127,7 @@ $ cardinal-opt -i solid.i
 # Result: Coupled Problem $T$, Last Timestep
 
 !style halign=center
-!media step6_solution.png style=width:50%
+!media step6_solution.png style=width:50% alt=Step 6 solution
 
 !style halign=center
 From `solid_out.e` and `solid_out_fluid0.e` in Paraview, last timestep

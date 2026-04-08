@@ -118,7 +118,7 @@ $ cardinal-opt -i diffusion.i
 ## Result: Diffusion Problem
 
 !style halign=center
-!media step2-1_solution.png style=width:50%
+!media step2-1_solution.png style=width:50% alt=Step 2-1 solution
 
 !style halign=center
 From `diffusion_out.e` in Paraview
@@ -150,7 +150,7 @@ $ cardinal-opt -i diffusion_volumetric_source.i
 ## Result: Diffusion with Volumetric Source
 
 !style halign=center
-!media step2-2_solution.png style=width:50%
+!media step2-2_solution.png style=width:50% alt=Step 2-2 solution
 
 !style halign=center
 From `diffusion_volumetric_source_out.e` in Paraview

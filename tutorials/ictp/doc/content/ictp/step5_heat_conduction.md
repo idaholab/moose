@@ -75,7 +75,7 @@ Postprocessor Values:
 ## Result: Solid Heat Conduction
 
 !style halign=center
-!media step5-1_solution.png style=width:50%
+!media step5-1_solution.png style=width:50% alt=Step 5-1 solution
 
 !style halign=center
 From `solid_out.e` in Paraview
@@ -85,7 +85,7 @@ From `solid_out.e` in Paraview
 ## Result: Solid Heat Conduction Line
 
 !style halign=center
-!media step5-1_line.png style=width:50%
+!media step5-1_line.png style=width:50% alt=Step 5-1 line
 
 !style halign=center
 Line plot of $T$ through $y = 0$ from `solid_out.e` in Paraview with refinement
@@ -97,7 +97,7 @@ Line plot of $T$ through $y = 0$ from `solid_out.e` in Paraview with refinement
 Recall our "fluid" mesh from [#ictp_step1]:
 
 !style halign=center
-!media step1-4_mesh.png style=width:35%
+!media step1-4_mesh.png style=width:35% alt=Step 1-4 mesh
 
 !---
 
@@ -135,7 +135,7 @@ $ cardinal-opt -i fluid.i
 ## Result: Fluid Heat Conduction
 
 !style halign=center
-!media step5-2_solution.png style=width:50%
+!media step5-2_solution.png style=width:50% alt=Step 5-2 solution
 
 !style halign=center
 From `fluid_out.e` in Paraview

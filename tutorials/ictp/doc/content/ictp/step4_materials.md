@@ -49,7 +49,7 @@ $ cardinal-opt -i diffusion_materials.i
 ## Result: Spatially-Dependent Diffusion
 
 !style halign=center
-!media step4-1_solution.png style=width:50%
+!media step4-1_solution.png style=width:50% alt=Step 4-1 solution
 
 !style halign=center
 From `diffusion_materials_out.e` in Paraview
@@ -59,7 +59,7 @@ From `diffusion_materials_out.e` in Paraview
 ## Result: Spatially-Dependent Diffusion Line
 
 !style halign=center
-!media step4-1_line.png style=width:50%
+!media step4-1_line.png style=width:50% alt=Step 4-1 line
 
 !style halign=center
 Line plot of $u$ through $y = 0$ from `diffusion_materials_out.e` in Paraview with refinement

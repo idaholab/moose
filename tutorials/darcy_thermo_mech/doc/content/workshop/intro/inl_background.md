@@ -66,4 +66,4 @@ to demonstrate advanced reactors through modeling and simulation. More informati
 ## Advanced Reactor Demonstration Timeline
 
 !style halign=center
-!media inl_reactor_timeline.png
+!media inl_reactor_timeline.png alt=Reactor timeline
