@@ -87,6 +87,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
           "nodal_normal_z variables must exist.  Are you missing the \\[NodalNormals\\] block?");
     }
   }
+
+  // Request the nodeToElem map upfront
+  _mesh.nodeToElemMap();
 }
 
 PenetrationLocator::~PenetrationLocator()

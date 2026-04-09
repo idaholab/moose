@@ -633,11 +633,9 @@ MooseMesh::update()
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
 
-  // Update the node to elem map
+  // Clear the node to elem maps
   _node_to_elem_map.clear();
-  _node_to_elem_map_built = false;
   _node_to_active_semilocal_elem_map.clear();
-  _node_to_active_semilocal_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -670,6 +668,20 @@ MooseMesh::update()
 #endif
 
   _finite_volume_info_dirty = true;
+
+  // Rebuild the node to elem maps, in case the object(s) who got references to the maps
+  // actually do need to use them
+  if (_node_to_elem_map_built)
+  {
+    // it won't stay false
+    _node_to_elem_map_built = false;
+    nodeToElemMap();
+  }
+  if (_node_to_active_semilocal_elem_map_built)
+  {
+    _node_to_active_semilocal_elem_map_built = false;
+    nodeToActiveSemilocalElemMap();
+  }
 }
 
 void
@@ -1676,8 +1688,11 @@ MooseMesh::addQuadratureNode(const Elem * elem,
 
     if (elem->active())
     {
-      _node_to_elem_map[new_id].push_back(elem->id());
-      _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
+      // If they have not been built, no need to start building an incomplete one
+      if (_node_to_elem_map_built)
+        _node_to_elem_map[new_id].push_back(elem->id());
+      if (_node_to_active_semilocal_elem_map_built)
+        _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
     }
   }
   else
@@ -1723,6 +1738,8 @@ MooseMesh::clearQuadratureNodes()
   _quadrature_nodes.clear();
   _elem_to_side_to_qp_to_quadrature_nodes.clear();
   _extra_bnd_nodes.clear();
+
+  // NOTE: this does not clear them from the nodeToElem and nodeToActiveSemiLocalElem maps
 }
 
 BoundaryID

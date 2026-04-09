@@ -639,8 +639,9 @@ NonlinearSystemBase::addConstraint(const std::string & c_name,
   _constraints.addObject(constraint);
   postAddResidualObject(*constraint);
 
-  if (constraint && constraint->addCouplingEntriesToJacobian())
-    addImplicitGeometricCouplingEntriesToJacobian(true);
+  if (!_fe_problem.useHashTableMatrixAssembly())
+    if (constraint && constraint->addCouplingEntriesToJacobian())
+      addImplicitGeometricCouplingEntriesToJacobian(true);
 }
 
 void
