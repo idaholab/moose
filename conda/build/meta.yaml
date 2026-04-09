@@ -7,7 +7,7 @@
 {% set version = "2026.04.07" %}
 
 package:
-  name: moose-mpi
+  name: moose-build
   version: {{ version }}
 
 source:

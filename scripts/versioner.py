@@ -180,7 +180,16 @@ class AppInfo:
 
 ### Unittest Tracking Libraries (versioner_hashes.yaml)
 # note: Order is important
-TRACKING_LIBRARIES = ["tools", "mpi", "petsc", "libmesh", "wasp", "moose-dev", "app"]
+TRACKING_LIBRARIES = [
+    "tools",
+    "mpi",
+    "petsc",
+    "libmesh",
+    "wasp",
+    "moose-dev",
+    "app",
+    "build",
+]
 
 ### Additional libraries for tracking_libraries, necessary to build the moose-dev Conda stack
 # This allows returning a proper verification
