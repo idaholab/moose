@@ -428,13 +428,13 @@ class Tester(MooseObject, OutputInterface):
             entries = [
                 (
                     f"'{param}'"
-                    + (f" -> capability '{capability}'" if capability else "")
+                    + (f" -> capabilities '{capability}'" if capability else "")
                 )
                 for param, capability in bad_params
             ]
             message = (
                 "The following parameters are deprecated and should use the "
-                "'capability' param instead; " + ", ".join(entries)
+                "'capabilities' param instead; " + ", ".join(entries)
             )
             raise RuntimeError(message)
 
