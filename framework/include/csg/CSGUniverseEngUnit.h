@@ -81,6 +81,16 @@ protected:
   ///@}
 
   /**
+   * @brief Create a deep copy of this engineering unit for use in a different CSGBase instance.
+   *
+   * Derived classes must implement this and return a fully-constructed copy with
+   * the same attributes.
+   *
+   * @return unique_ptr to a fresh copy of this engineering unit
+   */
+  virtual std::unique_ptr<CSGUniverseEngUnit> clone() const = 0;
+
+  /**
    * @brief Create the CSGUniverse and any other necessary components that replace this engineering
    * unit in CSGBase.
    *

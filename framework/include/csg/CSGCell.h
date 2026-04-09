@@ -202,9 +202,8 @@ protected:
   /// Fill object if fill is CSGLattice
   const CSGLattice * _fill_lattice;
 
-  friend class CSGCellList;    // needed for setName() access
-  friend class CSGEngUnitList; // needed for renameEngUnit() access
-  friend class CSGBase;        // needed for updateRegion() access
+  friend class CSGCellList; // needed for setName() access
+  friend class CSGBase;     // needed for updateRegion() access
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing

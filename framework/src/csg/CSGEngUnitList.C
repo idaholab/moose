@@ -15,30 +15,38 @@ namespace CSG
 CSGEngUnitList::CSGEngUnitList() {}
 
 CSGEngUnit &
-CSGEngUnitList::addEngUnit(std::unique_ptr<CSGEngUnit> unit)
+CSGEngUnitList::addEngUnit(CSGEngUnit & unit)
 {
-  auto name = unit->getName();
-  auto [it, inserted] = _eng_units.emplace(name, std::move(unit));
-  if (!inserted)
+  const auto & name = unit.getName();
+  if (hasEngUnit(name))
     mooseError("An engineering unit with name '", name, "' already exists in geometry.");
-  return *it->second;
+  _eng_units.push_back(&unit);
+  return unit;
 }
 
 CSGEngUnit &
 CSGEngUnitList::getEngUnit(const std::string & name) const
 {
-  auto it = _eng_units.find(name);
-  if (it == _eng_units.end())
-    mooseError("Engineering unit with name '", name, "' does not exist in this CSGBase.");
-  return *it->second;
+  for (auto * ptr : _eng_units)
+    if (ptr->getName() == name)
+      return *ptr;
+  mooseError("Engineering unit with name '", name, "' does not exist in this CSGBase.");
+}
+
+void
+CSGEngUnitList::removeEngUnit(const CSGEngUnit & unit)
+{
+  auto it = std::find(_eng_units.begin(), _eng_units.end(), &unit);
+  if (it != _eng_units.end())
+    _eng_units.erase(it);
 }
 
 std::vector<std::reference_wrapper<const CSGEngUnit>>
 CSGEngUnitList::getAllEngUnits() const
 {
   std::vector<std::reference_wrapper<const CSGEngUnit>> result;
-  for (const auto & [name, unit_ptr] : _eng_units)
-    result.push_back(*unit_ptr);
+  for (const auto * ptr : _eng_units)
+    result.push_back(*ptr);
   return result;
 }
 
@@ -46,12 +54,9 @@ std::vector<std::reference_wrapper<const CSGSurfaceEngUnit>>
 CSGEngUnitList::getAllSurfaceEngUnits() const
 {
   std::vector<std::reference_wrapper<const CSGSurfaceEngUnit>> result;
-  for (const auto & [name, unit_ptr] : _eng_units)
-  {
-    const CSGSurfaceEngUnit * surf = dynamic_cast<const CSGSurfaceEngUnit *>(unit_ptr.get());
-    if (surf)
+  for (const auto * ptr : _eng_units)
+    if (const auto * surf = dynamic_cast<const CSGSurfaceEngUnit *>(ptr))
       result.push_back(*surf);
-  }
   return result;
 }
 
@@ -59,12 +64,9 @@ std::vector<std::reference_wrapper<const CSGCellEngUnit>>
 CSGEngUnitList::getAllCellEngUnits() const
 {
   std::vector<std::reference_wrapper<const CSGCellEngUnit>> result;
-  for (const auto & [name, unit_ptr] : _eng_units)
-  {
-    const CSGCellEngUnit * cell = dynamic_cast<const CSGCellEngUnit *>(unit_ptr.get());
-    if (cell)
+  for (const auto * ptr : _eng_units)
+    if (const auto * cell = dynamic_cast<const CSGCellEngUnit *>(ptr))
       result.push_back(*cell);
-  }
   return result;
 }
 
@@ -72,38 +74,10 @@ std::vector<std::reference_wrapper<const CSGUniverseEngUnit>>
 CSGEngUnitList::getAllUniverseEngUnits() const
 {
   std::vector<std::reference_wrapper<const CSGUniverseEngUnit>> result;
-  for (const auto & [name, unit_ptr] : _eng_units)
-  {
-    const CSGUniverseEngUnit * univ = dynamic_cast<const CSGUniverseEngUnit *>(unit_ptr.get());
-    if (univ)
+  for (const auto * ptr : _eng_units)
+    if (const auto * univ = dynamic_cast<const CSGUniverseEngUnit *>(ptr))
       result.push_back(*univ);
-  }
   return result;
-}
-
-void
-CSGEngUnitList::renameEngUnit(const CSGEngUnit & unit, const std::string & name)
-{
-  const auto & old_name = unit.getName();
-  auto it = _eng_units.find(old_name);
-  if (it == _eng_units.end() || it->second.get() != &unit)
-    mooseError("Engineering unit '",
-               old_name,
-               "' cannot be renamed as it does not exist in this CSGBase instance.");
-
-  auto unit_ptr = std::move(it->second);
-  _eng_units.erase(old_name);
-
-  if (auto * surf = dynamic_cast<CSGSurfaceEngUnit *>(unit_ptr.get()))
-    static_cast<CSGSurface *>(surf)->setName(name);
-  else if (auto * cell = dynamic_cast<CSGCellEngUnit *>(unit_ptr.get()))
-    static_cast<CSGCell *>(cell)->setName(name);
-  else if (auto * univ = dynamic_cast<CSGUniverseEngUnit *>(unit_ptr.get()))
-    static_cast<CSGUniverse *>(univ)->setName(name);
-  else
-    mooseError("Engineering unit '", old_name, "' has an unrecognized type and cannot be renamed.");
-
-  addEngUnit(std::move(unit_ptr));
 }
 
 bool
@@ -112,7 +86,6 @@ CSGEngUnitList::operator==(const CSGEngUnitList & other) const
   const auto all_units = this->getAllEngUnits();
   const auto other_units = other.getAllEngUnits();
 
-  // Check that same number of engineering units are defined in both lists
   if (all_units.size() != other_units.size())
     return false;
 
