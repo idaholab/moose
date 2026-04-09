@@ -4,6 +4,8 @@
 
 Solves a transient heat conduction problem using a mixed weak form, representing temperature on piecewise constant $L^2$ conforming finite elements, and heat fluxes on $H(\mathrm{div})$ conforming Raviart-Thomas elements.
 
+This example is based on the [Firedrake Irksome demo_mixed_heat example](https://www.firedrakeproject.org/Irksome/demos/demo_mixed_heat.py.html).
+
 ## Description
 
 This problem solves the transient heat equation with strong form:
@@ -39,7 +41,7 @@ T, T' &\in L_2(\Omega)\\
 \end{split}
 \end{equation}
 
-and the polynomial order of the FEs used to represent $\vec h$ and $\vec h'$ is one order higher than $T$ and $T'$.
+and the polynomial order of the FEs used to represent $\vec h$ and $\vec h'$ is the same as $T$ and $T'$.
 
 Notably, in contrast to the primal weak form for the transient heat equation solved [here](syntax/MFEM/HeatTransfer.md), the heat flux on $\Gamma_\mathrm{h}$ is strongly imposed via a Dirichlet condition, and temperatures on boundaries $\Gamma_\mathrm{T}$ are imposed weakly via boundary integrals.
 
