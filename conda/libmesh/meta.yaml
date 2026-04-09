@@ -39,9 +39,9 @@ requirements:
     - make
     - pkg-config
   host:
-    - {{ mpi }} {{ mpi_version_spec }}
+    - {{ mpi }} {{ mpi_version }}
     - moose-petsc 3.24.5 {{ mpi }}_1
-    - moose-libmesh 2026.04.07_3ca87a2 {{ mpi }}_0
+    - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
     - _openmp_mutex
     - hdf5 {{ hdf5 }}
     - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
