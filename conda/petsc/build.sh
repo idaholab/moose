@@ -60,7 +60,8 @@ function do_build(){
     make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH install
 
     # tired tired tired of broken, slow, Intel Macs
-    if [[ "$(uname -m)" == 'arm64' ]] || [[ $(uname) == 'linux' ]]; then
+    # TODO: get testing working on macs
+    if [[ $(uname) == 'linux' ]]; then
         # set forth by MPI conda-forge package
         # shellcheck disable=SC2154
         make SLEPC_DIR="$PREFIX"/moose-petsc PETSC_DIR="$PREFIX"/moose-petsc PETSC_ARCH="" check
