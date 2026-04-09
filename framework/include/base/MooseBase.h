@@ -329,9 +329,12 @@ public:
    * @param with_prefix If true, add the prefix from messagePrefix(), which is the object
    * information (type, name, etc)
    * @param node Optional hit node to add file path context as a prefix
+   * @param suppress_trace Whether or not to suppress the stack trace
    */
-  [[noreturn]] void
-  callMooseError(std::string msg, const bool with_prefix, const hit::Node * node = nullptr) const;
+  [[noreturn]] void callMooseError(std::string msg,
+                                   const bool with_prefix,
+                                   const hit::Node * node = nullptr,
+                                   const bool suppress_trace = false) const;
 
   /**
    * External method for calling moose error with added object context.
@@ -345,12 +348,14 @@ public:
    * @param with_prefix If true, add the prefix from messagePrefix(), which is the object
    * information (type, name, etc)
    * @param node Optional hit node to add file path context as a prefix
+   * @param suppress_trace Whether or not to suppress the stack trace
    */
   [[noreturn]] static void callMooseError(MooseApp * const app,
                                           const InputParameters & params,
                                           std::string msg,
                                           const bool with_prefix,
-                                          const hit::Node * node);
+                                          const hit::Node * node,
+                                          const bool suppress_trace = false);
 
 protected:
   /// The MOOSE application this is associated with

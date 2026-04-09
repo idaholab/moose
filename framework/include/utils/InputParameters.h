@@ -1472,7 +1472,8 @@ private:
    */
   [[noreturn]] void callMooseError(std::string msg,
                                    const bool with_prefix = true,
-                                   const hit::Node * node = nullptr) const;
+                                   const hit::Node * node = nullptr,
+                                   const bool suppress_trace = false) const;
 
   /// The actual parameter data. Each Metadata object contains attributes for the corresponding
   /// parameter.
@@ -2465,10 +2466,7 @@ InputParameters::paramError(const std::string & param, Args... args) const
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
   const auto [prefix, node] = paramMessageContext(param);
-
-  Moose::show_trace = false;
-  callMooseError(prefix + oss.str(), false, node);
-  Moose::show_trace = true;
+  callMooseError(prefix + oss.str(), false, node, /* suppress_trace = */ true);
 }
 
 namespace Moose

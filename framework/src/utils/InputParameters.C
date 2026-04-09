@@ -1887,7 +1887,8 @@ InputParameters::paramMessagePrefix(const std::string & param) const
 [[noreturn]] void
 InputParameters::callMooseError(std::string msg,
                                 const bool with_prefix /* = true */,
-                                const hit::Node * node /* = nullptr */) const
+                                const hit::Node * node /* = nullptr */,
+                                const bool suppress_trace /* = false */) const
 {
   // Find the context of the app if we can. This will let our errors be
   // prefixed by the multiapp name (if applicable) and will flush the
@@ -1896,5 +1897,5 @@ InputParameters::callMooseError(std::string msg,
   if (isMooseBaseObject() && have_parameter<MooseApp *>(MooseBase::app_param))
     app = get<MooseApp *>(MooseBase::app_param);
 
-  MooseBase::callMooseError(app, *this, msg, with_prefix, node);
+  MooseBase::callMooseError(app, *this, msg, with_prefix, node, suppress_trace);
 }
