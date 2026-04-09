@@ -1,4 +1,4 @@
-# Step 5: Heat Conduction id=ictp_step5
+# Step 5: Heat Conduction id=user_short_workshop_step5
 
 !---
 
@@ -47,7 +47,7 @@ We will also use an [`AuxVariable`](AuxVariables/index.md) named `T_fluid` to de
 
 ## Input: Solid Heat Conduction
 
-!listing ictp/inputs/step5_heat_conduction/solid.i prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step5_heat_conduction/solid.i prefix=moose/step5_heat_conduction
 
 !---
 
@@ -92,7 +92,7 @@ Line plot of $T$ through $y = 0$ from `solid_out.e` in Paraview with refinement
 
 ## Fluid Heat Conduction
 
-Recall our "fluid" mesh from [#ictp_step1]:
+Recall our "fluid" mesh from [#user_short_workshop_step1]:
 
 !style halign=center
 !media step1-4_mesh.png style=width:35% alt=Step 1-4 mesh
@@ -118,7 +118,7 @@ The material properties are as follows:
 
 ## Input: Fluid Heat Conduction
 
-!listing ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step5_heat_conduction/fluid.i prefix=moose/step5_heat_conduction
 
 !---
 

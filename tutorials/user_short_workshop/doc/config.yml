@@ -1,8 +1,8 @@
 Content:
-    ictp:
-        root_dir: ${MOOSE_DIR}/tutorials/ictp/doc/content
+    user_short_workshop:
+        root_dir: ${MOOSE_DIR}/tutorials/user_short_workshop/doc/content
         content:
-            - ictp/**
+            - user_short_workshop/**
             - index.md
 
     regular_workshop:
@@ -103,7 +103,7 @@ Extensions:
     MooseDocs.extensions.listing:
         modal-link: False
     MooseDocs.extensions.reveal:
-        translate: ictp/index.md
+        translate: user_short_workshop/index.md
         background_image: tutorials/INL_logo.png
         background_position: bottom 30px center
         background_size: auto 4%

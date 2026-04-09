@@ -1,4 +1,4 @@
-# Step 6: Coupling id=ictp_step6
+# Step 6: Coupling id=user_short_workshop_step6
 
 !---
 
@@ -8,7 +8,7 @@ Next, we will couple our fluid and solid (fuel pin) systems together at the inte
 
 This aims to be an example of multiphysics coupling within MOOSE. Note that it isn't a true multiphysics simulation, but it is an example on the use of the [`MultiApp`](MultiApps/index.md) system and the [`Transfer`](Transfers/index.md) system.
 
-The two inputs that were created in [#ictp_step5] will be extended in this problem.
+The two inputs that were created in [#user_short_workshop_step5] will be extended in this problem.
 
 !---
 
@@ -93,25 +93,25 @@ This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two tra
 
 ## Problem `MultiApp` Block
 
-!listing ictp/inputs/step6_coupling/solid.i block=MultiApps prefix=moose/step6_coupling
+!listing user_short_workshop/inputs/step6_coupling/solid.i block=MultiApps prefix=moose/step6_coupling
 
 !---
 
 ## Problem `Transfers` Block
 
-!listing ictp/inputs/step6_coupling/solid.i block=Transfers prefix=moose/step6_coupling
+!listing user_short_workshop/inputs/step6_coupling/solid.i block=Transfers prefix=moose/step6_coupling
 
 !---
 
 ## Problem Input: Solid
 
-!listing ictp/inputs/step6_coupling/solid.i diff=ictp/inputs/step5_heat_conduction/solid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step6_coupling/solid.i diff=user_short_workshop/inputs/step5_heat_conduction/solid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
 
 !---
 
 ## Problem Input: Fluid
 
-!listing ictp/inputs/step6_coupling/fluid.i diff=ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step6_coupling/fluid.i diff=user_short_workshop/inputs/step5_heat_conduction/fluid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
 
 !---
 
