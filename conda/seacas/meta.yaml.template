@@ -39,6 +39,7 @@ requirements:
     - fmt
     - xorg-libx11
     - xorg-xorgproto
+    - zlib
     - zstd
 
 test:
