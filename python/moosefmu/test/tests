@@ -5,13 +5,13 @@
     requirement = 'The MooseFMU utils functions should run successfully.'
     type = PythonUnitTest
     input = 'test_fmu_utils.py'
-    platform = 'linux'
+    capabilities = 'platform=linux'
   []
 
   [fmu_moose]
     requirement = 'The MooseFMU interface functions should run successfully.'
     type = PythonUnitTest
     input = 'test_moose_fmu.py'
-    platform = 'linux'
+    capabilities = 'platform=linux'
   []
 []
