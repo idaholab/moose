@@ -42,13 +42,14 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryValue() const
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
+  const auto state = determineState();
 
   // By default we approximate the boundary value with the neighboring cell value
-  auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  auto boundary_value = _var.getElemValue(*elem_info, state);
 
   // If we request linear extrapolation, we add the gradient term as well
   if (_two_term_expansion)
-    boundary_value += _var.gradSln(*elem_info) * computeCellToFaceVector();
+    boundary_value += _var.gradSln(*elem_info, state) * computeCellToFaceVector();
 
   return boundary_value;
 }
@@ -66,7 +67,7 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryNormalGradient() const
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-    normal_gradient = _var.gradSln(*elem_info) * _current_face_info->normal();
+    normal_gradient = _var.gradSln(*elem_info, determineState()) * _current_face_info->normal();
   }
   return normal_gradient;
 }
@@ -91,7 +92,7 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryValueRHSContribution() 
     const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-    contribution = _var.gradSln(*elem_info) * computeCellToFaceVector();
+    contribution = _var.gradSln(*elem_info, determineState()) * computeCellToFaceVector();
   }
 
   return contribution;

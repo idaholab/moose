@@ -55,7 +55,7 @@ LinearFVFunctorRadiativeBC::extrapolateFaceTemperature(Moose::StateArg state) co
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
   return _var.getElemValue(*elem_info, state) +
-         _var.gradSln(*elem_info) * computeCellToFaceVector();
+         _var.gradSln(*elem_info, state) * computeCellToFaceVector();
 }
 
 Real

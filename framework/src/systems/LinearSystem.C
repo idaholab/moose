@@ -14,8 +14,6 @@
 #include "PetscSupport.h"
 #include "Factory.h"
 #include "ParallelUniqueId.h"
-#include "ComputeLinearFVGreenGaussGradientFaceThread.h"
-#include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
 #include "ComputeLinearFVElementalThread.h"
 #include "ComputeLinearFVFaceThread.h"
 #include "DisplacedProblem.h"
@@ -38,6 +36,7 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVBoundaryCondition.h"
+#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -79,6 +78,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
+    LinearFVGradientInterface(static_cast<SystemBase &>(*this)),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
@@ -107,6 +107,7 @@ void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
+  _current_solution = system().current_local_solution.get();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -114,6 +115,8 @@ LinearSystem::initialSetup()
       mooseError("You are trying to add a nonlinear variable to a linear system! The variable "
                  "which is assigned to the wrong system: ",
                  name);
+
+  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -151,6 +154,13 @@ LinearSystem::initialSetup()
 }
 
 void
+LinearSystem::reinit()
+{
+  _current_solution = system().current_local_solution.get();
+  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+}
+
+void
 LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
                                       const std::set<TagID> & matrix_tags,
                                       const bool compute_gradients)
@@ -173,49 +183,6 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
     // The buck stops here, we have already handled the exception by
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
-  }
-}
-
-void
-LinearSystem::computeGradients()
-{
-  _new_gradient.clear();
-  for (auto & vec : _raw_grad_container)
-    _new_gradient.push_back(vec->zero_clone());
-
-  TIME_SECTION("LinearVariableFV_Gradients", 3 /*, "Computing Linear FV variable gradients"*/);
-
-  PARALLEL_TRY
-  {
-    using FaceInfoRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
-                                  _fe_problem.mesh().ownedFaceInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientFaceThread gradient_face_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
-    Threads::parallel_reduce(face_info_range, gradient_face_thread);
-  }
-  PARALLEL_CATCH;
-
-  for (auto & vec : _new_gradient)
-    vec->close();
-
-  PARALLEL_TRY
-  {
-    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
-    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
-                                  _fe_problem.mesh().ownedElemInfoEnd());
-
-    ComputeLinearFVGreenGaussGradientVolumeThread gradient_volume_thread(
-        _fe_problem, _fe_problem.linearSysNum(name()));
-    Threads::parallel_reduce(elem_info_range, gradient_volume_thread);
-  }
-  PARALLEL_CATCH;
-
-  for (const auto i : index_range(_raw_grad_container))
-  {
-    _new_gradient[i]->close();
-    _raw_grad_container[i] = std::move(_new_gradient[i]);
   }
 }
 

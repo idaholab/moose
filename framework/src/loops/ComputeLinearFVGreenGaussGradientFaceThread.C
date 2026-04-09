@@ -8,20 +8,21 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
-#include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "SystemBase.h"
 #include "PetscVectorReader.h"
 #include "FEProblemBase.h"
 
 ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFaceThread(
-    FEProblemBase & fe_problem, const unsigned int linear_system_num)
+    FEProblemBase & fe_problem,
+    SystemBase & system,
+    std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient)
   : _fe_problem(fe_problem),
     _dim(_fe_problem.mesh().dimension()),
-    _linear_system_number(linear_system_num),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(
-        _fe_problem.getLinearSystem(_linear_system_number).system())),
-    _system_number(_linear_system.number()),
-    _new_gradient(_fe_problem.getLinearSystem(_linear_system_number).newGradientContainer())
+    _system(system),
+    _libmesh_system(system.system()),
+    _system_number(_libmesh_system.number()),
+    _temporary_gradient(temporary_gradient)
 {
 }
 
@@ -29,12 +30,12 @@ ComputeLinearFVGreenGaussGradientFaceThread::ComputeLinearFVGreenGaussGradientFa
     ComputeLinearFVGreenGaussGradientFaceThread & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
     _dim(x._dim),
-    _linear_system_number(x._linear_system_number),
-    _linear_system(x._linear_system),
+    _system(x._system),
+    _libmesh_system(x._libmesh_system),
     _system_number(x._system_number),
     // This will be the vector we work on since the old gradient might still be needed
     // to compute extrapolated boundary conditions for example.
-    _new_gradient(x._new_gradient)
+    _temporary_gradient(x._temporary_gradient)
 {
 }
 
@@ -46,27 +47,26 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
 
   unsigned int size = 0;
 
-  for (const auto & variable :
-       _fe_problem.getLinearSystem(_linear_system_number).getVariables(_tid))
+  for (const auto & variable : _system.getVariables(_tid))
   {
     _current_var = dynamic_cast<MooseLinearVariableFV<Real> *>(variable);
-    mooseAssert(_current_var,
-                "This should be a linear FV variable, did we somehow add a nonlinear variable to "
-                "the linear system?");
+    if (!_current_var)
+      continue;
+
     if (_current_var->needsGradientVectorStorage())
     {
       if (!size)
         size = range.size();
 
-      std::vector<std::vector<Real>> new_values_elem(_new_gradient.size(),
-                                                     std::vector<Real>(size, 0.0));
-      std::vector<std::vector<Real>> new_values_neighbor(_new_gradient.size(),
-                                                         std::vector<Real>(size, 0.0));
+      std::vector<std::vector<Real>> temporary_values_elem(_temporary_gradient.size(),
+                                                           std::vector<Real>(size, 0.0));
+      std::vector<std::vector<Real>> temporary_values_neighbor(_temporary_gradient.size(),
+                                                               std::vector<Real>(size, 0.0));
       std::vector<dof_id_type> dof_indices_elem(size, 0);
       std::vector<dof_id_type> dof_indices_neighbor(size, 0);
 
       {
-        PetscVectorReader solution_reader(*_linear_system.current_local_solution);
+        PetscVectorReader solution_reader(*_libmesh_system.current_local_solution);
 
         // Iterate over all the face infos in the range
         auto face_iterator = range.begin();
@@ -97,8 +97,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
 
             for (const auto i : make_range(_dim))
             {
-              new_values_elem[i][face_i] = contribution(i);
-              new_values_neighbor[i][face_i] = -contribution(i);
+              temporary_values_elem[i][face_i] = contribution(i);
+              temporary_values_neighbor[i][face_i] = -contribution(i);
             }
           }
           // If this face is on the boundary of the block where the variable is defined, we
@@ -125,8 +125,8 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
                                           ? dof_indices_elem
                                           : dof_indices_neighbor;
             auto & contribution_container = current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                                                ? new_values_elem
-                                                : new_values_neighbor;
+                                                ? temporary_values_elem
+                                                : temporary_values_neighbor;
 
             dof_id_container[face_i] =
                 elem_info->dofIndices()[_system_number][_current_var->number()];
@@ -145,8 +145,9 @@ ComputeLinearFVGreenGaussGradientFaceThread::operator()(const FaceInfoRange & ra
       }
       for (const auto i : make_range(_dim))
       {
-        _new_gradient[i]->add_vector(new_values_elem[i].data(), dof_indices_elem);
-        _new_gradient[i]->add_vector(new_values_neighbor[i].data(), dof_indices_neighbor);
+        _temporary_gradient[i]->add_vector(temporary_values_elem[i].data(), dof_indices_elem);
+        _temporary_gradient[i]->add_vector(temporary_values_neighbor[i].data(),
+                                           dof_indices_neighbor);
       }
     }
   }

@@ -118,8 +118,8 @@ LinearFVAnisotropicDiffusion::computeFluxRHSContribution()
     const auto state_arg = determineState();
 
     // Get the gradients from the adjacent cells
-    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
-    const auto grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
+    const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
+    const auto grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
 
     // Interpolate the two gradients to the face
     const auto interp_coeffs =
@@ -192,9 +192,10 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
   mooseAssert(diff_bc, "This should be a valid BC!");
 
   const auto face_arg = singleSidedFaceArg(_current_face_info);
+  const auto state_arg = determineState();
   auto grad_contrib = diff_bc->computeBoundaryGradientRHSContribution();
 
-  auto scaled_diff_tensor = _diffusion_tensor(face_arg, determineState());
+  auto scaled_diff_tensor = _diffusion_tensor(face_arg, state_arg);
 
   for (const auto i : make_range(Moose::dim))
     scaled_diff_tensor(i) = _current_face_info->normal()(i) * scaled_diff_tensor(i);
@@ -205,7 +206,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
                              : _current_face_info->neighborInfo();
   mooseAssert(elem_info, "We should always have an element info for the current face");
 
-  auto boundary_grad = _var.gradSln(*elem_info);
+  auto boundary_grad = _var.gradSln(*elem_info, state_arg);
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.

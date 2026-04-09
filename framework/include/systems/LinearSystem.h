@@ -10,7 +10,11 @@
 #pragma once
 
 #include "SolverSystem.h"
+#include "LinearFVGradientInterface.h"
 #include "PerfGraphInterface.h"
+#include "GradientLimiterType.h"
+
+#include <set>
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
@@ -32,7 +36,9 @@ class DiagonalMatrix;
 /**
  * Linear system to be solved
  */
-class LinearSystem : public SolverSystem, public PerfGraphInterface
+class LinearSystem : public SolverSystem,
+                     public PerfGraphInterface,
+                     public LinearFVGradientInterface
 {
 public:
   LinearSystem(FEProblemBase & problem, const std::string & name);
@@ -48,6 +54,7 @@ public:
   virtual bool converged() override { return _converged; }
 
   virtual void initialSetup() override;
+  virtual void reinit() override;
 
   // Overriding these to make sure the linear systems don't do anything during
   // residual/jacobian setup
@@ -126,18 +133,9 @@ public:
   SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
   const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
 
-  /**
-   * Compute the Green-Gauss gradients
-   */
-  void computeGradients();
-
-  /**
-   * Return a reference to the new (temporary) gradient container vectors
-   */
-  std::vector<std::unique_ptr<NumericVector<Number>>> & newGradientContainer()
-  {
-    return _new_gradient;
-  }
+  using LinearFVGradientInterface::computeGradients;
+  using LinearFVGradientInterface::linearFVLimitedGradientContainer;
+  using LinearFVGradientInterface::requestLinearFVLimitedGradients;
 
   virtual void compute(ExecFlagType type) override;
 
@@ -200,12 +198,6 @@ protected:
 
   /// Base class reference to the linear implicit system in libmesh
   libMesh::LinearImplicitSystem & _linear_implicit_system;
-
-  /// Vectors to store the new gradients during the computation. This is needed
-  /// because the old gradients might still be needed to determine boundary values
-  /// (for extrapolated boundary conditions). Once the computation is done, we
-  /// move the nev vectors to the original containers.
-  std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)

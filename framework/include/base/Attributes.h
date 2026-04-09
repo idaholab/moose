@@ -35,7 +35,8 @@ enum class Interfaces
   BoundaryRestrictable = 1 << 14,
   Reporter = 1 << 15,
   DomainUserObject = 1 << 16,
-  MortarUserObject = 1 << 17
+  MortarUserObject = 1 << 17,
+  FVInterpolationMethod = 1 << 18
 };
 
 template <>

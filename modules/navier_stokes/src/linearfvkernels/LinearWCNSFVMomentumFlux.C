@@ -203,8 +203,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
       const auto state_arg = determineState();
 
       // Get the gradients from the adjacent cells
-      const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo());
-      const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo());
+      const auto grad_elem = _var.gradSln(*_current_face_info->elemInfo(), state_arg);
+      const auto & grad_neighbor = _var.gradSln(*_current_face_info->neighborInfo(), state_arg);
 
       // Interpolate the two gradients to the face
       const auto interp_coeffs =
@@ -224,6 +224,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
     // scenario (2), we will have to account for the deviatoric parts of the stress tensor.
     if (_use_deviatoric_terms)
     {
+      const auto state_arg = determineState();
+
       // Interpolate the two gradients to the face
       const auto interp_coeffs =
           interpCoeffs(Moose::FV::InterpMethod::Average, *_current_face_info, true);
@@ -238,14 +240,14 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
       // Loop over every velocity component so we can form the symmetric gradient pieces
       for (const auto dir : make_range(_dim))
       {
-        grad_elem[dir] = velocityVar(dir).gradSln(*_current_face_info->elemInfo());
-        grad_neighbor[dir] = velocityVar(dir).gradSln(*_current_face_info->neighborInfo());
+        grad_elem[dir] = velocityVar(dir).gradSln(*_current_face_info->elemInfo(), state_arg);
+        grad_neighbor[dir] =
+            velocityVar(dir).gradSln(*_current_face_info->neighborInfo(), state_arg);
         trace_elem += grad_elem[dir](dir);
         trace_neighbor += grad_neighbor[dir](dir);
       }
 
       const auto face_arg = makeCDFace(*_current_face_info);
-      const auto state_arg = determineState();
 
       if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
       {
@@ -325,7 +327,8 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     const auto correction_vector =
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
-    grad_contrib += _mu(face_arg, determineState()) * _var.gradSln(*elem_info) *
+    const auto state_arg = determineState();
+    grad_contrib += _mu(face_arg, state_arg) * _var.gradSln(*elem_info, state_arg) *
                     _boundary_normal_factor * correction_vector;
   }
 
@@ -345,7 +348,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     for (const auto dir : make_range(_dim))
     {
-      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info);
+      grad_elem[dir] = velocityVar(dir).gradSln(*elem_info, state_arg);
       trace_elem += grad_elem[dir](dir);
     }
 

@@ -27,7 +27,7 @@
 #include "FVBoundaryCondition.h"
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
-
+#include "GradientLimiterType.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
@@ -1561,19 +1561,6 @@ SystemBase::initialSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     _vars[tid].initialSetup();
-
-  // If we need raw gradients, we initialize them here.
-  bool gradient_storage_initialized = false;
-  for (const auto & field_var : _vars[0].fieldVariables())
-    if (!gradient_storage_initialized && field_var->needsGradientVectorStorage())
-    {
-      _raw_grad_container.clear();
-      for (const auto i : make_range(this->_mesh.dimension()))
-      {
-        libmesh_ignore(i);
-        _raw_grad_container.push_back(currentSolution()->zero_clone());
-      }
-    }
 }
 
 void
