@@ -39,7 +39,7 @@ requirements:
     - cmake
     - ninja
   host:
-    - {{ mpi }} {{ mpi_version_spec }}
+    - {{ mpi }} {{ mpi_version }}
 
 test:
   commands:
