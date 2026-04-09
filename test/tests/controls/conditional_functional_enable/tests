@@ -9,4 +9,12 @@
     requirement = "The Control system shall be capable of activating or deactivating"
       " MOOSE objects using a conditional function."
   [../]
+  [linear-fv-bc-control-switch]
+    type = CSVDiff
+    input = 'linear-fv-bc-control-switch.i'
+    csvdiff = 'linear-fv-bc-control-switch_out.csv'
+    requirement = 'The system shall correctly apply linear finite volume boundary conditions that are '
+                  'enabled or disabled by controls by refreshing the boundary map every timestep.'
+    max_threads = 1
+  []
 []
