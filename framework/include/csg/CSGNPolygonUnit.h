@@ -30,7 +30,8 @@ class CSGBase;
  *
  * Implements:
  *   - expandUnit(CSGBase &) — creates N CSGPlane surfaces in CSGBase, one per side
- *   - getExpandedRegion() — returns the intersection of the N negative half-spaces
+ *   - getExpandedRegion() — returns the intersection of the N half-spaces formed by the planes that
+ *     containing the origin
  *   - evaluateSurfaceEquationAtPoint() — returns the maximum plane evaluation over
  *     all N sides; negative means the point is inside, positive means outside
  *   - clone() — returns a deep copy
@@ -63,12 +64,41 @@ public:
   Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
   /**
-   * @brief Return the engineering attributes of this unit.
+   * @brief Return the polygon attributes for this object.
    *
-   * @return map containing: n_sides (unsigned int), apothem (Real),
-   *         x_center (Real), y_center (Real)
+   * @return map containing: n_sides (unsigned int), apothem (Real)
    */
   std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
+
+  // helper getter functions to get additional polygon dimensions/attributes
+
+  /**
+   * @brief Get the number of sides for the polygon
+   *
+   * @return number of sides
+   */
+  unsigned int getNumSides() { return _n_sides; }
+
+  /**
+   * @brief Get the polygon apothem (center-to-flat distance)
+   *
+   * @return apothem value
+   */
+  Real getApothem() { return _apothem; }
+
+  /**
+   * @brief Get the polygon side length
+   *
+   * @return side length
+   */
+  Real getSideLength() { return 2.0 * _apothem * std::tan(M_PI / _n_sides); }
+
+  /**
+   * @brief Get the the circumradius for the polygon (center-to-vertex distance)
+   *
+   * @return radius value
+   */
+  Real getRadius() { return _apothem / (std::cos(M_PI / _n_sides)); }
 
 protected:
   /**

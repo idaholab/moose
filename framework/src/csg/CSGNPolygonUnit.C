@@ -29,11 +29,11 @@ CSGNPolygonUnit::evaluateSurfaceEquationAtPoint(const Point & p) const
 {
   // Condition for interior (negative value) vs exterior (positive value) for the polygon is:
   // for point (x, y), if the following is true for all values of k, then the point is "interior".
-  // If any one value is positive, then the point is outside the polygone. Therefore, we calculate
+  // If any one value is positive, then the point is outside the polygon. Therefore, we calculate
   // the maximum value. If that max value remains negative, then getHalfspaceFromPoint will
   // correctly determine the point to be interior.
   //
-  //    x·cos(2*pi*k/N) + y·sin(2*pi*k/N) <= apothem, for all k = 0..N-1
+  //    x*cos(2*pi*k/N) + y*sin(2*pi*k/N) <= apothem, for all k = 0..N-1
 
   Real max_val = -1e200; // initialize to extremely large negative (to be updated)
   for (unsigned int k = 0; k < _n_sides - 1; ++k)
