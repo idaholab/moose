@@ -11,8 +11,8 @@
 """
 Python port of env_pre_check.sh with an extended allow-list for Unicode characters.
 - Mirrors the checks from the original shell script.
-- Adds a configurable Unicode allow-list (ASCII + Latin Extended/European accents + Greek + Superscripts/Subscripts + ¹²³ + µ + math symbols).
-- Uses standard `re` module with manual Unicode classification.
+- Adds a configurable Unicode allow-list (ASCII + Latin Extended/European accents + Greek +
+  Superscripts/Subscripts + ¹²³ + µ + math symbols).
 """
 
 import os
@@ -21,78 +21,38 @@ import sys
 import stat
 import subprocess
 import textwrap
+import unicodedata
 from pathlib import Path
-from typing import Iterable, List, Tuple, Optional
+from typing import Iterable
 
 # --------------------------- Helpers ---------------------------
 
 
-def run(
-    cmd: List[str], capture=True, text=True, check=False
-) -> subprocess.CompletedProcess:
-    """Execute a shell command and return the result.
-
-    Args:
-        cmd: Command and arguments as a list
-        capture: Whether to capture output
-        text: Whether to decode output as text
-        check: Whether to raise exception on non-zero exit
-
-    Returns:
-        CompletedProcess object with command result
-    """
-    return subprocess.run(cmd, capture_output=capture, text=text, check=check)
-
-
-def git_files(*patterns: str) -> List[str]:
-    """
-    Return repo-tracked files matching glob patterns.
-
-    Args:
-        *patterns: List of glob patterns to match (e.g., "*.py", "*.[Ch]"), inclusive
-
-    Returns:
-        List of file paths, excluding contrib/ directory
-    """
-    if not patterns:
-        patterns = ("",)
-    cmd = ["git", "ls-files", "-z", *patterns]
-    cp = run(cmd, check=True)
-    items = [p for p in cp.stdout.split("\x00") if p]
-    items = [
-        p
-        for p in items
-        if not (
-            p.startswith("contrib/")
-            or "/contrib/" in p
-            or p.endswith("/test_pre_check.py")
+def git_files(*patterns: str) -> list[str]:
+    """Return repo-tracked files matching glob patterns, excluding contrib/."""
+    try:
+        cp = subprocess.run(
+            ["git", "ls-files", "-z", *patterns],
+            capture_output=True,
+            text=True,
+            check=True,
         )
+    except subprocess.CalledProcessError as e:
+        print("Git error output:", e.stderr)
+        raise
+
+    return [
+        p
+        for p in cp.stdout.split("\x00")
+        if p
+        and not p.startswith("contrib/")
+        and "/contrib/" not in p
+        and not p.endswith("/test_pre_check.py")
     ]
-    return items
-
-
-def read_text_bytes(path: str) -> bytes:
-    """Read file as bytes.
-
-    Args:
-        path: File path to read
-
-    Returns:
-        File contents as bytes
-    """
-    with open(path, "rb") as f:
-        return f.read()
 
 
 def read_text(path: str) -> str:
-    """Read file as UTF-8 text, replacing invalid byte sequences.
-
-    Args:
-        path: File path to read
-
-    Returns:
-        File contents as string, with invalid UTF-8 replaced
-    """
+    """Read file as UTF-8 text, replacing invalid byte sequences."""
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         return f.read()
 
@@ -101,290 +61,151 @@ def read_text(path: str) -> str:
 
 
 def ticket_references(log_from: str, log_to: str) -> str:
-    r"""
-    Find commit messages with ticket references between two commits.
-
-    Searches for patterns like '#1234' or 'moose/issues/' or 'moose/pull/'.
-
-    Args:
-        log_from: Starting commit reference
-        log_to: Ending commit reference
-
-    Returns:
-        Newline-separated list of matching commit messages
-    """
-    cp = run(["git", "log", f"{log_from}..{log_to}"], capture=True, text=True, check=True)
-    text = cp.stdout or ""
-    pat = re.compile(r"(?:moose/(?:issues|pull)/)|#\d{1,}")
-    out = []
-    for line in text.splitlines():
-        if pat.search(line):
-            out.append(line)
-    return "\n".join(out)
+    r"""Find commit messages with ticket references (#1234, moose/issues/, moose/pull/)."""
+    cp = subprocess.run(
+        ["git", "log", f"{log_from}..{log_to}"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    pat = re.compile(r"(?:moose/(?:issues|pull)/)|#\d+")
+    return "\n".join(
+        line for line in (cp.stdout or "").splitlines() if pat.search(line)
+    )
 
 
 # --------------------------- File set helpers ---------------------------
 
 
-def files_for_tabs_except_input() -> List[str]:
-    """Get C/C++ and Python files for tab checking, excluding input files."""
+def files_for_tabs_except_input() -> list[str]:
     return git_files("*.[Ch]", "*.py")
 
 
-def files_for_tabs() -> List[str]:
-    """Get all C/C++, input, and Python files for tab checking."""
+def files_for_tabs() -> list[str]:
     return git_files("*.[Chi]", "*.py")
 
 
-def files_for_whitespace(
-    check_cpp_whitespace: str, check_f_whitespace: str
-) -> List[str]:
-    """Get files to check for trailing whitespace.
-
-    Args:
-        check_cpp_whitespace: "1" to include C/C++ files, "0" for only input files
-        check_f_whitespace: "1" to include Fortran files
-
-    Returns:
-        List of file paths to check
-    """
-    if check_cpp_whitespace == "0":
-        files = ["*.i", "*.py"]
-    else:
-        files = ["*.[Cchi]", "*.py"]
-    if check_f_whitespace == "1":
+def files_for_whitespace(check_cpp: bool, check_fortran: bool) -> list[str]:
+    """Get files to check for trailing whitespace."""
+    files = ["*.[Cchi]", "*.py"] if check_cpp else ["*.i", "*.py"]
+    if check_fortran:
         files += ["*.[FfH]", "*.f90", "*.F90", "*.FF90"]
     return git_files(*files)
 
 
-def files_for_headers() -> List[str]:
-    """Get all header files."""
+def files_for_headers() -> list[str]:
     return git_files("*.h")
 
 
 # --------------------------- Individual checks ---------------------------
 
 
-def find_tabs(files: Iterable[str]) -> List[str]:
-    """Check files for tab characters.
+def find_tabs(files: Iterable[str]) -> list[str]:
+    """Return files containing tab characters."""
+    return [f for f in files if "\t" in read_text(f)]
 
-    Args:
-        files: Iterable of file paths to check
 
-    Returns:
-        List of files containing tabs, prefixed with tabs
-    """
+def banned_keywords() -> list[str]:
+    r"""Return C/C++ files containing banned keywords (std::cout, std::cerr, printf, sleep, print_trace)."""
     bad = []
-    seen = set()
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
-        data = read_text(f)
-        if "\t" in data:
-            bad.append("\t" + f)
-    return bad
-
-
-def banned_keywords() -> List[str]:
-    r"""
-    Check for banned keywords in C/C++ files.
-
-    Detects:
-    - std::cout, std::cerr (should use mooseInfo/mooseError)
-    - printf() calls
-    - sleep() calls (except in SlowProblem.C)
-    - print_trace (except in MooseError files)
-
-    Returns:
-        List of files containing banned keywords, prefixed with tabs
-    """
-    bad = []
-    seen = set()
-    files = git_files("*.[Ch]")
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
+    for f in git_files("*.[Ch]"):
         text = read_text(f)
         if "std::cout" in text or "std::cerr" in text:
-            bad.append("\t" + f)
-            continue
-        if re.search(r"printf\s*\(", text):
-            bad.append("\t" + f)
-            continue
-        if not f.endswith("SlowProblem.C") and re.search(r"sleep\s*\(", text):
-            bad.append("\t" + f)
-            continue
-        if not re.search(r"MooseError\.(h|C)$", f) and "print_trace" in text:
-            bad.append("\t" + f)
-            continue
+            bad.append(f)
+        elif re.search(r"printf\s*\(", text):
+            bad.append(f)
+        elif not f.endswith("SlowProblem.C") and re.search(r"sleep\s*\(", text):
+            bad.append(f)
+        elif not re.search(r"MooseError\.(h|C)$", f) and "print_trace" in text:
+            bad.append(f)
     return bad
 
 
-def banned_funcs() -> List[str]:
-    r"""
-    Check for deprecated MOOSE function calls.
-
-    Detects usage of mooseError2, mooseWarning2, etc. which should be
-    replaced with mooseError, mooseWarning, etc.
-
-    Returns:
-        List of files containing banned functions, prefixed with tabs
-    """
-    bad = []
-    seen = set()
-    files = git_files("*.[Ch]")
+def banned_funcs() -> list[str]:
+    r"""Return files containing deprecated MOOSE function calls (mooseError2, mooseWarning2, etc.)."""
     pat_file_ok = re.compile(r"Moose(Error|Object)\.(h|C)$")
     pat = re.compile(
         r"moose(Warning|Error|Deprecated|Info)2\s*\(", re.IGNORECASE | re.DOTALL
     )
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
-        if pat_file_ok.search(f):
-            continue
-        text = read_text(f)
-        if pat.search(text):
-            bad.append("\t" + f)
-    return bad
+    return [
+        f
+        for f in git_files("*.[Ch]")
+        if not pat_file_ok.search(f) and pat.search(read_text(f))
+    ]
 
 
-def classified_keywords() -> List[str]:
-    r"""
-    Check for classified or proprietary keywords.
-
-    Searches for variations of 'proprietary' and 'classified' that might
-    indicate restricted content. Ignores pre_check.py itself.
-
-    Returns:
-        List of files containing classified keywords, prefixed with tabs
-    """
-    bad = []
-    seen = set()
-    files = git_files("*.[Chi]", "*.py")
+def classified_keywords() -> list[str]:
+    r"""Return files containing classified or proprietary keywords."""
     pat_prop = re.compile(r"p\s*r\s*o\s*p\s*r\s*i\s*e\s*t\s*a\s*r\s*y", re.IGNORECASE)
     pat_class = re.compile(r"c\s*l\s*a\s*s\s*s\s*i\s*f\s*i\s*e\s*d", re.IGNORECASE)
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
-        # Skip env_pre_check.py itself since it needs to check for these keywords
+    bad = []
+    for f in git_files("*.[Chi]", "*.py"):
         if f.endswith("pre_check.py"):
             continue
         text = read_text(f)
         if pat_prop.search(text) or pat_class.search(text):
-            bad.append("\t" + f)
+            bad.append(f)
     return bad
 
 
-def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
-    """Check files for trailing whitespace at line ends.
-
-    Args:
-        files: Iterable of file paths to check
-
-    Returns:
-        List of files with trailing whitespace, prefixed with tabs
-    """
+def trailing_whitespace_files(files: Iterable[str]) -> list[str]:
+    """Return files containing trailing whitespace."""
     bad = []
-    seen = set()
     for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
-        found = False
         with open(f, "r", encoding="utf-8", errors="replace") as fh:
-            for line in fh:
-                if re.search(r"\s+$", line.rstrip("\n")):
-                    found = True
-                    break
-        if found:
-            bad.append("\t" + f)
+            if any(re.search(r"\s+$", line.rstrip("\n")) for line in fh):
+                bad.append(f)
     return bad
 
 
-def no_newline_at_eof_files() -> List[str]:
-    """Check for files missing newline at end of file.
-
-    Returns:
-        List of files without newline at EOF, prefixed with tabs
-    """
+def no_newline_at_eof_files() -> list[str]:
+    """Return files missing a newline at end of file."""
     bad = []
-    files = git_files("*.[Chi]", "*.py")
-    for f in files:
+    for f in git_files("*.[Chi]", "*.py"):
         with open(f, "rb") as fh:
             fh.seek(0, 2)
-            size = fh.tell()
-            if size == 0:
+            if fh.tell() == 0:
                 continue
             fh.seek(-1, 2)
-            last = fh.read(1)
-            if last != b"\n":
-                bad.append("\t" + f)
+            if fh.read(1) != b"\n":
+                bad.append(f)
     return bad
 
 
-def find_bad_executables() -> List[str]:
-    """Find files with incorrect executable permissions.
+def find_bad_executables() -> list[str]:
+    """Return files with incorrect executable permissions.
 
-    Scripts (.py, .js, .sh, .pl) and extensionless files are allowed to be
-    executable. Other files should not have executable permissions.
-
-    Returns:
-        List of incorrectly executable files, prefixed with tabs
+    Scripts (.py, .js, .sh, .pl) and extensionless files are allowed to be executable.
     """
     bad = []
-    cp = run(["git", "ls-files"], check=True)
-    for f in cp.stdout.splitlines():
-        if f.endswith((".pl", ".py", ".js", ".sh")):
-            continue
-        if "." not in Path(f).name:
-            # ignore files with no extension
+    for f in git_files():
+        if f.endswith((".pl", ".py", ".js", ".sh")) or "." not in Path(f).name:
             continue
         st = os.stat(f)
         if stat.S_ISREG(st.st_mode) and os.access(f, os.X_OK):
-            bad.append("\t" + f)
+            bad.append(f)
     return bad
 
 
-def include_guard_files() -> List[str]:
-    """Check for old-style C++ include guards.
-
-    MOOSE prefers '#pragma once' over traditional #ifndef/#define guards.
-
-    Returns:
-        List of headers with old-style guards, prefixed with tabs
-    """
-    bad = []
-    files = files_for_headers()
+def include_guard_files() -> list[str]:
+    """Return header files using old-style #ifndef/#define include guards."""
     pat = re.compile(r"^#ifndef\s+(\S+_H_?)\s*\n#define\s+\1", re.M)
-    for f in files:
-        text = read_text(f)
-        if pat.search(text):
-            bad.append("\t" + f)
-    return bad
+    return [f for f in files_for_headers() if pat.search(read_text(f))]
 
 
-def windows_line_endings() -> List[str]:
-    """Check for Windows-style line endings (CRLF).
-
-    Returns:
-        List of files with Windows line endings, prefixed with tabs
-    """
+def windows_line_endings() -> list[str]:
+    """Return files with Windows-style (CRLF) line endings."""
     bad = []
-    files = git_files("*.[Chi]", "*.py", "*.md")
-    for f in files:
-        data = read_text_bytes(f)
-        if b"\r\n" in data:
-            bad.append("\t" + f)
+    for f in git_files("*.[Chi]", "*.py", "*.md"):
+        with open(f, "rb") as fh:
+            if b"\r\n" in fh.read():
+                bad.append(f)
     return bad
 
 
 # --------------------------- Unicode allow-list check ---------------------------
 
-# Optional slightly wider variant additions (explicit operators)
+# Notation/relation symbols used to describe math but not as inline operators
 WIDER_EXTRAS = [
     "PLUS-MINUS SIGN",  # ±
     "MINUS-OR-PLUS SIGN",  # ∓
@@ -406,8 +227,9 @@ WIDER_EXTRAS = [
     "DOUBLE-STRUCK CAPITAL C",  # ℂ
 ]
 
+# Computational operators used directly in PDE/continuum mechanics expressions
 CORE_NAMES = [
-    # Dots / operators
+    # Dots / products
     "MIDDLE DOT",  # ·
     "BULLET OPERATOR",  # ∙
     "DOT OPERATOR",  # ⋅
@@ -437,22 +259,10 @@ LEGACY_SUPERSCRIPTS = [
 ]  # ¹ ² ³
 MICRO_SIGN = "MICRO SIGN"  # µ
 
-
-def _named_chars(names: Iterable[str]) -> List[str]:
-    out = []
-    import unicodedata
-
-    for n in names:
-        try:
-            out.append(unicodedata.lookup(n))
-        except KeyError:
-            pass
-    return out
-
-
-ALLOWED_NAMED_CHARS = _named_chars(
-    CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN]
-)
+ALLOWED_NAMED_CHARS = {
+    unicodedata.lookup(n)
+    for n in CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN]
+}
 
 
 def _in_greek(ch: str) -> bool:
@@ -462,101 +272,49 @@ def _in_greek(ch: str) -> bool:
 
 
 def _in_superscripts_subscripts(ch: str) -> bool:
-    cp = ord(ch)
-    return 0x2070 <= cp <= 0x209F
-
-
-def _is_ascii(ch: str) -> bool:
-    return ord(ch) < 128
+    return 0x2070 <= ord(ch) <= 0x209F
 
 
 def _in_latin_extended(ch: str) -> bool:
-    """Check if character is in Latin-1 Supplement or Latin Extended blocks."""
-    cp = ord(ch)
-    # Latin-1 Supplement: U+0080 - U+00FF (includes most Western European accents)
-    # This covers French, Spanish, German, Italian, Portuguese, etc.
-    if 0x00A0 <= cp <= 0x00FF:  # Skip control chars, start from non-breaking space
-        return True
-    # Latin Extended-A: U+0100 - U+017F (Central European, Baltic)
-    # Covers Polish, Czech, Croatian, Hungarian, etc.
-    if 0x0100 <= cp <= 0x017F:
-        return True
-    # Latin Extended-B: U+0180 - U+024F (less common, but still European)
-    if 0x0180 <= cp <= 0x024F:
-        return True
-    # Latin Extended Additional: U+1E00 - U+1EFF (Vietnamese and other special Latin)
-    # Uncomment if needed: if 0x1E00 <= cp <= 0x1EFF: return True
-    # IPA Extensions: U+0250 - U+02AF (phonetic symbols)
-    # Uncomment if needed: if 0x0250 <= cp <= 0x02AF: return True
-    return False
+    """Latin-1 Supplement (U+00A0 - U+00FF) and Latin Extended-A/B (U+0100 - U+024F)."""
+    return 0x00A0 <= ord(ch) <= 0x024F
 
 
 def _is_allowed_manual(ch: str) -> bool:
-    # ASCII
-    if _is_ascii(ch):
-        return True
-    # Latin extended (European accents)
-    if _in_latin_extended(ch):
-        return True
-    # Greek
-    if _in_greek(ch):
-        return True
-    # Superscripts/Subscripts block
-    if _in_superscripts_subscripts(ch):
-        return True
-    # Named math symbols and special characters
-    if ch in ALLOWED_NAMED_CHARS:
-        return True
-    return False
+    return (
+        ord(ch) < 128
+        or _in_latin_extended(ch)
+        or _in_greek(ch)
+        or _in_superscripts_subscripts(ch)
+        or ch in ALLOWED_NAMED_CHARS
+    )
 
 
-def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
-    r"""
-    Return list of (index, char) for characters NOT in the allow-list.
-    Uses manual classification since standard re doesn't support Unicode properties.
-    """
-    out = []
-    for i, ch in enumerate(text):
-        if not _is_allowed_manual(ch):
-            out.append((i, ch))
-    return out
+def _disallowed_spans(text: str) -> list[tuple[int, str]]:
+    """Return (index, char) pairs for characters not in the allow-list."""
+    return [(i, ch) for i, ch in enumerate(text) if not _is_allowed_manual(ch)]
 
 
-def _get_line_col(text: str, index: int) -> Tuple[int, int]:
-    """Convert a string index to line and column numbers (1-based)."""
-    line = 1
-    col = 1
-    for i, ch in enumerate(text):
-        if i == index:
-            return line, col
-        if ch == "\n":
-            line += 1
-            col = 1
-        else:
-            col += 1
+def _get_line_col(text: str, index: int) -> tuple[int, int]:
+    """Convert a string index to 1-based (line, column)."""
+    line = text.count("\n", 0, index) + 1
+    col = index - text.rfind("\n", 0, index)
     return line, col
 
 
-def unicode_files() -> Tuple[List[str], List[str]]:
-    """Returns (bad_files, detailed_locations)."""
+def unicode_files() -> tuple[list[str], list[str]]:
+    """Return (bad_files, detailed_locations) for files containing disallowed Unicode."""
     bad = []
     locations = []
-    files = git_files("*.[Chi]", "*.py")
-    seen = set()
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
+    for f in git_files("*.[Chi]", "*.py"):
         text = read_text(f)
         disallowed = _disallowed_spans(text)
         if disallowed:
-            bad.append("\t" + f)
-            # Collect detailed location info for each disallowed character
+            bad.append(f)
             for idx, ch in disallowed:
                 line, col = _get_line_col(text, idx)
-                # Show the character code point for clarity
                 char_info = f"U+{ord(ch):04X}"
-                if ch.isprintable() and ch not in ["\n", "\r", "\t"]:
+                if ch.isprintable() and ch not in "\n\r\t":
                     char_info += f" '{ch}'"
                 locations.append(f"\t  {f}:{line}:{col}: {char_info}")
     return bad, locations
@@ -565,328 +323,246 @@ def unicode_files() -> Tuple[List[str], List[str]]:
 # --------------------------- Main precheck logic ---------------------------
 
 
+def _fmt_files(files: list[str]) -> str:
+    return "\n".join(f"\t{f}" for f in files)
+
+
 def precheck_errors(log_from: str, log_to: str) -> int:
-    """Run all precheck validations on git commits.
+    """Run all precheck validations and return 0 on pass, 1 on failure."""
+    # --- Read toggles ---
+    check_ticket = os.environ.get("CHECK_TICKET_REFERENCE", "1") == "1"
+    check_keywords = os.environ.get("CHECK_KEYWORDS", "1") == "1"
+    check_eof = os.environ.get("CHECK_EOF", "1") == "1"
+    check_exes = os.environ.get("CHECK_EXECUTABLES", "0") == "1"
+    check_whitespace = os.environ.get("CHECK_WHITESPACE", "1") == "1"
+    check_tabs = os.environ.get("CHECK_TABS", "1") == "1"
+    check_tabs_except_input = (
+        os.environ.get("CHECK_TABS_EXCEPT_INPUT_FILES", "0") == "1"
+    )
+    check_classified = os.environ.get("CHECK_CLASSIFIED", "1") == "1"
+    check_unicode = os.environ.get("CHECK_UNICODE", "0") == "1"
+    check_include_guards = os.environ.get("CHECK_INCLUDE_GUARDS", "0") == "1"
+    check_windows = os.environ.get("CHECK_WINDOWS_FILES", "1") == "1"
+    check_cpp_whitespace = os.environ.get("CHECK_CPP_WHITESPACE", "0") == "1"
+    check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0") == "1"
+    check_banned_funcs = os.environ.get("CHECK_BANNED_FUNCS", "0") == "1"
 
-    Performs various code quality checks on the changes between two git references,
-    including style, keywords, whitespace, Unicode characters, and more.
+    # --- Run checks ---
+    ticket_reference = ""
+    whitespace_bad: list[str] = []
+    tab_bad: list[str] = []
+    classified_bad: list[str] = []
+    keyword_bad: list[str] = []
+    eof_bad: list[str] = []
+    exe_bad: list[str] = []
+    banned_func_bad: list[str] = []
+    unicode_bad: list[str] = []
+    unicode_locations: list[str] = []
+    include_guard_bad: list[str] = []
+    windows_bad: list[str] = []
 
-    Args:
-        log_from: Starting git reference (commit/branch/tag)
-        log_to: Ending git reference (commit/branch/tag)
+    if check_ticket:
+        ticket_reference = ticket_references(log_from, log_to)
+        if ticket_reference and os.environ.get("VERBOSE", "0") == "1":
+            print(f"TICKET_REFERENCES:\n{ticket_reference}")
 
-    Returns:
-        0 if all checks pass, 1 if any check fails
-    """
-    # Read toggles (match the shell script defaults)
-    check_ticket = os.environ.get("CHECK_TICKET_REFERENCE", "1")
-    check_keywords = os.environ.get("CHECK_KEYWORDS", "1")
-    check_eof = os.environ.get("CHECK_EOF", "1")
-    check_exes = os.environ.get("CHECK_EXECUTABLES", "0")
-    check_whitespace = os.environ.get("CHECK_WHITESPACE", "1")
-    check_tabs = os.environ.get("CHECK_TABS", "1")
-    check_tabs_except_input_files = os.environ.get("CHECK_TABS_EXCEPT_INPUT_FILES", "0")
-    check_classified = os.environ.get("CHECK_CLASSIFIED", "1")
-    check_unicode = os.environ.get("CHECK_UNICODE", "0")
-    check_include_guards = os.environ.get("CHECK_INCLUDE_GUARDS", "0")
-    check_windows_files = os.environ.get("CHECK_WINDOWS_FILES", "1")
-    check_cpp_whitespace = os.environ.get("CHECK_CPP_WHITESPACE", "0")
-    check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0")
-
-    TICKET_REFERENCE = ""
-    BANNED_KEYWORDS = ""
-    EOF_FILES = ""
-    WHITESPACE_FILES = ""
-    TAB_FILES = ""
-    CLASSIFIED_FILES = ""
-    UNICODE_FILES = ""
-    UNICODE_LOCATIONS = ""
-    INCLUDE_GUARD_FILES = ""
-    WINDOWS_FILES = ""
-    EXE_FILES = ""
-    BAN_FUNC_FILES = ""
-
-    if check_ticket == "1":
-        TICKET_REFERENCE = ticket_references(log_from, log_to)
-        if TICKET_REFERENCE and os.environ.get("VERBOSE", "0") == "1":
-            print(f"TICKET_REFERENCES:\n{TICKET_REFERENCE}")
-
-    if check_whitespace == "1":
-        WHITESPACE_FILES = "\n".join(
-            trailing_whitespace_files(
-                files_for_whitespace(check_cpp_whitespace, check_f_whitespace)
-            )
+    if check_whitespace:
+        whitespace_bad = trailing_whitespace_files(
+            files_for_whitespace(check_cpp_whitespace, check_f_whitespace)
         )
+    if check_tabs:
+        tab_bad = find_tabs(
+            files_for_tabs_except_input()
+            if check_tabs_except_input
+            else files_for_tabs()
+        )
+    if check_classified:
+        classified_bad = classified_keywords()
+    if check_keywords:
+        keyword_bad = banned_keywords()
+    if check_eof:
+        eof_bad = no_newline_at_eof_files()
+    if check_exes:
+        exe_bad = find_bad_executables()
+    if check_banned_funcs:
+        banned_func_bad = banned_funcs()
+    if check_unicode:
+        unicode_bad, unicode_locations = unicode_files()
+    if check_include_guards:
+        include_guard_bad = include_guard_files()
+    if check_windows:
+        windows_bad = windows_line_endings()
 
-    if check_tabs == "1":
-        if check_tabs_except_input_files == "1":
-            TAB_FILES = "\n".join(find_tabs(files_for_tabs_except_input()))
-        else:
-            TAB_FILES = "\n".join(find_tabs(files_for_tabs()))
+    # --- Tabulate results ---
+    # Each entry: (enabled, files, pass_msg, disabled_msg, error_header, extra_error, locations)
+    tabs_pass_msg = (
+        "Your patch contains no tabs (input files not checked)."
+        if check_tabs_except_input
+        else "Your patch contains no tabs."
+    )
+    file_checks = [
+        (
+            check_whitespace,
+            whitespace_bad,
+            "Your patch contains no trailing whitespace.",
+            "Whitespace check disabled.",
+            "ERROR: The following files contain trailing whitespace after applying your patch:",
+            'Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
+            [],
+        ),
+        (
+            check_classified,
+            classified_bad,
+            "Your patch contains no proprietary or classified keywords.",
+            "Classified keyword check disabled.",
+            "ERROR: The following files contain classified or proprietary keywords:",
+            "",
+            [],
+        ),
+        (
+            check_tabs,
+            tab_bad,
+            tabs_pass_msg,
+            "Tabs check disabled.",
+            "ERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:",
+            "",
+            [],
+        ),
+        (
+            check_eof,
+            eof_bad,
+            "Your patch contains no files without newlines before EOF.",
+            "EOF check disabled",
+            "ERROR: The following files do not contain a newline character before EOF:",
+            'Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
+            [],
+        ),
+        (
+            check_exes,
+            exe_bad,
+            "Your patch contains no bad executable files.",
+            "Executable file check disabled",
+            "ERROR: The following files are executable but shouldn't be:",
+            "",
+            [],
+        ),
+        (
+            check_banned_funcs,
+            banned_func_bad,
+            "Your patch contains no banned functions.",
+            "Banned function check disabled",
+            "ERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.)\n"
+            "Use mooseError, mooseWarning, etc. instead:",
+            "",
+            [],
+        ),
+        (
+            check_keywords,
+            keyword_bad,
+            "Your patch contains no banned keywords.",
+            "Keywords check disabled",
+            "ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):",
+            "",
+            [],
+        ),
+        (
+            check_unicode,
+            unicode_bad,
+            "Your patch contains no disallowed unicode characters.",
+            "Unicode check disabled",
+            "ERROR: The following files contain disallowed unicode characters:",
+            "",
+            unicode_locations,
+        ),
+        (
+            check_include_guards,
+            include_guard_bad,
+            "Your patch contains no old style C++ include guards.",
+            "Include Guard check disabled",
+            'ERROR: The following files contain include guards, MOOSE uses "#pragma once":',
+            "",
+            [],
+        ),
+        (
+            check_windows,
+            windows_bad,
+            "Your patch contains no windows line endings.",
+            "Windows line ending check disabled",
+            "ERROR: The following files contain windows line endings:",
+            "",
+            [],
+        ),
+    ]
 
-    if check_classified == "1":
-        CLASSIFIED_FILES = "\n".join(classified_keywords())
+    # --- Determine pass/fail ---
+    ticket_failed = check_ticket and not ticket_reference
+    failed = ticket_failed or any(
+        enabled and files for enabled, files, *_ in file_checks
+    )
+    any_passed = (check_ticket and bool(ticket_reference)) or any(
+        enabled and not files for enabled, files, *_ in file_checks
+    )
 
-    if check_keywords == "1":
-        BANNED_KEYWORDS = "\n".join(banned_keywords())
-
-    if check_eof == "1":
-        EOF_FILES = "\n".join(no_newline_at_eof_files())
-
-    if check_exes == "1":
-        EXE_FILES = "\n".join(find_bad_executables())
-
-    if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1":
-        BAN_FUNC_FILES = "\n".join(banned_funcs())
-
-    if check_unicode == "1":
-        files, locations = unicode_files()
-        UNICODE_FILES = "\n".join(files)
-        UNICODE_LOCATIONS = "\n".join(locations)
-
-    if check_include_guards == "1":
-        INCLUDE_GUARD_FILES = "\n".join(include_guard_files())
-
-    if check_windows_files == "1":
-        WINDOWS_FILES = "\n".join(windows_line_endings())
-
-    one_failed = 0
-    one_passed = 0
-
-    def _pf(cond_pass: bool):
-        """Track pass/fail status for checks."""
-        nonlocal one_failed, one_passed
-        if cond_pass:
-            one_passed = 1
-        else:
-            one_failed = 1
-
-    if check_ticket == "1":
-        _pf(bool(TICKET_REFERENCE))
-
-    if check_whitespace == "1":
-        _pf(not WHITESPACE_FILES)
-
-    if check_classified == "1":
-        _pf(not CLASSIFIED_FILES)
-
-    if check_tabs == "1":
-        _pf(not TAB_FILES)
-
-    if check_eof == "1":
-        _pf(not EOF_FILES)
-
-    if check_exes == "1":
-        _pf(not EXE_FILES)
-
-    if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1":
-        _pf(not BAN_FUNC_FILES)
-
-    if check_keywords == "1":
-        _pf(not BANNED_KEYWORDS)
-
-    if check_unicode == "1":
-        _pf(not UNICODE_FILES)
-
-    if check_include_guards == "1":
-        _pf(not INCLUDE_GUARD_FILES)
-
-    if check_windows_files == "1":
-        _pf(not WINDOWS_FILES)
-
-    if one_passed == 1:
+    # --- Info block ---
+    if any_passed:
         info_msgs = []
-
-        # Build info messages based on check results
-        if check_ticket == "1":
-            if TICKET_REFERENCE:
+        if check_ticket:
+            if ticket_reference:
                 info_msgs.append("Your patch contains a valid ticket reference.")
         else:
             info_msgs.append("Ticket reference check disabled.")
 
-        if check_whitespace == "1":
-            if not WHITESPACE_FILES:
-                info_msgs.append("Your patch contains no trailing whitespace.")
-        else:
-            info_msgs.append("Whitespace check disabled.")
+        for enabled, files, pass_msg, disabled_msg, *_ in file_checks:
+            if enabled:
+                if not files:
+                    info_msgs.append(pass_msg)
+            else:
+                info_msgs.append(disabled_msg)
 
-        if check_classified == "1":
-            if not CLASSIFIED_FILES:
-                info_msgs.append(
-                    "Your patch contains no proprietary or classified keywords."
-                )
-        else:
-            info_msgs.append("Classified keyword check disabled.")
-
-        if check_tabs == "1":
-            if not TAB_FILES:
-                if check_tabs_except_input_files == "1":
-                    info_msgs.append(
-                        "Your patch contains no tabs (input files not checked)."
-                    )
-                else:
-                    info_msgs.append("Your patch contains no tabs.")
-        else:
-            info_msgs.append("Tabs check disabled.")
-
-        if check_eof == "1":
-            if not EOF_FILES:
-                info_msgs.append(
-                    "Your patch contains no files without newlines before EOF."
-                )
-        else:
-            info_msgs.append("EOF check disabled")
-
-        if check_exes == "1":
-            if not EXE_FILES:
-                info_msgs.append("Your patch contains no bad executable files.")
-        else:
-            info_msgs.append("Executable file check disabled")
-
-        if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1":
-            if not BAN_FUNC_FILES:
-                info_msgs.append("Your patch contains no banned functions.")
-        else:
-            info_msgs.append("Banned function check disabled")
-
-        if check_keywords == "1":
-            if not BANNED_KEYWORDS:
-                info_msgs.append("Your patch contains no banned keywords.")
-        else:
-            info_msgs.append("Keywords check disabled")
-
-        if check_unicode == "1":
-            if not UNICODE_FILES:
-                info_msgs.append(
-                    "Your patch contains no disallowed unicode characters."
-                )
-        else:
-            info_msgs.append("Unicode check disabled")
-
-        if check_include_guards == "1":
-            if not INCLUDE_GUARD_FILES:
-                info_msgs.append("Your patch contains no old style C++ include guards.")
-        else:
-            info_msgs.append("Include Guard check disabled")
-
-        if check_windows_files == "1":
-            if not WINDOWS_FILES:
-                info_msgs.append("Your patch contains no windows line endings.")
-        else:
-            info_msgs.append("Windows line ending check disabled")
-
-        # Print all info messages at once
-        info_output = "\n" + "#" * 74 + "\n"
+        print("\n" + "#" * 74)
         for msg in info_msgs:
-            info_output += f"INFO: {msg}\n"
-        info_output += "#" * 74 + "\n"
-        print(info_output)
+            print(f"INFO: {msg}")
+        print("#" * 74 + "\n")
 
-    if one_failed == 1:
+    # --- Error block ---
+    if failed:
         error_output = "\n" + "#" * 74 + "\n"
 
-        if check_ticket == "1" and not TICKET_REFERENCE:
+        if ticket_failed:
             error_output += "ERROR: Your patch does not contain a valid ticket reference! (i.e. #1234)\n"
-            try:
-                cp = run(["git", "log", f"{log_from}..{log_to}", "--pretty=%s"])
-                error_output += cp.stdout + "\n"
-            except Exception:
-                pass
+            cp = subprocess.run(
+                ["git", "log", f"{log_from}..{log_to}", "--pretty=%s"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            error_output += cp.stdout + "\n"
 
-        if check_whitespace == "1" and WHITESPACE_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain trailing whitespace after applying your patch:
-                {WHITESPACE_FILES}
-
-                Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.
-                """)
-
-        if check_classified == "1" and CLASSIFIED_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain classified or proprietary keywords:
-                {CLASSIFIED_FILES}
-                """)
-
-        if check_tabs == "1" and TAB_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:
-                {TAB_FILES}
-                """)
-
-        if check_eof == "1" and EOF_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files do not contain a newline character before EOF:
-                {EOF_FILES}
-
-                Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.
-                """)
-
-        if check_exes == "1" and EXE_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files are executable but shouldn't be:
-                {EXE_FILES}
-                """)
-
-        if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1" and BAN_FUNC_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.)
-                Use mooseError, mooseWarning, etc. instead:
-                {BAN_FUNC_FILES}
-                """)
-
-        if check_keywords == "1" and BANNED_KEYWORDS:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):
-                {BANNED_KEYWORDS}
-                """)
-
-        if check_unicode == "1" and UNICODE_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain disallowed unicode characters:
-                {UNICODE_FILES}
-                """)
-            if UNICODE_LOCATIONS:
-                error_output += textwrap.dedent(f"""
-                    Detailed locations:
-                    {UNICODE_LOCATIONS}
-                    """)
-
-        if check_include_guards == "1" and INCLUDE_GUARD_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain include guards, MOOSE uses "#pragma once":
-                {INCLUDE_GUARD_FILES}
-                """)
-
-        if check_windows_files == "1" and WINDOWS_FILES:
-            error_output += textwrap.dedent(f"""
-                ERROR: The following files contain windows line endings:
-                {WINDOWS_FILES}
-                """)
+        for enabled, files, _, __, error_header, extra_error, locations in file_checks:
+            if not (enabled and files):
+                continue
+            error_output += f"\n{error_header}\n{_fmt_files(files)}\n"
+            if extra_error:
+                error_output += f"\n{extra_error}\n"
+            if locations:
+                error_output += f"\nDetailed locations:\n" + "\n".join(locations) + "\n"
 
         error_output += "#" * 74 + "\n"
         print(error_output)
 
-    return one_failed
+    return int(failed)
 
 
 # --------------------------- Entry point ---------------------------
 
 
-def main(argv: List[str]) -> int:
-    """Entry point for the pre-check script.
-
-    Args:
-        argv: Command line arguments (script name, optional log_from, optional log_to)
-
-    Returns:
-        Exit code (0 for success, 1 for failure)
-    """
+def main(argv: list[str]) -> int:
+    """Entry point. Optionally accepts log_from and log_to as arguments."""
     if len(argv) < 3:
-        # Try to use merge-base with upstream/next as default
         try:
-            cp = run(
+            cp = subprocess.run(
                 ["git", "merge-base", "upstream/next", "HEAD"],
-                capture=True,
+                capture_output=True,
                 text=True,
                 check=True,
             )
@@ -897,7 +573,8 @@ def main(argv: List[str]) -> int:
                 file=sys.stderr,
             )
         except subprocess.CalledProcessError:
-            error_msg = textwrap.dedent("""\
+            print(
+                textwrap.dedent("""\
                 ERROR: Could not determine merge-base with upstream/next
 
                 Please specify a comparison range explicitly:
@@ -908,8 +585,9 @@ def main(argv: List[str]) -> int:
                 Or ensure 'upstream' remote is configured:
                   git remote add upstream https://github.com/idaholab/moose.git
                   git fetch upstream
-                """)
-            print(error_msg, file=sys.stderr)
+                """),
+                file=sys.stderr,
+            )
             return 1
     else:
         log_from, log_to = argv[1], argv[2]
