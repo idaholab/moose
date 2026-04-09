@@ -375,7 +375,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
+EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
   height = trueX.Size();
   width = trueRHS.Size();

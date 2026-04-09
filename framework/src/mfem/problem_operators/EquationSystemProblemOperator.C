@@ -42,7 +42,7 @@ void
 EquationSystemProblemOperator::BuildEquationSystemOperator()
 {
   GetEquationSystem()->BuildEquationSystem();
-  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
+  GetEquationSystem()->FormSystem(_true_x, _true_rhs);
 }
 
 } // namespace Moose::MFEM
