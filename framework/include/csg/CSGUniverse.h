@@ -127,9 +127,8 @@ protected:
 
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;
-  friend class CSGEngUnitList; // needed for renameEngUnit() access
 
-  // CSGUniverseList needs to be friend to access addCell()
+  // CSGBase needs to be friend to access addCell()
   friend class CSGBase;
 
 #ifdef MOOSE_UNIT_TEST

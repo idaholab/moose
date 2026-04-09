@@ -17,7 +17,13 @@ namespace CSG
 {
 
 /**
- * CSGEngUnitList is a container for storing CSGEngUnit objects in the CSGBase object.
+ * CSGEngUnitList is a non-owning index of CSGEngUnit objects stored in the type lists
+ * (CSGSurfaceList, CSGCellList, CSGUniverseList) of a CSGBase instance. It provides
+ * lookup by name and typed queries without holding ownership of the objects.
+ *
+ * A vector of raw pointers is used rather than a name-keyed map so that renames require
+ * no index update — the object's name is updated in-place by the owning type list, and
+ * the pointer in this vector automatically reflects the new name.
  */
 class CSGEngUnitList
 {
@@ -40,27 +46,10 @@ protected:
    */
   bool hasEngUnit(const std::string & name) const
   {
-    return _eng_units.find(name) != _eng_units.end();
-  }
-
-  /**
-   * @brief Get the non-const map of all names to engineering units
-   *
-   * @return map of all names to CSGEngUnit unique_ptrs
-   */
-  std::unordered_map<std::string, std::unique_ptr<CSGEngUnit>> & getEngUnitListMap()
-  {
-    return _eng_units;
-  }
-
-  /**
-   * @brief Get the const map of all names to engineering units
-   *
-   * @return map of all names to CSGEngUnit unique_ptrs
-   */
-  const std::unordered_map<std::string, std::unique_ptr<CSGEngUnit>> & getEngUnitListMap() const
-  {
-    return _eng_units;
+    for (const auto * ptr : _eng_units)
+      if (ptr->getName() == name)
+        return true;
+    return false;
   }
 
   /**
@@ -92,14 +81,15 @@ protected:
   std::vector<std::reference_wrapper<const CSGUniverseEngUnit>> getAllUniverseEngUnits() const;
 
   /**
-   * @brief Add an engineering unit to the list. Ownership of the unit is transferred to the list.
+   * @brief Register an engineering unit in this index. The object must already be owned
+   * by the appropriate type list (CSGSurfaceList, CSGCellList, or CSGUniverseList).
    *
    * Throws if an engineering unit with the given name already exists.
    *
-   * @param unit unique_ptr to the engineering unit to add
-   * @return reference to the CSGEngUnit that was added
+   * @param unit reference to the engineering unit to register (non-owning)
+   * @return reference to the registered engineering unit
    */
-  CSGEngUnit & addEngUnit(std::unique_ptr<CSGEngUnit> unit);
+  CSGEngUnit & addEngUnit(CSGEngUnit & unit);
 
   /**
    * @brief Get an engineering unit by name
@@ -110,12 +100,14 @@ protected:
   CSGEngUnit & getEngUnit(const std::string & name) const;
 
   /**
-   * @brief Rename the specified engineering unit.
+   * @brief Remove an engineering unit from this index by address.
    *
-   * @param unit reference to the engineering unit to rename
-   * @param name new name to assign
+   * Called by CSGBase when a unit is deleted or expanded. Does not affect ownership —
+   * the object is destroyed by the owning type list.
+   *
+   * @param unit reference to the engineering unit to remove
    */
-  void renameEngUnit(const CSGEngUnit & unit, const std::string & name);
+  void removeEngUnit(const CSGEngUnit & unit);
 
   /// Operator overload for checking if two CSGEngUnitList objects are equal
   bool operator==(const CSGEngUnitList & other) const;
@@ -123,8 +115,9 @@ protected:
   /// Operator overload for checking if two CSGEngUnitList objects are not equal
   bool operator!=(const CSGEngUnitList & other) const;
 
-  /// Mapping of engineering unit names to their stored CSGEngUnit objects
-  std::unordered_map<std::string, std::unique_ptr<CSGEngUnit>> _eng_units;
+  /// Non-owning index: raw pointers into the type lists. Rename does not require updating
+  /// this vector because the pointed-to object's name is updated in-place by the type list.
+  std::vector<CSGEngUnit *> _eng_units;
 
   // Only CSGBase should be calling the methods in CSGEngUnitList
   friend class CSGBase;

@@ -80,10 +80,7 @@ public:
    *
    * @return reference to CSGSurface that was added
    */
-  const CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf)
-  {
-    return _surface_list.addSurface(std::move(surf));
-  }
+  const CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf);
 
   /**
    * @brief Remove a Surface object passed in by reference from the stored surface list. Any CSG
@@ -289,7 +286,7 @@ public:
    */
   void renameRootUniverse(const std::string & name)
   {
-    _universe_list.renameUniverse(_universe_list.getRoot(), name);
+    renameUniverse(_universe_list.getRoot(), name);
   }
 
   /**
@@ -544,8 +541,19 @@ public:
   const T & addEngUnit(std::unique_ptr<T> unit)
   {
     static_assert(std::is_base_of_v<CSGEngUnit, T>, "T must derive from CSGEngUnit");
+    static_assert(std::is_base_of_v<CSGSurface, T> || std::is_base_of_v<CSGCell, T> ||
+                      std::is_base_of_v<CSGUniverse, T>,
+                  "T must also derive from CSGSurface, CSGCell, or CSGUniverse");
     T * raw = unit.get();
-    _eng_unit_list.addEngUnit(std::move(unit));
+    // Transfer ownership to the appropriate type list
+    if constexpr (std::is_base_of_v<CSGSurface, T>)
+      _surface_list.addSurface(std::move(unit));
+    else if constexpr (std::is_base_of_v<CSGCell, T>)
+      _cell_list.addCell(std::move(unit));
+    else if constexpr (std::is_base_of_v<CSGUniverse, T>)
+      _universe_list.addUniverse(std::move(unit));
+    // Register non-owning pointer in the CSGEngUnitList
+    _eng_unit_list.addEngUnit(static_cast<CSGEngUnit &>(*raw));
     return *raw;
   }
 
@@ -594,10 +602,7 @@ public:
    * @param unit reference to engineering unit to rename
    * @param name new name
    */
-  void renameEngUnit(const CSGEngUnit & unit, const std::string & name)
-  {
-    _eng_unit_list.renameEngUnit(unit, name);
-  }
+  void renameEngUnit(const CSGEngUnit & unit, const std::string & name);
 
   /**
    * @brief Get all engineering units of all types in CSGBase
