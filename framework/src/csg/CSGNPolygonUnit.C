@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGNPolygonUnit.h"
-#include "CSGSphere.h"
+#include "CSGPlane.h"
 
 namespace CSG
 {
@@ -40,10 +40,51 @@ CSGNPolygonUnit::getAttributes() const
 void
 CSGNPolygonUnit::expandUnit(CSGBase & base)
 {
-  // PLACEHOLDER
-  std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>("s1", 3.0);
-  auto & _s1 = base.addSurface(std::move(s1_ptr));
-  _expanded_region = -_s1;
+  // Polygon orientation assumes an infinite prism oriented with the z-axis.
+  // The right-most face is parallel to the y-axis and is centered at the origin.
+  // Equation for the kth face, where the 0th face is the right-most and A is the apothem, follows
+  // this equation:
+  //    x*cos(2*pi*k/N) + y*sin(2*pi*k/N) + z*0 = A
+  // Coefficients for the plane ax + by + cz = d:
+  //    a = cos(2*pi*k/N)
+  //    b = sin(2*pi*k/N)
+  //    c = 0.0
+  //    d = A (apothem)
+  //
+  // Surface naming scheme: [UnitName]_exp_[k]
+
+  Real a, b; // to be calculated based on side
+  Real c = 0.0;
+  Real d = _apothem;
+
+  // Initialize region to be added to:
+  Point p(0, 0, 0); // origin used for determining half-space
+
+  // base name for surfaces
+  std::string base_name = getName() + "_exp_";
+
+  for (unsigned int k = 0; k < _n_sides - 1; ++k)
+  {
+    auto sname = base_name + std::to_string(k);
+    a = std::cos(2.0 * M_PI * k / _n_sides);
+    b = std::sin(2.0 * M_PI * k / _n_sides);
+    std::unique_ptr<CSG::CSGPlane> s_ptr = std::make_unique<CSG::CSGPlane>(sname, a, b, c, d);
+    auto & surf = base.addSurface(std::move(s_ptr));
+
+    // determine the halfspace that contains the origin for this surface
+    auto hp_type = surf.getHalfspaceFromPoint(p);
+    CSGRegion hp; // halfspace region for this surface only (to be intersected below)
+    if (hp_type == CSGSurface::Halfspace::POSITIVE)
+      hp = +surf;
+    else
+      hp = -surf;
+
+    // start the region with first half-space, otherwise intersect with existing region
+    if (_expanded_region.getRegionType() == CSGRegion::RegionType::EMPTY)
+      _expanded_region = hp;
+    else
+      _expanded_region &= hp; // intersect with existing region
+  }
 }
 
 } // namespace CSG
