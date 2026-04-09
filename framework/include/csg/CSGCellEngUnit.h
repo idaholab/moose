@@ -75,6 +75,16 @@ protected:
    */
   CSGCellEngUnit(const std::string & name, const std::string & unit_type);
 
+  /// Cell fill and region updates are not permitted on engineering units — the geometry
+  /// is defined by the derived class and produced only via expandUnit().
+  ///@{
+  void resetCellFill() = delete;
+  void updateCellFill(const std::string &) = delete;
+  void updateCellFill(const CSGUniverse *) = delete;
+  void updateCellFill(const CSGLattice *) = delete;
+  void updateRegion(const CSGRegion &) = delete;
+  ///@}
+
   /**
    * @brief Create the CSGCell and any other necessary components that replace this engineering
    * unit in CSGBase.

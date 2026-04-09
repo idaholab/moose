@@ -1068,6 +1068,27 @@ private:
   // error if universe is the root, used in any lattice, or used as a cell fill
   void prepareUniverseDeletion(const CSGUniverse & universe) const;
 
+  // Returns the CSGSurfaceEngUnit pointer if surf is an eng unit, nullptr otherwise.
+  // Usable as a boolean check or to access the eng unit directly.
+  const CSGSurfaceEngUnit * isSurfaceEngUnit(const CSGSurface & surf) const
+  {
+    return dynamic_cast<const CSGSurfaceEngUnit *>(&surf);
+  }
+
+  // Returns the CSGCellEngUnit pointer if cell is an eng unit, nullptr otherwise.
+  // Usable as a boolean check or to access the eng unit directly.
+  const CSGCellEngUnit * isCellEngUnit(const CSGCell & cell) const
+  {
+    return dynamic_cast<const CSGCellEngUnit *>(&cell);
+  }
+
+  // Returns the CSGUniverseEngUnit pointer if univ is an eng unit, nullptr otherwise.
+  // Usable as a boolean check or to access the eng unit directly.
+  const CSGUniverseEngUnit * isUniverseEngUnit(const CSGUniverse & univ) const
+  {
+    return dynamic_cast<const CSGUniverseEngUnit *>(&univ);
+  }
+
   /**
    * @brief Add a new cell to the cell list based on a cell reference.
    * This method is called by the copy constructor of CSGBase

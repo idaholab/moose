@@ -80,12 +80,27 @@ CSGBase::deleteSurface(const CSGSurface & surface)
                "CSGBase instance.");
 
   prepareSurfaceDeletion(surface);
-  _surface_list.getSurfaceListMap().erase(surface.getName());
+  if (const auto * eng_unit = isSurfaceEngUnit(surface))
+    deleteEngUnit(*eng_unit);
+  else
+    _surface_list.getSurfaceListMap().erase(surface.getName());
 }
 
 const CSGCell &
 CSGBase::addCellToList(const CSGCell & cell)
 {
+  // check if the cell is actually an engineering unit first. If so, return the engineering unit
+  // if it is already in the engineering units list. Otherwise raise error that it needs to be added
+  // via addEngUnit instead.
+  if (const auto * eng_unit = isCellEngUnit(cell))
+  {
+    if (hasEngUnit(eng_unit->getName()))
+      return *eng_unit;
+    else
+      mooseError("Cell '" + cell.getName() +
+                 "' is a CSGCellEngUnit and must be added via addEngUnit().");
+  }
+
   // If cell has already been created, we just return a reference to it
   const auto name = cell.getName();
   if (_cell_list.hasCell(name))
@@ -121,6 +136,18 @@ CSGBase::addCellToList(const CSGCell & cell)
 const CSGUniverse &
 CSGBase::addUniverseToList(const CSGUniverse & univ)
 {
+  // check if the universe is actually an engineering unit first. If so, return the engineering unit
+  // if it is already in the engineering units list. Otherwise raise error that it needs to be added
+  // via addEngUnit instead.
+  if (const auto * eng_unit = isUniverseEngUnit(univ))
+  {
+    if (hasEngUnit(eng_unit->getName()))
+      return *eng_unit;
+    else
+      mooseError("Universe '" + univ.getName() +
+                 "' is a CSGUniverseEngUnit and must be added via addEngUnit().");
+  }
+
   // If universe has already been created, we just return a reference to it
   const auto name = univ.getName();
   if (_universe_list.hasUniverse(name))
@@ -302,12 +329,20 @@ CSGBase::deleteCell(const CSGCell & cell)
                "CSGBase instance.");
 
   prepareCellDeletion(cell);
-  _cell_list.getCellListMap().erase(cell.getName());
+  if (const auto * eng_unit = isCellEngUnit(cell))
+    deleteEngUnit(*eng_unit);
+  else
+    _cell_list.getCellListMap().erase(cell.getName());
 }
 
 void
 CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (isCellEngUnit(cell))
+    mooseError("Region cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   checkRegionSurfaces(region);
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
@@ -320,6 +355,11 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 void
 CSGBase::resetCellFill(const CSGCell & cell)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (isCellEngUnit(cell))
+    mooseError("Fill cannot be reset for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkCellInBase(cell))
     mooseError("The fill of cell with name " + cell.getName() +
                " that is being updated is different " +
@@ -331,6 +371,11 @@ CSGBase::resetCellFill(const CSGCell & cell)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const std::string & mat_name)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (isCellEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
                " that is being updated is different " +
@@ -342,6 +387,11 @@ CSGBase::updateCellFill(const CSGCell & cell, const std::string & mat_name)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const CSGUniverse * univ)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (isCellEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkUniverseInBase(*univ))
     mooseError("Universe with name ",
                univ->getName(),
@@ -358,6 +408,11 @@ CSGBase::updateCellFill(const CSGCell & cell, const CSGUniverse * univ)
 void
 CSGBase::updateCellFill(const CSGCell & cell, const CSGLattice * lattice)
 {
+  // cannot update region for a cell that is actually an engineering unit
+  if (isCellEngUnit(cell))
+    mooseError("Fill cannot be updated for cell '" + cell.getName() +
+               "' because it is a CSGCellEngUnit.");
+
   if (!checkLatticeInBase(*lattice))
     mooseError("Lattice with name ",
                lattice->getName(),
@@ -424,12 +479,20 @@ CSGBase::deleteUniverse(const CSGUniverse & univ)
                "CSGBase instance.");
 
   prepareUniverseDeletion(univ);
-  _universe_list.getUniverseListMap().erase(univ.getName());
+  if (const auto * eng_unit = isUniverseEngUnit(univ))
+    deleteEngUnit(*eng_unit);
+  else
+    _universe_list.getUniverseListMap().erase(univ.getName());
 }
 
 void
 CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
 {
+  // if universe is actually engineering unit, cannot add cells
+  if (isUniverseEngUnit(universe))
+    mooseError("Universe '" + universe.getName() +
+               "' cannot add cells because it is a CSGUniverseEngUnit.");
+
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
     mooseError("A cell named " + cell.getName() + " is being added to universe " +
@@ -466,7 +529,9 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
                " that is different " +
                "from the universe of the same name in the CSGBase instance.");
   auto & univ = _universe_list.getUniverse(universe.getName());
-  univ.removeCell(cell.getName());
+  univ.removeCell(
+      cell.getName()); // this will produce error that cell is not found in the case that the
+                       // universe is actually an engineering unit, so we don't need to check that.
 }
 
 void
@@ -975,7 +1040,7 @@ bool
 CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
 {
   // CSGSurfaceEngUnit objects are stored in the eng unit list, not the surface list
-  if (const auto * eng_unit = dynamic_cast<const CSGSurfaceEngUnit *>(&surface))
+  if (const auto * eng_unit = isSurfaceEngUnit(surface))
     return checkEngUnitInBase(*eng_unit);
 
   auto name = surface.getName();
@@ -988,8 +1053,8 @@ CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
 bool
 CSGBase::checkCellInBase(const CSGCell & cell) const
 {
-  // CSGCellEngUnit objects are stored in the eng unit list, not the surface list
-  if (const auto * eng_unit = dynamic_cast<const CSGCellEngUnit *>(&cell))
+  // CSGCellEngUnit objects are stored in the eng unit list, not the cell list
+  if (const auto * eng_unit = isCellEngUnit(cell))
     return checkEngUnitInBase(*eng_unit);
 
   auto name = cell.getName();
@@ -1002,8 +1067,8 @@ CSGBase::checkCellInBase(const CSGCell & cell) const
 bool
 CSGBase::checkUniverseInBase(const CSGUniverse & universe) const
 {
-  // CSGUniverseEngUnit objects are stored in the eng unit list, not the surface list
-  if (const auto * eng_unit = dynamic_cast<const CSGUniverseEngUnit *>(&universe))
+  // CSGUniverseEngUnit objects are stored in the eng unit list, not the universe list
+  if (const auto * eng_unit = isUniverseEngUnit(universe))
     return checkEngUnitInBase(*eng_unit);
 
   auto name = universe.getName();

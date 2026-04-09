@@ -74,6 +74,12 @@ protected:
    */
   CSGUniverseEngUnit(const std::string & name, const std::string & unit_type, bool is_root = false);
 
+  /// addCell updates are not permitted on engineering units — the geometry
+  /// is defined by the derived class and produced only via expandUnit().
+  ///@{
+  void addCell(const CSGCell &) = delete;
+  ///@}
+
   /**
    * @brief Create the CSGUniverse and any other necessary components that replace this engineering
    * unit in CSGBase.
