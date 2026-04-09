@@ -49,7 +49,7 @@ def git_files(*patterns: str) -> List[str]:
     Return repo-tracked files matching glob patterns.
 
     Args:
-        *patterns: Glob patterns to match (e.g., "*.py", "*.[Ch]")
+        *patterns: List of glob patterns to match (e.g., "*.py", "*.[Ch]"), inclusive
 
     Returns:
         List of file paths, excluding contrib/ directory
@@ -57,9 +57,7 @@ def git_files(*patterns: str) -> List[str]:
     if not patterns:
         patterns = ("",)
     cmd = ["git", "ls-files", "-z", *patterns]
-    cp = run(cmd)
-    if cp.returncode != 0:
-        return []
+    cp = run(cmd, check=True)
     items = [p for p in cp.stdout.split("\x00") if p]
     items = [
         p
@@ -74,23 +72,20 @@ def git_files(*patterns: str) -> List[str]:
 
 
 def read_text_bytes(path: str) -> bytes:
-    """Read file as bytes, returning empty bytes on error.
+    """Read file as bytes.
 
     Args:
         path: File path to read
 
     Returns:
-        File contents as bytes, or empty bytes if error
+        File contents as bytes
     """
-    try:
-        with open(path, "rb") as f:
-            return f.read()
-    except Exception:
-        return b""
+    with open(path, "rb") as f:
+        return f.read()
 
 
 def read_text(path: str) -> str:
-    """Read file as UTF-8 text, with fallback for encoding errors.
+    """Read file as UTF-8 text, replacing invalid byte sequences.
 
     Args:
         path: File path to read
@@ -98,12 +93,8 @@ def read_text(path: str) -> str:
     Returns:
         File contents as string, with invalid UTF-8 replaced
     """
-    try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            return f.read()
-    except Exception:
-        # Fallback to bytes decode with replacement
-        return read_text_bytes(path).decode("utf-8", errors="replace")
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        return f.read()
 
 
 # --------------------------- Ticket references ---------------------------
@@ -122,11 +113,8 @@ def ticket_references(log_from: str, log_to: str) -> str:
     Returns:
         Newline-separated list of matching commit messages
     """
-    try:
-        cp = run(["git", "log", f"{log_from}..{log_to}"], capture=True, text=True)
-        text = cp.stdout or ""
-    except Exception:
-        text = ""
+    cp = run(["git", "log", f"{log_from}..{log_to}"], capture=True, text=True, check=True)
+    text = cp.stdout or ""
     pat = re.compile(r"(?:moose/(?:issues|pull)/)|#\d{1,}")
     out = []
     for line in text.splitlines():
@@ -213,7 +201,7 @@ def banned_keywords() -> List[str]:
     """
     bad = []
     seen = set()
-    files = git_files("*.[Chi]")
+    files = git_files("*.[Ch]")
     for f in files:
         if f in seen:
             continue
@@ -307,14 +295,11 @@ def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
             continue
         seen.add(f)
         found = False
-        try:
-            with open(f, "r", encoding="utf-8", errors="replace") as fh:
-                for line in fh:
-                    if re.search(r"\s+$", line.rstrip("\n")):
-                        found = True
-                        break
-        except Exception:
-            pass
+        with open(f, "r", encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if re.search(r"\s+$", line.rstrip("\n")):
+                    found = True
+                    break
         if found:
             bad.append("\t" + f)
     return bad
@@ -329,18 +314,15 @@ def no_newline_at_eof_files() -> List[str]:
     bad = []
     files = git_files("*.[Chi]", "*.py")
     for f in files:
-        try:
-            with open(f, "rb") as fh:
-                fh.seek(0, 2)
-                size = fh.tell()
-                if size == 0:
-                    continue
-                fh.seek(-1, 2)
-                last = fh.read(1)
-                if last != b"\n":
-                    bad.append("\t" + f)
-        except Exception:
-            continue
+        with open(f, "rb") as fh:
+            fh.seek(0, 2)
+            size = fh.tell()
+            if size == 0:
+                continue
+            fh.seek(-1, 2)
+            last = fh.read(1)
+            if last != b"\n":
+                bad.append("\t" + f)
     return bad
 
 
@@ -354,23 +336,16 @@ def find_bad_executables() -> List[str]:
         List of incorrectly executable files, prefixed with tabs
     """
     bad = []
-    try:
-        cp = run(["git", "ls-files"])
-        files = cp.stdout.splitlines()
-    except Exception:
-        files = []
-    for f in files:
+    cp = run(["git", "ls-files"], check=True)
+    for f in cp.stdout.splitlines():
         if f.endswith((".pl", ".py", ".js", ".sh")):
             continue
         if "." not in Path(f).name:
             # ignore files with no extension
             continue
-        try:
-            st = os.stat(f)
-            if stat.S_ISREG(st.st_mode) and os.access(f, os.X_OK):
-                bad.append("\t" + f)
-        except Exception:
-            continue
+        st = os.stat(f)
+        if stat.S_ISREG(st.st_mode) and os.access(f, os.X_OK):
+            bad.append("\t" + f)
     return bad
 
 
@@ -399,7 +374,7 @@ def windows_line_endings() -> List[str]:
         List of files with Windows line endings, prefixed with tabs
     """
     bad = []
-    files = git_files("*.[Chi]", "*.py")
+    files = git_files("*.[Chi]", "*.py", "*.md")
     for f in files:
         data = read_text_bytes(f)
         if b"\r\n" in data:
@@ -420,17 +395,15 @@ WIDER_EXTRAS = [
     "PROPORTIONAL TO",  # ∝
     "INFINITY",  # ∞
     "SQUARE ROOT",  # √
-    "CIRCLED DOT OPERATOR",  # ⊙
-    "CIRCLED PLUS",  # ⊕
     "ELEMENT OF",  # ∈
+    "NOT AN ELEMENT OF",  # ∉
+    "CONTAINS AS MEMBER",  # ∋
+    "DOES NOT CONTAIN AS MEMBER",  # ∌
     "DOUBLE-STRUCK CAPITAL R",  # ℝ
     "DOUBLE-STRUCK CAPITAL N",  # ℕ
     "DOUBLE-STRUCK CAPITAL Z",  # ℤ
     "DOUBLE-STRUCK CAPITAL Q",  # ℚ
     "DOUBLE-STRUCK CAPITAL C",  # ℂ
-    "NOT AN ELEMENT OF",  # ∉
-    "CONTAINS AS MEMBER",  # ∋
-    "DOES NOT CONTAIN AS MEMBER",  # ∌
 ]
 
 CORE_NAMES = [
@@ -448,11 +421,13 @@ CORE_NAMES = [
     "SURFACE INTEGRAL",  # ∯
     "VOLUME INTEGRAL",  # ∰
     "PARTIAL DIFFERENTIAL",  # ∂
-    # Product / cross
+    # Product / cross / direct sum
     "MULTIPLICATION SIGN",  # ×
     "VECTOR OR CROSS PRODUCT",  # ⨯
     "CIRCLED TIMES",  # ⊗
     "N-ARY CIRCLED TIMES OPERATOR",  # ⨂
+    "CIRCLED DOT OPERATOR",  # ⊙
+    "CIRCLED PLUS",  # ⊕
 ]
 
 LEGACY_SUPERSCRIPTS = [
