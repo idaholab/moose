@@ -82,6 +82,9 @@ TEST(CSGEngUnitTest, testSurfUnit)
     ASSERT_TRUE(found);
   }
   ASSERT_EQ("INTERSECTION", reg.getRegionTypeString());
+
+  // base should have no units after expansion
+  ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
 }
 
 /// Test CSGCellEngUnit functionality as CSGEngUnit and CSGCell
@@ -97,9 +100,34 @@ TEST(CSGEngUnitTest, testCellUnit)
   // attributes - should not cause any error (contents don't matter for this unit test)
   ASSERT_NO_THROW(cell_unit_ptr->getAttributes());
 
-  // calling getExpandedRegion() before expandUnit() should cause error
+  // calling getExpandedCell() before expandUnit() should cause error
   Moose::UnitUtils::assertThrows([&cell_unit_ptr]() { cell_unit_ptr->getExpandedCell(); },
                                  "getExpandedCell() cannot be called on CSGCellEngUnit");
+
+  /* Test the CSGCell-related functionality */
+  // getFillType - should be "VOID"
+  ASSERT_EQ("VOID", cell_unit_ptr->getFillType());
+  // getRegion - should be empty
+  ASSERT_EQ(CSGRegion(), cell_unit_ptr->getRegion());
+  // setName() should be functioning through CSGCell
+  cell_unit_ptr->setName("new_name");
+  ASSERT_EQ("new_name", cell_unit_ptr->getName());
+
+  /* Test the expandUnit() functionality */
+  auto csg_obj = std::make_unique<CSGBase>();
+  // base object should have no cells, universe, or surfaces
+  cell_unit_ptr->expandUnit(*csg_obj);
+  // base object should now have 2 universe "fill_univ" + root, 1 surface "s1", 1 cell "real_cell",
+  // and no units
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
+  ASSERT_TRUE(csg_obj->hasSurface("s1"));
+  ASSERT_EQ(2, csg_obj->getAllUniverses().size());
+  ASSERT_TRUE(csg_obj->hasUniverse("fill_univ"));
+  ASSERT_EQ(1, csg_obj->getAllCells().size());
+  ASSERT_TRUE(csg_obj->hasCell("real_cell"));
+  ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
+  // check getExpandedCell is same as cell in csg_obj
+  ASSERT_EQ(&cell_unit_ptr->getExpandedCell(), &csg_obj->getCellByName("real_cell"));
 }
 
 } // namespace CSG
