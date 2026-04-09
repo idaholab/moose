@@ -95,9 +95,7 @@
 
 ###### [github.com/idaholab/moose/discussions](https://github.com/idaholab/moose/discussions)
 
-!media darcy_thermo_mech/moose_contributors.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
-       alt=Plot of the total number of contributions and unique contributors to MOOSE, from 2008 to 2023.
+!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 

@@ -1,0 +1,14 @@
+Content:
+    ictp:
+        root_dir: ${MOOSE_DIR}/tutorials/ictp/doc/content
+        content:
+            - ictp/**
+
+    ictp_input:
+        root_dir: ${MOOSE_DIR}
+        content:
+            - moose/*.i
+
+Executioner: !include tutorials/ictp/doc/config.yml Executioner
+Renderer: !include tutorials/ictp/doc/config.yml Renderer
+Extensions: !include tutorials/ictp/doc/config.yml Extensions
