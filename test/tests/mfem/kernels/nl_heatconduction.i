@@ -8,7 +8,7 @@ alpha = 1e-2
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
-  serial_refine = 1
+  uniform_refine = 1
 []
 
 [Problem]

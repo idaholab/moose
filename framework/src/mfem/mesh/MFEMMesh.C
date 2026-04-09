@@ -53,18 +53,21 @@ MFEMMesh::~MFEMMesh() {}
 void
 MFEMMesh::init()
 {
-  if (!_mesh)
-    _mesh = buildMeshBaseObject();
+  // _mesh must be constructed by the action system before init() is called.
+  // MFEMMesh is always used within the normal MOOSE action system, so the fringe
+  // case of a mesh built outside that system does not apply here.
+  mooseAssert(_mesh, "MooseMesh base mesh must be constructed before MFEMMesh::init()");
 
-  if (_app.isSplitMesh() && _use_distributed_mesh)
-    mooseError("You cannot use the mesh splitter capability with DistributedMesh!");
-
-  TIME_SECTION("init", 2);
+  // MooseMesh::init() handles the libMesh dummy mesh:
+  //   - recovery:    reads the libMesh mesh back from its checkpoint file
+  //   - normal run:  calls buildMesh(), which for MFEMMesh builds both the
+  //                  dummy libMesh mesh and the MFEM ParMesh
+  MooseMesh::init();
 
   if (_app.isRecovering() && recoveryAllowed() && _app.isUltimateMaster())
   {
-    buildDummyMooseMesh();
-
+    // MooseMesh::init() already restored the libMesh dummy mesh from its checkpoint.
+    // Now restore the MFEM parallel mesh from its own checkpoint file.
     const auto checkpoint_file = _app.getRestartRecoverFileBase() + _app.checkpointSuffix() +
                                  ".mfem.mesh." + std::to_string(this->processor_id());
     std::ifstream input(checkpoint_file);
@@ -76,8 +79,6 @@ MFEMMesh::init()
     if (isParamSetByUser("displacement"))
       _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
   }
-  else
-    MooseMesh::init();
 }
 
 void
