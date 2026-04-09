@@ -30,24 +30,25 @@ requirements:
     - {{ compiler("c") }}
     - {{ compiler("cxx") }}
     - {{ compiler("fortran") }}
-    - gfortran
-    - xorg-libx11 1.8.9
+    - {{ stdlib("c") }}
+    - automake
     - cmake
     - make
     - ninja
-    - automake
-  run:
+  host:
+    - python 3.14
     - xorg-libx11
-    - python
+    - xorg-xorgproto
 
 test:
   commands:
+    - test "$SEACAS_DIR" == "${PREFIX}/moose-seacas"
     - exodiff --version
     - algebra
     - explore
     - grepos
     - gjoin -v
-    - python $PREFIX/seacas/lib/tests/test_exodus3.py
+    - python3 $PREFIX/seacas/lib/tests/test_exodus3.py
     - blot --help || test $? -eq 1
 
 about:
