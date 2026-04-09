@@ -69,6 +69,8 @@ fortran_compiler_version:
 
 bzip2:
   - 1
+fmt:
+  - '12.0'
 hdf5:
   - 1.14.6
 krb5:
@@ -79,12 +81,18 @@ libcap:
   - '2.77'
 libcurl:
   - 8
+libffi:
+  - '3.5'
 libhwloc:
   - 2.12.2
 libiconv:
   - 1
 libssh2:
   - 1
+libuuid:
+  - 2
+libxcb:
+  - '1'
 libxml2:
   - '2.14'
 ncurses:
@@ -93,8 +101,14 @@ openssl:
   - '3.5'
 perl:
   - 5.32.1
+readline:
+  - "8"
+ucc:
+  - 1
 ucx:
   - '1.20'
+xz:
+  - 5
 zlib:
   - 1
 zstd:
