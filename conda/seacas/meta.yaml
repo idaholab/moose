@@ -36,11 +36,12 @@ requirements:
     - make
     - ninja
   host:
-    - python 3.14
     - xorg-libx11
     - xorg-xorgproto
 
 test:
+  requires:
+    - python 3
   commands:
     - test "$SEACAS_DIR" == "${PREFIX}/moose-seacas"
     - exodiff --version
@@ -48,7 +49,7 @@ test:
     - explore
     - grepos
     - gjoin -v
-    - python3 $PREFIX/seacas/lib/tests/test_exodus3.py
+    - python3 ${SEACAS_DIR}/lib/tests/test_exodus3.py
     - blot --help || test $? -eq 1
 
 about:
