@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu
+set -eux
 
 # this function is called from conda/functions/retry_build.sh
 function do_build(){
@@ -15,14 +15,15 @@ function do_build(){
     export COMPILER="unused"
 
     # Install third party libraries
-    ./install-tpl.sh
+    ./install-tpl.sh || return 1
 
     # Setup build location and configure there.
     mkdir -p "${SRC_DIR:?}/build" || exit 1
     cd "${SRC_DIR:?}/build" || exit 1
     ../cmake-config \
         $CMAKE_ARGS \
-        -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" || return 1
+        -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" \
+        -DCMAKE_PROGRAM_PATH="$BUILD_PREFIX/moose-secas/bin;$PREFIX/moose-seacas/bin" || return 1
     # Make and install
     cmake --build . --parallel "$JOBS" || return 1
     cmake --install . || return 1
@@ -40,7 +41,7 @@ retry_build
 #   moose-mpich HDF5 bins if the user has both packages installed.
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export SEACAS_DIR=${PREFIX}
+export SEACAS_DIR=${PREFIX}/moose-seacas
 export PATH=\${PATH}:${PREFIX}/moose-seacas/bin
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"

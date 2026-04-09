@@ -36,12 +36,14 @@ requirements:
     - make
     - ninja
   host:
+    - fmt
     - xorg-libx11
     - xorg-xorgproto
+    - zstd
 
 test:
   requires:
-    - python 3
+    - python >=3.10
   commands:
     - test "$SEACAS_DIR" == "${PREFIX}/moose-seacas"
     - exodiff --version
