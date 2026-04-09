@@ -1052,7 +1052,6 @@ parse(const std::string & fname,
   std::stringstream input_errors;
   std::shared_ptr<wasp::DefaultHITInterpreter> interpreter =
       std::make_shared<wasp::DefaultHITInterpreter>(input_errors);
-  interpreter->set_should_load_includes(options.expand_includes);
 
   std::vector<ErrorMessage> errors;
 
@@ -1080,7 +1079,7 @@ parse(const std::string & fname,
   {
     std::string starting_file = interpreter->root().node_pool()->stream_name();
     std::size_t starting_line = interpreter->root().line();
-    buildHITTree(interpreter, interpreter->root(), root.get(), starting_file, starting_line);
+    buildHITTree(interpreter, interpreter->root(), root.get(), starting_file, starting_line, options);
   }
 
   return root.release();
@@ -1172,10 +1171,7 @@ matches(const std::string & s, const std::string & regex, bool full = true)
   }
 }
 
-Formatter::Formatter()
-  : canonical_section_markers(true), line_length(100), indent_string("  "), expand_includes(true)
-{
-}
+Formatter::Formatter() : canonical_section_markers(true), line_length(100), indent_string("  ") {}
 
 void
 Formatter::walkPatternConfig(const std::string & prefix, Node * n)
@@ -1197,7 +1193,7 @@ Formatter::walkPatternConfig(const std::string & prefix, Node * n)
 }
 
 Formatter::Formatter(const std::string & fname, const std::string & hit_config)
-  : canonical_section_markers(true), line_length(100), indent_string("  "), expand_includes(true)
+  : canonical_section_markers(true), line_length(100), indent_string("  ")
 {
   std::unique_ptr<hit::Node> root(hit::parse(fname, hit_config));
   if (root->find("format/indent_string"))
@@ -1213,8 +1209,9 @@ Formatter::Formatter(const std::string & fname, const std::string & hit_config)
 std::string
 Formatter::format(const std::string & fname, const std::string & input)
 {
+  // formatting should parse the document without included content expanded
   ParseOptions options;
-  options.expand_includes = expand_includes;
+  options.expand_includes = false;
   std::unique_ptr<hit::Node> root(hit::parse(fname, input, nullptr, options));
   format(root.get());
   return root->render(0, indent_string, line_length);
@@ -1340,12 +1337,25 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
              wasp::HITNodeView hnv_parent,
              Node * hit_parent,
              std::string & previous_file,
-             std::size_t & previous_line)
+             std::size_t & previous_line,
+             const ParseOptions & options)
 {
   if (hnv_parent.is_null())
     return;
 
-  for (const auto & hnv_child : hnv_parent)
+  // do range-based traversal in normal conditions to expand included files
+  // do index-based traversal for format to not descend into included files
+  auto walk_children = [](wasp::HITNodeView hnv_parent, bool expand_includes, auto visit)
+  {
+    if (expand_includes)
+      for (const auto & hnv_child : hnv_parent)
+        visit(hnv_child);
+    else
+      for (std::size_t i = 0, count = hnv_parent.child_count(); i < count; i++)
+        visit(hnv_parent.child_at(i));
+  };
+
+  walk_children(hnv_parent, options.expand_includes, [&](const auto & hnv_child)
   {
     // create and add comment node as terminal leaf but do not recurse deeper
     if (hnv_child.type() == wasp::COMMENT)
@@ -1435,7 +1445,7 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
       // recurse using section if found and do not create or add anything new
       if (auto hit_child = hit_parent->find(hnv_child.name());
           hit_child && hit_child->type() == NodeType::Section)
-        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
+        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line, options);
 
       // create and add new section node if not found then recurse using node
       else
@@ -1449,12 +1459,12 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
         hit_parent->addChild(hit_child);
         previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.line();
-        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
+        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line, options);
         previous_file = hnv_child.node_pool()->stream_name();
         previous_line = hnv_child.last_line();
       }
     }
-  }
+  });
 }
 
 } // namespace hit

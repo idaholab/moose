@@ -91,6 +91,9 @@ enum class TraversalOrder
 
 class Node;
 
+// structure with options that can be used to control behavior when parsing
+// currently only contains option for formatter to not expand include files
+// this is passed into parse() and buildHITTree() and may be expanded later
 struct ParseOptions
 {
   bool expand_includes = true;
@@ -705,8 +708,6 @@ public:
   /// The text used to represent a single level of nesting indentation.  It must be comprised of
   /// only whitespace characters.
   std::string indent_string;
-  /// Whether !include directives should be expanded before formatting.
-  bool expand_includes;
 
 private:
   struct Pattern
@@ -791,6 +792,7 @@ void buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
                   wasp::HITNodeView hnv_parent,
                   Node * hit_parent,
                   std::string & previous_file,
-                  std::size_t & previous_line);
+                  std::size_t & previous_line,
+                  const ParseOptions & options = ParseOptions{});
 
 } // namespace hit

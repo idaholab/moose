@@ -437,7 +437,6 @@ format(int argc, char ** argv)
   flags.add("h", "print help");
   flags.add("help", "print help");
   flags.add("i", "modify file(s) inplace");
-  flags.add("no-expand-includes", "preserve !include directives instead of formatting expanded content");
   flags.add("style", "hit style file detailing format to use", "");
 
   auto positional = parseOpts(argc, argv, flags);
@@ -471,8 +470,6 @@ format(int argc, char ** argv)
       return 1;
     }
   }
-
-  fmt.expand_includes = !flags.have("no-expand-includes");
 
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
