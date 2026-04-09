@@ -8,7 +8,7 @@ Content:
     regular_workshop:
         root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
         content:
-            - workshop/**
+            - workshop/intro/**
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
