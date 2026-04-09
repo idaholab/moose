@@ -8,13 +8,9 @@ package:
   name: moose-dev
   version: {{ version }}
 
-source:
-  path: ../moose-dev
-
 build:
   number: 0
   string: {{ mpi }}
-  skip: true  # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
@@ -22,10 +18,10 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   run:
-    - {{ mpi }}
-    - {{ moose_tools }}
-    - {{ moose_libmesh }}
-    - {{ moose_wasp }}
+    - moose-mpi __VERSIONER_MPI_VERSION__ {{ mpi }}
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    - moose-tools __VERSIONER_TOOLS_VERSION__
 
 about:
   home: https://mooseframework.inl.gov/

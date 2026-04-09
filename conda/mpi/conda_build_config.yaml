@@ -1,37 +1,5 @@
-mpi:
-  - mpich
-  - openmpi
-
-mpi_version:
-  # MPICH version
-  - 4.3.2
-  # OpenMPI version
-  - 5.0.10
-
-mpi_friendly_name:
-  - MPICH
-  - OpenMPI
-
-mpi_website:
-  - http://www.mpich.org/documentation/guides
-  - https://www.open-mpi.org/doc/
-
-mpi_dev_website:
-  - https://github.com/pmodels/mpich
-  - https://github.com/open-mpi/ompi
-
-zip_keys:
-  - mpi
-  - mpi_version
-  - mpi_friendly_name
-  - mpi_website
-  - mpi_dev_website
-
 ##
 ## Compiler versions
-##
-## Used for the build time environment for moose-[petsc,libmesh-libmesh-vtk]
-## and the runtime environment for moose-dev
 ##
 ## Should near-mirror the versions from conda-forge-pinning-feedstock,
 ## but with a slightly stricter pinning
@@ -51,21 +19,3 @@ moose_fortran_compiler:
   - gfortran_linux-64 14.3.*                                # [linux]
   - gfortran_osx-64 14.3.*                                  # [osx and x86_64]
   - gfortran_osx-arm64 14.3.*                               # [osx and arm64]
-
-##
-## Compiler symlink packages
-##
-## Used for the runtime environment so that the clang compilers are presented
-## as the simple known compilers; for example: x86_64-conda-linux-gnu-gcc -> gcc
-##
-
-moose_c_compiler_symlink:
-  - gcc                                                     # [linux]
-  - clang                                                   # [osx]
-
-moose_cxx_compiler_symlink:
-  - gxx                                                     # [linux]
-  - clangxx                                                 # [osx]
-
-moose_fortran_compiler_symlink:
-  - gfortran

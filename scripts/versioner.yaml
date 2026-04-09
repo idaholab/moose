@@ -13,7 +13,7 @@ packages:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
     influential:
       - conda/conda_build_config.yaml
-  # dependers: libmesh-vtk, petsc, libmesh, moose-dev
+  # dependers: moose-dev
   mpi:
     version: 2026.04.07
     conda: conda/mpi
@@ -23,7 +23,7 @@ packages:
       - apptainer/mpi.def
       - apptainer/files/mpi
       - conda/conda_build_config.yaml
-      - conda/mpi/base_build.sh
+      - conda/mpi/build.sh
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
@@ -32,8 +32,6 @@ packages:
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
-    dependencies:
-      - mpi
     influential:
       - conda/conda_build_config.yaml
       - conda/libmesh-vtk/build.sh
@@ -62,7 +60,6 @@ packages:
     build_number: 0
     conda: conda/libmesh
     templates:
-      conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
       conda/libmesh/meta.yaml.template: conda/libmesh/meta.yaml
     dependencies:
       - petsc
@@ -109,7 +106,6 @@ packages:
     version: 2026.04.07
     conda: conda/moose-dev
     templates:
-      conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
     dependencies:
       - libmesh

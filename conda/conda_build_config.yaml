@@ -26,10 +26,26 @@ ruff:
 xmltodict:
   - <0.14
 
-mpich:
+##
+## MPI
+##
+
+mpi:
+  - mpich
+  - openmpi
+
+mpi_version:
   - 5.0.0
-openmpi:
   - 5.0.10
+
+mpi_friendly_name:
+  - MPICH
+  - OpenMPI
+
+zip_keys:
+  - mpi
+  - mpi_version
+  - mpi_friendly_name
 
 ##
 ## Compilers from conda-forge-pinning

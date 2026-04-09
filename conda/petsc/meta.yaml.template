@@ -46,7 +46,7 @@ requirements:
     - python 3.12.*
     - gnuconfig
   host:
-    - {{ mpi }}
+    - {{ mpi }} {{ mpi_version }}
     - _openmp_mutex # [linux]
     - bzip2
     - cmake
