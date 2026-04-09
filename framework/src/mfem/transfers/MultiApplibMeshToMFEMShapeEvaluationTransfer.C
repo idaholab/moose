@@ -93,26 +93,18 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
     const unsigned int var_index,
     mfem::Vector & interp_vals)
 {
-  // Evaluate source grid function at target points
-  std::vector<libMesh::MeshFunction> local_meshfuns;
-  local_meshfuns.clear();
-  local_meshfuns.reserve(_from_problems.size());
+  FEProblemBase & from_problem = getActiveFromProblem();
+  MooseVariableFieldBase & from_var = from_problem.getVariable(0,
+                                                               getFromVarName(var_index),
+                                                               Moose::VarKindType::VAR_ANY,
+                                                               Moose::VarFieldType::VAR_FIELD_ANY);
+  System & from_sys = from_var.sys().system();
+  unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
   // Construct a local mesh function for each origin problem
-  for (const auto i_from : make_range(_from_problems.size()))
-  {
-    FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFieldBase & from_var =
-        from_problem.getVariable(0,
-                                 getFromVarName(var_index),
-                                 Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_ANY);
-    System & from_sys = from_var.sys().system();
-    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-    local_meshfuns.emplace_back(
-        from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
-    local_meshfuns.back().init();
-    local_meshfuns.back().enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
-  }
+  libMesh::MeshFunction local_meshfuns(
+      from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
+  local_meshfuns.init();
+  local_meshfuns.enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
 
   // Gather all of the evaluations, pick out the best ones for each point, and apply them to the
   // solution vector. Fill values and app ids for incoming points We are responsible to compute
@@ -128,27 +120,23 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
     for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
     {
       Point pt = incoming_points[i_pt];
-
       // Loop until we've found the lowest-ranked app that actually contains
       // the quadrature point.
-      for (MooseIndex(_from_problems.size()) i_from = 0;
-           i_from < _from_problems.size() &&
-           vals_ids_for_incoming_points[i_pt].first == getMFEMOutOfMeshValue();
-           ++i_from)
+      if (vals_ids_for_incoming_points[i_pt].first == getMFEMOutOfMeshValue())
       {
         const auto from_global_num =
-            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
+            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[0];
         // Use mesh function to compute interpolation values
         vals_ids_for_incoming_points[i_pt].first =
-            (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+            local_meshfuns(_from_transforms[from_global_num]->mapBack(pt));
         // Record problem ID as well
         switch (_current_direction)
         {
           case FROM_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[i_from];
+            vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[0];
             break;
           case TO_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[i_from];
+            vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[0];
             break;
           case BETWEEN_MULTIAPP:
             break;
