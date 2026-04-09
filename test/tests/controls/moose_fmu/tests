@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30912'
-  design = 'syntax/Controls/index.md source/controls/MOOSE_FMU.md'
+  design = 'syntax/Controls/index.md source/controls/MOOSEFMU.md'
 
   [moosefmu]
     requirement = 'The system shall support'

@@ -21,7 +21,7 @@ inside `moose_fmu_tester.py`:
 - `dt_tolerance`: Permitted synchronization tolerance between FMU time and the
   MOOSE simulation clock.
 
-!listing python/MooseFMU/MOOSE2FMU.py start=def __init__ end=# Default synchronization and data retrieval flags
+!listing python/moosefmu/moose2fmu.py start=def __init__ end=# Default synchronization and data retrieval flags
 
 The class also exposes a ``default_experiment`` that can be customized if the
 FMU should advertise a different start/stop time or nominal step size.

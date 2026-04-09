@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30912'
-  design = 'source/controls/MOOSE_FMU.md'
+  design = 'source/controls/MOOSEFMU.md'
   [fmu_utils]
     requirement = 'The MooseFMU utils functions should run successfully.'
     type = PythonUnitTest
