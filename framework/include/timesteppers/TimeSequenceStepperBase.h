@@ -35,6 +35,10 @@ public:
   // Get the time of the current step from input time sequence
   virtual Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
 
+  /// Advance past sequence times that have already been reached and report whether a future
+  /// sequence time remains.
+  bool advanceToFutureTime(Real time, Real tolerance);
+
   virtual void init() override {}
   virtual void acceptStep() override;
 

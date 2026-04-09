@@ -246,7 +246,6 @@
       csvdiff = 'OutputData/NLHeatTransferLinearized_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
                  'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '
@@ -258,8 +257,8 @@
       csvdiff = 'OutputData/NLHeatTransfer_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
+      prereq = 'MFEMNonLinearHeatTransfer/linearized'
     []
   []
   [MFEMNonLinearHeatConduction]
@@ -276,7 +275,6 @@
                 OutputData/NLHeatConduction_centre_temperature_0050.csv'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
     restep = false
   []
 []
