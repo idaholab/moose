@@ -1,6 +1,4 @@
-# Introduction to MOOSE
-
-## Second Joint ICTP-IAEA Workshop on Open-Source Nuclear Codes for Reactor Analysis
+# MOOSE User Short Workshop
 
 !style halign=center fontsize=150%
 [ENTER](user_short_workshop/index.md exact=True)
