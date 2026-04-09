@@ -135,7 +135,7 @@ We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and a
 
 ## Input: Diffusion with Volumetric Source
 
-!listing user_short_workshop/inputs/step2_diffusion/diffusion_volumetric_source.i diff=user_short_workshop/inputs/step2_diffusion/diffusion.i prefix=moose/step2_diffusion diff_prefix=moose/step2_diffusion
+!listing user_short_workshop/inputs/step2_diffusion/diffusion_volumetric_source.i diff=user_short_workshop/inputs/step2_diffusion/diffusion.i
 
 !---
 

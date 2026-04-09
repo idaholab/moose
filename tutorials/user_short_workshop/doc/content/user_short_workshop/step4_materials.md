@@ -33,7 +33,7 @@ This will require two changes:
 
 ## Input: Spatially-Dependent Diffusion
 
-!listing user_short_workshop/inputs/step4_materials/diffusion_materials.i diff=user_short_workshop/inputs/step2_diffusion/diffusion.i prefix=moose/step4_materials diff_prefix=moose/step2_diffusion
+!listing user_short_workshop/inputs/step4_materials/diffusion_materials.i diff=user_short_workshop/inputs/step2_diffusion/diffusion.i
 
 !---
 

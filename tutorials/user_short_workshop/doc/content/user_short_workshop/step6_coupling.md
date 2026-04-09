@@ -105,13 +105,13 @@ This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two tra
 
 ## Problem Input: Solid
 
-!listing user_short_workshop/inputs/step6_coupling/solid.i diff=user_short_workshop/inputs/step5_heat_conduction/solid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step6_coupling/solid.i diff=user_short_workshop/inputs/step5_heat_conduction/solid.i
 
 !---
 
 ## Problem Input: Fluid
 
-!listing user_short_workshop/inputs/step6_coupling/fluid.i diff=user_short_workshop/inputs/step5_heat_conduction/fluid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
+!listing user_short_workshop/inputs/step6_coupling/fluid.i diff=user_short_workshop/inputs/step5_heat_conduction/fluid.i
 
 !---
 
