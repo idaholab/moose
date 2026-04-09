@@ -5,13 +5,22 @@ package:
   version: {{ version }}
 
 source:
-  - path: ../pprof
-  - path: ../functions/retry_build.sh
+  git_url: https://github.com/google/pprof.git
+  git_rev: a15ffb7f9dccb95074ad153aef0f1fcbb01e61e3
 
 build:
   number: 0
   string: build_0
-  skip: true  # [win]
+  script: |
+    GO111MODULE=on CGO_ENABLED=0 go build -o "$PREFIX"/bin/pprof .
+
+    mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
+    cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
+    export GPERF_DIR=${PREFIX}
+    EOF
+    cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
+    unset GPERF_DIR
+    EOF
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
@@ -19,12 +28,12 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   build:
-    - {{ compiler('c') }}
+    - git
+  host:
     - go
   run:
     - gperftools
     - graphviz
-    - perl
 test:
   commands:
     - pprof --help

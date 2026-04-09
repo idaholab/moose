@@ -147,7 +147,6 @@ packages:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
     influential:
       - conda/conda_build_config.yaml
-      - conda/pprof/build.sh
   # dependers: none
   seacas:
     version: 2025.10.14
