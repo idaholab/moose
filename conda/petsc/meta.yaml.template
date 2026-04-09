@@ -47,6 +47,7 @@ requirements:
     - gnuconfig
   host:
     - {{ mpi }}
+    - _openmp_mutex # [linux]
     - bzip2
     - cmake
     - hdf5 {{ hdf5 }}
