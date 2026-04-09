@@ -39,9 +39,8 @@ def as_scalar(value: Any) -> Any:
             with contextlib.suppress(Exception):
                 return value[0]
 
-        raise ValueError(
-            f"Expected scalar FMU value, got array-like shape={getattr(value, 'shape', '?')}"
-        )
+        shape = getattr(value, "shape", "?")
+        raise ValueError(f"Expected scalar FMU value, got array-like shape={shape}")
 
     if isinstance(value, (list, tuple)):
         if len(value) == 1:
