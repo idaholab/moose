@@ -155,6 +155,14 @@ MooseLinearVariableFV<OutputType>::initialSetup()
 }
 
 template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::timestepSetup()
+{
+  MooseVariableField<OutputType>::timestepSetup();
+  cacheBoundaryBCMap();
+}
+
+template <typename OutputType>
 typename MooseLinearVariableFV<OutputType>::ValueType
 MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg & state) const
 {
