@@ -6,17 +6,17 @@
 
 Let's solve a diffusion problem on our pin mesh to introduce the solving of a basic finite element problem.
 
-Consider the steady-state diffusion equation on the domain $\Omega$ (our pin cell): find $u$ such that
+Consider the steady-state diffusion equation on the domain $\Omega$ (our pin cell mesh, `../step1_input_and_meshing/fuel_pin_in.e`): find $u$ such that
 
 !equation
 -\nabla \cdot \nabla u = 0,
 
-where $u = 0$ on the interior and $u = 1$ on the exterior.
+where $u = 0$ on the interior boundary (`inner`) and $u = 1$ on the exterior boundary (`water_solid_interface`).
 
-The weak form of this equation, in inner-product notation, is given by:
+Multiplying by the test function $\psi_i$ and integrating by parts gives the weak form of this equation, where $u_h$ is our numerical solution:
 
 !equation
-\left(\nabla \psi_i, \nabla u_h\right) = 0 \quad \forall \psi_i,
+\left(\nabla u_h, \nabla \psi_i\right)_\Omega - \left<\nabla u_h, \psi_i \mathbf{n}\right>_{\partial\Omega} = 0.
 
 !--
 
@@ -72,7 +72,7 @@ Kernels can be "block restricted" (applied to a subset of the physical mesh) via
 
 ## Boundary Condition Definition
 
-Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `outer` with a value of `1`:
+Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `water_solid_interface` with a value of `1`:
 
 !listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=BCs prefix=moose/step2_diffusion
 
