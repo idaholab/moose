@@ -41,7 +41,7 @@ This will require two changes:
 
 ```bash
 $ cd ../step4_materials
-$ cardinal-opt -i diffusion_materials.i
+$ moose-opt -i diffusion_materials.i
 ```
 
 !---

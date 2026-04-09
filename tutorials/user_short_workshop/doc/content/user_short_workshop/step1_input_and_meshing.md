@@ -47,7 +47,7 @@ The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named 
 
 ```bash
 $ cd moose/step1_input_and_meshing
-$ cardinal-opt -i basic.i --mesh-only
+$ moose-opt -i basic.i --mesh-only
 ```
 
 - The argument `-i` specifies which input file to run
@@ -157,7 +157,7 @@ We will also apply a special treatment at the clad-fluid interface to support a 
 ## Run: Concentric Circle Mesh
 
 ```bash
-$ cardinal-opt -i concentric_circle.i --mesh-only
+$ moose-opt -i concentric_circle.i --mesh-only
 ```
 
 ```
@@ -308,7 +308,7 @@ For the tasks that follow, we will utilize the:
 ## Run: Fuel Mesh
 
 ```bash
-$ cardinal-opt -i fuel_pin.i --mesh-only
+$ moose-opt -i fuel_pin.i --mesh-only
 ```
 
 ```
@@ -406,7 +406,7 @@ From `fuel_pin_in.e`: The grey elements represent the fuel (block `fuel`), and t
 ## Run: Fluid Mesh
 
 ```bash
-$ cardinal-opt -i fluid.i --mesh-only
+$ moose-opt -i fluid.i --mesh-only
 ```
 
 ```

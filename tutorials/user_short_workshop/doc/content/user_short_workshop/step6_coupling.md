@@ -119,7 +119,7 @@ This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two tra
 
 ```bash
 $ cd ../step6_coupling
-$ cardinal-opt -i solid.i
+$ moose-opt -i solid.i
 ```
 
 !--

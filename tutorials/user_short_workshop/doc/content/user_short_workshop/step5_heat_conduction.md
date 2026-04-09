@@ -55,7 +55,7 @@ We will also use an [`AuxVariable`](AuxVariables/index.md) named `T_fluid` to de
 
 ```bash
 $ cd ../step5_heat_conduction
-$ cardinal-opt -i solid.i
+$ moose-opt -i solid.i
 ```
 
 ```
@@ -127,7 +127,7 @@ The material properties are as follows:
 !---
 
 ```bash
-$ cardinal-opt -i fluid.i
+$ moose-opt -i fluid.i
 ```
 
 !---

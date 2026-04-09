@@ -110,7 +110,7 @@ Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/neme
 
 ```bash
 $ cd ../step2_diffusion
-$ cardinal-opt -i diffusion.i
+$ moose-opt -i diffusion.i
 ```
 
 !---
@@ -142,7 +142,7 @@ We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and a
 ## Run: Diffusion with Volumetric Source
 
 ```bash
-$ cardinal-opt -i diffusion_volumetric_source.i
+$ moose-opt -i diffusion_volumetric_source.i
 ```
 
 !---

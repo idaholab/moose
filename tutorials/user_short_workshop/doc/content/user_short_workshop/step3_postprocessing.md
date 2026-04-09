@@ -39,7 +39,7 @@ For the simple diffusion problem in the previous step, the [`PostProcessor`](Pos
 
 ```bash
 $ cd ../step3_postprocessing
-$ cardinal-opt -i postprocessing.i
+$ moose-opt -i postprocessing.i
 ```
 
 At the end of the simulation, the postprocessor values appear on screen:
