@@ -8,15 +8,15 @@ Thus far, we've solved the diffusion problem on our pin cell with heterogeneity 
 
 - The outer boundary (`water_solid_interface`) has a prescribed temperature of $300$ K
 - The inner boundary has zero heat flux
-- There is a volumetric heat source in the fuel (`fuel`) of $10^8~\text{W}/\text{m}^2$
+- There is a volumetric heat source in the fuel (`fuel`) of $10^8~\text{W}/\text{m}^3$
 
 The material properties are as follows:
 
 | Property | Fuel | Clad |
 | - | - | - |
-| $k$ | $2~\text{W}/\text{m}^2$ | $10~\text{W}/\text{m}^2$ |
-| $c_p$ | $3100~\text{W}/(\text{K} \cdot \text{kg})$ | $2800~\text{W}/(\text{K} \cdot \text{kg})$ |
-| $\rho$ | $10700~\text{kg}/\text{m}^3$ | $5400~\text{kg}/\text{m}^3$ |
+| $k$ | 2 W/m | 10 W/m |
+| $c_p$ | 3100 J/(kg-K) |  2800 J/(kg-K) |
+| $\rho$ | 10700 kg/m$^3$ | 5400 kg/m$^3$ |
 
 !---
 
@@ -110,9 +110,9 @@ The material properties are as follows:
 
 | Property | Value |
 | - | - | - |
-| $k$ | $0.6~\text{W}/\text{m}^2$ |
-| $c_p$ | $1000~\text{W}/(\text{K} \cdot \text{kg})$ |
-| $\rho$ | $4100~\text{kg}/\text{m}^3$ |
+| $k$ | 0.6 W/m |
+| $c_p$ | 1000 J/(kg-K) |
+| $\rho$ | 4100 kg/m$^3$ |
 
 !---
 

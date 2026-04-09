@@ -127,7 +127,7 @@ From `diffusion_out.e` in Paraview
 
 ## Diffusion with Volumetric Source
 
-Let's replace the outer boundary condition (Dirichlet setting $u$ = 1) with the natural boundary condition $\nabla u = 0$ and then add a volumetric source represented by the function $10^9 * \sqrt{x^2 + y^2}$.
+Let's replace the outer boundary condition (Dirichlet setting $u = 1$) with the natural boundary condition $\nabla u = 0$ and then add a volumetric source represented by the function $10^9 \sqrt{x^2 + y^2}$.
 
 We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and add a new Kernel of type [`BodyForce`](BodyForce.md).
 
