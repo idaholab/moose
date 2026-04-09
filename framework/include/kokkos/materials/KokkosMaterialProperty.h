@@ -26,7 +26,6 @@ MaterialPropertyBase::init(const PropRecord & record, const StorageKey &)
 {
   _record = &record;
   _id = record.id;
-  _constant_option = record.constant_option;
 }
 
 template <typename T, unsigned int dimension>
@@ -118,18 +117,25 @@ MaterialProperty<T, dimension>::allocate(const Mesh & mesh,
   if (!_data.isAlloc())
     _data.create(mesh.getNumSubdomains());
 
+  if (!_constant_option.isAlloc())
+  {
+    _constant_option.create(mesh.getNumSubdomains());
+    _constant_option = PropertyConstantOption::NONE;
+  }
+
   for (const auto subdomain : subdomains)
   {
     auto sid = mesh.getContiguousSubdomainID(subdomain);
+    auto constant_option = libmesh_map_find(_record->constant_option, subdomain);
 
     std::vector<dof_id_type> n;
 
     for (unsigned int i = 0; i < dimension; ++i)
       n.push_back(libmesh_map_find(_record->dims, subdomain)[i]);
 
-    if (_constant_option == PropertyConstantOption::NONE)
+    if (constant_option == PropertyConstantOption::NONE)
       n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
-    else if (_constant_option == PropertyConstantOption::ELEMENT)
+    else if (constant_option == PropertyConstantOption::ELEMENT)
       n.push_back(bnd ? assembly.getElemFacePropertySize(sid)
                       : mesh.getNumSubdomainLocalElements(subdomain));
     else
@@ -137,9 +143,12 @@ MaterialProperty<T, dimension>::allocate(const Mesh & mesh,
 
     if (!_data[sid].isAlloc())
       _data[sid].createDevice(n);
+
+    _constant_option[sid] = constant_option;
   }
 
   _data.copyToDevice();
+  _constant_option.copyToDevice();
 }
 
 template <typename T, unsigned int dimension>

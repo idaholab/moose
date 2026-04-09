@@ -43,8 +43,8 @@ Using a class with dynamic allocations will [incur a significant performance hit
 Instead, the material properties in Kokkos-MOOSE can be multi-dimensional to partially support the needs for dynamically-sized material properties.
 The dimension is provided as the second template argument `dimension`, which has the default value of 0 (scalar).
 The size of each dimension is provied as a vector as the function argument `dims`.
-When a material property is declared by multiple materials, it should have the same dimension over the entire domain, while the size of each dimension can be different between non-overlapping subdomains.
-However, a material property declared by boundary-restricted materials should have identical dimension sizes over the entire domain, even though the materials do not have overlapping boundaries.
+When a material property is declared by multiple materials, it should have the same dimension over the entire domain, while the size of each dimension can be different between subdomains.
+However, a material property declared by boundary-restricted materials should have identical dimension sizes over the entire domain.
 
 The material properties are stored as an object of type `Moose::Kokkos::MaterialProperty<type, dimension>`.
 Note that any material property object [should be stored as a concrete instance](syntax/Kokkos/index.md#kokkos_value_binding).
@@ -143,6 +143,7 @@ By default, material properties are computed and stored for each quadrature poin
 However, material properties are often constant within an element or subdomain, or vary little in space so that they can be approximated as constant without significant loss of accuracy.
 In this case, you can set the `constant_on` parameter of a material to `ELEMENT` or `SUBDOMAIN`, which makes the material properties declared by the material only computed and stored on per-element or per-subdomain basis.
 This can help save both computational cost and memory usage.
+However, note that a material property declared by boundary-restricted materials should have identical `constant_on` option across the entire domain.
 
 ## Material Property Output
 

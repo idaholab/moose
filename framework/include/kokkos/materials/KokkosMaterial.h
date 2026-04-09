@@ -183,10 +183,7 @@ Material::operator()(ElementInit, const ThreadID tid, const Derived & material) 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template initQpStatefulProperties<Derived>(qp, datum);
-  }
 }
 
 template <typename Derived>
@@ -200,10 +197,7 @@ Material::operator()(SideInit, const ThreadID tid, const Derived & material) con
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template initQpStatefulProperties<Derived>(qp, datum);
-  }
 }
 
 template <typename Derived>
@@ -217,10 +211,7 @@ Material::operator()(NeighborInit, const ThreadID tid, const Derived & material)
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template initQpStatefulProperties<Derived>(qp, datum);
-  }
 }
 
 template <typename Derived>
@@ -236,10 +227,7 @@ Material::operator()(ElementCompute, const ThreadID tid, const Derived & materia
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template computeQpProperties<Derived>(qp, datum);
-  }
 }
 
 template <typename Derived>
@@ -253,10 +241,7 @@ Material::operator()(SideCompute, const ThreadID tid, const Derived & material) 
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template computeQpProperties<Derived>(qp, datum);
-  }
 }
 
 template <typename Derived>
@@ -270,10 +255,7 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
   const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
 
   for (unsigned int qp = 0; qp < num_qps; ++qp)
-  {
-    datum.reinit();
     material.template computeQpProperties<Derived>(qp, datum);
-  }
 }
 
 } // namespace Moose::Kokkos

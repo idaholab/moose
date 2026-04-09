@@ -180,9 +180,9 @@ public:
   KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
 
   /**
-   * Reset the reinit flag
+   * Deprecated, will be removed
    */
-  KOKKOS_FUNCTION void reinit() { _transform_reinit = false; }
+  KOKKOS_FUNCTION void reinit() {}
 
 protected:
   /**
@@ -234,9 +234,10 @@ private:
   KOKKOS_FUNCTION void reinitTransform(const unsigned int qp);
 
   /**
-   * Flag whether the physical transformation data was cached
+   * Cached quadrature point index for checking whether the physical transformation data should be
+   * recomputed
    */
-  bool _transform_reinit = false;
+  unsigned int _cached_qp = libMesh::invalid_uint;
   /**
    * Cached physical transformation data
    */
@@ -317,7 +318,7 @@ Datum::normals(const unsigned int qp)
 KOKKOS_FUNCTION inline void
 Datum::reinitTransform(const unsigned int qp)
 {
-  if (_transform_reinit)
+  if (_cached_qp == qp)
     return;
 
   if (!isSide())
@@ -329,7 +330,7 @@ Datum::reinitTransform(const unsigned int qp)
   else
     _assembly.computePhysicalMap(_elem, _side, qp, &_J, &_JxW, &_xyz, &_normal);
 
-  _transform_reinit = true;
+  _cached_qp = qp;
 }
 
 /**
