@@ -1367,21 +1367,10 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
     display_text = valid_params.getDocString(paramkey);
     MooseUtils::escape(display_text);
 
-    // get parameter type and prepare it to check if units need to be added
-    std::string dirty_type = valid_params.type(paramkey);
-    std::string clean_type = MooseUtils::prettyCppType(dirty_type);
-
-    // cache set of parameter types that should have unit information added
-    static const std::vector<std::string> unit_type_substrs = {
-        "double", "Variable", "Postprocessor", "Funct", "MaterialProperty"};
-
-    // add units to hover text if specified or if type should display units
-    std::string doc_unit = valid_params.getDocUnit(paramkey);
-    if (!doc_unit.empty() || std::any_of(unit_type_substrs.begin(),
-                                         unit_type_substrs.end(),
-                                         [&](const std::string & sub)
-                                         { return clean_type.find(sub) != std::string::npos; }))
-      display_text += "\n\nUnits: " + (doc_unit.empty() ? "(no unit assumed)" : doc_unit);
+    // add units information to hover text if it is specified for parameter
+    std::string doc_units = valid_params.getDocUnit(paramkey);
+    if (!doc_units.empty())
+      display_text += "\n\nUnits: " + doc_units;
 
     // add range information to hover text if it is specified for parameter
     if (valid_params.isRangeChecked(paramkey))

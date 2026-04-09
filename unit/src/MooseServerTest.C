@@ -1458,7 +1458,7 @@ TEST_F(MooseServerTest, HoverDocumentationRequests)
   request_line = 48;
   request_char = 11;
   expect_text = "The target wall time interval (in seconds) at which to output\n\n"
-                "Units: (no unit assumed)\n\n"
+                "Units: seconds\n\n"
                 "Range: wall_time_interval > 0";
   check_hover(request_id, doc_uri, request_line, request_char, expect_text);
 
