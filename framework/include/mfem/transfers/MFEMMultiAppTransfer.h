@@ -47,6 +47,8 @@ protected:
   virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; }
   /// Getter for current problem containing destination variables
   virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
+  /// Get libMesh EquationSystem, which may or may not be displaced
+  EquationSystems & getlibMeshEquationSystem(FEProblemBase & problem, bool use_displaced) const;
 
   /// Set default value for transfers evaluated at points outside source mesh
   void setMFEMOutOfMeshValue(mfem::real_t mfem_out_of_mesh_value)

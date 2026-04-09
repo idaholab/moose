@@ -140,7 +140,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
                                Moose::VarKindType::VAR_ANY,
                                Moose::VarFieldType::VAR_FIELD_ANY));
     const auto & to_var_name = getToVarName(var_index);
-    auto & es = to_problem.es();
+    auto & es = getlibMeshEquationSystem(to_problem, _displaced_target_mesh);
     System & to_sys = *find_sys(es, to_var_name);
     // Extract set of target points in libMesh mesh to perform interpolation of MFEM variable at
     std::vector<Point> outgoing_libmesh_points;

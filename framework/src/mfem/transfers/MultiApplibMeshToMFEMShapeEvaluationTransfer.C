@@ -102,7 +102,10 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
   // Construct a local mesh function for each origin problem
   libMesh::MeshFunction local_meshfuns(
-      from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
+      getlibMeshEquationSystem(from_problem, _displaced_source_mesh),
+      *from_sys.current_local_solution,
+      from_sys.get_dof_map(),
+      from_var_num);
   local_meshfuns.init();
   local_meshfuns.enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
 

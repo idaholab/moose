@@ -31,6 +31,7 @@ All MFEM to libMesh transfers executed from this class should be able to support
 - transfers between parent and child applications
 - transfers between sibling applications (child to child)
 - transfers from multiple variables to multiple variables
+- transfers between displaced meshes
 
 !syntax parameters /Transfers/MultiAppMFEMTolibMeshShapeEvaluationTransfer
 

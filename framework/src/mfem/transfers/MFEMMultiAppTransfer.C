@@ -11,6 +11,7 @@
 
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
+#include "DisplacedProblem.h"
 
 InputParameters
 MFEMMultiAppTransfer::validParams()
@@ -88,6 +89,19 @@ MFEMMultiAppTransfer::checkSiblingsTransferSupported() const
   }
   else
     mooseError("Number of source and target child apps must match for siblings transfer");
+}
+
+EquationSystems &
+MFEMMultiAppTransfer::getlibMeshEquationSystem(FEProblemBase & problem, bool use_displaced) const
+{
+  if (use_displaced)
+  {
+    if (!problem.getDisplacedProblem())
+      mooseError("No displaced problem to provide a displaced equation system");
+    return problem.getDisplacedProblem()->es();
+  }
+  else
+    return problem.es();
 }
 
 #endif

@@ -108,33 +108,6 @@
   []
 []
 
-# [Postprocessors]
-#   # [nodal_nodal_error]
-#   #   type = MFEML2Error
-#   #   variable = received_nodal
-#   #   function = received_nodal_var_func
-#   #   execute_on = 'TIMESTEP_END'
-#   # []
-#   # [elem_elem_error]
-#   #   type = MFEML2Error
-#   #   variable = received_elem
-#   #   function = received_elem_var_func
-#   #   execute_on = 'TIMESTEP_END'
-#   # []
-#   [nodal_elem_error]
-#     type = MFEML2Error
-#     variable = received_elem
-#     function = received_nodal_var_func
-#     execute_on = 'TIMESTEP_END'
-#   []
-#   [elem_nodal_error]
-#     type = MFEML2Error
-#     variable = received_nodal
-#     function = received_elem_var_func
-#     execute_on = 'TIMESTEP_END'
-#   []
-# []
-
 [Outputs]
   csv = true
 []

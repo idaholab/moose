@@ -1,0 +1,16 @@
+[Tests]
+  design = MultiAppMFEMShapeEvaluationTransfer.md
+  issues = '#31982'
+  [MFEMTransferFromlibMeshDisplaced]
+    type = XMLDiff
+    input = mfem_parent.i
+    xmldiff = 'OutputData/Displaced/Run0/Run0.pvd
+                OutputData/Displaced/Run0/Cycle000010/proc000000.vtu'
+    requirement = "The system shall be able to transfer from a libMesh source application that is being displaced to an MFEM target application."
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
+[]
