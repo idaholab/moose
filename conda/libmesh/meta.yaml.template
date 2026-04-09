@@ -39,7 +39,7 @@ requirements:
     - make
     - pkg-config
   host:
-    - {{ mpi }}
+    - {{ mpi }} {{ mpi_version_spec }}
     - moose-petsc __VERSIONER_PETSC_VERSION__ {{ mpi }}___VERSIONER_PETSC_BUILD_NUMBER__
     - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
     - _openmp_mutex
