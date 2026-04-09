@@ -35,7 +35,7 @@
 [Kernels/heat_source]
   type = BodyForce
   variable = T
-  value = 1e8 # [W/m^2 in 2D]
+  value = 1e8 # [W/m^3]
 []
 
 [Materials]

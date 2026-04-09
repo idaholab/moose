@@ -15,9 +15,8 @@
   # Prescribe the heat flux on the water solid
   # interface to that from the interface, pulled
   # in from the aux variable "flux_from_solid"
-  # (for now is the value 500 W/M)
   heat_flux_boundaries = water_solid_interface
-  boundary_heat_fluxes = flux_from_solid # [W/m2]
+  boundary_heat_fluxes = flux_from_solid # [W/m^2]
 
   # Evacuate heat at the outer boundary
   # with a prescribed temperature of 300 K
@@ -34,7 +33,7 @@
 # flux from the solid
 [AuxVariables]
   [flux_from_solid]
-    initial_condition = 2e4 # [W/m]
+    initial_condition = 2e4 # [W/m^2]
   []
 []
 
