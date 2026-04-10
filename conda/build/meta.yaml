@@ -50,6 +50,7 @@ requirements:
     - cmake
     - make
     - ninja
+    - pkg-config
 
 test:
   commands:
