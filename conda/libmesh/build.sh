@@ -16,8 +16,15 @@ function do_build(){
     make install
 }
 
-# Use MPI wrappers for compilers
+# Use mpi wrapped compilers
 export CC=mpicc CXX=mpicxx FC=mpifort F77=mpifort F90=mpifort
+# Strip flags that cause issues
+STRIP_FLAGS=("-DNDEBUG" "-O2" "-D_FORTIFY_SOURCE=2")
+for FLAG in "${STRIP_FLAGS[@]}"; do
+  export CPPFLAGS="$(echo "$CPPFLAGS" | sed "s/${FLAG}//g" | xargs)"
+  export CXXFLAGS="$(echo "$CXXFLAGS" | sed "s/${FLAG}//g" | xargs)"
+  export FFLAGS="$(echo "$FFLAGS" | sed "s/${FLAG}//g" | xargs)"
+done
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR:?}/configure_libmesh.sh"
