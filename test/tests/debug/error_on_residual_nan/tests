@@ -1,0 +1,19 @@
+[Tests]
+  design = 'SetupDebugAction.md'
+  issues = '#32504'
+  [dbg_devel]
+    type = RunException
+    input = 'error_on_residual_nan.i'
+    expect_err = 'NaN or Inf detected in'
+    capabilities = 'method=dbg | method=devel'
+    cli_args = '--no-trap-fpe' # For Linux, this test would fail due to hitting trap
+    requirement = 'The system shall allow the user to specify to report an error when a NaN or Inf value enters the residual.'
+  []
+  [opt_oprof]
+    type = RunException
+    input = 'error_on_residual_nan.i'
+    expect_err = "The parameter 'error_on_residual_nan' may only be set to 'true' for 'dbg' and 'devel' modes."
+    capabilities = 'method=opt | method=oprof'
+    requirement = "The system shall report an error if 'report_on_residual_nan' is enabled in opt mode."
+  []
+[]

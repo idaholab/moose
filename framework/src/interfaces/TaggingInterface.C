@@ -376,6 +376,11 @@ TaggingInterface::prepareMatrixTagLower(Assembly & assembly,
 void
 TaggingInterface::accumulateTaggedLocalResidual()
 {
+#ifndef NDEBUG
+  if (_subproblem.checkResidualForNans())
+    checkForNans();
+#endif
+
   for (auto & re : _re_blocks)
     *re += _local_re;
   for (auto & absre : _absre_blocks)
@@ -386,6 +391,11 @@ TaggingInterface::accumulateTaggedLocalResidual()
 void
 TaggingInterface::assignTaggedLocalResidual()
 {
+#ifndef NDEBUG
+  if (_subproblem.checkResidualForNans())
+    checkForNans();
+#endif
+
   for (auto & re : _re_blocks)
     *re = _local_re;
   for (auto & absre : _absre_blocks)
@@ -448,6 +458,27 @@ TaggingInterface::assignTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke = _local_ke;
+}
+
+void
+TaggingInterface::checkForNans() const
+{
+  for (const auto i : index_range(_local_re))
+    if (!std::isfinite(_local_re(i)))
+    {
+      std::stringstream ss;
+      ss << "NaN or Inf detected in '" << _moose_object.name() << "'.\n";
+      ss << "To further troubleshoot this value in this residual object, add the following lines "
+            "before returning the value in the computeQpResidual() (or similar) method in the "
+            "source file for the class of '"
+         << _moose_object.name() << "':\n\n";
+      ss << "  if (!std::isfinite(<return value>))\n";
+      ss << "    mooseError(\"Found NaN or Inf\");\n\n";
+      ss << "Then you can use a breakpoint in a debugger to troubleshoot the origin of the NaN or "
+            "Inf value.";
+
+      mooseError(ss.str());
+    }
 }
 
 TaggingInterface::~TaggingInterface() {}

@@ -283,19 +283,21 @@ in a scalable manner.
 
 ### Solver reports the presence of a 'not a number' (NaN) id=nan
 
-If the solver is faced with invalid floating point arithmetic, such as dividing by 0 or computing the derivative of a
-L2-norm at 0, it will generate a `NaN` in the solution vector. This is undesirable and will cause the solve to fail.
+If the solver is faced with invalid floating point arithmetic, such as division by zero, a `NaN` or `Inf` will be appear in the nonlinear residual vector, causing the solve to fail.
 MOOSE will report the nonlinear solve as having not converged with:
 
 ```
 Nonlinear solve did not converge due to DIVERGED_FNORM_NAN.
 ```
 
-99% of the time, this arises because a variable is not initialized and the material properties are being evaluated out
-of bounds. Initializing all the variables in the simulation will fix the problem.
+Common sources of NaN or Inf values are:
 
-If not, you must find the source of the `NaN`. In most cases, you will be able to run your simulation again and
-pass the command line argument `--trap-fpe`. In some cases, this will not suffice and you will need to use a debugger.
+- Division by zero
+- Uninitialized variables
+
+To troubleshoot a NaN or Inf value, first compile in `dbg` mode (see [application_development/debugging.md#building_dbg]), which will provide more useful information to debuggers.
+
+For Linux machines, the command line argument `--trap-fpe` (note that this is enabled by default in `dbg` mode) should effectively trap floating point exceptions and provide a means to create a breakpoint in a debugger.
 Detailed instructions on using the debugger with a MOOSE-based application can be found on this [page](application_development/debugging.md).
 Once you have started the debugger, you will need to set a breakpoint on floating point exceptions then generate a backtrace.
 
@@ -318,6 +320,24 @@ avoid the division by 0 by setting a minimum denominator.
 []
 ```
 
+For Mac machines, the above strategy may not be effective. The parameter [!param](/Debug/error_on_residual_nan) can be used in `devel` and `dbg` modes, which throws an error when NaN or Inf values enter the nonlinear residual vector:
+
+```
+[Debug]
+  error_on_residual_nan = true
+[]
+```
+
+This provides the name of the residual object where the bad value enters the residual. If after reviewing the class' `computeQpResidual()` (or similar) method, you are still unable to understand the origin of the NaN or Inf value, you can use a debugger to break at the occurrence: add the following check to the return value `value` for `computeQpResidual()`:
+
+```
+if (!std::isfinite(value))
+  mooseError("NaN or Inf detected");
+```
+
+You can then add a breakpoint on this line and print intermediate values as necessary to determine the source of the NaN or Inf value. See [application_development/debugging.md] for more information.
+
+This approach should catch any NaN or Inf values entering the residual. Please [contact us](help/contact_us.md optional=True) if not, or if you also need to troubleshoot NaN or Inf values entering the Jacobian matrix.
 
 ## Failing nonlinear solve
 

@@ -75,6 +75,11 @@ SetupDebugAction::validParams()
       "show_block_restriction",
       BlockRestrictionDebugOutput::getScopes("none"),
       "Print out active objects like variables supplied for each block.");
+  params.addParam<bool>(
+      "error_on_residual_nan",
+      false,
+      "This option applies only to dbg and devel modes. If enabled, residual contributions are "
+      "checked for NaN or Inf values; if found, an error is reported.");
 
   params.addClassDescription("Adds various debugging type output to the simulation system.");
 
@@ -187,5 +192,15 @@ SetupDebugAction::act()
     const std::string type = "ControlOutput";
     auto params = _factory.getValidParams(type);
     _problem->addOutput(type, "_moose_controllable_debug_output", params);
+  }
+
+  // Enable residual NaN/Inf-checking
+  if (getParam<bool>("error_on_residual_nan"))
+  {
+#ifdef NDEBUG
+    mooseError("The parameter 'error_on_residual_nan' may only be set to 'true' for 'dbg' and "
+               "'devel' modes.");
+#endif
+    _problem->setCheckResidualForNans(true);
   }
 }
