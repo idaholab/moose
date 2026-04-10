@@ -1335,6 +1335,7 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
         if (syntax.verifyMooseObjectTask(moose_base, obj_act_task))
         {
           display_text = object_params.getClassDescription();
+          MooseUtils::escape(display_text);
           break;
         }
       }
@@ -1354,14 +1355,32 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
     else if (valid_params.have_parameter<std::vector<MooseEnum>>(paramkey))
       getEnumsAndDocs(valid_params.get<std::vector<MooseEnum>>(paramkey)[0], options_and_descs);
     if (options_and_descs.count(paramval))
+    {
       display_text = options_and_descs.find(paramval)->second;
+      MooseUtils::escape(display_text);
+    }
   }
 
   // use parameter documentation as display text when request is valid name
   else if (request_context.type() == wasp::DECL && valid_params.getParametersList().count(paramkey))
+  {
     display_text = valid_params.getDocString(paramkey);
+    MooseUtils::escape(display_text);
 
-  MooseUtils::escape(display_text);
+    // add units information to hover text if it is specified for parameter
+    std::string doc_units = valid_params.getDocUnit(paramkey);
+    if (!doc_units.empty())
+      display_text += "\n\nUnits: " + doc_units;
+
+    // add range information to hover text if it is specified for parameter
+    if (valid_params.isRangeChecked(paramkey))
+    {
+      std::string doc_range = valid_params.rangeCheckedFunction(paramkey);
+      if (!doc_range.empty())
+        display_text += "\n\nRange: " + doc_range;
+    }
+  }
+
   return true;
 }
 

@@ -54,6 +54,7 @@ Output::validParams()
       std::numeric_limits<Real>::max(),
       "wall_time_interval > 0",
       "The target wall time interval (in seconds) at which to output");
+  params.setDocUnit("wall_time_interval", "seconds");
   params.addParam<std::vector<Real>>(
       "sync_times", {}, "Times at which the output and solution is forced to occur");
   params.addParam<TimesName>(
