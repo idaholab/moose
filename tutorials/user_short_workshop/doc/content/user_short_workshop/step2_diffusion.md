@@ -1,0 +1,156 @@
+# Step 2: Diffusion id=user_short_workshop_step2
+
+!---
+
+## Diffusion Problem
+
+Let's solve a diffusion problem on our pin mesh to introduce the solving of a basic finite element problem.
+
+Consider the steady-state diffusion equation on the domain $\Omega$ (our pin cell mesh, `../step1_input_and_meshing/fuel_pin_in.e`): find $u$ such that
+
+!equation
+-\nabla \cdot \nabla u = 0,
+
+where $u = 0$ on the interior boundary (`inner`) and $u = 1$ on the exterior boundary (`water_solid_interface`).
+
+Multiplying by the test function $\psi_i$ and integrating by parts gives the weak form of this equation, where $u_h$ is our numerical solution:
+
+!equation
+\left(\nabla u_h, \nabla \psi_i\right)_\Omega - \left<\nabla u_h, \psi_i \mathbf{n}\right>_{\partial\Omega} = 0.
+
+!--
+
+## Required MOOSE Systems
+
+We will utilize the following systems in MOOSE in addition to `[Mesh]` in our input:
+
+- `[Variables]`: Define the unknown(s) of the problem
+
+  - The variable $u$
+
+- `[Kernels]`: Define the equation(s) to solve
+
+  - The diffusion operator
+
+- `[BCs]`: Define the boundary condition(s) of the problem
+
+  - Dirichlet boundary conditions on the interior and exterior
+
+- `[Executioner]`: Define how the problem will be solved
+
+  - A steady state problem
+
+- `[Outputs]`: Define how the solution will be returned
+
+  - Exodus output for field visualization
+
+!--
+
+## Variable Definition
+
+Define the variable $u$:
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=Variables prefix=moose/step2_diffusion
+
+Variables can be thought of as the equation(s) you are trying to solve.
+
+The default parameters designate first-order linear Lagrange shape functions, thus without any additional parameters we end up with these shape functions.
+
+!--
+
+## Kernel Definition
+
+Define a [`Diffusion`](Diffusion.md) kernel on the variable `u`:
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=Kernels prefix=moose/step2_diffusion
+
+A Kernel represents an object that contributes to the residual and the Jacobian matrix. Multiple can be used and they can also be coupled to one another to add nonlinearity.
+
+Kernels can be "block restricted" (applied to a subset of the physical mesh) via the `block` parameter.
+
+!--
+
+## Boundary Condition Definition
+
+Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `water_solid_interface` with a value of `1`:
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=BCs prefix=moose/step2_diffusion
+
+!--
+
+## Executioner Definition
+
+Define a [`Steady`](Steady.md) executioner:
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=Executioner prefix=moose/step2_diffusion
+
+The other common executioner is the [`Transient`](Transient.md) executioner, which enables transient simulation.
+
+!--
+
+## Output Definition
+
+Use the shorthand `Outputs/exodus` syntax for enabling Exodus output:
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i block=Outputs prefix=moose/step2_diffusion
+
+The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where the output files are created with the name `<input_file_name>_out.e` (in our case, `diffusion_out.e`)
+
+Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/nemesis` for Nemesis (distributed Exodus) field output.
+
+!--
+
+## Input: Diffusion Problem
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion.i prefix=moose/step2_diffusion
+
+!---
+
+## Run: Diffusion Problem
+
+```bash
+$ cd ../step2_diffusion
+$ moose-opt -i diffusion.i
+```
+
+!---
+
+## Result: Diffusion Problem
+
+!style halign=center
+!media step2-1_solution.png style=width:50% alt=Step 2-1 solution
+
+!style halign=center
+From `diffusion_out.e` in Paraview
+
+!--
+
+## Diffusion with Volumetric Source
+
+Let's replace the outer boundary condition (Dirichlet setting $u = 1$) with the natural boundary condition $\nabla u = 0$ and then add a volumetric source represented by the function $10^9 \sqrt{x^2 + y^2}$.
+
+We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and add a new Kernel of type [`BodyForce`](BodyForce.md).
+
+!--
+
+## Input: Diffusion with Volumetric Source
+
+!listing user_short_workshop/inputs/step2_diffusion/diffusion_volumetric_source.i diff=user_short_workshop/inputs/step2_diffusion/diffusion.i
+
+!---
+
+## Run: Diffusion with Volumetric Source
+
+```bash
+$ moose-opt -i diffusion_volumetric_source.i
+```
+
+!---
+
+## Result: Diffusion with Volumetric Source
+
+!style halign=center
+!media step2-2_solution.png style=width:50% alt=Step 2-2 solution
+
+!style halign=center
+From `diffusion_volumetric_source_out.e` in Paraview

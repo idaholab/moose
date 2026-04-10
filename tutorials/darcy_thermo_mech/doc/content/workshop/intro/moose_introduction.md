@@ -76,8 +76,8 @@
 
 ## Software Quality
 
-- Follows an Nuclear Quality Assurance Level 1 (NQA-1) development process
-- All changes undergo independent review using and must pass regression tests before merge
+- Follows a Nuclear Quality Assurance Level 1 (NQA-1) development process
+- All changes undergo independent review and must pass regression tests before merge
 - Includes a test suite and documentation system to allow for agile development while maintaining a NQA-1 process
 - **External contributions are guided through the process by the team, and are very welcome!**
 
@@ -95,9 +95,7 @@
 
 ###### [github.com/idaholab/moose/discussions](https://github.com/idaholab/moose/discussions)
 
-!media darcy_thermo_mech/moose_contributors.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
-       alt=Plot of the total number of contributions and unique contributors to MOOSE, from 2008 to 2023.
+!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block; alt=MOOSE Discussions screenshot
 
 !---
 

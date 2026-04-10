@@ -5,6 +5,7 @@ Content:
         root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
         content:
             - workshop/intro/**
+            - workshop/media/**
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
