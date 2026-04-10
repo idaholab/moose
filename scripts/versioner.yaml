@@ -90,6 +90,7 @@ packages:
       - conda/functions/retry_build.sh
       - conda/wasp/build.sh
       - framework/contrib/wasp
+      - scripts/configure_wasp.sh
       - scripts/update_and_rebuild_wasp.sh
   # dependers: none
   pyhit:
@@ -102,6 +103,7 @@ packages:
       - conda/functions/retry_build.sh
       - conda/pyhit/pyhit
       - conda/pyhit/build.sh
+      - conda/pyhit/message.patch
       - conda/pyhit/pyhit.patch
       - conda/pyhit/test_pyhit.py
       - python/moosetree
