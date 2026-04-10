@@ -168,7 +168,7 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
       FEProblemBase & from_problem = *_from_problems[i_from];
       auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
       // No need for displaced mesh for checking domain of definition
-      const auto & node_to_elem_map = from_problem.mesh().nodeToActiveSemilocalElemMap();
+      const auto & node_to_elem_map = from_problem.mesh().nodeToElemMap();
 
       // Get functor for that app
       const auto & functor = _functors[i_from][var_index];
