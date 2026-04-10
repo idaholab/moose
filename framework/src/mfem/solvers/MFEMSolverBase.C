@@ -11,6 +11,7 @@
 
 #include "MFEMSolverBase.h"
 #include "MFEMProblem.h"
+#include "MFEMEigensolverBase.h"
 
 InputParameters
 MFEMSolverBase::validParams()
