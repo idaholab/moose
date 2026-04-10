@@ -33,9 +33,6 @@ function do_build(){
     #fi
     # Now add ADDITIONAL_ARGS to the below configure_petsc arguments
 
-    mpicc -show
-    mpifort -show
-
     # set forth by MPI conda-forge package
     # shellcheck disable=SC2153
     HDF5_DIR=${PREFIX} configure_petsc \
