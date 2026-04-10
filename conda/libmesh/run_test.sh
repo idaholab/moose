@@ -7,7 +7,9 @@ test "${LIBMESH_DIR:?}" == "${PREFIX:?}"/moose-libmesh
 
 cp -r "${LIBMESH_DIR:?}"/examples/fem_system/ex1 .
 cd ex1
-make
-mpiexec -n 2 ./example-opt -d 2 "${LIBMESH_DIR:?}"/share/reference_elements/2D/one_quad.xda
+for METHOD in opt oprof devel dbg; do
+    make METHOD="${METHOD}"
+    mpiexec -n 2 ./example-"${METHOD}" -d 2 "${LIBMESH_DIR:?}"/share/reference_elements/2D/one_quad.xda
+done
 cd ..
 rm -rf ex1
