@@ -10,11 +10,19 @@
 #include "gtest/gtest.h"
 
 #include "CSGEngUnitTest.h"
+#include "CSGNPolygonUnit.h"
+#include "CSGPlane.h"
 
 #include "MooseUnitUtils.h"
 
 namespace CSG
 {
+
+/**
+ * Tests to make sure the basic functionality and inheritance mechanisms for each engineering unit
+ * type is functioning properly. This uses some bare minimum fake engineering units defined in the
+ * header file for these tests.
+ */
 
 /// tests the CSGSurfaceEngUnit functionality as a CSGEngUnit and CSGSurface
 TEST(CSGEngUnitTest, testSurfUnit)
@@ -129,6 +137,104 @@ TEST(CSGEngUnitTest, testUnivUnit)
   univ_unit_ptr->expandUnit(*csg_obj);
   // expanded universe should be same as one in base
   ASSERT_EQ(&univ_unit_ptr->getExpandedUniverse(), &csg_obj->getUniverseByName("real_univ"));
+}
+
+/**
+ * Tests for the correctness of the N-sided regular polygon engineering unit.
+ * Using N = 4 (square) for tests.
+ */
+
+/// test the polygon unit properties
+TEST(CSGEngUnitTest, testPolygonUnitProperties)
+{
+  // create unit
+  int num_sides = 4;
+  Real apothem = 5.0;
+  auto sq_ptr = std::make_unique<CSGNPolygonUnit>("test_square", num_sides, apothem);
+
+  // attributes and properties
+  std::unordered_map<std::string, AttributeVariant> exp_attrs = {{"apothem", apothem},
+                                                                 {"num_sides", num_sides}};
+  ASSERT_EQ(exp_attrs, sq_ptr->getAttributes());
+  ASSERT_EQ("test_square", sq_ptr->getName());
+  ASSERT_EQ("SURFACE", sq_ptr->getBehavior());
+  ASSERT_EQ("CSG::CSGNPolygonUnit", sq_ptr->getUnitType());
+  ASSERT_EQ(num_sides, sq_ptr->getNumSides());
+  ASSERT_EQ(apothem, sq_ptr->getApothem());
+  // side length = 2*apothem for square
+  ASSERT_TRUE(MooseUtils::absoluteFuzzyEqual(2.0 * apothem, sq_ptr->getSideLength()));
+  // expected circumradius formed by right triangle of apothems = sqrt(a^2 + a^2) = a*sqrt(2)
+  Real exp_r = std::sqrt(2.0) * apothem;
+  ASSERT_TRUE(MooseUtils::absoluteFuzzyEqual(exp_r, sq_ptr->getRadius()));
+}
+
+/// test evaluateSurfaceEquationAtPoint
+TEST(CSGEngUnitTest, testPolygonUnitSurfaceEval)
+{
+  // create unit
+  int num_sides = 4;
+  Real apothem = 5.0;
+  auto sq_ptr = std::make_unique<CSGNPolygonUnit>("test_square", num_sides, apothem);
+
+  // evaluate surface equation at point: test a point inside and 4 outside (one outside each face)
+  // we only need to test that it correctly determines positive vs negative evaluation
+  Point p_in(1.0, 1.0, 1.0);
+  ASSERT_TRUE(0.0 > sq_ptr->evaluateSurfaceEquationAtPoint(p_in));
+  std::vector<Point> p_out = {{6.0, 0.0, 0.0}, {0.0, 6.0, 0.0}, {-6.0, 0.0, 0.0}, {0.0, -6.0, 0.0}};
+  for (auto p : p_out)
+    ASSERT_TRUE(0.0 < sq_ptr->evaluateSurfaceEquationAtPoint(p));
+}
+
+/// test expandUnit
+TEST(CSGEngUnitTest, testPolygonUnitExpansion)
+{
+  // create unit
+  int num_sides = 4;
+  Real apothem = 5.0;
+  auto sq_ptr = std::make_unique<CSGNPolygonUnit>("test_square", num_sides, apothem);
+
+  // expand the unit
+  auto csg_obj = std::make_unique<CSGBase>();
+  sq_ptr->expandUnit(*csg_obj);
+  auto region = sq_ptr->getExpandedRegion();
+
+  // build expected identical surface coeffients to test equality. Maps expected surface name to the
+  // expected coefficients
+  std::unordered_map<std::string, std::unordered_map<std::string, Real>> exp_coeffs;
+  std::vector<Real> a = {1.0, 0.0, -1.0, 0.0};
+  std::vector<Real> b = {0.0, 1.0, 0.0, -1.0};
+  for (int k = 0; k < num_sides; k++)
+  {
+    std::string name = "test_square_exp_" + std::to_string(k);
+    std::unordered_map<std::string, Real> coeffs = {
+        {"a", a[k]}, {"b", b[k]}, {"c", 0.0}, {"d", apothem}};
+    exp_coeffs.emplace(name, coeffs);
+  }
+
+  // check region surfaces using a coefficient check that uses fuzzy equal because the coefficients
+  // are calcualted using sin/cos in the implementation which may create non-zero "zero" values
+  // of ~1e-17.
+  auto reg_surfs = region.getSurfaces();
+  ASSERT_EQ(num_sides, reg_surfs.size());
+  for (const auto & rs : reg_surfs)
+  {
+    const CSGSurface & surf = rs.get();
+    auto exp_c = exp_coeffs.find(surf.getName());
+    for (const auto & [k, v] : surf.getCoeffs())
+      ASSERT_TRUE(MooseUtils::absoluteFuzzyEqual(v, exp_c->second.at(k)));
+  }
+}
+
+/// test the clone method
+TEST(CSGEngUnitTest, testPolygonUnitClone)
+{
+  int num_sides = 4;
+  Real apothem = 5.0;
+  auto sq_ptr = std::make_unique<CSGNPolygonUnit>("test_square", num_sides, apothem);
+  const CSGEngUnit & sq_eng = *sq_ptr;
+  auto clone_ptr = sq_ptr->clone();
+  const CSGEngUnit & clone_eng = dynamic_cast<const CSGEngUnit &>(*clone_ptr);
+  ASSERT_TRUE(sq_eng == clone_eng);
 }
 
 } // namespace CSG

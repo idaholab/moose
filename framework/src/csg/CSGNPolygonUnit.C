@@ -13,7 +13,7 @@
 namespace CSG
 {
 
-CSGNPolygonUnit::CSGNPolygonUnit(const std::string & name, unsigned int n_sides, Real apothem)
+CSGNPolygonUnit::CSGNPolygonUnit(const std::string & name, int n_sides, Real apothem)
   : CSGSurfaceEngUnit(name, MooseUtils::prettyCppType<CSGNPolygonUnit>()),
     _n_sides(n_sides),
     _apothem(apothem)
@@ -36,10 +36,11 @@ CSGNPolygonUnit::evaluateSurfaceEquationAtPoint(const Point & p) const
   //    x*cos(2*pi*k/N) + y*sin(2*pi*k/N) <= apothem, for all k = 0..N-1
 
   Real max_val = -1e200; // initialize to extremely large negative (to be updated)
-  for (unsigned int k = 0; k < _n_sides - 1; ++k)
+  for (int k = 0; k < _n_sides; ++k)
   {
     auto val =
-        p(0) * std::cos(2.0 * M_PI * k / _n_sides) + p(0) * std::sin(2.0 * M_PI * k / _n_sides);
+        (p(0) * std::cos(2.0 * M_PI * k / _n_sides) + p(1) * std::sin(2.0 * M_PI * k / _n_sides)) -
+        _apothem;
     if (val > max_val)
       max_val = val;
   }
@@ -49,7 +50,7 @@ CSGNPolygonUnit::evaluateSurfaceEquationAtPoint(const Point & p) const
 std::unordered_map<std::string, AttributeVariant>
 CSGNPolygonUnit::getAttributes() const
 {
-  return {{"num_sides", static_cast<unsigned int>(_n_sides)}, {"apothem", _apothem}};
+  return {{"num_sides", _n_sides}, {"apothem", _apothem}};
 }
 
 void
@@ -78,7 +79,7 @@ CSGNPolygonUnit::expandUnit(CSGBase & base)
   // base name for surfaces
   std::string base_name = getName() + "_exp_";
 
-  for (unsigned int k = 0; k < _n_sides - 1; ++k)
+  for (int k = 0; k < _n_sides; ++k)
   {
     auto sname = base_name + std::to_string(k);
     a = std::cos(2.0 * M_PI * k / _n_sides);
