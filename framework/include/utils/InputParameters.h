@@ -13,6 +13,7 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
