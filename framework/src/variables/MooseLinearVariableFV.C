@@ -320,12 +320,12 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   // element value
   else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
   {
-    const auto & elem_info = this->_mesh.elemInfo(fi->elemPtr()->id());
+    const auto & elem_info = *(face.fi->elemInfo());
     return getElemValue(elem_info, state);
   }
   else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    const auto & elem_info = this->_mesh.elemInfo(fi->neighborPtr()->id());
+    const auto & elem_info = *(face.fi->neighborInfo());
     return getElemValue(elem_info, state);
   }
   else
