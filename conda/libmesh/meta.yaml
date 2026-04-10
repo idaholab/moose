@@ -37,13 +37,10 @@ requirements:
     - make
     - pkg-config
   host:
-    - {{ mpi }} {{ mpi_version }}
     - moose-petsc 3.24.5 {{ mpi }}_1
     - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
     - _openmp_mutex
     - libtirpc
-    - hdf5 {{ hdf5 }}
-    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
     - zlib
 
 test:
