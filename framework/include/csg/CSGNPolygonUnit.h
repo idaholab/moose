@@ -47,7 +47,7 @@ public:
    * @param n_sides number of sides of the regular polygon (must be >= 3)
    * @param apothem distance from the center to the midpoint of each side
    */
-  CSGNPolygonUnit(const std::string & name, unsigned int n_sides, Real apothem);
+  CSGNPolygonUnit(const std::string & name, int n_sides, Real apothem);
 
   /**
    * @brief Evaluate the polygon's surface equation at the given point.
@@ -77,7 +77,7 @@ public:
    *
    * @return number of sides
    */
-  unsigned int getNumSides() { return _n_sides; }
+  int getNumSides() { return _n_sides; }
 
   /**
    * @brief Get the polygon apothem (center-to-flat distance)
@@ -122,13 +122,18 @@ protected:
 
 private:
   /// Number of sides of the regular polygon
-  const unsigned int _n_sides;
+  const int _n_sides;
 
   /// Distance from the polygon center to the midpoint of each side
   const Real _apothem;
 
   /// Pointers to the expanded plane surfaces, populated during expandUnit()
   std::vector<const CSGSurface *> _planes;
+
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(CSGEngUnitTest, testPolygonUnitExpansion);
+  FRIEND_TEST(CSGEngUnitTest, testPolygonUnitClone);
+#endif
 };
 
 } // namespace CSG
