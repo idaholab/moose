@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDataCollection.h"
+#include "MFEMEigenproblem.h"
 
 InputParameters
 MFEMDataCollection::validParams()

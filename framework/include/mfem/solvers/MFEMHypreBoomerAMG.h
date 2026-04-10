@@ -22,6 +22,7 @@ public:
   static InputParameters validParams();
 
   MFEMHypreBoomerAMG(const InputParameters &);
+  ~MFEMHypreBoomerAMG();
 
   /// Updates the solver with the bilinear form in case LOR solve is required
   void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
@@ -31,6 +32,8 @@ protected:
 
 private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
+  /// Assembled matrix used by the solver for eigenproblem setups. Stored to manage its lifetime.
+  std::unique_ptr<mfem::HypreParMatrix> _assembled_matrix;
 };
 
 #endif
