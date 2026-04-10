@@ -326,6 +326,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
+    _unique_coord_system(other_mesh._unique_coord_system),
     _rz_coord_axis(other_mesh._rz_coord_axis),
     _subdomain_id_to_rz_coord_axis(other_mesh._subdomain_id_to_rz_coord_axis),
     _coord_system_set(other_mesh._coord_system_set),
@@ -4296,6 +4297,8 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                                 : Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
     for (const auto sid : meshSubdomains())
       _coord_sys[sid] = coord_type;
+    _unique_coord_system = coord_type;
+    _coord_system_set = true;
     return;
   }
 
@@ -4322,9 +4325,11 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                                 : Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
     for (const auto sid : subdomains)
       _coord_sys[sid] = coord_type;
+    _unique_coord_system = coord_type;
   }
   else
   {
+    bool found_different_coord_type = false;
     if (blocks.size() != coord_sys.size())
       mooseError("Number of blocks and coordinate systems does not match.");
 
@@ -4334,6 +4339,18 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
       Moose::CoordinateSystemType coord_type =
           Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
       _coord_sys[sid] = coord_type;
+
+      // Set unique coordinate system if possible or needed
+      if (!found_different_coord_type)
+      {
+        if (_unique_coord_system.has_value() && coord_type != _unique_coord_system.value())
+        {
+          _unique_coord_system.reset();
+          found_different_coord_type = true;
+        }
+        else if (i == 0)
+          _unique_coord_system = coord_type;
+      }
     }
 
     for (const auto & sid : subdomains)
@@ -4350,6 +4367,11 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
 Moose::CoordinateSystemType
 MooseMesh::getCoordSystem(SubdomainID sid) const
 {
+  // Faster if all coordinates are the same
+  if (_unique_coord_system.has_value())
+    return *_unique_coord_system;
+
+  mooseAssert(_coord_system_set, "Should have set the coordinate system");
   auto it = _coord_sys.find(sid);
   if (it != _coord_sys.end())
     return (*it).second;
@@ -4360,15 +4382,9 @@ MooseMesh::getCoordSystem(SubdomainID sid) const
 Moose::CoordinateSystemType
 MooseMesh::getUniqueCoordSystem() const
 {
-  const auto unique_system = _coord_sys.find(*meshSubdomains().begin())->second;
-  // Check that it is actually unique
-  bool result = std::all_of(
-      std::next(_coord_sys.begin()),
-      _coord_sys.end(),
-      [unique_system](
-          typename std::unordered_map<SubdomainID, Moose::CoordinateSystemType>::const_reference
-              item) { return (item.second == unique_system); });
-  if (!result)
+  const auto has_unique_system = _unique_coord_system.has_value();
+  mooseAssert(_coord_system_set, "Should have set the coordinate system");
+  if (!has_unique_system)
     mooseError("The unique coordinate system of the mesh was requested by the mesh contains "
                "multiple blocks with different coordinate systems");
 
@@ -4376,12 +4392,15 @@ MooseMesh::getUniqueCoordSystem() const
     mooseError("General axisymmetric coordinate axes are being used, and it is currently "
                "conservatively assumed that in this case there is no unique coordinate system.");
 
-  return unique_system;
+  return _unique_coord_system.value();
 }
 
 const std::map<SubdomainID, Moose::CoordinateSystemType> &
 MooseMesh::getCoordSystem() const
 {
+  // mooseAssert(_coord_system_set, "Should have set the coordinate system");
+  // We can't assert this because the MooseAppCoordTransform are created early and call this
+  // they are then updated.
   return _coord_sys;
 }
 
@@ -4438,6 +4457,9 @@ MooseMesh::setGeneralAxisymmetricCoordAxes(
                  "' was specified to use the 'RZ' coordinate system but was not given in "
                  "setGeneralAxisymmetricCoordAxes().");
 
+  // If we are using general RZ coord system we'd have to do extra work to check this
+  _unique_coord_system.reset();
+
   updateCoordTransform();
 }
 
@@ -4492,14 +4514,23 @@ MooseMesh::checkCoordinateSystems()
       mooseError("An RSPHERICAL coordinate system was requested for subdomain " +
                  Moose::stringify(sid) + " which contains 2D or 3D elements.");
   }
+
+#ifndef NDEBUG
+  if (_unique_coord_system.has_value())
+    for (const auto & coord_pair : _coord_sys)
+      mooseAssert(coord_pair.second == _unique_coord_system.value(),
+                  "Unique coordinate system does not match all coordinate systems");
+#endif
 }
 
 void
 MooseMesh::setCoordData(const MooseMesh & other_mesh)
 {
   _coord_sys = other_mesh._coord_sys;
+  _unique_coord_system = other_mesh._unique_coord_system;
   _rz_coord_axis = other_mesh._rz_coord_axis;
   _subdomain_id_to_rz_coord_axis = other_mesh._subdomain_id_to_rz_coord_axis;
+  _coord_system_set = other_mesh._coord_system_set;
 }
 
 const MooseUnits &

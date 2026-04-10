@@ -1743,7 +1743,7 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
   // Make sure to honor the name of this method and set the _coord_type member because users may
   // make use of the const Moose::CoordinateSystem & coordTransformation() { return _coord_type; }
   // API. MaterialBase for example uses it
-  _coord_type = _subproblem.getCoordSystem(sub_id);
+  _coord_type = _mesh.getCoordSystem(sub_id);
 
   coord.resize(n_points);
   for (unsigned int qp = 0; qp < n_points; qp++)
@@ -2355,7 +2355,7 @@ Assembly::reinitLowerDElem(const Elem * elem,
     // We only have dummy weights so the JxWs computed during our FE reinits are meaningless and
     // we cannot use them
 
-    if (_subproblem.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
+    if (_mesh.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
       // We are in a Cartesian coordinate system and we can just use the element volume method
       // which has fast computation for certain element types
       _current_lower_d_elem_volume = elem->volume();
@@ -2390,7 +2390,7 @@ Assembly::reinitNeighborLowerDElem(const Elem * elem)
   if (!_need_neighbor_lower_d_elem_volume)
     return;
 
-  if (_subproblem.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
+  if (_mesh.getCoordSystem(elem->subdomain_id()) == Moose::CoordinateSystemType::COORD_XYZ)
     // We are in a Cartesian coordinate system and we can just use the element volume method which
     // has fast computation for certain element types
     _current_neighbor_lower_d_elem_volume = elem->volume();

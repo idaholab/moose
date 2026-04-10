@@ -2014,6 +2014,9 @@ private:
   /// Type of coordinate system per subdomain
   std::map<SubdomainID, Moose::CoordinateSystemType> & _coord_sys;
 
+  /// If the coordinate system is shared, can avoid the map search
+  std::optional<Moose::CoordinateSystemType> _unique_coord_system;
+
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
 

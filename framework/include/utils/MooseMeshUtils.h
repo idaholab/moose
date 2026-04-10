@@ -162,14 +162,13 @@ coordTransformFactor(const P & point,
     {
       mooseAssert(rz_radial_coord != libMesh::invalid_uint,
                   "Must pass in a valid rz radial coordinate");
-      factor = 2 * M_PI * point(rz_radial_coord);
+      factor = 2. * M_PI * point(rz_radial_coord);
       break;
     }
-    case Moose::COORD_RSPHERICAL:
-      factor = 4 * M_PI * point(0) * point(0);
-      break;
+    // RZ is the only 3rd option
     default:
-      mooseError("Unknown coordinate system");
+      factor = 4. * M_PI * point(0) * point(0);
+      break;
   }
 }
 
