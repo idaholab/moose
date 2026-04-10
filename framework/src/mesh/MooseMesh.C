@@ -1683,11 +1683,14 @@ MooseMesh::addQuadratureNode(const Elem * elem,
 
     if (elem->active())
     {
-      // If they have not been built, no need to start building an incomplete one
-      if (_node_to_elem_map_built)
-        _node_to_elem_map[new_id].push_back(elem->id());
-      if (_node_to_active_semilocal_elem_map_built)
-        _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
+      mooseAssert(_node_to_elem_map_built,
+                  "If we are adding quadrature nodes, then we darn well should have ensured we "
+                  "need the node to elem map built.");
+      _node_to_elem_map[new_id].push_back(elem->id());
+      mooseAssert(_node_to_active_semilocal_elem_map_built,
+                  "If we are adding quadrature nodes, then we darn well should have ensured we "
+                  "need the node to active semilocal elem map built.");
+      _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
     }
   }
   else
