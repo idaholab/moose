@@ -54,14 +54,13 @@ function configure_libmesh()
                --enable-petsc-hypre-required \
                --enable-metaphysicl-required \
                --enable-xdr-required \
-               --with-cxx-std-min=2014 \
                --without-gdb-command \
                --with-methods="${METHODS}" \
                --prefix="${LIBMESH_DIR}" \
                --with-future-timpi-dir="${LIBMESH_DIR}" \
                INSTALL="${SRC_DIR}/build-aux/install-sh -C" \
                "${EXTRA_ARGS[@]}" \
-               $*
+               "$@"
   local RETURN_CODE=$?
 
   # Restore unbound variable checks
