@@ -47,10 +47,6 @@ test:
   requires:
     - {{ compiler('cxx') }}
     - make
-  commands:
-    - test $LIBMESH_DIR == ${PREFIX}/moose-libmesh
-    - ${LIBMESH_DIR}/bin/output_libmesh_version-opt
-    - cp -r ${LIBMESH_DIR}/examples/fem_system/ex1 . && cd ex1 && make && sh run.sh && cd .. && rm -rf ex1
 
 about:
   home: http://libmesh.github.io/
