@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#5676 #13295'
+  issues = '#5676 #13295 #32742'
   design = 'syntax/Controls/index.md source/controls/ConditionalFunctionEnableControl.md'
   [./test]
     type = CSVDiff
