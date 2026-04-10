@@ -173,7 +173,7 @@ NodalPatchRecovery::compute()
   reinitPatch();
 
   // get node-to-conneted-elem map
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
   std::vector<dof_id_type> elem_ids = node_to_elem_pair->second;

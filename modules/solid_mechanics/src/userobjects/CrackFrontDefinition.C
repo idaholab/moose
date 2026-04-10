@@ -488,8 +488,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
     // set_intersection.
     // The original map contains vectors, and we can't sort them, so we create sets in the local
     // map.
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
-        _mesh.nodeToElemMap();
+    const auto & node_to_elem_map = _mesh.nodeToElemMap();
     std::map<dof_id_type, std::set<dof_id_type>> crack_front_node_to_elem_map;
 
     for (const auto & node_id : nodes)

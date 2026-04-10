@@ -54,7 +54,7 @@ Component1DJunction::setupMesh()
   // name the sideset corresponding to the sides of all connected component ends
   boundary_info.sideset_name(boundary_id) = name();
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = mesh().nodeToElemMap();
+  const auto & node_to_elem = mesh().nodeToElemMap();
   for (auto & nid : _nodes)
   {
     const auto & it = node_to_elem.find(nid);

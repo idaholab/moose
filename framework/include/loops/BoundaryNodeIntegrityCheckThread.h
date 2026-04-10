@@ -52,5 +52,5 @@ protected:
   const TheWarehouse::Query & _query;
 
   /// Node to element map. Used for determining vertex vs. non-vertex nodes
-  const std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
+  const std::unordered_map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
 };

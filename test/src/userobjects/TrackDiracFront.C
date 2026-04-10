@@ -64,7 +64,7 @@ TrackDiracFront::finalize()
 Elem *
 TrackDiracFront::localElementConnectedToCurrentNode()
 {
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Node missing in node to elem map");
   const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;

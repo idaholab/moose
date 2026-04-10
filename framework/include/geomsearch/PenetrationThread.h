@@ -24,22 +24,23 @@ typedef MooseVariableFE<libMesh::VectorValue<Real>> VectorMooseVariable;
 class PenetrationThread
 {
 public:
-  PenetrationThread(SubProblem & subproblem,
-                    const MooseMesh & mesh,
-                    BoundaryID primary_boundary,
-                    BoundaryID secondary_boundary,
-                    std::map<dof_id_type, PenetrationInfo *> & penetration_info,
-                    bool check_whether_reasonable,
-                    bool update_location,
-                    Real tangential_tolerance,
-                    bool do_normal_smoothing,
-                    Real normal_smoothing_distance,
-                    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-                    bool use_point_locator,
-                    std::vector<std::vector<libMesh::FEBase *>> & fes,
-                    libMesh::FEType & fe_type,
-                    NearestNodeLocator & nearest_node,
-                    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map);
+  PenetrationThread(
+      SubProblem & subproblem,
+      const MooseMesh & mesh,
+      BoundaryID primary_boundary,
+      BoundaryID secondary_boundary,
+      std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+      bool check_whether_reasonable,
+      bool update_location,
+      Real tangential_tolerance,
+      bool do_normal_smoothing,
+      Real normal_smoothing_distance,
+      PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+      bool use_point_locator,
+      std::vector<std::vector<libMesh::FEBase *>> & fes,
+      libMesh::FEType & fe_type,
+      NearestNodeLocator & nearest_node,
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map);
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
@@ -78,7 +79,7 @@ protected:
 
   NearestNodeLocator & _nearest_node;
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
+  const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   THREAD_ID _tid;
 

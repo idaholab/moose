@@ -237,7 +237,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _skip_refine_when_use_split(getParam<bool>("skip_refine_when_use_split")),
     _skip_deletion_repartition_after_refine(false),
     _is_nemesis(false),
-    _node_to_elem_map_built(false),
     _patch_size(getParam<unsigned int>("patch_size")),
     _ghosting_patch_size(isParamValid("ghosting_patch_size")
                              ? getParam<unsigned int>("ghosting_patch_size")
@@ -305,7 +304,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _skip_refine_when_use_split(other_mesh._skip_refine_when_use_split),
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
     _is_nemesis(other_mesh._is_nemesis),
-    _node_to_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
@@ -628,8 +626,13 @@ MooseMesh::update()
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
 
-  // Clear the node to elem map
+  // Capture whether the map needs rebuilding, then invalidate the stale data.
+  // We use clear() rather than destroying the container so that any stored references
+  // to _node_to_elem_map (e.g. in NodeFaceConstraint) remain valid through the window
+  // between the clear and the rebuild at the end of this function.
+  const bool rebuild_node_to_elem_map = _node_to_elem_map_built;
   _node_to_elem_map.clear();
+  _node_to_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -663,14 +666,10 @@ MooseMesh::update()
 
   _finite_volume_info_dirty = true;
 
-  // Rebuild the node to elem maps, in case the object(s) who got references to the maps
-  // actually do need to use them
-  if (_node_to_elem_map_built)
-  {
-    // it won't stay false
-    _node_to_elem_map_built = false;
+  // Rebuild the node to elem map, in case the object(s) who got references to the map
+  // actually do need to use it
+  if (rebuild_node_to_elem_map)
     nodeToElemMap();
-  }
 }
 
 void
@@ -1216,8 +1215,8 @@ MooseMesh::buildBndElemList()
   }
 }
 
-const std::map<dof_id_type, std::vector<dof_id_type>> &
-MooseMesh::nodeToElemMap()
+std::unordered_map<dof_id_type, std::vector<dof_id_type>> &
+MooseMesh::internalNodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
   {
@@ -1234,6 +1233,7 @@ MooseMesh::nodeToElemMap()
       TIME_SECTION("nodeToElemMap", 5, "Building Node To Elem Map");
       Threads::in_threads = in_threads;
 
+      mooseAssert(_node_to_elem_map.empty(), "Expected empty map before building");
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
           _node_to_elem_map[elem->node_id(n)].push_back(elem->id());
@@ -1244,6 +1244,11 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
+const std::unordered_map<dof_id_type, std::vector<dof_id_type>> &
+MooseMesh::nodeToElemMap()
+{
+  return internalNodeToElemMap();
+}
 
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
@@ -1643,12 +1648,7 @@ MooseMesh::addQuadratureNode(const Elem * elem,
     _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
 
     if (elem->active())
-    {
-      mooseAssert(_node_to_elem_map_built,
-                  "If we are adding quadrature nodes, then we darn well should have ensured we "
-                  "need the node to elem map built.");
-      _node_to_elem_map[new_id].push_back(elem->id());
-    }
+      internalNodeToElemMap()[new_id].push_back(elem->id());
   }
   else
     qnode = _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp];

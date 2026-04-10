@@ -71,7 +71,7 @@ NearestNodeLocator::findNodes()
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the secondary nodes.  This will speed searching later.
    */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
 
   if (_first || (_reinit_iteration && _patch_update_strategy == Moose::Iteration))
   {
@@ -294,7 +294,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
     primary_points[i] = node;
   }
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
 
   // Create object kd_tree of class KDTree using the coordinates of trial
   // primary nodes.

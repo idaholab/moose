@@ -252,7 +252,7 @@ public:
    * If not already created, creates a map from every node to all
    * elements to which they are connected.
    */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
+  const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
 
   /**
    * These structs are required so that the bndNodes{Begin,End} and
@@ -1647,8 +1647,10 @@ protected:
       _bnd_elem_range;
 
   /// A map of all of the current nodes to the elements that they are connected to.
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
-  bool _node_to_elem_map_built;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
+
+  /// Whether @p _node_to_elem_map has been built.
+  bool _node_to_elem_map_built = false;
 
   /**
    * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
@@ -1732,6 +1734,12 @@ protected:
   void setPartitionerHelper(MeshBase * mesh = nullptr);
 
 private:
+  /**
+   * If not already created, creates a map from every node to all
+   * elements to which they are connected.
+   */
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> & internalNodeToElemMap();
+
   /// Map connecting elems with their corresponding ElemInfo, we use the element ID as
   /// the key
   mutable std::unordered_map<dof_id_type, ElemInfo> _elem_to_elem_info;
