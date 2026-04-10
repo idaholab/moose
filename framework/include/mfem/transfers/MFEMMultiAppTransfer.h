@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MultiAppTransfer.h"
+#include "libmesh/equation_systems.h"
 
 /**
  * Virtual base class for MultiApp transfers to and/or from MFEMProblems.

@@ -165,8 +165,11 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
                                    interp_vals,
                                    ordering);
 
+    // Get undisplaced system for writing transferred variable to
+    auto & out_es = getlibMeshEquationSystem(to_problem, false);
+    auto & out_sys = *find_sys(out_es, to_var_name);
     // Project interpolated values at destination nodes onto destination variables to set DoFs
-    projectlibMeshNodalValues(to_sys, to_var, interp_vals);
+    projectlibMeshNodalValues(out_sys, to_var, interp_vals);
   }
 }
 

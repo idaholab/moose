@@ -13,4 +13,14 @@
     recover = false
     restep = false
   []
+  [MFEMTransferTolibMeshDisplaced]
+    type = 'Exodiff'
+    input = 'libmesh_parent.i'
+    exodiff = 'libmesh_parent_out.e'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    restep = false
+    requirement = "The system shall be able to transfer from an MFEM source application to a displaced libMesh target application."
+  []
 []
