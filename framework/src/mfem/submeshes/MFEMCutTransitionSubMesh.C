@@ -133,14 +133,12 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                  getMFEMProblem().getComm());
 
   // Detect shared vertices and add corresponding elements
-  for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
-  {
-    for (int gv = 0; gv < parent_mesh.GroupNVertices(g); gv++, sv++)
+  for (const auto g : make_range(1, parent_mesh.GetNGroups()))
+    for (const auto gv : make_range(parent_mesh.GroupNVertices(g)))
     {
       // all elements touching this shared vertex should be updated
       int cut_vert = parent_mesh.GroupVertex(g, gv);
       for (std::size_t i = 0; i < all_cut_verts.size(); i += 1)
-      {
         if (gi[cut_vert] == all_cut_verts[i]) // check if shared vertex is on the cut plane
         {
           int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
@@ -154,9 +152,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
               transition_els.Append(el_adj_to_cut);
           }
         }
-      }
     }
-  }
 
   transition_els.Sort();
   transition_els.Unique();
