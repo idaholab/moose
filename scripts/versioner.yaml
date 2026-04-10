@@ -38,6 +38,7 @@ packages:
       conda/libmesh-vtk/meta.yaml.template: conda/libmesh-vtk/meta.yaml
     influential:
       - conda/conda_build_config.yaml
+      - conda/functions/retry_build.sh
       - conda/libmesh-vtk/build.sh
   # dependers: libmesh, moose-dev
   petsc:
@@ -74,6 +75,7 @@ packages:
       - libmesh
       - apptainer/libmesh.def
       - conda/conda_build_config.yaml
+      - conda/functions/retry_build.sh
       - conda/libmesh/build.sh
       - scripts/configure_libmesh.sh
       - scripts/update_and_rebuild_libmesh.sh
@@ -85,9 +87,10 @@ packages:
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
     influential:
-      - scripts/update_and_rebuild_wasp.sh
-      - framework/contrib/wasp
+      - conda/functions/retry_build.sh
       - conda/wasp/build.sh
+      - framework/contrib/wasp
+      - scripts/update_and_rebuild_wasp.sh
   # dependers: none
   pyhit:
     version: 2026.04.07
@@ -96,9 +99,11 @@ packages:
       - wasp
     influential:
       - conda/conda_build_config.yaml
+      - conda/functions/retry_build.sh
       - conda/pyhit/pyhit
       - conda/pyhit/build.sh
       - conda/pyhit/pyhit.patch
+      - conda/pyhit/test_pyhit.py
       - python/moosetree
       - python/mooseutils/message.py
       - python/mooseutils/mooseutils.py
@@ -148,6 +153,7 @@ packages:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
     influential:
       - conda/conda_build_config.yaml
+      - conda/pprof/LICENSE
   # dependers: none
   seacas:
     version: 2025.10.14
@@ -157,6 +163,10 @@ packages:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
     influential:
       - conda/conda_build_config.yaml
+      - conda/functions/retry_build.sh
+      - conda/seacas/build.sh
+      - conda/seacas/LICENSE
+      - conda/seacas/sequoia-15.4.patch
   # dependers: none
   app:
     templates:
