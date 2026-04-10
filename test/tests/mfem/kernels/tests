@@ -277,4 +277,26 @@
     compute_devices = 'cpu'
     restep = false
   []
+  [MFEMNonLinearHeatConductionComplexAux]
+    design = 'EquationSystem.md'
+    issues = '#30076'
+    requirement = 'The system shall correctly checkpoint and recover a transient MFEM problem that includes a complex auxiliary variable, exercising the cmplx_gridfunctions restore path.'
+    type = CSVDiff
+    input = nl_heatconduction_complex_aux.i
+    csvdiff = 'OutputData/NLHeatConductionComplexAux_centre_temperature_0000.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0010.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0020.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0030.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0040.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0050.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0000.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0010.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0020.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0030.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0040.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    restep = false
+  []
 []
