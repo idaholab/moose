@@ -31,7 +31,7 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
     _nodal_array_aux(_aux_sys.nodalArrayAuxWarehouse()),
     _query(query),
-    _node_to_elem_map(fe_problem.mesh().nodeToActiveSemilocalElemMap())
+    _node_to_elem_map(fe_problem.mesh().nodeToElemMap())
 {
 }
 

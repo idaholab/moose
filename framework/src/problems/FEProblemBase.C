@@ -1427,7 +1427,7 @@ FEProblemBase::initialSetup()
     Threads::parallel_reduce(bnd_nodes, bnict);
 
     // Nodal bcs aren't threaded
-    const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+    const auto & node_to_elem_map = _mesh.nodeToElemMap();
     for (const auto & bnode : bnd_nodes)
     {
       const auto boundary_id = bnode->_bnd_id;

@@ -238,7 +238,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _skip_deletion_repartition_after_refine(false),
     _is_nemesis(false),
     _node_to_elem_map_built(false),
-    _node_to_active_semilocal_elem_map_built(false),
     _patch_size(getParam<unsigned int>("patch_size")),
     _ghosting_patch_size(isParamValid("ghosting_patch_size")
                              ? getParam<unsigned int>("ghosting_patch_size")
@@ -307,7 +306,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _skip_deletion_repartition_after_refine(other_mesh._skip_deletion_repartition_after_refine),
     _is_nemesis(other_mesh._is_nemesis),
     _node_to_elem_map_built(false),
-    _node_to_active_semilocal_elem_map_built(false),
     _patch_size(other_mesh._patch_size),
     _ghosting_patch_size(other_mesh._ghosting_patch_size),
     _max_leaf_size(other_mesh._max_leaf_size),
@@ -630,9 +628,8 @@ MooseMesh::update()
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
 
-  // Clear the node to elem maps
+  // Clear the node to elem map
   _node_to_elem_map.clear();
-  _node_to_active_semilocal_elem_map.clear();
 
   buildNodeList();
   buildBndElemList();
@@ -673,11 +670,6 @@ MooseMesh::update()
     // it won't stay false
     _node_to_elem_map_built = false;
     nodeToElemMap();
-  }
-  if (_node_to_active_semilocal_elem_map_built)
-  {
-    _node_to_active_semilocal_elem_map_built = false;
-    nodeToActiveSemilocalElemMap();
   }
 }
 
@@ -1252,37 +1244,6 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
-const std::map<dof_id_type, std::vector<dof_id_type>> &
-MooseMesh::nodeToActiveSemilocalElemMap()
-{
-  if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-
-    // This is allowing the timing to be run even with threads
-    // This is safe because all threads will be waiting on this section when it runs
-    // NOTE: Do not copy this construction to other places without thinking REALLY hard about it
-    // The PerfGraph is NOT threadsafe and will cause all kinds of havok if care isn't taken
-    auto in_threads = Threads::in_threads;
-    Threads::in_threads = false;
-    TIME_SECTION("nodeToActiveSemilocalElemMap", 5, "Building SemiLocalElemMap");
-    Threads::in_threads = in_threads;
-
-    if (!_node_to_active_semilocal_elem_map_built)
-    {
-      for (const auto & elem :
-           as_range(getMesh().semilocal_elements_begin(), getMesh().semilocal_elements_end()))
-        if (elem->active())
-          for (unsigned int n = 0; n < elem->n_nodes(); n++)
-            _node_to_active_semilocal_elem_map[elem->node_id(n)].push_back(elem->id());
-
-      _node_to_active_semilocal_elem_map_built =
-          true; // MUST be set at the end for double-checked locking to work!
-    }
-  }
-
-  return _node_to_active_semilocal_elem_map;
-}
 
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
@@ -1687,10 +1648,6 @@ MooseMesh::addQuadratureNode(const Elem * elem,
                   "If we are adding quadrature nodes, then we darn well should have ensured we "
                   "need the node to elem map built.");
       _node_to_elem_map[new_id].push_back(elem->id());
-      mooseAssert(_node_to_active_semilocal_elem_map_built,
-                  "If we are adding quadrature nodes, then we darn well should have ensured we "
-                  "need the node to active semilocal elem map built.");
-      _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
     }
   }
   else

@@ -255,15 +255,6 @@ public:
   const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToElemMap();
 
   /**
-   * If not already created, creates a map from every node to all
-   * _active_ _semilocal_ elements to which they are connected.
-   * Semilocal elements include local elements and elements that share at least
-   * one node with a local element.
-   * \note Extra ghosted elements are not included in this map!
-   */
-  const std::map<dof_id_type, std::vector<dof_id_type>> & nodeToActiveSemilocalElemMap();
-
-  /**
    * These structs are required so that the bndNodes{Begin,End} and
    * bndElems{Begin,End} functions work...
    */
@@ -1658,10 +1649,6 @@ protected:
   /// A map of all of the current nodes to the elements that they are connected to.
   std::map<dof_id_type, std::vector<dof_id_type>> _node_to_elem_map;
   bool _node_to_elem_map_built;
-
-  /// A map of all of the current nodes to the active elements that they are connected to.
-  std::map<dof_id_type, std::vector<dof_id_type>> _node_to_active_semilocal_elem_map;
-  bool _node_to_active_semilocal_elem_map_built;
 
   /**
    * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
