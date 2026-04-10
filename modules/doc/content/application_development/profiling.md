@@ -110,7 +110,7 @@ MOOSE_PROFILE_BASE environment variable to a file base used to store the profili
 data.  Performing profiling run might look something like this:
 
 ```
-MOOSE_PROFILE_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i
+MOOSE_PROFILE_BASE=run1_ mpiexec -n 32 ./your-app_oprof -i input_file.i --no-timing
 ```
 
 This will use the filename base you pass and append a suffix of the form
@@ -122,6 +122,9 @@ argument `--gperf-profiler-on` with a comma-separated list of MPI ranks to gener
 the profiling files only on the selected ranks. For example `--gperf-profiler-on 0,2`
 with the above MOOSE_PROFILE_BASE will generate `run1_0.prof` and `run1_2.prof`.
 If this argument is not given, files of all ranks will be generated.
+
+!alert note
+Disabling the perf graph with `--no-timing` often leads to clearer profiles.
 
 ### Heap Profiling
 
