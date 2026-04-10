@@ -150,7 +150,7 @@
     input = 'bspline_curve_find_center_on_2D_end.i'
     exodiff = 'bspline_curve_find_center_on_2D_end_in.e'
     cli_args = '--mesh-only'
-    requirement = 'The system shall generate a 1D spline curve mesh connecting two other meshes by computing center points on the given end boundary.'
+    requirement = 'The system shall generate a 1D spline curve mesh in 3D space connecting two other meshes by computing center points on the given end boundary.'
     recover = false
   []
   [find_center_2D_start]
@@ -158,7 +158,7 @@
     input = 'bspline_curve_find_center_on_2D_start.i'
     exodiff = 'bspline_curve_find_center_on_2D_start_in.e'
     cli_args = '--mesh-only'
-    requirement = 'The system shall generate a 1D spline curve mesh connecting two other meshes by computing center points on the given start boundary.'
+    requirement = 'The system shall generate a 1D spline curve mesh in 3D space connecting two other meshes by computing center points on the given start boundary.'
     recover = false
   []
   [find_center_2D_both_sides]
@@ -166,7 +166,7 @@
     input = 'bspline_curve_find_center_on_2D_both.i'
     exodiff = 'bspline_curve_find_center_on_2D_both_in.e'
     cli_args = '--mesh-only'
-    requirement = 'The system shall generate a 1D spline curve mesh connecting two other meshes by computing center points on the given boundaries.'
+    requirement = 'The system shall generate a 1D spline curve mesh in 3D space connecting two other meshes by computing center points on the given boundaries.'
     recover = false
   []
 []

@@ -46,19 +46,19 @@ BSplineCurveGenerator::validParams()
   params.addParam<MeshGeneratorName>("start_mesh",
                                      "Meshgenerator providing the mesh to start spline from.");
   params.addParam<BoundaryName>(
-      "start_point_at_boundary_centroid",
+      "boundary_providing_start_point",
       "Boundary at whose centroid the spline should start. If the start_direction is not set, the "
       "starting direction is computed from a side-volume average of the side-vertex-average "
       "normals of the boundary sides");
   params.addParam<MeshGeneratorName>("end_mesh",
                                      "Meshgenerator providing the mesh to end splne on.");
   params.addParam<BoundaryName>(
-      "end_point_at_boundary_centroid",
+      "boundary_providing_end_point",
       "Boundary at whose centroid the spline should end. If the end_direction is not set, the "
       "ending direction is computed from a side-volume average of the side-vertex-average normals "
       "of the boundary sides");
   params.addParamNamesToGroup(
-      "start_mesh end_mesh start_point_at_boundary_centroid end_point_at_boundary_centroid",
+      "start_mesh end_mesh boundary_providing_start_point boundary_providing_end_point",
       "Curve extremities input");
 
   // Spline shape parameters
@@ -102,17 +102,17 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
   // Check input parameters
   if (!isParamValid("start_point"))
   {
-    if (!isParamValid("start_point_at_boundary_centroid"))
-      paramError("start_point_at_boundary_centroid",
-                 "start_point_at_boundary_centroid must be specified if start_point is not");
+    if (!isParamValid("boundary_providing_start_point"))
+      paramError("boundary_providing_start_point",
+                 "boundary_providing_start_point must be specified if start_point is not");
     else if (!isParamValid("start_mesh"))
       paramError("start_mesh", "start_mesh must be specified if start_point is not.");
   }
   else
   {
-    if (isParamValid("start_point_at_boundary_centroid") || isParamValid("start_mesh"))
+    if (isParamValid("boundary_providing_start_point") || isParamValid("start_mesh"))
       paramError("start_point",
-                 "start_point and start_point_at_boundary_centroid or start_mesh cannot be "
+                 "start_point and boundary_providing_start_point or start_mesh cannot be "
                  "simultaneously specified!");
     if (!isParamValid("start_direction"))
       paramError("start_direction",
@@ -120,17 +120,17 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
   }
   if (!isParamValid("end_point"))
   {
-    if (!isParamValid("end_point_at_boundary_centroid"))
-      paramError("end_point_at_boundary_centroid",
-                 "end_point_at_boundary_centroid must be specified if start_point is not");
+    if (!isParamValid("boundary_providing_end_point"))
+      paramError("boundary_providing_end_point",
+                 "boundary_providing_end_point must be specified if start_point is not");
     else if (!isParamValid("end_mesh"))
       paramError("end_mesh", "end_mesh must be specified if start_point is not.");
   }
   else
   {
-    if (isParamValid("end_point_at_boundary_centroid") || isParamValid("end_mesh"))
+    if (isParamValid("boundary_providing_end_point") || isParamValid("end_mesh"))
       paramError("end_point",
-                 "end_point and end_point_at_boundary_centroid or end_mesh cannot be "
+                 "end_point and boundary_providing_end_point or end_mesh cannot be "
                  "simultaneously specified!");
     if (!isParamValid("end_direction"))
       paramError("end_direction",
@@ -151,7 +151,7 @@ BSplineCurveGenerator::generate()
   const auto start_dir = startDirection();
   const auto end_dir = endDirection();
 
-  auto mesh = buildReplicatedMesh(3);
+  auto mesh = buildReplicatedMesh(2);
 
   // determine number of control points needed
   unsigned int half_cps;
@@ -220,41 +220,41 @@ BSplineCurveGenerator::generate()
 }
 
 Point
-BSplineCurveGenerator::startPoint()
+BSplineCurveGenerator::startPoint() const
 {
   if (isParamValid("start_point"))
     return getParam<Point>("start_point");
   else
     return MooseMeshUtils::boundaryCentroidCalculator(
-        getParam<BoundaryName>("start_point_at_boundary_centroid"), *_start_mesh);
+        getParam<BoundaryName>("boundary_providing_start_point"), *_start_mesh);
 }
 
 Point
-BSplineCurveGenerator::endPoint()
+BSplineCurveGenerator::endPoint() const
 {
   if (isParamValid("end_point"))
     return getParam<Point>("end_point");
   else
     return MooseMeshUtils::boundaryCentroidCalculator(
-        getParam<BoundaryName>("end_point_at_boundary_centroid"), *_end_mesh);
+        getParam<BoundaryName>("boundary_providing_end_point"), *_end_mesh);
 }
 
 RealVectorValue
-BSplineCurveGenerator::startDirection()
+BSplineCurveGenerator::startDirection() const
 {
   if (isParamValid("start_direction"))
     return getParam<RealVectorValue>("start_direction");
   else
     return MooseMeshUtils::boundaryWeightedNormal(
-        getParam<BoundaryName>("start_point_at_boundary_centroid"), *_start_mesh);
+        getParam<BoundaryName>("boundary_providing_start_point"), *_start_mesh);
 }
 
 RealVectorValue
-BSplineCurveGenerator::endDirection()
+BSplineCurveGenerator::endDirection() const
 {
   if (isParamValid("end_direction"))
     return getParam<RealVectorValue>("end_direction");
   else
     return MooseMeshUtils::boundaryWeightedNormal(
-        getParam<BoundaryName>("end_point_at_boundary_centroid"), *_end_mesh);
+        getParam<BoundaryName>("boundary_providing_end_point"), *_end_mesh);
 }

@@ -21,9 +21,9 @@
   []
   [bscg]
     type = BSplineCurveGenerator
-    start_point_at_boundary_centroid = 'top'
+    boundary_providing_start_point = 'top'
     start_mesh = gmg1
-    end_point_at_boundary_centroid = 'left'
+    boundary_providing_end_point = 'left'
     end_mesh = gmg2
     num_elements = 20
   []

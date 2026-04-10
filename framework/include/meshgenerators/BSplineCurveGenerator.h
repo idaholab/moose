@@ -26,13 +26,13 @@ public:
 
 protected:
   /// Return the starting point of the spline
-  Point startPoint();
+  Point startPoint() const;
   /// Return the ending point of the spline
-  Point endPoint();
+  Point endPoint() const;
   /// Return the starting direction of the spline
-  RealVectorValue startDirection();
+  RealVectorValue startDirection() const;
   /// Return the ending direction of the spline
-  RealVectorValue endDirection();
+  RealVectorValue endDirection() const;
 
   /// Subdomain ID for the elements created
   const SubdomainID _new_subdomain_id;
