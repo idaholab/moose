@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMHypreBoomerAMG.h"
+#include "MFEMEigenproblem.h"
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
@@ -44,6 +45,8 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 {
   constructSolver();
 }
+
+MFEMHypreBoomerAMG::~MFEMHypreBoomerAMG() { _solver.reset(); }
 
 void
 MFEMHypreBoomerAMG::constructSolver()
@@ -81,7 +84,8 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
   }
   else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
   {
-    auto solver = new mfem::HypreBoomerAMG(*a.ParallelAssemble());
+    _assembled_matrix.reset(a.ParallelAssemble());
+    auto solver = new mfem::HypreBoomerAMG(*_assembled_matrix);
     solver->SetTol(getParam<mfem::real_t>("l_tol"));
     solver->SetMaxIter(getParam<int>("l_max_its"));
     solver->SetPrintLevel(getParam<int>("print_level"));
