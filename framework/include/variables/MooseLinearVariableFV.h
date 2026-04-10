@@ -184,6 +184,7 @@ public:
                                    const Moose::FV::GradientLimiterType limiter_type) const;
 
   virtual void initialSetup() override;
+  virtual void timestepSetup() override;
 
   /**
    * Get the solution value for the provided element and seed the derivative for the corresponding
