@@ -30,14 +30,6 @@ function configure_libmesh()
     exit 1
   fi
 
-  # Preserves capability in update_and_rebuild_libmesh.sh, but this is set in
-  # conda/libmesh/build.sh. If not, conda considers it an "unbound variable"
-  if [[ -n "$INSTALL_BINARY" ]]; then
-    echo "INFO: INSTALL_BINARY set"
-  else
-    export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
-  fi
-
   # If METHODS is not set in update_and_rebuild_libmesh.sh, set a default value.
   export METHODS=${METHODS:="opt oprof devel dbg"}
 
@@ -67,7 +59,7 @@ function configure_libmesh()
                --with-methods="${METHODS}" \
                --prefix="${LIBMESH_DIR}" \
                --with-future-timpi-dir="${LIBMESH_DIR}" \
-               INSTALL="${INSTALL_BINARY}" \
+               INSTALL="${SRC_DIR}/build-aux/install-sh -C" \
                "${EXTRA_ARGS[@]}" \
                $*
   local RETURN_CODE=$?
