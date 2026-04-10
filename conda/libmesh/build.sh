@@ -7,7 +7,7 @@ function do_build(){
     rm -rf "$LIBMESH_PREFIX"
     mkdir -p "${SRC_DIR:?}/build"
     cd "${SRC_DIR:?}/build"
-    LIBMESH_DIR="$LIBMESH_PREFIX" PETSC_DIR="${PETSC_DIR:?}" configure_libmesh \
+    PREFIX="$LIBMESH_PREFIX" LIBMESH_DIR="$LIBMESH_PREFIX" PETSC_DIR="${PETSC_DIR:?}" configure_libmesh \
         --disable-dependency-tracking \
         --with-vtk-lib="${VTKLIB_DIR:?}" \
         --with-vtk-include="${VTKINCLUDE_DIR:?}"
