@@ -118,6 +118,12 @@ NodeFaceConstraint::computeSecondaryValue(NumericVector<Number> & current_soluti
 }
 
 void
+NodeFaceConstraint::meshChanged()
+{
+  _penetration_locator.reinit();
+}
+
+void
 NodeFaceConstraint::residualSetup()
 {
   _secondary_residual_computed = false;

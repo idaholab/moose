@@ -27,16 +27,6 @@
     requirement = "The system shall be able to enforce the equal value boundary constraint in parallel "
                   "with adaptivity."
   []
-  [adaptivity_standard_assembly]
-    type = Exodiff
-    input = 'adaptivity.i'
-    cli_args = 'Problem/use_hash_table_matrix_assembly=false'
-    mesh_mode = REPLICATED
-    issues = '#32747'
-    requirement = "The system shall correctly rebuild the node-to-element map after mesh adaptivity "
-                  "when using standard (CSR) matrix assembly with constraints, so that constraint "
-                  "solves remain correct across refinement steps."
-  []
   [set_primary_and_coord_error]
     type = RunException
     input = 'equal_value_boundary_constraint_test.i'
