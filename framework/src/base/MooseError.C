@@ -53,7 +53,7 @@ mooseMsgFmt(const std::string & msg, const std::string & color)
 mooseErrorRaw(std::string msg,
               const std::string & prefix /* = "" */,
               const hit::Node * node /* = nullptr */,
-              const bool show_trace /* = Moose::show_trace */)
+              const bool show_trace /* = true */)
 {
   if (Moose::_throw_on_error)
     throw MooseRuntimeError(msg, node);

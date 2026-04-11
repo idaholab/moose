@@ -529,33 +529,31 @@ MooseApp::MooseApp(const InputParameters & parameters)
 {
   if (&parameters != &_pars)
   {
-    const auto show_trace = Moose::show_trace;
-    Moose::show_trace = false;
     const std::string bad_params = "(InputParameters parameters)";
     const std::string good_params = "(const InputParameters & parameters)";
     const std::string source_constructor = type() + "::" + type();
-    mooseDoOnce(mooseDeprecated(type(),
-                                " copy-constructs its input parameters.\n\n",
-                                "This is deprecated and will not be allowed in the future.\n\n",
-                                "In ",
-                                type(),
-                                ".C, change:\n  ",
-                                source_constructor,
-                                bad_params,
-                                " -> ",
-                                source_constructor,
-                                good_params,
-                                "\n\n",
-                                "In ",
-                                type(),
-                                ".h, change:\n  ",
-                                type(),
-                                bad_params,
-                                "; -> ",
-                                type(),
-                                good_params,
-                                ";"));
-    Moose::show_trace = show_trace;
+    mooseDoOnce(
+        mooseDeprecatedNoTrace(type(),
+                               " copy-constructs its input parameters.\n\n",
+                               "This is deprecated and will not be allowed in the future.\n\n",
+                               "In ",
+                               type(),
+                               ".C, change:\n  ",
+                               source_constructor,
+                               bad_params,
+                               " -> ",
+                               source_constructor,
+                               good_params,
+                               "\n\n",
+                               "In ",
+                               type(),
+                               ".h, change:\n  ",
+                               type(),
+                               bad_params,
+                               "; -> ",
+                               type(),
+                               good_params,
+                               ";"));
   }
 
   mooseAssert(_command_line->hasParsed(), "Command line has not parsed");

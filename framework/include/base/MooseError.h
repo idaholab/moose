@@ -170,12 +170,12 @@ std::string mooseMsgFmt(const std::string & msg, const std::string & color);
  * @param msg The error message
  * @param prefix Optional prefix to add to every line of the error (for multiapp prefixes)
  * @param node Optional HIT node to associate with the error, adding file path context
- * @param show_trace Whether or not to show the trace (defaults to Moose::show_trace)
+ * @param show_trace Whether or not to show a stack trace, defaults to true
  */
 [[noreturn]] void mooseErrorRaw(std::string msg,
                                 const std::string & prefix = "",
                                 const hit::Node * node = nullptr,
-                                const bool show_trace = Moose::show_trace);
+                                const bool show_trace = true);
 
 /**
  * All of the following are not meant to be called directly - they are called by the normal macros
@@ -249,7 +249,8 @@ mooseInfoStream(S & oss, Args &&... args)
 
 template <typename S, typename... Args>
 void
-mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args &&... args)
+mooseDeprecatedStream(
+    S & oss, const bool expired, const bool print_title, const bool show_trace, Args &&... args)
 {
   if (Moose::_deprecated_is_error)
     mooseError("\n\nDeprecated code:\n", std::forward<Args>(args)...);
@@ -262,7 +263,7 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
                                 : mooseMsgFmt(ss.str(), color);
   oss << msg;
   ss.str("");
-  if (Moose::show_trace)
+  if (show_trace)
   {
     if (libMesh::global_n_processors() == 1)
       libMesh::print_trace(ss);
@@ -356,19 +357,42 @@ mooseUnused(Args &&... args)
 }
 
 /// Emit a deprecated code/feature message with the given stringified, concatenated args.
+/// Will include a stack trace; use mooseDeprecatedNoTrace to exclude the trace.
 template <typename... Args>
 void
 mooseDeprecated(Args &&... args)
 {
-  moose::internal::mooseDeprecatedStream(Moose::out, false, true, std::forward<Args>(args)...);
+  moose::internal::mooseDeprecatedStream(
+      Moose::out, false, true, true, std::forward<Args>(args)...);
 }
 
 /// Emit a deprecated code/feature message with the given stringified, concatenated args.
+/// Will not include a stack trace; use mooseDeprecated to include the trace.
+template <typename... Args>
+void
+mooseDeprecatedNoTrace(Args &&... args)
+{
+  moose::internal::mooseDeprecatedStream(
+      Moose::out, false, true, false, std::forward<Args>(args)...);
+}
+
+/// Emit a deprecated code/feature message with the given stringified, concatenated args.
+/// Will include a stack trace; use mooseDeprecationExpiredNoTrace to exclude the trace.
 template <typename... Args>
 void
 mooseDeprecationExpired(Args &&... args)
 {
-  moose::internal::mooseDeprecatedStream(Moose::out, true, true, std::forward<Args>(args)...);
+  moose::internal::mooseDeprecatedStream(Moose::out, true, true, true, std::forward<Args>(args)...);
+}
+
+/// Emit a deprecated code/feature message with the given stringified, concatenated args.
+/// Will not include a stack trace; use mooseDeprecationExpired to include the trace.
+template <typename... Args>
+void
+mooseDeprecationExpiredNoTrace(Args &&... args)
+{
+  moose::internal::mooseDeprecatedStream(
+      Moose::out, true, true, false, std::forward<Args>(args)...);
 }
 
 /// Emit an informational message with the given stringified, concatenated args.
