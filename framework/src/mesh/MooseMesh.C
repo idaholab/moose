@@ -1686,12 +1686,12 @@ MooseMesh::addQuadratureNode(const Elem * elem,
     // Keep track of this new node in two different ways for easy lookup
     _quadrature_nodes[new_id] = qnode;
     _elem_to_side_to_qp_to_quadrature_nodes[elem->id()][side][qp] = qnode;
+    mooseAssert(_node_to_elem_map_built, "Should have been built");
 
     if (elem->active())
     {
       // If they have not been built, no need to start building an incomplete one
-      if (_node_to_elem_map_built)
-        _node_to_elem_map[new_id].push_back(elem->id());
+      _node_to_elem_map[new_id].push_back(elem->id());
       if (_node_to_active_semilocal_elem_map_built)
         _node_to_active_semilocal_elem_map[new_id].push_back(elem->id());
     }

@@ -45,6 +45,9 @@ GeometricSearchData::update(GeometricSearchType type)
 {
   if (type == ALL || type == QUADRATURE || type == NEAREST_NODE)
   {
+    // Request the nodeToElem map upfront
+    _mesh.nodeToElemMap();
+
     if (_first) // Only do this once
     {
       _first = false;
