@@ -111,8 +111,6 @@ public:
 
   void residualSetup() override;
 
-  void meshChanged() override;
-
   /**
    * @returns material property dependencies
    */
