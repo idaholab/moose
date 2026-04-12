@@ -11,6 +11,7 @@
 
 #include "KokkosUserObject.h"
 #include "KokkosNodalReducer.h"
+#include "KokkosMaterialPropertyValue.h"
 
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
