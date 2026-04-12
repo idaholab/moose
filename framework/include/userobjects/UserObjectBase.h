@@ -155,11 +155,19 @@ public:
    */
   unsigned int systemNumber() const { return _sys.number(); }
 
+  /**
+   * Whether or not a threaded copy of this object is needed when obtaining it in
+   * another object, like via the UserObjectInterface.
+   *
+   * Derived classes should override this as needed.
+   */
+  virtual bool needThreadedCopy() const { return false; }
+
 protected:
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
   virtual void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override;
-  virtual void addUserObjectDependencyHelper(const UserObject & uo) const override;
+  virtual void addUserObjectDependencyHelper(const UserObjectBase & uo) const override;
   void addReporterDependencyHelper(const ReporterName & reporter_name) override;
 
   /// Thread ID of this postprocessor

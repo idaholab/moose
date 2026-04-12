@@ -61,14 +61,6 @@ public:
 
   UserObject * primaryThreadCopy() { return _primary_thread_copy; }
 
-  /**
-   * Whether or not a threaded copy of this object is needed when obtaining it in
-   * another object, like via the UserObjectInterface.
-   *
-   * Derived classes should override this as needed.
-   */
-  virtual bool needThreadedCopy() const { return false; }
-
 protected:
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

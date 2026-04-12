@@ -80,7 +80,7 @@ InitialConditionBase::getSuppliedItems()
 }
 
 void
-InitialConditionBase::addUserObjectDependencyHelper(const UserObject & uo) const
+InitialConditionBase::addUserObjectDependencyHelper(const UserObjectBase & uo) const
 {
   if (!_ignore_uo_dependency)
     _depend_uo.insert(uo.name());

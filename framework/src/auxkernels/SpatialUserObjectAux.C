@@ -26,7 +26,7 @@ SpatialUserObjectAux::validParams()
 }
 
 SpatialUserObjectAux::SpatialUserObjectAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _user_object(getUserObjectBase("user_object"))
+  : AuxKernel(parameters), _user_object(getUserObject<UserObject>("user_object"))
 {
 }
 
