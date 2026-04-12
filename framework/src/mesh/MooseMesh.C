@@ -260,8 +260,11 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _is_displaced(false),
     _coord_sys(
         declareRestartableData<std::map<SubdomainID, Moose::CoordinateSystemType>>("coord_sys")),
-    _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
-    _coord_system_set(false),
+    _unique_coord_system(
+        declareRestartableData<std::optional<Moose::CoordinateSystemType>>("unique_coord_system")),
+    _rz_coord_axis(declareRestartableData<unsigned int>("rz_coord_axis",
+                                                        getParam<MooseEnum>("rz_coord_axis"))),
+    _coord_system_set(declareRestartableData<bool>("coord_sys_set", false)),
     _doing_p_refinement(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
@@ -4408,6 +4411,9 @@ void
 MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 {
   _rz_coord_axis = rz_coord_axis;
+  mooseAssert(_unique_coord_system.has_value(), "Should only have one coordinate system");
+  mooseAssert(_unique_coord_system.value() == Moose::COORD_RZ,
+              "Should only have one coordinate system");
 
   updateCoordTransform();
 }
@@ -4530,7 +4536,7 @@ MooseMesh::setCoordData(const MooseMesh & other_mesh)
   _unique_coord_system = other_mesh._unique_coord_system;
   _rz_coord_axis = other_mesh._rz_coord_axis;
   _subdomain_id_to_rz_coord_axis = other_mesh._subdomain_id_to_rz_coord_axis;
-  _coord_system_set = other_mesh._coord_system_set;
+  _coord_system_set = true;
 }
 
 const MooseUnits &
