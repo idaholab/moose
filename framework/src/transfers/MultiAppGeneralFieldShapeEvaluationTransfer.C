@@ -92,7 +92,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
                                 from_sys.get_dof_map(),
                                 from_var_num);
     local_meshfuns.back().init();
-    local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
+    local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::OutOfMeshValue);
   }
 }
 
@@ -117,7 +117,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
   for (auto & [pt, mesh_div] : incoming_points)
   {
     bool point_found = false;
-    outgoing_vals[i_pt].second = GeneralFieldTransfer::BetterOutOfMeshValue;
+    outgoing_vals[i_pt].second = GeneralFieldTransfer::OutOfMeshValue;
 
     // Loop on all local origin problems until:
     // - we've found the point in an app and the value at that point is valid
@@ -153,7 +153,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         }
 
         // No need to consider decision factors if value is invalid
-        if (val == GeneralFieldTransfer::BetterOutOfMeshValue)
+        if (val == GeneralFieldTransfer::OutOfMeshValue)
           continue;
         else
           point_found = true;
@@ -171,8 +171,8 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     }
 
     if (!point_found)
-      outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
-                             GeneralFieldTransfer::BetterOutOfMeshValue};
+      outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                             GeneralFieldTransfer::OutOfMeshValue};
 
     // Move to next point
     i_pt++;

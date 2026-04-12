@@ -117,7 +117,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
   for (auto & [pt, mesh_div] : incoming_points)
   {
     bool point_found = false;
-    outgoing_vals[i_pt].second = GeneralFieldTransfer::BetterOutOfMeshValue;
+    outgoing_vals[i_pt].second = GeneralFieldTransfer::OutOfMeshValue;
 
     // Loop on all local origin problems until:
     // - we've found the point in an app and the value at that point is valid
@@ -157,7 +157,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         }
 
         // No need to consider decision factors if value is invalid
-        if (val == GeneralFieldTransfer::BetterOutOfMeshValue)
+        if (val == GeneralFieldTransfer::OutOfMeshValue)
           continue;
         else
           point_found = true;
@@ -172,8 +172,8 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
     }
 
     if (!point_found)
-      outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
-                             GeneralFieldTransfer::BetterOutOfMeshValue};
+      outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                             GeneralFieldTransfer::OutOfMeshValue};
 
     // Move to next point
     i_pt++;

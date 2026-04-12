@@ -520,13 +520,13 @@ namespace GeneralFieldTransfer
 // Transfer::OutOfMeshValue is an actual number.  Why?  Why!
 static_assert(std::numeric_limits<Real>::has_infinity,
               "What are you trying to use for Real?  It lacks infinity!");
-extern Number BetterOutOfMeshValue;
+extern Number OutOfMeshValue;
 
 inline bool
-isBetterOutOfMeshValue(Number val)
+isOutOfMeshValue(Number val)
 {
   // Might need to be changed for e.g. NaN
-  return val == GeneralFieldTransfer::BetterOutOfMeshValue;
+  return val == GeneralFieldTransfer::OutOfMeshValue;
 }
 
 // We need two functors that record point (value and gradient,
@@ -686,7 +686,7 @@ public:
     auto it = _cache.find(n);
     if (it == _cache.end())
     {
-      if (_default_value != GeneralFieldTransfer::BetterOutOfMeshValue)
+      if (_default_value != GeneralFieldTransfer::OutOfMeshValue)
         return _default_value;
       else
         return (*_backup)(n);
@@ -705,7 +705,7 @@ public:
     auto it = _cache.find(n);
     if (it == _cache.end())
     {
-      if (_default_value != GeneralFieldTransfer::BetterOutOfMeshValue)
+      if (_default_value != GeneralFieldTransfer::OutOfMeshValue)
         return _default_value;
       else
         return (*_backup)(n);

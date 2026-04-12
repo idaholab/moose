@@ -37,7 +37,7 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
       "neighbor(s) in the origin application.");
 
   // Nearest node is historically more an extrapolation transfer
-  params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::BetterOutOfMeshValue;
+  params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::OutOfMeshValue;
   params.suppressParameter<Real>("extrapolation_constant");
   // We dont keep track of both point distance to app and to nearest node, so we cannot guarantee
   // that the nearest app (among the local apps, not globally) will hold the nearest location.
@@ -382,8 +382,8 @@ MultiAppGeneralFieldNearestLocationTransfer::evaluateInterpValuesNearestNode(
 
     // none of the source problem meshes were within the restrictions set
     if (!point_found)
-      outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
-                             GeneralFieldTransfer::BetterOutOfMeshValue};
+      outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                             GeneralFieldTransfer::OutOfMeshValue};
     else if (_search_value_conflicts)
     {
       // Local source meshes conflicts can happen two ways:

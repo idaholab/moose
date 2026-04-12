@@ -33,7 +33,7 @@ using namespace libMesh;
 
 namespace GeneralFieldTransfer
 {
-Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+Number OutOfMeshValue = std::numeric_limits<Real>::infinity();
 }
 
 InputParameters
@@ -553,7 +553,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   {
     outgoing_vals.resize(
         incoming_locations.size(),
-        {GeneralFieldTransfer::BetterOutOfMeshValue, GeneralFieldTransfer::BetterOutOfMeshValue});
+        {GeneralFieldTransfer::OutOfMeshValue, GeneralFieldTransfer::OutOfMeshValue});
     // Evaluate interpolation values for these incoming points
     evaluateInterpValues(i, incoming_locations, outgoing_vals);
   };
@@ -970,14 +970,14 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // We should only have one closest value for each variable at any given point.
       // While there are shared Qps, on vertices for higher order variables usually,
       // the generic projector only queries each point once
-      if (_search_value_conflicts && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
+      if (_search_value_conflicts && !GeneralFieldTransfer::isOutOfMeshValue(val) &&
           value_cache.hasKey(p) != 0 && !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
         registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
 
       // if we use the nearest app, even if the value is bad we want to save the distance because
       // it's the distance to the app, if that's the closest app then so be it with the bad value
-      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val) || _use_nearest_app) &&
+      if ((!GeneralFieldTransfer::isOutOfMeshValue(val) || _use_nearest_app) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
@@ -1053,7 +1053,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - the smallest rank with the same distance
         // It is debatable whether we want invalid values from the nearest app. It could just be
         // that the app position was closer but the extent of another child app was large enough
-        if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) ||
+        if ((!GeneralFieldTransfer::isOutOfMeshValue(incoming_vals[val_offset].first) ||
              _use_nearest_app) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
              ((val.pid > pid) &&
@@ -1523,7 +1523,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         const auto val = val_pair.second.interp;
 
         // This will happen if meshes are mismatched
-        if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        if (_error_on_miss && GeneralFieldTransfer::isOutOfMeshValue(val))
         {
           const auto target_location =
               hasToMultiApp()
@@ -1554,9 +1554,9 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         // but it can be that we want to set it to a different value than what was already there
         // for example: the source app has been displaced and was sending an indicator of its
         // position
-        if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        if (GeneralFieldTransfer::isOutOfMeshValue(val))
         {
-          if (!GeneralFieldTransfer::isBetterOutOfMeshValue(_default_extrapolation_value))
+          if (!GeneralFieldTransfer::isOutOfMeshValue(_default_extrapolation_value))
             to_sys->solution->set(dof, _default_extrapolation_value);
           continue;
         }
@@ -1694,7 +1694,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
           dof_object = to_mesh.elem_ptr(dof_object_id);
         const auto dof = dof_object->dof_number(sys_num, var_num, 0);
         const auto val = val_pair.second.interp;
-        if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        if (GeneralFieldTransfer::isOutOfMeshValue(val))
         {
           Real nearest_value = 0.;
           dof_id_type min_dist_id = std::numeric_limits<dof_id_type>::max();
@@ -1721,7 +1721,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                 if (distance_sq < min_distance_sq && elem_node.id() != node->id())
                 {
                   if (dofobject_to_val.count(elem_node.id()) &&
-                      !GeneralFieldTransfer::isBetterOutOfMeshValue(
+                      !GeneralFieldTransfer::isOutOfMeshValue(
                           libmesh_map_find(dofobject_to_val, elem_node.id()).interp))
                   {
                     min_distance_sq = distance_sq;
@@ -1733,7 +1733,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                     const auto other_dof = elem_node.dof_number(sys_num, var_num, 0);
                     try
                     {
-                      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(
+                      if (!GeneralFieldTransfer::isOutOfMeshValue(
                               (*to_sys->current_local_solution)(other_dof)) &&
                           (*to_sys->current_local_solution)(other_dof) !=
                               _default_extrapolation_value)
@@ -1764,7 +1764,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
               if (distance_sq < min_distance_sq)
               {
                 if (dofobject_to_val.count(neigh->id()) &&
-                    !GeneralFieldTransfer::isBetterOutOfMeshValue(
+                    !GeneralFieldTransfer::isOutOfMeshValue(
                         libmesh_map_find(dofobject_to_val, neigh->id()).interp))
                 {
                   min_distance_sq = distance_sq;
@@ -1777,7 +1777,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                   const auto other_dof = neigh->dof_number(sys_num, var_num, 0);
                   try
                   {
-                    if (!GeneralFieldTransfer::isBetterOutOfMeshValue(
+                    if (!GeneralFieldTransfer::isOutOfMeshValue(
                             (*to_sys->current_local_solution)(other_dof)) &&
                         (*to_sys->current_local_solution)(other_dof) !=
                             _default_extrapolation_value)
@@ -2190,8 +2190,8 @@ MultiAppGeneralFieldTransfer::detectConflict(Real current_value,
   // No conflict if we're not looking for them
   if (_search_value_conflicts)
     // Only consider conflicts if the values are valid and different
-    if (current_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
-        new_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
+    if (current_value != GeneralFieldTransfer::OutOfMeshValue &&
+        new_value != GeneralFieldTransfer::OutOfMeshValue &&
         !MooseUtils::absoluteFuzzyEqual(current_value, new_value))
       // Conflict only occurs if the origin points are equidistant
       if (MooseUtils::absoluteFuzzyEqual(current_distance, new_distance))

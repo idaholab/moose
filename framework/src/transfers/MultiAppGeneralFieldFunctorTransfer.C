@@ -452,8 +452,8 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       if (!point_found && _extrapolation_behavior == 0) /*flat*/
       {
         // The base class will do take care of replacing the value
-        outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
-                               GeneralFieldTransfer::BetterOutOfMeshValue};
+        outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                               GeneralFieldTransfer::OutOfMeshValue};
         continue;
       }
 
@@ -496,8 +496,8 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
 
     // none of the source problem meshes were within the restrictions set
     if (!point_found)
-      outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
-                             GeneralFieldTransfer::BetterOutOfMeshValue};
+      outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                             GeneralFieldTransfer::OutOfMeshValue};
     else if (_search_value_conflicts)
     {
       // Within the domain: implemented above
