@@ -42,7 +42,7 @@ public:
    * Get input expression
    * @returns The input expression
    */
-  const auto & expression() const { return _expression; }
+  const std::string & expression() const { return _expression; }
 
 private:
   /**
@@ -56,7 +56,7 @@ private:
   /**
    * Input expression
    */
-  const std::string & _expression;
+  const std::string _expression;
 };
 
 /**
@@ -175,7 +175,7 @@ public:
    * Get RPN sequence
    * @returns The RPN sequence
    */
-  const auto & getRPN() const { return _rpn; }
+  const std::vector<Instruction> & getRPN() const { return _rpn; }
 
   /**
    * Add default variables
@@ -210,12 +210,12 @@ public:
    * Get numbers used in the expression
    * @returns The numbers
    */
-  const auto & getNumbers() const { return _numbers; }
+  const std::vector<Real> & getNumbers() const { return _numbers; }
   /**
    * Get variables used in the expression
    * @returns The variables
    */
-  const auto & getVariables() const { return _variables; }
+  const std::unordered_map<std::string, Variable> & getVariables() const { return _variables; }
 
   /**
    * Finalize the builder and prevent further changes
@@ -302,7 +302,7 @@ private:
   /**
    * Error on attempts to update the builder after finalization
    */
-  void finalizedError();
+  void checkFinalized();
 };
 
 /**

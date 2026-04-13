@@ -40,7 +40,7 @@ KokkosParsedFuncCoefDiffusion::computeQpResidual(const unsigned int i,
                                                  AssemblyDatum & datum) const
 {
   const auto & func = static_cast<const KokkosParsedFunction &>(_function);
-  Real k = func.value(_t, datum.q_point(qp));
+  const Real k = func.value(_t, datum.q_point(qp));
   return k * _grad_u(datum, qp) * _grad_test(datum, i, qp);
 }
 
@@ -52,6 +52,6 @@ KokkosParsedFuncCoefDiffusion::computeQpJacobian(const unsigned int i,
                                                  AssemblyDatum & datum) const
 {
   const auto & func = static_cast<const KokkosParsedFunction &>(_function);
-  Real k = func.value(_t, datum.q_point(qp));
+  const Real k = func.value(_t, datum.q_point(qp));
   return k * _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
 }

@@ -18,7 +18,8 @@ KokkosParsedFunction::validParams()
   params += MooseParsedFunctionBase::validParams();
   params.addCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "The user defined function.");
-  params.addParam<bool>("print_rpn", "Print parsed Reverse Polish Notation (RPN) for debugging.");
+  params.addParam<bool>(
+      "print_rpn", false, "Print parsed Reverse Polish Notation (RPN) for debugging.");
 
   params.addClassDescription("Function created by parsing a string");
 
@@ -62,6 +63,8 @@ KokkosParsedFunction::initialSetup()
 {
   const auto & symbol_names = getParam<std::vector<std::string>>("symbol_names");
   const auto & symbol_values = getParam<std::vector<std::string>>("symbol_values");
+
+  _symbol_values.reserve(symbol_values.size());
 
   for (const auto i : make_range(symbol_names.size()))
   {

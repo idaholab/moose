@@ -9,6 +9,8 @@
 
 #include "KokkosFunctionParser.h"
 
+#include "MooseUtils.h"
+
 namespace Moose::Kokkos
 {
 
@@ -93,7 +95,7 @@ PEGParser::PEGParser(const std::string & expression, const ConsoleStream * conso
 void
 RPNBuilder::build(const peg::Ast & ast)
 {
-  finalizedError();
+  checkFinalized();
 
   if (ast.name == "Start" || ast.name == "Primary" || ast.name == "ArgList")
     for (const auto & node : ast.nodes)
@@ -169,18 +171,18 @@ RPNBuilder::build(const peg::Ast & ast)
 void
 RPNBuilder::printRPN(const ConsoleStream & console) const
 {
-  console << std::endl;
+  std::vector<std::string> instructions;
 
   for (const auto & instruction : _rpn)
-    console << instruction.text << " ";
+    instructions.push_back(instruction.text);
 
-  console << std::endl;
+  console << std::endl << MooseUtils::join(instructions, " ") << std::endl << std::endl;
 }
 
 void
 RPNBuilder::addDefaultVariables()
 {
-  finalizedError();
+  checkFinalized();
 
   _has_default_variables = true;
 
@@ -193,7 +195,7 @@ RPNBuilder::addDefaultVariables()
 unsigned int
 RPNBuilder::addNumber(Real number)
 {
-  finalizedError();
+  checkFinalized();
 
   _numbers.push_back(number);
   return _numbers.size() - 1;
@@ -202,12 +204,13 @@ RPNBuilder::addNumber(Real number)
 unsigned int
 RPNBuilder::addVariable(const std::string & name)
 {
-  finalizedError();
+  checkFinalized();
 
   auto it = _variables.find(name);
   if (it != _variables.end())
     return it->second.idx;
 
+  // Default variables: x, y, z, t
   unsigned int idx = _variables.size() + (_has_default_variables ? 0 : 4);
 
   _variables[name].idx = idx;
@@ -218,7 +221,7 @@ RPNBuilder::addVariable(const std::string & name)
 void
 RPNBuilder::associateValue(const std::string & name, const Real * value)
 {
-  finalizedError();
+  checkFinalized();
 
   auto it = _variables.find(name);
   if (it == _variables.end())
@@ -239,7 +242,7 @@ RPNBuilder::builderError(const peg::Ast & ast, const std::string & message) cons
 }
 
 void
-RPNBuilder::finalizedError()
+RPNBuilder::checkFinalized()
 {
   if (_finalized)
     mooseError("Kokkos parsed function error: cannot update builder after finalization.");
