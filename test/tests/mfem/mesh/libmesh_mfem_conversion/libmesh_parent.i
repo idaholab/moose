@@ -1,6 +1,8 @@
+elem_type = square
+
 [Mesh]
   type = FileMesh
-  file = ../square.e
+  file = ../${elem_type}.e
 []
 
 [Problem]
@@ -13,13 +15,6 @@
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
-  []
-[]
-
-[AuxVariables]
-  [mfem_mesh_var] # The variable solved on the mesh read directly by MFEM
-    type = MFEMVariable
-    fespace = H1FESpace
   []
 []
 
@@ -68,16 +63,10 @@
 []
 
 [Outputs]
-  file_base = 'libmesh_to_mfem_mesh_quads'
-  exodus = true
-  csv = true
-[]
-
-[Postprocessors]
-  [Difference]
-    type = MFEML2Error
-    variable = libmesh_mesh_var
-    function = mfem_mesh_var
+  [libMeshOutput]
+    type = MFEMMeshOutput
+    file_base = 'libmesh-mesh-${elem_type}'
+    ordering = HILBERT
   []
 []
 
@@ -86,14 +75,5 @@
     type = FullSolveMultiApp
     input_files = mfem_sub.i
     execute_on = 'INITIAL'
-  []
-[]
-
-[Transfers]
-  [transfer_from_mfem]
-    type = MultiAppMFEMCopyTransfer
-    source_variable = mfem_mesh_var
-    variable = mfem_mesh_var
-    from_multi_app = mfem_app
   []
 []

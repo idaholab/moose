@@ -1,6 +1,8 @@
+elem_type = square
+
 [Mesh]
   type = MFEMMesh
-  file = ../square.e
+  file = ../${elem_type}.e
 []
 
 [Problem]
@@ -57,4 +59,12 @@
 
 [Executioner]
   type = MFEMSteady
+[]
+
+[Outputs]
+  [MFEMOutput]
+    type = MFEMMeshOutput
+    file_base = 'mfem-mesh-${elem_type}'
+    ordering = HILBERT
+  []
 []
