@@ -422,7 +422,7 @@ private:
                                 const std::set<TagID> & absolute_value_vector_tags);
 
   /**
-   * Checks \c _local_re for NaNs/Infs and throws exception if found
+   * Checks \c _local_re for NaNs/Infs and throws an exception if found
    */
   void checkForNans() const;
 

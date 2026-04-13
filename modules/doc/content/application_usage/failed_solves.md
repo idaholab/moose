@@ -292,8 +292,8 @@ Nonlinear solve did not converge due to DIVERGED_FNORM_NAN.
 
 Common sources of NaN or Inf values are:
 
-- Division by zero
 - Uninitialized variables
+- Division by zero
 
 To troubleshoot a NaN or Inf value, first compile in `dbg` mode (see [application_development/debugging.md#building_dbg]), which will provide more useful information to debuggers.
 
