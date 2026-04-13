@@ -73,7 +73,7 @@
     boundary = 4
   []
   [gamma_h_topbottom]
-    type = MFEMVectorDirichletBC
+    type = MFEMVectorNormalDirichletBC
     variable = time_integrated_heat_flux
     vector_coefficient = '0.0 0.0'
     boundary = '1 3'
