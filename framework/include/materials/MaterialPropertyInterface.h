@@ -288,6 +288,23 @@ public:
   std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
   getBlockMaterialProperty(const MaterialPropertyName & name);
 
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Retrieve a Kokkos material property with the mesh blocks where it is defined
+   * NOTE: This is not a drop-in replacement of getBlockMaterialProperty(). Unlike the original API,
+   * this function cannot be called after object construction
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @tparam state The property state
+   * @param name The name of the material property to retrieve
+   * @returns The Kokkos material property with the name 'name' and the set of blocks where the
+   * property is valid
+   */
+  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
+  std::pair<Moose::Kokkos::MaterialProperty<T, dimension>, std::set<SubdomainID>>
+  getKokkosBlockMaterialProperty(const MaterialPropertyName & name);
+#endif
+
   /**
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
@@ -762,12 +779,12 @@ template <typename T>
 std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
 MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name_in)
 {
+  if (_mi_block_ids.empty())
+    mooseError("getBlockMaterialProperty must be called by a block restrictable object");
+
   const auto name = _get_suffix.empty()
                         ? static_cast<const std::string &>(name_in)
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-
-  if (_mi_block_ids.empty())
-    mooseError("getBlockMaterialProperty must be called by a block restrictable object");
 
   using pair_type = std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>;
 
@@ -1023,5 +1040,46 @@ MaterialPropertyInterface::getKokkosMaterialPropertyByName(const std::string & p
   getKokkosMaterialPropertyHook(prop_name_in, state);
 
   return prop;
+}
+
+template <typename T, unsigned int dimension, unsigned int state>
+std::pair<Moose::Kokkos::MaterialProperty<T, dimension>, std::set<SubdomainID>>
+MaterialPropertyInterface::getKokkosBlockMaterialProperty(const MaterialPropertyName & name_in)
+{
+  if (!_is_kokkos_object)
+    _mi_moose_object.mooseError(
+        "Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
+
+  if (_mi_block_ids.empty())
+    mooseError("getKokkosBlockMaterialProperty must be called by a block restrictable object");
+
+  const auto name = _get_suffix.empty()
+                        ? static_cast<const std::string &>(name_in)
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+
+  using pair_type = std::pair<Moose::Kokkos::MaterialProperty<T, dimension>, std::set<SubdomainID>>;
+
+  if (!hasKokkosMaterialPropertyByName<T, dimension>(name))
+    return pair_type(Moose::Kokkos::MaterialProperty<T, dimension>(), {});
+
+  checkExecutionStage();
+
+  // Mark property as requested
+  markMatPropRequested(name);
+
+  // Call first so that the ID gets registered
+  auto prop = _material_data.getKokkosProperty<T, dimension, state>(name);
+  auto blocks = getMaterialPropertyBlocks(name);
+  auto prop_blocks_pair = pair_type(prop, std::move(blocks));
+
+  _material_property_dependencies.insert(_material_data.getPropertyId(name));
+
+  // Update consumed properties in MaterialPropertyDebugOutput
+  if constexpr (state == 0)
+    addConsumedPropertyName(_mi_moose_object_name, name);
+
+  getKokkosMaterialPropertyHook(name_in, state);
+
+  return prop_blocks_pair;
 }
 #endif
