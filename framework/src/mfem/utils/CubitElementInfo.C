@@ -346,7 +346,10 @@ const std::map<libMesh::ElemMappingType, int> CubitBlockInfo::_libmesh_to_mfem_b
     {libMesh::ElemMappingType::RATIONAL_BERNSTEIN_MAP, mfem::BasisType::Positive},
     {libMesh::ElemMappingType::LAGRANGE_MAP, mfem::BasisType::ClosedUniform}};
 
-// FIXME: It looks like libMesh and MFEM read EDGE4 differently from ExodusII. libMesh assumes evenly-spaced nodes, while MFEM assumes GaussLobatto, I think. This is actually true of all elements, but it only becomes apparent for 3rd order and above. EDGE4 is the only element for which that is the case.
+// FIXME: It looks like libMesh and MFEM read EDGE4 differently from ExodusII. libMesh assumes
+// evenly-spaced nodes, while MFEM assumes GaussLobatto, I think. This is actually true of all
+// elements, but it only becomes apparent for 3rd order and above. EDGE4 is the only element for
+// which that is the case.
 
 const CubitBlockInfo::ElementInfo &
 CubitBlockInfo::getElementInfo(libMesh::ElemType elem_type, bool warn) const
