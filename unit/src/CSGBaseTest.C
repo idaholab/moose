@@ -13,9 +13,13 @@
 #include "CSGSphere.h"
 #include "CSGPlane.h"
 #include "CSGXCylinder.h"
+#include "CSGPlane.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGTransformationHelper.h"
+#include "CSGNPolygonUnit.h"
+#include "CSGEngUnitTest.h"
+#include "CSGRegionTestHelper.h"
 
 #include "MooseUnitUtils.h"
 
@@ -1168,6 +1172,159 @@ TEST(CSGBaseTest, testSurfEngUnitDelete)
   csg_obj->deleteSurface(poly2);
   ASSERT_FALSE(csg_obj->hasSurface(name2));
   ASSERT_FALSE(csg_obj->hasEngUnit(name2));
+}
+
+/// test the successful expandUnit for surface units via base
+TEST(CSGBaseTest, testSurfEngUnitExpand)
+{
+  std::string name = "polygon_unit";
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit<CSGNPolygonUnit>(std::move(poly_ptr));
+
+  // assert num surfs and eng units pre-expansion
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(1, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+
+  // include transformation on the unit (to check that it transfers with expansion)
+  csg_obj->applyAxisRotation(poly, RotationAxisType::Z, 30.0);
+
+  // expand the unit
+  csg_obj->expandEngUnit(poly);
+
+  // no units should be in base, but should have 4 surfaces
+  ASSERT_EQ(4, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
+
+  // expandUnit method in CSGNPolygonUnit renames surfaces to "<name>_exp_<k>". Original
+  // "polygon_unit" should not exist as a surface or an engineering unit.
+  ASSERT_FALSE(csg_obj->hasSurface(name));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name));
+  for (int k = 0; k < 4; ++k)
+  {
+    std::string new_name = name + "_exp_" + std::to_string(k);
+    ASSERT_TRUE(csg_obj->hasSurface(new_name));
+  }
+
+  // all surfaces should also have the transformations applied
+  std::pair<TransformationType, std::tuple<Real, Real, Real>> exp_trans = {
+      TransformationType::ROTATION, std::make_tuple(30, 0, 0)};
+  auto all_surfs = csg_obj->getAllSurfaces();
+  for (const CSGSurface & s : all_surfs)
+  {
+    auto trans = s.getTransformations();
+    ASSERT_EQ(1, trans.size());
+    ASSERT_EQ(exp_trans, trans[0]);
+  }
+}
+
+/// tests that uses of the engineering unit are properly updated in cell regions after expansion
+/// when the original region was a negative "half-space"
+TEST(CSGBaseTest, testUseSurfEngUnit)
+{
+  // make a cell that uses the polygon unit in the region definition and a regular surface
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr =
+      std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+  const auto & cell = csg_obj->createCell("my_cell", "my_mat", -poly); // negative half-space
+
+  // check cell region has just one surface associated with it
+  auto pre_reg = cell.getRegion();
+  auto pre_surfs = pre_reg.getSurfaces();
+  ASSERT_EQ(1, pre_surfs.size());
+  // original region should be considered a halfspace (one surface)
+  ASSERT_EQ("HALFSPACE", pre_reg.getRegionTypeString());
+  ASSERT_EQ("(-polygon_unit)", infixJSONToString(pre_reg.toInfixJSON()));
+
+  // surface should be exactly the polygon unit
+  ASSERT_TRUE(static_cast<const CSGSurface &>(poly) == pre_surfs[0]);
+
+  // expand unit and check surface of cell region again
+  csg_obj->expandEngUnit(poly);
+
+  // should no longer have the unit at all
+  ASSERT_FALSE(csg_obj->hasEngUnit("polygon_unit"));
+
+  // new cell region should be 4 surfaces and considered an intersection instead
+  auto post_reg = cell.getRegion();
+  auto post_surfs = post_reg.getSurfaces();
+  ASSERT_EQ(4, post_surfs.size());
+  std::string reg_str_out = infixJSONToString(post_reg.toInfixJSON());
+  std::string reg_str_exp = "(-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
+                            "-polygon_unit_exp_3)";
+  ASSERT_EQ(reg_str_exp, reg_str_out);
+  ASSERT_EQ("INTERSECTION", post_reg.getRegionTypeString());
+}
+
+/// tests that the surface references in a region definition are properly updated when original unit
+/// was used as a positive half-sapce
+TEST(CSGBaseTest, testUseSurfEngUnitAsPos)
+{
+  // make a cell that uses the POSITIVE halfspace of the polygon unit in the region definition
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr =
+      std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+  const auto & cell = csg_obj->createCell("my_cell", "my_mat", +poly);
+
+  // check cell region - should be considered positive halfspace
+  auto pre_reg = cell.getRegion();
+  // original region should be considered a halfspace (one surface)
+  ASSERT_EQ("HALFSPACE", pre_reg.getRegionTypeString());
+  ASSERT_EQ("(+polygon_unit)", infixJSONToString(pre_reg.toInfixJSON()));
+
+  // expand unit and check surface of cell region again
+  csg_obj->expandEngUnit(poly);
+
+  // new region should be a complement of the negative "half-space" representation
+  auto post_reg = cell.getRegion();
+  std::string reg_str_out = infixJSONToString(post_reg.toInfixJSON());
+  std::string reg_str_exp = "(~ (-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
+                            "-polygon_unit_exp_3))";
+  ASSERT_EQ(reg_str_exp, reg_str_out);
+  ASSERT_EQ("COMPLEMENT", post_reg.getRegionTypeString());
+}
+
+/// tests that cell region is updated properly with mix of surface units and regular surfaces
+TEST(CSGBaseTest, testUseSurfEngUnitComplex)
+{
+  // create a cell with a region that uses a mix of surface units and regular surfaces
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr =
+      std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+  // make normal plane at z=2
+  std::unique_ptr<CSGPlane> surf_ptr = std::make_unique<CSGPlane>("plane", 0, 0, 1, 2);
+  const auto & surf = csg_obj->addSurface(std::move(surf_ptr));
+  // make the region use the positive halfspace to check proper accounting of neg/pos halfspace
+  const auto & cell = csg_obj->createCell("my_cell", "my_mat", +poly & -surf);
+
+  // original region should have just 2 surfaces
+  // check cell region has just one surface associated with it
+  auto pre_reg = cell.getRegion();
+  auto pre_surfs = pre_reg.getSurfaces();
+  ASSERT_EQ(2, pre_surfs.size());
+  // original region should be considered an intersection
+  ASSERT_EQ("INTERSECTION", pre_reg.getRegionTypeString());
+  std::string pre_reg_str_out = infixJSONToString(pre_reg.toInfixJSON());
+  std::string pre_reg_str_exp = "(+polygon_unit & -plane)";
+  ASSERT_EQ(pre_reg_str_exp, pre_reg_str_out);
+
+  // when expanded, only the "polygon_unit" in the region should be replaced
+  csg_obj->expandEngUnit(poly);
+
+  // new region should contain a complement of the negative "half-space" representation but
+  // ultimately still be an intersection
+  auto post_reg = cell.getRegion();
+  std::string post_reg_str_out = infixJSONToString(post_reg.toInfixJSON());
+  std::string post_reg_str_exp =
+      "(~ (-polygon_unit_exp_0 & -polygon_unit_exp_1 & -polygon_unit_exp_2 & "
+      "-polygon_unit_exp_3) & -plane)";
+  ASSERT_EQ(post_reg_str_exp, post_reg_str_out);
+  ASSERT_EQ("INTERSECTION", post_reg.getRegionTypeString());
 }
 
 /**
