@@ -708,9 +708,7 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
             addTransformation(surface, type, values);
           }
         }
-        else if constexpr (std::is_same_v<T, CSGSurfaceEngUnit> ||
-                           std::is_same_v<T, CSGCellEngUnit> ||
-                           std::is_same_v<T, CSGUniverseEngUnit>)
+        else if constexpr (std::is_same_v<T, CSGEngUnit>)
         {
           const CSGEngUnit & eng_unit = obj.get();
           if (!checkEngUnitInBase(eng_unit))
@@ -718,9 +716,17 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
                        eng_unit.getName(),
                        " that is not in this CSGBase instance.");
 
-          // T is the specific EngUnit type — addTransformation is accessible via its CSG base
-          T & mutable_eng = static_cast<T &>(_eng_unit_list.getEngUnit(eng_unit.getName()));
-          mutable_eng.addTransformation(type, values);
+          CSGEngUnit & mutable_eng = _eng_unit_list.getEngUnit(eng_unit.getName());
+          if (auto * s = dynamic_cast<CSGSurfaceEngUnit *>(&mutable_eng))
+            s->addTransformation(type, values);
+          else if (auto * c = dynamic_cast<CSGCellEngUnit *>(&mutable_eng))
+            c->addTransformation(type, values);
+          else if (auto * u = dynamic_cast<CSGUniverseEngUnit *>(&mutable_eng))
+            u->addTransformation(type, values);
+          else
+            mooseError("Engineering unit '",
+                       eng_unit.getName(),
+                       "' has an unrecognized type for transformation.");
         }
         else
           mooseError("Transformation not implemented for this object type: ", typeid(T).name());
