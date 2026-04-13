@@ -52,7 +52,8 @@ mooseMsgFmt(const std::string & msg, const std::string & color)
 [[noreturn]] void
 mooseErrorRaw(std::string msg,
               const std::string & prefix /* = "" */,
-              const hit::Node * node /* = nullptr */)
+              const hit::Node * node /* = nullptr */,
+              const bool show_trace /* = true */)
 {
   if (Moose::_throw_on_error)
     throw MooseRuntimeError(msg, node);
@@ -109,7 +110,7 @@ mooseErrorRaw(std::string msg,
     }
 
     // Print the trace if enabled and on a single rank
-    if (Moose::show_trace && libMesh::global_n_processors() == 1)
+    if (show_trace && libMesh::global_n_processors() == 1)
     {
       std::ostringstream oss;
       print_trace(oss);
