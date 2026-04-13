@@ -48,7 +48,6 @@ requirements:
   host:
     - {{ mpi }} {{ mpi_version }}
     - _openmp_mutex # [linux]
-    - libgcc        # [osx]
     - llvm-openmp   # [osx]
     - bzip2
     - cmake
