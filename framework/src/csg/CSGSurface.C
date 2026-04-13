@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGSurface.h"
+#include "CSGEngUnit.h"
 #include "CSGUtils.h"
 
 namespace CSG
@@ -44,6 +45,16 @@ CSGSurface::getHalfspaceFromPoint(const Point & p) const
 bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
+  // If both objects are engineering units, delegate to CSGEngUnit::operator== to avoid
+  // calling getCoeffs(), which is not supported on engineering unit types.
+  if (const auto * this_eng = dynamic_cast<const CSGEngUnit *>(this))
+  {
+    const auto * other_eng = dynamic_cast<const CSGEngUnit *>(&other);
+    if (other_eng)
+      return *this_eng == *other_eng;
+    return false; // an engineering unit cannot equal a plain surface
+  }
+
   return (this->getName() == other.getName()) &&
          (this->getSurfaceType() == other.getSurfaceType()) &&
          (this->getCoeffs() == other.getCoeffs()) &&
