@@ -293,21 +293,6 @@ private:
   bool _finalized = false;
 
   /**
-   * Find node excluding whitespaces
-   * @param ast The root node
-   * @param i The node index to find
-   * @return The node
-   */
-  const peg::Ast & getNode(const peg::Ast & ast, const unsigned int i) const;
-
-  /**
-   * Count the number of nodes excluding whitespaces
-   * @param ast The root node
-   * @return The number of nodes
-   */
-  unsigned int getNumNodes(const peg::Ast & ast) const;
-
-  /**
    * Print a pretty error showing the position of error
    * @param ast The erroneous AST node
    * @param message The error message

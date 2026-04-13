@@ -60,7 +60,7 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & paramet
 
 MooseParsedFunctionBase::~MooseParsedFunctionBase() {}
 
-const std::string
+std::string
 MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 {
   // Throws an error if quotes are found

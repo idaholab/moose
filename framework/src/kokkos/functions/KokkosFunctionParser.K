@@ -16,9 +16,9 @@ PEGParser::PEGParser(const std::string & expression, const ConsoleStream * conso
   : _parser(R"(# Entry
                Start           <- _ Expr _
 
-               # Whitespace helpers
-               WS              <- [ \t\r\n]*
-               _               <- WS
+               # Whitespace helpers (ignored: never appear as AST nodes)
+               ~WS             <- [ \t\r\n]*
+               ~_              <- WS
 
                # Expressions (lowest precedence at the top)
                Expr            <- OrExpr
@@ -62,7 +62,7 @@ PEGParser::PEGParser(const std::string & expression, const ConsoleStream * conso
                                 / '(' _ Expr _ ')'
 
                # Function calls with zero or more arguments
-               FunctionCall    <- Identifier _ '(' _ ArgList? _ ')'
+               FunctionCall    <- Identifier _ '(' _ ArgList? _ ')' { no_ast_opt }
                ArgList         <- Expr (_ ',' _ Expr)*
 
                # Identifiers
@@ -109,56 +109,53 @@ RPNBuilder::build(const peg::Ast & ast)
   }
   else if (ast.name == "UnaryExpr")
   {
-    build(getNode(ast, 1));
-
-    const auto op = getNode(ast, 0).token_to_string();
-
+    // nodes: [UnaryOp, UnaryExpr]
+    build(*ast.nodes[1]);
+    const auto op = ast.nodes[0]->token_to_string();
     _rpn.push_back({libmesh_map_find(_unary_opcode_map, op), op});
   }
   else if (ast.name == "OrExpr" || ast.name == "AndExpr" || ast.name == "AddExpr" ||
            ast.name == "MulExpr")
   {
-    build(getNode(ast, 0));
-    build(getNode(ast, 1));
+    // nodes: [LeftOperand, Tail]
+    build(*ast.nodes[0]);
+    build(*ast.nodes[1]);
   }
   else if (ast.name == "OrTail" || ast.name == "AndTail" || ast.name == "AddTail" ||
            ast.name == "MulTail")
   {
-    build(getNode(ast, 1));
-
-    const auto op = getNode(ast, 0).token_to_string();
-
+    // nodes: [Op, RightOperand, ?NextTail]
+    build(*ast.nodes[1]);
+    const auto op = ast.nodes[0]->token_to_string();
     _rpn.push_back({libmesh_map_find(_binary_opcode_map, op), op});
-
-    if (getNumNodes(ast) == 3)
-      build(getNode(ast, 2));
+    if (ast.nodes.size() == 3)
+      build(*ast.nodes[2]);
   }
   else if (ast.name == "CmpExpr" || ast.name == "PowExpr")
   {
-    build(getNode(ast, 0));
-    build(getNode(ast, 2));
-
-    const auto op = getNode(ast, 1).token_to_string();
-
+    // nodes: [LeftOperand, Op, RightOperand]
+    build(*ast.nodes[0]);
+    build(*ast.nodes[2]);
+    const auto op = ast.nodes[1]->token_to_string();
     _rpn.push_back({libmesh_map_find(_binary_opcode_map, op), op});
   }
   else if (ast.name == "FunctionCall")
   {
-    const auto func = getNode(ast, 0).token_to_string();
+    // nodes: [Identifier, ?ArgList]
+    const auto func = ast.nodes[0]->token_to_string();
 
     auto it = _function_opcode_map.find(func);
     if (it == _function_opcode_map.end())
       builderError(ast, "unsupported function '" + func + "()'.");
 
-    if (getNumNodes(ast) == 1)
+    if (ast.nodes.size() == 1)
       builderError(ast, "argument(s) missing for function '" + func + "()'.");
 
-    const auto & args = getNode(ast, 1);
+    const auto & args = *ast.nodes[1];
 
     unsigned int num_args = 1;
-
     if (args.name == "ArgList")
-      num_args = getNumNodes(args);
+      num_args = args.nodes.size();
 
     if (num_args != it->second.second)
       builderError(ast, func + "() expects " + std::to_string(it->second.second) + " argument(s).");
@@ -230,37 +227,6 @@ RPNBuilder::associateValue(const std::string & name, const Real * value)
                " was not added but attempted to associate a value.");
 
   _variables[name].value = value;
-}
-
-const peg::Ast &
-RPNBuilder::getNode(const peg::Ast & ast, const unsigned int i) const
-{
-  unsigned int n = 0;
-
-  for (const auto & node : ast.nodes)
-  {
-    if (node->name == "WS")
-      continue;
-
-    if (n == i)
-      return *node;
-
-    ++n;
-  }
-
-  return ast;
-}
-
-unsigned int
-RPNBuilder::getNumNodes(const peg::Ast & ast) const
-{
-  unsigned int n = 0;
-
-  for (const auto & node : ast.nodes)
-    if (node->name != "WS")
-      ++n;
-
-  return n;
 }
 
 void
