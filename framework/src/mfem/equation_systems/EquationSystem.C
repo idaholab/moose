@@ -235,7 +235,7 @@ EquationSystem::ApplyEssentialBCs()
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
 
-    // Assign initial condition as initial guess for non-linear problems
+    // Initial guess for non-linear problems (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());

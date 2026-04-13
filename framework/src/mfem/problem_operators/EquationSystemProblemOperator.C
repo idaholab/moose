@@ -35,6 +35,7 @@ EquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+
   GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }
 
