@@ -483,8 +483,8 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
   // NB: the specified ordering is byVDIM.
   // byVDim: XYZ, XYZ, XYZ, XYZ,...
   // byNode: XXX..., YYY..., ZZZ...
-  mfem::FiniteElementSpace * finite_element_space =
-      new mfem::FiniteElementSpace(this, finite_element_collection, spaceDim, mfem::Ordering::byVDIM);
+  mfem::FiniteElementSpace * finite_element_space = new mfem::FiniteElementSpace(
+      this, finite_element_collection, spaceDim, mfem::Ordering::byVDIM);
 
   Nodes = new mfem::GridFunction(finite_element_space);
   Nodes->MakeOwner(finite_element_collection); // Nodes will destroy 'finite_element_collection'

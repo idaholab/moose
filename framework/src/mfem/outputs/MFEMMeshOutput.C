@@ -21,7 +21,12 @@ MFEMMeshOutput::validParams()
   params.addParam<std::string>("submesh",
                                "Submesh to output variables on. Leave blank to use base mesh.");
   MooseEnum ordering("NONE HILBERT GECKO", "NONE", false);
-  params.addParam<MooseEnum>("ordering", ordering, "Whether to reorder the elements of the mesh. Options are NONE to do nothing, HILBERT to perform a spatial sort on the elements so theyappriximately follow the Hilbert curve, and GECKO to use the Gecko library to order elements for increased memory coherence.");
+  params.addParam<MooseEnum>(
+      "ordering",
+      ordering,
+      "Whether to reorder the elements of the mesh. Options are NONE to do nothing, HILBERT to "
+      "perform a spatial sort on the elements so theyappriximately follow the Hilbert curve, and "
+      "GECKO to use the Gecko library to order elements for increased memory coherence.");
   params.addParam<int>("precision", 16, "Number of digits to use with ASCII output.");
   // FIXME: Allow users to specify precision
   return params;
@@ -30,14 +35,18 @@ MFEMMeshOutput::validParams()
 MFEMMeshOutput::MFEMMeshOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _pmesh(parameters.isParamValid("submesh")
-           ? static_cast<MFEMProblem *>(_problem_ptr)->getProblemData().submeshes.GetRef(getParam<std::string>("submesh"))
-           : static_cast<MFEMProblem *>(_problem_ptr)->mfemParMesh()),
+               ? static_cast<MFEMProblem *>(_problem_ptr)
+                     ->getProblemData()
+                     .submeshes.GetRef(getParam<std::string>("submesh"))
+               : static_cast<MFEMProblem *>(_problem_ptr)->mfemParMesh()),
     _ordering(getParam<MooseEnum>("ordering")),
     _precision(getParam<int>("precision"))
 {
 }
 
-std::string MFEMMeshOutput::filename() {
+std::string
+MFEMMeshOutput::filename()
+{
   std::ostringstream output;
   output << _file_base << ".mesh";
 
@@ -56,19 +65,23 @@ MFEMMeshOutput::output()
   constexpr int save_rank = 0;
   mfem::Mesh serial_mesh = _pmesh.GetSerialMesh(save_rank);
 
-  if (_ordering > 0) {
+  if (_ordering > 0)
+  {
     mfem::Array<int> new_order;
-    if (_ordering == 1) {
+    if (_ordering == 1)
+    {
       serial_mesh.GetHilbertElementOrdering(new_order);
     }
-    else {
+    else
+    {
       // FIXME: Add support for various Gecko element ordering configs
       serial_mesh.GetGeckoElementOrdering(new_order);
     }
     serial_mesh.ReorderElements(new_order);
   }
 
-  if (processor_id() == save_rank) {
+  if (processor_id() == save_rank)
+  {
     serial_mesh.Save(filename().c_str(), _precision);
   }
 }
