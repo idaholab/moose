@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MultiAppTransfer.h"
-#include "libmesh/equation_systems.h"
 
 /**
  * Virtual base class for MultiApp transfers to and/or from MFEMProblems.
@@ -49,7 +48,7 @@ protected:
   /// Getter for current problem containing destination variables
   virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
   /// Get libMesh EquationSystem, which may or may not be displaced
-  EquationSystems & getlibMeshEquationSystem(FEProblemBase & problem, bool use_displaced) const;
+  libMesh::EquationSystems & getlibMeshEquationSystem(FEProblemBase & problem, bool use_displaced) const;
 
   /// Set default value for transfers evaluated at points outside source mesh
   void setMFEMOutOfMeshValue(mfem::real_t mfem_out_of_mesh_value)
@@ -106,9 +105,9 @@ private:
   std::vector<VariableName> _from_var_names;
   /// Vector of destination variable names to transfer to
   std::vector<VariableName> _to_var_names;
-  /// Pointer to active source problem variable is being transferred from
-  FEProblemBase * _active_to_problem{nullptr};
   /// Pointer to active destination problem variable is being transferred to
+  FEProblemBase * _active_to_problem{nullptr};
+  /// Pointer to active source problem variable is being transferred from  
   FEProblemBase * _active_from_problem{nullptr};
   /// Default value to return for transfers from points outside the source mesh
   mfem::real_t _mfem_out_of_mesh_value{std::numeric_limits<mfem::real_t>::infinity()};
