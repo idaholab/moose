@@ -125,10 +125,7 @@ public:
    * @param surface CSGSurface to rename
    * @param name new name
    */
-  void renameSurface(const CSGSurface & surface, const std::string & name)
-  {
-    _surface_list.renameSurface(surface, name);
-  }
+  void renameSurface(const CSGSurface & surface, const std::string & name);
 
   /**
    * @brief Create a Material Cell object
@@ -228,10 +225,7 @@ public:
    * @param cell reference to CSGCell to rename
    * @param name new name
    */
-  void renameCell(const CSGCell & cell, const std::string & name)
-  {
-    _cell_list.renameCell(cell, name);
-  }
+  void renameCell(const CSGCell & cell, const std::string & name);
 
   /**
    * @brief change the region of the specified cell
@@ -295,10 +289,7 @@ public:
    * @param universe reference to CSGUniverse to rename
    * @param name new name
    */
-  void renameUniverse(const CSGUniverse & universe, const std::string & name)
-  {
-    _universe_list.renameUniverse(universe, name);
-  }
+  void renameUniverse(const CSGUniverse & universe, const std::string & name);
 
   /**
    * @brief Create an empty Universe object
