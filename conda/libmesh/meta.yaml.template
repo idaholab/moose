@@ -48,11 +48,9 @@ requirements:
     - zlib
 
 test:
-  requires:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
-    - make
+  commands:
+    - test "$LIBMESH_DIR" == ${PREFIX}/moose-libmesh
+    - ${LIBMESH_DIR}/bin/output_libmesh_version-opt
 
 about:
   home: http://libmesh.github.io/
