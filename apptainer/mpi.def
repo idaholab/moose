@@ -10,7 +10,7 @@
 
 Bootstrap: docker
 {%- if ALTERNATE_FROM == "clang" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.0_2026.04.12
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.1_2026.04.13
 {%- elif ALTERNATE_FROM == "clang_min" %}
 From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.1_2026.04.12
 {%- elif ALTERNATE_FROM == "cuda" %}
