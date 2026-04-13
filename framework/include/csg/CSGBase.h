@@ -43,9 +43,7 @@ typedef std::variant<std::reference_wrapper<const CSGSurface>,
                      std::reference_wrapper<const CSGUniverse>,
                      std::reference_wrapper<const CSGRegion>,
                      std::reference_wrapper<const CSGLattice>,
-                     std::reference_wrapper<const CSGSurfaceEngUnit>,
-                     std::reference_wrapper<const CSGCellEngUnit>,
-                     std::reference_wrapper<const CSGUniverseEngUnit>>
+                     std::reference_wrapper<const CSGEngUnit>>
     CSGObjectVariant;
 
 /**
@@ -753,6 +751,21 @@ public:
                          const std::tuple<Real, Real, Real> & values);
 
   /**
+   * @brief Apply a transformation to a CSGEngUnit object
+   *
+   * @param unit The CSGEngUnit object to transform (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
+   * CSGUniverseEngUnit, or any derived type)
+   * @param type The type of transformation to apply (TRANSLATION, ROTATION, SCALE)
+   * @param values tuple of transformation values (3 values for any transformation type)
+   */
+  void addTransformation(const CSGEngUnit & unit,
+                         TransformationType type,
+                         const std::tuple<Real, Real, Real> & values)
+  {
+    addTransformation(CSGObjectVariant{std::cref(unit)}, type, values);
+  }
+
+  /**
    * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
    *
    * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
@@ -762,6 +775,19 @@ public:
                         const std::tuple<Real, Real, Real> & distances)
   {
     addTransformation(csg_object, TransformationType::TRANSLATION, distances);
+  }
+
+  /**
+   * @brief Apply a translation to a CSGEngUnit object in the specified x, y, and z directions.
+   *
+   * @param unit The CSGEngUnit object to translate (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
+   * CSGUniverseEngUnit, or any derived type)
+   * @param distances size 3 tuple with
+   * translation distances in x, y, and z directions {x, y, z}
+   */
+  void applyTranslation(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & distances)
+  {
+    addTransformation(unit, TransformationType::TRANSLATION, distances);
   }
 
   /**
@@ -777,6 +803,18 @@ public:
   }
 
   /**
+   * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
+   *
+   * @param unit The CSGEngUnit object to rotate (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
+   * CSGUniverseEngUnit, or any derived type)
+   * @param angles size 3 tuple {phi, theta, psi} with rotation angles in degrees
+   */
+  void applyRotation(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & angles)
+  {
+    addTransformation(unit, TransformationType::ROTATION, angles);
+  }
+
+  /**
    * @brief Apply a rotation to a CSG object about a specified axis (X, Y, Z).
    *
    * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
@@ -785,6 +823,19 @@ public:
    */
   void
   applyAxisRotation(const CSGObjectVariant & csg_object, RotationAxisType axis, const Real angle);
+
+  /**
+   * @brief Apply a rotation to a CSGEngUnit object about a specified axis (X, Y, Z).
+   *
+   * @param unit The CSGEngUnit object to rotate (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
+   * CSGUniverseEngUnit, or any derived type)
+   * @param axis Axis type (X, Y, or Z) about which to rotate
+   * @param angle angle in degrees to rotate about the specified axis
+   */
+  void applyAxisRotation(const CSGEngUnit & unit, RotationAxisType axis, const Real angle)
+  {
+    applyAxisRotation(CSGObjectVariant{std::cref(unit)}, axis, angle);
+  }
 
   /**
    * @brief Scale a CSG object in the specified x, y, and z directions.
@@ -796,6 +847,18 @@ public:
                     const std::tuple<Real, Real, Real> & values)
   {
     addTransformation(csg_object, TransformationType::SCALE, values);
+  }
+
+  /**
+   * @brief Scale a CSGEngUnit object in the specified x, y, and z directions.
+   *
+   * @param unit The CSGEngUnit object to scale (CSGEngUnit, CSGSurfaceEngUnit, CSGCellEngUnit,
+   * CSGUniverseEngUnit, or any derived type)
+   * @param values size 3 tuple with scaling values in x, y, and z directions {x, y, z}
+   */
+  void applyScaling(const CSGEngUnit & unit, const std::tuple<Real, Real, Real> & values)
+  {
+    addTransformation(unit, TransformationType::SCALE, values);
   }
 
 private:
