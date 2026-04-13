@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGCell.h"
+#include "CSGEngUnit.h"
 #include "CSGUniverse.h"
 #include "CSGLattice.h"
 #include "CSGUtils.h"
@@ -124,6 +125,15 @@ CSGCell::updateCellRegionSurfaces(
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {
+  // If both objects are engineering units, delegate to CSGEngUnit::operator==
+  if (const auto * this_eng = dynamic_cast<const CSGEngUnit *>(this))
+  {
+    const auto * other_eng = dynamic_cast<const CSGEngUnit *>(&other);
+    if (other_eng)
+      return *this_eng == *other_eng;
+    return false; // an engineering unit cannot equal a plain cell
+  }
+
   const auto name_eq = this->getName() == other.getName();
   const auto region_eq = this->getRegion() == other.getRegion();
   const auto fill_type_eq =
