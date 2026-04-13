@@ -5,7 +5,7 @@
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
-{% set version = "2026.04.07_3ca87a2" %}
+{% set version = "2026.04.13_3ca87a2" %}
 
 package:
   name: moose-libmesh
@@ -39,7 +39,7 @@ requirements:
     - pkg-config
   host:
     - {{ mpi }} {{ mpi_version }}
-    - moose-petsc 3.24.5 {{ mpi }}_1
+    - moose-petsc 3.24.6 {{ mpi }}_0
     - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
     - _openmp_mutex
     - hdf5 {{ hdf5 }}
