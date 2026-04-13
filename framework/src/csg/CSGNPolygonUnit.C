@@ -19,9 +19,9 @@ CSGNPolygonUnit::CSGNPolygonUnit(const std::string & name, int n_sides, Real apo
     _apothem(apothem)
 {
   if (_n_sides < 3)
-    mooseError("N-sided polygon engineering unit must have 3 or more sides.");
+    mooseError("N-sided polygon engineering unit " + name + " must have 3 or more sides.");
   if (_apothem <= 0.0)
-    mooseError("N-sided polygon engineering unit apothem must be positive.");
+    mooseError("N-sided polygon engineering unit " + name + " apothem must be positive.");
 }
 
 Real
