@@ -236,6 +236,17 @@ TEST(CSGEngUnitTest, testPolygonUnitClone)
   ASSERT_TRUE(static_cast<const CSGEngUnit &>(sq) == clone_eng);
 }
 
+/// error checks during construction
+TEST(CSGEngUnitTest, testPolygonUnitErrors)
+{
+  // expect error if try to make polygon with less than 3 sides
+  Moose::UnitUtils::assertThrows([]() { CSGNPolygonUnit p("name", 1, 1.0); },
+                                 "must have 3 or more sides.");
+  // expect error if apothem is less than 0.0
+  Moose::UnitUtils::assertThrows([]() { CSGNPolygonUnit p("name", 3, -1.0); },
+                                 "apothem must be positive.");
+}
+
 /// test equality operators
 TEST(CSGEngUnitTest, testEngUnitEqual)
 {
