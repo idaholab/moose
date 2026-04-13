@@ -99,6 +99,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithNullTransform);
+  FRIEND_TEST(CSGEngUnitTest, testEngUnitEqual);
   ///@}
 #endif
 };

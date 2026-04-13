@@ -236,4 +236,36 @@ TEST(CSGEngUnitTest, testPolygonUnitClone)
   ASSERT_TRUE(static_cast<const CSGEngUnit &>(sq) == clone_eng);
 }
 
+/// test equality operators
+TEST(CSGEngUnitTest, testEngUnitEqual)
+{
+  // use polygon unit to check equality
+  CSGNPolygonUnit u1("thelma", 4.0, 1.0);
+  CSGNPolygonUnit u2("thelma", 4.0, 1.0); // identical
+
+  // check == operator
+  ASSERT_TRUE(u1 == u2);
+
+  // make units that differ from u1 by different features
+  // update u2 so it differs from u1 by transformation
+  u2.addTransformation(TransformationType::TRANSLATION, std::make_tuple(1.0, -2.0, 3.0));
+  FakeSurfEngUnit u3("thelma");           // differs from u1 by unit type (same name and behavior)
+  FakeCellEngUnit u4("thelma");           // differs from u1 by behavior
+  CSGNPolygonUnit u5("louise", 4.0, 1.0); // differs from u1 by name
+  CSGNPolygonUnit u6("thelma", 3.0, 4.0); // differs from u1 by attributes
+
+  // u5 and u6 should differ from u1 without having to cast
+  ASSERT_TRUE(u1 != u5);
+  ASSERT_TRUE(u1 != u6);
+
+  // cast all to basic CSGEngUnit type to be able to compare across types (compilation error if
+  // object types are different)
+  const CSGEngUnit & eng_u1 = u1;
+  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u2));
+  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u3));
+  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u4));
+  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u5));
+  ASSERT_TRUE(eng_u1 != static_cast<const CSGEngUnit &>(u6));
+}
+
 } // namespace CSG
