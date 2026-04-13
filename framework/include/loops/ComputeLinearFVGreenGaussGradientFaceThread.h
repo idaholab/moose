@@ -16,9 +16,10 @@
 // libmesh
 #include "libmesh/elem_range.h"
 #include "libmesh/threads.h"
-#include "libmesh/linear_implicit_system.h"
+#include "libmesh/system.h"
 
 class FEProblemBase;
+class SystemBase;
 
 /**
  * The gradient in a volume using Green Gauss theorem and a cell-centered finite-volume
@@ -37,11 +38,13 @@ public:
   /**
    * Class constructor.
    * @param fe_problem Reference to the problem
-   * @param linear_system_num The number of the linear system which contains variables that need
-   * gradients.
+   * @param system The system which contains variables that need gradients.
+   * @param temporary_gradient Scratch storage for gradients being assembled.
    */
-  ComputeLinearFVGreenGaussGradientFaceThread(FEProblemBase & fe_problem,
-                                              const unsigned int linear_system_num);
+  ComputeLinearFVGreenGaussGradientFaceThread(
+      FEProblemBase & fe_problem,
+      SystemBase & system,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & temporary_gradient);
 
   /**
    * Splitting constructor.
@@ -67,11 +70,11 @@ protected:
   /// The dimension of the domain
   const unsigned int _dim;
 
-  /// The number of the linear system on which this thread is acting.
-  const unsigned int _linear_system_number;
+  /// The system wrapper this thread operates on.
+  SystemBase & _system;
 
-  /// Reference to the linear system at libmesh level
-  const libMesh::LinearImplicitSystem & _linear_system;
+  /// Reference to the libMesh system backing the wrapper system.
+  const libMesh::System & _libmesh_system;
 
   /// Global system number (the number of this system in the libmesh equation system)
   const unsigned int _system_number;
@@ -82,7 +85,7 @@ protected:
   /// Pointer to the current variable
   MooseLinearVariableFV<Real> * _current_var;
 
-  /// Cache for the new gradient which is being built. It is needed because in certain scenarios the
-  /// old gradient is used for computing the new gradient.
-  std::vector<std::unique_ptr<NumericVector<Number>>> & _new_gradient;
+  /// Cache for the temporary gradient being built. It is needed because in certain scenarios the
+  /// old gradient is used while assembling the replacement gradient.
+  std::vector<std::unique_ptr<NumericVector<Number>>> & _temporary_gradient;
 };

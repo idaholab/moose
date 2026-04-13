@@ -150,8 +150,7 @@ Reactor\\
 !---
 
 !style halign=center
-!media tutorials/darcy_thermo_mech/multiapp_hierarchy.png style=width:70% alt=Example of multi-level MultiApp hierarchy.
-
+!media multiapp_tree.png style=width:70% alt=Multiapp tree
 
 !---
 

@@ -392,7 +392,7 @@ RhieChowMassFlux::computeFaceMassFlux()
 void
 RhieChowMassFlux::computeCellVelocity()
 {
-  auto & pressure_gradient = _pressure_system->gradientContainer();
+  auto & pressure_gradient = _pressure_system->linearFVGradientContainer();
 
   // We set the dof value in the solution vector the same logic applies:
   // u_C = -(H/A)_C - (1/A)_C*grad(p)_C where C is the cell index
@@ -725,7 +725,7 @@ RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
   if (updated_pressure)
   {
     _grad_p_current.clear();
-    for (const auto & component : _pressure_system->gradientContainer())
+    for (const auto & component : _pressure_system->linearFVGradientContainer())
       _grad_p_current.push_back(component->clone());
   }
 

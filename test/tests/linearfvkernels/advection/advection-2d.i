@@ -20,12 +20,33 @@
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+  [average]
+    type = FVGeometricAverage
+  []
+  [muscl_venkat]
+    type = FVAdvectedVenkatakrishnanDeferredCorrection
+    deferred_correction_factor = 1.0
+  []
+  [nvd_vanleer]
+    type = FVAdvectedVanLeerWeightBased
+    blending_factor = 1.0
+  []
+  [nvd_minmod]
+    type = FVAdvectedMinmodWeightBased
+    blending_factor = 1.0
+  []
+[]
+
 [LinearFVKernels]
   [advection]
     type = LinearFVAdvection
     variable = u
     velocity = "0.5 0 0"
-    advected_interp_method = upwind
+    advected_interp_method_name = upwind
   []
   [source]
     type = LinearFVSource
@@ -87,8 +108,8 @@
   l_tol = 1e-10
   multi_system_fixed_point=true
   multi_system_fixed_point_convergence=linear
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-10'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -pc_factor_mat_solver_type -mat_mumps_icntl_14'
+  petsc_options_value = 'lu       NONZERO               1e-12                     mumps                    50'
 []
 
 [Outputs]

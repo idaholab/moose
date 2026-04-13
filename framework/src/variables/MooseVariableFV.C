@@ -617,7 +617,12 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
                                                   const StateArg & state,
                                                   const bool correct_skewness) const
 {
-  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+  const auto face_type = fi.faceType(std::make_pair(this->number(), this->sys().number()));
+  mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,
+              "Gradient requested on a face where the variable is defined on neither side.");
+
+  const bool var_defined_on_elem = (face_type == FaceInfo::VarFaceNeighbors::BOTH) ||
+                                   (face_type == FaceInfo::VarFaceNeighbors::ELEM);
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
@@ -626,8 +631,9 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // apply a zero Hessian assumption and use the element centroid gradient as the uncorrected face
   // gradient
-  if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
+  if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
   {
+    mooseAssert(elem_two, "Face type indicates BOTH but neighbor information is missing.");
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, state, correct_skewness);
 
     // Uncorrected gradient value

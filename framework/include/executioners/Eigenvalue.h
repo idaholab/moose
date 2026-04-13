@@ -12,12 +12,10 @@
 #include "libmesh/libmesh_config.h"
 
 #include "Executioner.h"
+#include "EigenProblemSolve.h"
 
 class InputParameters;
 class EigenProblem;
-
-template <typename T>
-InputParameters validParams();
 
 /**
  * Eigenvalue executioner is used to drive the eigenvalue calculations. At the end,
@@ -30,14 +28,13 @@ InputParameters validParams();
 class Eigenvalue : public Executioner
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Constructor
    *
    * @param parameters The parameters object holding data for the class to use.
-   * @return Whether or not the solve was successful.
    */
-  static InputParameters validParams();
-
   Eigenvalue(const InputParameters & parameters);
 
   virtual void execute() override;
@@ -55,23 +52,14 @@ public:
   /**
    * Get the number of grid sequencing steps
    */
-  unsigned int numGridSteps() const { return _feproblem_solve.numGridSteps(); }
-
-private:
-  /**
-   * Prepare right petsc options
-   */
-  void prepareSolverOptions();
+  unsigned int numGridSteps() const { return _eigen_problem_solve.numGridSteps(); }
 #endif
 
 protected:
   EigenProblem & _eigen_problem;
 
   /// inner-most solve object to perform Newton solve with SLEPc
-  FEProblemSolve _feproblem_solve;
-
-  /// Postprocessor value that scales solution when eigensolve is finished
-  const PostprocessorValue * const _normalization;
+  EigenProblemSolve _eigen_problem_solve;
 
   Real _system_time;
   int & _time_step;

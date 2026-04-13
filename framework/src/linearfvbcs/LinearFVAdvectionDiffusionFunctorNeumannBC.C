@@ -37,6 +37,7 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::LinearFVAdvectionDiffusionFunctorNeu
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
 {
+  const auto state = determineState();
   const auto face_arg = makeCDFace(*_current_face_info);
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
@@ -47,18 +48,19 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
   // correction_vector is a vector orthogonal to the boundary normal
   const auto correction_vector =
       (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
-  return _var.getElemValue(*elem_info, determineState()) +
-         _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-             _diffusion_coeff(face_arg, determineState()) * distance +
-         _var.gradSln(*elem_info) * correction_vector;
+  return _var.getElemValue(*elem_info, state) +
+         _functor(singleSidedFaceArg(_current_face_info), state) /
+             _diffusion_coeff(face_arg, state) * distance +
+         _var.gradSln(*elem_info, state) * correction_vector;
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryNormalGradient() const
 {
+  const auto state = determineState();
   const auto face_arg = makeCDFace(*_current_face_info);
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-         _diffusion_coeff(face_arg, determineState());
+  return _functor(singleSidedFaceArg(_current_face_info), state) /
+         _diffusion_coeff(face_arg, state);
 }
 
 Real
@@ -70,6 +72,7 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueMatrixContributi
 Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution() const
 {
+  const auto state = determineState();
   const auto face_arg = makeCDFace(*_current_face_info);
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                              ? _current_face_info->elemInfo()
@@ -82,9 +85,9 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution(
   // correction_vector is a vector orthogonal to the boundary normal
   const auto correction_vector =
       (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-             _diffusion_coeff(face_arg, determineState()) * distance +
-         _var.gradSln(*elem_info) * correction_vector;
+  return _functor(singleSidedFaceArg(_current_face_info), state) /
+             _diffusion_coeff(face_arg, state) * distance +
+         _var.gradSln(*elem_info, state) * correction_vector;
 }
 
 Real

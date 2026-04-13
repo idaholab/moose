@@ -9,6 +9,7 @@
 
 import enum
 import os
+import copy
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from logging import getLogger
@@ -259,6 +260,23 @@ class StochasticControl(MooseControl):
         else:
             self.set_continue()
 
+    def getVectorOutput(self) -> list:
+        """
+        Waits for simulation completion and retrieves QoI reporter vector
+
+
+        Returns:
+            A list of lists with shape (num_samples, num_qois, len(qois))
+        :rtype: list
+        """
+        self.wait("TIMESTEP_END")
+
+        y = []
+        for qoi in self._qois:
+            rep = f"{self.qoi_storage_name}/" + qoi.replace("/", ":")
+            y.append(self.get_reporter(rep))
+        return y
+
     def getOutput(self) -> np.ndarray:
         """
         Waits for simulation completion and retrieves QoI reporter values.
@@ -269,10 +287,35 @@ class StochasticControl(MooseControl):
         self.wait("TIMESTEP_END")
 
         y = []
+        all_floats = True  # Determine if we are only gathering scalar quantities
+        # Will determine this from the size of the first reporter gathered
+        num_samples = None
         for qoi in self._qois:
             rep = f"{self.qoi_storage_name}/" + qoi.replace("/", ":")
-            y.append(self.get_reporter(rep))
-        return np.array(y).T
+            rep_val = self.get_reporter(rep)
+
+            # See if value is list of floats
+            assert isinstance(rep_val, list)
+            all_floats = all_floats and all(isinstance(v, float) for v in rep_val)
+
+            # Check reporter size
+            if num_samples is None:
+                num_samples = len(rep_val)
+            else:
+                assert num_samples == len(rep_val)
+
+            y.append(rep_val)
+
+        # If all reporters are scalar values, then we can return a standard 2-D numpy array
+        if all_floats:
+            return np.array(y).T
+        # Otherwise, we will return a 2-D numpy array of objects
+        else:
+            arr = np.empty((num_samples, len(y)), dtype=object)
+            for n in range(num_samples):
+                for q in range(len(y)):
+                    arr[n, q] = copy.deepcopy(y[q][n])
+            return arr
 
     def _buildStochasticInput(self) -> pyhit.Node:
         """
@@ -492,7 +535,10 @@ class _ResultCache:
                 Must be > 0.
         """
         assert maxsize > 0
-        assert tol > 0.0
+        if type(tol) is list:
+            assert all([x > 0 for x in tol])
+        else:
+            assert tol > 0.0
         self.maxsize = maxsize
         self.tol = tol
         self._cache: OrderedDict[tuple[int, ...], tuple[np.ndarray, np.ndarray]] = (
@@ -571,8 +617,7 @@ class _ResultCache:
             store outputs corresponding to `x`.
         """
         k = self._key(x)
-        self._cache[k] = (x.copy(), y.copy())
-        self._cache.move_to_end(k)
+        self._cache[k] = (x.copy(), copy.deepcopy(y))
         if len(self._cache) > self.maxsize:
             self._cache.popitem(False)
 
@@ -675,7 +720,9 @@ class StochasticRunner:
             - Sets `_result_cache` to a new `_ResultCache` instance when both
             `maxsize > 0` and `tol > 0.0`; otherwise sets `_result_cache = None`.
         """
-        if maxsize > 0 and tol > 0.0:
+        if maxsize > 0 and type(tol) is list and all([x > 0 for x in tol]):
+            self._result_cache = _ResultCache(maxsize, tol)
+        elif maxsize > 0 and tol > 0.0:
             self._result_cache = _ResultCache(maxsize, tol)
         else:
             self._result_cache = None
@@ -717,11 +764,16 @@ class StochasticRunner:
             y_cache = self._result_cache.get(x[i, :])
             if not y_cache is None:
                 need_run_rows[i] = False
+                if isinstance(y_cache.dtype, np.object_):
+                    y = y.astype(np.object_)
                 y[i, :] = y_cache
 
         # Run if any rows are not cached
         if any(need_run_rows):
-            y[need_run_rows, :] = self._run_control(x[need_run_rows, :])
+            src = self._run_control(x[need_run_rows, :])
+            if src.dtype != y.dtype:
+                y = y.astype(src.dtype, copy=False)
+            y[need_run_rows, :] = src
             # Store
             for i, store in enumerate(need_run_rows):
                 if store:
@@ -776,7 +828,9 @@ class StochasticRunner:
         """Return either float, vector, or matrix based on size of 2-D array."""
         if np.size(y) == 1:  # A single QoI and row
             return y[0, 0]
-        elif 1 in y.shape:  # A single QoI or row
+        elif y.shape[0] == 1 and y.shape.count(1) < len(y.shape) - 1:
+            return y[0, :]
+        elif y.shape.count(1) >= len(y.shape) - 1:  # A single QoI or row
             return y.reshape(-1)
         else:
             return y

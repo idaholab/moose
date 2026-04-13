@@ -31,4 +31,5 @@ SolveObject::SolveObject(Executioner & ex)
     _aux(_problem.getAuxiliarySystem()),
     _inner_solve(nullptr)
 {
+  ex.registerSolveObject(*this);
 }

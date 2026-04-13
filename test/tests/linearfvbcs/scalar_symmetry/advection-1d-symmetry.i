@@ -22,6 +22,12 @@ vel = 0.1
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [Functions]
   [u_exact]
     type = ParsedFunction
@@ -38,7 +44,7 @@ vel = 0.1
     type = LinearFVAdvection
     variable = u
     velocity = "${vel} 0 0"
-    advected_interp_method = average
+    advected_interp_method_name = average
   []
   [source]
     type = LinearFVSource
