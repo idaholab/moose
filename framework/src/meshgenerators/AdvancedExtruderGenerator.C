@@ -10,6 +10,7 @@
 #include "AdvancedExtruderGenerator.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
+#include "MathUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/function_base.h"
@@ -132,13 +133,16 @@ AdvancedExtruderGenerator::validParams()
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
-  params.addParam<Real>(
-      "r_final", "Final radius to extrude to. Defaults to constant radius if not specified.");
+  params.addParam<Real>("end_radial_extent",
+                        0,
+                        "If modifying the radial extent of the extruded geometry, final radial "
+                        "extent to reach at the end of the extrusion process");
+  MooseEnum radial_growth_methods("linear cubic", "linear");
   params.addParam<MooseEnum>("radial_growth_method",
                              radial_growth_methods,
                              "Functional form to change radius while extruding along curve.");
-  params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
-  params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
+  params.addParam<Real>("start_radial_growth_rate", 1., "Starting rate of radial expansion.");
+  params.addParam<Real>("end_radial_growth_rate", 1., "Ending rate of radial expansion.");
 
   params.addParamNamesToGroup(
       "top_boundary bottom_boundary upward_boundary_source_blocks upward_boundary_ids "
@@ -148,7 +152,7 @@ AdvancedExtruderGenerator::validParams()
       "subdomain_swaps boundary_swaps elem_integer_names_to_swap elem_integers_swaps", "ID Swap");
   params.addParamNamesToGroup("extrusion_curve start_extrusion_direction end_extrusion_direction",
                               "Extrusion along curve");
-  params.addParamNamesToGroup("twist_pitch r_final radial_growth_method "
+  params.addParamNamesToGroup("twist_pitch end_radial_extent radial_growth_method "
                               "start_radial_growth_rate end_radial_growth_rate",
                               "Radial transformation");
 
@@ -170,10 +174,10 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
     _extrusion_curve(getMesh("extrusion_curve", true)),
     _start_extrusion_direction(isParamValid("start_extrusion_direction")
-                                   ? getParam<Point>("start_extrusion_direction")
+                                   ? getParam<Point>("start_extrusion_direction").unit()
                                    : Point(0, 0, 0)),
     _end_extrusion_direction(isParamValid("end_extrusion_direction")
-                                 ? getParam<Point>("end_extrusion_direction")
+                                 ? getParam<Point>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
     _has_top_boundary(isParamValid("top_boundary")),
@@ -201,7 +205,11 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
             ? getParam<std::vector<std::vector<boundary_id_type>>>("downward_boundary_ids")
             : std::vector<std::vector<boundary_id_type>>(_heights.size(),
                                                          std::vector<boundary_id_type>())),
-    _twist_pitch(getParam<Real>("twist_pitch"))
+    _twist_pitch(getParam<Real>("twist_pitch")),
+    _end_radial_extent(getParam<Real>("end_radial_extent")),
+    _radial_expansion_method(getParam<MooseEnum>("radial_growth_method")),
+    _start_radial_growth_rate(getParam<Real>("start_radial_growth_rate")),
+    _end_radial_growth_rate(getParam<Real>("end_radial_growth_rate"))
 {
   if (_extrude_along_curve)
   {
@@ -533,43 +541,41 @@ AdvancedExtruderGenerator::generate()
   // Container to catch the boundary IDs handed back by the BoundaryInfo object
   std::vector<boundary_id_type> ids_to_copy;
 
-  Point old_distance;
-  Point current_distance;
-
-  // the following code looks to systematically find the starting radius by finding the largest
-  // distance from the starting point on the curve (this is assumed to be at the center).
-  libMesh::Node * reference_point = nullptr;
+  // We need to compute the distance to the axis
+  Real start_radial_extent = 0;
+  Point reference_point;
   if (_extrude_along_curve)
-    reference_point = extrusion_curve->node_ptr(0);
-  libMesh::Real start_radius = 0;
-  if (isParamValid("r_final"))
-  {
+    reference_point = *(extrusion_curve->node_ptr(0));
+  else if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+    // Backwards compatibility: we were twisting along an axis going through the origin
+    reference_point = Point(0, 0, 0);
+  else
+    reference_point = MooseMeshUtils::meshCentroidCalculator(*input);
 
-    libMesh::Real test_radius;
-    unsigned int counter = 0;
-    for (const auto & node : input->node_ptr_range())
-    {
-      test_radius = (*node - *reference_point).norm(); // this might throw a type error
-      if (counter == 0)
-        start_radius = test_radius;
-      else
-      {
-        if (test_radius > start_radius)
-          start_radius = test_radius;
-      }
-    }
+  if (_end_radial_extent)
+  {
+    // the center is at the curve if we are extruding along a curve, and the centroid of the mesh
+    // otherwise
+    RealVectorValue reference_direction;
+    if (_extrude_along_curve)
+      reference_direction = _start_extrusion_direction;
+    else
+      reference_direction = _direction;
+
+    // now we measure the initial radial extent
+    start_radial_extent =
+        MooseMeshUtils::computeMaxDistanceToAxis(*input, reference_point, reference_direction);
   }
 
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
     unsigned int current_node_layer = 0;
-
-    old_distance.zero();
-
-    Real start_node_radius = 0;
-    if (_extrude_along_curve)
-      start_node_radius = (*node - *reference_point).norm(); // find distance from node to spline
+    Point old_step;
+    Point current_step;
+    Real cumulative_step_size = 0.;
+    // Initial distance from the node to the extrusion axis
+    Real start_node_radius = (*node - reference_point).norm();
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
@@ -587,16 +593,16 @@ AdvancedExtruderGenerator::generate()
         bias = _biases[e];
       }
 
-      Real t; // parameter for radial expansion
       unsigned int total_extrap_heights =
           order * num_layers +
           (e == 0 ? 1 : 0); // total number of extrapolations steps to take per node
+
       // k is the element layer ordering within each elevation layer
       for (const auto k : make_range(total_extrap_heights))
       {
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
-          current_distance.zero();
+          current_step.zero();
         else
         {
           // Shift the previous position by a certain fraction of 'height' along the extrusion
@@ -607,93 +613,27 @@ AdvancedExtruderGenerator::generate()
           Real step_size = 0;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_next; // next point along curve (conditionally set)
-            libMesh::Node * P_current =
+            const Node * P_current =
                 extrusion_curve->node_ptr(k); // current point in extrusion curve
-            libMesh::Node * P_prev =
+            const Node * P_prev =
                 extrusion_curve->node_ptr(k - 1); // previous point in extrusion curve
-            libMesh::RealVectorValue P_start =
-                old_distance + *node; // previous node to extrude from
 
-            // define a couple of vectors for convenience
-            RealVectorValue a_vec = *P_current - *P_prev;
-            RealVectorValue b_vec = P_start - *P_prev;
+            // // Select the extrusion direction based on the curve or the user parameters
+            // if (k == 1)
+            // {
+            //   const auto P_next = extrusion_curve->node_ptr(k + 1);
+            //   intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+            // }
+            // else if (k < order * num_layers - 1)
+            // {
+            //   const auto P_next = extrusion_curve->node_ptr(k + 1);
+            //   intersecting_plane_normal_vec =
+            //       *P_next - *P_prev; // this approximates the derivative at the spline point
+            // }
+            // else
+            //   intersecting_plane_normal_vec = _end_extrusion_direction;
 
-            Real prev_node_distance_to_spline = b_vec.norm();
-
-            RealVectorValue
-                intersecting_plane_normal_vec; // normal vector describing plane to extrude to
-
-            // handle definition of intersecting plane.
-            if (k > 0 && k < order * num_layers - 1)
-            {
-              P_next = extrusion_curve->node_ptr(k + 1);
-              intersecting_plane_normal_vec =
-                  *P_next - *P_prev; // this approximates the derivative at the spline point
-            }
-            else if (k == 1)
-            {
-              P_next = extrusion_curve->node_ptr(k + 1);
-              intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
-            }
-            else
-            {
-              intersecting_plane_normal_vec = _end_extrusion_direction;
-            }
-            intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
-
-            if (prev_node_distance_to_spline > libMesh::TOLERANCE) // check to see if on the spline
-            {
-              t = (double)k /
-                  (double)(total_extrap_heights - 1); // parameter for expansion function
-
-              RealVectorValue current_plane_normal_vec =
-                  a_vec.cross(b_vec); // normal vector that defines the first plane
-              current_plane_normal_vec /= current_plane_normal_vec.norm(); // normalize
-
-              RealVectorValue dir_along_line = current_plane_normal_vec.cross(
-                  intersecting_plane_normal_vec);      // calculate the line of intersection's slope
-              dir_along_line /= dir_along_line.norm(); // normalize
-
-              Real node_radius; // allocate some memory
-
-              // Handle if we are expanding the radius as we extrude.
-              if (isParamValid("r_final"))
-              {
-                Real radius_scaling =
-                    start_node_radius /
-                    start_radius; // fraction of the total starting radius the node lives in
-                Real radial_weight = AdvancedExtruderGenerator::radialWeighting(
-                    getParam<MooseEnum>("radial_growth_method"),
-                    t); // calculate weighting for expansion
-                node_radius = (start_radius * (1 - radial_weight) +
-                               getParam<libMesh::Real>("r_final") * radial_weight) *
-                              radius_scaling; // calculate new radius
-              }
-              else
-              {
-                node_radius = prev_node_distance_to_spline; // standard node radius if no expansion
-              }
-
-              libMesh::Point new_node_point =
-                  *P_current + node_radius * dir_along_line; // calculate new node location
-              current_distance = new_node_point -
-                                 *node; // this backtracks a bit, but it fits in with what's here...
-            }
-            else
-            {
-              _direction = *P_current - *P_prev;
-              _direction /= _direction.norm(); // normalize direction
-              mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
-                          "Norm of direction vector is not 1!");
-
-              // Calculate step size.
-              // Note: old_distance+*node is the vector description of the previously-created node
-              step_size = ((*P_current - (old_distance + *node)) * _direction);
-              current_distance =
-                  old_distance +
-                  _direction * step_size; // update distance from starting node to new node
-            }
+            // intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
           }
           else
           {
@@ -701,9 +641,44 @@ AdvancedExtruderGenerator::generate()
                             ? height / (Real)num_layers / (Real)order
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
-            current_distance =
-                old_distance +
-                _direction * step_size; // update distance from starting node to new node
+            current_step =
+                old_step + _direction * step_size; // update distance from starting node to new node
+          }
+
+          // Keep track of the cumulative step size as an extrusion axis coordinate
+          cumulative_step_size += step_size;
+
+          // Handle radial expansion. No need to perform expansion at the centerline
+          if (_end_radial_extent && start_node_radius > libMesh::TOLERANCE)
+          {
+            // How far along we are in the extrusion
+            // TODO: this assumes equi-distance of the nodes!!
+            Real tm1 = (Real)(k - 1) / (Real)(total_extrap_heights - 1);
+            Real t = (Real)k / (Real)(total_extrap_heights - 1);
+
+            // Direction of radial expansion.
+            RealVectorValue node_to_extrusion_axis;
+            if (_extrude_along_curve)
+              node_to_extrusion_axis = *node + current_step - *(extrusion_curve->node_ptr(k));
+            // The radial expansion has to be performed in the rotated frame
+            else if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
+              node_to_extrusion_axis =
+                  *node + current_step - (reference_point + _direction * cumulative_step_size);
+            // when extruding in a straight line with no twisting, we can use the original radial
+            // direction
+            else
+              node_to_extrusion_axis = *node - reference_point;
+
+            // Fraction of the total starting radius the node lives in
+            const auto radius_scaling = start_node_radius / start_radial_extent;
+            // Calculate weighting for expansion
+            const auto radial_ratio_m1 = AdvancedExtruderGenerator::radialExpansionRatio(tm1);
+            const auto radial_ratio = AdvancedExtruderGenerator::radialExpansionRatio(t);
+
+            // Compute change in step
+            current_step += (start_radial_extent * (radial_ratio_m1 - radial_ratio) +
+                             (radial_ratio - radial_ratio_m1) * _end_radial_extent) *
+                            radius_scaling * node_to_extrusion_axis.unit();
           }
 
           // Handle helicoidal extrusion
@@ -722,12 +697,39 @@ AdvancedExtruderGenerator::generate()
                          (sin(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
                           sin(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
                              twist1;
-            twist *= std::sqrt(node->norm_sq() + libMesh::Utility::pow<2>(_direction * (*node)));
-            current_distance += twist;
+
+            // If we normalize twist, we must multiply by 2 * sin(libMesh::pi * step_size /
+            // _twist_pitch) if (!MooseUtils::absoluteFuzzyEqual(twist.norm(), .0))
+            //   twist /= twist.norm();
+
+            // Get a point on the extrusion axis (around which we currently twist the geometry)
+            // at the local elevation height to be able to compute the distance to the axis
+            Point extrusion_axis_at_elevation;
+            Point prev_extrusion_axis_at_elevation;
+            if (_extrude_along_curve)
+            {
+              extrusion_axis_at_elevation = *extrusion_curve->node_ptr(k);
+              prev_extrusion_axis_at_elevation = *extrusion_curve->node_ptr(k - 1);
+            }
+            else
+            {
+              // We can't use old and current step because they have been "twisted"
+              extrusion_axis_at_elevation = reference_point + _direction * cumulative_step_size;
+              prev_extrusion_axis_at_elevation =
+                  reference_point + _direction * (cumulative_step_size - step_size);
+            }
+
+            // Scale with how far the node is from the extrusion axis, before twisting
+            twist *= (*node + current_step - extrusion_axis_at_elevation).norm();
+
+            // No need to twist or expand the point on the axis
+            if (!MooseUtils::absoluteFuzzyEqual(twist1.norm(), .0))
+              current_step += twist;
           }
         }
 
-        Node * new_node = mesh->add_point(*node + current_distance,
+        // Add the new node to the mesh
+        Node * new_node = mesh->add_point(*node + current_step,
                                           node->id() + (current_node_layer * orig_nodes),
                                           node->processor_id());
 
@@ -756,7 +758,7 @@ AdvancedExtruderGenerator::generate()
                                        : id_to_copy);
           }
 
-        old_distance = current_distance;
+        old_step = current_step;
         current_node_layer++;
       }
     }
@@ -1446,35 +1448,20 @@ AdvancedExtruderGenerator::generate()
   return mesh;
 }
 
-libMesh::Real
-AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const libMesh::Real t)
+Real
+AdvancedExtruderGenerator::radialExpansionRatio(const Real t) const
 {
   // NOTE: All functions added to this method must obey the following: f(0)=0, f(1)=1 for all t in
   // [0,1].
-
-  // hold the case definitions in this method to keep generate() cleaner
-  int switch_val = -1; // set default
-  if (function_type == "LINEAR")
-    switch_val = 1;
-  else if (function_type == "CUBIC")
-    switch_val = 2;
-
-  Real start_growth_rate = getParam<Real>("start_radial_growth_rate");
-  Real end_growth_rate = getParam<Real>("end_radial_growth_rate");
-
-  Real result;
-  switch (switch_val)
+  switch (_radial_expansion_method)
   {
-    case 1:
-      result = t;
-      break;
-    case 2:
-      result = (-2 + start_growth_rate + end_growth_rate) * std::pow(t, 3) +
-               (3 - (2 * start_growth_rate + end_growth_rate)) * std::pow(t, 2) +
-               start_growth_rate * t;
-      break;
+    case 0:
+      return t;
+    // Only linear and cubic implemented
     default:
-      mooseError("radial_growth_method specfied not valid for radial expansion!");
+      return (-2. + _start_radial_growth_rate + _end_radial_growth_rate) * MathUtils::pow(t, 3) +
+             (3. - (2. * _start_radial_growth_rate + _end_radial_growth_rate)) *
+                 MathUtils::pow(t, 2) +
+             _start_radial_growth_rate * t;
   }
-  return result;
 }

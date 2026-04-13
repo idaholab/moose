@@ -357,6 +357,21 @@ boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh)
   return volume_weighted_normal_sum / volume_sum;
 }
 
+Real
+computeMaxDistanceToAxis(const MeshBase & mesh,
+                         const Point & origin,
+                         const RealVectorValue & direction)
+{
+  Real distance = 0;
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(direction.norm_sq(), 1),
+              "Direction should be normalized");
+  for (const auto & node : mesh.node_ptr_range())
+    if (const auto dist_node = (*node - origin).cross(direction).norm(); dist_node > distance)
+      distance = dist_node;
+  mesh.comm().max(distance);
+  return distance;
+}
+
 std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,

@@ -204,6 +204,17 @@ computeDistanceToAxis(const P & point, const Point & origin, const RealVectorVal
 }
 
 /**
+ * Computes the maximum distance from all nodes of a mesh to a general axis
+ *
+ * @param[in] mesh mesh to get the distance from
+ * @param[in] origin  Axis starting point
+ * @param[in] direction  Axis direction
+ */
+Real computeMaxDistanceToAxis(const MeshBase & mesh,
+                              const Point & origin,
+                              const RealVectorValue & direction);
+
+/**
  * Computes a coordinate transformation factor for a general axisymmetric axis
  *
  * @param[in] point  The libMesh \p Point in space where we are evaluating the factor

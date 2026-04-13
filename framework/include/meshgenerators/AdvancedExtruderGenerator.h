@@ -90,6 +90,17 @@ protected:
   /// Axial pitch for a full rotation
   const Real _twist_pitch;
 
-  /// Calculate radius for expansion
-  libMesh::Real radialWeighting(const MooseEnum function_type, const libMesh::Real t);
+  // Radial transformation attributes
+  /// Radial extent of the extruded geometry at the end  of the extrusion
+  const Real _end_radial_extent;
+  /// Function type for modifying the radial extent of the extruded shape
+  const MooseEnum _radial_expansion_method;
+  /// Derivative of the radial expansion function at the beginning of the extrusion
+  const Real _start_radial_growth_rate;
+  /// Derivative of the radial expansion function at the end of the extrusion
+  const Real _end_radial_growth_rate;
+
+  /// Calculate ratio to apply to the expansion
+  /// @param t coordinate along the curve (in the axial direction of extrusion)
+  Real radialExpansionRatio(const Real t) const;
 };
