@@ -326,7 +326,7 @@ LibmeshMFEMMesh::buildMFEMBoundaryElements(
       }
 
       boundary[iboundary++] = buildMFEMFaceElement(
-          boundary_face_info.mfem_elem_type, renumbered_vertex_ids.data(), boundary_block_id);
+          boundary_face_info.mfem_elem_type, renumbered_vertex_ids.data(), boundary_id);
     }
   }
 
@@ -484,7 +484,7 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
   // byVDim: XYZ, XYZ, XYZ, XYZ,...
   // byNode: XXX..., YYY..., ZZZ...
   mfem::FiniteElementSpace * finite_element_space =
-      new mfem::FiniteElementSpace(this, finite_element_collection, spaceDim);
+      new mfem::FiniteElementSpace(this, finite_element_collection, spaceDim, mfem::Ordering::byVDIM);
 
   Nodes = new mfem::GridFunction(finite_element_space);
   Nodes->MakeOwner(finite_element_collection); // Nodes will destroy 'finite_element_collection'

@@ -317,9 +317,8 @@ buildElementAndNodeIDs(MeshBase & libmesh,
 
     std::vector<int> elements_in_block;
 
-    // MFEM block IDs are 1-indexed, while libmesh ones are 0-indexed, so offset by 1.
-    auto active_block_elements_begin = libmesh.active_subdomain_elements_begin(block_id - 1);
-    auto active_block_elements_end = libmesh.active_subdomain_elements_end(block_id - 1);
+    auto active_block_elements_begin = libmesh.active_subdomain_elements_begin(block_id);
+    auto active_block_elements_end = libmesh.active_subdomain_elements_end(block_id);
 
     for (auto element_iterator = active_block_elements_begin;
          element_iterator != active_block_elements_end;
@@ -471,11 +470,10 @@ buildCubitBlockInfo(MeshBase & libmesh,
    */
   for (int block_id : unique_block_ids)
   {
-    // MFEM block IDs are 1-indexed, while libmesh ones are 0-indexed, so offset by 1.
-    auto element_range = libmesh.active_subdomain_elements_ptr_range(block_id - 1);
+    auto element_range = libmesh.active_subdomain_elements_ptr_range(block_id);
     if (element_range.begin() == element_range.end())
     {
-      mooseError("Block '", block_id - 1, "' contains no elements.");
+      mooseError("Block '", block_id, "' contains no elements.");
     }
 
     auto first_element_ptr = *element_range.begin();
@@ -498,8 +496,7 @@ getLibmeshBlockIDs(const MeshBase & libmesh)
   int counter = 0;
   for (auto block_id : block_ids_set)
   {
-    // MFEM block IDs are 1-indexed, while libmesh ones are 0-indexed, so offset by 1.
-    unique_block_ids[counter++] = block_id + 1;
+    unique_block_ids[counter++] = block_id;
   }
 
   return unique_block_ids;
