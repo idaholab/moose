@@ -1558,6 +1558,11 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         {
           if (!GeneralFieldTransfer::isOutOfMeshValue(_default_extrapolation_value))
           {
+            // For nearest-valid-target, keep the out-of-mesh sentinel in the solution so
+            // that correctSolutionVectorValues can reliably identify which DOFs still need
+            // extrapolation. Writing _default_extrapolation_value here instead would make it
+            // impossible to distinguish a legitimately-transferred value that happens to equal
+            // the extrapolation constant from a DOF that never received data.
             const auto missing_value = _post_transfer_extrapolation == "nearest-valid-target"
                                            ? GeneralFieldTransfer::OutOfMeshValue
                                            : _default_extrapolation_value;
@@ -1738,12 +1743,16 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                     const auto other_dof = elem_node.dof_number(sys_num, var_num, 0);
                     try
                     {
-                      if (!GeneralFieldTransfer::isOutOfMeshValue(
-                              (*to_sys->current_local_solution)(other_dof)))
+                      // setSolutionVectorValues leaves DOFs that did not receive a transfer
+                      // value marked with OutOfMeshValue, so isOutOfMeshValue is sufficient
+                      // to reject them here. DOFs that did receive data (even if the value
+                      // equals _default_extrapolation_value) are accepted correctly.
+                      if (const auto sol_val = (*to_sys->current_local_solution)(other_dof);
+                          !GeneralFieldTransfer::isOutOfMeshValue(sol_val))
                       {
                         min_distance_sq = distance_sq;
                         min_dist_id = elem_node.id();
-                        nearest_value = (*to_sys->current_local_solution)(other_dof);
+                        nearest_value = sol_val;
                       }
                     }
                     catch (...)
@@ -1780,10 +1789,12 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                   const auto other_dof = neigh->dof_number(sys_num, var_num, 0);
                   try
                   {
-                    if (!GeneralFieldTransfer::isOutOfMeshValue(
-                            (*to_sys->current_local_solution)(other_dof)))
+                    // Same reasoning as the nodal branch: DOFs without transfer data carry
+                    // OutOfMeshValue, so isOutOfMeshValue is the correct rejection criterion.
+                    if (const auto sol_val = (*to_sys->current_local_solution)(other_dof);
+                        !GeneralFieldTransfer::isOutOfMeshValue(sol_val))
                     {
-                      nearest_value = (*to_sys->current_local_solution)(other_dof);
+                      nearest_value = sol_val;
                       min_distance_sq = distance_sq;
                       min_dist_id = neigh->id();
                     }
@@ -1804,6 +1815,8 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
             to_sys->solution->set(dof, nearest_value);
           else
           {
+            // No valid neighbor was found; replace the out-of-mesh sentinel with the
+            // fallback value so the solution vector does not retain an invalid sentinel.
             to_sys->solution->set(dof, _default_extrapolation_value);
             flagSolutionWarning(
                 "Search for the valid target nearest from a target point for which no "

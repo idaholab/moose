@@ -180,6 +180,32 @@ in the source mesh division.
 
 It is advised to keep the number of source mesh divisions the same as the number of target subapps for simplicity.
 
+## Post-transfer extrapolation to uncovered target points
+
+When some target DOFs lie outside all source application domains, the transfer cannot
+provide values for them directly. The
+[!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/post_transfer_extrapolation)
+parameter controls what happens to those DOFs after the main transfer completes.
+
+- `none` (default): DOFs that did not receive a value are left unchanged. If
+  [!param](/Transfers/MultiAppGeneralFieldUserObjectTransfer/extrapolation_constant) is set to a
+  finite value, that constant is written to uncovered DOFs during the transfer.
+
+- `nearest-valid-target`: After the main transfer, each uncovered DOF is assigned the value
+  of its nearest already-covered neighbor on the target mesh. The search walks the immediate
+  element neighborhood (adjacent nodes for nodal variables, adjacent elements for elemental
+  variables). If no covered neighbor exists within that neighborhood,
+  [!param](/Transfers/MultiAppGeneralFieldUserObjectTransfer/extrapolation_constant) is used
+  as a final fallback and a warning is emitted.
+
+!alert note
+`nearest-valid-target` performs a single-layer neighborhood search, not a global search.
+For nodal variables, the candidate pool for an uncovered node is all nodes that share at
+least one element with it. For elemental variables, the candidate pool is the set of
+face-adjacent neighbor elements. If none of the candidates in that pool received a value
+from the transfer, the fallback constant is used regardless of how close a covered DOF
+might be elsewhere on the mesh.
+
 ## Overlap and floating point precision indetermination detection
 
 The derived classes of `MultiAppGeneralFieldTransfer` may keep track of indetermination in origin values.
