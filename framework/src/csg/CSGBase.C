@@ -1108,14 +1108,55 @@ CSGBase::renameEngUnit(const CSGEngUnit & unit, const std::string & name)
   // The EngUnit index stores raw pointers; because the object's name is updated in-place,
   // no index update is needed.
   if (const auto * surf = dynamic_cast<const CSGSurfaceEngUnit *>(&unit))
-    _surface_list.renameSurface(static_cast<const CSGSurface &>(*surf), name);
+    renameSurface(static_cast<const CSGSurface &>(*surf), name);
   else if (const auto * cell = dynamic_cast<const CSGCellEngUnit *>(&unit))
-    _cell_list.renameCell(static_cast<const CSGCell &>(*cell), name);
+    renameCell(static_cast<const CSGCell &>(*cell), name);
   else if (const auto * univ = dynamic_cast<const CSGUniverseEngUnit *>(&unit))
-    _universe_list.renameUniverse(static_cast<const CSGUniverse &>(*univ), name);
+    renameUniverse(static_cast<const CSGUniverse &>(*univ), name);
   else
     mooseError(
         "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be renamed.");
+}
+
+void
+CSGBase::renameSurface(const CSGSurface & surface, const std::string & name)
+{
+  // if surface is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (isSurfaceEngUnit(surface))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename surface " + surface.getName() + " to " + name + ". " +
+                 surface.getName() + " is an engineering unit and a unit with name " + name +
+                 " already exists.");
+
+  _surface_list.renameSurface(surface, name);
+}
+
+void
+CSGBase::renameCell(const CSGCell & cell, const std::string & name)
+{
+  // if cell is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (isCellEngUnit(cell))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename cell " + cell.getName() + " to " + name + ". " + cell.getName() +
+                 " is an engineering unit and a unit with name " + name + " already exists.");
+
+  _cell_list.renameCell(cell, name);
+}
+
+void
+CSGBase::renameUniverse(const CSGUniverse & universe, const std::string & name)
+{
+  // if universe is actually an engineering unit, we have to also check that no other units have the
+  // same name already
+  if (isUniverseEngUnit(universe))
+    if (_eng_unit_list.hasEngUnit(name))
+      mooseError("Cannot rename universe " + universe.getName() + " to " + name + ". " +
+                 universe.getName() + " is an engineering unit and a unit with name " + name +
+                 " already exists.");
+
+  _universe_list.renameUniverse(universe, name);
 }
 
 void
