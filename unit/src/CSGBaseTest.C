@@ -1006,6 +1006,171 @@ TEST(CSGBaseTest, testDeleteLattice)
 }
 
 /**
+ * Engineering Units Tests - test usage of all 3 types using:
+ *  CSGSurfaceEngUnit - uses CSGNPolygonUnit
+ *  CSGCellEngUnit - uses FakeCellEngUnit (which also uses FakeSurfaceEngUnit for nested units)
+ *  CSGUnivEngUnit - uses FakeUnivEngUnit
+ */
+
+/// tests addEngUnit for surfaces type units
+TEST(CSGBaseTest, testSurfEngUnit)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr =
+      std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+
+  // check that this is registered as a "surface" and an engineering unit in CSGBase
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_TRUE(csg_obj->hasSurface("polygon_unit"));
+  ASSERT_TRUE(csg_obj->hasEngUnit("polygon_unit"));
+
+  // should be able to retrieve as a surface or engineering unit
+  // check that objects are the same in-memory
+  ASSERT_EQ(&poly, &csg_obj->getSurfaceByName("polygon_unit"));
+  ASSERT_EQ(&poly, &csg_obj->getEngUnitByName("polygon_unit"));
+}
+
+/// tests the different mechanisms for renaming a surface-type engineering unit
+TEST(CSGBaseTest, testSurfEngUnitRename)
+{
+  // renaming allowable either through renameSurface or renameEngUnit
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr =
+      std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+
+  // starting name
+  ASSERT_EQ(poly.getName(), "polygon_unit");
+
+  // rename using renameSurface()
+  csg_obj->renameSurface(poly, "new_name_for_surf");
+  ASSERT_EQ(poly.getName(), "new_name_for_surf");
+  // rename using renameEngUnit()
+  csg_obj->renameEngUnit(poly, "another_name");
+  ASSERT_EQ(poly.getName(), "another_name");
+}
+
+/// tests that errors are raised properly for renaming surfaces and surface engineering units
+TEST(CSGBaseTest, testSurfEngUnitRenameErrors)
+{
+  std::string eng_unit_name = "polygon_unit";
+  std::string surf_name = "duplicate_name";
+
+  // need to recreate unit/surf for each error check because when the error is thrown during rename,
+  // it leaves the lists in a corrupted state. This is fine in practice because we don't need to
+  // continue if the error is raised. For testing, make a new pointer each time.
+  auto make_csg = [&]()
+  {
+    auto csg_obj = std::make_unique<CSG::CSGBase>();
+    auto poly_ptr = std::make_unique<CSGNPolygonUnit>(eng_unit_name, 4, 2.0);
+    csg_obj->addEngUnit(std::move(poly_ptr));
+    auto sptr = std::make_unique<CSGSphere>(surf_name, 2.0);
+    csg_obj->addSurface(std::move(sptr));
+    return csg_obj;
+  };
+
+  // renaming unit via renameEngUnit to same name as existing surface raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & poly = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &poly, &surf_name]() { csg_obj->renameEngUnit(poly, surf_name); },
+        "Surface with name " + surf_name + " already exists in geometry.");
+  }
+
+  // renaming unit via renameSurface to same name as existing surface raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & poly = csg_obj->getEngUnitByName<CSGNPolygonUnit>(
+        eng_unit_name); // need to specify type to be able to call renameSurface
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &poly, &surf_name]() { csg_obj->renameSurface(poly, surf_name); },
+        "Surface with name " + surf_name + " already exists in geometry.");
+  }
+
+  // renaming surface to same name as engineering unit raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & surf = csg_obj->getSurfaceByName(surf_name);
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &surf, &eng_unit_name]() { csg_obj->renameSurface(surf, eng_unit_name); },
+        "Surface with name " + eng_unit_name + " already exists in geometry.");
+  }
+
+  // add a cell-type engineering unit and try to rename the surface engineering unit via
+  // renameSurface to the same name as the cell unit. This should also raise an error because a unit
+  // with that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeCellEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & poly = csg_obj->getEngUnitByName<CSGNPolygonUnit>(
+        eng_unit_name); // need to specify type to be able to call renameSurface
+    Moose::UnitUtils::assertThrows([&csg_obj, &poly]()
+                                   { csg_obj->renameSurface(poly, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+
+  // add a cell-type engineering unit and try to rename the surface engineering unit via
+  // renameEngUnit to the same name as the cell unit. This calls renameSurface and so it should
+  // raise the same error as above that a unit of that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeCellEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & poly = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows([&csg_obj, &poly]()
+                                   { csg_obj->renameEngUnit(poly, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+}
+
+/// tests error is raised via addSurface for engineering units
+TEST(CSGBaseTest, testSurfEngUnitAddErrors)
+{
+  // trying to unit via addSurface will raise error
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // make the unit a surface pointer instead so that we can try to add it via addSurface
+  std::unique_ptr<CSGSurface> poly_ptr = std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
+  Moose::UnitUtils::assertThrows([&csg_obj, &poly_ptr]()
+                                 { csg_obj->addSurface(std::move(poly_ptr)); },
+                                 " is a CSGSurfaceEngUnit and must be added via addEngUnit()");
+}
+
+/// tests deleteSurface and deleteEngUnit for a surface engineering unit
+TEST(CSGBaseTest, testSurfEngUnitDelete)
+{
+  // make 2 units to delete
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string name1 = "polygon_unit1";
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr1 = std::make_unique<CSGNPolygonUnit>(name1, 4, 2.0);
+  const auto & poly1 = csg_obj->addEngUnit(std::move(poly_ptr1));
+  std::string name2 = "polygon_unit2";
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr2 = std::make_unique<CSGNPolygonUnit>(name2, 4, 2.0);
+  csg_obj->addEngUnit(std::move(poly_ptr2));
+
+  // check that it has both registered as a surface and as an engineering unit
+  ASSERT_TRUE(csg_obj->hasSurface(name1));
+  ASSERT_TRUE(csg_obj->hasSurface(name2));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name1));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name2));
+
+  // delete one as an engineering unit
+  csg_obj->deleteEngUnit(poly1);
+  ASSERT_FALSE(csg_obj->hasSurface(name1));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name1));
+
+  // delete the other as if it were a surface (get as surface to have the right type)
+  const auto & poly2 = csg_obj->getSurfaceByName(name2);
+  csg_obj->deleteSurface(poly2);
+  ASSERT_FALSE(csg_obj->hasSurface(name2));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name2));
+}
+
+/**
  * CSGBase::addTransformation methods
  */
 
