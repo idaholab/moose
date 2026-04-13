@@ -40,11 +40,6 @@ source "${SRC_DIR:?}/configure_libmesh.sh"
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR:?}/retry_build.sh"
 
-# Not sure why, but this resolves issues like "ld: library not found for -lemutls_w"
-if [[ $HOST == arm64-apple-darwin* ]]; then
-    export LDFLAGS="${LDFLAGS:?} -L${PREFIX:?}/lib -Wl,-rpath,${PREFIX:?}/lib"
-fi
-
 # Sets up retry functions and calls do_build. Blocking until success
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
