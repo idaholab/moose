@@ -86,11 +86,26 @@ PETSC_DIR="${PREFIX}/moose-petsc"
 rm -f "$PETSC_DIR"/lib/petsc/conf/configure-hash
 find "$PETSC_DIR"/lib/petsc -name '*.pyc' -delete
 
-# Replace ${BUILD_PREFIX} after installation
-grep -l "${BUILD_PREFIX}" -R "${PETSC_DIR}/lib/petsc" | while IFS= read -r line; do
-  echo "Fixing ${BUILD_PREFIX} in $line"
-  sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$line"
+# remove abspath of executables in $BUILD_PREFIX
+# let them resolve on $PATH
+for f in $(grep -l "${BUILD_PREFIX}/bin/" -R "${PETSC_DIR}/lib/petsc") "$PETSC_DIR/lib/pkgconfig/PETSc.pc"; do
+  echo "Fixing ${BUILD_PREFIX}/bin/ in $f"
+  grep "${BUILD_PREFIX}/bin/" "$f" || true
+  sedinplace s%"${BUILD_PREFIX}"/bin/%%g "$f"
 done
+
+# rewrite remaining $BUILD_PREFIX to $PREFIX
+for f in $(grep -l "${BUILD_PREFIX}" -R "${PETSC_DIR}/lib/petsc") "$PETSC_DIR/lib/pkgconfig/PETSc.pc"; do
+  echo "Fixing ${BUILD_PREFIX} in $f"
+  grep "${BUILD_PREFIX}" "$f" || true
+  sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$f"
+done
+
+# Strip GCC runtime libs on mac
+if [[ $(uname) == Darwin ]]; then
+  echo "Stripping GCC runtime libs"
+  sed -i '' 's/-lemutls_w//g; s/-lheapt_w//g; s/-lgcc_s\.1[^ ]*//g' "$PETSC_DIR"/lib/pkgconfig/PETSc.pc "$PETSC_DIR"/lib/petsc/conf/petscvariables
+fi
 
 echo "Removing example files"
 du -hs "$PETSC_DIR"/share/petsc/examples/src
