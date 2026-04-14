@@ -1283,6 +1283,11 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
   // Get mutable reference from the owning cell list — expandUnit() is non-const
   auto & mutable_unit = static_cast<CSGCellEngUnit &>(_cell_list.getCell(unit.getName()));
 
+  // Record whether the original unit lives in root before expansion — createCell() inside
+  // expandUnit() might create a new cell which defaults to being added to root. If the original
+  // cell unit was not a part of root, then the new cell should not be a part of root either.
+  const bool unit_in_root = getRootUniverse().hasCell(unit.getName());
+
   // Derived class creates the CSGCell object and any other necessary objects and adds them to
   // CSGBase, storing the result internally for retrieval via getExpandedCell()
   mutable_unit.expandUnit(*this);
@@ -1299,6 +1304,12 @@ CSGBase::expandEngUnit(const CSGCellEngUnit & unit)
 
   // Replace all references to the CSGCellEngUnit in universes with the new expanded CSGCell
   replaceCellRefs(static_cast<const CSGCell &>(mutable_unit), exp_cell);
+
+  // createCell() inside expandUnit() could add the new cell to root by default, even if the
+  // original unit was not a part of root. If the original unit was not in root, remove the expanded
+  // cell from root to match the original ownership.
+  if (!unit_in_root && getRootUniverse().hasCell(exp_cell.getName()))
+    removeCellFromUniverse(getRootUniverse(), exp_cell);
 
   // Remove the EngUnit (destroyed here — no more references to it after replaceCellRefs)
   deleteEngUnit(unit);
