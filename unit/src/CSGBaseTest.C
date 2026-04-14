@@ -133,6 +133,7 @@ TEST(CSGBaseTest, testCheckRegionSurfaces)
                                  "from the surface of the same name in the CSGBase instance.");
 }
 
+/// tests CSGBase::deleteSurface
 TEST(CSGBaseTest, testDeleteSurface)
 {
   // initialize a CSGBase object
@@ -433,6 +434,7 @@ TEST(CSGBaseTest, testUpdateCellFill)
   }
 }
 
+/// tests CSGBase::deleteCell
 TEST(CSGBaseTest, testDeleteCell)
 {
   // initialize a CSGBase object
@@ -656,6 +658,7 @@ TEST(CSGBaseTest, testGetUniverse)
   }
 }
 
+/// tests CSGBase::deleteUniverse
 TEST(CSGBaseTest, testDeleteUniverse)
 {
   // initialize a CSGBase object
@@ -973,6 +976,7 @@ TEST(CSGBaseTest, testGetLatticeMethods)
   }
 }
 
+/// tests CSGBase::deleteLattice
 TEST(CSGBaseTest, testDeleteLattice)
 {
   // initialize a CSGBase object
@@ -1016,7 +1020,7 @@ TEST(CSGBaseTest, testDeleteLattice)
  *  CSGUnivEngUnit - uses FakeUnivEngUnit
  */
 
-/// tests addEngUnit for surfaces type units
+/// tests addEngUnit for surface-type units
 TEST(CSGBaseTest, testSurfEngUnit)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
@@ -1325,6 +1329,166 @@ TEST(CSGBaseTest, testUseSurfEngUnitComplex)
       "-polygon_unit_exp_3) & -plane)";
   ASSERT_EQ(post_reg_str_exp, post_reg_str_out);
   ASSERT_EQ("INTERSECTION", post_reg.getRegionTypeString());
+}
+
+/// tests addEngUnit for cell-type units
+TEST(CSGBaseTest, testCellEngUnit)
+{
+  // make a cell engineering unit
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  const auto & cu = csg_obj->addEngUnit(std::move(cell_ptr));
+
+  // check that this is registered as a "cell" and an engineering unit in CSGBase
+  ASSERT_EQ(1, csg_obj->getAllCells().size());
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllCellEngUnits().size());
+  ASSERT_TRUE(csg_obj->hasCell("cell_unit"));
+  ASSERT_TRUE(csg_obj->hasEngUnit("cell_unit"));
+
+  // should be able to retrieve as a cell or engineering unit
+  // check that objects are the same in-memory
+  ASSERT_EQ(&cu, &csg_obj->getCellByName("cell_unit"));
+  ASSERT_EQ(&cu, &csg_obj->getEngUnitByName("cell_unit"));
+}
+
+/// tests the different mechanisms for renaming a cell-type engineering unit
+TEST(CSGBaseTest, testCellEngUnitRename)
+{
+  // renaming allowable either through renameSurface or renameEngUnit
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  const auto & cu = csg_obj->addEngUnit(std::move(cell_ptr));
+
+  // starting name
+  ASSERT_EQ(cu.getName(), "cell_unit");
+
+  // rename using renameCell()
+  csg_obj->renameCell(cu, "new_name_for_cell");
+  ASSERT_EQ(cu.getName(), "new_name_for_cell");
+  // rename using renameEngUnit()
+  csg_obj->renameEngUnit(cu, "another_name");
+  ASSERT_EQ(cu.getName(), "another_name");
+}
+
+/// tests that errors are raised properly for renaming cells and cell engineering units
+TEST(CSGBaseTest, testCellEngUnitRenameErrors)
+{
+  std::string eng_unit_name = "cell_unit";
+  std::string cell_name = "duplicate_name";
+
+  // need to recreate unit/cell for each error check because when the error is thrown during rename,
+  // it leaves the lists in a corrupted state. This is fine in practice because we don't need to
+  // continue if the error is raised. For testing, make a new pointer each time.
+  auto make_csg = [&]()
+  {
+    auto csg_obj = std::make_unique<CSG::CSGBase>();
+    std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+    csg_obj->addEngUnit(std::move(cu_ptr));
+    auto sptr = std::make_unique<CSGSphere>("sphere", 2.0);
+    auto & sph = csg_obj->addSurface(std::move(sptr));
+    csg_obj->createCell(cell_name, -sph);
+    return csg_obj;
+  };
+
+  // renaming unit via renameEngUnit to same name as existing cell raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit, &cell_name]()
+                                   { csg_obj->renameEngUnit(unit, cell_name); },
+                                   "Cell with name " + cell_name + " already exists in geometry.");
+  }
+
+  // renaming unit via renameCell to same name as existing cell raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & unit = csg_obj->getEngUnitByName<FakeCellEngUnit>(
+        eng_unit_name); // need to specify type to be able to call renameCell
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit, &cell_name]()
+                                   { csg_obj->renameCell(unit, cell_name); },
+                                   "Cell with name " + cell_name + " already exists in geometry.");
+  }
+
+  // renaming cell to same name as engineering unit raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & cell = csg_obj->getCellByName(cell_name);
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &cell, &eng_unit_name]() { csg_obj->renameCell(cell, eng_unit_name); },
+        "Cell with name " + eng_unit_name + " already exists in geometry.");
+  }
+
+  // add a surface-type engineering unit and try to rename the cell engineering unit via
+  // renameCell to the same name as the surface unit. This should also raise an error because a unit
+  // with that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & unit = csg_obj->getEngUnitByName<FakeCellEngUnit>(
+        eng_unit_name); // need to specify type to be able to call renameCell
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->renameCell(unit, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+
+  // add a surface-type engineering unit and try to rename the cell engineering unit via
+  // renameEngUnit to the same name as the surface unit. This calls renameCell and so it should
+  // raise the same error as above that a unit of that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
+                                   { csg_obj->renameEngUnit(unit, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+}
+
+/// tests error is raised via addCellToList (private) for engineering units
+TEST(CSGBaseTest, testCellEngUnitAddErrors)
+{
+  // Note - this method of adding a cell is not done in practice as it is a private method, but
+  // it is being tested for sake of robustness
+
+  // trying to unit via addCellToList will raise error
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // make the unit as a normal ref to use addCellToList (not done in practice)
+  const auto & cu = FakeCellEngUnit("cell_unit");
+  Moose::UnitUtils::assertThrows([&csg_obj, &cu]() { csg_obj->addCellToList(cu); },
+                                 " is a CSGCellEngUnit and must be added via addEngUnit()");
+}
+
+/// tests deleteCell and deleteEngUnit for a surface engineering unit
+TEST(CSGBaseTest, testCellEngUnitDelete)
+{
+  // make 2 units to delete
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string name1 = "unit1";
+  std::unique_ptr<FakeCellEngUnit> unit_ptr1 = std::make_unique<FakeCellEngUnit>(name1);
+  csg_obj->addEngUnit(std::move(unit_ptr1));
+  std::string name2 = "unit2";
+  std::unique_ptr<FakeCellEngUnit> unit_ptr2 = std::make_unique<FakeCellEngUnit>(name2);
+  csg_obj->addEngUnit(std::move(unit_ptr2));
+
+  // check that it has both registered as a cell and as an engineering unit
+  ASSERT_TRUE(csg_obj->hasCell(name1));
+  ASSERT_TRUE(csg_obj->hasCell(name2));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name1));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name2));
+
+  // delete one as an engineering unit
+  const auto & unit1 = csg_obj->getEngUnitByName(name1);
+  csg_obj->deleteEngUnit(unit1);
+  ASSERT_FALSE(csg_obj->hasCell(name1));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name1));
+
+  // delete the other as if it were a cell (get as cell to have the right type)
+  const auto & unit2 = csg_obj->getCellByName(name2);
+  csg_obj->deleteCell(unit2);
+  ASSERT_FALSE(csg_obj->hasSurface(name2));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name2));
 }
 
 /**
