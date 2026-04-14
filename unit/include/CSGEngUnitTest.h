@@ -100,8 +100,11 @@ protected:
     std::unique_ptr<FakeSurfEngUnit> s1_ptr = std::make_unique<FakeSurfEngUnit>("s1");
     auto & s1 = base.addEngUnit(std::move(s1_ptr));
     auto & univ = base.createUniverse("fill_univ");
+    // intentionally create a cell that doesn't specifiy a universe that it should be added to so
+    // that management of ownership through CSGBase can be properly tested
     _expanded_cell = &base.createCell("real_cell", univ, -s1);
   }
+
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(CSGEngUnitTest, testCellUnit);
 #endif
