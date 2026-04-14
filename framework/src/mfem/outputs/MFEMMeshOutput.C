@@ -64,20 +64,18 @@ MFEMMeshOutput::output()
 {
   constexpr int save_rank = 0;
   mfem::Mesh serial_mesh = _pmesh.GetSerialMesh(save_rank);
+  serial_mesh.ReorientTetMesh();
 
   if (_ordering > 0)
   {
     mfem::Array<int> new_order;
     if (_ordering == 1)
-    {
       serial_mesh.GetHilbertElementOrdering(new_order);
-    }
     else
-    {
       // FIXME: Add support for various Gecko element ordering configs
       serial_mesh.GetGeckoElementOrdering(new_order);
-    }
     serial_mesh.ReorderElements(new_order);
+    serial_mesh.ReorientTetMesh();
   }
 
   if (processor_id() == save_rank)
