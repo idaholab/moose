@@ -75,17 +75,17 @@ public:
   virtual void finalize() {}
 
   /**
-   * Return the variable names produced by this object.
+   * Return the variable name produced by this object, or std::nullopt if none.
    */
-  virtual std::set<std::string> producedVariableNames() const;
+  virtual std::optional<std::string> producedVariableName() const;
   /**
-   * Return the postprocessor names produced by this object.
+   * Return the postprocessor name produced by this object, or std::nullopt if none.
    */
-  virtual std::set<std::string> producedPostprocessorNames() const;
+  virtual std::optional<std::string> producedPostprocessorName() const;
   /**
-   * Return the vector postprocessor names produced by this object.
+   * Return the vector postprocessor name produced by this object, or std::nullopt if none.
    */
-  virtual std::set<std::string> producedVectorPostprocessorNames() const;
+  virtual std::optional<std::string> producedVectorPostprocessorName() const;
 
   virtual const std::set<std::string> & getRequestedItems() override;
   virtual const std::set<std::string> & getSuppliedItems() override;

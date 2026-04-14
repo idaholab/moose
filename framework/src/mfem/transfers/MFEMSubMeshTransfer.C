@@ -42,10 +42,10 @@ MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
 {
 }
 
-std::set<std::string>
-MFEMSubMeshTransfer::producedVariableNames() const
+std::optional<std::string>
+MFEMSubMeshTransfer::producedVariableName() const
 {
-  return {_result_var_name};
+  return _result_var_name;
 }
 
 void

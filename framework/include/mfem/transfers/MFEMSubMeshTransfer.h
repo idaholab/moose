@@ -24,7 +24,7 @@ public:
 
   MFEMSubMeshTransfer(const InputParameters & parameters);
 
-  virtual std::set<std::string> producedVariableNames() const override;
+  virtual std::optional<std::string> producedVariableName() const override;
 
   /// Executes the transfer.
   virtual void execute() override;

@@ -25,7 +25,7 @@ public:
 
   MFEMPostprocessor(const InputParameters & parameters);
 
-  virtual std::set<std::string> producedPostprocessorNames() const override;
+  virtual std::optional<std::string> producedPostprocessorName() const override;
 
   /**
    * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to

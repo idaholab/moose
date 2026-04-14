@@ -31,10 +31,10 @@ MFEMAuxKernel::MFEMAuxKernel(const InputParameters & parameters)
 {
 }
 
-std::set<std::string>
-MFEMAuxKernel::producedVariableNames() const
+std::optional<std::string>
+MFEMAuxKernel::producedVariableName() const
 {
-  return {_result_var_name};
+  return _result_var_name;
 }
 
 #endif

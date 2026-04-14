@@ -41,22 +41,22 @@ MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
         {static_cast<DependencyKind>(kinds[i]), param_names[i], is_vector_flags[i]});
 }
 
-std::set<std::string>
-MFEMExecutedObject::producedVariableNames() const
+std::optional<std::string>
+MFEMExecutedObject::producedVariableName() const
 {
-  return {};
+  return std::nullopt;
 }
 
-std::set<std::string>
-MFEMExecutedObject::producedPostprocessorNames() const
+std::optional<std::string>
+MFEMExecutedObject::producedPostprocessorName() const
 {
-  return {};
+  return std::nullopt;
 }
 
-std::set<std::string>
-MFEMExecutedObject::producedVectorPostprocessorNames() const
+std::optional<std::string>
+MFEMExecutedObject::producedVectorPostprocessorName() const
 {
-  return {};
+  return std::nullopt;
 }
 
 const std::set<std::string> &
@@ -111,12 +111,12 @@ MFEMExecutedObject::getSuppliedItems()
 
   _supplied_items.emplace();
 
-  for (const auto & name : producedVariableNames())
-    _supplied_items->insert(variableDependencyKey(name));
-  for (const auto & name : producedPostprocessorNames())
-    _supplied_items->insert(postprocessorDependencyKey(name));
-  for (const auto & name : producedVectorPostprocessorNames())
-    _supplied_items->insert(vectorPostprocessorDependencyKey(name));
+  if (const auto name = producedVariableName())
+    _supplied_items->insert(variableDependencyKey(*name));
+  if (const auto name = producedPostprocessorName())
+    _supplied_items->insert(postprocessorDependencyKey(*name));
+  if (const auto name = producedVectorPostprocessorName())
+    _supplied_items->insert(vectorPostprocessorDependencyKey(*name));
 
   return *_supplied_items;
 }

@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
   MFEMInitialCondition(const InputParameters & params);
 
-  virtual std::set<std::string> producedVariableNames() const override;
+  virtual std::optional<std::string> producedVariableName() const override;
 };
 
 #endif

@@ -25,10 +25,10 @@ MFEMPostprocessor::MFEMPostprocessor(const InputParameters & parameters)
 {
 }
 
-std::set<std::string>
-MFEMPostprocessor::producedPostprocessorNames() const
+std::optional<std::string>
+MFEMPostprocessor::producedPostprocessorName() const
 {
-  return {name()};
+  return name();
 }
 
 #endif

@@ -25,7 +25,7 @@ public:
 
   MFEMVectorPostprocessor(const InputParameters & parameters);
 
-  virtual std::set<std::string> producedVectorPostprocessorNames() const override;
+  virtual std::optional<std::string> producedVectorPostprocessorName() const override;
 };
 
 #endif // MOOSE_MFEM_ENABLED

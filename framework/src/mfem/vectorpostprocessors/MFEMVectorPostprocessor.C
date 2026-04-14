@@ -25,10 +25,10 @@ MFEMVectorPostprocessor::MFEMVectorPostprocessor(const InputParameters & paramet
 {
 }
 
-std::set<std::string>
-MFEMVectorPostprocessor::producedVectorPostprocessorNames() const
+std::optional<std::string>
+MFEMVectorPostprocessor::producedVectorPostprocessorName() const
 {
-  return {PPName()};
+  return PPName();
 }
 
 #endif // MOOSE_MFEM_ENABLED
