@@ -1246,6 +1246,35 @@ CSGBase::deleteEngUnit(const CSGEngUnit & unit)
         "Engineering unit '", unit.getName(), "' has an unrecognized type and cannot be deleted.");
 }
 
+void
+CSGBase::expandAllEngUnits()
+{
+  // Snapshot raw pointers before expanding — expandEngUnit destroys each unit after expansion
+  // so iterating live references would dangle.
+  std::vector<const CSGSurfaceEngUnit *> surfs;
+  std::vector<const CSGCellEngUnit *> cells;
+  std::vector<const CSGUniverseEngUnit *> univs;
+  for (const auto & u : getAllSurfaceEngUnits())
+    surfs.push_back(&u.get());
+  for (const auto & u : getAllCellEngUnits())
+    cells.push_back(&u.get());
+  for (const auto & u : getAllUniverseEngUnits())
+    univs.push_back(&u.get());
+
+  for (const auto * s : surfs)
+    expandEngUnit(*s);
+  for (const auto * c : cells)
+    expandEngUnit(*c);
+  for (const auto * u : univs)
+    expandEngUnit(*u);
+
+  // expandUnit() implementations may themselves create additional engineering units
+  // (e.g., a CSGCellEngUnit that internally adds a CSGSurfaceEngUnit). If any remain,
+  // recurse to expand them.
+  if (getAllEngUnits().size())
+    expandAllEngUnits();
+}
+
 CSGRegion
 CSGBase::expandEngUnit(const CSGSurfaceEngUnit & unit)
 {
@@ -1400,29 +1429,6 @@ CSGBase::replaceSurfaceRefsWithRegion(const CSGSurface & old_surf, const CSGRegi
     new_region.replaceWithSubRegion(old_surf, sub_region);
     updateCellRegion(cell, new_region);
   }
-}
-
-void
-CSGBase::expandAllEngUnits()
-{
-  // Snapshot raw pointers before expanding — expandEngUnit destroys each unit after expansion
-  // so iterating live references would dangle.
-  std::vector<const CSGSurfaceEngUnit *> surfs;
-  std::vector<const CSGCellEngUnit *> cells;
-  std::vector<const CSGUniverseEngUnit *> univs;
-  for (const auto & u : getAllSurfaceEngUnits())
-    surfs.push_back(&u.get());
-  for (const auto & u : getAllCellEngUnits())
-    cells.push_back(&u.get());
-  for (const auto & u : getAllUniverseEngUnits())
-    univs.push_back(&u.get());
-
-  for (const auto * s : surfs)
-    expandEngUnit(*s);
-  for (const auto * c : cells)
-    expandEngUnit(*c);
-  for (const auto * u : univs)
-    expandEngUnit(*u);
 }
 
 nlohmann::json
