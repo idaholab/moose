@@ -330,6 +330,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # Additional options with cuda
         MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DCUDA_ARCH=sm_80")
+        # The build environment lacks libnvidia-ml.so.1, which PETSc needs, so we bypass the test that
+        # MFEM uses to check PETSc's installation during CMake configuration.
+        MFEM_OPTIONS+=("-DPETSC_EXECUTABLE_RUNS=YES")
         # Expose the compat libraries if we haven't already
         if [[ "$LD_LIBRARY_PATH" != *"${CUDA_DIR}/compat"* ]]; then
             export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}

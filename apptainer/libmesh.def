@@ -112,8 +112,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     IFS=' ' read -r -a LIBMESH_ARR_OPTIONS <<< "{{ LIBMESH_OPTIONS }}"
     if [ -n "$CUDA_DIR" ]; then
         LIBMESH_ARR_OPTIONS+=("--with-nvtx=${CUDA_DIR}" "--enable-perflog")
+        # The build environment lacks libnvidia-ml.so.1, so we use -Wl,--as-needed to drop that
+        # dependency, which is inherited from PETSc, when linking the simple program that netCDF
+        # uses to check the compiler during configuration so that the dynamic linker does not
+        # complain when configure subsequently runs it.
+        SUB_LDFLAGS=-Wl,--as-needed
     fi
 
+    SUB_LDFLAGS=${SUB_LDFLAGS} \
     LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR} LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
         "${LIBMESH_ARR_OPTIONS[@]}" --skip-submodule-update 2>&1 | tee ${LIBMESH_DIR}/logs/build.log
     cp ${LIBMESH_SRC_DIR}/build/config.log ${LIBMESH_DIR}/logs/
