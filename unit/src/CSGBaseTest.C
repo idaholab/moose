@@ -1491,6 +1491,62 @@ TEST(CSGBaseTest, testCellEngUnitDelete)
   ASSERT_FALSE(csg_obj->hasEngUnit(name2));
 }
 
+/// test the successful expandUnit for cel units via base
+TEST(CSGBaseTest, testCellEngUnitExpand)
+{
+  std::string name = "cell_unit";
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>(name);
+  const auto & cell_unit = csg_obj->addEngUnit<FakeCellEngUnit>(std::move(cell_ptr));
+  // create an extra universe to add the cell unit to
+  const auto & univ = csg_obj->createUniverse("extra_univ");
+  csg_obj->addCellToUniverse(univ, cell_unit);
+
+  // assert num cells, eng units, surfaces, and universes pre-expansion
+  ASSERT_EQ(1, csg_obj->getAllCells().size());
+  ASSERT_EQ(1, csg_obj->getAllCellEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(2, csg_obj->getAllUniverses().size()); // root + extra that contains the unit
+
+  // assert that cell unit is in the extra universe and not root
+  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(name));
+  ASSERT_TRUE(univ.hasCell(name));
+
+  // include transformation on the unit (to check that it transfers with expansion)
+  csg_obj->applyAxisRotation(cell_unit, RotationAxisType::Z, 30.0);
+
+  // expand the unit - returns the cell that was created
+  auto cell_expanded = csg_obj->expandEngUnit(cell_unit);
+
+  // FakeCellEngUnit intentionally includes the creation of another engineering unit during the
+  // expansion process to test the handling of such nested units.
+  // Expect 1 unit in base (different from original, surface-type), 1 cell, no cell units, and 2
+  // additional universe (beyond root)
+  ASSERT_EQ(1, csg_obj->getAllSurfaces().size());        // this is the generated surface-type unit
+  ASSERT_EQ(1, csg_obj->getAllSurfaceEngUnits().size()); // surface unit created in expansion
+  ASSERT_EQ(0, csg_obj->getAllCellEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(3, csg_obj->getAllUniverses().size()); // root, extra, and one created during expansion
+
+  // expansion should remove the original cell unit
+  ASSERT_FALSE(csg_obj->hasCell(name));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name));
+
+  // new cell should belong to the extra universe, not root
+  ASSERT_FALSE(univ.hasCell(name)); // original cell unit should no longer be in universe
+  ASSERT_TRUE(univ.hasCell(cell_expanded.getName()));
+  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(
+      cell_expanded.getName())); // root should still not contain new cell
+
+  // new cell should also have the transformations applied
+  std::pair<TransformationType, std::tuple<Real, Real, Real>> exp_trans = {
+      TransformationType::ROTATION, std::make_tuple(30, 0, 0)};
+  auto trans = cell_expanded.getTransformations();
+  ASSERT_EQ(1, trans.size());
+  ASSERT_EQ(exp_trans, trans[0]);
+}
+
 /**
  * CSGBase::addTransformation methods
  */
