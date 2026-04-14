@@ -96,8 +96,9 @@ protected:
 
   void expandUnit(CSGBase & base) override
   {
-    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>("s1", 3.0);
-    auto & s1 = base.addSurface(std::move(s1_ptr));
+    // use the surface unit in this one for nested units
+    std::unique_ptr<FakeSurfEngUnit> s1_ptr = std::make_unique<FakeSurfEngUnit>("s1");
+    auto & s1 = base.addEngUnit(std::move(s1_ptr));
     auto & univ = base.createUniverse("fill_univ");
     _expanded_cell = &base.createCell("real_cell", univ, -s1);
   }
