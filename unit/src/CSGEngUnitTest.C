@@ -77,10 +77,11 @@ TEST(CSGEngUnitTest, testSurfUnit)
 /// Test CSGCellEngUnit functionality as CSGEngUnit and CSGCell
 TEST(CSGEngUnitTest, testCellUnit)
 {
-  FakeCellEngUnit cell_unit("cell_unit");
+  std::string name = "cell_unit";
+  FakeCellEngUnit cell_unit(name);
 
   /* Test the Engineering Unit related functionality (pre-expansion) */
-  ASSERT_EQ("cell_unit", cell_unit.getName());
+  ASSERT_EQ(name, cell_unit.getName());
   ASSERT_EQ("CELL", cell_unit.getBehavior());
   ASSERT_EQ("CSG::FakeCellEngUnit", cell_unit.getUnitType());
 
@@ -97,23 +98,25 @@ TEST(CSGEngUnitTest, testCellUnit)
   // getRegion - should be empty
   ASSERT_EQ(CSGRegion(), cell_unit.getRegion());
   // setName() should be functioning through CSGCell
-  cell_unit.setName("new_name");
-  ASSERT_EQ("new_name", cell_unit.getName());
+  std::string new_name = "new_name";
+  cell_unit.setName(new_name);
+  ASSERT_EQ(new_name, cell_unit.getName());
 
   /* Test the expandUnit() functionality */
   auto csg_obj = std::make_unique<CSGBase>();
   cell_unit.expandUnit(*csg_obj);
   // check getExpandedCell is same object as cell in csg_obj
-  ASSERT_EQ(&cell_unit.getExpandedCell(), &csg_obj->getCellByName("real_cell"));
+  ASSERT_EQ(&cell_unit.getExpandedCell(), &csg_obj->getCellByName(new_name + "_real_cell"));
 }
 
 /// Test CSGUniverseEngUnit functionality as CSGEngUnit and CSGUniverse
 TEST(CSGEngUnitTest, testUnivUnit)
 {
-  FakeUnivEngUnit univ_unit("univ_unit");
+  std::string name = "univ_unit";
+  FakeUnivEngUnit univ_unit(name);
 
   /* Test the Engineering Unit related functionality (pre-expansion) */
-  ASSERT_EQ("univ_unit", univ_unit.getName());
+  ASSERT_EQ(name, univ_unit.getName());
   ASSERT_EQ("UNIVERSE", univ_unit.getBehavior());
   ASSERT_EQ("CSG::FakeUnivEngUnit", univ_unit.getUnitType());
 
@@ -129,14 +132,15 @@ TEST(CSGEngUnitTest, testUnivUnit)
   ASSERT_EQ(0, univ_unit.getAllCells().size());
   ASSERT_FALSE(univ_unit.isRoot());
   // setName() should be functioning through CSGCell
-  univ_unit.setName("new_name");
-  ASSERT_EQ("new_name", univ_unit.getName());
+  std::string new_name = "new_name";
+  univ_unit.setName(new_name);
+  ASSERT_EQ(new_name, univ_unit.getName());
 
   /* Test the expandUnit() functionality */
   auto csg_obj = std::make_unique<CSGBase>();
   univ_unit.expandUnit(*csg_obj);
   // expanded universe should be same object as one in base
-  ASSERT_EQ(&univ_unit.getExpandedUniverse(), &csg_obj->getUniverseByName("real_univ"));
+  ASSERT_EQ(&univ_unit.getExpandedUniverse(), &csg_obj->getUniverseByName(new_name + "_real_univ"));
 }
 
 /**

@@ -29,6 +29,7 @@
  *    - 1 cell
  *    - at least 1 surface is FakeSurfEngUnit
  *    - cell is filled with a universe
+ *    - creation of cell doesn't specify which universe it should belong to
  *
  *  - FakeUnivEngUnit:
  *    - 2 cells where one is FakeCellEngUnit
@@ -62,8 +63,8 @@ protected:
 
   void expandUnit(CSGBase & base) override
   {
-    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>("s1", 3.0);
-    std::unique_ptr<CSGSurface> s2_ptr = std::make_unique<CSGSphere>("s2", 1.0);
+    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
+    std::unique_ptr<CSGSurface> s2_ptr = std::make_unique<CSGSphere>(getName() + "_s2", 1.0);
     auto & s1 = base.addSurface(std::move(s1_ptr));
     auto & s2 = base.addSurface(std::move(s2_ptr));
     _expanded_region = -s1 & +s2;
@@ -97,12 +98,12 @@ protected:
   void expandUnit(CSGBase & base) override
   {
     // use the surface unit in this one for nested units
-    std::unique_ptr<FakeSurfEngUnit> s1_ptr = std::make_unique<FakeSurfEngUnit>("s1");
+    std::unique_ptr<FakeSurfEngUnit> s1_ptr = std::make_unique<FakeSurfEngUnit>(getName() + "_s1");
     auto & s1 = base.addEngUnit(std::move(s1_ptr));
-    auto & univ = base.createUniverse("fill_univ");
+    auto & univ = base.createUniverse(getName() + "_fill_univ");
     // intentionally create a cell that doesn't specifiy a universe that it should be added to so
     // that management of ownership through CSGBase can be properly tested
-    _expanded_cell = &base.createCell("real_cell", univ, -s1);
+    _expanded_cell = &base.createCell(getName() + "_real_cell", univ, -s1);
   }
 
 #ifdef MOOSE_UNIT_TEST
@@ -132,14 +133,15 @@ protected:
 
   void expandUnit(CSGBase & base) override
   {
-    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>("s1", 3.0);
+    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
     auto & s1 = base.addSurface(std::move(s1_ptr));
-    auto c1_prt = std::make_unique<FakeCellEngUnit>("c1_unit");
+    auto c1_prt = std::make_unique<FakeCellEngUnit>(getName() + "_c1_unit");
     auto & c1 = base.addEngUnit(std::move(c1_prt));
-    auto & c2 = base.createCell("c2", +s1);
+    auto & c2 = base.createCell(getName() + "_c2", +s1);
     std::vector<std::reference_wrapper<const CSG::CSGCell>> cells = {c1, c2};
-    _expanded_universe = &base.createUniverse("real_univ", cells);
+    _expanded_universe = &base.createUniverse(getName() + "_real_univ", cells);
   }
+
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(CSGEngUnitTest, testUnivUnit);
 #endif
