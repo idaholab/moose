@@ -98,7 +98,7 @@ TransformGenerator::generate()
       break;
   }
 
-  // MeshTools:: operations have already marked us as unprepared
+  // The operations we've called should have already appropriately marked us as unprepared
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
@@ -112,8 +112,12 @@ TransformGenerator::rotateExtrinsic(MeshBase & mesh,
   const auto R = RealTensorValue::extrinsic_rotation_matrix(
       alpha, beta, gamma); // this line is the only difference from rotate...
 
-  if (beta)
-    mesh.set_spatial_dimension(3);
+  // Let's not try to guess what this did to our spatial dimension (it
+  // could have reduced it, depending on the input mesh!), let's just
+  // mark that it needs to be recomputed.
+  // if (beta)
+  //  mesh.set_spatial_dimension(3);
+  mesh.unset_has_cached_elem_data();
 
   for (auto & node : mesh.node_ptr_range())
   {
@@ -132,7 +136,10 @@ TransformGenerator::rotateWithMatrix(MeshBase & mesh,
                                      const GenericRealTensorValue<false> & rotation_matrix)
 {
 #if LIBMESH_DIM == 3
-  mesh.set_spatial_dimension(3);
+  // Let's not try to guess what this did to our spatial dimension,
+  // let's just mark that it needs to be recomputed.
+  // mesh.set_spatial_dimension(3);
+  mesh.unset_has_cached_elem_data();
 
   for (auto & node : mesh.node_ptr_range())
   {
