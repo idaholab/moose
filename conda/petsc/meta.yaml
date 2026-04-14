@@ -53,6 +53,12 @@ requirements:
     - cmake
     - hdf5 {{ hdf5 }}
     - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
+    {% if mpi == "mpich" %}
+    # libfabric 2.5.1 on linux has an undefined reference to
+    # getrandom@GLIBC_2.25 during the petsc openblas build due
+    # to the 2.25 sysroot bump in conda-forge/libfabric-feedstock#42
+    - libfabric <2.5.1 # [linux]
+    {% endif %}
     - xz
     - zlib
 
