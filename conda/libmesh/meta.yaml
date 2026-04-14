@@ -41,10 +41,11 @@ requirements:
     - {{ mpi }} {{ mpi_version }}
     - moose-petsc 3.24.6 {{ mpi }}_0
     - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
-    - _openmp_mutex
+    - _openmp_mutex # [linux]
     - hdf5 {{ hdf5 }}
     - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
     - libtirpc
+    - llvm-openmp # [osx]
     - zlib
 
 test:
