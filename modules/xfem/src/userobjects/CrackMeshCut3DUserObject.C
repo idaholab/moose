@@ -158,8 +158,6 @@ CrackMeshCut3DUserObject::initialize()
           _is_mesh_modified = true;
           growFront();
           sortFrontNodes();
-          if (_inactive_boundary_pos.size() != 0)
-            findFrontIntersection();
           refineFront();
           triangulation();
           joinBoundary();
@@ -718,13 +716,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
     std::vector<Point> temp;
     Point dir;
 
-    if (_inactive_boundary_pos.size() != 0)
-    {
-      for (unsigned int j = 0; j < 3; ++j)
-        dir(j) = 0;
-      temp.push_back(dir);
-    }
-
+    // Compute direction for all interior active nodes
     unsigned int i1 = 1;
     unsigned int i2 = _active_boundary[i].size() - 1;
     if (_inactive_boundary_pos.size() == 0)
@@ -810,11 +802,11 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
     else
       mooseError("This growth_dir_method is not pre-defined!");
 
-    if (_inactive_boundary_pos.size() != 0)
+    // Boundary nodes copy direction from their connected active neighbor
+    if (_inactive_boundary_pos.size() != 0 && temp.size() > 0)
     {
-      for (unsigned int j = 0; j < 3; ++j)
-        dir(j) = 0;
-      temp.push_back(dir);
+      temp.insert(temp.begin(), temp.front());
+      temp.push_back(temp.back());
     }
 
     _active_direction.push_back(temp);
@@ -846,13 +838,8 @@ CrackMeshCut3DUserObject::growFront()
   {
     std::vector<dof_id_type> temp;
 
-    unsigned int i1 = 1;
-    unsigned int i2 = _active_boundary[i].size() - 1;
-    if (_inactive_boundary_pos.size() == 0)
-    {
-      i1 = 0;
-      i2 = _active_boundary[i].size();
-    }
+    unsigned int i1 = 0;
+    unsigned int i2 = _active_boundary[i].size();
 
     std::vector<int> index = getFrontPointsIndex();
     for (unsigned int j = i1; j < i2; ++j)
@@ -874,8 +861,14 @@ CrackMeshCut3DUserObject::growFront()
         case GrowthRateEnum::REPORTER:
         {
           int ind = index[j];
-          if (index[j] == -1)
-            growth_increment = 0;
+          if (ind == -1)
+          {
+            // Boundary node: use increment from nearest active neighbor
+            if (j == 0 && index.size() > 1 && index[1] != -1)
+              growth_increment = _growth_inc_reporter->at(index[1]);
+            else if (j == i2 - 1 && index.size() > 1 && index[i2 - 2] != -1)
+              growth_increment = _growth_inc_reporter->at(index[i2 - 2]);
+          }
           else
             growth_increment = _growth_inc_reporter->at(ind);
           break;
