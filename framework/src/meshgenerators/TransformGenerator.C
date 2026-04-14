@@ -77,18 +77,37 @@ TransformGenerator::generate()
   else
     vector_value = getParam<RealVectorValue>("vector_value");
 
+  // Any non-identity transform is going to invalidate any existing
+  // point locator
+  mesh->clear_point_locator();
+
   switch (_transform)
   {
     case 1:
     case 2:
     case 3:
       MeshTools::Modification::translate(*mesh, vector_value(0), vector_value(1), vector_value(2));
+      // libMesh translate() fails to properly mark the spatial
+      // dimension as unprepared in cases where we've displaced a 1D
+      // mesh in y or z or a 2D mesh in z.  Until that's fixed we work
+      // around the bug.
+      mesh->unset_has_cached_elem_data();
       break;
     case 4:
       MeshTools::Modification::rotate(*mesh, vector_value(0), vector_value(1), vector_value(2));
+      // libMesh rotate() tries to set the spatial dimension properly,
+      // and probably does for all realistic use cases, but there are
+      // at least hypothetical cases where it could be wrong.
+      //
+      // Until that's fixed we work around it.
+      mesh->unset_has_cached_elem_data();
       break;
     case 5:
       MeshTools::Modification::scale(*mesh, vector_value(0), vector_value(1), vector_value(2));
+      // Is anybody using scale() to just squash a manifold's spatial
+      // dimension down to its mesh dimension?  Let's be safe until
+      // libMesh is handling that case.
+      mesh->unset_has_cached_elem_data();
       break;
     case 6:
       TransformGenerator::rotateWithMatrix(*mesh, rotation_matrix);
