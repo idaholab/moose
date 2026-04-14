@@ -1,6 +1,6 @@
 [Mesh/fluid]
   type = FileMeshGenerator
-  file = ../step1_input_and_meshing/fluid_in.e
+  file = ../step1_input_and_meshing/gold/fluid_in.e
 []
 
 [Physics/HeatConduction/FiniteElement/heat_conduction]

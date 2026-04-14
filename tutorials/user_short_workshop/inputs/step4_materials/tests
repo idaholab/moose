@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#32759'
+  design = 'examples_and_tutorials/index.md'
+  [check_input]
+    requirement = "The user short workshop shall have correct input syntax for the input file"
+    [diffusion_materials]
+      type = RunApp
+      input = 'diffusion_materials.i'
+      check_input = True
+      detail = 'diffusion_materials.i'
+    []
+  []
+[]

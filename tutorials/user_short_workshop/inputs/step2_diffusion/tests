@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#32759'
+  design = 'examples_and_tutorials/index.md'
+  [check_input]
+    requirement = "The user short workshop shall have correct input syntax for the input file"
+    [diffusion_volumetric_source]
+      type = RunApp
+      input = 'diffusion_volumetric_source.i'
+      check_input = True
+      detail = 'diffusion_volumetric_source.i'
+    []
+    [diffusion]
+      type = RunApp
+      input = 'diffusion.i'
+      check_input = True
+      detail = 'diffusion.i'
+    []
+  []
+[]

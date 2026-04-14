@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#32759'
+  design = 'examples_and_tutorials/index.md'
+  [check_input]
+    requirement = "The user short workshop shall have correct input syntax for the input file"
+    [postprocessing]
+      type = RunApp
+      input = 'postprocessing.i'
+      check_input = True
+      detail = 'postprocessing.i'
+    []
+  []
+[]
