@@ -26,7 +26,7 @@ MFEMVectorPostprocessor::MFEMVectorPostprocessor(const InputParameters & paramet
 }
 
 std::optional<std::string>
-MFEMVectorPostprocessor::producedVectorPostprocessorName() const
+MFEMVectorPostprocessor::suppliedVectorPostprocessorName() const
 {
   return PPName();
 }

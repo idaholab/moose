@@ -34,7 +34,7 @@ MFEMInitialCondition::MFEMInitialCondition(const InputParameters & params)
 }
 
 std::optional<std::string>
-MFEMInitialCondition::producedVariableName() const
+MFEMInitialCondition::suppliedVariableName() const
 {
   return getParam<VariableName>("variable");
 }

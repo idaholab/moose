@@ -25,13 +25,13 @@ The template parameter `T` must be one of `VariableName`, `std::vector<VariableN
 `PostprocessorName`, `std::vector<PostprocessorName>`, `VectorPostprocessorName`, or
 `std::vector<VectorPostprocessorName>`. The scheduler infers the resource category from the type.
 
-The resource produced by this object is declared by overriding one of:
+The resource supplied by this object is declared by overriding one of:
 
-- `producedVariableName()` — name of the MFEM variable written by this object.
-- `producedPostprocessorName()` — name of the postprocessor written by this object.
-- `producedVectorPostprocessorName()` — name of the vector postprocessor written by this object.
+- `suppliedVariableName()` — name of the MFEM variable written by this object.
+- `suppliedPostprocessorName()` — name of the postprocessor written by this object.
+- `suppliedVectorPostprocessorName()` — name of the vector postprocessor written by this object.
 
-Each returns `std::optional<std::string>`; return `std::nullopt` (the default) if the object produces no resource in that category.
+Each returns `std::optional<std::string>`; return `std::nullopt` (the default) if the object supplies no resource in that category.
 
 ## Lifecycle methods
 

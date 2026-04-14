@@ -32,7 +32,7 @@ MFEMComplexAuxKernel::MFEMComplexAuxKernel(const InputParameters & parameters)
 }
 
 std::optional<std::string>
-MFEMComplexAuxKernel::producedVariableName() const
+MFEMComplexAuxKernel::suppliedVariableName() const
 {
   return _result_var_name;
 }

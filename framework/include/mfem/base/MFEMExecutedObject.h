@@ -75,17 +75,17 @@ public:
   virtual void finalize() {}
 
   /**
-   * Return the variable name produced by this object, or std::nullopt if none.
+   * Return the variable name supplied by this object, or std::nullopt if none.
    */
-  virtual std::optional<std::string> producedVariableName() const;
+  virtual std::optional<std::string> suppliedVariableName() const;
   /**
-   * Return the postprocessor name produced by this object, or std::nullopt if none.
+   * Return the postprocessor name supplied by this object, or std::nullopt if none.
    */
-  virtual std::optional<std::string> producedPostprocessorName() const;
+  virtual std::optional<std::string> suppliedPostprocessorName() const;
   /**
-   * Return the vector postprocessor name produced by this object, or std::nullopt if none.
+   * Return the vector postprocessor name supplied by this object, or std::nullopt if none.
    */
-  virtual std::optional<std::string> producedVectorPostprocessorName() const;
+  virtual std::optional<std::string> suppliedVectorPostprocessorName() const;
 
   virtual const std::set<std::string> & getRequestedItems() override;
   virtual const std::set<std::string> & getSuppliedItems() override;
@@ -108,15 +108,15 @@ public:
 
 protected:
   /**
-   * Build the dependency key used for a produced/requested variable.
+   * Build the dependency key used for a supplied/requested variable.
    */
   static std::string variableDependencyKey(const std::string & name);
   /**
-   * Build the dependency key used for a produced/requested postprocessor.
+   * Build the dependency key used for a supplied/requested postprocessor.
    */
   static std::string postprocessorDependencyKey(const std::string & name);
   /**
-   * Build the dependency key used for a produced/requested vector postprocessor.
+   * Build the dependency key used for a supplied/requested vector postprocessor.
    */
   static std::string vectorPostprocessorDependencyKey(const std::string & name);
 
@@ -143,7 +143,7 @@ protected:
 private:
   /// Lazily constructed requested dependency keys for this object's registered dependencies.
   std::optional<std::set<std::string>> _requested_items;
-  /// Lazily constructed supplied dependency keys for this object's produced resources.
+  /// Lazily constructed supplied dependency keys for this object's supplied resources.
   std::optional<std::set<std::string>> _supplied_items;
   /// Compact typed metadata describing dependency-bearing parameters on this object.
   std::vector<DependencyParam> _dependency_params;

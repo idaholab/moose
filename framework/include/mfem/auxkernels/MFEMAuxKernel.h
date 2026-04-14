@@ -28,7 +28,7 @@ public:
   /// Method called to update any owned objects upon an FE space update
   virtual void update() {}
 
-  virtual std::optional<std::string> producedVariableName() const override;
+  virtual std::optional<std::string> suppliedVariableName() const override;
 
 protected:
   /// Name of auxvariable to store the result of the auxkernel in.

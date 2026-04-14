@@ -42,19 +42,19 @@ MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
 }
 
 std::optional<std::string>
-MFEMExecutedObject::producedVariableName() const
+MFEMExecutedObject::suppliedVariableName() const
 {
   return std::nullopt;
 }
 
 std::optional<std::string>
-MFEMExecutedObject::producedPostprocessorName() const
+MFEMExecutedObject::suppliedPostprocessorName() const
 {
   return std::nullopt;
 }
 
 std::optional<std::string>
-MFEMExecutedObject::producedVectorPostprocessorName() const
+MFEMExecutedObject::suppliedVectorPostprocessorName() const
 {
   return std::nullopt;
 }
@@ -111,11 +111,11 @@ MFEMExecutedObject::getSuppliedItems()
 
   _supplied_items.emplace();
 
-  if (const auto name = producedVariableName())
+  if (const auto name = suppliedVariableName())
     _supplied_items->insert(variableDependencyKey(*name));
-  if (const auto name = producedPostprocessorName())
+  if (const auto name = suppliedPostprocessorName())
     _supplied_items->insert(postprocessorDependencyKey(*name));
-  if (const auto name = producedVectorPostprocessorName())
+  if (const auto name = suppliedVectorPostprocessorName())
     _supplied_items->insert(vectorPostprocessorDependencyKey(*name));
 
   return *_supplied_items;
