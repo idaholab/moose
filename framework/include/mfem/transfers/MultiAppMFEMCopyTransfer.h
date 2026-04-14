@@ -28,6 +28,8 @@ public:
 protected:
   /// Transfer all variables from active source problem to active destination problem.
   virtual void transferVariables() override;
+  /// Check number of source and target child apps match for sibling transfer
+  void checkSiblingsTransferSupported() const override;
 
   /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override

@@ -60,35 +60,22 @@ MFEMMultiAppTransfer::execute()
       break;
     case BETWEEN_MULTIAPP:
       int transfers_done = 0;
-      for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
-        if (getFromMultiApp()->hasLocalApp(i) && getToMultiApp()->hasLocalApp(i))
-        {
-          setActiveToProblem(getToMultiApp()->appProblemBase(i));
-          setActiveFromProblem(getFromMultiApp()->appProblemBase(i));
-          transferVariables();
-          ++transfers_done;
-        }
+      for (unsigned int from_app_id = 0; from_app_id < getFromMultiApp()->numGlobalApps();
+           from_app_id++)
+        for (unsigned int to_app_id = 0; to_app_id < getToMultiApp()->numGlobalApps(); to_app_id++)
+          if (getFromMultiApp()->hasLocalApp(from_app_id) &&
+              getToMultiApp()->hasLocalApp(to_app_id))
+          {
+            setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id));
+            setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id));
+            transferVariables();
+            ++transfers_done;
+          }
       if (!transfers_done)
         mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
                    "per multiapp involved on each rank");
       break;
   }
-}
-
-void
-MFEMMultiAppTransfer::checkSiblingsTransferSupported() const
-{
-  // Check that we are in the supported configuration: same number of source and target apps
-  // The allocation of the child apps on the processors must be the same
-  if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
-  {
-    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-      if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
-        mooseError("Child application allocation on parallel processes must be the same to support "
-                   "siblings variable field copy transfer");
-  }
-  else
-    mooseError("Number of source and target child apps must match for siblings transfer");
 }
 
 EquationSystems &
