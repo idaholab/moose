@@ -310,11 +310,24 @@ public:
     moose::internal::mooseWarningStream(_console, std::forward<Args>(args)...);
   }
 
+  /**
+   * Emits a deprecation warning prefixed with the object name and type, and a stack trace.
+   */
   template <typename... Args>
   void mooseDeprecated(Args &&... args) const
   {
     moose::internal::mooseDeprecatedStream(
-        _console, false, true, messagePrefix(true), std::forward<Args>(args)...);
+        _console, false, true, true, messagePrefix(true), std::forward<Args>(args)...);
+  }
+
+  /**
+   * Emits a deprecation warning prefixed with the object name and type, and no stack trace.
+   */
+  template <typename... Args>
+  void mooseDeprecatedNoTrace(Args &&... args) const
+  {
+    moose::internal::mooseDeprecatedStream(
+        _console, false, true, false, messagePrefix(true), std::forward<Args>(args)...);
   }
 
   template <typename... Args>
@@ -329,9 +342,12 @@ public:
    * @param with_prefix If true, add the prefix from messagePrefix(), which is the object
    * information (type, name, etc)
    * @param node Optional hit node to add file path context as a prefix
+   * @param show_trace Whether or not to show a stack trace, defaults to true
    */
-  [[noreturn]] void
-  callMooseError(std::string msg, const bool with_prefix, const hit::Node * node = nullptr) const;
+  [[noreturn]] void callMooseError(std::string msg,
+                                   const bool with_prefix,
+                                   const hit::Node * node = nullptr,
+                                   const bool show_trace = true) const;
 
   /**
    * External method for calling moose error with added object context.
@@ -345,12 +361,14 @@ public:
    * @param with_prefix If true, add the prefix from messagePrefix(), which is the object
    * information (type, name, etc)
    * @param node Optional hit node to add file path context as a prefix
+   * @param show_trace Whether or not to show a stack trace, defaults to true
    */
   [[noreturn]] static void callMooseError(MooseApp * const app,
                                           const InputParameters & params,
                                           std::string msg,
                                           const bool with_prefix,
-                                          const hit::Node * node);
+                                          const hit::Node * node,
+                                          const bool show_trace = true);
 
 protected:
   /// The MOOSE application this is associated with

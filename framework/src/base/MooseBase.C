@@ -104,9 +104,10 @@ MooseBase::connectControllableParams(const std::string & parameter,
 [[noreturn]] void
 MooseBase::callMooseError(std::string msg,
                           const bool with_prefix,
-                          const hit::Node * node /* = nullptr */) const
+                          const hit::Node * node /* = nullptr */,
+                          const bool show_trace /* = true */) const
 {
-  callMooseError(&_app, _pars, msg, with_prefix, node);
+  callMooseError(&_app, _pars, msg, with_prefix, node, show_trace);
 }
 
 [[noreturn]] void
@@ -114,7 +115,8 @@ MooseBase::callMooseError(MooseApp * const app,
                           const InputParameters & params,
                           std::string msg,
                           const bool with_prefix,
-                          const hit::Node * node)
+                          const hit::Node * node,
+                          const bool show_trace /* = true */)
 {
   if (!node)
     node = MooseBase::getHitNode(params);
@@ -131,7 +133,7 @@ MooseBase::callMooseError(MooseApp * const app,
     // False here because the hit context will get processed by the node
     msg = messagePrefix(params, false) + msg;
 
-  moose::internal::mooseErrorRaw(msg, multiapp_prefix, node);
+  moose::internal::mooseErrorRaw(msg, multiapp_prefix, node, show_trace);
 }
 
 std::string

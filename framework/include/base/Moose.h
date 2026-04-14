@@ -172,12 +172,6 @@ inline constexpr std::size_t invalid_size_t = std::numeric_limits<std::size_t>::
 extern int interrupt_signal_number;
 
 /**
- * Set to true (the default) to print the stack trace with error and warning
- * messages - false to omit it.
- */
-extern bool show_trace;
-
-/**
  * Set to false (the default) to display an error message only once for each error call code
  * location (as opposed to every time the code is executed).
  */
