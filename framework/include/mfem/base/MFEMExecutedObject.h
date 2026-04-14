@@ -15,10 +15,8 @@
 #include "SetupInterface.h"
 #include "DependencyResolverInterface.h"
 
-#include <algorithm>
 #include <optional>
 #include <set>
-#include <type_traits>
 
 /**
  * Base class for MFEM objects that participate in execution ordering but are not UserObjects.
@@ -29,26 +27,14 @@ class MFEMExecutedObject : public MFEMObject,
 {
 public:
   /**
-   * Dependency resource categories understood by the MFEM executed-object scheduler.
-   */
-  enum class DependencyKind : unsigned char
-  {
-    Variable = 0,
-    Postprocessor = 1,
-    VectorPostprocessor = 2
-  };
-
-  /**
    * Metadata describing one dependency-bearing input parameter on this object.
    */
   struct DependencyParam
   {
     /// The resource category requested through this parameter.
-    DependencyKind kind;
+    std::string kind;
     /// The parameter name storing the dependency value(s).
     std::string param_name;
-    /// Whether the parameter stores a vector of dependency names.
-    bool is_vector;
   };
 
   /**
@@ -121,24 +107,11 @@ protected:
   static std::string vectorPostprocessorDependencyKey(const std::string & name);
 
   /**
-   * Map a dependency parameter type to its scheduler resource category.
-   */
-  template <typename T>
-  static constexpr DependencyKind dependencyKind();
-
-  /**
-   * Whether a dependency parameter type stores a vector of dependency names.
-   */
-  template <typename T>
-  static constexpr bool dependencyIsVector();
-
-  /**
    * Record one dependency-bearing parameter in the private parameter metadata.
    */
   static void appendDependencyParam(InputParameters & params,
                                     const std::string & param_name,
-                                    const DependencyKind kind,
-                                    const bool is_vector);
+                                    const std::string & kind);
 
 private:
   /// Lazily constructed requested dependency keys for this object's registered dependencies.
@@ -156,7 +129,7 @@ MFEMExecutedObject::addDependencyParam(InputParameters & params,
                                        const std::string & doc_string)
 {
   params.addParam<T>(param_name, doc_string);
-  appendDependencyParam(params, param_name, dependencyKind<T>(), dependencyIsVector<T>());
+  appendDependencyParam(params, param_name, typeid(T).name());
 }
 
 template <typename T>
@@ -166,38 +139,7 @@ MFEMExecutedObject::addRequiredDependencyParam(InputParameters & params,
                                                const std::string & doc_string)
 {
   params.addRequiredParam<T>(param_name, doc_string);
-  appendDependencyParam(params, param_name, dependencyKind<T>(), dependencyIsVector<T>());
-}
-
-template <typename T>
-constexpr MFEMExecutedObject::DependencyKind
-MFEMExecutedObject::dependencyKind()
-{
-  if constexpr (std::is_same_v<T, VariableName> || std::is_same_v<T, std::vector<VariableName>>)
-    return DependencyKind::Variable;
-  else if constexpr (std::is_same_v<T, PostprocessorName> ||
-                     std::is_same_v<T, std::vector<PostprocessorName>>)
-    return DependencyKind::Postprocessor;
-  else if constexpr (std::is_same_v<T, VectorPostprocessorName> ||
-                     std::is_same_v<T, std::vector<VectorPostprocessorName>>)
-    return DependencyKind::VectorPostprocessor;
-  else
-    static_assert(!sizeof(T), "Unsupported MFEM executed-object dependency parameter type");
-}
-
-template <typename T>
-constexpr bool
-MFEMExecutedObject::dependencyIsVector()
-{
-  if constexpr (std::is_same_v<T, std::vector<VariableName>> ||
-                std::is_same_v<T, std::vector<PostprocessorName>> ||
-                std::is_same_v<T, std::vector<VectorPostprocessorName>>)
-    return true;
-  else if constexpr (std::is_same_v<T, VariableName> || std::is_same_v<T, PostprocessorName> ||
-                     std::is_same_v<T, VectorPostprocessorName>)
-    return false;
-  else
-    static_assert(!sizeof(T), "Unsupported MFEM executed-object dependency parameter type");
+  appendDependencyParam(params, param_name, typeid(T).name());
 }
 
 #endif
