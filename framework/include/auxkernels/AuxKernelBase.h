@@ -27,7 +27,7 @@
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "ElementIDInterface.h"
-#include "UserObject.h"
+#include "UserObjectBase.h"
 #include "NonADFunctorInterface.h"
 
 // forward declarations

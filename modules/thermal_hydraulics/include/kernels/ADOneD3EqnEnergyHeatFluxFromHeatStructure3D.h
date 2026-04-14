@@ -11,6 +11,8 @@
 
 #include "ADKernel.h"
 
+class UserObject;
+
 /**
  * Computes heat source term for 1-phase flow channel coupled with a 3D heat structure.
  */

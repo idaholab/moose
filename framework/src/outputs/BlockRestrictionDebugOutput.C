@@ -20,6 +20,7 @@
 #include "KernelBase.h"
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
+#include "UserObject.h"
 
 #include "libmesh/transient_system.h"
 

@@ -15,7 +15,6 @@
 
 // Forward declarations
 class MooseObject;
-class UserObject;
 class UserObjectBase;
 class FEProblemBase;
 
