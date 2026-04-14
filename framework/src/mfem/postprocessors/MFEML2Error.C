@@ -23,7 +23,7 @@ MFEML2Error::validParams()
       "gridfunctions using H1 or L2 elements.");
   params.addParam<MFEMScalarCoefficientName>("function",
                                              "The analytic solution to compare against.");
-  MFEMExecutedObject::addDependencyParam<VariableName>(
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "variable", "Name of the variable of which to find the norm of the error.");
   return params;
 }
