@@ -20,12 +20,10 @@ class ParsedMaterialBase
 public:
   static InputParameters validParams();
 
-  ParsedMaterialBase(const InputParameters & parameters, const MooseObject * obj);
+  ParsedMaterialBase(const InputParameters & parameters);
+  virtual ~ParsedMaterialBase() = default;
 
 protected:
-  /// Pointer to the MooseObject (to call paramError)
-  const MooseObject * const _derived_object;
-
   /// Parameter that the function comes from
   const std::string _function_param;
 

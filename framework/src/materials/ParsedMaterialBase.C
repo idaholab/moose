@@ -73,9 +73,8 @@ ParsedMaterialBase::validParams()
   return params;
 }
 
-ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters, const MooseObject * obj)
-  : _derived_object(obj),
-    _function_param(parameters.isParamValid("function") ? "function" : "expression"),
+ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters)
+  : _function_param(parameters.isParamValid("function") ? "function" : "expression"),
     _function(parameters.get<std::string>(_function_param))
 {
   // get constant vectors
@@ -100,8 +99,8 @@ ParsedMaterialBase::validateVectorNames(const std::set<std::string> & reserved_n
   // helper method to raise an paramError
   auto raiseErr = [this](std::string param_name, std::string msg)
   {
-    if (_derived_object != nullptr)
-      _derived_object->paramError(param_name, msg);
+    if (auto derived_object = dynamic_cast<MooseObject *>(this))
+      derived_object->paramError(param_name, msg);
     else
       mooseException(msg);
   };

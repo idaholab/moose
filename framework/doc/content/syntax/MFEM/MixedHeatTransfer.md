@@ -28,7 +28,7 @@ the mixed weak form of the transient heat equation
 \left(\rho c_p \frac{\partial T}{\partial t}, T'\right)_\Omega + \left(\vec \nabla \cdot \vec h, T'\right)_\Omega
 = 0 \,\,\, \forall T' \in V_T \\
 \left(k^{-1} \vec h, \vec h'\right)_\Omega - (T, \vec \nabla \cdot \vec h')_\Omega
-= (T , \vec h' \cdot \hat n)_{\partial \Omega} \,\,\, \forall \vec h' \in V_h
+= -(T , \vec h' \cdot \hat n)_{\partial \Omega} \,\,\, \forall \vec h' \in V_h
 \end{split}
 \end{equation}
 

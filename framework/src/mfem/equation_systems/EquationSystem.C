@@ -235,8 +235,8 @@ EquationSystem::ApplyEssentialBCs()
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
 
-    // For now, we zero out the gridfunction before populating it with the essential dofs
-    trial_gf = 0;
+    // Initial guess for non-linear problems (initial condition or the previous time step solution)
+    trial_gf = _gfuncs->GetRef(trial_var_name);
 
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
@@ -375,7 +375,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
+EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
   height = trueX.Size();
   width = trueRHS.Size();

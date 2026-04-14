@@ -25,7 +25,7 @@ DerivativeParsedMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
     const InputParameters & parameters)
-  : ParsedMaterialBase(parameters, this),
+  : ParsedMaterialBase(parameters),
     DerivativeParsedMaterialHelperTempl<is_ad>(
         parameters, VariableNameMappingMode::USE_MOOSE_NAMES, _function_param)
 {
