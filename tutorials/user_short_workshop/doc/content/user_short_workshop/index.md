@@ -10,6 +10,10 @@
 
 !---
 
+!include common_tutorial_pages/moose_applications.md
+
+!---
+
 !include workshop/intro/moose_multiphysics.md
 
 !---

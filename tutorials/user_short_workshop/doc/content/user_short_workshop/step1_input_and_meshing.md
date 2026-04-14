@@ -482,7 +482,7 @@ From `fluid_in.e`: The grey elements represent the water (block `water`). There 
 
 !---
 
-## Re-using The Meshes
+## Reusing the Meshes
 
 We can then load these meshes in later inputs with:
 

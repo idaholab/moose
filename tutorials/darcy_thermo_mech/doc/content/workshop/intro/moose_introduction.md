@@ -25,13 +25,19 @@
   - Working efficiently on a few and many processors
   - Providing an object-oriented, extensible system for creating all aspects of a simulation tool
 
+- Motivated by multiphysics problems in nuclear engineering, but applications have
+  extended into diverse fields
+
+- Core team at Idaho National Laboratory, but with significant contributions from
+  other laboratories, universities, and industry, both domestically and internationally
+
 !---
 
 ## By The Numbers
 
 - 250 contributors
 - 58,000 commits
-- 5000 unique visitors per month
+- 5,000 unique visitors per month
 - ~40 new Discussion participants per week
 - 150M tests per week
 
@@ -47,7 +53,7 @@
 - Higher order geometry
 - Mesh adaptivity (refinement and coarsening)
 - Massively parallel (MPI and threads)
-- User code agnostic of dimension, parallelism, shape functions, etc
+- User code agnostic of dimension, parallelism, shape functions, etc.
 - Native support for executing multiphysics simulations across applications
 - GPU support for execution via MFEM and Kokkos
 - Operating Systems:

@@ -47,6 +47,7 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
             - application_usage/failed_solves.md
+            - common_tutorial_pages/moose_applications.md
             - getting_started/installation/index.md
             - help/development/VSCode.md
     chemical_reactions:
