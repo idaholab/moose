@@ -1,0 +1,35 @@
+[Tests]
+  issues = '#32759'
+  design = 'examples_and_tutorials/index.md'
+  [check_input]
+    requirement = "The user short workshop shall generate the correct mesh for the input file"
+    [basic]
+      type = Exodiff
+      input = 'basic.i'
+      cli_args = '--mesh-only'
+      exodiff = 'basic_in.e'
+      detail = 'basic.i'
+    []
+    [concentric_circle]
+      type = Exodiff
+      input = 'concentric_circle.i'
+      cli_args = '--mesh-only'
+      exodiff = 'concentric_circle_in.e'
+      detail = 'concentric_circle.i'
+    []
+    [fluid]
+      type = Exodiff
+      input = 'fluid.i'
+      cli_args = '--mesh-only'
+      exodiff = 'fluid_in.e'
+      detail = 'fluid.i'
+    []
+    [fuel_pin]
+      type = Exodiff
+      input = 'fuel_pin.i'
+      cli_args = '--mesh-only'
+      exodiff = 'fuel_pin_in.e'
+      detail = 'fuel_pin.i'
+    []
+  []
+[]

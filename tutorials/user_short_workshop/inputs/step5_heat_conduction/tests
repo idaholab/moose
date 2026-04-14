@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#32759'
+  design = 'examples_and_tutorials/index.md'
+  [check_input]
+    requirement = "The user short workshop shall have correct input syntax for the input file"
+    [fluid]
+      type = RunApp
+      input = 'fluid.i'
+      check_input = True
+      detail = 'fluid.i'
+    []
+    [solid]
+      type = RunApp
+      input = 'solid.i'
+      check_input = True
+      detail = 'solid.i'
+    []
+  []
+[]
