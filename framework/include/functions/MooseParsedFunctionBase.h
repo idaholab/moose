@@ -59,7 +59,7 @@ protected:
    * @return The vector of strings, if the input function is valid
    * @see ParsedFunction
    */
-  const std::string verifyFunction(const std::string & function_str);
+  std::string verifyFunction(const std::string & function_str);
 
   /// Reference to the FEProblemBase class for this object
   FEProblemBase & _pfb_feproblem;
