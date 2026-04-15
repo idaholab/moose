@@ -138,13 +138,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
 		libmesh_CPPFLAGS += -isystem $(LIBTORCH_DIR)/include/c10
 
     # Dynamically linking with the available pytorch library
-		ifeq ($(shell uname -s),Darwin)
-			libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib
-		else
-		  libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(LIBTORCH_DIR)/lib
-		endif
-
-    libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
+    libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib -L$(LIBTORCH_DIR)/lib -ltorch
 
   else
 		# No libtorch library found
@@ -172,13 +166,7 @@ ifeq ($(ENABLE_MFEM),true)
     libmesh_CPPFLAGS += $(MFEM_INCFLAGS) -DMFEM_CONFIG_FILE=\"_config-$(METHOD).hpp\"
 
     # Dynamically linking with the available MFEM library
-    ifeq ($(shell uname -s),Darwin)
-      libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
-    else
-      libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
-    endif
-
-    libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem-$(METHOD) -lmfem-common-$(METHOD)
+    libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib -L$(MFEM_DIR)/lib -lmfem-$(METHOD) -lmfem-common-$(METHOD)
 
   else
     # No mfem library found
