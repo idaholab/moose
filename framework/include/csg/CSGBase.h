@@ -1194,6 +1194,7 @@ private:
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   FRIEND_TEST(CSGBaseTest, testCellEngUnitAddErrors);
+  FRIEND_TEST(CSGBaseTest, testUnivEngUnitAddErrors);
   ///@}
 #endif
 };
