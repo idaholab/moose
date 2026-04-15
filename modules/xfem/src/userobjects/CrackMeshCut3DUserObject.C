@@ -732,9 +732,9 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
         Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
         mooseAssert(this_node, "Node is NULL");
         Point & this_point = *this_node;
-        dir(0) = _func_x->value(0, this_point);
-        dir(1) = _func_y->value(0, this_point);
-        dir(2) = _func_z->value(0, this_point);
+        dir(0) = _func_x->value(_t, this_point);
+        dir(1) = _func_y->value(_t, this_point);
+        dir(2) = _func_z->value(_t, this_point);
 
         temp.push_back(dir);
       }
@@ -855,7 +855,7 @@ CrackMeshCut3DUserObject::growFront()
       {
         case GrowthRateEnum::FUNCTION:
         {
-          growth_increment = _func_v->value(0, Point(0, 0, 0));
+          growth_increment = _func_v->value(_t, Point(0, 0, 0));
           break;
         }
         case GrowthRateEnum::REPORTER:
