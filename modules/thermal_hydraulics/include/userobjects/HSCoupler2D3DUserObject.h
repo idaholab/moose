@@ -70,6 +70,9 @@ protected:
   /// Mesh alignment object
   MeshAlignment2D3D & _mesh_alignment;
 
+  /// Azimuthal symmetry correction factor (= 2*pi / covered_angle; 1.0 for full circle)
+  const Real _symmetry_factor;
+
   /// Map of the element ID to the heat flux
   std::map<dof_id_type, std::vector<ADReal>> _elem_id_to_heat_flux;
 };
