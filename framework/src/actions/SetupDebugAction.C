@@ -200,7 +200,8 @@ SetupDebugAction::act()
 #ifdef NDEBUG
     mooseError("The parameter 'error_on_residual_nan' may only be set to 'true' for 'dbg' and "
                "'devel' modes.");
-#endif
+#else
     _problem->setCheckResidualForNans(true);
+#endif
   }
 }

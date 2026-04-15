@@ -221,6 +221,7 @@ public:
    */
   bool checkingUOAuxState() const { return _checking_uo_aux_state; }
 
+#ifndef NDEBUG
   virtual bool checkResidualForNans() const override { return _check_residual_for_nans; }
 
   /// Setter for residual NaN/Inf checking
@@ -228,6 +229,7 @@ public:
   {
     _check_residual_for_nans = check_residual_for_nans;
   }
+#endif
 
   /**
    * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
@@ -3294,8 +3296,10 @@ protected:
   /// Whether or not checking the state of uo/aux evaluation
   const bool _uo_aux_state_check;
 
+#ifndef NDEBUG
   /// Whether to check the residual for NaN or Inf values
   bool _check_residual_for_nans;
+#endif
 
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
