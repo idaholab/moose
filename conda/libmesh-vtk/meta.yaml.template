@@ -45,9 +45,9 @@ test:
   commands:
     - test $VTK_VERSION == {{ vtk_friendly_version }}
     - test -d $VTKLIB_DIR
-    - test $VTKLIB_DIR == ${PREFIX}/moose-libmesh-vtk/lib
+    - test $VTKLIB_DIR == ${PREFIX}/lib
     - test -d $VTKINCLUDE_DIR
-    - test $VTKINCLUDE_DIR == ${PREFIX}/moose-libmesh-vtk/include/vtk-${VTK_VERSION}
+    - test $VTKINCLUDE_DIR == ${PREFIX}/include/vtk-${VTK_VERSION}
     - test -f ${VTKLIB_DIR}/libvtkCommonCore-${VTK_VERSION}.dylib # [osx]
     - test -f ${VTKLIB_DIR}/libvtkCommonCore-${VTK_VERSION}.so    # [linux]
 

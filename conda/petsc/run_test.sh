@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exu
 
-test "${PETSC_DIR:?}" == "${PREFIX:?}"/moose-petsc
+test "${PETSC_DIR:?}" == "${PREFIX:?}"
 
 pkg-config --validate PETSc
 pkg-config --cflags PETSc | grep -v isystem

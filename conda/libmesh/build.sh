@@ -2,7 +2,6 @@
 set -eux
 export PATH=/bin:$PATH
 export METHODS="opt oprof devel dbg"
-LIBMESH_PREFIX="${PREFIX:?}/moose-libmesh"
 
 function do_build(){
     # Strip flags that cause issues
@@ -16,10 +15,9 @@ function do_build(){
         _FFLAGS="${_FFLAGS/${FLAG} /}"
     done
 
-    rm -rf "$LIBMESH_PREFIX"
     mkdir -p "${SRC_DIR:?}/build"
     cd "${SRC_DIR:?}/build"
-    PREFIX="$LIBMESH_PREFIX" LIBMESH_DIR="$LIBMESH_PREFIX" PETSC_DIR="${PETSC_DIR:?}" configure_libmesh \
+    LIBMESH_DIR="$PREFIX" PETSC_DIR="${PETSC_DIR:?}" configure_libmesh \
         --disable-dependency-tracking \
         --with-vtk-lib="${VTKLIB_DIR:?}" \
         --with-vtk-include="${VTKINCLUDE_DIR:?}" \
@@ -53,26 +51,26 @@ sedinplace() {
     sed -i"" "$@"
   fi
 }
-sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$LIBMESH_PREFIX"/bin/libmesh-config
-sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$LIBMESH_PREFIX"/contrib/bin/libtool
+sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$PREFIX"/bin/libmesh-config
+sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$PREFIX"/contrib/bin/libtool
 
 # Fix hard paths to /usr/bin/ when most operating system want these tools in /bin
 if [ "$(uname)" != "Darwin" ]; then
     for tool in sed grep dd; do
-        sed -i"" s%/usr/bin/"${tool}"%/bin/"${tool}"%g "$LIBMESH_PREFIX"/contrib/bin/libtool
+        sed -i"" s%/usr/bin/"${tool}"%/bin/"${tool}"%g "$PREFIX"/contrib/bin/libtool
     done
 # Fix rpath for libmesh libs on mac; linking to libnglib (netgen) will fail without this
 else
     for METHOD in $METHODS; do
-        install_name_tool -add_rpath "$LIBMESH_PREFIX"/lib "$LIBMESH_PREFIX"/lib/libmesh_"$METHOD".0.dylib
+        install_name_tool -add_rpath "$PREFIX"/lib "$PREFIX"/lib/libmesh_"$METHOD".0.dylib
     done
 fi
 
 # Set LIBMESH_DIR, Eigen3_DIR
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export LIBMESH_DIR=${LIBMESH_PREFIX}
-export Eigen3_DIR=${LIBMESH_PREFIX}/include/Eigen
+export LIBMESH_DIR=${PREFIX}
+export Eigen3_DIR=${PREFIX}/include/Eigen
 EOF
 # Unset previously set variables
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"

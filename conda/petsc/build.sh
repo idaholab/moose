@@ -13,7 +13,7 @@ function do_build(){
     export PETSC_DIR=$SRC_DIR
     export PETSC_ARCH=arch-conda-c-opt
 
-    rm -rf "${PREFIX:?}/moose-petsc" "${SRC_DIR:?}/${PETSC_ARCH}"
+    rm -rf "${SRC_DIR:?}/${PETSC_ARCH}"
 
     ## TODO: the following is a partial requirement for the day we introduce pytorch
     # Handle switches created by Conda variants
@@ -51,7 +51,7 @@ function do_build(){
         --with-cxxlib-autodetect=0 \
         --with-x=0 \
         --with-ssl=0 \
-        --prefix="${PREFIX}/moose-petsc"
+        --prefix="$PREFIX"
 
     make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH all
     make PETSC_DIR="$SRC_DIR" PETSC_ARCH=$PETSC_ARCH install
@@ -61,7 +61,7 @@ function do_build(){
     if [[ $(uname) == 'linux' ]]; then
         # set forth by MPI conda-forge package
         # shellcheck disable=SC2154
-        make SLEPC_DIR="$PREFIX"/moose-petsc PETSC_DIR="$PREFIX"/moose-petsc PETSC_ARCH="" check
+        make SLEPC_DIR="$PREFIX" PETSC_DIR="$PREFIX" PETSC_ARCH="" check
     fi
 }
 
@@ -80,22 +80,21 @@ source "${SRC_DIR:?}/retry_build.sh"
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
 
-PETSC_DIR="${PREFIX}/moose-petsc"
 
 # Remove unneeded files
-rm -f "$PETSC_DIR"/lib/petsc/conf/configure-hash
-find "$PETSC_DIR"/lib/petsc -name '*.pyc' -delete
+rm -f "$PREFIX"/lib/petsc/conf/configure-hash
+find "$PREFIX"/lib/petsc -name '*.pyc' -delete
 
 # remove abspath of executables in $BUILD_PREFIX
 # let them resolve on $PATH
-for f in $(grep -l "${BUILD_PREFIX}/bin/" -R "${PETSC_DIR}/lib/petsc") "$PETSC_DIR/lib/pkgconfig/PETSc.pc"; do
+for f in $(grep -l "${BUILD_PREFIX}/bin/" -R "${PREFIX}/lib/petsc") "$PREFIX/lib/pkgconfig/PETSc.pc"; do
   echo "Fixing ${BUILD_PREFIX}/bin/ in $f"
   grep "${BUILD_PREFIX}/bin/" "$f" || true
   sedinplace s%"${BUILD_PREFIX}"/bin/%%g "$f"
 done
 
 # rewrite remaining $BUILD_PREFIX to $PREFIX
-for f in $(grep -l "${BUILD_PREFIX}" -R "${PETSC_DIR}/lib/petsc") "$PETSC_DIR/lib/pkgconfig/PETSc.pc"; do
+for f in $(grep -l "${BUILD_PREFIX}" -R "${PREFIX}/lib/petsc") "$PREFIX/lib/pkgconfig/PETSc.pc"; do
   echo "Fixing ${BUILD_PREFIX} in $f"
   grep "${BUILD_PREFIX}" "$f" || true
   sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$f"
@@ -104,25 +103,23 @@ done
 # Strip GCC runtime libs on mac
 if [[ $(uname) == Darwin ]]; then
   echo "Stripping GCC runtime libs"
-  sed -i '' 's/-lemutls_w//g; s/-lheapt_w//g; s/-lgcc_s\.1[^ ]*//g' "$PETSC_DIR"/lib/pkgconfig/PETSc.pc "$PETSC_DIR"/lib/petsc/conf/petscvariables
+  sed -i '' 's/-lemutls_w//g; s/-lheapt_w//g; s/-lgcc_s\.1[^ ]*//g' "$PREFIX"/lib/pkgconfig/PETSc.pc "$PREFIX"/lib/petsc/conf/petscvariables
 fi
 
 echo "Removing example files"
-du -hs "$PETSC_DIR"/share/petsc/examples/src
-rm -fr "$PETSC_DIR"/share/petsc/examples/src
+du -hs "$PREFIX"/share/petsc/examples/src
+rm -fr "$PREFIX"/share/petsc/examples/src
 echo "Removing data files"
-du -hs "$PETSC_DIR"/share/petsc/datafiles/*
-rm -fr "$PETSC_DIR"/share/petsc/datafiles
+du -hs "$PREFIX"/share/petsc/datafiles/*
+rm -fr "$PREFIX"/share/petsc/datafiles
 
 # Set PETSC_DIR environment variable for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export PETSC_DIR=$PETSC_DIR
-export PKG_CONFIG_PATH=${PETSC_DIR}/lib/pkgconfig:\${PKG_CONFIG_PATH}
+export PETSC_DIR=$PREFIX
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset PETSC_DIR
-export PKG_CONFIG_PATH=\${PKG_CONFIG_PATH%":${PETSC_DIR}/lib/pkgconfig"}
 EOF
 
 ## TODO: the following is a partial requirement for the day we introduce pytorch

@@ -29,14 +29,14 @@ requirements:
     - {{ compiler('fortran') }}
     - {{ stdlib('c') }}
     # for libmesh libtool
-    - moose-libmesh 2026.04.13_3ca87a2 {{ mpi }}_0
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
     # build utilities
     - make
     - packaging
     - patchelf # [linux]
     # python; for doc build + premake
     - python 3.14.*
-    - moose-tools 2026.04.13
+    - moose-tools __VERSIONER_TOOLS_VERSION__
   host:
     - {{ mpi }} {{ mpi_version }}
     - hdf5 {{ hdf5 }}
@@ -46,18 +46,18 @@ requirements:
     - libfabric {{ libfabric }} # [linux]
     {% endif %}
     - libpng
-    - moose-libmesh 2026.04.13_3ca87a2 {{ mpi }}_0
-    - moose-wasp 2025.09.19_02960f1 build_6
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
     - zlib
   run:
     - {{ mpi }} {{ mpi_version }}
-    - moose-libmesh 2026.04.13_3ca87a2 {{ mpi }}_0
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
     # c++ compiler for jit
     - gxx_linux-64 {{ cxx_compiler_version }}.*               # [linux]
     - clangxx_osx-64 {{ cxx_compiler_version }}.*             # [osx and x86_64]
     - clangxx_osx-arm64 {{ cxx_compiler_version }}.*          # [osx and arm64]
     # for testharness/python utilities
-    - moose-tools 2026.04.13
+    - moose-tools __VERSIONER_TOOLS_VERSION__
     # for running app --copy-inputs
     - rsync
   run_constrained:

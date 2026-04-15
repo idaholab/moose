@@ -57,8 +57,8 @@ requirements:
 
 test:
   commands:
-    - test "$LIBMESH_DIR" == ${PREFIX}/moose-libmesh
-    - ${LIBMESH_DIR}/bin/output_libmesh_version-opt
+    - test $LIBMESH_DIR == $PREFIX
+    - ${PREFIX}/bin/output_libmesh_version-opt
 
 about:
   home: http://libmesh.github.io/
