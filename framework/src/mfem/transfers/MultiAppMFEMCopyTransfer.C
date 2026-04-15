@@ -28,7 +28,7 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
 }
 
 void
-MultiAppMFEMCopyTransfer::transferVariables()
+MultiAppMFEMCopyTransfer::transferVariables(bool /*is_target_local*/)
 {
   auto getGF = [&](MFEMProblem & problem, const std::string & name) -> mfem::Vector &
   {

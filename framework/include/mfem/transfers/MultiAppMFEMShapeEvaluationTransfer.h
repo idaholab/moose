@@ -32,7 +32,7 @@ protected:
   mfem::FindPointsGSLIB _mfem_interpolator;
 
   /// Transfer all variables from active source problem to active destination problem.
-  virtual void transferVariables() override;
+  virtual void transferVariables(bool is_target_local) override;
 
   /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override

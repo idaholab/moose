@@ -33,7 +33,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
 }
 
 void
-MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
+MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool /*is_target_local*/)
 {
   for (const auto var_index : make_range(numToVar()))
   {

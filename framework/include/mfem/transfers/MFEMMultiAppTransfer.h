@@ -37,7 +37,7 @@ public:
 
 protected:
   /// Transfer all variables from active source problem to active destination problem.
-  virtual void transferVariables() = 0;
+  virtual void transferVariables(bool is_target_local) = 0;
 
   /// Set current problem to fetch source variables from
   void setActiveFromProblem(FEProblemBase & from_problem, const unsigned int global_app_index)

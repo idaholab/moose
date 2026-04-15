@@ -39,7 +39,7 @@ protected:
                                  mfem::Vector & interp_vals);
 
   /// Transfer all variables from active MFEM source problem to active libMesh destination problem.
-  virtual void transferVariables() override;
+  virtual void transferVariables(bool is_target_local) override;
 
   /// Set current MFEM problem to fetch source variables from
   virtual MFEMProblem & getActiveFromProblem() override

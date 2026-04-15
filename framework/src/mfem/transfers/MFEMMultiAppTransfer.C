@@ -46,7 +46,7 @@ MFEMMultiAppTransfer::execute()
         {
           setActiveToProblem(getToMultiApp()->appProblemBase(i), i);
           setActiveFromProblem(getToMultiApp()->problemBase(), 0);
-          transferVariables();
+          transferVariables(true);
         }
       break;
     case FROM_MULTIAPP:
@@ -55,7 +55,7 @@ MFEMMultiAppTransfer::execute()
         {
           setActiveToProblem(getFromMultiApp()->problemBase(), 0);
           setActiveFromProblem(getFromMultiApp()->appProblemBase(i), i);
-          transferVariables();
+          transferVariables(true);
         }
       break;
     case BETWEEN_MULTIAPP:
@@ -63,13 +63,19 @@ MFEMMultiAppTransfer::execute()
       for (unsigned int from_app_id = 0; from_app_id < getFromMultiApp()->numGlobalApps();
            from_app_id++)
         for (unsigned int to_app_id = 0; to_app_id < getToMultiApp()->numGlobalApps(); to_app_id++)
-          if (getFromMultiApp()->hasLocalApp(from_app_id) &&
-              getToMultiApp()->hasLocalApp(to_app_id))
+          if (getFromMultiApp()->hasLocalApp(from_app_id))
           {
-            setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id), to_app_id);
             setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id), from_app_id);
-            transferVariables();
-            ++transfers_done;
+            if (getToMultiApp()->hasLocalApp(to_app_id))
+            {
+              setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id), to_app_id);
+              transferVariables(true);
+              ++transfers_done;
+            }
+            else
+            {
+              transferVariables(false);
+            }
           }
       if (!transfers_done)
         mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "

@@ -30,7 +30,7 @@ MultiAppMFEMShapeEvaluationTransfer::MultiAppMFEMShapeEvaluationTransfer(
 }
 
 void
-MultiAppMFEMShapeEvaluationTransfer::transferVariables()
+MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool /*is_target_local*/)
 {
   auto transformTargetPointsToSourceFrame =
       [this](mfem::Vector & point_coordinates, const unsigned int dimension)
