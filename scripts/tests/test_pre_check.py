@@ -23,6 +23,7 @@ import pre_check
 ALL_CHECKS_OFF = {
     "CHECK_TICKET_REFERENCE": "0",
     "CHECK_KEYWORDS": "0",
+    "CHECK_STYLE": "0",
     "CHECK_EOF": "0",
     "CHECK_EXECUTABLES": "0",
     "CHECK_WHITESPACE": "0",
@@ -215,6 +216,24 @@ class TestIndividualChecks(unittest.TestCase):
         self.assertIn("README.md", result)
         self.assertNotIn("script.py", result)
 
+    @patch("pre_check.git_files")
+    @patch("pre_check.read_text")
+    def test_style_files_bad(self, mock_read_text, mock_git_files):
+        """Test style_files() detects control keywords without a space"""
+        mock_git_files.return_value = ["file1.C"]
+        mock_read_text.return_value = "if(x) { return 1; }"
+        result = pre_check.style_files()
+        self.assertEqual(result, ["file1.C"])
+
+    @patch("pre_check.git_files")
+    @patch("pre_check.read_text")
+    def test_style_files_ok(self, mock_read_text, mock_git_files):
+        """Test style_files() passes when keywords have proper spacing"""
+        mock_git_files.return_value = ["file1.C"]
+        mock_read_text.return_value = "if (x) { return 1; }"
+        result = pre_check.style_files()
+        self.assertEqual(result, [])
+
     @patch("pre_check.files_for_headers")
     @patch("pre_check.read_text")
     def test_include_guard_files(self, mock_read_text, mock_headers):
@@ -346,30 +365,48 @@ class TestMainFunction(unittest.TestCase):
     """Test main() entry point function"""
 
     @patch("pre_check.precheck_errors")
-    def test_main_with_args(self, mock_precheck):
-        """Test main() with explicit arguments"""
+    def test_main_with_base_arg(self, mock_precheck):
+        """Test main() with explicit --base argument"""
         mock_precheck.return_value = 0
-        result = pre_check.main(["pre_check.py", "HEAD~1", "HEAD"])
+        result = pre_check.main(["pre_check.py", "--base", "HEAD~1"])
         self.assertEqual(result, 0)
         mock_precheck.assert_called_once_with("HEAD~1", "HEAD")
 
     @patch("pre_check.subprocess.run")
     @patch("pre_check.precheck_errors")
     @patch("sys.stderr")
-    def test_main_merge_base_success(self, mock_stderr, mock_precheck, mock_run):
-        """Test main() using merge-base when no args provided"""
+    def test_main_merge_base_origin_devel(self, mock_stderr, mock_precheck, mock_run):
+        """Test main() uses origin/devel first when no --base provided"""
         mock_run.return_value = MagicMock(stdout="abc123\n", returncode=0)
         mock_precheck.return_value = 0
 
         result = pre_check.main(["pre_check.py"])
         self.assertEqual(result, 0)
         mock_precheck.assert_called_once_with("abc123", "HEAD")
+        # Confirm origin/devel was tried first
+        first_call_args = mock_run.call_args_list[0][0][0]
+        self.assertIn("origin/devel", first_call_args)
+
+    @patch("pre_check.subprocess.run")
+    @patch("pre_check.precheck_errors")
+    @patch("sys.stderr")
+    def test_main_merge_base_fallback_to_local_devel(self, mock_stderr, mock_precheck, mock_run):
+        """Test main() falls back to local devel when origin/devel is unavailable"""
+        mock_run.side_effect = [
+            MagicMock(returncode=1, stdout="", stderr=""),   # origin/devel fails
+            MagicMock(returncode=0, stdout="def456\n"),      # devel succeeds
+        ]
+        mock_precheck.return_value = 0
+
+        result = pre_check.main(["pre_check.py"])
+        self.assertEqual(result, 0)
+        mock_precheck.assert_called_once_with("def456", "HEAD")
 
     @patch("pre_check.subprocess.run")
     @patch("sys.stderr")
     def test_main_merge_base_failure(self, mock_stderr, mock_run):
-        """Test main() when merge-base fails"""
-        mock_run.side_effect = subprocess.CalledProcessError(1, "git")
+        """Test main() when both origin/devel and devel are unavailable"""
+        mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="")
 
         result = pre_check.main(["pre_check.py"])
         self.assertEqual(result, 1)
