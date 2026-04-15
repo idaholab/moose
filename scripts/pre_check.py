@@ -15,6 +15,7 @@ Python port of env_pre_check.sh with an extended allow-list for Unicode characte
   Superscripts/Subscripts + ¹²³ + µ + math symbols).
 """
 
+import argparse
 import os
 import re
 import sys
@@ -187,6 +188,16 @@ def find_bad_executables() -> list[str]:
     return bad
 
 
+def style_files() -> list[str]:
+    r"""Return C/C++ files containing control keywords without a space before '('.
+
+    Detects `if(`, `for(`, `while(`, `switch(` — keywords that should be
+    written `if (`, `for (`, etc. per MOOSE coding standards.
+    """
+    pat = re.compile(r"\b(if|for|while|switch)\(")
+    return [f for f in git_files("*.[Ch]") if pat.search(read_text(f))]
+
+
 def include_guard_files() -> list[str]:
     """Return header files using old-style #ifndef/#define include guards."""
     pat = re.compile(r"^#ifndef\s+(\S+_H_?)\s*\n#define\s+\1", re.M)
@@ -346,6 +357,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     check_cpp_whitespace = os.environ.get("CHECK_CPP_WHITESPACE", "0") == "1"
     check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0") == "1"
     check_banned_funcs = os.environ.get("CHECK_BANNED_FUNCS", "0") == "1"
+    check_style        = os.environ.get("CHECK_STYLE",        "1") == "1"
 
     # --- Run checks ---
     ticket_reference = ""
@@ -353,6 +365,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     tab_bad: list[str] = []
     classified_bad: list[str] = []
     keyword_bad: list[str] = []
+    style_bad: list[str] = []
     eof_bad: list[str] = []
     exe_bad: list[str] = []
     banned_func_bad: list[str] = []
@@ -380,6 +393,8 @@ def precheck_errors(log_from: str, log_to: str) -> int:
         classified_bad = classified_keywords()
     if check_keywords:
         keyword_bad = banned_keywords()
+    if check_style:
+        style_bad = style_files()
     if check_eof:
         eof_bad = no_newline_at_eof_files()
     if check_exes:
@@ -462,6 +477,16 @@ def precheck_errors(log_from: str, log_to: str) -> int:
             "Your patch contains no banned keywords.",
             "Keywords check disabled",
             "ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):",
+            "",
+            [],
+        ),
+        (
+            check_style,
+            style_bad,
+            "Your patch contains proper spacing after control keywords.",
+            "Style check disabled",
+            "ERROR: The following files contain control keywords without proper spacing"
+            " (if, for, while, or switch):",
             "",
             [],
         ),
@@ -557,41 +582,48 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
 
 def main(argv: list[str]) -> int:
-    """Entry point. Optionally accepts log_from and log_to as arguments."""
-    if len(argv) < 3:
-        try:
+    """Entry point."""
+    parser = argparse.ArgumentParser(
+        description="Run pre-commit checks on changes relative to a base commit."
+    )
+    parser.add_argument(
+        "--base",
+        metavar="COMMIT",
+        help=(
+            "Base commit to compare against HEAD. "
+            "When omitted, the merge-base with devel is used."
+        ),
+    )
+    args = parser.parse_args(argv[1:])
+
+    if args.base:
+        log_from = args.base
+    else:
+        for ref in ("origin/devel", "devel"):
             cp = subprocess.run(
-                ["git", "merge-base", "upstream/next", "HEAD"],
-                capture_output=True,
-                text=True,
-                check=True,
+                ["git", "merge-base", ref, "HEAD"],
+                capture_output=True, text=True,
             )
-            log_from = cp.stdout.strip()
-            log_to = "HEAD"
-            print(
-                f"Using merge-base with upstream/next: {log_from[:8]}..{log_to}",
-                file=sys.stderr,
-            )
-        except subprocess.CalledProcessError:
+            if cp.returncode == 0:
+                log_from = cp.stdout.strip()
+                print(f"Using merge-base with {ref}: {log_from[:8]}..HEAD", file=sys.stderr)
+                break
+        else:
             print(
                 textwrap.dedent("""\
-                ERROR: Could not determine merge-base with upstream/next
+                    ERROR: Could not determine merge-base with origin/devel or devel.
 
-                Please specify a comparison range explicitly:
-                  pre_check.py HEAD~1 HEAD
-                  pre_check.py upstream/next HEAD
-                  pre_check.py <commit-hash> HEAD
+                    Specify a base commit explicitly:
+                      pre_check.py --base HEAD~1
+                      pre_check.py --base <commit-hash>
 
-                Or ensure 'upstream' remote is configured:
-                  git remote add upstream https://github.com/idaholab/moose.git
-                  git fetch upstream
-                """),
+                    Or ensure a 'devel' branch exists locally or as origin/devel.
+                    """),
                 file=sys.stderr,
             )
             return 1
-    else:
-        log_from, log_to = argv[1], argv[2]
-    return precheck_errors(log_from, log_to)
+
+    return precheck_errors(log_from, "HEAD")
 
 
 if __name__ == "__main__":
