@@ -1,0 +1,17 @@
+black:
+  - 26.1.0
+
+clang_format:
+  - 19
+
+clang_tools:
+  - 19
+
+coverage:
+  - 7.13.2
+
+ruff:
+  - 0.15.1
+
+xmltodict:
+  - <0.14

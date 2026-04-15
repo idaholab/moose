@@ -1,14 +1,11 @@
-black:
-  - 26.1.0
+# Common pinnings shared across all moose-built conda packages
+#
+# Many of these should generally follow those
+# from conda-forge-pinning when possible
 
-clang_format:
-  - 19
-
-clang_tools:
-  - 19
-
-coverage:
-  - 7.13.2
+#
+# Python
+#
 
 python:
   - 3.14
@@ -20,39 +17,33 @@ python:
 moose_python_constrained:
   - python >=3.10,<3.15
 
-ruff:
-  - 0.15.1
-
-xmltodict:
-  - <0.14
-
-##
-## MPI
-##
+#
+# MPI
+#
 
 mpi:
   - mpich
-  - openmpi
+  - openmpi                                                 # [linux or (osx and arm64)]
 
 mpi_version:
   - 5.0.1
-  - 5.0.10
+  - 5.0.10                                                  # [linux or (osx and arm64)]
 
 mpi_friendly_name:
   - MPICH
-  - OpenMPI
+  - OpenMPI                                                 # [linux or (osx and arm64)]
 
 zip_keys:
   - mpi
   - mpi_version
   - mpi_friendly_name
 
-##
-## Compilers from conda-forge-pinning
-##
-## Should update regularly to keep pins in line with other
-## conda-forge packages
-##
+#
+# Compilers from conda-forge-pinning
+#
+# Should update regularly to keep pins in line with other
+# conda-forge packages
+#
 
 c_compiler:
   - gcc                                                     # [linux]
@@ -73,12 +64,12 @@ fortran_compiler:
 fortran_compiler_version:
   - 14
 
-##
-## Packages from conda-forge-pinning that we use
-##
-## Should update regularly to keep pins in line with other
-## conda-forge packages
-##
+#
+# Packages from conda-forge-pinning that we use
+#
+# Should update regularly to keep pins in line with other
+# conda-forge packages
+#
 
 bzip2:
   - 1
@@ -127,9 +118,9 @@ zlib:
 zstd:
   - '1.5'
 
-##
-## System root
-##
+#
+# System root
+#
 
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/conda-sdks/MacOSX13.3.sdk                          # [osx]
