@@ -366,6 +366,8 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
 {
   // Rebuild _postfix_tokens, substituting each [old_surf_ref][Halfspace] pair with the
   // tokens of sub_region (and a trailing COMPLEMENT for the positive / outside halfspace).
+  // This will also update the _surfaces list to remove the old_surf (if present) and append the
+  // surfaces from the sub-region if they are used to replace the old_surf here.
   std::vector<PostfixTokenVariant> new_tokens;
   new_tokens.reserve(_postfix_tokens.size());
 
@@ -376,6 +378,8 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
 
     if (ref_ptr && &ref_ptr->get() == &old_surf)
     {
+      // encountered the old_surf to be replaced, so replace with the sub_region tokens
+
       // The next token must be the Halfspace that was applied to this surface
       mooseAssert(i + 1 < _postfix_tokens.size(),
                   "Expected a Halfspace token after surface reference in postfix stream");
@@ -385,25 +389,27 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
       new_tokens.insert(
           new_tokens.end(), sub_region._postfix_tokens.begin(), sub_region._postfix_tokens.end());
 
-      // Positive halfspace means "outside" → complement of sub-region
+      // Positive halfspace means "outside" so use complement of sub-region
       if (hs == CSGSurface::Halfspace::POSITIVE)
         new_tokens.push_back(RegionType::COMPLEMENT);
+
+      // Add the sub-region's surfaces to the flat surface list
+      for (const auto & surf : sub_region._surfaces)
+        if (std::none_of(_surfaces.begin(),
+                         _surfaces.end(),
+                         [&](const auto & s) { return &s.get() == &surf.get(); }))
+          _surfaces.push_back(surf);
     }
     else
       new_tokens.push_back(_postfix_tokens[i]);
   }
   _postfix_tokens = std::move(new_tokens);
 
-  // Update _surfaces: remove old_surf, then add any sub_region surfaces not already present
+  // Remove old_surf from the flat surface list — (won't remove anything if old_surf isn't there)
   _surfaces.erase(std::remove_if(_surfaces.begin(),
                                  _surfaces.end(),
                                  [&](const auto & s) { return &s.get() == &old_surf; }),
                   _surfaces.end());
-  for (const auto & surf : sub_region._surfaces)
-    if (std::none_of(_surfaces.begin(),
-                     _surfaces.end(),
-                     [&](const auto & s) { return &s.get() == &surf.get(); }))
-      _surfaces.push_back(surf);
 
   // Update _region_type from the last operator token in the new stream
   const auto it =
