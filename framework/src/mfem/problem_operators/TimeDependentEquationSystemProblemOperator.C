@@ -58,15 +58,9 @@ TimeDependentEquationSystemProblemOperator::Solve()
 
 void
 TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
-                                                          const mfem::Vector & X_old,
+                                                          const mfem::Vector &,
                                                           mfem::Vector & X_new)
 {
-  X_new = X_old;
-
-  if ((GetEquationSystem()->_non_linear))
-    for (const auto i : index_range(_trial_variables))
-      *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
-
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
@@ -78,7 +72,9 @@ TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
 
   _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, X_new);
+  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+
+  X_new = _true_x;
 }
 
 void
@@ -86,7 +82,7 @@ TimeDependentEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::re
 {
   GetEquationSystem()->SetTimeStep(dt);
   GetEquationSystem()->BuildEquationSystem();
-  GetEquationSystem()->FormLinearSystem(_true_x, _true_rhs);
+  GetEquationSystem()->FormSystem(_true_x, _true_rhs);
 }
 
 } // namespace Moose::MFEM

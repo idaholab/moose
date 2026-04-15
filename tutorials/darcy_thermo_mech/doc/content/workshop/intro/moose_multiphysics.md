@@ -13,9 +13,8 @@
 
   - Was a "siloed" task; handoffs of data/results from person to person
 
-- Codes are very computationally efficient and well validated
-
-  - ... but the process wasn't necessarily efficient
+- While individual codes were computationally efficient and well validated, coupling
+  them was neither efficient nor well validated
 
 - Used many approximations for evaluations of safety parameters
 
@@ -23,33 +22,23 @@
 
 !---
 
-## Current Multiphysics Simulation
+## Modern Multiphysics Simulation
 
 - Direct, physics-based models of all components
 
   - Reduces approximations as needed
   - Can be computationally expensive
-  - Validation?
 
-- Tighter and consistent coupling
-
-  - How separate - full coupling or loose coupling?
+- Can employ tighter and more consistent coupling
 
 - Length and time scales of physics can be vastly different
 
   - What does this change for the analyst?
 
-- Quite new: +validation of direct physics-based models are not as well validated+
+- Not as well validated:
 
-!--
-
-## Writing a Multiphysics Code
-
-- Scientists are adept at creating applications in their domain
-- What about collaborating across research groups and/or disciplines?
-
-  - Iterating between design teams?
-  - Development of "coupling" codes?
+  - Experiments prohibitively expensive
+  - Very large design space
 
 !---
 
@@ -67,18 +56,6 @@
 - A consistent set of "systems" are needed to carry out common actions, these systems should be
   separated by interfaces
 
-
-!---
-
-## MOOSE Pluggable Systems
-
-- Systems break apart responsibility
-- No direct communication between systems
-- Data flows through MOOSE interfaces
-- Objects can be mixed and matched to achieve simulation goals
-- An object, by itself, can be lifted from one application and used by another
-
-
 !---
 
 ## Finite-Element Reactor Fuel Simulation
@@ -87,75 +64,28 @@
 
 !---
 
-## MOOSE Modules
+## MOOSE Coupling Strategies
 
-!style! halign=center
-!row!
-!col! small=12 medium=6 large=3 style=margin-left:10%;
-+Physics+\\
-Chemical Reactions\\
-Contact\\
-Electromagnetics\\
-Fluid Structure Interaction (FSI)\\
-Geochemistry\\
-Heat Transfer\\
-Level Set\\
-Navier Stokes\\
-Peridynamics\\
-Phase Field\\
-Porous Flow\\
-Solid Mechanics\\
-Subchannel\\
-Thermal Hydraulics\\
-!col-end!
+- Coupling strategies:
 
-!col! small=12 medium=6 large=3 style=margin-right:2%;
-+Numerics+\\
-External PETSc Solver\\
-Function Expansion Tools\\
-Optimization\\
-Ray Tracing\\
-rDG\\
-Stochastic Tools\\
-XFEM\\
-!col-end!
+  - +Full coupling+: Solve all physics in a single (linear or nonlinear) system
+  - +Loose coupling+: Solve each physics sequentially
+  - +Tight coupling+: Solve each physics sequentially and iterate
 
-!col! small=12 medium=6 large=3 style=margin-right:10%;
-+Physics support+\\
-Fluid Properties\\
-Solid Properties\\
-Reactor\\
-!col-end!
-!row-end!
-!style-end!
+- Segregated (loose/tight) coupling achieved using [`MultiApps`](MultiApps/index.md)
 
-!---
+  - Physics coupled via in-memory transfer of fields and scalars
 
-## MOOSE Coupling Strategy
+- Coupling specified in the input file (no code needed)
 
-- Numerically separates a multiphysics solve by physics components (equations)
-
-  - Connect physics together via in-memory transfer of fields and scalars
-
-- Input file based
-
-  - No code needed!
-
-- There is no single unique hierarchy to solve a specific problem
-
-  - Multiple may exist, some may be more efficient
+- No universally superior coupling strategy; correct choice depends on problem
 
 - +Provides a standardized interface for an analyst to produce a coupled model+
 
 !---
 
+## MOOSE MultiApp Hierarchy Example
+
 !style halign=center
 !media multiapp_tree.png style=width:70% alt=Multiapp tree
 
-!---
-
-## The MOOSE ecosystem
-
-!media darcy_thermo_mech/moose_herd_2022.png alt=The MOOSE herd, as of 2022. style=margin-left:auto;margin-right:auto;display:block;
-
-Many are open-source on GitHub. Some are accessible through the [NCRC](https://inl.gov/ncrc/)

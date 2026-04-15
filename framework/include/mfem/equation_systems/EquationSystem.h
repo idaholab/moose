@@ -46,8 +46,11 @@ public:
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level);
-  /// Build linear system, with essential boundary conditions accounted for
-  virtual void FormLinearSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  /**
+   * Assemble the linear part of the operator, assemble the right-hand side, apply essential and
+   * eliminated-variable constraints, and populate the true-DoF vectors used by the solve.
+   */
+  void FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
   /// Get Jacobian at the provided vector of true DoFs of trial variables

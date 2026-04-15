@@ -5,4 +5,5 @@
 [#user_short_workshop_step2]\\
 [#user_short_workshop_step3]\\
 [#user_short_workshop_step4]\\
-[#user_short_workshop_step5]
+[#user_short_workshop_step5]\\
+[#user_short_workshop_step6]
