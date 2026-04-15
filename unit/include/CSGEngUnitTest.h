@@ -32,8 +32,10 @@
  *    - creation of cell doesn't specify which universe it should belong to
  *
  *  - FakeUnivEngUnit:
- *    - 2 cells where one is FakeCellEngUnit
+ *    - 2 cells where one is FakeCellEngUnit and both are added to the created universe via
+ *      different mechanisms, which will make one also be a part of root
  *    - 1 universe
+ *    - 1 real surface (for cell region use)
  */
 
 namespace CSG
@@ -133,13 +135,17 @@ protected:
 
   void expandUnit(CSGBase & base) override
   {
+    _expanded_universe = &base.createUniverse(getName() + "_real_univ");
+    // surface for cell region
     std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
     auto & s1 = base.addSurface(std::move(s1_ptr));
+    // add the cell unit to the created universe to start (should never be a part of root)
     auto c1_prt = std::make_unique<FakeCellEngUnit>(getName() + "_c1_unit");
-    auto & c1 = base.addEngUnit(std::move(c1_prt));
+    base.addEngUnit(std::move(c1_prt), _expanded_universe);
+    // when creating the plain cell, do not add to a universe until after createion
+    // (should be a part of new universe and root)
     auto & c2 = base.createCell(getName() + "_c2", +s1);
-    std::vector<std::reference_wrapper<const CSG::CSGCell>> cells = {c1, c2};
-    _expanded_universe = &base.createUniverse(getName() + "_real_univ", cells);
+    base.addCellToUniverse(*_expanded_universe, c2);
   }
 
 #ifdef MOOSE_UNIT_TEST
