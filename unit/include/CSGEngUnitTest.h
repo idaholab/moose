@@ -136,13 +136,13 @@ protected:
   void expandUnit(CSGBase & base) override
   {
     _expanded_universe = &base.createUniverse(getName() + "_real_univ");
-    // surface for cell region
-    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
-    auto & s1 = base.addSurface(std::move(s1_ptr));
     // add the cell unit to the created universe to start (should never be a part of root)
     auto c1_prt = std::make_unique<FakeCellEngUnit>(getName() + "_c1_unit");
     base.addEngUnit(std::move(c1_prt), _expanded_universe);
-    // when creating the plain cell, do not add to a universe until after createion
+    // surface for cell region
+    std::unique_ptr<CSGSurface> s1_ptr = std::make_unique<CSGSphere>(getName() + "_s1", 3.0);
+    auto & s1 = base.addSurface(std::move(s1_ptr));
+    // when creating the plain cell, do not add to a universe until after creation
     // (should be a part of new universe and root)
     auto & c2 = base.createCell(getName() + "_c2", +s1);
     base.addCellToUniverse(*_expanded_universe, c2);

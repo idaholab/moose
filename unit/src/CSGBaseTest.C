@@ -1800,6 +1800,118 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   ASSERT_EQ(exp_trans, trans[0]);
 }
 
+/// tests CSGBase::expandAllEngUnits()
+TEST(CSGBaseTest, testExpandAllUnits)
+{
+  // create two engineering units that do not create any other engineering units when expanded
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<CSGNPolygonUnit> ptr1 = std::make_unique<CSGNPolygonUnit>("u1", 4, 2.0);
+  csg_obj->addEngUnit(std::move(ptr1));
+  std::unique_ptr<CSGNPolygonUnit> ptr2 = std::make_unique<CSGNPolygonUnit>("u2", 3, 1.0);
+  csg_obj->addEngUnit(std::move(ptr2));
+
+  // before expansion: should have 2 surfaces which are 2 engineering units
+  ASSERT_EQ(2, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(2, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(2, csg_obj->getAllEngUnits().size());
+
+  // expand all
+  csg_obj->expandAllEngUnits();
+
+  // after expansion: should have 7 real surfaces and no engineering units
+  ASSERT_EQ(7, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
+}
+
+/// tests CSGBase::expandAllUnits() when unit expansion recursively creates more units that need
+/// to be subsequently expanded as well.
+TEST(CSGBaseTest, testExpandAllRecursive)
+{
+  // create a FakeUnivEngUnit which should cause a double recursion during expansion.
+  //  - FakeUnivEngUnit will create FakeCellEngUnit
+  //  - FakeCellEngUnit will create FakeSurfEngUnit
+
+  // create just a single universe unit
+  std::string name = "original_unit";
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>(name);
+  csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr));
+
+  // check number of expected objects before expansion: 2 univs (root + unit), 1 universe unit, &
+  // no other object types
+  ASSERT_EQ(2, csg_obj->getAllUniverses().size());
+  ASSERT_EQ(1, csg_obj->getAllUniverseEngUnits().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(0, csg_obj->getAllCells().size());
+  ASSERT_EQ(0, csg_obj->getAllCellEngUnits().size());
+
+  // expand all - should expand FakeUnivEngUnit, then FakeCellEngUnit, and then FakeSurfEngUnit
+  csg_obj->expandAllEngUnits();
+
+  // Expected objects after expansion
+  //  - 0 units of any type
+  //  - 3 surfaces (1 from FakeUnivEngUnit and 2 from FakeCellEngUnit)
+  //  - 2 cells (1 from FakeUnivEngUnit and 1 from FakeCellEngUnit)
+  //  - 3 universes (root, 1 from FakeUnivEngUnit, and 1 from FakeCellEngUnit (used as a fill))
+  ASSERT_EQ(0, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(3, csg_obj->getAllSurfaces().size());
+  ASSERT_EQ(0, csg_obj->getAllSurfaceEngUnits().size());
+  ASSERT_EQ(2, csg_obj->getAllCells().size());
+  ASSERT_EQ(0, csg_obj->getAllCellEngUnits().size());
+  ASSERT_EQ(3, csg_obj->getAllUniverses().size());
+  ASSERT_EQ(0, csg_obj->getAllUniverseEngUnits().size());
+
+  // Expected cell/universe relationships after expansion
+  //  - root universe should contain only a cell called <name>_c2
+  //  - expanded universe <name>_real_univ should contain <name>_c2, <name>_c1_unit_real_cell
+  //    (recursively generated)
+  //  - cell <name>_c1_unit_real_cell should use <name>_c1_unit_fill_univ for the cell fill
+  //  - <name>_c1_unit_fill_univ should not contain any cells (used only as a fill)
+  std::string exp_univ_name = name + "_real_univ";
+  auto exp_univ = csg_obj->getUniverseByName(exp_univ_name);
+  auto root = csg_obj->getRootUniverse();
+  auto exp_cell = csg_obj->getCellByName(name + "_c1_unit_real_cell");
+  auto fill_univ = csg_obj->getUniverseByName(name + "_c1_unit_fill_univ");
+  std::string c2_name = name + "_c2";
+  ASSERT_TRUE(root.hasCell(c2_name));
+  ASSERT_EQ(1, root.getAllCells().size()); // should contain only the one
+  ASSERT_TRUE(exp_univ.hasCell(c2_name));
+  ASSERT_TRUE(exp_univ.hasCell(name + "_c1_unit_real_cell"));
+  ASSERT_EQ(2, exp_univ.getAllCells().size()); // should only contain the 2
+  ASSERT_TRUE(exp_cell.getFillUniverse() == fill_univ);
+  ASSERT_EQ(0, fill_univ.getAllCells().size()); // should not have any cells added to it
+
+  // expected cell region surface names:
+  //  - exp_cell <name>_c1_unit_real_cell (created as a FakeCellEngUnit) should use the two surfaces
+  //    created by FakeSurfEngUnit when fully expanded: <name>_c1_unit_s1_s[1/2]
+  //  - c2 cell <name>_c2 uses one real surface <name>_s1 (should never be modified after it is
+  //    first created)
+
+  // checking the exp_cell surfaces
+  auto c1_surfs = exp_cell.getRegion().getSurfaces();
+  ASSERT_EQ(2, c1_surfs.size());
+  bool found_1 = false; // <name>_c1_unit_s1_s1
+  bool found_2 = false; // <name>_c1_unit_s1_s2
+  for (auto & s : c1_surfs)
+  {
+    auto s_name = s.get().getName();
+    if (s_name == name + "_c1_unit_s1_s1")
+      found_1 = true;
+    if (s_name == name + "_c1_unit_s1_s2")
+      found_2 = true;
+  }
+  ASSERT_TRUE(found_1);
+  ASSERT_TRUE(found_2);
+
+  // checking the c2 cell surface (should only have one)
+  auto c2_cell = csg_obj->getCellByName(c2_name);
+  auto c2_surfs = c2_cell.getRegion().getSurfaces();
+  ASSERT_EQ(1, c2_surfs.size());
+  ASSERT_TRUE(c2_surfs[0].get().getName() == name + "_s1");
+}
+
 /**
  * CSGBase::addTransformation methods
  */
