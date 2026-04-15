@@ -1383,7 +1383,7 @@ TEST(CSGBaseTest, testCellEngUnitRenameErrors)
   auto make_csg = [&]()
   {
     auto csg_obj = std::make_unique<CSG::CSGBase>();
-    std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+    std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>(eng_unit_name);
     csg_obj->addEngUnit(std::move(cu_ptr));
     auto sptr = std::make_unique<CSGSphere>("sphere", 2.0);
     auto & sph = csg_obj->addSurface(std::move(sptr));
@@ -1460,7 +1460,7 @@ TEST(CSGBaseTest, testCellEngUnitAddErrors)
                                  " is a CSGCellEngUnit and must be added via addEngUnit()");
 }
 
-/// tests deleteCell and deleteEngUnit for a surface engineering unit
+/// tests deleteCell and deleteEngUnit for a cell engineering unit
 TEST(CSGBaseTest, testCellEngUnitDelete)
 {
   // make 2 units to delete
@@ -1487,7 +1487,7 @@ TEST(CSGBaseTest, testCellEngUnitDelete)
   // delete the other as if it were a cell (get as cell to have the right type)
   const auto & unit2 = csg_obj->getCellByName(name2);
   csg_obj->deleteCell(unit2);
-  ASSERT_FALSE(csg_obj->hasSurface(name2));
+  ASSERT_FALSE(csg_obj->hasCell(name2));
   ASSERT_FALSE(csg_obj->hasEngUnit(name2));
 }
 
@@ -1545,6 +1545,165 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
   auto trans = cell_expanded.getTransformations();
   ASSERT_EQ(1, trans.size());
   ASSERT_EQ(exp_trans, trans[0]);
+}
+
+/// tests addEngUnit for universe-type units
+TEST(CSGBaseTest, testUniverseEngUnit)
+{
+  // make a cell engineering unit
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_unit");
+  const auto & unit = csg_obj->addEngUnit(std::move(uptr));
+
+  // check that this is registered as a "universe" and an engineering unit in CSGBase
+  ASSERT_EQ(2, csg_obj->getAllUniverses().size()); // root and unit
+  ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
+  ASSERT_EQ(1, csg_obj->getAllUniverseEngUnits().size());
+  ASSERT_TRUE(csg_obj->hasUniverse("univ_unit"));
+  ASSERT_TRUE(csg_obj->hasEngUnit("univ_unit"));
+
+  // should be able to retrieve as a universe or engineering unit
+  // check that objects are the same in-memory
+  ASSERT_EQ(&unit, &csg_obj->getUniverseByName("univ_unit"));
+  ASSERT_EQ(&unit, &csg_obj->getEngUnitByName("univ_unit"));
+}
+
+/// tests the different mechanisms for renaming a universe-type engineering unit
+TEST(CSGBaseTest, testUniverseEngUnitRename)
+{
+  // renaming allowable either through renameSurface or renameEngUnit
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_unit");
+  const auto & unit = csg_obj->addEngUnit(std::move(uptr));
+
+  // starting name
+  ASSERT_EQ(unit.getName(), "univ_unit");
+
+  // rename using renameUniverse()
+  csg_obj->renameUniverse(unit, "new_name_for_univ");
+  ASSERT_EQ(unit.getName(), "new_name_for_univ");
+  // rename using renameEngUnit()
+  csg_obj->renameEngUnit(unit, "another_name");
+  ASSERT_EQ(unit.getName(), "another_name");
+}
+
+/// tests that errors are raised properly for renaming universes and universe engineering units
+TEST(CSGBaseTest, testUnivEngUnitRenameErrors)
+{
+  std::string eng_unit_name = "univ_unit";
+  std::string univ_name = "duplicate_name";
+
+  // need to recreate unit/univ for each error check because when the error is thrown during rename,
+  // it leaves the lists in a corrupted state. This is fine in practice because we don't need to
+  // continue if the error is raised. For testing, make a new pointer each time.
+  auto make_csg = [&]()
+  {
+    auto csg_obj = std::make_unique<CSG::CSGBase>();
+    std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>(eng_unit_name);
+    csg_obj->addEngUnit(std::move(uptr));
+    csg_obj->createUniverse(univ_name);
+    return csg_obj;
+  };
+
+  // renaming unit via renameEngUnit to same name as existing universe raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &unit, &univ_name]() { csg_obj->renameEngUnit(unit, univ_name); },
+        "Universe with name " + univ_name + " already exists in geometry.");
+  }
+
+  // renaming unit via renameUniverse to same name as existing universe raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & unit = csg_obj->getEngUnitByName<FakeUnivEngUnit>(
+        eng_unit_name); // need to specify type to be able to call renameUniverse
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &unit, &univ_name]() { csg_obj->renameUniverse(unit, univ_name); },
+        "Universe with name " + univ_name + " already exists in geometry.");
+  }
+
+  // renaming universe to same name as engineering unit raises error
+  {
+    auto csg_obj = make_csg();
+    const auto & univ = csg_obj->getUniverseByName(univ_name);
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &univ, &eng_unit_name]() { csg_obj->renameUniverse(univ, eng_unit_name); },
+        "Universe with name " + eng_unit_name + " already exists in geometry.");
+  }
+
+  // add a surface-type engineering unit and try to rename the universe engineering unit via
+  // renameUniverse to the same name as the surface unit. This should also raise an error because a
+  // unit with that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & unit = csg_obj->getEngUnitByName<FakeUnivEngUnit>(
+        eng_unit_name); // need to specify type to be able to call renameUniverse
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
+                                   { csg_obj->renameUniverse(unit, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+
+  // add a surface-type engineering unit and try to rename the universe engineering unit via
+  // renameEngUnit to the same name as the surface unit. This calls renameUniverse and so it should
+  // raise the same error as above that a unit of that name already exists.
+  {
+    auto csg_obj = make_csg();
+    auto unit_ptr = std::make_unique<FakeSurfEngUnit>("other_name");
+    csg_obj->addEngUnit(std::move(unit_ptr));
+    const auto & unit = csg_obj->getEngUnitByName(eng_unit_name); // get as generic CSGEngUnit type
+    Moose::UnitUtils::assertThrows([&csg_obj, &unit]()
+                                   { csg_obj->renameEngUnit(unit, "other_name"); },
+                                   " is an engineering unit and a unit with name ");
+  }
+}
+
+/// tests error is raised via addUniverseToList (private) for engineering units
+TEST(CSGBaseTest, testUnivEngUnitAddErrors)
+{
+  // Note - this method of adding a unievrse is not done in practice as it is a private method, but
+  // it is being tested for sake of robustness
+
+  // trying to unit via addUniverseToList will raise error
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // make the unit as a normal ref to use addUniverseToList (not done in practice)
+  const auto & unit = FakeUnivEngUnit("universe_unit");
+  Moose::UnitUtils::assertThrows([&csg_obj, &unit]() { csg_obj->addUniverseToList(unit); },
+                                 " is a CSGUniverseEngUnit and must be added via addEngUnit()");
+}
+
+/// tests deleteUniverse and deleteEngUnit for a universe engineering unit
+TEST(CSGBaseTest, testUnivEngUnitDelete)
+{
+  // make 2 units to delete
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string name1 = "unit1";
+  std::unique_ptr<FakeUnivEngUnit> unit_ptr1 = std::make_unique<FakeUnivEngUnit>(name1);
+  csg_obj->addEngUnit(std::move(unit_ptr1));
+  std::string name2 = "unit2";
+  std::unique_ptr<FakeUnivEngUnit> unit_ptr2 = std::make_unique<FakeUnivEngUnit>(name2);
+  csg_obj->addEngUnit(std::move(unit_ptr2));
+
+  // check that it has both registered as a universe and as an engineering unit
+  ASSERT_TRUE(csg_obj->hasUniverse(name1));
+  ASSERT_TRUE(csg_obj->hasUniverse(name2));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name1));
+  ASSERT_TRUE(csg_obj->hasEngUnit(name2));
+
+  // delete one as an engineering unit
+  const auto & unit1 = csg_obj->getEngUnitByName(name1);
+  csg_obj->deleteEngUnit(unit1);
+  ASSERT_FALSE(csg_obj->hasUniverse(name1));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name1));
+
+  // delete the other as if it were a universe (get as universe to have the right type)
+  const auto & unit2 = csg_obj->getUniverseByName(name2);
+  csg_obj->deleteUniverse(unit2);
+  ASSERT_FALSE(csg_obj->hasUniverse(name2));
+  ASSERT_FALSE(csg_obj->hasEngUnit(name2));
 }
 
 /**
