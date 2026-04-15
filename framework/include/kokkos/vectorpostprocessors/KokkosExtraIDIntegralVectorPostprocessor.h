@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KokkosElementVectorPostprocessor.h"
-#include "KokkosMaterialPropertyValue.h"
 
 #include "MooseMesh.h"
 

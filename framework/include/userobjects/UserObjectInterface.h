@@ -14,9 +14,9 @@
 #include "MooseUtils.h"
 
 // Forward declarations
-class UserObject;
-class FEProblemBase;
 class MooseObject;
+class UserObjectBase;
+class FEProblemBase;
 
 /**
  * Interface for objects that need to use UserObjects.
@@ -89,8 +89,8 @@ public:
    * object (if we are a user object)
    * @return The user object with name associated with the parameter \p param_name
    */
-  const UserObject & getUserObjectBase(const std::string & param_name,
-                                       bool is_dependency = true) const;
+  const UserObjectBase & getUserObjectBase(const std::string & param_name,
+                                           bool is_dependency = true) const;
 
   /**
    * Get an user object with the name \p object_name
@@ -100,21 +100,22 @@ public:
    * object (if we are a user object)
    * @return The user object with the name \p object_name
    */
-  const UserObject & getUserObjectBaseByName(const UserObjectName & object_name,
-                                             bool is_dependency = true) const;
+  const UserObjectBase & getUserObjectBaseByName(const UserObjectName & object_name,
+                                                 bool is_dependency = true) const;
 
 protected:
   /**
    * Helper for deriving classes to override to add dependencies when a UserObject
    * is requested.
    */
-  virtual void addUserObjectDependencyHelper(const UserObject & /* uo */) const {}
+  virtual void addUserObjectDependencyHelper(const UserObjectBase & /* uo */) const {}
 
 private:
   /**
-   * Go directly to the FEProblem for the requested \p UserObject
+   * Go directly to the FEProblem for the requested \p object_name for thread ID \p tid
    */
-  const UserObject & getUserObjectFromFEProblem(const UserObjectName & object_name) const;
+  const UserObjectBase & getUserObjectFromFEProblem(const UserObjectName & object_name,
+                                                    const THREAD_ID tid = 0) const;
 
   /**
    * Internal helper that casts the UserObject \p uo_base to the requested type. Exits with
@@ -122,7 +123,8 @@ private:
    * is valid, a paramError() will be used instead.
    */
   template <class T>
-  const T & castUserObject(const UserObject & uo_base, const std::string & param_name = "") const;
+  const T & castUserObject(const UserObjectBase & uo_base,
+                           const std::string & param_name = "") const;
 
   /**
    * emit an error for the given parameter
@@ -130,9 +132,9 @@ private:
   void mooseObjectError(const std::string & param_name, std::stringstream & oss) const;
 
   /// Gets a UserObject's type; avoids including UserObject.h in the UserObjectInterface
-  const std::string & userObjectType(const UserObject & uo) const;
+  const std::string & userObjectType(const UserObjectBase & uo) const;
   /// Gets a UserObject's name; avoids including UserObject.h in the UserObjectInterface
-  const std::string & userObjectName(const UserObject & uo) const;
+  const std::string & userObjectName(const UserObjectBase & uo) const;
 
   /// Moose object using the interface
   const MooseObject & _uoi_moose_object;
@@ -146,7 +148,7 @@ private:
 
 template <class T>
 const T &
-UserObjectInterface::castUserObject(const UserObject & uo_base,
+UserObjectInterface::castUserObject(const UserObjectBase & uo_base,
                                     const std::string & param_name /* = "" */) const
 {
   const T * uo = dynamic_cast<const T *>(&uo_base);
