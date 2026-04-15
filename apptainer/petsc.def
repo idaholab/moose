@@ -92,6 +92,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
     fi
 
+    if [ -n "$ONEAPI_ROOT" ]; then
+        # OpenBLAS fails to correctly detect mpif90(ifx), so we override relevant variables
+        PETSC_OPTIONS+=("--download-openblas-make-options=DYNAMIC_ARCH=1 NOFORTRAN=0 F_COMPILER=INTEL FEXTRALIB=")
+    fi
+
     # Build PETSc
     umask 022
     cd ${ROOT_BUILD_DIR}
