@@ -16,7 +16,6 @@
 
 #include "PolycrystalKernelAction.h"
 
-
 /**
  * Action that adds the polycrystal dislocation deformation energy to the
  * grain growth problem.

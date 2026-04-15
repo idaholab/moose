@@ -32,7 +32,8 @@ PolycrystalDislocationKernelAction::validParams()
   return params;
 }
 
-PolycrystalDislocationKernelAction::PolycrystalDislocationKernelAction(const InputParameters & params)
+PolycrystalDislocationKernelAction::PolycrystalDislocationKernelAction(
+    const InputParameters & params)
   : PolycrystalKernelAction(params), _grain_tracker_name(getParam<std::string>("grain_tracker"))
 {
 }

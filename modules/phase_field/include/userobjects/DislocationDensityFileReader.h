@@ -17,7 +17,6 @@
 #include "GeneralUserObject.h"
 #include <vector>
 
-
 /**
  * Read a file to provide initial dislocation densities to grains
  **/

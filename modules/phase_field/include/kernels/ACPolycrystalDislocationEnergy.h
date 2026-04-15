@@ -17,7 +17,6 @@
 #include "ACGrGrBase.h"
 #include "GrainTrackerDislocations.h"
 
-
 /**
  * This kernel calculates the residual for grain growth driven by dislocation density.
  * */
