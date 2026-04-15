@@ -5,7 +5,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ./base_strip.e
+  file = base_strip.e
 []
 
 [FESpaces]

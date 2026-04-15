@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = ./displaced_indicator_strip.e
+  file = displaced_indicator_strip.e
   displacements = 'disp_x disp_y'
 []
 

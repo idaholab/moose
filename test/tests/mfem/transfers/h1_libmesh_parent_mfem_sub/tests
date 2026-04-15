@@ -17,7 +17,7 @@
       type = CSVDiff
       input = libmesh_parent_scalar.i
       csvdiff = 'libmesh_parent_scalar_mfem_sub_quads_order_2.csv'
-      detail = ' second order scalar LAGRANGE variables defined on quads, '
+      detail = 'second order scalar LAGRANGE variables defined on quads, '
       abs_zero = 1e-8
       capabilities = 'mfem'
       recover = false
@@ -44,7 +44,7 @@
       type = CSVDiff
       input = libmesh_parent_scalar.i
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tris_order_2.csv'
-      detail = ' second order scalar LAGRANGE variables defined on tris, '
+      detail = 'second order scalar LAGRANGE variables defined on tris, '
       abs_zero = 1e-8
       capabilities = 'mfem'
       recover = false
@@ -73,7 +73,7 @@
       type = CSVDiff
       input = libmesh_parent_scalar.i
       csvdiff = 'libmesh_parent_scalar_mfem_sub_tri_to_quad_order_2.csv'
-      detail = ' second order scalar LAGRANGE variables from tris to quads, '
+      detail = 'second order scalar LAGRANGE variables from tris to quads, '
       abs_zero = 1e-8
       capabilities = 'mfem'
       recover = false
