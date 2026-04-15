@@ -460,6 +460,7 @@ TaggingInterface::assignTaggedLocalMatrix()
     *ke = _local_ke;
 }
 
+#ifndef NDEBUG
 void
 TaggingInterface::checkForNans() const
 {
@@ -480,5 +481,6 @@ TaggingInterface::checkForNans() const
       mooseError(ss.str());
     }
 }
+#endif
 
 TaggingInterface::~TaggingInterface() {}
