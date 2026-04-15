@@ -54,8 +54,23 @@ done
 
 mkdir -p "${PREFIX:?}/etc/conda/activate.d" "${PREFIX:?}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export MOOSE_ADFPARSER_JIT_INCLUDE=\${PREFIX}/include/moose/ADRealMonolithic.h
+export MOOSE_ADFPARSER_JIT_INCLUDE=${PREFIX}/include/moose/ADRealMonolithic.h
 EOF
+
+if [[ "${mpi:?}" == "mpich" ]]; then
+  cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
+export FI_PROVIDER=tcp
+export MPICH_CH4_NETMOD=ofi
+EOF
+fi
+
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset MOOSE_ADFPARSER_JIT_INCLUDE
 EOF
+
+if [[ "${mpi:?}" == "mpich" ]]; then
+  cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
+unset FI_PROVIDER
+unset MPICH_CH4_NETMOD
+EOF
+fi
