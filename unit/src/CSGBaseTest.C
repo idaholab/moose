@@ -1021,7 +1021,7 @@ TEST(CSGBaseTest, testDeleteLattice)
  */
 
 /// tests addEngUnit for surface-type units
-TEST(CSGBaseTest, testSurfEngUnit)
+TEST(CSGBaseTest, testSurfEngUnitAdd)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSGNPolygonUnit> poly_ptr =
@@ -1332,7 +1332,7 @@ TEST(CSGBaseTest, testUseSurfEngUnitComplex)
 }
 
 /// tests addEngUnit for cell-type units
-TEST(CSGBaseTest, testCellEngUnit)
+TEST(CSGBaseTest, testCellEngUnitAdd)
 {
   // make a cell engineering unit
   auto csg_obj = std::make_unique<CSG::CSGBase>();
@@ -1346,10 +1346,27 @@ TEST(CSGBaseTest, testCellEngUnit)
   ASSERT_TRUE(csg_obj->hasCell("cell_unit"));
   ASSERT_TRUE(csg_obj->hasEngUnit("cell_unit"));
 
+  // cell unit did not specify a universe to add to, so it should be in root by default
+  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell("cell_unit"));
+
   // should be able to retrieve as a cell or engineering unit
   // check that objects are the same in-memory
   ASSERT_EQ(&cu, &csg_obj->getCellByName("cell_unit"));
   ASSERT_EQ(&cu, &csg_obj->getEngUnitByName("cell_unit"));
+}
+
+/// tests that addEngUnit adds a cell unit to a different universe (not root) if specified
+TEST(CSGBaseTest, testCellEngUnitAddToUniv)
+{
+  // make a cell engineering unit and add it to a universe right away to bypass root
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const auto & univ = csg_obj->createUniverse("extra_univ");
+  std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>("cell_unit");
+  const auto & cu = csg_obj->addEngUnit(std::move(cell_ptr), &univ);
+
+  // cell should not be in root
+  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell("cell_unit"));
+  ASSERT_TRUE(univ.hasCell("cell_unit"));
 }
 
 /// tests the different mechanisms for renaming a cell-type engineering unit
@@ -1491,14 +1508,15 @@ TEST(CSGBaseTest, testCellEngUnitDelete)
   ASSERT_FALSE(csg_obj->hasEngUnit(name2));
 }
 
-/// test the successful expandUnit for cel units via base
+/// test the successful expandUnit for cell units via base
 TEST(CSGBaseTest, testCellEngUnitExpand)
 {
   std::string name = "cell_unit";
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<FakeCellEngUnit> cell_ptr = std::make_unique<FakeCellEngUnit>(name);
   const auto & cell_unit = csg_obj->addEngUnit<FakeCellEngUnit>(std::move(cell_ptr));
-  // create an extra universe to add the cell unit to
+  // create an extra universe to add the cell unit to; should also still be a part of root because
+  // a different universe was not specified at the time of adding the cell unit
   const auto & univ = csg_obj->createUniverse("extra_univ");
   csg_obj->addCellToUniverse(univ, cell_unit);
 
@@ -1509,8 +1527,8 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
   ASSERT_EQ(0, csg_obj->getAllSurfaces().size());
   ASSERT_EQ(2, csg_obj->getAllUniverses().size()); // root + extra that contains the unit
 
-  // assert that cell unit is in the extra universe and not root
-  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(name));
+  // assert that cell unit is in the extra universe and in root
+  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell(name));
   ASSERT_TRUE(univ.hasCell(name));
 
   // include transformation on the unit (to check that it transfers with expansion)
@@ -1533,10 +1551,9 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
   ASSERT_FALSE(csg_obj->hasCell(name));
   ASSERT_FALSE(csg_obj->hasEngUnit(name));
 
-  // new cell should belong to the extra universe, not root
-  ASSERT_FALSE(univ.hasCell(name)); // original cell unit should no longer be in universe
+  // new cell should belong to the extra universe and root
   ASSERT_TRUE(univ.hasCell(cell_expanded.getName()));
-  ASSERT_FALSE(csg_obj->getRootUniverse().hasCell(
+  ASSERT_TRUE(csg_obj->getRootUniverse().hasCell(
       cell_expanded.getName())); // root should still not contain new cell
 
   // new cell should also have the transformations applied
@@ -1548,7 +1565,7 @@ TEST(CSGBaseTest, testCellEngUnitExpand)
 }
 
 /// tests addEngUnit for universe-type units
-TEST(CSGBaseTest, testUniverseEngUnit)
+TEST(CSGBaseTest, testUniverseEngUnitAdd)
 {
   // make a cell engineering unit
   auto csg_obj = std::make_unique<CSG::CSGBase>();

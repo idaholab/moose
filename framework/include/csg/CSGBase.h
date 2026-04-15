@@ -524,10 +524,14 @@ public:
    *
    * @tparam T a type derived from CSGSurfaceEngUnit, CSGCellEngUnit, or CSGUniverseEngUnit
    * @param unit unique_ptr to the engineering unit to register
+   * @param add_to_univ optional pointer to a CSGUniverse object to which a CSGCellEngUnit should be
+   * added. If not specified, the CSGCellEngUnit will be added to the root universe. For other
+   * CSGEngUnit types, this will be ignored. This universe cannot be a CSGUniverseEngUnit.
+   *
    * @return const reference to the stored engineering unit
    */
   template <typename T>
-  const T & addEngUnit(std::unique_ptr<T> unit)
+  const T & addEngUnit(std::unique_ptr<T> unit, const CSGUniverse * add_to_univ = nullptr)
   {
     static_assert(std::is_base_of_v<CSGEngUnit, T>, "T must derive from CSGEngUnit");
     static_assert(std::is_base_of_v<CSGSurface, T> || std::is_base_of_v<CSGCell, T> ||
@@ -538,7 +542,14 @@ public:
     if constexpr (std::is_base_of_v<CSGSurface, T>)
       _surface_list.addSurface(std::move(unit));
     else if constexpr (std::is_base_of_v<CSGCell, T>)
-      _cell_list.addCell(std::move(unit));
+    {
+      // must add a cell unit to the appropriate universe
+      auto & cell = _cell_list.addCell(std::move(unit));
+      if (add_to_univ)
+        addCellToUniverse(*add_to_univ, cell);
+      else
+        addCellToUniverse(getRootUniverse(), cell);
+    }
     else if constexpr (std::is_base_of_v<CSGUniverse, T>)
       _universe_list.addUniverse(std::move(unit));
     // Register non-owning pointer in the CSGEngUnitList
