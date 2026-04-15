@@ -4,8 +4,7 @@ set -eux
 test "$MOOSE_ADFPARSER_JIT_INCLUDE" == "${PREFIX}/include/moose/ADRealMonolithic.h"
 test -f "$MOOSE_ADFPARSER_JIT_INCLUDE"
 
-for BINARY_PREFIX in moose moose_test combined; do
-    BINARY="${BINARY_PREFIX}-opt"
+for BINARY in moose moose-opt moose_test-opt combined-opt; do
     test "$(which "$BINARY")" == "${PREFIX}/bin/${BINARY}"
     "$BINARY" --show-capabilities
 done

@@ -39,6 +39,10 @@ fi
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
 
+cd "${PREFIX:?}/bin"
+ln -s combined-opt moose-opt
+ln -s combined-opt moose
+
 # Fix (hack) for moose -> moose symlink collision binary/copy inputs
 cd "${PREFIX:?}/share/moose"
 for f in ../combined/*; do
