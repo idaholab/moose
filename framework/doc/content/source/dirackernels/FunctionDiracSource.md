@@ -12,6 +12,8 @@ at the point `(0.1 0.2 0)` and its intensity is controlled by the `switch_off` f
 
 !listing test/tests/dirackernels/function_dirac_source/function_dirac_source.i block=Functions DiracKernels
 
+!include source/dirackernels/dirac_point_value_note.md
+
 !syntax parameters /DiracKernels/FunctionDiracSource
 
 !syntax inputs /DiracKernels/FunctionDiracSource

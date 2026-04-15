@@ -15,6 +15,8 @@ with those three sources.
 
 !listing test/tests/dirackernels/constant_point_source/3d_point_source.i block=DiracKernels
 
+!include source/dirackernels/dirac_point_value_note.md
+
 !syntax parameters /DiracKernels/ConstantPointSource
 
 !syntax inputs /DiracKernels/ConstantPointSource

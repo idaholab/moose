@@ -36,17 +36,9 @@ ReporterPointSource::validParams()
   params.addParam<ReporterName>("weight_name",
                                 "Name of vector-postprocessor or reporter vector containing "
                                 "weights to scale value, default is assumed to be all 1s.");
-  params.addParam<bool>("combine_duplicates",
-                        true,
-                        "Whether or not to combine duplicates internally by summing their values "
-                        "times their weights");
-  // Values and weights for duplicates need to be combined with combine_duplicates=true
-  // Duplicate points are never actually applied as separate dirac points, instead they are combined
-  // and computeQpResidual can be multiplied by the number of points found at a single location by
-  // setting drop_duplicate_points=false.  This will not work for our case where each point may have
-  // a different value and weight so we must combine the weights and values ourself and apply them
-  // as a single point with a single value
-  params.set<bool>("drop_duplicate_points") = true;
+  // Duplicate points are combined internally by adding their weighted values at the same location.
+  // We therefore need the Dirac assembly path to use the stored point values.
+  params.set<bool>("drop_duplicate_points") = false;
   params.suppressParameter<bool>("drop_duplicate_points");
   return params;
 }
@@ -54,7 +46,6 @@ ReporterPointSource::validParams()
 ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
   : DiracKernel(parameters),
     ReporterInterface(this),
-    _combine_duplicates(getParam<bool>("combine_duplicates")),
     _read_in_points(isParamValid("point_name")),
     _values(getReporterValue<std::vector<Real>>("value_name", REPORTER_MODE_REPLICATED)),
     _ones_vec(_values.size(), 1.0),
@@ -84,8 +75,6 @@ ReporterPointSource::ReporterPointSource(const InputParameters & parameters)
 void
 ReporterPointSource::addPoints()
 {
-  _point_to_weightedValue.clear();
-
   const auto nval = _values.size();
   if (nval == 0)
     paramError("value_name", "Value vector must not be empty.");
@@ -105,7 +94,7 @@ ReporterPointSource::addPoints()
   if (_read_in_points)
   {
     for (const auto & i : index_range(_point))
-      fillPoint(_point[i], i);
+      addPoint(_point[i], i, _values[i] * _weight[i]);
   }
   else
   {
@@ -113,7 +102,7 @@ ReporterPointSource::addPoints()
     for (const auto i : index_range(_values))
     {
       const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
-      fillPoint(point, i);
+      addPoint(point, i, _values[i] * _weight[i]);
     }
   }
 }
@@ -122,27 +111,7 @@ Real
 ReporterPointSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp] * libmesh_map_find(_point_to_weightedValue, _current_point);
-}
-
-void
-ReporterPointSource::fillPoint(const Point & point, const dof_id_type id)
-{
-  auto it = _point_to_weightedValue.find(point);
-  if (it == _point_to_weightedValue.end())
-  {
-    addPoint(point, id);
-    it = _point_to_weightedValue.emplace(point, 0).first;
-  }
-  else if (!_combine_duplicates)
-    paramError("combine_duplicates",
-               "combine_duplicates must be true if reporter has duplicate points.  Found "
-               "duplicate point (",
-               point,
-               ").");
-
-  auto & value = it->second;
-  value += _values[id] * _weight[id];
+  return -_test[_i][_qp];
 }
 
 void

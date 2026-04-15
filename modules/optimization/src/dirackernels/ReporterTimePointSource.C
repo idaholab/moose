@@ -35,7 +35,6 @@ ReporterTimePointSource::ReporterTimePointSource(const InputParameters & paramet
 void
 ReporterTimePointSource::addPoints()
 {
-  // Do some size checks
   const auto nval = _values.size();
   if (nval == 0)
     paramError("value_name", "Value vector must not be empty.");
@@ -53,7 +52,6 @@ ReporterTimePointSource::addPoints()
   errorCheck("point_name", _point.size());
   errorCheck("time_name", _coordt.size());
 
-  _point_to_weightedValue.clear();
   const Real at =
       MooseUtils::absoluteFuzzyEqual(_reverse_time_end, 0.0) ? _t : _reverse_time_end - _t + _dt;
   for (const auto & i : make_range(nval))
@@ -61,13 +59,11 @@ ReporterTimePointSource::addPoints()
     if (_coordt.empty() || MooseUtils::absoluteFuzzyEqual(at, _coordt[i]))
     {
       if (_read_in_points)
-      {
-        fillPoint(_point[i], i);
-      }
+        addPoint(_point[i], i, _values[i] * _weight[i]);
       else
       {
         const Point point = Point(_coordx[i], _coordy[i], _coordz[i]);
-        fillPoint(point, i);
+        addPoint(point, i, _values[i] * _weight[i]);
       }
     }
   }

@@ -1,6 +1,6 @@
 [Tests]
   design = 'ReporterPointSource.md'
-  issues = '#15831 #18528'
+  issues = '#15831 #18528 #32706'
   [reporterPointSource]
     requirement = 'The system shall support point sources with locations and values given by a Reporter '
     [2dConstantReporter]
@@ -36,19 +36,18 @@
       csvdiff = '2d_vpp_transient_out_point_sample_out.csv'
       detail = "in a transient problem with the vpp source value changing as the vpp changes."
     []
-    [wrong_size_error]
-      type = 'RunException'
-      input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source_dup_err'"
-      expect_err = "Number of x_coord_name entries \(2\) does not match number of entries read for value_name \(3\)"
-      detail = "shall report an error if the input arrays are not the same size."
+    [TwoReportersClosePoints]
+      type = 'CSVDiff'
+      input = 'two_reporters_close_points.i'
+      csvdiff = 'two_reporters_close_points_out.csv'
+      detail = 'in a steady state problem with two separate reporter point sources at nearly the same location.'
     []
-    [duplicate_error]
-      type = 'RunException'
-      input = '2d_vpp.i'
-      cli_args = "DiracKernels/inactive='reporter_point_source_err'"
-      expect_err = "combine_duplicates must be true if reporter has duplicate points"
-      detail = "shall report an error if the input arrays have duplicated values."
-    []
+  []
+  [wrong_size_error]
+    type = 'RunException'
+    input = '2d_vpp.i'
+    cli_args = "DiracKernels/inactive='reporter_point_source_dup_err'"
+    expect_err = "Number of x_coord_name entries \(2\) does not match number of entries read for value_name \(3\)"
+    requirement = "The system shall report an error for ReporterPointSource when the input arrays are not the same size."
   []
 []

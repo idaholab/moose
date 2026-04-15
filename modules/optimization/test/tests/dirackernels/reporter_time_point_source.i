@@ -34,7 +34,6 @@
     z_coord_name = values4D/coordz
     weight_name = values4D/weight
     time_name = values4D/time
-    combine_duplicates=true
   []
 []
 
