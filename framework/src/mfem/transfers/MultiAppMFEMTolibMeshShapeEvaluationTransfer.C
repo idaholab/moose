@@ -47,10 +47,8 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::extractlibMeshNodePositions(
 
   // Populate set of points
   if (fe_type.order > CONSTANT && !is_nodal)
-  {
-    mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than "
+    mooseError("Transfers of non-nodal FEs between libMesh and MFEM with order higher than "
                "CONSTANT are not supported.");
-  }
   else if (is_nodal)
   {
     for (const auto & node : to_mesh.local_node_ptr_range())
@@ -87,10 +85,8 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::projectlibMeshNodalValues(
 
   unsigned int mfem_point_index = 0;
   if (fe_type.order > CONSTANT && !is_nodal)
-  {
-    mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than "
+    mooseError("Transfers of non-nodal FEs between libMesh and MFEM with order higher than "
                "CONSTANT are not supported.");
-  }
   else if (is_nodal)
   {
     for (const auto & node : to_mesh.local_node_ptr_range())

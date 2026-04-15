@@ -30,7 +30,7 @@ MFEMMultiAppTransfer::MFEMMultiAppTransfer(InputParameters const & params)
     _to_var_names(getParam<std::vector<VariableName>>("variable"))
 {
   if (numToVar() != numFromVar())
-    mooseError("Number of variables transferred must be same in both systems.");
+    paramError("source_variable", "Number of variables transferred must be same in both systems.");
 }
 
 void

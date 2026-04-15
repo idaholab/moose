@@ -24,7 +24,7 @@ public:
   /// Set active source and destination problems, and execute variable transfer
   void execute() override;
   /// Allow sibling transfers
-  void checkSiblingsTransferSupported() const override {};
+  void checkSiblingsTransferSupported() const override {}
 
   /// Getter for source variable name
   const VariableName & getFromVarName(int i) const { return _from_var_names.at(i); }
@@ -134,9 +134,9 @@ protected:
 
 private:
   /// Vector of source variable names to be transferred
-  std::vector<VariableName> _from_var_names;
+  const std::vector<VariableName> & _from_var_names;
   /// Vector of destination variable names to transfer to
-  std::vector<VariableName> _to_var_names;
+  const std::vector<VariableName> & _to_var_names;
   /// Pointer to active destination problem variable is being transferred to
   FEProblemBase * _active_to_problem{nullptr};
   /// Pointer to active source problem variable is being transferred from

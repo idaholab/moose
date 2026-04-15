@@ -21,13 +21,9 @@ MFEMIndex(const size_t i_dim,
           const mfem::Ordering::Type ordering)
 {
   if (ordering == mfem::Ordering::byNODES)
-  {
     return i_dim * num_points + i_point;
-  }
   else // ordering == mfem::Ordering::byVDIM
-  {
     return i_point * num_dims + i_dim;
-  }
 }
 
 libMesh::Point
@@ -45,14 +41,12 @@ libMeshPointsToMFEMVector(const std::vector<libMesh::Point> & points,
   const unsigned int num_points = points.size();
   mfem::Vector mfem_points(num_points * num_dims);
   for (unsigned int i_point = 0; i_point < num_points; i_point++)
-  {
     for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
     {
       const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
 
       mfem_points(idx) = points[i_point](i_dim);
     }
-  }
 
   return mfem_points;
 }

@@ -19,7 +19,7 @@ For transfers in the opposite direction, from MFEM-based applications to libMesh
 2. Interpolation of the source libMesh-based `MooseVariable` at this set of node locations. Required
    gather/scatter operations are performed similarly to those in
    [`MultiAppGeneralFieldTransfer`](MultiAppGeneralFieldTransfer.md), with interpolation analagous
-   to [`MultiAppShapeEvaluationTransfer`](MultiAppShapeEvaluationTransfer.md).
+   to [`MultiAppGeneralFieldShapeEvaluationTransfer`](MultiAppGeneralFieldShapeEvaluationTransfer.md).
 3. Projection of the evaluated source variable values onto the destination variable nodes, to set
    the destination variable degrees of freedom, using [`MFEMNodalProjector`](MFEMNodalProjector.md).
 

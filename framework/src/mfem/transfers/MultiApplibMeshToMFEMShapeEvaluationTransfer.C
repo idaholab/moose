@@ -111,7 +111,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   local_meshfuns.enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
 
   // Gather all of the evaluations, pick out the best ones for each point, and apply them to the
-  // solution vector. Fill values and app ids for incoming points We are responsible to compute
+  // solution vector. Fill values and app ids for incoming points. We are responsible to compute
   // values for these incoming points
   auto gather_functor =
       [this,
@@ -121,7 +121,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   {
     vals_ids_for_incoming_points.resize(incoming_points.size(),
                                         std::make_pair(getMFEMOutOfMeshValue(), 0));
-    for (MooseIndex(incoming_points.size()) i_pt = 0; i_pt < incoming_points.size(); ++i_pt)
+    for (const auto i_pt : index_range(incoming_points))
     {
       Point pt = incoming_points[i_pt];
       // Loop until we've found the lowest-ranked app that actually contains
@@ -175,7 +175,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   {
     for (auto & group : incoming_vals_ids)
     {
-      double val = group.second[i].first;
+      const auto val = group.second[i].first;
       if (val == getMFEMOutOfMeshValue())
         continue;
       interp_vals[i] = val;
