@@ -2,7 +2,7 @@
   design = MultiAppMFEMShapeEvaluationTransfer.md
   issues = '#31982'
   [MFEM_to_libMesh_sibling_transfers]
-    requirement = "The system shall support multiapp sibling transfers from MFEM to libMesh sub-apps via shape function evaluations "
+    requirement = "The system shall support multiapp sibling transfers from MFEM to libMesh sub-apps via shape function evaluations"
     [nodal_nodal]
       type = Exodiff
       input = main_between_multiapp.i
@@ -12,7 +12,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'between nodal variables, '
+      detail = 'between nodal variables,'
     []
     [elem_elem]
       type = Exodiff
@@ -23,7 +23,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false      
-      detail = 'between elemental variables, '
+      detail = 'between elemental variables,'
     []    
     [nodal_elem]
       type = Exodiff
@@ -34,7 +34,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'from nodal to elemental variables, '
+      detail = 'from nodal to elemental variables,'
     []
     [1_to_N_nodal]
       type = Exodiff
@@ -48,10 +48,10 @@
       recover = false
       restep = false
       detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
-    []
+    []  
   []
   [libMesh_to_MFEM_sibling_transfers]
-    requirement = "The system shall support multiapp sibling transfers from libMesh to MFEM sub-apps via shape function evaluations "
+    requirement = "The system shall support multiapp sibling transfers from libMesh to MFEM sub-apps via shape function evaluations"
     [nodal_nodal]
       type = CSVDiff
       input = main_between_multiapp.i
@@ -62,7 +62,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'between nodal variables, '
+      detail = 'between nodal variables,'
     []
     [elem_elem]
       type = CSVDiff
@@ -74,7 +74,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'between elemental variables, '
+      detail = 'between elemental variables,'
     []
     [nodal_elem]
       type = CSVDiff

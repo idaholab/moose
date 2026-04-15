@@ -2,9 +2,9 @@
   [MFEMShapeEvaluationTransfer]
     design = MultiAppMFEMShapeEvaluationTransfer.md
     issues = '#31982'
-    requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation, '
+    requirement = 'The system shall be able to transfer MFEM variable data from a sub-application to the parent application via shape function interpolation,'
     [FromSubToParent]
-      detail = 'for real scalar variables, verified by '
+      detail = 'for real scalar variables, verified by'
       [run]
         type = RunApp
         input = parent.i
@@ -12,7 +12,7 @@
         compute_devices = 'cpu cuda'
         recover = false
         cli_args = 'Transfers/active=general_transfer_from_sub '        
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
       []
       [verify]
         type = RunCommand
@@ -28,14 +28,14 @@
       []
     []
     [ComplexFromSubToParent]
-      detail = 'for complex scalar variables, verified by '
+      detail = 'for complex scalar variables, verified by'
       [run]
         type = RunApp
         input = parent_complex.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        cli_args = 'Transfers/active=general_transfer_from_sub '        
+        cli_args = 'Transfers/active=general_transfer_from_sub'        
         detail = 'running the inputs, and '
         max_parallel = 1 # idaholab/moose#32250
       []
@@ -58,7 +58,7 @@
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex.csv'
-        detail = 'between hex meshes, '
+        detail = 'between hex meshes,'
         abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
@@ -68,7 +68,7 @@
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
-        detail = 'between tetrahedral meshes, '
+        detail = 'between tetrahedral meshes,'
         abs_zero = 1e-8
         capabilities = 'mfem'
         recover = false
@@ -108,17 +108,17 @@
   []
   [MFEMCopyTransfer]
     design = MultiAppMFEMCopyTransfer.md
-    requirement = 'The system shall be able to copy MFEM variables '
+    requirement = 'The system shall be able to copy MFEM variables'
     issues = '#29632 #32008'
     [FromSubToParent]
-      detail = 'representing real variables from a sub-application to the parent application, verified by '
+      detail = 'representing real variables from a sub-application to the parent application, verified by'
       [run]
         type = RunApp
         input = parent.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
       []
       [verify]
         type = RunCommand
@@ -134,7 +134,7 @@
       []
     []
     [ToSubFromParent]
-      detail = 'from a parent application to a sub-application, verified by '
+      detail = 'from a parent application to a sub-application, verified by'
       [run]
         type = RunApp
         input = sub.i
@@ -143,7 +143,7 @@
         recover = false
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
       []
       [verify]
         type = RunCommand
@@ -159,14 +159,14 @@
       []
     []
     [ComplexFromSubToParent]
-      detail = 'representing complex variables from a sub-application to the parent application, verified by '
+      detail = 'representing complex variables from a sub-application to the parent application, verified by'
       [run]
         type = RunApp
         input = parent_complex.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
         max_parallel = 1 # idaholab/moose#32250
       []
       [verify]
@@ -183,7 +183,7 @@
       []
     []
     [ComplexToSubFromParent]
-      detail = 'representing complex variables from a parent application to a sub-application, verified by '      
+      detail = 'representing complex variables from a parent application to a sub-application, verified by'      
       [run]
         type = RunApp
         input = sub_complex.i
@@ -192,7 +192,7 @@
         recover = false
         cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                   'subapp:MultiApps/active="" subapp:Transfers/active=""'
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
         max_parallel = 1 # idaholab/moose#32250
       []
       [verify]

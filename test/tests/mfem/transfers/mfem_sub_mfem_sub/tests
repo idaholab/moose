@@ -1,7 +1,7 @@
 [Tests]
   [MFEMShapeEvaluationTransfer]
     design = MultiAppMFEMShapeEvaluationTransfer.md
-    requirement = 'The system shall be able to transfer MFEM variable data between sub-applications via shape function evaluations, verified through '
+    requirement = 'The system shall be able to transfer MFEM variable data between sub-applications via shape function evaluations, verified through'
     issues = '#31982'
     [run]
       type = RunApp
@@ -10,7 +10,7 @@
       compute_devices = 'cpu cuda'
       recover = false
       cli_args = 'Transfers/active=general_transfer_between_sub '        
-      detail = 'running the inputs, and '
+      detail = 'running the inputs, and'
     []
     [verify]
       type = RunCommand
@@ -28,16 +28,16 @@
   [MFEMCopyTransfer]   
     issues = '#29632'
     design = MultiAppMFEMCopyTransfer.md
-    requirement = 'The system shall be able to copy MFEM variable data between sub-applications, '
+    requirement = 'The system shall be able to copy MFEM variable data between sub-applications,'
     [test]
-      detail = 'verified through '
+      detail = 'verified through'
       [run]
         type = RunApp
         input = parent.i
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        detail = 'running the inputs, and '
+        detail = 'running the inputs, and'
       []
       [verify]
         type = RunCommand
