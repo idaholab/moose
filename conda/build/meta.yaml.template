@@ -34,6 +34,10 @@ requirements:
     - {{ moose_c_compiler }}
     - {{ moose_cxx_compiler }}
     - {{ moose_fortran_compiler }}
+    {% if mpi == "mpich" %}
+    # see libfabric entry in conda/conda_build_config.yaml
+    - libfabric {{ libfabric }} # [linux]
+    {% endif %}
     # Compiler symlinks (example: make "gcc" available on path)
     - gcc                 # [linux]
     - clang               # [osx]
