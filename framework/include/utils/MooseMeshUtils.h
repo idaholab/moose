@@ -132,9 +132,25 @@ std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
 /**
  * Calculates the centroid of a MeshBase.
  * @param mesh input mesh whose centroid needs to be calculated
- * @return a Point data containing the mesh centroid
+ * @return a Point corresponding to the mesh centroid
  */
 Point meshCentroidCalculator(const MeshBase & mesh);
+
+/**
+ * Calculates the centroid of a boundary on a mesh
+ * @param boundary boundary to compute the centroid of
+ * @param mesh input mesh holding the boundary whose centroid needs to be calculated
+ * @return a Point corresponding to the boundary centroid
+ */
+Point boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh);
+
+/**
+ * Calculates the side-volume weighted (side-vertex) average normal of a boundary on a mesh
+ * @param boundary boundary to compute the weighted normal of
+ * @param mesh input mesh holding the boundary whose averaged normal needs to be calculated
+ * @return a Point corresponding to the boundary weighted normal
+ */
+RealVectorValue boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh);
 
 /**
  * Compute a coordinate transformation volume integration factor
