@@ -70,7 +70,6 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _have_ad_objects(false),
     _show_functors(false),
     _show_chain_control_data(false),
-    _check_residual_for_nans(false),
     _typed_vector_tags(2),
     _have_p_refinement(false)
 {

@@ -925,13 +925,8 @@ public:
   /// Setter for debug chain control data output
   void setChainControlDataOutput(bool set_output) { _show_chain_control_data = set_output; }
 
-  /// Getter for residual NaN/Inf checking
-  bool checkResidualForNans() const { return _check_residual_for_nans; }
-  /// Setter for residual NaN/Inf checking
-  void setCheckResidualForNans(bool check_residual_for_nans)
-  {
-    _check_residual_for_nans = check_residual_for_nans;
-  }
+  /// Whether to check residual for NaN/Inf values
+  virtual bool checkResidualForNans() const = 0;
 
   /**
    * @return the number of nonlinear systems in the problem
@@ -1175,9 +1170,6 @@ private:
 
   /// Whether to output a list of all the chain control data
   bool _show_chain_control_data;
-
-  /// Whether to check the residual for NaN or Inf values
-  bool _check_residual_for_nans;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
