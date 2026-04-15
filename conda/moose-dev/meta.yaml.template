@@ -16,6 +16,12 @@ build:
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
+  run_exports:
+    - moose-build __VERSIONER_BUILD_VERSION__ {{ mpi }}
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    - moose-tools __VERSIONER_TOOLS_VERSION__
+
 requirements:
   run:
     - moose-build __VERSIONER_BUILD_VERSION__ {{ mpi }}

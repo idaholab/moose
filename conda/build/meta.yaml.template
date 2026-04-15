@@ -52,7 +52,7 @@ requirements:
     - cmake
     - make
     - ninja
-    - patchelf
+    - patchelf # [linux]
     - pkg-config
 
 test:

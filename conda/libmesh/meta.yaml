@@ -26,6 +26,9 @@ build:
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
+  run_exports:
+    - moose-petsc 3.24.6 {{ mpi }}_0
+    - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
 
 requirements:
   build:
