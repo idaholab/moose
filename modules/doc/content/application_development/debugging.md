@@ -13,7 +13,7 @@ For a good tutorial on debugging [see Example 21](/ex21_debugging.md optional=Tr
 
 ## Debug Executable id=building_dbg
 
-The first step to debugging anything is to build a debug executable.  By default MOOSE-based applications are built in "optimized" (`opt`) mode, which ensures the fastest solves. However, an optimized executable is missing a lot of information that is useful to a debugger and the optimization process itself can cause code to get reordered (or even skipped!) making it difficult to step through a program. Additionally, debug modes contain assert statements that do not appear in the optimized builds, which may immediately catch the underlying issue. The following table summarizes the build options:
+The first step to debugging anything is to build a debug executable.  By default MOOSE-based applications are built in "optimized" (`opt`) mode, which ensures the fastest solves. However, an optimized executable is missing a lot of information that is useful to a debugger and the optimization process itself can cause code to get reordered (or even skipped!) making it difficult to step through a program. Additionally, debugging modes (`devel, `dbg`) contain assert statements that do not appear in the optimized builds, which may immediately catch the underlying issue. The following table summarizes the build options:
 
 | Build | Optimization/Speed | Debugging Info | Profiling Info | Typical Use |
 | :- | :- | :- | :- | :- |

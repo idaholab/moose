@@ -14,6 +14,6 @@
     input = 'error_on_residual_nan.i'
     expect_err = "The parameter 'error_on_residual_nan' may only be set to 'true' for 'dbg' and 'devel' modes."
     capabilities = 'method=opt | method=oprof'
-    requirement = "The system shall report an error if the check for NaNs is selected in the compilation mode with maximum optimization."
+    requirement = "The system shall report an error if the check for NaNs is selected in optimized compilation modes."
   []
 []

@@ -328,7 +328,7 @@ For Mac machines, the above strategy may not be effective. The parameter [!param
 []
 ```
 
-This provides the name of the residual object where the bad value enters the residual. If after reviewing the class' `computeQpResidual()` (or similar) method, you are still unable to understand the origin of the NaN or Inf value, you can use a debugger to break at the occurrence: add the following check to the return value `value` for `computeQpResidual()`:
+This provides the name of the residual object where the bad value enters the residual. If after reviewing the class's `computeQpResidual()` (or similar) method, you are still unable to understand the origin of the NaN or Inf value, you can use a debugger to break at the occurrence: add the following check to the return value `value` for `computeQpResidual()`:
 
 ```
 if (!std::isfinite(value))
