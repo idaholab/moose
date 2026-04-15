@@ -40,13 +40,44 @@ protected:
   virtual void transferVariables() = 0;
 
   /// Set current problem to fetch source variables from
-  void setActiveFromProblem(FEProblemBase & from_problem) { _active_from_problem = &from_problem; }
+  void setActiveFromProblem(FEProblemBase & from_problem, const unsigned int global_app_index)
+  {
+    _active_from_problem = &from_problem;
+    _active_from_global_app_index = global_app_index;
+  }
   /// Set current problem to fetch destination variables from
-  void setActiveToProblem(FEProblemBase & to_problem) { _active_to_problem = &to_problem; }
+  void setActiveToProblem(FEProblemBase & to_problem, const unsigned int global_app_index)
+  {
+    _active_to_problem = &to_problem;
+    _active_to_global_app_index = global_app_index;
+  }
   /// Getter for current problem containing source variables
   virtual FEProblemBase & getActiveFromProblem() { return *_active_from_problem; }
   /// Getter for current problem containing destination variables
   virtual FEProblemBase & getActiveToProblem() { return *_active_to_problem; }
+  /// Getter for current destination problem global app index.
+  virtual unsigned int & getActiveToProblemGlobalAppIndex() { return _active_to_global_app_index; }
+  /// Getter for current destination problem global app index.
+  virtual unsigned int & getActiveFromProblemGlobalAppIndex()
+  {
+    return _active_from_global_app_index;
+  }
+
+  /// Getter for the active source transform
+  const MultiAppCoordTransform & getActiveFromTransform() const
+  {
+    return *_from_transforms[_active_from_global_app_index];
+  }
+  /// Getter for the active destination transform
+  const MultiAppCoordTransform & getActiveToTransform() const
+  {
+    return *_to_transforms[_active_to_global_app_index];
+  }
+  /// Map a point in the active destination app frame to the active source app frame
+  libMesh::Point mapPointToActiveSourceFrame(const Point & point_in_target_frame) const
+  {
+    return getActiveFromTransform().mapBack(getActiveToTransform()(point_in_target_frame));
+  }
   /// Get libMesh EquationSystem, which may or may not be displaced
   libMesh::EquationSystems & getlibMeshEquationSystem(FEProblemBase & problem,
                                                       bool use_displaced) const;
@@ -110,6 +141,10 @@ private:
   FEProblemBase * _active_to_problem{nullptr};
   /// Pointer to active source problem variable is being transferred from
   FEProblemBase * _active_from_problem{nullptr};
+  /// Global app index for the active destination problem
+  unsigned int _active_to_global_app_index{0};
+  /// Global app index for the active source problem
+  unsigned int _active_from_global_app_index{0};
   /// Default value to return for transfers from points outside the source mesh
   mfem::real_t _mfem_out_of_mesh_value{std::numeric_limits<mfem::real_t>::infinity()};
 };

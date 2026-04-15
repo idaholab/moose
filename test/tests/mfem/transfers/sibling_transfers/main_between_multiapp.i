@@ -96,3 +96,13 @@
   type = Transient
   num_steps = 1
 []
+
+# Positions used to create multiple subapps for the 1 to N and N to 1 tests
+[Positions]
+  [libmesh_locs]
+    type = InputPositions
+    positions = '0 0 0
+                 0.1 0.4 0
+                 0.7 0.2 0'
+  []    
+[]

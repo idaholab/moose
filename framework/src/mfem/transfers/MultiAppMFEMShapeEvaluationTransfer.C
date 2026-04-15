@@ -32,6 +32,28 @@ MultiAppMFEMShapeEvaluationTransfer::MultiAppMFEMShapeEvaluationTransfer(
 void
 MultiAppMFEMShapeEvaluationTransfer::transferVariables()
 {
+  auto transformTargetPointsToSourceFrame =
+      [this](mfem::Vector & point_coordinates, const unsigned int dimension)
+  {
+    mooseAssert(dimension == 2 || dimension == 3, "Target finite element space must be 2D or 3D");
+
+    const auto n_points = point_coordinates.Size() / dimension;
+    for (const auto i : make_range(n_points))
+    {
+      Point point_in_target_frame;
+      point_in_target_frame(0) = point_coordinates[i];
+      point_in_target_frame(1) = point_coordinates[i + n_points];
+      if (dimension == 3)
+        point_in_target_frame(2) = point_coordinates[i + 2 * n_points];
+
+      const auto point_in_source_frame = mapPointToActiveSourceFrame(point_in_target_frame);
+      point_coordinates[i] = point_in_source_frame(0);
+      point_coordinates[i + n_points] = point_in_source_frame(1);
+      if (dimension == 3)
+        point_coordinates[i + 2 * n_points] = point_in_source_frame(2);
+    }
+  };
+
   // Get GridFunction from problem by name. For complex variables, return the real component.
   auto getGridFunction = [&](MFEMProblem & problem,
                              const std::string & name,
@@ -72,6 +94,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables()
 
     // Evaluate source grid function at target points
     const int dim = to_pfespace.GetParMesh()->Dimension();
+    transformTargetPointsToSourceFrame(vxyz, dim);
     const int nodes_cnt = vxyz.Size() / dim;
     const int to_gf_ncomp = to_gf.VectorDim();
     mfem::Ordering::Type to_gf_ordering(to_pfespace.GetOrdering());

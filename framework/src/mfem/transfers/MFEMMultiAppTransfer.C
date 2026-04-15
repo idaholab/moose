@@ -44,8 +44,8 @@ MFEMMultiAppTransfer::execute()
       for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
         if (getToMultiApp()->hasLocalApp(i))
         {
-          setActiveToProblem(getToMultiApp()->appProblemBase(i));
-          setActiveFromProblem(getToMultiApp()->problemBase());
+          setActiveToProblem(getToMultiApp()->appProblemBase(i), i);
+          setActiveFromProblem(getToMultiApp()->problemBase(), 0);
           transferVariables();
         }
       break;
@@ -53,8 +53,8 @@ MFEMMultiAppTransfer::execute()
       for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         if (getFromMultiApp()->hasLocalApp(i))
         {
-          setActiveToProblem(getFromMultiApp()->problemBase());
-          setActiveFromProblem(getFromMultiApp()->appProblemBase(i));
+          setActiveToProblem(getFromMultiApp()->problemBase(), 0);
+          setActiveFromProblem(getFromMultiApp()->appProblemBase(i), i);
           transferVariables();
         }
       break;
@@ -66,8 +66,8 @@ MFEMMultiAppTransfer::execute()
           if (getFromMultiApp()->hasLocalApp(from_app_id) &&
               getToMultiApp()->hasLocalApp(to_app_id))
           {
-            setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id));
-            setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id));
+            setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id), to_app_id);
+            setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id), from_app_id);
             transferVariables();
             ++transfers_done;
           }

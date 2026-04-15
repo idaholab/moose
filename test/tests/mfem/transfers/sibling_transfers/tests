@@ -34,7 +34,20 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'and from nodal to elemental variables.'
+      detail = 'from nodal to elemental variables, '
+    []
+    [1_to_N_nodal]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'mfem_to_libmesh_nodal_1toN_libmesh_sub0.e mfem_to_libmesh_nodal_1toN_libmesh_sub1.e'
+      cli_args = "Outputs/file_base=mfem_to_libmesh_nodal_1toN
+                  MultiApps/libmesh_sub/positions_objects=libmesh_locs
+                  Transfers/active='mfem_to_libmesh_nodal_nodal'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
     []
   []
   [libMesh_to_MFEM_sibling_transfers]
@@ -75,5 +88,5 @@
       restep = false
       detail = 'and from nodal to elemental variables.'
     []
-  []  
+  []
 []

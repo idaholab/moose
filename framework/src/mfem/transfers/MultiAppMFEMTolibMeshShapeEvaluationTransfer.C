@@ -149,6 +149,8 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
 
     // Perform interpolation of MFEM variable
     const mfem::Ordering::Type ordering = mfem::Ordering::byVDIM;
+    for (auto & point : outgoing_libmesh_points)
+      point = mapPointToActiveSourceFrame(point);
     mfem::Vector outgoing_mfem_points = Moose::MFEM::libMeshPointsToMFEMVector(
         outgoing_libmesh_points, to_mesh.mesh_dimension(), ordering);
     mfem::Vector interp_vals;
@@ -159,6 +161,8 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables()
                  "vector variables from MFEM to libMesh-based subapps");
     from_var.ParFESpace()->GetParMesh()->EnsureNodes();
     _mfem_interpolator.SetDefaultInterpolationValue(getMFEMOutOfMeshValue());
+    // TODO: FindpointsGSLib::Interpolate needs to be executed across all ranks,
+    //       not only on those on which transferVariables is called
     _mfem_interpolator.Interpolate(*from_var.ParFESpace()->GetParMesh(),
                                    outgoing_mfem_points,
                                    from_var,

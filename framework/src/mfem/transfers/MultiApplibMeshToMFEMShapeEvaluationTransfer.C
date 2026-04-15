@@ -59,21 +59,22 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables()
     {
       for (const auto i_proc : make_range(n_processors()))
       {
+        libMesh::Point point_in_target_frame;
         if (dim == 3)
         {
-          const mfem::Vector transformed_node(
-              {vxyz[i], vxyz[i + NE * nsp], vxyz[i + 2 * NE * nsp]});
-          outgoing_points[i_proc].push_back(
-              Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
+          point_in_target_frame(0) = vxyz[i];
+          point_in_target_frame(1) = vxyz[i + NE * nsp];
+          point_in_target_frame(2) = vxyz[i + 2 * NE * nsp];
         }
         else if (dim == 2)
         {
-          const mfem::Vector transformed_node({vxyz[i], vxyz[i + NE * nsp]});
-          outgoing_points[i_proc].push_back(
-              Moose::MFEM::libMeshPointFromMFEMVector(transformed_node));
+          point_in_target_frame(0) = vxyz[i];
+          point_in_target_frame(1) = vxyz[i + NE * nsp];
         }
         else
           mooseError("Target finite element space must be 2D or 3D.");
+
+        outgoing_points[i_proc].push_back(mapPointToActiveSourceFrame(point_in_target_frame));
       }
     }
 
@@ -127,19 +128,16 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
       // the quadrature point.
       if (vals_ids_for_incoming_points[i_pt].first == getMFEMOutOfMeshValue())
       {
-        const auto from_global_num =
-            _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[0];
         // Use mesh function to compute interpolation values
-        vals_ids_for_incoming_points[i_pt].first =
-            local_meshfuns(_from_transforms[from_global_num]->mapBack(pt));
+        vals_ids_for_incoming_points[i_pt].first = local_meshfuns(pt);
         // Record problem ID as well
         switch (_current_direction)
         {
           case FROM_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = _from_local2global_map[0];
+            vals_ids_for_incoming_points[i_pt].second = getActiveFromProblemGlobalAppIndex();
             break;
           case TO_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = _to_local2global_map[0];
+            vals_ids_for_incoming_points[i_pt].second = getActiveToProblemGlobalAppIndex();
             break;
           case BETWEEN_MULTIAPP:
             break;
