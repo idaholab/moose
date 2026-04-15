@@ -1,7 +1,6 @@
 #!/bin/bash
 set -eux
 export PATH=/bin:$PATH
-export METHODS="opt oprof devel dbg"
 
 function do_build(){
     # Strip flags that cause issues
@@ -58,11 +57,6 @@ sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$PREFIX"/contrib/bin/libtool
 if [ "$(uname)" != "Darwin" ]; then
     for tool in sed grep dd; do
         sed -i"" s%/usr/bin/"${tool}"%/bin/"${tool}"%g "$PREFIX"/contrib/bin/libtool
-    done
-# Fix rpath for libmesh libs on mac; linking to libnglib (netgen) will fail without this
-else
-    for METHOD in $METHODS; do
-        install_name_tool -add_rpath "$PREFIX"/lib "$PREFIX"/lib/libmesh_"$METHOD".0.dylib
     done
 fi
 
