@@ -55,6 +55,15 @@ class FEType;
 class Point;
 }
 
+#ifdef MOOSE_MFEM_ENABLED
+namespace Moose::MFEM
+{
+struct SolutionState
+{
+};
+}
+#endif
+
 /**
  * Scalar helper routine
  */
@@ -441,8 +450,11 @@ template <>
 void dataStore(std::ostream & stream, ADReal & dn, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
-
+#ifdef MOOSE_MFEM_ENABLED
 template <>
+void dataStore(std::ostream & stream, Moose::MFEM::SolutionState & state, void * context);
+#endif
+
 /**
  * Stores an owned numeric vector.
  *
@@ -453,6 +465,7 @@ template <>
  * Requirements: the unique_ptr must exist (cannot be null), the vector
  * cannot be ghosted, and the provided context must be the Communicator.
  */
+template <>
 void dataStore(std::ostream & stream,
                std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
                void * context);
@@ -811,7 +824,10 @@ template <>
 void dataLoad(std::istream & stream, ADReal & dn, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
+#ifdef MOOSE_MFEM_ENABLED
 template <>
+void dataLoad(std::istream & stream, Moose::MFEM::SolutionState & state, void * context);
+#endif
 /**
  * Loads an owned numeric vector.
  *
@@ -829,6 +845,7 @@ template <>
  * the Communicator, and if \p v is initialized, it must have the same global
  * and local sizes that the vector was stored with.
  */
+template <>
 void dataLoad(std::istream & stream,
               std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
               void * context);

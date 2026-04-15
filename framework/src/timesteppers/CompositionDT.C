@@ -181,13 +181,10 @@ CompositionDT::getSequenceSteppersNextTime()
   Real next_time_to_hit = std::numeric_limits<Real>::max();
   for (auto & tss : time_sequence_steppers)
   {
-    Real ts_time_to_hit = tss->getNextTimeInSequence();
+    if (!tss->advanceToFutureTime(_time, _dt_min))
+      continue;
 
-    if (ts_time_to_hit - _time <= _dt_min)
-    {
-      tss->increaseCurrentStep();
-      ts_time_to_hit = tss->getNextTimeInSequence();
-    }
+    const Real ts_time_to_hit = tss->getNextTimeInSequence();
     if (next_time_to_hit > ts_time_to_hit)
     {
       _closest_time_sequence_stepper = tss;

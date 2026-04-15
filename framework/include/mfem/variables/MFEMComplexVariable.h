@@ -3,12 +3,12 @@
 #pragma once
 
 #include "MFEMFESpace.h"
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 
 /**
  * Constructs and stores an mfem::ParComplexGridFunction object.
  */
-class MFEMComplexVariable : public MFEMGeneralUserObject
+class MFEMComplexVariable : public MFEMObject
 {
 public:
   static InputParameters validParams();

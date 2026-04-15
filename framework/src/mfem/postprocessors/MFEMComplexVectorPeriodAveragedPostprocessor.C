@@ -24,10 +24,10 @@ MFEMComplexVectorPeriodAveragedPostprocessor::validParams()
                              "coefficient.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
-  params.addRequiredParam<VariableName>(
-      "primal_variable", "Name of the first complex vector variable in the inner product.");
-  params.addRequiredParam<VariableName>(
-      "dual_variable", "Name of the second complex vector variable in the inner product.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "primal_variable", "Name of the first complex vector variable in the inner product.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "dual_variable", "Name of the second complex vector variable in the inner product.");
   return params;
 }
 

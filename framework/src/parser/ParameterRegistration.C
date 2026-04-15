@@ -109,6 +109,8 @@ registerParameter(SolverSystemName);
 registerParameter(MFEMScalarCoefficientName);
 registerParameter(MFEMVectorCoefficientName);
 registerParameter(MFEMMatrixCoefficientName);
+registerParameter(MFEMFESpaceName);
+registerParameter(MFEMSolverName);
 #endif
 
 /*******************************************************************************/

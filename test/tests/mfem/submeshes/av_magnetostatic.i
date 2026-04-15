@@ -48,7 +48,6 @@
     source = a_field
     scale_factor = 1.0
     execute_on = TIMESTEP_END
-    execution_order_group = 3
   []
 []
 

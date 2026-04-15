@@ -162,7 +162,7 @@
     xmldiff = 'OutputData/MixedHeatTransfer/Run0/Run0.pvd
                 OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
@@ -221,7 +221,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
   [MFEMNonLinearDiffusionNonZeroRHS]
     type = XMLDiff
     input = nldiffusion.i
@@ -246,10 +246,9 @@
       csvdiff = 'OutputData/NLHeatTransferLinearized_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
-                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '      
+                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '
     []
     [non-linear]
       detail = 'when the non-linear BC is given state-dependent coefficients.'
@@ -258,8 +257,8 @@
       csvdiff = 'OutputData/NLHeatTransfer_line_sample_0003.csv'
       capabilities = 'mfem'
       compute_devices = 'cpu'
-      recover = false
       restep = false
+      prereq = 'MFEMNonLinearHeatTransfer/linearized'
     []
   []
   [MFEMNonLinearHeatConduction]
@@ -276,7 +275,28 @@
                 OutputData/NLHeatConduction_centre_temperature_0050.csv'
     capabilities = 'mfem'
     compute_devices = 'cpu'
-    recover = false
-    restep = false    
+    restep = false
+  []
+  [MFEMNonLinearHeatConductionComplexAux]
+    design = 'EquationSystem.md'
+    issues = '#30076'
+    requirement = 'The system shall correctly checkpoint and recover a transient MFEM problem that includes a complex auxiliary variable, exercising the cmplx_gridfunctions restore path.'
+    type = CSVDiff
+    input = nl_heatconduction_complex_aux.i
+    csvdiff = 'OutputData/NLHeatConductionComplexAux_centre_temperature_0000.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0010.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0020.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0030.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0040.csv
+                OutputData/NLHeatConductionComplexAux_centre_temperature_0050.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0000.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0010.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0020.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0030.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0040.csv
+                OutputData/NLHeatConductionComplexAux_centre_complex_temperature_0050.csv'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    restep = false
   []
 []

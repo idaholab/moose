@@ -97,6 +97,7 @@
     requirement = 'The system shall display first-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     # This is first order in the original implementation as well. At some point somebody could take a look at the error terms.
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [mms-2d-rz]
     type = MMSTest
@@ -104,6 +105,7 @@
     test_case = TestAdvection2DRZ
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
   [diagonal-step-2d-upwind]
     type = CSVDiff

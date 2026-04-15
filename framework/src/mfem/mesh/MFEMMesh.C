@@ -10,7 +10,10 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMesh.h"
+#include "MooseApp.h"
 #include "libmesh/mesh_generation.h"
+
+#include <fstream>
 
 registerMooseObject("MooseApp", MFEMMesh);
 
@@ -46,6 +49,37 @@ MFEMMesh::validParams()
 MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
 
 MFEMMesh::~MFEMMesh() {}
+
+void
+MFEMMesh::init()
+{
+  // _mesh must be constructed by the action system before init() is called.
+  // MFEMMesh is always used within the normal MOOSE action system, so the fringe
+  // case of a mesh built outside that system does not apply here.
+  mooseAssert(_mesh, "MooseMesh base mesh must be constructed before MFEMMesh::init()");
+
+  // MooseMesh::init() handles the libMesh dummy mesh:
+  //   - recovery:    reads the libMesh mesh back from its checkpoint file
+  //   - normal run:  calls buildMesh(), which for MFEMMesh builds both the
+  //                  dummy libMesh mesh and the MFEM ParMesh
+  MooseMesh::init();
+
+  if (_app.isRecovering() && recoveryAllowed() && _app.isUltimateMaster())
+  {
+    // MooseMesh::init() already restored the libMesh dummy mesh from its checkpoint.
+    // Now restore the MFEM parallel mesh from its own checkpoint file.
+    const auto checkpoint_file = _app.getRestartRecoverFileBase() + _app.checkpointSuffix() +
+                                 ".mfem.mesh." + std::to_string(this->processor_id());
+    std::ifstream input(checkpoint_file);
+    if (!input)
+      mooseError("Unable to open MFEM recovery mesh file '", checkpoint_file, "'.");
+
+    _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), input);
+
+    if (isParamSetByUser("displacement"))
+      _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+  }
+}
 
 void
 MFEMMesh::buildMesh()
@@ -93,6 +127,23 @@ MFEMMesh::buildMesh()
 
   if (isParamSetByUser("displacement"))
     _mesh_displacement_variable.emplace(getParam<std::string>("displacement"));
+}
+
+std::vector<std::filesystem::path>
+MFEMMesh::writeRecoveryFiles(const std::filesystem::path & file_base) const
+{
+  MooseMesh::writeRecoveryFiles(file_base);
+
+  mooseAssert(_mfem_par_mesh, "MFEM parallel mesh is not initialized");
+
+  const auto checkpoint_file =
+      file_base.string() + ".mfem.mesh." + std::to_string(this->processor_id());
+  std::ofstream output(checkpoint_file);
+  if (!output)
+    mooseError("Unable to open MFEM recovery mesh file '", checkpoint_file, "' for writing.");
+
+  _mfem_par_mesh->ParPrint(output);
+  return {checkpoint_file};
 }
 
 void
