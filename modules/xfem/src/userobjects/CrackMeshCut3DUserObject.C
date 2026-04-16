@@ -52,19 +52,21 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
   params.addParam<unsigned int>("n_step_growth", 0, "Number of steps for crack growth");
+  params.addParam<Real>(
+      "min_elem_area", 1e-6, "Growth elements smaller than min_elem_area will not be added.");
   params.addClassDescription("Creates a UserObject for a mesh cutter in 3D problems");
   return params;
 }
 
-// This code does not allow predefined crack growth as a function of time
-// all inital cracks are defined at t_start = t_end = 0
 CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & parameters)
   : MeshCutUserObjectBase(parameters),
     _mesh(_subproblem.mesh()),
     _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
     _growth_increment_method(
         getParam<MooseEnum>("growth_increment_method").getEnum<GrowthRateEnum>()),
+    _size_control(getParam<Real>("size_control")),
     _n_step_growth(getParam<unsigned int>("n_step_growth")),
+    _min_elem_area(getParam<Real>("min_elem_area")),
     _is_mesh_modified(false),
     _func_x(parameters.isParamValid("growth_direction_x") ? &getFunction("growth_direction_x")
                                                           : nullptr),
@@ -92,11 +94,8 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
 
   if (_grow)
   {
-    if (!isParamValid("size_control"))
+    if (!isParamSetByUser("size_control"))
       paramError("size_control", "Crack growth needs size control.");
-
-    _size_control = getParam<Real>("size_control");
-
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
@@ -186,7 +185,6 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
                                                std::vector<Xfem::CutFace> & cut_faces) const
 // With the crack defined by a planar mesh, this method cuts a solid element by all elements in the
 // planar mesh
-// TODO: Time evolving cuts not yet supported in 3D (hence the lack of use of the time variable)
 {
   bool elem_cut = false;
 
@@ -348,6 +346,15 @@ CrackMeshCut3DUserObject::getRelativePosition(const Point & p1,
   Real full_len = (p2 - p1).norm();
   Real len_p1_p = (p - p1).norm();
   return len_p1_p / full_len;
+}
+
+bool
+CrackMeshCut3DUserObject::isTriAreaAboveTol(const Point & p1,
+                                            const Point & p2,
+                                            const Point & p3) const
+{
+  Real area = 0.5 * ((p2 - p1).cross(p3 - p1)).norm();
+  return area >= _min_elem_area;
 }
 
 bool
@@ -589,60 +596,6 @@ CrackMeshCut3DUserObject::findDistance(dof_id_type node1, dof_id_type node2)
   mooseAssert(n2 != nullptr, "Node is NULL");
   Real distance = (*n1 - *n2).norm();
   return distance;
-}
-
-void
-CrackMeshCut3DUserObject::refineBoundary()
-{
-  std::vector<dof_id_type> new_boundary_order(_boundary.begin(), _boundary.end());
-
-  mooseAssert(_boundary.size() >= 2, "Boundary must be at least two nodes");
-
-  for (unsigned int i = _boundary.size() - 1; i >= 1; --i)
-  {
-    dof_id_type node1 = _boundary[i - 1];
-    dof_id_type node2 = _boundary[i];
-
-    Real distance = findDistance(node1, node2);
-
-    if (distance > _size_control)
-    {
-      unsigned int n = static_cast<unsigned int>(distance / _size_control);
-      std::array<Real, 3> x1;
-      std::array<Real, 3> x2;
-
-      Node * n1 = _cutter_mesh->node_ptr(node1);
-      mooseAssert(n1 != nullptr, "Node is NULL");
-      Point & p1 = *n1;
-      Node * n2 = _cutter_mesh->node_ptr(node2);
-      mooseAssert(n2 != nullptr, "Node is NULL");
-      Point & p2 = *n2;
-
-      for (unsigned int j = 0; j < 3; ++j)
-      {
-        x1[j] = p1(j);
-        x2[j] = p2(j);
-      }
-
-      for (unsigned int j = 0; j < n; ++j)
-      {
-        Point x;
-        for (unsigned int k = 0; k < 3; ++k)
-          x(k) = x2[k] - (x2[k] - x1[k]) * (j + 1) / (n + 1);
-
-        Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
-        _cutter_mesh->add_node(this_node);
-
-        dof_id_type id = _cutter_mesh->n_nodes() - 1;
-        auto it = new_boundary_order.begin();
-        new_boundary_order.insert(it + i, id);
-      }
-    }
-  }
-
-  _boundary = new_boundary_order;
-  mooseAssert(_boundary.size() > 0, "Boundary should not have zero size");
-  _boundary.pop_back();
 }
 
 void
@@ -897,10 +850,38 @@ CrackMeshCut3DUserObject::growFront()
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_increment;
 
-      this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
-      _cutter_mesh->add_node(this_node);
+      // Skip if x forms a degenerate triangle with both crack front neighbors
+      bool skip_node = false;
 
-      dof_id_type id = _cutter_mesh->n_nodes() - 1;
+      auto map_it = _boundary_map.find(orig_id);
+      if (map_it != _boundary_map.end())
+      {
+        bool all_small = true;
+        for (dof_id_type neighbor_id : map_it->second)
+        {
+          Point neighbor_pt = *_cutter_mesh->node_ptr(neighbor_id);
+          if (isTriAreaAboveTol(this_point, neighbor_pt, x))
+          {
+            all_small = false;
+            break;
+          }
+        }
+        if (all_small)
+          skip_node = true;
+      }
+
+      dof_id_type id;
+      if (skip_node)
+      {
+        id = orig_id;
+      }
+      else
+      {
+        this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
+        _cutter_mesh->add_node(this_node);
+        id = _cutter_mesh->n_nodes() - 1;
+      }
+
       temp.push_back(id);
       grown_node_map[orig_id] = id;
 
@@ -1076,11 +1057,19 @@ CrackMeshCut3DUserObject::refineFront()
           x2[j] = p2(j);
         }
 
+        // Get the corresponding old boundary node for area check
+        unsigned int ab_idx = (i - 1 < _active_boundary[ifront].size()) ? i - 1 : 0;
+        Point ab_pt = *_cutter_mesh->node_ptr(_active_boundary[ifront][ab_idx]);
+
         for (unsigned int j = 0; j < n; ++j)
         {
           Point x;
           for (unsigned int k = 0; k < 3; ++k)
             x(k) = x2[k] - (x2[k] - x1[k]) * (j + 1) / (n + 1);
+
+          // Skip if both triangles with old boundary node would be degenerate
+          if (!isTriAreaAboveTol(x, p1, ab_pt) && !isTriAreaAboveTol(x, p2, ab_pt))
+            continue;
 
           Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
           _cutter_mesh->add_node(this_node);
@@ -1193,6 +1182,12 @@ CrackMeshCut3DUserObject::triangulation()
         elem.push_back(p3);
         i1++;
       }
+
+      // Skip degenerate elements
+      if (!isTriAreaAboveTol(Point(*_cutter_mesh->node_ptr(elem[0])),
+                             Point(*_cutter_mesh->node_ptr(elem[1])),
+                             Point(*_cutter_mesh->node_ptr(elem[2]))))
+        continue;
 
       Elem * new_elem = Elem::build(TRI3).release();
 
