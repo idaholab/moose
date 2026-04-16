@@ -1106,11 +1106,10 @@ private:
                         const std::string & new_root_name_incoming);
 
   /**
-   * @brief join a separate CSGEngUnitList object to this one
-   *
-   * @param eng_unit_list CSGEngUnitList from a separate CSGBase object
+   * @brief rebuilds the list of raw pointers to engineering units by iterating through the surface,
+   * cell, and universe lists.
    */
-  void joinEngUnitList(CSGEngUnitList & eng_unit_list);
+  void rebuildEngUnitList();
 
   /// Replace all cell fills and lattice elements/outers referencing old_univ with new_univ
   void replaceUniverseRefs(const CSGUniverse & old_univ, const CSGUniverse & new_univ);

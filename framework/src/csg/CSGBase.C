@@ -783,6 +783,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identica
   joinCellList(base->getCellList(), ignore_identical_components);
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(base->getUniverseList(), ignore_identical_components);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -798,6 +800,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
   joinCellList(base->getCellList(), ignore_identical_components);
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(base->getUniverseList(), ignore_identical_components, new_root_name_join);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -815,6 +819,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
   joinLatticeList(base->getLatticeList(), ignore_identical_components);
   joinUniverseList(
       base->getUniverseList(), ignore_identical_components, new_root_name_base, new_root_name_join);
+  rebuildEngUnitList(); // finds all engineering units again, allowing us to keep any ignored
+                        // surfaces that were removed from the surface list out of this list
 }
 
 void
@@ -973,13 +979,21 @@ CSGBase::joinLatticeList(CSGLatticeList & lattice_list, const bool ignore_identi
 }
 
 void
-CSGBase::joinEngUnitList(CSGEngUnitList & eng_unit_list)
+CSGBase::rebuildEngUnitList()
 {
-  // Objects are already owned by the type lists (moved via joinSurfaceList/joinCellList/
-  // joinUniverseList). Copy the raw pointers into our index — they still point to the
-  // objects now living in our type lists.
-  for (auto * ptr : eng_unit_list._eng_units)
-    _eng_unit_list.addEngUnit(*ptr);
+  _eng_unit_list = CSGEngUnitList(); // reset to empty
+
+  // iterate through all existing lists to find all CSGEngUnit types and store the pointers to the
+  // rebuilt engineering unit list
+  for (auto & [name, surf] : _surface_list.getSurfaceListMap())
+    if (auto * eu = dynamic_cast<CSGSurfaceEngUnit *>(surf.get()))
+      _eng_unit_list.addEngUnit(*eu);
+  for (auto & [name, cell] : _cell_list.getCellListMap())
+    if (auto * eu = dynamic_cast<CSGCellEngUnit *>(cell.get()))
+      _eng_unit_list.addEngUnit(*eu);
+  for (auto & [name, univ] : _universe_list.getUniverseListMap())
+    if (auto * eu = dynamic_cast<CSGUniverseEngUnit *>(univ.get()))
+      _eng_unit_list.addEngUnit(*eu);
 }
 
 void
