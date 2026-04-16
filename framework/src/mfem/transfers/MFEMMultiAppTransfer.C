@@ -18,9 +18,9 @@ MFEMMultiAppTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<VariableName>>("variable",
-                                                     "AuxVariable to store transferred value in.");
+                                                     "Variable(s) to store transferred values in.");
   params.addRequiredParam<std::vector<VariableName>>("source_variable",
-                                                     "Variable to transfer from");
+                                                     "Variable(s) to transfer from.");
   return params;
 }
 
