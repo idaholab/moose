@@ -34,7 +34,9 @@ Kernel::Kernel(const InputParameters & parameters)
 void
 Kernel::computeResidual()
 {
-  Policy policy(0, numKokkosBlockElements());
+  _thread.resize(_num_local_threads, numKokkosBlockElements());
+
+  Policy policy(0, _thread.size());
 
   if (!_residual_dispatcher)
     _residual_dispatcher = DispatcherRegistry::build<ResidualLoop>(this, type());
@@ -47,7 +49,9 @@ Kernel::computeJacobian()
 {
   if (DispatcherRegistry::hasUserMethod<JacobianLoop>(type()))
   {
-    Policy policy(0, numKokkosBlockElements());
+    _thread.resize(_num_local_threads, numKokkosBlockElements());
+
+    Policy policy(0, _thread.size());
 
     if (!_jacobian_dispatcher)
       _jacobian_dispatcher = DispatcherRegistry::build<JacobianLoop>(this, type());
@@ -59,7 +63,8 @@ Kernel::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize(sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements());
+    _thread.resize(
+        _num_local_threads, sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements());
 
     Policy policy(0, _thread.size());
 

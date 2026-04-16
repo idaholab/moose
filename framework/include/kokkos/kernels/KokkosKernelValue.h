@@ -120,29 +120,16 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
-  Real value = 0;
-
   ResidualObject::computeJacobianInternal(
       datum,
-      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          unsigned int j_old = libMesh::invalid_uint;
+          Real value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
 
-          for (unsigned int ij = ijb; ij < ije; ++ij)
-          {
-            unsigned int i = ij % datum.n_jdofs();
-            unsigned int j = ij / datum.n_jdofs();
-
-            if (j != j_old)
-            {
-              value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
-              j_old = j;
-            }
-
-            local_ke[ij] += value * _test(datum, i, qp);
-          }
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += value * _test(datum, i, qp);
         }
       });
 }
