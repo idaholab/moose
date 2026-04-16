@@ -9,7 +9,7 @@ package:
   version: {{ VERSION }}
 
 source:
-  - path: ../../../fix_conda_mac
+  - path: ../../../moose
   - path: ../functions/retry_build.sh
 
 build:
