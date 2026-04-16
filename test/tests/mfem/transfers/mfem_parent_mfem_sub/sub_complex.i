@@ -72,8 +72,8 @@
   active = ''
   [to_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variable = u
-    variable = u
+    source_variables = u
+    variables = u
     to_multi_app = subapp
   []
 []

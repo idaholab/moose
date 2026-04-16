@@ -17,20 +17,20 @@ InputParameters
 MFEMMultiAppTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
-  params.addRequiredParam<std::vector<VariableName>>("variable",
+  params.addRequiredParam<std::vector<VariableName>>("variables",
                                                      "Variable(s) to store transferred values in.");
-  params.addRequiredParam<std::vector<VariableName>>("source_variable",
+  params.addRequiredParam<std::vector<VariableName>>("source_variables",
                                                      "Variable(s) to transfer from.");
   return params;
 }
 
 MFEMMultiAppTransfer::MFEMMultiAppTransfer(InputParameters const & params)
   : MultiAppTransfer(params),
-    _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
-    _to_var_names(getParam<std::vector<VariableName>>("variable"))
+    _from_var_names(getParam<std::vector<VariableName>>("source_variables")),
+    _to_var_names(getParam<std::vector<VariableName>>("variables"))
 {
   if (numToVar() != numFromVar())
-    paramError("source_variable", "Number of variables transferred must be same in both systems.");
+    paramError("source_variables", "Number of variables transferred must be same in both systems.");
 }
 
 void

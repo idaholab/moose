@@ -41,8 +41,8 @@
   [pull_indicator_nodal]
     type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     from_multi_app = solid_domain
-    source_variable = solid_indicator
-    variable = indicator_nodal
+    source_variables = solid_indicator
+    variables = indicator_nodal
     displaced_source_mesh = true
     execute_on = 'initial timestep_begin'
   []

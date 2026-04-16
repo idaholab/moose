@@ -70,8 +70,8 @@
 [Transfers]
   [transfer_from_mfem]
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
-    source_variable = mfem_scalar_var
-    variable = mfem_scalar_var
+    source_variables = mfem_scalar_var
+    variables = mfem_scalar_var
     from_multi_app = mfem_app
   []
 []

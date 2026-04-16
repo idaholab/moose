@@ -40,14 +40,14 @@
   active = 'copy_from_sub'
   [copy_from_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variable = u
-    variable = u
+    source_variables = u
+    variables = u
     from_multi_app = subapp
   []
   [general_transfer_from_sub]
     type = MultiAppMFEMShapeEvaluationTransfer
-    source_variable = u
-    variable = u
+    source_variables = u
+    variables = u
     from_multi_app = subapp
   []
 []

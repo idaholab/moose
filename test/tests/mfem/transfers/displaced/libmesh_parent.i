@@ -40,8 +40,8 @@
   [pull_indicator_nodal]
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     from_multi_app = background
-    source_variable = indicator_field
-    variable = background_field
+    source_variables = indicator_field
+    variables = background_field
     displaced_target_mesh = true
     execute_on = 'initial timestep_begin'
   []

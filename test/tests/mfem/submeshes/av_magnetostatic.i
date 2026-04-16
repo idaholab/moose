@@ -133,8 +133,8 @@
 [Transfers]
   [from_coil]
     type = MultiAppMFEMCopyTransfer
-    source_variable = e_field
-    variable = e_field
+    source_variables = e_field
+    variables = e_field
     from_multi_app = coil
   []
 []

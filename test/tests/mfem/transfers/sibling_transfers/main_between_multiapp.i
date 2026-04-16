@@ -32,15 +32,15 @@
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     from_multi_app = mfem_sub
     to_multi_app = libmesh_sub
-    source_variable = sent_nodal
-    variable = received_nodal
+    source_variables = sent_nodal
+    variables = received_nodal
   []
   [libmesh_to_mfem_nodal_nodal]
     type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     from_multi_app = libmesh_sub
     to_multi_app = mfem_sub
-    source_variable = sent_nodal
-    variable = received_nodal
+    source_variables = sent_nodal
+    variables = received_nodal
   []
 
   # Elemental to elemental variables
@@ -48,15 +48,15 @@
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     from_multi_app = mfem_sub
     to_multi_app = libmesh_sub
-    source_variable = sent_elem
-    variable = received_elem
+    source_variables = sent_elem
+    variables = received_elem
   []
   [libmesh_to_mfem_elem_elem]
     type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     from_multi_app = libmesh_sub
     to_multi_app = mfem_sub
-    source_variable = sent_elem
-    variable = received_elem
+    source_variables = sent_elem
+    variables = received_elem
   []
 
   # Elemental to nodal variables
@@ -64,15 +64,15 @@
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     from_multi_app = mfem_sub
     to_multi_app = libmesh_sub
-    source_variable = sent_elem
-    variable = received_nodal
+    source_variables = sent_elem
+    variables = received_nodal
   []
   [libmesh_to_mfem_elem_nodal]
     type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     from_multi_app = libmesh_sub
     to_multi_app = mfem_sub
-    source_variable = sent_elem
-    variable = received_nodal
+    source_variables = sent_elem
+    variables = received_nodal
   []
 
   # Nodal to elemental variables
@@ -80,15 +80,15 @@
     type = MultiAppMFEMTolibMeshShapeEvaluationTransfer
     from_multi_app = mfem_sub
     to_multi_app = libmesh_sub
-    source_variable = sent_nodal
-    variable = received_elem
+    source_variables = sent_nodal
+    variables = received_elem
   []
   [libmesh_to_mfem_nodal_elem]
     type = MultiApplibMeshToMFEMShapeEvaluationTransfer
     from_multi_app = libmesh_sub
     to_multi_app = mfem_sub
-    source_variable = sent_nodal
-    variable = received_elem
+    source_variables = sent_nodal
+    variables = received_elem
   []
 []
 

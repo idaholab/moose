@@ -117,8 +117,8 @@
 [Transfers]
   [transfer_from_subapp]
     type = MultiAppMFEMShapeEvaluationTransfer
-    source_variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
-    variable = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
+    source_variables = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
+    variables = 'mfem_sub_h1_vector_var mfem_sub_hcurl_vector_var mfem_sub_hdiv_vector_var mfem_sub_l2_vector_var'
     from_multi_app = mfem_app
   []
 []
