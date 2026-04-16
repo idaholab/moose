@@ -85,6 +85,22 @@ protected:
                                   const unsigned int valid_mesh_div,
                                   const unsigned int i_from) const;
 
+  /**
+   * @brief Search all local KD-trees for the nearest node/element and update outgoing_val.
+   *
+   * Performs a first pass to find the nearest neighbor value across all sources, then a second
+   * pass for search-value-conflict detection when _search_value_conflicts is true.
+   *
+   * @param pt           Target point in the reference coordinate frame
+   * @param mesh_div     Mesh-division / sub-app index encoded in the point request
+   * @param outgoing_val Accumulator {value, distance}; caller must pre-set .second to max()
+   * @param point_found  Set to true when at least one non-empty KD-tree contributes a value
+   */
+  void evaluateNearestNodeFromKDTrees(const Point & pt,
+                                      unsigned int mesh_div,
+                                      std::pair<Real, Real> & outgoing_val,
+                                      bool & point_found);
+
   /// KD-Trees for all the local source apps
   std::vector<std::shared_ptr<KDTree>> _local_kdtrees;
 

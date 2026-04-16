@@ -187,7 +187,7 @@ MultiAppGeneralFieldFunctorTransfer::buildKDTrees(const unsigned int var_index)
       else
         from_blocks = Moose::NodeArg::undefined_subdomain_connection;
 
-      // We need to loop on the nodes on the node at the edge of the domain of definition the
+      // We need to loop over the nodes at the edge of the domain of definition of the
       // current functor
       if (_extrapolation_behavior == 2) // nearest-node
         for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
@@ -381,7 +381,8 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
     bool point_found = false;
 
-    // Loop on all sources
+    // Loop on all sources to locate the point and evaluate the functor if it is in-domain,
+    // or to extrapolate with evaluate_oob if it is out-of-domain
     for (const auto i_source : make_range(_num_sources))
     {
       // Examine all restrictions for the point. This source (KDTree+values) could be ruled out
@@ -444,70 +445,51 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         value /= num_values;
         point_found = true;
         outgoing_vals[i_pt] = {value, 0};
-        // Skip nearest node KD-Tree evaluation
+        // Skip KD-Tree evaluation for this source; nearest-node/nearest-elem are handled below
         continue;
       }
 
-      // Check if we have already found a point to avoid over-writing a valid value
-      // No need to check the KD-Tree if the extrapolation behavior is flat
-      if (!point_found && _extrapolation_behavior == 0) /*flat*/
+      // For evaluate_oob: find the nearest boundary location via KD-tree, then evaluate
+      // the functor out-of-domain at the transformed point.
+      // nearest-node / nearest-elem are handled after the source loop via the shared base-class
+      // method, which also provides search_value_conflicts detection for the extrapolation path.
+      if (_extrapolation_behavior == 1) /*evaluate_oob*/
       {
-        // The base class will do take care of replacing the value
-        outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
-                               GeneralFieldTransfer::OutOfMeshValue};
-        continue;
-      }
+        // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+        std::vector<std::size_t> return_index(_num_nearest_points);
+        std::vector<Real> return_dist_sqr(_num_nearest_points);
 
-      // TODO: Pre-allocate these two work arrays. They will be regularly resized by the
-      // searches
-      std::vector<std::size_t> return_index(_num_nearest_points);
-      std::vector<Real> return_dist_sqr(_num_nearest_points);
-
-      // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
-      if (_local_kdtrees[i_source]->numberCandidatePoints())
-      {
-        point_found = true;
-        // Note that we do not need to use the transformed_pt (in the source app frame)
-        // because the KDTree has been created in the reference frame
-        _local_kdtrees[i_source]->neighborSearch(
-            pt, _num_nearest_points, return_index, return_dist_sqr);
-        Real val_sum = 0, dist_sum = 0;
-        for (const auto index : return_index)
+        if (_local_kdtrees[i_source]->numberCandidatePoints())
         {
-          val_sum += _local_values[i_source][index];
-          dist_sum += (_local_points[i_source][index] - pt).norm();
-        }
+          point_found = true;
+          _local_kdtrees[i_source]->neighborSearch(
+              pt, _num_nearest_points, return_index, return_dist_sqr);
+          Real dist_sum = 0;
+          for (const auto index : return_index)
+            dist_sum += (_local_points[i_source][index] - pt).norm();
 
-        // If the new value found is closer than for other sources, use it
-        const auto new_distance = dist_sum / return_dist_sqr.size();
-        if (new_distance < outgoing_vals[i_pt].second)
-        {
-          if (_extrapolation_behavior == 1) /*evaluate oob*/
+          const auto new_distance = dist_sum / return_dist_sqr.size();
+          if (new_distance < outgoing_vals[i_pt].second)
           {
             Moose::ElemPointArg elem_pt_arg = {nullptr, transformed_pt, /*correct skewness*/ false};
             Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
             outgoing_vals[i_pt] = {functor(elem_pt_arg, time_arg), new_distance};
           }
-          // /* nearest-node and nearest-elem */
-          else
-            outgoing_vals[i_pt] = {val_sum / return_index.size(), new_distance};
         }
       }
     }
+
+    // nearest-node / nearest-elem extrapolation: delegate to the shared KD-tree search.
+    // This also performs search_value_conflicts detection for the extrapolation path.
+    if (!point_found &&
+        (_extrapolation_behavior == 2 /*nearest-node*/ ||
+         _extrapolation_behavior == 3 /*nearest-elem*/))
+      evaluateNearestNodeFromKDTrees(pt, mesh_div, outgoing_vals[i_pt], point_found);
 
     // none of the source problem meshes were within the restrictions set
     if (!point_found)
       outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
                              GeneralFieldTransfer::OutOfMeshValue};
-    else if (_search_value_conflicts)
-    {
-      // Within the domain: implemented above
-      // Outside the domain, it depends on the extrapolation option
-      // Flat: no conflict
-      // Evaluate out-of-bounds: same issue as nearest location
-      // Nearest-node: same issue as nearest location
-      // Linear: TBD
-    }
 
     // Move to next point
     i_pt++;

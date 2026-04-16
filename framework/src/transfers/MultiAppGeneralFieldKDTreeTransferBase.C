@@ -278,3 +278,122 @@ MultiAppGeneralFieldKDTreeTransferBase::checkRestrictionsForSource(const Point &
 
   return true;
 }
+
+void
+MultiAppGeneralFieldKDTreeTransferBase::evaluateNearestNodeFromKDTrees(
+    const Point & pt,
+    unsigned int mesh_div,
+    std::pair<Real, Real> & outgoing_val,
+    bool & point_found)
+{
+  // First pass: find the nearest neighbor value across all local sources
+  for (const auto i_from : make_range(_num_sources))
+  {
+    if (!checkRestrictionsForSource(pt, mesh_div, i_from))
+      continue;
+
+    // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+    std::vector<std::size_t> return_index(_num_nearest_points);
+    std::vector<Real> return_dist_sqr(_num_nearest_points);
+
+    // KD-Tree can be empty if no points are within block/boundary/bounding box restrictions
+    if (_local_kdtrees[i_from]->numberCandidatePoints())
+    {
+      point_found = true;
+      // Note that we do not need to use the transformed_pt (in the source app frame)
+      // because the KDTree has been created in the reference frame
+      _local_kdtrees[i_from]->neighborSearch(
+          pt, _num_nearest_points, return_index, return_dist_sqr);
+      Real val_sum = 0, dist_sum = 0;
+      for (const auto index : return_index)
+      {
+        val_sum += _local_values[i_from][index];
+        dist_sum += (_local_points[i_from][index] - pt).norm();
+      }
+
+      // If the new value found is closer than for other sources, use it
+      const auto new_distance = dist_sum / return_dist_sqr.size();
+      if (new_distance < outgoing_val.second)
+        outgoing_val = {val_sum / return_index.size(), new_distance};
+    }
+  }
+
+  // Second pass: search-value-conflict detection
+  if (point_found && _search_value_conflicts)
+  {
+    unsigned int num_equidistant_problems = 0;
+
+    for (const auto i_from : make_range(_num_sources))
+    {
+      if (!checkRestrictionsForSource(pt, mesh_div, i_from))
+        continue;
+
+      // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+      std::vector<std::size_t> return_index(_num_nearest_points + 1);
+      std::vector<Real> return_dist_sqr(_num_nearest_points + 1);
+
+      const auto app_index = getAppIndex(i_from, i_from / getNumDivisions());
+      const auto num_search = _num_nearest_points + 1;
+
+      if (_local_kdtrees[i_from]->numberCandidatePoints())
+      {
+        _local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
+        auto num_found = return_dist_sqr.size();
+
+        // Local coordinates only accessible when not using nearest-position
+        // as we did not keep the index of the source app, only the position index
+        const Point local_pt = getPointInLocalSourceFrame(app_index, pt);
+
+        if (!_nearest_positions_obj &&
+            _from_transforms[getGlobalSourceAppIndex(app_index)]->hasCoordinateSystemTypeChange())
+          if (!_skip_coordinate_collapsing)
+            mooseInfo("Search value conflict cannot find the origin point due to the "
+                      "non-uniqueness of the coordinate collapsing reverse mapping");
+
+        // Look for too many equidistant nodes within a problem. First zip then sort by distance
+        std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;
+        for (const auto i : make_range(num_found))
+          zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
+        std::sort(zipped_nearest_points.begin(), zipped_nearest_points.end());
+
+        // If two furthest are equally far from target point, then we have an indetermination in
+        // what is sent in this communication round from this process. However, it may not
+        // materialize to an actual conflict, as values sent from another process for the
+        // desired target point could be closer (nearest). There is no way to know at this point
+        // in the communication that a closer value exists somewhere else
+        if (num_found > 1 && num_found == num_search &&
+            MooseUtils::absoluteFuzzyEqual(zipped_nearest_points[num_found - 1].first,
+                                           zipped_nearest_points[num_found - 2].first))
+        {
+          if (_nearest_positions_obj)
+            registerConflict(app_index, 0, pt, outgoing_val.second, true);
+          else
+            registerConflict(app_index, 0, local_pt, outgoing_val.second, true);
+        }
+
+        // Recompute the distance for this problem. If it matches the cached value more than
+        // once it means multiple problems provide equidistant values for this point
+        Real dist_sum = 0;
+        for (const auto i : make_range(num_search - 1))
+        {
+          auto index = zipped_nearest_points[i].second;
+          dist_sum += (_local_points[i_from][index] - pt).norm();
+        }
+
+        // Compare to the selected value found after looking at all the problems
+        if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),
+                                           outgoing_val.second))
+        {
+          num_equidistant_problems++;
+          if (num_equidistant_problems > 1)
+          {
+            if (_nearest_positions_obj)
+              registerConflict(app_index, 0, pt, outgoing_val.second, true);
+            else
+              registerConflict(app_index, 0, local_pt, outgoing_val.second, true);
+          }
+        }
+      }
+    }
+  }
+}
