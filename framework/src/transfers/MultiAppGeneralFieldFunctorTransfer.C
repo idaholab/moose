@@ -374,6 +374,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
 {
   dof_id_type i_pt = 0;
   std::set<const Elem *> elem_candidates;
+  const auto num_apps_per_tree = getNumAppsPerTree();
 
   for (const auto & [pt, mesh_div] : incoming_points)
   {
@@ -391,76 +392,89 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Note: because this transfer is intended for extrapolation,
       // this will usually not restrict the source. The distance comparisons will be crucial
 
-      const auto app_index = getAppIndex(i_source, i_source / getNumDivisions());
-
-      // Retrieve the functor
-      const auto & functor = *_functors[app_index][var_index];
-
-      // Get the intersection of the functor and transfer source block restrictions
-      std::set<SubdomainID> from_blocks;
-      for (const auto bl : _from_blocks.size()
-                               ? _from_blocks
-                               : _from_problems[app_index]->mesh().getMesh().get_mesh_subdomains())
-        if (functor.hasBlocks(bl))
-          from_blocks.insert(bl);
-
-      // If in domain, use the functor evaluation at the point
-      // Locate the point and an element
-      // Clear the nearest candidates
-      elem_candidates.clear();
+      // The transformed point is the same for all apps in this source
       const auto transformed_pt = getPointInLocalSourceFrame(i_source, pt);
-      if (from_blocks.size())
-        (*_point_locators[app_index])(transformed_pt, elem_candidates, &from_blocks);
-      else
-        (*_point_locators[app_index])(transformed_pt, elem_candidates);
-      if (elem_candidates.size())
+
+      // Inner loop: when group_subapps is true, multiple apps contribute to the same source
+      // (one KD-tree per position). Mirror the structure of buildKDTrees.
+      bool source_in_domain = false;
+      for (const auto app_i : make_range(num_apps_per_tree))
       {
-        // Register conflict if any
-        if (point_found && _search_value_conflicts)
-        {
-          // In the nearest-position/app mode, we save conflicts in the reference frame
-          if (_nearest_positions_obj)
-            registerConflict(i_source, /*dof*/ 0, pt, 0, true);
-          else
-            registerConflict(i_source, 0, transformed_pt, 0, true);
-        }
+        const auto app_index = getAppIndex(i_source, app_i);
 
-        // Average the result for now
-        // TODO: if we knew the functor were continuous, we could return earlier
-        Real value = 0;
-        unsigned int num_values = 0;
-        for (const auto elem : elem_candidates)
+        // Retrieve the functor
+        const auto & functor = *_functors[app_index][var_index];
+
+        // Get the intersection of the functor and transfer source block restrictions
+        std::set<SubdomainID> from_blocks;
+        for (const auto bl : _from_blocks.size()
+                                 ? _from_blocks
+                                 : _from_problems[app_index]->mesh().getMesh().get_mesh_subdomains())
+          if (functor.hasBlocks(bl))
+            from_blocks.insert(bl);
+
+        // If in domain, use the functor evaluation at the point
+        // Locate the point and an element
+        // Clear the nearest candidates
+        elem_candidates.clear();
+        if (from_blocks.size())
+          (*_point_locators[app_index])(transformed_pt, elem_candidates, &from_blocks);
+        else
+          (*_point_locators[app_index])(transformed_pt, elem_candidates);
+        if (elem_candidates.size())
         {
-          // Variables would hit a ghosting error; compare against the sub-app communicator rank,
-          // not the parent communicator rank - each sub-app runs in its own sub-communicator
-          // where ranks start at 0, regardless of the global rank of the owning process
-          if (_functor_is_variable[var_index] &&
-              elem->processor_id() != _from_problems[app_index]->processor_id())
+          // Register conflict if any
+          if (point_found && _search_value_conflicts)
+          {
+            // In the nearest-position/app mode, we save conflicts in the reference frame
+            if (_nearest_positions_obj)
+              registerConflict(i_source, /*dof*/ 0, pt, 0, true);
+            else
+              registerConflict(i_source, 0, transformed_pt, 0, true);
+          }
+
+          // Average the result for now
+          // TODO: if we knew the functor were continuous, we could return earlier
+          Real value = 0;
+          unsigned int num_values = 0;
+          for (const auto elem : elem_candidates)
+          {
+            // Variables would hit a ghosting error; compare against the sub-app communicator rank,
+            // not the parent communicator rank - each sub-app runs in its own sub-communicator
+            // where ranks start at 0, regardless of the global rank of the owning process
+            if (_functor_is_variable[var_index] &&
+                elem->processor_id() != _from_problems[app_index]->processor_id())
+              continue;
+            Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
+            Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
+            value += functor(elem_pt_arg, time_arg);
+            num_values++;
+          }
+          if (num_values == 0)
             continue;
-          Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
-          Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
-          value += functor(elem_pt_arg, time_arg);
-          num_values++;
-        }
-        if (num_values == 0)
-          continue;
 
-        value /= num_values;
-        point_found = true;
-        outgoing_vals[i_pt] = {value, 0};
-        // Skip KD-Tree evaluation for this source; nearest-node/nearest-elem are handled below
-        continue;
+          value /= num_values;
+          point_found = true;
+          source_in_domain = true;
+          outgoing_vals[i_pt] = {value, 0};
+        }
       }
+
+      // In-domain hit found for this source; skip KD-tree extrapolation
+      if (source_in_domain)
+        continue;
 
       // For evaluate_oob: find the nearest boundary location via KD-tree, then evaluate
       // the functor out-of-domain at the transformed point.
-      // nearest-node / nearest-elem are handled after the source loop via the shared base-class
-      // method, which also provides search_value_conflicts detection for the extrapolation path.
+      // nearest-node / nearest-elem are handled after the source loop.
       if (_extrapolation_behavior == 1) /*evaluate_oob*/
       {
         // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
         std::vector<std::size_t> return_index(_num_nearest_points);
         std::vector<Real> return_dist_sqr(_num_nearest_points);
+
+        // Use the first app in this source group for the out-of-bounds functor evaluation
+        const auto & functor = *_functors[getAppIndex(i_source, 0)][var_index];
 
         if (_local_kdtrees[i_source]->numberCandidatePoints())
         {
