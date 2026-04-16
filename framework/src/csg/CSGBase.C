@@ -1183,14 +1183,9 @@ CSGBase::checkUniverseLinking() const
   // Recursively figure out which universe names are linked to root universe
   getLinkedUniverses(getRootUniverse(), linked_universe_names, linked_cell_names);
 
-  // Iterate through combined list of universes and universe engineering units and check that they
-  // exist in universes linked to root universe list.
-  // (CSGUniverseEngUnit is derived from CSGUniverse, so they share the same base interface)
-  auto all_univs = getAllUniverses();
-  for (const CSGUniverseEngUnit & eu : getAllUniverseEngUnits())
-    all_univs.emplace_back(static_cast<const CSGUniverse &>(eu));
-
-  for (const CSGUniverse & univ : all_univs)
+  // Iterate through all universes in universe list and check that they exist in universes linked
+  // to root universe list. Universe list includes CSGUniverseEngUnits.
+  for (const CSGUniverse & univ : getAllUniverses())
     if (std::find(linked_universe_names.begin(), linked_universe_names.end(), univ.getName()) ==
         linked_universe_names.end())
       mooseWarning("Universe with name ", univ.getName(), " is not linked to root universe.");

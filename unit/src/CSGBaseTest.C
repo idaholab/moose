@@ -2844,8 +2844,9 @@ TEST(CSGBaseTest, testUniverseLinking)
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ2 is not linked to root universe.");
 
-  // set the outer to a universe, universe should also not be linked
-  auto & univ_out = csg_obj->createUniverse("univ_out");
+  // set the outer to a universe unit, universe should also not be linked
+  std::unique_ptr<FakeUnivEngUnit> uptr = std::make_unique<FakeUnivEngUnit>("univ_out");
+  const auto & univ_out = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr));
   csg_obj->setLatticeOuter(lat, univ_out);
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ_out is not linked to root universe.");
