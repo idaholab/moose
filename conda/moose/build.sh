@@ -62,6 +62,10 @@ if [[ "${mpi:?}" == "mpich" ]]; then
 export FI_PROVIDER=tcp
 export MPICH_CH4_NETMOD=ofi
 EOF
+elif [ "${mpi:?}" == "openmpi" ]; then
+  cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
+export OMPI_MCA_mca_base_component_show_load_errors=0
+EOF
 fi
 
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
@@ -72,5 +76,9 @@ if [[ "${mpi:?}" == "mpich" ]]; then
   cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset FI_PROVIDER
 unset MPICH_CH4_NETMOD
+EOF
+elif [ "${mpi:?}" == "openmpi" ]; then
+  cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
+unset OMPI_MCA_mca_base_component_show_load_errors
 EOF
 fi
