@@ -431,8 +431,11 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         unsigned int num_values = 0;
         for (const auto elem : elem_candidates)
         {
-          // Variables would hit a ghosting error
-          if (_functor_is_variable[var_index] && elem->processor_id() != processor_id())
+          // Variables would hit a ghosting error; compare against the sub-app communicator rank,
+          // not the parent communicator rank - each sub-app runs in its own sub-communicator
+          // where ranks start at 0, regardless of the global rank of the owning process
+          if (_functor_is_variable[var_index] &&
+              elem->processor_id() != _from_problems[app_index]->processor_id())
             continue;
           Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
           Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
