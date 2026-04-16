@@ -1912,6 +1912,33 @@ TEST(CSGBaseTest, testExpandAllRecursive)
   ASSERT_TRUE(c2_surfs[0].get().getName() == name + "_s1");
 }
 
+/// tests getEngUnitByName
+TEST(CSGBaseTest, testGetEngUnit)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string name = "polygon_unit";
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  csg_obj->addEngUnit(std::move(poly_ptr));
+
+  // get unit without specifying type (should default to return CSGEngUnit type)
+  const auto & eng_obj = csg_obj->getEngUnitByName(name);
+  ASSERT_TRUE((std::is_same_v<decltype(eng_obj), const CSGEngUnit &>));
+
+  // specify the specific unit type
+  const auto & poly_obj = csg_obj->getEngUnitByName<CSGNPolygonUnit>(name);
+  ASSERT_TRUE((std::is_same_v<decltype(poly_obj), const CSGNPolygonUnit &>));
+
+  // specify the wrong unit type - should raise error
+  Moose::UnitUtils::assertThrows([&csg_obj, &name]()
+                                 { csg_obj->getEngUnitByName<FakeUnivEngUnit>(name); },
+                                 "Engineering unit is not of specified type CSG::FakeUnivEngUnit");
+
+  // try to get unit using name that doesn't exist - should raise error
+  Moose::UnitUtils::assertThrows(
+      [&csg_obj]() { csg_obj->getEngUnitByName("fake_name"); },
+      "Engineering unit with name 'fake_name' does not exist in this CSGBase.");
+}
+
 /**
  * CSGBase::addTransformation methods
  */
