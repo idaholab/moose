@@ -109,10 +109,13 @@ protected:
   const Real _const_intersection = 0.01;
 
   /// Used for cutter mesh refinement and front advancement
-  Real _size_control;
+  const Real _size_control;
 
   /// Number of steps to grow the mesh
-  unsigned int _n_step_growth;
+  const unsigned int _n_step_growth;
+
+  /// Minimum element area for crack growth elements
+  const Real _min_elem_area;
 
   /// Variables to help control the work flow
   bool _stop;
@@ -184,6 +187,16 @@ protected:
   bool isInsideCutPlane(const std::vector<Point> & _vertices, const Point & p) const;
 
   /**
+    Compute the area of a triangle defined by three points.
+    Returns true if the area is above min_elem_area.
+    @param p1 first vertex of the triangle
+    @param p2 second vertex of the triangle
+    @param p3 third vertex of the triangle
+    @return true if the triangle area exceeds the minimum threshold
+   */
+  bool isTriAreaAboveTol(const Point & p1, const Point & p2, const Point & p3) const;
+
+  /**
     Find boundary nodes of the cutter mesh
     This is a simple algorithm simply based on the added angle = 360 degrees
     Works fine for planar cutting surface for curved cutting surface, need to re-work this
@@ -205,11 +218,6 @@ protected:
     Find distance between two nodes
    */
   Real findDistance(dof_id_type node1, dof_id_type node2);
-
-  /**
-    If boundary nodes are too sparse, add nodes in between
-   */
-  void refineBoundary();
 
   /**
     Find growth direction at each active node
