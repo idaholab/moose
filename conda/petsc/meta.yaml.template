@@ -30,8 +30,6 @@ build:
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
-  run_exports:
-    - {{ pin_subpackage('moose-petsc', exact=True) }}
 
 requirements:
   build:

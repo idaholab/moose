@@ -16,6 +16,13 @@ source:
 build:
   number: 0
   string: {{ mpi }}
+  run_exports:
+    # things that depend on this moose-build must use
+    # these versions (pin mpi + compiler)
+    - {{ mpi }} {{ mpi_version }}
+    - {{ moose_c_compiler }}
+    - {{ moose_cxx_compiler }}
+    - {{ moose_fortran_compiler }}
 
 requirements:
   build:

@@ -27,6 +27,9 @@ build:
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
   run_exports:
+    # things that depend on this moose-libmesh must use the
+    # exact moose-petsc and moose-libmesh-vtk that this was
+    # built with
     - moose-petsc 3.24.6 {{ mpi }}_0
     - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
 
