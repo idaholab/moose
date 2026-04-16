@@ -12,6 +12,6 @@ done
 moose_test-opt --copy-inputs tests
 cd moose_test/tests
 moose_test-opt --run '-p 2 --re=kernels/simple_diffusion'
-moose_test-opt --run '-v --re materials/derivative_material_interface.analytic_derivatives/parsed_material'
+moose_test-opt --run '--re materials/derivative_material_interface.analytic_derivatives/parsed_material'
 cd ../..
 rm -rf moose_test
