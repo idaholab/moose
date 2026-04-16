@@ -2551,21 +2551,28 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
 TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
 {
   // Create two CSGBase objects to join together into a single root
-  // Both of these CSGBase objects will contain the identical surface based on its member data
-  // Upon joining these CSGBases, the identical surface will be discarded and not inserted
-  // into the combined CSGBase object
+  // Both of these CSGBase objects will contain the same surfaces (one real surface and one
+  // engineering unit) based on its member data.
+  // Upon joining these CSGBases, the identical surfaces will be discarded and not inserted
+  // into the combined CSGBase object.
 
-  // CSGBase 1: only one cell with a region defined by the positive halfspace of a plane
+  // CSGBase 1: only one cell with a region defined by the positive halfspace of a plane intersected
+  // with the positive half-space of a polygon
   std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGPlane> surf_ptr1 = std::make_unique<CSG::CSGPlane>("s1", 1, 1, 1, 1);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
-  base1->createCell("c1", +surf1);
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr1 = std::make_unique<CSGNPolygonUnit>("s2", 4, 2.0);
+  const auto & poly1 = base1->addEngUnit(std::move(poly_ptr1));
+  base1->createCell("c1", +surf1 & +poly1);
 
   // CSGBase 2: only one cell with a region defined by the negative halfspace of the same plane
+  // intersected with the negative half-space of the same polygon
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGPlane> surf_ptr2 = std::make_unique<CSG::CSGPlane>("s1", 1, 1, 1, 1);
   const auto & surf2 = base2->addSurface(std::move(surf_ptr2));
-  base2->createCell("c2", -surf2);
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr2 = std::make_unique<CSGNPolygonUnit>("s2", 4, 2.0);
+  const auto & poly2 = base2->addEngUnit(std::move(poly_ptr2));
+  base2->createCell("c2", -surf2 & -poly2);
 
   // CSGBase 3: deep copy of base2, used in following error check
   auto base3 = base2->clone();
@@ -2595,18 +2602,21 @@ TEST(CSGBaseTest, joinOtherBaseIgnoreIdenticalSurface)
   // can be combined properly
   base1->joinOtherBase(std::move(base2), true);
 
-  // We now rename the s1 surface. Both regions of c1 and c2 should point to
-  // the renamed surface
+  // We now rename the s1 and s2 surface. Both regions of c1 and c2 should point to
+  // the renamed surfaces
   base1->renameSurface(surf1, "s1_rename");
+  base1->renameSurface(poly1, "s2_rename");
   auto c1 = base1->getCellByName("c1");
-  std::vector<std::string> expected_c1_region{"s1_rename", "+"};
-  ASSERT_EQ(expected_c1_region, c1.getRegion().toPostfixStringList());
+  std::string exp_reg_str_c1 = "(+s1_rename & +s2_rename)";
+  ASSERT_EQ(exp_reg_str_c1, infixJSONToString(c1.getRegion().toInfixJSON()));
   auto c2 = base1->getCellByName("c2");
-  std::vector<std::string> expected_c2_region{"s1_rename", "-"};
-  ASSERT_EQ(expected_c2_region, c2.getRegion().toPostfixStringList());
+  std::string exp_reg_str_c2 = "(-s1_rename & -s2_rename)";
+  ASSERT_EQ(exp_reg_str_c2, infixJSONToString(c2.getRegion().toInfixJSON()));
 
-  // Check that there is only one surface defined in base1
-  ASSERT_EQ(base1->getAllSurfaces().size(), 1);
+  // Check that there are only 2 surfaces in base1, one of which should be a surface eng unit
+  ASSERT_EQ(base1->getAllSurfaces().size(), 2);
+  ASSERT_EQ(base1->getAllEngUnits().size(), 1);
+  ASSERT_EQ(base1->getAllSurfaceEngUnits().size(), 1);
 }
 
 /// test CSGBase::joinOtherBase with identical cells that have a universe fill
