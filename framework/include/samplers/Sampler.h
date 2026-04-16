@@ -20,6 +20,7 @@
 #include "MultiApp.h"
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
+#include "MooseRandomStateless.h"
 
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
@@ -175,24 +176,27 @@ protected:
   void setNumberOfRandomSeeds(std::size_t number);
 
   /**
-   * Get the next random number from the generator.
+   * Get nth random number from the generator.
+   * @param n 0-based index of the random number to generate
    * @param index The index of the seed, by default this is zero. To add additional seeds
    *              indices call the setNumberOfRequiedRandomSeeds method.
    *
    * @return A double for the random number, this is double because MooseRandom class uses double.
    */
-  Real getRand(unsigned int index = 0);
+  Real getRand(std::size_t n, unsigned int index = 0) const;
 
   /**
-   * Get the next random integer from the generator within the specified range [lower, upper)
-   * @param index The index of the seed, by default this is zero. To add additional seeds
-   *              indices call the setNumberOfRequiedRandomSeeds method.
+   * Get nth random integer from the generator within the specified range [lower, upper)
+   * @param n 0-based index of the random number to generate
    * @param lower Lower bounds
    * @param upper Upper bounds
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRequiedRandomSeeds method.
    *
    * @return A integer for the random number
    */
-  uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
+  unsigned int
+  getRandl(std::size_t n, unsigned int lower, unsigned int upper, unsigned int index = 0) const;
 
   /**
    * Base class must override this method to supply the sample distribution data.
@@ -275,8 +279,8 @@ protected:
   /**
    * Here we save/restore generator states
    */
-  void saveGeneratorState() { _generator.saveState(); }
-  void restoreGeneratorState() { _generator.restoreState(); }
+  void saveGeneratorState() {}
+  void restoreGeneratorState() {}
   //@}
 
   /**
@@ -331,7 +335,7 @@ private:
   void advanceGeneratorsInternal(const dof_id_type count);
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
-  MooseRandom _generator;
+  std::vector<std::unique_ptr<MooseRandomStateless>> _generators;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;
@@ -385,12 +389,6 @@ private:
 
 template <typename T>
 void
-Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, const CommMethod method)
+Sampler::shuffle(std::vector<T> &, const std::size_t, const CommMethod)
 {
-  if (method == CommMethod::NONE)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, nullptr);
-  else if (method == CommMethod::LOCAL)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, &_communicator);
-  else if (method == CommMethod::SEMI_LOCAL)
-    MooseUtils::shuffle<T>(data, _generator, seed_index, &_local_comm);
 }

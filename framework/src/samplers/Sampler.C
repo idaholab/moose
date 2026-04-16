@@ -102,8 +102,12 @@ Sampler::init()
   seed_generator.seed(0, seed);
 
   // See the "secondary" generator that will be used for the random number generation
+  _generators.resize(_n_seeds);
   for (std::size_t i = 0; i < _n_seeds; ++i)
-    _generator.seed(i, seed_generator.randl(0));
+  {
+    const auto gseed = seed_generator.randl(0);
+    _generators[i] = std::make_unique<MooseRandomStateless>(gseed);
+  }
 
   // Save the initial state
   saveGeneratorState();
@@ -185,11 +189,9 @@ Sampler::execute()
     reinit();
 
   if (_has_executed)
-  {
-    restoreGeneratorState();
-    advanceGeneratorsInternal(_n_rows * _n_cols);
-  }
-  saveGeneratorState();
+    for (auto & gen : _generators)
+      gen->advance(_n_rows * _n_cols);
+
   executeTearDown();
   _has_executed = true;
 }
@@ -333,14 +335,12 @@ Sampler::advanceGenerators(const dof_id_type count)
 {
   TIME_SECTION("advanceGenerators", 2, "Advancing Generators");
 
-  for (std::size_t j = 0; j < _generator.size(); ++j)
+  for (std::size_t j = 0; j < _generators.size(); ++j)
     advanceGenerator(j, count);
 }
 void
 Sampler::advanceGenerator(const unsigned int seed_index, const dof_id_type count)
 {
-  for (std::size_t i = 0; i < count; ++i)
-    getRand(seed_index);
 }
 
 void
@@ -356,18 +356,18 @@ Sampler::setAutoAdvanceGenerators(const bool state)
   _auto_advance_generators = state;
 }
 
-double
-Sampler::getRand(const unsigned int index)
+Real
+Sampler::getRand(std::size_t n, unsigned int index) const
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
-  return _generator.rand(index);
+  mooseAssert(index < _generators.size(), "The seed number index does not exists.");
+  return _generators[index]->rand(n);
 }
 
-uint32_t
-Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
+unsigned int
+Sampler::getRandl(std::size_t n, unsigned int lower, unsigned int upper, unsigned int index) const
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
-  return _generator.randl(index, lower, upper);
+  mooseAssert(index < _generators.size(), "The seed number index does not exists.");
+  return _generators[index]->randl(n, lower, upper);
 }
 
 dof_id_type

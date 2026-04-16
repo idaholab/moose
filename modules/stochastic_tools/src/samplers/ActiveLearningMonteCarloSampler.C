@@ -82,7 +82,8 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   {
     for (dof_id_type i = 0; i < _num_batch; ++i)
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
+        _inputs_sto[i][j] =
+            _distributions[j]->quantile(getRand(i * _distributions.size() + j, _step));
   }
   // If we do have enough failed inputs, assign them and clear the tracked ones
   else

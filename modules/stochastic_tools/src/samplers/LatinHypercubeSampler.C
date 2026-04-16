@@ -40,30 +40,21 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
 }
 
 void
-LatinHypercubeSampler::sampleSetUp(const SampleMode mode)
+LatinHypercubeSampler::executeTearDown()
 {
-  const bool is_global = mode == Sampler::SampleMode::GLOBAL;
-
-  // Get seeds to use for shuffler construction
-  std::vector<uint32_t> seeds(getNumberOfCols());
-  if (is_global || processor_id() == 0)
-  {
-    for (dof_id_type col = 0; col < getNumberOfCols(); ++col)
-      seeds[col] = getRandl(1, 0, std::numeric_limits<uint32_t>::max());
-    // Need to restore generator to be consistent when sampler is called multiple times
-    restoreGeneratorState();
-  }
-  if (!is_global)
-    _local_comm.broadcast(seeds);
-
   _shufflers.clear();
-  for (const auto & seed : seeds)
+  for (const auto col : make_range(getNumberOfCols()))
+  {
+    const auto seed = getRandl(col, 0, std::numeric_limits<uint32_t>::max(), 1);
     _shufflers.push_back(std::make_unique<MooseRandomPerturbation>(seed, getNumberOfRows()));
+  }
 }
 
 Real
 LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  mooseAssert(_shufflers.size() > 0, "Shufflers have not been initialized.");
+
   // Divide [0,1] into N equal bins of width 1/N.
   const Real bin_size = 1. / getNumberOfRows();
 
@@ -75,10 +66,8 @@ LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_inde
   // Draw a uniform random point within the selected bin.
   const auto lower = bin * bin_size;
   const auto upper = (bin + 1) * bin_size;
-  const Real probability = getRand() * (upper - lower) + lower;
-
-  // Need to increment index to be consistent when sampler is called multiple times
-  getRand(1);
+  const Real probability =
+      getRand(row_index * getNumberOfCols() + col_index) * (upper - lower) + lower;
 
   // Transform the probability through the inverse CDF to obtain the sample value.
   return _distributions[col_index]->quantile(probability);

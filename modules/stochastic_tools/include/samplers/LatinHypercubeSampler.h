@@ -40,7 +40,7 @@ protected:
    * Constructs one MooseRandomPerturbation per column, each seeded
    * independently from generator 1.
    */
-  virtual void sampleSetUp(const SampleMode mode) override;
+  virtual void executeTearDown() override;
 
   /**
    * Return the sample value for the given row and column.
