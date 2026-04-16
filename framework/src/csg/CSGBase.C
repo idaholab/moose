@@ -43,10 +43,9 @@ CSGBase::CSGBase(const CSGBase & other_base)
     if (const auto * eng_unit = isCellEngUnit(*cell))
     {
       addEngUnit(eng_unit->clone());
-      // addEngUnit adds cell eng units to root by default; if the original was not in root,
-      // remove it so universe membership is correctly reconstructed below.
-      if (!other_base.getRootUniverse().hasCell(name))
-        removeCellFromUniverse(getRootUniverse(), _cell_list.getCell(name));
+      // addEngUnit always adds cell eng units to root by default. Always remove from root here so
+      // that root membership is reconstructed uniformly by the loop below for all cell types.
+      removeCellFromUniverse(getRootUniverse(), _cell_list.getCell(name));
     }
   for (const auto & [name, cell] : other_base.getCellList().getCellListMap())
     if (!isCellEngUnit(*cell))
