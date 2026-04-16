@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6320 #23572 #32418'
+  issues = '#6320 #23572 #32418 #32779'
   [crack_propagation_ave]
     type = Exodiff
     input = crack_propagation_2d.i
@@ -120,6 +120,15 @@
       # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction.'
+    []
+    [face_cut]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
+      exodiff = 'face_crack_3d_xfem_function_xfemcutter_XFEMCutMeshOutput.e'
+      map = false
+      # XFEM requires --enable-unique-ids in libmesh
+      capabilities = 'unique_id'
+      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume.'
     []
   []
   [penny_crack]
