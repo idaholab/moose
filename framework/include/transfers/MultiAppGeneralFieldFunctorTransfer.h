@@ -50,6 +50,11 @@ private:
    */
   void buildKDTrees(const unsigned int var_index) override;
 
+  std::string getDataSourceName(unsigned int var_index) const override
+  {
+    return "functor '" + _functor_names[var_index] + "'";
+  }
+
   /*
    * Evaluate values (interpolation and extrapolation) for incoming points
    * @param incoming_points all the points at which we need values

@@ -47,7 +47,7 @@ public:
   virtual void postExecute() override;
 
   /// Get the source variable name, with the suffix for array/vector variables
-  VariableName getFromVarName(unsigned int var_index);
+  VariableName getFromVarName(unsigned int var_index) const;
 
   /// Get the target variable name, with the suffix for array/vector variables
   VariableName getToVarName(unsigned int var_index);
@@ -61,6 +61,14 @@ protected:
   {
     return _to_variables[var_index];
   }
+
+  /**
+   * Return a human-readable description of the data source (variable, functor, user object, etc.)
+   * used for conflict warning messages. Override in derived classes that use a different source
+   * type (e.g. functors).
+   * @param var_index index of the variable/functor being transferred
+   */
+  virtual std::string getDataSourceName(unsigned int var_index) const;
 
   /*
    * Prepare evaluation of interpolation values

@@ -1373,11 +1373,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
             "will not be output.\nIncrease 'search_value_conflicts_max_log' to output more.";
     }
     // Explicitly name source to give more context
-    std::string source_str = "unknown";
-    if (_from_var_names.size())
-      source_str = "variable '" + getFromVarName(var_index) + "'";
-    else if (isParamValid("source_user_object"))
-      source_str = "user object '" + getParam<UserObjectName>("source_user_object") + "'";
+    const std::string source_str = getDataSourceName(var_index);
 
     mooseWarning("On rank " + rank_str +
                  ", multiple valid values from equidistant points were "
@@ -2160,8 +2156,18 @@ MultiAppGeneralFieldTransfer::getGlobalStartAppPerProc() const
   return global_app_start_per_proc;
 }
 
+std::string
+MultiAppGeneralFieldTransfer::getDataSourceName(unsigned int var_index) const
+{
+  if (_from_var_names.size())
+    return "variable '" + getFromVarName(var_index) + "'";
+  else if (isParamValid("source_user_object"))
+    return "user object '" + getParam<UserObjectName>("source_user_object") + "'";
+  return "unknown";
+}
+
 VariableName
-MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index)
+MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index) const
 {
   mooseAssert(var_index < _from_var_names.size(), "No source variable at this index");
   VariableName var_name = _from_var_names[var_index];
