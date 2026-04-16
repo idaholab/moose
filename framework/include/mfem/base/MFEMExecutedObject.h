@@ -27,17 +27,6 @@ class MFEMExecutedObject : public MFEMObject,
 {
 public:
   /**
-   * Metadata describing one dependency-bearing input parameter on this object.
-   */
-  struct DependencyParam
-  {
-    /// The resource category requested through this parameter.
-    std::string kind;
-    /// The parameter name storing the dependency value(s).
-    std::string param_name;
-  };
-
-  /**
    * Declare the common parameters used by MFEM executed objects.
    */
   static InputParameters validParams();
@@ -109,17 +98,13 @@ protected:
   /**
    * Record one dependency-bearing parameter in the private parameter metadata.
    */
-  static void appendDependencyParam(InputParameters & params,
-                                    const std::string & param_name,
-                                    const std::string & kind);
+  static void appendDependencyParam(InputParameters & params, const std::string & param_name);
 
 private:
   /// Lazily constructed requested dependency keys for this object's registered dependencies.
   std::optional<std::set<std::string>> _requested_items;
   /// Lazily constructed supplied dependency keys for this object's supplied resources.
   std::optional<std::set<std::string>> _supplied_items;
-  /// Compact typed metadata describing dependency-bearing parameters on this object.
-  std::vector<DependencyParam> _dependency_params;
 };
 
 template <typename T>
@@ -129,7 +114,7 @@ MFEMExecutedObject::addDependencyParam(InputParameters & params,
                                        const std::string & doc_string)
 {
   params.addParam<T>(param_name, doc_string);
-  appendDependencyParam(params, param_name, typeid(T).name());
+  appendDependencyParam(params, param_name);
 }
 
 template <typename T>
@@ -139,7 +124,7 @@ MFEMExecutedObject::addRequiredDependencyParam(InputParameters & params,
                                                const std::string & doc_string)
 {
   params.addRequiredParam<T>(param_name, doc_string);
-  appendDependencyParam(params, param_name, typeid(T).name());
+  appendDependencyParam(params, param_name);
 }
 
 #endif

@@ -18,7 +18,6 @@ MFEMExecutedObject::validParams()
   params += SetupInterface::validParams();
   params.registerSystemAttributeName("MFEMExecutedObject");
   params.addPrivateParam<std::vector<std::string>>("_mfem_dependency_param_names", {});
-  params.addPrivateParam<std::vector<std::string>>("_mfem_dependency_param_kinds", {});
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
   params.addClassDescription("Base class for executed MFEM objects.");
   return params;
@@ -27,15 +26,6 @@ MFEMExecutedObject::validParams()
 MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
   : MFEMObject(parameters), SetupInterface(this), DependencyResolverInterface()
 {
-  const auto & param_names = getParam<std::vector<std::string>>("_mfem_dependency_param_names");
-  const auto & kinds = getParam<std::vector<std::string>>("_mfem_dependency_param_kinds");
-
-  mooseAssert(param_names.size() == kinds.size(),
-              "MFEM dependency parameter metadata size mismatch");
-
-  _dependency_params.reserve(param_names.size());
-  for (const auto i : index_range(param_names))
-    _dependency_params.push_back({kinds[i], param_names[i]});
 }
 
 std::optional<std::string>
@@ -64,27 +54,22 @@ MFEMExecutedObject::getRequestedItems()
 
   _requested_items.emplace();
 
-  for (const auto & dep : _dependency_params)
+  for (const auto & param : getParam<std::vector<std::string>>("_mfem_dependency_param_names"))
   {
-    if (!isParamValid(dep.param_name))
-      continue;
-
-    if (dep.kind == typeid(VariableName).name())
-      _requested_items->insert(variableDependencyKey(getParam<VariableName>(dep.param_name)));
-    else if (dep.kind == typeid(std::vector<VariableName>).name())
-      for (const auto & name : getParam<std::vector<VariableName>>(dep.param_name))
+    if (const auto * name = queryParam<VariableName>(param))
+      _requested_items->insert(variableDependencyKey(*name));
+    if (const auto * names = queryParam<std::vector<VariableName>>(param))
+      for (const auto & name : *names)
         _requested_items->insert(variableDependencyKey(name));
-    else if (dep.kind == typeid(PostprocessorName).name())
-      _requested_items->insert(
-          postprocessorDependencyKey(getParam<PostprocessorName>(dep.param_name)));
-    else if (dep.kind == typeid(std::vector<PostprocessorName>).name())
-      for (const auto & name : getParam<std::vector<PostprocessorName>>(dep.param_name))
+    if (const auto * name = queryParam<PostprocessorName>(param))
+      _requested_items->insert(postprocessorDependencyKey(*name));
+    if (const auto * names = queryParam<std::vector<PostprocessorName>>(param))
+      for (const auto & name : *names)
         _requested_items->insert(postprocessorDependencyKey(name));
-    else if (dep.kind == typeid(VectorPostprocessorName).name())
-      _requested_items->insert(
-          vectorPostprocessorDependencyKey(getParam<VectorPostprocessorName>(dep.param_name)));
-    else if (dep.kind == typeid(std::vector<VectorPostprocessorName>).name())
-      for (const auto & name : getParam<std::vector<VectorPostprocessorName>>(dep.param_name))
+    if (const auto * name = queryParam<VectorPostprocessorName>(param))
+      _requested_items->insert(vectorPostprocessorDependencyKey(*name));
+    if (const auto * names = queryParam<std::vector<VectorPostprocessorName>>(param))
+      for (const auto & name : *names)
         _requested_items->insert(vectorPostprocessorDependencyKey(name));
   }
 
@@ -128,25 +113,10 @@ MFEMExecutedObject::vectorPostprocessorDependencyKey(const std::string & name)
 }
 
 void
-MFEMExecutedObject::appendDependencyParam(InputParameters & params,
-                                          const std::string & param_name,
-                                          const std::string & kind)
+MFEMExecutedObject::appendDependencyParam(InputParameters & params, const std::string & param_name)
 {
   auto & param_names = params.set<std::vector<std::string>>("_mfem_dependency_param_names");
-  auto & kinds = params.set<std::vector<std::string>>("_mfem_dependency_param_kinds");
-
-#ifndef NDEBUG
-  const auto it = std::find(param_names.begin(), param_names.end(), param_name);
-  if (it != param_names.end())
-  {
-    const auto idx = std::distance(param_names.begin(), it);
-    mooseAssert(kinds[idx] == kind,
-                "MFEM dependency parameter metadata mismatch for parameter " + param_name);
-  }
-#endif
-
   param_names.push_back(param_name);
-  kinds.push_back(kind);
 }
 
 #endif
