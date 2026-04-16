@@ -12,6 +12,7 @@
 #include "MFEMVariable.h"
 #include "MFEMProblem.h"
 #include "MooseVariableBase.h"
+#include "MFEMVectorMagnitudeCoefficient.h"
 
 registerMooseObject("MooseApp", MFEMVariable);
 
@@ -59,11 +60,23 @@ void
 MFEMVariable::declareCoefficients()
 {
   if (getFESpace().isScalar())
+  {
     getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         name(), getGridFunction().get());
+    getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
+        name() + "_grad", getGridFunction().get());
+  }
   else
+  {
     getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         name(), getGridFunction().get());
+    getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
+        name() + "_curl", getGridFunction().get());
+    getMFEMProblem().getCoefficients().declareScalar<mfem::DivergenceGridFunctionCoefficient>(
+        name() + "_div", getGridFunction().get());
+    getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
+        name() + "_mag", getMFEMProblem().getCoefficients().getVectorCoefficient(name()));
+  }
 }
 
 #endif

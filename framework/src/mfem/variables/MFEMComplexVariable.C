@@ -44,15 +44,34 @@ MFEMComplexVariable::declareCoefficients()
   {
     getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         name() + "_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
+        name() + "_grad_real", &getComplexGridFunction()->real());
     getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         name() + "_imag", &getComplexGridFunction()->imag());
+    getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
+        name() + "_grad_imag", &getComplexGridFunction()->imag());
   }
   else
   {
     getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         name() + "_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
+        name() + "_curl_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareScalar<mfem::DivergenceGridFunctionCoefficient>(
+        name() + "_div_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
+        name() + "_real_mag",
+        getMFEMProblem().getCoefficients().getVectorCoefficient(name() + "_real"));
+
     getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         name() + "_imag", &getComplexGridFunction()->imag());
+    getMFEMProblem().getCoefficients().declareVector<mfem::CurlGridFunctionCoefficient>(
+        name() + "_curl_imag", &getComplexGridFunction()->imag());
+    getMFEMProblem().getCoefficients().declareScalar<mfem::DivergenceGridFunctionCoefficient>(
+        name() + "_div_imag", &getComplexGridFunction()->imag());
+    getMFEMProblem().getCoefficients().declareScalar<MFEMVectorMagnitudeCoefficient>(
+        name() + "_imag_mag",
+        getMFEMProblem().getCoefficients().getVectorCoefficient(name() + "_imag"));
   }
 }
 
