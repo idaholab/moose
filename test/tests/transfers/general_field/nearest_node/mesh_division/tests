@@ -170,4 +170,11 @@
       detail = 'the techniques for the target and source mesh divisions are incompatible.'
     []
   []
+  [functor_search_value_conflict]
+    type = RunException
+    input = main_match_subapps_functor.i
+    cli_args = "MultiApps/sub/positions='-.05 -.05 0 .95 -.05 0 -.05 .95 0 .95 .95 0'"
+    expect_err = "multiple valid values from equidistant points were found in the origin mesh for source functor 'to_main'"
+    requirement = 'The system shall be able to detect search value conflicts when extrapolating from functor boundary evaluation points.'
+  []
 []
