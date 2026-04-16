@@ -538,6 +538,15 @@ public:
                       std::is_base_of_v<CSGUniverse, T>,
                   "T must also derive from CSGSurface, CSGCell, or CSGUniverse");
     T * raw = unit.get();
+
+    // must check if an engineering unit of the same name (regardless of type) exists already before
+    //  adding it any list so that we don't add to a type-list before knowing if it is actually
+    // allowable as a unit. The addX checks below will check that the name doesn't conflict with a
+    // real type unit too.
+    if (_eng_unit_list.hasEngUnit(raw->getName()))
+      mooseError(
+          "An engineering unit with name '", raw->getName(), "' already exists in geometry.");
+
     // Transfer ownership to the appropriate type list
     if constexpr (std::is_base_of_v<CSGSurface, T>)
       _surface_list.addSurface(std::move(unit));
@@ -552,7 +561,8 @@ public:
     }
     else if constexpr (std::is_base_of_v<CSGUniverse, T>)
       _universe_list.addUniverse(std::move(unit));
-    // Register non-owning pointer in the CSGEngUnitList
+
+    // Register non-owning pointer in the CSGEngUnitList if no name conflicts identified above.
     _eng_unit_list.addEngUnit(static_cast<CSGEngUnit &>(*raw));
     return *raw;
   }

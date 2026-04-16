@@ -1939,6 +1939,101 @@ TEST(CSGBaseTest, testGetEngUnit)
       "Engineering unit with name 'fake_name' does not exist in this CSGBase.");
 }
 
+/// tests the error checks in CSGBase::addEngUnitError
+TEST(CSGBaseTest, addEngUnitError)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string name = "polygon_unit";
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  csg_obj->addEngUnit(std::move(poly_ptr));
+
+  // try to add another engineering unit of the same derived type with the same name
+  std::unique_ptr<FakeSurfEngUnit> sptr = std::make_unique<FakeSurfEngUnit>(name);
+  Moose::UnitUtils::assertThrows(
+      [&csg_obj, &sptr]() { csg_obj->addEngUnit(std::move(sptr)); },
+      "An engineering unit with name 'polygon_unit' already exists in geometry.");
+
+  // try to add another engineering unit of a different derived type with the same name
+  // should capture at the addEngUnit level
+  std::unique_ptr<FakeCellEngUnit> cptr = std::make_unique<FakeCellEngUnit>(name);
+  Moose::UnitUtils::assertThrows(
+      [&csg_obj, &cptr]() { csg_obj->addEngUnit(std::move(cptr)); },
+      "An engineering unit with name 'polygon_unit' already exists in geometry.");
+  ASSERT_FALSE(csg_obj->hasCell(name));
+
+  // try to add a unit of the same base type that has the same name (ie CSGSurfaceEngUnit has same
+  // name as existing CSGSurface)
+  std::string sname = "new_surf";
+  std::unique_ptr<CSGSphere> sp_ptr = std::make_unique<CSGSphere>(sname, 2.0);
+  csg_obj->addSurface(std::move(sp_ptr));
+  // make a surface unit of the same name and try to add it (error should be captured by addSurface)
+  std::unique_ptr<CSGNPolygonUnit> new_poly = std::make_unique<CSGNPolygonUnit>(sname, 4, 2.0);
+  Moose::UnitUtils::assertThrows([&csg_obj, &new_poly]()
+                                 { csg_obj->addEngUnit(std::move(new_poly)); },
+                                 "Surface with name new_surf already exists in geometry.");
+  // should not have a unit with this name
+  ASSERT_FALSE(csg_obj->hasEngUnit(sname));
+}
+
+/// tests that for the various add/create methods for CSGSurfaces, CSGCells, and CSGUniverses, that
+/// errors are raised when an engineering unit of the same base type already exists with that name.
+TEST(CSGBaseTest, testAddObjUnitErrors)
+{
+  /// make engineering units of each of the 3 base types
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string sname = "curly";
+  std::unique_ptr<FakeSurfEngUnit> su_ptr = std::make_unique<FakeSurfEngUnit>(sname);
+  auto & surf = csg_obj->addEngUnit(std::move(su_ptr));
+  std::string cname = "larry";
+  std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>(cname);
+  csg_obj->addEngUnit(std::move(cu_ptr));
+  std::string uname = "moe";
+  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>(uname);
+  csg_obj->addEngUnit(std::move(uu_ptr));
+
+  // Try to make/add each of the real types of the same names. This should raise errors for
+  // identical base types, but not other types. Ie, a CSGSurface named sname is not allowed, but one
+  // named cname or uname is allowable.
+
+  // CSGSurface
+  {
+    // same name as CSGSurfaceEngUnit: error
+    std::unique_ptr<CSGSphere> s_ptr1 = std::make_unique<CSGSphere>(sname, 1.0);
+    Moose::UnitUtils::assertThrows([&csg_obj, &s_ptr1]()
+                                   { csg_obj->addSurface(std::move(s_ptr1)); },
+                                   "Surface with name curly already exists in geometry.");
+    // same name as CSGCellEngUnit: allowable
+    std::unique_ptr<CSGSphere> s_ptr2 = std::make_unique<CSGSphere>(cname, 1.0);
+    ASSERT_NO_THROW(csg_obj->addSurface(std::move(s_ptr2)));
+    // same name as CSGUniverseEngUnit: allowable
+    std::unique_ptr<CSGSphere> s_ptr3 = std::make_unique<CSGSphere>(uname, 1.0);
+    ASSERT_NO_THROW(csg_obj->addSurface(std::move(s_ptr3)));
+  }
+
+  // CSGCell
+  {
+    // same name as CSGSurfaceEngUnit: allowable
+    ASSERT_NO_THROW(csg_obj->createCell(sname, -surf));
+    // same name as CSGCellEngUnit: error
+    Moose::UnitUtils::assertThrows([&csg_obj, &cname, &surf]()
+                                   { csg_obj->createCell(cname, -surf); },
+                                   "Cell with name larry already exists in geometry.");
+    // same name as CSGUniverseEngUnit: allowable
+    ASSERT_NO_THROW(csg_obj->createCell(uname, -surf));
+  }
+
+  // CSGUniverse
+  {
+    // same name as CSGSurfaceEngUnit: allowable
+    ASSERT_NO_THROW(csg_obj->createUniverse(sname));
+    // same name as CSGCellEngUnit: allowable
+    ASSERT_NO_THROW(csg_obj->createUniverse(cname));
+    // same name as CSGUniverseEngUnit: error
+    Moose::UnitUtils::assertThrows([&csg_obj, &uname]() { csg_obj->createUniverse(uname); },
+                                   "Universe with name moe already exists in geometry.");
+  }
+}
+
 /**
  * CSGBase::addTransformation methods
  */
