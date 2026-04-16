@@ -32,6 +32,16 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
   checkValidTransferProblemTypes<MFEMProblem, FEProblemBase>();
 }
 
+MFEMProblem &
+MultiApplibMeshToMFEMShapeEvaluationTransfer::getActiveToProblem()
+{
+  MFEMProblem * mfem_to_problem =
+      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
+  if (!mfem_to_problem)
+    mooseError("Transfer destination problem is not an MFEM problem");
+  return *mfem_to_problem;
+}
+
 void
 MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool /*is_target_local*/)
 {

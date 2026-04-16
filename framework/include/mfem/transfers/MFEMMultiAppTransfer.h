@@ -92,45 +92,7 @@ protected:
 
   /// Templated method to check source and destination problems are of the expected types
   template <typename TO_PROBLEM, typename FROM_PROBLEM>
-  void checkValidTransferProblemTypes()
-  {
-    auto bad_problem = [this]()
-    {
-      mooseError(
-          type(),
-          " is not compatible with the provided source and/or destination Problem types of the "
-          "provided variables.");
-    };
-
-    if (hasFromMultiApp())
-    {
-      // Check if source sub-apps exist, and if so, if they are of the expected type
-      if (getFromMultiApp()->numGlobalApps())
-      {
-        for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
-          if (getFromMultiApp()->hasLocalApp(i) &&
-              !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
-            bad_problem();
-      }
-      else // check source sub-app is of the expected type if it is the transfer source
-        if (!dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->problemBase()))
-          bad_problem();
-    }
-    if (hasToMultiApp())
-    {
-      // Check if destination sub-apps exist, and if so, if they are of the expected type
-      if (getToMultiApp()->numGlobalApps())
-      {
-        for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-          if (getToMultiApp()->hasLocalApp(i) &&
-              !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
-            bad_problem();
-      }
-      else // check destination sub-app is of the expected type if it is the transfer destination
-        if (!dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->problemBase()))
-          bad_problem();
-    }
-  }
+  void checkValidTransferProblemTypes();
 
 private:
   /// Vector of source variable names to be transferred
@@ -148,5 +110,47 @@ private:
   /// Default value to return for transfers from points outside the source mesh
   mfem::real_t _mfem_out_of_mesh_value{std::numeric_limits<mfem::real_t>::infinity()};
 };
+
+template <typename TO_PROBLEM, typename FROM_PROBLEM>
+inline void
+MFEMMultiAppTransfer::checkValidTransferProblemTypes()
+{
+  auto bad_problem = [this]()
+  {
+    mooseError(
+        type(),
+        " is not compatible with the provided source and/or destination Problem types of the "
+        "provided variables.");
+  };
+
+  if (hasFromMultiApp())
+  {
+    // Check if source sub-apps exist, and if so, if they are of the expected type
+    if (getFromMultiApp()->numGlobalApps())
+    {
+      for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+        if (getFromMultiApp()->hasLocalApp(i) &&
+            !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
+          bad_problem();
+    }
+    else // check source sub-app is of the expected type if it is the transfer source
+      if (!dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->problemBase()))
+        bad_problem();
+  }
+  if (hasToMultiApp())
+  {
+    // Check if destination sub-apps exist, and if so, if they are of the expected type
+    if (getToMultiApp()->numGlobalApps())
+    {
+      for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+        if (getToMultiApp()->hasLocalApp(i) &&
+            !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
+          bad_problem();
+    }
+    else // check destination sub-app is of the expected type if it is the transfer destination
+      if (!dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->problemBase()))
+        bad_problem();
+  }
+}
 
 #endif

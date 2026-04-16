@@ -38,14 +38,7 @@ protected:
                                   mfem::Vector & interp_vals);
 
   /// Set current MFEM problem to fetch destination variables from
-  virtual MFEMProblem & getActiveToProblem() override
-  {
-    MFEMProblem * mfem_to_problem =
-        dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
-    if (!mfem_to_problem)
-      mooseError("Transfer destination problem is not an MFEM problem");
-    return *mfem_to_problem;
-  }
+  virtual MFEMProblem & getActiveToProblem() override;
 };
 
 #endif

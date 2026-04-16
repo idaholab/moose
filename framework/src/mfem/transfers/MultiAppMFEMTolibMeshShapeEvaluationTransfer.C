@@ -31,6 +31,16 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::MultiAppMFEMTolibMeshShapeEvaluati
   checkValidTransferProblemTypes<FEProblemBase, MFEMProblem>();
 }
 
+MFEMProblem &
+MultiAppMFEMTolibMeshShapeEvaluationTransfer::getActiveFromProblem()
+{
+  MFEMProblem * mfem_from_problem =
+      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
+  if (!mfem_from_problem)
+    mooseError("Transfer source problem is not an MFEM problem");
+  return *mfem_from_problem;
+}
+
 /// Extract locations from libMesh-based MooseVariable at which projection will take place
 void
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::extractlibMeshNodePositions(

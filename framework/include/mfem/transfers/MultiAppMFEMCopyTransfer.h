@@ -32,23 +32,9 @@ protected:
   void checkSiblingsTransferSupported() const override;
 
   /// Set current MFEM problem to fetch source variables from
-  virtual MFEMProblem & getActiveFromProblem() override
-  {
-    MFEMProblem * mfem_from_problem =
-        dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
-    if (!mfem_from_problem)
-      mooseError("Transfer source problem is not an MFEM problem");
-    return *mfem_from_problem;
-  }
+  virtual MFEMProblem & getActiveFromProblem() override;
   /// Set current MFEM problem to fetch destination variables from
-  virtual MFEMProblem & getActiveToProblem() override
-  {
-    MFEMProblem * mfem_to_problem =
-        dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
-    if (!mfem_to_problem)
-      mooseError("Transfer destination problem is not an MFEM problem");
-    return *mfem_to_problem;
-  }
+  virtual MFEMProblem & getActiveToProblem() override;
 };
 
 #endif
