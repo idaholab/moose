@@ -85,6 +85,7 @@ CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_to
     }
   }
   return true;
+}
 
 const char *
 CSGRegion::regionTypeName(const RegionType region_type)
@@ -392,24 +393,11 @@ CSGRegion::replaceWithSubRegion(const CSGSurface & old_surf, const CSGRegion & s
       // Positive halfspace means "outside" so use complement of sub-region
       if (hs == CSGSurface::Halfspace::POSITIVE)
         new_tokens.push_back(RegionType::COMPLEMENT);
-
-      // Add the sub-region's surfaces to the flat surface list
-      for (const auto & surf : sub_region._surfaces)
-        if (std::none_of(_surfaces.begin(),
-                         _surfaces.end(),
-                         [&](const auto & s) { return &s.get() == &surf.get(); }))
-          _surfaces.push_back(surf);
     }
     else
       new_tokens.push_back(_postfix_tokens[i]);
   }
   _postfix_tokens = std::move(new_tokens);
-
-  // Remove old_surf from the flat surface list — (won't remove anything if old_surf isn't there)
-  _surfaces.erase(std::remove_if(_surfaces.begin(),
-                                 _surfaces.end(),
-                                 [&](const auto & s) { return &s.get() == &old_surf; }),
-                  _surfaces.end());
 
   // Update _region_type from the last operator token in the new stream
   const auto it =
