@@ -826,6 +826,37 @@ TEST(CSGBaseTest, testAddLattice)
   }
 }
 
+/// tests errors are properly raised when adding a lattice that uses universe engineering units that
+/// have not been added to CSGBase
+TEST(CSGBaseTest, testAddLatticeEngUnitError)
+{
+  // make units but do not add them to base before adding lattice
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string ele_name = "unit_element";
+  std::string outer_name = "unit_outer";
+  auto uele = FakeUnivEngUnit(ele_name);
+  auto uout = FakeUnivEngUnit(outer_name);
+
+  // make a lattice using these the units as elements (no outer)
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{uele, uele},
+                                                                               {uele, uele}};
+  std::unique_ptr<CSGCartesianLattice> lat_ptr1 =
+      std::make_unique<CSGCartesianLattice>("lat1", 1.0, univs);
+
+  // make a lattice with outer units (no elements)
+  std::unique_ptr<CSGCartesianLattice> lat_ptr2 =
+      std::make_unique<CSGCartesianLattice>("lat2", 1.0, uout);
+
+  // adding either of these lattices should raise an error that the units/universes are not in the
+  // base instance
+  Moose::UnitUtils::assertThrows([&csg_obj, &lat_ptr1]()
+                                 { csg_obj->addLattice(std::move(lat_ptr1)); },
+                                 "No universe by name unit_element exists in the geometry.");
+  Moose::UnitUtils::assertThrows([&csg_obj, &lat_ptr2]()
+                                 { csg_obj->addLattice(std::move(lat_ptr2)); },
+                                 "No universe by name unit_outer exists in the geometry.");
+}
+
 /// tests the CSGBase::setUniverseAtLatticeIndex method
 TEST(CSGBaseTest, testSetUniverseAtLatticeIndex)
 {
@@ -1798,6 +1829,53 @@ TEST(CSGBaseTest, testUnivEngUnitExpand)
   auto trans = univ_expanded.getTransformations();
   ASSERT_EQ(1, trans.size());
   ASSERT_EQ(exp_trans, trans[0]);
+}
+
+/// test expansion of universe units when used in a lattice
+TEST(CSGBaseTest, testUnivEngUnitExpandLattice)
+{
+  // make two univ units - one to use as lattice elements and one to use as lattice outer
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  std::string ele_name = "unit_element";
+  std::string outer_name = "unit_outer";
+  std::unique_ptr<FakeUnivEngUnit> uptr1 = std::make_unique<FakeUnivEngUnit>(ele_name);
+  std::unique_ptr<FakeUnivEngUnit> uptr2 = std::make_unique<FakeUnivEngUnit>(outer_name);
+  const auto & uele = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr1));
+  const auto & uout = csg_obj->addEngUnit<FakeUnivEngUnit>(std::move(uptr2));
+
+  // make a lattice using these universe units
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{uele, uele},
+                                                                               {uele, uele}};
+  std::unique_ptr<CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSGCartesianLattice>("lat", 1.0, univs, uout);
+  auto & lat = csg_obj->addLattice(std::move(lat_ptr));
+
+  // pre-expansion: all universe elements and outer should be the exact units above
+  auto univ_eles = lat.getUniverses();
+  for (auto urow : univ_eles)
+    for (auto & u : urow)
+      ASSERT_TRUE(&u.get() == &uele);
+  ASSERT_TRUE(&uout == &lat.getOuterUniverse());
+
+  // expand just the universe elements first and check refs (all elements should be new expanded
+  // universes, and outer should still be the unit)
+  auto & u_ele_exp = csg_obj->expandEngUnit(uele);
+  auto univs_exp = lat.getUniverses();
+  for (auto urow : univs_exp)
+    for (auto & u : urow)
+      ASSERT_TRUE(&u.get() == &u_ele_exp);
+  // outer universe is still the original unit
+  ASSERT_TRUE(&uout == &lat.getOuterUniverse());
+
+  // expand the outer too and check refs again (elements should be unchanged from last expansion,
+  // outer should be new expanded universe)
+  auto & u_out_exp = csg_obj->expandEngUnit(uout);
+  auto univs_exp2 = lat.getUniverses();
+  for (auto urow : univs_exp2) // these should not change from above
+    for (auto & u : urow)
+      ASSERT_TRUE(&u.get() == &u_ele_exp);
+  // outer universe is expanded now
+  ASSERT_TRUE(&u_out_exp == &lat.getOuterUniverse());
 }
 
 /// tests CSGBase::expandAllEngUnits()
