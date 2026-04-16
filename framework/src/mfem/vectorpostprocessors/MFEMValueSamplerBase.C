@@ -99,8 +99,14 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _points(pointsToMFEMVector(points, _mesh.SpaceDimension(), _points_ordering)),
     _interp_vals(points.size())
 {
-  if (getMFEMProblem().mesh().shouldDisplace())
-    mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+  auto & moose_mesh = getMFEMProblem().mesh();
+  if (moose_mesh.type() == "MFEMMesh")
+  {
+    if (static_cast<MFEMMesh &>(moose_mesh).shouldDisplace())
+    {
+      mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+    }
+  }
 
   // set up points vector
   _mesh.EnsureNodes();

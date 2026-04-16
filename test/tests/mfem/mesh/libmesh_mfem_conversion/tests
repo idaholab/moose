@@ -1,0 +1,170 @@
+[Tests]
+  design = 'source/mfem/utils/BuildMFEMMesh.md'
+  issues = '#32520'
+  [LibMeshToMFEMMeshQuad]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of quads, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-square.mesh mfem-mesh-square.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshQuad/run
+    []
+  []
+  [LibMeshToMFEMMeshHex]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of hexes, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=hex-8 '
+                 'mfem_app0:elem_type=hex-8'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-hex-8.mesh mfem-mesh-hex-8.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshHex/run
+    []
+  []
+  [LibMeshToMFEMMeshHex2]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order hexes, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=hex-27 '
+                 'mfem_app0:elem_type=hex-27'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-hex-27.mesh mfem-mesh-hex-27.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshHex/run
+    []
+  []
+  [LibMeshToMFEMMeshTet]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of tets, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=tet-4 '
+                 'mfem_app0:elem_type=tet-4'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-tet-4.mesh mfem-mesh-tet-4.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshTet/run
+    []
+  []
+  [LibMeshToMFEMMeshTet2]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order tets, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=tet-10 '
+                 'mfem_app0:elem_type=tet-10'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-tet-10.mesh mfem-mesh-tet-10.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshTet2/run
+    []
+  []
+  [LibMeshToMFEMMeshWedge]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of wedges, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=wedge-6 '
+                 'mfem_app0:elem_type=wedge-6'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-wedge-6.mesh mfem-mesh-wedge-6.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshWedge/run
+    []
+  []
+  [LibMeshToMFEMMeshWedge2]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of second-order wedges, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=wedge-18 '
+                 'mfem_app0:elem_type=wedge-18'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-wedge-18.mesh mfem-mesh-wedge-18.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshWedge2/run
+    []
+  []
+  [LibMeshToMFEMMeshPyramid]
+    requirement = 'It shall be possible to create MFEM meshes from LibMesh ones made up of pyramids, '
+    [run]
+      type = RunApp
+      input = libmesh_parent.i
+      detail = 'verified by running simulations with meshes read both through libMesh and directly from MFEM '
+      capabilities = 'mfem'
+      recover = false
+      compute_devices = 'cpu cuda'
+      cli_args = 'elem_type=pyramid-5 '
+                 'mfem_app0:elem_type=pyramid-5'
+    []
+    [verify]
+      type = RunCommand
+      command = './check.sh libmesh-mesh-pyramid-5.mesh mfem-mesh-pyramid-5.mesh'
+      detail = "and confirming that the meshes they write to disk are the same."
+      capabilities = 'mfem'
+      recover = false
+      prereq = LibMeshToMFEMMeshPyramid/run
+    []
+  []
+[]
