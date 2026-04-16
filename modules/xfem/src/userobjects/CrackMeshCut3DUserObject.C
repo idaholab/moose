@@ -11,6 +11,7 @@
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"
+#include "libmesh/libmesh_common.h"
 #include "libmesh/string_to_enum.h"
 #include "MooseMesh.h"
 #include "MooseEnum.h"
@@ -158,6 +159,8 @@ CrackMeshCut3DUserObject::initialize()
           _is_mesh_modified = true;
           growFront();
           sortFrontNodes();
+          if (_inactive_boundary_pos.size() != 0)
+            findFrontIntersection();
           refineFront();
           triangulation();
           joinBoundary();
@@ -834,17 +837,29 @@ CrackMeshCut3DUserObject::growFront()
 {
   _front.clear();
 
+  // Track already-grown boundary nodes to avoid duplicates when a boundary node
+  // appears in two active segments (as the last node of one and the first of the next)
+  std::map<dof_id_type, dof_id_type> grown_node_map;
+
   for (unsigned int i = 0; i < _active_boundary.size(); ++i)
   {
     std::vector<dof_id_type> temp;
 
-    unsigned int i1 = 0;
     unsigned int i2 = _active_boundary[i].size();
-
     std::vector<int> index = getFrontPointsIndex();
-    for (unsigned int j = i1; j < i2; ++j)
+    for (unsigned int j = 0; j < i2; ++j)
     {
-      Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
+      dof_id_type orig_id = _active_boundary[i][j];
+
+      // If this node was already grown in a previous segment, reuse the grown node
+      auto git = grown_node_map.find(orig_id);
+      if (git != grown_node_map.end())
+      {
+        temp.push_back(git->second);
+        continue;
+      }
+
+      Node * this_node = _cutter_mesh->node_ptr(orig_id);
       mooseAssert(this_node, "Node is NULL");
       Point & this_point = *this_node;
       Point dir = _active_direction[i][j];
@@ -887,6 +902,7 @@ CrackMeshCut3DUserObject::growFront()
 
       dof_id_type id = _cutter_mesh->n_nodes() - 1;
       temp.push_back(id);
+      grown_node_map[orig_id] = id;
 
       if (_cfd)
       {
@@ -916,117 +932,105 @@ CrackMeshCut3DUserObject::findFrontIntersection()
 {
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
 
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+
   for (unsigned int i = 0; i < _front.size(); ++i)
   {
-    if (_front[i].size() >= 2)
+    if (_front[i].size() < 2)
+      continue;
+
+    // Project the first front node along the crack front edge tangent to the FEM surface
+    // _front[i][0] is the grown boundary node (may be outside)
+    // _front[i][1] is its interior neighbor (should be inside)
+    Node * bd_node1 = _cutter_mesh->node_ptr(_front[i][0]);
+    mooseAssert(bd_node1, "Node is NULL");
+    Node * in_node1 = _cutter_mesh->node_ptr(_front[i][1]);
+    mooseAssert(in_node1, "Node is NULL");
+
+    if ((*pl)(*bd_node1) == nullptr && (*pl)(*in_node1) != nullptr)
     {
-      std::vector<Point> pint1;
-      std::vector<Point> pint2;
-      std::vector<Real> length1;
-      std::vector<Real> length2;
+      Point inside_pt = *in_node1;
+      Point outside_pt = *bd_node1;
 
-      Real node_id = _front[i][0];
-      Node * this_node = _cutter_mesh->node_ptr(node_id);
-      mooseAssert(this_node, "Node is NULL");
-      Point & p2 = *this_node;
-
-      if (_front[i].size() >= 4)
-        node_id = _front[i][2];
-      else
-        node_id = _front[i][1];
-
-      this_node = _cutter_mesh->node_ptr(node_id);
-      mooseAssert(this_node, "Node is NULL");
-      Point & p1 = *this_node;
-
-      node_id = _front[i].back();
-      this_node = _cutter_mesh->node_ptr(node_id);
-      mooseAssert(this_node, "Node is NULL");
-      Point & p4 = *this_node;
-
-      if (_front[i].size() >= 4)
-        node_id = _front[i][_front[i].size() - 3];
-      else
-        node_id = _front[i][_front[i].size() - 2];
-
-      this_node = _cutter_mesh->node_ptr(node_id);
-      mooseAssert(this_node, "Node is NULL");
-      Point & p3 = *this_node;
-
-      bool do_inter1 = 1;
-      bool do_inter2 = 1;
-
-      std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-      pl->enable_out_of_mesh_mode();
-      const Elem * elem = (*pl)(p1);
-      if (elem == nullptr)
-        do_inter1 = 0;
-      elem = (*pl)(p4);
-      if (elem == nullptr)
-        do_inter2 = 0;
+      Real best_dist = std::numeric_limits<Real>::max();
+      Point best_intersection;
+      bool found = false;
 
       for (const auto & belem : range)
       {
-        Point pt;
-        std::vector<Point> vertices;
-
-        elem = belem->_elem;
+        const Elem * elem = belem->_elem;
         std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
+        std::vector<Point> vertices;
         for (unsigned int j = 0; j < curr_side->n_nodes(); ++j)
-        {
-          const Node * node = curr_side->node_ptr(j);
-          const Point & this_point = *node;
-          vertices.push_back(this_point);
-        }
+          vertices.push_back(*(curr_side->node_ptr(j)));
 
-        if (findIntersection(p1, p2, vertices, pt))
+        Point pt;
+        if (intersectWithEdge(inside_pt, outside_pt, vertices, pt))
         {
-          pint1.push_back(pt);
-          length1.push_back((pt - p1) * (pt - p1));
-        }
-        if (findIntersection(p3, p4, vertices, pt))
-        {
-          pint2.push_back(pt);
-          length2.push_back((pt - p3) * (pt - p3));
+          Real dist = (pt - outside_pt).norm();
+          if (dist < best_dist)
+          {
+            best_dist = dist;
+            best_intersection = pt;
+            found = true;
+          }
         }
       }
 
-      if (length1.size() != 0 && do_inter1)
+      if (found)
       {
-        auto it1 = std::min_element(length1.begin(), length1.end());
-        Point inter1 = pint1[std::distance(length1.begin(), it1)];
-        inter1 += (inter1 - p1) * _const_intersection;
+        Point direction = (outside_pt - best_intersection);
+        Real dir_norm = direction.norm();
+        if (dir_norm > libMesh::TOLERANCE)
+          direction /= dir_norm;
+        *bd_node1 = best_intersection + direction * _const_intersection;
+      }
+    }
 
-        Node * this_node = Node::build(inter1, _cutter_mesh->n_nodes()).release();
-        _cutter_mesh->add_node(this_node);
+    // Project the last front node along the crack front edge tangent to the FEM surface
+    Node * bd_node2 = _cutter_mesh->node_ptr(_front[i].back());
+    mooseAssert(bd_node2, "Node is NULL");
+    Node * in_node2 = _cutter_mesh->node_ptr(_front[i][_front[i].size() - 2]);
+    mooseAssert(in_node2, "Node is NULL");
 
-        mooseAssert(_cutter_mesh->n_nodes() - 1 > 0, "The cut mesh must be at least one element.");
-        unsigned int n = _cutter_mesh->n_nodes() - 1;
+    if ((*pl)(*bd_node2) == nullptr && (*pl)(*in_node2) != nullptr)
+    {
+      Point inside_pt = *in_node2;
+      Point outside_pt = *bd_node2;
 
-        auto it = _front[i].begin();
-        _front[i].insert(it, n);
+      Real best_dist = std::numeric_limits<Real>::max();
+      Point best_intersection;
+      bool found = false;
 
-        if (_cfd)
-          _tracked_crack_front_points[_tracked_crack_front_points.size() - 1] = n;
+      for (const auto & belem : range)
+      {
+        const Elem * elem = belem->_elem;
+        std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
+        std::vector<Point> vertices;
+        for (unsigned int j = 0; j < curr_side->n_nodes(); ++j)
+          vertices.push_back(*(curr_side->node_ptr(j)));
+
+        Point pt;
+        if (intersectWithEdge(inside_pt, outside_pt, vertices, pt))
+        {
+          Real dist = (pt - outside_pt).norm();
+          if (dist < best_dist)
+          {
+            best_dist = dist;
+            best_intersection = pt;
+            found = true;
+          }
+        }
       }
 
-      if (length2.size() != 0 && do_inter2)
+      if (found)
       {
-        auto it2 = std::min_element(length2.begin(), length2.end());
-        Point inter2 = pint2[std::distance(length2.begin(), it2)];
-        inter2 += (inter2 - p2) * _const_intersection;
-
-        Node * this_node = Node::build(inter2, _cutter_mesh->n_nodes()).release();
-        _cutter_mesh->add_node(this_node);
-
-        dof_id_type n = _cutter_mesh->n_nodes() - 1;
-
-        auto it = _front[i].begin();
-        unsigned int m = _front[i].size();
-        _front[i].insert(it + m, n);
-
-        if (_cfd)
-          _tracked_crack_front_points[0] = n;
+        Point direction = (outside_pt - best_intersection);
+        Real dir_norm = direction.norm();
+        if (dir_norm > libMesh::TOLERANCE)
+          direction /= dir_norm;
+        *bd_node2 = best_intersection + direction * _const_intersection;
       }
     }
   }
