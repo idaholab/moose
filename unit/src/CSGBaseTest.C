@@ -2899,6 +2899,13 @@ TEST(CSGBaseTest, testCSGBaseClone)
   const auto & lat = csg_obj->addLattice(std::move(lat_ptr));
   csg_obj->setLatticeOuter(lat, outer_univ);
   csg_obj->createCell("cell_lat_fill", lat, -csg_sphere_outer);
+  // create each type of engineering unit
+  std::unique_ptr<FakeSurfEngUnit> su_ptr = std::make_unique<FakeSurfEngUnit>("surf_unit_name");
+  csg_obj->addEngUnit(std::move(su_ptr));
+  std::unique_ptr<FakeCellEngUnit> cu_ptr = std::make_unique<FakeCellEngUnit>("cell_unit_name");
+  csg_obj->addEngUnit(std::move(cu_ptr));
+  std::unique_ptr<FakeUnivEngUnit> uu_ptr = std::make_unique<FakeUnivEngUnit>("univ_unit_name");
+  csg_obj->addEngUnit(std::move(uu_ptr));
 
   auto csg_obj_clone = csg_obj->clone();
   ASSERT_TRUE(*csg_obj == *csg_obj_clone);
