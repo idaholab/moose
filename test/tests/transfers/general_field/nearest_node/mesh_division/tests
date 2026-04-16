@@ -57,6 +57,16 @@
                  "Transfers/from_sub_elem/bbox_factor=20 "
       detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions,'
     []
+    [matching_subapps_functor]
+      type = Exodiff
+      input = 'main_match_subapps_functor.i'
+      exodiff = "main_match_subapps_functor_out.e main_match_subapps_functor_out_sub0.e "
+                "main_match_subapps_functor_out_sub1.e main_match_subapps_functor_out_sub2.e "
+                "main_match_subapps_functor_out_sub3.e"
+      design = 'MeshDivisions/index.md transfers/MultiAppGeneralFieldFunctorTransfer.md'
+      issues = '#13754 #19451'
+      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions, using a variable-backed functor,'
+    []
     [matching_subapps_nobbox]
       type = Exodiff
       input = 'main_match_subapps.i'

@@ -1,17 +1,15 @@
-# Base input for testing functor transfers restricted by mesh divisions matched to subapp indices.
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 4
-  ny = 4
+  nx = 3
+  ny = 3
 []
 
 [MeshDivisions]
-  [middle]
+  [quadrants]
     type = CartesianGridDivision
-    bottom_left = '0.21 0.21 0'
-    top_right = '1.001 1.001 0'
+    bottom_left = '-.01 -.01 0'
+    top_right = '1.02 1.02 0'
     nx = 2
     ny = 2
     nz = 1
@@ -41,6 +39,19 @@
       function = '2 + 2*x*x + 3*y*y*y'
     []
   []
+  [mesh_div]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+[AuxKernels]
+  [mesh_div]
+    type = MeshDivisionAux
+    mesh_division = quadrants
+    variable = mesh_div
+    execute_on = 'initial'
+  []
 []
 
 [Executioner]
@@ -52,24 +63,20 @@
 []
 
 [Outputs]
-  [out]
-    type = Exodus
-    hide = 'to_sub to_sub_elem div'
-    overwrite = true
-  []
+  exodus = true
 []
 
 [MultiApps]
   [sub]
     type = FullSolveMultiApp
     app_type = MooseTestApp
-    input_files = ../../../nearest_node/mesh_division/sub.i
+    input_files = sub_corner.i
     output_in_position = true
-    positions = '0.1001 0.0000013 0
-                 0.30054 0.600001985 0
-                 0.70021 0.4000022 0
-                 0.800212 0.8500022 0'
-    cli_args = 'base_value=1 base_value=2 base_value=3 base_value=4'
+    # Placed at the four corners so each sub-app sits within one quadrant of 'quadrants'
+    positions = '-.04 -.04 0
+                 0.94 -.04 0
+                 -.04 0.94 0
+                 0.94 0.94 0'
   []
 []
 
@@ -80,8 +87,10 @@
     source_functors = to_sub
     variable = from_main
     extrapolation_behavior = nearest-node
-    from_mesh_division = middle
+    from_mesh_division = quadrants
     from_mesh_division_usage = 'matching_subapp_index'
+    bbox_factor = 20
+    search_value_conflicts = true
   []
 
   [to_sub_elem]
@@ -90,8 +99,10 @@
     source_functors = to_sub_elem
     variable = from_main_elem
     extrapolation_behavior = nearest-elem
-    from_mesh_division = middle
+    from_mesh_division = quadrants
     from_mesh_division_usage = 'matching_subapp_index'
+    bbox_factor = 20
+    search_value_conflicts = true
   []
 
   [from_sub]
@@ -100,8 +111,10 @@
     source_functors = to_main
     variable = from_sub
     extrapolation_behavior = nearest-node
-    to_mesh_division = middle
+    to_mesh_division = quadrants
     to_mesh_division_usage = 'matching_subapp_index'
+    bbox_factor = 20
+    search_value_conflicts = true
   []
 
   [from_sub_elem]
@@ -110,22 +123,9 @@
     source_functors = to_main_elem
     variable = from_sub_elem
     extrapolation_behavior = nearest-elem
-    to_mesh_division = middle
+    to_mesh_division = quadrants
     to_mesh_division_usage = 'matching_subapp_index'
-  []
-[]
-
-[AuxVariables]
-  [div]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [mesh_div]
-    type = MeshDivisionAux
-    variable = div
-    mesh_division = 'middle'
+    bbox_factor = 20
+    search_value_conflicts = true
   []
 []
