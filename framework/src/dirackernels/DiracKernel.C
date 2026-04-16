@@ -62,10 +62,10 @@ DiracKernelTempl<T>::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
-  const std::vector<unsigned int> * multiplicities =
+  const std::vector<Real> * point_values =
       _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
-  Real multiplicity = 1.0;
+  Real point_value = 1.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -73,10 +73,10 @@ DiracKernelTempl<T>::computeResidual()
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       if (!_drop_duplicate_points)
-        multiplicity = (*multiplicities)[local_qp++];
+        point_value = (*point_values)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += multiplicity * computeQpResidual();
+        _local_re(_i) += point_value * computeQpResidual();
     }
   }
 
@@ -89,10 +89,10 @@ DiracKernelTempl<T>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
-  const std::vector<unsigned int> * multiplicities =
+  const std::vector<Real> * point_values =
       _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
-  Real multiplicity = 1.0;
+  Real point_value = 1.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -100,11 +100,11 @@ DiracKernelTempl<T>::computeJacobian()
     if (isActiveAtPoint(_current_elem, _current_point))
     {
       if (!_drop_duplicate_points)
-        multiplicity = (*multiplicities)[local_qp++];
+        point_value = (*point_values)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
         for (_j = 0; _j < _phi.size(); _j++)
-          _local_ke(_i, _j) += multiplicity * computeQpJacobian();
+          _local_ke(_i, _j) += point_value * computeQpJacobian();
     }
   }
 
@@ -123,10 +123,10 @@ DiracKernelTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
   {
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
-    const std::vector<unsigned int> * multiplicities =
+    const std::vector<Real> * point_values =
         _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
     unsigned int local_qp = 0;
-    Real multiplicity = 1.0;
+    Real point_value = 1.0;
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
@@ -134,11 +134,11 @@ DiracKernelTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
       if (isActiveAtPoint(_current_elem, _current_point))
       {
         if (!_drop_duplicate_points)
-          multiplicity = (*multiplicities)[local_qp++];
+          point_value = (*point_values)[local_qp++];
 
         for (_i = 0; _i < _test.size(); _i++)
           for (_j = 0; _j < _phi.size(); _j++)
-            _local_ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar_num);
+            _local_ke(_i, _j) += point_value * computeQpOffDiagJacobian(jvar_num);
       }
     }
 

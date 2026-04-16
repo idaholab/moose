@@ -79,6 +79,8 @@ x    & y    & z    & t    & s \\
 
 During the simulation, only the values where the time value (fourth column) is applied. So at $t_{\mathrm{sim}}=0.10$ only the first eight rows are applied.
 
+!include source/dirackernels/dirac_point_value_note.md
+
 !syntax parameters /DiracKernels/ReporterTimePointSource
 
 !syntax inputs /DiracKernels/ReporterTimePointSource

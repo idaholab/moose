@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "LinearInterpolation.h"
+#include "libMeshReducedNamespace.h"
 
 /**
  * Mesh generator to create a 1D B-spline curve mesh in 3D space
@@ -25,24 +25,35 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Return the starting point of the spline
+  Point startPoint() const;
+  /// Return the ending point of the spline
+  Point endPoint() const;
+  /// Return the starting direction of the spline
+  RealVectorValue startDirection() const;
+  /// Return the ending direction of the spline
+  RealVectorValue endDirection() const;
+
   /// Subdomain ID for the elements created
   const SubdomainID _new_subdomain_id;
   /// degree of interpolating spline
   const unsigned int _degree;
-  /// starting point of curve
-  const libMesh::Point _start_point;
-  /// ending point of curve
-  const libMesh::Point _end_point;
-  /// direction of curve at start point
-  const libMesh::RealVectorValue _start_dir;
-  /// direction of curve at end point
-  const libMesh::RealVectorValue _end_dir;
   /// sharpness of curve (measure of how close it is to the curve with three orthogonal segments)
-  const libMesh::Real _sharpness;
+  const Real _sharpness;
   /// number of control points to be generated
   const unsigned int _num_cps;
   /// order of the EDGE elements to be generated
   const unsigned int _order;
   /// number of edge elements on the curve
   const unsigned int _num_elements;
+
+  // Alternative geometry input: use boundary centroids (and boundary average normals)
+  /// If 'start_mesh' parameter is set, reference to input mesh providing the starting boundary
+  std::unique_ptr<MeshBase> & _start_mesh_input;
+  /// If 'end_mesh' parameter is set, reference to input mesh providing the ending boundary
+  std::unique_ptr<MeshBase> & _end_mesh_input;
+  /// If 'start_mesh' parameter is set, mesh providing the starting boundary
+  std::unique_ptr<MeshBase> _start_mesh;
+  /// If 'end_mesh' parameter is set, mesh providing the ending boundary
+  std::unique_ptr<MeshBase> _end_mesh;
 };

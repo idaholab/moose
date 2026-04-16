@@ -29,6 +29,18 @@ with:
 If the start and end direction are parallel, the generator will fall back to producing a circle if the vector from the start to the end point
 is orthogonal to the shared direction and the two direction vectors are also equal. All other cases with parallel directions will error.
 
+## Setting start and end points / directions from mesh boundaries
+
+As an alternative to specifying start/end points and directions manually, the user may specify another mesh generator
+and a boundary (sideset) on the mesh created by that mesh generator for the start / end point and direction.
+
+In that case, the starting point is computed from the centroid of the boundary (as a sideset).
+The starting direction can still be specified with the [!param](/Mesh/BSplineCurveGenerator/start_direction),
+or if it is not specified, using the side-area-weighted sum of the side-vertex-average-normal of the side elements on the boundary,
+which is essentially one way to compute the average boundary normal.
+
+The behavior is similar for the ending point/direction.
+
 !syntax parameters /Mesh/BSplineCurveGenerator
 
 !syntax inputs /Mesh/BSplineCurveGenerator

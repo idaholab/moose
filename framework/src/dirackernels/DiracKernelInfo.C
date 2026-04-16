@@ -26,27 +26,27 @@ DiracKernelInfo::DiracKernelInfo()
 DiracKernelInfo::~DiracKernelInfo() {}
 
 void
-DiracKernelInfo::addPoint(const Elem * elem, const Point & p)
+DiracKernelInfo::addPoint(const Elem * elem, const Point & p, const Real & value)
 {
   _elements.insert(elem);
 
-  std::pair<std::vector<Point>, std::vector<unsigned int>> & multi_point_list = _points[elem];
+  std::pair<std::vector<Point>, std::vector<Real>> & multi_point_list = _points[elem];
 
   const unsigned int npoint = multi_point_list.first.size();
   mooseAssert(npoint == multi_point_list.second.size(),
-              "Different sizes for location and multiplicity data");
+              "Different sizes for location and point value data");
 
   for (unsigned int i = 0; i < npoint; ++i)
     if (pointsFuzzyEqual(multi_point_list.first[i], p))
     {
-      // a point at the same (within a tolerance) location as p exists, increase its multiplicity
-      multi_point_list.second[i]++;
+      // A point at the same (within a tolerance) location as p exists, accumulate its value.
+      multi_point_list.second[i] += value;
       return;
     }
 
-  // no prior point found at this location, add it with a multiplicity of one
+  // No prior point found at this location, add it with its initial value.
   multi_point_list.first.push_back(p);
-  multi_point_list.second.push_back(1);
+  multi_point_list.second.push_back(value);
 }
 
 void

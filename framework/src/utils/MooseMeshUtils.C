@@ -291,6 +291,72 @@ meshCentroidCalculator(const MeshBase & mesh)
   return centroid_pt;
 }
 
+Point
+boundaryCentroidCalculator(const BoundaryName & boundary, MeshBase & mesh)
+{
+  // Need boundaries to be synchronized
+  if (!mesh.preparation().has_boundary_id_sets)
+    mesh.get_boundary_info().synchronize_global_id_set();
+  BoundaryInfo & mesh_boundary_info = mesh.get_boundary_info();
+  boundary_id_type boundary_id = mesh_boundary_info.get_id_by_name(boundary);
+  const auto side_list = mesh_boundary_info.build_side_list();
+
+  // Initialize sums
+  Real volume_sum = 0;
+  Point volume_weighted_centroid_sum(0, 0, 0);
+
+  for (const auto & [eid, side_i, bid] : side_list)
+  {
+    if (bid != boundary_id)
+      continue;
+
+    // Get the side
+    const auto elem = mesh.elem_ptr(eid);
+    const auto side = elem->side_ptr(side_i);
+
+    volume_sum += side->volume();
+    volume_weighted_centroid_sum += side->volume() * side->true_centroid();
+  }
+  // Sum across processes
+  mesh.comm().sum(volume_weighted_centroid_sum);
+  mesh.comm().sum(volume_sum);
+
+  return volume_weighted_centroid_sum / volume_sum;
+}
+
+RealVectorValue
+boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh)
+{
+  // Need boundaries to be synchronized
+  if (!mesh.preparation().has_boundary_id_sets)
+    mesh.get_boundary_info().synchronize_global_id_set();
+  BoundaryInfo & mesh_boundary_info = mesh.get_boundary_info();
+  boundary_id_type boundary_id = mesh_boundary_info.get_id_by_name(boundary);
+  const auto side_list = mesh_boundary_info.build_side_list();
+
+  // Initialize sums
+  Real volume_sum = 0;
+  RealVectorValue volume_weighted_normal_sum(0, 0, 0);
+
+  for (const auto & [eid, side_i, bid] : side_list)
+  {
+    if (bid != boundary_id)
+      continue;
+
+    // Get the side
+    const auto elem = mesh.elem_ptr(eid);
+    const auto side = elem->side_ptr(side_i);
+
+    volume_sum += side->volume();
+    volume_weighted_normal_sum += side->volume() * elem->side_vertex_average_normal(side_i);
+  }
+  // Sum across processes
+  mesh.comm().sum(volume_weighted_normal_sum);
+  mesh.comm().sum(volume_sum);
+
+  return volume_weighted_normal_sum / volume_sum;
+}
+
 std::unordered_map<dof_id_type, dof_id_type>
 getExtraIDUniqueCombinationMap(const MeshBase & mesh,
                                const std::set<SubdomainID> & block_ids,
@@ -618,14 +684,15 @@ buildBoundaryMesh(const MeshBase & input_mesh, const boundary_id_type boundary_i
   auto side_list = input_mesh.get_boundary_info().build_side_list();
 
   std::unordered_map<dof_id_type, dof_id_type> old_new_node_map;
-  for (const auto & bside : side_list)
+  for (const auto & [eid, side_i, bid] : side_list)
   {
-    if (std::get<2>(bside) != boundary_id)
+    if (bid != boundary_id)
       continue;
 
-    const Elem * elem = input_mesh.elem_ptr(std::get<0>(bside));
-    const auto side = std::get<1>(bside);
-    auto side_elem = elem->build_side_ptr(side);
+    // Get the side
+    const auto elem = input_mesh.elem_ptr(eid);
+    const auto side = elem->side_ptr(side_i);
+    auto side_elem = elem->build_side_ptr(side_i);
     auto copy = side_elem->build(side_elem->type());
 
     for (const auto i : side_elem->node_index_range())
@@ -908,14 +975,11 @@ getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id)
   // Get all nodes from the sideset with ID of boundary_id
   const auto & bc_sides =
       boundary_info.build_side_list(libMesh::BoundaryInfo::BCTupleSortBy::BOUNDARY_ID);
-  for (const auto & bc_s : bc_sides)
+  for (const auto & [elem_id, side, bc_id] : bc_sides)
   {
-    auto bc_id = std::get<2>(bc_s);
     if (bc_id == boundary_id)
     {
-      auto elem_id = std::get<0>(bc_s);
       const auto elem = mesh.elem_ptr(elem_id);
-      auto side = std::get<1>(bc_s);
       for (const auto ni : elem->nodes_on_side(side))
         boundary_node_ids.insert(elem->node_id(ni));
     }
@@ -923,12 +987,9 @@ getBoundaryNodes(const MeshBase & mesh, const BoundaryID boundary_id)
 
   // Get all nodes from nodeset with ID of boundary_id
   const auto & bc_nodes = boundary_info.build_node_list();
-  for (const auto & bc_n : bc_nodes)
-  {
-    auto bc_id = std::get<1>(bc_n);
+  for (const auto & [n_id, bc_id] : bc_nodes)
     if (bc_id == boundary_id)
-      boundary_node_ids.insert(std::get<0>(bc_n));
-  }
+      boundary_node_ids.insert(n_id);
 
   return boundary_node_ids;
 }
@@ -1020,10 +1081,10 @@ createSubdomainFromSidesets(MeshBase & mesh,
 
   std::vector<std::pair<dof_id_type, ElemSidePair>> element_sides_on_boundary;
   dof_id_type counter = 0;
-  for (const auto & triple : side_list)
-    if (sidesets.count(std::get<2>(triple)))
+  for (const auto & [eid, side, bid] : side_list)
+    if (sidesets.count(bid))
     {
-      if (auto elem = mesh.query_elem_ptr(std::get<0>(triple)))
+      if (auto elem = mesh.query_elem_ptr(eid))
       {
         if (!elem->active())
           mooseError(
@@ -1031,8 +1092,7 @@ createSubdomainFromSidesets(MeshBase & mesh,
               "elements. Make sure that ",
               type_name,
               "s are run before any refinement generators");
-        element_sides_on_boundary.push_back(
-            std::make_pair(counter, ElemSidePair(elem, std::get<1>(triple))));
+        element_sides_on_boundary.push_back(std::make_pair(counter, ElemSidePair(elem, side)));
       }
       ++counter;
     }

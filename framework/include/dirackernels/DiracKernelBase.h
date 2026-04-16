@@ -77,16 +77,23 @@ protected:
   /**
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
+   * @param elem Pointer to the element in which the point is located
+   * @param p The (x,y,z) location of the Dirac point
+   * @param id Optional user-assigned ID for caching the point/element association
+   * @param value The source value at this point; accumulated when points coincide
    */
-  void addPoint(const Elem * elem, Point p, unsigned id = libMesh::invalid_uint);
+  void addPoint(const Elem * elem, Point p, unsigned id = libMesh::invalid_uint, Real value = 1.0);
 
   /**
    * This is a highly inefficient way to add a point where this DiracKernel needs to be
    * evaluated.
    *
    * This spawns a search for the element containing that point!
+   * @param p The (x,y,z) location of the Dirac point
+   * @param id Optional user-assigned ID for caching the point/element association
+   * @param value The source value at this point; accumulated when points coincide
    */
-  const Elem * addPoint(Point p, unsigned id = libMesh::invalid_uint);
+  const Elem * addPoint(Point p, unsigned id = libMesh::invalid_uint, Real value = 1.0);
 
   /**
    * Returns the user-assigned ID of the current Dirac point if it
@@ -158,5 +165,5 @@ private:
 
   /// A helper function for addPoint(Point, id) for when
   /// id != invalid_uint.
-  const Elem * addPointWithValidId(Point p, unsigned id);
+  const Elem * addPointWithValidId(Point p, unsigned id, Real value);
 };

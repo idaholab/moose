@@ -43,8 +43,9 @@ public:
    * Adds a point source
    * @param elem Pointer to the geometric element in which the point is located
    * @param p The (x,y,z) location of the Dirac point
+   * @param value The value accumulated for this point when it coincides with an existing point
    */
-  void addPoint(const Elem * elem, const Point & p);
+  void addPoint(const Elem * elem, const Point & p, const Real & value = 1);
 
   /**
    * Remove all of the current points and elements.
@@ -61,8 +62,7 @@ public:
    */
   std::set<const Elem *> & getElements() { return _elements; }
 
-  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<unsigned int>>>
-      MultiPointMap;
+  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<Real>>> MultiPointMap;
 
   /**
    * Returns a writeable reference to the _points container.
