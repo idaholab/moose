@@ -37,4 +37,23 @@ MFEMComplexVariable::buildComplexGridFunction()
   return std::make_shared<mfem::ParComplexGridFunction>(_fespace.getFESpace().get());
 }
 
+void
+MFEMComplexVariable::declareCoefficients()
+{
+  if (getFESpace().isScalar())
+  {
+    getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        name() + "_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        name() + "_imag", &getComplexGridFunction()->imag());
+  }
+  else
+  {
+    getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        name() + "_real", &getComplexGridFunction()->real());
+    getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        name() + "_imag", &getComplexGridFunction()->imag());
+  }
+}
+
 #endif

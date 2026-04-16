@@ -24,6 +24,9 @@ public:
   /// Returns a reference to the fespace used by the gridfunction.
   inline const MFEMFESpace & getFESpace() const { return _fespace; }
 
+  // Declare default coefficients associated with this ComplexGridFunction
+  virtual void declareCoefficients();
+
 protected:
   const MFEMFESpace & _fespace;
 

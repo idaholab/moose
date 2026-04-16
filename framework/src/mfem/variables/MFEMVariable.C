@@ -55,4 +55,15 @@ MFEMVariable::buildGridFunction()
   return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
 }
 
+void
+MFEMVariable::declareCoefficients()
+{
+  if (getFESpace().isScalar())
+    getMFEMProblem().getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        name(), getGridFunction().get());
+  else
+    getMFEMProblem().getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        name(), getGridFunction().get());
+}
+
 #endif

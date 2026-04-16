@@ -269,31 +269,13 @@ MFEMProblem::addGridFunction(const std::string & var_type,
     MFEMComplexVariable & mfem_variable =
         getMFEMObject<MFEMComplexVariable>("MooseVariableBase", var_name);
     getProblemData().cmplx_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
-    if (mfem_variable.getFESpace().isScalar())
-    {
-      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
-      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-          var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
-    }
-    else
-    {
-      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
-      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-          var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
-    }
+    mfem_variable.declareCoefficients();
   }
   else // must be real, but may have been set up indirectly from a MOOSE variable
   {
     MFEMVariable & mfem_variable = getMFEMObject<MFEMVariable>("MooseVariableBase", var_name);
     getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
-    if (mfem_variable.getFESpace().isScalar())
-      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-          var_name, mfem_variable.getGridFunction().get());
-    else
-      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-          var_name, mfem_variable.getGridFunction().get());
+    mfem_variable.declareCoefficients();
   }
 }
 
