@@ -106,7 +106,17 @@
       recover = false
       max_threads = 1
       restep = false
-      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps.'
+      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps,'
     []
+    [1_to_N_nodal_parallel]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_nodal_sample_0002.csv'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel.'
+    []    
   []
 []
