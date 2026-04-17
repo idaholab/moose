@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMHypreAMS.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMHypreAMS);
 
@@ -19,7 +20,7 @@ MFEMHypreAMS::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
-  params.addParam<UserObjectName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
+  params.addParam<MFEMFESpaceName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
   params.addParam<bool>("singular",
                         false,
                         "Declare that the system is singular; use when solving curl-curl problem "
@@ -30,7 +31,9 @@ MFEMHypreAMS::validParams()
 }
 
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
+  : MFEMSolverBase(parameters),
+    _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
+                                                              getParam<MFEMFESpaceName>("fespace")))
 {
   constructSolver();
 }

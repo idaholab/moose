@@ -14,14 +14,21 @@
 InputParameters
 MFEMVectorPostprocessor::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMExecutedObject::validParams();
   params += VectorPostprocessor::validParams();
+  params.registerSystemAttributeName("MFEMExecutedObject");
   return params;
 }
 
 MFEMVectorPostprocessor::MFEMVectorPostprocessor(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), VectorPostprocessor(this)
+  : MFEMExecutedObject(parameters), VectorPostprocessor(this)
 {
+}
+
+std::optional<std::string>
+MFEMVectorPostprocessor::suppliedVectorPostprocessorName() const
+{
+  return name();
 }
 
 #endif // MOOSE_MFEM_ENABLED

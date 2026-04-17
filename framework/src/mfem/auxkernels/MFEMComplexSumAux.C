@@ -22,8 +22,8 @@ MFEMComplexSumAux::validParams()
       "Calculates the sum of an arbitrary number of complex variables sharing an FE space, each "
       "optionally scaled by a complex constant, and stores the result in an auxiliary complex "
       "variable.");
-  params.addRequiredParam<std::vector<VariableName>>(
-      "source_variables", "The names of the MFEM complex variables to sum");
+  MFEMExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
+      params, "source_variables", "The names of the MFEM complex variables to sum");
   params.addParam<std::vector<mfem::real_t>>(
       "scale_factors_real",
       "The real parts of the factors to scale each MFEM variable by during summation");

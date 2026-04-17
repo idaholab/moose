@@ -1473,6 +1473,14 @@ public:
   bool hasPostprocessorValueByName(const PostprocessorName & name) const;
 
   /**
+   * Return the Postprocessor object registered under the supplied object name.
+   * @param object_name The name of the Postprocessor object
+   * @param tid The thread identifier for thread-local object lookup
+   */
+  const Postprocessor & getPostprocessorObjectByName(const PostprocessorName & object_name,
+                                                     const THREAD_ID tid = 0) const;
+
+  /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
    * @param t_index Flag for getting current (0), old (1), or older (2) values

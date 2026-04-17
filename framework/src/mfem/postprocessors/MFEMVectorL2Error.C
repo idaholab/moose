@@ -23,8 +23,8 @@ MFEMVectorL2Error::validParams()
       "vector gridfunctions.");
   params.addParam<MFEMVectorCoefficientName>("function",
                                              "The analytic solution to compare against.");
-  params.addParam<VariableName>(
-      "variable", "Name of the vector variable of which to find the norm of the error.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "variable", "Name of the vector variable of which to find the norm of the error.");
   return params;
 }
 

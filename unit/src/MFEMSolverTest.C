@@ -231,7 +231,7 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreADS");
-  solver_params.set<UserObjectName>("fespace") = "HDivFESpace";
+  solver_params.set<MFEMFESpaceName>("fespace") = "HDivFESpace";
 
   // Construct solver
   MFEMHypreADS & solver = addObject<MFEMHypreADS>("MFEMHypreADS", "solver1", solver_params);
@@ -257,7 +257,7 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreAMS");
-  solver_params.set<UserObjectName>("fespace") = "HCurlFESpace";
+  solver_params.set<MFEMFESpaceName>("fespace") = "HCurlFESpace";
 
   // Construct solver
   MFEMHypreAMS & solver = addObject<MFEMHypreAMS>("MFEMHypreAMS", "solver1", solver_params);

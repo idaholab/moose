@@ -14,14 +14,21 @@
 InputParameters
 MFEMPostprocessor::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMExecutedObject::validParams();
   params += Postprocessor::validParams();
+  params.registerSystemAttributeName("MFEMExecutedObject");
   return params;
 }
 
 MFEMPostprocessor::MFEMPostprocessor(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), Postprocessor(this)
+  : MFEMExecutedObject(parameters), Postprocessor(this)
 {
+}
+
+std::optional<std::string>
+MFEMPostprocessor::suppliedPostprocessorName() const
+{
+  return name();
 }
 
 #endif

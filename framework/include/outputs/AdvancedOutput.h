@@ -387,34 +387,26 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   oss << "execute_" << execute_data_name << "_on";
   std::string execute_on_name = oss.str();
 
-  std::vector<UserObjectBase *> objs;
-  _problem_ptr->theWarehouse()
-      .query()
-      .condition<AttribSystem>("UserObject")
-      .condition<AttribThread>(0)
-      .queryIntoUnsorted(objs);
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  std::vector<UserObjectBase *> kokkos_objs;
-  _problem_ptr->theWarehouse()
-      .query()
-      .condition<AttribSystem>("KokkosUserObject")
-      .condition<AttribThread>(0)
-      .queryIntoUnsorted(kokkos_objs);
-
-  objs.insert(objs.end(), kokkos_objs.begin(), kokkos_objs.end());
-#endif
+  std::vector<postprocessor_type *> objs;
+  if constexpr (std::is_same_v<postprocessor_type, Postprocessor>)
+    _problem_ptr->theWarehouse()
+        .query()
+        .condition<AttribInterfaces>(Interfaces::Postprocessor)
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(objs);
+  else if constexpr (std::is_same_v<postprocessor_type, VectorPostprocessor>)
+    _problem_ptr->theWarehouse()
+        .query()
+        .condition<AttribInterfaces>(Interfaces::VectorPostprocessor)
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(objs);
 
   for (const auto & obj : objs)
   {
-    auto pps = dynamic_cast<postprocessor_type *>(obj);
-    if (!pps)
-      continue;
-
-    execute_data.available.insert(pps->PPName());
+    execute_data.available.insert(obj->PPName());
 
     // Extract the list of outputs
-    const auto & pps_outputs = pps->getOutputs();
+    const auto & pps_outputs = obj->getOutputs();
 
     // Check that the outputs lists are valid
     _app.getOutputWarehouse().checkOutputs(pps_outputs);
@@ -433,7 +425,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
         mooseWarning("The ",
                      pp_type_str,
                      " '",
-                     pps->PPName(),
+                     obj->PPName(),
                      "' has requested to be output by the '",
                      name(),
                      "' output, but ",

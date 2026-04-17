@@ -15,20 +15,26 @@
 InputParameters
 MFEMComplexAuxKernel::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMExecutedObject::validParams();
   params.registerBase("AuxKernel");
-  params.addClassDescription("Base class for MFEMGeneralUserObjects that update auxiliary "
-                             "variables outside of the main solve step.");
+  params.addClassDescription("Base class for MFEM objects that update auxiliary variables outside "
+                             "of the main solve step.");
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
   return params;
 }
 
 MFEMComplexAuxKernel::MFEMComplexAuxKernel(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MFEMExecutedObject(parameters),
     _result_var_name(getParam<AuxVariableName>("variable")),
     _result_var(*getMFEMProblem().getComplexGridFunction(_result_var_name))
 {
+}
+
+std::optional<std::string>
+MFEMComplexAuxKernel::suppliedVariableName() const
+{
+  return _result_var_name;
 }
 
 void
