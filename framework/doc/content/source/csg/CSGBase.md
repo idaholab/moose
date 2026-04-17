@@ -397,6 +397,12 @@ The code snippet below demonstrates this expansion behavior by expanding a `CSGN
 
 !listing CSGBaseTest.C start=make a cell that uses the polygon unit in the region definition end=INTERSECTION include-end=true
 
+!alert! note title=CSGSurfaceEngUnits as Regions
+
+`CSGSurfaceEngUnit`s are intended to be used as a surface for a `CSGRegion` definition. Each derived unit type has a mechanism for determining the positive or negative half-space for that "surface" and therefore should be treated as a half-space during definition. During expansion, the unit "surface" is replaced with a `CSGRegion` that defines the negative half-space of that unit. If the positive half-space was used in the `CSGRegion` definition, then the unit half-space is replaced with the complement (`~`) of the newly generated `CSGRegion`.
+
+!alert-end!
+
 !alert! note title=Expanding Nested Engineering Units
 
 It is allowable to define an expansion method for an engineering unit that creates additional `CSGEngUnit` objects during the expansion process. If `expandUnit` is called on a single engineering unit, any newly generated engineering units will not be subsequently expanded. However, if `expandAllEngUnits()` is called, any additionally created `CSGEngUnit` objects will also be expanded recursively until no more `CSGEngUnit` objects remain.
