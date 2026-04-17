@@ -13,17 +13,15 @@
   dim = 2
 []
 
-# This application use at most 3 processes
-[MultiApps/mfem_sub]
-  type = TransientMultiApp
-  input_files = mfem_sub_between_diffusion.i
-  max_procs_per_app = 3
-[]
-
-# This application will use as many processes as the main app
-[MultiApps/libmesh_sub]
-  type = TransientMultiApp
-  input_files = libmesh_sub_between_diffusion.i
+[MultiApps]
+  [mfem_sub]
+    type = TransientMultiApp
+    input_files = mfem_sub_between_diffusion.i
+  []
+  [libmesh_sub]
+    type = TransientMultiApp
+    input_files = libmesh_sub_between_diffusion.i
+  []
 []
 
 [Transfers]

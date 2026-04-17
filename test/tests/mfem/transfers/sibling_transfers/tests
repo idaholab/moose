@@ -89,4 +89,24 @@
       detail = 'and from nodal to elemental variables.'
     []
   []
+  [MFEM_to_MFEM_sibling_transfers]
+    requirement = "The system shall support multiapp sibling transfers from MFEM to MFEM sub-apps via shape function evaluations"
+    [1_to_N_nodal]
+      type = XMLDiff
+      input = mfem_main_between_multiapp.i
+      xmldiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu'                 
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      max_parallel = 1 # XML schemadiff with multiple ranks
+      recover = false
+      max_threads = 1
+      restep = false
+      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps.'
+    []
+  []
 []

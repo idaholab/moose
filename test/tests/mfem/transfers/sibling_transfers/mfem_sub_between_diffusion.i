@@ -110,4 +110,9 @@
 
 [Outputs]
   csv = true
+  inactive = ParaViewDataCollection
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    vtk_format = ASCII
+  []
 []

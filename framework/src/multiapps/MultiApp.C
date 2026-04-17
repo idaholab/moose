@@ -1170,7 +1170,10 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
 #ifdef MOOSE_MFEM_ENABLED
-  if (i == 0) // MFEM device must only be set once across all apps
+  // MFEM device must only be set once across all apps
+  // FIXME: this required that the base app is an MFEM app; itwill
+  // still fail if multiple MFEM sub-apps are launched from a libMesh base app
+  if (i == 0)
   {
     app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
         _app.getMFEMDevice(Moose::PassKey<MultiApp>());
