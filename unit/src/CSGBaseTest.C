@@ -1055,9 +1055,10 @@ TEST(CSGBaseTest, testDeleteLattice)
 TEST(CSGBaseTest, testSurfEngUnitAdd)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // define a 4-sided polygon
   std::unique_ptr<CSGNPolygonUnit> poly_ptr =
       std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
-  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
+  const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr)); // returns CSGEngUnit type
 
   // check that this is registered as a "surface" and an engineering unit in CSGBase
   ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
@@ -1214,10 +1215,12 @@ TEST(CSGBaseTest, testSurfEngUnitExpand)
 {
   std::string name = "polygon_unit";
   auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // make a 4-sided polygon with apothem length 2.0
   std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  // add to base and return as CSGNPolygonUnit type
   const auto & poly = csg_obj->addEngUnit<CSGNPolygonUnit>(std::move(poly_ptr));
 
-  // assert num surfs and eng units pre-expansion
+  // check number of surfaces and units pre-expansion
   ASSERT_EQ(1, csg_obj->getAllSurfaces().size());
   ASSERT_EQ(1, csg_obj->getAllSurfaceEngUnits().size());
   ASSERT_EQ(1, csg_obj->getAllEngUnits().size());
@@ -1259,8 +1262,8 @@ TEST(CSGBaseTest, testSurfEngUnitExpand)
 /// when the original region was a negative "half-space"
 TEST(CSGBaseTest, testUseSurfEngUnit)
 {
-  // make a cell that uses the polygon unit in the region definition and a regular surface
   auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // make a cell that uses the polygon unit in the region definition as if it were a regular surface
   std::unique_ptr<CSGNPolygonUnit> poly_ptr =
       std::make_unique<CSGNPolygonUnit>("polygon_unit", 4, 2.0);
   const auto & poly = csg_obj->addEngUnit(std::move(poly_ptr));
@@ -1995,7 +1998,7 @@ TEST(CSGBaseTest, testGetEngUnit)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string name = "polygon_unit";
-  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 1.0);
   csg_obj->addEngUnit(std::move(poly_ptr));
 
   // get unit without specifying type (should default to return CSGEngUnit type)
@@ -2022,7 +2025,7 @@ TEST(CSGBaseTest, addEngUnitError)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   std::string name = "polygon_unit";
-  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 2.0);
+  std::unique_ptr<CSGNPolygonUnit> poly_ptr = std::make_unique<CSGNPolygonUnit>(name, 4, 3.0);
   csg_obj->addEngUnit(std::move(poly_ptr));
 
   // try to add another engineering unit of the same derived type with the same name
