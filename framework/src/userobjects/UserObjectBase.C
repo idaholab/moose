@@ -147,7 +147,7 @@ UserObjectBase::getDependObjects() const
 }
 
 void
-UserObjectBase::addUserObjectDependencyHelper(const UserObject & uo) const
+UserObjectBase::addUserObjectDependencyHelper(const UserObjectBase & uo) const
 {
   _depend_uo.insert(uo.name());
 }

@@ -37,31 +37,17 @@ FunctorAux::FunctorAux(const InputParameters & parameters)
     paramError(
         "variable",
         "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
+
+  const auto & functor_name = getParam<MooseFunctorName>("functor");
+
+  // Add user object to dependency
+  if (hasUserObjectByName(functor_name))
+    getUserObjectBaseByName(functor_name);
 }
 
 Real
 FunctorAux::computeValue()
 {
-  mooseDoOnce( // PPs: need to execute before this auxkernel
-      const auto & functor_name = getParam<MooseFunctorName>("functor");
-      if (_c_fe_problem.hasPostprocessorValueByName(functor_name)) {
-        if (!(_c_fe_problem.getUserObjectBase(functor_name).isParamValid("force_preaux") &&
-              _c_fe_problem.getUserObjectBase(functor_name).getParam<bool>("force_preaux")))
-          paramError(
-              "functor",
-              "Functor is a postprocessor and does not have 'force_preaux' set to true. The value "
-              "of the postprocessor would be lagged in the functor evaluation. 'force_preaux' will "
-              "ensure the value is updated before the auxiliary variables computation.");
-      } else if (_c_fe_problem.hasUserObject(functor_name)) {
-        const auto & uo = _c_fe_problem.getUserObjectBase(functor_name);
-        if (!(uo.isParamValid("force_preaux") && uo.getParam<bool>("force_preaux")))
-          paramError(
-              "functor",
-              "Functor is a user object and does not have 'force_preaux' set to true. The value "
-              "of the user object would be lagged in the functor evaluation. 'force_preaux' will "
-              "ensure the value is updated before the auxiliary variables computation.");
-      });
-
   const auto state = determineState();
   if (isNodal())
   {

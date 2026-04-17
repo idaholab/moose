@@ -27,7 +27,7 @@
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "ElementIDInterface.h"
-#include "UserObject.h"
+#include "UserObjectBase.h"
 #include "NonADFunctorInterface.h"
 
 // forward declarations
@@ -117,7 +117,7 @@ protected:
 
 private:
   void addPostprocessorDependencyHelper(const PostprocessorName & name) const override final;
-  void addUserObjectDependencyHelper(const UserObject & uo) const override final;
+  void addUserObjectDependencyHelper(const UserObjectBase & uo) const override final;
   void
   addVectorPostprocessorDependencyHelper(const VectorPostprocessorName & name) const override final;
 

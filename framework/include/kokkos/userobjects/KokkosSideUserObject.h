@@ -11,6 +11,7 @@
 
 #include "KokkosUserObject.h"
 #include "KokkosSideReducer.h"
+#include "KokkosMaterialPropertyValue.h"
 
 #include "BoundaryRestrictableRequired.h"
 #include "MaterialPropertyInterface.h"

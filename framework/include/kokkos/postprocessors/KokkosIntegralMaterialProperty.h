@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KokkosElementIntegralPostprocessor.h"
-#include "KokkosMaterialPropertyValue.h"
 
 template <typename Base>
 class KokkosIntegralMaterialProperty : public Base

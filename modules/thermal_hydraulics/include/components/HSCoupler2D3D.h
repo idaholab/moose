@@ -36,6 +36,8 @@ protected:
   const BoundaryName & _boundary_2d;
   /// 3D heat structure boundary
   const BoundaryName & _boundary_3d;
+  /// Symmetry reduction factor
+  const Real _symmetry_factor;
 
   /// Mesh alignment
   MeshAlignment2D3D _mesh_alignment;

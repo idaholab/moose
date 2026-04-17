@@ -125,7 +125,7 @@ public:
   KOKKOS_FUNCTION
   MaterialPropertyValue(const MaterialProperty<T, 0> & property,
                         const Datum & datum,
-                        unsigned int qp);
+                        const unsigned int qp);
 
   /**
    * Get the const reference of a property value

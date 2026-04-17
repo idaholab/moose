@@ -205,7 +205,7 @@ AuxKernelBase::coupledCallback(const std::string & var_name, bool is_old) const
 }
 
 void
-AuxKernelBase::addUserObjectDependencyHelper(const UserObject & uo) const
+AuxKernelBase::addUserObjectDependencyHelper(const UserObjectBase & uo) const
 {
   _depend_uo.insert(uo.name());
   for (const auto & indirect_dependent : uo.getDependObjects())

@@ -121,8 +121,6 @@ Material::computeProperties()
 void
 Material::getKokkosMaterialPropertyHook(const std::string & prop_name_in, const unsigned int state)
 {
-  MaterialBase::checkExecutionStage();
-
   const auto prop_name =
       _get_suffix.empty()
           ? prop_name_in

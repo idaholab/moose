@@ -34,6 +34,9 @@ public:
   // Unused for Kokkos user objects because all subdomains are computed in parallel
   virtual void subdomainSetup() override final {}
 
+  // Kokkos user objects are never threaded
+  virtual bool needThreadedCopy() const override final { return false; }
+
   /**
    * Compute this user object
    */

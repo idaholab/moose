@@ -126,7 +126,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
                                   InputParameters & parameters)
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
-  const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
+  const UserObject * mfem_bc_uo = &(getUserObject<UserObject>(name));
 
   if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo))
   {
@@ -308,7 +308,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
                        InputParameters & parameters)
 {
   FEProblemBase::addUserObject(kernel_name, name, parameters);
-  const UserObject * kernel_uo = &(getUserObjectBase(name));
+  const UserObject * kernel_uo = &(getUserObject<UserObject>(name));
 
   if (dynamic_cast<const MFEMKernel *>(kernel_uo))
   {

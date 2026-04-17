@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosMaterials/index.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_block_prop_test.i'
+    exodiff = 'kokkos_block_prop_test_out.e'
+    requirement = 'The Kokkos system shall support retrieving a material property along with the list of valid subdomains and bypass material property checks.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
