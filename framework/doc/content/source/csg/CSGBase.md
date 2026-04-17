@@ -329,7 +329,7 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 ### Engineering Units
 
 Like surfaces and lattices, an [engineering unit](syntax/CSG/index.md#engineering-units) is created by calling the specific constructor directly to create a unique pointer.
-This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const references to that engineering unit.
+This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const reference to that engineering unit.
 The `addEngUnit()` method is a templated method, meaning the specific unit type can be specified in order to get the reference returned as that type, but if not specified, a `CSGEngUnit` type will be returned.
 An example of creating an N-sided polygon unit is shown below.
 
@@ -406,6 +406,23 @@ The code snippet below demonstrates this expansion behavior by expanding a `CSGN
 !alert! note title=Expanding Nested Engineering Units
 
 It is allowable to define an expansion method for an engineering unit that creates additional `CSGEngUnit` objects during the expansion process. If `expandUnit` is called on a single engineering unit, any newly generated engineering units will not be subsequently expanded. However, if `expandAllEngUnits()` is called, any additionally created `CSGEngUnit` objects will also be expanded recursively until no more `CSGEngUnit` objects remain.
+
+!alert-end!
+
+#### N-Sided Regular Polygon Unit
+
+The `CSGBase` class provides support for creating an N-sided regular polygon, but any custom unit type can also be defined by following the information in [source/csg/CSGEngUnit.md].
+To create a `CSGNPolygonUnit`, simply provide the constructor with the number of sides and length of the apothem (center-to-flat distance).
+This polygon is an infinite region along the z-axis assumed to be centered at the origin with the right-most edge parallel to the y-axis, but can be modified with the application of [transformations][#transformations].
+A `CSGNPolygonUnit` can then be used as a `CSGSurface` for any cell region definition and the "negative" half-space is considered to be the interior of the polygon.
+If expanded, the unit will be replaced with the interior region of a polygon defined by $N$ planes corresponding to the edges of the polygon.
+Below is an example of creating a square with a side length of 4.0 (apothem is 2.0) and using it as the region of a material cell.
+
+!listing CSGBaseTest.C start=make a cell that uses the polygon unit end=createCell include-end=true
+
+!alert! note title=Custom Engineering Units
+
+Instructions for how to define custom engineering units that behave as surfaces, cells, or universes, is provided in [source/csg/CSGEngUnit.md].
 
 !alert-end!
 
