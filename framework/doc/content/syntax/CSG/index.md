@@ -45,6 +45,17 @@ A visual depiction of a lattice with an outer fill is shown in [!ref](fig:lat_ou
 
 For a more detailed description of how surfaces, cells, universes, and lattices are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
 
+### Engineering Units
+
+An "engineering unit" refers to a broad class of user-friendly domain-specific objects that can be used in place of the standard rudimentary [!ac](CSG) components.
+Each type of engineering unit is defined by a set of intuitive and domain-specific attributes that describe the geometry.
+The idea is that these attributes are much simpler for a user to define than all the necessary rudimentary CSG components, but comprehensive enough such that the unit can be automatically deconstructed into the standard [!ac](CSG) components if necessary.
+The "units" are then usable in place of a surface, cell, or universe, depending on its defined behavior.
+An example of this is defining an infinite regular N-sided polygon region.
+If defined using only CSG surface components, the user would need to determine the surface equations for all $N$ planes that define the region.
+However, an N-sided polygon unit would only require the user to define the number of sides $N$ and the apothem of the polygon.
+Internally, this unit is easily redefined automatically as the set of planes from the simple information provided by the user.
+
 ## How to Generate a CSG Model
 
 The [!ac](CSG) model generation can be invoked on the command line using the `--csg-only` option with any MOOSE mesh input file.
@@ -65,6 +76,7 @@ There are four main sections in the file:
 - [`cells`](#cells)
 - [`universes`](#universes)
 - [`lattices`](#lattices) (if any)
+- [`units`](#engineering-units) (if any)
 
 Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
@@ -147,3 +159,17 @@ The additional attributes that are provided for each of these types are:
 Below is example output for a $2 \times 2$ Cartesian lattice filled with two different universes called `sq1_univ` and `sq2_univ`.
 
 !listing csg_lattice_cart_out_csg.json start="lattices" end="surfaces"
+
+### Units
+
+If any engineering units are used, they will be located in the `units` section.
+Each unit includes the following information:
+
+- `unit_type`: the type of units as defined by the class name that was used to create the unit
+- `behavior`: what type of rudimentary component this unit behaves as, either `"SURFACE"`, `"CELL"`, or `"UNIVERSE"`.
+- `attributes`: a map of a unit-specific attribute names to their values.
+
+If engineering units are included in a model, the name of those units may be present in other component definitions as if it were the type of object that it behaves like.
+For example, below is an N-sided polygon engineering unit which behaves like a surface.
+It is used as a surface name to define the region of the cell.
+Because the only surface in this model is actually an engineering unit, the `surfaces` output block is empty.
