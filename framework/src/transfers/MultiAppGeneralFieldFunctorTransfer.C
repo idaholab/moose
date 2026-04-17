@@ -406,9 +406,10 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
 
         // Get the intersection of the functor and transfer source block restrictions
         std::set<SubdomainID> from_blocks;
-        for (const auto bl : _from_blocks.size()
-                                 ? _from_blocks
-                                 : _from_problems[app_index]->mesh().getMesh().get_mesh_subdomains())
+        for (const auto bl :
+             _from_blocks.size()
+                 ? _from_blocks
+                 : _from_problems[app_index]->mesh().getMesh().get_mesh_subdomains())
           if (functor.hasBlocks(bl))
             from_blocks.insert(bl);
 
@@ -460,19 +461,27 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
     }
 
     // Extrapolation: only reached when no in-domain functor evaluation was found.
-    // evaluate_oob searches all sources for the nearest boundary point, then evaluates the
-    // functor there. nearest-node / nearest-elem delegate to the shared KD-tree method which
-    // also handles search_value_conflicts detection for the extrapolation path.
+    //   flat:          return OutOfMeshValue; the base class post-transfer step handles
+    //                  any user-specified constant or nearest-node fill on the target mesh
+    //   evaluate_oob:  find the nearest boundary point via KD-tree, then evaluate the functor
+    //                  there (out-of-bounds evaluation with a nullptr element)
+    //   nearest-node / nearest-elem: delegate to the shared KD-tree method on the base class,
+    //                  which also handles search_value_conflicts detection
     if (!point_found)
     {
-      if (_extrapolation_behavior == 1) /*evaluate_oob*/
-      {
+      if (_extrapolation_behavior == 0) /*flat*/
+        // The base class will do take care of replacing the value
+        outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
+                               GeneralFieldTransfer::OutOfMeshValue};
+
+      else if (_extrapolation_behavior == 1) /*evaluate_oob*/
         for (const auto i_source : make_range(_num_sources))
         {
           if (!checkRestrictionsForSource(pt, mesh_div, i_source))
             continue;
 
-          // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
+          // TODO: Pre-allocate these two work arrays. They will be regularly resized by the
+          // searches
           std::vector<std::size_t> return_index(_num_nearest_points);
           std::vector<Real> return_dist_sqr(_num_nearest_points);
 
@@ -492,22 +501,22 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             const auto new_distance = dist_sum / return_dist_sqr.size();
             if (new_distance < outgoing_vals[i_pt].second)
             {
-              Moose::ElemPointArg elem_pt_arg = {nullptr, transformed_pt, /*correct skewness*/ false};
+              Moose::ElemPointArg elem_pt_arg = {
+                  nullptr, transformed_pt, /*correct skewness*/ false};
               Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
               outgoing_vals[i_pt] = {functor(elem_pt_arg, time_arg), new_distance};
             }
           }
         }
-      }
       else if (_extrapolation_behavior == 2 /*nearest-node*/ ||
                _extrapolation_behavior == 3 /*nearest-elem*/)
         evaluateNearestNodeFromKDTrees(pt, mesh_div, outgoing_vals[i_pt], point_found);
-    }
+      else
+        mooseAssert(false,
+                    "Unexpected extrapolation behavior '" << std::to_string(_extrapolation_behavior)
+                                                          << "'");
 
-    // none of the source problem meshes were within the restrictions set
-    if (!point_found)
-      outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
-                             GeneralFieldTransfer::OutOfMeshValue};
+    }
 
     // Move to next point
     i_pt++;
