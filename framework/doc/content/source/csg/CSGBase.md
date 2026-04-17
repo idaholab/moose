@@ -326,9 +326,90 @@ The `setUniverseAtLatticeIndex` method is not meant to be used to change a latti
 
 !alert-end!
 
+### Engineering Units
+
+Like surfaces and lattices, an [engineering unit](syntax/CSG/index.md#engineering-units) is created by calling the specific constructor directly to create a unique pointer.
+This pointer is then added to the `CSGBase` instance using `addEngUnit()`, which will return a const references to that engineering unit.
+The `addEngUnit()` method is a templated method, meaning the specific unit type can be specified in order to get the reference returned as that type, but if not specified, a `CSGEngUnit` type will be returned.
+An example of creating an N-sided polygon unit is shown below.
+
+!listing CSGBaseTest.C start=define a 4-sided polygon end=addEngUnit include-end=true
+
+!listing CSGBaseTest.C start=make a 4-sided polygon with apothem length 2.0 end=addEngUnit include-end=true
+
+#### Behavior
+
+Engineering units can behave as a `CSGSurface` (defined as a `CSGSurfaceEngUnit`), `CSGCell` (defined as a `CSGCellEngUnit`), or `CSGUniverse` (defined as a `CSGUniverseEngUnit`), depending on the specific engineering unit implementation and definition.
+This means that a unit with surface behavior can be used in place of any `CSGSurface` object, one with cell behavior can be used in place of any `CSGCell`, and a universe type in place of any `CSGUniverse`.
+For example, a standard `CSGCell` can have a region that is defined using a `CSGSurfaceEngUnit` (such as a `CSGNPolygonUnit`) instead of the individual planes, as shown in the example below.
+
+!listing CSGBaseTest.C start=make a cell that uses the polygon unit end=createCell include-end=true
+
+Because each engineering unit is technically derived from a basic CSG component (`CSGSurface`, `CSGCell`, and `CSGUniverse`), each engineering unit stored and managed in `CSGBase` as if were an object of that type.
+For all rudimentary component types, any getter-type method for that component is also usable on the derived `CSGEngUnit` objects too.
+This means that calling methods like `getAllSurfaces()` or `getSurfaceByName` will include any `CSGSurfaceEngUnit` types in the query.
+Similarly, methods like `hasCell(name)` will return `true` if a `CSGCellEngUnit` has is called `name`.
+Not all methods that alter an object are available though.
+Below is a table that shows which of the `CSGBase` non-getter-type methods are usable for each type of `CSGEngUnit`.
+
+| Method                      | `CSGSurfaceEngUnit` | `CSGCellEngUnit` | `CSGUniverseEngUnit` |
+|-----------------------------|---------------------|------------------|----------------------|
+| `addSurface`                | no | - | - |
+| `renameSurface`             | yes | - | - |
+| `deleteSurface`             | yes | - | - |
+| `renameCell`                | - | yes | - |
+| `deleteCell`                | - | yes | - |
+| `createCell`                | yes | no | yes as a fill, but not as the "add-to" universe |
+| `updateCellRegion`          | yes, as a `CSGSurface` in the region | no | - |
+| `resetCellFill`             | - | no | - |
+| `deleteUniverse`            | - | - | yes |
+| `updateCellFill`            | - | no | yes |
+| `renameUniverse`            | - | - | yes |
+| `addCell[s]ToUniverse`      | - | yes | no |
+| `removeCell[s]FromUniverse` | - | yes | no |
+| `addLattice`                | - | - | yes, as either a lattice element(s) or outer |
+| `setUniverseAtLatticeIndex` | - | - | yes |
+| `setLatticeUniverses`       | - | - | yes |
+| `setLatticeOuter`           | - | - | yes |
+
+In order to use any of the above methods, it may be necessary to "retrieve" the engineering unit object as that type first.
+For example, in order to call `deleteSurface` on a `CSGNPolygonUnit` called `name2` below, the unit is retrieved with `getSurfaceByName` first.
+
+!listing CSGBaseTest.C start=get as surface to have the right type end=deleteSurface include-end=true
+
+#### Naming Restrictions
+
+Because each engineering unit is also considered an object of the type from which it is derived (e.g., a `CSGSurfaceEngUnit` is also a `CSGSurface`), there are additional restrictions on naming components when engineering units are involved.
+All `CSGEngUnit` objects must have unique names (regardless of derived type units).
+No basic object or engineering unit of that derived type may have the same name.
+In other words, a `CSGSurface` and `CSGSurfaceEngUnit` cannot use the same name, but a `CSGSurface` and `CSGCellEngUnit` can be named the same.
+
+#### Expansion
+
+Any engineering unit that is used it a geometry, can be "expanded" and replaced with the equivalent basic CSG components to define the object by calling `expandEngUnit` on any `CSGEngUnit` object.
+Expanding a `CSGSurfaceEngUnit` returns a `CSGRegion`, a `CSGCellEngUnit` returns a `CSGCell`, and a `CSGUniverseEngUnit` returns a `CSGUniverse`.
+During the expansion process, a unit is redefined in terms of the rudimentary components and those additional components are added to the `CSGBase` instance.
+For example, a `CSGCellEngUnit` might also need to create new `CSGSurface` objects to define the cell region or a `CSGUniverse` to use as a fill.
+In this case, any generated `CSGSurface` or `CSGUniverse` would be added to the `CSGBase` instance at the time of expansion.
+Any instance where the `CSGEngUnit` object was used in the `CSGBase` instance is updated and replaced with the aforementioned returned basic object.
+When the expansion process is complete, that original `CSGEngUnit` will be deleted and no longer exist in the `CSGBase` instance.
+The code snippet below demonstrates this expansion behavior by expanding a `CSGNPolygonUnit` that is used as a single surface in a `CSGCell` region into a new region that defined by four new `CSGSurface` objects.
+
+!listing CSGBaseTest.C start=make a cell that uses the polygon unit in the region definition end=INTERSECTION include-end=true
+
+!alert! note title=Expanding Nested Engineering Units
+
+It is allowable to define an expansion method for an engineering unit that creates additional `CSGEngUnit` objects during the expansion process. If `expandUnit` is called on a single engineering unit, any newly generated engineering units will not be subsequently expanded. However, if `expandAllEngUnits()` is called, any additionally created `CSGEngUnit` objects will also be expanded recursively until no more `CSGEngUnit` objects remain.
+
+!alert-end!
+
 ### Deletion Methods
 
-In order to delete CSG components from the `CSGBase` object, the `deleteSurface`, `deleteCell`, `deleteUniverse`, and `deleteLattice` methods can be used, which take in a reference to the CSG object to be deleted. Once the CSG component is deleted, the object is deallocated and the reference to that object should no longer be used. Additionally, these methods do not automtically delete any other components associated with the object to be deleted. Therefore, users should ensure that the CSG component to be deleted is not used in the definition of other CSG components. For these scenarios, an error is thrown:
+In order to delete CSG components from the `CSGBase` object, the `deleteSurface`, `deleteCell`, `deleteUniverse`, `deleteLattice`, and `deleteEngUnit` methods can be used, which take in a reference to the CSG object to be deleted.
+Once the CSG component is deleted, the object is deallocated and the reference to that object should no longer be used.
+Additionally, these methods do not automatically delete any other components associated with the object to be deleted.
+Therefore, users should ensure that the CSG component to be deleted is not used in the definition of other CSG components.
+For these scenarios, an error is thrown:
 
 - A `CSGSurface` is deleted but it is used in the region definition of a `CSGCell`
 - A `CSGLattice` is deleted but it is used as a fill of a `CSGCell`
@@ -337,14 +418,16 @@ In order to delete CSG components from the `CSGBase` object, the `deleteSurface`
 
 Additionally, when a `CSGCell` is deleted but it is used in the cells definition of a `CSGUniverse`, the cell is first removed from the cells of the `CSGUniverse` and a warning is thrown by MOOSE about this additional operation.
 
-Nested CSG components should be manually deteled by starting from the top-most level and going downwards in terms of the dependency tree. For example, when deleting a universe and the cells linked to the universe, start by deleting the universe first and then its cells, as shown in the following example:
+For `CSGEngUnit` objects deleted with `deleteEngUnit`, the deletion method for the derived types is called (e.g., `deleteSurface` for `CSGSurfaceEngUnit`s), and therefore are subjected to the same set or error and warnings listed above.
+
+Nested CSG components should be manually deleted by starting from the top-most level and going downwards in terms of the dependency tree. For example, when deleting a universe and the cells linked to the universe, start by deleting the universe first and then its cells, as shown in the following example:
 
 !listing TestCSGUniverseCellDeleterGenerator.C start=delete newly created universe and its cell end=Recreate
 
 ### Transformations
 
 Three types of object transformations are supported in the `CSGBase` class: rotation, translation, and scaling.
-These transformations can be applied to any `CSGBase` object (`CSGSurface`, `CSGRegion`, `CSGCell`, `CSGUniverse`, and `CSGLattice`).
+These transformations can be applied to any `CSGBase` object (`CSGSurface`, `CSGRegion`, `CSGCell`, `CSGUniverse`, `CSGLattice`, and `CSGEngUnit`-derived types).
 When a transformation is applied, existing attributes for the object (such as surface coefficients) are not directly altered.
 Instead, information about the transformation applied is stored as vector of pairs on the object, where the first item in the pair is the type of transformation and the second item is the value of the transformation (stored as a size 3 tuple).
 The order of the transformation vector is the order in which the transformations are applied.
