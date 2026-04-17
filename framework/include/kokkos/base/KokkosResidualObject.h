@@ -180,11 +180,9 @@ protected:
    * The common loop structure template for computing elemental Jacobian
    * @param datum The AssemblyDatum object of the current thread
    * @param body The quadrature point loop body
-   * @param lumping Whether to lump mass matrix
    */
   template <typename function>
-  KOKKOS_FUNCTION void
-  computeJacobianInternal(AssemblyDatum & datum, function body, const bool lumping = false) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(AssemblyDatum & datum, function body) const;
 
 private:
   /**
@@ -337,9 +335,7 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
 
 template <typename function>
 KOKKOS_FUNCTION void
-ResidualObject::computeJacobianInternal(AssemblyDatum & datum,
-                                        function body,
-                                        const bool lumping) const
+ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) const
 {
   Real local_ke[MAX_CACHED_DOF];
 
@@ -362,8 +358,7 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum,
       body(local_ke - ib, ib, ie, j);
 
       for (unsigned int i = ib; i < ie; ++i)
-        accumulateTaggedElementalMatrix(
-            local_ke[i - ib], datum.elem().id, i, lumping ? i : j, datum.jvar());
+        accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
     }
   }
 }
