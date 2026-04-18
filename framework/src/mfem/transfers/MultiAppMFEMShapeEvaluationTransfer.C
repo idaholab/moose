@@ -105,7 +105,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
     mfem::Vector vxyz;
     // Ordering of node coordinates x,y,z
     mfem::Ordering::Type point_ordering = mfem::Ordering::Type::byNODES;
-    // Ordering of (vector) GridFunction data 
+    // Ordering of (vector) GridFunction data
     mfem::Ordering::Type to_gf_ordering = mfem::Ordering::Type::byVDIM;
     // Vector to store GridFunction values at interp. pts
     mfem::Vector interp_vals;

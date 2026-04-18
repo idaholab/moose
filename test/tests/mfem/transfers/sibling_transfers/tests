@@ -94,6 +94,7 @@
     [1_to_N_nodal]
       type = XMLDiff
       input = mfem_main_between_multiapp.i
+      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
       xmldiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Run0.pvd
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Run0.pvd
@@ -112,11 +113,25 @@
       type = CSVDiff
       input = mfem_main_between_multiapp.i
       csvdiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"     
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
       restep = false
       detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel.'
-    []    
+    []
+    [nodal_mixed_mesh]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'nodal_nodal_mixed_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=nodal_nodal_mixed
+                   MultiApps/mfem_recv/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=nodal_nodal_mixed_mfem_recv0;Outputs/inactive=''
+                   MultiApps/mfem_send/cli_args='Mesh/file=../../mesh/square_mixed.e'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel.'
+    []
   []
 []

@@ -22,7 +22,6 @@
   [mfem_recv]
     type = TransientMultiApp
     input_files = mfem_sub_between_diffusion.i
-    positions_objects = mfem_recv_locs
     cli_args = Outputs/inactive=''
   []
 []
