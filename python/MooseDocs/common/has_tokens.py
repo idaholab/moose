@@ -6,11 +6,12 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import moosetree
+
+from moosetools import tree
 
 
 def has_tokens(root, *names):
     """
     Return True if the supplied tree of Token objects in *root* contain any of the supplied *names*.
     """
-    return moosetree.find(root, func=lambda n: n.name in names) is not None
+    return tree.find(root, func=lambda n: n.name in names) is not None

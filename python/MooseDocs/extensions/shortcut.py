@@ -9,7 +9,8 @@
 
 import logging
 
-import moosetree
+from moosetools import tree
+
 from ..base import Extension
 from ..common import report_error
 from . import core
@@ -44,9 +45,8 @@ class ShortcutExtension(Extension):
 
     def preRender(self, page, ast, result):
         """Cache Shortcut tokens in the page attributes."""
-
         page["shortcuts"].clear()  # in case this page is being live reloaded
-        for node in moosetree.findall(ast, lambda n: (n.name == "Shortcut")):
+        for node in tree.findall(ast, lambda n: (n.name == "Shortcut")):
             key = node["key"]
             if key not in page["shortcuts"]:
                 page["shortcuts"][key] = node.copy()

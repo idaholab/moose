@@ -7,13 +7,23 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys
-import json
+import importlib.util
 import inspect
-import traceback
+import json
+import os
+import sys
+from typing import Tuple
 
 
 class Factory:
+
+    _cache: dict[Tuple[str, type], list[Tuple[str, type]]] = {}
+    """
+    Cache of already loaded modules.
+
+    Stored as (<file path>, <base class type) -> list[<class name>, <class type>].
+    """
+
     def __init__(self):
         self.objects = {}  # The registered Objects array
 
@@ -35,32 +45,56 @@ class Factory:
                 classes.extend(self.getClassHierarchy(aclass.__subclasses__()))
         return classes
 
-    def loadPlugins(self, base_dirs, plugin_path, attribute):
+    def loadPlugins(self, base_dirs: list[str], plugin_path: str, base_type: type):
         for dir in base_dirs:
             dir = os.path.join(dir, plugin_path)
             if not os.path.exists(dir):
                 continue
 
-            sys.path.append(os.path.abspath(dir))
             for file in os.listdir(dir):
-                if file[-2:] == "py":
-                    module_name = file[:-3]
-                    try:
-                        __import__(module_name)
-                        # Search through the module and look for classes that
-                        # have the passed in attribute, which should be a bool and be True
-                        for name, obj in inspect.getmembers(sys.modules[module_name]):
-                            if inspect.isclass(obj) and hasattr(obj, attribute):
-                                at = getattr(obj, attribute)
-                                if isinstance(at, bool) and at:
-                                    self.register(obj, name)
-                    except Exception as e:
-                        print(
-                            '\nERROR: Your Plugin Tester "'
-                            + module_name
-                            + '" failed to import:'
-                        )
-                        traceback.print_exc()
+                # Only check .py files, ignoring init
+                if len(file) < 4 or file[-3:] != ".py" or file == "__init__.py":
+                    continue
+
+                # Full path to the file
+                path = os.path.abspath(os.path.join(dir, file))
+                path_split = path.split("/")
+                # Attempt at guessing the module name; for example:
+                # <root>/TestHarness/testers/RunApp.py -> TestHarness.testers.RunApp
+                module_name = f"{path_split[-3]}.{path_split[-2]}.{path_split[-1][:-3]}"
+
+                # Key for storing in Factory._cache
+                cache_key = (module_name, base_type)
+                # See if we've already loaded this file for this base type
+                derived_classes = self._cache.get(cache_key)
+                # Haven't, so load it now
+                if derived_classes is None:
+                    # Load the module if we haven't already
+                    module = sys.modules.get(module_name)
+                    if module is None:
+                        spec = importlib.util.spec_from_file_location(module_name, path)
+                        assert spec is not None and spec.loader is not None
+                        module = importlib.util.module_from_spec(spec)
+                        sys.modules[module_name] = module
+                        try:
+                            spec.loader.exec_module(module)
+                        except Exception as e:
+                            sys.modules.pop(module_name, None)
+                            raise ImportError(f"Failed to import plugin {path}") from e
+
+                    # Inspect classes in the module that derive from base_type
+                    classes = inspect.getmembers(module, inspect.isclass)
+                    derived_classes = [
+                        (name, class_type)
+                        for name, class_type in classes
+                        if issubclass(class_type, base_type) and class_type != base_type
+                    ]
+                    # And store in the cache
+                    self._cache[cache_key] = derived_classes
+
+                # Register classes in the module that derive from base_type
+                for name, class_type in derived_classes:
+                    self.register(class_type, name)
 
     def printDump(self, root_node_name):
         print("[" + root_node_name + "]")

@@ -9,20 +9,13 @@
 
 """Developer tools for MooseDocs."""
 
-import argparse
 import os
-import re
-import collections
 import logging
 
-import MooseDocs
 import moosesqa
-import moosetree
 import mooseutils
 import moosesyntax
-
-from .. import common
-from ..extensions import template
+from moosetools import tree
 
 LOG = logging.getLogger(__name__)
 
@@ -65,7 +58,7 @@ def main(opt):
     for report in app_reports:
         report.app_types = opt.app_types
         report.getReport()  # this is needed to generate the app syntax
-        for node in moosetree.iterate(
+        for node in tree.iterate(
             report.app_syntax, lambda n: _shouldCreateStub(report, n)
         ):
             _createStubPage(report, node)
@@ -91,7 +84,7 @@ def _createStubPage(report, node):
     if isinstance(node, moosesyntax.ObjectNodeBase):
         filename = os.path.join(report.working_dir, node["_md_path"])
     elif isinstance(node, moosesyntax.SyntaxNode):
-        action = moosetree.find(node, lambda n: isinstance(n, moosesyntax.ActionNode))
+        action = tree.find(node, lambda n: isinstance(n, moosesyntax.ActionNode))
         filename = os.path.join(
             report.working_dir, os.path.dirname(node["_md_path"]), "index.md"
         )

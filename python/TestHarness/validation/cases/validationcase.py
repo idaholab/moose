@@ -9,21 +9,33 @@
 
 # pylint: disable=invalid-name
 import inspect
+import json
+import sys
 import traceback
 import typing
-import sys
-import json
-from numbers import Number
-from typing import Any, Optional, Tuple, Union
 from dataclasses import asdict
+from numbers import Number
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 import numpy as np
-
-from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
+from FactorySystem.MooseObject import MooseObject
 
-from TestHarness.validation.dataclasses import *
-from TestHarness.validation.exceptions import *
+if TYPE_CHECKING:
+    from TestHarness.validation.dataclasses import ValidationVectorDataInputType
+
+from TestHarness.validation.dataclasses import (
+    ValidationData,
+    ValidationResult,
+    ValidationScalarData,
+    ValidationVectorData,
+)
+from TestHarness.validation.exceptions import (
+    ValidationDataKeyAlreadyExists,
+    ValidationNoTestsDefined,
+    ValidationTestMissingResults,
+    ValidationTestRunException,
+)
 from TestHarness.validation.utils import ExtendedEnum
 
 
@@ -88,6 +100,7 @@ class ValidationCase(MooseObject):
             message: Message associated with the status
         Keyword arguments:
             Additional arguments passed to a Result
+
         """
         assert isinstance(status, self.Status)
         assert isinstance(message, str)
@@ -114,6 +127,7 @@ class ValidationCase(MooseObject):
             Additional arguments to pass to the build
         Returns:
             The built Data object
+
         """
         if key in self._data:
             raise ValidationDataKeyAlreadyExists(key)
@@ -146,6 +160,7 @@ class ValidationCase(MooseObject):
             description: Human readable description of the data
         Keyword arguments:
             Additional arguments passed to Data
+
         """
         if not isinstance(description, str):
             raise TypeError("description is not of type str")
@@ -183,6 +198,7 @@ class ValidationCase(MooseObject):
         Returns:
             Status: The associated status (ok or fail)
             str: Message associated with the check
+
         """
         value = ValidationCase.toFloat(value, "value")
         min_bound = ValidationCase.toFloat(min_bound, "min_bound")
@@ -224,6 +240,7 @@ class ValidationCase(MooseObject):
         Returns:
             Status: The associated status (ok or fail)
             str: Message associated with the check
+
         """
         value = ValidationCase.toFloat(value, "value")
         nominal = ValidationCase.toFloat(nominal, "nominal")
@@ -279,9 +296,11 @@ class ValidationCase(MooseObject):
             value: The value of the data
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
-        Keyword arguments:
+
+        Keyword Arguments:
             abs_zero: Absolute zero to use in comparisons
             Additional arguments passed to ScalarData (bounds, nominal, rel_err, etc)
+
         """
         value = self.toFloat(value, "value")
         if not isinstance(description, str):
@@ -339,6 +358,7 @@ class ValidationCase(MooseObject):
             context (optional): Optional context to prefix exceptions with
         Returns:
             list[float]: The converted value
+
         """
         prefix = f"{context} " if context else ""
         try:
@@ -355,8 +375,8 @@ class ValidationCase(MooseObject):
     def addVectorData(
         self,
         key: str,
-        x: ValidationVectorDataInputType,
-        value: ValidationVectorDataInputType,
+        x: "ValidationVectorDataInputType",
+        value: "ValidationVectorDataInputType",
         **kwargs,
     ) -> None:
         """
@@ -374,8 +394,10 @@ class ValidationCase(MooseObject):
             key: The key to store the data
             x: The independent data (see ValidationVectorDataInputType above)
             value: The dependent data (see ValidationVectorDataInputType above)
-        Keyword arguments:
+
+        Keyword Arguments:
             Additional arguments passed to VectorData (bounds, nominal, etc)
+
         """
         for k in ["x", "value"]:
             v = locals()[k]
@@ -474,6 +496,7 @@ class ValidationCase(MooseObject):
 
         Args:
             status: The status
+
         """
         return len([r for r in self.results if r.status == status])
 
@@ -545,8 +568,9 @@ class ValidationCase(MooseObject):
         Gets the output files that were tested by the Tester
         executing this validation case.
 
-        Keyword arguments:
+        Keyword Arguments:
             extension: Extension to filter the files with
+
         """
         assert self._tester_outputs is not None
         files = self._tester_outputs

@@ -9,8 +9,7 @@ import copy
 import pandas
 import os
 
-import pyhit
-import moosetree
+from moosetools import hit, tree
 
 x_pp = "h"
 y_pp = ["error_real", "error_imag", "error_azim_dB_dt_vector"]
@@ -31,15 +30,15 @@ for i in range(0, runs):
     console = True
 
     # Read the file
-    root = pyhit.load("vector_azim_magnetic_time_deriv.i")
+    root = hit.load("vector_azim_magnetic_time_deriv.i")
 
     # Locate and modify "x_max" parameter for the mesh
-    mesh = moosetree.find(root, func=lambda n: n.fullpath == "/Mesh/gmg")
+    mesh = tree.find(root, func=lambda n: n.fullpath == "/Mesh/gmg")
     mesh["nx"] = 10 * 2**i
     mesh["ny"] = 10 * 2**i
 
     # Write the modified file
-    pyhit.write("vector_azim_magnetic_time_deriv.i", root)
+    hit.write("vector_azim_magnetic_time_deriv.i", root)
 
     input_files = ["vector_azim_magnetic_time_deriv.i"]
     cli_args = ["-i"] + input_files
@@ -67,7 +66,7 @@ for i in range(0, runs):
 # Reset mesh
 mesh["nx"] = 5
 mesh["ny"] = 5
-pyhit.write("vector_azim_magnetic_time_deriv.i", root)
+hit.write("vector_azim_magnetic_time_deriv.i", root)
 
 
 fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")

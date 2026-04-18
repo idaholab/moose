@@ -7,10 +7,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
 import os
 import sys
+
 from mooseutils.ImageDiffer import ImageDiffer
+
+from TestHarness.testers.FileTester import FileTester
 
 
 class ImageDiff(FileTester):
@@ -51,7 +53,6 @@ class ImageDiff(FileTester):
         """
         Perform image diff
         """
-
         # Call base class processResults
         output = super().processResults(moose_dir, options, exit_code, runner_output)
         if self.isFail():

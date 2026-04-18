@@ -23,16 +23,17 @@ import subprocess
 import sys
 import typing
 from collections import defaultdict, namedtuple
+from importlib.util import find_spec
 from socket import gethostname
 from typing import TYPE_CHECKING, Optional, Tuple
 
-import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 
 if TYPE_CHECKING:
-    from pycapabilities import Capabilities
+    from moosetools.capabilities import Capabilities
+    from moosetools.hit import hit
 
 from TestHarness import RaceChecker, util
 from TestHarness.capability_util import (
@@ -46,8 +47,9 @@ testharness_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 def readTestRoot(fname):
+    from moosetools import hit
 
-    root = pyhit.load(fname)
+    root = hit.load(fname)
     args = root.get("run_tests_args", "").split()
 
     # TODO: add check to see if the binary exists before returning. This can be used to
@@ -269,29 +271,44 @@ class TestHarness:
 
     @staticmethod
     def build(
-        argv: list,
-        app_name: str,
-        moose_dir: str,
-        moose_python: Optional[str] = None,
-        skip_testroot: bool = False,
+        argv: list, app_name: str, moose_dir: str, skip_testroot: bool = False
     ) -> "TestHarness":
         # Cannot skip the testroot if we don't have an application name
         if skip_testroot and not app_name:
-            raise ValueError(f'Must provide "app_name" when skip_testroot=True')
+            raise ValueError('Must provide "app_name" when skip_testroot=True')
 
-        # Assume python directory from moose (in-tree)
-        if moose_python is None:
-            moose_python_dir = os.path.join(moose_dir, "python")
-        # Given a python directory (installed app)
+        # Append moose python and moosetools to PYTHONPATH so that child
+        # processes have them available
+        if PYTHONPATH := os.environ.get("PYTHONPATH"):
+            pythonpath = PYTHONPATH.split(":")
         else:
-            moose_python_dir = moose_python
+            pythonpath = []
 
-        # Set MOOSE_DIR and PYTHONPATH for child processes
+        def append_pythonpath(dir: str):
+            nonlocal pythonpath
+            dir = os.path.realpath(dir)
+            if dir not in pythonpath:
+                pythonpath = [dir] + pythonpath
+                os.environ["PYTHONPATH"] = ":".join(pythonpath)
+
+        # MOOSE python folder root (which TestHarness is in)
+        moose_python_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..")
+        )
+        append_pythonpath(moose_python_root)
+        # moosetools folder root; if installed this is in the same
+        # folder as the TestHarness
+        moosetools_spec = find_spec("moosetools")
+        assert moosetools_spec is not None and moosetools_spec.origin is not None
+        if (
+            moose_moosetools_parent := os.path.abspath(
+                os.path.join(os.path.dirname(moosetools_spec.origin), "..")
+            )
+        ) != moose_python_root:
+            append_pythonpath(moose_moosetools_parent)
+
+        # Also set MOOSE_DIR for children processes
         os.environ["MOOSE_DIR"] = moose_dir
-        pythonpath = os.environ.get("PYTHONPATH", "").split(":")
-        if moose_python_dir not in pythonpath:
-            pythonpath = [moose_python_dir] + pythonpath
-            os.environ["PYTHONPATH"] = ":".join(pythonpath)
 
         # Search for the test root (if any; required when app_name is not specified)
         test_root = None if skip_testroot else findTestRoot()
@@ -312,11 +329,13 @@ class TestHarness:
                 )
             # app_name was specified so just run from this directory
             # without any additional parameters
+            from moosetools.hit import Node
+
             test_root = TestRoot(
                 root_dir=".",
                 app_name=app_name,
                 args=[],
-                hit_node=pyhit.Node(),
+                hit_node=Node(),
                 extra_pythonpath="",
             )
         # Found a testroot, but without an app_name
@@ -328,7 +347,7 @@ class TestHarness:
             elif app_name is not None:
                 raise RuntimeError(f"{test_root.root_dir}/testroot missing app_name")
 
-        return TestHarness(argv, moose_dir, moose_python_dir, test_root)
+        return TestHarness(argv, moose_dir, test_root)
 
     @staticmethod
     def buildAndRun(argv: list, app_name: str, moose_dir: str, *args, **kwargs) -> None:
@@ -340,10 +359,7 @@ class TestHarness:
     def validComputeDevices():
         return ["cpu", "cuda", "hip", "mps", "ceed-cpu", "ceed-cuda", "ceed-hip", "xpu"]
 
-    def __init__(
-        self, argv: list, moose_dir: str, moose_python: str, test_root: TestRoot
-    ):
-        self.moose_python_dir = moose_python
+    def __init__(self, argv: list, moose_dir: str, test_root: TestRoot):
         self._rootdir = test_root.root_dir
         self._orig_cwd = os.getcwd()
         os.chdir(test_root.root_dir)
@@ -382,7 +398,9 @@ class TestHarness:
         )
 
         # Finally load the plugins!
-        self.factory.loadPlugins(dirs, "testers", "IS_TESTER")
+        from TestHarness.testers.Tester import Tester
+
+        self.factory.loadPlugins(dirs, "testers", Tester)
 
         self.parse_errors = []
         self.finished_jobs: list = []
@@ -438,7 +456,7 @@ class TestHarness:
         # Override with '--distributed-mesh'
         if (
             self.options.distributed_mesh
-            or not self.options.cli_args is None
+            or self.options.cli_args is not None
             and self.options.cli_args.find("--distributed-mesh") != -1
         ):
             option_set = set(["ALL", "DISTRIBUTED"])
@@ -459,7 +477,7 @@ class TestHarness:
     def getCapabilities(
         options: argparse.Namespace,
         executable: Optional[str],
-        test_root_params: Optional[pyhit.Node],
+        test_root_params: Optional["hit.Node"],
     ) -> Tuple["Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
@@ -470,12 +488,12 @@ class TestHarness:
             The TestHarness options.
         executable : Optional[str]
             Path to the executable; needed when not --minimal-capabilities.
-        test_root_params : Optional[pyhit.Node]
+        test_root_params : Optional[hit.Node]
             The parsed test_root, if any.
 
         Returns:
         -------
-        pycapabilities.Capabilities:
+        moosetools.capabilities.Capabilities:
             Built Capabilities object with app + augmented capabilities.
         dict:
             The augmented capabilities.
@@ -533,9 +551,9 @@ class TestHarness:
                     )
 
         # This is one of the few places where we actually
-        # load the pycapabilities module and that is
+        # load the moosetools.capabilities module and that is
         # intentional as it can trigger a build
-        from pycapabilities import Capabilities, AUGMENTED_CAPABILITY_NAMES
+        from moosetools.capabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
 
         # Build the capabilities.Capabilities object, which
         # has the application capabilities plus the ones
@@ -673,7 +691,6 @@ class TestHarness:
                                     continue
 
                                 saved_cwd = os.getcwd()
-                                sys.path.append(os.path.abspath(dirpath))
                                 os.chdir(dirpath)
 
                                 # Create the testers for this test
@@ -689,7 +706,6 @@ class TestHarness:
                                 launched_tests.append(os.path.join(dirpath, file))
 
                                 os.chdir(saved_cwd)
-                                sys.path.pop()
 
             # Wait for all the tests to complete (blocking)
             self.scheduler.waitFinish()
@@ -749,7 +765,7 @@ class TestHarness:
         return testers
 
     def notMySpecFile(self, dirpath, filename):
-        """true if dirpath/filename does not match supplied --spec-file"""
+        """True if dirpath/filename does not match supplied --spec-file"""
         if (
             self.options.spec_file
             and os.path.isfile(self.options.spec_file)
@@ -786,7 +802,6 @@ class TestHarness:
         params["app_name"] = self.app_name
         params["hostname"] = self.host_name
         params["moose_dir"] = self.moose_dir
-        params["moose_python_dir"] = self.moose_python_dir
         params["base_dir"] = self.base_dir
         params["first_directory"] = first_directory
         params["root_params"] = testroot_params.get("root_params", self.root_params)
@@ -805,9 +820,7 @@ class TestHarness:
         if (
             self.options.valgrind_mode
             and self.num_failed > self.options.valgrind_max_fails
-        ):
-            tester.setStatus(tester.fail, "Max Fails Exceeded")
-        elif self.num_failed > self.options.max_fails:
+        ) or self.num_failed > self.options.max_fails:
             tester.setStatus(tester.fail, "Max Fails Exceeded")
         elif (
             tester.parameters().isValid("_have_parse_errors")
@@ -1156,7 +1169,8 @@ class TestHarness:
         return "RunLocal"
 
     def initializeResults(self):
-        """Initializes the results storage
+        """
+        Initializes the results storage
 
         If using existing storage, this will load the previous storage.
 
@@ -1242,7 +1256,8 @@ class TestHarness:
         self.writeResults()
 
     def writeResults(self, complete=False, stats=None):
-        """Forcefully write the current results to file
+        """
+        Forcefully write the current results to file
 
         Will not do anything if using existing storage.
         """
@@ -1356,7 +1371,9 @@ class TestHarness:
             os.path.join(self.moose_dir, "python", "TestHarness"),
             os.path.join(self.moose_dir, "share", "moose", "python", "TestHarness"),
         ]
-        self.factory.loadPlugins(plugin_paths, "schedulers", "IS_SCHEDULER")
+        from TestHarness.schedulers.Scheduler import Scheduler
+
+        self.factory.loadPlugins(plugin_paths, "schedulers", Scheduler)
 
         scheduler_plugin = self.determineScheduler()
 
@@ -1384,7 +1401,7 @@ class TestHarness:
         self.initializeResults()
 
     def useExistingStorage(self):
-        """reasons for returning bool if we should use a previous results_storage file"""
+        """Reasons for returning bool if we should use a previous results_storage file"""
         return self.options.failed_tests or self.options.show_last_run
 
     ## Parse command line options and assign them to self.options
@@ -2043,7 +2060,7 @@ class TestHarness:
         if opts.verbose and opts.quiet:
             self.errorExit("Do not be an oxymoron with --verbose and --quiet")
         if opts.error and opts.allow_warnings:
-            self.errorExit(f"Cannot use --error and --allow-warnings together")
+            self.errorExit("Cannot use --error and --allow-warnings together")
 
         # Setup absolute paths and output paths
         if opts.output_dir:
@@ -2142,6 +2159,7 @@ class TestHarness:
             hostname: The HPC system hostname
         Returns:
             HPCCluster: The config, if found, otherwise None
+
         """
         for host, config in TestHarness.hpc_configs.items():
             if host in hostname:

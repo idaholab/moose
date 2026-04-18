@@ -7,12 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import uuid
 import collections
 import re
 import logging
-import moosetree
-import MooseDocs
+from moosetools import tree
 from ..common import exceptions, report_error
 from ..base import components, MarkdownReader, LatexRenderer, Extension
 from ..tree import tokens, html, latex
@@ -118,7 +116,7 @@ class FloatExtension(command.CommandExtension):
         """Set float number for each counter."""
         counts = collections.defaultdict(int)
         floats = dict()
-        for node in moosetree.iterate(ast, lambda n: n.name == "FloatCaption"):
+        for node in tree.iterate(ast, lambda n: n.name == "FloatCaption"):
             prefix = node.get("prefix", None)
             if prefix is not None:
                 counts[prefix] += 1

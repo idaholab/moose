@@ -9,7 +9,7 @@
 
 """Implement MMSTest for testing with the method of manufactured solutions."""
 
-from PythonUnitTest import PythonUnitTest
+from TestHarness.testers.PythonUnitTest import PythonUnitTest
 
 
 class MMSTest(PythonUnitTest):

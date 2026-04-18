@@ -15,7 +15,7 @@ from copy import deepcopy
 from typing import Optional
 
 import pytest
-from moosepytest.runtestharness import run_test_harness
+from moosetools._internal.testing.runtestharness import run_test_harness
 
 # Cache for the TestHarness results
 CACHED_TESTHARNESS_RESULTS: dict = {}

@@ -8,14 +8,13 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 # pylint: disable
+import json
+import os
+import unittest
 from copy import deepcopy
 from dataclasses import asdict
-import os
-import json
-import unittest
 from tempfile import TemporaryDirectory
 
-import pandas as pd
 from TestHarness.validation import CSVValidationCase
 
 DEFAULT_REL_ERR: float = float(CSVValidationCase.validParams()["validation_rel_err"])
@@ -58,8 +57,10 @@ class TestCSVValidationCase(unittest.TestCase):
         for k, v in set_params.items():
             params[k] = v
 
-        gold_df = pd.DataFrame(gold_data)
-        df = pd.DataFrame(data)
+        from pandas import DataFrame
+
+        gold_df = DataFrame(gold_data)
+        df = DataFrame(data)
 
         cwd = os.getcwd()
         try:

@@ -9,23 +9,9 @@
 
 """Developer tools for MooseDocs."""
 
-import argparse
-import os
-import re
-import collections
 import logging
 
-import MooseDocs
 import moosesqa
-import moosetree
-import mooseutils
-import moosesyntax
-
-from .. import common
-
-# from ..common import exceptions
-# from ..tree import syntax
-from ..extensions import template
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +33,6 @@ def command_line_options(subparser, parent):
 
 def main(opt):
     """./moosedocs syntax"""
-
     # Setup logging
     logger = logging.getLogger("MooseDocs")
     logger.handlers = list()

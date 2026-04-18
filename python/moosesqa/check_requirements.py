@@ -11,7 +11,6 @@ import os
 import collections
 import logging
 import enum
-import pyhit
 import mooseutils
 import moosesqa
 from .Requirement import Requirement

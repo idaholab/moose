@@ -34,7 +34,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
     def testAddAugmentedCapability(self):
         """Test TestHarness.capability_util.addAugmentedCapability."""
-        from pycapabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
+        from moosetools.capabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
 
         capabilities = Capabilities({})
         name = next(iter(AUGMENTED_CAPABILITY_NAMES))

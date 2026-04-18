@@ -15,8 +15,12 @@ import shlex
 from numbers import Number
 from typing import Optional
 
-from moosecontrol import MooseControl, SubprocessPortRunner, SubprocessSocketRunner
-from moosecontrol.runners.interfaces import SubprocessRunnerInterface
+from moosetools.control import (
+    MooseControl,
+    SubprocessPortRunner,
+    SubprocessSocketRunner,
+)
+from moosetools.control.runners.interfaces import SubprocessRunnerInterface
 
 
 class TestMooseControl:

@@ -11,7 +11,7 @@
 import os
 import mooseutils
 from peacock.PeacockException import PeacockException
-from pyhit import hit
+from moosetools.hit import hit
 
 
 class DupWalker(object):

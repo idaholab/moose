@@ -9,8 +9,7 @@ import copy
 import pandas
 import os
 
-import pyhit
-import moosetree
+from moosetools import hit, tree
 
 x_pp = "h"
 y_pp = ["error_real", "error_imag"]
@@ -31,15 +30,15 @@ for i in range(0, runs):
     console = True
 
     # Read the file
-    root = pyhit.load("vector_ADmaterial_wave_reaction.i")
+    root = hit.load("vector_ADmaterial_wave_reaction.i")
 
     # Locate and modify "x_max" parameter for the mesh
-    mesh = moosetree.find(root, func=lambda n: n.fullpath == "/Mesh/gmg")
+    mesh = tree.find(root, func=lambda n: n.fullpath == "/Mesh/gmg")
     mesh["nx"] = 5 * 2**i
     mesh["ny"] = 5 * 2**i
 
     # Write the modified file
-    pyhit.write("vector_ADmaterial_wave_reaction.i", root)
+    hit.write("vector_ADmaterial_wave_reaction.i", root)
 
     input_files = ["vector_ADmaterial_wave_reaction.i"]
     cli_args = ["-i"] + input_files
@@ -67,7 +66,7 @@ for i in range(0, runs):
 # Reset mesh
 mesh["nx"] = 5
 mesh["ny"] = 5
-pyhit.write("vector_ADmaterial_wave_reaction.i", root)
+hit.write("vector_ADmaterial_wave_reaction.i", root)
 
 
 fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")

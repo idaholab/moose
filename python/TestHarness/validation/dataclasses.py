@@ -7,19 +7,22 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from dataclasses import dataclass
-from typing import Any, Optional, Tuple, Union
 import json
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
-from numpy import float64
-from numpy.typing import NDArray
+if TYPE_CHECKING:
+    from numpy import float64
+    from numpy.typing import NDArray
 
-# The valid numeric data types
-ValidationNumericDataType = Union[float, list[float]]
-# Valid numeric vector types
-ValidationNumericVectorType = Union[NDArray[float64], list[float]]
-# Input type for addVectorData
-ValidationVectorDataInputType = Tuple[ValidationNumericVectorType, str, Optional[str]]
+    # The valid numeric data types
+    ValidationNumericDataType = Union[float, list[float]]
+    # Valid numeric vector types
+    ValidationNumericVectorType = Union[NDArray[float64], list[float]]
+    # Input type for addVectorData
+    ValidationVectorDataInputType = Tuple[
+        ValidationNumericVectorType, str, Optional[str]
+    ]
 
 
 @dataclass(kw_only=True)
@@ -104,9 +107,11 @@ class ValidationNumericData(ValidationData):
     units: Optional[str]
     # A nominal value for this data; unused
     # in the test but useful in postprocessing
-    nominal: Optional[ValidationNumericDataType] = None
+    nominal: Optional["ValidationNumericDataType"] = None
     # Bounds for the data (min and max)
-    bounds: Optional[Tuple[ValidationNumericDataType, ValidationNumericDataType]] = None
+    bounds: Optional[
+        Tuple["ValidationNumericDataType", "ValidationNumericDataType"]
+    ] = None
     # Allowed relative error for the data
     rel_err: Optional[float] = None
     # Allowed absolute zero for the data

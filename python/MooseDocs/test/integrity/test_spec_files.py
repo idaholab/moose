@@ -13,8 +13,7 @@ import sys
 import unittest
 import glob
 import mooseutils
-import pyhit
-import moosetree
+from moosetools import hit, tree
 import inspect
 import MooseDocs
 
@@ -40,11 +39,11 @@ class TestSpecFiles(unittest.TestCase):
                     "Missing a test spec file in '{}'".format(os.path.dirname(spec))
                 )
         else:
-            node = pyhit.load(os.path.join(location, "tests"))
+            node = hit.load(os.path.join(location, "tests"))
 
             # check for PythonUnitTest blocks in [Tests]
-            block = moosetree.find(node, lambda n: n.name == "Tests")
-            for subblock in moosetree.findall(block, lambda n: n):
+            block = tree.find(node, lambda n: n.name == "Tests")
+            for subblock in tree.findall(block, lambda n: n):
                 if subblock["type"] == "PythonUnitTest":
                     tested.add(subblock["input"])
 

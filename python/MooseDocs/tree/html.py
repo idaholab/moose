@@ -8,7 +8,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import html
 import re
-import moosetree
+
+from moosetools import tree
 from .base import NodeBase
 
 
@@ -88,7 +89,7 @@ class Tag(NodeBase):
         Convert String objects into a single string.
         """
         strings = []
-        for node in moosetree.iterate(self):
+        for node in tree.iterate(self):
             if node.name == "String":
                 strings.append(node["content"])
         return re.sub(r" {2,}", " ", " ".join(strings))

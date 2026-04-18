@@ -10,10 +10,11 @@
 
 import os
 import unittest
-import logging
-import moosetree
-import mooseutils
+
+from moosetools import tree
+
 import moosesyntax
+import mooseutils
 
 
 class TestSyntaxTreeRun(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestSyntaxTree(unittest.TestCase):
         root = moosesyntax.get_moose_syntax_tree(self.json)
 
         # SyntaxNode
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Adaptivity")
+        node = tree.find(root, lambda n: n.fullpath() == "/Adaptivity")
         self.assertEqual(node.name, "Adaptivity")
         self.assertIsInstance(node, moosesyntax.SyntaxNode)
         self.assertEqual(node.hidden, False)
@@ -57,13 +58,11 @@ class TestSyntaxTree(unittest.TestCase):
         )
         self.assertIn("Indicators", [syntax.name for syntax in node.syntax()])
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Adaptivity/Markers")
+        node = tree.find(root, lambda n: n.fullpath() == "/Adaptivity/Markers")
         self.assertIn("BoxMarker", [obj.name for obj in node.objects()])
 
         # MooseObjectNode
-        node = moosetree.find(
-            root, lambda n: n.fullpath() == "/Functions/ParsedFunction"
-        )
+        node = tree.find(root, lambda n: n.fullpath() == "/Functions/ParsedFunction")
         self.assertEqual(node.name, "ParsedFunction")
         self.assertIsInstance(node, moosesyntax.MooseObjectNode)
         self.assertEqual(node.hidden, False)
@@ -82,9 +81,7 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertIn("expression", node.parameters)
 
         # ActionNode
-        node = moosetree.find(
-            root, lambda n: n.fullpath() == "/Outputs/CommonOutputAction"
-        )
+        node = tree.find(root, lambda n: n.fullpath() == "/Outputs/CommonOutputAction")
         self.assertEqual(node.name, "CommonOutputAction")
         self.assertIsInstance(node, moosesyntax.ActionNode)
         self.assertEqual(node.hidden, False)
@@ -93,9 +90,7 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertIn("common_output", node.tasks)
 
         # MooseObjectActionNode
-        node = moosetree.find(
-            root, lambda n: n.fullpath() == "/Outputs/AddOutputAction"
-        )
+        node = tree.find(root, lambda n: n.fullpath() == "/Outputs/AddOutputAction")
         self.assertEqual(node.name, "AddOutputAction")
         self.assertIsInstance(node, moosesyntax.ActionNode)
         self.assertEqual(node.hidden, False)
@@ -109,15 +104,15 @@ class TestSyntaxTree(unittest.TestCase):
         root = moosesyntax.get_moose_syntax_tree(
             self.json, remove=["/Outputs", "/Kernels/Diffusion"]
         )
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Outputs")
+        node = tree.find(root, lambda n: n.fullpath() == "/Outputs")
         self.assertTrue(all([n.removed for n in node]))  # children should be marked
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels")
         self.assertFalse(node.removed)
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
         self.assertTrue(node.removed)
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels/ADDiffusion")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels/ADDiffusion")
         self.assertFalse(node.removed)
 
         # Test with dict of lists
@@ -126,34 +121,34 @@ class TestSyntaxTree(unittest.TestCase):
         )
         root = moosesyntax.get_moose_syntax_tree(self.json, remove=remove)
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Outputs")
+        node = tree.find(root, lambda n: n.fullpath() == "/Outputs")
         self.assertTrue(all([n.removed for n in node]))  # children should be marked
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels")
         self.assertFalse(node.removed)
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
         self.assertTrue(node.removed)
 
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels/ADDiffusion")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels/ADDiffusion")
         self.assertTrue(node.removed)
 
     def testAlias(self):
         root = moosesyntax.get_moose_syntax_tree(
             self.json, alias={"/Kernels/Diffusion": "/Physics/Diffusion"}
         )
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
+        node = tree.find(root, lambda n: n.fullpath() == "/Kernels/Diffusion")
         self.assertIn(node.alias, "/Physics/Diffusion")
 
     def testUnregister(self):
         # Without unregister
         root = moosesyntax.get_moose_syntax_tree(self.json)
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/UserObjects/AreaPostprocessor"
         )
         self.assertEqual(node["moose_base"], "Postprocessor")
         self.assertEqual(node["parent_syntax"], "UserObjects/*")
         self.assertFalse(node.removed)
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/Materials/GenericFunctorMaterial"
         )
         self.assertFalse(node.removed)
@@ -166,11 +161,11 @@ class TestSyntaxTree(unittest.TestCase):
                 "FunctorMaterial": "Materials/*",
             },
         )
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/UserObjects/AreaPostprocessor"
         )
         self.assertTrue(node.removed)
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/Materials/GenericFunctorMaterial"
         )
         self.assertTrue(node.removed)
@@ -183,18 +178,18 @@ class TestSyntaxTree(unittest.TestCase):
             }
         }
         root = moosesyntax.get_moose_syntax_tree(self.json, unregister=unregister)
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/UserObjects/AreaPostprocessor"
         )
         self.assertTrue(node.removed)
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/Materials/GenericFunctorMaterial"
         )
         self.assertTrue(node.removed)
 
     def testTestApp(self):
         root = moosesyntax.get_moose_syntax_tree(self.json)
-        node = moosetree.find(root, lambda n: n.fullpath() == "/Testing")
+        node = tree.find(root, lambda n: n.fullpath() == "/Testing")
         self.assertTrue(node.test)
         self.assertTrue(node(0).test)
         self.assertTrue(node(0, 0).test)
@@ -206,7 +201,7 @@ class TestSyntaxTree(unittest.TestCase):
                 "/AuxKernels/ADMaterialRealAux": "auxkernels/ADMaterialRealAux.md"
             },
         )
-        node = moosetree.find(
+        node = tree.find(
             root, lambda n: n.fullpath() == "/AuxKernels/ADMaterialRealAux"
         )
         self.assertEqual(node.markdown, "auxkernels/ADMaterialRealAux.md")

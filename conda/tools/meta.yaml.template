@@ -23,89 +23,70 @@ requirements:
   build:
     - {{ moose_python }}
     - setuptools
+  # This should (nearly) mirror requirements.txt, but won't exactly
+  # because we will have a few more packages (listed first) and there
+  # isn't a one-to-one mapping from pypi packages to conda packages
   run:
-    # NOTE: If you are here to add a Python package in order to make the TestHarness or
-    #       versioner.py work, you also have to add that package in mpi/meta.yaml, under
-    #       moose-python. This allows folks that build their own PETSc, libMesh, WASP,
-    #       etc combos, to continue to do so with only needing the moose-mpi package.
-    - beautifulsoup4
-    - {{ black }}
-    - {{ clang_format }}
-    - {{ clang_tools }}
-    - coverage 7.13.2
-    - deepdiff
+    # Packages that do not exist in requirements.txt
+    - python
     - git-lfs
-    - gitpython
-    - graphviz
-    - h5py
+
     - jinja2
-    - livereload
-    - lxml
-    - mako
-    - matplotlib-base
-    - mock
+    - matplotlib-base # instead of matplotlib from pypi
     - numpy
-    - packaging
     - pandas
-    - paramiko
     - plotly
-    - psutil
-    - psycopg2
-    - pyarrow
-    - pybtex
-    - pycobertura
-    - pyflakes
-    - pylatexenc
     - pylint
-    - pymongo
+    - pyyaml
+    - scikit-image
+    - sympy
+
+    # Python utilities
+    - packaging
+    - setuptools
+
+    # Cardinal
+    - uncertainties
+    # CI/CD
+    - gitpython
+    - paramiko
+    - psycopg2 # instead of psycopg-binary from pypi
+    - pycobertura
+    # Formatting and linting
+    - black 26.1.0
+    - clang-format 19.1.7
+    - ruff 0.15.7
+    # Testing
+    - coverage 7.13.2
+    - mock
     - pytest
     - pytest-cov
-    - python
-    - pyyaml
+
+    # python/moosecontrol
     - requests
-    - {{ ruff }}
-    - scikit-image
-    - setuptools
-    - sympy
+    # python/MooseDocs.commands
+    - beautifulsoup4
+    - livereload
+    - lxml
+    # python/MooseDocs.extensions
+    - pybtex
+    - pylatexenc
+    # python/TestHarness.testers
+    - deepdiff
+    - xmltodict<0.14
+    # python/TestHarness.resultssummary
     - tabulate
-    - uncertainties
-    - xmltodict <0.14
-    - yaml
+    # python/TestHarness.resultsstore
+    - pymongo
+    # python/TestHarness.schedulers
+    - psutil
 test:
   commands:
     - black --version
     - clang-format --version
-    - dot -V
     - git-lfs --version
     - pg_config --help
     - ruff --version
-  imports:
-    - bs4
-    - deepdiff
-    - coverage
-    - git
-    - jinja2
-    - livereload
-    - lxml
-    - matplotlib
-    - mock
-    - numpy
-    - pandas
-    - psycopg2
-    - pyarrow
-    - pybtex
-    - pycobertura
-    - pyflakes
-    - pylatexenc
-    - pylint
-    - pymongo
-    - pytest
-    - requests
-    - skimage
-    - sympy
-    - tabulate
-    - xmltodict
-    - yaml
 
 about:
   home: https://mooseframework.inl.gov/

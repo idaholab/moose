@@ -271,7 +271,7 @@ cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)
 
 # LEXER
-# The following code exposes some basic hit lexer to the pyhit library. The purpose is to provide
+# The following code exposes some basic hit lexer to the python hit library. The purpose is to provide
 # tools necessary for a Peacock based hit file editor with highlighting and autocomplete.
 class TokenType(enum.Enum):
     """

@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
 import os
+
+from TestHarness import util
+from TestHarness.testers.FileTester import FileTester
 
 
 def findExodiff(moose_dir):
@@ -147,7 +148,7 @@ class Exodiff(FileTester):
 
                 if (
                     "different" in exo_output or "ERROR" in exo_output
-                ) and not "Files are the same" in exo_output:
+                ) and "Files are the same" not in exo_output:
                     self.setStatus(self.diff, "EXODIFF")
                     break
 

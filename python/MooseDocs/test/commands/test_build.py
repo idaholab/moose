@@ -8,13 +8,15 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import unittest
-import mock
 import types
-import moosetree
+import unittest
+
+import mock
+from moosetools import tree
+
 import MooseDocs
-from MooseDocs.commands import build
 from MooseDocs import base, common
+from MooseDocs.commands import build
 
 
 class TestBuild(unittest.TestCase):
@@ -165,7 +167,7 @@ class TestBuild(unittest.TestCase):
         root = body.parent
         result = types.SimpleNamespace(root=root)
         renderer.postRender(mock.MagicMock(), result)
-        script = moosetree.find(root, lambda n: n.name == "script")
+        script = tree.find(root, lambda n: n.name == "script")
         self.assertEqual(script.get("async"), True)
         self.assertEqual(script.get("type"), "text/javascript")
         self.assertEqual(script.get("id"), "_fed_an_ua_tag")

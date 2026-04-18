@@ -7,15 +7,15 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
-import moosetree
+from moosetools import tree
 import mooseutils
 
 LOG = logging.getLogger(__name__)
 
 
-class NodeBase(moosetree.Node):
+class NodeBase(tree.Node):
     """
-    Base class for tree nodes that accepts arbitrary attributes, see moosetree.Node.
+    Base class for tree nodes that accepts arbitrary attributes, see tree.Node.
     """
 
     # The color to print (see mooseutils.colorText).
@@ -29,7 +29,7 @@ class NodeBase(moosetree.Node):
         Prints the name of the token, this works in union with __str__ to print
         the tree structure of any given node.
         """
-        return mooseutils.colorText(moosetree.Node.__repr__(self), self.COLOR)
+        return mooseutils.colorText(tree.Node.__repr__(self), self.COLOR)
 
     def write(self):
         """
@@ -40,12 +40,12 @@ class NodeBase(moosetree.Node):
             out += child.write()
         return out
 
-    @moosetree.Node.name.setter
+    @tree.Node.name.setter
     def name(self, value):
         """TODO: Get rid of the need to rename Nodes...don't know how yet"""
         self._Node__name = value
 
-    @moosetree.Node.children.setter
+    @tree.Node.children.setter
     def children(self, value):
         """TODO: Get rid the need to set children directly...see navigation.py"""
         for child in self._Node__children:

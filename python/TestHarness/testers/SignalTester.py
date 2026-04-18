@@ -9,7 +9,7 @@
 
 import signal
 
-from RunApp import RunApp
+from TestHarness.testers.RunApp import RunApp
 
 
 # Classes that derive from this class are expected to write

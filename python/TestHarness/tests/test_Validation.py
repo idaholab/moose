@@ -254,7 +254,7 @@ class TestValidation(TestHarnessTestCase):
         """
         out = self.runTests("-i", "validation_bad_python", exit_code=128).output
         self.assertIn(
-            "validation_bad_python:2:   invalid syntax (validation_badpython.py, line 1)",
+            "validation_bad_python:2: Failed to create Tester: invalid syntax (validation_badpython.py, line 1)",
             out,
         )
 

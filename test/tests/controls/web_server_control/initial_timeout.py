@@ -12,7 +12,7 @@
 
 from sys import exit
 
-from moosecontrol.runners.interfaces import SubprocessRunnerInterface
+from moosetools.control.runners.interfaces import SubprocessRunnerInterface
 from testmoosecontrol import TestMooseControl
 
 if __name__ == "__main__":

@@ -10,10 +10,6 @@ endif
 
 UNAME := $(shell uname)
 
-pyconfig := python3-config
-ifeq (, $(shell which $(pyconfig) 2>/dev/null))
-	pyconfig := python-config
-endif
 cython := cython3
 ifeq (, $(shell which $(cython) 2>/dev/null))
 	cython := 'cython'
@@ -27,15 +23,11 @@ else
 	hit_pad_LDFLAGS :=
 endif
 
-$(info Building hit for python with $(pyconfig))
-
 hit_srcdir         := src/hit
 hit_srcfiles       := $(hit_srcdir)/parse.cc $(hit_srcdir)/lex.cc $(hit_srcdir)/braceexpr.cc
 hit_includeflags   := -Iinclude
 
-PYTHONPREFIX ?= `$(pyconfig) --prefix`
-PYTHONCFLAGS ?= `$(pyconfig) --cflags`
-HITCPP := $(hit_srcdir)/hit.cpp
+HITCPP := $(hit_srcdir)/hit_cython.cpp
 
 WASP_DIR           ?= $(abspath ../wasp/install)
 
@@ -58,14 +50,10 @@ wasp_CXXFLAGS  += -I$(WASP_DIR)/include
 wasp_LDFLAGS   += -Wl,-rpath,$(WASP_DIR)/lib -L$(WASP_DIR)/lib $(wasp_LIBS)
 
 hit: $(hit_srcdir)/main.cc $(hit_srcfiles) include/hit/braceexpr.h include/hit/lex.h include/hit/parse.h
-	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -g $(CXXFLAGS) $< $(hit_srcfiles) -o $@ $(wasp_LDFLAGS)
+	@echo "Building and linking $(CURDIR)/$@..."
+	@$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -g $(CXXFLAGS) $< $(hit_srcfiles) -o $@ $(wasp_LDFLAGS)
 
-bindings: hit.so
-
-hit.so: $(hit_srcfiles)
-	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS) $(hit_pad_LDFLAGS)
-
-$(HITCPP): hit.pyx chit.pxd
+hit_cython $(HITCPP): hit.pyx chit.pxd
 	$(cython) -o $@ --cplus $<
 
 .PRECIOUS: $(HITCPP)
@@ -73,4 +61,5 @@ $(HITCPP): hit.pyx chit.pxd
 .PHONY: clean bindings
 
 clean:
-	rm -f hit hit.so
+	rm -f hit
+	rm -rf build

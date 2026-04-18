@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
-import moosetree
+from moosetools import tree
 from ..base import Extension
 from ..common import find_heading
 from . import core
@@ -36,7 +36,7 @@ class HeadingExtension(Extension):
     def postTokenize(self, page, ast):
         func = lambda n: (n.name == "Heading")
         level = 100
-        for node in moosetree.iterate(ast.root, func):
+        for node in tree.iterate(ast.root, func):
             id_ = node.get("id") or node.text("-").lower()
             node["id"] = id_
             if page["title"] is None or node["level"] < level:

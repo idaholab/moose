@@ -12,9 +12,8 @@
 import os
 import logging
 
-import moosetree
+from moosetools import tree
 
-import MooseDocs
 from .. import common
 from ..common import mixins
 from ..tree import tokens, pages
@@ -110,7 +109,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
 
         # Report errors
         if report:
-            for token in moosetree.iterate(root):
+            for token in tree.iterate(root):
                 if token.name == "ErrorToken":
                     msg = common.report_error(
                         token["message"],

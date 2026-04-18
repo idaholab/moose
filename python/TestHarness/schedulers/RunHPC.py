@@ -24,9 +24,8 @@ from enum import Enum
 from multiprocessing.pool import ThreadPool
 from typing import Optional
 
-from Scheduler import Scheduler
-
 from TestHarness import util
+from TestHarness.schedulers.Scheduler import Scheduler
 
 
 class HPCJob:
@@ -945,7 +944,8 @@ class RunHPC(Scheduler):
 
     @staticmethod
     def getHPCJobName(job) -> str:
-        """Gets the name of the HPC job given a tester
+        """
+        Gets the name of the HPC job given a tester
 
         PBS doesn't like ":" or "/", hence changing them to "."
         """

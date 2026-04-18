@@ -9,17 +9,17 @@
 
 """Defines Renderer objects that convert AST (from Reader) into an output format."""
 
+import codecs
+import copy
+import logging
 import os
 import re
-import logging
-import traceback
-import codecs
 import shutil
-import moosetree
-import copy
+import traceback
 
-import MooseDocs
-from ..common import exceptions, mixins, report_error, Storage, find_heading
+from moosetools import tree
+
+from ..common import exceptions, find_heading, mixins, report_error
 from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
@@ -173,7 +173,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         if isinstance(page, pages.Source):
             self._create_directory(page.destination)
             LOG.debug("WRITE %s-->%s", page.source, page.destination)
-            with codecs.open(page.destination, "w", encoding="utf-8") as fid:
+            with open(page.destination, "w", encoding="utf-8") as fid:
                 fid.write(result.write())
 
         elif isinstance(page, pages.File):
@@ -314,8 +314,8 @@ class HTMLRenderer(Renderer):
 
         # get the parent nodes to tag
         root = result.root
-        head = moosetree.find(root, lambda n: n.name == "head")
-        body = moosetree.find(root, lambda n: n.name == "body")
+        head = tree.find(root, lambda n: n.name == "head")
+        body = tree.find(root, lambda n: n.name == "body")
 
         favicon = self.get("favicon")
         if favicon:
@@ -376,7 +376,6 @@ class HTMLRenderer(Renderer):
             root[tokens.Token]: The root node for the AST.
             page[page.PageNodeBase]: The current page being converted.
         """
-
         # Locate h1 heading and, if it is found, extract the rendered text
         if "title" in [child.name for child in head]:
             return

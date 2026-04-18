@@ -15,8 +15,7 @@ from unittest import mock
 import importlib.util
 import numpy as np
 
-import pyhit
-import moosetree
+from moosetools import hit, tree
 
 if importlib.util.find_spec("moose_stochastic_tools") is None:
     _moose_dir = os.environ.get(
@@ -85,23 +84,22 @@ class TestStochasticControl(unittest.TestCase):
             os.remove(self.input_file_name)
 
     def checkWithBase(self, root):
-        """Checks that the pyhit tree contains everything in the base input."""
-        base_root = pyhit.parse(_BASE_FILE)
+        """Checks that the hit tree contains everything in the base input."""
 
-        for base_node in moosetree.iterate(base_root):
-            node = moosetree.find(
-                root, func=lambda n: n.fullpath[1:] == base_node.fullpath
-            )
+        base_root = hit.parse(_BASE_FILE)
+
+        for base_node in tree.iterate(base_root):
+            node = tree.find(root, func=lambda n: n.fullpath[1:] == base_node.fullpath)
             self.assertIsNotNone(node)
 
             for param, val in base_node.params():
                 self.assertEqual(node.get(param), val)
 
     def checkParameter(self, root, path, val):
-        """Checks that the parameter gathered from the pyhit tree equals inputted value."""
+        """Checks that the parameter gathered from the hit tree equals inputted value."""
         node_path = os.path.dirname(path)
         param = path.split("/")[-1]
-        node = moosetree.find(root, func=lambda n: n.fullpath[1:] == node_path)
+        node = tree.find(root, func=lambda n: n.fullpath[1:] == node_path)
         self.assertIsNotNone(node)
         self.assertEqual(node.get(param), val)
 
@@ -115,7 +113,7 @@ class TestStochasticControl(unittest.TestCase):
             "PRE_MULTIAPP_SETUP MULTIAPP_FIXED_POINT_BEGIN",
         )
         # No transfer
-        node = moosetree.find(
+        node = tree.find(
             root,
             func=lambda n: n.fullpath[1:]
             == f"/Transfers/{StochasticControl.parameter_transfer_name}",
@@ -168,7 +166,7 @@ class TestStochasticControl(unittest.TestCase):
                 val,
             )
         # No Control
-        node = moosetree.find(
+        node = tree.find(
             root,
             func=lambda n: n.fullpath[1:]
             == f"/Controls/{StochasticControl.parameter_transfer_name}",
@@ -433,7 +431,7 @@ class TestStochasticControlRun(unittest.TestCase):
 
     @staticmethod
     def getSamplingMatrix(root):
-        node = moosetree.find(
+        node = tree.find(
             root,
             func=lambda n: n.fullpath[1:]
             == f"/Samplers/{StochasticControl.sampler_name}",

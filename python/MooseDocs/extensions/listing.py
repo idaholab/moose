@@ -6,8 +6,7 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import pyhit
-import moosetree
+from moosetools import hit, tree
 import difflib
 from moosesyntax import SyntaxNode, ObjectNodeBase
 import json
@@ -83,7 +82,7 @@ class ListingExtension(command.CommandExtension):
     def postTokenize(self, page, ast):
         """Only add the moose input parser JavaScript if the page needs it."""
         find_moose_code_token = lambda token: token.get("language", None) == "moose"
-        if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
+        if self.syntax and tree.find(ast, func=find_moose_code_token) is not None:
             self.translator.renderer.addJavaScript(
                 "moose_input_parser", "js/moose_input_parser.js", page
             )
@@ -140,7 +139,7 @@ class LocalListingCommand(command.CommandComponent):
         """
         Append content with syntax/object/parameter information.
 
-        This method will utilize pyhit to get syntaxes contained in the input
+        This method will utilize moosetools.hit to get syntaxes contained in the input
         then use the appsyntax extension to associate those syntaxes with nodes
         containing the object descriptions and documentation location. Once that
         node is located, it appends via json format that data.
@@ -159,6 +158,7 @@ class LocalListingCommand(command.CommandComponent):
         `framework/doc/content/js/moose_input_parser.js` JavaScript file knows
         how to add the approriate HTML links and tooltips.
         """
+
         if self.extension.syntax is None:
             return content
 
@@ -166,10 +166,10 @@ class LocalListingCommand(command.CommandComponent):
 
         content_lines = content.splitlines()
         try:
-            root = pyhit.parse(content)
+            root = hit.parse(content)
         except:
             return content
-        for node in moosetree.iterate(root):
+        for node in tree.iterate(root):
             # Add reference to moose syntax
             fullpath = "/".join([n.name for n in node.path])
             moose_node = syntax_ext.find(
@@ -452,15 +452,15 @@ class InputListingCommand(FileListingCommand):
     @staticmethod
     def extractInputBlocks(filename, blocks):
         """Read input file block(s)"""
-        hit = pyhit.load(filename)
+        hit = hit.load(filename)
         out = []
         for block in blocks.split():
-            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.rstrip("/")))
+            node = tree.find(hit, lambda n: n.fullpath.endswith(block.rstrip("/")))
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)
             # This render doesn't include the parents (if any), but...
-            # we want the parents. There's zero editing capability in pyhit,
+            # we want the parents. There's zero editing capability in hit,
             # so we're going to lazily replace the name with the full path :/
             render = str(node.render())
             if node.parent != hit:
@@ -468,13 +468,13 @@ class InputListingCommand(FileListingCommand):
                     f"[{node.name}]", f'[{node.fullpath.strip("/")}]', 1
                 )
             out.append(render)
-        return pyhit.parse("\n".join(out)) if out else hit
+        return hit.parse("\n".join(out)) if out else hit
 
     @staticmethod
     def removeInputBlocks(hit, remove):
         """Remove input file block(s) and/or parameter(s)"""
         for r in remove.split():
-            for node in moosetree.iterate(hit):
+            for node in tree.iterate(hit):
                 block, param = InputListingCommand.removeHelper(node, r)
                 if block is not None:
                     if param is None:

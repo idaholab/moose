@@ -8,7 +8,7 @@
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarness import util
-from RunApp import RunApp
+from TestHarness.testers.RunApp import RunApp
 
 
 class RunException(RunApp):

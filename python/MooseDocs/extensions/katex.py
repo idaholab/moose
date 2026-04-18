@@ -6,11 +6,10 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
 import re
 import uuid
 import logging
-import moosetree
+from moosetools import tree
 from .. import common
 from ..base import components, renderers
 from ..tree import tokens, html, latex
@@ -78,7 +77,7 @@ class KatexExtension(command.CommandExtension):
         labels = dict()
         count = 0
         func = lambda n: (n.name == "Equation") and (n["label"] is not None)
-        for node in moosetree.iterate(ast, func):
+        for node in tree.iterate(ast, func):
             count += 1
             node["number"] = count
             labels[node["label"]] = (count, node["bookmark"])

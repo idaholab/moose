@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
 import os
+
+from TestHarness import util
+from TestHarness.testers.FileTester import FileTester
 
 
 class CheckFiles(FileTester):

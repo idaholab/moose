@@ -7,10 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2026.02.16
+    version: 2026.03.20
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
+    influential:
+      # must be updated when requirements are updated
+      - requirements.txt
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
     version: 2026.03.19
@@ -92,7 +95,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2026.03.19
+    version: 2026.03.20
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -104,6 +107,8 @@ packages:
     apptainer:
       from: libmesh
     influential:
+      # python environment
+      - requirements.txt
       # container build definitions
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def

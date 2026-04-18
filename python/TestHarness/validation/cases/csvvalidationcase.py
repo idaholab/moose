@@ -8,12 +8,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from pandas import DataFrame
-import pandas as pd
+if TYPE_CHECKING:
+    from pandas import DataFrame
 
-from TestHarness.validation import ValidationCase
+from TestHarness.validation.cases.validationcase import ValidationCase
 
 NoneType = type(None)
 
@@ -62,8 +62,11 @@ class CSVValidationCase(ValidationCase):
         if not os.path.exists(self._gold_csv):
             raise FileNotFoundError(f"Gold CSV file {self._gold_csv} not found")
 
+        # avoid loading in __init__.py
+        from pandas import read_csv
+
         # Load the gold file
-        self._gold_df: DataFrame = pd.read_csv(self._gold_csv)
+        self._gold_df: "DataFrame" = read_csv(self._gold_csv)
 
     def getOutputFiles(self):
         return super().getOutputFiles() + [self.getParam("validation_csv")]
@@ -71,7 +74,11 @@ class CSVValidationCase(ValidationCase):
     def initialize(self):
         if not os.path.exists(self._csv):
             raise FileNotFoundError(f"CSV file {self._csv} not found")
-        self._df: DataFrame = pd.read_csv(self._csv)
+
+        # avoid loading in __init__.py
+        from pandas import read_csv
+
+        self._df: "DataFrame" = read_csv(self._csv)
         self._called_csv_initialize = True
 
     def _getScalarCSV(self, key: str, index: int, gold: bool) -> float:
@@ -82,6 +89,7 @@ class CSVValidationCase(ValidationCase):
             key: The key in the CSV (column)
             index: The index in the CSV file to read
             gold: Whether or not to read the gold file
+
         """
         assert isinstance(key, str)
         assert isinstance(index, int)
@@ -124,11 +132,13 @@ class CSVValidationCase(ValidationCase):
             index: The index in the CSV file to read (-1 for last)
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
-        Keyword arguments:
+
+        Keyword Arguments:
             check: Whether or not to check the data (default: True)
             store_key: The key to store the data as in the database,
                 otherwise just use 'key'
             Remaining arguments passed to addScalarData()
+
         """
         assert isinstance(key, str)
         assert isinstance(index, int)

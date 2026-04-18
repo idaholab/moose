@@ -7,9 +7,27 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys
+import os
+import sys
+from importlib.util import find_spec
+
 from TestHarness import util
-from FileTester import FileTester
+from TestHarness.testers.FileTester import FileTester
+
+HAS_NUMPY: bool = find_spec("numpy") is not None
+"""
+Whether or not not numpy is available.
+
+Used in AnalyzeJacobian.checkRunnable(), which will skip the
+test if numpy is not available.
+"""
+
+ANALYZEJACOBIAN_PATH: str = ""
+"""Path to the analyzejacobian.py script, if numpy is available. """
+if HAS_NUMPY:
+    from jacobiandebug import analyzejacobian
+
+    ANALYZEJACOBIAN_PATH = analyzejacobian.__file__
 
 
 class AnalyzeJacobian(FileTester):
@@ -56,21 +74,14 @@ class AnalyzeJacobian(FileTester):
 
     # Check if numpy is available
     def checkRunnable(self, options):
-        try:
-            import numpy
-
-            assert numpy  # silence pyflakes warning
-            return True
-        except Exception:
+        if not HAS_NUMPY:
             self.addCaveats("skipped (no numpy)")
             return False
 
     def getCommand(self, options):
         specs = self.specs
         # Create the command line string to run
-        command = os.path.join(
-            self.getMoosePythonDir(), "jacobiandebug", "analyzejacobian.py"
-        )
+        command = ANALYZEJACOBIAN_PATH
 
         # Check for built application
         if not options.dry_run and not os.path.exists(command):

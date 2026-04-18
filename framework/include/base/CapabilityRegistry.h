@@ -28,8 +28,9 @@ class Capabilities;
 /**
  * Registry of capabilities that checks capability requirements.
  *
- * This registry is used both within MOOSE (in framework/src/base/Capabilities.C)
- * and within the python interface (in python/pycapabilities/_pycapabilities.C).
+ * This registry is used both within:
+ *   - framework/src/base/Capabilities.C
+ *   - moosetools/src/moosetools/capabilities/_core.cpp
  */
 class CapabilityRegistry
 {
@@ -112,7 +113,7 @@ public:
    */
   ///@{
   const Capability * query(std::string capability) const;
-#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_MOOSETOOLS)
   inline Capability * query(std::string capability);
 #endif
   ///@}
@@ -140,8 +141,8 @@ public:
    * @param requirements The requirement string
    * @param options Options to apply to the check
    *
-   * This method is exposed to Python within pycapabilities.Capabilities.check in
-   * python/pycapabilities/_pycapabilities.C. This external method is used
+   * This method is exposed to Python within moosecapabilities._core.Capabilities.check in
+   * moosetools/src/moosetools/capabilities/_core.cpp. This external method is used
    * significantly by the TestHarness to check capabilities for individual test specs.
    *
    * Additionally, this method is used by the MooseApp command line option
@@ -171,7 +172,7 @@ protected:
   RegistryType _registry;
 };
 
-#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_MOOSETOOLS)
 Capability *
 CapabilityRegistry::query(std::string capability)
 {

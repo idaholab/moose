@@ -33,8 +33,6 @@ MOOSE_PYTHON = os.path.join(MOOSE_DIR, "python")
 if MOOSE_PYTHON not in sys.path:
     sys.path.append(MOOSE_PYTHON)
 
-import pyhit
-
 from TestHarness import TestHarness, capability_util
 from TestHarness.schedulers.Job import Job
 
@@ -243,7 +241,9 @@ class TestHarnessTestCase(unittest.TestCase):
         """
         assert isinstance(tests, dict)
 
-        root = pyhit.Node()
+        from moosetools.hit import Node
+
+        root = Node()
         tests_section = root.insert(0, "Tests")
 
         for i, (name, params) in enumerate(tests.items()):

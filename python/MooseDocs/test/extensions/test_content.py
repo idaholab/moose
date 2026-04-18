@@ -576,7 +576,7 @@ class TestContentOutline(MooseDocsTestCase):
             current = head["level"]
             diff = current - previous
 
-            # determine MooseTree indices for current header's `li` tag
+            # determine moosetools.tree indices for current header's `li` tag
             if diff == 0:
                 indices = indices[:-3] + "(" + str(count[current - 1]) + ")"
 
