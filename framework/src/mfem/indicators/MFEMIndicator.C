@@ -15,8 +15,9 @@
 InputParameters
 MFEMIndicator::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params.registerBase("Indicator");
+  params.registerSystemAttributeName("Indicator");
 
   params.addRequiredParam<VariableName>("variable", "Variable to perform amr with");
   params.addRequiredParam<std::string>("kernel", "Kernel to perform amr with");
@@ -24,7 +25,7 @@ MFEMIndicator::validParams()
 }
 
 MFEMIndicator::MFEMIndicator(const InputParameters & params)
-  : MFEMGeneralUserObject(params),
+  : MFEMObject(params),
     _var_name(getParam<VariableName>("variable")),
     _kernel_name(getParam<std::string>("kernel")),
     _fespace(*getMFEMProblem().getGridFunction(_var_name)->ParFESpace())

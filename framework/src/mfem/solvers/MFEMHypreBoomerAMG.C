@@ -11,6 +11,7 @@
 
 #include "MFEMHypreBoomerAMG.h"
 #include "MFEMFESpace.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
 
@@ -23,7 +24,7 @@ MFEMHypreBoomerAMG::validParams()
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<UserObjectName>(
+  params.addParam<MFEMFESpaceName>(
       "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
   params.addParam<mfem::real_t>(
       "strength_threshold", 0.25, "HypreBoomerAMG strong threshold. Defaults to 0.25.");
@@ -34,8 +35,12 @@ MFEMHypreBoomerAMG::validParams()
 
 MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _mfem_fespace(isParamSetByUser("fespace") ? getUserObject<MFEMFESpace>("fespace").getFESpace()
-                                              : nullptr)
+    _mfem_fespace(
+        isParamSetByUser("fespace")
+            ? getMFEMProblem()
+                  .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))
+                  .getFESpace()
+            : nullptr)
 {
   constructSolver();
 }

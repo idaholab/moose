@@ -11,18 +11,20 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMExecutedObject.h"
 
 /**
  * Class to transfer MFEM variable data to or from a restricted copy of the variable defined on an a
  * subspace of an MFEMMesh, represented as an MFEMSubMesh.
  */
-class MFEMSubMeshTransfer : public MFEMGeneralUserObject
+class MFEMSubMeshTransfer : public MFEMExecutedObject
 {
 public:
   static InputParameters validParams();
 
   MFEMSubMeshTransfer(const InputParameters & parameters);
+
+  virtual std::optional<std::string> suppliedVariableName() const override;
 
   /// Executes the transfer.
   virtual void execute() override;

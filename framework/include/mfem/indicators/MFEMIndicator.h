@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
+#include "MFEMObject.h"
 #include "MFEMContainers.h"
 #include "MFEMVariable.h"
 
@@ -19,7 +19,7 @@
  * Wrapper class for mfem::ErrorEstimator objects. To keep the
  * naming consistent with MOOSE, we refer to it as an Indicator.
  */
-class MFEMIndicator : public MFEMGeneralUserObject
+class MFEMIndicator : public MFEMObject
 {
 public:
   static InputParameters validParams();

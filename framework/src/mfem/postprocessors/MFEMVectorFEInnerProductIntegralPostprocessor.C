@@ -23,10 +23,10 @@ MFEMVectorFEInnerProductIntegralPostprocessor::validParams()
       "Calculates the integral of the inner product of two vector variables within a subdomain.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
-  params.addRequiredParam<VariableName>("primal_variable",
-                                        "Name of the first vector variable in the inner product.");
-  params.addRequiredParam<VariableName>("dual_variable",
-                                        "Name of the second vector variable in the inner product.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "primal_variable", "Name of the first vector variable in the inner product.");
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "dual_variable", "Name of the second vector variable in the inner product.");
   return params;
 }
 

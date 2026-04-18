@@ -221,7 +221,7 @@
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
   [MFEMNonLinearDiffusionNonZeroRHS]
     type = XMLDiff
     input = nldiffusion.i
@@ -249,7 +249,7 @@
       recover = false
       restep = false
       cli_args = 'BCs/active="linearized" '
-                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '      
+                 'Outputs/CSV/file_base=OutputData/NLHeatTransferLinearized '
     []
     [non-linear]
       detail = 'when the non-linear BC is given state-dependent coefficients.'
@@ -277,6 +277,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu'
     recover = false
-    restep = false    
+    restep = false
   []
 []

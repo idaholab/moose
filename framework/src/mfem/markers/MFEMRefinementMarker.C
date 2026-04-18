@@ -17,8 +17,9 @@ registerMooseObject("MooseApp", MFEMRefinementMarker);
 InputParameters
 MFEMRefinementMarker::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MFEMObject::validParams();
   params.registerBase("Marker");
+  params.registerSystemAttributeName("Marker");
 
   params.addRequiredParam<std::string>("indicator", "Estimator to use");
   params.addRangeCheckedParam<Real>("threshold",
@@ -35,7 +36,7 @@ MFEMRefinementMarker::validParams()
 }
 
 MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
-  : MFEMGeneralUserObject(params),
+  : MFEMObject(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("threshold")),
     _rebalance(getParam<bool>("rebalance")),
@@ -48,7 +49,7 @@ void
 MFEMRefinementMarker::initialSetup()
 {
   // fetch const ref to the estimator
-  _estimator = &getUserObjectByName<MFEMIndicator>(_estimator_name);
+  _estimator = &getMFEMProblem().getMFEMObject<MFEMIndicator>("Indicator", _estimator_name);
 
   // Check if p-refinement is supported by the fespace supplied with the variable
   if (_max_p_level and !_estimator->getFESpace().PRefinementSupported())
