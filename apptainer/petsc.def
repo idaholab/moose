@@ -31,27 +31,29 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %environment
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
-    source ${MOOSE_MPICH_DIR}/env.sh
+    . ${MOOSE_MPICH_DIR}/env.sh
     unset MOOSE_OPENMPI_DIR
 {%- elif MPI_FLAVOUR == "openmpi" %}
-    source ${MOOSE_OPENMPI_DIR}/env.sh
+    . ${MOOSE_OPENMPI_DIR}/env.sh
     unset MOOSE_MPICH_DIR
 {%- endif %}
 
     export PETSC_DIR={{ PETSC_DIR }}
 
-%post
+%post -c /bin/bash
     umask 022
+    set -xeo pipefail
 
-    # So that piping things to tee fails
-    set -o pipefail
+    # Determine OS
+    grep -q "rhel" /etc/os-release && IS_RHEL=1
+    grep -q "debian" /etc/os-release && IS_DEBIAN=1
 
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
-    source ${MOOSE_MPICH_DIR}/env.sh
+    . ${MOOSE_MPICH_DIR}/env.sh
     rm -rf /opt/openmpi
 {%- elif MPI_FLAVOUR == "openmpi" %}
-    source ${MOOSE_OPENMPI_DIR}/env.sh
+    . ${MOOSE_OPENMPI_DIR}/env.sh
     rm -rf /opt/mpich
 {%- endif %}
     which mpirun
@@ -64,7 +66,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Additional installs needed for petsc with cuda
     if [ -n "$CUDA_DIR" ]; then
-        dnf install -y libX11-devel
+        if [ -n "$IS_RHEL" ]; then
+            dnf install -y libX11-devel
+        elif [ -n "$IS_DEBIAN" ]; then
+            apt-get update
+            apt-get install -y libx11-dev
+        fi
     fi
 
     # Clone PETSc
@@ -111,7 +118,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
+    if [ -n "$IS_RHEL" ]; then
+        dnf clean all
+    elif [ -n "$IS_DEBIAN" ]; then
+        apt-get autoremove -y
+        apt-get clean
+        rm -rf /var/lib/apt/lists/*
+    fi
 
 %files
     {{ MOOSE_DIR }}/scripts/configure_petsc.sh {{ ROOT_BUILD_DIR }}/scripts/configure_petsc.sh
