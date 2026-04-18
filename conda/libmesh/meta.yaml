@@ -57,6 +57,9 @@ requirements:
     - libtirpc
     - llvm-openmp # [osx]
     - zlib
+  run:
+    - moose-petsc 3.24.6 {{ mpi }}_0
+    - moose-libmesh-vtk 9.6.1 {{ mpi }}_0
 
 test:
   commands:
