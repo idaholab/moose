@@ -13,12 +13,14 @@
 
 #include "MFEMComplexIntegratedBC.h"
 
-class MFEMRWTE10IntegratedBC : public MFEMComplexIntegratedBC
+namespace Moose::MFEM
+{
+class RWTE10IntegratedBC : public ComplexIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMRWTE10IntegratedBC(const InputParameters & parameters);
+  RWTE10IntegratedBC(const InputParameters & parameters);
 
   void RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E);
   void RWTE10Real(const mfem::Vector & x, mfem::Vector & v);
@@ -68,4 +70,5 @@ protected:
   std::unique_ptr<mfem::VectorFunctionCoefficient> _u_imag{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

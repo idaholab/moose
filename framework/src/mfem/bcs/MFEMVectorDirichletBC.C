@@ -11,26 +11,29 @@
 
 #include "MFEMVectorDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMVectorDirichletBC);
+registerMooseMFEMObject("MooseApp", VectorDirichletBC);
 
-InputParameters
-MFEMVectorDirichletBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMVectorDirichletBCBase::validParams();
+InputParameters
+VectorDirichletBC::validParams()
+{
+  InputParameters params = VectorDirichletBCBase::validParams();
   params.addClassDescription(
       "Applies a Dirichlet condition to all components of a vector variable.");
   return params;
 }
 
-MFEMVectorDirichletBC::MFEMVectorDirichletBC(const InputParameters & parameters)
-  : MFEMVectorDirichletBCBase(parameters)
+VectorDirichletBC::VectorDirichletBC(const InputParameters & parameters)
+  : VectorDirichletBCBase(parameters)
 {
 }
 
 void
-MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
+VectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficient(_vec_coef, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

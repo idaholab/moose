@@ -12,28 +12,30 @@
 #include "MFEMVectorFEInnerProductIntegralPostprocessor.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMVectorFEInnerProductIntegralPostprocessor);
+registerMooseMFEMObject("MooseApp", VectorFEInnerProductIntegralPostprocessor);
 
-InputParameters
-MFEMVectorFEInnerProductIntegralPostprocessor::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMPostprocessor::validParams();
-  params += MFEMBlockRestrictable::validParams();
+InputParameters
+VectorFEInnerProductIntegralPostprocessor::validParams()
+{
+  InputParameters params = Postprocessor::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Calculates the integral of the inner product of two vector variables within a subdomain.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "primal_variable", "Name of the first vector variable in the inner product.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "dual_variable", "Name of the second vector variable in the inner product.");
   return params;
 }
 
-MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralPostprocessor(
+VectorFEInnerProductIntegralPostprocessor::VectorFEInnerProductIntegralPostprocessor(
     const InputParameters & parameters)
-  : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(
+  : Postprocessor(parameters),
+    BlockRestrictable(
         parameters,
         getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("primal_variable"))),
     _primal_var(*getMFEMProblem().getGridFunction(getParam<VariableName>("primal_variable"))),
@@ -50,16 +52,17 @@ MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralP
 }
 
 void
-MFEMVectorFEInnerProductIntegralPostprocessor::execute()
+VectorFEInnerProductIntegralPostprocessor::execute()
 {
   _subdomain_integrator.Assemble();
   _integral = _subdomain_integrator(_primal_var);
 }
 
 PostprocessorValue
-MFEMVectorFEInnerProductIntegralPostprocessor::getValue() const
+VectorFEInnerProductIntegralPostprocessor::getValue() const
 {
   return _integral;
 }
 
+} // namespace Moose::MFEM
 #endif

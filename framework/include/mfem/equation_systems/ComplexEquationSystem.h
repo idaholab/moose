@@ -49,13 +49,13 @@ public:
   virtual void ApplyEssentialBCs() override;
 
   /// Add complex kernels
-  void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
+  void AddComplexKernel(std::shared_ptr<ComplexKernel> kernel);
 
   /// Add complex integrated BCs
-  void AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc);
+  void AddComplexIntegratedBC(std::shared_ptr<ComplexIntegratedBC> bc);
 
   /// Add complex essential BCs
-  void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
+  void AddComplexEssentialBCs(std::shared_ptr<ComplexEssentialBC> bc);
 
   /// Form matrix-free representation of system operator.
   /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
@@ -78,15 +78,13 @@ public:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
-          kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>> & kernels_map);
 
   /// Method for applying LinearFormIntegrators on domains from kernels to a ParComplexLinearForm
   inline void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParComplexLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
-          kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>> & kernels_map);
 
   /// Template method for applying BilinearFormIntegrators on boudaries from kernels to a SesquilinearForm
   template <class FormType>
@@ -94,14 +92,14 @@ public:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>> &
           integrated_bc_map);
 
   /// Method for applying LinearFormIntegrators on boundaries from kernels to a ParComplexLinearForm
   inline void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParComplexLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>> &
           integrated_bc_map);
 
   // Complex Linear and Bilinear Forms
@@ -109,13 +107,12 @@ public:
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
   // Complex kernels and integrated BCs
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
-      _cmplx_kernels_map;
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>> _cmplx_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>>
       _cmplx_integrated_bc_map;
 
   // Complex essential BCs
-  NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
+  NamedFieldsMap<std::vector<std::shared_ptr<ComplexEssentialBC>>> _cmplx_essential_bc_map;
 
   /// Pointers to coupled variables not part of the reduced EquationSystem.
   ComplexGridFunctions _cmplx_eliminated_variables;
@@ -124,7 +121,7 @@ public:
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cmplx_var_ess_constraints;
 
   // Pointer to complex GridFunctions to enable updates during nonlinear iterations
-  Moose::MFEM::ComplexGridFunctions * _complex_gfuncs;
+  ComplexGridFunctions * _complex_gfuncs;
 };
 
 template <class FormType>
@@ -133,7 +130,7 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
@@ -158,7 +155,7 @@ inline void
 ComplexEquationSystem::ApplyDomainLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParComplexLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name))
   {
@@ -185,7 +182,7 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name) &&
@@ -212,7 +209,7 @@ inline void
 ComplexEquationSystem::ApplyBoundaryLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParComplexLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name))

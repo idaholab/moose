@@ -30,7 +30,7 @@ SetMFEMMeshFESpaceAction::SetMFEMMeshFESpaceAction(const InputParameters & param
 void
 SetMFEMMeshFESpaceAction::act()
 {
-  auto * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  auto * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
 
   if (!mfem_problem)
   {

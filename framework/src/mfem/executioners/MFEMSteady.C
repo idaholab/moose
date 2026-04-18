@@ -13,21 +13,23 @@
 #include "MFEMProblem.h"
 #include "EquationSystemProblemOperator.h"
 
-registerMooseObject("MooseApp", MFEMSteady);
+registerMooseMFEMObject("MooseApp", Steady);
 
-InputParameters
-MFEMSteady::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMProblemSolve::validParams();
+InputParameters
+Steady::validParams()
+{
+  InputParameters params = ProblemSolve::validParams();
   params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }
 
-MFEMSteady::MFEMSteady(const InputParameters & params)
+Steady::Steady(const InputParameters & params)
   : Executioner(params),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem(dynamic_cast<Problem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, getProblemOperators()),
     _system_time(getParam<Real>("time")),
@@ -40,18 +42,16 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    if (_mfem_problem.num_type == MFEMProblem::NumericType::REAL)
+    if (_mfem_problem.num_type == Problem::NumericType::REAL)
     {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+      _mfem_problem_data.eqn_system = std::make_shared<EquationSystem>();
+      auto problem_operator = std::make_shared<EquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
     }
-    else if (_mfem_problem.num_type == MFEMProblem::NumericType::COMPLEX)
+    else if (_mfem_problem.num_type == Problem::NumericType::COMPLEX)
     {
-      _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
+      _mfem_problem_data.eqn_system = std::make_shared<ComplexEquationSystem>();
+      auto problem_operator = std::make_shared<ComplexEquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
     }
     else
@@ -61,7 +61,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 }
 
 void
-MFEMSteady::init()
+Steady::init()
 {
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
@@ -85,7 +85,7 @@ MFEMSteady::init()
 }
 
 void
-MFEMSteady::execute()
+Steady::execute()
 {
   if (_app.isRecovering())
   {
@@ -130,4 +130,5 @@ MFEMSteady::execute()
   postExecute();
 }
 
+} // namespace Moose::MFEM
 #endif

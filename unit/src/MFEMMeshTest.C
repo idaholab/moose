@@ -22,7 +22,7 @@ protected:
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
   std::string _mesh_type;
-  std::shared_ptr<MFEMMesh> _mfem_mesh_ptr;
+  std::shared_ptr<Moose::MFEM::Mesh> _mfem_mesh_ptr;
 };
 
 /**
@@ -47,7 +47,7 @@ MFEMMeshTest::buildMFEMMesh(MeshFileName filename, int serial_ref, int parallel_
   params.set<MeshFileName>("file") = filename;
   params.set<unsigned int>("serial_refine") = serial_ref;
   params.set<unsigned int>("parallel_refine") = parallel_ref;
-  _mfem_mesh_ptr = _factory->create<MFEMMesh>(_mesh_type, "moose_mesh", params);
+  _mfem_mesh_ptr = _factory->create<Moose::MFEM::Mesh>(_mesh_type, "moose_mesh", params);
   _app->actionWarehouse().mesh() = _mfem_mesh_ptr;
   _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
   _mfem_mesh_ptr->buildMesh();

@@ -12,17 +12,19 @@
 #include "MFEMComplexExteriorProductAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexExteriorProductAux);
+registerMooseMFEMObject("MooseApp", ComplexExteriorProductAux);
 
-InputParameters
-MFEMComplexExteriorProductAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexExteriorProductAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Projects $s \\vec u \\wedge \\vec v*$ onto a complex vector MFEM auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "first_source_vec", "Complex vector variable (3D)");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "second_source_vec", "Complex vector variable (3D)");
   params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of constant multiplier");
   params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of constant multiplier");
@@ -30,8 +32,8 @@ MFEMComplexExteriorProductAux::validParams()
   return params;
 }
 
-MFEMComplexExteriorProductAux::MFEMComplexExteriorProductAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexExteriorProductAux::ComplexExteriorProductAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
                   getParam<mfem::real_t>("scale_factor_imag")),
     _u_coef_real(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_real")),
@@ -50,20 +52,23 @@ MFEMComplexExteriorProductAux::MFEMComplexExteriorProductAux(const InputParamete
 
   // Must be [L2]^3
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()) || fes->GetVDim() != 3)
-    mooseError("MFEMComplexExteriorProductAux requires the target variable to be vector [L2]^3.");
+    mooseError(
+        "Moose::MFEM::ComplexExteriorProductAux requires the target variable to be vector [L2]^3.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMComplexExteriorProductAux currently supports only L2 spaces with interior DOFs "
+    mooseError("Moose::MFEM::ComplexExteriorProductAux currently supports only L2 spaces with "
+               "interior DOFs "
                "(no shared/constrained DOFs).");
 }
 
 void
-MFEMComplexExteriorProductAux::execute()
+ComplexExteriorProductAux::execute()
 {
   _result_var.ProjectCoefficient(_final_coef_real, _final_coef_imag);
 
   complexScale(_result_var, _scale_factor);
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

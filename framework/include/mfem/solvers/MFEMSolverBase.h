@@ -19,7 +19,7 @@ namespace Moose::MFEM
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */
-class SolverBase : public MFEMObject
+class SolverBase : public Object
 {
 public:
   static InputParameters validParams();

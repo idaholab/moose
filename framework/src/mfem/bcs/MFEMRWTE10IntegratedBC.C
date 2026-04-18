@@ -11,12 +11,14 @@
 
 #include "MFEMRWTE10IntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMRWTE10IntegratedBC);
+registerMooseMFEMObject("MooseApp", RWTE10IntegratedBC);
 
-InputParameters
-MFEMRWTE10IntegratedBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexIntegratedBC::validParams();
+InputParameters
+RWTE10IntegratedBC::validParams()
+{
+  InputParameters params = ComplexIntegratedBC::validParams();
   params.addClassDescription("Adds the Robin boundary conditions for an electromagnetic problem "
                              "with transverse waves in a rectangular waveguide.");
   params.addParam<RealVectorValue>(
@@ -36,8 +38,8 @@ MFEMRWTE10IntegratedBC::validParams()
   return params;
 }
 
-MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameters)
-  : MFEMComplexIntegratedBC(parameters),
+RWTE10IntegratedBC::RWTE10IntegratedBC(const InputParameters & parameters)
+  : ComplexIntegratedBC(parameters),
     _mu(getParam<Real>("mu")),
     _epsilon(getParam<Real>("epsilon")),
     _omega(2 * M_PI * getParam<Real>("frequency")),
@@ -62,7 +64,7 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
 }
 
 void
-MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E)
+RWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E)
 {
 
   mfem::Vector e_hat(normalizedCrossProduct(_k_c, _k_a));
@@ -78,7 +80,7 @@ MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<
 }
 
 void
-MFEMRWTE10IntegratedBC::RWTE10Real(const mfem::Vector & x, mfem::Vector & v)
+RWTE10IntegratedBC::RWTE10Real(const mfem::Vector & x, mfem::Vector & v)
 {
   std::vector<std::complex<mfem::real_t>> eval(x.Size());
   RWTE10(x, eval);
@@ -86,7 +88,7 @@ MFEMRWTE10IntegratedBC::RWTE10Real(const mfem::Vector & x, mfem::Vector & v)
     v(i) = -2 * _k.imag() * eval[i].imag() / _mu;
 }
 void
-MFEMRWTE10IntegratedBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
+RWTE10IntegratedBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
 {
   std::vector<std::complex<mfem::real_t>> eval(x.Size());
   RWTE10(x, eval);
@@ -94,4 +96,5 @@ MFEMRWTE10IntegratedBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
     v(i) = 2 * _k.imag() * eval[i].real() / _mu;
 }
 
+} // namespace Moose::MFEM
 #endif

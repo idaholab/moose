@@ -13,17 +13,19 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Projects a scalar coefficient onto a scalar-valued auxvariable.
  */
-class MFEMScalarProjectionAux : public MFEMAuxKernel
+class ScalarProjectionAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarProjectionAux(const InputParameters & parameters);
+  ScalarProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMScalarProjectionAux() = default;
+  virtual ~ScalarProjectionAux() = default;
 
   virtual void execute() override;
 
@@ -32,4 +34,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

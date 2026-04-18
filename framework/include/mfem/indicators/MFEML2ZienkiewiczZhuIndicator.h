@@ -13,16 +13,18 @@
 
 #include "MFEMIndicator.h"
 
+namespace Moose::MFEM
+{
 /**
  * Wrapper for the Zienkiewicz-Zhu estimator with L2 projection.
  * See mfem example 6p for more details.
  */
-class MFEML2ZienkiewiczZhuIndicator : public MFEMIndicator
+class L2ZienkiewiczZhuIndicator : public Indicator
 {
 public:
   static InputParameters validParams();
 
-  MFEML2ZienkiewiczZhuIndicator(const InputParameters & parameters);
+  L2ZienkiewiczZhuIndicator(const InputParameters & parameters);
 
   /// Override the createEstimator method to use a Zienkiewicz-Zhu estimator.
   virtual void createEstimator() override;
@@ -44,4 +46,5 @@ protected:
   std::unique_ptr<mfem::BilinearFormIntegrator> _integ;
 };
 
+} // namespace Moose::MFEM
 #endif

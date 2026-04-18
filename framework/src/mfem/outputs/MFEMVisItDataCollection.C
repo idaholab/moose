@@ -11,12 +11,14 @@
 
 #include "MFEMVisItDataCollection.h"
 
-registerMooseObject("MooseApp", MFEMVisItDataCollection);
+registerMooseMFEMObject("MooseApp", VisItDataCollection);
 
-InputParameters
-MFEMVisItDataCollection::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMDataCollection::validParams();
+InputParameters
+VisItDataCollection::validParams()
+{
+  InputParameters params = DataCollection::validParams();
   params.addClassDescription("Output for controlling export to an mfem::VisItDataCollection.");
   params.addParam<unsigned int>("refinements",
                                 0,
@@ -26,8 +28,8 @@ MFEMVisItDataCollection::validParams()
   return params;
 }
 
-MFEMVisItDataCollection::MFEMVisItDataCollection(const InputParameters & parameters)
-  : MFEMDataCollection(parameters),
+VisItDataCollection::VisItDataCollection(const InputParameters & parameters)
+  : DataCollection(parameters),
     _visit_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(),
               &_pmesh),
     _refinements(getParam<unsigned int>("refinements"))
@@ -36,4 +38,5 @@ MFEMVisItDataCollection::MFEMVisItDataCollection(const InputParameters & paramet
   registerFields();
 }
 
+} // namespace Moose::MFEM
 #endif

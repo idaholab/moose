@@ -12,32 +12,36 @@
 #include "MFEMScalarBoundaryIC.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMScalarBoundaryIC);
+registerMooseMFEMObject("MooseApp", ScalarBoundaryIC);
 
-InputParameters
-MFEMScalarBoundaryIC::validParams()
+namespace Moose::MFEM
 {
-  auto params = MFEMInitialCondition::validParams();
-  params += MFEMBoundaryRestrictable::validParams();
+InputParameters
+ScalarBoundaryIC::validParams()
+{
+  auto params = InitialCondition::validParams();
+  params += BoundaryRestrictable::validParams();
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>("coefficient",
+                                                              "The scalar coefficient");
   return params;
 }
 
-MFEMScalarBoundaryIC::MFEMScalarBoundaryIC(const InputParameters & params)
-  : MFEMInitialCondition(params),
-    MFEMBoundaryRestrictable(
-        params, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable")))
+ScalarBoundaryIC::ScalarBoundaryIC(const InputParameters & params)
+  : InitialCondition(params),
+    BoundaryRestrictable(params,
+                         getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable")))
 {
 }
 
 void
-MFEMScalarBoundaryIC::execute()
+ScalarBoundaryIC::execute()
 {
   auto & coeff = getScalarCoefficient("coefficient");
   auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectBdrCoefficient(coeff, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -12,30 +12,33 @@
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMMixedScalarCurlKernel);
+registerMooseMFEMObject("MooseApp", MixedScalarCurlKernel);
 
-InputParameters
-MFEMMixedScalarCurlKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMMixedBilinearFormKernel::validParams();
+InputParameters
+MixedScalarCurlKernel::validParams()
+{
+  InputParameters params = MixedBilinearFormKernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k\\vec\\nabla \\times \\vec u, v)_\\Omega$ "
                              "arising from the weak form of the scalar curl operator "
                              "$k\\vec\\nabla \\times u$. The vector must be 2D.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar property k to multiply the integrator by.");
   return params;
 }
 
-MFEMMixedScalarCurlKernel::MFEMMixedScalarCurlKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+MixedScalarCurlKernel::MixedScalarCurlKernel(const InputParameters & parameters)
+  : MixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedScalarCurlKernel::createMBFIntegrator()
+MixedScalarCurlKernel::createMBFIntegrator()
 {
   return new mfem::MixedScalarCurlIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

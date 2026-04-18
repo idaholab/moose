@@ -11,12 +11,10 @@
 
 #include "ProblemOperatorBase.h"
 
-class MFEMProblem;
-
 namespace Moose::MFEM
 {
 
-ProblemOperatorBase::ProblemOperatorBase(MFEMProblem & problem)
+ProblemOperatorBase::ProblemOperatorBase(Problem & problem)
   : _problem(problem), _problem_data(problem.getProblemData())
 {
 }

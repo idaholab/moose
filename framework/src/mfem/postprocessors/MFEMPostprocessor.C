@@ -11,24 +11,27 @@
 
 #include "MFEMPostprocessor.h"
 
-InputParameters
-MFEMPostprocessor::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMExecutedObject::validParams();
-  params += Postprocessor::validParams();
-  params.registerSystemAttributeName("MFEMExecutedObject");
+InputParameters
+Postprocessor::validParams()
+{
+  InputParameters params = ExecutedObject::validParams();
+  params += ::Postprocessor::validParams();
+  params.registerSystemAttributeName("Moose::MFEM::ExecutedObject");
   return params;
 }
 
-MFEMPostprocessor::MFEMPostprocessor(const InputParameters & parameters)
-  : MFEMExecutedObject(parameters), Postprocessor(this)
+Postprocessor::Postprocessor(const InputParameters & parameters)
+  : ExecutedObject(parameters), ::Postprocessor(this)
 {
 }
 
 std::optional<std::string>
-MFEMPostprocessor::suppliedPostprocessorName() const
+Postprocessor::suppliedPostprocessorName() const
 {
   return name();
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -12,24 +12,26 @@
 #include "MFEMNewtonNonlinearSolver.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMNewtonNonlinearSolver);
+registerMooseMFEMObject("MooseApp", NewtonNonlinearSolver);
 
-InputParameters
-MFEMNewtonNonlinearSolver::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = Moose::MFEM::NonlinearSolverBase::validParams();
+InputParameters
+NewtonNonlinearSolver::validParams()
+{
+  InputParameters params = NonlinearSolverBase::validParams();
   params.addClassDescription("MFEM native nonlinear solver using Newton's method.");
   return params;
 }
 
-MFEMNewtonNonlinearSolver::MFEMNewtonNonlinearSolver(const InputParameters & parameters)
-  : Moose::MFEM::NonlinearSolverBase(parameters)
+NewtonNonlinearSolver::NewtonNonlinearSolver(const InputParameters & parameters)
+  : NonlinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMNewtonNonlinearSolver::constructSolver()
+NewtonNonlinearSolver::constructSolver()
 {
   auto solver = std::make_unique<mfem::NewtonSolver>(getMFEMProblem().getComm());
   solver->iterative_mode = getParam<bool>("use_initial_guess");
@@ -41,20 +43,21 @@ MFEMNewtonNonlinearSolver::constructSolver()
 }
 
 void
-MFEMNewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
+NewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
   static_cast<mfem::NewtonSolver &>(getSolver()).SetOperator(op);
 }
 
 void
-MFEMNewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
+NewtonNonlinearSolver::SetLinearSolver(mfem::Solver & solver)
 {
   static_cast<mfem::NewtonSolver &>(getSolver()).SetSolver(solver);
 }
 
 void
-MFEMNewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+NewtonNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
 {
   getSolver().Mult(rhs, x);
 }
+} // namespace Moose::MFEM
 #endif

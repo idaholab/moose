@@ -17,17 +17,14 @@ namespace Moose::MFEM
 InputParameters
 SolverBase::validParams()
 {
-  InputParameters params = MFEMObject::validParams();
+  InputParameters params = Object::validParams();
   params.addClassDescription("Base class for defining mfem::Solver derived classes for Moose.");
   params.registerBase("Moose::MFEM::SolverBase");
   params.registerSystemAttributeName("Moose::MFEM::SolverBase");
   return params;
 }
 
-SolverBase::SolverBase(const InputParameters & parameters)
-  : MFEMObject(parameters), _solver{nullptr}
-{
-}
+SolverBase::SolverBase(const InputParameters & parameters) : Object(parameters), _solver{nullptr} {}
 } // namespace Moose::MFEM
 
 #endif

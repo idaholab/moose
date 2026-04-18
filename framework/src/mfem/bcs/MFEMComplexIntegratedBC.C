@@ -11,19 +11,22 @@
 
 #include "MFEMComplexIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMComplexIntegratedBC);
+registerMooseMFEMObject("MooseApp", ComplexIntegratedBC);
 
-InputParameters
-MFEMComplexIntegratedBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
+InputParameters
+ComplexIntegratedBC::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
 
   return params;
 }
 
-MFEMComplexIntegratedBC::MFEMComplexIntegratedBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters)
+ComplexIntegratedBC::ComplexIntegratedBC(const InputParameters & parameters)
+  : BoundaryCondition(parameters)
 {
 }
 
+} // namespace Moose::MFEM
 #endif

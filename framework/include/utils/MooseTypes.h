@@ -1120,7 +1120,8 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * Be sure to use the DerivativeStringToJSON macro for new types in
  * MooseTypes.C to also define to_json for each
  */
-#define MooseDerivativeStringClass(TheName)                                                        \
+/// Private helper — defines the class body only, used by the macros below.
+#define MOOSE_DERIVATIVE_STRING_CLASS_IMPL(TheName)                                                \
   class TheName : public std::string, public Moose::DerivativeStringClass                          \
   {                                                                                                \
   public:                                                                                          \
@@ -1130,13 +1131,36 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
     TheName(const char * s, size_t n) : std::string(s, n) {}                                       \
     TheName(const char * s) : std::string(s) {}                                                    \
     TheName(size_t n, char c) : std::string(n, c) {}                                               \
-  };                                                                                               \
+  }
+
+#define MooseDerivativeStringClass(TheName)                                                        \
+  MOOSE_DERIVATIVE_STRING_CLASS_IMPL(TheName);                                                     \
   namespace nlohmann                                                                               \
   {                                                                                                \
   template <>                                                                                      \
   struct adl_serializer<TheName>                                                                   \
   {                                                                                                \
     static void to_json(json & j, const TheName & v);                                              \
+  };                                                                                               \
+  }                                                                                                \
+  static_assert(true, "")
+
+/**
+ * Like MooseDerivativeStringClass but defines the class inside the given namespace NS (e.g.
+ * Moose::MFEM). The nlohmann::adl_serializer specialization is always placed in the global
+ * ::nlohmann namespace regardless of the calling scope.
+ */
+#define MooseDerivativeStringClassInNamespace(NS, TheName)                                         \
+  namespace NS                                                                                     \
+  {                                                                                                \
+  MOOSE_DERIVATIVE_STRING_CLASS_IMPL(TheName);                                                     \
+  }                                                                                                \
+  namespace nlohmann                                                                               \
+  {                                                                                                \
+  template <>                                                                                      \
+  struct adl_serializer<NS::TheName>                                                               \
+  {                                                                                                \
+    static void to_json(json & j, const NS::TheName & v);                                          \
   };                                                                                               \
   }                                                                                                \
   static_assert(true, "")
@@ -1284,11 +1308,11 @@ MooseDerivativeStringClass(CLIArgString);
  * Coefficients used in input for MFEM residual objects
  */
 ///@{
-MooseDerivativeStringClass(MFEMScalarCoefficientName);
-MooseDerivativeStringClass(MFEMVectorCoefficientName);
-MooseDerivativeStringClass(MFEMMatrixCoefficientName);
-MooseDerivativeStringClass(MFEMFESpaceName);
-MooseDerivativeStringClass(MFEMSolverName);
+MooseDerivativeStringClassInNamespace(Moose::MFEM, ScalarCoefficientName);
+MooseDerivativeStringClassInNamespace(Moose::MFEM, VectorCoefficientName);
+MooseDerivativeStringClassInNamespace(Moose::MFEM, MatrixCoefficientName);
+MooseDerivativeStringClassInNamespace(Moose::MFEM, FESpaceName);
+MooseDerivativeStringClassInNamespace(Moose::MFEM, SolverName);
 ///@}
 #endif
 /**

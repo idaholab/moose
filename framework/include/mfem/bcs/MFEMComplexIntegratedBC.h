@@ -13,13 +13,15 @@
 
 #include "MFEMIntegratedBC.h"
 
-class MFEMComplexIntegratedBC : public MFEMBoundaryCondition
+namespace Moose::MFEM
+{
+class ComplexIntegratedBC : public BoundaryCondition
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexIntegratedBC(const InputParameters & parameters);
-  virtual ~MFEMComplexIntegratedBC() = default;
+  ComplexIntegratedBC(const InputParameters & parameters);
+  virtual ~ComplexIntegratedBC() = default;
 
   virtual mfem::LinearFormIntegrator * getRealLFIntegrator()
   {
@@ -38,16 +40,17 @@ public:
     return _imag_bc->createBFIntegrator();
   }
 
-  virtual void setRealBC(std::shared_ptr<MFEMIntegratedBC> bc) { _real_bc = bc; }
-  virtual void setImagBC(std::shared_ptr<MFEMIntegratedBC> bc) { _imag_bc = bc; }
+  virtual void setRealBC(std::shared_ptr<IntegratedBC> bc) { _real_bc = bc; }
+  virtual void setImagBC(std::shared_ptr<IntegratedBC> bc) { _imag_bc = bc; }
 
   /// Get name of the trial variable (gridfunction) the bc acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 
 protected:
-  std::shared_ptr<MFEMIntegratedBC> _real_bc{nullptr};
-  std::shared_ptr<MFEMIntegratedBC> _imag_bc{nullptr};
+  std::shared_ptr<IntegratedBC> _real_bc{nullptr};
+  std::shared_ptr<IntegratedBC> _imag_bc{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

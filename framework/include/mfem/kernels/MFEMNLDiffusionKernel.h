@@ -12,17 +12,19 @@
 #pragma once
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k(u) \vec \nabla u, \vec \nabla v)
  * \f]
  */
-class MFEMNLDiffusionKernel : public MFEMKernel
+class NLDiffusionKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMNLDiffusionKernel(const InputParameters & parameters);
+  NLDiffusionKernel(const InputParameters & parameters);
 
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() override;
 
@@ -32,4 +34,5 @@ protected:
   mfem::ParGridFunction & _trial_var;
 };
 
+} // namespace Moose::MFEM
 #endif

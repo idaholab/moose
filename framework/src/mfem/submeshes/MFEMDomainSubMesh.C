@@ -12,27 +12,29 @@
 #include "MFEMDomainSubMesh.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDomainSubMesh);
+registerMooseMFEMObject("MooseApp", DomainSubMesh);
 
-InputParameters
-MFEMDomainSubMesh::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSubMesh::validParams();
-  params += MFEMBlockRestrictable::validParams();
-  params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
-                             "parent mesh restricted to the set of user-specified subdomains.");
+InputParameters
+DomainSubMesh::validParams()
+{
+  InputParameters params = SubMesh::validParams();
+  params += BlockRestrictable::validParams();
+  params.addClassDescription(
+      "Class to construct an Moose::MFEM::SubMesh formed from the subspace of the "
+      "parent mesh restricted to the set of user-specified subdomains.");
   params.addParam<BoundaryName>("submesh_boundary", "Name to assign submesh boundary.");
   return params;
 }
 
-MFEMDomainSubMesh::MFEMDomainSubMesh(const InputParameters & parameters)
-  : MFEMSubMesh(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh())
+DomainSubMesh::DomainSubMesh(const InputParameters & parameters)
+  : SubMesh(parameters), BlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh())
 {
 }
 
 void
-MFEMDomainSubMesh::buildSubMesh()
+DomainSubMesh::buildSubMesh()
 {
   _submesh = std::make_shared<mfem::ParSubMesh>(
       mfem::ParSubMesh::CreateFromDomain(getMesh(), getSubdomainAttributes()));
@@ -45,4 +47,5 @@ MFEMDomainSubMesh::buildSubMesh()
         mfem::Array<int>({getMesh().bdr_attributes.Max() + 1}));
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -11,27 +11,30 @@
 
 #include "MFEMVectorProjectionAux.h"
 
-registerMooseObject("MooseApp", MFEMVectorProjectionAux);
+registerMooseMFEMObject("MooseApp", VectorProjectionAux);
 
-InputParameters
-MFEMVectorProjectionAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+VectorProjectionAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Projects a vector coefficient onto a vector MFEM auxvariable.");
-  params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient",
-                                                     "Name of the vector coefficient to project.");
+  params.addRequiredParam<Moose::MFEM::VectorCoefficientName>(
+      "vector_coefficient", "Name of the vector coefficient to project.");
   return params;
 }
 
-MFEMVectorProjectionAux::MFEMVectorProjectionAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+VectorProjectionAux::VectorProjectionAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 
 void
-MFEMVectorProjectionAux::execute()
+VectorProjectionAux::execute()
 {
   _result_var.ProjectCoefficient(_vec_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

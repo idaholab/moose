@@ -19,8 +19,8 @@ InputParameters
 AddMFEMComplexKernelComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription(
-      "Add an MFEMKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
+  params.addClassDescription("Add an Moose::MFEM::Kernel to serve as the real or imaginary "
+                             "component of an Moose::MFEM::ComplexKernel.");
   return params;
 }
 
@@ -35,7 +35,7 @@ AddMFEMComplexKernelComponentAction::act()
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  Moose::MFEM::Problem * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
 
   if (mfem_problem && _name == "RealComponent")
     mfem_problem->addRealComponentToKernel(

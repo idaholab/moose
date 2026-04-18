@@ -11,31 +11,34 @@
 
 #include "MFEMBoundaryIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMBoundaryIntegratedBC);
+registerMooseMFEMObject("MooseApp", BoundaryIntegratedBC);
 
-InputParameters
-MFEMBoundaryIntegratedBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMIntegratedBC::validParams();
+InputParameters
+BoundaryIntegratedBC::validParams()
+{
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "The coefficient which will be used in the integrated BC");
   return params;
 }
 
-MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters), _coef(getScalarCoefficient("coefficient"))
+BoundaryIntegratedBC::BoundaryIntegratedBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMBoundaryIntegratedBC::createLFIntegrator()
+BoundaryIntegratedBC::createLFIntegrator()
 {
   return new mfem::BoundaryLFIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

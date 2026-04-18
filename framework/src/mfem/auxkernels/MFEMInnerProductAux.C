@@ -12,22 +12,26 @@
 #include "MFEMInnerProductAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMInnerProductAux);
+registerMooseMFEMObject("MooseApp", InnerProductAux);
 
-InputParameters
-MFEMInnerProductAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+InnerProductAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Projects $s \\vec u \\cdot \\vec v$ onto a scalar MFEM auxvariable");
-  params.addRequiredParam<MFEMVectorCoefficientName>("first_source_vec", "Vector coefficient");
-  params.addRequiredParam<MFEMVectorCoefficientName>("second_source_vec", "Vector coefficient");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addRequiredParam<Moose::MFEM::VectorCoefficientName>("first_source_vec",
+                                                              "Vector coefficient");
+  params.addRequiredParam<Moose::MFEM::VectorCoefficientName>("second_source_vec",
+                                                              "Vector coefficient");
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar coefficient s to scale the inner product by");
   return params;
 }
 
-MFEMInnerProductAux::MFEMInnerProductAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
+InnerProductAux::InnerProductAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _inner(getVectorCoefficient("first_source_vec"), getVectorCoefficient("second_source_vec")),
     _scaled_inner(getScalarCoefficient("coefficient"), _inner)
 {
@@ -36,18 +40,19 @@ MFEMInnerProductAux::MFEMInnerProductAux(const InputParameters & parameters)
 
   // Must be scalar L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()) || fes->GetVDim() != 1)
-    mooseError("MFEMInnerProductAux requires the target variable to be scalar L2.");
+    mooseError("Moose::MFEM::InnerProductAux requires the target variable to be scalar L2.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMInnerProductAux currently supports only L2 spaces with interior DOFs "
+    mooseError("Moose::MFEM::InnerProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
 }
 
 void
-MFEMInnerProductAux::execute()
+InnerProductAux::execute()
 {
   _result_var.ProjectCoefficient(_scaled_inner);
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

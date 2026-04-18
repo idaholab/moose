@@ -3349,7 +3349,8 @@ MooseApp::isInTree()
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)
+MooseApp::setMFEMDevice(const std::string & device_string,
+                        Moose::PassKey<Moose::MFEM::ProblemSolve>)
 {
   const auto string_vec = MooseUtils::split(device_string, ",");
   auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());

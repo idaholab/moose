@@ -14,22 +14,25 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMContainers.h"
 
+namespace Moose::MFEM
+{
 /**
  * Declares material properties based on names and functions prescribed by input parameters.
  *
  * This is identical in function to the GenericFunctionVectorMaterial in Moose.
  */
-class MFEMGenericFunctorVectorMaterial : public MFEMFunctorMaterial
+class GenericFunctorVectorMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  MFEMGenericFunctorVectorMaterial(const InputParameters & parameters);
-  virtual ~MFEMGenericFunctorVectorMaterial();
+  GenericFunctorVectorMaterial(const InputParameters & parameters);
+  virtual ~GenericFunctorVectorMaterial();
 
 protected:
   const std::vector<std::string> & _prop_names;
-  const std::vector<MFEMVectorCoefficientName> _prop_values;
+  const std::vector<Moose::MFEM::VectorCoefficientName> _prop_values;
 };
 
+} // namespace Moose::MFEM
 #endif

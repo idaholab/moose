@@ -36,11 +36,11 @@ public:
     NDFE_params.set<MooseEnum>("fec_type") = "ND";
     _mfem_problem->addFESpace("MFEMVectorFESpace", "ND_vector", NDFE_params);
     InputParameters scalar_params = _factory.getValidParams("MFEMVariable");
-    scalar_params.set<MFEMFESpaceName>("fespace") = "H1_scalar";
+    scalar_params.set<Moose::MFEM::FESpaceName>("fespace") = "H1_scalar";
     _mfem_problem->addVariable("MFEMVariable", "scalar_var", scalar_params);
     _scalar_var = _mfem_problem->getProblemData().gridfunctions.Get("scalar_var");
     InputParameters vector_params = _factory.getValidParams("MFEMVariable");
-    vector_params.set<MFEMFESpaceName>("fespace") = "ND_vector";
+    vector_params.set<Moose::MFEM::FESpaceName>("fespace") = "ND_vector";
     _mfem_problem->addVariable("MFEMVariable", "vector_var", vector_params);
     _vector_var = _mfem_problem->getProblemData().gridfunctions.Get("vector_var");
   }
@@ -52,9 +52,9 @@ public:
 TEST_F(MFEMPostprocessorTest, MFEML2Error)
 {
   InputParameters pp_params = _factory.getValidParams("MFEML2Error");
-  pp_params.set<MFEMScalarCoefficientName>("function") = "scalar_ones";
+  pp_params.set<Moose::MFEM::ScalarCoefficientName>("function") = "scalar_ones";
   pp_params.set<VariableName>("variable") = "scalar_var";
-  auto & l2_pp = addObject<MFEML2Error>("MFEML2Error", "ppl2", pp_params);
+  auto & l2_pp = addObject<Moose::MFEM::L2Error>("MFEML2Error", "ppl2", pp_params);
 
   mfem::ConstantCoefficient twos(2.);
   _scalar_var->ProjectCoefficient(twos);
@@ -71,7 +71,7 @@ TEST_F(MFEMPostprocessorTest, MFEML2Error)
 TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
 {
   InputParameters pp_params = _factory.getValidParams("MFEML2Error");
-  pp_params.set<MFEMScalarCoefficientName>("function") = "scalar_ones";
+  pp_params.set<Moose::MFEM::ScalarCoefficientName>("function") = "scalar_ones";
   pp_params.set<VariableName>("variable") = "scalar_var";
   _mfem_problem->addPostprocessor("MFEML2Error", "ppl2", pp_params);
   auto & l2_pp = _mfem_problem->getPostprocessorObjectByName("ppl2");
@@ -108,9 +108,9 @@ TEST_F(MFEMPostprocessorTest, MFEML2ErrorCoefficient)
 TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
 {
   InputParameters pp_params = _factory.getValidParams("MFEMVectorL2Error");
-  pp_params.set<MFEMVectorCoefficientName>("function") = "vector_ones";
+  pp_params.set<Moose::MFEM::VectorCoefficientName>("function") = "vector_ones";
   pp_params.set<VariableName>("variable") = "vector_var";
-  auto & l2_pp = addObject<MFEMVectorL2Error>("MFEMVectorL2Error", "ppl2", pp_params);
+  auto & l2_pp = addObject<Moose::MFEM::VectorL2Error>("MFEMVectorL2Error", "ppl2", pp_params);
 
   mfem::VectorConstantCoefficient twos(mfem::Vector({2., 2., 2.}));
   _vector_var->ProjectCoefficient(twos);

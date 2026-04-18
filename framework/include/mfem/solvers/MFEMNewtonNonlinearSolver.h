@@ -13,15 +13,17 @@
 
 #include "MFEMNonlinearSolverBase.h"
 
+namespace Moose::MFEM
+{
 /**
  * MooseObject wrapper for mfem::NewtonSolver-backed nonlinear solves.
  */
-class MFEMNewtonNonlinearSolver : public Moose::MFEM::NonlinearSolverBase
+class NewtonNonlinearSolver : public NonlinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMNewtonNonlinearSolver(const InputParameters & parameters);
+  NewtonNonlinearSolver(const InputParameters & parameters);
 
   void constructSolver() override;
 
@@ -32,4 +34,5 @@ public:
   bool usesExternalLinearSolver() const override { return true; }
 };
 
+} // namespace Moose::MFEM
 #endif

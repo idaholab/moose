@@ -17,12 +17,15 @@
  * MFEM Postprocessor which samples values at a set of points evenly
  * distributed along a line.
  */
-class MFEMLineValueSampler : public MFEMValueSamplerBase
+namespace Moose::MFEM
+{
+class LineValueSampler : public ValueSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMLineValueSampler(const InputParameters & parameters);
+  LineValueSampler(const InputParameters & parameters);
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

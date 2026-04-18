@@ -23,7 +23,7 @@ namespace
 std::vector<std::string> execution_log;
 }
 
-class TestMFEMDependencyAux : public MFEMAuxKernel
+class TestMFEMDependencyAux : public Moose::MFEM::AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -41,14 +41,15 @@ registerMooseObject("MooseUnitApp", TestMFEMDependencyAux);
 InputParameters
 TestMFEMDependencyAux::validParams()
 {
-  auto params = MFEMAuxKernel::validParams();
-  MFEMExecutedObject::addDependencyParam<PostprocessorName>(
+  auto params = Moose::MFEM::AuxKernel::validParams();
+  Moose::MFEM::ExecutedObject::addDependencyParam<PostprocessorName>(
       params, "postprocessor", "Optional postprocessor dependency used to set the output value.");
   return params;
 }
 
 TestMFEMDependencyAux::TestMFEMDependencyAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters), _use_postprocessor(parameters.isParamSetByUser("postprocessor"))
+  : Moose::MFEM::AuxKernel(parameters),
+    _use_postprocessor(parameters.isParamSetByUser("postprocessor"))
 {
 }
 
@@ -62,7 +63,7 @@ TestMFEMDependencyAux::execute()
   _result_var.ProjectCoefficient(coef);
 }
 
-class TestMFEMDependencyPostprocessor : public MFEMPostprocessor
+class TestMFEMDependencyPostprocessor : public Moose::MFEM::Postprocessor
 {
 public:
   static InputParameters validParams();
@@ -83,14 +84,14 @@ registerMooseObject("MooseUnitApp", TestMFEMDependencyPostprocessor);
 InputParameters
 TestMFEMDependencyPostprocessor::validParams()
 {
-  auto params = MFEMPostprocessor::validParams();
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  auto params = Moose::MFEM::Postprocessor::validParams();
+  Moose::MFEM::ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "variable", "The MFEM variable this test postprocessor reads.");
   return params;
 }
 
 TestMFEMDependencyPostprocessor::TestMFEMDependencyPostprocessor(const InputParameters & parameters)
-  : MFEMPostprocessor(parameters),
+  : Moose::MFEM::Postprocessor(parameters),
     _variable_name(getParam<VariableName>("variable")),
     _variable(*getMFEMProblem().getProblemData().gridfunctions.Get(_variable_name))
 {
@@ -119,7 +120,7 @@ public:
     _mfem_problem->addFESpace("MFEMScalarFESpace", "h1", fe_params);
 
     InputParameters variable_params = _factory.getValidParams("MFEMVariable");
-    variable_params.set<MFEMFESpaceName>("fespace") = "h1";
+    variable_params.set<Moose::MFEM::FESpaceName>("fespace") = "h1";
     _mfem_problem->addVariable("MFEMVariable", "aux0_var", variable_params);
     _mfem_problem->addVariable("MFEMVariable", "aux1_var", variable_params);
   }

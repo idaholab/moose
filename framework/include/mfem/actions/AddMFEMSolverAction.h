@@ -18,7 +18,7 @@
  *
  * [Solvers]
  *   [nl]
- *     type = MFEMNewtonNonlinearSolver
+ *     type = Moose::MFEM::NewtonNonlinearSolver
  *   []
  * []
  */

@@ -21,10 +21,10 @@ namespace Moose::MFEM
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
+  TimeDependentEquationSystem(const TimeDerivativeMap & time_derivative_map);
 
   virtual void SetTimeStep(mfem::real_t & dt) { _dt = dt; };
-  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
+  virtual void AddKernel(std::shared_ptr<Kernel> kernel) override;
 
 protected:
   virtual void BuildBilinearForms() override;
@@ -35,15 +35,14 @@ protected:
   /// Timestep size
   mfem::real_t _dt;
 
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-      _td_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> _td_kernels_map;
   /// Containers to store contributions to weak form of the form (F du/dt, v)
-  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+  NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _td_mblfs; // named according to trial variable
 
   /// Map between variable names and their time derivatives
-  const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
+  const TimeDerivativeMap & _time_derivative_map;
 
 private:
   friend class TimeDependentEquationSystemProblemOperator;

@@ -16,12 +16,14 @@
 
 #ifdef MFEM_USE_PETSC
 
-registerMooseObject("MooseApp", MFEMPetscNonlinearSolver);
+registerMooseMFEMObject("MooseApp", PetscNonlinearSolver);
 
-InputParameters
-MFEMPetscNonlinearSolver::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = Moose::MFEM::NonlinearSolverBase::validParams();
+InputParameters
+PetscNonlinearSolver::validParams()
+{
+  InputParameters params = NonlinearSolverBase::validParams();
   params.addClassDescription("MFEM PETSc-backed nonlinear solver using SNES.");
   params.addParam<MultiMooseEnum>(
       "petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "Singleton PETSc options");
@@ -36,14 +38,14 @@ MFEMPetscNonlinearSolver::validParams()
   return params;
 }
 
-MFEMPetscNonlinearSolver::MFEMPetscNonlinearSolver(const InputParameters & parameters)
-  : Moose::MFEM::NonlinearSolverBase(parameters)
+PetscNonlinearSolver::PetscNonlinearSolver(const InputParameters & parameters)
+  : NonlinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMPetscNonlinearSolver::constructSolver()
+PetscNonlinearSolver::constructSolver()
 {
   const auto & prefix = getParam<std::string>("petsc_options_prefix");
   const auto normalized_prefix = !prefix.empty() && prefix.back() != '_' ? prefix + "_" : prefix;
@@ -75,23 +77,24 @@ MFEMPetscNonlinearSolver::constructSolver()
 }
 
 void
-MFEMPetscNonlinearSolver::SetOperator(const mfem::Operator & op)
+PetscNonlinearSolver::SetOperator(const mfem::Operator & op)
 {
   static_cast<mfem::PetscNonlinearSolver &>(getSolver()).SetOperator(op);
 }
 
 void
-MFEMPetscNonlinearSolver::SetLinearSolver(mfem::Solver &)
+PetscNonlinearSolver::SetLinearSolver(mfem::Solver &)
 {
-  mooseError("MFEMPetscNonlinearSolver does not support an external MFEM linear solver. "
+  mooseError("Moose::MFEM::PetscNonlinearSolver does not support an external MFEM linear solver. "
              "Configure PETSc KSP/PC behavior through PETSc options instead.");
 }
 
 void
-MFEMPetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
+PetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
 {
   getSolver().Mult(rhs, x);
 }
 #endif
 
+} // namespace Moose::MFEM
 #endif

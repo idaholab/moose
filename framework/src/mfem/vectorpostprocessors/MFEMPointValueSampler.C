@@ -11,12 +11,14 @@
 
 #include "MFEMPointValueSampler.h"
 
-registerMooseObject("MooseApp", MFEMPointValueSampler);
+registerMooseMFEMObject("MooseApp", PointValueSampler);
 
-InputParameters
-MFEMPointValueSampler::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMValueSamplerBase::validParams();
+InputParameters
+PointValueSampler::validParams()
+{
+  InputParameters params = ValueSamplerBase::validParams();
 
   params.addClassDescription("Sample an MFEM variable at specific points.");
   params.addRequiredParam<std::vector<Point>>(
@@ -25,9 +27,10 @@ MFEMPointValueSampler::validParams()
   return params;
 }
 
-MFEMPointValueSampler::MFEMPointValueSampler(const InputParameters & parameters)
-  : MFEMValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
+PointValueSampler::PointValueSampler(const InputParameters & parameters)
+  : ValueSamplerBase(parameters, parameters.get<std::vector<Point>>("points"))
 {
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

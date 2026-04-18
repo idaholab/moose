@@ -12,28 +12,30 @@
 #include "MFEMConvectiveHeatFluxBC.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMConvectiveHeatFluxBC);
+registerMooseMFEMObject("MooseApp", ConvectiveHeatFluxBC);
 
-InputParameters
-MFEMConvectiveHeatFluxBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMIntegratedBC::validParams();
+InputParameters
+ConvectiveHeatFluxBC::validParams()
+{
+  InputParameters params = IntegratedBC::validParams();
   // FIXME: Should these really be specified via properties? T_infinity in particular? Use functions
   // instead?
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties to add to MFEM problems.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "T_infinity", "0.", "Name of a coefficient specifying the far-field temperature");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "heat_transfer_coefficient",
       "1.",
       "Name of the coefficient specifying the heat transfer coefficient");
   return params;
 }
 
-MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters),
+ConvectiveHeatFluxBC::ConvectiveHeatFluxBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _heat_transfer_coef(getScalarCoefficient("heat_transfer_coefficient")),
     _T_inf_coef(getScalarCoefficient("T_infinity")),
     _external_heat_flux_coef(
@@ -47,16 +49,17 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMConvectiveHeatFluxBC::createLFIntegrator()
+ConvectiveHeatFluxBC::createLFIntegrator()
 {
   return new mfem::BoundaryLFIntegrator(_external_heat_flux_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMConvectiveHeatFluxBC::createBFIntegrator()
+ConvectiveHeatFluxBC::createBFIntegrator()
 {
   return new mfem::BoundaryMassIntegrator(_heat_transfer_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

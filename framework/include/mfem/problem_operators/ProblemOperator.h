@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMProblemData.h"
 #include "ProblemOperatorBase.h"
 
 namespace Moose::MFEM
@@ -20,7 +19,7 @@ namespace Moose::MFEM
 class ProblemOperator : public mfem::Operator, public ProblemOperatorBase
 {
 public:
-  ProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
+  ProblemOperator(Problem & problem) : ProblemOperatorBase(problem) {}
 
   virtual void SetGridFunctions() override;
 

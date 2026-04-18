@@ -12,26 +12,30 @@
 #include "MFEMScalarIC.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMScalarIC);
+registerMooseMFEMObject("MooseApp", ScalarIC);
 
-InputParameters
-MFEMScalarIC::validParams()
+namespace Moose::MFEM
 {
-  auto params = MFEMInitialCondition::validParams();
+InputParameters
+ScalarIC::validParams()
+{
+  auto params = InitialCondition::validParams();
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>("coefficient",
+                                                              "The scalar coefficient");
   return params;
 }
 
-MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMInitialCondition(params) {}
+ScalarIC::ScalarIC(const InputParameters & params) : InitialCondition(params) {}
 
 void
-MFEMScalarIC::execute()
+ScalarIC::execute()
 {
   auto & coeff = getScalarCoefficient("coefficient");
   auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }
 
+} // namespace Moose::MFEM
 #endif

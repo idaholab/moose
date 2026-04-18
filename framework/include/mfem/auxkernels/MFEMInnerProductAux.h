@@ -13,6 +13,8 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Project \f$ s \vec u \cdot \vec v \f$ onto a scalar MFEM auxvariable.
  *
@@ -20,13 +22,13 @@
  *  - The target variable's FE Space must be L2.
  *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
-class MFEMInnerProductAux : public MFEMAuxKernel
+class InnerProductAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMInnerProductAux(const InputParameters & parameters);
-  ~MFEMInnerProductAux() override = default;
+  InnerProductAux(const InputParameters & parameters);
+  ~InnerProductAux() override = default;
 
   void execute() override;
 
@@ -38,4 +40,5 @@ protected:
   mfem::ProductCoefficient _scaled_inner;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

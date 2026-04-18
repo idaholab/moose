@@ -11,28 +11,32 @@
 
 #include "MFEMComplexVectorDirichletBCBase.h"
 
-InputParameters
-MFEMComplexVectorDirichletBCBase::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexEssentialBC::validParams();
-  params.addParam<MFEMVectorCoefficientName>("vector_coefficient_real",
-                                             "0. 0. 0.",
-                                             "Vector coefficient specifying the real part of the "
-                                             "values the variable takes on the boundary");
-  params.addParam<MFEMVectorCoefficientName>("vector_coefficient_imag",
-                                             "0. 0. 0.",
-                                             "Vector coefficient specifying the imaginary part of "
-                                             "the values the variable takes on the boundary");
+InputParameters
+ComplexVectorDirichletBCBase::validParams()
+{
+  InputParameters params = ComplexEssentialBC::validParams();
+  params.addParam<Moose::MFEM::VectorCoefficientName>(
+      "vector_coefficient_real",
+      "0. 0. 0.",
+      "Vector coefficient specifying the real part of the "
+      "values the variable takes on the boundary");
+  params.addParam<Moose::MFEM::VectorCoefficientName>(
+      "vector_coefficient_imag",
+      "0. 0. 0.",
+      "Vector coefficient specifying the imaginary part of "
+      "the values the variable takes on the boundary");
 
   return params;
 }
 
-MFEMComplexVectorDirichletBCBase::MFEMComplexVectorDirichletBCBase(
-    const InputParameters & parameters)
-  : MFEMComplexEssentialBC(parameters),
+ComplexVectorDirichletBCBase::ComplexVectorDirichletBCBase(const InputParameters & parameters)
+  : ComplexEssentialBC(parameters),
     _vec_coef_real(getVectorCoefficient("vector_coefficient_real")),
     _vec_coef_imag(getVectorCoefficient("vector_coefficient_imag"))
 {
 }
 
+} // namespace Moose::MFEM
 #endif

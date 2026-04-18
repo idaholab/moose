@@ -15,15 +15,17 @@
 
 #ifdef MFEM_USE_PETSC
 
+namespace Moose::MFEM
+{
 /**
  * MooseObject wrapper for mfem::PetscNonlinearSolver-backed nonlinear solves.
  */
-class MFEMPetscNonlinearSolver : public Moose::MFEM::NonlinearSolverBase
+class PetscNonlinearSolver : public NonlinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMPetscNonlinearSolver(const InputParameters & parameters);
+  PetscNonlinearSolver(const InputParameters & parameters);
 
   void constructSolver() override;
 
@@ -36,4 +38,5 @@ public:
 
 #endif
 
+} // namespace Moose::MFEM
 #endif

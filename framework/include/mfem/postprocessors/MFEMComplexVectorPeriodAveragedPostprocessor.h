@@ -14,17 +14,18 @@
 #include "MFEMPostprocessor.h"
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Compute the time average of the inner product between two complex MFEM vector FE variables,
  * scaled by an optional scalar coefficient.
  */
-class MFEMComplexVectorPeriodAveragedPostprocessor : public MFEMPostprocessor,
-                                                     public MFEMBlockRestrictable
+class ComplexVectorPeriodAveragedPostprocessor : public Postprocessor, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexVectorPeriodAveragedPostprocessor(const InputParameters & parameters);
+  ComplexVectorPeriodAveragedPostprocessor(const InputParameters & parameters);
 
   /**
    * Evaluate integral.
@@ -59,4 +60,5 @@ private:
   mfem::ParLinearForm _subdomain_integrator;
 };
 
+} // namespace Moose::MFEM
 #endif

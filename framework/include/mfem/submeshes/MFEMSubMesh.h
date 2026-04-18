@@ -13,16 +13,18 @@
 
 #include "MFEMObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Base class for construction of a mfem::ParSubMesh object. Access using the
  * getSubMesh() accessor.
  */
-class MFEMSubMesh : public MFEMObject
+class SubMesh : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMSubMesh(const InputParameters & parameters);
+  SubMesh(const InputParameters & parameters);
 
   /// Returns a shared pointer to the constructed fespace.
   inline std::shared_ptr<mfem::ParSubMesh> getSubMesh()
@@ -39,4 +41,5 @@ protected:
   virtual void buildSubMesh() = 0;
 };
 
+} // namespace Moose::MFEM
 #endif

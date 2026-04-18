@@ -106,11 +106,11 @@ registerParameter(ConvergenceName);
 registerParameter(LinearSystemName);
 registerParameter(SolverSystemName);
 #ifdef MOOSE_MFEM_ENABLED
-registerParameter(MFEMScalarCoefficientName);
-registerParameter(MFEMVectorCoefficientName);
-registerParameter(MFEMMatrixCoefficientName);
-registerParameter(MFEMFESpaceName);
-registerParameter(MFEMSolverName);
+registerParameter(Moose::MFEM::ScalarCoefficientName);
+registerParameter(Moose::MFEM::VectorCoefficientName);
+registerParameter(Moose::MFEM::MatrixCoefficientName);
+registerParameter(Moose::MFEM::FESpaceName);
+registerParameter(Moose::MFEM::SolverName);
 #endif
 
 /*******************************************************************************/

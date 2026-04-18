@@ -88,7 +88,7 @@ EquationSystem::SetTrialVariableNames()
 }
 
 void
-EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
+EquationSystem::AddKernel(std::shared_ptr<Kernel> kernel)
 {
   const auto & trial_var_name = kernel->getTrialVariableName();
   const auto & test_var_name = kernel->getTestVariableName();
@@ -98,20 +98,20 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   if (!_kernels_map.Has(test_var_name))
   {
     auto kernel_field_map =
-        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>>();
     _kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new kernels map if not present for the test/trial variable pair
   if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<Kernel>>>();
     _kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
   _kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
 }
 
 void
-EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
+EquationSystem::AddIntegratedBC(std::shared_ptr<IntegratedBC> bc)
 {
   const auto & trial_var_name = bc->getTrialVariableName();
   const auto & test_var_name = bc->getTestVariableName();
@@ -120,36 +120,36 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   // Register new integrated bc map if not present for the test variable
   if (!_integrated_bc_map.Has(test_var_name))
   {
-    auto integrated_bc_field_map = std::make_shared<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
+    auto integrated_bc_field_map =
+        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>>();
     _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
   }
   // Register new integrated bc map if not present for the test/trial variable pair
   if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<IntegratedBC>>>();
     _integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
   }
   _integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
 }
 
 void
-EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
+EquationSystem::AddEssentialBC(std::shared_ptr<EssentialBC> bc)
 {
   const auto & test_var_name = bc->getTestVariableName();
   AddTestVariableNameIfMissing(test_var_name);
   // Register new essential bc map if not present for the test variable
   if (!_essential_bc_map.Has(test_var_name))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialBC>>>();
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<EssentialBC>>>();
     _essential_bc_map.Register(test_var_name, std::move(bcs));
   }
   _essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
+EquationSystem::Init(GridFunctions & gridfunctions,
+                     ComplexGridFunctions & cmplx_gridfunctions,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -559,7 +559,7 @@ EquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_mblfs = std::make_shared<NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
@@ -599,7 +599,7 @@ void
 EquationSystem::ApplyDomainLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
   {
@@ -622,7 +622,7 @@ void
 EquationSystem::ApplyDomainNLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParNonlinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map,
     std::optional<mfem::real_t> scale_factor)
 {
   if (kernels_map.Has(test_var_name))
@@ -654,8 +654,7 @@ void
 EquationSystem::ApplyBoundaryLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> & integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name) &&
       integrated_bc_map.Get(test_var_name)->Has(test_var_name))
@@ -679,8 +678,7 @@ void
 EquationSystem::ApplyBoundaryNLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParNonlinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> & integrated_bc_map,
     std::optional<mfem::real_t> scale_factor)
 {
   if (integrated_bc_map.Has(test_var_name))

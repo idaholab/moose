@@ -13,20 +13,22 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * AuxKernel to compute a running time average of a scalar coefficient
  * using a linear blend.
  *
  * avg_new(x) = (1 - w) * avg_old(x) + w * src(x), w = dt / (t - s), t > s
  */
-class MFEMScalarTimeAverageAux : public MFEMAuxKernel
+class ScalarTimeAverageAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarTimeAverageAux(const InputParameters & parameters);
+  ScalarTimeAverageAux(const InputParameters & parameters);
 
-  virtual ~MFEMScalarTimeAverageAux() override = default;
+  virtual ~ScalarTimeAverageAux() override = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -46,4 +48,5 @@ protected:
   const Real & _dt;
 };
 
+} // namespace Moose::MFEM
 #endif

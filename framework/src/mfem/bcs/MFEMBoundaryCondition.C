@@ -15,11 +15,13 @@
 #include "mfem/miniapps/common/mesh_extras.hpp"
 #include "libmesh/restore_warnings.h"
 
-InputParameters
-MFEMBoundaryCondition::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params += MFEMBoundaryRestrictable::validParams();
+InputParameters
+BoundaryCondition::validParams()
+{
+  InputParameters params = Object::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addClassDescription("Base class for applying boundary conditions to MFEM problems.");
   params.registerBase("BoundaryCondition");
@@ -28,12 +30,13 @@ MFEMBoundaryCondition::validParams()
   return params;
 }
 
-MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    MFEMBoundaryRestrictable(
-        parameters, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters)
+  : Object(parameters),
+    BoundaryRestrictable(parameters,
+                         getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _test_var_name(getParam<VariableName>("variable"))
 {
 }
 
+} // namespace Moose::MFEM
 #endif

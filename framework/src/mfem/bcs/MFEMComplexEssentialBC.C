@@ -11,16 +11,19 @@
 
 #include "MFEMComplexEssentialBC.h"
 
-InputParameters
-MFEMComplexEssentialBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
+InputParameters
+ComplexEssentialBC::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
   return params;
 }
 
-MFEMComplexEssentialBC::MFEMComplexEssentialBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters)
+ComplexEssentialBC::ComplexEssentialBC(const InputParameters & parameters)
+  : BoundaryCondition(parameters)
 {
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -68,12 +68,12 @@ private:
   std::function<double(double)> _func;
 };
 
-class TestOffDiagonalLinearIntegratedBC : public MFEMIntegratedBC
+class TestOffDiagonalLinearIntegratedBC : public Moose::MFEM::IntegratedBC
 {
 public:
   static InputParameters validParams()
   {
-    auto params = MFEMIntegratedBC::validParams();
+    auto params = Moose::MFEM::IntegratedBC::validParams();
     params.addParam<VariableName>("trial_variable",
                                   "Trial variable this boundary condition acts on.");
     params.addClassDescription(
@@ -82,7 +82,7 @@ public:
   }
 
   TestOffDiagonalLinearIntegratedBC(const InputParameters & parameters)
-    : MFEMIntegratedBC(parameters),
+    : Moose::MFEM::IntegratedBC(parameters),
       _trial_var_name(getParam<VariableName>("trial_variable")),
       _coef(1.0)
   {
@@ -100,12 +100,12 @@ private:
   mfem::ConstantCoefficient _coef;
 };
 
-class TestOffDiagonalNonlinearIntegratedBC : public MFEMIntegratedBC
+class TestOffDiagonalNonlinearIntegratedBC : public Moose::MFEM::IntegratedBC
 {
 public:
   static InputParameters validParams()
   {
-    auto params = MFEMIntegratedBC::validParams();
+    auto params = Moose::MFEM::IntegratedBC::validParams();
     params.addParam<VariableName>("trial_variable",
                                   "Trial variable this boundary condition acts on.");
     params.addClassDescription(
@@ -114,7 +114,8 @@ public:
   }
 
   TestOffDiagonalNonlinearIntegratedBC(const InputParameters & parameters)
-    : MFEMIntegratedBC(parameters), _trial_var_name(getParam<VariableName>("trial_variable"))
+    : Moose::MFEM::IntegratedBC(parameters),
+      _trial_var_name(getParam<VariableName>("trial_variable"))
   {
   }
 
@@ -180,10 +181,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMBoundaryNormalIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMBoundaryNormalIntegratedBC & integrated_bc =
-      addObject<MFEMBoundaryNormalIntegratedBC>("MFEMBoundaryNormalIntegratedBC", "bc1", bc_params);
+  Moose::MFEM::BoundaryNormalIntegratedBC & integrated_bc =
+      addObject<Moose::MFEM::BoundaryNormalIntegratedBC>(
+          "MFEMBoundaryNormalIntegratedBC", "bc1", bc_params);
 
   // Test MFEMBoundaryNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
@@ -210,10 +212,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMBoundaryNormalIntegratedBC)
   _mfem_problem->addFunction("ParsedVectorFunction", "func1", func_params);
   InputParameters bc_params = _factory.getValidParams("MFEMBoundaryNormalIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func1";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMBoundaryNormalIntegratedBC & integrated_bc =
-      addObject<MFEMBoundaryNormalIntegratedBC>("MFEMBoundaryNormalIntegratedBC", "bc1", bc_params);
+  Moose::MFEM::BoundaryNormalIntegratedBC & integrated_bc =
+      addObject<Moose::MFEM::BoundaryNormalIntegratedBC>(
+          "MFEMBoundaryNormalIntegratedBC", "bc1", bc_params);
 
   // Test MFEMBoundaryNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
@@ -235,16 +238,16 @@ TEST_F(MFEMIntegratedBCTest, MFEMBoundaryIntegratedBC)
   // Build required BC inputs
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"3.0"};
+  coef_params.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {"3.0"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "coef1";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "coef1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMBoundaryIntegratedBC & integrated_bc =
-      addObject<MFEMBoundaryIntegratedBC>("MFEMBoundaryIntegratedBC", "bc1", bc_params);
+  Moose::MFEM::BoundaryIntegratedBC & integrated_bc =
+      addObject<Moose::MFEM::BoundaryIntegratedBC>("MFEMBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
@@ -274,11 +277,11 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMConvectiveHeatFluxBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("heat_transfer_coefficient") = "htc";
-  bc_params.set<MFEMScalarCoefficientName>("T_infinity") = "Tinf";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("heat_transfer_coefficient") = "htc";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("T_infinity") = "Tinf";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMConvectiveHeatFluxBC & integrated_bc =
-      addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", bc_params);
+  Moose::MFEM::ConvectiveHeatFluxBC & integrated_bc =
+      addObject<Moose::MFEM::ConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", bc_params);
 
   // Test MFEMConvectiveHeatFluxBC returns an integrator of the expected type
   auto lf_integrator =
@@ -359,9 +362,9 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedConstantBC)
   InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
-  auto & bc =
-      addObject<MFEMVectorBoundaryIntegratedBC>("MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  auto & bc = addObject<Moose::MFEM::VectorBoundaryIntegratedBC>(
+      "MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());
@@ -386,9 +389,9 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
   InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func1";
-  auto & bc =
-      addObject<MFEMVectorBoundaryIntegratedBC>("MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "func1";
+  auto & bc = addObject<Moose::MFEM::VectorBoundaryIntegratedBC>(
+      "MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());
@@ -404,7 +407,7 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+  diag_test_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters nonlinear_params =
       _factory.getValidParams("TestOffDiagonalNonlinearIntegratedBC");
@@ -412,8 +415,8 @@ TEST_F(MFEMIntegratedBCTest, RejectsOffDiagonalNonlinearIntegratedBCWhenBuilding
   nonlinear_params.set<VariableName>("trial_variable") = "trial_variable_name";
   nonlinear_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
-  auto diag_test =
-      addSharedObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "diag_test_bc", diag_test_params);
+  auto diag_test = addSharedObject<Moose::MFEM::DiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_test_bc", diag_test_params);
   auto nonlinear = addSharedObject<TestOffDiagonalNonlinearIntegratedBC>(
       "TestOffDiagonalNonlinearIntegratedBC", "nonlinear_offdiag_bc", nonlinear_params);
 
@@ -442,20 +445,20 @@ TEST_F(MFEMIntegratedBCTest, AcceptsLinearOffDiagonalIntegratedBCWhenBuildingEqu
 {
   InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_test_params.set<VariableName>("variable") = "test_variable_name";
-  diag_test_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+  diag_test_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
   diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
-  diag_trial_params.set<MFEMScalarCoefficientName>("coefficient") = "1.0";
+  diag_trial_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
 
   InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearIntegratedBC");
   linear_params.set<VariableName>("variable") = "test_variable_name";
   linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
   linear_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
-  auto diag_test = addSharedObject<MFEMDiffusionKernel>(
+  auto diag_test = addSharedObject<Moose::MFEM::DiffusionKernel>(
       "MFEMDiffusionKernel", "diag_test_bc_2", diag_test_params);
-  auto diag_trial = addSharedObject<MFEMDiffusionKernel>(
+  auto diag_trial = addSharedObject<Moose::MFEM::DiffusionKernel>(
       "MFEMDiffusionKernel", "diag_trial_bc_2", diag_trial_params);
   auto linear = addSharedObject<TestOffDiagonalLinearIntegratedBC>(
       "TestOffDiagonalLinearIntegratedBC", "linear_offdiag_bc", linear_params);

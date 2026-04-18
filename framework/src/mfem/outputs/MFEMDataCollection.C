@@ -11,19 +11,21 @@
 
 #include "MFEMDataCollection.h"
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMDataCollection::validParams()
+DataCollection::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Output for controlling MFEMDataCollection inherited data.");
+  params.addClassDescription("Output for controlling Moose::MFEM::DataCollection inherited data.");
   params.addParam<std::string>("submesh",
                                "Submesh to output variables on. Leave blank to use base mesh.");
   return params;
 }
 
-MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
+DataCollection::DataCollection(const InputParameters & parameters)
   : FileOutput(parameters),
-    _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData()),
+    _problem_data(static_cast<Problem *>(_problem_ptr)->getProblemData()),
     _pmesh(parameters.isParamValid("submesh")
                ? _problem_data.submeshes.GetRef(getParam<std::string>("submesh"))
                : const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get()))
@@ -31,7 +33,7 @@ MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
 }
 
 void
-MFEMDataCollection::registerFields()
+DataCollection::registerFields()
 {
   // Save real fields
   mfem::DataCollection & dc(getDataCollection());
@@ -61,7 +63,7 @@ MFEMDataCollection::registerFields()
 }
 
 void
-MFEMDataCollection::output()
+DataCollection::output()
 {
   mfem::DataCollection & dc(getDataCollection());
   // Write fields to disk
@@ -71,4 +73,5 @@ MFEMDataCollection::output()
   ++_file_num;
 }
 
+} // namespace Moose::MFEM
 #endif

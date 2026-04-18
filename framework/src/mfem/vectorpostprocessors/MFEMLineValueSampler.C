@@ -17,7 +17,7 @@
 
 #include <vector>
 
-registerMooseObject("MooseApp", MFEMLineValueSampler);
+registerMooseMFEMObject("MooseApp", LineValueSampler);
 
 namespace
 {
@@ -26,8 +26,8 @@ generateLinePoints(const Point & start_point, const Point & end_point, unsigned 
 {
   if (num_points < 2)
   {
-    mooseError("In MFEMLineValueSampler: line must have at least 2 points,"
-               "for single points use MFEMPointValueSampler.");
+    mooseError("In Moose::MFEM::LineValueSampler: line must have at least 2 points,"
+               "for single points use Moose::MFEM::PointValueSampler.");
   }
 
   // initialize and populate vector with linearly-spaced points along line
@@ -44,10 +44,12 @@ generateLinePoints(const Point & start_point, const Point & end_point, unsigned 
 }
 }
 
-InputParameters
-MFEMLineValueSampler::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMValueSamplerBase::validParams();
+InputParameters
+LineValueSampler::validParams()
+{
+  InputParameters params = ValueSamplerBase::validParams();
 
   params.addClassDescription("Sample an MFEM variable along a specified line.");
 
@@ -61,14 +63,15 @@ MFEMLineValueSampler::validParams()
   return params;
 }
 
-MFEMLineValueSampler::MFEMLineValueSampler(const InputParameters & parameters)
-  : MFEMValueSamplerBase(parameters,
-                         // can't call getParam as that requires initialized base class
-                         // so calling parameters.get directly
-                         generateLinePoints(parameters.get<Point>("start_point"),
-                                            parameters.get<Point>("end_point"),
-                                            parameters.get<unsigned int>("num_points")))
+LineValueSampler::LineValueSampler(const InputParameters & parameters)
+  : ValueSamplerBase(parameters,
+                     // can't call getParam as that requires initialized base class
+                     // so calling parameters.get directly
+                     generateLinePoints(parameters.get<Point>("start_point"),
+                                        parameters.get<Point>("end_point"),
+                                        parameters.get<unsigned int>("num_points")))
 {
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

@@ -12,32 +12,35 @@
 #include "MFEMDiffusionKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDiffusionKernel);
+registerMooseMFEMObject("MooseApp", DiffusionKernel);
 
-InputParameters
-MFEMDiffusionKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+DiffusionKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of property for diffusion coefficient k.");
   return params;
 }
 
-MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+DiffusionKernel::DiffusionKernel(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMDiffusionKernel::createBFIntegrator()
+DiffusionKernel::createBFIntegrator()
 {
   return new mfem::DiffusionIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

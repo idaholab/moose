@@ -127,7 +127,8 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRES)
   solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
+  Moose::MFEM::HypreGMRES & solver =
+      addObject<Moose::MFEM::HypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
 
   testDiffusionSolve<mfem::HypreGMRES>(solver, 1e-5);
 }
@@ -141,8 +142,8 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRES)
   InputParameters solver_params = _factory.getValidParams("MFEMHypreFGMRES");
   solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreFGMRES cannot set absolute tolerance
   // Construct kernel
-  MFEMHypreFGMRES & solver =
-      addObject<MFEMHypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
+  Moose::MFEM::HypreFGMRES & solver =
+      addObject<Moose::MFEM::HypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
 
   testDiffusionSolve<mfem::HypreFGMRES>(solver, 1e-5);
 }
@@ -158,7 +159,8 @@ TEST_F(MFEMSolverTest, MFEMHyprePCG)
   solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
+  Moose::MFEM::HyprePCG & solver =
+      addObject<Moose::MFEM::HyprePCG>("MFEMHyprePCG", "solver1", solver_params);
 
   testDiffusionSolve<mfem::HyprePCG>(solver, 1e-5);
 }
@@ -175,8 +177,8 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolver)
   solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMGMRESSolver & solver =
-      addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
+  Moose::MFEM::GMRESSolver & solver =
+      addObject<Moose::MFEM::GMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
 
   testDiffusionSolve<mfem::GMRESSolver>(solver, 1e-5);
 }
@@ -189,7 +191,8 @@ TEST_F(MFEMSolverTest, MFEMCGSolver)
   solver_params.set<mfem::real_t>("l_abs_tol") = 1e-5;
 
   // Construct kernel
-  MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+  Moose::MFEM::CGSolver & solver =
+      addObject<Moose::MFEM::CGSolver>("MFEMCGSolver", "solver1", solver_params);
 
   testDiffusionSolve<mfem::CGSolver>(solver, 1e-5);
 }
@@ -204,8 +207,8 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7; // HypreBoomerAMG cannot set absolute tolerance
 
   // Construct solver
-  MFEMHypreBoomerAMG & solver =
-      addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
+  Moose::MFEM::HypreBoomerAMG & solver =
+      addObject<Moose::MFEM::HypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
   auto solver_downcast = dynamic_cast<mfem::HypreBoomerAMG *>(&solver.getSolver());
@@ -227,14 +230,15 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
   fespace_params.set<MooseEnum>("fec_type") = "RT";
 
   // Construct fespace
-  addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HDivFESpace", fespace_params);
+  addObject<Moose::MFEM::VectorFESpace>("MFEMVectorFESpace", "HDivFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreADS");
-  solver_params.set<MFEMFESpaceName>("fespace") = "HDivFESpace";
+  solver_params.set<Moose::MFEM::FESpaceName>("fespace") = "HDivFESpace";
 
   // Construct solver
-  MFEMHypreADS & solver = addObject<MFEMHypreADS>("MFEMHypreADS", "solver1", solver_params);
+  Moose::MFEM::HypreADS & solver =
+      addObject<Moose::MFEM::HypreADS>("MFEMHypreADS", "solver1", solver_params);
 
   // Test MFEMSolver returns a solver of the expected type
   auto solver_downcast = dynamic_cast<mfem::HypreADS *>(&solver.getSolver());
@@ -253,14 +257,15 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
   fespace_params.set<MooseEnum>("fec_type") = "ND";
 
   // Construct fespace
-  addObject<MFEMVectorFESpace>("MFEMVectorFESpace", "HCurlFESpace", fespace_params);
+  addObject<Moose::MFEM::VectorFESpace>("MFEMVectorFESpace", "HCurlFESpace", fespace_params);
 
   // Build required solver inputs
   InputParameters solver_params = _factory.getValidParams("MFEMHypreAMS");
-  solver_params.set<MFEMFESpaceName>("fespace") = "HCurlFESpace";
+  solver_params.set<Moose::MFEM::FESpaceName>("fespace") = "HCurlFESpace";
 
   // Construct solver
-  MFEMHypreAMS & solver = addObject<MFEMHypreAMS>("MFEMHypreAMS", "solver1", solver_params);
+  Moose::MFEM::HypreAMS & solver =
+      addObject<Moose::MFEM::HypreAMS>("MFEMHypreAMS", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
   auto solver_downcast = dynamic_cast<mfem::HypreAMS *>(&solver.getSolver());
@@ -276,7 +281,8 @@ TEST_F(MFEMSolverTest, MFEMSuperLU)
   InputParameters solver_params = _factory.getValidParams("MFEMSuperLU");
 
   // Construct kernel
-  MFEMSuperLU & solver = addObject<MFEMSuperLU>("MFEMSuperLU", "solver1", solver_params);
+  Moose::MFEM::SuperLU & solver =
+      addObject<Moose::MFEM::SuperLU>("MFEMSuperLU", "solver1", solver_params);
 
   testDiffusionSolve<mfem::SuperLUSolver>(solver, 1e-12);
 }
@@ -290,7 +296,8 @@ TEST_F(MFEMSolverTest, MFEMMUMPS)
   InputParameters solver_params = _factory.getValidParams("MFEMMUMPS");
 
   // Construct solver
-  MFEMMUMPS & solver = addObject<MFEMMUMPS>("MFEMMUMPS", "solver1", solver_params);
+  Moose::MFEM::MUMPS & solver =
+      addObject<Moose::MFEM::MUMPS>("MFEMMUMPS", "solver1", solver_params);
 
   testDiffusionSolve<mfem::MUMPSSolver>(solver, 1e-12);
 }
@@ -306,7 +313,8 @@ TEST_F(MFEMSolverTest, MFEMHypreGMRESLOR)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
-  MFEMHypreGMRES & solver = addObject<MFEMHypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
+  Moose::MFEM::HypreGMRES & solver =
+      addObject<Moose::MFEM::HypreGMRES>("MFEMHypreGMRES", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::HypreGMRES>>(solver, 1e-5);
 }
@@ -322,8 +330,8 @@ TEST_F(MFEMSolverTest, MFEMHypreFGMRESLOR)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
-  MFEMHypreFGMRES & solver =
-      addObject<MFEMHypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
+  Moose::MFEM::HypreFGMRES & solver =
+      addObject<Moose::MFEM::HypreFGMRES>("MFEMHypreFGMRES", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::HypreFGMRES>>(solver, 1e-5);
 }
@@ -339,7 +347,8 @@ TEST_F(MFEMSolverTest, MFEMHyprePCGLOR)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
-  MFEMHyprePCG & solver = addObject<MFEMHyprePCG>("MFEMHyprePCG", "solver1", solver_params);
+  Moose::MFEM::HyprePCG & solver =
+      addObject<Moose::MFEM::HyprePCG>("MFEMHyprePCG", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::HyprePCG>>(solver, 1e-5);
 }
@@ -356,8 +365,8 @@ TEST_F(MFEMSolverTest, MFEMGMRESSolverLOR)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
-  MFEMGMRESSolver & solver =
-      addObject<MFEMGMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
+  Moose::MFEM::GMRESSolver & solver =
+      addObject<Moose::MFEM::GMRESSolver>("MFEMGMRESSolver", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::GMRESSolver>>(solver, 1e-5);
 }
@@ -370,7 +379,8 @@ TEST_F(MFEMSolverTest, MFEMCGSolverLOR)
   solver_params.set<mfem::real_t>("l_tol") = 1e-7;
 
   // Construct kernel
-  MFEMCGSolver & solver = addObject<MFEMCGSolver>("MFEMCGSolver", "solver1", solver_params);
+  Moose::MFEM::CGSolver & solver =
+      addObject<Moose::MFEM::CGSolver>("MFEMCGSolver", "solver1", solver_params);
 
   testDiffusionSolve<mfem::LORSolver<mfem::CGSolver>>(solver, 1e-5);
 }
@@ -382,8 +392,8 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
   solver_params.set<bool>("low_order_refined") = true;
 
   // Construct kernel
-  MFEMHypreBoomerAMG & solver =
-      addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
+  Moose::MFEM::HypreBoomerAMG & solver =
+      addObject<Moose::MFEM::HypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   mfem::ParMesh pmesh = makeMesh();
   mfem::ParFiniteElementSpace fespace(&pmesh, new mfem::H1_FECollection(3, 3));

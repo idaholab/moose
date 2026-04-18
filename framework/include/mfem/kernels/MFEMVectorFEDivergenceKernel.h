@@ -13,18 +13,20 @@
 
 #include "MFEMMixedBilinearFormKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k \vec \nabla \cdot \vec u, v)
  * \f]
  */
-class MFEMVectorFEDivergenceKernel : public MFEMMixedBilinearFormKernel
+class VectorFEDivergenceKernel : public MixedBilinearFormKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEDivergenceKernel(const InputParameters & parameters);
-  ~MFEMVectorFEDivergenceKernel() override = default;
+  VectorFEDivergenceKernel(const InputParameters & parameters);
+  ~VectorFEDivergenceKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
@@ -32,4 +34,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

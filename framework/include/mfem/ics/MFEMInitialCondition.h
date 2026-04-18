@@ -13,16 +13,19 @@
 
 #include "MFEMExecutedObject.h"
 
+namespace Moose::MFEM
+{
 /**
- * Base class used to set the initial value(s) on an MFEMVariable.
+ * Base class used to set the initial value(s) on an Moose::MFEM::Variable.
  */
-class MFEMInitialCondition : public MFEMExecutedObject
+class InitialCondition : public ExecutedObject
 {
 public:
   static InputParameters validParams();
-  MFEMInitialCondition(const InputParameters & params);
+  InitialCondition(const InputParameters & params);
 
   virtual std::optional<std::string> suppliedVariableName() const override;
 };
 
+} // namespace Moose::MFEM
 #endif

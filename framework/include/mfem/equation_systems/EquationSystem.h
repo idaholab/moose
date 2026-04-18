@@ -37,10 +37,10 @@ public:
   ~EquationSystem() override;
 
   /// Add kernels.
-  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
-  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+  virtual void AddKernel(std::shared_ptr<Kernel> kernel);
+  virtual void AddIntegratedBC(std::shared_ptr<IntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
-  virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
+  virtual void AddEssentialBC(std::shared_ptr<EssentialBC> bc);
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
@@ -148,7 +148,7 @@ protected:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   /**
@@ -158,7 +158,7 @@ protected:
   void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map);
 
   /**
    * Apply domain NonlinearFormIntegrators from kernels to the nonlinear form associated with the
@@ -167,7 +167,7 @@ protected:
   void ApplyDomainNLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   /**
@@ -179,7 +179,7 @@ protected:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> &
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
@@ -190,7 +190,7 @@ protected:
   void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> &
           integrated_bc_map);
 
   /**
@@ -200,7 +200,7 @@ protected:
   void ApplyBoundaryNLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParNonlinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> &
           integrated_bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
@@ -214,7 +214,7 @@ protected:
   /// Names of all coupled variables without a corresponding test variable.
   std::vector<std::string> _eliminated_var_names;
   /// Pointers to coupled variables not part of the reduced EquationSystem.
-  Moose::MFEM::GridFunctions _eliminated_variables;
+  GridFunctions _eliminated_variables;
   /// Names of all test variables corresponding to linear forms in this equation system
   std::vector<std::string> _test_var_names;
   /// Pointers to finite element spaces associated with test variables.
@@ -235,13 +235,13 @@ protected:
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks, _jacobian_blocks;
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> _kernels_map;
   /// Arrays to store integrated BCs to act on each component of weak form.
   /// Named according to test and trial variables.
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> _integrated_bc_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> _integrated_bc_map;
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
-  NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  NamedFieldsMap<std::vector<std::shared_ptr<EssentialBC>>> _essential_bc_map;
 
   // Operator handle for the jacobian
   mutable mfem::OperatorHandle _jacobian;
@@ -250,7 +250,7 @@ protected:
   mfem::AssemblyLevel _assembly_level;
 
   // Pointer to GridFunctions to enable updates during nonlinear iterations
-  Moose::MFEM::GridFunctions * _gfuncs;
+  GridFunctions * _gfuncs;
   // Array storing block offsets of solution and residual vector
   mfem::Array<int> _block_true_offsets;
   // Boolean indicating if EquationSystem contains nonlinear integrators
@@ -260,7 +260,7 @@ protected:
 
 private:
   friend class EquationSystemProblemOperator;
-  friend class ::MFEMProblemSolve;
+  friend class ProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
@@ -271,7 +271,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>> & kernels_map,
     std::optional<mfem::real_t> scale_factor)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
@@ -299,8 +299,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<IntegratedBC>>>> & integrated_bc_map,
     std::optional<mfem::real_t> scale_factor)
 {
   if (integrated_bc_map.Has(test_var_name) &&

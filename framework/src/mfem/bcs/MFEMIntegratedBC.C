@@ -11,16 +11,16 @@
 
 #include "MFEMIntegratedBC.h"
 
-InputParameters
-MFEMIntegratedBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
+InputParameters
+IntegratedBC::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
   return params;
 }
 
-MFEMIntegratedBC::MFEMIntegratedBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters)
-{
-}
+IntegratedBC::IntegratedBC(const InputParameters & parameters) : BoundaryCondition(parameters) {}
 
+} // namespace Moose::MFEM
 #endif

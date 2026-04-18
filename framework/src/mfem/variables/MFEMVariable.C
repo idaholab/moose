@@ -13,15 +13,17 @@
 #include "MFEMProblem.h"
 #include "MooseVariableBase.h"
 
-registerMooseObject("MooseApp", MFEMVariable);
+registerMooseMFEMObject("MooseApp", Variable);
 
-InputParameters
-MFEMVariable::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
+InputParameters
+Variable::validParams()
+{
+  InputParameters params = Object::validParams();
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
-  params.addRequiredParam<MFEMFESpaceName>("fespace",
-                                           "The finite element space this variable is defined on.");
+  params.addRequiredParam<Moose::MFEM::FESpaceName>(
+      "fespace", "The finite element space this variable is defined on.");
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
@@ -34,10 +36,10 @@ MFEMVariable::validParams()
   return params;
 }
 
-MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<MFEMFESpaceName>("fespace"))),
+Variable::Variable(const InputParameters & parameters)
+  : Object(parameters),
+    _fespace(getMFEMProblem().getMFEMObject<FESpace>(
+        "Moose::MFEM::FESpace", getParam<Moose::MFEM::FESpaceName>("fespace"))),
     _gridfunction(buildGridFunction()),
     _time_derivative_name(
         isParamValid("time_derivative")
@@ -50,9 +52,10 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
 }
 
 const std::shared_ptr<mfem::ParGridFunction>
-MFEMVariable::buildGridFunction()
+Variable::buildGridFunction()
 {
   return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
 }
 
+} // namespace Moose::MFEM
 #endif

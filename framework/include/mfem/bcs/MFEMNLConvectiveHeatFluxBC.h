@@ -13,18 +13,20 @@
 
 #include "MFEMIntegratedBC.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (h(T) (T-T_\infty), T')
  * \f]
  */
-class MFEMNLConvectiveHeatFluxBC : public MFEMIntegratedBC
+class NLConvectiveHeatFluxBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
   /// Construct the nonlinear convective heat flux boundary condition.
-  MFEMNLConvectiveHeatFluxBC(const InputParameters & parameters);
+  NLConvectiveHeatFluxBC(const InputParameters & parameters);
 
   /// Create MFEM non-linear integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() override;
@@ -42,4 +44,5 @@ protected:
   mfem::Coefficient & _T_coef;
 };
 
+} // namespace Moose::MFEM
 #endif

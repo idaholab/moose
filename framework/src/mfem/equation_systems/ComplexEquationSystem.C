@@ -148,7 +148,7 @@ ComplexEquationSystem::ApplyEssentialBCs()
 }
 
 void
-ComplexEquationSystem::AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel)
+ComplexEquationSystem::AddComplexKernel(std::shared_ptr<ComplexKernel> kernel)
 {
   const auto & trial_var_name = kernel->getTrialVariableName();
   const auto & test_var_name = kernel->getTestVariableName();
@@ -158,20 +158,20 @@ ComplexEquationSystem::AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kerne
   if (!_cmplx_kernels_map.Has(test_var_name))
   {
     auto kernel_field_map =
-        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<ComplexKernel>>>>();
     _cmplx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new complex kernels map if not present for the test/trial variable pair
   if (!_cmplx_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMComplexKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<ComplexKernel>>>();
     _cmplx_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
   _cmplx_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
 }
 
 void
-ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc)
+ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<ComplexIntegratedBC> bc)
 {
   const auto & trial_var_name = bc->getTrialVariableName();
   const auto & test_var_name = bc->getTestVariableName();
@@ -181,27 +181,27 @@ ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegra
   if (!_cmplx_integrated_bc_map.Has(test_var_name))
   {
     auto integrated_bc_field_map =
-        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
+        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<ComplexIntegratedBC>>>>();
     _cmplx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
   }
   // Register new complex integrated bc map if not present for the test/trial variable pair
   if (!_cmplx_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>();
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<ComplexIntegratedBC>>>();
     _cmplx_integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
   }
   _cmplx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
 }
 
 void
-ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc)
+ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<ComplexEssentialBC> bc)
 {
   const auto & test_var_name = bc->getTestVariableName();
   AddTestVariableNameIfMissing(test_var_name);
   // Register new complex essential bc map if not present for the test variable
   if (!_cmplx_essential_bc_map.Has(test_var_name))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>();
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<ComplexEssentialBC>>>();
     _cmplx_essential_bc_map.Register(test_var_name, std::move(bcs));
   }
   _cmplx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));

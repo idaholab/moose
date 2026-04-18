@@ -13,8 +13,10 @@
 #include "MFEMProblemSolve.h"
 #include "MFEMProblem.h"
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMProblemSolve::validParams()
+ProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
@@ -24,24 +26,23 @@ MFEMProblemSolve::validParams()
   return params;
 }
 
-MFEMProblemSolve::MFEMProblemSolve(
-    Executioner & ex,
-    std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators)
+ProblemSolve::ProblemSolve(Executioner & ex,
+                           std::vector<std::shared_ptr<ProblemOperatorBase>> & problem_operators)
   : SolveObject(ex),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(_problem)),
+    _mfem_problem(dynamic_cast<Problem &>(_problem)),
     _problem_operators(problem_operators)
 {
   if (const auto compute_device = _app.getComputeDevice())
-    _app.setMFEMDevice(*compute_device, Moose::PassKey<MFEMProblemSolve>());
+    _app.setMFEMDevice(*compute_device, Moose::PassKey<ProblemSolve>());
   else
     _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
                        : _app.isUltimateMaster() ? "cpu"
                                                  : "",
-                       Moose::PassKey<MFEMProblemSolve>());
+                       Moose::PassKey<ProblemSolve>());
 }
 
 bool
-MFEMProblemSolve::solve()
+ProblemSolve::solve()
 {
   if (_mfem_problem.shouldSolve())
   {
@@ -70,4 +71,5 @@ MFEMProblemSolve::solve()
   return true;
 }
 
+} // namespace Moose::MFEM
 #endif

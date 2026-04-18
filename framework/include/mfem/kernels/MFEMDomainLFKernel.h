@@ -13,17 +13,19 @@
 
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (f, v)
  * \f]
  */
-class MFEMDomainLFKernel : public MFEMKernel
+class DomainLFKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMDomainLFKernel(const InputParameters & parameters);
+  DomainLFKernel(const InputParameters & parameters);
 
   virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
@@ -31,4 +33,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

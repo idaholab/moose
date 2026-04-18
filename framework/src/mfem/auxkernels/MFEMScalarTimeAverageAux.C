@@ -12,22 +12,25 @@
 #include "MFEMScalarTimeAverageAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMScalarTimeAverageAux);
+registerMooseMFEMObject("MooseApp", ScalarTimeAverageAux);
 
-InputParameters
-MFEMScalarTimeAverageAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+ScalarTimeAverageAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Calculates a running time average of a scalar coefficient projected onto an auxvariable");
-  params.addRequiredParam<MFEMScalarCoefficientName>("source", "Scalar coefficient to average");
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>("source",
+                                                              "Scalar coefficient to average");
   params.addParam<mfem::real_t>("time_skip", 0.0, "Time to skip before beginning the average");
 
   return params;
 }
 
-MFEMScalarTimeAverageAux::MFEMScalarTimeAverageAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
+ScalarTimeAverageAux::ScalarTimeAverageAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _source_coefficient(getScalarCoefficient("source")),
     _result_coefficient(getScalarCoefficientByName(_result_var_name)),
     _average_var(_result_var.ParFESpace()),
@@ -38,7 +41,7 @@ MFEMScalarTimeAverageAux::MFEMScalarTimeAverageAux(const InputParameters & param
 }
 
 void
-MFEMScalarTimeAverageAux::execute()
+ScalarTimeAverageAux::execute()
 {
   if (_time <= _skip)
     return;
@@ -51,4 +54,5 @@ MFEMScalarTimeAverageAux::execute()
   _result_var = _average_var;
 }
 
+} // namespace Moose::MFEM
 #endif

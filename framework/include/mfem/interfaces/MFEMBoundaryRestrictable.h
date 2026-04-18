@@ -16,16 +16,18 @@
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
 
+namespace Moose::MFEM
+{
 /**
  * Base class for construction of an object that is restricted to a subset
  * of boundaries of the problem mesh.
  */
-class MFEMBoundaryRestrictable
+class BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMBoundaryRestrictable(const InputParameters & parameters, const mfem::ParMesh & mfem_mesh);
+  BoundaryRestrictable(const InputParameters & parameters, const mfem::ParMesh & mfem_mesh);
 
   mfem::Array<int> boundariesToAttributes();
   std::vector<std::string> boundariesToStrings();
@@ -51,4 +53,5 @@ protected:
   mfem::Array<int> _boundary_markers;
 };
 
+} // namespace Moose::MFEM
 #endif

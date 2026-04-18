@@ -12,17 +12,20 @@
 #include "MFEMSubMeshTransfer.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMSubMeshTransfer);
+registerMooseMFEMObject("MooseApp", SubMeshTransfer);
 
-InputParameters
-MFEMSubMeshTransfer::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMExecutedObject::validParams();
-  params.registerBase("MFEMSubMeshTransfer");
-  params.addClassDescription("Class to transfer MFEM variable data to or from a restricted copy of "
-                             "the variable defined on "
-                             " a subspace of an MFEMMesh, represented as an MFEMSubMesh.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+InputParameters
+SubMeshTransfer::validParams()
+{
+  InputParameters params = ExecutedObject::validParams();
+  params.registerBase("Moose::MFEM::SubMeshTransfer");
+  params.addClassDescription(
+      "Class to transfer MFEM variable data to or from a restricted copy of "
+      "the variable defined on "
+      " a subspace of an Moose::MFEM::Mesh, represented as an Moose::MFEM::SubMesh.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params,
       "from_variable",
       "MFEM variable to transfer data from. Can be defined on either the parent mesh or a "
@@ -33,8 +36,8 @@ MFEMSubMeshTransfer::validParams()
   return params;
 }
 
-MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
-  : MFEMExecutedObject(parameters),
+SubMeshTransfer::SubMeshTransfer(const InputParameters & parameters)
+  : ExecutedObject(parameters),
     _source_var_name(getParam<VariableName>("from_variable")),
     _source_var(*getMFEMProblem().getGridFunction(_source_var_name)),
     _result_var_name(getParam<VariableName>("to_variable")),
@@ -43,15 +46,16 @@ MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
 }
 
 std::optional<std::string>
-MFEMSubMeshTransfer::suppliedVariableName() const
+SubMeshTransfer::suppliedVariableName() const
 {
   return _result_var_name;
 }
 
 void
-MFEMSubMeshTransfer::execute()
+SubMeshTransfer::execute()
 {
   mfem::ParSubMesh::Transfer(_source_var, _result_var);
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -23,7 +23,7 @@ class MooseMesh;
 //*
 // Copy MFEMVariables between multiapps
 // The variables must be of the same type and dimension
-// and the MFEMMesh must be identical in both multiapps
+// and the Moose::MFEM::Mesh must be identical in both multiapps
 // */
 
 class MultiAppMFEMCopyTransfer : public MultiAppTransfer
@@ -41,7 +41,7 @@ protected:
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
 
-  void transfer(MFEMProblem & to_problem, MFEMProblem & from_problem);
+  void transfer(Moose::MFEM::Problem & to_problem, Moose::MFEM::Problem & from_problem);
 
   void checkSiblingsTransferSupported() const override;
 };

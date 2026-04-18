@@ -18,12 +18,14 @@
  *
  * Subclasses should override validParams and provide and use the constructor.
  */
-class MFEMValueSamplerBase : public MFEMVectorPostprocessor
+namespace Moose::MFEM
+{
+class ValueSamplerBase : public VectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  MFEMValueSamplerBase(const InputParameters & parameters, const std::vector<Point> & points);
+  ValueSamplerBase(const InputParameters & parameters, const std::vector<Point> & points);
 
   /** Perform the interpolation in FindPointsGSLIB.
    */
@@ -48,4 +50,5 @@ private:
   std::vector<std::reference_wrapper<VectorPostprocessorValue>> _declared_vals;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

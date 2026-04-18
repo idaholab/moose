@@ -13,12 +13,14 @@
 
 #include "MFEMEssentialBC.h"
 
-class MFEMScalarDirichletBC : public MFEMEssentialBC
+namespace Moose::MFEM
+{
+class ScalarDirichletBC : public EssentialBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarDirichletBC(const InputParameters & parameters);
+  ScalarDirichletBC(const InputParameters & parameters);
 
   void ApplyBC(mfem::GridFunction & gridfunc) override;
 
@@ -26,4 +28,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

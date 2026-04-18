@@ -13,18 +13,20 @@
 #include "MFEMObject.h"
 #include "MFEMIndicator.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to construct threshold refiner.
  * The underlying mfem::ThresholdRefiner needs to be initialised with a reference to the estimator.
  */
-class MFEMRefinementMarker : public MFEMObject
+class RefinementMarker : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMRefinementMarker(const InputParameters & params);
+  RefinementMarker(const InputParameters & params);
 
-  virtual ~MFEMRefinementMarker() = default;
+  virtual ~RefinementMarker() = default;
 
   /// Constructs associated mfem::ThresholdRefiner once mfem::ErrorEstimator is guaranteed to exist
   void initialSetup();
@@ -61,7 +63,8 @@ protected:
   unsigned _p_ref_counter{0};
 
   /// Pointer to the estimator/indicator
-  const MFEMIndicator * _estimator{nullptr};
+  const Indicator * _estimator{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

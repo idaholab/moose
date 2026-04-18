@@ -18,7 +18,9 @@
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
 
-class MFEMProblem : public ExternalProblem
+namespace Moose::MFEM
+{
+class Problem : public ExternalProblem
 {
 public:
   /**
@@ -29,12 +31,12 @@ public:
   /**
    * Construct an MFEM problem from the supplied parameters.
    */
-  MFEMProblem(const InputParameters & params);
+  Problem(const InputParameters & params);
 
   /**
    * Destroy the MFEM problem.
    */
-  virtual ~MFEMProblem() {}
+  virtual ~Problem() {}
 
   virtual void initialSetup() override;
   virtual void execute(const ExecFlagType & exec_type) override;
@@ -43,10 +45,10 @@ public:
 
   /**
    * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * MFEMMesh.
+   * Moose::MFEM::Mesh.
    */
-  virtual MFEMMesh & mesh() override;
-  virtual const MFEMMesh & mesh() const override;
+  virtual Mesh & mesh() override;
+  virtual const Mesh & mesh() const override;
   using ExternalProblem::mesh;
 
   /**
@@ -134,28 +136,28 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Adds a real component kernel to the parent MFEMComplexKernel.
+   * Adds a real component kernel to the parent Moose::MFEM::ComplexKernel.
    */
   void addRealComponentToKernel(const std::string & kernel_name,
                                 const std::string & name,
                                 InputParameters & parameters);
 
   /**
-   * Adds an imaginary component kernel to the parent MFEMComplexKernel.
+   * Adds an imaginary component kernel to the parent Moose::MFEM::ComplexKernel.
    */
   void addImagComponentToKernel(const std::string & kernel_name,
                                 const std::string & name,
                                 InputParameters & parameters);
 
   /**
-   * Adds a real component BC to the parent MFEMComplexIntegratedBC.
+   * Adds a real component BC to the parent Moose::MFEM::ComplexIntegratedBC.
    */
   void addRealComponentToBC(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
 
   /**
-   * Adds an imaginary component BC to the parent MFEMComplexIntegratedBC.
+   * Adds an imaginary component BC to the parent Moose::MFEM::ComplexIntegratedBC.
    */
   void addImagComponentToBC(const std::string & kernel_name,
                             const std::string & name,
@@ -206,16 +208,16 @@ public:
                              const std::string & name,
                              InputParameters & parameters);
   /**
-   * Override of FEProblemBase::addIndicator. Creates the MFEMIndicator used when setting up
-   * adaptive mesh refinement later.
+   * Override of FEProblemBase::addIndicator. Creates the Moose::MFEM::Indicator used when setting
+   * up adaptive mesh refinement later.
    */
   void addIndicator(const std::string & type,
                     const std::string & name,
                     InputParameters & parameters) override;
 
   /**
-   * Override of FEProblemBase::addMarker. Creates the MFEMRefinementMarker used for adaptive mesh
-   * refinement.
+   * Override of FEProblemBase::addMarker. Creates the Moose::MFEM::RefinementMarker used for
+   * adaptive mesh refinement.
    */
   void addMarker(const std::string & type,
                  const std::string & name,
@@ -245,18 +247,18 @@ public:
    * properties and converting them to MFEM coefficients. This is used
    * by Material and Kernel classes (among others).
    */
-  Moose::MFEM::CoefficientManager & getCoefficients() { return _problem_data.coefficients; }
+  CoefficientManager & getCoefficients() { return _problem_data.coefficients; }
 
   /**
-   * Method to get the current MFEMProblemData object storing the
+   * Method to get the current ProblemData object storing the
    * current data specifying the FE problem.
    */
-  MFEMProblemData & getProblemData() { return _problem_data; }
+  ProblemData & getProblemData() { return _problem_data; }
 
   /**
    * Return the current MFEM problem data in a const context.
    */
-  const MFEMProblemData & getProblemData() const { return _problem_data; }
+  const ProblemData & getProblemData() const { return _problem_data; }
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
@@ -274,7 +276,7 @@ public:
       return *_problem_data.cmplx_gridfunctions.Get(var_name)->ParFESpace()->GetParMesh();
     else
       mooseError("Variable " + var_name +
-                 " not found in MFEMProblem real or complex gridfunctions.");
+                 " not found in Moose::MFEM::Problem real or complex gridfunctions.");
   }
 
   /**
@@ -364,14 +366,14 @@ protected:
   /**
    * Aggregated MFEM-side state for meshes, spaces, variables, coefficients, and solvers.
    */
-  MFEMProblemData _problem_data;
+  ProblemData _problem_data;
 };
 
 template <typename T>
 T &
-MFEMProblem::getMFEMObject(const std::string & system,
-                           const std::string & name,
-                           const THREAD_ID tid) const
+Problem::getMFEMObject(const std::string & system,
+                       const std::string & name,
+                       const THREAD_ID tid) const
 {
   std::vector<T *> objs;
   theWarehouse()
@@ -386,4 +388,5 @@ MFEMProblem::getMFEMObject(const std::string & system,
   return *(objs[0]);
 }
 
+} // namespace Moose::MFEM
 #endif

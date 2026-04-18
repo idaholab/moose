@@ -14,13 +14,13 @@
 namespace Moose::MFEM
 {
 TimeDependentEquationSystem::TimeDependentEquationSystem(
-    const Moose::MFEM::TimeDerivativeMap & time_derivative_map)
+    const TimeDerivativeMap & time_derivative_map)
   : _dt(1.0), _time_derivative_map(time_derivative_map)
 {
 }
 
 void
-TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
+TimeDependentEquationSystem::AddKernel(std::shared_ptr<Kernel> kernel)
 {
   if (!_time_derivative_map.isTimeDerivative(kernel->getTrialVariableName()))
   {
@@ -37,13 +37,13 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   if (!_td_kernels_map.Has(test_var_name))
   {
     auto kernel_field_map =
-        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+        std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<Kernel>>>>();
     _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new td kernels map if not present for the test/trial variable pair
   if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<Kernel>>>();
     _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
   _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
@@ -95,7 +95,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     const auto & test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_mblfs = std::make_shared<NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
@@ -134,8 +134,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     const auto & test_var_name = _test_var_names.at(i);
-    auto test_td_mblfs =
-        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_td_mblfs = std::make_shared<NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_trial_var_names))
     {
       const auto & trial_var_name = _trial_var_names.at(j);

@@ -16,12 +16,15 @@
 /*
  * MFEM Postprocessor which samples values at points.
  */
-class MFEMPointValueSampler : public MFEMValueSamplerBase
+namespace Moose::MFEM
+{
+class PointValueSampler : public ValueSamplerBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMPointValueSampler(const InputParameters & parameters);
+  PointValueSampler(const InputParameters & parameters);
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

@@ -29,7 +29,7 @@ AddMFEMFESpaceAction::AddMFEMFESpaceAction(const InputParameters & parameters)
 void
 AddMFEMFESpaceAction::act()
 {
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  Moose::MFEM::Problem * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
   if (mfem_problem)
     mfem_problem->addFESpace(_type, _name, _moose_object_pars);
 }

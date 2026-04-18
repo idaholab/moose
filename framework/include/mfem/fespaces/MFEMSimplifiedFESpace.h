@@ -13,14 +13,16 @@
 
 #include "MFEMFESpace.h"
 
-/// Class with common parameters for MFEMVectorFESpace and
-/// MFEMScalarFESpace.
-class MFEMSimplifiedFESpace : public MFEMFESpace
+/// Class with common parameters for Moose::MFEM::VectorFESpace and
+/// Moose::MFEM::ScalarFESpace.
+namespace Moose::MFEM
+{
+class SimplifiedFESpace : public FESpace
 {
 public:
   static InputParameters validParams();
 
-  MFEMSimplifiedFESpace(const InputParameters & parameters);
+  SimplifiedFESpace(const InputParameters & parameters);
 
 protected:
   /// Order of the basis functions in the finite element collection
@@ -31,4 +33,5 @@ protected:
   int getProblemDim() const;
 };
 
+} // namespace Moose::MFEM
 #endif

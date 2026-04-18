@@ -13,12 +13,14 @@
 #include "MFEMProblem.h"
 #include "MFEMHyprePatch.h"
 
-registerMooseObject("MooseApp", MFEMHyprePCG);
+registerMooseMFEMObject("MooseApp", HyprePCG);
 
-InputParameters
-MFEMHyprePCG::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = Moose::MFEM::LinearSolverBase::validParams();
+InputParameters
+HyprePCG::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the preconditioned conjugate gradient method.");
 
@@ -26,19 +28,19 @@ MFEMHyprePCG::validParams()
   params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<Moose::MFEM::SolverName>("preconditioner",
+                                           "Optional choice of preconditioner to use.");
 
   return params;
 }
 
-MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
-  : Moose::MFEM::LinearSolverBase(parameters)
+HyprePCG::HyprePCG(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMHyprePCG::constructSolver()
+HyprePCG::constructSolver()
 {
   auto solver = std::make_unique<mfem::patched::HyprePCG>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
@@ -50,7 +52,7 @@ MFEMHyprePCG::constructSolver()
 }
 
 void
-MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
@@ -74,4 +76,5 @@ MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   }
 }
 
+} // namespace Moose::MFEM
 #endif

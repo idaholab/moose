@@ -38,7 +38,7 @@ LinearSolverBase::setPreconditioner(T & solver)
   {
     if (!_preconditioner)
       _preconditioner = &getMFEMProblem().getMFEMObject<LinearSolverBase>(
-          "Moose::MFEM::SolverBase", getParam<MFEMSolverName>("preconditioner"));
+          "Moose::MFEM::SolverBase", getParam<Moose::MFEM::SolverName>("preconditioner"));
 
     auto & mfem_pre = _preconditioner->getSolver();
     if constexpr (std::is_base_of_v<mfem::HypreSolver, T>)

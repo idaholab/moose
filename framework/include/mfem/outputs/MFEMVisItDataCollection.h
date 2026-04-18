@@ -13,15 +13,17 @@
 
 #include "MFEMDataCollection.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class for output information saved in MFEM VisItDataCollections
  */
-class MFEMVisItDataCollection : public MFEMDataCollection
+class VisItDataCollection : public DataCollection
 {
 public:
   static InputParameters validParams();
 
-  MFEMVisItDataCollection(const InputParameters & parameters);
+  VisItDataCollection(const InputParameters & parameters);
 
   virtual mfem::DataCollection & getDataCollection() override { return _visit_dc; }
 
@@ -30,4 +32,5 @@ protected:
   const unsigned int _refinements;
 };
 
+} // namespace Moose::MFEM
 #endif

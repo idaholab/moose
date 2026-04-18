@@ -14,16 +14,18 @@
 #include "Postprocessor.h"
 #include "MFEMExecutedObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Postprocessor for MFEM results. Must inherit from Postprocessor in
  * order for MOOSE to call it.
  */
-class MFEMPostprocessor : public MFEMExecutedObject, public Postprocessor
+class Postprocessor : public ExecutedObject, public ::Postprocessor
 {
 public:
   static InputParameters validParams();
 
-  MFEMPostprocessor(const InputParameters & parameters);
+  Postprocessor(const InputParameters & parameters);
 
   virtual std::optional<std::string> suppliedPostprocessorName() const override;
 
@@ -38,4 +40,5 @@ public:
   virtual void finalize() override {}
 };
 
+} // namespace Moose::MFEM
 #endif

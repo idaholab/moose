@@ -20,7 +20,7 @@ namespace Moose::MFEM
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(MFEMProblem & problem)
+  EquationSystemProblemOperator(Problem & problem)
     : ProblemOperator(problem), _equation_system(_problem_data.eqn_system)
   {
   }
@@ -28,7 +28,7 @@ public:
   virtual void SetGridFunctions() override;
   virtual void Solve() override;
 
-  [[nodiscard]] virtual Moose::MFEM::EquationSystem * GetEquationSystem() const override
+  [[nodiscard]] virtual EquationSystem * GetEquationSystem() const override
   {
     mooseAssert(_equation_system, "No EquationSystem in EquationSystemProblemOperator.");
     return _equation_system.get();
@@ -39,7 +39,7 @@ protected:
   void BuildEquationSystemOperator();
 
 private:
-  std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
+  std::shared_ptr<EquationSystem> _equation_system{nullptr};
 };
 
 } // namespace Moose::MFEM

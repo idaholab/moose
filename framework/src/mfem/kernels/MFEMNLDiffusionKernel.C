@@ -13,19 +13,21 @@
 #include "MFEMProblem.h"
 #include "NLDiffusionIntegrator.h"
 
-registerMooseObject("MooseApp", MFEMNLDiffusionKernel);
+registerMooseMFEMObject("MooseApp", NLDiffusionKernel);
 
-InputParameters
-MFEMNLDiffusionKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+NLDiffusionKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the nonlinear form "
                              "$(k(u) \\vec\\nabla u, \\vec\\nabla v)_\\Omega "
                              "arising from the weak form of the non-linear operator "
                              "$- \\vec\\nabla \\cdot (k(u) \\vec\\nabla u)$.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "k_coefficient", "1.", "Name of property for nonlinear diffusivity coefficient k(u).");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "dk_du_coefficient",
       "0.",
       "Name of property partial derivative of diffusivity coefficient k(u) with respect to the "
@@ -33,8 +35,8 @@ MFEMNLDiffusionKernel::validParams()
   return params;
 }
 
-MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
+NLDiffusionKernel::NLDiffusionKernel(const InputParameters & parameters)
+  : Kernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
     _dk_du_coef(getScalarCoefficient("dk_du_coefficient")),
     _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
@@ -42,9 +44,10 @@ MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(const InputParameters & parameters)
 }
 
 mfem::NonlinearFormIntegrator *
-MFEMNLDiffusionKernel::createNLIntegrator()
+NLDiffusionKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLDiffusionIntegrator(_k_coef, _dk_du_coef, &_trial_var);
+  return new NLDiffusionIntegrator(_k_coef, _dk_du_coef, &_trial_var);
 }
 
+} // namespace Moose::MFEM
 #endif

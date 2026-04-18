@@ -12,15 +12,15 @@
 #include "MFEMGenericFunctorVectorMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMGenericFunctorVectorMaterial);
+registerMooseMFEMObject("MooseApp", GenericFunctorVectorMaterial);
 
 /// Handle any numerical vector values, which should be enclosed in curly braces
-std::vector<MFEMVectorCoefficientName>
-processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
+std::vector<Moose::MFEM::VectorCoefficientName>
+processLiteralVectors(const std::vector<Moose::MFEM::VectorCoefficientName> & input)
 {
-  std::vector<MFEMVectorCoefficientName> result;
+  std::vector<Moose::MFEM::VectorCoefficientName> result;
   bool in_literal = false;
-  MFEMVectorCoefficientName literal;
+  Moose::MFEM::VectorCoefficientName literal;
   for (const auto & item : input)
   {
     if (in_literal)
@@ -52,32 +52,33 @@ processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
   }
   if (in_literal)
     mooseError("No closing curly brace for vector value in "
-               "MFEMGenericFunctorVectorMaterial prop_values: '{" +
+               "Moose::MFEM::GenericFunctorVectorMaterial prop_values: '{" +
                literal + "'");
   return result;
 }
 
-InputParameters
-MFEMGenericFunctorVectorMaterial::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMFunctorMaterial::validParams();
+InputParameters
+GenericFunctorVectorMaterial::validParams()
+{
+  InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Declares material vector properties based on names and coefficients "
                              "prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
-  params.addRequiredParam<std::vector<MFEMVectorCoefficientName>>(
+  params.addRequiredParam<std::vector<Moose::MFEM::VectorCoefficientName>>(
       "prop_values",
       "The corresponding names of coefficients associated with the named properties");
 
   return params;
 }
 
-MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
-    const InputParameters & parameters)
-  : MFEMFunctorMaterial(parameters),
+GenericFunctorVectorMaterial::GenericFunctorVectorMaterial(const InputParameters & parameters)
+  : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(
-        processLiteralVectors(getParam<std::vector<MFEMVectorCoefficientName>>("prop_values")))
+    _prop_values(processLiteralVectors(
+        getParam<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values")))
 {
   if (_prop_names.size() != _prop_values.size())
     paramError("prop_names", "Must match the size of prop_values");
@@ -89,6 +90,7 @@ MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
                                       _prop_values[i]);
 }
 
-MFEMGenericFunctorVectorMaterial::~MFEMGenericFunctorVectorMaterial() {}
+GenericFunctorVectorMaterial::~GenericFunctorVectorMaterial() {}
 
+} // namespace Moose::MFEM
 #endif

@@ -12,12 +12,14 @@
 #include "MFEMRefinementMarker.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMRefinementMarker);
+registerMooseMFEMObject("MooseApp", RefinementMarker);
 
-InputParameters
-MFEMRefinementMarker::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
+InputParameters
+RefinementMarker::validParams()
+{
+  InputParameters params = Object::validParams();
   params.registerBase("Marker");
   params.registerSystemAttributeName("Marker");
 
@@ -35,8 +37,8 @@ MFEMRefinementMarker::validParams()
   return params;
 }
 
-MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
-  : MFEMObject(params),
+RefinementMarker::RefinementMarker(const InputParameters & params)
+  : Object(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("threshold")),
     _rebalance(getParam<bool>("rebalance")),
@@ -46,10 +48,10 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
 }
 
 void
-MFEMRefinementMarker::initialSetup()
+RefinementMarker::initialSetup()
 {
   // fetch const ref to the estimator
-  _estimator = &getMFEMProblem().getMFEMObject<MFEMIndicator>("Indicator", _estimator_name);
+  _estimator = &getMFEMProblem().getMFEMObject<Indicator>("Indicator", _estimator_name);
 
   // Check if p-refinement is supported by the fespace supplied with the variable
   if (_max_p_level and !_estimator->getFESpace().PRefinementSupported())
@@ -80,7 +82,7 @@ MFEMRefinementMarker::initialSetup()
 }
 
 bool
-MFEMRefinementMarker::pRefine()
+RefinementMarker::pRefine()
 {
   // Nothing to do if we've reached the max level of refinement
   if (_p_ref_counter >= _max_p_level)
@@ -108,7 +110,7 @@ MFEMRefinementMarker::pRefine()
 }
 
 bool
-MFEMRefinementMarker::hRefine()
+RefinementMarker::hRefine()
 {
   // Nothing to do if we've reached the max level of refinement
   if (_h_ref_counter >= _max_h_level)
@@ -133,4 +135,5 @@ MFEMRefinementMarker::hRefine()
   return refined && ++_h_ref_counter;
 }
 
+} // namespace Moose::MFEM
 #endif

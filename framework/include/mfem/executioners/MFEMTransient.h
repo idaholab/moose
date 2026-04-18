@@ -16,12 +16,14 @@
 #include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
 
-class MFEMTransient : public TransientBase, public Moose::MFEM::ProblemOperatorInterface
+namespace Moose::MFEM
+{
+class Transient : public TransientBase, public ProblemOperatorInterface
 {
 public:
   static InputParameters validParams();
 
-  explicit MFEMTransient(const InputParameters & params);
+  explicit Transient(const InputParameters & params);
 
   virtual void init() override;
 
@@ -34,8 +36,9 @@ public:
   /// Not supported for MFEM problems, so error if called.
   virtual Real relativeSolutionDifferenceNorm(bool /*check_aux*/) const override
   {
-    mooseError("MFEMTransient executioner does not yet support evaluating the relative solution "
-               "difference norm at each timestep.");
+    mooseError(
+        "Moose::MFEM::Transient executioner does not yet support evaluating the relative solution "
+        "difference norm at each timestep.");
     return 0.0;
   }
 
@@ -46,9 +49,10 @@ public:
   virtual std::vector<std::string> getTimeIntegratorNames() const override { return {}; }
 
 private:
-  MFEMProblem & _mfem_problem;
-  MFEMProblemData & _mfem_problem_data;
-  MFEMProblemSolve _mfem_problem_solve;
+  Problem & _mfem_problem;
+  ProblemData & _mfem_problem_data;
+  ProblemSolve _mfem_problem_solve;
 };
 
+} // namespace Moose::MFEM
 #endif

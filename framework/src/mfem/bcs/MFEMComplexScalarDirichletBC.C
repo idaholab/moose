@@ -11,18 +11,20 @@
 
 #include "MFEMComplexScalarDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMComplexScalarDirichletBC);
+registerMooseMFEMObject("MooseApp", ComplexScalarDirichletBC);
 
-InputParameters
-MFEMComplexScalarDirichletBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexEssentialBC::validParams();
+InputParameters
+ComplexScalarDirichletBC::validParams()
+{
+  InputParameters params = ComplexEssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient_real",
       "0.",
       "The coefficient setting the real part of the values on the essential boundary");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient_imag",
       "0.",
       "The coefficient setting the imaginary part of the values on the essential boundary");
@@ -30,17 +32,18 @@ MFEMComplexScalarDirichletBC::validParams()
   return params;
 }
 
-MFEMComplexScalarDirichletBC::MFEMComplexScalarDirichletBC(const InputParameters & parameters)
-  : MFEMComplexEssentialBC(parameters),
+ComplexScalarDirichletBC::ComplexScalarDirichletBC(const InputParameters & parameters)
+  : ComplexEssentialBC(parameters),
     _coef_real(getScalarCoefficient("coefficient_real")),
     _coef_imag(getScalarCoefficient("coefficient_imag"))
 {
 }
 
 void
-MFEMComplexScalarDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
+ComplexScalarDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficient(_coef_real, _coef_imag, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

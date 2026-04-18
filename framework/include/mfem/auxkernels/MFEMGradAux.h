@@ -16,17 +16,19 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
  */
-class MFEMGradAux : public MFEMAuxKernel
+class GradAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMGradAux(const InputParameters & parameters);
+  GradAux(const InputParameters & parameters);
 
-  virtual ~MFEMGradAux() = default;
+  virtual ~GradAux() = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -35,7 +37,7 @@ public:
   virtual void update() override;
 
 protected:
-  /// Name of source MFEMVariable to take the gradient of.
+  /// Name of source Moose::MFEM::Variable to take the gradient of.
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParGridFunction & _source_var;
@@ -45,4 +47,5 @@ protected:
   mfem::common::ParDiscreteGradOperator _grad;
 };
 
+} // namespace Moose::MFEM
 #endif

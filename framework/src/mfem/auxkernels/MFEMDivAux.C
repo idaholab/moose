@@ -12,23 +12,25 @@
 #include "MFEMDivAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDivAux);
+registerMooseMFEMObject("MooseApp", DivAux);
 
-InputParameters
-MFEMDivAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+DivAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Calculates the divergence of an H(div) conforming RT source variable and stores the result"
       " on an L2 conforming result auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "source", "Vector H(div) MFEMVariable to take the divergence of.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(div) Moose::MFEM::Variable to take the divergence of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }
 
-MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
+DivAux::DivAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getGridFunction(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
@@ -41,14 +43,14 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
 
 // Computes the auxvariable.
 void
-MFEMDivAux::execute()
+DivAux::execute()
 {
   update();
   _div.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 void
-MFEMDivAux::update()
+DivAux::update()
 {
   if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
   {
@@ -59,4 +61,5 @@ MFEMDivAux::update()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

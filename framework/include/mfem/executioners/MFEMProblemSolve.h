@@ -14,28 +14,31 @@
 #include "ProblemOperatorBase.h"
 #include "SolveObject.h"
 
-class MFEMProblem;
 class Executioner;
 
-class MFEMProblemSolve : public SolveObject
+namespace Moose::MFEM
+{
+class Problem;
+
+class ProblemSolve : public SolveObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMProblemSolve(
-      Executioner & ex,
-      std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators);
+  ProblemSolve(Executioner & ex,
+               std::vector<std::shared_ptr<ProblemOperatorBase>> & problem_operators);
 
   /**
    * Solve routine provided by this object.
    * @return True if solver is converged. Currently, this always will return true for
-   * MFEMProblemSolve.
+   * Moose::MFEM::ProblemSolve.
    */
   virtual bool solve() override;
 
 protected:
-  MFEMProblem & _mfem_problem;
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & _problem_operators;
+  Problem & _mfem_problem;
+  std::vector<std::shared_ptr<ProblemOperatorBase>> & _problem_operators;
 };
 
+} // namespace Moose::MFEM
 #endif

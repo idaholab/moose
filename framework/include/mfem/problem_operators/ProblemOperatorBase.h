@@ -20,7 +20,7 @@ namespace Moose::MFEM
 class ProblemOperatorBase
 {
 public:
-  ProblemOperatorBase(MFEMProblem & problem);
+  ProblemOperatorBase(Problem & problem);
   virtual ~ProblemOperatorBase() = default;
 
   virtual void SetGridFunctions();
@@ -43,8 +43,8 @@ protected:
                          const std::function<void()> & prepare_linear_solver);
 
   /// Reference to the current problem.
-  MFEMProblem & _problem;
-  MFEMProblemData & _problem_data;
+  Problem & _problem;
+  ProblemData & _problem_data;
 
   /// Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   /// vector during solve.
