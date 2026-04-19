@@ -38,9 +38,9 @@ rad=0.1
   [FEM_mesh]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 13
-    ny = 7
-    nz = 7
+    nx = 14
+    ny = 3
+    nz = 8
     xmin = ${fparse -2*rad}
     xmax = ${fparse 2*rad}
     ymin = ${fparse -rad}
