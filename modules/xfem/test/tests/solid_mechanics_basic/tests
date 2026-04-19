@@ -1,12 +1,16 @@
 [Tests]
   issues = '#6320 #23572 #32418 #32779'
+  # XFEM exodiff tests usually require the following options
+  # newly created cut elements can lie on top of one another so geometrical matching will not work
+  # map = false
+  # XFEM requires --enable-unique-ids in libmesh
+  # capabilities = 'unique_id'
   [crack_propagation_ave]
     type = Exodiff
     input = crack_propagation_2d.i
     exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
     abs_zero = 1e-8
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     restep = false # Issue #31054
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem '
@@ -23,7 +27,6 @@
     exodiff = 'crack_propagation_2d_out.e crack_propagation_2d_out.e-s002'
     abs_zero = 1e-8
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in '
                   'which crack growth occurs when the average stress in the element at the crack tip '
@@ -38,7 +41,6 @@
     exodiff = 'crack_propagation_2d_single_point_out.e crack_propagation_2d_single_point_out.e-s002'
     abs_zero = 1e-8
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     restep = false # Issue #31054
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in '
@@ -52,7 +54,6 @@
     exodiff = 'edge_crack_3d_out.e'
     abs_zero = 1e-8
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics '
                   'model with XFEM, where the crack is defined using a rectangular cutting plane by RectangleCutUserObject'
@@ -69,7 +70,6 @@
       exodiff = 'edge_crack_3d_fatigue_out.e edge_crack_3d_fatigue_out.e-s002'
       abs_zero = 1e-8
       map = false
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth speeds determined by the fatigue cracking Paris law, or'
     []
@@ -78,7 +78,6 @@
       cli_args = 'Executioner/end_time=11'
       input = 'edge_crack_3d_domain.i edge_crack_3d_scc.i'
       csvdiff = 'edge_crack_3d_scc_out_II_KI_1_0012.csv'
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth speeds determined by the stress corrosion cracking constant timestep, or'
     []
@@ -87,7 +86,6 @@
       cli_args = 'Executioner/end_time=2'
       input = 'edge_crack_3d_domain.i edge_crack_3d_scc_crit.i'
       jsondiff = 'edge_crack_3d_scc_crit_out.json'
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth speeds determined by the stress corrosion cracking maximum growth length, or'
     []
@@ -98,7 +96,6 @@
       abs_zero = 1e-4 #crack face is normal to z so this gets rid of exodiffs caused by z-direction variables
       map = false
       partial=true
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth directions determined by computing the maximum hoop stress law using interaction integrals, or'
     []
@@ -108,7 +105,6 @@
       exodiff = 'edge_crack_3d_propagation_out.e edge_crack_3d_propagation_out.e-s002'
       abs_zero = 1e-8
       map = false
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth directions determined by an parsed function, or'
     []
@@ -117,7 +113,6 @@
       input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
       cli_args = 'DomainIntegral/number_points_from_provider=3'
       expect_err = 'This must match the number of points provided by the XFEM mesh cutter object.'
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction, or'
     []
@@ -125,8 +120,6 @@
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
       exodiff = 'face_crack_3d_xfem_function_xfemcutter_XFEMCutMeshOutput.e'
-      map = false
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume.'
     []
@@ -141,7 +134,6 @@
       input = penny_crack.i
       exodiff = 'penny_crack_out.e'
       map = false
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' explicitly specified.'
     []
@@ -150,7 +142,6 @@
       input = penny_crack_cfp.i
       exodiff = 'penny_crack_cfp_out.e'
       map = false
-      # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' are provided by a class that derives from CrackFrontPointsProvider.'
     []
@@ -160,7 +151,6 @@
     input = elliptical_crack.i
     exodiff = 'elliptical_crack_out.e'
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics '
                   'model with XFEM, where the crack is defined using an elliptical cutting plane by EllipseCutUserObject'
@@ -171,7 +161,6 @@
     input = square_branch_quad_2d.i
     exodiff = 'square_branch_quad_2d_out.e square_branch_quad_2d_out.e-s002 square_branch_quad_2d_out.e-s003'
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a '
                   '4-noded quadrilateral element by two prescribed evolving cutting planes'
@@ -182,7 +171,6 @@
     input = square_branch_tri_2d.i
     exodiff = 'square_branch_tri_2d_out.e square_branch_tri_2d_out.e-s002 square_branch_tri_2d_out.e-s003'
     map = false
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a '
                   '3-noded triangle element by two prescribed evolving cutting planes'
@@ -192,7 +180,6 @@
     type = CSVDiff
     input = crack_counter.i
     csvdiff = 'crack_counter_out.csv'
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM system shall provide an accessor function to the crack_tip_origin_direction_map'
     allow_test_objects = true
@@ -204,7 +191,6 @@
     type = CSVDiff
     input = 'double_cantilever_crack.i'
     csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
-    # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id & method=opt'
     requirement = 'The XFEM module shall reproduce published results for a moving crack in a 3D double cantilever beam.'
   []

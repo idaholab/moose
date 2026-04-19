@@ -651,7 +651,9 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
       std::vector<dof_id_type> temp;
       for (unsigned int j = _inactive_boundary_pos[n_inactive_boundary - 1]; j < n_boundary; ++j)
         temp.push_back(_boundary[j]);
-      for (unsigned int j = 0; j <= _inactive_boundary_pos[0]; ++j)
+      // _boundary is closed (_boundary[n_boundary - 1] == _boundary[0]); skip j=0 to avoid
+      // pushing the same node twice in a row at the wrap-around
+      for (unsigned int j = 1; j <= _inactive_boundary_pos[0]; ++j)
         temp.push_back(_boundary[j]);
       _active_boundary.push_back(temp);
     }
@@ -850,39 +852,75 @@ CrackMeshCut3DUserObject::growFront()
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_increment;
 
-      // Skip if x forms a degenerate triangle with both crack front neighbors
-      bool skip_node = false;
+      // Classify each neighbor as producing a degenerate triangle (below tol) or not.
+      // - If all neighbors degenerate: push only orig_id (node fully stuck, e.g. node 8).
+      // - If some degenerate: create new node, push both orig_id and new id; orig goes on the
+      //   non-degenerate side, new goes on the degenerate side.
+      // - If none degenerate: push only new id (normal advancement).
+      // Only consider neighbors that are within the active segment; neighbors on the full
+      // boundary outside this active segment are handled by the inactive-bordering logic
+      // elsewhere and should not trigger interleaving here.
+      dof_id_type prev_id = (j > 0) ? _active_boundary[i][j - 1] : DofObject::invalid_id;
+      dof_id_type next_id = (j + 1 < i2) ? _active_boundary[i][j + 1] : DofObject::invalid_id;
+
+      bool prev_degenerate = false;
+      unsigned int n_relevant_neighbors = 0;
+      unsigned int n_degenerate = 0;
 
       auto map_it = _boundary_map.find(orig_id);
       if (map_it != _boundary_map.end())
       {
-        bool all_small = true;
         for (dof_id_type neighbor_id : map_it->second)
         {
+          if (neighbor_id != prev_id && neighbor_id != next_id)
+            continue;
+          ++n_relevant_neighbors;
           Point neighbor_pt = *_cutter_mesh->node_ptr(neighbor_id);
-          if (isTriAreaAboveTol(this_point, neighbor_pt, x))
+          if (!isTriAreaAboveTol(this_point, neighbor_pt, x))
           {
-            all_small = false;
-            break;
+            ++n_degenerate;
+            if (neighbor_id == prev_id)
+              prev_degenerate = true;
           }
         }
-        if (all_small)
-          skip_node = true;
       }
 
+      const bool all_degenerate =
+          (n_relevant_neighbors > 0 && n_degenerate == n_relevant_neighbors);
+      const bool some_degenerate = (n_degenerate > 0 && !all_degenerate);
+
       dof_id_type id;
-      if (skip_node)
+      if (all_degenerate)
       {
         id = orig_id;
+        temp.push_back(orig_id);
       }
       else
       {
         this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
         _cutter_mesh->add_node(this_node);
         id = _cutter_mesh->n_nodes() - 1;
-      }
 
-      temp.push_back(id);
+        if (some_degenerate)
+        {
+          // Place orig adjacent to the degenerate (stuck) neighbor, new adjacent to the
+          // non-degenerate neighbor, so triangulation pairs the right nodes on each edge.
+          if (prev_degenerate)
+          {
+            temp.push_back(orig_id);
+            temp.push_back(id);
+          }
+          else // next_degenerate
+          {
+            temp.push_back(id);
+            temp.push_back(orig_id);
+          }
+        }
+        else
+        {
+          temp.push_back(id);
+        }
+      }
       grown_node_map[orig_id] = id;
 
       if (_cfd)
