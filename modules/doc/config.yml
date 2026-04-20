@@ -113,6 +113,7 @@ Extensions:
             Applications:
                 Thermal Hydraulics: applications/thermal_hydraulics.md
                 NCRC Applications: help/inl/applications.md
+                Community: tracked_apps.md
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
