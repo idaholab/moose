@@ -61,8 +61,6 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool /*is_target
     // Populate outgoing point locations map between processor and points vector for libMesh to use
     // in interpolation
     std::map<processor_id_type, std::vector<Point>> outgoing_points;
-    const int nelem = to_pfespace.GetParMesh()->GetNE();
-    const int nqpt = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
     const int dim = to_pfespace.GetParMesh()->Dimension();
     const int nodes_cnt = vxyz.Size() / dim;
     for (const auto i : make_range(nodes_cnt))
@@ -73,13 +71,13 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool /*is_target
         if (dim == 3)
         {
           point_in_target_frame(0) = vxyz[i];
-          point_in_target_frame(1) = vxyz[i + nelem * nqpt];
-          point_in_target_frame(2) = vxyz[i + 2 * nelem * nqpt];
+          point_in_target_frame(1) = vxyz[i + nodes_cnt];
+          point_in_target_frame(2) = vxyz[i + 2 * nodes_cnt];
         }
         else if (dim == 2)
         {
           point_in_target_frame(0) = vxyz[i];
-          point_in_target_frame(1) = vxyz[i + nelem * nqpt];
+          point_in_target_frame(1) = vxyz[i + nodes_cnt];
         }
         else
           mooseError("Target finite element space must be 2D or 3D.");

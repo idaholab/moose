@@ -86,8 +86,21 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'and from nodal to elemental variables.'
+      detail = 'from nodal to elemental variables,'
     []
+    [nodal_mixed_mesh]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'nodal_nodal_mixed_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=nodal_nodal_mixed Transfers/active='libmesh_to_mfem_nodal_nodal'
+                   MultiApps/mfem_sub/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=nodal_nodal_mixed_mfem_sub0
+                   MultiApps/libmesh_sub/cli_args='Mesh/file=../../mesh/square_mixed.e'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types.'
+    []    
   []
   [MFEM_to_MFEM_sibling_transfers]
     requirement = "The system shall support multiapp sibling transfers from MFEM to MFEM sub-apps via shape function evaluations"
@@ -118,7 +131,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel.'
+      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
     []
     [nodal_mixed_mesh]
       type = CSVDiff
@@ -131,7 +144,7 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel.'
+      detail = 'and between nodal variables sent between MFEM sub-apps defined on meshes comprised of mixed element types.'
     []
   []
 []
