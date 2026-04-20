@@ -1,0 +1,34 @@
+{
+  "cells": {
+    "tri_prism_poly_cell": {
+      "fill": "poly_material",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "-tri_prism_poly_surf"
+      ],
+      "region_postfix": [
+        "tri_prism_poly_surf",
+        "-"
+      ]
+    }
+  },
+  "surfaces": null,
+  "units": {
+    "tri_prism_poly_surf": {
+      "attributes": {
+        "apothem": 4.0,
+        "num_sides": 3
+      },
+      "behavior": "SURFACE",
+      "unit_type": "CSG::CSGNPolygonUnit"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "tri_prism_poly_cell"
+      ],
+      "root": true
+    }
+  }
+}
