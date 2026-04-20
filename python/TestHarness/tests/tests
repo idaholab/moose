@@ -377,7 +377,7 @@
   [tao_gradient_tester]
     type = PythonUnitTest
     input = test_TaoGradientTester.py
-    requirement = 'The TaoGradientTester shall correctly construct TAO/PETSc CLI options and parse gradient test output to determine pass or fail.'
+    requirement = 'The system shall correctly construct TAO/PETSc CLI options and parse gradient test output to determine pass or fail.'
     issues = '#32496'
   []
 []
