@@ -19,21 +19,56 @@ public:
   KokkosTimeDerivative(const InputParameters & parameters);
 
   template <typename Derived>
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
+  template <typename Derived>
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobianDummy(const unsigned int,
+                                              const unsigned int,
+                                              AssemblyDatum &) const
+  {
+    return 0;
+  }
+
+  // The computeQpJacobian() of this class has the same signature with that of KernelValue (without
+  // test function index), but this class itself derives from TimeKernel whose base class is Kernel
+  // (with test function index). Therefore, their function pointers cannot be compared. Instead, we
+  // provide the function pointer of a dummy function to the dispatcher registry to make it think
+  // that non-default computeQpJacobian() was implemented.
+  template <typename Derived>
+  static auto defaultJacobian()
+  {
+    return &KokkosTimeDerivative::computeQpJacobianDummy<Derived>;
+  }
 
 protected:
   const bool _lumping;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosTimeDerivative::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
+{
+  ResidualObject::computeResidualInternal(
+      datum,
+      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          Real value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
+
+          for (unsigned int i = ib; i < ie; ++i)
+            local_re[i] += value * _test(datum, i, qp);
+        }
+      });
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void
@@ -60,9 +95,12 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
         local_ke[i - ib] = 0;
 
       for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+      {
+        Real value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
+
         for (unsigned int i = ib; i < ie; ++i)
-          local_ke[i - ib] +=
-              datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(i, j, qp, datum);
+          local_ke[i - ib] += value * _test(datum, i, qp);
+      }
 
       for (unsigned int i = ib; i < ie; ++i)
         accumulateTaggedElementalMatrix(
@@ -73,19 +111,16 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosTimeDerivative::computeQpResidual(const unsigned int i,
-                                        const unsigned int qp,
-                                        AssemblyDatum & datum) const
+KokkosTimeDerivative::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _u_dot(datum, qp);
+  return _u_dot(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosTimeDerivative::computeQpJacobian(const unsigned int i,
-                                        const unsigned int j,
+KokkosTimeDerivative::computeQpJacobian(const unsigned int j,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
+  return _phi(datum, j, qp) * _du_dot_du;
 }
