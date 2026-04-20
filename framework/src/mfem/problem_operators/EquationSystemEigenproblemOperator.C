@@ -17,7 +17,7 @@ namespace Moose::MFEM
 void
 EquationSystemEigenproblemOperator::Solve()
 {
-  GetEquationSystem()->BuildEigenproblemJacobian(_true_x, _mass_rhs);
+  BuildEquationSystemOperator();
 
   if (GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("Eigenproblems are only supported in single-variable systems");
@@ -33,6 +33,13 @@ EquationSystemEigenproblemOperator::Solve()
   mfem::Array<mfem::real_t> eigenvalues;
   GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions,
                                                    eigensolver.get());
+}
+
+void
+EquationSystemEigenproblemOperator::BuildEquationSystemOperator()
+{
+  GetEquationSystem()->BuildEquationSystem();
+  GetEquationSystem()->BuildEigenproblemJacobian(_true_x, _mass_rhs);
 }
 
 } // namespace Moose::MFEM

@@ -13,6 +13,8 @@
 
 #include "MFEMObject.h"
 
+class MFEMProblemSolve;
+
 /**
  * Base class for wrapping mfem::Solver-derived classes.
  */

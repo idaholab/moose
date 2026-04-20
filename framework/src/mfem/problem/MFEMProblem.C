@@ -116,11 +116,6 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 {
   getProblemData().jacobian_solver =
       addObject<MFEMSolverBase>(user_object_name, name, parameters).front();
-  getProblemData().eqn_system->setEigensolve(getProblemData().jacobian_solver->isEigensolver());
-
-  if (is_eigenproblem && !getProblemData().jacobian_solver->isEigensolver())
-    mooseError("The selected solver '" + name +
-               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }
 
 void
