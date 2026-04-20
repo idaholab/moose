@@ -161,7 +161,7 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
         _std_sto[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 1);
       }
       _prev_value[i] =
-          (Normal::quantile(getRand(i + 1, _t_step), _mean_sto[i], _std_factor * _std_sto[i]));
+          (Normal::quantile(getRand(i, _t_step), _mean_sto[i], _std_factor * _std_sto[i]));
     }
 
     // check if we have performed all the importance sampling steps
