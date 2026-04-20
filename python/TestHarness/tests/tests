@@ -374,4 +374,10 @@
     requirement = 'The system shall provide the ability to filter tests if they do not require at or above a certain number of threads.'
     issues = '#32442'
   []
+  [tao_gradient_tester]
+    type = PythonUnitTest
+    input = test_TaoGradientTester.py
+    requirement = 'The TaoGradientTester shall correctly construct TAO/PETSc CLI options and parse gradient test output to determine pass or fail.'
+    issues = '#32496'
+  []
 []
