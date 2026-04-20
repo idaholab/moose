@@ -5,11 +5,11 @@
 ## Overview
 
 `STLSubdomainGenerator` assigns a subdomain ID based on whether an element's vertex-average point
-lies inside a closed STL manifold. The STL surface must be watertight and manifold. Vertex-average
+lies inside a closed STL manifold. The STL surface must be watertight and a manifold. Vertex-average
 points that lie on the STL surface within the configured tolerance are treated as inside.
 
 This generator reads an STL file directly for assigning subdomains in another mesh. It does not make STL a
-general-purpose input format for [FileMeshGenerator](FileMeshGenerator.md).
+general-purpose input format, like those supported in [FileMeshGenerator](FileMeshGenerator.md).
 
 ## Example
 

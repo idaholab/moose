@@ -76,7 +76,7 @@ private:
    * Minimal geometric record for one STL triangle.
    *
    * We cache a bounding box per triangle because it is used repeatedly in both the near-surface
-   * test and the ray-casting candidate filtering.
+   * test and the positive-x intersection-counting pass used for inside/outside classification.
    */
   struct STLTriangle
   {
@@ -196,7 +196,7 @@ private:
   /// Width of one yz-grid cell in the z direction.
   Real _z_cell_size = 1.0;
 
-  /// Lookup from packed yz-grid cell index to candidate triangles for ray casting.
+  /// Lookup from packed yz-grid cell index to triangles that could intersect the +x query ray.
   std::unordered_map<std::uint64_t, std::vector<std::size_t>> _ray_grid;
 
   /// Original STL file name, retained for error messages.
