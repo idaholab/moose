@@ -86,7 +86,7 @@ To implement this, it is expected that `CSGSurfaces`, and possibly `CSGUniverses
 
 To define a universe-like engineering unit, define a class the derives from `CSGUniverseEngUnit`.
 Functionally, these behave like a `CSGUniverse` object in that you can use them as fills for `CSGCells` or elements or outer for a `CSGLattice`.
-The expectation is that a `CSGUniverseEngUnit` replaces a collection of `CSGCell` objects using human-readable information, and therefore, the method `addCell` are not applicable to this unit type like it is a `CSGUniverse`.
+The expectation is that a `CSGUniverseEngUnit` replaces a collection of `CSGCell` objects using human-readable information, and therefore, the method `addCell` is not applicable to this unit type like it is a `CSGUniverse`.
 
 ### Expansion Implementation
 
@@ -97,7 +97,7 @@ To implement this, it is expected that `CSGCell` objects will be generated and a
 
 !alert! note title=Cell and Universe Relationships
 
-It is important to note that when calling methods like `createCell` on the `CSGBase` object, by default the cell is added to the root universe of that `CSGBase` instance unless a `CSGUniverse` object is provided during the creation method. Therefore, when implementing the `expandUnit` method for a `CSGUniverse` where the generated `CSGUniverse` is expected to own the collection of generated cells (rather than the root universe), it is highly recommended to provide `_expanded_universe` as the "add-to" universe during the `createCell` call.
+It is important to note that when calling methods like `createCell` on the `CSGBase` object, by default the cell is added to the root universe of that `CSGBase` instance unless a `CSGUniverse` object is provided during the creation method. Therefore, when implementing the `expandUnit` method for a `CSGUniverseEngUnit` where the generated `CSGUniverse` is expected to own the collection of generated cells (rather than the root universe), it is highly recommended to provide `_expanded_universe` as the "add-to" universe during the `createCell` calls.
 
 !alert-end!
 
