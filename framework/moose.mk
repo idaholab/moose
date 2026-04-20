@@ -138,7 +138,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
 		libmesh_CPPFLAGS += -isystem $(LIBTORCH_DIR)/include/c10
 
     # Dynamically linking with the available pytorch library
-    libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib -L$(LIBTORCH_DIR)/lib -ltorch
+    libmesh_LDFLAGS += -Wl,-rpath,$(LIBTORCH_DIR)/lib -L$(LIBTORCH_DIR)/lib -ltorch -ltorch_cpu -lc10
 
   else
 		# No libtorch library found
