@@ -12,6 +12,16 @@
       recover = False
       detail = 'by first creating a mesh containing the data needed for optimization on a mesh;'
     []
+    [coarse_mesh]
+      type = CheckFiles
+      input = initial_param_mesh.i
+      cli_args = 'Outputs/file_base=initial_param_mesh_coarse_in
+                  Mesh/cmg/ix="2 4 2"
+                  Mesh/cmg/iy="2"'
+      check_files = initial_param_mesh_coarse_in.e
+      recover = False
+      detail = 'by first creating a coarse mesh containing the data needed for optimization on a mesh;'
+    []
     [input_file_ICs]
       type = 'Exodiff'
       input = 'main.i optimizationReporterInputIC.i'
@@ -36,10 +46,12 @@
       detail = " with initial conditions read from the mesh;"
     []
     [grad_check]
-      prereq = 'gradient_l2_regularization/mesh'
+      prereq = 'gradient_l2_regularization/coarse_mesh'
       type = TaoGradientTester
       input = 'main.i optimizationReporterMeshIC.i'
-      max_rel_tol = 2e-4
+      cli_args = 'OptimizationReporter/parameter_meshes="initial_param_mesh_coarse_in.e"
+                  forward_and_adjoint0:Functions/source_function/exodus_mesh="initial_param_mesh_coarse_in.e"'
+      max_rel_tol = 1e-4
       detail = " the adjoint gradient will be accurate."
     []
   []
