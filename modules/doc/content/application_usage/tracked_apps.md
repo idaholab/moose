@@ -107,6 +107,7 @@ Combined applications
 - MONARCH - Radiation damage modeling in semiconductors, developed at LANL
 - GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
 - [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
+- Fizzy - Couples FISPACT-II to MOOSE and Cardinal for radiation activation calculations
 
 
 ## Legacy software
