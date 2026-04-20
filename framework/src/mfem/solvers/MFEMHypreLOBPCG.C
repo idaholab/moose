@@ -21,6 +21,7 @@ MFEMHypreLOBPCG::validParams()
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "coefficient", "Name of the scalar coefficient for the mass matrix.");
+  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;
 }

@@ -26,6 +26,10 @@ public:
   virtual void Solve() override;
 
   mfem::OperatorHandle _mass_rhs;
+
+protected:
+  /// Add kernels/bcs and assemble the linear part of the equation system
+  void BuildEquationSystemOperator();
 };
 
 } // namespace Moose::MFEM

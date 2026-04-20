@@ -32,12 +32,10 @@ MFEMEigenproblem::addMFEMSolver(const std::string & user_object_name,
                                 const std::string & name,
                                 InputParameters & parameters)
 {
-  FEProblemBase::addUserObject(user_object_name, name, parameters);
-  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
+  getProblemData().jacobian_solver =
+      addObject<MFEMSolverBase>(user_object_name, name, parameters).front();
 
-  getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMEigensolverBase>(object_ptr);
-
-  if (!getProblemData().jacobian_solver)
+  if (!std::dynamic_pointer_cast<MFEMEigensolverBase>(getProblemData().jacobian_solver))
     mooseError("The selected solver '" + name +
                "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }
@@ -59,10 +57,14 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
                                        InputParameters & parameters)
 {
 
-  if (var_type == "MFEMVariable" || var_type == "MFEMComplexVariable")
+  if (var_type == "MFEMVariable")
   {
     // Add MFEM variable directly.
-    FEProblemBase::addUserObject(var_type, var_name, parameters);
+    addObject<MFEMVariable>(var_type, var_name, parameters);
+  }
+  else if (var_type == "MFEMComplexVariable")
+  {
+    mooseError("Complex variables are not currently supported for eigenproblems.");
   }
   else
   {
@@ -71,12 +73,11 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
 
     // Add MFEM variable indirectly ("gridfunction").
     InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
-    FEProblemBase::addUserObject("MFEMVariable", var_name, mfem_variable_params);
+    addObject<MFEMVariable>("MFEMVariable", var_name, mfem_variable_params);
   }
 
   // Register gridfunction.
-
-  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+  MFEMVariable & mfem_variable = getMFEMObject<MFEMVariable>("MooseVariableBase", var_name);
   getProblemData().eigen_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
   if (mfem_variable.getFESpace().isScalar())
     getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
