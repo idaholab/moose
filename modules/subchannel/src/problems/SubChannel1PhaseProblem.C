@@ -1292,7 +1292,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
 
             if (_segregated_bool)
             {
-              auto dp_in = _DP(i_ch, iz) - 1;
+              auto dp_in = _DP(i_ch, iz - 1);
               auto dp_out = _DP(i_ch, iz);
               auto dp_interp = computeInterpolatedValue(dp_out, dp_in, 0.5);
               PetscScalar value_v = -1.0 * dp_interp * S_interp;
