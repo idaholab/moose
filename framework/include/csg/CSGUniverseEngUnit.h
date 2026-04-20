@@ -31,6 +31,7 @@ class CSGBase; // forward declaration
  *     CSG components that are required for defining the unit in basic CSG components
  *     and add them to CSGBase. The created CSGUniverse should set to _expanded_universe once
  *     generated so it can be returned by getExpandedUniverse().
+ *   - clone() — return a deep copy of the derived class.
  *   - getAttributes() — return a map of domain-specific attribute name to value.
  */
 class CSGUniverseEngUnit : public CSGUniverse, public CSGEngUnit

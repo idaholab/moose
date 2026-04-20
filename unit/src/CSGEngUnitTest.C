@@ -216,7 +216,7 @@ TEST(CSGEngUnitTest, testPolygonUnitExpansion)
   }
 
   // check region surfaces using a coefficient check that uses fuzzy equal because the coefficients
-  // are calcualted using sin/cos in the implementation which may create non-zero "zero" values
+  // are calculated using sin/cos in the implementation which may create non-zero "zero" values
   // of ~1e-17.
   auto reg_surfs = region.getSurfaces();
   ASSERT_EQ(num_sides, reg_surfs.size());

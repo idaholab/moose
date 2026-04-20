@@ -379,7 +379,8 @@ For example, in order to call `deleteSurface` on a `CSGNPolygonUnit` called `nam
 
 #### Naming Restrictions
 
-Because each engineering unit is also considered an object of the type from which it is derived (e.g., a `CSGSurfaceEngUnit` is also a `CSGSurface`), there are additional restrictions on naming components when engineering units are involved.
+Naming engineering units follows the same rules as described in [the section below](#object-naming-recommendations).
+However, because each engineering unit is also considered an object of the type from which it is derived (e.g., a `CSGSurfaceEngUnit` is also a `CSGSurface`), there are additional restrictions on naming components when engineering units are involved.
 All `CSGEngUnit` objects must have unique names (regardless of derived type units).
 No basic object or engineering unit of that derived type may have the same name.
 In other words, a `CSGSurface` and `CSGSurfaceEngUnit` cannot use the same name, but a `CSGSurface` and `CSGCellEngUnit` can be named the same.
@@ -399,7 +400,7 @@ The code snippet below demonstrates this expansion behavior by expanding a `CSGN
 
 !alert! note title=CSGSurfaceEngUnits as Regions
 
-`CSGSurfaceEngUnit`s are intended to be used as a surface for a `CSGRegion` definition. Each derived unit type has a mechanism for determining the positive or negative half-space for that "surface" and therefore should be treated as a half-space during definition. During expansion, the unit "surface" is replaced with a `CSGRegion` that defines the negative half-space of that unit. If the positive half-space was used in the `CSGRegion` definition, then the unit half-space is replaced with the complement (`~`) of the newly generated `CSGRegion`.
+`CSGSurfaceEngUnit`s are intended to be used as a surface for a `CSGRegion` definition. Each derived unit type has a mechanism for determining the positive or negative half-space for that "surface" and therefore should be treated as a half-space during use. During expansion, the unit "surface" is replaced with a `CSGRegion` that defines the negative half-space of that unit. If the positive half-space was used in the `CSGRegion` definition, then the unit half-space is replaced with the complement (`~`) of the newly generated `CSGRegion`.
 
 !alert-end!
 
@@ -422,7 +423,7 @@ Below is an example of creating a square with a side length of 4.0 (apothem is 2
 
 !alert! note title=Custom Engineering Units
 
-Instructions for how to define custom engineering units that behave as surfaces, cells, or universes, is provided in [source/csg/CSGEngUnit.md].
+Instructions for how to define custom engineering units that behave as surfaces, cells, or universes, are provided in [source/csg/CSGEngUnit.md].
 
 !alert-end!
 
@@ -579,7 +580,7 @@ Consult the Doxygen documentation for information on all object-specific methods
 
 ## Object Naming Recommendations
 
-For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, `CSGUniverse`, and `CSGLattice`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
+For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, `CSGUniverse`, `CSGLattice`, and `CSGEngUnit`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
