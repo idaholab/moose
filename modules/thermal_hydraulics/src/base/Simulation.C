@@ -788,10 +788,6 @@ Simulation::setupCoordinateSystem()
     }
   }
   _fe_problem.setCoordSystem(blocks, coord_types);
-
-  // RZ geometries are always aligned with x-axis
-  MooseEnum rz_coord_axis("X=0 Y=1", "X");
-  _fe_problem.setAxisymmetricCoordAxis(rz_coord_axis);
 }
 
 void
