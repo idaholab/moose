@@ -6,7 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "Standardizer.h"
 
@@ -29,8 +29,8 @@ Standardizer::set(const Real & mean, const Real & stdev)
   stdev_vec.push_back(stdev);
 
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = torch::from_blob(mean_vec.data(), {1, 1}, options).to(at::kDouble);
-  _stdev = torch::from_blob(stdev_vec.data(), {1, 1}, options).to(at::kDouble);
+  _mean = torch::from_blob(mean_vec.data(), {1, 1}, options).clone();
+  _stdev = torch::from_blob(stdev_vec.data(), {1, 1}, options).clone();
 }
 
 void
@@ -95,8 +95,15 @@ Standardizer::getDescaled(torch::Tensor & input) const
 void
 Standardizer::getScaled(RealEigenMatrix & input) const
 {
-  Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  input = input.array().rowwise() / stdev.transpose().array();
+  mooseAssert(_stdev.dim() == 2 && _stdev.size(1) == 1,
+              "Standardizer standard deviation tensor must be a column vector.");
+  mooseAssert(input.cols() == _stdev.size(0),
+              "Input column count must match the size of the standard deviation vector.");
+
+  const auto stdev_accessor = _stdev.accessor<Real, 2>();
+  for (const auto row : make_range(input.rows()))
+    for (const auto col : make_range(input.cols()))
+      input(row, col) /= stdev_accessor[col][0];
 }
 
 /// Helper for dataStore

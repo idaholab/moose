@@ -248,7 +248,7 @@ dataStore(std::ostream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
@@ -642,7 +642,7 @@ dataLoad(std::istream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 template <>
 void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)

@@ -6,7 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "ActiveLearningGaussianProcess.h"
 
@@ -105,7 +105,7 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
     _gp.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.dataStandardizer().set(0, 1, inputs[0].size());
+    _gp.dataStandardizer().set(0, 1);
 
   // Setup the covariance
   _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
@@ -126,8 +126,10 @@ ActiveLearningGaussianProcess::getTrainingStandardizer() const
 void
 ActiveLearningGaussianProcess::getNormTrainingOuts(std::vector<Real> & norm_training_outs) const
 {
+  norm_training_outs.resize(_training_data.size(0));
+  const auto data_accessor = _training_data.accessor<Real, 2>();
   for (unsigned int i = 0; i < norm_training_outs.size(); ++i)
-    norm_training_outs[i] = _training_data(i, 0);
+    norm_training_outs[i] = data_accessor[i][0];
 }
 
 #endif

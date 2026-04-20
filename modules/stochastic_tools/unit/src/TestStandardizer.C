@@ -1,4 +1,4 @@
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "gtest/gtest.h"
 #include <torch/torch.h>

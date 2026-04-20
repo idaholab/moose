@@ -9,7 +9,7 @@
 
 // Stocastic Tools Includes
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "GaussianProcessData.h"
 

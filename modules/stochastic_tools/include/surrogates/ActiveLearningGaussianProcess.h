@@ -6,11 +6,10 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
-#include "ActiveLearningGaussianProcess.h"
 #include "Standardizer.h"
 #include "LibtorchUtils.h"
 
@@ -71,7 +70,7 @@ private:
   torch::Tensor & _training_params;
 
   /// Outputs (y) used for training, along with statistics
-  RealEigenMatrix & _training_data;
+  torch::Tensor & _training_data;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;

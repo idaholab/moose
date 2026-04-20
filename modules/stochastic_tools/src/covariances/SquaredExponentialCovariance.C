@@ -6,7 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "SquaredExponentialCovariance.h"
 #include <cmath>
@@ -60,9 +60,7 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
                                                          const Real sigma_n_squared,
                                                          const bool is_self_covariance)
 {
-  unsigned int num_params_x = x.sizes()[1];
-
-  mooseAssert(num_params_x == xp.sizes()[1],
+  mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
   std::vector length_factor_cp = length_factor;
