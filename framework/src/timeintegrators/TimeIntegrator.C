@@ -52,7 +52,8 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
         "var_restriction", !getParam<std::vector<VariableName>>("variables").empty())),
     _local_indices(declareRestartableData<std::vector<dof_id_type>>("local_indices")),
     _vars(declareRestartableData<std::unordered_set<unsigned int>>("vars")),
-    _from_subvector(NumericVector<Number>::build(this->comm()))
+    _from_subvector(
+        NumericVector<Number>::build(this->comm(), libMesh::default_solver_package(), PARALLEL))
 {
   _fe_problem.setUDotRequested(true);
 }
@@ -96,8 +97,10 @@ TimeIntegrator::init()
                std::back_inserter(_local_indices));
   }
 
-  _solution_sub = NumericVector<Number>::build(_solution->comm());
-  _solution_old_sub = NumericVector<Number>::build(_solution_old.comm());
+  _solution_sub =
+      NumericVector<Number>::build(_solution->comm(), libMesh::default_solver_package(), PARALLEL);
+  _solution_old_sub = NumericVector<Number>::build(
+      _solution_old.comm(), libMesh::default_solver_package(), PARALLEL);
 }
 
 void
