@@ -13,7 +13,6 @@
 #include "CSGSphere.h"
 #include "CSGPlane.h"
 #include "CSGXCylinder.h"
-#include "CSGPlane.h"
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGTransformationHelper.h"
