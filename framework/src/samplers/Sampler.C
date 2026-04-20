@@ -189,8 +189,7 @@ Sampler::execute()
     reinit();
 
   if (_has_executed)
-    for (auto & gen : _generators)
-      gen->advance(_n_rows * _n_cols);
+    advanceGeneratorsInternal(_n_rows * _n_cols);
 
   executeTearDown();
   _has_executed = true;
@@ -341,6 +340,8 @@ Sampler::advanceGenerators(const dof_id_type count)
 void
 Sampler::advanceGenerator(const unsigned int seed_index, const dof_id_type count)
 {
+  mooseAssert(seed_index < _generators.size(), "The seed number index does not exists.");
+  _generators[seed_index]->advance(count);
 }
 
 void

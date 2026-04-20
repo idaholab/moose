@@ -42,7 +42,6 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
     _flag_sample(getReporterValue<std::vector<bool>>("flag_sample")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _num_batch(getParam<dof_id_type>("num_batch")),
-    _check_step(std::numeric_limits<int>::min()),
     _num_samples(getParam<int>("num_samples"))
 {
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
@@ -51,15 +50,12 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
   setNumberOfCols(_distributions.size());
   _inputs_sto.resize(_num_batch, std::vector<Real>(_distributions.size()));
   setNumberOfRandomSeeds(getParam<unsigned int>("num_random_seeds"));
+  setAutoAdvanceGenerators(false);
 }
 
 void
-ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
+ActiveLearningMonteCarloSampler::executeSetUp()
 {
-  // If we've already done this step, skip
-  if (_check_step == _step)
-    return;
-
   if (_is_sampling_completed)
     mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
                "has been requested.");
@@ -91,8 +87,6 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
     _inputs_sto.assign(_inputs_gp_fails.begin(), _inputs_gp_fails.begin() + _num_batch);
     _inputs_gp_fails.erase(_inputs_gp_fails.begin(), _inputs_gp_fails.begin() + _num_batch);
   }
-
-  _check_step = _step;
 
   // check if we have finished the sampling
   if (_step >= _num_samples + _retraining_steps)
