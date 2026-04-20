@@ -160,15 +160,6 @@ private:
   /// Get the subset of triangles whose yz extents may intersect the query ray.
   std::vector<std::size_t> rayCandidates(const Point & point) const;
 
-  /// Squared distance from a point to a triangle.
-  Real pointTriangleDistanceSq(const Point & point, const STLTriangle & tri) const;
-
-  /// Squared distance from a point to a line segment.
-  Real pointSegmentDistanceSq(const Point & point, const Point & a, const Point & b) const;
-
-  /// Signed solid angle subtended by one oriented triangle at the query point.
-  Real solidAngle(const Point & point, const STLTriangle & tri) const;
-
   /// All transformed triangles parsed from the STL file.
   std::vector<STLTriangle> _triangles;
 

@@ -9,6 +9,7 @@
 
 #include "STLManifold.h"
 
+#include "GeometryUtils.h"
 #include "MooseError.h"
 #include "MooseUtils.h"
 
@@ -560,7 +561,7 @@ STLManifold::pointOnSurface(const Point & point) const
         point(2) > tri.bbox.max()(2) + _surface_tolerance)
       continue;
 
-    if (pointTriangleDistanceSq(point, tri) <= tolerance_sq)
+    if (geom_utils::pointTriangleDistanceSq(point, tri.v0, tri.v1, tri.v2) <= tolerance_sq)
       return true;
   }
 
@@ -604,9 +605,9 @@ STLManifold::rayIntersectsTriangle(const Point & point, const STLTriangle & tri)
 
   const Point intersection = point + t * direction;
   const auto tolerance_sq = _surface_tolerance * _surface_tolerance;
-  if (pointSegmentDistanceSq(intersection, tri.v0, tri.v1) <= tolerance_sq ||
-      pointSegmentDistanceSq(intersection, tri.v1, tri.v2) <= tolerance_sq ||
-      pointSegmentDistanceSq(intersection, tri.v2, tri.v0) <= tolerance_sq)
+  if (geom_utils::pointSegmentDistanceSq(intersection, tri.v0, tri.v1) <= tolerance_sq ||
+      geom_utils::pointSegmentDistanceSq(intersection, tri.v1, tri.v2) <= tolerance_sq ||
+      geom_utils::pointSegmentDistanceSq(intersection, tri.v2, tri.v0) <= tolerance_sq)
     // Edge and vertex hits are where odd/even parity counting is the least reliable.
     return RayIntersection::Ambiguous;
 
@@ -623,7 +624,10 @@ STLManifold::containsBySolidAngle(const Point & point) const
     // outside. Taking parity over components handles nested shells cleanly.
     Real total_angle = 0.0;
     for (const auto triangle_index : component)
-      total_angle += solidAngle(point, _triangles[triangle_index]);
+      total_angle += geom_utils::solidAngle(point,
+                                            _triangles[triangle_index].v0,
+                                            _triangles[triangle_index].v1,
+                                            _triangles[triangle_index].v2);
 
     if (std::abs(total_angle) > 2.0 * libMesh::pi)
       ++num_inside_components;
@@ -650,92 +654,4 @@ STLManifold::rayCandidates(const Point & point) const
 
   // Return by value to keep the helper simple and avoid exposing internal storage.
   return it->second;
-}
-
-Real
-STLManifold::pointTriangleDistanceSq(const Point & point, const STLTriangle & tri) const
-{
-  // Region-based closest-point-on-triangle algorithm from Real-Time Collision Detection.
-  const Point ab = tri.v1 - tri.v0;
-  const Point ac = tri.v2 - tri.v0;
-  const Point ap = point - tri.v0;
-  const Real d1 = ab * ap;
-  const Real d2 = ac * ap;
-  if (d1 <= 0.0 && d2 <= 0.0)
-    return (point - tri.v0).norm_sq();
-
-  const Point bp = point - tri.v1;
-  const Real d3 = ab * bp;
-  const Real d4 = ac * bp;
-  if (d3 >= 0.0 && d4 <= d3)
-    return (point - tri.v1).norm_sq();
-
-  const Real vc = d1 * d4 - d3 * d2;
-  if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0)
-  {
-    const Real v = d1 / (d1 - d3);
-    const Point projection = tri.v0 + v * ab;
-    return (point - projection).norm_sq();
-  }
-
-  const Point cp = point - tri.v2;
-  const Real d5 = ab * cp;
-  const Real d6 = ac * cp;
-  if (d6 >= 0.0 && d5 <= d6)
-    return (point - tri.v2).norm_sq();
-
-  const Real vb = d5 * d2 - d1 * d6;
-  if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0)
-  {
-    const Real w = d2 / (d2 - d6);
-    const Point projection = tri.v0 + w * ac;
-    return (point - projection).norm_sq();
-  }
-
-  const Real va = d3 * d6 - d5 * d4;
-  if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0)
-  {
-    const Point bc = tri.v2 - tri.v1;
-    const Real w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-    const Point projection = tri.v1 + w * bc;
-    return (point - projection).norm_sq();
-  }
-
-  const Real denom = 1.0 / (va + vb + vc);
-  const Real v = vb * denom;
-  const Real w = vc * denom;
-  const Point projection = tri.v0 + ab * v + ac * w;
-  return (point - projection).norm_sq();
-}
-
-Real
-STLManifold::pointSegmentDistanceSq(const Point & point, const Point & a, const Point & b) const
-{
-  const Point ab = b - a;
-  const auto length_sq = ab.norm_sq();
-  if (length_sq <= std::numeric_limits<Real>::epsilon())
-    // Degenerate segments are treated as a single endpoint.
-    return (point - a).norm_sq();
-
-  const auto t = std::clamp(((point - a) * ab) / length_sq, 0.0, 1.0);
-  const Point projection = a + t * ab;
-  return (point - projection).norm_sq();
-}
-
-Real
-STLManifold::solidAngle(const Point & point, const STLTriangle & tri) const
-{
-  // Compute the signed solid angle subtended by one oriented triangle at the query point.
-  const Point a = tri.v0 - point;
-  const Point b = tri.v1 - point;
-  const Point c = tri.v2 - point;
-
-  const Real la = a.norm();
-  const Real lb = b.norm();
-  const Real lc = c.norm();
-
-  const Real numerator = a * (b.cross(c));
-  const Real denominator = la * lb * lc + (a * b) * lc + (b * c) * la + (c * a) * lb;
-
-  return 2.0 * std::atan2(numerator, denominator);
 }

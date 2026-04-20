@@ -187,4 +187,34 @@ bool arePointsColinear(const Point & p1, const Point & p2, const Point & p3);
  * @return true if the two line segments intersect, false otherwise
  */
 bool segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Point & p4);
+
+/**
+ * Compute the squared distance from a point to a 3-D line segment.
+ * @param[in] point point of interest
+ * @param[in] a first segment endpoint
+ * @param[in] b second segment endpoint
+ * @return squared distance from the point to the segment
+ */
+Real pointSegmentDistanceSq(const Point & point, const Point & a, const Point & b);
+
+/**
+ * Compute the squared distance from a point to a 3-D triangle.
+ * @param[in] point point of interest
+ * @param[in] v0 first triangle vertex
+ * @param[in] v1 second triangle vertex
+ * @param[in] v2 third triangle vertex
+ * @return squared distance from the point to the triangle
+ */
+Real
+pointTriangleDistanceSq(const Point & point, const Point & v0, const Point & v1, const Point & v2);
+
+/**
+ * Compute the signed solid angle subtended by one oriented triangle at the query point.
+ * @param[in] point query point
+ * @param[in] v0 first triangle vertex
+ * @param[in] v1 second triangle vertex
+ * @param[in] v2 third triangle vertex
+ * @return signed solid angle in steradians
+ */
+Real solidAngle(const Point & point, const Point & v0, const Point & v1, const Point & v2);
 } // end of namespace geom_utils
