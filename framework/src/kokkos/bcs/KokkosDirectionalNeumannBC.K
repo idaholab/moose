@@ -14,7 +14,7 @@ registerKokkosBoundaryCondition("MooseApp", KokkosDirectionalNeumannBC);
 InputParameters
 KokkosDirectionalNeumannBC::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = IntegratedBCValue::validParams();
   params.addParam<RealVectorValue>(
       "vector_value", RealVectorValue(), "vector this BC should act in");
   params.addClassDescription("Imposes the integrated boundary condition "
@@ -24,6 +24,6 @@ KokkosDirectionalNeumannBC::validParams()
 }
 
 KokkosDirectionalNeumannBC::KokkosDirectionalNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _value(getParam<RealVectorValue>("vector_value"))
+  : IntegratedBCValue(parameters), _value(getParam<RealVectorValue>("vector_value"))
 {
 }

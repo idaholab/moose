@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosNeumannBC);
 InputParameters
 KokkosNeumannBC::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = IntegratedBCValue::validParams();
   params.addParam<Real>("value",
                         0.0,
                         "For a Laplacian problem, the value of the gradient dotted with the "
@@ -27,6 +27,6 @@ KokkosNeumannBC::validParams()
 }
 
 KokkosNeumannBC::KokkosNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _value(getParam<Real>("value"))
+  : IntegratedBCValue(parameters), _value(getParam<Real>("value"))
 {
 }

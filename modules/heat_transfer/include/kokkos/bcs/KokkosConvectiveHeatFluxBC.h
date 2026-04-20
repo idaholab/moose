@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.
  */
-class KokkosConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
+class KokkosConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -23,12 +23,9 @@ public:
   KokkosConvectiveHeatFluxBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
 
@@ -45,20 +42,17 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
-                                              const unsigned int qp,
-                                              AssemblyDatum & datum) const
+KokkosConvectiveHeatFluxBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_test(datum, i, qp) * _htc(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp));
+  return -_htc(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
-                                              const unsigned int j,
+KokkosConvectiveHeatFluxBC::computeQpJacobian(const unsigned int j,
                                               const unsigned int qp,
                                               AssemblyDatum & datum) const
 {
-  return -_test(datum, i, qp) * _phi(datum, j, qp) *
+  return -_phi(datum, j, qp) *
          (-_htc(datum, qp) + _htc_dT(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp)));
 }

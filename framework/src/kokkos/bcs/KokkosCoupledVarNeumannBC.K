@@ -14,7 +14,7 @@ registerKokkosResidualObject("MooseApp", KokkosCoupledVarNeumannBC);
 InputParameters
 KokkosCoupledVarNeumannBC::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = IntegratedBCValue::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the gradient on the boundary.");
   params.addCoupledVar("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addParam<Real>(
@@ -24,8 +24,9 @@ KokkosCoupledVarNeumannBC::validParams()
                              "where $v$ is a variable.");
   return params;
 }
+
 KokkosCoupledVarNeumannBC::KokkosCoupledVarNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
+  : IntegratedBCValue(parameters),
     _coupled_var(kokkosCoupledValue("v")),
     _coupled_num(coupled("v")),
     _coef(getParam<Real>("coef")),

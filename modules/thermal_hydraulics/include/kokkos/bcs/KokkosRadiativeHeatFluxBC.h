@@ -14,8 +14,7 @@
 /**
  * Radiative heat transfer boundary condition for a plate heat structure
  */
-class KokkosRadiativeHeatFluxBC final
-  : public KokkosRadiativeHeatFluxBCBase<KokkosRadiativeHeatFluxBC>
+class KokkosRadiativeHeatFluxBC : public KokkosRadiativeHeatFluxBCBase
 {
 public:
   static InputParameters validParams();
