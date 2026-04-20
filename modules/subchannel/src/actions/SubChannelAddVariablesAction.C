@@ -58,24 +58,26 @@ SubChannelAddVariablesAction::act()
     if (generator_type == "SCMQuadSubChannelMeshGenerator" ||
         generator_type == "SCMTriSubChannelMeshGenerator")
     {
-      // Support either spelling if needed
-      fluid_blocks = {"sub_channel"};
+      // Use the user-provided mesh generator block name
+      fluid_blocks = {mesh_action->name()};
     }
 
     if (generator_type == "SCMTriPinMeshGenerator" || generator_type == "SCMQuadPinMeshGenerator")
     {
       pin_mesh_exist = true;
-      pin_blocks = {"fuel_pins"};
+      // Use the user-provided mesh generator block name
+      pin_blocks = {mesh_action->name()};
     }
 
     if (generator_type == "SCMTriDuctMeshGenerator" || generator_type == "SCMQuadDuctMeshGenerator")
     {
       duct_mesh_exist = true;
-      duct_blocks = {"duct"};
+      // Use the user-provided mesh generator block name
+      duct_blocks = {mesh_action->name()};
     }
   }
 
-  // Fallback if no explicit subchannel mesh generator name was found
+  // Backward-compatible fallback if no explicit subchannel mesh generator name was found
   if (fluid_blocks.empty())
     fluid_blocks = {"sub_channel"};
 

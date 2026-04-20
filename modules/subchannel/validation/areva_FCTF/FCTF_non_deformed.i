@@ -37,7 +37,7 @@ unheated_length_exit = 0.855 #m
 ###################################################
 
 [TriSubChannelMesh]
-  [sub_channel]
+  [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 65
@@ -53,7 +53,7 @@ unheated_length_exit = 0.855 #m
     spacer_k = '0.0'
   []
 
-  [fuel_pins]
+  [pins]
     type = SCMTriPinMeshGenerator
     input = sub_channel
     nrings = ${n_rings}
@@ -95,7 +95,6 @@ unheated_length_exit = 0.855 #m
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
-  deformation = false
   # Heat Transfer Correlations
   pin_HTC_closure = 'gnielinski'
   # friction model

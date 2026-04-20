@@ -6,86 +6,72 @@ Depending on the mesh type defined in the SCM input file, SCM automatically crea
 
 This is the Subchannel mesh that gets created by: [SCMQuadSubChannelMeshGenerator](SCMQuadSubChannelMeshGenerator.md) and [SCMTriSubChannelMeshGenerator](SCMTriSubChannelMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the `[sub_channel]` mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the subchannel mesh block, automatically defines the following auxiliary variables:
 
-Mass flow rate: $kg/s$ = "mdot"
+- Mass flow rate: "mdot" $kg/s$
 
-Subchannel surface area: $m^2$ = "S"
+- Subchannel surface area: "S" $m^2$
 
-Subchannel wetted perimeter: $m$ = "w_perim"
+- Subchannel wetted perimeter: "w_perim" $m$
 
-Net crossflow per subchannel cell: $kg/s$ = "SumWij" (This applies to the cell immediately behind the node)
+- Net crossflow per subchannel cell: "SumWij" $kg/s$ (This refers to the cell value immediately below the node)
 
-Pressure: $Pa$ = "P"
+- Pressure: "P" $Pa$
 
-Enthalpy: $J/kg$ = "h"
+- Enthalpy: "h" $J/kg$
 
-Temperature: $K$ = "T"
+- Temperature: "T" $K$
 
-Density: $kg/m^3$ = "rho"
+- Density: "rho" $kg/m^3$
 
-Viscosity: $Pa*s$ = "mu"
+- Viscosity: "mu" $Pa*s$
 
-Linear heat rate: $W/m$ = "q_prime"
+- Linear heat rate: "q_prime" $W/m$
 
-!alert note
-The subchannel mesh block needs to be named: `[sub_channel]`.
+- Subchannel centroid displacement: "displacement" $m$
+
+An example usage of displacement can be found [here](areva_fctf.md).
 
 ### Flags
 
-- Enabling the boolean flag [!param](/Problem/QuadSubChannel1PhaseProblem/full_output) in the `[SubChannel]` problem creates the additional auxvariables:
+Enabling the boolean flag [!param](/Problem/QuadSubChannel1PhaseProblem/full_output) in the `[SubChannel]` problem creates the additional auxvariables:
 
-Pressure drop: $Pa$ = "DP" (This applies to the cell immediately behind the node)
+- Pressure drop: "DP" $Pa$ (This refers to the cell value immediately below the node)
+
+- Friction factor: "ff" $unitless$ (This refers to the cell value immediately below the node)
 
 !alert note
 This `DP` auxvariable variable is not calculated for the monolithic solve, in which case it will read zero in all nodes.
-
-Friction factor: $unitless$ = "ff" (This applies to the cell immediately behind the node)
-
-- Enabling the boolean flag [!param](/Problem/QuadSubChannel1PhaseProblem/deformation) in the `[SubChannel]` problem creates the additional auxvariables:
-
-Subchannel centroid displacement: $m$ = "displacement"
-
-An example usage of displacement can be found [here](areva_fctf.md).
 
 ## Fuel pins mesh
 
 This is the Pin mesh that gets created by: [SCMQuadPinMeshGenerator](SCMQuadPinMeshGenerator.md) and [SCMTriPinMeshGenerator](SCMTriPinMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the `[fuel_pins]` mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the fuel pin mesh block, automatically defines the following auxiliary variables:
 
-Fuel pin average surface temperature: $K$ = "Tpin"
+- Fuel pin average surface temperature: $K$ = "Tpin"
 
-Fuel pin diameter: $m$ = "Dpin"
+- Fuel pin diameter: "Dpin" $m$
 
-Linear heat rate: $W/m$ = "q_prime"
+- Linear heat rate: "q_prime" $W/m$
 
-The variable `q_prime` is created on:
-
-- the `fuel_pins` mesh if a pin mesh is present
-
-- otherwise on the `sub_channel` mesh
-
-Average subchannel convective heat transfer coefficient: $W/m^2K$ = "HTC"
+- Average subchannel convective heat transfer coefficient: "HTC" $W/m^2K$
 
 !alert note
-The fuel pin mesh block needs to be named: `[fuel_pins]`.
+The variable `q_prime` is created on: the fuel pin mesh if a pin mesh is present otherwise on the subchannel mesh
 
 ## Duct mesh
 
 This is the Duct mesh that gets created by: [SCMQuadDuctMeshGenerator](SCMQuadDuctMeshGenerator.md) and [SCMTriDuctMeshGenerator](SCMTriDuctMeshGenerator.md) for square and triangular assemblies respetively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the `[duct]` mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the duct mesh block, automatically defines the following auxiliary variables:
 
-Duct heat flux: $W/m^2$ = "duct_heat_flux"
+- Duct heat flux: "duct_heat_flux" $W/m^2$
 
-Duct temperature: $K$ = "Tduct"
-
-!alert note
-The duct mesh block needs to be named: `[duct]`.
+- Duct temperature: "Tduct" $K$
 
 !alert warning
 Block names must match those defined in the mesh. All ICs, AuxKernels, and Postprocessors using these variables must be applied on compatible blocks. Mismatched block names will result in an error.
 
 !alert note
-All SCM auxiliary variables are block-restricted by default. Each variable is defined only on the mesh block where it is physically meaningful (e.g., subchannel, fuel pins, or duct). When visualized in ParaView, these variables may appear across the entire domain. However, values outside their native blocks are not meaningful and may be shown as zero or interpolated by the visualization tool. For example, subchannel quantities such as surface area or mass flow rate are defined on the `[sub_channel]` mesh and should only be interpreted there.
+All SCM auxiliary variables are block-restricted by default. Each variable is defined only on the mesh block where it is physically meaningful (e.g., subchannel, fuel pins, or duct). When visualized in ParaView, these variables may appear across the entire domain. However, values outside their native blocks are not meaningful and may be shown as zero or interpolated by the visualization tool. For example, subchannel quantities such as surface area or mass flow rate are defined on the subchannel mesh and should only be interpreted there.
