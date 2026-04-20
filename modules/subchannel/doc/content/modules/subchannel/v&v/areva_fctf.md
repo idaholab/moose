@@ -62,6 +62,8 @@ For the side subchannels, located in the perimeter of the hexagonal assembly, on
 
 For the corner subchannel the surface area, gap, and wetted perimeter are affected. In this case a lambda (blue-shaded) shaped area is added to the original surface area subchannel. Again, this is an approximation necessitated by the fact that in the subchannel formulation all values are considered in a per subchannel basis. The deformation is assumed to be symmetric across the line connecting the center of the corner pin to the corner of the duct.
 
+Alternatively, the user can opt to create custom ICs to directly define the geometric parameters: surface area and wetted perimeter for the deformed edge/corner subchannels.
+
 ## Input files
 
 !! Intentional comment to provide extra spacing
@@ -86,7 +88,6 @@ Pressure measurements were taken from a pressure tap in the middle of Face B (se
        caption=Deformed duct pressure measurements.
 
 In all cases SCM over-predicts pressure drop in comparison to CFD and the experiment except for the half pitch ($0-\frac{1}{2}P$) in the non-deformed duct case. The reason for this over-prediction is that there are wire-wrap/half-pitch effects that are not captured by the friction factor model [!citep](chen2018upgraded) implemented in SCM. The linear model implemented in the subchannel scale, calculates an axial/surface averaged friction factor, that does not capture effects in the sub-pitch, sub-subchannel scale, associated with the wire-wrap and TPG mentioned above. Contrary, the CFD models the effect of the wire-wrap in a more refined way, hence it better matches with the experimental results in all axial lengths.
-
 
 Experimental temperature measurements are extracted from locations on the outer surface of specific unheated tubes, and on duct Face E, at two different axial heights. The first plane, known as Plane B, is at an axial height 4.4167P above the start of the heated section. At plane B the wire-wrapping is at 5 o'clock and the thermocouples are at 4 and 6 o'clock ([planeB]).
 

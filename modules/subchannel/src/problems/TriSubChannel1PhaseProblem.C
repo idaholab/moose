@@ -67,18 +67,39 @@ TriSubChannel1PhaseProblem::cleanUp()
 void
 TriSubChannel1PhaseProblem::initializeSolution()
 {
-  auto pin_diameter = _subchannel_mesh.getPinDiameter();
+  const Real tol = 1e-8;
+  const auto pin_diameter = _subchannel_mesh.getPinDiameter();
+
   for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
   {
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+
       if (_pin_mesh_exist)
       {
-        if ((*_Dpin_soln)(node) != pin_diameter)
-          _deformation = true;
+        const Real Dpin = (*_Dpin_soln)(node);
+
+        if (std::abs(Dpin) <= tol)
+          mooseError("Dpin is zero at node ",
+                     node->id(),
+                     ". You must initialize Dpin to a non-zero value.");
       }
-      if ((*_displacement_soln)(node) != 0.0)
+    }
+  }
+
+  for (unsigned int iz = 0; iz < _n_cells + 1 && !_deformation; iz++)
+  {
+    for (unsigned int i_ch = 0; i_ch < _n_channels && !_deformation; i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+
+      if (_pin_mesh_exist && std::abs((*_Dpin_soln)(node)-pin_diameter) > tol)
+        _deformation = true;
+
+      if ((subch_type == EChannelType::CORNER || subch_type == EChannelType::EDGE) &&
+          std::abs((*_displacement_soln)(node)) > tol)
         _deformation = true;
     }
   }

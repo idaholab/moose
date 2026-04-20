@@ -6,7 +6,7 @@ Depending on the mesh type defined in the SCM input file, SCM automatically crea
 
 This is the Subchannel mesh that gets created by: [SCMQuadSubChannelMeshGenerator](SCMQuadSubChannelMeshGenerator.md) and [SCMTriSubChannelMeshGenerator](SCMTriSubChannelMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the subchannel mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the subchannel mesh block, automatically defines the following auxiliary variables that live on the subchannel mesh nodes:
 
 - Mass flow rate: "mdot" $kg/s$
 
@@ -45,9 +45,9 @@ This `DP` auxvariable variable is not calculated for the monolithic solve, in wh
 
 ## Fuel pins mesh
 
-This is the Pin mesh that gets created by: [SCMQuadPinMeshGenerator](SCMQuadPinMeshGenerator.md) and [SCMTriPinMeshGenerator](SCMTriPinMeshGenerator.md) for quadrilateral and triangular lattice respectively.
+This is the fuel pin mesh that gets created by: [SCMQuadPinMeshGenerator](SCMQuadPinMeshGenerator.md) and [SCMTriPinMeshGenerator](SCMTriPinMeshGenerator.md) for quadrilateral and triangular lattice respectively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the fuel pin mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the fuel pin mesh block, automatically defines the following auxiliary variables that live on the fuel pin mesh nodes:
 
 - Fuel pin average surface temperature: $K$ = "Tpin"
 
@@ -60,18 +60,21 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 !alert note
 The variable `q_prime` is created on: the fuel pin mesh if a pin mesh is present otherwise on the subchannel mesh
 
+!alert note
+In general, the pin diameter is defined by the mesh and provided by the user through the mesh generator objects. As a result, it is assumed to be constant for all fuel pins. If a pin mesh is present, the auxiliary variable `Dpin` is automatically created. Typically, the user must initialize `Dpin` to the pin diameter specified in the mesh generators [!param](/Mesh/SCMTriSubChannelMeshGenerator/pin_diameter), [!param](/Mesh/SCMQuadSubChannelMeshGenerator/pin_diameter), to avoid confusion and ensure consistency. This enforces the assumption that all fuel pins share the same diameter. The initial conditions used to compute geometric quantities—such as flow area and wetted perimeter—also rely on this assumption of uniform pin diameter and use pin diameter value from the mesh. If different pin diameters are required, the user can override this behavior by manually defining `Dpin` using a custom initial condition. In that case, the solver detects the variation and recomputes the geometric properties (surface area, wetted perimeter, and gap) before each time step.
+
 ## Duct mesh
 
-This is the Duct mesh that gets created by: [SCMQuadDuctMeshGenerator](SCMQuadDuctMeshGenerator.md) and [SCMTriDuctMeshGenerator](SCMTriDuctMeshGenerator.md) for square and triangular assemblies respetively.
+This is the duct mesh that gets created by: [SCMQuadDuctMeshGenerator](SCMQuadDuctMeshGenerator.md) and [SCMTriDuctMeshGenerator](SCMTriDuctMeshGenerator.md) for square and triangular assemblies respetively.
 
-When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the duct mesh block, automatically defines the following auxiliary variables:
+When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the duct mesh block, automatically defines the following auxiliary variables that live on the duct mesh nodes:
 
 - Duct heat flux: "duct_heat_flux" $W/m^2$
 
 - Duct temperature: "Tduct" $K$
 
 !alert warning
-Block names must match those defined in the mesh. All ICs, AuxKernels, and Postprocessors using these variables must be applied on compatible blocks. Mismatched block names will result in an error.
+ All ICs, AuxKernels, and Postprocessors using these variables must be applied on compatible blocks. Mismatched block names will result in an error.
 
 !alert note
-All SCM auxiliary variables are block-restricted by default. Each variable is defined only on the mesh block where it is physically meaningful (e.g., subchannel, fuel pins, or duct). When visualized in ParaView, these variables may appear across the entire domain. However, values outside their native blocks are not meaningful and may be shown as zero or interpolated by the visualization tool. For example, subchannel quantities such as surface area or mass flow rate are defined on the subchannel mesh and should only be interpreted there.
+All SCM auxiliary variables are block-restricted by default. Each variable is defined only on the mesh block where it is physically meaningful (e.g., subchannel, fuel pins, or duct). When visualized in ParaView, these variables may appear across the entire domain (all mesh types). However, values outside their native blocks are not meaningful and may be shown as zero or interpolated by the visualization tool. For example, subchannel quantities such as surface area or mass flow rate are defined on the subchannel mesh and should only be interpreted there.
