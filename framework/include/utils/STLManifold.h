@@ -47,7 +47,8 @@ public:
    * @param rotation Extrinsic Euler angles in degrees.
    * @param translation Translation applied after scaling and rotation.
    * @param surface_tolerance Absolute tolerance used for manifold validation and near-surface
-   * classification.
+   * classification. This should be chosen relative to the STL length scale and expected vertex
+   * noise from the export pipeline.
    */
   STLManifold(const std::string & file_name,
               const RealVectorValue & scale,

@@ -59,6 +59,6 @@ protected:
   /// Translation applied after scaling and rotation.
   const RealVectorValue _translation;
 
-  /// Absolute tolerance used by the manifold classifier.
+  /// Absolute tolerance used by the manifold classifier; choose relative to geometry scale/noise.
   const Real _surface_tolerance;
 };

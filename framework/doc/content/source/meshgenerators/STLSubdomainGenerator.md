@@ -26,6 +26,12 @@ then rotation, then translation. Users may also limit reassignment to selected
 existing blocks with
 [!param](/Mesh/STLSubdomainGenerator/restricted_subdomains).
 
+[!param](/Mesh/STLSubdomainGenerator/surface_tolerance) is an absolute tolerance.
+Set it relative to the STL length scale and the coordinate noise produced by the
+export pipeline. If coincident vertices differ by more than this tolerance, the
+manifold validation step can reject an otherwise visually closed surface as
+non-watertight.
+
 !syntax parameters /Mesh/STLSubdomainGenerator
 
 !syntax inputs /Mesh/STLSubdomainGenerator

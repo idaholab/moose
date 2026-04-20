@@ -248,7 +248,7 @@ STLManifold::parse(const std::string & file_name,
 
   std::array<char, 84> header = {{0}};
   probe.read(header.data(), header.size());
-  if (!probe && file_size >= header.size())
+  if (probe.gcount() < static_cast<std::streamsize>(header.size()) && file_size >= header.size())
     mooseError("Failed while reading STL file '", file_name, "'.");
 
   // Binary STL encodes a triangle count in bytes 80-83, so the expected file size is known.
@@ -258,7 +258,7 @@ STLManifold::parse(const std::string & file_name,
     std::uint32_t triangle_count = 0;
     std::memcpy(&triangle_count, header.data() + 80, sizeof(std::uint32_t));
     const auto expected_size = static_cast<std::size_t>(84ull + 50ull * triangle_count);
-    parse_as_binary = expected_size == file_size;
+    parse_as_binary = triangle_count > 0 && expected_size == file_size;
   }
 
   probe.close();
@@ -599,6 +599,9 @@ STLManifold::rayIntersectsTriangle(const Point & point, const STLTriangle & tri)
     return RayIntersection::Miss;
 
   const Real t = inv_determinant * (edge2 * q);
+  if (t < 0.0)
+    // Intersections behind the ray origin do not contribute to +x parity counting.
+    return RayIntersection::Miss;
   if (t <= _surface_tolerance)
     // Hits too close to the ray origin are treated as ambiguous boundary situations.
     return RayIntersection::Ambiguous;

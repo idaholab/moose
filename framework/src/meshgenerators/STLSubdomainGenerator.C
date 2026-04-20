@@ -49,7 +49,8 @@ STLSubdomainGenerator::validParams()
       "surface_tolerance",
       1e-10,
       "surface_tolerance>0",
-      "Absolute geometric tolerance used for manifold validation and near-surface classification.");
+      "Absolute geometric tolerance used for manifold validation and near-surface classification. "
+      "Choose this relative to the STL length scale and expected coordinate noise.");
   params.addClassDescription("Changes the subdomain ID of elements whose centroid lies inside or "
                              "outside a closed STL manifold.");
   return params;
@@ -91,6 +92,12 @@ STLSubdomainGenerator::generate()
       restricted_ids.insert(MooseMeshUtils::getSubdomainID(name, *mesh));
     }
   }
+
+  if (MooseMeshUtils::hasSubdomainID(*mesh, _block_id) && mesh->processor_id() == 0)
+    mooseInfo("The requested block_id ",
+              _block_id,
+              " already exists on the input mesh. Elements outside the STL manifold that are "
+              "already assigned to this block will remain unchanged.");
 
   // Build the classifier up front so the per-element loop only performs centroid queries.
   STLManifold manifold(_stl_file, _scale, _rotation, _translation, _surface_tolerance);
