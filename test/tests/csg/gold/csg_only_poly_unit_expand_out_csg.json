@@ -1,0 +1,62 @@
+{
+  "cells": {
+    "tri_prism_poly_cell": {
+      "fill": "poly_material",
+      "filltype": "CSG_MATERIAL",
+      "region_infix": [
+        "-tri_prism_poly_surf_exp_0",
+        "&",
+        "-tri_prism_poly_surf_exp_1",
+        "&",
+        "-tri_prism_poly_surf_exp_2"
+      ],
+      "region_postfix": [
+        "tri_prism_poly_surf_exp_0",
+        "-",
+        "tri_prism_poly_surf_exp_1",
+        "-",
+        "&",
+        "tri_prism_poly_surf_exp_2",
+        "-",
+        "&"
+      ]
+    }
+  },
+  "surfaces": {
+    "tri_prism_poly_surf_exp_0": {
+      "coefficients": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 4.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "tri_prism_poly_surf_exp_1": {
+      "coefficients": {
+        "a": -0.49999999999999983,
+        "b": 0.8660254037844387,
+        "c": 0.0,
+        "d": 4.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "tri_prism_poly_surf_exp_2": {
+      "coefficients": {
+        "a": -0.5000000000000004,
+        "b": -0.8660254037844384,
+        "c": 0.0,
+        "d": 4.0
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "tri_prism_poly_cell"
+      ],
+      "root": true
+    }
+  }
+}
