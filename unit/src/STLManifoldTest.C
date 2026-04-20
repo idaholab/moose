@@ -332,15 +332,4 @@ TEST(STLManifold, errors)
                                                1e-10),
                                    "degenerate triangle");
   }
-
-  {
-    Moose::UnitUtils::TempFile temp_file;
-    writeCubeASCII(temp_file.path());
-    EXPECT_MOOSEERROR_MSG_CONTAINS(STLManifold(temp_file.path().string(),
-                                               RealVectorValue(0, 1, 1),
-                                               RealVectorValue(0, 0, 0),
-                                               RealVectorValue(0, 0, 0),
-                                               1e-10),
-                                   "scale components must be strictly positive");
-  }
 }

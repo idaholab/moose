@@ -6,14 +6,14 @@
     type = CSVDiff
     input = basic_inside.i
     csvdiff = basic_inside_out_elem_counter_0001.csv
-    requirement = 'The system shall assign a subdomain to 3D mesh elements whose centroids lie inside a closed STL manifold.'
+    requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie inside a closed STL manifold.'
   []
 
   [outside]
     type = CSVDiff
     input = outside.i
     csvdiff = outside_out_elem_counter_0001.csv
-    requirement = 'The system shall assign a subdomain to 3D mesh elements whose centroids lie outside a closed STL manifold.'
+    requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie outside a closed STL manifold.'
   []
 
   [restricted]

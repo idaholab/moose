@@ -161,15 +161,12 @@ STLManifold::STLManifold(const std::string & file_name,
                          const Real surface_tolerance)
   : _file_name(file_name), _surface_tolerance(surface_tolerance)
 {
-  // A non-positive tolerance would make both quantization and surface classification ill-defined.
-  if (_surface_tolerance <= 0.0)
-    mooseError("surface_tolerance must be strictly positive.");
+  mooseAssert(_surface_tolerance > 0.0, "surface_tolerance must be strictly positive.");
 
   // The current implementation accepts only strictly positive scale factors so the geometry is not
   // collapsed or mirrored unexpectedly.
-  for (const auto i : make_range(Moose::dim))
-    if (scale(i) <= 0.0)
-      mooseError("scale components must be strictly positive.");
+  mooseAssert(scale(0) > 0.0 && scale(1) > 0.0 && scale(2) > 0.0,
+              "scale components must be strictly positive.");
 
   // Parse while applying the requested scale -> rotation -> translation transform.
   parse(file_name, scale, rotation, translation);
@@ -528,13 +525,11 @@ STLManifold::addTriangle(const Point & v0,
     _bounding_box = std::make_unique<libMesh::BoundingBox>(_triangles.back().bbox);
   else
     // Update the global bounds incrementally as triangles are added.
-    _bounding_box = std::make_unique<libMesh::BoundingBox>(
-        Point(std::min(_bounding_box->min()(0), _triangles.back().bbox.min()(0)),
-              std::min(_bounding_box->min()(1), _triangles.back().bbox.min()(1)),
-              std::min(_bounding_box->min()(2), _triangles.back().bbox.min()(2))),
-        Point(std::max(_bounding_box->max()(0), _triangles.back().bbox.max()(0)),
-              std::max(_bounding_box->max()(1), _triangles.back().bbox.max()(1)),
-              std::max(_bounding_box->max()(2), _triangles.back().bbox.max()(2))));
+    for (const auto i : make_range(Moose::dim))
+    {
+      _bounding_box->min()(i) = std::min(_bounding_box->min()(i), _triangles.back().bbox.min()(i));
+      _bounding_box->max()(i) = std::max(_bounding_box->max()(i), _triangles.back().bbox.max()(i));
+    }
 }
 
 bool
@@ -582,8 +577,9 @@ STLManifold::rayIntersectsTriangle(const Point & point, const STLTriangle & tri)
   const Point edge2 = tri.v2 - tri.v0;
   const Point h = direction.cross(edge2);
   const Real determinant = edge1 * h;
+  const Real characteristic_length = std::max(edge1.norm(), edge2.norm());
 
-  if (std::abs(determinant) <= _surface_tolerance)
+  if (std::abs(determinant) <= _surface_tolerance * characteristic_length)
     // Nearly parallel triangles are ignored because they do not provide a stable parity event.
     return RayIntersection::Miss;
 

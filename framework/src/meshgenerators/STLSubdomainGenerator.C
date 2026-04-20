@@ -22,7 +22,7 @@ registerMooseObject("MooseApp", STLSubdomainGenerator);
 InputParameters
 STLSubdomainGenerator::validParams()
 {
-  // This interface intentionally mirrors other centroid-based subdomain tagging generators.
+  // This interface intentionally mirrors other point-sampling subdomain tagging generators.
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   InputParameters params = MeshGenerator::validParams();
@@ -51,8 +51,9 @@ STLSubdomainGenerator::validParams()
       "surface_tolerance>0",
       "Absolute geometric tolerance used for manifold validation and near-surface classification. "
       "Choose this relative to the STL length scale and expected coordinate noise.");
-  params.addClassDescription("Changes the subdomain ID of elements whose centroid lies inside or "
-                             "outside a closed STL manifold.");
+  params.addClassDescription(
+      "Changes the subdomain ID of elements whose vertex-average point lies inside or outside a "
+      "closed STL manifold.");
   return params;
 }
 
@@ -68,6 +69,9 @@ STLSubdomainGenerator::STLSubdomainGenerator(const InputParameters & parameters)
     _translation(getParam<RealVectorValue>("translation")),
     _surface_tolerance(getParam<Real>("surface_tolerance"))
 {
+  for (unsigned int i = 0; i < Moose::dim; ++i)
+    if (_scale(i) <= 0.0)
+      paramError("scale", "all components must be strictly positive.");
 }
 
 std::unique_ptr<MeshBase>
@@ -99,7 +103,7 @@ STLSubdomainGenerator::generate()
               " already exists on the input mesh. Elements outside the STL manifold that are "
               "already assigned to this block will remain unchanged.");
 
-  // Build the classifier up front so the per-element loop only performs centroid queries.
+  // Build the classifier up front so the per-element loop only performs point-in-manifold queries.
   STLManifold manifold(_stl_file, _scale, _rotation, _translation, _surface_tolerance);
 
   // On distributed meshes, only locally owned active elements are modified on each rank.
@@ -108,8 +112,8 @@ STLSubdomainGenerator::generate()
     if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
       continue;
 
-    // This generator follows the same centroid-based semantics as the existing bounding-box and
-    // parsed subdomain generators.
+    // This generator intentionally samples at the vertex average instead of the true geometric
+    // centroid, matching the inexpensive behavior of other subdomain tagging generators.
     const bool contains = manifold.contains(elem->vertex_average());
     if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
       elem->subdomain_id() = _block_id;

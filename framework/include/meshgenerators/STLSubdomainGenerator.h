@@ -15,12 +15,12 @@
 class STLManifold;
 
 /**
- * MeshGenerator for defining a subdomain based on whether element centroids lie within a closed
- * STL manifold.
+ * MeshGenerator for defining a subdomain based on whether element vertex averages lie within a
+ * closed STL manifold.
  *
- * The generator is intentionally centroid-based to mirror the behavior of other subdomain tagging
- * mesh generators in MOOSE. The STL geometry is transformed in the order scale, then rotation,
- * then translation.
+ * The generator intentionally uses Elem::vertex_average() rather than the true geometric centroid
+ * to mirror the inexpensive point-sampling behavior of other subdomain tagging mesh generators in
+ * MOOSE. The STL geometry is transformed in the order scale, then rotation, then translation.
  */
 class STLSubdomainGenerator : public MeshGenerator
 {
@@ -31,7 +31,7 @@ public:
   /// Construct the mesh generator from user input.
   STLSubdomainGenerator(const InputParameters & parameters);
 
-  /// Apply STL-based subdomain tagging to the input mesh.
+  /// Apply STL-based subdomain tagging using element vertex averages as the query points.
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
