@@ -95,7 +95,6 @@ unheated_length_exit = 0.855 #m
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
-  deformation = true
   # Heat Transfer Correlations
   pin_HTC_closure = 'gnielinski'
   # friction model

@@ -91,7 +91,7 @@ SubChannelAddVariablesAction::act()
   vars_to_add.push_back({SubChannelApp::TEMPERATURE, fluid_blocks});
   vars_to_add.push_back({SubChannelApp::DENSITY, fluid_blocks});
   vars_to_add.push_back({SubChannelApp::VISCOSITY, fluid_blocks});
-  vars_to_add.push_back({SubChannelApp::DISPLACEMENT, fluid_blocks};
+  vars_to_add.push_back({SubChannelApp::DISPLACEMENT, fluid_blocks});
 
   // q_prime lives on pins if pins exist, otherwise on the fluid mesh
   if (pin_mesh_exist)

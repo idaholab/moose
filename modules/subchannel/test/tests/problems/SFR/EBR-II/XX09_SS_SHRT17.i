@@ -70,7 +70,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
-  deformation = true
   verbose_subchannel = true
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'

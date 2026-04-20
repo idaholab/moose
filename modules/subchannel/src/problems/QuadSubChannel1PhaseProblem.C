@@ -48,10 +48,10 @@ QuadSubChannel1PhaseProblem::initializeSolution()
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
       if (_pin_mesh_exist)
       {
-        if (_Dpin_soln(node) != pin_diameter)
+        if ((*_Dpin_soln)(node) != pin_diameter)
           _deformation = true;
       }
-      if (_displacement_soln(node) != 0.0)
+      if ((*_displacement_soln)(node) != 0.0)
         _deformation = true;
     }
   }
