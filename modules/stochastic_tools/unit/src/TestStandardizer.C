@@ -1,8 +1,10 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "gtest/gtest.h"
-#include <torch/torch.h>
 #include "Standardizer.h"
+
+#include <sstream>
+#include <torch/torch.h>
 
 using namespace StochasticTools;
 
@@ -15,64 +17,94 @@ TEST(StochasticTools, getMean)
       {{1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}},
       {torch::kFloat64});
 
-  StochasticTools::Standardizer torch;
-  torch.computeSet(input_tensor);
+  StochasticTools::Standardizer standardizer;
+  standardizer.computeSet(input_tensor);
 
-  auto mean = torch.getMean();
-  auto stddev = torch.getStdDev();
-  unsigned int n = mean.sizes()[1];
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    EXPECT_EQ(mean[i].item<Real>(), mean_gold[i]);
-    EXPECT_EQ(stddev.data_ptr<Real>()[i], stddev_gold[i]);
-  }
+  const auto mean = standardizer.getMean();
+  const auto stddev = standardizer.getStdDev();
+
+  ASSERT_EQ(mean.size(0), mean_gold.size());
+  ASSERT_EQ(stddev.size(0), stddev_gold.size());
+
+  const auto mean_accessor = mean.accessor<Real, 2>();
+  const auto stddev_accessor = stddev.accessor<Real, 2>();
+  for (std::size_t i = 0; i < mean_gold.size(); ++i)
+    EXPECT_EQ(mean_accessor[i][0], mean_gold[i]);
+  for (std::size_t i = 0; i < stddev_gold.size(); ++i)
+    EXPECT_EQ(stddev_accessor[i][0], stddev_gold[i]);
 }
 
 TEST(StochasticTools, getStandardized)
 {
-  const std::vector<double> gold = {1.0, -1.0, -1.0, 1.0};
-
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
+  const auto gold = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
 
-  StochasticTools::Standardizer torch;
-  torch.computeSet(input_tensor);
-  torch.getStandardized(input_tensor);
+  StochasticTools::Standardizer standardizer;
+  standardizer.computeSet(input_tensor);
+  standardizer.getStandardized(input_tensor);
 
-  for (unsigned int i = 0; i < gold.size(); ++i)
-  {
-    EXPECT_EQ(input_tensor.data_ptr<Real>()[i], gold[i]);
-  }
+  EXPECT_TRUE(torch::allclose(input_tensor, gold));
 }
 
 TEST(StochasticTools, getDestandardized)
 {
-  const std::vector<double> gold = {1.0, -1.0, -1.0, 1.0};
-
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
+  const auto gold = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
 
-  StochasticTools::Standardizer torch;
-  torch.computeSet(input_tensor);
-  torch.getStandardized(input_tensor);
-  torch.getDestandardized(input_tensor);
-  for (unsigned int i = 0; i < gold.size(); ++i)
-  {
-    EXPECT_EQ(input_tensor.data_ptr<Real>()[i], gold[i]);
-  }
+  StochasticTools::Standardizer standardizer;
+  standardizer.computeSet(input_tensor);
+  standardizer.getStandardized(input_tensor);
+  standardizer.getDestandardized(input_tensor);
+
+  EXPECT_TRUE(torch::allclose(input_tensor, gold));
 }
 
 TEST(StochasticTools, getDescaled)
 {
-  // input = input.array().rowwise() * stdev.transpose().array();
-  StochasticTools::Standardizer torch;
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {1.0, 1.0}}, {torch::kFloat64});
-  const std::vector<double> gold = {0.0, -1.0, 0.0, 1.0};
+  const auto gold = torch::tensor({{0.0, -1.0}, {0.0, 1.0}}, {torch::kFloat64});
 
-  torch.computeSet(input_tensor);
-  torch.getDescaled(input_tensor);
-  for (unsigned int i = 0; i < gold.size(); ++i)
-  {
-    EXPECT_EQ(input_tensor.data_ptr<Real>()[i], gold[i]);
-  }
+  StochasticTools::Standardizer standardizer;
+  standardizer.computeSet(input_tensor);
+  standardizer.getDescaled(input_tensor);
+
+  EXPECT_TRUE(torch::allclose(input_tensor, gold));
+}
+
+TEST(StochasticTools, tensorDataStoreLoad)
+{
+  torch::Tensor stored =
+      torch::tensor({{1.0, 2.0, 3.0}, {-4.0, -5.0, -6.0}}, {torch::kFloat64});
+
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+
+  torch::Tensor loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  ASSERT_EQ(loaded.size(0), stored.size(0));
+  ASSERT_EQ(loaded.size(1), stored.size(1));
+  EXPECT_TRUE(torch::allclose(loaded, stored));
+}
+
+TEST(StochasticTools, standardizerDataStoreLoad)
+{
+  torch::Tensor input_tensor =
+      torch::tensor({{3.0, 1.0}, {5.0, -1.0}, {7.0, 3.0}}, {torch::kFloat64});
+
+  StochasticTools::Standardizer stored;
+  stored.computeSet(input_tensor);
+
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+
+  StochasticTools::Standardizer loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  EXPECT_TRUE(torch::allclose(loaded.getMean(), stored.getMean()));
+  EXPECT_TRUE(torch::allclose(loaded.getStdDev(), stored.getStdDev()));
 }
 
 #endif

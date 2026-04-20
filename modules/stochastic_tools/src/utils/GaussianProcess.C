@@ -72,22 +72,19 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
                                        const torch::Tensor & training_data,
                                        const GPOptimizerOptions & opts)
 {
-  const bool batch_decision =
-      opts.batch_size > 0 && (opts.batch_size <= training_params.sizes()[0]);
-  _batch_size = batch_decision ? opts.batch_size : training_params.sizes()[0];
+  const auto num_samples = training_params.size(0);
+  const auto num_outputs = training_data.size(1);
+  const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= num_samples);
+  _batch_size = batch_decision ? opts.batch_size : num_samples;
   _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}).to(at::kDouble);
 
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K = torch::resize(_K,
-                     {training_params.sizes()[0] * training_data.sizes()[1],
-                      training_params.sizes()[0] * training_data.sizes()[1]})
-           .to(at::kDouble);
+  _K = torch::empty({num_samples * num_outputs, num_samples * num_outputs}, at::kDouble);
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
-  torch::Tensor training_data_transpose = torch::transpose(training_data, 0, 1);
-  torch::Tensor flattened_tensor = torch::reshape(
-      training_data_transpose, {training_params.sizes()[0] * training_data.sizes()[1], 1});
+  torch::Tensor flattened_tensor =
+      torch::reshape(torch::transpose(training_data, 0, 1), {num_samples * num_outputs, 1});
 
   //  Compute the Cholesky decomposition and inverse action of the covariance matrix
   setupStoredMatrices(flattened_tensor);
@@ -98,10 +95,8 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
 void
 GaussianProcess::setupStoredMatrices(const torch::Tensor & input)
 {
-  // llt does the llt decomposition as part of the Cholesky module
   _K_cho_decomp = torch::linalg_cholesky(_K);
-  _K_results_solve =
-      torch::linalg_solve(torch::mm(_K_cho_decomp, torch::transpose(_K_cho_decomp, 0, 1)), input);
+  _K_results_solve = torch::cholesky_solve(input, _K_cho_decomp);
 }
 
 void
@@ -263,8 +258,8 @@ GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
   Real log_likelihood = 0;
   log_likelihood +=
       -1 * torch::mm(torch::transpose(flattened_data, 0, 1), _K_results_solve).item<Real>();
-  log_likelihood += -std::log(torch::det(_K).item<Real>());
-  log_likelihood -= _batch_size * std::log(2 * M_PI);
+  log_likelihood += -2.0 * torch::sum(torch::log(torch::diagonal(_K_cho_decomp))).item<Real>();
+  log_likelihood -= flattened_data.size(0) * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   return log_likelihood;
 }
@@ -285,11 +280,8 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
     {
       const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
-      // This is just temporary. Convert dKhp_matrix to tensor
-      auto tmp =
-          torch::trace(torch::mm(alpha, dKdhp) -
-                       torch::linalg_solve(
-                           torch::mm(_K_cho_decomp, torch::transpose(_K_cho_decomp, 0, 1)), dKdhp))
+      const auto tmp =
+          torch::trace(torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp))
               .item<Real>();
       grad_vec[global_index] = tmp / -2.0;
     }

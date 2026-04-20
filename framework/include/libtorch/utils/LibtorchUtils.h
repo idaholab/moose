@@ -29,6 +29,18 @@ void
 vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach = false);
 
 /**
+ * Utility function that creates a non-owning tensor view of a standard vector.
+ * The returned tensor shares the storage of the provided vector, so the vector
+ * must outlive the tensor.
+ * @tparam DataType The vector element type
+ * @param vector The vector that needs to be wrapped
+ * @param sizes The desired tensor shape
+ */
+template <typename DataType>
+torch::Tensor
+vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
+
+/**
  * Utility function that converts a `torch::Tensor` to a standard vector.
  * @tparam DataType The type of data (float,double, etc.) which the vector is filled with
  * @param tensor The tensor which needs to be converted
