@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosKernelValue.h"
 
 /**
  * Implements a source term proportional to the value of a coupled variable. Weak form: $(\\psi_i,
  * -\\sigma v)$.
  */
-class KokkosCoupledForce : public Moose::Kokkos::Kernel
+class KokkosCoupledForce : public Moose::Kokkos::KernelValue
 {
 public:
   static InputParameters validParams();
@@ -23,9 +23,7 @@ public:
   KokkosCoupledForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
   /// Coupled variable number
@@ -38,9 +36,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledForce::computeQpResidual(const unsigned int i,
-                                      const unsigned int qp,
-                                      AssemblyDatum & datum) const
+KokkosCoupledForce::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_coef * _v(datum, qp) * _test(datum, i, qp);
+  return -_coef * _v(datum, qp);
 }

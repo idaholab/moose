@@ -16,7 +16,7 @@ registerKokkosResidualObject("MooseApp", KokkosMatCoupledForce);
 InputParameters
 KokkosMatCoupledForce::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = KernelValue::validParams();
 
   params.addClassDescription(
       "Implements a forcing term RHS of the form PDE = RHS, where RHS = Sum_j c_j * m_j * v_j. "
@@ -31,7 +31,7 @@ KokkosMatCoupledForce::validParams()
 }
 
 KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
-  : Kernel(parameters),
+  : KernelValue(parameters),
     _n_coupled(coupledComponents("v")),
     _coupled_props(isParamValid("material_properties")),
     _v_var(coupledIndices("v")),

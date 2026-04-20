@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosKernelValue.h"
 #include "KokkosMap.h"
 
 /**
@@ -18,7 +18,7 @@
  * m_j is a vector of material properties, and v_j is a vector
  * of variables
  */
-class KokkosMatCoupledForce : public Moose::Kokkos::Kernel
+class KokkosMatCoupledForce : public Moose::Kokkos::KernelValue
 {
 public:
   static InputParameters validParams();
@@ -26,12 +26,9 @@ public:
   KokkosMatCoupledForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const;
@@ -48,9 +45,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const
+KokkosMatCoupledForce::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   Real r = 0;
   if (_coupled_props)
@@ -59,13 +54,12 @@ KokkosMatCoupledForce::computeQpResidual(const unsigned int i,
   else
     for (unsigned int j = 0; j < _n_coupled; ++j)
       r += -_coef[j] * _v(datum, qp, j);
-  return r * _test(datum, i, qp);
+  return r;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
+KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const
@@ -76,6 +70,6 @@ KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int i,
   unsigned int p = _v_var_to_index[jvar];
 
   if (_coupled_props)
-    return -_coef[p] * _mat_props[p](datum, qp) * _phi(datum, j, qp) * _test(datum, i, qp);
-  return -_coef[p] * _phi(datum, j, qp) * _test(datum, i, qp);
+    return -_coef[p] * _mat_props[p](datum, qp) * _phi(datum, j, qp);
+  return -_coef[p] * _phi(datum, j, qp);
 }
