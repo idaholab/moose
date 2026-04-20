@@ -1,15 +1,16 @@
 # Engineering Units
 
-Custom domain-specific engineering units can be defined such that they can be used in place of surfaces, cells, and universes in a `CSGBase` instance.
+Custom domain-specific engineering units can be defined such that they can be used in place of basic [!ac](CSG) components (surfaces, cells, and universes) in a `CSGBase` instance.
 To define a custom engineering unit, create a class that derives from one of the engineering unit class types: `CSGSurfaceEngUnit` for surface-like units, `CSGCellEngUnit` for cell-like units, and `CSGUniverseEngUnit` for universe-like units.
 Each of these classes derive from both the `CSGEngUnit` class and the corresponding base class (`CSGSurface`, `CSGCell`, and `CSGUniverse`, respectively).
 Therefore, any defined engineering unit can behave as the base component from which it derives, while benefiting from the functionality and convenience of being an engineering unit.
 A more detailed description of how to use engineering units in the `generateCSG` method can be found in [source/csg/CSGBase.md].
 
 ## Common Methods
+
 All custom engineering units must implement the following two methods (first two methods are described in more detail below):
 
-- `expandUnit`: creates the equivalent object using basic CSG components and adds them to the provided `CSGBase` instance
+- `expandUnit`: creates the equivalent object using basic [!ac](CSG) components and adds them to the provided `CSGBase` instance
 - `getAttributes`: returns a map of necessary unit attributes to their values
 - `clone`: clones the instance as a unique pointer
 
@@ -26,6 +27,12 @@ This method recreates the engineering unit as the corresponding rudimentary comp
 The implementation of this method follows the same basic guidelines for implementing the `generateCSG` method described in [source/csg/CSGBase.md].
 More details on implementing this method for each of the three types of units is below in the respective sections.
 
+!alert! note title=Naming Conventions and Restrictions
+
+To avoid naming conflicts between units and other `CSGBase` components during the expansion, a good practice is to include the original unit's name (retrievable with `getName()`) as a part of the name for any generated component. Additionally, because the original unit is still present in the `CSGBase` instance until the full expansion process is complete, the final generated component cannot have the same name as the original unit. I.e., if a `CSGCellEngUnit` is named `my_cell`, the resulting `_expanded_cell` cannot also be named simply `my_cell`, but `my_cell_expanded` would be allowable.
+
+!alert-end!
+
 ### Unit Attributes
 
 The engineering unit attributes at a minimum are any pieces of data that are needed for a complete definition of the unit for any downstream connected codes or defining the expansion method.
@@ -41,7 +48,7 @@ The `getAttributes()` method returns a map of `AttributeVariant` data types (`st
 ### Setting the Unit Type
 
 The type of unit must be set for `_unit_type` in the unit constructor.
-It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<LatticeClassName>()` so that the unit type automatically matches the class that created it.
+It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<EngUnitClassName>()` so that the unit type automatically matches the class that created it.
 
 ## `CSGSurfaceEngUnit`
 
