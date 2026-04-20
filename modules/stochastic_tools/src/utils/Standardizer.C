@@ -23,14 +23,8 @@ Standardizer::set(const Real & n)
 void
 Standardizer::set(const Real & mean, const Real & stdev)
 {
-  std::vector<Real> mean_vec;
-  std::vector<Real> stdev_vec;
-  mean_vec.push_back(mean);
-  stdev_vec.push_back(stdev);
-
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = torch::from_blob(mean_vec.data(), {1, 1}, options).clone();
-  _stdev = torch::from_blob(stdev_vec.data(), {1, 1}, options).clone();
+  _mean = torch::full({1, 1}, mean, at::kDouble);
+  _stdev = torch::full({1, 1}, stdev, at::kDouble);
 }
 
 void
@@ -46,25 +40,16 @@ Standardizer::set(const std::vector<Real> & mean, const std::vector<Real> & stde
 {
   mooseAssert(mean.size() == stdev.size(),
               "Provided mean and standard deviation vectors are of differing size.");
-  auto mean_copy = mean;
-  auto stdev_copy = stdev;
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean =
-      torch::from_blob(mean_copy.data(), {long(mean.size()), 1}, options).to(at::kDouble).clone();
-  _stdev =
-      torch::from_blob(stdev_copy.data(), {long(stdev.size()), 1}, options).to(at::kDouble).clone();
+  _mean = LibtorchUtils::vectorToTensorView(mean, {long(mean.size()), 1}).clone();
+  _stdev = LibtorchUtils::vectorToTensorView(stdev, {long(stdev.size()), 1}).clone();
 }
 
 void
 Standardizer::computeSet(const torch::Tensor & input)
 {
   // comptue mean and standard deviation
-  auto mean = torch::mean(input, 0, false);
-  auto stdev = torch::std(input, 0, 0, false);
-  mean = torch::resize(mean, {mean.sizes()[0], 1});
-  stdev = torch::resize(stdev, {stdev.sizes()[0], 1});
-  _mean = mean;
-  _stdev = stdev;
+  _mean = torch::mean(input, 0, false).unsqueeze(1);
+  _stdev = torch::std(input, 0, 0, false).unsqueeze(1);
 }
 
 void

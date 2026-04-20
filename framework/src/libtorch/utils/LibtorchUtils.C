@@ -11,21 +11,35 @@
 
 #include "LibtorchUtils.h"
 
+#include <functional>
+#include <numeric>
+
 namespace LibtorchUtils
 {
+
+namespace
+{
+
+template <typename DataType>
+torch::TensorOptions
+tensorOptions()
+{
+  if constexpr (std::is_same<DataType, double>::value)
+    return torch::TensorOptions().dtype(at::kDouble);
+  else if constexpr (std::is_same<DataType, float>::value)
+    return torch::TensorOptions().dtype(at::kFloat);
+  else
+    static_assert(Moose::always_false<DataType>,
+                  "Tensor conversion is not implemented for the given data type!");
+}
+
+} // namespace
 
 template <typename DataType>
 void
 vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach)
 {
-  auto options = torch::TensorOptions();
-  if constexpr (std::is_same<DataType, double>::value)
-    options = torch::TensorOptions().dtype(at::kDouble);
-  else if constexpr (std::is_same<DataType, float>::value)
-    options = torch::TensorOptions().dtype(at::kFloat);
-  else
-    static_assert(Moose::always_false<DataType>,
-                  "vectorToTensor is not implemented for the given data type!");
+  const auto options = tensorOptions<DataType>();
 
   // We need to clone here because from_blob() doesn't take ownership of the pointer so if it
   // vector goes out of scope before tensor, we get unwanted behavior
@@ -38,6 +52,27 @@ vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const boo
 // Explicitly instantiate for DataType=Real
 template void
 vectorToTensor<Real>(std::vector<Real> & vector, torch::Tensor & tensor, const bool detach);
+
+template <typename DataType>
+torch::Tensor
+vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
+{
+  const auto options = tensorOptions<DataType>();
+  const auto expected_numel =
+      std::accumulate(sizes.begin(), sizes.end(), static_cast<int64_t>(1), std::multiplies<int64_t>());
+
+  mooseAssert(expected_numel == static_cast<int64_t>(vector.size()),
+              "The requested tensor shape is incompatible with the vector size.");
+
+  if (vector.empty())
+    return torch::empty(sizes, options);
+
+  return torch::from_blob(const_cast<DataType *>(vector.data()), sizes, options);
+}
+
+// Explicitly instantiate for DataType=Real
+template torch::Tensor
+vectorToTensorView<Real>(const std::vector<Real> & vector, c10::IntArrayRef sizes);
 
 template <typename DataType>
 void

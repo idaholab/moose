@@ -9,6 +9,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "SquaredExponentialCovariance.h"
+#include "LibtorchUtils.h"
 #include <cmath>
 
 registerMooseObject("StochasticToolsApp", SquaredExponentialCovariance);
@@ -63,10 +64,8 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
   mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
-  std::vector length_factor_cp = length_factor;
-  torch::Tensor l_factor =
-      torch::from_blob(length_factor_cp.data(), {1, long(length_factor_cp.size())}, at::kDouble)
-          .clone();
+  const auto l_factor =
+      LibtorchUtils::vectorToTensorView(length_factor, {1, long(length_factor.size())});
   torch::Tensor scaled_distance =
       torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0), 2);
   K = sigma_f_squared * torch::exp(-scaled_distance / 2.0);

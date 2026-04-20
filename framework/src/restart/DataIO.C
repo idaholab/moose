@@ -253,6 +253,7 @@ template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
 {
+  mooseAssert(t.dim() == 2, "Restart storage currently supports only rank-2 tensors.");
   unsigned int m = t.sizes()[0];
   stream.write((char *)&m, sizeof(m));
   unsigned int n = t.sizes()[1];
@@ -647,10 +648,9 @@ template <>
 void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)
 {
-  // t = t.to(at::kDouble);
-  unsigned int m = t.sizes()[0];
+  unsigned int m = 0;
   stream.read((char *)&m, sizeof(m));
-  unsigned int n = t.sizes()[1];
+  unsigned int n = 0;
   stream.read((char *)&n, sizeof(n));
   t = torch::empty({m, n}, at::kDouble);
   auto t_accessor = t.accessor<Real, 2>();

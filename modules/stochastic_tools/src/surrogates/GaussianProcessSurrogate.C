@@ -105,9 +105,7 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   torch::Tensor pred_var =
       K_test -
       torch::mm(torch::transpose(K_train_test, 0, 1),
-                torch::linalg_solve(torch::mm(_gp.getKCholeskyDecomp(),
-                                              torch::transpose(_gp.getKCholeskyDecomp(), 0, 1)),
-                                    K_train_test));
+                torch::cholesky_solve(K_train_test, _gp.getKCholeskyDecomp()));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   torch::Tensor std_dev_mat = torch::sqrt(pred_var);
