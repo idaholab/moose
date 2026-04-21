@@ -101,6 +101,37 @@ TEST(StochasticTools, tensorDataStoreLoad)
   EXPECT_TRUE(torch::allclose(loaded, stored));
 }
 
+TEST(StochasticTools, tensorScalarDataStoreLoad)
+{
+  torch::Tensor stored = torch::tensor(3.25, {torch::kFloat64});
+
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+
+  torch::Tensor loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  ASSERT_EQ(loaded.dim(), stored.dim());
+  EXPECT_TRUE(torch::allclose(loaded, stored));
+}
+
+TEST(StochasticTools, tensorVectorDataStoreLoad)
+{
+  torch::Tensor stored = torch::tensor({1.0, -2.0, 3.5, 7.0}, {torch::kFloat64});
+
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+
+  torch::Tensor loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  ASSERT_EQ(loaded.dim(), stored.dim());
+  ASSERT_EQ(loaded.size(0), stored.size(0));
+  EXPECT_TRUE(torch::allclose(loaded, stored));
+}
+
 TEST(StochasticTools, tensorDataStoreLoadNonContiguous)
 {
   const torch::Tensor base =

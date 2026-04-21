@@ -16,6 +16,69 @@
 
 registerMooseAction("StochasticToolsApp", LoadCovarianceDataAction, "load_covariance_data");
 
+namespace
+{
+
+using HyperParameterMap = CovarianceFunctionBase::HyperParameterMap;
+
+bool
+isScalarHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 0;
+}
+
+bool
+isVectorHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 1;
+}
+
+std::vector<Real>
+exportHyperParameter(const torch::Tensor & tensor)
+{
+  const auto flattened = tensor.reshape({-1}).contiguous();
+  return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
+}
+
+void
+assignRequiredHyperParameter(InputParameters & params,
+                             const std::string & param_name,
+                             const torch::Tensor & tensor)
+{
+  if (params.have_parameter<Real>(param_name))
+  {
+    if (!isScalarHyperParameter(tensor))
+      mooseError("Expected scalar hyperparameter for ", param_name, ".");
+    params.set<Real>(param_name) = tensor.item<Real>();
+  }
+  else if (params.have_parameter<unsigned int>(param_name))
+  {
+    if (!isScalarHyperParameter(tensor))
+      mooseError("Expected scalar hyperparameter for ", param_name, ".");
+    params.set<unsigned int>(param_name) = static_cast<unsigned int>(tensor.item<Real>());
+  }
+  else if (params.have_parameter<std::vector<Real>>(param_name))
+  {
+    if (!isVectorHyperParameter(tensor))
+      mooseError("Expected vector hyperparameter for ", param_name, ".");
+    params.set<std::vector<Real>>(param_name) = exportHyperParameter(tensor);
+  }
+}
+
+void
+loadRequiredHyperParameter(InputParameters & params,
+                           const UserObjectName & object_name,
+                           const std::string & param_name,
+                           const HyperParameterMap & hyperparameters)
+{
+  const auto expected_name = std::string(object_name) + ":" + param_name;
+  const auto hyperparam_it = hyperparameters.find(expected_name);
+  if (hyperparam_it != hyperparameters.end())
+    assignRequiredHyperParameter(params, param_name, hyperparam_it->second);
+}
+
+} // namespace
+
 InputParameters
 LoadCovarianceDataAction::validParams()
 {
@@ -56,9 +119,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
   // This is for the covariance on the very top, the lower-level covariances are
   // all assumed to have num_outputs=1.
   const unsigned int num_outputs = model.getGP().getCovarNumOutputs();
-  const std::unordered_map<std::string, Real> & map = model.getGP().getHyperParamMap();
-  const std::unordered_map<std::string, std::vector<Real>> & vec_map =
-      model.getGP().getHyperParamVectorMap();
+  const HyperParameterMap & hyperparameters = model.getGP().getHyperParamMap();
 
   // We start by creating and loading the lower-level covariances if they need
   // to be present. Right now we can only load a complex covariance which has
@@ -76,21 +137,7 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
     const auto param_list = covar_params.getParametersList();
     for (const auto & param : param_list)
       if (covar_params.isParamRequired(param))
-      {
-        const std::string expected_name = name + ":" + param;
-        for (const auto & it_map : map)
-        {
-          const auto pos = it_map.first.find(expected_name);
-          if (pos != std::string::npos)
-            covar_params.set<Real>(param) = it_map.second;
-        }
-        for (const auto & it_map : vec_map)
-        {
-          const auto pos = it_map.first.find(expected_name);
-          if (pos != std::string::npos)
-            covar_params.set<std::vector<Real>>(param) = it_map.second;
-        }
-      }
+        loadRequiredHyperParameter(covar_params, name, param, hyperparameters);
 
     _problem->addObject<CovarianceFunctionBase>(type, name, covar_params, /*threaded=*/false);
   }
@@ -105,21 +152,11 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
     // can be constructed. The non-required hyperparameters (if present in the
     // parameter maps) will be inserted later.
     if (covar_params.isParamRequired(param))
-    {
-      const std::string expected_name = covar_name + ":" + param;
-
-      const auto & map_it = map.find(expected_name);
-      if (map_it != map.end())
-        covar_params.set<Real>(param) = map_it->second;
-
-      const auto & vec_map_it = vec_map.find(expected_name);
-      if (vec_map_it != vec_map.end())
-        covar_params.set<std::vector<Real>>(param) = vec_map_it->second;
-    }
+      loadRequiredHyperParameter(covar_params, covar_name, param, hyperparameters);
 
   auto covar_object = _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
-  covar_object[0]->loadHyperParamMap(map, vec_map);
+  covar_object[0]->loadHyperParamMap(hyperparameters);
 
   model.setupCovariance(covar_name);
 }

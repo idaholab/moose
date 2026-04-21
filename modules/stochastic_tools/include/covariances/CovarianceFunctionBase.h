@@ -20,6 +20,8 @@
 class CovarianceFunctionBase : public MooseObject, public CovarianceInterface
 {
 public:
+  using HyperParameterMap = std::unordered_map<std::string, torch::Tensor>;
+
   static InputParameters validParams();
   CovarianceFunctionBase(const InputParameters & parameters);
 
@@ -33,17 +35,13 @@ public:
                                        const torch::Tensor & xp,
                                        const bool is_self_covariance) const = 0;
 
-  /// Load some hyperparameters into the local maps contained in this object.
-  /// @param map Input map of scalar hyperparameters
-  /// @param vec_map Input map of vector hyperparameters
-  void loadHyperParamMap(const std::unordered_map<std::string, Real> & map,
-                         const std::unordered_map<std::string, std::vector<Real>> & vec_map);
+  /// Load some hyperparameters into the local map contained in this object.
+  /// @param map Input map of hyperparameters
+  void loadHyperParamMap(const HyperParameterMap & map);
 
   /// Populates the input maps with the owned hyperparameters.
-  /// @param map Map of scalar hyperparameters that should be populated
-  /// @param vec_map Map of vector hyperparameters that should be populated
-  void buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                          std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
+  /// @param map Map of hyperparameters that should be populated
+  void buildHyperParamMap(HyperParameterMap & map) const;
 
   /// Get the default minimum and maximum and size of a hyperparameter.
   /// Returns false is the parameter has not been found in this covariance object.
@@ -86,8 +84,6 @@ public:
   unsigned int numOutputs() const { return _num_outputs; }
 
 protected:
-  using HyperParameterMap = std::unordered_map<std::string, torch::Tensor>;
-
   /// Register a scalar hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter

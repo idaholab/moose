@@ -253,28 +253,26 @@ template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
 {
-  mooseAssert(t.dim() == 2, "Restart storage currently supports only rank-2 tensors.");
   const auto tensor = t.contiguous();
   mooseAssert(tensor.device().is_cpu(), "Restart storage currently supports only CPU tensors.");
   mooseAssert(tensor.scalar_type() == at::kDouble,
               "Restart storage currently supports only double tensors.");
-  unsigned int m = tensor.sizes()[0];
-  stream.write((char *)&m, sizeof(m));
-  unsigned int n = tensor.sizes()[1];
-  stream.write((char *)&n, sizeof(n));
-  auto t_accessor = tensor.accessor<Real, 2>();
-  for (unsigned int i = 0; i < m; i++)
-    for (unsigned int j = 0; j < n; j++)
-    {
-      Real r = t_accessor[i][j];
-      dataStore(stream, r, context);
-    }
-  /*
-  auto sizes = t.sizes();
-  stream.write((char *)&sizes, sizeof(sizes));
-  auto data = t.data_ptr<Real>();
-  stream.write((char *)&data, sizeof(data));
-  */
+
+  unsigned int rank = tensor.dim();
+  stream.write((char *)&rank, sizeof(rank));
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    unsigned int size = tensor.sizes()[dim];
+    stream.write((char *)&size, sizeof(size));
+  }
+
+  const auto flattened = tensor.reshape({tensor.numel()});
+  const auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = t_accessor[i];
+    dataStore(stream, r, context);
+  }
 }
 #endif
 
@@ -652,26 +650,26 @@ template <>
 void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)
 {
-  unsigned int m = 0;
-  stream.read((char *)&m, sizeof(m));
-  unsigned int n = 0;
-  stream.read((char *)&n, sizeof(n));
-  t = torch::empty({m, n}, at::kDouble);
-  auto t_accessor = t.accessor<Real, 2>();
-  for (unsigned int i = 0; i < m; i++)
-    for (unsigned int j = 0; j < n; j++)
-    {
-      Real r = 0;
-      dataLoad(stream, r, context);
-      t_accessor[i][j] = r;
-    }
-  /*
-  auto sizes = t.sizes();
-  stream.read((char *)&sizes, sizeof(sizes));
-  auto data = t.data_ptr<Real>();
-  stream.read((char *)&sizes, sizeof(sizes));
-  t = torch::Tensor(data);
-  */
+  unsigned int rank = 0;
+  stream.read((char *)&rank, sizeof(rank));
+
+  std::vector<int64_t> sizes(rank);
+  for (unsigned int dim = 0; dim < rank; ++dim)
+  {
+    unsigned int size = 0;
+    stream.read((char *)&size, sizeof(size));
+    sizes[dim] = size;
+  }
+
+  t = torch::empty(sizes, at::kDouble);
+  auto flattened = t.reshape({t.numel()});
+  auto t_accessor = flattened.accessor<Real, 1>();
+  for (int64_t i = 0; i < flattened.numel(); ++i)
+  {
+    Real r = 0;
+    dataLoad(stream, r, context);
+    t_accessor[i] = r;
+  }
 }
 #endif
 
