@@ -9,7 +9,6 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LMC.h"
-#include "LibtorchUtils.h"
 #include "MooseRandom.h"
 #include "MathUtils.h"
 
@@ -41,26 +40,22 @@ LMC::LMC(const InputParameters & parameters)
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
-    const std::string a_coeff_name_with_prefix = _name + ":" + a_coeff_name;
-    _a_coeffs.push_back(
-        &addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true));
-
-    auto & acoeff_vector = _hp_map_vector_real[a_coeff_name_with_prefix];
+    auto & acoeff_vector = addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true);
+    _a_coeffs.push_back(&acoeff_vector);
+    auto acoeff_accessor = acoeff_vector.accessor<Real, 1>();
     for (const auto out_i : make_range(_num_outputs))
-      acoeff_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      acoeff_accessor[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
   }
 
   // Then add and initialize the lambda coefficients in the (aa^T+lambda*I) matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string lambda_name = "lambda_" + std::to_string(exp_i);
-    const std::string lambda_name_with_prefix = _name + ":" + lambda_name;
-    _lambdas.push_back(
-        &addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true));
-
-    auto & lambda_vector = _hp_map_vector_real[lambda_name_with_prefix];
+    auto & lambda_vector = addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true);
+    _lambdas.push_back(&lambda_vector);
+    auto lambda_accessor = lambda_vector.accessor<Real, 1>();
     for (const auto out_i : make_range(_num_outputs))
-      lambda_vector[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
+      lambda_accessor[out_i] = 3.0 * generator_latent.rand(0) + 1.0;
   }
 }
 
@@ -165,12 +160,8 @@ LMC::computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
   const auto & lambda_coeffs = *_lambdas[exp_i];
-  const auto a_coeff_tensor =
-      LibtorchUtils::vectorToTensorView(a_coeffs, {long(a_coeffs.size())});
-  const auto lambda_tensor =
-      LibtorchUtils::vectorToTensorView(lambda_coeffs, {long(lambda_coeffs.size())});
-  Bmat = torch::outer(a_coeff_tensor, a_coeff_tensor);
-  torch::diagonal(Bmat) += lambda_tensor;
+  Bmat = torch::outer(a_coeffs, a_coeffs);
+  torch::diagonal(Bmat) += lambda_coeffs;
 }
 
 void
@@ -179,13 +170,12 @@ LMC::computeAGradient(torch::Tensor & grad,
                       const unsigned int index) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
-  // Add asserts here
-  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
-  auto grad_accessor = grad.accessor<Real, 2>();
-  for (const auto col_i : make_range(_num_outputs))
-    grad_accessor[index][col_i] = a_coeffs[col_i];
-  const torch::Tensor transpose = torch::transpose(grad, 0, 1);
-  grad = grad + transpose;
+  mooseAssert(index < static_cast<unsigned int>(a_coeffs.numel()),
+              "Incorrect LMC coefficient index.");
+  auto basis = torch::zeros({long(_num_outputs)}, at::kDouble);
+  auto basis_accessor = basis.accessor<Real, 1>();
+  basis_accessor[index] = 1.0;
+  grad = torch::outer(basis, a_coeffs) + torch::outer(a_coeffs, basis);
 }
 
 void
@@ -193,8 +183,8 @@ LMC::computeLambdaGradient(torch::Tensor & grad,
                            const unsigned int /*exp_i*/,
                            const unsigned int index) const
 {
-  // grad.setZero();
-  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
+  mooseAssert(index < _num_outputs, "Incorrect LMC lambda index.");
+  grad = torch::zeros({long(_num_outputs), long(_num_outputs)}, at::kDouble);
   auto grad_accessor = grad.accessor<Real, 2>();
   grad_accessor[index][index] = 1.0;
 }

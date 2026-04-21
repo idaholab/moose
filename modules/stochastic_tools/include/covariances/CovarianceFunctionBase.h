@@ -85,36 +85,27 @@ public:
   /// Return the number of outputs assumed for this covariance function
   unsigned int numOutputs() const { return _num_outputs; }
 
-  /// Get the map of scalar parameters
-  std::unordered_map<std::string, Real> & hyperParamMapReal() { return _hp_map_real; }
-
-  /// Get the map of vector parameters
-  std::unordered_map<std::string, std::vector<Real>> & hyperParamMapVectorReal()
-  {
-    return _hp_map_vector_real;
-  }
-
 protected:
   /// Register a scalar hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter
   /// @param is_tunable If the parameter is tunable during optimization
-  const Real &
+  torch::Tensor &
   addRealHyperParameter(const std::string & name, const Real value, const bool is_tunable);
 
   /// Register a vector hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter
   /// @param is_tunable If the parameter is tunable during optimization
-  const std::vector<Real> & addVectorRealHyperParameter(const std::string & name,
-                                                        const std::vector<Real> value,
-                                                        const bool is_tunable);
+  torch::Tensor & addVectorRealHyperParameter(const std::string & name,
+                                              const std::vector<Real> & value,
+                                              const bool is_tunable);
 
-  /// Map of real-valued hyperparameters
-  std::unordered_map<std::string, Real> _hp_map_real;
+  /// Map of scalar hyperparameters stored as rank-0 tensors
+  std::unordered_map<std::string, torch::Tensor> _hp_map_real;
 
-  /// Map of vector-valued hyperparameters
-  std::unordered_map<std::string, std::vector<Real>> _hp_map_vector_real;
+  /// Map of vector hyperparameters stored as rank-1 tensors
+  std::unordered_map<std::string, torch::Tensor> _hp_map_vector_real;
 
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
