@@ -26,6 +26,21 @@
                   'stateful properties (partial import).'
   []
 
+  [export_subset_source]
+    type = 'RunApp'
+    input = 'export_subset_source.i'
+    requirement = 'The system shall export multiple stateful material properties for subset '
+                  'import testing.'
+  []
+
+  [import_subset]
+    type = 'RunApp'
+    input = 'import_subset.i'
+    prereq = 'export_subset_source'
+    requirement = 'The system shall skip exported stateful properties that are not declared in '
+                  'the current simulation while still importing matching properties.'
+  []
+
   [type_mismatch]
     type = 'RunException'
     input = 'type_mismatch.i'

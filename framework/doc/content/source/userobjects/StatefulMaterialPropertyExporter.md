@@ -47,6 +47,11 @@ simulation are exported.  Non-stateful (current-only) properties are not written
 The current implementation exports volumetric (interior) properties only (`side = 0`).
 Boundary/face material properties are not yet supported.
 
+!alert note title=Current-state data is also written
+The exporter writes state `0` (current), `1` (old), and `2` (older, if present)
+for every exported property. The importer restores state `0` as well so that the first
+transient shift preserves the imported history.
+
 ## Example Input Syntax
 
 !listing test/tests/userobjects/stateful_material_remap/export.i block=UserObjects
@@ -66,6 +71,11 @@ The intended workflow is:
 2. Run simulation B (potentially on a different mesh and with a different number of MPI
    ranks).  [StatefulMaterialPropertyImporter](StatefulMaterialPropertyImporter.md) reads
    all rank files and remaps old/older states onto the new mesh via closest-point matching.
+
+## Limitations
+
+- Volumetric properties only (`side = 0`); boundary/face material properties are not yet
+  supported.
 
 !syntax parameters /UserObjects/StatefulMaterialPropertyExporter
 

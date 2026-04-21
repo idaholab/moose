@@ -22,8 +22,10 @@ StatefulMaterialPropertyImporter::validParams()
   params.addClassDescription(
       "Imports stateful material property data from a binary .smatprop file produced by "
       "StatefulMaterialPropertyExporter and remaps it onto the current mesh using "
-      "closest-point matching within each subdomain. Overwrites old/older states directly "
-      "after initStatefulProperties() has run for all elements.");
+      "closest-point matching within each subdomain. The remapped values are staged during "
+      "EXEC_INITIAL so the second stateful-property initialization pass can load them through "
+      "the normal restart path. Exported properties not declared as stateful in the current "
+      "simulation are skipped.");
   params.addRequiredParam<std::string>(
       "file_base",
       "Base name for the .smatprop files written by StatefulMaterialPropertyExporter "
@@ -50,7 +52,7 @@ StatefulMaterialPropertyImporter::initialSetup()
 void
 StatefulMaterialPropertyImporter::execute()
 {
-  overwriteStorageStates();
+  populateRestartableMap();
 }
 
 void
@@ -234,28 +236,32 @@ StatefulMaterialPropertyImporter::buildPropertyMapping()
 
   const auto & registry = storage.getMaterialPropertyRegistry();
 
-  // Build mapping: file stateful_id → current stateful_id
-  // based on property name matching
+  // Build mapping: file stateful_id -> current stateful_id based on property name matching.
+  // Properties present in the file but not declared stateful in the current simulation are
+  // skipped; properties that do match must still have the same concrete type.
   _file_to_current_sid.resize(_file_props.size());
   for (const auto file_sid : index_range(_file_props))
   {
     const auto & file_prop = _file_props[file_sid];
     const auto query_id = registry.queryID(file_prop.name);
     if (!query_id)
-      mooseError("Stateful material property '",
-                 file_prop.name,
-                 "' exists in the import file but is not declared as a stateful property "
-                 "in the current simulation. All properties present in the import file "
-                 "must exist in the current simulation.");
+    {
+      mooseInfo("Skipping imported stateful property '",
+                file_prop.name,
+                "' because it does not exist in the current simulation.");
+      continue;
+    }
 
     const auto target_prop_id = *query_id;
     const auto & record = storage.getPropRecord(target_prop_id);
     if (!record.stateful())
-      mooseError("Stateful material property '",
-                 file_prop.name,
-                 "' exists in the import file but is not declared as a stateful property "
-                 "in the current simulation. All properties present in the import file "
-                 "must exist in the current simulation.");
+    {
+      mooseInfo("Skipping imported property '",
+                file_prop.name,
+                "' because it is not declared as a stateful property in the current "
+                "simulation.");
+      continue;
+    }
 
     // Validate type match
     if (record.type != file_prop.type_str)
@@ -279,12 +285,12 @@ StatefulMaterialPropertyImporter::buildPropertyMapping()
     }
 
   if (!any_match)
-    mooseWarning("No matching stateful material properties found between .smatprop file and "
-                 "current simulation.");
+    mooseInfo("No matching stateful material properties found between .smatprop file and "
+              "current simulation.");
 }
 
 void
-StatefulMaterialPropertyImporter::overwriteStorageStates()
+StatefulMaterialPropertyImporter::populateRestartableMap()
 {
   // Get non-const storage via the RemapKey pattern
   MaterialPropertyStorage::RemapKey key;
@@ -319,8 +325,9 @@ StatefulMaterialPropertyImporter::overwriteStorageStates()
     const auto & q_points = assembly.qPoints();
     const auto n_qpoints = static_cast<unsigned int>(q_points.size());
 
-    // For each current stateful_id that has a file match, overwrite states 1 and 2
-    // only (state 0 = current will be recomputed in the first timestep).
+    // For each current stateful_id that has a file match, stage current and historical states
+    // into the restartable map. initStatefulProps() will load these values in place while
+    // still running normal initialization for non-imported properties.
     for (const auto file_sid : index_range(_file_props))
     {
       if (!_file_to_current_sid[file_sid])
@@ -329,8 +336,7 @@ StatefulMaterialPropertyImporter::overwriteStorageStates()
       const auto current_sid = *_file_to_current_sid[file_sid];
       const auto max_state = std::min(_file_props[file_sid].max_state, storage.maxState());
 
-      // Only overwrite stateful states (1 = old, 2 = older); skip state 0 (current)
-      for (unsigned int state = 1; state <= max_state; ++state)
+      for (unsigned int state = 0; state <= max_state; ++state)
       {
         // Assemble a blob by concatenating per-qp data from nearest stored qps.
         // This blob is compatible with PropertyValue::load() which reads n_qpoints
@@ -363,17 +369,14 @@ StatefulMaterialPropertyImporter::overwriteStorageStates()
           }
         }
 
-        // Deserialize directly into the live PropertyValue in _storage
-        assembled.seekg(0, std::ios::beg);
-        auto & target_props = storage.setProps(elem, side, state);
-        dataLoad(assembled, target_props[current_sid], nullptr);
+        storage.addToRestartableMap(key, elem, side, current_sid, state, std::move(assembled));
       }
     }
 
     remapped_elems++;
   }
 
-  mooseInfo("Overwrote stateful storage (states 1+) for ",
+  mooseInfo("Prepared remapped stateful storage (states 0+) for ",
             remapped_elems,
             " elements (",
             skipped_elems,
