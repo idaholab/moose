@@ -89,7 +89,7 @@ These applications require a license. Many of them can be obtained through the [
 - [Grizzly](https://inlsoftware.inl.gov/product/grizzly) - Nuclear Plant Component Degradation Modeling
 - [MARMOT](https://inlsoftware.inl.gov/product/marmot) - Nuclear materials phase field and mechanics application
 - [PRONGHORN](https://inlsoftware.inl.gov/product/pronghorn) - Transient prismatic and pebble bed reactor analysis code
-- [RELAP7](https://inlsoftware.inl.gov/product/relap7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
+- [RELAP-7](https://inlsoftware.inl.gov/product/relap-7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
 - [SAM](https://www.anl.gov/nse/system-analysis-module) - Advanced nuclear reactor system analysis code (weakly-compressible flow), developed at ANL
 - [Sockeye](https://inlsoftware.inl.gov/product/sockeye) - Multi-fidelity studies of heat pipes for nuclear applications
 - SWIFT - A thermo-chemistry tool for metal hydride moderators, developed at LANL
