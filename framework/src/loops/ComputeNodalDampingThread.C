@@ -46,13 +46,18 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   const auto & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : ndampers)
-    damped_vars.insert(damper->getVariable());
+    if (damper->variableDefinedOnNode(node))
+      damped_vars.insert(damper->getVariable());
 
-  _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
+  if (!damped_vars.empty())
+    _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
 
   const auto & objects = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & obj : objects)
   {
+    if (!obj->variableDefinedOnNode(node))
+      continue;
+
     Real cur_damping = obj->computeDamping();
     obj->checkMinDamping(cur_damping);
     if (cur_damping < _damping)

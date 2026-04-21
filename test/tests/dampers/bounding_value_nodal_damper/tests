@@ -16,4 +16,10 @@
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a minimum value on nodes."
   [../]
+  [./bounding_value_block_restricted]
+    type = 'RunApp'
+    input = 'bounding_value_block_restricted_test.i'
+    cli_args = '--n-threads=2'
+    requirement = "The system shall not evaluate a nodal bounding-value damper on nodes where a block-restricted variable is undefined."
+  [../]
 []
