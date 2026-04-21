@@ -26,13 +26,6 @@ makeVectorHyperParameter(const std::vector<Real> & value)
   return LibtorchUtils::vectorToTensorView(value, {long(value.size())}).clone();
 }
 
-std::vector<Real>
-exportVectorHyperParameter(const torch::Tensor & tensor)
-{
-  const auto flattened = tensor.reshape({-1}).contiguous();
-  return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
-}
-
 torch::Tensor &
 insertHyperParameter(std::unordered_map<std::string, torch::Tensor> & hyperparameters,
                      std::unordered_set<std::string> & tunable_hp,
@@ -135,51 +128,39 @@ CovarianceFunctionBase::isTunable(const std::string & name) const
 }
 
 void
-CovarianceFunctionBase::loadHyperParamMap(
-    const std::unordered_map<std::string, Real> & map,
-    const std::unordered_map<std::string, std::vector<Real>> & vec_map)
+CovarianceFunctionBase::loadHyperParamMap(const HyperParameterMap & map)
 {
   // First, load the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-    dependent_covar->loadHyperParamMap(map, vec_map);
+    dependent_covar->loadHyperParamMap(map);
 
   // Then we load the hyperparameters of this object
   for (auto & iter : _hyperparameters)
   {
-    if (isScalarHyperParameter(iter.second))
-    {
-      const auto map_iter = map.find(iter.first);
-      if (map_iter != map.end())
-        iter.second = makeScalarHyperParameter(map_iter->second);
-    }
-    else if (isVectorHyperParameter(iter.second))
-    {
-      const auto map_iter = vec_map.find(iter.first);
-      if (map_iter != vec_map.end())
-        iter.second = makeVectorHyperParameter(map_iter->second);
-    }
-    else
-      mooseError("Unsupported hyperparameter rank ", iter.second.dim(), " for ", iter.first, ".");
+    const auto map_iter = map.find(iter.first);
+    if (map_iter == map.end())
+      continue;
+
+    if (!isScalarHyperParameter(map_iter->second) && !isVectorHyperParameter(map_iter->second))
+      mooseError("Unsupported hyperparameter rank ", map_iter->second.dim(), " for ", iter.first, ".");
+
+    iter.second = map_iter->second.clone();
   }
 }
 
 void
-CovarianceFunctionBase::buildHyperParamMap(
-    std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
+CovarianceFunctionBase::buildHyperParamMap(HyperParameterMap & map) const
 {
   // First, add the hyperparameters of the dependent covariance functions
   for (const auto dependent_covar : _covariance_functions)
-    dependent_covar->buildHyperParamMap(map, vec_map);
+    dependent_covar->buildHyperParamMap(map);
 
   // At the end we just append the hyperparameters this object owns
   for (const auto & iter : _hyperparameters)
-    if (isScalarHyperParameter(iter.second))
-      map[iter.first] = iter.second.item<Real>();
-    else if (isVectorHyperParameter(iter.second))
-      vec_map[iter.first] = exportVectorHyperParameter(iter.second);
-    else
+    if (!isScalarHyperParameter(iter.second) && !isVectorHyperParameter(iter.second))
       mooseError("Unsupported hyperparameter rank ", iter.second.dim(), " for ", iter.first, ".");
+    else
+      map[iter.first] = iter.second.clone();
 }
 
 bool

@@ -28,12 +28,62 @@ namespace StochasticTools
 namespace
 {
 
+using HyperParameterMap = GaussianProcess::HyperParameterMap;
+
 torch::Tensor
 flattenOutputData(const torch::Tensor & output_data)
 {
   mooseAssert(output_data.dim() == 2, "GaussianProcess output data must be rank-2.");
   return torch::reshape(torch::transpose(output_data, 0, 1),
-                        {output_data.size(0) * output_data.size(1), 1});
+	                        {output_data.size(0) * output_data.size(1), 1});
+}
+
+bool
+isScalarHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 0;
+}
+
+bool
+isVectorHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 1;
+}
+
+std::vector<Real>
+exportHyperParameter(const torch::Tensor & tensor)
+{
+  if (!isScalarHyperParameter(tensor) && !isVectorHyperParameter(tensor))
+    mooseError("Unsupported hyperparameter rank ", tensor.dim(), ".");
+  const auto flattened = tensor.reshape({-1}).contiguous();
+  return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
+}
+
+torch::Tensor
+buildVectorHyperParameter(const std::vector<Real> & values, const torch::TensorOptions & options)
+{
+  auto tensor = torch::empty({long(values.size())}, options.dtype(at::kDouble));
+  auto tensor_accessor = tensor.accessor<Real, 1>();
+  for (const auto index : index_range(values))
+    tensor_accessor[index] = values[index];
+  return tensor;
+}
+
+void
+updateHyperParameter(torch::Tensor & tensor,
+                     const std::vector<Real> & values,
+                     const std::string & name)
+{
+  auto options = tensor.options().dtype(at::kDouble);
+  if (isScalarHyperParameter(tensor))
+  {
+    mooseAssert(values.size() == 1, "Scalar hyperparameter update requires a single value.");
+    tensor = torch::tensor(values[0], options);
+  }
+  else if (isVectorHyperParameter(tensor))
+    tensor = buildVectorHyperParameter(values, options);
+  else
+    mooseError("Unsupported hyperparameter rank ", tensor.dim(), " for ", name, ".");
 }
 
 } // namespace
@@ -110,7 +160,8 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
   // Compute the Cholesky decomposition and inverse action of the covariance matrix.
   setupStoredMatrices(flattened_tensor);
 
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _hyperparam_map.clear();
+  _covariance_function->buildHyperParamMap(_hyperparam_map);
 }
 
 void
@@ -176,9 +227,10 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
                                      const GPOptimizerOptions & opts)
 {
   std::vector<Real> theta(_num_tunable, 0.0);
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _hyperparam_map.clear();
+  _covariance_function->buildHyperParamMap(_hyperparam_map);
 
-  mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
+  mapToVec(_tuning_data, _hyperparam_map, theta);
 
   // Internal params for Adam; set to the recommended values in the paper
   Real b1 = opts.b1;
@@ -238,8 +290,8 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
         theta[global_index] = std::min(std::max(new_val, min_value), max_value);
       }
     }
-    vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+    vecToMap(_tuning_data, _hyperparam_map, theta);
+    _covariance_function->loadHyperParamMap(_hyperparam_map);
   }
   if (opts.show_every_nth_iteration)
   {
@@ -303,23 +355,22 @@ void
 GaussianProcess::mapToVec(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
-    const std::unordered_map<std::string, Real> & scalar_map,
-    const std::unordered_map<std::string, std::vector<Real>> & vector_map,
+    const HyperParameterMap & hyperparam_map,
     std::vector<Real> & vec) const
 {
   for (auto iter : tuning_data)
   {
     const std::string & param_name = iter.first;
-    const auto scalar_it = scalar_map.find(param_name);
-    if (scalar_it != scalar_map.end())
-      vec[std::get<0>(iter.second)] = scalar_it->second;
-    else
-    {
-      const auto vector_it = vector_map.find(param_name);
-      if (vector_it != vector_map.end())
-        for (unsigned int ii = 0; ii < std::get<1>(iter.second); ++ii)
-          vec[std::get<0>(iter.second) + ii] = (vector_it->second)[ii];
-    }
+    const auto tensor_it = hyperparam_map.find(param_name);
+    if (tensor_it == hyperparam_map.end())
+      mooseError("The covariance parameter ", param_name, " could not be found!");
+
+    const auto values = exportHyperParameter(tensor_it->second);
+    const auto num_entries = std::get<1>(iter.second);
+    mooseAssert(values.size() == num_entries,
+                "Hyperparameter size does not match tuning metadata.");
+    for (unsigned int ii = 0; ii < num_entries; ++ii)
+      vec[std::get<0>(iter.second) + ii] = values[ii];
   }
 }
 
@@ -327,18 +378,23 @@ void
 GaussianProcess::vecToMap(
     const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
         tuning_data,
-    std::unordered_map<std::string, Real> & scalar_map,
-    std::unordered_map<std::string, std::vector<Real>> & vector_map,
+    HyperParameterMap & hyperparam_map,
     const std::vector<Real> & vec) const
 {
   for (auto iter : tuning_data)
   {
     const std::string & param_name = iter.first;
-    if (scalar_map.find(param_name) != scalar_map.end())
-      scalar_map[param_name] = vec[std::get<0>(iter.second)];
-    else if (vector_map.find(param_name) != vector_map.end())
-      for (unsigned int ii = 0; ii < std::get<1>(iter.second); ++ii)
-        vector_map[param_name][ii] = vec[std::get<0>(iter.second) + ii];
+    const auto tensor_it = hyperparam_map.find(param_name);
+    if (tensor_it == hyperparam_map.end())
+      mooseError("The covariance parameter ", param_name, " could not be found!");
+
+    const auto first_index = std::get<0>(iter.second);
+    const auto num_entries = std::get<1>(iter.second);
+    std::vector<Real> values(num_entries);
+    for (unsigned int ii = 0; ii < num_entries; ++ii)
+      values[ii] = vec[first_index + ii];
+
+    updateHyperParameter(tensor_it->second, values, param_name);
   }
 }
 
@@ -349,7 +405,6 @@ void
 dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);
-  dataStore(stream, gp_utils.hyperparamVectorMap(), context);
   dataStore(stream, gp_utils.covarType(), context);
   dataStore(stream, gp_utils.covarName(), context);
   dataStore(stream, gp_utils.covarNumOutputs(), context);
@@ -367,7 +422,6 @@ void
 dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
 {
   dataLoad(stream, gp_utils.hyperparamMap(), context);
-  dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
   dataLoad(stream, gp_utils.covarType(), context);
   dataLoad(stream, gp_utils.covarName(), context);
   dataLoad(stream, gp_utils.covarNumOutputs(), context);

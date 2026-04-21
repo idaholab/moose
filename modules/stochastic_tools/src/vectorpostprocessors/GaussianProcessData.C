@@ -15,6 +15,30 @@
 
 registerMooseObject("StochasticToolsApp", GaussianProcessData);
 
+namespace
+{
+
+bool
+isScalarHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 0;
+}
+
+bool
+isVectorHyperParameter(const torch::Tensor & tensor)
+{
+  return tensor.dim() == 1;
+}
+
+std::vector<Real>
+exportHyperParameter(const torch::Tensor & tensor)
+{
+  const auto flattened = tensor.reshape({-1}).contiguous();
+  return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
+}
+
+} // namespace
+
 InputParameters
 GaussianProcessData::validParams()
 {
@@ -37,22 +61,24 @@ GaussianProcessData::GaussianProcessData(const InputParameters & parameters)
 void
 GaussianProcessData::initialize()
 {
-  const std::unordered_map<std::string, Real> & _hyperparam_map =
-      _gp_surrogate.getGP().getHyperParamMap();
-  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =
-      _gp_surrogate.getGP().getHyperParamVectorMap();
+  const auto & hyperparam_map = _gp_surrogate.getGP().getHyperParamMap();
 
-  for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
+  for (const auto & iter : hyperparam_map)
   {
-    _hp_vector.push_back(&declareVector(iter->first));
-    _hp_vector.back()->push_back(iter->second);
-  }
-  for (auto iter = _hyperparam_vec_map.begin(); iter != _hyperparam_vec_map.end(); ++iter)
-  {
-    std::vector<Real> vec = iter->second;
+    if (isScalarHyperParameter(iter.second))
+    {
+      _hp_vector.push_back(&declareVector(iter.first));
+      _hp_vector.back()->push_back(iter.second.item<Real>());
+      continue;
+    }
+
+    if (!isVectorHyperParameter(iter.second))
+      mooseError("Unsupported hyperparameter rank ", iter.second.dim(), " for ", iter.first, ".");
+
+    const auto vec = exportHyperParameter(iter.second);
     for (unsigned int ii = 0; ii < vec.size(); ++ii)
     {
-      _hp_vector.push_back(&declareVector(iter->first + std::to_string(ii)));
+      _hp_vector.push_back(&declareVector(iter.first + std::to_string(ii)));
       _hp_vector.back()->push_back(vec[ii]);
     }
   }

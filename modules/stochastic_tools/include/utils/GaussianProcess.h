@@ -27,6 +27,8 @@ namespace StochasticTools
 class GaussianProcess
 {
 public:
+  using HyperParameterMap = CovarianceFunctionBase::HyperParameterMap;
+
   GaussianProcess();
 
   /**
@@ -148,21 +150,19 @@ public:
   // Computes Gradient of the loss function
   std::vector<Real> getGradient(torch::Tensor & inputs) const;
 
-  /// Function used to convert the hyperparameter maps in this object to
-  /// vectors
+  /// Function used to convert the hyperparameter map in this object to
+  /// a flat vector
   void mapToVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
-      const std::unordered_map<std::string, Real> & scalar_map,
-      const std::unordered_map<std::string, std::vector<Real>> & vector_map,
+      const HyperParameterMap & hyperparam_map,
       std::vector<Real> & vec) const;
 
-  /// Function used to convert the vectors back to hyperparameter maps
+  /// Function used to convert the vector back to the hyperparameter map
   void vecToMap(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
-      std::unordered_map<std::string, Real> & scalar_map,
-      std::unordered_map<std::string, std::vector<Real>> & vector_map,
+      HyperParameterMap & hyperparam_map,
       const std::vector<Real> & vec) const;
 
   /// @{
@@ -188,11 +188,7 @@ public:
   }
   const unsigned int & getCovarNumOutputs() const { return _num_outputs; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
-  const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
-  const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVectorMap() const
-  {
-    return _hyperparam_vec_map;
-  }
+  const HyperParameterMap & getHyperParamMap() const { return _hyperparam_map; }
   const std::vector<Real> & getLengthScales() const { return _length_scales; }
   ///@}
 
@@ -217,11 +213,7 @@ public:
   {
     return _tuning_data;
   }
-  std::unordered_map<std::string, Real> & hyperparamMap() { return _hyperparam_map; }
-  std::unordered_map<std::string, std::vector<Real>> & hyperparamVectorMap()
-  {
-    return _hyperparam_vec_map;
-  }
+  HyperParameterMap & hyperparamMap() { return _hyperparam_map; }
   std::vector<Real> & lengthScales() { return _length_scales; }
   ///@}
 
@@ -250,11 +242,8 @@ protected:
   /// The number of outputs of the GP
   unsigned int _num_outputs = 0;
 
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> _hyperparam_vec_map;
+  /// Hyperparameters. Stored as tensors for use in surrogate reload/reporting.
+  HyperParameterMap _hyperparam_map;
 
   /// Standardizer for use with params (x)
   StochasticTools::Standardizer _param_standardizer;
