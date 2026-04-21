@@ -36,14 +36,6 @@ MFEMProblem::validParams()
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem");
 
-  //Coordinate coefficient parameters
-  params.addParam<MooseEnum>(
-    "coordinate", 
-    MooseEnum("cartesian=0 cylindrical"),"Physical coordinate system. Use 'cylindrical' for 2D axisymmetric");
-  params.addParam<Real>(
-    "inv_r_eps", 1e-12, 
-    "Floor used in inv_r = 1/(r + eps) to avoid axis singularity in axisymmetric problems");
-
   return params;
 }
 
@@ -764,5 +756,3 @@ MFEMProblem::hasMFEMObject(const std::string & system, const std::string & name)
       .queryInto(objs);
   return !objs.empty();
 }
-
-#endif

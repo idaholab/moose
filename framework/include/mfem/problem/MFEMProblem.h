@@ -17,7 +17,6 @@
 #include "MFEMMesh.h"
 #include "MFEMRefinementMarker.h"
 #include "MFEMComplexVariable.h"
-#include "MFEMCoordinateCoefficients.h"
 #include <memory>
 
 class MFEMProblem : public ExternalProblem
@@ -334,34 +333,6 @@ public:
   {
     return _problem_data.cmplx_gridfunctions.GetShared(name);
   }
-  
-  /** 
-   * Axisymmetric geometry API (public getters)
-  */
-  const mfem::Coefficient * getRadialCoefficient() const
-  {
-    return _coordinates ? _coordinates->getRadialCoefficient() : nullptr;
-  }
-
-  const mfem::Coefficient * getInverseRadialCoefficient() const
-  {
-    return _coordinates ? _coordinates->getInverseRadialCoefficient() : nullptr;
-  }
-
-  const mfem::Coefficient * getTwoPiRCoefficient() const
-  {
-    return _coordinates ? _coordinates->getTwoPiRCoefficient() : nullptr;
-  }
-
-  const mfem::Coefficient * getMeasureWeightCoefficient() const
-  {
-    return _coordinates ? _coordinates->getMeasureWeightCoefficient() : nullptr;
-  }
-
-  /** 
-  * Return built-in axisymmetric coefficient by name (used by materials via the CoefficientManager)
-  */
-  const mfem::Coefficient * getBuiltinCoefficient(const std::string & name) const;
 
   /**
    * Enumerates the supported numeric representations for MFEM variables and operators.
@@ -389,15 +360,6 @@ public:
    * Determine whether an MFEM object with the supplied system and name exists.
    */
   bool hasMFEMObject(const std::string & system, const std::string & name) const;
-
-private:
-  Moose::MFEM::MFEMCoordinateCoefficients::CoordinateSystem _coord =
-      Moose::MFEM::MFEMCoordinateCoefficients::CoordinateSystem::Cartesian;
-
-  Real _inv_r_eps = 1e-12;
-
-  std::unique_ptr<Moose::MFEM::MFEMCoordinateCoefficients> _coordinates;
-
 
 protected:
   /**
