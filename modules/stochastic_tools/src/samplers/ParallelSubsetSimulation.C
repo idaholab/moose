@@ -54,7 +54,6 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
     _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _count_max(std::floor(1 / _subset_probability)),
-    _check_step(0),
     _subset(0),
     _is_sampling_completed(false)
 {
@@ -92,6 +91,7 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
   _markov_seed.resize(_distributions.size());
 
   setNumberOfRandomSeeds(_num_random_seeds);
+  setAutoAdvanceGenerators(false);
 }
 
 const unsigned int &
@@ -113,19 +113,22 @@ ParallelSubsetSimulation::getSubsetProbability() const
 }
 
 void
-ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
+ParallelSubsetSimulation::executeSetUp()
 {
-  if (_step <= 1 || _check_step == _step)
-    return;
-  _check_step = _step;
-
   if (_is_sampling_completed)
     mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
                "has been requested.");
 
-  _subset = ((_step - 1) * getNumberOfRows()) / _num_samplessub;
-  const unsigned int sub_ind = (_step - 1) - (_num_samplessub / getNumberOfRows()) * _subset;
+  _subset = (_step * getNumberOfRows()) / _num_samplessub;
+  const unsigned int sub_ind = _step - (_num_samplessub / getNumberOfRows()) * _subset;
   const unsigned int offset = sub_ind * getNumberOfRows();
+
+  // check if we have completed the last sample
+  if (_subset >= _num_subsets)
+  {
+    _is_sampling_completed = true;
+    return;
+  }
 
   // Get and store the accepted samples input across all the procs from the previous step
   for (dof_id_type j = 0; j < _distributions.size(); ++j)
@@ -135,10 +138,7 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
   // Get the accepted sample outputs across all the procs from the previous step
   std::vector<Real> tmp =
       _use_absolute_value ? AdaptiveMonteCarloUtils::computeVectorABS(_outputs) : _outputs;
-  if (mode == Sampler::SampleMode::GLOBAL)
-    _communicator.allgather(tmp);
-  else
-    _local_comm.allgather(tmp);
+  _communicator.allgather(tmp);
   for (dof_id_type ss = 0; ss < getNumberOfRows(); ++ss)
     _outputs_sto[ss + offset] = tmp[ss];
 
@@ -159,42 +159,38 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     {
       const unsigned int soffset = (sub_ind / _count_max) * getNumberOfRows();
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _markov_seed[j].assign(_inputs_sorted[j].begin() + soffset + getLocalRowBegin(),
-                               _inputs_sorted[j].begin() + soffset + getLocalRowEnd());
+        _markov_seed[j].assign(_inputs_sorted[j].begin() + soffset,
+                               _inputs_sorted[j].begin() + soffset + getNumberOfRows());
     }
     // Otherwise, use the previously accepted input values to propose the next set of input
     // values
     else
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _markov_seed[j].assign(_inputs_sto[j].begin() + offset + getLocalRowBegin(),
-                               _inputs_sto[j].begin() + offset + getLocalRowEnd());
+        _markov_seed[j].assign(_inputs_sto[j].begin() + offset,
+                               _inputs_sto[j].begin() + offset + getNumberOfRows());
     }
   }
-
-  // check if we have completed the last sample (sub_ind == _num_samplessub /getNumberOfRows() - 1)
-  // of the last subset (_subset == _num_subsets - 1)
-  if (_subset == _num_subsets - 1 && sub_ind == _num_samplessub / getNumberOfRows() - 1)
-    _is_sampling_completed = true;
 }
 
 Real
 ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
+  const dof_id_type n = row_index * getNumberOfCols() + col_index;
   Real val;
 
   if (_subset == 0)
-    val = getRand(seed_value);
+    val = getRand(n, seed_value);
   else
   {
-    const dof_id_type loc_ind = row_index - getLocalRowBegin();
-    const Real rv = Normal::quantile(getRand(seed_value), _markov_seed[col_index][loc_ind], 1.0);
+    const Real rv =
+        Normal::quantile(getRand(n, seed_value), _markov_seed[col_index][row_index], 1.0);
     const Real acceptance_ratio = std::log(Normal::pdf(rv, 0, 1)) -
-                                  std::log(Normal::pdf(_markov_seed[col_index][loc_ind], 0, 1));
-    const Real new_sample = acceptance_ratio > std::log(getRand(seed_value + 1))
+                                  std::log(Normal::pdf(_markov_seed[col_index][row_index], 0, 1));
+    const Real new_sample = acceptance_ratio > std::log(getRand(n, seed_value + 1))
                                 ? rv
-                                : _markov_seed[col_index][loc_ind];
+                                : _markov_seed[col_index][row_index];
     val = Normal::cdf(new_sample, 0, 1);
   }
 
