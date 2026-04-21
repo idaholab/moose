@@ -86,6 +86,8 @@ public:
   unsigned int numOutputs() const { return _num_outputs; }
 
 protected:
+  using HyperParameterMap = std::unordered_map<std::string, torch::Tensor>;
+
   /// Register a scalar hyperparameter to this covariance function
   /// @param name The name of the parameter
   /// @param value The initial value of the parameter
@@ -101,11 +103,8 @@ protected:
                                               const std::vector<Real> & value,
                                               const bool is_tunable);
 
-  /// Map of scalar hyperparameters stored as rank-0 tensors
-  std::unordered_map<std::string, torch::Tensor> _hp_map_real;
-
-  /// Map of vector hyperparameters stored as rank-1 tensors
-  std::unordered_map<std::string, torch::Tensor> _hp_map_vector_real;
+  /// Map of hyperparameters stored as rank-0 or rank-1 tensors
+  HyperParameterMap _hyperparameters;
 
   /// list of tunable hyper-parameters
   std::unordered_set<std::string> _tunable_hp;
