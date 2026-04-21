@@ -64,7 +64,7 @@ public:
   {
     mooseError("computeOffDiagJacobian() is not used for Kokkos residual objects.");
   }
-  virtual void computeResidualAndJacobian() override final
+  virtual void computeResidualAndJacobian() override
   {
     computeResidual();
     computeJacobian();
@@ -156,6 +156,18 @@ protected:
                                                        const unsigned int jvar,
                                                        const unsigned int comp = 0) const;
   /**
+   * Accumulate local elemental Jacobian contribution to tagged matrices using automatic
+   * differentiation (AD)
+   * @param local_ke The local elemental Jacobian contribution
+   * @param datum The AssemblyDatum object of the current thread
+   * @param i The test function DOF index
+   * @param comp The variable component
+   */
+  KOKKOS_FUNCTION void accumulateTaggedElementalMatrix(const DNDerivativeType & local_ke,
+                                                       const AssemblyDatum & datum,
+                                                       const unsigned int i,
+                                                       const unsigned int comp = 0) const;
+  /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
    * @param add The flag whether to add or set the local residual
    * @param local_ke The local nodal Jacobian contribution
@@ -167,6 +179,18 @@ protected:
                                                    const Real local_ke,
                                                    const ContiguousNodeID node,
                                                    const unsigned int jvar,
+                                                   const unsigned int comp = 0) const;
+  /**
+   * Accumulate or set local nodal Jacobian contribution to tagged matrices using automatic
+   * differentiation (AD)
+   * @param add The flag whether to add or set the local residual
+   * @param local_ke The local elemental Jacobian contribution
+   * @param node The contiguous node ID
+   * @param comp The variable component
+   */
+  KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
+                                                   const DNDerivativeType & local_ke,
+                                                   const ContiguousNodeID node,
                                                    const unsigned int comp = 0) const;
 
   /**
@@ -266,6 +290,29 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
 }
 
 KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedElementalMatrix(const DNDerivativeType & local_ke,
+                                                const AssemblyDatum & datum,
+                                                const unsigned int i,
+                                                const unsigned int comp) const
+{
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto row = sys.getElemLocalDofIndex(datum.elem().id, i, _kokkos_var.var(comp));
+
+  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  {
+    auto tag = _matrix_tags[t];
+
+    if (sys.isMatrixTagActive(tag) && !sys.hasNodalBCMatrixTag(row, tag))
+      for (unsigned int j = 0; j < local_ke.size(); ++j)
+      {
+        auto col = local_ke.raw_index(j);
+
+        ::Kokkos::atomic_add(&sys.getMatrixValue(row, col, tag), local_ke.raw_at(j));
+      }
+  }
+}
+
+KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalMatrix(const bool add,
                                             const Real local_ke,
                                             const ContiguousNodeID node,
@@ -293,6 +340,38 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
       {
         matrix.zero(row);
         matrix(row, col) = local_ke;
+      }
+    }
+  }
+}
+
+KOKKOS_FUNCTION inline void
+ResidualObject::accumulateTaggedNodalMatrix(const bool add,
+                                            const DNDerivativeType & local_ke,
+                                            const ContiguousNodeID node,
+                                            const unsigned int comp) const
+{
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
+  auto row = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var(comp));
+
+  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
+  {
+    auto tag = _matrix_tags[t];
+    auto & matrix = sys.getMatrix(tag);
+
+    if (sys.isMatrixTagActive(tag))
+    {
+      if (!add)
+        matrix.zero(row);
+
+      for (unsigned int j = 0; j < local_ke.size(); ++j)
+      {
+        auto col = local_ke.raw_index(j);
+
+        if (add)
+          matrix(row, col) += local_ke.raw_at(j);
+        else
+          matrix(row, col) = local_ke.raw_at(j);
       }
     }
   }

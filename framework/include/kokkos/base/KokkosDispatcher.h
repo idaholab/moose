@@ -403,6 +403,42 @@ private:
 #define registerKokkosBoundaryConditionAliased(app, classname, alias)                              \
   registerKokkosResidualObjectAliased(app, classname, alias)
 
+// AD Kernel, NodalKernel, BC
+
+#define callRegisterKokkosADResidualObjectFunction(classname, objectname)                          \
+  static char registerKokkosADResidualObject##classname()                                          \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_ad_residual_object_##classname, __COUNTER__) =        \
+      registerKokkosADResidualObject##classname()
+
+#define registerKokkosADResidualObject(app, classname)                                             \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosADResidualObjectFunction(classname, #classname)
+
+#define registerKokkosADResidualObjectAliased(app, classname, alias)                               \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosADResidualObjectFunction(classname, alias)
+
+#define registerKokkosADKernel(app, classname) registerKokkosADResidualObject(app, classname)
+#define registerKokkosADKernelAliased(app, classname, alias)                                       \
+  registerKokkosADResidualObjectAliased(app, classname, alias)
+
+#define registerKokkosADNodalKernel(app, classname) registerKokkosADResidualObject(app, classname)
+#define registerKokkosADNodalKernelAliased(app, classname, alias)                                  \
+  registerKokkosADResidualObjectAliased(app, classname, alias)
+
+#define registerKokkosADBoundaryCondition(app, classname)                                          \
+  registerKokkosADResidualObject(app, classname)
+#define registerKokkosADBoundaryConditionAliased(app, classname, alias)                            \
+  registerKokkosADResidualObjectAliased(app, classname, alias)
+
 // Material
 
 #define callRegisterKokkosMaterialFunction(classname, objectname)                                  \

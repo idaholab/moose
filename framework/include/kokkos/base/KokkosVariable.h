@@ -38,41 +38,99 @@ public:
    * @param variable The MOOSE variable
    * @param tag The vector tag ID
    */
-  Variable(const MooseVariableBase & variable, const TagID tag) { init(variable, tag); }
+  Variable(const MooseVariableFieldBase & variable, const TagID tag) { init(variable, tag); }
   /**
    * Constructor
    * Initialize the variable with a MOOSE variable and vector tag name
    * @param variable The MOOSE variable
    * @param tag_name The vector tag name
    */
-  Variable(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
+  Variable(const MooseVariableFieldBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
   {
     init(variable, tag_name);
   }
+  /**
+   * Constructor
+   * Initialize the variable with multiple MOOSE variables and vector tag ID
+   * @param variables The MOOSE variables
+   * @param tag The vector tag ID
+   */
+  ///@{
+  Variable(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
+  Variable(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag)
+  {
+    init(variables, tag);
+  }
+  ///@}
+  /**
+   * Constructor
+   * Initialize the variable with multiple MOOSE variables and vector tag name
+   * @param variables The MOOSE variables
+   * @param tag The vector tag ID
+   */
+  ///@{
+  Variable(const std::vector<const MooseVariableFieldBase *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
+  Variable(const std::vector<MooseVariableFieldBase *> & variables,
+           const TagName & tag_name = Moose::SOLUTION_TAG)
+  {
+    init(variables, tag_name);
+  }
+  ///@}
   /**
    * Initialize the variable with a MOOSE variable and vector tag ID
    * @param variable The MOOSE variable
    * @param tag The vector tag ID
    */
-  void init(const MooseVariableBase & variable, const TagID tag);
+  void init(const MooseVariableFieldBase & variable, const TagID tag);
   /**
    * Initialize the variable with a MOOSE variable and vector tag name
    * @param variable The MOOSE variable
    * @param tag_name The vector tag name
    */
-  void init(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const MooseVariableFieldBase & variable,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
   /**
-   * Initialize the variable with coupled MOOSE variables
-   * @param variables The coupled MOOSE variables
+   * Initialize the variable with multiple MOOSE variables and vector tag ID
+   * @param variables The MOOSE variables
    * @param tag The vector tag ID
    */
-  void
-  init(const std::vector<const MooseVariableBase *> & variables, const TagID tag, CoupleableKey);
+  ///@{
+  void init(const std::vector<const MooseVariableFieldBase *> & variables, const TagID tag);
+  void init(const std::vector<MooseVariableFieldBase *> & variables, const TagID tag);
+  ///@}
+  /**
+   * Initialize the variable with multiple MOOSE variables and vector tag name
+   * @param variables The MOOSE variables
+   * @param tag_name The vector tag name
+   */
+  ///@{
+  void init(const std::vector<const MooseVariableFieldBase *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
+  void init(const std::vector<MooseVariableFieldBase *> & variables,
+            const TagName & tag_name = Moose::SOLUTION_TAG);
+  ///@}
   /**
    * Initialize the variable with coupled default values
    * @param values The default coupled values
    */
   void init(const std::vector<Real> & values, CoupleableKey);
+
+  /**
+   * Get the MOOSE variable of a component
+   * @param comp The variable component
+   * @returns The MOOSE variable
+   */
+  const MooseVariableFieldBase * mooseVar(unsigned int comp = 0)
+  {
+    return _moose_var.size() ? _moose_var[comp] : nullptr;
+  }
 
   /**
    * Get whether the variable is initialized
@@ -89,6 +147,11 @@ public:
    * @returns Whether the variable is nodal
    */
   KOKKOS_FUNCTION bool nodal() const { return _nodal; }
+  /**
+   * Get whether the tag is time derivative
+   * @returns Whether the tag is time derivative
+   */
+  KOKKOS_FUNCTION bool dot() const { return _dot; }
   /**
    * Get the number of components
    * @returns The number of components
@@ -137,6 +200,10 @@ private:
    */
   bool _nodal = false;
   /**
+   * Whether the tag is time derivative
+   */
+  bool _dot = false;
+  /**
    * Number of components
    */
   unsigned int _components = 1;
@@ -144,6 +211,10 @@ private:
    * Vector tag ID
    */
   TagID _tag = Moose::INVALID_TAG_ID;
+  /**
+   * MOOSE variable of each component
+   */
+  Array<const MooseVariableFieldBase *> _moose_var;
   /**
    * Variable number of each component
    */

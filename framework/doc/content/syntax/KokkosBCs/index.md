@@ -42,7 +42,7 @@ To keep the consistency between interfaces, however, it is still passed as an ar
 `_current_node`, which is a pointer to the current libMesh node object, does not have a direct replacement.
 Instead, the node index can be queried by `datum.node()` and used to retrieve mesh data from the Kokkos mesh object.
 The node coordinate can also be obtained by `datum.q_point(qp)`.
-As a result, the following residual function in `DirichletBCBase`:
+As a result, the following residual function:
 
 ```cpp
 Real
@@ -52,7 +52,7 @@ DirichletBCBase::computeQpResidual()
 }
 ```
 
-becomes the following in `Moose::Kokkos::DirichletBCBase`:
+becomes the following:
 
 ```cpp
 template <typename Derived>

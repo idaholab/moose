@@ -10,11 +10,13 @@
 #include "KokkosDirichletBC.h"
 
 registerKokkosDirichletBC("MooseApp", KokkosDirichletBC);
+registerKokkosADDirichletBC("MooseApp", KokkosADDirichletBC);
 
+template <bool is_ad>
 InputParameters
-KokkosDirichletBC::validParams()
+KokkosDirichletBCTempl<is_ad>::validParams()
 {
-  InputParameters params = DirichletBCBase::validParams();
+  InputParameters params = Moose::Kokkos::DirichletBCBaseTempl<is_ad>::validParams();
   params.addRequiredParam<Real>("value", "Value of the BC");
   params.declareControllable("value");
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -22,7 +24,12 @@ KokkosDirichletBC::validParams()
   return params;
 }
 
-KokkosDirichletBC::KokkosDirichletBC(const InputParameters & parameters)
-  : DirichletBCBase(parameters), _value(getParam<Real>("value"))
+template <bool is_ad>
+KokkosDirichletBCTempl<is_ad>::KokkosDirichletBCTempl(const InputParameters & parameters)
+  : Moose::Kokkos::DirichletBCBaseTempl<is_ad>(parameters),
+    _value(this->template getParam<Real>("value"))
 {
 }
+
+template class KokkosDirichletBCTempl<false>;
+template class KokkosDirichletBCTempl<true>;
