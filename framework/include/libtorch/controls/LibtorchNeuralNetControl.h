@@ -12,6 +12,7 @@
 #pragma once
 
 #include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchObservationHistory.h"
 #include "Control.h"
 
 /**
@@ -104,6 +105,9 @@ protected:
   const std::vector<Real> _response_scaling_factors;
   /// Multipliers for the actions
   const std::vector<Real> _action_scaling_factors;
+
+  /// Shared observation normalization and history stacking helper
+  const LibtorchObservationHistory _observation_history;
 
   /// Pointer to the neural net object which is supposed to be used to control
   /// the parameter values. The controller owns this object, but it can be read
