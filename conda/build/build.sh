@@ -40,7 +40,7 @@ if [[ -z "\${CONDA_BUILD}" ]]; then
     if [[ \$b_FFLAGS =~ (-mtune=[a-zA-Z0-9.-]+) ]]; then
         o_flags+=("\${BASH_REMATCH[1]}")
     fi
-    # Lets assume this flag when used, is globbed together, separated by spaces
+    # Lets assume this flag, when used, is globbed together, separated by spaces
     if [[ \$b_CXXFLAGS =~ (-fdebug-prefix-map=.* ) ]]; then
         o_flags+=("\${BASH_REMATCH[1]}")
     fi

@@ -53,7 +53,7 @@ sedinplace() {
 sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$PREFIX"/bin/libmesh-config
 sedinplace s%"${BUILD_PREFIX}"%"${PREFIX}"%g "$PREFIX"/contrib/bin/libtool
 
-# Fix hard paths to /usr/bin/ when most operating system want these tools in /bin
+# Fix hard paths to /usr/bin/ when most operating systems want these tools in /bin
 if [ "$(uname)" != "Darwin" ]; then
     for tool in sed grep dd; do
         sed -i"" s%/usr/bin/"${tool}"%/bin/"${tool}"%g "$PREFIX"/contrib/bin/libtool
