@@ -169,4 +169,5 @@ public:
 
   friend class SCMQuadSubChannelMeshGenerator;
   friend class SCMQuadPinMeshGenerator;
+  friend class SCMQuadAssemblyMeshGenerator;
 };
