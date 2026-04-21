@@ -40,7 +40,8 @@ LMC::LMC(const InputParameters & parameters)
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string a_coeff_name = "acoeff_" + std::to_string(exp_i);
-    auto & acoeff_vector = addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true);
+    auto & acoeff_vector =
+        addVectorRealHyperParameter(a_coeff_name, std::vector(_num_outputs, 1.0), true);
     _a_coeffs.push_back(&acoeff_vector);
     auto acoeff_accessor = acoeff_vector.accessor<Real, 1>();
     for (const auto out_i : make_range(_num_outputs))
@@ -51,7 +52,8 @@ LMC::LMC(const InputParameters & parameters)
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     const std::string lambda_name = "lambda_" + std::to_string(exp_i);
-    auto & lambda_vector = addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true);
+    auto & lambda_vector =
+        addVectorRealHyperParameter(lambda_name, std::vector(_num_outputs, 1.0), true);
     _lambdas.push_back(&lambda_vector);
     auto lambda_accessor = lambda_vector.accessor<Real, 1>();
     for (const auto out_i : make_range(_num_outputs))

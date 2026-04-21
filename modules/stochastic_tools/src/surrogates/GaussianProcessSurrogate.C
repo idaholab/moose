@@ -103,9 +103,8 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   _gp.getDataStandardizer().getDestandardized(pred_value);
 
   torch::Tensor pred_var =
-      K_test -
-      torch::mm(torch::transpose(K_train_test, 0, 1),
-                torch::cholesky_solve(K_train_test, _gp.getKCholeskyDecomp()));
+      K_test - torch::mm(torch::transpose(K_train_test, 0, 1),
+                         torch::cholesky_solve(K_train_test, _gp.getKCholeskyDecomp()));
 
   // Only the marginal variances are returned. Clamp tiny negative roundoff before sqrt.
   torch::Tensor std_dev_vec =

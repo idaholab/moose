@@ -58,8 +58,8 @@ torch::Tensor
 vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
 {
   const auto options = tensorOptions<DataType>();
-  const auto expected_numel =
-      std::accumulate(sizes.begin(), sizes.end(), static_cast<int64_t>(1), std::multiplies<int64_t>());
+  const auto expected_numel = std::accumulate(
+      sizes.begin(), sizes.end(), static_cast<int64_t>(1), std::multiplies<int64_t>());
 
   mooseAssert(expected_numel == static_cast<int64_t>(vector.size()),
               "The requested tensor shape is incompatible with the vector size.");
@@ -71,8 +71,8 @@ vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
 }
 
 // Explicitly instantiate for DataType=Real
-template torch::Tensor
-vectorToTensorView<Real>(const std::vector<Real> & vector, c10::IntArrayRef sizes);
+template torch::Tensor vectorToTensorView<Real>(const std::vector<Real> & vector,
+                                                c10::IntArrayRef sizes);
 
 template <typename DataType>
 void
