@@ -23,8 +23,8 @@ TEST(StochasticTools, getMean)
   const auto mean = standardizer.getMean();
   const auto stddev = standardizer.getStdDev();
 
-  ASSERT_EQ(mean.size(0), mean_gold.size());
-  ASSERT_EQ(stddev.size(0), stddev_gold.size());
+  ASSERT_EQ(static_cast<std::size_t>(mean.size(0)), mean_gold.size());
+  ASSERT_EQ(static_cast<std::size_t>(stddev.size(0)), stddev_gold.size());
 
   const auto mean_accessor = mean.accessor<Real, 2>();
   const auto stddev_accessor = stddev.accessor<Real, 2>();
@@ -71,10 +71,43 @@ TEST(StochasticTools, getDescaled)
   EXPECT_TRUE(torch::allclose(input_tensor, gold));
 }
 
+TEST(StochasticTools, getScaled)
+{
+  torch::Tensor input_tensor = torch::tensor({{4.0, -8.0}, {-4.0, 8.0}}, {torch::kFloat64});
+  const auto reference = torch::tensor({{2.0, -4.0}, {-2.0, 4.0}}, {torch::kFloat64});
+  const auto gold = torch::tensor({{2.0, -2.0}, {-2.0, 2.0}}, {torch::kFloat64});
+
+  StochasticTools::Standardizer standardizer;
+  standardizer.computeSet(reference);
+  standardizer.getScaled(input_tensor);
+
+  EXPECT_TRUE(torch::allclose(input_tensor, gold));
+}
+
 TEST(StochasticTools, tensorDataStoreLoad)
 {
   torch::Tensor stored =
       torch::tensor({{1.0, 2.0, 3.0}, {-4.0, -5.0, -6.0}}, {torch::kFloat64});
+
+  std::stringbuf buffer;
+  std::iostream stream(&buffer);
+  dataStore(stream, stored, nullptr);
+
+  torch::Tensor loaded;
+  dataLoad(stream, loaded, nullptr);
+
+  ASSERT_EQ(loaded.size(0), stored.size(0));
+  ASSERT_EQ(loaded.size(1), stored.size(1));
+  EXPECT_TRUE(torch::allclose(loaded, stored));
+}
+
+TEST(StochasticTools, tensorDataStoreLoadNonContiguous)
+{
+  const torch::Tensor base =
+      torch::tensor({{1.0, 2.0, 3.0}, {-4.0, -5.0, -6.0}}, {torch::kFloat64});
+  torch::Tensor stored = torch::transpose(base, 0, 1);
+
+  ASSERT_FALSE(stored.is_contiguous());
 
   std::stringbuf buffer;
   std::iostream stream(&buffer);

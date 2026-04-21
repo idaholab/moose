@@ -57,7 +57,7 @@ public:
   void getDescaled(torch::Tensor & input) const;
 
   /// Scales the assumed de-scaled input
-  void getScaled(RealEigenMatrix & input) const;
+  void getScaled(torch::Tensor & input) const;
 
 protected:
   torch::Tensor _mean;

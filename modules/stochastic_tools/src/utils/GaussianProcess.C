@@ -25,7 +25,20 @@
 namespace StochasticTools
 {
 
-GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nth_iteration,
+namespace
+{
+
+torch::Tensor
+flattenOutputData(const torch::Tensor & output_data)
+{
+  mooseAssert(output_data.dim() == 2, "GaussianProcess output data must be rank-2.");
+  return torch::reshape(torch::transpose(output_data, 0, 1),
+                        {output_data.size(0) * output_data.size(1), 1});
+}
+
+} // namespace
+
+GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const unsigned int show_every_nth_iteration,
                                                         const unsigned int num_iter,
                                                         const unsigned int batch_size,
                                                         const Real learning_rate,
@@ -72,21 +85,29 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
                                        const torch::Tensor & training_data,
                                        const GPOptimizerOptions & opts)
 {
+  mooseAssert(training_params.dim() == 2, "GaussianProcess training parameters must be rank-2.");
+  mooseAssert(training_data.dim() == 2, "GaussianProcess training responses must be rank-2.");
+
   const auto num_samples = training_params.size(0);
   const auto num_outputs = training_data.size(1);
+
+  mooseAssert(training_data.size(0) == num_samples,
+              "Training parameter and response sample counts must match.");
+  mooseAssert(num_outputs == _num_outputs,
+              "Training response dimension does not match the covariance output dimension.");
+
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= num_samples);
   _batch_size = batch_decision ? opts.batch_size : num_samples;
-  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}).to(at::kDouble);
+  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}, at::kDouble);
 
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
   _K = torch::empty({num_samples * num_outputs, num_samples * num_outputs}, at::kDouble);
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
-  torch::Tensor flattened_tensor =
-      torch::reshape(torch::transpose(training_data, 0, 1), {num_samples * num_outputs, 1});
+  const auto flattened_tensor = flattenOutputData(training_data);
 
-  //  Compute the Cholesky decomposition and inverse action of the covariance matrix
+  // Compute the Cholesky decomposition and inverse action of the covariance matrix.
   setupStoredMatrices(flattened_tensor);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -163,7 +184,7 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
   Real b1 = opts.b1;
   Real b2 = opts.b2;
   Real eps = opts.eps;
-  static constexpr Real lambda = 1e-4;
+  const Real lambda = opts.lambda;
 
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
@@ -174,32 +195,22 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
   Real store_loss = 0.0;
   std::vector<Real> grad1;
 
-  // Initialize randomizer
+  // Preserve the existing deterministic shuffle sequence, but let libtorch gather the batch.
   std::vector<unsigned int> v_sequence(training_params.sizes()[0]);
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
-  torch::Tensor inputs = torch::empty({_batch_size, training_params.sizes()[1]}, at::kDouble);
-  torch::Tensor outputs = torch::empty({_batch_size, training_data.sizes()[1]}, at::kDouble);
-  auto params_accessor = training_params.accessor<Real, 2>();
-  auto data_accessor = training_data.accessor<Real, 2>();
-  auto inputs_accessor = inputs.accessor<Real, 2>();
-  auto outputs_accessor = outputs.accessor<Real, 2>();
   if (opts.show_every_nth_iteration)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
-    // Shuffle data
     MooseRandom generator;
     generator.seed(0, 1980);
     generator.saveState();
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
-    for (unsigned int ii = 0; ii < _batch_size; ++ii)
-    {
-      for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
-        inputs_accessor[ii][jj] = params_accessor[v_sequence[ii]][jj];
 
-      for (unsigned int jj = 0; jj < training_data.sizes()[1]; ++jj)
-        outputs_accessor[ii][jj] = data_accessor[v_sequence[ii]][jj];
-    }
+    std::vector<int64_t> batch_indices_vec(v_sequence.begin(), v_sequence.begin() + _batch_size);
+    auto batch_indices = torch::tensor(batch_indices_vec, torch::TensorOptions().dtype(torch::kLong));
+    auto inputs = torch::index_select(training_params, 0, batch_indices);
+    auto outputs = torch::index_select(training_data, 0, batch_indices);
 
     store_loss = getLoss(inputs, outputs);
     if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
@@ -250,8 +261,7 @@ Real
 GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
-  torch::Tensor flattened_data = torch::reshape(torch::transpose(outputs, 0, 1),
-                                                {outputs.sizes()[0] * outputs.sizes()[1], -1});
+  const auto flattened_data = flattenOutputData(outputs);
 
   setupStoredMatrices(flattened_data);
 
