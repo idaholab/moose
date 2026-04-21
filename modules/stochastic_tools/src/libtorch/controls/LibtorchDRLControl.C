@@ -14,7 +14,58 @@
 #include "Transient.h"
 #include "LibtorchUtils.h"
 
+#include <torch/serialize/archive.h>
+
 registerMooseObject("StochasticToolsApp", LibtorchDRLControl);
+
+namespace
+{
+
+bool
+readArchiveTensor(torch::serialize::InputArchive & archive,
+                  const std::string & key,
+                  torch::Tensor & tensor)
+{
+  try
+  {
+    archive.read(key, tensor);
+    return true;
+  }
+  catch (const c10::Error &)
+  {
+    return false;
+  }
+}
+
+void
+loadActorParametersWithLegacyFallback(Moose::LibtorchActorNeuralNet & actor,
+                                      const std::string & filename)
+{
+  torch::serialize::InputArchive archive;
+  archive.load_from(filename);
+
+  for (auto & parameter : actor.named_parameters())
+  {
+    torch::Tensor stored_tensor;
+    bool loaded = readArchiveTensor(archive, parameter.key(), stored_tensor);
+
+    if (!loaded && parameter.key().rfind("action_head.", 0) == 0)
+      loaded = readArchiveTensor(
+          archive, parameter.key().substr(std::string("action_head.").size()), stored_tensor);
+
+    if (!loaded)
+      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+                 "the result of the file not existing or a misalignment in the generated "
+                 "container and the data in the file. Make sure the dimensions of the generated "
+                 "neural net are the same as the dimensions of the parameters in the input file!\n"
+                 "Missing serialized parameter: ",
+                 parameter.key());
+
+    parameter.value().data().copy_(stored_tensor);
+  }
+}
+
+} // namespace
 
 InputParameters
 LibtorchDRLControl::validParams()
@@ -26,13 +77,25 @@ LibtorchDRLControl::validParams()
 
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
 
-  params.addParam<unsigned int>("num_stems_in_period", 1, "Blabla");
-  params.addParam<Real>("smoother", 1.0, "Blabla");
+  params.addParam<unsigned int>(
+      "num_steps_in_period",
+      1,
+      "Preferred spelling for the number of timesteps to reuse the most recent sampled "
+      "action before evaluating the policy again.");
+  params.addParam<unsigned int>(
+      "num_stems_in_period", 1, "Deprecated compatibility spelling for num_steps_in_period.");
+  params.addParam<Real>(
+      "smoother", 1.0, "Relaxation factor applied when smoothing control updates.");
 
-  params.addParam<bool>("stochastic", true, "Blabla");
+  params.addParam<bool>(
+      "stochastic",
+      true,
+      "If true, sample from the policy distribution; otherwise use the deterministic action.");
 
-  params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
-  params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
+  params.addParam<std::vector<Real>>(
+      "min_control_value", {}, "The minimum values of the control signal.");
+  params.addParam<std::vector<Real>>(
+      "max_control_value", {}, "The maximum values of the control signal.");
   params.addParam<std::vector<Real>>(
       "action_standard_deviations",
       {},
@@ -48,7 +111,9 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _previous_control_signal(std::vector<Real>(_control_names.size(), 0.0)),
     _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
     _call_counter(0),
-    _num_steps_in_period(getParam<unsigned int>("num_stems_in_period")),
+    _num_steps_in_period(parameters.isParamSetByUser("num_steps_in_period")
+                             ? getParam<unsigned int>("num_steps_in_period")
+                             : getParam<unsigned int>("num_stems_in_period")),
     _smoother(getParam<Real>("smoother")),
     _stochastic(getParam<bool>("stochastic"))
 {
@@ -56,7 +121,7 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   if (isParamValid("seed"))
     torch::manual_seed(getParam<unsigned int>("seed"));
 
-  if (isParamValid("filename"))
+  if (parameters.isParamSetByUser("filename"))
     loadControlNeuralNetFromFile(parameters);
 }
 
@@ -83,24 +148,26 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
     const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
     const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
 
-    auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
-        filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, minimum_values, maximum_values);
+    auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
+                                                              num_inputs,
+                                                              num_outputs,
+                                                              num_neurons_per_layer,
+                                                              activation_functions,
+                                                              minimum_values,
+                                                              maximum_values);
 
     try
     {
       torch::load(nn, filename);
-      _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
-      _nn = _actor_nn;
     }
-    catch (const c10::Error & e)
+    catch (const c10::Error &)
     {
-      mooseError(
-          "The requested pytorch parameter file could not be loaded. This can either be the"
-          "result of the file not existing or a misalignment in the generated container and"
-          "the data in the file. Make sure the dimensions of the generated neural net are the"
-          "same as the dimensions of the parameters in the input file!\n",
-          e.msg());
+      loadActorParametersWithLegacyFallback(*nn, filename);
+      _console << "Loaded requested legacy .pt file." << std::endl;
     }
+
+    _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
+    _nn = _actor_nn;
   }
 }
 
