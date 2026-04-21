@@ -45,8 +45,21 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     mooseError("The number of activation functions should be either one or the same as the number "
                "of hidden layers");
 
-  if (_minimum_values.size())
+  const bool has_minimum_values = !_minimum_values.empty();
+  const bool has_maximum_values = !_maximum_values.empty();
+  if (has_minimum_values != has_maximum_values)
+    mooseError("Bounded neural network outputs require both minimum_values and maximum_values.");
+
+  if (has_minimum_values)
   {
+    if (_minimum_values.size() != _num_outputs || _maximum_values.size() != _num_outputs)
+      mooseError("The number of minimum_values and maximum_values entries must match the number "
+                 "of outputs.");
+
+    for (const auto i : make_range(_minimum_values.size()))
+      if (!(_maximum_values[i] > _minimum_values[i]))
+        mooseError("maximum_values entries must be strictly greater than minimum_values entries.");
+
     auto min_value = _minimum_values;
     LibtorchUtils::vectorToTensor(min_value, _min_tensor);
     _min_tensor.to(_data_type).to(_device_type);
@@ -60,8 +73,7 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
 }
 
 LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
-    const Moose::LibtorchArtificialNeuralNet & nn,
-    const bool build_on_construct)
+    const Moose::LibtorchArtificialNeuralNet & nn, const bool build_on_construct)
   : torch::nn::Module(),
     _name(nn.name()),
     _num_inputs(nn.numInputs()),
@@ -102,7 +114,7 @@ LibtorchArtificialNeuralNet::determineGain(const std::string & activation)
   if (activation == "relu")
     return std::sqrt(2);
   if (activation == "tanh")
-    return 5.0/3.0;
+    return 5.0 / 3.0;
 
   return 1.0;
 }
@@ -112,7 +124,8 @@ LibtorchArtificialNeuralNet::initializeNeuralNetwork()
 {
   for (unsigned int i = 0; i < numHiddenLayers(); ++i)
   {
-    const auto & activation = _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
+    const auto & activation =
+        _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     const Real gain = determineGain(activation);
     torch::nn::init::orthogonal_(_weights[i]->weight, gain);
     torch::nn::init::zeros_(_weights[i]->bias);
@@ -320,8 +333,15 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   dataLoad(stream, data_type, context);
   const torch::ScalarType datt(static_cast<torch::ScalarType>(data_type));
 
-  nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, min_values, max_values, divt, datt);
+  nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(name,
+                                                            num_inputs,
+                                                            num_outputs,
+                                                            num_neurons_per_layer,
+                                                            activation_functions,
+                                                            min_values,
+                                                            max_values,
+                                                            divt,
+                                                            datt);
 
   torch::load(nn, name);
 }
