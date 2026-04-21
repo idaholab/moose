@@ -225,9 +225,9 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   // Compute Forward Euler
   // Split diag mass and residual vectors into correct subvectors
   const std::unique_ptr<NumericVector<Number>> mass_inv_first(
-      NumericVector<Number>::build(_communicator));
+      NumericVector<Number>::build(_communicator, libMesh::default_solver_package(), PARALLEL));
   const std::unique_ptr<NumericVector<Real>> exp_res_first(
-      NumericVector<Number>::build(_communicator));
+      NumericVector<Number>::build(_communicator, libMesh::default_solver_package(), PARALLEL));
   _mass_matrix_diag_inverted->create_subvector(*mass_inv_first, _local_first_order_indices, false);
   _explicit_residual->create_subvector(*exp_res_first, _local_first_order_indices, false);
 
@@ -243,9 +243,9 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   // Compute Central Difference
   // Split diag mass and residual vectors into correct subvectors
   const std::unique_ptr<NumericVector<Real>> mass_inv_second(
-      NumericVector<Number>::build(_communicator));
+      NumericVector<Number>::build(_communicator, libMesh::default_solver_package(), PARALLEL));
   const std::unique_ptr<NumericVector<Real>> exp_res_second(
-      NumericVector<Number>::build(_communicator));
+      NumericVector<Number>::build(_communicator, libMesh::default_solver_package(), PARALLEL));
   _mass_matrix_diag_inverted->create_subvector(
       *mass_inv_second, _local_second_order_indices, false);
   _explicit_residual->create_subvector(*exp_res_second, _local_second_order_indices, false);
