@@ -20,8 +20,6 @@ namespace
 class TestableLibtorchActorNeuralNet : public Moose::LibtorchActorNeuralNet
 {
 public:
-  using Moose::LibtorchActorNeuralNet::_alpha_module;
-  using Moose::LibtorchActorNeuralNet::_beta_module;
   using Moose::LibtorchActorNeuralNet::_weights;
   using Moose::LibtorchActorNeuralNet::LibtorchActorNeuralNet;
 };
@@ -46,13 +44,13 @@ TEST(LibtorchActorNeuralNetTest, boundedBetaLogProbability)
       "test_beta", 1, 1, {1}, {"linear"}, {min_value}, {max_value});
 
   ASSERT_EQ(network._weights.size(), 1);
-  ASSERT_EQ(network._alpha_module.size(), 1);
-  ASSERT_EQ(network._beta_module.size(), 1);
 
   network._weights[0]->weight.data().fill_(0.0);
   network._weights[0]->bias.data().fill_(1.0);
-  network._alpha_module[0]->weight.data().fill_(inverseSoftplusPlusOne(alpha_target));
-  network._beta_module[0]->weight.data().fill_(inverseSoftplusPlusOne(beta_target));
+  network.actionDistributionHead().primaryModule()->weight.data().fill_(
+      inverseSoftplusPlusOne(alpha_target));
+  network.actionDistributionHead().secondaryModule()->weight.data().fill_(
+      inverseSoftplusPlusOne(beta_target));
 
   auto input = torch::zeros({1, 1}, at::kDouble);
   network.evaluate(input, false);
