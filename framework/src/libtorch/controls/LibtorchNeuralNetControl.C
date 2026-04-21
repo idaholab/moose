@@ -112,7 +112,7 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & p
 {
   const auto & filename = getParam<std::string>("filename");
   if (getParam<bool>("torch_script_format"))
-    _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+    _nn = std::make_shared<Moose::TorchScriptModule>(filename);
   else
   {
     unsigned int num_inputs = _response_names.size() * _input_timesteps;

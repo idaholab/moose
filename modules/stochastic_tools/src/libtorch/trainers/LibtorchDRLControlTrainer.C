@@ -127,6 +127,11 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<unsigned int>("batch_size", 100, "Batch size");
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
+  params.addParam<std::vector<Real>>(
+      "action_standard_deviations",
+      {},
+      "Deprecated compatibility parameter. Actor policies now learn their own action "
+      "distribution widths.");
 
   params.addParam<Real>("entropy_coeff", 0.01, "ASDASD");
 
@@ -166,6 +171,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _clip_param(getParam<Real>("clip_parameter")),
     _decay_factor(getParam<Real>("decay_factor")),
     _lambda_factor(getParam<Real>("lambda_factor")),
+    _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
@@ -663,16 +669,16 @@ LibtorchDRLControlTrainer::trainController()
         //     critic_params[param_i].value().data_ptr<Real>() + critic_params[param_i].value().numel())) << std::endl;
         // }
 
-              // print loss per epoch
+      // print loss per epoch
       if (_loss_print_frequency)
         if (epoch % _loss_print_frequency == 0 && batch_begin == 0)
         {
           _console << "Epoch: " << epoch << " | Actor Loss: " << COLOR_GREEN
-                << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: " << COLOR_GREEN
-                << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
+                   << actor_loss.item<double>() << COLOR_DEFAULT << " | Critic Loss: "
+                   << COLOR_GREEN << critic_loss.item<double>() << COLOR_DEFAULT << std::endl;
         }
 
-        batch_begin = batch_end;
+      batch_begin = batch_end;
       }
       // std::cout << _control_nn->stdTensor() << std::endl;
       if (_min_values.size())

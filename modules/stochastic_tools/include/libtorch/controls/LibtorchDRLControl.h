@@ -44,16 +44,6 @@ public:
   virtual void loadControlNeuralNetFromFile(const InputParameters & parameters) override;
 
 protected:
-  /**
-   * Function which computes the logarithmic probability of given actions.
-   * @param action The tensor containing the perturbed control signals (also known as the action of
-   * the controller)
-   * @param output_tensor The expected value of the signals predicted by the neural net
-   * @return The logarithmic probability of the action with respect to the neural net prediction
-   */
-  torch::Tensor computeLogProbability(const torch::Tensor & action,
-                                      const torch::Tensor & output_tensor);
-
   /// The log probability of control signals from the last evaluation of the controller
   std::vector<Real> _current_control_signal_log_probabilities;
 

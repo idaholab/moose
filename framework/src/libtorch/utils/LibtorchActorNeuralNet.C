@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchActorNeuralNet.h"
 #include "MooseError.h"
@@ -179,7 +179,7 @@ LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
 }
 
 torch::Tensor
-LibtorchActorNeuralNet::forward(torch::Tensor & x)
+LibtorchActorNeuralNet::forward(const torch::Tensor & x)
 {
   torch::Tensor output(x);
   if (_data_type != output.scalar_type())

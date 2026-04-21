@@ -10,12 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchDRLControl.h"
-<<<<<<< HEAD
 #include "TorchScriptModule.h"
-#include "LibtorchArtificialNeuralNet.h"
-=======
-#include "LibtorchTorchScriptNeuralNet.h"
->>>>>>> a7b46c70e5 (Add actor network)
 #include "Transient.h"
 #include "LibtorchUtils.h"
 
@@ -38,6 +33,11 @@ LibtorchDRLControl::validParams()
 
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
+  params.addParam<std::vector<Real>>(
+      "action_standard_deviations",
+      {},
+      "Deprecated compatibility parameter. Actor policies now learn their own action "
+      "distribution widths.");
 
   return params;
 }
@@ -65,7 +65,10 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
 {
   const auto & filename = getParam<std::string>("filename");
   if (getParam<bool>("torch_script_format"))
-    _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+  {
+    _actor_nn.reset();
+    _nn = std::make_shared<Moose::TorchScriptModule>(filename);
+  }
   else
   {
     unsigned int num_inputs = _response_names.size() * _input_timesteps;
@@ -86,7 +89,8 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
     try
     {
       torch::load(nn, filename);
-      _actor_nn =std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
+      _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
+      _nn = _actor_nn;
     }
     catch (const c10::Error & e)
     {
@@ -103,155 +107,72 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
 void
 LibtorchDRLControl::execute()
 {
-  if (_actor_nn)
+  if (!_actor_nn && !_nn)
+    return;
+
+  if (_current_execute_flag != EXEC_TIMESTEP_BEGIN)
+    return;
+
+  const unsigned int n_controls = _control_names.size();
+  const unsigned int num_old_timesteps = _input_timesteps - 1;
+
+  // Fill a vector with the current values of the responses.
+  updateCurrentResponse();
+
+  // Seed the response history with the initial response when the control first runs.
+  if (_old_responses.empty())
+    _old_responses.assign(num_old_timesteps, _current_response);
+
+  if (_call_counter % _num_steps_in_period == 0)
   {
-    unsigned int n_controls = _control_names.size();
-    unsigned int num_old_timesteps = _input_timesteps - 1;
+    torch::Tensor input_tensor = prepareInputTensor();
+    torch::Tensor action;
 
-    // Fill a vector with the current values of the responses
-    updateCurrentResponse();
-
-<<<<<<< HEAD
-    // If this is the first time this control is called and we need to use older values, fill up the
-    // needed old values using the initial values
-    if (_old_responses.empty())
-      _old_responses.assign(num_old_timesteps, _current_response);
-
-    if (_call_counter % _num_steps_in_period == 0)
+    if (_actor_nn)
     {
-      // Organize the old an current solution into a tensor so we can evaluate the neural net
-      torch::Tensor input_tensor = prepareInputTensor();
+      action = _actor_nn->evaluate(input_tensor, _stochastic);
 
-      // Evaluate the neural network to get the expected control value
-      torch::Tensor output_tensor = _nn->forward(input_tensor);
-
-      // std::cout << "Input " << input_tensor << std::endl;
-      // std::cout << "Output " << output_tensor << std::endl;
-
-      // Sample control value (action) from Gaussian distribution
-      torch::Tensor action = at::normal(output_tensor, _std);
-
-      // Compute log probability
-      torch::Tensor log_probability = computeLogProbability(action, output_tensor);
-
-      _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
-
-      for (const auto i : index_range(_current_control_signals))
-        _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
-
-      _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
-                                                 log_probability.data_ptr<Real>() +
-                                                     log_probability.size(1)};
+      if (_stochastic)
+      {
+        torch::Tensor log_probability = _actor_nn->logProbability(action);
+        _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
+                                                     log_probability.data_ptr<Real>() +
+                                                         log_probability.size(1)};
+      }
+      else
+        _current_control_signal_log_probabilities.assign(n_controls, 0.0);
+    }
+    else
+    {
+      action = _nn->forward(input_tensor);
+      _current_control_signal_log_probabilities.assign(n_controls, 0.0);
     }
 
-    // Convert data
-    _previous_control_signal = _current_smoothed_signal;
+    _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
 
-
-    for (const auto i : index_range(_current_smoothed_signal))
-      _current_smoothed_signal[i] = _previous_control_signal[i] + _smoother*(_current_control_signals[i] - _previous_control_signal[i]);
-
-
-    // std::cout << "Setting control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
-    // std::cout << "Setting log probability to: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
-
-    for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
-    {
-
-      // We scale the controllable value for physically meaningful control action
-      setControllableValueByName<Real>(_control_names[control_i],
-                                       _current_smoothed_signal[control_i] *
-                                           _action_scaling_factors[control_i]);
-    }
-
-    // We add the curent solution to the old solutions and move everything in there one step
-    // backward
-    if (_old_responses.size())
-    {
-      std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-      _old_responses[0] = _current_response;
-    }
-    _call_counter++;
-=======
-    if (_current_execute_flag == EXEC_TIMESTEP_BEGIN)
-    {
-      // If this is the first time this control is called and we need to use older values, fill up the
-      // needed old values using the initial values
-      if (!_initialized)
-      {
-        _old_responses.clear();
-        for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-          _old_responses.push_back(_current_response);
-        _initialized = true;
-      }
-
-      if (_call_counter % _num_steps_in_period == 0)
-      {
-        // Organize the old an current solution into a tensor so we can evaluate the neural net
-        torch::Tensor input_tensor = prepareInputTensor();
-
-        // std::cout << "Std" << _actor_nn->stdTensor() << std::endl;
-        // std::cout << "Input" << input_tensor << std::endl;
-        // Evaluate the neural network to get the expected control value
-        torch::Tensor action = _actor_nn->evaluate(input_tensor, _stochastic);
-
-        // std::cout << "in za control " << action << std::endl;
-        // Compute log probability
-
-        _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
-
-        if (_call_counter == 0)
-          _current_smoothed_signal = _current_control_signals;
-
-        // std::cout << "Computing control signal to: " << Moose::stringify(_current_control_signals) << std::endl;
-
-
-        // for (const auto i : index_range(_current_control_signals))
-        //   _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
-
-        if (_stochastic)
-        {
-          torch::Tensor log_probability = _actor_nn->logProbability(action);
-
-          _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
-                                                    log_probability.data_ptr<Real>() +
-                                                      log_probability.size(1)};
-          // std::cout << "Logprob: " << Moose::stringify(_current_control_signal_log_probabilities) << std::endl;
-        }
-      }
-
-
-      // Convert data
-      _previous_control_signal = _current_smoothed_signal;
-
-
-      for (const auto i : index_range(_current_smoothed_signal))
-        _current_smoothed_signal[i] = _previous_control_signal[i] + _smoother*(_current_control_signals[i] - _previous_control_signal[i]);
-
-
-      // std::cout << "Setting control signal to: " << Moose::stringify(_current_smoothed_signal) << std::endl;
-
-
-      for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
-      {
-
-        // We scale the controllable value for physically meaningful control action
-        setControllableValueByName<Real>(_control_names[control_i],
-                                        _current_smoothed_signal[control_i] *
-                                            _action_scaling_factors[control_i]);
-      }
-
-      // We add the curent solution to the old solutions and move everything in there one step
-      // backward
-      if (_old_responses.size())
-      {
-        std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-        _old_responses[0] = _current_response;
-      }
-      _call_counter++;
-    }
->>>>>>> a7b46c70e5 (Add actor network)
+    if (_call_counter == 0)
+      _current_smoothed_signal = _current_control_signals;
   }
+
+  _previous_control_signal = _current_smoothed_signal;
+
+  for (const auto i : index_range(_current_smoothed_signal))
+    _current_smoothed_signal[i] =
+        _previous_control_signal[i] +
+        _smoother * (_current_control_signals[i] - _previous_control_signal[i]);
+
+  for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
+    setControllableValueByName<Real>(_control_names[control_i],
+                                     _current_smoothed_signal[control_i] *
+                                         _action_scaling_factors[control_i]);
+
+  if (_old_responses.size())
+  {
+    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+    _old_responses[0] = _current_response;
+  }
+
+  _call_counter++;
 }
 
 void
