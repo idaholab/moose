@@ -1,17 +1,13 @@
-# Tests partial import: the material has two stateful properties ("diffusivity" and
-# "conductivity"), but only "diffusivity" is present in the import file.
-# After import, PartialStatefulMaterial::computeQpProperties() asserts at the first
-# timestep that:
-#   - diffusivity_old was overwritten by the importer (remapped value, not initial_diffusivity)
-#   - conductivity_old equals initial_conductivity, proving initStatefulProperties()
-#     ran correctly for the non-imported property (not zero-initialized)
+# This input file exports two stateful properties ("diffusivity" and "conductivity")
+# so import_subset.i can verify that the importer skips exported properties that are
+# not declared in the current simulation.
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 6
-    ny = 6
+    nx = 4
+    ny = 4
     xmin = 0
     xmax = 1
     ymin = 0
@@ -56,22 +52,22 @@
 [Materials]
   [stateful]
     type = PartialStatefulMaterial
-    initial_diffusivity = 10.0
+    initial_diffusivity = 1.0
     initial_conductivity = 2.0
-    verify_import = true
   []
 []
 
 [UserObjects]
-  [importer]
-    type = StatefulMaterialPropertyImporter
-    file_base = 'stateful_export'
+  [exporter]
+    type = StatefulMaterialPropertyExporter
+    file_base = 'subset_export'
+    execute_on = FINAL
   []
 []
 
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 1
+  num_steps = 3
   dt = 0.1
 []

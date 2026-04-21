@@ -20,11 +20,12 @@
  * by StatefulMaterialPropertyExporter and remaps it onto the current mesh using
  * closest-point matching within each subdomain.
  *
- * Timing: execute_on = EXEC_INITIAL, which fires AFTER FEProblemBase::initialSetup()
- * completes (including initElementStatefulProps()). initStatefulProperties() runs
- * normally for ALL elements first. The importer then overwrites only states 1 (old)
- * and 2 (older) for elements/properties present in the import file. State 0 (current)
- * is left as-is and recomputed in the first timestep.
+ * Timing: execute_on = EXEC_INITIAL. execute() runs during FEProblemBase::initialSetup()
+ * after the first initElementStatefulProps() pass but before a second pass that reinitializes
+ * stateful properties. The importer uses execute() to populate
+ * MaterialPropertyStorage::_restartable_map so that the second initStatefulProps() call
+ * loads remapped values in place while non-imported properties keep the values established
+ * during the first initialization pass.
  *
  * This correctly handles partial imports: materials with both imported and non-imported
  * properties will have all properties properly initialized via initStatefulProperties(),
@@ -85,6 +86,6 @@ protected:
   /// Build the property name mapping from file IDs to current simulation stateful IDs
   void buildPropertyMapping();
 
-  /// Overwrite states 1 and 2 in _storage with remapped data from the file
-  void overwriteStorageStates();
+  /// Populate MaterialPropertyStorage::_restartable_map with remapped data for later loading
+  void populateRestartableMap();
 };
