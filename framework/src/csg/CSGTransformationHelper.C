@@ -70,4 +70,41 @@ CSGTransformationHelper::getTransformationsAsStrings() const
   return result;
 }
 
+Point
+CSGTransformationHelper::applyReverseTransformsToPoint(const Point & p) const
+{
+  Point p_trans = p; // make a local copy to modify
+
+  // iterate in reverse
+  for (auto it = _transformations.rbegin(); it != _transformations.rend(); ++it)
+  {
+    auto trans_type = it->first;
+    auto val = it->second;
+
+    if (trans_type == TransformationType::TRANSLATION)
+    {
+      Point offset(std::get<0>(val), std::get<1>(val), std::get<2>(val));
+      for (int i = 0; i < 3; ++i)
+        p_trans(i) -= offset(i);
+    }
+    else if (trans_type == TransformationType::SCALE)
+    {
+      Point scale(std::get<0>(val), std::get<1>(val), std::get<2>(val));
+      for (int i = 0; i < 3; ++i)
+        p_trans(i) /= scale(i);
+    }
+    else if (trans_type == TransformationType::ROTATION)
+    {
+      // get the transpose of the original rotation matrix and apply to point p
+      const auto rot_matrix = RealTensorValue::intrinsic_rotation_matrix(
+          std::get<0>(val), std::get<1>(val), std::get<2>(val));
+      const auto rot_transpose = rot_matrix.transpose();
+      p_trans = rot_transpose * p_trans;
+    }
+    else
+      mooseError("Transformation type is not recognized.");
+  }
+  return p_trans;
+}
+
 } // namespace CSG

@@ -22,7 +22,13 @@ CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
 CSGSurface::Halfspace
 CSGSurface::getHalfspaceFromPoint(const Point & p) const
 {
-  auto eval = evaluateSurfaceEquationAtPoint(p);
+  // if transformations are present on the surface, apply them in reverse to the point and pass that
+  // new point to the evaluation to ensure transformations are considered.
+
+  // Create a local transformed copy - the original p in the calling scope is NOT modified
+  const Point p_trans = getTransformations().size() ? applyReverseTransformsToPoint(p) : p;
+
+  auto eval = evaluateSurfaceEquationAtPoint(p_trans);
   if (MooseUtils::absoluteFuzzyGreaterThan(eval, 0))
     return Halfspace::POSITIVE;
   else if (MooseUtils::absoluteFuzzyLessThan(eval, 0))

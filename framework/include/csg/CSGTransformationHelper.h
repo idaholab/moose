@@ -80,11 +80,26 @@ protected:
    */
   void addTransformation(TransformationType type, const std::tuple<Real, Real, Real> & values);
 
+  /**
+   * @brief update the value of point p by applying the inverse of the list of transformations to
+   * the point
+   * @param p point to transform
+   * @return transformed point
+   */
+  Point applyReverseTransformsToPoint(const Point & p) const;
+
   /// List of transformations applied to this object
   std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
 
   // CSGBase needs to be a friend to access addTransformation
   friend class CSGBase;
+
+#ifdef MOOSE_UNIT_TEST
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
+  ///@}
+#endif
 };
 
 } // namespace CSG
