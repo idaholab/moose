@@ -925,6 +925,11 @@ public:
   /// Setter for debug chain control data output
   void setChainControlDataOutput(bool set_output) { _show_chain_control_data = set_output; }
 
+#ifndef NDEBUG
+  /// Whether to check residual for NaN/Inf values
+  virtual bool checkResidualForNans() const = 0;
+#endif
+
   /**
    * @return the number of nonlinear systems in the problem
    */
