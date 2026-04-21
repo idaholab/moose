@@ -51,6 +51,8 @@ requirements:
     - gxx                 # [linux]
     - clangxx             # [osx]
     - gfortran
+    # libMesh dependencies
+    - libtirpc
     # Parallel HDF5
     - hdf5 {{ hdf5 }}
     - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
