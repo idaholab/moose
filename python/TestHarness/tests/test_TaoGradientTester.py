@@ -14,10 +14,7 @@ import sys
 import unittest
 from types import SimpleNamespace
 
-MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-MOOSE_PYTHON = os.path.join(MOOSE_DIR, "python")
-if MOOSE_PYTHON not in sys.path:
-    sys.path.append(MOOSE_PYTHON)
+from TestHarnessTestCase import MOOSE_DIR, MOOSE_PYTHON
 
 TESTER_DIR = os.path.join(MOOSE_PYTHON, "TestHarness", "testers")
 if TESTER_DIR not in sys.path:
