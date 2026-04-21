@@ -75,7 +75,9 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
                                   : std::vector<Real>(_response_names.size(), 1.0)),
     _action_scaling_factors(isParamValid("action_scaling_factors")
                                 ? getParam<std::vector<Real>>("action_scaling_factors")
-                                : std::vector<Real>(_control_names.size(), 1.0))
+                                : std::vector<Real>(_control_names.size(), 1.0)),
+    _observation_history(
+        _input_timesteps, _response_shift_factors, _response_scaling_factors)
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -103,8 +105,9 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     _response_values.push_back(&getPostprocessorValueByName(_response_names[resp_i]));
 
   // If the user wants to read the neural net from file, we do it. We can read it from a
-  // torchscript file, or we can create a shell and read back the parameters
-  this->loadControlNeuralNetFromFile(parameters);
+  // torchscript file, or we can create a shell and read back the parameters.
+  if (parameters.isParamSetByUser("filename"))
+    this->loadControlNeuralNetFromFile(parameters);
 }
 
 void
@@ -151,14 +154,13 @@ LibtorchNeuralNetControl::execute()
   if (_nn)
   {
     const unsigned int n_controls = _control_names.size();
-    const unsigned int num_old_timesteps = _input_timesteps - 1;
 
     // Fetch current reporter values and populate _current_response
     updateCurrentResponse();
 
     // If this is the first timestep, we fill up the old values with the initial value
     if (_old_responses.empty())
-      _old_responses.assign(num_old_timesteps, _current_response);
+      _observation_history.initializeHistory(_current_response, _old_responses);
 
     // Organize the old an current solution into a tensor so we can evaluate the neural net
     torch::Tensor input_tensor = prepareInputTensor();
@@ -178,10 +180,7 @@ LibtorchNeuralNetControl::execute()
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
     if (_old_responses.size())
-    {
-      std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-      _old_responses[0] = _current_response;
-    }
+      _observation_history.advanceHistory(_current_response, _old_responses);
   }
 }
 
@@ -215,11 +214,12 @@ void
 LibtorchNeuralNetControl::updateCurrentResponse()
 {
   // Gather the current response values from the reporters
-  _current_response.clear();
-
+  std::vector<Real> raw_response;
+  raw_response.reserve(_response_names.size());
   for (const auto & resp_i : index_range(_response_names))
-    _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
-                                _response_scaling_factors[resp_i]);
+    raw_response.push_back(*_response_values[resp_i]);
+
+  _current_response = _observation_history.normalize(raw_response);
 }
 
 void
@@ -231,14 +231,7 @@ LibtorchNeuralNetControl::loadControlNeuralNet(const Moose::LibtorchArtificialNe
 torch::Tensor
 LibtorchNeuralNetControl::prepareInputTensor()
 {
-  const unsigned int num_old_timesteps = _input_timesteps - 1;
-
-  // We convert the standard vectors to libtorch tensors
-  std::vector<Real> raw_input(_current_response);
-
-  for (const auto & step_i : make_range(num_old_timesteps))
-    raw_input.insert(raw_input.end(), _old_responses[step_i].begin(), _old_responses[step_i].end());
-
+  auto raw_input = _observation_history.stackCurrentObservation(_current_response, _old_responses);
   torch::Tensor input_tensor;
   LibtorchUtils::vectorToTensor(raw_input, input_tensor);
 
