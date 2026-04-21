@@ -335,9 +335,8 @@ addPetscOptionsFromCommandline(FEProblemBase * const problem)
   // Some vector/matrix-type options may have been consumed before the PETSc database rebuild.
   // Replay only the command-line-controlled applications so input-file options handled through
   // setSinglePetscOption() do not pay the cost twice.
-  PetscBool have_vec_type = PETSC_FALSE;
+  const bool have_vec_type = petscOptionsHasName(command_line_options, "-vec_type");
   bool have_mat_type = false;
-  have_vec_type = petscOptionsHasName(command_line_options, "-vec_type");
 
   for (const auto sys_index : make_range(problem->numSolverSystems()))
   {
