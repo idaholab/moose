@@ -40,6 +40,8 @@ public:
   void advanceHistory(const std::vector<Real> & normalized_response,
                       std::vector<std::vector<Real>> & old_responses) const;
 
+  std::vector<Real> expandFeatureFactors(const std::vector<Real> & feature_factors) const;
+
   std::vector<Real> stackCurrentObservation(
       const std::vector<Real> & normalized_response,
       const std::vector<std::vector<Real>> & old_responses) const;

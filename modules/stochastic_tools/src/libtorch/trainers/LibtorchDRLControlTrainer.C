@@ -38,6 +38,10 @@ LibtorchDRLControlTrainer::validParams()
       "control",
       "Reporters containing the values of the controlled quantities (control signals) from the "
       "model simulations.");
+  params.addParam<std::vector<Real>>(
+      "action_scaling_factors",
+      "Scale factors embedded into the trained policy outputs so transferred and checkpointed "
+      "controllers operate in physical units.");
   params.addRequiredParam<std::vector<ReporterName>>(
       "log_probability",
       "Reporters containing the log probabilities of the actions taken during the simulations.");
@@ -149,6 +153,9 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
                                ? getParam<std::vector<Real>>("response_scaling_factors")
                                : std::vector<Real>(_state_names.size(), 1.0)),
     _action_names(getParam<std::vector<ReporterName>>("control")),
+    _action_scaling_factors(isParamValid("action_scaling_factors")
+                                ? getParam<std::vector<Real>>("action_scaling_factors")
+                                : std::vector<Real>(_action_names.size(), 1.0)),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
     _reward_name(getParam<ReporterName>("reward")),
     _reward_value_pointer(&getReporterValueByName<std::vector<std::vector<Real>>>(_reward_name)),
@@ -196,6 +203,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
                "The number of log-probability reporters must match the number of control "
                "reporters.");
 
+  if (_action_names.size() != _action_scaling_factors.size())
+    paramError("action_scaling_factors",
+               "The number of action scaling factors must match the number of control "
+               "reporters.");
+
   // We establish the links with the chosen reporters
   getReporterPointers(_state_names, _state_value_pointers);
   getReporterPointers(_action_names, _action_value_pointers);
@@ -206,6 +218,9 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   torch::manual_seed(getParam<unsigned int>("seed"));
 
   bool filename_valid = isParamValid("filename_base");
+  const auto input_shift_factors = _observation_history.expandFeatureFactors(_state_shift_factors);
+  const auto input_scaling_factors =
+      _observation_history.expandFeatureFactors(_state_scaling_factors);
 
   // Initializing the control neural net so that the control can grab it right away
   _control_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
@@ -215,14 +230,26 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_control_neurons_per_layer,
       getParam<std::vector<std::string>>("control_activation_functions"),
       _min_values,
-      _max_values);
+      _max_values,
+      torch::kCPU,
+      torch::kDouble,
+      true,
+      input_shift_factors,
+      input_scaling_factors,
+      _action_scaling_factors);
 
   // We read parameters for the control neural net if it is requested
   if (_read_from_file)
   {
     try
     {
-      torch::load(_control_nn, _control_nn->name());
+      if (Moose::isLegacyLibtorchActorArchive(_control_nn->name()))
+        Moose::loadLegacyLibtorchActorNeuralNetState(
+            *_control_nn,
+            _control_nn->name(),
+            getParam<std::vector<Real>>("action_standard_deviations"));
+      else
+        Moose::loadLibtorchActorNeuralNetState(*_control_nn, _control_nn->name());
       _console << "Loaded requested .pt file." << std::endl;
     }
     catch (const c10::Error & e)
@@ -240,7 +267,14 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_inputs,
       1,
       _num_critic_neurons_per_layer,
-      getParam<std::vector<std::string>>("critic_activation_functions"));
+      getParam<std::vector<std::string>>("critic_activation_functions"),
+      std::vector<Real>(),
+      std::vector<Real>(),
+      torch::kCPU,
+      torch::kDouble,
+      true,
+      input_shift_factors,
+      input_scaling_factors);
 
   _actor_optimizer = std::make_unique<torch::optim::Adam>(
       _control_nn->parameters(), torch::optim::AdamOptions(_control_learning_rate));
@@ -252,7 +286,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   {
     try
     {
-      torch::load(_critic_nn, _critic_nn->name());
+      Moose::loadLibtorchArtificialNeuralNetState(*_critic_nn, _critic_nn->name());
       _console << "Loaded requested .pt file." << std::endl;
     }
     catch (const c10::Error & e)
@@ -427,8 +461,6 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     for (const auto state_i : index_range(_state_value_pointers))
       normalized_responses[state_i] = extractDownsampledSequence(
           (*_state_value_pointers[state_i])[sample_i], 0, num_transitions + 1);
-
-    _observation_history.normalizeTrajectoryInPlace(normalized_responses);
 
     LibtorchRLTrajectoryBuffer::Trajectory trajectory;
     trajectory.observations.reserve(num_transitions);

@@ -55,7 +55,8 @@ LibtorchNeuralNetControl::validParams()
 
   params.addParam<std::vector<Real>>(
       "action_scaling_factors",
-      "Scale factor that multiplies the NN output to obtain a physically meaningful value.");
+      "Scale factors embedded into constructed neural-network outputs so checkpointed policies "
+      "carry their physical-unit action scaling.");
 
   return params;
 }
@@ -76,8 +77,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     _action_scaling_factors(isParamValid("action_scaling_factors")
                                 ? getParam<std::vector<Real>>("action_scaling_factors")
                                 : std::vector<Real>(_control_names.size(), 1.0)),
-    _observation_history(
-        _input_timesteps, _response_shift_factors, _response_scaling_factors)
+    _observation_history(_input_timesteps, _response_shift_factors, _response_scaling_factors)
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -106,7 +106,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
 
   // If the user wants to read the neural net from file, we do it. We can read it from a
   // torchscript file, or we can create a shell and read back the parameters.
-  if (parameters.isParamSetByUser("filename"))
+  if (parameters.isParamSetByUser("filename") && type() == "LibtorchNeuralNetControl")
     this->loadControlNeuralNetFromFile(parameters);
 }
 
@@ -126,12 +126,27 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & p
         parameters.isParamSetByUser("activation_function")
             ? getParam<std::vector<std::string>>("activation_function")
             : std::vector<std::string>({"relu"});
-    auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-        filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
+    const auto input_shift_factors =
+        _observation_history.expandFeatureFactors(_response_shift_factors);
+    const auto input_scaling_factors =
+        _observation_history.expandFeatureFactors(_response_scaling_factors);
+    auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(filename,
+                                                                   num_inputs,
+                                                                   num_outputs,
+                                                                   num_neurons_per_layer,
+                                                                   activation_functions,
+                                                                   std::vector<Real>(),
+                                                                   std::vector<Real>(),
+                                                                   torch::kCPU,
+                                                                   torch::kDouble,
+                                                                   true,
+                                                                   input_shift_factors,
+                                                                   input_scaling_factors,
+                                                                   _action_scaling_factors);
 
     try
     {
-      torch::load(nn, filename);
+      Moose::loadLibtorchArtificialNeuralNetState(*nn, filename);
       _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
     }
     catch (const c10::Error & e)
@@ -171,10 +186,8 @@ LibtorchNeuralNetControl::execute()
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
-      // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
-                                       _current_control_signals[control_i] *
-                                           _action_scaling_factors[control_i]);
+                                       _current_control_signals[control_i]);
     }
 
     // We add the curent solution to the old solutions and move everything in there one step
@@ -219,7 +232,7 @@ LibtorchNeuralNetControl::updateCurrentResponse()
   for (const auto & resp_i : index_range(_response_names))
     raw_response.push_back(*_response_values[resp_i]);
 
-  _current_response = _observation_history.normalize(raw_response);
+  _current_response = raw_response;
 }
 
 void

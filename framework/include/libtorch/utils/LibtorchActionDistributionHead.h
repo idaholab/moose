@@ -37,7 +37,8 @@ public:
                                  const std::vector<Real> & maximum_values = {},
                                  torch::DeviceType device_type = torch::kCPU,
                                  torch::ScalarType scalar_type = torch::kDouble,
-                                 bool build_on_construct = true);
+                                 bool build_on_construct = true,
+                                 const std::vector<Real> & output_scaling_factors = {});
 
   LibtorchActionDistributionHead(const LibtorchActionDistributionHead & head,
                                  bool build_on_construct = true);
@@ -45,6 +46,8 @@ public:
   void constructHead();
 
   void initialize();
+
+  void synchronizeScalingFactorsFromBuffer();
 
   void reset(const torch::Tensor & input);
 
@@ -76,10 +79,12 @@ private:
   const std::vector<Real> _maximum_values;
   const torch::DeviceType _device_type;
   const torch::ScalarType _data_type;
+  std::vector<Real> _output_scaling_factors;
 
   torch::nn::Linear _primary_parameter_module{nullptr};
   torch::nn::Linear _secondary_parameter_module{nullptr};
 
+  torch::Tensor _action_scale_tensor;
   torch::Tensor _min_tensor;
   torch::Tensor _max_tensor;
   torch::Tensor _alpha_tensor;

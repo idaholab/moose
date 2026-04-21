@@ -14,58 +14,7 @@
 #include "Transient.h"
 #include "LibtorchUtils.h"
 
-#include <torch/serialize/archive.h>
-
 registerMooseObject("StochasticToolsApp", LibtorchDRLControl);
-
-namespace
-{
-
-bool
-readArchiveTensor(torch::serialize::InputArchive & archive,
-                  const std::string & key,
-                  torch::Tensor & tensor)
-{
-  try
-  {
-    archive.read(key, tensor);
-    return true;
-  }
-  catch (const c10::Error &)
-  {
-    return false;
-  }
-}
-
-void
-loadActorParametersWithLegacyFallback(Moose::LibtorchActorNeuralNet & actor,
-                                      const std::string & filename)
-{
-  torch::serialize::InputArchive archive;
-  archive.load_from(filename);
-
-  for (auto & parameter : actor.named_parameters())
-  {
-    torch::Tensor stored_tensor;
-    bool loaded = readArchiveTensor(archive, parameter.key(), stored_tensor);
-
-    if (!loaded && parameter.key().rfind("action_head.", 0) == 0)
-      loaded = readArchiveTensor(
-          archive, parameter.key().substr(std::string("action_head.").size()), stored_tensor);
-
-    if (!loaded)
-      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-                 "the result of the file not existing or a misalignment in the generated "
-                 "container and the data in the file. Make sure the dimensions of the generated "
-                 "neural net are the same as the dimensions of the parameters in the input file!\n"
-                 "Missing serialized parameter: ",
-                 parameter.key());
-
-    parameter.value().data().copy_(stored_tensor);
-  }
-}
-
-} // namespace
 
 InputParameters
 LibtorchDRLControl::validParams()
@@ -147,6 +96,10 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
 
     const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
     const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
+    const auto input_shift_factors =
+        _observation_history.expandFeatureFactors(_response_shift_factors);
+    const auto input_scaling_factors =
+        _observation_history.expandFeatureFactors(_response_scaling_factors);
 
     auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
                                                               num_inputs,
@@ -154,16 +107,27 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
                                                               num_neurons_per_layer,
                                                               activation_functions,
                                                               minimum_values,
-                                                              maximum_values);
+                                                              maximum_values,
+                                                              torch::kCPU,
+                                                              torch::kDouble,
+                                                              true,
+                                                              input_shift_factors,
+                                                              input_scaling_factors,
+                                                              _action_scaling_factors);
 
     try
     {
-      torch::load(nn, filename);
+      if (Moose::isLegacyLibtorchActorArchive(filename))
+        Moose::loadLegacyLibtorchActorNeuralNetState(
+            *nn, filename, getParam<std::vector<Real>>("action_standard_deviations"));
+      else
+        Moose::loadLibtorchActorNeuralNetState(*nn, filename);
     }
-    catch (const c10::Error &)
+    catch (const c10::Error & e)
     {
-      loadActorParametersWithLegacyFallback(*nn, filename);
-      _console << "Loaded requested legacy .pt file." << std::endl;
+      mooseError("The requested pytorch parameter file could not be loaded for the control neural "
+                 "net.\n",
+                 e.msg());
     }
 
     _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
@@ -230,8 +194,7 @@ LibtorchDRLControl::execute()
 
   for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     setControllableValueByName<Real>(_control_names[control_i],
-                                     _current_smoothed_signal[control_i] *
-                                         _action_scaling_factors[control_i]);
+                                     _current_smoothed_signal[control_i]);
 
   if (_old_responses.size())
   {
