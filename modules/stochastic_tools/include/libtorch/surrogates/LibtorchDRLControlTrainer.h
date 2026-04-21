@@ -13,17 +13,19 @@
 
 #include <torch/torch.h>
 #include "LibtorchActorNeuralNet.h"
+#include "LibtorchObservationHistory.h"
+#include "LibtorchRLMiniBatchSampler.h"
+#include "LibtorchRLPPOLoss.h"
+#include "LibtorchRLTrajectoryBuffer.h"
+#include "LibtorchRLValueEstimator.h"
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
 /**
- * This trainer is responsible for training neural networks that efficiently control
- * different processes. It utilizes the Proximal Policy Optimization algorithms. For more
- * information on the algorithm, see the following resources: Schulman, John, et al. "Proximal
- * policy optimization algorithms." arXiv preprint arXiv:1707.06347 (2017).
- * https://medium.com/analytics-vidhya/coding-ppo-from-scratch-with-pytorch-part-1-4-613dfc1b14c8
- * https://stable-baselines.readthedocs.io/en/master/modules/ppo2.html
+ * Fixed-horizon actor-critic trainer that collects trajectories from MOOSE reporters and runs a
+ * PPO update on top of reusable RL-core components (observation history, trajectory buffer,
+ * mini-batch sampler, value estimator, and PPO loss).
  */
 class LibtorchDRLControlTrainer : public SurrogateTrainerBase
 {
@@ -46,54 +48,13 @@ public:
   std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
   /// The condensed training function
-  void trainController();
+  void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
 
   const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
 
 protected:
   /// Compute the average eposiodic reward
   void computeEpisodeRewardStatistics();
-
-  /**
-   * Function to convert input/output data from std::vector<std::vector> to torch::tensor
-   * @param vector_data The input data in vector-vectors format
-   * @param tensor_data The tensor where we would like to save the results
-   * @param detach If the gradient info needs to be detached from the tensor
-   */
-  void convertDataToTensor(std::vector<std::vector<std::vector<Real>>> & vector_data,
-                           torch::Tensor & tensor_data,
-                           const bool detach = false);
-
-  /**
-   * Function to convert input/output data from std::vector<std::vector> to torch::tensor
-   * @param vector_data The input data in vector-vectors format
-   * @param tensor_data The tensor where we would like to save the results
-   * @param detach If the gradient info needs to be detached from the tensor
-   */
-  void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
-    torch::Tensor & tensor_data,
-    const bool detach = false);
-
-  /**
-   * Function which evaluates the critic to get the value (discounter reward)
-   * @param input The observation values (responses)
-   * @return The estimated value
-   */
-  torch::Tensor evaluateValue(torch::Tensor & input);
-
-  /**
-   * Function which evaluates the control net and then computes the logarithmic probability of the
-   * action
-   * @param input The observation values (responses)
-   * @param output The actions corresponding to the observations
-   * @return The estimated value for the logarithmic probability
-   */
-  torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
-
-  /// Compute the return value by discounting the rewards and summing them
-  void computeReturn(std::vector<std::vector<Real>> & data,
-                         const std::vector<std::vector<Real>> & reward,
-                        const Real decay_factor);
 
   /// Reset data after updating the neural network
   void resetData();
@@ -140,21 +101,6 @@ protected:
   /// Number of outputs for the control neural network
   unsigned int _num_outputs;
 
-  ///@{
-  std::vector<std::vector<std::vector<Real>>> _state_data;
-  std::vector<std::vector<std::vector<Real>>> _next_state_data;
-  std::vector<std::vector<std::vector<Real>>> _action_data;
-  std::vector<std::vector<std::vector<Real>>> _log_probability_data;
-  ///@}
-
-  ///@{
-  /// The reward and return data. The return is calculated using the _reward_data
-  std::vector<std::vector<Real>> _reward_data;
-  std::vector<std::vector<Real>> _return_data;
-  std::vector<std::vector<Real>> _delta_data;
-  std::vector<std::vector<Real>> _gae_data;
-  ///@}
-
   /// Number of epochs for the training of the emulator
   const unsigned int _num_epochs;
 
@@ -180,9 +126,6 @@ protected:
   const Real _decay_factor;
   const Real _lambda_factor;
 
-  /// Standard deviation for the actions
-  const std::vector<Real> _action_std;
-
   /// Name of the pytorch output file. This is used for loading and storing
   /// already existing data
   const std::string _filename_base;
@@ -203,7 +146,6 @@ protected:
 
   std::vector<Real> _sample_average_episode_reward;
   std::vector<Real> _sample_std_episode_reward;
-  std::vector<unsigned int> _sample_lengths;
 
   /// Switch to enable the standardization of the advantages
   const bool _standardize_advantage;
@@ -221,15 +163,6 @@ protected:
   /// Pointer to the critic neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
 
-  /// Torch::tensor version of the input and action data
-  torch::Tensor _state_tensor;
-  torch::Tensor _next_state_tensor;
-  torch::Tensor _action_tensor;
-  torch::Tensor _gae_tensor;
-  torch::Tensor _return_tensor;
-  torch::Tensor _delta_tensor;
-  torch::Tensor _log_probability_tensor;
-
   Real _highest_reward;
   Real _entropy_coeff;
 
@@ -237,51 +170,28 @@ protected:
   std::unique_ptr<torch::optim::Adam> _critic_optimizer;
 
 private:
-  /**
-   * Extract the response values from the postprocessors of the controlled system.
-   * This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the response values
-   * @param reporter_names The names of the reporters which need to be extracted
-   * @param num_timesteps The number of timesteps we want to use for training
-   */
-  void getResponseDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
-                                  std::vector<std::vector<std::vector<Real>>> & next_data,
-                                  const std::vector<const std::vector<std::vector<Real>> *> & reporter_links,
-                                  const unsigned int num_timesteps);
-  /**
-   * Extract the signal (actions, logarithmic probabilities) values from the postprocessors
-   * of the controlled system. This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the output values
-   * @param reporter_names The names of the reporters which need to be extracted
-   */
-  void getSignalDataFromReporter(std::vector<std::vector<std::vector<Real>>> & data,
-                                 const std::vector<const std::vector<std::vector<Real>> *> & reporter_links);
-
-  void computeCumulativeRewardEstimate(std::vector<std::vector<Real>> & data,
-                                  std::vector<std::vector<std::vector<Real>>> & state,
-                                  std::vector<std::vector<std::vector<Real>>> & next_state,
-                                  std::vector<std::vector<Real>> & reward);
-
-  void normalizeResponseData(std::vector<std::vector<std::vector<Real>>> & data,
-          const unsigned int num_timesteps);
-
-  /**
-   * Extract the reward values from the postprocessors of the controlled system
-   * This assumes that they are stored in an AccumulateReporter.
-   * @param data The data where we would like to store the reward values
-   * @param reporter_names The name of the reporter which need to be extracted
-   */
-  void getRewardDataFromReporter(std::vector<std::vector<Real>> & data,
-                                 const std::vector<std::vector<Real>> * const reporter_link);
-
   /// Getting reporter pointers with given names
   void getReporterPointers(const std::vector<ReporterName> & reporter_names,
                            std::vector<const std::vector<std::vector<Real>> *> & pointer_storage);
+
+  void collectTrajectoriesFromReporters();
+
+  unsigned int computeNumTransitions(std::size_t raw_sequence_size) const;
+
+  std::vector<Real> extractDownsampledSequence(const std::vector<Real> & sample,
+                                               unsigned int offset,
+                                               unsigned int num_entries) const;
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
 
   unsigned int _timestep_window;
+
+  const LibtorchObservationHistory _observation_history;
+  LibtorchRLTrajectoryBuffer _trajectory_buffer;
+  const LibtorchRLMiniBatchSampler _sampler;
+  const LibtorchRLValueEstimator _value_estimator;
+  const LibtorchRLPPOLoss _ppo_loss;
 };
 
 #endif
