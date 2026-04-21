@@ -54,7 +54,7 @@ public:
     this->declareScalar(name, coef);
     return *coef;
   }
-  
+
   /**
    * Use an existing scalar coefficient for a property on some blocks
    * of the mesh. The property will be a piecewise coefficient and it
