@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -51,7 +51,7 @@ public:
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
    */
-  virtual torch::Tensor forward(torch::Tensor & x) override;
+  virtual torch::Tensor forward(const torch::Tensor & x) override;
 
   virtual torch::Tensor evaluate(torch::Tensor & input, bool sampled);
 
