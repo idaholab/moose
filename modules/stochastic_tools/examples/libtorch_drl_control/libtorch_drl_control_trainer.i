@@ -62,6 +62,7 @@
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
+    action_scaling_factors = 20
 
     standardize_advantage = true
 

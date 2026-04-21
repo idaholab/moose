@@ -104,6 +104,24 @@ LibtorchObservationHistory::advanceHistory(const std::vector<Real> & normalized_
 }
 
 std::vector<Real>
+LibtorchObservationHistory::expandFeatureFactors(const std::vector<Real> & feature_factors) const
+{
+  if (feature_factors.empty())
+    return {};
+
+  std::vector<Real> expanded;
+  expanded.reserve(feature_factors.size() * _input_timesteps);
+
+  for (const auto lag : make_range(_input_timesteps))
+  {
+    libmesh_ignore(lag);
+    expanded.insert(expanded.end(), feature_factors.begin(), feature_factors.end());
+  }
+
+  return expanded;
+}
+
+std::vector<Real>
 LibtorchObservationHistory::stackCurrentObservation(
     const std::vector<Real> & normalized_response,
     const std::vector<std::vector<Real>> & old_responses) const

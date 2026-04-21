@@ -13,6 +13,41 @@
 #include "MooseError.h"
 #include "LibtorchUtils.h"
 
+#include <cmath>
+
+namespace
+{
+
+bool
+readArchiveTensor(torch::serialize::InputArchive & archive,
+                  const std::string & key,
+                  torch::Tensor & tensor)
+{
+  try
+  {
+    archive.read(key, tensor);
+    return true;
+  }
+  catch (const c10::Error &)
+  {
+    return false;
+  }
+}
+
+void
+copyTensor(torch::Tensor & destination, const torch::Tensor & source)
+{
+  destination.data().copy_(source.to(destination.options()));
+}
+
+bool
+isOptionalArtificialNeuralNetBuffer(const std::string & key)
+{
+  return key == "input_shift" || key == "input_scale" || key == "output_scale";
+}
+
+} // namespace
+
 namespace Moose
 {
 
@@ -26,7 +61,10 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const std::vector<Real> & maximum_values,
     const torch::DeviceType device_type,
     const torch::ScalarType data_type,
-    const bool build_on_construct)
+    const bool build_on_construct,
+    const std::vector<Real> & input_shift_factors,
+    const std::vector<Real> & input_scaling_factors,
+    const std::vector<Real> & output_scaling_factors)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
@@ -34,10 +72,17 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _activation_function(MultiMooseEnum("relu sigmoid elu gelu linear tanh", "relu")),
     _device_type(device_type),
     _data_type(data_type),
+    _input_shift_factors(
+        normalizeAffineFactors(input_shift_factors, num_inputs, 0.0, "input_shift_factors")),
+    _input_scaling_factors(
+        normalizeAffineFactors(input_scaling_factors, num_inputs, 1.0, "input_scaling_factors")),
+    _output_scaling_factors(
+        normalizeAffineFactors(output_scaling_factors, num_outputs, 1.0, "output_scaling_factors")),
     _minimum_values(minimum_values),
     _maximum_values(maximum_values)
 {
   _activation_function = activation_function;
+  initializeAffineBuffers();
 
   // Check if the number of activation functions matches the number of hidden layers
   if ((_activation_function.size() != 1) &&
@@ -62,10 +107,10 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
 
     auto min_value = _minimum_values;
     LibtorchUtils::vectorToTensor(min_value, _min_tensor);
-    _min_tensor.to(_data_type).to(_device_type);
+    _min_tensor = _min_tensor.transpose(0, 1).to(_data_type).to(_device_type);
     auto max_value = _maximum_values;
     LibtorchUtils::vectorToTensor(max_value, _max_tensor);
-    _max_tensor.to(_data_type).to(_device_type);
+    _max_tensor = _max_tensor.transpose(0, 1).to(_data_type).to(_device_type);
   }
 
   if (build_on_construct)
@@ -82,9 +127,13 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _activation_function(nn.activationFunctions()),
     _device_type(nn.deviceType()),
     _data_type(nn.dataType()),
+    _input_shift_factors(nn.inputShiftFactors()),
+    _input_scaling_factors(nn.inputScalingFactors()),
+    _output_scaling_factors(nn.outputScalingFactors()),
     _minimum_values(nn.minValues()),
     _maximum_values(nn.maxValues())
 {
+  initializeAffineBuffers();
 
   // We construct the NN architecture
   if (build_on_construct)
@@ -95,16 +144,21 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     auto to_params = this->named_parameters();
     for (unsigned int param_i : make_range(from_params.size()))
       to_params[param_i].value().data() = from_params[param_i].value().data().clone();
+
+    const auto & from_buffers = nn.named_buffers();
+    auto to_buffers = this->named_buffers();
+    for (unsigned int buffer_i : make_range(from_buffers.size()))
+      to_buffers[buffer_i].value().data() = from_buffers[buffer_i].value().data().clone();
   }
 
   if (_minimum_values.size())
   {
     auto min_value = _minimum_values;
     LibtorchUtils::vectorToTensor(min_value, _min_tensor);
-    _min_tensor.to(_data_type).to(_device_type);
+    _min_tensor = _min_tensor.transpose(0, 1).to(_data_type).to(_device_type);
     auto max_value = _maximum_values;
     LibtorchUtils::vectorToTensor(max_value, _max_tensor);
-    _max_tensor.to(_data_type).to(_device_type);
+    _max_tensor = _max_tensor.transpose(0, 1).to(_data_type).to(_device_type);
   }
 }
 
@@ -135,6 +189,60 @@ LibtorchArtificialNeuralNet::initializeNeuralNetwork()
   torch::nn::init::zeros_(_weights.back()->bias);
 }
 
+std::vector<Real>
+LibtorchArtificialNeuralNet::normalizeAffineFactors(const std::vector<Real> & factors,
+                                                    const unsigned int expected_size,
+                                                    const Real default_value,
+                                                    const std::string & factor_name,
+                                                    const bool forbid_zero)
+{
+  const auto normalized =
+      factors.empty() ? std::vector<Real>(expected_size, default_value) : factors;
+
+  if (normalized.size() != expected_size)
+    mooseError("The number of ", factor_name, " entries must match ", expected_size, ".");
+
+  if (forbid_zero)
+    for (const auto factor : normalized)
+      if (std::abs(factor) == 0.0)
+        mooseError("The ", factor_name, " entries must be non-zero.");
+
+  return normalized;
+}
+
+void
+LibtorchArtificialNeuralNet::initializeAffineBuffers()
+{
+  auto input_shift = _input_shift_factors;
+  LibtorchUtils::vectorToTensor(input_shift, _input_shift_tensor);
+  _input_shift_tensor = register_buffer(
+      "input_shift", _input_shift_tensor.transpose(0, 1).to(_data_type).to(_device_type));
+
+  auto input_scale = _input_scaling_factors;
+  LibtorchUtils::vectorToTensor(input_scale, _input_scale_tensor);
+  _input_scale_tensor = register_buffer(
+      "input_scale", _input_scale_tensor.transpose(0, 1).to(_data_type).to(_device_type));
+
+  auto output_scale = _output_scaling_factors;
+  LibtorchUtils::vectorToTensor(output_scale, _output_scale_tensor);
+  _output_scale_tensor = register_buffer(
+      "output_scale", _output_scale_tensor.transpose(0, 1).to(_data_type).to(_device_type));
+}
+
+void
+LibtorchArtificialNeuralNet::synchronizeAffineFactorsFromBuffers()
+{
+  auto input_shift = _input_shift_tensor.detach().reshape({-1}).to(torch::kCPU).to(torch::kDouble);
+  LibtorchUtils::tensorToVector(input_shift, _input_shift_factors);
+
+  auto input_scale = _input_scale_tensor.detach().reshape({-1}).to(torch::kCPU).to(torch::kDouble);
+  LibtorchUtils::tensorToVector(input_scale, _input_scaling_factors);
+
+  auto output_scale =
+      _output_scale_tensor.detach().reshape({-1}).to(torch::kCPU).to(torch::kDouble);
+  LibtorchUtils::tensorToVector(output_scale, _output_scaling_factors);
+}
+
 void
 LibtorchArtificialNeuralNet::constructNeuralNetwork()
 {
@@ -158,13 +266,27 @@ LibtorchArtificialNeuralNet::constructNeuralNetwork()
 }
 
 torch::Tensor
+LibtorchArtificialNeuralNet::preprocessInput(const torch::Tensor & x) const
+{
+  torch::Tensor input(x);
+  if (_data_type != input.scalar_type())
+    input = input.to(_data_type);
+  if (_device_type != input.device().type())
+    input = input.to(_device_type);
+
+  return (input - _input_shift_tensor) * _input_scale_tensor;
+}
+
+torch::Tensor
+LibtorchArtificialNeuralNet::scaleOutput(const torch::Tensor & y) const
+{
+  return y * _output_scale_tensor;
+}
+
+torch::Tensor
 LibtorchArtificialNeuralNet::forward(const torch::Tensor & x)
 {
-  torch::Tensor output(x);
-  if (_data_type != output.scalar_type())
-    output.to(_data_type);
-  if (_device_type != output.device().type())
-    output.to(_device_type);
+  torch::Tensor output = preprocessInput(x);
 
   for (unsigned int i = 0; i < _weights.size() - 1; ++i)
   {
@@ -187,16 +309,14 @@ LibtorchArtificialNeuralNet::forward(const torch::Tensor & x)
   if (_minimum_values.size())
   {
     output = torch::sigmoid(_weights[_weights.size() - 1]->forward(output));
-    torch::Tensor scale = torch::sub(_max_tensor, _min_tensor).to(_data_type);
+    const auto scale = _max_tensor - _min_tensor;
     output = torch::mul(output, scale);
     output = output + _min_tensor;
   }
   else
-  {
     output = _weights[_weights.size() - 1]->forward(output);
-  }
 
-  return output;
+  return scaleOutput(output);
 }
 
 void
@@ -230,6 +350,10 @@ LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
         named_params[param_i].value().data_ptr<Real>(),
         named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel());
   }
+
+  json["input_shift_factors"] = _input_shift_factors;
+  json["input_scaling_factors"] = _input_scaling_factors;
+  json["output_scaling_factors"] = _output_scaling_factors;
 }
 
 void
@@ -237,6 +361,49 @@ to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const 
 {
   if (network)
     network->store(json);
+}
+
+void
+loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
+                                     const std::string & filename)
+{
+  torch::serialize::InputArchive archive;
+  archive.load_from(filename);
+
+  for (auto & parameter : nn.named_parameters())
+  {
+    torch::Tensor stored_tensor;
+    if (!readArchiveTensor(archive, parameter.key(), stored_tensor))
+      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+                 "the result of the file not existing or a misalignment in the generated "
+                 "container and the data in the file. Make sure the dimensions of the generated "
+                 "neural net are the same as the dimensions of the parameters in the input file!\n"
+                 "Missing serialized parameter: ",
+                 parameter.key());
+
+    copyTensor(parameter.value(), stored_tensor);
+  }
+
+  for (auto & buffer : nn.named_buffers())
+  {
+    torch::Tensor stored_tensor;
+    if (!readArchiveTensor(archive, buffer.key(), stored_tensor))
+    {
+      if (isOptionalArtificialNeuralNetBuffer(buffer.key()))
+        continue;
+
+      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+                 "the result of the file not existing or a misalignment in the generated "
+                 "container and the data in the file. Make sure the dimensions of the generated "
+                 "neural net are the same as the dimensions of the parameters in the input file!\n"
+                 "Missing serialized buffer: ",
+                 buffer.key());
+    }
+
+    copyTensor(buffer.value(), stored_tensor);
+  }
+
+  nn.synchronizeAffineFactorsFromBuffers();
 }
 
 }
@@ -343,7 +510,7 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
                                                             divt,
                                                             datt);
 
-  torch::load(nn, name);
+  Moose::loadLibtorchArtificialNeuralNetState(*nn, name);
 }
 
 template <>

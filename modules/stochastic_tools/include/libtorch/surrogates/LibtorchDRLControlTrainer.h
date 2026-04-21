@@ -75,6 +75,9 @@ protected:
   /// Control reporter names
   const std::vector<ReporterName> _action_names;
 
+  /// Multiplicative action scaling embedded in the actor outputs
+  const std::vector<Real> _action_scaling_factors;
+
   /// Pointers to the current values of the control signals
   /// We can have multiple control signals, multiple samples, multiple timesteps
   std::vector<const std::vector<std::vector<Real>> *> _action_value_pointers;

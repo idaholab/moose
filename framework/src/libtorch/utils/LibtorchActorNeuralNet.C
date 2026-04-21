@@ -12,6 +12,74 @@
 #include "LibtorchActorNeuralNet.h"
 #include "MooseError.h"
 
+namespace
+{
+
+bool
+readArchiveTensor(torch::serialize::InputArchive & archive,
+                  const std::string & key,
+                  torch::Tensor & tensor)
+{
+  try
+  {
+    archive.read(key, tensor);
+    return true;
+  }
+  catch (const c10::Error &)
+  {
+    return false;
+  }
+}
+
+void
+copyTensor(torch::Tensor & destination, const torch::Tensor & source)
+{
+  destination.data().copy_(source.to(destination.options()));
+}
+
+bool
+readActorStateTensor(torch::serialize::InputArchive & archive,
+                     const std::string & key,
+                     torch::Tensor & tensor)
+{
+  if (readArchiveTensor(archive, key, tensor))
+    return true;
+
+  if (key.rfind("action_head.", 0) == 0)
+    return readArchiveTensor(archive, key.substr(std::string("action_head.").size()), tensor);
+
+  return false;
+}
+
+bool
+isOptionalActorBuffer(const std::string & key)
+{
+  return key == "input_shift" || key == "input_scale" || key == "output_scale" ||
+         key == "action_head.action_scale";
+}
+
+bool
+isOptionalActorParameter(const std::string & key)
+{
+  return key == "action_head.mean.bias" || key == "action_head.std.bias";
+}
+
+template <typename NamedTensorList>
+bool
+findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
+{
+  for (const auto & entry : tensors)
+    if (entry.name == key)
+    {
+      tensor = entry.value;
+      return true;
+    }
+
+  return false;
+}
+
+} // namespace
+
 namespace Moose
 {
 
@@ -25,7 +93,10 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
     const std::vector<Real> & maximum_values,
     const torch::DeviceType device_type,
     const torch::ScalarType data_type,
-    const bool build_on_construct)
+    const bool build_on_construct,
+    const std::vector<Real> & input_shift_factors,
+    const std::vector<Real> & input_scaling_factors,
+    const std::vector<Real> & output_scaling_factors)
   : LibtorchArtificialNeuralNet(name,
                                 num_inputs,
                                 num_outputs,
@@ -35,7 +106,10 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
                                 maximum_values,
                                 device_type,
                                 data_type,
-                                false)
+                                false,
+                                input_shift_factors,
+                                input_scaling_factors,
+                                output_scaling_factors)
 {
   if (build_on_construct)
     constructNeuralNetwork();
@@ -54,6 +128,11 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralN
     auto to_params = this->named_parameters();
     for (unsigned int param_i : make_range(from_params.size()))
       to_params[param_i].value().data() = from_params[param_i].value().data().clone();
+
+    const auto & from_buffers = nn.named_buffers();
+    auto to_buffers = this->named_buffers();
+    for (unsigned int buffer_i : make_range(from_buffers.size()))
+      to_buffers[buffer_i].value().data() = from_buffers[buffer_i].value().data().clone();
   }
 }
 
@@ -91,14 +170,15 @@ LibtorchActorNeuralNet::constructNeuralNetwork()
     inp_neurons = _num_neurons_per_layer[i];
   }
 
-  _action_head = std::make_shared<LibtorchActionDistributionHead>(
-      "action_head",
-      inp_neurons,
-      _num_outputs,
-      _minimum_values,
-      _maximum_values,
-      _device_type,
-      _data_type);
+  _action_head = std::make_shared<LibtorchActionDistributionHead>("action_head",
+                                                                  inp_neurons,
+                                                                  _num_outputs,
+                                                                  _minimum_values,
+                                                                  _maximum_values,
+                                                                  _device_type,
+                                                                  _data_type,
+                                                                  true,
+                                                                  _output_scaling_factors);
   register_module("action_head", _action_head);
 }
 
@@ -120,11 +200,7 @@ LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
 torch::Tensor
 LibtorchActorNeuralNet::forward(const torch::Tensor & x)
 {
-  torch::Tensor output(x);
-  if (_data_type != output.scalar_type())
-    output.to(_data_type);
-  if (_device_type != output.device().type())
-    output.to(_device_type);
+  torch::Tensor output = preprocessInput(x);
 
   for (unsigned int i = 0; i < _weights.size(); ++i)
   {
@@ -152,15 +228,7 @@ LibtorchActorNeuralNet::forward(const torch::Tensor & x)
 torch::Tensor
 LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
 {
-  torch::Tensor output(x);
-  // std::cout << output << std::endl;
-  if (_data_type != output.scalar_type())
-    output.to(_data_type);
-  if (_device_type != output.device().type())
-    output.to(_device_type);
-
-  // std::cout << "input" << output << std::endl;
-  output = forward(output);
+  torch::Tensor output = forward(x);
 
   // std::cout << "midresult" << output << std::endl;
   resetDistributionParams(output);
@@ -181,6 +249,142 @@ torch::Tensor
 LibtorchActorNeuralNet::logProbability(const torch::Tensor & action)
 {
   return _action_head->logProbability(action);
+}
+
+void
+loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn, const std::string & filename)
+{
+  torch::serialize::InputArchive archive;
+  archive.load_from(filename);
+
+  for (auto & parameter : nn.named_parameters())
+  {
+    torch::Tensor stored_tensor;
+    if (!readActorStateTensor(archive, parameter.key(), stored_tensor))
+    {
+      if (isOptionalActorParameter(parameter.key()))
+      {
+        parameter.value().data().zero_();
+        continue;
+      }
+
+      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+                 "the result of the file not existing or a misalignment in the generated "
+                 "container and the data in the file. Make sure the dimensions of the generated "
+                 "neural net are the same as the dimensions of the parameters in the input file!\n"
+                 "Missing serialized parameter: ",
+                 parameter.key());
+    }
+
+    copyTensor(parameter.value(), stored_tensor);
+  }
+
+  for (auto & buffer : nn.named_buffers())
+  {
+    torch::Tensor stored_tensor;
+    if (!readActorStateTensor(archive, buffer.key(), stored_tensor))
+    {
+      if (isOptionalActorBuffer(buffer.key()))
+        continue;
+
+      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+                 "the result of the file not existing or a misalignment in the generated "
+                 "container and the data in the file. Make sure the dimensions of the generated "
+                 "neural net are the same as the dimensions of the parameters in the input file!\n"
+                 "Missing serialized buffer: ",
+                 buffer.key());
+    }
+
+    copyTensor(buffer.value(), stored_tensor);
+  }
+
+  nn.synchronizeAffineFactorsFromBuffers();
+  nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+}
+
+bool
+isLegacyLibtorchActorArchive(const std::string & filename)
+{
+  try
+  {
+    const auto scripted = torch::jit::load(filename);
+    const auto parameters = scripted.named_parameters();
+
+    torch::Tensor ignored;
+    return findNamedTensor(parameters, "output_layer_.weight", ignored) &&
+           !findNamedTensor(parameters, "action_head.mean.weight", ignored);
+  }
+  catch (const c10::Error &)
+  {
+    return false;
+  }
+}
+
+void
+loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
+                                      const std::string & filename,
+                                      const std::vector<Real> & action_standard_deviations)
+{
+  if (nn.actionDistributionHead().isBounded())
+    mooseError("Legacy deterministic DRL checkpoints are only supported for unbounded actors.");
+
+  const auto legacy_std = action_standard_deviations.empty()
+                              ? std::vector<Real>(nn.numOutputs(), 1e-12)
+                              : action_standard_deviations;
+
+  if (legacy_std.size() != nn.numOutputs())
+    mooseError("The number of action_standard_deviations entries must match the number of action "
+               "outputs when loading a legacy deterministic DRL checkpoint.");
+
+  for (const auto std_value : legacy_std)
+    if (!(std_value > 0.0))
+      mooseError("Legacy action_standard_deviations entries must be strictly positive.");
+
+  const auto scripted = torch::jit::load(filename);
+  const auto legacy_parameters = scripted.named_parameters();
+
+  for (auto & parameter : nn.named_parameters())
+  {
+    const auto & key = parameter.key();
+    torch::Tensor stored_tensor;
+
+    if (key == "action_head.mean.weight")
+    {
+      if (!findNamedTensor(legacy_parameters, "output_layer_.weight", stored_tensor))
+        mooseError("Legacy deterministic DRL checkpoint is missing output_layer_.weight.");
+      copyTensor(parameter.value(), stored_tensor);
+      continue;
+    }
+
+    if (key == "action_head.mean.bias")
+    {
+      if (!findNamedTensor(legacy_parameters, "output_layer_.bias", stored_tensor))
+        mooseError("Legacy deterministic DRL checkpoint is missing output_layer_.bias.");
+      copyTensor(parameter.value(), stored_tensor);
+      continue;
+    }
+
+    if (key == "action_head.std.weight")
+    {
+      parameter.value().data().zero_();
+      continue;
+    }
+
+    if (key == "action_head.std.bias")
+    {
+      auto log_std = torch::log(torch::tensor(legacy_std, parameter.value().options()));
+      copyTensor(parameter.value(), log_std);
+      continue;
+    }
+
+    if (!findNamedTensor(legacy_parameters, key, stored_tensor))
+      mooseError("Legacy deterministic DRL checkpoint is missing serialized parameter: ", key);
+
+    copyTensor(parameter.value(), stored_tensor);
+  }
+
+  nn.synchronizeAffineFactorsFromBuffers();
+  nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
 }
 
 }

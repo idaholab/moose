@@ -24,20 +24,21 @@
     control_name = src_control
   []
   [r_transfer]
-    type = MultiAppReporterTransfer
+    type = SamplerReporterTransfer
     from_multi_app = runner
-    to_reporters = 'results/center_temp results/env_temp results/reward results/left_flux results/log_prob_left_flux'
-    from_reporters = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value T_reporter/left_flux:value T_reporter/log_prob_left_flux:value'
+    sampler = dummy
+    stochastic_reporter = storage
+    from_reporter = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value T_reporter/left_flux:value T_reporter/log_prob_left_flux:value'
   []
 []
 
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    response = 'results/center_temp results/env_temp'
-    control = 'results/left_flux'
-    log_probability = 'results/log_prob_left_flux'
-    reward = 'results/reward'
+    response = 'storage/r_transfer:T_reporter:center_temp_tend:value storage/r_transfer:T_reporter:env_temp:value'
+    control = 'storage/r_transfer:T_reporter:left_flux:value'
+    log_probability = 'storage/r_transfer:T_reporter:log_prob_left_flux:value'
+    reward = 'storage/r_transfer:T_reporter:reward:value'
 
     num_epochs = 10
     update_frequency = 2
@@ -55,19 +56,19 @@
     input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
+    action_scaling_factors = 100
     action_standard_deviations = '0.1'
 
     read_from_file = false
+    shift_outputs = false
   []
 []
 
 [Reporters]
-  [results]
-    type = ConstantReporter
-    real_vector_names = 'center_temp env_temp reward left_flux log_prob_left_flux'
-    real_vector_values = '0; 0; 0; 0; 0'
-    outputs = 'csv_out'
-    execute_on = timestep_begin
+  [storage]
+    type = StochasticReporter
+    parallel_type = ROOT
+    outputs = none
   []
   [nn_parameters]
     type = DRLControlNeuralNetParameters

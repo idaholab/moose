@@ -38,14 +38,17 @@ public:
                          const std::vector<Real> & maximum_values = {},
                          const torch::DeviceType device_type = torch::kCPU,
                          const torch::ScalarType scalar_type = torch::kDouble,
-                         const bool build_on_construct = true);
+                         const bool build_on_construct = true,
+                         const std::vector<Real> & input_shift_factors = {},
+                         const std::vector<Real> & input_scaling_factors = {},
+                         const std::vector<Real> & output_scaling_factors = {});
 
   /**
    * Copy construct an artificial neural network
    * @param nn The neural network which needs to be copied
    */
   LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
-    const bool build_on_construct = true);
+                         const bool build_on_construct = true);
 
   /**
    * Overriding the forward substitution function for the neural network, unfortunately
@@ -61,11 +64,11 @@ public:
   /// Construct the neural network
   virtual void constructNeuralNetwork() override;
 
-  const torch::Tensor & stdTensor() const {return  _std_tensor;}
+  const torch::Tensor & stdTensor() const { return _std_tensor; }
 
-  const torch::Tensor & alphaTensor() const {return  _alpha_tensor;}
+  const torch::Tensor & alphaTensor() const { return _alpha_tensor; }
 
-  const torch::Tensor & betaTensor() const {return  _beta_tensor;}
+  const torch::Tensor & betaTensor() const { return _beta_tensor; }
 
   const LibtorchActionDistributionHead & actionDistributionHead() const { return *_action_head; }
   LibtorchActionDistributionHead & actionDistributionHead() { return *_action_head; }
@@ -87,29 +90,38 @@ protected:
 
 void to_json(nlohmann::json & json, const Moose::LibtorchActorNeuralNet * const & network);
 
+void loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
+                                     const std::string & filename);
+
+bool isLegacyLibtorchActorArchive(const std::string & filename);
+
+void loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
+                                           const std::string & filename,
+                                           const std::vector<Real> & action_standard_deviations);
+
 }
 
 template <>
-void dataStore<Moose::LibtorchActorNeuralNet>(
-    std::ostream & stream,
-    std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
-    void * context);
+void dataStore<Moose::LibtorchActorNeuralNet>(std::ostream & stream,
+                                              std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
+                                              void * context);
 
 template <>
-void dataLoad<Moose::LibtorchActorNeuralNet>(
-    std::istream & stream,
-    std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
-    void * context);
+void dataLoad<Moose::LibtorchActorNeuralNet>(std::istream & stream,
+                                             std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
+                                             void * context);
 
 // This is needed because the reporter which is used to ouput the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
 // we are only interested in the JSON output and we don't want to output everything
 template <>
-void dataStore<Moose::LibtorchActorNeuralNet const>(
-    std::ostream & stream, Moose::LibtorchActorNeuralNet const *& nn, void * context);
+void dataStore<Moose::LibtorchActorNeuralNet const>(std::ostream & stream,
+                                                    Moose::LibtorchActorNeuralNet const *& nn,
+                                                    void * context);
 
 template <>
-void dataLoad<Moose::LibtorchActorNeuralNet const>(
-    std::istream & stream, Moose::LibtorchActorNeuralNet const *& nn, void * context);
+void dataLoad<Moose::LibtorchActorNeuralNet const>(std::istream & stream,
+                                                   Moose::LibtorchActorNeuralNet const *& nn,
+                                                   void * context);
 
 #endif

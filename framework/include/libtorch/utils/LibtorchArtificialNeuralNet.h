@@ -13,6 +13,7 @@
 
 #include <torch/torch.h>
 #include <torch/script.h>
+#include <torch/serialize/archive.h>
 #include "LibtorchNeuralNetBase.h"
 #include "MooseError.h"
 #include "DataIO.h"
@@ -42,14 +43,17 @@ public:
                               const std::vector<Real> & maximum_values = {},
                               const torch::DeviceType device_type = torch::kCPU,
                               const torch::ScalarType scalar_type = torch::kDouble,
-                              const bool build_on_construct = true);
+                              const bool build_on_construct = true,
+                              const std::vector<Real> & input_shift_factors = {},
+                              const std::vector<Real> & input_scaling_factors = {},
+                              const std::vector<Real> & output_scaling_factors = {});
 
   /**
    * Copy construct an artificial neural network
    * @param nn The neural network which needs to be copied
    */
   LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn,
-                             const bool build_on_construct = true);
+                              const bool build_on_construct = true);
 
   /**
    * Add layers to the neural network
@@ -83,21 +87,42 @@ public:
   torch::DeviceType deviceType() const { return _device_type; }
   /// Return the data type which is used by this neural network
   torch::ScalarType dataType() const { return _data_type; }
+  /// Return the affine input shift factors used before evaluation
+  const std::vector<Real> & inputShiftFactors() const { return _input_shift_factors; }
+  /// Return the affine input scaling factors used before evaluation
+  const std::vector<Real> & inputScalingFactors() const { return _input_scaling_factors; }
+  /// Return the output scaling factors applied after evaluation
+  const std::vector<Real> & outputScalingFactors() const { return _output_scaling_factors; }
   /// Construct the neural network
   virtual void constructNeuralNetwork();
+
+  /// Update cached affine metadata vectors from the registered libtorch buffers.
+  void synchronizeAffineFactorsFromBuffers();
 
   Real determineGain(const std::string & activation);
 
   virtual void initializeNeuralNetwork();
 
-  const std::vector<Real> & minValues() const {return _minimum_values;};
+  const std::vector<Real> & minValues() const { return _minimum_values; };
 
-  const std::vector<Real> & maxValues() const {return _maximum_values;};
+  const std::vector<Real> & maxValues() const { return _maximum_values; };
 
   /// Store the network architecture in a json file (for debugging, visualization)
   void store(nlohmann::json & json) const;
 
 protected:
+  static std::vector<Real> normalizeAffineFactors(const std::vector<Real> & factors,
+                                                  unsigned int expected_size,
+                                                  Real default_value,
+                                                  const std::string & factor_name,
+                                                  bool forbid_zero = false);
+
+  void initializeAffineBuffers();
+
+  virtual torch::Tensor preprocessInput(const torch::Tensor & x) const;
+
+  virtual torch::Tensor scaleOutput(const torch::Tensor & y) const;
+
   /// Name of the neural network
   const std::string _name;
   /// Submodules that hold linear operations and the corresponding
@@ -116,14 +141,26 @@ protected:
   const torch::DeviceType _device_type;
   /// The data type used in this neural network
   const torch::ScalarType _data_type;
+  /// Affine preprocessing applied to the flattened input
+  std::vector<Real> _input_shift_factors;
+  /// Multiplicative affine preprocessing applied after shifting the input
+  std::vector<Real> _input_scaling_factors;
+  /// Multiplicative scaling applied after the network output is formed
+  std::vector<Real> _output_scaling_factors;
   ///
   const std::vector<Real> _minimum_values;
   const std::vector<Real> _maximum_values;
+  torch::Tensor _input_shift_tensor;
+  torch::Tensor _input_scale_tensor;
+  torch::Tensor _output_scale_tensor;
   torch::Tensor _min_tensor;
   torch::Tensor _max_tensor;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
+
+void loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
+                                          const std::string & filename);
 
 }
 
