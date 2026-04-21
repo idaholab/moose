@@ -119,6 +119,7 @@ function configure_petsc()
       --download-openblas-make-options='DYNAMIC_ARCH=1' \
       --download-hpddm=1 \
       --download-hypre=1 \
+      --download-hypre-configure-arguments='--enable-bigint=no --enable-mixedint=yes' \
       --download-metis=1 \
       --download-mumps=1 \
       --download-ptscotch=1 \
