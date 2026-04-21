@@ -13,6 +13,28 @@
 namespace StochasticTools
 {
 
+namespace
+{
+
+void
+checkInputCompatibility(const torch::Tensor & input, const torch::Tensor & reference)
+{
+  if (input.dim() != 2)
+    mooseError("Standardizer input must be a rank-2 tensor.");
+  if (reference.dim() != 2 || reference.size(1) != 1)
+    mooseError("Standardizer moments must be stored as column vectors.");
+  if (input.size(1) != reference.size(0))
+    mooseError("Standardizer input dimension mismatch.");
+}
+
+torch::Tensor
+asRowVector(const torch::Tensor & column_vector)
+{
+  return torch::transpose(column_vector, 0, 1);
+}
+
+} // namespace
+
 void
 Standardizer::set(const Real & n)
 {
@@ -31,8 +53,8 @@ void
 Standardizer::set(const Real & mean, const Real & stdev, const Real & n)
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = mean * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
-  _stdev = stdev * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
+  _mean = torch::full({long(n), 1}, mean, options);
+  _stdev = torch::full({long(n), 1}, stdev, options);
 }
 
 void
@@ -47,7 +69,9 @@ Standardizer::set(const std::vector<Real> & mean, const std::vector<Real> & stde
 void
 Standardizer::computeSet(const torch::Tensor & input)
 {
-  // comptue mean and standard deviation
+  if (input.dim() != 2)
+    mooseError("Standardizer input must be a rank-2 tensor.");
+  // Compute mean and standard deviation
   _mean = torch::mean(input, 0, false).unsqueeze(1);
   _stdev = torch::std(input, 0, 0, false).unsqueeze(1);
 }
@@ -55,40 +79,29 @@ Standardizer::computeSet(const torch::Tensor & input)
 void
 Standardizer::getStandardized(torch::Tensor & input) const
 {
-  torch::Tensor mean = torch::transpose(_mean, 0, 1);
-  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
-  //  Standardize input tensor
-  input = input - mean;
-  input = input / stdev;
+  checkInputCompatibility(input, _mean);
+  input = (input - asRowVector(_mean)) / asRowVector(_stdev);
 }
 
 void
 Standardizer::getDestandardized(torch::Tensor & input) const
 {
-  torch::Tensor mean = torch::transpose(_mean, 0, 1);
-  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
-  input = ((input * stdev) + mean);
+  checkInputCompatibility(input, _mean);
+  input = input * asRowVector(_stdev) + asRowVector(_mean);
 }
 
 void
 Standardizer::getDescaled(torch::Tensor & input) const
 {
-  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
-  input = (input * stdev);
+  checkInputCompatibility(input, _stdev);
+  input = input * asRowVector(_stdev);
 }
 
 void
-Standardizer::getScaled(RealEigenMatrix & input) const
+Standardizer::getScaled(torch::Tensor & input) const
 {
-  mooseAssert(_stdev.dim() == 2 && _stdev.size(1) == 1,
-              "Standardizer standard deviation tensor must be a column vector.");
-  mooseAssert(input.cols() == _stdev.size(0),
-              "Input column count must match the size of the standard deviation vector.");
-
-  const auto stdev_accessor = _stdev.accessor<Real, 2>();
-  for (const auto row : make_range(input.rows()))
-    for (const auto col : make_range(input.cols()))
-      input(row, col) /= stdev_accessor[col][0];
+  checkInputCompatibility(input, _stdev);
+  input = input / asRowVector(_stdev);
 }
 
 /// Helper for dataStore

@@ -107,16 +107,17 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
       torch::mm(torch::transpose(K_train_test, 0, 1),
                 torch::cholesky_solve(K_train_test, _gp.getKCholeskyDecomp()));
 
-  // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  torch::Tensor std_dev_mat = torch::sqrt(pred_var);
-  _gp.getDataStandardizer().getDescaled(std_dev_mat);
-  auto std_accessor = std_dev_mat.accessor<Real, 2>();
+  // Only the marginal variances are returned. Clamp tiny negative roundoff before sqrt.
+  torch::Tensor std_dev_vec =
+      torch::sqrt(torch::clamp_min(torch::diagonal(pred_var), 0.0)).unsqueeze(0);
+  _gp.getDataStandardizer().getDescaled(std_dev_vec);
+  auto std_accessor = std_dev_vec.accessor<Real, 2>();
   auto pred_value_accessor = pred_value.accessor<Real, 2>();
 
   for (const auto output_i : make_range(n_outputs))
   {
     y[output_i] = pred_value_accessor[0][output_i];
-    std[output_i] = std_accessor[output_i][output_i];
+    std[output_i] = std_accessor[0][output_i];
   }
 }
 

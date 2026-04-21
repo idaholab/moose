@@ -48,8 +48,6 @@ public:
   /// hyperparameter-tuning
   struct GPOptimizerOptions
   {
-    /// Default constructor
-    GPOptimizerOptions();
     /**
      * Construct a new GPOptimizerOptions object using
      * input parameters that will control the optimization
@@ -63,20 +61,20 @@ public:
      * @param eps Tuning constant for the Adam algorithm
      * @param lambda Tuning constant for the Adam algorithm
      */
-    GPOptimizerOptions(const bool show_every_nth_iteration = 1,
+    GPOptimizerOptions(const unsigned int show_every_nth_iteration = 0,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
                        const Real eps = 1e-7,
-                       const Real lambda = 0.0);
+                       const Real lambda = 1e-4);
 
     /// Switch to enable verbose output for parameter tuning at every n-th iteration
-    const unsigned int show_every_nth_iteration = false;
+    const unsigned int show_every_nth_iteration = 0;
     /// The number of iterations for Adam optimizer
     const unsigned int num_iter = 1000;
-    /// The batch isize for Adam optimizer
+    /// The batch size for Adam optimizer
     const unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
     const Real learning_rate = 1e-3;
@@ -87,7 +85,7 @@ public:
     /// Tuning parameter from the paper
     const Real eps = 1e-7;
     /// Tuning parameter from the paper
-    const Real lambda = 0.0;
+    const Real lambda = 1e-4;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -235,7 +233,7 @@ protected:
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
   /// Number of tunable hyperparameters
-  unsigned int _num_tunable;
+  unsigned int _num_tunable = 0;
 
   /// Type of covariance function used for this GP
   std::string _covar_type;
@@ -250,7 +248,7 @@ protected:
   std::map<UserObjectName, std::string> _dependent_covar_types;
 
   /// The number of outputs of the GP
-  unsigned int _num_outputs;
+  unsigned int _num_outputs = 0;
 
   /// Scalar hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, Real> _hyperparam_map;
@@ -273,14 +271,8 @@ protected:
   /// Cholesky decomposition libtorch tensor object
   torch::Tensor _K_cho_decomp;
 
-  /// Paramaters (x) used for training, along with statistics
-  const torch::Tensor * _training_params;
-
-  /// Data (y) used for training
-  const torch::Tensor * _training_data;
-
   /// The batch size for Adam optimization
-  unsigned int _batch_size;
+  unsigned int _batch_size = 0;
 
   /// To return the GP length scales for active learning
   std::vector<Real> _length_scales;

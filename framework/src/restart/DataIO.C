@@ -254,11 +254,15 @@ void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
 {
   mooseAssert(t.dim() == 2, "Restart storage currently supports only rank-2 tensors.");
-  unsigned int m = t.sizes()[0];
+  const auto tensor = t.contiguous();
+  mooseAssert(tensor.device().is_cpu(), "Restart storage currently supports only CPU tensors.");
+  mooseAssert(tensor.scalar_type() == at::kDouble,
+              "Restart storage currently supports only double tensors.");
+  unsigned int m = tensor.sizes()[0];
   stream.write((char *)&m, sizeof(m));
-  unsigned int n = t.sizes()[1];
+  unsigned int n = tensor.sizes()[1];
   stream.write((char *)&n, sizeof(n));
-  auto t_accessor = t.accessor<Real, 2>();
+  auto t_accessor = tensor.accessor<Real, 2>();
   for (unsigned int i = 0; i < m; i++)
     for (unsigned int j = 0; j < n; j++)
     {
