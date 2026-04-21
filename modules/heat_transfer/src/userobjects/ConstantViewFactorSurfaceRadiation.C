@@ -9,7 +9,9 @@
 
 #include "ConstantViewFactorSurfaceRadiation.h"
 
-registerMooseObject("HeatTransferApp", ConstantViewFactorSurfaceRadiation);
+registerMooseObjectDeprecated("HeatTransferApp",
+                              ConstantViewFactorSurfaceRadiation,
+                              "08/30/2026 24:00");
 
 InputParameters
 ConstantViewFactorSurfaceRadiation::validParams()
@@ -27,6 +29,9 @@ ConstantViewFactorSurfaceRadiation::ConstantViewFactorSurfaceRadiation(
     const InputParameters & parameters)
   : GrayLambertSurfaceRadiationBase(parameters)
 {
+  mooseDeprecated("ConstantViewFactorSurfaceRadiation is deprecated. Please use "
+                  "ViewFactorObjectSurfaceRadiation in conjunction with SpecifiedViewFactor to "
+                  "achieve the same effect as this object.");
 }
 
 std::vector<std::vector<Real>>

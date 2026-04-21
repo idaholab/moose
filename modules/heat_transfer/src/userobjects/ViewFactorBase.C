@@ -25,6 +25,15 @@ ViewFactorBase::validParams()
                         true,
                         "Determines if view factors are normalized to sum to one (consistent with "
                         "their definition).");
+
+  MooseEnum normalization_method("lagrange_multiplier inverse_row_sum", "lagrange_multiplier");
+  normalization_method.addDocumentation("lagrange_multiplier", "Uses Lagrange multiplier method");
+  normalization_method.addDocumentation("inverse_row_sum",
+                                        "Divides each view factor by its row sum");
+  params.addParam<MooseEnum>("normalization_method",
+                             normalization_method,
+                             "Normalization method to use if 'normalize_view_factor' is 'true'.");
+
   params.addClassDescription(
       "A base class for automatic computation of view factors between sidesets.");
   return params;
@@ -36,6 +45,8 @@ ViewFactorBase::ViewFactorBase(const InputParameters & parameters)
     _areas(_n_sides),
     _view_factor_tol(getParam<Real>("view_factor_tol")),
     _normalize_view_factor(getParam<bool>("normalize_view_factor")),
+    _normalization_method(
+        getParam<MooseEnum>("normalization_method").getEnum<NormalizationMethod>()),
     _print_view_factor_info(getParam<bool>("print_view_factor_info"))
 {
   // sizing the view factor array
@@ -90,11 +101,31 @@ ViewFactorBase::getViewFactor(BoundaryName from_name, BoundaryName to_name) cons
 }
 
 void
+ViewFactorBase::initialize()
+{
+  std::fill(_areas.begin(), _areas.end(), 0);
+}
+
+void
+ViewFactorBase::execute()
+{
+  // compute areas
+  auto current_boundary_name = _mesh.getBoundaryName(_current_boundary_id);
+  auto it = _side_name_index.find(current_boundary_name);
+  if (it == _side_name_index.end())
+    mooseError("Current boundary name: ",
+               current_boundary_name,
+               " with id ",
+               _current_boundary_id,
+               " not in boundary parameter.");
+
+  _areas[it->second] += _current_side_volume;
+}
+
+void
 ViewFactorBase::finalize()
 {
-  // do some communication before finalizing view_factors
-  for (unsigned int i = 0; i < _n_sides; ++i)
-    gatherSum(_view_factors[i]);
+  gatherSum(_areas);
 
   finalizeViewFactor();
   checkAndNormalizeViewFactor();
@@ -105,10 +136,8 @@ ViewFactorBase::threadJoin(const UserObject & y)
 {
   const auto & pps = static_cast<const ViewFactorBase &>(y);
   for (unsigned int i = 0; i < _n_sides; ++i)
-  {
-    for (unsigned int j = 0; j < _n_sides; ++j)
-      _view_factors[i][j] += pps._view_factors[i][j];
-  }
+    _areas[i] += pps._areas[i];
+
   threadJoinViewFactor(y);
 }
 
@@ -185,69 +214,28 @@ ViewFactorBase::checkAndNormalizeViewFactor()
     if (_print_view_factor_info)
       _console << "\nNormalizing view factors.\n" << std::endl;
 
-    // allocate space
-    DenseVector<Real> rhs(_n_sides);
-    DenseVector<Real> lmults(_n_sides);
-    DenseMatrix<Real> matrix(_n_sides, _n_sides);
+    const auto view_factors_original = _view_factors;
 
-    // equations for the Lagrange multiplier
-    for (unsigned int i = 0; i < _n_sides; ++i)
+    switch (_normalization_method)
     {
-      // set the right hand side
-      rhs(i) = 1 - viewFactorRowSum(i);
-
-      // contribution from the delta_ii element
-      matrix(i, i) = -0.5;
-
-      // contributions from the upper diagonal
-      for (unsigned int j = i + 1; j < _n_sides; ++j)
-      {
-        Real ar = _areas[i] / _areas[j];
-        Real f = 2 * (1 + ar * ar);
-        matrix(i, i) += -1 / f;
-        matrix(i, j) += -1 / f * ar;
-        rhs(i) += ar * ar / (1 + ar * ar) * devReciprocity(i, j);
-      }
-
-      // contributions from the lower diagonal
-      for (unsigned int j = 0; j < i; ++j)
-      {
-        Real ar = _areas[j] / _areas[i];
-        Real f = 2 * (1 + ar * ar);
-        matrix(i, i) += -1 / f * ar * ar;
-        matrix(i, j) += -1 / f * ar;
-        rhs(i) -= ar * devReciprocity(j, i) * (1 - ar * ar / (1 + ar * ar));
-      }
+      case NormalizationMethod::LAGRANGE_MULTIPLIER:
+        normalizeUsingLagrangeMultiplier();
+        break;
+      case NormalizationMethod::INVERSE_ROW_SUM:
+        normalizeUsingInverseRowSum();
+        break;
+      default:
+        mooseError("Invalid normalization method.");
     }
 
-    // solve the linear system
-    matrix.lu_solve(rhs, lmults);
-
-    // perform corrections but store view factors to temporary array
-    // because we cannot modify _view_factors as it's used in this calc
-    std::vector<std::vector<Real>> vf_temp = _view_factors;
-    for (unsigned int i = 0; i < _n_sides; ++i)
-      for (unsigned int j = 0; j < _n_sides; ++j)
+    // compute max and min correction for reporting
+    for (const auto i : make_range(_n_sides))
+      for (const auto j : make_range(_n_sides))
       {
-        Real correction;
-        if (i == j)
-          correction = -0.5 * lmults(i);
-        else
-        {
-          Real ar = _areas[i] / _areas[j];
-          Real f = 2 * (1 + ar * ar);
-          correction = -(lmults(i) + lmults(j) * ar + 2 * ar * ar * devReciprocity(i, j)) / f;
-        }
-
-        // update the temporary view factor
-        vf_temp[i][j] += correction;
-
-        if (correction < min_correction)
-          min_correction = correction;
-        if (correction > max_correction)
-          max_correction = correction;
+        const Real correction = _view_factors[i][j] - view_factors_original[i][j];
+        min_correction = std::min(correction, min_correction);
+        max_correction = std::max(correction, max_correction);
       }
-    _view_factors = vf_temp;
   }
 
   if (_print_view_factor_info)
@@ -302,6 +290,80 @@ ViewFactorBase::checkAndNormalizeViewFactor()
     _console << std::setw(60) << std::left << "Max deviation from reciprocity after normalization: "
              << max_reciprocity_deviation_after_normalization << std::endl;
     _console << std::endl;
+  }
+}
+
+void
+ViewFactorBase::normalizeUsingLagrangeMultiplier()
+{
+  // allocate space
+  DenseVector<Real> rhs(_n_sides);
+  DenseVector<Real> lmults(_n_sides);
+  DenseMatrix<Real> matrix(_n_sides, _n_sides);
+
+  // equations for the Lagrange multiplier
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    // set the right hand side
+    rhs(i) = 1 - viewFactorRowSum(i);
+
+    // contribution from the delta_ii element
+    matrix(i, i) = -0.5;
+
+    // contributions from the upper diagonal
+    for (unsigned int j = i + 1; j < _n_sides; ++j)
+    {
+      Real ar = _areas[i] / _areas[j];
+      Real f = 2 * (1 + ar * ar);
+      matrix(i, i) += -1 / f;
+      matrix(i, j) += -1 / f * ar;
+      rhs(i) += ar * ar / (1 + ar * ar) * devReciprocity(i, j);
+    }
+
+    // contributions from the lower diagonal
+    for (unsigned int j = 0; j < i; ++j)
+    {
+      Real ar = _areas[j] / _areas[i];
+      Real f = 2 * (1 + ar * ar);
+      matrix(i, i) += -1 / f * ar * ar;
+      matrix(i, j) += -1 / f * ar;
+      rhs(i) -= ar * devReciprocity(j, i) * (1 - ar * ar / (1 + ar * ar));
+    }
+  }
+
+  // solve the linear system
+  matrix.lu_solve(rhs, lmults);
+
+  // perform corrections but store view factors to temporary array
+  // because we cannot modify _view_factors as it's used in this calc
+  std::vector<std::vector<Real>> vf_temp = _view_factors;
+  for (unsigned int i = 0; i < _n_sides; ++i)
+    for (unsigned int j = 0; j < _n_sides; ++j)
+    {
+      Real correction;
+      if (i == j)
+        correction = -0.5 * lmults(i);
+      else
+      {
+        Real ar = _areas[i] / _areas[j];
+        Real f = 2 * (1 + ar * ar);
+        correction = -(lmults(i) + lmults(j) * ar + 2 * ar * ar * devReciprocity(i, j)) / f;
+      }
+
+      // update the temporary view factor
+      vf_temp[i][j] += correction;
+    }
+  _view_factors = vf_temp;
+}
+
+void
+ViewFactorBase::normalizeUsingInverseRowSum()
+{
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    const Real row_sum = viewFactorRowSum(i);
+    for (auto & v : _view_factors[i])
+      v /= row_sum;
   }
 }
 
