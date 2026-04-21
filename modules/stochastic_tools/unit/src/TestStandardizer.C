@@ -86,8 +86,7 @@ TEST(StochasticTools, getScaled)
 
 TEST(StochasticTools, tensorDataStoreLoad)
 {
-  torch::Tensor stored =
-      torch::tensor({{1.0, 2.0, 3.0}, {-4.0, -5.0, -6.0}}, {torch::kFloat64});
+  torch::Tensor stored = torch::tensor({{1.0, 2.0, 3.0}, {-4.0, -5.0, -6.0}}, {torch::kFloat64});
 
   std::stringbuf buffer;
   std::iostream stream(&buffer);

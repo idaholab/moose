@@ -142,7 +142,8 @@ CovarianceFunctionBase::loadHyperParamMap(const HyperParameterMap & map)
       continue;
 
     if (!isScalarHyperParameter(map_iter->second) && !isVectorHyperParameter(map_iter->second))
-      mooseError("Unsupported hyperparameter rank ", map_iter->second.dim(), " for ", iter.first, ".");
+      mooseError(
+          "Unsupported hyperparameter rank ", map_iter->second.dim(), " for ", iter.first, ".");
 
     iter.second = map_iter->second.clone();
   }

@@ -188,18 +188,15 @@ MaternHalfIntCovariance::computedKdlf(torch::Tensor & K,
         // u'v
         Real summation = 0;
         for (unsigned int tt = 0; tt < p_value + 1; ++tt)
-          summation += (tgamma(p_value + tt + 1) /
-                        (tgamma(tt + 1) * tgamma(p_value - tt + 1))) *
+          summation += (tgamma(p_value + tt + 1) / (tgamma(tt + 1) * tgamma(p_value - tt + 1))) *
                        pow(2 * factor * r_scaled, p_value - tt);
         K_accessor[ii][jj] = -factor * std::exp(-factor * r_scaled) * summation;
         // uv'
         // dont need tt=p, (p-tt) factor ->0. Also avoids unsigned integer subtraction wraparound
         summation = 0;
         for (unsigned int tt = 0; tt < p_value; ++tt)
-          summation += (tgamma(p_value + tt + 1) /
-                        (tgamma(tt + 1) * tgamma(p_value - tt + 1))) *
-                       2 * factor * (p_value - tt) *
-                       pow(2 * factor * r_scaled, p_value - tt - 1);
+          summation += (tgamma(p_value + tt + 1) / (tgamma(tt + 1) * tgamma(p_value - tt + 1))) *
+                       2 * factor * (p_value - tt) * pow(2 * factor * r_scaled, p_value - tt - 1);
         K_accessor[ii][jj] += std::exp(-factor * r_scaled) * summation;
         // Apply chain rule for dr_scaled/dl_i
         K_accessor[ii][jj] *= -std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /

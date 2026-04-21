@@ -35,7 +35,7 @@ flattenOutputData(const torch::Tensor & output_data)
 {
   mooseAssert(output_data.dim() == 2, "GaussianProcess output data must be rank-2.");
   return torch::reshape(torch::transpose(output_data, 0, 1),
-	                        {output_data.size(0) * output_data.size(1), 1});
+                        {output_data.size(0) * output_data.size(1), 1});
 }
 
 bool
@@ -260,7 +260,8 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
 
     std::vector<int64_t> batch_indices_vec(v_sequence.begin(), v_sequence.begin() + _batch_size);
-    auto batch_indices = torch::tensor(batch_indices_vec, torch::TensorOptions().dtype(torch::kLong));
+    auto batch_indices =
+        torch::tensor(batch_indices_vec, torch::TensorOptions().dtype(torch::kLong));
     auto inputs = torch::index_select(training_params, 0, batch_indices);
     auto outputs = torch::index_select(training_data, 0, batch_indices);
 

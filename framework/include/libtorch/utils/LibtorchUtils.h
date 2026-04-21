@@ -37,8 +37,7 @@ vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const boo
  * @param sizes The desired tensor shape
  */
 template <typename DataType>
-torch::Tensor
-vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
+torch::Tensor vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
 
 /**
  * Utility function that converts a `torch::Tensor` to a standard vector.
