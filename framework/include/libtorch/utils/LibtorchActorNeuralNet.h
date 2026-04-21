@@ -13,6 +13,7 @@
 
 #include <torch/torch.h>
 #include <torch/script.h>
+#include "LibtorchActionDistributionHead.h"
 #include "LibtorchArtificialNeuralNet.h"
 
 namespace Moose
@@ -66,6 +67,9 @@ public:
 
   const torch::Tensor & betaTensor() const {return  _beta_tensor;}
 
+  const LibtorchActionDistributionHead & actionDistributionHead() const { return *_action_head; }
+  LibtorchActionDistributionHead & actionDistributionHead() { return *_action_head; }
+
   void resetDistributionParams(torch::Tensor input);
 
   torch::Tensor logProbability(const torch::Tensor & other);
@@ -75,22 +79,10 @@ public:
   virtual void initializeNeuralNetwork() override;
 
 protected:
-  std::vector<torch::nn::Linear> _log_std_module;
-  std::vector<torch::nn::Linear> _mean_module;
-
-  std::vector<torch::nn::Linear> _alpha_module;
-  std::vector<torch::nn::Linear> _beta_module;
-
   torch::Tensor _alpha_tensor;
   torch::Tensor _beta_tensor;
-  torch::Tensor _alpha_beta_tensor;
-  torch::Tensor _log_norm;
-
-  torch::Tensor _mean_tensor;
   torch::Tensor _std_tensor;
-  torch::Tensor _log_std_tensor;
-
-  torch::Tensor _mean;
+  std::shared_ptr<LibtorchActionDistributionHead> _action_head;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchActorNeuralNet * const & network);
