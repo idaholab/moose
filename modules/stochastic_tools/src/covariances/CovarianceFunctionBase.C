@@ -9,6 +9,31 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "CovarianceFunctionBase.h"
+#include "LibtorchUtils.h"
+
+namespace
+{
+
+torch::Tensor
+makeScalarHyperParameter(const Real value)
+{
+  return torch::tensor(value, torch::TensorOptions().dtype(at::kDouble));
+}
+
+torch::Tensor
+makeVectorHyperParameter(const std::vector<Real> & value)
+{
+  return LibtorchUtils::vectorToTensorView(value, {long(value.size())}).clone();
+}
+
+std::vector<Real>
+exportVectorHyperParameter(const torch::Tensor & tensor)
+{
+  const auto flattened = tensor.reshape({-1}).contiguous();
+  return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
+}
+
+} // namespace
 
 InputParameters
 CovarianceFunctionBase::validParams()
@@ -49,7 +74,7 @@ CovarianceFunctionBase::computedKdhyper(torch::Tensor & /*dKdhp*/,
              "computedKdhyper() to compute gradient.");
 }
 
-const Real &
+torch::Tensor &
 CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
                                               const Real value,
                                               const bool is_tunable)
@@ -57,18 +82,18 @@ CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
   const auto prefixed_name = _name + ":" + name;
   if (is_tunable)
     _tunable_hp.insert(prefixed_name);
-  return _hp_map_real.emplace(prefixed_name, value).first->second;
+  return _hp_map_real.emplace(prefixed_name, makeScalarHyperParameter(value)).first->second;
 }
 
-const std::vector<Real> &
+torch::Tensor &
 CovarianceFunctionBase::addVectorRealHyperParameter(const std::string & name,
-                                                    const std::vector<Real> value,
+                                                    const std::vector<Real> & value,
                                                     const bool is_tunable)
 {
   const auto prefixed_name = _name + ":" + name;
   if (is_tunable)
     _tunable_hp.insert(prefixed_name);
-  return _hp_map_vector_real.emplace(prefixed_name, value).first->second;
+  return _hp_map_vector_real.emplace(prefixed_name, makeVectorHyperParameter(value)).first->second;
 }
 
 bool
@@ -102,13 +127,13 @@ CovarianceFunctionBase::loadHyperParamMap(
   {
     const auto & map_iter = map.find(iter.first);
     if (map_iter != map.end())
-      iter.second = map_iter->second;
+      iter.second = makeScalarHyperParameter(map_iter->second);
   }
   for (auto & iter : _hp_map_vector_real)
   {
     const auto & map_iter = vec_map.find(iter.first);
     if (map_iter != vec_map.end())
-      iter.second = map_iter->second;
+      iter.second = makeVectorHyperParameter(map_iter->second);
   }
 }
 
@@ -123,9 +148,9 @@ CovarianceFunctionBase::buildHyperParamMap(
 
   // At the end we just append the hyperparameters this object owns
   for (const auto & iter : _hp_map_real)
-    map[iter.first] = iter.second;
+    map[iter.first] = iter.second.item<Real>();
   for (const auto & iter : _hp_map_vector_real)
-    vec_map[iter.first] = iter.second;
+    vec_map[iter.first] = exportVectorHyperParameter(iter.second);
 }
 
 bool
@@ -150,7 +175,7 @@ CovarianceFunctionBase::getTuningData(const std::string & name,
   else if (_hp_map_vector_real.find(name) != _hp_map_vector_real.end())
   {
     const auto & vector_value = _hp_map_vector_real.find(name);
-    size = vector_value->second.size();
+    size = vector_value->second.numel();
     return true;
   }
   else

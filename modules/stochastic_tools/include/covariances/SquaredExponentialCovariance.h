@@ -27,9 +27,9 @@ public:
   static void SquaredExponentialFunction(torch::Tensor & K,
                                          const torch::Tensor & x,
                                          const torch::Tensor & xp,
-                                         const std::vector<Real> & length_factor,
-                                         const Real sigma_f_squared,
-                                         const Real sigma_n_squared,
+                                         const torch::Tensor & length_factor,
+                                         const torch::Tensor & sigma_f_squared,
+                                         const torch::Tensor & sigma_n_squared,
                                          const bool is_self_covariance);
 
   /// Redirect dK/dhp for hyperparameter "hp"
@@ -41,19 +41,19 @@ public:
   /// Computes dK/dlf for individual length factors
   static void computedKdlf(torch::Tensor & K,
                            const torch::Tensor & x,
-                           const std::vector<Real> & length_factor,
-                           const Real sigma_f_squared,
+                           const torch::Tensor & length_factor,
+                           const torch::Tensor & sigma_f_squared,
                            const int ind);
 
 protected:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  const std::vector<Real> & _length_factor;
+  const torch::Tensor & _length_factor;
 
   /// signal variance (\sigma_f^2)
-  const Real & _sigma_f_squared;
+  const torch::Tensor & _sigma_f_squared;
 
   /// noise variance (\sigma_n^2)
-  const Real & _sigma_n_squared;
+  const torch::Tensor & _sigma_n_squared;
 };
 
 #endif

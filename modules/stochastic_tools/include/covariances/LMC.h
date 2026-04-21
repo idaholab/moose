@@ -69,8 +69,8 @@ protected:
 private:
   /// The vectors in the $B = \sum_i a_i a_i^T + diag(lambda_i)$
   /// expansion
-  std::vector<const std::vector<Real> *> _a_coeffs;
-  std::vector<const std::vector<Real> *> _lambdas;
+  std::vector<const torch::Tensor *> _a_coeffs;
+  std::vector<const torch::Tensor *> _lambdas;
 };
 
 #endif

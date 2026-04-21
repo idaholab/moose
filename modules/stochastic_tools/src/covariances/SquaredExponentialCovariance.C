@@ -9,7 +9,6 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "SquaredExponentialCovariance.h"
-#include "LibtorchUtils.h"
 #include <cmath>
 
 registerMooseObject("StochasticToolsApp", SquaredExponentialCovariance);
@@ -45,7 +44,7 @@ SquaredExponentialCovariance::computeCovarianceMatrix(torch::Tensor & K,
                                                       const torch::Tensor & xp,
                                                       const bool is_self_covariance) const
 {
-  if ((unsigned)x.sizes()[1] != _length_factor.size())
+  if ((unsigned)x.sizes()[1] != _length_factor.numel())
     mooseError("length_factor size does not match dimension of trainer input.");
 
   SquaredExponentialFunction(
@@ -56,16 +55,15 @@ void
 SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
                                                          const torch::Tensor & x,
                                                          const torch::Tensor & xp,
-                                                         const std::vector<Real> & length_factor,
-                                                         const Real sigma_f_squared,
-                                                         const Real sigma_n_squared,
+                                                         const torch::Tensor & length_factor,
+                                                         const torch::Tensor & sigma_f_squared,
+                                                         const torch::Tensor & sigma_n_squared,
                                                          const bool is_self_covariance)
 {
   mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
-  const auto l_factor =
-      LibtorchUtils::vectorToTensorView(length_factor, {1, long(length_factor.size())});
+  const auto l_factor = length_factor.unsqueeze(0);
   torch::Tensor scaled_distance =
       torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0), 2);
   K = sigma_f_squared * torch::exp(-scaled_distance / 2.0);
@@ -86,13 +84,25 @@ SquaredExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
 
   if (name_without_prefix == "noise_variance")
   {
-    SquaredExponentialFunction(dKdhp, x, x, _length_factor, 0, 1, true);
+    SquaredExponentialFunction(dKdhp,
+                               x,
+                               x,
+                               _length_factor,
+                               torch::tensor(0.0, at::kDouble),
+                               torch::tensor(1.0, at::kDouble),
+                               true);
     return true;
   }
 
   if (name_without_prefix == "signal_variance")
   {
-    SquaredExponentialFunction(dKdhp, x, x, _length_factor, 1, 0, false);
+    SquaredExponentialFunction(dKdhp,
+                               x,
+                               x,
+                               _length_factor,
+                               torch::tensor(1.0, at::kDouble),
+                               torch::tensor(0.0, at::kDouble),
+                               false);
     return true;
   }
 
@@ -108,8 +118,8 @@ SquaredExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
 void
 SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
                                            const torch::Tensor & x,
-                                           const std::vector<Real> & length_factor,
-                                           const Real sigma_f_squared,
+                                           const torch::Tensor & length_factor,
+                                           const torch::Tensor & sigma_f_squared,
                                            const int ind)
 {
   unsigned int num_samples_x = x.sizes()[0];
@@ -117,6 +127,8 @@ SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
 
   mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
+  const auto length_factor_accessor = length_factor.accessor<Real, 1>();
+  const auto sigma_f_squared_value = sigma_f_squared.item<Real>();
   auto K_accessor = K.accessor<Real, 2>();
   auto x_accessor = x.accessor<Real, 2>();
   for (unsigned int ii = 0; ii < num_samples_x; ++ii)
@@ -127,10 +139,10 @@ SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
       Real r_squared_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
         r_squared_scaled +=
-            std::pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor[kk], 2);
-      K_accessor[ii][jj] = sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
+            std::pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor_accessor[kk], 2);
+      K_accessor[ii][jj] = sigma_f_squared_value * std::exp(-r_squared_scaled / 2.0);
       K_accessor[ii][jj] = std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /
-                           std::pow(length_factor[ind], 3) * K_accessor[ii][jj];
+                           std::pow(length_factor_accessor[ind], 3) * K_accessor[ii][jj];
     }
   }
 }
