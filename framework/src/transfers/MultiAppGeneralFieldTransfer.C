@@ -1589,7 +1589,8 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
   {
     auto * pl = _from_point_locators[i_from].get();
     const auto from_global_num = getGlobalSourceAppIndex(i_from);
-    const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
+    const auto transformed_pt =
+        getPointInSourceAppFrame(pt, i_from, "Source point acceptance check");
 
     // Check point against source block restriction
     if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, transformed_pt))

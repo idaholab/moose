@@ -194,18 +194,14 @@ MultiAppGeneralFieldKDTreeTransferBase::getNumDivisions() const
 }
 
 Point
-MultiAppGeneralFieldKDTreeTransferBase::getPointInLocalSourceFrame(unsigned int i_from,
-                                                                   const Point & pt) const
+MultiAppGeneralFieldKDTreeTransferBase::getPointInSourceKDTreeFrame(unsigned int i_source,
+                                                                    const Point & pt) const
 {
-
-  if (!_nearest_positions_obj &&
-      (!_from_transforms[getGlobalSourceAppIndex(i_from)]->hasCoordinateSystemTypeChange() ||
-       _skip_coordinate_collapsing))
-    return _from_transforms[getGlobalSourceAppIndex(i_from)]->mapBack(pt);
-  else if (!_nearest_positions_obj || !_group_subapps)
-    return pt - _from_positions[i_from];
-  else
+  if (_nearest_positions_obj && _group_subapps)
+    // KD-trees are built in global coords when grouping subapps with nearest-positions
     return pt;
+  else
+    return getPointInSourceAppFrame(pt, i_source, "KD-tree neighbor search");
 }
 
 bool
@@ -237,11 +233,10 @@ MultiAppGeneralFieldKDTreeTransferBase::checkRestrictionsForSource(const Point &
   // Check mesh restriction before anything
   if (_source_app_must_contain_point)
   {
-    // We have to be careful that getPointInLocalSourceFrame returns in the reference frame
     if (_nearest_positions_obj)
       mooseError("Nearest-positions + source_app_must_contain_point not implemented");
     // Transform the point to place it in the local coordinate system
-    const auto local_pt = getPointInLocalSourceFrame(app_index, pt);
+    const auto local_pt = getPointInSourceAppFrame(pt, app_index, "Source mesh containment check");
     if (!inMesh(_from_point_locators[app_index].get(), local_pt))
       return false;
   }
@@ -340,9 +335,9 @@ MultiAppGeneralFieldKDTreeTransferBase::evaluateNearestNodeFromKDTrees(
         _local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
         auto num_found = return_dist_sqr.size();
 
-        // Local coordinates only accessible when not using nearest-position
+        // Local coordinates only accessible when not using nearest-position,
         // as we did not keep the index of the source app, only the position index
-        const Point local_pt = getPointInLocalSourceFrame(app_index, pt);
+        const Point local_pt = getPointInSourceKDTreeFrame(app_index, pt);
 
         if (!_nearest_positions_obj &&
             _from_transforms[getGlobalSourceAppIndex(app_index)]->hasCoordinateSystemTypeChange())

@@ -392,14 +392,15 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
       // Note: because this transfer is intended for extrapolation,
       // this will usually not restrict the source. The distance comparisons will be crucial
 
-      // The transformed point is the same for all apps in this source
-      const auto transformed_pt = getPointInLocalSourceFrame(i_source, pt);
-
       // Inner loop: when group_subapps is true, multiple apps contribute to the same source
       // (one KD-tree per position). Mirror the structure of buildKDTrees.
       for (const auto app_i : make_range(num_apps_per_tree))
       {
         const auto app_index = getAppIndex(i_source, app_i);
+
+        // Point locators and functor evaluation work in each app's local frame
+        const Point app_local_pt =
+            getPointInSourceAppFrame(pt, app_index, "Functor value evaluation");
 
         // Retrieve the functor
         const auto & functor = *_functors[app_index][var_index];
@@ -418,9 +419,9 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         // Clear the nearest candidates
         elem_candidates.clear();
         if (from_blocks.size())
-          (*_point_locators[app_index])(transformed_pt, elem_candidates, &from_blocks);
+          (*_point_locators[app_index])(app_local_pt, elem_candidates, &from_blocks);
         else
-          (*_point_locators[app_index])(transformed_pt, elem_candidates);
+          (*_point_locators[app_index])(app_local_pt, elem_candidates);
         if (elem_candidates.size())
         {
           // Register conflict if any
@@ -430,7 +431,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             if (_nearest_positions_obj)
               registerConflict(i_source, /*dof*/ 0, pt, 0, true);
             else
-              registerConflict(i_source, 0, transformed_pt, 0, true);
+              registerConflict(i_source, 0, app_local_pt, 0, true);
           }
 
           // Average the result for now
@@ -445,7 +446,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             if (_functor_is_variable[var_index] &&
                 elem->processor_id() != _from_problems[app_index]->processor_id())
               continue;
-            Moose::ElemPointArg elem_pt_arg = {elem, transformed_pt, /*correct skewness*/ false};
+            Moose::ElemPointArg elem_pt_arg = {elem, app_local_pt, /*correct skewness*/ false};
             Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
             value += functor(elem_pt_arg, time_arg);
             num_values++;
@@ -485,9 +486,12 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
           std::vector<std::size_t> return_index(_num_nearest_points);
           std::vector<Real> return_dist_sqr(_num_nearest_points);
 
-          const auto transformed_pt = getPointInLocalSourceFrame(i_source, pt);
-          // Use the first app in this source group for the out-of-bounds functor evaluation
-          const auto & functor = *_functors[getAppIndex(i_source, 0)][var_index];
+          // KD-tree neighbor search uses global pt (KD-trees store global coords);
+          // functor evaluation needs the per-app local coordinate
+          const auto first_app = getAppIndex(i_source, 0);
+          const Point oob_local_pt =
+              getPointInSourceAppFrame(pt, first_app, "Out-of-bounds functor extrapolation");
+          const auto & functor = *_functors[first_app][var_index];
 
           if (_local_kdtrees[i_source]->numberCandidatePoints())
           {
@@ -501,8 +505,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             const auto new_distance = dist_sum / return_dist_sqr.size();
             if (new_distance < outgoing_vals[i_pt].second)
             {
-              Moose::ElemPointArg elem_pt_arg = {
-                  nullptr, transformed_pt, /*correct skewness*/ false};
+              Moose::ElemPointArg elem_pt_arg = {nullptr, oob_local_pt, /*correct skewness*/ false};
               Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
               outgoing_vals[i_pt] = {functor(elem_pt_arg, time_arg), new_distance};
             }
@@ -515,7 +518,6 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
         mooseAssert(false,
                     "Unexpected extrapolation behavior '" << std::to_string(_extrapolation_behavior)
                                                           << "'");
-
     }
 
     // Move to next point

@@ -246,6 +246,18 @@ protected:
                                  const std::string & phase) const;
 
   /**
+   * Get the source app point from a point in the reference frame
+   * @param p the point in the reference frame
+   * @param local_i_from the local source problem index
+   * @param phase the phase of the transfer where this is being attempted in case we have
+   *              to output an info message that the coordinate collapse is not being applied
+   * @return the point in the source app frame
+   */
+  Point getPointInSourceAppFrame(const Point & p,
+                                 unsigned int local_i_from,
+                                 const std::string & phase) const;
+
+  /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.
    *
    * This method was added to allow the check to be delayed by child classes,
@@ -274,6 +286,13 @@ private:
    * \p MooseAppCoordTransform object
    */
   virtual bool usesMooseAppCoordTransform() const { return false; }
+
+  /// Shared implementation for getPointInSourceAppFrame / getPointInTargetAppFrame:
+  /// calls transform.mapBack(p), skipping coordinate collapsing when a coordinate system type
+  /// change is present (the reverse mapping is not uniquely defined in that case).
+  Point mapBackWithoutCollapsing(MultiAppCoordTransform & transform,
+                                 const Point & p,
+                                 const std::string & phase) const;
 
   /// The MultiApps this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _from_multi_app;

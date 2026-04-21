@@ -134,14 +134,13 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         continue;
       else
       {
-        const auto from_global_num = getGlobalSourceAppIndex(i_from);
-
         // Get user object from the local problem
         const UserObject & user_object =
             _from_problems[i_from]->getUserObjectBase(_user_object_name);
 
         // Use spatial value routine to compute the origin value to transfer
-        const auto local_pt = _from_transforms[from_global_num]->mapBack(pt);
+        const auto local_pt =
+            getPointInSourceAppFrame(pt, i_from, "User object spatial value evaluation");
         auto val = user_object.spatialValue(local_pt);
 
         // Look for overlaps. The check is not active outside of overlap search because in that

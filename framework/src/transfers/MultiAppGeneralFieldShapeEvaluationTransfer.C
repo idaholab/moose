@@ -135,8 +135,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       else
       {
         // Use mesh function to compute interpolation values
-        const auto from_global_num = getGlobalSourceAppIndex(i_from);
-        const auto local_pt = _from_transforms[from_global_num]->mapBack(pt);
+        const auto local_pt = getPointInSourceAppFrame(pt, i_from, "Shape function evaluation");
         auto val = (local_meshfuns[i_from])(local_pt);
 
         // Look for overlaps. The check is not active outside of overlap search because in that

@@ -66,11 +66,13 @@ protected:
   unsigned int getNumDivisions() const;
 
   /**
-   * Transform a point towards the local frame
-   * @param i_from the local index of the source application
-   * @param pt the point to move from the global to the local frame
+   * Transform a point into the frame used for KD-tree queries.
+   * When grouping subapps with nearest-positions, KD-trees are built in the global frame so this
+   * returns pt unchanged. Otherwise delegates to getPointInSourceAppFrame.
+   * @param i_source index of the KD-tree source (may be a position index when grouping subapps)
+   * @param pt the point in the global frame
    */
-  Point getPointInLocalSourceFrame(unsigned int i_from, const Point & pt) const;
+  Point getPointInSourceKDTreeFrame(unsigned int i_source, const Point & pt) const;
 
   /**
    * @brief Examine all spatial restrictions that could preclude this source from being
