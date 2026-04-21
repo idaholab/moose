@@ -24,13 +24,12 @@ not appear in any of the export files, the elements in that subdomain are silent
 and their stateful properties are initialized by the material's `initStatefulProperties()`
 as normal.
 
-!alert note title=All file properties must exist in the current simulation
-Every property present in the export files must be declared as a stateful property in the
-current simulation.  The importer will error if a property name is found in the files but
-not in the current simulation, because it cannot skip a serialized value of unknown type.
-The reverse — having additional stateful properties in the current simulation that are
-absent from the files — is allowed; those properties receive their normal custom
-initialization from `initStatefulProperties()`.
+!alert note title=Imported properties may be skipped
+Properties present in the export files but not declared as stateful properties in the
+current simulation are skipped. The reverse — having additional stateful
+properties in the current simulation that are absent from the files — is also allowed;
+those properties receive their normal custom initialization from
+`initStatefulProperties()`.
 
 ### Type Safety
 
@@ -40,16 +39,16 @@ do not match, preventing silent data corruption.
 
 ### Timing and Initialization Order
 
-The importer executes at `EXEC_INITIAL`, which fires *after*
-`FEProblemBase::initialSetup()` has completed — including the call to
-`initElementStatefulProps()` that runs `initStatefulProperties()` on every material for
-every element.  Only after that custom initialization has finished does the importer
-overwrite **states 1 (old) and 2 (older)** with the remapped values from the export files.
-State 0 (current) is left untouched; it will be recomputed in the first timestep.
+The importer stages its remapped data during `EXEC_INITIAL`, after the first
+`initElementStatefulProps()` pass in `FEProblemBase::initialSetup()` but before the second pass
+that reinitializes stateful properties. The staged values are then loaded through
+`MaterialPropertyStorage`'s normal restart path while the second `initStatefulProperties()`
+pass runs on each element. This preserves the first-pass initialization for non-imported
+properties while restoring imported state in place.
 
 This ordering ensures that materials with a mix of imported and non-imported stateful
-properties are handled correctly: `initStatefulProperties()` runs for all properties first,
-and only the imported ones are subsequently replaced.
+properties are handled correctly: the first initialization pass establishes normal values for
+all properties, and the second pass reloads only the imported ones through the restart path.
 
 ### Parallel I/O
 
@@ -80,9 +79,9 @@ the export file — is also supported:
 
 - Volumetric properties only (`side = 0`); boundary/face material properties are not yet
   supported.
-- Nearest-point copy only; no weighted interpolation between source quadrature points.
-- All properties present in the export files must exist as stateful properties in the
-  current simulation.
+- Nearest-point copy only; there is no interpolation or distance-based acceptance criterion.
+- Every rank reads and stores the full exported point cloud before remapping, so import
+  memory use and file I/O scale with the global export size on every rank.
 
 ## Related Objects
 

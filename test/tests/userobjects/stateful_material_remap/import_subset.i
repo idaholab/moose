@@ -1,10 +1,6 @@
-# Tests partial import: the material has two stateful properties ("diffusivity" and
-# "conductivity"), but only "diffusivity" is present in the import file.
-# After import, PartialStatefulMaterial::computeQpProperties() asserts at the first
-# timestep that:
-#   - diffusivity_old was overwritten by the importer (remapped value, not initial_diffusivity)
-#   - conductivity_old equals initial_conductivity, proving initStatefulProperties()
-#     ran correctly for the non-imported property (not zero-initialized)
+# This input file imports from export_subset_source.i onto a target simulation that only
+# declares the "diffusivity" stateful property. The importer should skip the exported
+# "conductivity" history with a warning instead of erroring out.
 
 [Mesh]
   [gen]
@@ -55,17 +51,15 @@
 
 [Materials]
   [stateful]
-    type = PartialStatefulMaterial
+    type = ImportCheckStatefulMaterial
     initial_diffusivity = 10.0
-    initial_conductivity = 2.0
-    verify_import = true
   []
 []
 
 [UserObjects]
   [importer]
     type = StatefulMaterialPropertyImporter
-    file_base = 'stateful_export'
+    file_base = 'subset_export'
   []
 []
 

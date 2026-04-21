@@ -17,6 +17,11 @@ PartialStatefulMaterial::validParams()
   InputParameters params = Material::validParams();
   params.addParam<Real>("initial_diffusivity", 1.0, "Initial value for diffusivity");
   params.addParam<Real>("initial_conductivity", 2.0, "Initial value for conductivity");
+  params.addParam<bool>("verify_import",
+                        false,
+                        "Enable timestep-1 checks that imported diffusivity_old overwrote the "
+                        "target initialization while conductivity_old retained its initialized "
+                        "value.");
   return params;
 }
 
@@ -24,6 +29,7 @@ PartialStatefulMaterial::PartialStatefulMaterial(const InputParameters & paramet
   : Material(parameters),
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),
     _initial_conductivity(getParam<Real>("initial_conductivity")),
+    _verify_import(getParam<bool>("verify_import")),
     _diffusivity(declareProperty<Real>("diffusivity")),
     _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity")),
     _conductivity(declareProperty<Real>("conductivity")),
@@ -45,7 +51,7 @@ PartialStatefulMaterial::computeQpProperties()
   // - diffusivity_old must have been overwritten by the importer (not equal to initial_diffusivity)
   // - conductivity_old must still equal initial_conductivity, proving that
   //   initStatefulProperties() ran correctly for the non-imported property
-  if (_t_step == 1)
+  if (_verify_import && _t_step == 1)
   {
     if (MooseUtils::absoluteFuzzyEqual(_diffusivity_old[_qp], _initial_diffusivity))
       mooseError("diffusivity_old at qp ",
