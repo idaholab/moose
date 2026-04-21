@@ -104,8 +104,19 @@
   []
   [MFEM_to_MFEM_sibling_transfers]
     requirement = "The system shall support multiapp sibling transfers from MFEM to MFEM sub-apps via shape function evaluations"
+    [nodal_nodal]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'nodal_nodal_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=nodal_nodal"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables sent between MFEM sub-apps defined on meshes comprised of a single element type,'
+    []
     [1_to_N_nodal]
-      type = XMLDiff
+      type = XMLDiff # XMLDiff used to check out-of-mesh values are correctly located
       input = mfem_main_between_multiapp.i
       cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
       xmldiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Run0.pvd
