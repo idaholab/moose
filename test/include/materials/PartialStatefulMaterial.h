@@ -32,6 +32,7 @@ protected:
 private:
   const Real _initial_diffusivity;
   const Real _initial_conductivity;
+  const bool _verify_import;
 
   MaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
