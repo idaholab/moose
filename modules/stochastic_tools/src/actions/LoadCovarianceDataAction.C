@@ -55,7 +55,7 @@ assignRequiredHyperParameter(InputParameters & params,
   {
     if (!isScalarHyperParameter(tensor))
       mooseError("Expected scalar hyperparameter for ", param_name, ".");
-    params.set<unsigned int>(param_name) = static_cast<unsigned int>(tensor.item<Real>());
+    params.set<unsigned int>(param_name) = cast_int<unsigned int>(tensor.item<Real>());
   }
   else if (params.have_parameter<std::vector<Real>>(param_name))
   {

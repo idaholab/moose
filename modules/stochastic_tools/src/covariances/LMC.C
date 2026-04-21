@@ -172,8 +172,7 @@ LMC::computeAGradient(torch::Tensor & grad,
                       const unsigned int index) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
-  mooseAssert(index < static_cast<unsigned int>(a_coeffs.numel()),
-              "Incorrect LMC coefficient index.");
+  mooseAssert(cast_int<int64_t>(index) < a_coeffs.numel(), "Incorrect LMC coefficient index.");
   auto basis = torch::zeros({long(_num_outputs)}, at::kDouble);
   auto basis_accessor = basis.accessor<Real, 1>();
   basis_accessor[index] = 1.0;

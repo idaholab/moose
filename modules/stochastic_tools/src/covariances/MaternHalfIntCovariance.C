@@ -67,7 +67,7 @@ MaternHalfIntCovariance::maternHalfIntFunction(torch::Tensor & K,
   const auto length_factor_accessor = length_factor.accessor<Real, 1>();
   const auto sigma_f_squared_value = sigma_f_squared.item<Real>();
   const auto sigma_n_squared_value = sigma_n_squared.item<Real>();
-  const auto p_value = static_cast<unsigned int>(p.item<Real>());
+  const auto p_value = cast_int<unsigned int>(p.item<Real>());
   auto K_accessor = K.accessor<Real, 2>();
   auto x_accessor = x.accessor<Real, 2>();
   auto xp_accessor = xp.accessor<Real, 2>();
@@ -161,7 +161,7 @@ MaternHalfIntCovariance::computedKdlf(torch::Tensor & K,
 {
   const auto length_factor_accessor = length_factor.accessor<Real, 1>();
   const auto sigma_f_squared_value = sigma_f_squared.item<Real>();
-  const auto p_value = static_cast<unsigned int>(p.item<Real>());
+  const auto p_value = cast_int<unsigned int>(p.item<Real>());
   auto K_accessor = K.accessor<Real, 2>();
   auto x_accessor = x.accessor<Real, 2>();
 
