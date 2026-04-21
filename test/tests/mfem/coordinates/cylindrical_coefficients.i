@@ -1,0 +1,88 @@
+[Mesh]
+    type = MFEMMesh
+    file = ../mesh/star.mesh
+    dim = 2
+[]
+
+[Problem]
+    type = MFEMProblem
+[]
+
+[Coordinates]
+    [cylindrical]
+        type = CylindricalCoordinateCoefficients
+        inv_r_eps = 1e-100
+    []
+[]
+
+[FESpaces]
+    [H1FESpace]
+        type = MFEMScalarFESpace
+        fec_type = H1
+        fec_order = FIRST
+    []
+[]
+
+[Variables]
+    [u]
+        type = MFEMVariable
+        fespace = H1FESpace
+    []
+[]
+
+[Functions]
+    [u_exact]
+        type = ParsedFunction
+        expression = 10
+    []
+[]
+
+[FunctorMaterials]
+    [material]
+        type = MFEMGenericFunctorMaterial
+        prop_names = 'radialCoef diffCoef massCoef'
+        prop_values = 'r measure_weight inv_r' 
+        block =  1
+    []
+[]
+
+[BCs]
+    [Dirichlet]
+        type = MFEMScalarDirichletBC
+        variable = u
+        boundary = '1'
+        coefficient = u_exact
+    []
+[]
+
+[Kernels]
+    [diffusion]
+        type = MFEMDiffusionKernel
+        variable = u
+        coefficient = diffCoef
+    []
+
+    [mass]
+        type = MFEMMassKernel
+        variable = u
+        coefficient = massCoef
+    []
+[]
+
+[Solver]
+    type = MFEMMUMPS
+[]
+
+[Executioner]
+    type = MFEMSteady
+    device = cpu
+[]
+
+
+[Outputs]
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/CylindricalCoefficients
+    vtk_format = ASCII
+  []
+[]
