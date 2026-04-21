@@ -13,6 +13,8 @@
 #include "MooseError.h"
 #include "LibtorchUtils.h"
 
+#include <limits>
+
 namespace Moose
 {
 
@@ -27,31 +29,35 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
     const torch::DeviceType device_type,
     const torch::ScalarType data_type,
     const bool build_on_construct)
-  :
-  LibtorchArtificialNeuralNet(name, num_inputs, num_outputs, num_neurons_per_layer,
-                              activation_function, minimum_values, maximum_values,
-                              device_type, data_type,
-                              false)
+  : LibtorchArtificialNeuralNet(name,
+                                num_inputs,
+                                num_outputs,
+                                num_neurons_per_layer,
+                                activation_function,
+                                minimum_values,
+                                maximum_values,
+                                device_type,
+                                data_type,
+                                false)
 {
   if (build_on_construct)
     constructNeuralNetwork();
 }
 
-LibtorchActorNeuralNet::LibtorchActorNeuralNet(
-    const Moose::LibtorchActorNeuralNet & nn,
-    const bool build_on_construct)
-  :  LibtorchArtificialNeuralNet(dynamic_cast<const LibtorchArtificialNeuralNet &>(nn), false)
+LibtorchActorNeuralNet::LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
+                                               const bool build_on_construct)
+  : LibtorchArtificialNeuralNet(dynamic_cast<const LibtorchArtificialNeuralNet &>(nn), false)
 {
-    // We construct the NN architecture
-    if (build_on_construct)
-    {
-      constructNeuralNetwork();
-      // We fill it up with the current parameter values
-      const auto & from_params = nn.named_parameters();
-      auto to_params = this->named_parameters();
-      for (unsigned int param_i : make_range(from_params.size()))
-        to_params[param_i].value().data() = from_params[param_i].value().data().clone();
-    }
+  // We construct the NN architecture
+  if (build_on_construct)
+  {
+    constructNeuralNetwork();
+    // We fill it up with the current parameter values
+    const auto & from_params = nn.named_parameters();
+    auto to_params = this->named_parameters();
+    for (unsigned int param_i : make_range(from_params.size()))
+      to_params[param_i].value().data() = from_params[param_i].value().data().clone();
+  }
 }
 
 void
@@ -59,12 +65,13 @@ LibtorchActorNeuralNet::initializeNeuralNetwork()
 {
   for (unsigned int i = 0; i < numHiddenLayers(); ++i)
   {
-    const auto & activation = _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
+    const auto & activation =
+        _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     const Real gain = determineGain(activation);
 
     auto sizes = _weights[i]->weight.sizes();
     auto max_dim_size = *std::max_element(sizes.begin(), sizes.end());
-    torch::nn::init::orthogonal_(_weights[i]->weight, gain/max_dim_size);
+    torch::nn::init::orthogonal_(_weights[i]->weight, gain / max_dim_size);
     torch::nn::init::zeros_(_weights[i]->bias);
   }
 
@@ -72,15 +79,15 @@ LibtorchActorNeuralNet::initializeNeuralNetwork()
   {
     auto sizes = _alpha_module[0]->weight.sizes();
     auto max_dim_size = *std::max_element(sizes.begin(), sizes.end());
-    torch::nn::init::orthogonal_(_alpha_module[0]->weight, 1.0/max_dim_size);
-    torch::nn::init::orthogonal_(_beta_module[0]->weight, 1.0/max_dim_size);
+    torch::nn::init::orthogonal_(_alpha_module[0]->weight, 1.0 / max_dim_size);
+    torch::nn::init::orthogonal_(_beta_module[0]->weight, 1.0 / max_dim_size);
   }
   else
   {
     auto sizes = _mean_module[0]->weight.sizes();
     auto max_dim_size = *std::max_element(sizes.begin(), sizes.end());
-    torch::nn::init::orthogonal_(_mean_module[0]->weight, 1.0/max_dim_size);
-    torch::nn::init::orthogonal_(_log_std_module[0]->weight, 1.0/max_dim_size);
+    torch::nn::init::orthogonal_(_mean_module[0]->weight, 1.0 / max_dim_size);
+    torch::nn::init::orthogonal_(_log_std_module[0]->weight, 1.0 / max_dim_size);
   }
 }
 
@@ -100,19 +107,23 @@ LibtorchActorNeuralNet::constructNeuralNetwork()
     inp_neurons = _num_neurons_per_layer[i];
   }
 
-  auto num_inps = _num_neurons_per_layer[numHiddenLayers()-1];
+  auto num_inps = _num_neurons_per_layer[numHiddenLayers() - 1];
   if (_minimum_values.size())
   {
-    _alpha_module.push_back(register_module("alpha", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
-    _beta_module.push_back(register_module("beta", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
+    _alpha_module.push_back(register_module(
+        "alpha", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
+    _beta_module.push_back(register_module(
+        "beta", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
     _alpha_module[0]->to(_device_type, _data_type);
     _beta_module[0]->to(_device_type, _data_type);
 
     return;
   }
 
-  _mean_module.push_back(register_module("mean", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
-  _log_std_module.push_back(register_module("std", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
+  _mean_module.push_back(register_module(
+      "mean", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
+  _log_std_module.push_back(register_module(
+      "std", torch::nn::Linear(torch::nn::LinearOptions(num_inps, _num_outputs).bias(false))));
   _mean_module[0]->to(_device_type, _data_type);
   _log_std_module[0]->to(_device_type, _data_type);
 }
@@ -122,12 +133,13 @@ LibtorchActorNeuralNet::entropy()
 {
   if (_minimum_values.size())
   {
-    return _log_norm - (_beta_tensor - 1.0) * torch::digamma(_beta_tensor)
-           - (_alpha_tensor - 1.0) * torch::digamma(_alpha_tensor)
-           + (_alpha_beta_tensor - 2.0) * torch::digamma(_alpha_beta_tensor);
+    const auto scale = torch::clamp_min(_max_tensor - _min_tensor, 1e-8);
+    return _log_norm - (_beta_tensor - 1.0) * torch::digamma(_beta_tensor) -
+           (_alpha_tensor - 1.0) * torch::digamma(_alpha_tensor) +
+           (_alpha_beta_tensor - 2.0) * torch::digamma(_alpha_beta_tensor) + torch::log(scale);
   }
 
-  return 0.5*std::log(2*M_PI)+_log_std_tensor+0.5;
+  return 0.5 * std::log(2 * M_PI) + _log_std_tensor + 0.5;
 }
 
 void
@@ -143,11 +155,12 @@ LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
     // std::cout << "setting beta tensor to " << _beta_tensor << std::endl;
 
     _alpha_beta_tensor = torch::clamp_min(_alpha_tensor + _beta_tensor, 1e-8);
-    _mean = _alpha_tensor/_alpha_beta_tensor;
+    _mean = _alpha_tensor / _alpha_beta_tensor;
 
     // std::cout << "setting mean to " << _mean << std::endl;
 
-    _log_norm = at::lgamma(_alpha_tensor) + at::lgamma(_beta_tensor) - at::lgamma(_alpha_beta_tensor);
+    _log_norm =
+        at::lgamma(_alpha_tensor) + at::lgamma(_beta_tensor) - at::lgamma(_alpha_beta_tensor);
 
     return;
   }
@@ -163,7 +176,8 @@ LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
 
   //       # Clip log stddev for numerical stability
   //       log_eps = log(util.epsilon)  # epsilon < 1.0, hence negative
-  //       log_stddev = tf.clip_by_value(t=log_stddev, clip_value_min=log_eps, clip_value_max=-log_eps)
+  //       log_stddev = tf.clip_by_value(t=log_stddev, clip_value_min=log_eps,
+  //       clip_value_max=-log_eps)
 
   //       # Standard deviation
   //       stddev = tf.exp(x=log_stddev)
@@ -175,7 +189,6 @@ LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
 
   _log_std_tensor = torch::clamp(_log_std_tensor, std::log(1e-12), -std::log(1e-12));
   _std_tensor = torch::exp(_log_std_tensor);
-
 }
 
 torch::Tensor
@@ -230,7 +243,7 @@ LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
     return sample();
 
   if (_minimum_values.size())
-    return _min_tensor + (_max_tensor - _min_tensor)*_mean;
+    return _min_tensor + (_max_tensor - _min_tensor) * _mean;
 
   return _mean;
 }
@@ -247,7 +260,7 @@ LibtorchActorNeuralNet::sample()
 
     // std::cout << "sampled " << sampled << std::endl;
 
-    return _min_tensor + (_max_tensor - _min_tensor)*sampled;
+    return _min_tensor + (_max_tensor - _min_tensor) * sampled;
   }
 
   return at::normal(_mean, _std_tensor);
@@ -259,30 +272,26 @@ LibtorchActorNeuralNet::logProbability(const torch::Tensor & action)
   // Logarithmic probability of taken action, given the current distribution.
   if (_minimum_values.size())
   {
-    // std::cout << "input action " << action << std::endl;
-    // std::cout << "mintensor " << _min_tensor << std::endl;
-    // std::cout << "bewfore clamp " << (action - _min_tensor) / (_max_tensor - _min_tensor) <<std::endl;
+    const auto scale = torch::clamp_min(_max_tensor - _min_tensor, 1e-8);
+    const auto normalized = (action - _min_tensor) / scale;
+    const auto clipped = torch::clamp(normalized, 1e-8, 1.0 - 1e-8);
+    auto log_prob = (_alpha_tensor - 1.0) * torch::log(clipped) +
+                    (_beta_tensor - 1.0) * torch::log1p(-clipped) - _log_norm - torch::log(scale);
 
-    auto normalized = torch::clamp_max((action - _min_tensor) / (_max_tensor - _min_tensor), 1.0-1e-8);
+    const auto out_of_bounds = (normalized < 0.0) | (normalized > 1.0);
+    if (out_of_bounds.any().item<bool>())
+      log_prob = torch::where(out_of_bounds,
+                              torch::full_like(log_prob, -std::numeric_limits<Real>::infinity()),
+                              log_prob);
 
-    // std::cout << "normalized " << normalized << std::endl;
-    // std::cout << "beta tensor " << _beta_tensor << std::endl;
-    // std::cout << "_alpha_tensor " << _alpha_tensor << std::endl;
-    // std::cout << "_lognorm " << _log_norm << std::endl;
-
-    // std::cout << "First term " << (_beta_tensor - 1.0) << std::endl;
-    // std::cout << "Second " << torch::log(torch::clamp_min(normalized, 1e-8)) << std::endl;
-    // std::cout << "Third " << (_alpha_tensor - 1.0) * torch::log1p(-normalized) << std::endl;
-    // std::cout << "Lognorm " << _log_norm << std::endl;
-    return (_beta_tensor - 1.0) * torch::log(torch::clamp_min(normalized, 1e-8)) + (_alpha_tensor - 1.0) * torch::log1p(-normalized) - _log_norm;
+    return log_prob;
   }
 
   torch::Tensor var = _std_tensor * _std_tensor;
   return -((action - _mean) * (action - _mean)) / (2.0 * var) - _log_std_tensor -
-         0.5*std::log(2.0 * M_PI);
+         0.5 * std::log(2.0 * M_PI);
 }
 
 }
-
 
 #endif
