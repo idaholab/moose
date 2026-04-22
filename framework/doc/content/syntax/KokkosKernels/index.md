@@ -8,7 +8,7 @@ Before reading this documentation, consider reading the following materials firs
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE.
 
 !alert note
-Kokkos-MOOSE kernels do not support coupling with scalar variables and automatic differention yet.
+Kokkos-MOOSE kernels do not support coupling with scalar variables yet.
 
 The Kokkos-MOOSE kernels are designed to resemble the original MOOSE kernels as much as possible for easier porting and adaptation.
 However, some differences still exist due to the fundamentally different programming paradigm between CPU and GPU.
@@ -197,6 +197,21 @@ See the following source codes of `KokkosCoupledTimeDerivative` for an example o
 
 !listing framework/src/kokkos/kernels/KokkosCoupledTimeDerivative.K id=kokkos-time-derivative-source language=cpp
          caption=The `KokkosCoupledTimeDerivative` source file.
+
+## Automatic Differentiation id=kokkos_ad_kernel
+
+Kokkos-MOOSE kernels also support [automatic differentiation (AD)](automatic_differentiation/index.md).
+AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with either `registerKokkosADKernel()` or `registerKokkosADResidualObject()`.
+AD kernels requires `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
+
+```cpp
+template <typename Derived>
+KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int i,
+                                                        const unsigned int qp,
+                                                        AssemblyDatum & datum) const;
+```
+
+`computeQpJacobian()` and `computeQpOffDiagJacobian()` are unused, as AD automatically assembles Jacobian.
 
 !syntax list /Kernels objects=True actions=False subsystems=False
 
