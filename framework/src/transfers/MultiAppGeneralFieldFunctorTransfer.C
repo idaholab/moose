@@ -471,7 +471,7 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
     if (!point_found)
     {
       if (_extrapolation_behavior == 0) /*flat*/
-        // The base class will do take care of replacing the value
+        // The base class will take care of replacing the value
         outgoing_vals[i_pt] = {GeneralFieldTransfer::OutOfMeshValue,
                                GeneralFieldTransfer::OutOfMeshValue};
 
