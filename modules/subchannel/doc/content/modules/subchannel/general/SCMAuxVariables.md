@@ -49,7 +49,7 @@ This is the fuel pin mesh that gets created by: [SCMQuadPinMeshGenerator](SCMQua
 
 When the `[SubChannel]` problem syntax is present, defining either of these mesh generators in the fuel pin mesh block, automatically defines the following auxiliary variables that live on the fuel pin mesh nodes:
 
-- Fuel pin average surface temperature: $K$ = "Tpin"
+- Fuel pin average surface temperature: "Tpin" $K$
 
 - Fuel pin diameter: "Dpin" $m$
 
@@ -76,5 +76,6 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 !alert warning
  All ICs, AuxKernels, and Postprocessors using these variables must be applied on compatible blocks. Mismatched block names will result in an error.
 
-!alert note
+## Auxiliary variables, block restrictions and output
+
 All SCM auxiliary variables are block-restricted by default. Each variable is defined only on the mesh block where it is physically meaningful (e.g., subchannel, fuel pins, or duct). When visualized in ParaView, these variables may appear across the entire domain (all mesh types). However, values outside their native blocks are not meaningful and may be shown as zero or interpolated by the visualization tool. For example, subchannel quantities such as surface area or mass flow rate are defined on the subchannel mesh and should only be interpreted there.

@@ -134,7 +134,7 @@ length = 0.5
   [Dpin_ic]
     type = ConstantIC
     variable = Dpin
-    value = 0.00950
+    value = 0.125
   []
 
   [P_ic]

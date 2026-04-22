@@ -40,29 +40,22 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
 void
 QuadSubChannel1PhaseProblem::initializeSolution()
 {
-  const Real tol = 1e-8;
+  const Real tol = libMesh::TOLERANCE;
   const auto pin_diameter = _subchannel_mesh.getPinDiameter();
 
-  for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
-  {
-    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-    {
-      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-
-      if (_pin_mesh_exist)
+  if (_pin_mesh_exist)
+    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
+        auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
         const Real Dpin = (*_Dpin_soln)(node);
-
         if (std::abs(Dpin) <= tol)
           mooseError("Dpin is zero at node ",
                      node->id(),
                      ". You must initialize Dpin to a non-zero value.");
       }
-    }
-  }
 
   for (unsigned int iz = 0; iz < _n_cells + 1 && !_deformation; iz++)
-  {
     for (unsigned int i_ch = 0; i_ch < _n_channels && !_deformation; i_ch++)
     {
       auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -75,11 +68,11 @@ QuadSubChannel1PhaseProblem::initializeSolution()
           std::abs((*_displacement_soln)(node)) > tol)
         _deformation = true;
     }
-  }
 
   /// update surface area, wetted perimeter based on: Dpin, displacement
   if (_deformation)
   {
+    _console << " =========== DEFORMATION RECALCULATION ACTIVATED ============== " << std::endl;
     Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
     auto side_gap = _subchannel_mesh.getSideGap();
