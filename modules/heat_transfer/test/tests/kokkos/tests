@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#30655'
+  issues = '#30655 #32179'
 
   [conduction]
     design = 'KokkosHeatConduction.md KokkosHeatConductionMaterial.md'
@@ -20,6 +20,37 @@
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
       prereq = 'conduction/material'
+    []
+  []
+
+  [transient]
+    design = 'KokkosHeatConductionTimeDerivative.md'
+    requirement = 'The Kokkos system shall compute temperature field through conduction with time-derivative terms'
+    [plain]
+      type = 'Exodiff'
+      input = 'kokkos_transient_conduction.i'
+      exodiff = 'kokkos_transient_conduction_out.e'
+      detail = 'without temperature-derivative material properties,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [derivatives]
+      type = 'Exodiff'
+      input = 'kokkos_transient_heat_derivatives.i'
+      exodiff = 'kokkos_transient_heat_derivatives_out.e'
+      detail = 'with temperature-derivative material properties,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      allow_test_objects = true
+    []
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'kokkos_transient_heat_derivatives.i'
+      cli_args = 'Outputs/exodus=false'
+      detail = 'with perfect Jacobian assembled using temperature-derivative material properties'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      allow_test_objects = true
     []
   []
 
