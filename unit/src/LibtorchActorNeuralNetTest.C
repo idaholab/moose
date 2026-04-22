@@ -84,16 +84,16 @@ TEST(LibtorchActorNeuralNetTest, boundedBetaLogProbability)
 
   network._weights[0]->weight.data().fill_(0.0);
   network._weights[0]->bias.data().fill_(1.0);
-  network.actionDistributionHead().primaryModule()->weight.data().fill_(
+  network.betaActionDistribution().alphaModule()->weight.data().fill_(
       inverseSoftplusPlusOne(alpha_target));
-  network.actionDistributionHead().secondaryModule()->weight.data().fill_(
+  network.betaActionDistribution().betaModule()->weight.data().fill_(
       inverseSoftplusPlusOne(beta_target));
 
   auto input = torch::zeros({1, 1}, at::kDouble);
   network.evaluate(input, false);
 
-  const Real alpha = network.alphaTensor().item<Real>();
-  const Real beta = network.betaTensor().item<Real>();
+  const Real alpha = network.betaActionDistribution().alphaTensor().item<Real>();
+  const Real beta = network.betaActionDistribution().betaTensor().item<Real>();
   const Real normalized = (action_value - min_value) / (max_value - min_value);
   const Real log_norm = std::lgamma(alpha) + std::lgamma(beta) - std::lgamma(alpha + beta);
   const Real expected = (alpha - 1.0) * std::log(normalized) +
@@ -129,15 +129,16 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateI
                                          {input_scale},
                                          {action_scale});
 
-  network.actionDistributionHead().primaryModule()->weight.data().fill_(1.5);
-  network.actionDistributionHead().primaryModule()->bias.data().fill_(0.0);
-  network.actionDistributionHead().secondaryModule()->weight.data().fill_(123.0);
-  network.actionDistributionHead().secondaryModule()->bias.data().fill_(log_std);
+  network.gaussianActionDistribution().meanModule()->weight.data().fill_(1.5);
+  network.gaussianActionDistribution().meanModule()->bias.data().fill_(0.0);
+  network.gaussianActionDistribution().stdModule()->weight.data().fill_(123.0);
+  network.gaussianActionDistribution().stdModule()->bias.data().fill_(log_std);
 
   auto input = torch::tensor({{2.0}}, at::kDouble);
   const Real deterministic_action = network.evaluate(input, false).item<Real>();
   EXPECT_NEAR(deterministic_action, expected_deterministic_action, 1e-12);
-  EXPECT_NEAR(network.stdTensor().item<Real>(), std::exp(log_std), 1e-12);
+  EXPECT_NEAR(
+      network.gaussianActionDistribution().stdTensor().item<Real>(), std::exp(log_std), 1e-12);
 
   const Real unscaled_mean = expected_deterministic_action / action_scale;
   const Real unscaled_action = physical_action / action_scale;
@@ -153,7 +154,8 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateI
 
   auto second_input = torch::tensor({{4.0}}, at::kDouble);
   network.evaluate(second_input, false);
-  EXPECT_NEAR(network.stdTensor().item<Real>(), std::exp(log_std), 1e-12);
+  EXPECT_NEAR(
+      network.gaussianActionDistribution().stdTensor().item<Real>(), std::exp(log_std), 1e-12);
 }
 
 TEST(LibtorchActorNeuralNetTest, gaussianActorCanUseStateDependentStdWhenRequested)
@@ -173,18 +175,18 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorCanUseStateDependentStdWhenRequest
                                          {1.0},
                                          false);
 
-  network.actionDistributionHead().primaryModule()->weight.data().fill_(0.0);
-  network.actionDistributionHead().primaryModule()->bias.data().fill_(0.0);
-  network.actionDistributionHead().secondaryModule()->weight.data().fill_(0.5);
-  network.actionDistributionHead().secondaryModule()->bias.data().fill_(0.0);
+  network.gaussianActionDistribution().meanModule()->weight.data().fill_(0.0);
+  network.gaussianActionDistribution().meanModule()->bias.data().fill_(0.0);
+  network.gaussianActionDistribution().stdModule()->weight.data().fill_(0.5);
+  network.gaussianActionDistribution().stdModule()->bias.data().fill_(0.0);
 
   auto first_input = torch::tensor({{2.0}}, at::kDouble);
   network.evaluate(first_input, false);
-  const Real first_std = network.stdTensor().item<Real>();
+  const Real first_std = network.gaussianActionDistribution().stdTensor().item<Real>();
 
   auto second_input = torch::tensor({{4.0}}, at::kDouble);
   network.evaluate(second_input, false);
-  const Real second_std = network.stdTensor().item<Real>();
+  const Real second_std = network.gaussianActionDistribution().stdTensor().item<Real>();
 
   EXPECT_NEAR(first_std, std::exp(1.0), 1e-12);
   EXPECT_NEAR(second_std, std::exp(3.0), 1e-12);
@@ -209,13 +211,12 @@ TEST(LibtorchActorNeuralNetTest, loadActorStateAcceptsTorchSaveArchive)
 
   saved._weights[0]->weight.data() = torch::tensor({{1.0, 2.0}, {3.0, 4.0}}, at::kDouble);
   saved._weights[0]->bias.data() = torch::tensor({5.0, 6.0}, at::kDouble);
-  saved.actionDistributionHead().primaryModule()->weight.data() =
+  saved.gaussianActionDistribution().meanModule()->weight.data() =
       torch::tensor({{7.0, 8.0}}, at::kDouble);
-  saved.actionDistributionHead().primaryModule()->bias.data() = torch::tensor({9.0}, at::kDouble);
-  saved.actionDistributionHead().secondaryModule()->weight.data() =
+  saved.gaussianActionDistribution().meanModule()->bias.data() = torch::tensor({9.0}, at::kDouble);
+  saved.gaussianActionDistribution().stdModule()->weight.data() =
       torch::tensor({{-1.5, 2.5}}, at::kDouble);
-  saved.actionDistributionHead().secondaryModule()->bias.data() =
-      torch::tensor({-3.5}, at::kDouble);
+  saved.gaussianActionDistribution().stdModule()->bias.data() = torch::tensor({-3.5}, at::kDouble);
 
   Moose::UnitUtils::TempFile archive;
   torch::save(std::make_shared<Moose::LibtorchActorNeuralNet>(saved), archive.path().string());

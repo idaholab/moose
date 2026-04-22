@@ -65,14 +65,19 @@ public:
   /// Construct the neural network
   virtual void constructNeuralNetwork() override;
 
-  const torch::Tensor & stdTensor() const { return _std_tensor; }
+  const LibtorchActionDistribution & actionDistribution() const { return *_action_distribution; }
+  LibtorchActionDistribution & actionDistribution() { return *_action_distribution; }
 
-  const torch::Tensor & alphaTensor() const { return _alpha_tensor; }
+  const LibtorchGaussianActionDistribution * gaussianActionDistributionPtr() const;
+  LibtorchGaussianActionDistribution * gaussianActionDistributionPtr();
+  const LibtorchGaussianActionDistribution & gaussianActionDistribution() const;
+  LibtorchGaussianActionDistribution & gaussianActionDistribution();
 
-  const torch::Tensor & betaTensor() const { return _beta_tensor; }
+  const LibtorchBetaActionDistribution * betaActionDistributionPtr() const;
+  LibtorchBetaActionDistribution * betaActionDistributionPtr();
+  const LibtorchBetaActionDistribution & betaActionDistribution() const;
+  LibtorchBetaActionDistribution & betaActionDistribution();
 
-  const LibtorchActionDistributionHead & actionDistributionHead() const { return *_action_head; }
-  LibtorchActionDistributionHead & actionDistributionHead() { return *_action_head; }
   bool stateIndependentStd() const { return _state_independent_std; }
 
   void resetDistributionParams(torch::Tensor input);
@@ -84,11 +89,8 @@ public:
   virtual void initializeNeuralNetwork() override;
 
 protected:
-  torch::Tensor _alpha_tensor;
-  torch::Tensor _beta_tensor;
-  torch::Tensor _std_tensor;
   const bool _state_independent_std;
-  std::shared_ptr<LibtorchActionDistributionHead> _action_head;
+  std::shared_ptr<LibtorchActionDistribution> _action_distribution;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchActorNeuralNet * const & network);
