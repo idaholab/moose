@@ -46,7 +46,6 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
     TransientInterface(this),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
-    _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _num_tries(getParam<unsigned int>("num_tries"))
 {
@@ -62,17 +61,10 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
 
   // Setting the sizes for the different vectors enabling sampling and selection
   _inputs_all.resize(_num_tries, std::vector<Real>(_distributions.size(), 0.0));
-  _new_samples.resize(_num_parallel_proposals, std::vector<Real>(_distributions.size(), 0.0));
+  _new_samples.resize(_num_parallel_proposals);
 
   setNumberOfRandomSeeds(getParam<unsigned int>("num_random_seeds"));
-}
-
-void
-GenericActiveLearningSampler::fillVector(std::vector<Real> & vector,
-                                         const unsigned int & seed_value)
-{
-  for (unsigned int i = 0; i < _distributions.size(); ++i)
-    vector[i] = _distributions[i]->quantile(getRand(seed_value));
+  setAutoAdvanceGenerators(false);
 }
 
 const std::vector<std::vector<Real>> &
@@ -82,26 +74,30 @@ GenericActiveLearningSampler::getSampleTries() const
 }
 
 void
-GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
+GenericActiveLearningSampler::executeSetUp()
 {
-  if (_t_step < 1 || _check_step == _t_step)
-    return;
-  _check_step = _t_step;
+  std::size_t rand_index = 0;
+  auto fill_vector = [&](std::vector<Real> & vector)
+  {
+    vector.resize(getNumberOfCols());
+    for (const auto j : make_range(getNumberOfCols()))
+      vector[j] = _distributions[j]->quantile(getRand(rand_index++, _t_step + 1));
+  };
 
   /* If step is 1, randomly generate the samples.
   Else, generate the samples informed by the GP from the reporter "sorted_indices" */
-  for (dof_id_type i = 0; i < _num_parallel_proposals; ++i)
+  for (const auto i : make_range(getNumberOfRows()))
   {
-    if (_t_step <= 1)
-      fillVector(_new_samples[i], _t_step);
+    if (_t_step <= 0)
+      fill_vector(_new_samples[i]);
     else
       _new_samples[i] = _inputs_all[_sorted_indices[i]];
   }
 
   /* Finally, generate several new samples randomly for the GP to try and pass it to the
   reporter */
-  for (dof_id_type i = 0; i < _num_tries; ++i)
-    fillVector(_inputs_all[i], _t_step);
+  for (const auto i : make_range(_num_tries))
+    fill_vector(_inputs_all[i]);
 }
 
 Real
