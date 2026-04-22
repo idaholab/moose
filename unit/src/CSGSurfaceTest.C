@@ -322,6 +322,55 @@ TEST(CSGSurfaceTest, testHalfspaceWithTransform)
   }
 }
 
+/// tests that a point is properly handled if transformations do not alter surface
+/// (scale = 1, translate=0, rotation=0 or 360)
+TEST(CSGSurfaceTest, testHalfspaceWithNullTransform)
+{
+  // define a circle with r=1 and "apply" each transformation to it such that the point's half-space
+  // will change if transformed
+  CSGSphere sph1("sp", 1.0);
+  Point p(1.5, 0, 0);
+
+  // check scaling = 1
+  {
+    // pre-transformation - outside (positive)
+    ASSERT_EQ(CSGSurface::Halfspace::POSITIVE, sph1.getHalfspaceFromPoint(p));
+    // apply scale = 1 transform
+    std::tuple<Real, Real, Real> trans = {1.0, 1.0, 1.0};
+    sph1.addTransformation(TransformationType::SCALE, trans);
+    // post-transformation - still outside (positive)
+    ASSERT_EQ(CSGSurface::Halfspace::POSITIVE, sph1.getHalfspaceFromPoint(p));
+  }
+
+  // remake sphere located at (1, 0, 0) to test just rotation handling
+  CSGSphere sph2("sp", Point(1, 0, 0), 1.0);
+  // check rotation: if rotation 360 degrees around z-axis is applied, the point (1.5, 0, 0) should
+  // be considered still inside after the complete rotation
+  {
+    // pre-transformation - inside (negative)
+    ASSERT_EQ(CSGSurface::Halfspace::NEGATIVE, sph2.getHalfspaceFromPoint(p));
+    // apply rotation of 360 degrees around z-axis
+    std::tuple<Real, Real, Real> trans = {0.0, 0.0, 360};
+    sph2.addTransformation(TransformationType::ROTATION, trans);
+    // post-transformation - still inside (negative)
+    ASSERT_EQ(CSGSurface::Halfspace::NEGATIVE, sph2.getHalfspaceFromPoint(p));
+  }
+
+  // remake sphere at origin so no transformations are applied
+  CSGSphere sph3("sp", 1.0);
+  // check translation: if a translation of x=y=z=0 is applied, the point (1.5, 0, 0) should be
+  // considered in the positive (outside) half-space before and after translation
+  {
+    // pre-transformation - outside (positive)
+    ASSERT_EQ(CSGSurface::Halfspace::POSITIVE, sph3.getHalfspaceFromPoint(p));
+    // apply translation x=1
+    std::tuple<Real, Real, Real> trans = {0.0, 0.0, 0.0};
+    sph3.addTransformation(TransformationType::TRANSLATION, trans);
+    // post-transformation - still outside (positive)
+    ASSERT_EQ(CSGSurface::Halfspace::POSITIVE, sph3.getHalfspaceFromPoint(p));
+  }
+}
+
 /// tests surface equality operators
 TEST(CSGSurfaceTest, testSurfaceEquality)
 {

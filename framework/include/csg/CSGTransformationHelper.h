@@ -98,6 +98,7 @@ protected:
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithTransform);
+  FRIEND_TEST(CSGSurfaceTest, testHalfspaceWithNullTransform);
   ///@}
 #endif
 };
