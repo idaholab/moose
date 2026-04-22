@@ -76,65 +76,13 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [displacement]
-    block = sub_channel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [mu]
-    block = sub_channel
-  []
-  [duct_heat_flux]
-    block = duct
-    initial_condition = 0
-  []
-  [Tduct]
-    block = duct
-  []
-[]
-
 [FluidProperties]
   [sodium]
     type = PBSodiumFluidProperties
   []
 []
 
-[sub_channel]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   P_out = ${P_out}

@@ -57,36 +57,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 []
 
 [AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [rho]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
   [q_prime_init]
     block = fuel_pins
   []
@@ -95,18 +65,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
   [q_prime]
     block = fuel_pins
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [displacement]
-    block = sub_channel
-  []
-  [ff]
-    block = sub_channel
   []
 []
 

@@ -112,12 +112,6 @@ heated_length = 1.0
     value = 0.0
   []
 
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
-
   [Viscosity_ic]
     type = ViscosityIC
     variable = mu
@@ -229,7 +223,7 @@ heated_length = 1.0
   [subchannel_transfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
+    variable = 'mdot SumWij P h T rho mu S'
   []
   [pin_transfer]
     type = SCMPinSolutionTransfer
