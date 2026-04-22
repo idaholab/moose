@@ -403,29 +403,15 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
-  if (type == "LevelSetOlssonVortex")
-  {
-    return 2;
-  }
-  else if (type == "ParsedVectorFunction")
-  {
-    if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
-    {
-      return 3;
-    }
-    else if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y"))
-    {
-      return 2;
-    }
-    else
-    {
-      return 1;
-    }
-  }
-  else
-  {
+  if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
     return 3;
-  }
+  if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y") ||
+      type == "LevelSetOlssonVortex")
+    return 2;
+  if (parameters.isParamSetByUser("expression_x") || parameters.isParamSetByUser("value_x"))
+    return 1;
+
+  return 3;
 }
 
 const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",

@@ -22,7 +22,6 @@ class MFEMFunctorMaterial : public MFEMObject,
 {
 public:
   static InputParameters validParams();
-  static libMesh::Point libMeshPointFromMFEMVector(const mfem::Vector & vec);
 
   MFEMFunctorMaterial(const InputParameters & parameters);
   virtual ~MFEMFunctorMaterial();
