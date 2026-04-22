@@ -11,6 +11,7 @@
 
 #include "gtest/gtest.h"
 #include "LibtorchActorNeuralNet.h"
+#include "MooseUnitUtils.h"
 
 #include <cmath>
 
@@ -105,7 +106,7 @@ TEST(LibtorchActorNeuralNetTest, boundedBetaLogProbability)
   EXPECT_NEAR(actual, expected, 1e-12);
 }
 
-TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScaling)
+TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateIndependentStd)
 {
   constexpr Real input_shift = 1.0;
   constexpr Real input_scale = 2.0;
@@ -130,12 +131,13 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScaling)
 
   network.actionDistributionHead().primaryModule()->weight.data().fill_(1.5);
   network.actionDistributionHead().primaryModule()->bias.data().fill_(0.0);
-  network.actionDistributionHead().secondaryModule()->weight.data().fill_(log_std / 2.0);
-  network.actionDistributionHead().secondaryModule()->bias.data().fill_(0.0);
+  network.actionDistributionHead().secondaryModule()->weight.data().fill_(123.0);
+  network.actionDistributionHead().secondaryModule()->bias.data().fill_(log_std);
 
   auto input = torch::tensor({{2.0}}, at::kDouble);
   const Real deterministic_action = network.evaluate(input, false).item<Real>();
   EXPECT_NEAR(deterministic_action, expected_deterministic_action, 1e-12);
+  EXPECT_NEAR(network.stdTensor().item<Real>(), std::exp(log_std), 1e-12);
 
   const Real unscaled_mean = expected_deterministic_action / action_scale;
   const Real unscaled_action = physical_action / action_scale;
@@ -148,6 +150,122 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScaling)
   const Real actual_log_probability = network.logProbability(action).item<Real>();
 
   EXPECT_NEAR(actual_log_probability, expected_log_probability, 1e-12);
+
+  auto second_input = torch::tensor({{4.0}}, at::kDouble);
+  network.evaluate(second_input, false);
+  EXPECT_NEAR(network.stdTensor().item<Real>(), std::exp(log_std), 1e-12);
+}
+
+TEST(LibtorchActorNeuralNetTest, gaussianActorCanUseStateDependentStdWhenRequested)
+{
+  TestableLibtorchActorNeuralNet network("test_state_dependent_gaussian",
+                                         1,
+                                         1,
+                                         {},
+                                         {"linear"},
+                                         {},
+                                         {},
+                                         torch::kCPU,
+                                         torch::kDouble,
+                                         true,
+                                         {1.0},
+                                         {2.0},
+                                         {1.0},
+                                         false);
+
+  network.actionDistributionHead().primaryModule()->weight.data().fill_(0.0);
+  network.actionDistributionHead().primaryModule()->bias.data().fill_(0.0);
+  network.actionDistributionHead().secondaryModule()->weight.data().fill_(0.5);
+  network.actionDistributionHead().secondaryModule()->bias.data().fill_(0.0);
+
+  auto first_input = torch::tensor({{2.0}}, at::kDouble);
+  network.evaluate(first_input, false);
+  const Real first_std = network.stdTensor().item<Real>();
+
+  auto second_input = torch::tensor({{4.0}}, at::kDouble);
+  network.evaluate(second_input, false);
+  const Real second_std = network.stdTensor().item<Real>();
+
+  EXPECT_NEAR(first_std, std::exp(1.0), 1e-12);
+  EXPECT_NEAR(second_std, std::exp(3.0), 1e-12);
+  EXPECT_GT(second_std, first_std);
+}
+
+TEST(LibtorchActorNeuralNetTest, loadActorStateAcceptsTorchSaveArchive)
+{
+  TestableLibtorchActorNeuralNet saved("saved_actor",
+                                       2,
+                                       1,
+                                       {2},
+                                       {"linear"},
+                                       {},
+                                       {},
+                                       torch::kCPU,
+                                       torch::kDouble,
+                                       true,
+                                       {1.0, -2.0},
+                                       {0.5, 3.0},
+                                       {4.0});
+
+  saved._weights[0]->weight.data() = torch::tensor({{1.0, 2.0}, {3.0, 4.0}}, at::kDouble);
+  saved._weights[0]->bias.data() = torch::tensor({5.0, 6.0}, at::kDouble);
+  saved.actionDistributionHead().primaryModule()->weight.data() =
+      torch::tensor({{7.0, 8.0}}, at::kDouble);
+  saved.actionDistributionHead().primaryModule()->bias.data() = torch::tensor({9.0}, at::kDouble);
+  saved.actionDistributionHead().secondaryModule()->weight.data() =
+      torch::tensor({{-1.5, 2.5}}, at::kDouble);
+  saved.actionDistributionHead().secondaryModule()->bias.data() =
+      torch::tensor({-3.5}, at::kDouble);
+
+  Moose::UnitUtils::TempFile archive;
+  torch::save(std::make_shared<Moose::LibtorchActorNeuralNet>(saved), archive.path().string());
+
+  TestableLibtorchActorNeuralNet restored("restored_actor",
+                                          2,
+                                          1,
+                                          {2},
+                                          {"linear"},
+                                          {},
+                                          {},
+                                          torch::kCPU,
+                                          torch::kDouble,
+                                          true,
+                                          {1.0, -2.0},
+                                          {0.5, 3.0},
+                                          {4.0});
+
+  Moose::loadLibtorchActorNeuralNetState(restored, archive.path().string());
+
+  const auto saved_parameters = saved.named_parameters();
+  const auto restored_parameters = restored.named_parameters();
+  ASSERT_EQ(saved_parameters.size(), restored_parameters.size());
+  for (std::size_t i = 0; i < saved_parameters.size(); ++i)
+  {
+    EXPECT_EQ(saved_parameters[i].key(), restored_parameters[i].key());
+    EXPECT_TRUE(torch::allclose(saved_parameters[i].value(),
+                                restored_parameters[i].value(),
+                                /*rtol=*/0.0,
+                                /*atol=*/0.0));
+  }
+
+  const auto saved_buffers = saved.named_buffers();
+  const auto restored_buffers = restored.named_buffers();
+  ASSERT_EQ(saved_buffers.size(), restored_buffers.size());
+  for (std::size_t i = 0; i < saved_buffers.size(); ++i)
+  {
+    EXPECT_EQ(saved_buffers[i].key(), restored_buffers[i].key());
+    EXPECT_TRUE(torch::allclose(saved_buffers[i].value(),
+                                restored_buffers[i].value(),
+                                /*rtol=*/0.0,
+                                /*atol=*/0.0));
+  }
+
+  auto saved_input = torch::tensor({{3.0, -1.0}}, at::kDouble);
+  auto restored_input = saved_input.clone();
+  EXPECT_TRUE(torch::allclose(saved.evaluate(saved_input, false),
+                              restored.evaluate(restored_input, false),
+                              /*rtol=*/0.0,
+                              /*atol=*/0.0));
 }
 
 #endif

@@ -52,7 +52,8 @@ LibtorchActionDistributionHead::LibtorchActionDistributionHead(
     const torch::DeviceType device_type,
     const torch::ScalarType data_type,
     const bool build_on_construct,
-    const std::vector<Real> & output_scaling_factors)
+    const std::vector<Real> & output_scaling_factors,
+    const bool state_independent_std)
   : _name(name),
     _num_inputs(num_inputs),
     _num_outputs(num_outputs),
@@ -60,6 +61,7 @@ LibtorchActionDistributionHead::LibtorchActionDistributionHead(
     _maximum_values(maximum_values),
     _device_type(device_type),
     _data_type(data_type),
+    _state_independent_std(state_independent_std),
     _output_scaling_factors(normalizeActionScalingFactors(output_scaling_factors, num_outputs))
 {
   auto action_scale = _output_scaling_factors;
@@ -104,6 +106,7 @@ LibtorchActionDistributionHead::LibtorchActionDistributionHead(
     _maximum_values(head._maximum_values),
     _device_type(head._device_type),
     _data_type(head._data_type),
+    _state_independent_std(head._state_independent_std),
     _output_scaling_factors(head._output_scaling_factors)
 {
   auto action_scale = _output_scaling_factors;
@@ -161,6 +164,15 @@ LibtorchActionDistributionHead::initialize()
   torch::nn::init::orthogonal_(_primary_parameter_module->weight, 1.0 / primary_max_dim_size);
   torch::nn::init::zeros_(_primary_parameter_module->bias);
 
+  if (!isBounded() && _state_independent_std)
+  {
+    // Match the TorchRL reference more closely: learn one global log-std per action dimension
+    // instead of conditioning the exploration scale on the current state features.
+    _secondary_parameter_module->weight.data().zero_();
+    torch::nn::init::zeros_(_secondary_parameter_module->bias);
+    return;
+  }
+
   const auto secondary_sizes = _secondary_parameter_module->weight.sizes();
   const auto secondary_max_dim_size =
       *std::max_element(secondary_sizes.begin(), secondary_sizes.end());
@@ -200,7 +212,15 @@ LibtorchActionDistributionHead::reset(const torch::Tensor & input)
   }
 
   _mean = _primary_parameter_module->forward(features);
-  _log_std_tensor = _secondary_parameter_module->forward(features);
+  if (_state_independent_std)
+  {
+    if (_mean.dim() <= 1)
+      _log_std_tensor = _secondary_parameter_module->bias;
+    else
+      _log_std_tensor = _secondary_parameter_module->bias.view({1, -1}).expand(_mean.sizes());
+  }
+  else
+    _log_std_tensor = _secondary_parameter_module->forward(features);
   _log_std_tensor = torch::clamp(_log_std_tensor, std::log(1e-12), -std::log(1e-12));
   _std_tensor = torch::exp(_log_std_tensor);
 }

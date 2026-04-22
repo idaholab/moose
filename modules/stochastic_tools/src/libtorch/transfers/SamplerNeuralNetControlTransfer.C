@@ -45,11 +45,6 @@ SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(
 void
 SamplerNeuralNetControlTransfer::initialSetup()
 {
-  const auto multi_app = getToMultiApp();
-  const dof_id_type n = multi_app->numGlobalApps();
-  for (MooseIndex(n) i = 0; i < n; i++)
-    if (multi_app->hasLocalApp(i))
-      torch::manual_seed(i);
 }
 
 void
@@ -115,6 +110,15 @@ SamplerNeuralNetControlTransfer::executeToMultiapp()
 {
   if (getToMultiApp()->hasLocalApp(_app_index))
   {
+    // Use a rank-invariant seed based on the configured trainer seed, the current main-app
+    // training step, and the sampler row being executed. This keeps the stochastic rollout path
+    // tied to the actual sample instead of the transient local app slot chosen by batch-reset.
+    const uint64_t sample_seed = static_cast<uint64_t>(_trainer.seed()) +
+                                 static_cast<uint64_t>(_global_index) +
+                                 static_cast<uint64_t>(_sampler_ptr->getNumberOfRows()) *
+                                     static_cast<uint64_t>(_fe_problem.timeStep());
+    torch::manual_seed(sample_seed);
+
     // Get the control neural net from the trainer
     const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 

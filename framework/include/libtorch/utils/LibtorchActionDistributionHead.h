@@ -38,7 +38,8 @@ public:
                                  torch::DeviceType device_type = torch::kCPU,
                                  torch::ScalarType scalar_type = torch::kDouble,
                                  bool build_on_construct = true,
-                                 const std::vector<Real> & output_scaling_factors = {});
+                                 const std::vector<Real> & output_scaling_factors = {},
+                                 bool state_independent_std = true);
 
   LibtorchActionDistributionHead(const LibtorchActionDistributionHead & head,
                                  bool build_on_construct = true);
@@ -60,6 +61,7 @@ public:
   torch::Tensor entropy() const;
 
   bool isBounded() const { return !_minimum_values.empty(); }
+  bool stateIndependentStd() const { return _state_independent_std; }
 
   torch::nn::Linear & primaryModule() { return _primary_parameter_module; }
   const torch::nn::Linear & primaryModule() const { return _primary_parameter_module; }
@@ -79,6 +81,7 @@ private:
   const std::vector<Real> _maximum_values;
   const torch::DeviceType _device_type;
   const torch::ScalarType _data_type;
+  const bool _state_independent_std;
   std::vector<Real> _output_scaling_factors;
 
   torch::nn::Linear _primary_parameter_module{nullptr};

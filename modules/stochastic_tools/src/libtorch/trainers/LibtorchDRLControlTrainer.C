@@ -133,6 +133,11 @@ LibtorchDRLControlTrainer::validParams()
       {},
       "Deprecated compatibility parameter. Actor policies now learn their own action "
       "distribution widths.");
+  params.addParam<bool>(
+      "state_independent_std",
+      true,
+      "If true, learn one Gaussian log-std parameter per action dimension. If false, learn a "
+      "state-dependent std head as in the older MOOSE actor implementation.");
 
   params.addParam<Real>(
       "entropy_coeff", 0.01, "Entropy bonus coefficient used in the PPO actor loss.");
@@ -179,6 +184,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _average_episode_reward(0.0),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
+    _seed(getParam<unsigned int>("seed")),
     _min_values(getParam<std::vector<Real>>("min_control_value")),
     _max_values(getParam<std::vector<Real>>("max_control_value")),
     _highest_reward(-1e8),
@@ -215,7 +221,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
 
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
-  torch::manual_seed(getParam<unsigned int>("seed"));
+  torch::manual_seed(_seed);
 
   bool filename_valid = isParamValid("filename_base");
   const auto input_shift_factors = _observation_history.expandFeatureFactors(_state_shift_factors);
@@ -236,7 +242,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       true,
       input_shift_factors,
       input_scaling_factors,
-      _action_scaling_factors);
+      _action_scaling_factors,
+      getParam<bool>("state_independent_std"));
 
   // We read parameters for the control neural net if it is requested
   if (_read_from_file)
@@ -391,6 +398,11 @@ LibtorchDRLControlTrainer::trainController(const LibtorchRLTrajectoryBuffer::Ten
   // fetch the local threads which are available.
   if (processor_id() == 0)
   {
+    // Reset the mini-batch RNG for each outer training step so optimizer shuffling remains
+    // independent of how rollout sampling happened to be partitioned across MPI ranks.
+    torch::manual_seed(static_cast<uint64_t>(_seed) +
+                       static_cast<uint64_t>(_fe_problem.timeStep()));
+
     for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
     {
       const auto mini_batches =
@@ -506,8 +518,7 @@ unsigned int
 LibtorchDRLControlTrainer::computeNumTransitions(const std::size_t raw_sequence_size) const
 {
   unsigned int num_transitions = 0;
-  for (std::size_t raw_index = 0;
-       raw_index + _timestep_window < raw_sequence_size;
+  for (std::size_t raw_index = 0; raw_index + _timestep_window < raw_sequence_size;
        raw_index += _timestep_window)
     ++num_transitions;
 

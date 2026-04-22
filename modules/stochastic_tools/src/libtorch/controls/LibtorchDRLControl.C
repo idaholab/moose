@@ -50,6 +50,11 @@ LibtorchDRLControl::validParams()
       {},
       "Deprecated compatibility parameter. Actor policies now learn their own action "
       "distribution widths.");
+  params.addParam<bool>(
+      "state_independent_std",
+      true,
+      "If true, interpret the unbounded Gaussian actor as learning one log-std per action "
+      "dimension. If false, use a state-dependent std head.");
 
   return params;
 }
@@ -101,19 +106,21 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
     const auto input_scaling_factors =
         _observation_history.expandFeatureFactors(_response_scaling_factors);
 
-    auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
-                                                              num_inputs,
-                                                              num_outputs,
-                                                              num_neurons_per_layer,
-                                                              activation_functions,
-                                                              minimum_values,
-                                                              maximum_values,
-                                                              torch::kCPU,
-                                                              torch::kDouble,
-                                                              true,
-                                                              input_shift_factors,
-                                                              input_scaling_factors,
-                                                              _action_scaling_factors);
+    auto nn =
+        std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
+                                                        num_inputs,
+                                                        num_outputs,
+                                                        num_neurons_per_layer,
+                                                        activation_functions,
+                                                        minimum_values,
+                                                        maximum_values,
+                                                        torch::kCPU,
+                                                        torch::kDouble,
+                                                        true,
+                                                        input_shift_factors,
+                                                        input_scaling_factors,
+                                                        _action_scaling_factors,
+                                                        getParam<bool>("state_independent_std"));
 
     try
     {

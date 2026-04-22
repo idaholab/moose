@@ -51,6 +51,7 @@ public:
   void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
 
   const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
+  unsigned int seed() const { return _seed; }
 
 protected:
   /// Compute the average eposiodic reward
@@ -155,6 +156,9 @@ protected:
 
   /// The frequency the loss should be printed
   const unsigned int _loss_print_frequency;
+
+  /// Base seed for stochastic optimizers and policy sampling.
+  const unsigned int _seed;
 
   /// min
   std::vector<Real> _min_values;
