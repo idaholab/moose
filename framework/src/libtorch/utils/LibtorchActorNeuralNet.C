@@ -78,6 +78,130 @@ findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch:
   return false;
 }
 
+template <typename NamedTensorList>
+bool
+readScriptedActorStateTensor(const NamedTensorList & tensors,
+                             const std::string & key,
+                             torch::Tensor & tensor)
+{
+  if (findNamedTensor(tensors, key, tensor))
+    return true;
+
+  if (key.rfind("action_head.", 0) == 0)
+    return findNamedTensor(tensors, key.substr(std::string("action_head.").size()), tensor);
+
+  return false;
+}
+
+bool
+loadActorStateFromArchive(Moose::LibtorchActorNeuralNet & nn,
+                          const std::string & filename,
+                          std::string & error)
+{
+  try
+  {
+    torch::serialize::InputArchive archive;
+    archive.load_from(filename);
+
+    for (auto & parameter : nn.named_parameters())
+    {
+      torch::Tensor stored_tensor;
+      if (!readActorStateTensor(archive, parameter.key(), stored_tensor))
+      {
+        if (isOptionalActorParameter(parameter.key()))
+        {
+          parameter.value().data().zero_();
+          continue;
+        }
+
+        error = "Missing serialized parameter: " + parameter.key();
+        return false;
+      }
+
+      copyTensor(parameter.value(), stored_tensor);
+    }
+
+    for (auto & buffer : nn.named_buffers())
+    {
+      torch::Tensor stored_tensor;
+      if (!readActorStateTensor(archive, buffer.key(), stored_tensor))
+      {
+        if (isOptionalActorBuffer(buffer.key()))
+          continue;
+
+        error = "Missing serialized buffer: " + buffer.key();
+        return false;
+      }
+
+      copyTensor(buffer.value(), stored_tensor);
+    }
+
+    nn.synchronizeAffineFactorsFromBuffers();
+    nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+    return true;
+  }
+  catch (const c10::Error & e)
+  {
+    error = e.msg();
+    return false;
+  }
+}
+
+bool
+loadActorStateFromTorchScript(Moose::LibtorchActorNeuralNet & nn,
+                              const std::string & filename,
+                              std::string & error)
+{
+  try
+  {
+    const auto scripted = torch::jit::load(filename);
+    const auto scripted_parameters = scripted.named_parameters();
+    const auto scripted_buffers = scripted.named_buffers();
+
+    for (auto & parameter : nn.named_parameters())
+    {
+      torch::Tensor stored_tensor;
+      if (!readScriptedActorStateTensor(scripted_parameters, parameter.key(), stored_tensor))
+      {
+        if (isOptionalActorParameter(parameter.key()))
+        {
+          parameter.value().data().zero_();
+          continue;
+        }
+
+        error = "Missing scripted parameter: " + parameter.key();
+        return false;
+      }
+
+      copyTensor(parameter.value(), stored_tensor);
+    }
+
+    for (auto & buffer : nn.named_buffers())
+    {
+      torch::Tensor stored_tensor;
+      if (!readScriptedActorStateTensor(scripted_buffers, buffer.key(), stored_tensor))
+      {
+        if (isOptionalActorBuffer(buffer.key()))
+          continue;
+
+        error = "Missing scripted buffer: " + buffer.key();
+        return false;
+      }
+
+      copyTensor(buffer.value(), stored_tensor);
+    }
+
+    nn.synchronizeAffineFactorsFromBuffers();
+    nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+    return true;
+  }
+  catch (const c10::Error & e)
+  {
+    error = e.msg();
+    return false;
+  }
+}
+
 } // namespace
 
 namespace Moose
@@ -96,7 +220,8 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
     const bool build_on_construct,
     const std::vector<Real> & input_shift_factors,
     const std::vector<Real> & input_scaling_factors,
-    const std::vector<Real> & output_scaling_factors)
+    const std::vector<Real> & output_scaling_factors,
+    const bool state_independent_std)
   : LibtorchArtificialNeuralNet(name,
                                 num_inputs,
                                 num_outputs,
@@ -109,7 +234,8 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
                                 false,
                                 input_shift_factors,
                                 input_scaling_factors,
-                                output_scaling_factors)
+                                output_scaling_factors),
+    _state_independent_std(state_independent_std)
 {
   if (build_on_construct)
     constructNeuralNetwork();
@@ -117,7 +243,8 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
 
 LibtorchActorNeuralNet::LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
                                                const bool build_on_construct)
-  : LibtorchArtificialNeuralNet(dynamic_cast<const LibtorchArtificialNeuralNet &>(nn), false)
+  : LibtorchArtificialNeuralNet(dynamic_cast<const LibtorchArtificialNeuralNet &>(nn), false),
+    _state_independent_std(nn.stateIndependentStd())
 {
   // We construct the NN architecture
   if (build_on_construct)
@@ -178,7 +305,8 @@ LibtorchActorNeuralNet::constructNeuralNetwork()
                                                                   _device_type,
                                                                   _data_type,
                                                                   true,
-                                                                  _output_scaling_factors);
+                                                                  _output_scaling_factors,
+                                                                  _state_independent_std);
   register_module("action_head", _action_head);
 }
 
@@ -254,52 +382,22 @@ LibtorchActorNeuralNet::logProbability(const torch::Tensor & action)
 void
 loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn, const std::string & filename)
 {
-  torch::serialize::InputArchive archive;
-  archive.load_from(filename);
+  std::string archive_error;
+  if (loadActorStateFromArchive(nn, filename, archive_error))
+    return;
 
-  for (auto & parameter : nn.named_parameters())
-  {
-    torch::Tensor stored_tensor;
-    if (!readActorStateTensor(archive, parameter.key(), stored_tensor))
-    {
-      if (isOptionalActorParameter(parameter.key()))
-      {
-        parameter.value().data().zero_();
-        continue;
-      }
+  std::string torchscript_error;
+  if (loadActorStateFromTorchScript(nn, filename, torchscript_error))
+    return;
 
-      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-                 "the result of the file not existing or a misalignment in the generated "
-                 "container and the data in the file. Make sure the dimensions of the generated "
-                 "neural net are the same as the dimensions of the parameters in the input file!\n"
-                 "Missing serialized parameter: ",
-                 parameter.key());
-    }
-
-    copyTensor(parameter.value(), stored_tensor);
-  }
-
-  for (auto & buffer : nn.named_buffers())
-  {
-    torch::Tensor stored_tensor;
-    if (!readActorStateTensor(archive, buffer.key(), stored_tensor))
-    {
-      if (isOptionalActorBuffer(buffer.key()))
-        continue;
-
-      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-                 "the result of the file not existing or a misalignment in the generated "
-                 "container and the data in the file. Make sure the dimensions of the generated "
-                 "neural net are the same as the dimensions of the parameters in the input file!\n"
-                 "Missing serialized buffer: ",
-                 buffer.key());
-    }
-
-    copyTensor(buffer.value(), stored_tensor);
-  }
-
-  nn.synchronizeAffineFactorsFromBuffers();
-  nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+  mooseError("The requested pytorch parameter file could not be loaded. This can either be "
+             "the result of the file not existing or a misalignment in the generated "
+             "container and the data in the file. Make sure the dimensions of the generated "
+             "neural net are the same as the dimensions of the parameters in the input file!\n"
+             "InputArchive load failed with: ",
+             archive_error,
+             "\nTorchScript load failed with: ",
+             torchscript_error);
 }
 
 bool

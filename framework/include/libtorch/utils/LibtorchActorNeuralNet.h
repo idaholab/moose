@@ -41,7 +41,8 @@ public:
                          const bool build_on_construct = true,
                          const std::vector<Real> & input_shift_factors = {},
                          const std::vector<Real> & input_scaling_factors = {},
-                         const std::vector<Real> & output_scaling_factors = {});
+                         const std::vector<Real> & output_scaling_factors = {},
+                         const bool state_independent_std = true);
 
   /**
    * Copy construct an artificial neural network
@@ -72,6 +73,7 @@ public:
 
   const LibtorchActionDistributionHead & actionDistributionHead() const { return *_action_head; }
   LibtorchActionDistributionHead & actionDistributionHead() { return *_action_head; }
+  bool stateIndependentStd() const { return _state_independent_std; }
 
   void resetDistributionParams(torch::Tensor input);
 
@@ -85,6 +87,7 @@ protected:
   torch::Tensor _alpha_tensor;
   torch::Tensor _beta_tensor;
   torch::Tensor _std_tensor;
+  const bool _state_independent_std;
   std::shared_ptr<LibtorchActionDistributionHead> _action_head;
 };
 
