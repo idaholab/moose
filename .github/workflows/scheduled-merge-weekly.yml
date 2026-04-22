@@ -11,7 +11,7 @@ on:
 jobs:
   merge-scheduled-to-weekly:
     name: Merge scheduled to weekly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment: ${{ github.event_name == 'workflow_dispatch' && 'scheduled-merges' || '' }}
     env:
       SOURCE_BRANCH: scheduled
