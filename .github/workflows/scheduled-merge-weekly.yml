@@ -1,0 +1,30 @@
+name: "Scheduled: Merge weekly"
+
+on:
+  # Saturdays at 2AM
+  schedule:
+    - cron: "0 2 * * 6"
+      timezone: "America/Denver"
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  merge-scheduled-to-weekly:
+    name: Merge scheduled to weekly
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'scheduled-merges' || '' }}
+    env:
+      SOURCE_BRANCH: scheduled
+      TARGET_BRANCH: weekly
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.MOOSEBUILD_GIT_WRITE }}
+      - name: Merge
+        run: |
+          git fetch origin "$SOURCE_BRANCH"
+          git merge --ff-only "origin/${SOURCE_BRANCH}"
+          git push origin "$TARGET_BRANCH"
