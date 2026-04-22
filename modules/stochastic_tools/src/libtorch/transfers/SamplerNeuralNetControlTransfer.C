@@ -113,13 +113,13 @@ SamplerNeuralNetControlTransfer::initializeToMultiapp()
 void
 SamplerNeuralNetControlTransfer::executeToMultiapp()
 {
-  if (getToMultiApp()->hasLocalApp(_global_index))
+  if (getToMultiApp()->hasLocalApp(_app_index))
   {
     // Get the control neural net from the trainer
     const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
     // Get the control object from the other app
-    FEProblemBase & app_problem = _multi_app->appProblemBase(_global_index);
+    FEProblemBase & app_problem = _multi_app->appProblemBase(_app_index);
     auto & control_warehouse = app_problem.getControlWarehouse();
     std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
     LibtorchNeuralNetControl * control_object =

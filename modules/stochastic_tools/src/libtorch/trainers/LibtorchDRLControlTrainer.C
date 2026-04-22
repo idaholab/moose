@@ -507,7 +507,7 @@ LibtorchDRLControlTrainer::computeNumTransitions(const std::size_t raw_sequence_
 {
   unsigned int num_transitions = 0;
   for (std::size_t raw_index = 0;
-       raw_index + _timestep_window < raw_sequence_size + static_cast<std::size_t>(_shift_outputs);
+       raw_index + _timestep_window < raw_sequence_size;
        raw_index += _timestep_window)
     ++num_transitions;
 
