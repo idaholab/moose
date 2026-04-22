@@ -6,7 +6,7 @@ This boundary condition computes the heat flux density resulting from the
 radiative heat transfer between surfaces adjacent to this boundary. These
 surfaces must be diffuse, gray radiators (Lambert radiators). The heat flux
 is computed by the net radiation method described in [!cite](modest2013radiative).
-More information is available [here](userobjects/ConstantViewFactorSurfaceRadiation.md).
+More information is available [here](GrayDiffuseRadiation/index.md).
 
 There are two modes available for operating this boundary condition. The mode can be switched
 by the `reconstruct_emission` parameter. If set to `false`, the object queries the

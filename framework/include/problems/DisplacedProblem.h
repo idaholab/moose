@@ -386,6 +386,10 @@ public:
   virtual bool checkNonlocalCouplingRequirement() const override;
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
+#ifndef NDEBUG
+  virtual bool checkResidualForNans() const override { return _mproblem.checkResidualForNans(); }
+#endif
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

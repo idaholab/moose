@@ -341,7 +341,7 @@ FEProblemBase::validParams()
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
   params.addParam<bool>("show_invalid_solution_console",
                         true,
-                        "Set to true to show the invalid solution occurance summary in console");
+                        "Set to true to show the invalid solution occurrence summary in console");
   params.addParam<bool>("immediately_print_invalid_solution",
                         false,
                         "Whether or not to report invalid solution warnings at the time the "
@@ -495,6 +495,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
+#ifndef NDEBUG
+    _check_residual_for_nans(false),
+#endif
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),

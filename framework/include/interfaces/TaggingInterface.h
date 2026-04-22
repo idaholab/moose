@@ -421,6 +421,13 @@ private:
                                 const std::set<TagID> & vector_tags,
                                 const std::set<TagID> & absolute_value_vector_tags);
 
+#ifndef NDEBUG
+  /**
+   * Checks \c _local_re for NaNs/Infs and returns an error if found
+   */
+  void checkForNans() const;
+#endif
+
   /// The vector tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 

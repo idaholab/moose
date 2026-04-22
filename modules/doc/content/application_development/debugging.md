@@ -11,11 +11,18 @@ In particular, if you ever see a "Segfault" or a "Signal 11" that means it's tim
 
 For a good tutorial on debugging [see Example 21](/ex21_debugging.md optional=True)
 
-## Debug Executable
+## Debug Executable id=building_dbg
 
-The first step to debugging anything is to build a debug executable.  By default MOOSE-based applications are built in "optimized" (`opt`) mode.  That ensures the fastest solves.  However, an optimized executable is missing a lot of information that is useful to a debugger and the optimization process itself can cause code to get reordered (or even skipped!) making it difficult to step through a program.
+The first step to debugging anything is to build a debug executable.  By default MOOSE-based applications are built in "optimized" (`opt`) mode, which ensures the fastest solves. However, an optimized executable is missing a lot of information that is useful to a debugger and the optimization process itself can cause code to get reordered (or even skipped!) making it difficult to step through a program. Additionally, debugging modes (`devel, `dbg`) contain assert statements that do not appear in the optimized builds, which may immediately catch the underlying issue. The following table summarizes the build options:
 
-To build an executable suitable for debugging you need to set the `METHOD` environment variable to `dbg`.  You can `export` it in your environment but it's usually simpler to use a UNIX shortcut that allows you to define environment variables at the same time you run a command, like so:
+| Build | Optimization/Speed | Debugging Info | Profiling Info | Typical Use |
+| :- | :- | :- | :- | :- |
+| `opt` | High/High | Low | No | Production runs |
+| `oprof` | High/High | Low | Yes | Profiling |
+| `devel` | Medium/Medium | Medium | No | Daily development |
+| `dbg` | None/Slow | Full | No | Debugging |
+
+The `METHOD` environment variable specifies the build mode. While you could `export` it in your environment, it's usually simpler to use a UNIX shortcut that allows you to define environment variables at the same time you run a command, e.g.,
 
 ```bash
 METHOD=dbg make -j 8
@@ -23,7 +30,9 @@ METHOD=dbg make -j 8
 
 Always remember that the `8` should be modified to reflect the number of processors you want to use for the build (usually the number of cores in your computer).
 
-Once the build is complete you should end up with a "debug executable" that look like: `yourapp-dbg`.  That executable is perfect for loading into a debugger.  However, that executable will run VERY slowly - so make sure that before you begin debugging you come up with a problem that is as small as possible but still shows the problem you're trying to fix.
+The resulting executable is named `<appname>-<build>`, where `<appname>` is the name of your application, and `<build>` is the build (`opt`, `oprof`, `devel`, or `dbg`).
+
+`dbg` builds are ideal for debuggers, but keep in mind that they run very slowly, so you may want to reduce your problem size as much as possible while still preserving the defective behavior.
 
 ## Debuggers
 
