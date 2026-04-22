@@ -137,7 +137,7 @@ loadActorStateFromArchive(Moose::LibtorchActorNeuralNet & nn,
     }
 
     nn.synchronizeAffineFactorsFromBuffers();
-    nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+    nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
     return true;
   }
   catch (const c10::Error & e)
@@ -192,7 +192,7 @@ loadActorStateFromTorchScript(Moose::LibtorchActorNeuralNet & nn,
     }
 
     nn.synchronizeAffineFactorsFromBuffers();
-    nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+    nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
     return true;
   }
   catch (const c10::Error & e)
@@ -278,7 +278,7 @@ LibtorchActorNeuralNet::initializeNeuralNetwork()
     torch::nn::init::zeros_(_weights[i]->bias);
   }
 
-  _action_head->initialize();
+  _action_distribution->initialize();
 }
 
 void
@@ -297,32 +297,102 @@ LibtorchActorNeuralNet::constructNeuralNetwork()
     inp_neurons = _num_neurons_per_layer[i];
   }
 
-  _action_head = std::make_shared<LibtorchActionDistributionHead>("action_head",
-                                                                  inp_neurons,
-                                                                  _num_outputs,
-                                                                  _minimum_values,
-                                                                  _maximum_values,
-                                                                  _device_type,
-                                                                  _data_type,
-                                                                  true,
-                                                                  _output_scaling_factors,
-                                                                  _state_independent_std);
-  register_module("action_head", _action_head);
+  if (_minimum_values.empty() && _maximum_values.empty())
+    _action_distribution =
+        std::make_shared<LibtorchGaussianActionDistribution>("action_distribution",
+                                                             inp_neurons,
+                                                             _num_outputs,
+                                                             _device_type,
+                                                             _data_type,
+                                                             true,
+                                                             _output_scaling_factors,
+                                                             _state_independent_std);
+  else
+    _action_distribution =
+        std::make_shared<LibtorchBetaActionDistribution>("action_distribution",
+                                                         inp_neurons,
+                                                         _num_outputs,
+                                                         _minimum_values,
+                                                         _maximum_values,
+                                                         _device_type,
+                                                         _data_type,
+                                                         true,
+                                                         _output_scaling_factors);
+
+  // Keep the serialized module name stable so existing checkpoints continue to load.
+  register_module("action_head", _action_distribution);
 }
 
 torch::Tensor
 LibtorchActorNeuralNet::entropy()
 {
-  return _action_head->entropy();
+  return _action_distribution->entropy();
+}
+
+const LibtorchGaussianActionDistribution *
+LibtorchActorNeuralNet::gaussianActionDistributionPtr() const
+{
+  return dynamic_cast<const LibtorchGaussianActionDistribution *>(_action_distribution.get());
+}
+
+LibtorchGaussianActionDistribution *
+LibtorchActorNeuralNet::gaussianActionDistributionPtr()
+{
+  return dynamic_cast<LibtorchGaussianActionDistribution *>(_action_distribution.get());
+}
+
+const LibtorchGaussianActionDistribution &
+LibtorchActorNeuralNet::gaussianActionDistribution() const
+{
+  const auto * distribution = gaussianActionDistributionPtr();
+  if (!distribution)
+    mooseError("Requested a Gaussian action distribution from a bounded actor.");
+  return *distribution;
+}
+
+LibtorchGaussianActionDistribution &
+LibtorchActorNeuralNet::gaussianActionDistribution()
+{
+  auto * distribution = gaussianActionDistributionPtr();
+  if (!distribution)
+    mooseError("Requested a Gaussian action distribution from a bounded actor.");
+  return *distribution;
+}
+
+const LibtorchBetaActionDistribution *
+LibtorchActorNeuralNet::betaActionDistributionPtr() const
+{
+  return dynamic_cast<const LibtorchBetaActionDistribution *>(_action_distribution.get());
+}
+
+LibtorchBetaActionDistribution *
+LibtorchActorNeuralNet::betaActionDistributionPtr()
+{
+  return dynamic_cast<LibtorchBetaActionDistribution *>(_action_distribution.get());
+}
+
+const LibtorchBetaActionDistribution &
+LibtorchActorNeuralNet::betaActionDistribution() const
+{
+  const auto * distribution = betaActionDistributionPtr();
+  if (!distribution)
+    mooseError("Requested a Beta action distribution from an unbounded actor.");
+  return *distribution;
+}
+
+LibtorchBetaActionDistribution &
+LibtorchActorNeuralNet::betaActionDistribution()
+{
+  auto * distribution = betaActionDistributionPtr();
+  if (!distribution)
+    mooseError("Requested a Beta action distribution from an unbounded actor.");
+  return *distribution;
 }
 
 void
 LibtorchActorNeuralNet::resetDistributionParams(torch::Tensor input)
 {
-  _action_head->reset(input);
-  _alpha_tensor = _action_head->alphaTensor();
-  _beta_tensor = _action_head->betaTensor();
-  _std_tensor = _action_head->stdTensor();
+  _action_distribution->reset(input);
 }
 
 torch::Tensor
@@ -364,19 +434,19 @@ LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
   if (sampled)
     return sample();
 
-  return _action_head->deterministicAction();
+  return _action_distribution->deterministicAction();
 }
 
 torch::Tensor
 LibtorchActorNeuralNet::sample()
 {
-  return _action_head->sample();
+  return _action_distribution->sample();
 }
 
 torch::Tensor
 LibtorchActorNeuralNet::logProbability(const torch::Tensor & action)
 {
-  return _action_head->logProbability(action);
+  return _action_distribution->logProbability(action);
 }
 
 void
@@ -423,7 +493,7 @@ loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
                                       const std::string & filename,
                                       const std::vector<Real> & action_standard_deviations)
 {
-  if (nn.actionDistributionHead().isBounded())
+  if (nn.actionDistribution().isBounded())
     mooseError("Legacy deterministic DRL checkpoints are only supported for unbounded actors.");
 
   const auto legacy_std = action_standard_deviations.empty()
@@ -482,7 +552,7 @@ loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
   }
 
   nn.synchronizeAffineFactorsFromBuffers();
-  nn.actionDistributionHead().synchronizeScalingFactorsFromBuffer();
+  nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
 }
 
 }

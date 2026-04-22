@@ -22,81 +22,147 @@ namespace Moose
 {
 
 /**
- * Reusable continuous-action distribution head for actor policies.
- *
- * Unbounded actions use a Gaussian parameterization. If both minimum and maximum values are
- * provided, the head switches to a bounded Beta parameterization.
+ * Reusable continuous-action distribution interface for actor policies.
  */
-class LibtorchActionDistributionHead : public torch::nn::Module
+class LibtorchActionDistribution : public torch::nn::Module
 {
 public:
-  LibtorchActionDistributionHead(const std::string & name,
-                                 unsigned int num_inputs,
-                                 unsigned int num_outputs,
-                                 const std::vector<Real> & minimum_values = {},
-                                 const std::vector<Real> & maximum_values = {},
-                                 torch::DeviceType device_type = torch::kCPU,
-                                 torch::ScalarType scalar_type = torch::kDouble,
-                                 bool build_on_construct = true,
-                                 const std::vector<Real> & output_scaling_factors = {},
-                                 bool state_independent_std = true);
+  LibtorchActionDistribution(const std::string & name,
+                             unsigned int num_inputs,
+                             unsigned int num_outputs,
+                             torch::DeviceType device_type = torch::kCPU,
+                             torch::ScalarType scalar_type = torch::kDouble,
+                             const std::vector<Real> & output_scaling_factors = {});
 
-  LibtorchActionDistributionHead(const LibtorchActionDistributionHead & head,
-                                 bool build_on_construct = true);
+  virtual void initialize() = 0;
 
-  void constructHead();
+  virtual void reset(const torch::Tensor & input) = 0;
 
-  void initialize();
+  virtual torch::Tensor sample() const = 0;
+
+  virtual torch::Tensor deterministicAction() const = 0;
+
+  virtual torch::Tensor logProbability(const torch::Tensor & action) const = 0;
+
+  virtual torch::Tensor entropy() const = 0;
+
+  virtual bool isBounded() const = 0;
 
   void synchronizeScalingFactorsFromBuffer();
 
-  void reset(const torch::Tensor & input);
+protected:
+  torch::Tensor prepareFeatures(const torch::Tensor & input) const;
+  torch::Tensor prepareAction(const torch::Tensor & action) const;
+  const torch::Tensor & actionScaleTensor() const { return _action_scale_tensor; }
 
-  torch::Tensor sample() const;
+  const std::string _name;
+  const unsigned int _num_inputs;
+  const unsigned int _num_outputs;
+  const torch::DeviceType _device_type;
+  const torch::ScalarType _data_type;
+  std::vector<Real> _output_scaling_factors;
 
-  torch::Tensor deterministicAction() const;
+  torch::Tensor _action_scale_tensor;
+};
 
-  torch::Tensor logProbability(const torch::Tensor & action) const;
+/**
+ * Gaussian action distribution for unbounded action spaces.
+ */
+class LibtorchGaussianActionDistribution : public LibtorchActionDistribution
+{
+public:
+  LibtorchGaussianActionDistribution(const std::string & name,
+                                     unsigned int num_inputs,
+                                     unsigned int num_outputs,
+                                     torch::DeviceType device_type = torch::kCPU,
+                                     torch::ScalarType scalar_type = torch::kDouble,
+                                     bool build_on_construct = true,
+                                     const std::vector<Real> & output_scaling_factors = {},
+                                     bool state_independent_std = true);
 
-  torch::Tensor entropy() const;
+  virtual void initialize() override;
 
-  bool isBounded() const { return !_minimum_values.empty(); }
+  virtual void reset(const torch::Tensor & input) override;
+
+  virtual torch::Tensor sample() const override;
+
+  virtual torch::Tensor deterministicAction() const override;
+
+  virtual torch::Tensor logProbability(const torch::Tensor & action) const override;
+
+  virtual torch::Tensor entropy() const override;
+
+  virtual bool isBounded() const override { return false; }
+
   bool stateIndependentStd() const { return _state_independent_std; }
-
-  torch::nn::Linear & primaryModule() { return _primary_parameter_module; }
-  const torch::nn::Linear & primaryModule() const { return _primary_parameter_module; }
-
-  torch::nn::Linear & secondaryModule() { return _secondary_parameter_module; }
-  const torch::nn::Linear & secondaryModule() const { return _secondary_parameter_module; }
-
+  torch::nn::Linear & meanModule() { return _mean_module; }
+  const torch::nn::Linear & meanModule() const { return _mean_module; }
+  torch::nn::Linear & stdModule() { return _std_module; }
+  const torch::nn::Linear & stdModule() const { return _std_module; }
   const torch::Tensor & stdTensor() const { return _std_tensor; }
+
+private:
+  void constructDistribution();
+
+  const bool _state_independent_std;
+  torch::nn::Linear _mean_module{nullptr};
+  torch::nn::Linear _std_module{nullptr};
+  torch::Tensor _mean;
+  torch::Tensor _std_tensor;
+  torch::Tensor _log_std_tensor;
+};
+
+/**
+ * Beta action distribution for bounded action spaces.
+ */
+class LibtorchBetaActionDistribution : public LibtorchActionDistribution
+{
+public:
+  LibtorchBetaActionDistribution(const std::string & name,
+                                 unsigned int num_inputs,
+                                 unsigned int num_outputs,
+                                 const std::vector<Real> & minimum_values,
+                                 const std::vector<Real> & maximum_values,
+                                 torch::DeviceType device_type = torch::kCPU,
+                                 torch::ScalarType scalar_type = torch::kDouble,
+                                 bool build_on_construct = true,
+                                 const std::vector<Real> & output_scaling_factors = {});
+
+  virtual void initialize() override;
+
+  virtual void reset(const torch::Tensor & input) override;
+
+  virtual torch::Tensor sample() const override;
+
+  virtual torch::Tensor deterministicAction() const override;
+
+  virtual torch::Tensor logProbability(const torch::Tensor & action) const override;
+
+  virtual torch::Tensor entropy() const override;
+
+  virtual bool isBounded() const override { return true; }
+
+  torch::nn::Linear & alphaModule() { return _alpha_module; }
+  const torch::nn::Linear & alphaModule() const { return _alpha_module; }
+  torch::nn::Linear & betaModule() { return _beta_module; }
+  const torch::nn::Linear & betaModule() const { return _beta_module; }
   const torch::Tensor & alphaTensor() const { return _alpha_tensor; }
   const torch::Tensor & betaTensor() const { return _beta_tensor; }
 
 private:
-  const std::string _name;
-  const unsigned int _num_inputs;
-  const unsigned int _num_outputs;
+  void constructDistribution();
+
   const std::vector<Real> _minimum_values;
   const std::vector<Real> _maximum_values;
-  const torch::DeviceType _device_type;
-  const torch::ScalarType _data_type;
-  const bool _state_independent_std;
-  std::vector<Real> _output_scaling_factors;
 
-  torch::nn::Linear _primary_parameter_module{nullptr};
-  torch::nn::Linear _secondary_parameter_module{nullptr};
-
-  torch::Tensor _action_scale_tensor;
+  torch::nn::Linear _alpha_module{nullptr};
+  torch::nn::Linear _beta_module{nullptr};
   torch::Tensor _min_tensor;
   torch::Tensor _max_tensor;
   torch::Tensor _alpha_tensor;
   torch::Tensor _beta_tensor;
   torch::Tensor _alpha_beta_tensor;
   torch::Tensor _log_norm;
-  torch::Tensor _mean_tensor;
-  torch::Tensor _std_tensor;
-  torch::Tensor _log_std_tensor;
   torch::Tensor _mean;
 };
 

@@ -71,8 +71,8 @@ TEST(LibtorchRLCoreTest, PPOLossUsesStoredLogProbabilityAndValueTarget)
   constexpr Real pi = 3.14159265358979323846;
 
   Moose::LibtorchActorNeuralNet policy_network("policy", 1, 1, {}, {"linear"});
-  policy_network.actionDistributionHead().primaryModule()->weight.data().fill_(0.0);
-  policy_network.actionDistributionHead().secondaryModule()->weight.data().fill_(0.0);
+  policy_network.gaussianActionDistribution().meanModule()->weight.data().fill_(0.0);
+  policy_network.gaussianActionDistribution().stdModule()->weight.data().fill_(0.0);
 
   Moose::LibtorchArtificialNeuralNet value_network("value", 1, 1, {}, {"linear"});
   auto value_params = value_network.named_parameters();
