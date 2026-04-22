@@ -86,7 +86,7 @@ protected:
    * @param p point to transform
    * @return transformed point
    */
-  Point applyReverseTransformsToPoint(const Point & p) const;
+  Point applyReverseTransformsToPoint(Point p) const;
 
   /// List of transformations applied to this object
   std::vector<std::pair<TransformationType, std::tuple<Real, Real, Real>>> _transformations;
