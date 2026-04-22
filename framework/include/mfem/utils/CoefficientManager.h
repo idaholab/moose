@@ -36,7 +36,7 @@ class CoefficientManager
 public:
   CoefficientManager() = default;
   ///Provider for the built-in coordinate dependent coefficients
-   void setBuiltinProvider(const MFEMCoordinateCoefficients * provider)
+  void setBuiltinProvider(const MFEMCoordinateCoefficients * provider)
   {
     _builtin_provider = provider;
   }
@@ -184,7 +184,7 @@ private:
   VectorMap _vector_coeffs;
   MatrixMap _matrix_coeffs;
 
-  const MFEMCoordinateCoefficients* _builtin_provider = nullptr;
+  const MFEMCoordinateCoefficients * _builtin_provider = nullptr;
 
   mfem::Coefficient & declareScalar(const std::string & name,
                                     std::shared_ptr<mfem::Coefficient> coef);
