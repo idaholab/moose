@@ -1,0 +1,35 @@
+name: Merge staged -> devel
+
+on:
+  # Run nightly at 8 PM
+  schedule:
+    - cron: '0 20 * * *'
+    - timezone: "America/Denver"
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  merge-staged-to-devel:
+    name: Merge staged -> devel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge
+        run: |
+          SOURCE_BRANCH="next"
+          TARGET_BRANCH="devel"
+          git checkout "$SOURCE_BRANCH"
+          git merge --ff-only "origin/$TARGET_BRANCH"
+          git push origin "$TARGET_BRANCH"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Merge failed."
+          exit 1
