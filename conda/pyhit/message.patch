@@ -8,6 +8,6 @@ index 98cfc029c7..fc89230e74 100644
  import traceback
 -from mooseutils import colorText
 +from . import colorText
- 
+
  try:
      from PyQt5 import QtWidgets, QtCore

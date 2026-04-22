@@ -26,29 +26,45 @@ build:
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
+  run_exports:
+    # things that depend on this moose-libmesh must use the
+    # exact moose-petsc and moose-libmesh-vtk that this was
+    # built with
+    - moose-petsc __VERSIONER_PETSC_VERSION__ {{ mpi }}___VERSIONER_PETSC_BUILD_NUMBER__
+    - moose-libmesh-vtk __VERSIONER_LIBMESH_VTK_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
 
 requirements:
   build:
-    - {{ moose_petsc }}
-    - {{ moose_libmesh_vtk }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    - cmake
+    - m4
+    - make
     - pkg-config
-    - libpng
+  host:
+    - {{ mpi }} {{ mpi_version }}
+    - moose-petsc __VERSIONER_PETSC_VERSION__ {{ mpi }}___VERSIONER_PETSC_BUILD_NUMBER__
+    - moose-libmesh-vtk __VERSIONER_LIBMESH_VTK_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
+    - _openmp_mutex # [linux]
+    - hdf5 {{ hdf5 }}
+    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
+    {% if mpi == "mpich" %}
+    # see libfabric entry in conda/conda_build_config.yaml
+    - libfabric {{ libfabric }} # [linux]
+    {% endif %}
+    - libtirpc
+    - llvm-openmp # [osx]
     - zlib
   run:
-    - {{ mpi }}
-    - {{ moose_petsc }}
-    - {{ moose_libmesh_vtk }}
-    - pkg-config
-    - packaging
+    - moose-petsc __VERSIONER_PETSC_VERSION__ {{ mpi }}___VERSIONER_PETSC_BUILD_NUMBER__
+    - moose-libmesh-vtk __VERSIONER_LIBMESH_VTK_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_VTK_BUILD_NUMBER__
 
 test:
   commands:
-    - test -f $PREFIX/libmesh/lib/libmesh_opt.dylib     # [osx]
-    - test -f $PREFIX/libmesh/lib/libmesh_opt.so        # [linux]
-    - test -f $PREFIX/libmesh/lib/libmetaphysicl.dylib  # [osx]
-    - test -f $PREFIX/libmesh/lib/libmetaphysicl.so     # [linux]
-    - test -f $PREFIX/libmesh/lib/libtimpi_opt.dylib    # [osx]
-    - test -f $PREFIX/libmesh/lib/libtimpi_opt.so       # [linux]
+    - test $LIBMESH_DIR == $PREFIX
+    - ${PREFIX}/bin/output_libmesh_version-opt
 
 about:
   home: http://libmesh.github.io/

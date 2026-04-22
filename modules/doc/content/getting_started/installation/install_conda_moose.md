@@ -1,7 +1,7 @@
-## Install MOOSE id=moosepackages
+## MOOSE Development Environment id=moosepackages
 
 !style! halign=left
-Create a unique conda environment for [!ac](MOOSE), named `moose`, and install the MOOSE dependency
+Create a unique conda environment for [!ac](MOOSE) development, named `moose`, and install the MOOSE dependency
 packages:
 !style-end!
 
@@ -15,18 +15,7 @@ After the installation completes, activate the new environment:
 conda activate moose
 ```
 
+If you are on a Macintosh machine, a supported version of the Mac OS X Software Development Kit (SDK) is required to use this environment. If a supported version has not been installed, an error will appear when calling the previous activation command. Follow the instructions in the error message to install a supported version of the SDK.
+
 If you are running into errors, please see our
 [troubleshooting guide for Conda](help/troubleshooting.md#condaissues optional=True).
-
-!alert note
-Know that you will need to `conda activate moose` for +each terminal window you open, and each time
-you wish to perform MOOSE related work+. If you wish to make this automatic, you can add that
-command to the end of your shell profile with the command below:
-
-```bash
-if [[ "$0" = *"bash" ]]; then
-    echo "conda activate moose" >> ~/.bash_profile
-elif [[ "$0" = "zsh" ]]; then
-    echo "conda activate moose" >> ~/.zshrc
-fi
-```

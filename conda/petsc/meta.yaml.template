@@ -24,40 +24,50 @@ source:
 build:
   number: {{ build }}
   string: {{ mpi }}_{{ build }}
-  skip: true  # [win]
   script_env:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
-  run_exports:
-    - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 
 requirements:
   build:
-    - {{ mpi }}
-    - {{ moose_mpi }}
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
+    - {{ stdlib('c') }}
+    - bison
+    - diffutils
+    - make
     - pkg-config
-    - liblzma-devel                       # [linux]
-  run:
-    - {{ mpi }}
-    - {{ moose_mpi }}
-    - pkg-config
+    - python 3.12.*
+    - gnuconfig
+  host:
+    - {{ mpi }} {{ mpi_version }}
+    - _openmp_mutex # [linux]
+    - llvm-openmp   # [osx]
+    - bzip2
+    - cmake
+    - hdf5 {{ hdf5 }}
+    - hdf5 {{ hdf5 }} mpi_{{ mpi }}_*
+    {% if mpi == "mpich" %}
+    # see libfabric entry in conda/conda_build_config.yaml
+    - libfabric {{ libfabric }} # [linux]
+    {% endif %}
+    - xz
+    - zlib
 
 test:
   requires:
     - pkg-config
-    - {{ mpi }}
-    - {{ moose_mpi }}
+    - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('fortran') }}
   files:
     - tests/ex1.c
-    - tests/ex1f.F90
     - tests/makefile
-  commands:
-    - pkg-config --validate PETSc
-    - pkg-config --cflags PETSc
-    - pkg-config --libs PETSc
 
 about:
   home: https://petsc.org

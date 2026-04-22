@@ -43,7 +43,7 @@ WASP_DIR           ?= $(abspath ../wasp/install)
 lib_suffix := so
 ifeq ($(shell uname -s),Darwin)
 	lib_suffix := dylib
-	wasp_LIBS         := $(shell find -E $(WASP_DIR)/lib -regex ".*/lib[a-z]+.$(lib_suffix)")
+	wasp_LIBS         := $(shell find -E $(WASP_DIR)/lib -regex ".*/libwasp[a-z]+.$(lib_suffix)")
 else
 	wasp_LIBS         := $(wildcard $(WASP_DIR)/lib/libwasp*$(lib_suffix))
 endif
