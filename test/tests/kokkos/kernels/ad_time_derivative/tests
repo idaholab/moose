@@ -1,0 +1,58 @@
+[Tests]
+  issues = '#32699'
+
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_ad_time_derivative_test.i'
+    exodiff = 'kokkos_ad_time_derivative_test_out.e'
+    requirement = 'The Kokkos system shall provide a time derivative kernel using automatic differentation.'
+    design = 'KokkosADTimeDerivative.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [test_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'kokkos_ad_time_derivative_test.i'
+    cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from KokkosADTimeDerivative shall be perfect.'
+    design = 'KokkosADTimeDerivative.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+
+  [coupled]
+    type = 'Exodiff'
+    input = 'kokkos_ad_coupled_time_derivative_test.i'
+    exodiff = 'kokkos_ad_coupled_time_derivative_test_out.e'
+    requirement = 'The Kokkos system shall provide a coupled time derivative kernel using automatic differentation.'
+    design = 'KokkosADCoupledTimeDerivative.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [coupled_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'kokkos_ad_coupled_time_derivative_test.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from KokkosADCoupledTimeDerivative shall be perfect.'
+    design = 'KokkosADCoupledTimeDerivative.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+
+  [separate]
+    type = 'Exodiff'
+    input = 'kokkos_ad_coupled_time_derivative_test.i'
+    exodiff = 'kokkos_ad_coupled_time_derivative_test_out.e'
+    cli_args = 'Executioner/residual_and_jacobian_together=false'
+    requirement = 'The Kokkos system shall be able to compute residual and Jacobian separately with AD kernels.'
+    design = 'Executioner.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

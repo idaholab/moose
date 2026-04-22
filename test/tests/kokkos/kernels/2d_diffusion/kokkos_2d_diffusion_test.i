@@ -17,8 +17,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [u]
     order = FIRST
     family = LAGRANGE
@@ -26,8 +24,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -35,9 +31,6 @@
 []
 
 [BCs]
-  # BCs cannot be preset due to Jacobian test
-  active = 'left right'
-
   [left]
     type = KokkosDirichletBC
     variable = u
