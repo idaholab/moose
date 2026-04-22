@@ -16,7 +16,7 @@
 /configure.ac @lindsayad
 /pyproject.toml @loganharbour @zachmprince
 
-/.github @permcody
+/.github @cticenhour @loganharbour
 
 /libmesh @roystgnr @lindsayad @cticenhour @loganharbour
 /petsc @lindsayad @cticenhour @loganharbour
