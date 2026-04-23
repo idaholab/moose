@@ -47,8 +47,6 @@ TEST(LibtorchActorNeuralNetTest, artificialNetAppliesAffineInputAndOutputScaling
                                               1,
                                               {},
                                               {"linear"},
-                                              {},
-                                              {},
                                               torch::kCPU,
                                               torch::kDouble,
                                               true,

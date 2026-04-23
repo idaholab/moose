@@ -72,7 +72,9 @@ TEST(LibtorchRLCoreTest, PPOLossUsesStoredLogProbabilityAndValueTarget)
 
   Moose::LibtorchActorNeuralNet policy_network("policy", 1, 1, {}, {"linear"});
   policy_network.gaussianActionDistribution().meanModule()->weight.data().fill_(0.0);
+  policy_network.gaussianActionDistribution().meanModule()->bias.data().fill_(0.0);
   policy_network.gaussianActionDistribution().stdModule()->weight.data().fill_(0.0);
+  policy_network.gaussianActionDistribution().stdModule()->bias.data().fill_(0.0);
 
   Moose::LibtorchArtificialNeuralNet value_network("value", 1, 1, {}, {"linear"});
   auto value_params = value_network.named_parameters();
