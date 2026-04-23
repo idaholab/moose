@@ -106,7 +106,8 @@ SubChannelAddVariablesAction::act()
   {
     vars_to_add.push_back({SubChannelApp::PIN_TEMPERATURE, pin_blocks});
     vars_to_add.push_back({SubChannelApp::PIN_DIAMETER, pin_blocks});
-    vars_to_add.push_back({SubChannelApp::HEAT_TRANSFER_COEFFICIENT, pin_blocks});
+    // HTC is stored on subchannels and used to compute pin-surface temperature.
+    vars_to_add.push_back({SubChannelApp::HEAT_TRANSFER_COEFFICIENT, fluid_blocks});
   }
 
   // Duct-only variables
