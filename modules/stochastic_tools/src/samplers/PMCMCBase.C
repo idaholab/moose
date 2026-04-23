@@ -55,9 +55,10 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
     _upper_bound(isParamValid("upper_bound") ? &getParam<std::vector<Real>>("upper_bound")
                                              : nullptr),
     _variance_bound(getParam<Real>("variance_bound")),
-    _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
-    _num_random_seeds(getParam<unsigned int>("num_random_seeds"))
+    _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
+    _seed_index(0),
+    _rand_index(0)
 {
   // Filling the `priors` vector with the user-provided distributions.
   for (const DistributionName & name :
@@ -92,15 +93,14 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
   setNumberOfCols(_priors.size() + _confg_values.size());
 
   // Resizing the vectors and vector of vectors
-  _new_samples.resize(_num_parallel_proposals, std::vector<Real>(_priors.size(), 0.0));
+  _new_samples.resize(_num_parallel_proposals, _initial_values);
   _new_samples_confg.resize(_num_parallel_proposals * _confg_values[0].size(),
                             std::vector<Real>(_priors.size() + _confg_values.size(), 0.0));
   _rnd_vec.resize(_num_parallel_proposals);
   _new_var_samples.assign(_num_parallel_proposals, 0.0);
 
   setNumberOfRandomSeeds(_num_random_seeds);
-
-  _check_step = 0;
+  setAutoAdvanceGenerators(false);
 
   // Check whether both the lower and the upper bounds are specified and of same size
   bool bound_check1 = _lower_bound && !_upper_bound;
@@ -117,52 +117,51 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
 }
 
 void
-PMCMCBase::proposeSamples(const unsigned int seed_value)
+PMCMCBase::proposeSamples()
 {
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     for (unsigned int i = 0; i < _priors.size(); ++i)
-      _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
+      _new_samples[j][i] = _priors[i]->quantile(random());
 }
 
 void
-PMCMCBase::sampleSetUp(const SampleMode /*mode*/)
+PMCMCBase::executeSetUp()
 {
-  if (_t_step < 1 || _check_step == _t_step)
-    return;
-  _check_step = _t_step;
-
-  unsigned int seed_value = _t_step > 0 ? (_t_step - 1) : 0;
+  // _seed_index = _t_step > 0 ? _t_step - 1 : 0;
+  _seed_index = _t_step;
+  _rand_index = 0;
 
   // Filling the new_samples vector of vectors with new proposal samples
-  proposeSamples(seed_value);
+  proposeSamples();
 
   // Draw random numbers to facilitate decision making later on
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-    _rnd_vec[j] = getRand(seed_value);
+    _rnd_vec[j] = random();
 }
 
-void
-PMCMCBase::randomIndex(const unsigned int & upper_bound,
-                       const unsigned int & exclude,
-                       const unsigned int & seed,
-                       unsigned int & req_index)
+Real
+PMCMCBase::random()
 {
-  req_index = exclude;
+  return getRand(_rand_index++, _seed_index);
+}
+
+unsigned int
+PMCMCBase::randomIndex(const unsigned int & upper_bound, const unsigned int & exclude)
+{
+  auto req_index = exclude;
   while (req_index == exclude)
-    req_index = getRandl(seed, 0, upper_bound);
+    req_index = getRandl(_rand_index++, 0, upper_bound, _seed_index);
+  return req_index;
 }
 
-void
-PMCMCBase::randomIndexPair(const unsigned int & upper_bound,
-                           const unsigned int & exclude,
-                           const unsigned int & seed,
-                           unsigned int & req_index1,
-                           unsigned int & req_index2)
+std::pair<unsigned int, unsigned int>
+PMCMCBase::randomIndexPair(const unsigned int & upper_bound, const unsigned int & exclude)
 {
-  randomIndex(upper_bound, exclude, seed, req_index1);
-  req_index2 = req_index1;
+  auto req_index1 = randomIndex(upper_bound, exclude);
+  auto req_index2 = req_index1;
   while (req_index1 == req_index2)
-    randomIndex(upper_bound, exclude, seed, req_index2);
+    req_index2 = randomIndex(upper_bound, exclude);
+  return {req_index1, req_index2};
 }
 
 void

@@ -85,25 +85,25 @@ AffineInvariantDES::tuneParams(Real & gamma, Real & b, const Real & scale)
 }
 
 void
-AffineInvariantDES::proposeSamples(const unsigned int seed_value)
+AffineInvariantDES::proposeSamples()
 {
   unsigned int j = 0;
   bool indicator;
-  unsigned int index_req1, index_req2;
+  std::pair<unsigned int, unsigned int> index_req;
   Real diff;
   while (j < _num_parallel_proposals)
   {
     indicator = 0;
-    randomIndexPair(_num_parallel_proposals, j, seed_value, index_req1, index_req2);
+    index_req = randomIndexPair(_num_parallel_proposals, j);
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
-      computeDifferential(_previous_state[index_req1][i],
-                          _previous_state[index_req2][i],
-                          getRand(seed_value),
+      computeDifferential(_previous_state[index_req.first][i],
+                          _previous_state[index_req.second][i],
+                          random(),
                           _scales[i],
                           diff);
-      _new_samples[j][i] = (_t_step > decisionStep()) ? (_previous_state[j][i] + diff)
-                                                      : _priors[i]->quantile(getRand(seed_value));
+      _new_samples[j][i] = (_t_step + 1 > decisionStep()) ? (_previous_state[j][i] + diff)
+                                                          : _priors[i]->quantile(random());
       if (_lower_bound)
         indicator =
             (_new_samples[j][i] < (*_lower_bound)[i] || _new_samples[j][i] > (*_upper_bound)[i])
@@ -112,13 +112,13 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value)
     }
     if (_var_prior)
     {
-      computeDifferential(_previous_state_var[index_req1],
-                          _previous_state_var[index_req2],
-                          getRand(seed_value),
+      computeDifferential(_previous_state_var[index_req.first],
+                          _previous_state_var[index_req.second],
+                          random(),
                           1.0,
                           diff);
-      _new_var_samples[j] = (_t_step > decisionStep()) ? (_previous_state_var[j] + diff)
-                                                       : _var_prior->quantile(getRand(seed_value));
+      _new_var_samples[j] = (_t_step + 1 > decisionStep()) ? (_previous_state_var[j] + diff)
+                                                           : _var_prior->quantile(random());
       if (_new_var_samples[j] < 0.0 || _new_var_samples[j] > _variance_bound)
         indicator = 1;
     }
