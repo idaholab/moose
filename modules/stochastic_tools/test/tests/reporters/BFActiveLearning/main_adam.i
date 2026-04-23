@@ -27,7 +27,7 @@
     flag_sample = 'conditional/flag_sample'
     seed = 5
     num_samples = 10
-    execute_on = PRE_MULTIAPP_SETUP
+    execute_on = 'initial multiapp_fixed_point_begin'
   []
 []
 
