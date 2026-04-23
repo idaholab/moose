@@ -23,6 +23,7 @@ Sampler::validParams()
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_MULTIAPP_SETUP);
+  exec_enum = {EXEC_INITIAL};
 
   params.addParam<unsigned int>("seed", 0, "Random number generator initial seed");
   params.registerBase("Sampler");
