@@ -41,7 +41,7 @@ MFEMMultiAppTransfer::execute()
   switch (_current_direction)
   {
     case TO_MULTIAPP:
-      for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
+      for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
         if (getToMultiApp()->hasLocalApp(i))
         {
           setActiveToProblem(getToMultiApp()->appProblemBase(i), i);
@@ -50,7 +50,7 @@ MFEMMultiAppTransfer::execute()
         }
       break;
     case FROM_MULTIAPP:
-      for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
+      for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
         if (getFromMultiApp()->hasLocalApp(i))
         {
           setActiveToProblem(getFromMultiApp()->problemBase(), 0);
@@ -60,9 +60,8 @@ MFEMMultiAppTransfer::execute()
       break;
     case BETWEEN_MULTIAPP:
       int transfers_done = 0;
-      for (unsigned int from_app_id = 0; from_app_id < getFromMultiApp()->numGlobalApps();
-           from_app_id++)
-        for (unsigned int to_app_id = 0; to_app_id < getToMultiApp()->numGlobalApps(); to_app_id++)
+      for (const auto from_app_id : make_range(getFromMultiApp()->numGlobalApps()))
+        for (const auto to_app_id : make_range(getToMultiApp()->numGlobalApps()))
           if (getFromMultiApp()->hasLocalApp(from_app_id))
           {
             setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id), from_app_id);

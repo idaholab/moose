@@ -57,7 +57,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::extractlibMeshNodePositions(
 
   // Populate set of points
   if (fe_type.order > CONSTANT && !is_nodal)
-    mooseError("Transfers of non-nodal FEs between libMesh and MFEM with order higher than "
+    mooseError("Transfers of non-nodal FEs from MFEM to libMesh with order higher than "
                "CONSTANT are not supported.");
   else if (is_nodal)
   {
@@ -81,7 +81,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::extractlibMeshNodePositions(
   }
 }
 
-/// Extract locations from libMesh-based MooseVariable at which projection will take place
+/// Project interpolated values to set DoFs of libMesh-based MooseVariable
 void
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::projectlibMeshNodalValues(
     libMesh::System & to_sys, const MooseVariableFieldBase & to_var, mfem::Vector & interp_vals)
@@ -95,7 +95,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::projectlibMeshNodalValues(
 
   unsigned int mfem_point_index = 0;
   if (fe_type.order > CONSTANT && !is_nodal)
-    mooseError("Transfers of non-nodal FEs between libMesh and MFEM with order higher than "
+    mooseError("Transfers of non-nodal FEs from MFEM to libMesh with order higher than "
                "CONSTANT are not supported.");
   else if (is_nodal)
   {
@@ -139,8 +139,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables(bool is_target_l
   for (const auto var_index : make_range(numToVar()))
   {
     // Declare source variable alias and construct vectors to store interpolation points and vals
-    auto & from_var =
-        getActiveFromProblem().getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
+    auto & from_var = *getActiveFromProblem().getGridFunction(getFromVarName(var_index));
     if (from_var.VectorDim() > 1)
       mooseError("MultiAppMFEMTolibMeshShapeEvaluationTransfer does not support transfers of "
                  "vector variables from MFEM to libMesh-based subapps");

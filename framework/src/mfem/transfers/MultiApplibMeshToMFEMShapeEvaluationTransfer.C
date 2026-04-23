@@ -67,30 +67,27 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool is_target_l
       // Populate outgoing point locations map between processor and points vector for libMesh to
       // use in interpolation
       const int dim = to_pfespace.GetParMesh()->Dimension();
-      const int nodes_cnt = vxyz.Size() / dim;
-      for (const auto i : make_range(nodes_cnt))
+      const int nnodes = vxyz.Size() / dim;
+      for (const auto i : make_range(nnodes))
       {
         for (const auto i_proc : make_range(n_processors()))
         {
           libMesh::Point point_in_target_frame;
-          if (dim == 3)
+          switch (dim)
           {
-            point_in_target_frame(0) = vxyz[i];
-            point_in_target_frame(1) = vxyz[i + nodes_cnt];
-            point_in_target_frame(2) = vxyz[i + 2 * nodes_cnt];
+            case 3:
+              point_in_target_frame(2) = vxyz[i + 2 * nnodes];
+              [[fallthrough]];
+            case 2:
+              point_in_target_frame(1) = vxyz[i + nnodes];
+              [[fallthrough]];
+            case 1:
+              point_in_target_frame(0) = vxyz[i];
           }
-          else if (dim == 2)
-          {
-            point_in_target_frame(0) = vxyz[i];
-            point_in_target_frame(1) = vxyz[i + nodes_cnt];
-          }
-          else
-            mooseError("Target finite element space must be 2D or 3D.");
-
           outgoing_points[i_proc].push_back(mapPointToActiveSourceFrame(point_in_target_frame));
         }
       }
-      interp_vals.SetSize(nodes_cnt);
+      interp_vals.SetSize(nnodes);
     }
 
     // Perform interpolation of libMesh variable at specified points
@@ -100,7 +97,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool is_target_l
     if (is_target_local)
     {
       mfem::ParGridFunction & to_gf =
-          *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(var_index));
+          *getActiveToProblem().getGridFunction(getToVarName(var_index));
       mfem::Ordering::Type libmesh_interp_ordering(mfem::Ordering::Type::byNODES);
       _mfem_projector.projectNodalValues(interp_vals, libmesh_interp_ordering, to_gf);
     }

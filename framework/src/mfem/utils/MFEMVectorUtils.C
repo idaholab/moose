@@ -13,7 +13,7 @@
 
 namespace Moose::MFEM
 {
-size_t
+inline size_t
 MFEMIndex(const size_t i_dim,
           const size_t i_point,
           const size_t num_dims,
@@ -29,8 +29,7 @@ MFEMIndex(const size_t i_dim,
 libMesh::Point
 libMeshPointFromMFEMVector(const mfem::Vector & vec)
 {
-  return libMesh::Point(
-      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
+  return libMesh::Point(vec(0), vec.Size() > 1 ? vec(1) : 0., vec.Size() > 2 ? vec(2) : 0.);
 }
 
 mfem::Vector

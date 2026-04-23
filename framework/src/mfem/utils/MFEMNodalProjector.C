@@ -31,28 +31,28 @@ MFEMNodalProjector::extractNodePositions(const mfem::ParFiniteElementSpace & fes
   for (const auto i : make_range(nelem))
   {
     const mfem::IntegrationRule ir = fespace.GetFE(i)->GetNodes();
-    const int nipt = ir.GetNPoints();
+    const int nqpt = ir.GetNPoints();
 
     mfem::DenseMatrix pos;
     fespace.GetElementTransformation(i)->Transform(ir, pos);
     mfem::Vector rowx, rowy, rowz;
 
-    switch(dim)
+    switch (dim)
     {
       case 3:
-        rowz.SetDataAndSize(node_positions.GetData() + nodal_offset + 2 * nnodes, nipt);
+        rowz.SetDataAndSize(node_positions.GetData() + nodal_offset + 2 * nnodes, nqpt);
         pos.GetRow(2, rowz);
         [[fallthrough]];
       case 2:
-        rowy.SetDataAndSize(node_positions.GetData() + nodal_offset + 1 * nnodes, nipt);
+        rowy.SetDataAndSize(node_positions.GetData() + nodal_offset + 1 * nnodes, nqpt);
         pos.GetRow(1, rowy);
         [[fallthrough]];
       case 1:
-        rowx.SetDataAndSize(node_positions.GetData() + nodal_offset + 0 * nnodes, nipt);
+        rowx.SetDataAndSize(node_positions.GetData() + nodal_offset + 0 * nnodes, nqpt);
         pos.GetRow(0, rowx);
     }
 
-    nodal_offset += nipt;
+    nodal_offset += nqpt;
   }
   node_ordering = mfem::Ordering::Type::byNODES;
 }
@@ -71,7 +71,7 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
   // Check FESpaces can be transferred
   const auto map = fespace.FEColl()->GetMapType(fespace.GetParMesh()->Dimension());
   const bool H1L2 = map == mfem::FiniteElement::VALUE || map == mfem::FiniteElement::INTEGRAL;
-  const bool RTND =  map == mfem::FiniteElement::H_DIV || map == mfem::FiniteElement::H_CURL;
+  const bool RTND = map == mfem::FiniteElement::H_DIV || map == mfem::FiniteElement::H_CURL;
   if (!H1L2 && !RTND)
     mooseError("FESpace type not supported yet in transfers.");
 
@@ -82,13 +82,13 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
   int nodal_offset = 0;
   for (const auto el : make_range(nelem))
   {
-    const int nipt = fespace.GetFE(el)->GetNodes().GetNPoints();
-    mfem::Vector dof_vals(nipt * gf_ncomp);
+    const int nqpt = fespace.GetFE(el)->GetNodes().GetNPoints();
+    mfem::Vector dof_vals(nqpt * gf_ncomp);
     fespace.GetElementVDofs(el, vdofs); // Returned vdofs always indexed with ordering byNODES
-    for (const auto ip : make_range(nipt))
+    for (const auto qp : make_range(nqpt))
       for (const auto d : make_range(gf_ncomp))
-        dof_vals(Moose::MFEM::MFEMIndex(d, ip, gf_ncomp, nipt, dof_ordering)) =
-          nodal_vals(Moose::MFEM::MFEMIndex(d, ip, gf_ncomp, nipt, nodal_ordering) + nodal_offset);
+        dof_vals(Moose::MFEM::MFEMIndex(d, qp, gf_ncomp, nqpt, dof_ordering)) = nodal_vals(
+            Moose::MFEM::MFEMIndex(d, qp, gf_ncomp, nqpt, nodal_val_ordering) + nodal_offset);
 
     if (H1L2)
       gridfunction.SetSubVector(vdofs, dof_vals);
@@ -99,7 +99,7 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
       gridfunction.SetSubVector(vdofs, vals);
     }
 
-    nodal_offset += nipt * gf_ncomp;
+    nodal_offset += nqpt * gf_ncomp;
   }
   gridfunction.SetTrueVector();
 }

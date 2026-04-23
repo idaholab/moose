@@ -61,11 +61,17 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
     for (const auto i : make_range(n_points))
     {
       Point point_in_target_frame;
-      point_in_target_frame(0) = point_coordinates[i];
-      point_in_target_frame(1) = point_coordinates[i + n_points];
-      if (dimension == 3)
-        point_in_target_frame(2) = point_coordinates[i + 2 * n_points];
-
+      switch (dimension)
+      {
+        case 3:
+          point_in_target_frame(2) = point_coordinates[i + 2 * n_points];
+          [[fallthrough]];
+        case 2:
+          point_in_target_frame(1) = point_coordinates[i + n_points];
+          [[fallthrough]];
+        case 1:
+          point_in_target_frame(0) = point_coordinates[i];
+      }
       const auto point_in_source_frame = mapPointToActiveSourceFrame(point_in_target_frame);
       point_coordinates[i] = point_in_source_frame(0);
       point_coordinates[i + n_points] = point_in_source_frame(1);
@@ -82,7 +88,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
     if (problem.getProblemData().gridfunctions.Has(name))
     {
       is_complex = false;
-      return *problem.getProblemData().gridfunctions.Get(name);
+      return *problem.getGridFunction(name);
     }
     if (problem.getProblemData().cmplx_gridfunctions.Has(name))
     {
