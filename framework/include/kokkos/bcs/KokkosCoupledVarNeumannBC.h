@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class KokkosCoupledVarNeumannBC : public Moose::Kokkos::IntegratedBC
+class KokkosCoupledVarNeumannBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -23,12 +23,9 @@ public:
   KokkosCoupledVarNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
                                                 AssemblyDatum & datum) const;
@@ -49,23 +46,20 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
-                                             const unsigned int qp,
-                                             AssemblyDatum & datum) const
+KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _coupled_var(datum, qp);
+  return -_scale_factor(datum, qp) * _coef * _coupled_var(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int i,
-                                                    const unsigned int j,
+KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int j,
                                                     const unsigned int jvar,
                                                     const unsigned int qp,
                                                     AssemblyDatum & datum) const
 {
   if (jvar == _coupled_num)
-    return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _phi(datum, j, qp);
+    return -_scale_factor(datum, qp) * _coef * _phi(datum, j, qp);
   else
     return 0;
 }

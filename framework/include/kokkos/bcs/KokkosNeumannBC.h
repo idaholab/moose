@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
-class KokkosNeumannBC : public Moose::Kokkos::IntegratedBC
+class KokkosNeumannBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -19,9 +19,7 @@ public:
   KokkosNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int, AssemblyDatum &) const;
 
 private:
   /// Value of grad(u) on the boundary.
@@ -30,9 +28,7 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosNeumannBC::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KokkosNeumannBC::computeQpResidual(const unsigned int, AssemblyDatum &) const
 {
-  return -_test(datum, i, qp) * _value;
+  return -_value;
 }

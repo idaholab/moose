@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Implements a constant Neumann BC where grad(u) is a equal to a postprocessor on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class KokkosPostprocessorNeumannBC : public Moose::Kokkos::IntegratedBC
+class KokkosPostprocessorNeumannBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   /**
@@ -27,9 +27,7 @@ public:
   KokkosPostprocessorNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int, AssemblyDatum &) const;
 
 protected:
   /// Value of grad(u) on the boundary.
@@ -38,9 +36,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosPostprocessorNeumannBC::computeQpResidual(const unsigned int i,
-                                                const unsigned int qp,
-                                                AssemblyDatum & datum) const
+KokkosPostprocessorNeumannBC::computeQpResidual(const unsigned int, AssemblyDatum &) const
 {
-  return -_test(datum, i, qp) * _value;
+  return -_value;
 }

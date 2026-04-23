@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Implements a simple Vacuum BC for neutron diffusion on the boundary.
@@ -17,7 +17,7 @@
  * Hence, \f$ D\frac{du}{dn}=-\frac{u}{2} \f$ and \f$ -\frac{u}{2} \f$ is substituted into
  * the Neumann BC term produced from integrating the diffusion operator by parts.
  */
-class KokkosVacuumBC : public Moose::Kokkos::IntegratedBC
+class KokkosVacuumBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -25,12 +25,9 @@ public:
   KokkosVacuumBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
 
@@ -41,19 +38,16 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosVacuumBC::computeQpResidual(const unsigned int i,
-                                  const unsigned int qp,
-                                  AssemblyDatum & datum) const
+KokkosVacuumBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _alpha * _u(datum, qp) / 2.;
+  return _alpha * _u(datum, qp) / 2.;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosVacuumBC::computeQpJacobian(const unsigned int i,
-                                  const unsigned int j,
+KokkosVacuumBC::computeQpJacobian(const unsigned int j,
                                   const unsigned int qp,
                                   AssemblyDatum & datum) const
 {
-  return _test(datum, i, qp) * _alpha * _phi(datum, j, qp) / 2.;
+  return _alpha * _phi(datum, j, qp) / 2.;
 }

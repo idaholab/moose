@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosKernelValue.h"
 
-class KokkosBodyForce : public Moose::Kokkos::Kernel
+class KokkosBodyForce : public Moose::Kokkos::KernelValue
 {
 public:
   static InputParameters validParams();
@@ -19,9 +19,7 @@ public:
   KokkosBodyForce(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int, AssemblyDatum &) const;
 
 protected:
   /// Scale factor
@@ -33,9 +31,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBodyForce::computeQpResidual(const unsigned int i,
-                                   const unsigned int qp,
-                                   AssemblyDatum & datum) const
+KokkosBodyForce::computeQpResidual(const unsigned int, AssemblyDatum &) const
 {
-  return -_test(datum, i, qp) * _scale * _postprocessor;
+  return -_scale * _postprocessor;
 }

@@ -304,15 +304,24 @@ ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) co
 {
   Real local_re[MAX_CACHED_DOF];
 
-  unsigned int num_batches = datum.n_dofs() / MAX_CACHED_DOF;
+  unsigned int stride = MAX_CACHED_DOF * datum.num_local_threads();
+  unsigned int num_batches = datum.n_dofs() / stride;
 
-  if (datum.n_dofs() % MAX_CACHED_DOF)
+  if (datum.n_dofs() % stride)
     ++num_batches;
 
   for (unsigned int batch = 0; batch < num_batches; ++batch)
   {
-    unsigned int ib = batch * MAX_CACHED_DOF;
-    unsigned int ie = ::Kokkos::min(ib + MAX_CACHED_DOF, datum.n_dofs());
+    unsigned int ib = batch * stride;
+    unsigned int ie = ::Kokkos::min(ib + stride, datum.n_dofs());
+
+    const unsigned int n = ie - ib;
+    const unsigned int d = n / datum.num_local_threads();
+    const unsigned int m = n % datum.num_local_threads();
+    const unsigned int t = datum.local_thread_id();
+
+    ib += t * d + (t < m ? t : m);
+    ie = ib + d + (t < m ? 1 : 0);
 
     for (unsigned int i = ib; i < ie; ++i)
       local_re[i - ib] = 0;
@@ -330,27 +339,26 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
 {
   Real local_ke[MAX_CACHED_DOF];
 
-  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_CACHED_DOF;
-
-  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_CACHED_DOF)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
+  for (unsigned int j = datum.local_thread_id(); j < datum.n_jdofs();
+       j += datum.num_local_threads())
   {
-    unsigned int ijb = batch * MAX_CACHED_DOF;
-    unsigned int ije = ::Kokkos::min(ijb + MAX_CACHED_DOF, datum.n_idofs() * datum.n_jdofs());
+    unsigned int num_batches = datum.n_idofs() / MAX_CACHED_DOF;
 
-    for (unsigned int ij = ijb; ij < ije; ++ij)
-      local_ke[ij - ijb] = 0;
+    if (datum.n_idofs() % MAX_CACHED_DOF)
+      ++num_batches;
 
-    body(local_ke - ijb, ijb, ije);
-
-    for (unsigned int ij = ijb; ij < ije; ++ij)
+    for (unsigned int batch = 0; batch < num_batches; ++batch)
     {
-      unsigned int i = ij % datum.n_jdofs();
-      unsigned int j = ij / datum.n_jdofs();
+      unsigned int ib = batch * MAX_CACHED_DOF;
+      unsigned int ie = ::Kokkos::min(ib + MAX_CACHED_DOF, datum.n_idofs());
 
-      accumulateTaggedElementalMatrix(local_ke[ij - ijb], datum.elem().id, i, j, datum.jvar());
+      for (unsigned int i = ib; i < ie; ++i)
+        local_ke[i - ib] = 0;
+
+      body(local_ke - ib, ib, ie, j);
+
+      for (unsigned int i = ib; i < ie; ++i)
+        accumulateTaggedElementalMatrix(local_ke[i - ib], datum.elem().id, i, j, datum.jvar());
     }
   }
 }

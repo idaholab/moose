@@ -9,13 +9,14 @@
 
 #pragma once
 
-#include "KokkosKernel.h"
+#include "KokkosIntegratedBC.h"
 
 namespace Moose::Kokkos
 {
 
 /**
- * The base class for a user to derive their own Kokkos kernels where the residual is of the form
+ * The base class for a user to derive their own Kokkos integrated boundary conditions where the
+ * residual is of the form
  *
  * $(\dots, \psi_i)$
  *
@@ -37,7 +38,7 @@ namespace Moose::Kokkos
  * The signature of computeQpJacobian() and computeQpOffDiagJacobian() can be found in the code
  * below.
  */
-class KernelValue : public Kernel
+class IntegratedBCValue : public IntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -45,7 +46,7 @@ public:
   /**
    * Constructor
    */
-  KernelValue(const InputParameters & parameters);
+  IntegratedBCValue(const InputParameters & parameters);
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -104,12 +105,12 @@ public:
   template <typename Derived>
   static auto defaultJacobian()
   {
-    return &KernelValue::computeQpJacobian<Derived>;
+    return &IntegratedBCValue::computeQpJacobian<Derived>;
   }
   template <typename Derived>
   static auto defaultOffDiagJacobian()
   {
-    return &KernelValue::computeQpOffDiagJacobian<Derived>;
+    return &IntegratedBCValue::computeQpOffDiagJacobian<Derived>;
   }
   ///@}
 
@@ -119,18 +120,18 @@ public:
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & bc, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & bc,
                                                       AssemblyDatum & datum) const;
   ///@}
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
+IntegratedBCValue::computeResidualInternal(const Derived & bc, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -138,7 +139,7 @@ KernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum & dat
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real value = datum.JxW(qp) * kernel.template computeQpResidual<Derived>(qp, datum);
+          Real value = datum.JxW(qp) * bc.template computeQpResidual<Derived>(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _test(datum, i, qp);
@@ -148,7 +149,7 @@ KernelValue::computeResidualInternal(const Derived & kernel, AssemblyDatum & dat
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
+IntegratedBCValue::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -156,7 +157,7 @@ KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & dat
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
+          Real value = datum.JxW(qp) * bc.template computeQpJacobian<Derived>(j, qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _test(datum, i, qp);
@@ -166,7 +167,7 @@ KernelValue::computeJacobianInternal(const Derived & kernel, AssemblyDatum & dat
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelValue::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
+IntegratedBCValue::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -174,8 +175,8 @@ KernelValue::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatu
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          Real value = datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
-                                           j, datum.jvar(), qp, datum);
+          Real value = datum.JxW(qp) *
+                       bc.template computeQpOffDiagJacobian<Derived>(j, datum.jvar(), qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_ke[i] += value * _test(datum, i, qp);
