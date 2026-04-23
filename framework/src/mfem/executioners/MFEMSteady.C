@@ -46,14 +46,12 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 
       if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
-        _mfem_problem_data.eqn_system->setEigensolve(true);
         auto problem_operator =
             std::make_shared<Moose::MFEM::EquationSystemEigenproblemOperator>(_mfem_problem);
         addProblemOperator(std::move(problem_operator));
       }
       else
       {
-        _mfem_problem_data.eqn_system->setEigensolve(false);
         auto problem_operator =
             std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
         addProblemOperator(std::move(problem_operator));
@@ -62,7 +60,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     else if (_mfem_problem.num_type == MFEMProblem::NumericType::COMPLEX)
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
-      _mfem_problem_data.eqn_system->setEigensolve(false);
       auto problem_operator =
           std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
