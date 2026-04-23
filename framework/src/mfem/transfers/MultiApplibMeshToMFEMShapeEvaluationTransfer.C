@@ -55,7 +55,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool is_target_l
     {
       // Generate list of points where the grid function will be evaluated
       mfem::ParGridFunction & to_gf =
-          *getActiveToProblem().getProblemData().gridfunctions.Get(getToVarName(var_index));
+          *getActiveToProblem().getGridFunction(getToVarName(var_index));
       mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
       if (to_gf.VectorDim() > 1)
         mooseError("MultiApplibMeshToMFEMShapeEvaluationTransfer does not support transfers of "

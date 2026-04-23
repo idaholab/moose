@@ -19,36 +19,40 @@ MFEMNodalProjector::extractNodePositions(const mfem::ParFiniteElementSpace & fes
 {
   const int nelem = fespace.GetParMesh()->GetNE();
   const int dim = fespace.GetParMesh()->Dimension();
+
+  // Find total number of local nodes/interpolation points
   int nnodes = 0;
-  // Find total number of local nodes/integration points
-  for (int i = 0; i < nelem; i++)
-  {
-    const mfem::FiniteElement * fe = fespace.GetFE(i);
-    const int nqpt = fe->GetNodes().GetNPoints();
-    nnodes += nqpt;
-  }
+  for (const auto i : make_range(nelem))
+    nnodes += fespace.GetFE(i)->GetNodes().GetNPoints();
+
   node_positions.SetSize(nnodes * dim);
 
   int nodal_offset = 0;
-  for (int i = 0; i < nelem; i++)
+  for (const auto i : make_range(nelem))
   {
-    const mfem::FiniteElement * fe = fespace.GetFE(i);
-    const int nqpt = fe->GetNodes().GetNPoints();
-    const mfem::IntegrationRule ir = fe->GetNodes();
-    mfem::ElementTransformation * et = fespace.GetElementTransformation(i);
+    const mfem::IntegrationRule ir = fespace.GetFE(i)->GetNodes();
+    const int nipt = ir.GetNPoints();
 
     mfem::DenseMatrix pos;
-    et->Transform(ir, pos);
-    mfem::Vector rowx(node_positions.GetData() + nodal_offset, nqpt),
-        rowy(node_positions.GetData() + nodal_offset + nnodes, nqpt), rowz;
-    if (dim == 3)
-      rowz.SetDataAndSize(node_positions.GetData() + nodal_offset + 2 * nnodes, nqpt);
+    fespace.GetElementTransformation(i)->Transform(ir, pos);
+    mfem::Vector rowx, rowy, rowz;
 
-    pos.GetRow(0, rowx);
-    pos.GetRow(1, rowy);
-    if (dim == 3)
-      pos.GetRow(2, rowz);
-    nodal_offset += nqpt;
+    switch(dim)
+    {
+      case 3:
+        rowz.SetDataAndSize(node_positions.GetData() + nodal_offset + 2 * nnodes, nipt);
+        pos.GetRow(2, rowz);
+        [[fallthrough]];
+      case 2:
+        rowy.SetDataAndSize(node_positions.GetData() + nodal_offset + 1 * nnodes, nipt);
+        pos.GetRow(1, rowy);
+        [[fallthrough]];
+      case 1:
+        rowx.SetDataAndSize(node_positions.GetData() + nodal_offset + 0 * nnodes, nipt);
+        pos.GetRow(0, rowx);
+    }
+
+    nodal_offset += nipt;
   }
   node_ordering = mfem::Ordering::Type::byNODES;
 }
@@ -65,75 +69,37 @@ MFEMNodalProjector::projectNodalValues(const mfem::Vector & nodal_vals,
   fespace.GetParMesh()->EnsureNodes();
 
   // Check FESpaces can be transferred
-  int fieldtype;
-  {
-    const mfem::FiniteElementCollection * fec_in = fespace.FEColl();
-    const mfem::H1_FECollection * fec_h1 = dynamic_cast<const mfem::H1_FECollection *>(fec_in);
-    const mfem::L2_FECollection * fec_l2 = dynamic_cast<const mfem::L2_FECollection *>(fec_in);
-    const mfem::RT_FECollection * fec_rt = dynamic_cast<const mfem::RT_FECollection *>(fec_in);
-    const mfem::ND_FECollection * fec_nd = dynamic_cast<const mfem::ND_FECollection *>(fec_in);
-    if (fec_h1)
-      fieldtype = 0;
-    else if (fec_l2)
-      fieldtype = 1;
-    else if (fec_rt)
-      fieldtype = 2;
-    else if (fec_nd)
-      fieldtype = 3;
-    else
-      mooseError("FESpace type not supported yet in transfers.");
-  }
+  const auto map = fespace.FEColl()->GetMapType(fespace.GetParMesh()->Dimension());
+  const bool H1L2 = map == mfem::FiniteElement::VALUE || map == mfem::FiniteElement::INTEGRAL;
+  const bool RTND =  map == mfem::FiniteElement::H_DIV || map == mfem::FiniteElement::H_CURL;
+  if (!H1L2 && !RTND)
+    mooseError("FESpace type not supported yet in transfers.");
 
   // Project the interpolated values to the target FiniteElementSpace.
+  mfem::Ordering::Type dof_ordering = H1L2 ? mfem::Ordering::byNODES : mfem::Ordering::byVDIM;
   mfem::Array<int> vdofs;
   mfem::Vector vals;
   int nodal_offset = 0;
-  if (fieldtype <= 1) // H1 or L2
+  for (const auto el : make_range(nelem))
   {
-    for (int el = 0; el < nelem; el++)
+    const int nipt = fespace.GetFE(el)->GetNodes().GetNPoints();
+    mfem::Vector dof_vals(nipt * gf_ncomp);
+    fespace.GetElementVDofs(el, vdofs); // Returned vdofs always indexed with ordering byNODES
+    for (const auto ip : make_range(nipt))
+      for (const auto d : make_range(gf_ncomp))
+        dof_vals(Moose::MFEM::MFEMIndex(d, ip, gf_ncomp, nipt, dof_ordering)) =
+          nodal_vals(Moose::MFEM::MFEMIndex(d, ip, gf_ncomp, nipt, nodal_ordering) + nodal_offset);
+
+    if (H1L2)
+      gridfunction.SetSubVector(vdofs, dof_vals);
+    else if (RTND)
     {
-      const int nqpt = fespace.GetFE(el)->GetNodes().GetNPoints();
-      mfem::Vector elem_dof_vals(nqpt * gf_ncomp);
-      fespace.GetElementVDofs(el, vdofs); // Returned vdofs always indexed with ordering byNODES
-      for (int qp = 0; qp < nqpt; qp++)
-        for (int d = 0; d < gf_ncomp; d++)
-          switch (nodal_val_ordering)
-          {
-            case mfem::Ordering::Type::byNODES: // nqpt x VDIM x nelem
-              elem_dof_vals(qp + d * nqpt) = nodal_vals(qp + nqpt * d + nodal_offset);
-              break;
-            case mfem::Ordering::Type::byVDIM: // VDIM x nqpt x nelem
-              elem_dof_vals(qp + d * nqpt) = nodal_vals(d + gf_ncomp * qp + nodal_offset);
-              break;
-          }
-      gridfunction.SetSubVector(vdofs, elem_dof_vals);
-      nodal_offset += nqpt * gf_ncomp;
-    }
-  }
-  else // H(div) or H(curl)
-  {
-    for (int el = 0; el < nelem; el++)
-    {
-      const int nqpt = fespace.GetTypicalFE()->GetNodes().GetNPoints();
-      mfem::Vector elem_dof_vals(nqpt * gf_ncomp);
-      fespace.GetElementVDofs(el, vdofs);
-      for (int qp = 0; qp < nqpt; qp++)
-        for (int d = 0; d < gf_ncomp; d++)
-          switch (nodal_val_ordering) // elem_dof_vals ordering chosen for ProjectFromNodes
-          {
-            case mfem::Ordering::Type::byNODES: // nqpt x VDIM x nelem
-              elem_dof_vals(d + gf_ncomp * qp) = nodal_vals(qp + nqpt * d + nodal_offset);
-              break;
-            case mfem::Ordering::Type::byVDIM: // VDIM x nqpt x nelem
-              elem_dof_vals(d + gf_ncomp * qp) = nodal_vals(d + gf_ncomp * qp + nodal_offset);
-              break;
-          }
       vals.SetSize(vdofs.Size());
-      fespace.GetFE(el)->ProjectFromNodes(
-          elem_dof_vals, *fespace.GetElementTransformation(el), vals);
+      fespace.GetFE(el)->ProjectFromNodes(dof_vals, *fespace.GetElementTransformation(el), vals);
       gridfunction.SetSubVector(vdofs, vals);
-      nodal_offset += nqpt * gf_ncomp;
     }
+
+    nodal_offset += nipt * gf_ncomp;
   }
   gridfunction.SetTrueVector();
 }
