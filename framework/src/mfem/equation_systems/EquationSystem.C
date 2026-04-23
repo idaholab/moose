@@ -241,17 +241,24 @@ EquationSystem::ApplyEssentialBCs()
     // Initial guess for non-linear problems (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
-    if (!_is_eigensolve)
-    {
-      // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-      // essential boundaries to the global_ess_markers array
-      ApplyEssentialBC(trial_var_name, trial_gf, _global_ess_markers);
-      trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(i));
-    }
-    else
-    {
-      trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
-    }
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
+    ApplyEssentialBC(trial_var_name, trial_gf, _global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(i));
+  }
+}
+
+void
+EquationSystem::ApplyEigenEssentialBCs()
+{
+  for (const auto i : index_range(_trial_var_names))
+  {
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    _global_ess_markers = 0;
+    trial_gf.Update();
+    trial_gf = _gfuncs->GetRef(_trial_var_names.at(i));
+    trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
   }
 }
 
@@ -282,8 +289,6 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   {
     mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
                 "Non-legacy assembly is only supported for single test and trial variable systems");
-    mooseAssert(!_is_eigensolve, "Eigensolve is not supported for non-legacy assembly");
-
     FormSystemOperator(op, trueX, trueRHS);
   }
 }
@@ -432,6 +437,7 @@ EquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::Opera
 
   height = trueX.Size();
   width = trueX.Size();
+  ApplyEigenEssentialBCs();
   FormEigenproblemMatrix(_jacobian);
   FormMassMatrix(massRHS);
 }
