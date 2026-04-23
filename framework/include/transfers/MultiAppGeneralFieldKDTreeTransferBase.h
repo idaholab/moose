@@ -94,7 +94,7 @@ protected:
    * pass for search-value-conflict detection when _search_value_conflicts is true.
    *
    * @param pt           Target point in the reference coordinate frame
-   * @param mesh_div     Mesh-division / sub-app index encoded in the point request
+   * @param source_index     Mesh-division / sub-app index encoded in the point request
    * @param outgoing_val Accumulator {value, distance}; caller must pre-set .second to max()
    * @param point_found  Set to true when at least one non-empty KD-tree contributes a value
    */

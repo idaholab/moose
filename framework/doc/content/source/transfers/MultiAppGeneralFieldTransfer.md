@@ -182,7 +182,7 @@ It is advised to keep the number of source mesh divisions the same as the number
 
 ## Post-transfer extrapolation to uncovered target points
 
-When some target DOFs lie outside all source application domains, the transfer cannot
+When some target DOFs lie outside all source application domains, derived transfer classes may not be able to
 provide values for them directly. The
 [!param](/Transfers/MultiAppGeneralFieldNearestLocationTransfer/post_transfer_extrapolation)
 parameter controls what happens to those DOFs after the main transfer completes.

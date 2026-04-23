@@ -1818,7 +1818,7 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
             flagSolutionWarning(
                 "Search for the valid target nearest from a target point for which no "
                 "values were found (and thus extrapolation is required) failed. This warning will "
-                "not be repeated for further failures.");
+                "not be repeated on the console for further failures.");
           }
         }
       }
