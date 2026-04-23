@@ -1727,13 +1727,13 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
                 // dofobject_to_val
                 if (distance_sq < min_distance_sq && elem_node.id() != node->id())
                 {
-                  if (dofobject_to_val.count(elem_node.id()) &&
-                      !GeneralFieldTransfer::isOutOfMeshValue(
-                          libmesh_map_find(dofobject_to_val, elem_node.id()).interp))
+                  if (auto it = dofobject_to_val.find(elem_node.id());
+                      it != dofobject_to_val.end() &&
+                      !GeneralFieldTransfer::isOutOfMeshValue(it->second.interp))
                   {
                     min_distance_sq = distance_sq;
                     min_dist_id = elem_node.id();
-                    nearest_value = libmesh_map_find(dofobject_to_val, min_dist_id).interp;
+                    nearest_value = it->second.interp;
                   }
                   else if (elem_node.n_dofs(sys_num, var_num) > 0)
                   {
@@ -1772,13 +1772,13 @@ MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
               Real distance_sq = (neigh->vertex_average() - elem->vertex_average()).norm_sq();
               if (distance_sq < min_distance_sq)
               {
-                if (dofobject_to_val.count(neigh->id()) &&
-                    !GeneralFieldTransfer::isOutOfMeshValue(
-                        libmesh_map_find(dofobject_to_val, neigh->id()).interp))
+                if (auto it = dofobject_to_val.find(neigh->id());
+                    it != dofobject_to_val.end() &&
+                    !GeneralFieldTransfer::isOutOfMeshValue(it->second.interp))
                 {
                   min_distance_sq = distance_sq;
                   min_dist_id = neigh->id();
-                  nearest_value = libmesh_map_find(dofobject_to_val, min_dist_id).interp;
+                  nearest_value = it->second.interp;
                 }
                 // Access into ghosted solution vector. See comments for node
                 else if (neigh->n_dofs(sys_num, var_num) > 0)
