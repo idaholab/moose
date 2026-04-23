@@ -12,11 +12,11 @@
 // MOOSE includes
 #include "GeneralPostprocessor.h"
 
-class LaserPositionPostprocessor : public GeneralPostprocessor
+class LiftDragRewardPostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
-  LaserPositionPostprocessor(const InputParameters & parameters);
+  LiftDragRewardPostprocessor(const InputParameters & parameters);
 
   virtual void execute() override;
   virtual void initialize() override {}
@@ -24,8 +24,19 @@ public:
   virtual Real getValue() const override;
 
 protected:
+  const PostprocessorValue & _lift;
+  const PostprocessorValue & _drag;
 
-  const PostprocessorValue & _speed;
-  Real _current_arclength;
-  Real _delta_arclength;
+  const unsigned int _averaging_window;
+
+  const Real _coeff_1;
+  const Real _coeff_2;
+
+  Real _avg_lift;
+  Real _avg_drag;
+
+  std::vector<Real> _lift_history;
+  std::vector<Real> _drag_history;
+
+  unsigned int _replace_counter;
 };
