@@ -1,0 +1,11 @@
+[Tests]
+  [multiple_subapps_functor]
+    type = 'Exodiff'
+    input = 'main_between_multiapp_functor.i'
+    exodiff = 'main_between_multiapp_functor_out_ma10.e main_between_multiapp_functor_out_ma11.e
+               main_between_multiapp_functor_out_ma20.e main_between_multiapp_functor_out_ma21.e'
+    design = 'transfers/MultiAppGeneralFieldFunctorTransfer.md'
+    issues = '#13754 #19451 #32346'
+    requirement = 'The system shall be able to send data between sibling subapps using a variable-backed functor within a nearest-positions algorithm and with sub-apps grouped.'
+  []
+[]

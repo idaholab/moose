@@ -28,14 +28,14 @@
 
 [MultiApps/ma1]
   type = TransientMultiApp
-  input_files = sub_between_diffusion.i
+  input_files = ../../nearest_node/nearest_position/sub_between_diffusion.i
   positions_objects = 'input_app1'
   output_in_position = true
 []
 
 [MultiApps/ma2]
   type = TransientMultiApp
-  input_files = sub_between_diffusion.i
+  input_files = ../../nearest_node/nearest_position/sub_between_diffusion.i
   positions_objects = 'input_app2'
   output_in_position = true
 []

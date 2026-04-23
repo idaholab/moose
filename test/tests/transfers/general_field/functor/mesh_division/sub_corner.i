@@ -1,4 +1,4 @@
-# Sub-app input for use with main_match_subapps_corner_base.i.
+# Sub-app input for use with main_match_subapps_functor.i
 # The mesh is a small square in the lower-left, designed to be placed at a corner of the
 # parent domain via 'positions' so that each instance falls within exactly one quadrant of
 # the parent mesh division.

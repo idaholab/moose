@@ -57,16 +57,6 @@
                  "Transfers/from_sub_elem/bbox_factor=20 "
       detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions,'
     []
-    [matching_subapps_functor]
-      type = Exodiff
-      input = 'main_match_subapps_functor.i'
-      exodiff = "main_match_subapps_functor_out.e main_match_subapps_functor_out_sub0.e "
-                "main_match_subapps_functor_out_sub1.e main_match_subapps_functor_out_sub2.e "
-                "main_match_subapps_functor_out_sub3.e"
-      design = 'MeshDivisions/index.md transfers/MultiAppGeneralFieldFunctorTransfer.md'
-      issues = '#13754 #19451'
-      detail = 'to distribute field data restricted by matching divisions of the source mesh to target applications with the same index as the divisions, using a variable-backed functor,'
-    []
     [matching_subapps_nobbox]
       type = Exodiff
       input = 'main_match_subapps.i'
@@ -169,12 +159,5 @@
                    "matching the division index"
       detail = 'the techniques for the target and source mesh divisions are incompatible.'
     []
-  []
-  [functor_search_value_conflict]
-    type = RunException
-    input = main_match_subapps_functor.i
-    cli_args = "MultiApps/sub/positions='-.05 -.05 0 .95 -.05 0 -.05 .95 0 .95 .95 0'"
-    expect_err = "multiple valid values from equidistant points were found in the origin mesh for source functor 'to_main'"
-    requirement = 'The system shall be able to detect search value conflicts when extrapolating from functor boundary evaluation points.'
   []
 []
