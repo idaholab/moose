@@ -1,8 +1,7 @@
 !include base.i
 
 [GlobalParams]
-  gravity_direction = '0 0 0'
-  gravity_magnitude = 0
+  gravity_direction = '0 0 -5'
 []
 
 [Postprocessors]

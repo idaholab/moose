@@ -51,9 +51,7 @@ GravityVectorInterface::GravityVectorInterface(const MooseObject * moose_object)
     }
     else
     {
-      // Right now, _gravity_direction doesn't matter so long as _gravity_magnitude
-      // and _gravity_vector are right, but we'll use the convention that _gravity_direction
-      // is (0,0,0) for zero gravity.
+      // If gravity is zero, direction is the zero vector
       if (MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
         _gravity_direction = RealVectorValue(0, 0, 0);
       else
@@ -72,8 +70,10 @@ GravityVectorInterface::GravityVectorInterface(const MooseObject * moose_object)
     _gravity_vector = moose_object->getParam<RealVectorValue>("gravity_vector");
     _gravity_magnitude = _gravity_vector.norm();
 
-    // If gravity is zero, direction is the zero vector (which is initial value)
-    if (!MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+    // If gravity is zero, direction is the zero vector
+    if (MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+      _gravity_direction = RealVectorValue(0, 0, 0);
+    else
       _gravity_direction = _gravity_vector / _gravity_magnitude;
   }
   else
