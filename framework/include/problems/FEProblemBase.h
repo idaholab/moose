@@ -697,7 +697,7 @@ public:
    * @param name The Kokkos function name
    * @returns Whether a Kokkos function exists
    */
-  virtual bool hasKokkosFunction(const std::string & name);
+  virtual bool hasKokkosFunction(const std::string & name) const;
   /**
    * Get a Kokkos function in an abstract type
    * @param name The Kokkos function name

@@ -5,7 +5,7 @@
 This is the Kokkos version of [ParsedFunction](MooseParsedFunction.md). See the original document for details.
 
 !alert note
-The Kokkos version does not support using scalar variables or other functions for [!param](/Functions/KokkosParsedFunction/symbol_values) yet.
+The Kokkos version does not support using scalar variables for [!param](/Functions/KokkosParsedFunction/symbol_values) yet.
 
 ## Example Syntax
 

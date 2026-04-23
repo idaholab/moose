@@ -9,6 +9,8 @@
 
 #include "KokkosParsedFunction.h"
 
+#include "FEProblemBase.h"
+
 registerKokkosFunction("MooseApp", KokkosParsedFunction);
 
 InputParameters
@@ -30,14 +32,15 @@ KokkosParsedFunction::KokkosParsedFunction(const InputParameters & parameters)
   : FunctionBase(parameters),
     MooseParsedFunctionBase(parameters),
     _expression(verifyFunction(getParam<std::string>("expression"))),
-    _builder(std::make_unique<Moose::Kokkos::RPNBuilder>(_expression, &_console))
+    _builder(std::make_unique<Moose::Kokkos::RPNBuilder>(_expression, &_console)),
+    _problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
   _builder->addDefaultVariables();
 
   const auto & symbol_names = getParam<std::vector<std::string>>("symbol_names");
 
-  for (const auto i : make_range(symbol_names.size()))
-    _builder->addVariable(symbol_names[i]);
+  for (const auto & name : symbol_names)
+    _builder->addVariable(name);
 
   _builder->build();
 
@@ -54,7 +57,8 @@ KokkosParsedFunction::KokkosParsedFunction(const KokkosParsedFunction & function
   : FunctionBase(function),
     MooseParsedFunctionBase(function.parameters()),
     _expression(function._expression),
-    _evaluator(function._evaluator)
+    _evaluator(function._evaluator),
+    _problem(function._problem)
 {
 }
 
@@ -65,25 +69,28 @@ KokkosParsedFunction::initialSetup()
   const auto & symbol_values = getParam<std::vector<std::string>>("symbol_values");
 
   _symbol_values.reserve(symbol_values.size());
+  _symbol_functions.reserve(symbol_values.size());
 
   for (const auto i : make_range(symbol_names.size()))
   {
     if (hasPostprocessorByName(symbol_values[i]))
-      _builder->associateValue(symbol_names[i], &getPostprocessorValueByName(symbol_values[i]));
+      _builder->associateScalar(symbol_names[i], &getPostprocessorValueByName(symbol_values[i]));
+    else if (_problem.hasKokkosFunction(symbol_values[i]))
+    {
+      _symbol_functions.push_back(_problem.getKokkosFunction(symbol_values[i]));
+      _builder->associateFunction(symbol_names[i], &_symbol_functions.back());
+    }
     else if (MooseUtils::parsesToReal(symbol_values[i]))
     {
       _symbol_values.push_back(MooseUtils::convert<Real>(symbol_values[i]));
-      _builder->associateValue(symbol_names[i], &_symbol_values.back());
+      _builder->associateScalar(symbol_names[i], &_symbol_values.back());
     }
     else
-      paramError("symbol_values", "Symbols can only be constants or postprocessors for now.");
+      paramError("symbol_values", "Symbols cannot be scalar variables for now.");
   }
 
   _builder->finalize();
 
   // Should be called after finalization
   _evaluator.init(*_builder);
-
-  // Dry-run for checking whether pre-allocated stack size is sufficient
-  _evaluator.eval(0, Real3(0));
 }
