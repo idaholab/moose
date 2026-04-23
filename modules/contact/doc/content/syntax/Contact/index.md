@@ -26,6 +26,10 @@ formulations:
 
 In addition, face/face contact using a mortar method can also be specified using this block.
 
+For 3D mortar contact, the triangulation of clipped overlap polygons can be selected with the
+`triangulation` parameter. The `triangulate_triangles` parameter controls whether polygons that
+are already triangles are left intact or centroid-subdivided again.
+
 ## Constructed Objects
 
 The primary task performed by this action is creating the Constraint classes that perform the contact enforcement.

@@ -1966,7 +1966,9 @@ public:
       bool periodic,
       const bool debug,
       const bool correct_edge_dropping,
-      const Real minimum_projection_angle);
+      const Real minimum_projection_angle,
+      const MooseEnum & triangulation,
+      const bool triangulate_triangles);
 
   /**
    * Return the undisplaced or displaced mortar generation object associated with the provided
