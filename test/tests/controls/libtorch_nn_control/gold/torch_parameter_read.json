@@ -112,12 +112,23 @@
                         0.3051220898124913,
                         0.2652967572212219
                     ],
+                    "input_scaling_factors": [
+                        1.0,
+                        1.0
+                    ],
+                    "input_shift_factors": [
+                        0.0,
+                        0.0
+                    ],
                     "output_layer_.bias": [
                         0.4794089532666399
                     ],
                     "output_layer_.weight": [
                         0.47736589074351915,
                         0.11757504436858923
+                    ],
+                    "output_scaling_factors": [
+                        1.0
                     ]
                 }
             },

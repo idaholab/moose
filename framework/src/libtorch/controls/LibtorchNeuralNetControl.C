@@ -103,15 +103,19 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   // errors if we don't have the postprocessors requested in the input.
   for (unsigned int resp_i = 0; resp_i < _response_names.size(); ++resp_i)
     _response_values.push_back(&getPostprocessorValueByName(_response_names[resp_i]));
-
-  // If the user wants to read the neural net from file, we do it. We can read it from a
-  // torchscript file, or we can create a shell and read back the parameters.
-  if (parameters.isParamSetByUser("filename") && type() == "LibtorchNeuralNetControl")
-    this->loadControlNeuralNetFromFile(parameters);
 }
 
 void
-LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & parameters)
+LibtorchNeuralNetControl::initialSetup()
+{
+  // File-backed controllers are loaded after full construction so derived controls can override
+  // the loader without constructor-time type checks.
+  if (isParamSetByUser("filename"))
+    loadControlNeuralNetFromFile();
+}
+
+void
+LibtorchNeuralNetControl::loadControlNeuralNetFromFile()
 {
   const auto & filename = getParam<std::string>("filename");
   if (getParam<bool>("torch_script_format"))
@@ -123,7 +127,7 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & p
     std::vector<unsigned int> num_neurons_per_layer =
         getParam<std::vector<unsigned int>>("num_neurons_per_layer");
     std::vector<std::string> activation_functions =
-        parameters.isParamSetByUser("activation_function")
+        isParamSetByUser("activation_function")
             ? getParam<std::vector<std::string>>("activation_function")
             : std::vector<std::string>({"relu"});
     const auto input_shift_factors =

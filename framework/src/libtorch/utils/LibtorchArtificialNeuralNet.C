@@ -46,6 +46,115 @@ isOptionalArtificialNeuralNetBuffer(const std::string & key)
   return key == "input_shift" || key == "input_scale" || key == "output_scale";
 }
 
+template <typename NamedTensorList>
+bool
+findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
+{
+  for (const auto & entry : tensors)
+    if (entry.name == key)
+    {
+      tensor = entry.value;
+      return true;
+    }
+
+  return false;
+}
+
+bool
+loadArtificialNeuralNetStateFromArchive(Moose::LibtorchArtificialNeuralNet & nn,
+                                        const std::string & filename,
+                                        std::string & error)
+{
+  try
+  {
+    torch::serialize::InputArchive archive;
+    archive.load_from(filename);
+
+    for (auto & parameter : nn.named_parameters())
+    {
+      torch::Tensor stored_tensor;
+      if (!readArchiveTensor(archive, parameter.key(), stored_tensor))
+      {
+        error = "Missing serialized parameter: " + parameter.key();
+        return false;
+      }
+
+      copyTensor(parameter.value(), stored_tensor);
+    }
+
+    for (auto & buffer : nn.named_buffers())
+    {
+      torch::Tensor stored_tensor;
+      if (!readArchiveTensor(archive, buffer.key(), stored_tensor))
+      {
+        if (isOptionalArtificialNeuralNetBuffer(buffer.key()))
+          continue;
+
+        error = "Missing serialized buffer: " + buffer.key();
+        return false;
+      }
+
+      copyTensor(buffer.value(), stored_tensor);
+    }
+
+    nn.synchronizeAffineFactorsFromBuffers();
+    return true;
+  }
+  catch (const c10::Error & e)
+  {
+    error = e.msg();
+    return false;
+  }
+}
+
+bool
+loadArtificialNeuralNetStateFromTorchScript(Moose::LibtorchArtificialNeuralNet & nn,
+                                            const std::string & filename,
+                                            std::string & error)
+{
+  try
+  {
+    const auto scripted = torch::jit::load(filename);
+    const auto scripted_parameters = scripted.named_parameters();
+    const auto scripted_buffers = scripted.named_buffers();
+
+    for (auto & parameter : nn.named_parameters())
+    {
+      torch::Tensor stored_tensor;
+      if (!findNamedTensor(scripted_parameters, parameter.key(), stored_tensor))
+      {
+        error = "Missing scripted parameter: " + parameter.key();
+        return false;
+      }
+
+      copyTensor(parameter.value(), stored_tensor);
+    }
+
+    for (auto & buffer : nn.named_buffers())
+    {
+      torch::Tensor stored_tensor;
+      if (!findNamedTensor(scripted_buffers, buffer.key(), stored_tensor))
+      {
+        if (isOptionalArtificialNeuralNetBuffer(buffer.key()))
+          continue;
+
+        error = "Missing scripted buffer: " + buffer.key();
+        return false;
+      }
+
+      copyTensor(buffer.value(), stored_tensor);
+    }
+
+    nn.synchronizeAffineFactorsFromBuffers();
+    return true;
+  }
+  catch (const c10::Error & e)
+  {
+    error = e.msg();
+    return false;
+  }
+}
+
 } // namespace
 
 namespace Moose
@@ -318,43 +427,21 @@ void
 loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
                                      const std::string & filename)
 {
-  torch::serialize::InputArchive archive;
-  archive.load_from(filename);
+  std::string archive_error;
+  if (loadArtificialNeuralNetStateFromArchive(nn, filename, archive_error))
+    return;
 
-  for (auto & parameter : nn.named_parameters())
-  {
-    torch::Tensor stored_tensor;
-    if (!readArchiveTensor(archive, parameter.key(), stored_tensor))
-      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-                 "the result of the file not existing or a misalignment in the generated "
-                 "container and the data in the file. Make sure the dimensions of the generated "
-                 "neural net are the same as the dimensions of the parameters in the input file!\n"
-                 "Missing serialized parameter: ",
-                 parameter.key());
+  std::string scripted_error;
+  if (loadArtificialNeuralNetStateFromTorchScript(nn, filename, scripted_error))
+    return;
 
-    copyTensor(parameter.value(), stored_tensor);
-  }
-
-  for (auto & buffer : nn.named_buffers())
-  {
-    torch::Tensor stored_tensor;
-    if (!readArchiveTensor(archive, buffer.key(), stored_tensor))
-    {
-      if (isOptionalArtificialNeuralNetBuffer(buffer.key()))
-        continue;
-
-      mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-                 "the result of the file not existing or a misalignment in the generated "
-                 "container and the data in the file. Make sure the dimensions of the generated "
-                 "neural net are the same as the dimensions of the parameters in the input file!\n"
-                 "Missing serialized buffer: ",
-                 buffer.key());
-    }
-
-    copyTensor(buffer.value(), stored_tensor);
-  }
-
-  nn.synchronizeAffineFactorsFromBuffers();
+  mooseError("The requested pytorch parameter file could not be loaded. This can either be the "
+             "result of the file not existing or a misalignment in the generated container and "
+             "the data in the file. Make sure the dimensions of the generated neural net are the "
+             "same as the dimensions of the parameters in the input file!\nArchive load error: ",
+             archive_error,
+             "\nTorchScript load error: ",
+             scripted_error);
 }
 
 }
