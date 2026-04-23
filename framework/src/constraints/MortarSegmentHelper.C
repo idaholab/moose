@@ -10,9 +10,11 @@
 #include "MooseError.h"
 
 #include "libmesh/int_range.h"
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_triangle_interface.h"
 #include "libmesh/poly2tri_triangulator.h"
+#endif
 
 #include <algorithm>
 #include <array>
