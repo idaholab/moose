@@ -11,8 +11,54 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseError.h"
+#include "MooseEnum.h"
 #include "MortarExecutorInterface.h"
 #include "AutomaticMortarGeneration.h"
+
+namespace
+{
+struct ParsedMortarTriangulationOptions
+{
+  MortarSegmentTriangulationMode mode = MortarSegmentTriangulationMode::vertex;
+  std::string canonical_name = "vertex";
+};
+
+ParsedMortarTriangulationOptions
+parseTriangulationOptions(const MooseEnum & triangulation)
+{
+  ParsedMortarTriangulationOptions options;
+
+  if (triangulation == "vertex")
+  {
+    options.mode = MortarSegmentTriangulationMode::vertex;
+    options.canonical_name = "vertex";
+    return options;
+  }
+  if (triangulation == "centroid")
+  {
+    options.mode = MortarSegmentTriangulationMode::centroid;
+    options.canonical_name = "centroid";
+    return options;
+  }
+  if (triangulation == "ear_clipping")
+  {
+    options.mode = MortarSegmentTriangulationMode::ear_clipping;
+    options.canonical_name = "ear_clipping";
+    return options;
+  }
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
+  if (triangulation == "delaunay")
+  {
+    options.mode = MortarSegmentTriangulationMode::delaunay;
+    options.canonical_name = "delaunay";
+    return options;
+  }
+#endif
+
+  mooseError("Unsupported mortar triangulation option: ", triangulation);
+  return options;
+}
+}
 
 MortarInterfaceWarehouse::MortarInterfaceWarehouse(const libMesh::ParallelObject & other)
   : libMesh::ParallelObject(other), _mortar_initd(false)
@@ -28,7 +74,9 @@ MortarInterfaceWarehouse::createMortarInterface(
     bool periodic,
     const bool debug,
     const bool correct_edge_dropping,
-    const Real minimum_projection_angle)
+    const Real minimum_projection_angle,
+    const MooseEnum & triangulation,
+    const bool triangulate_triangles)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -40,7 +88,15 @@ MortarInterfaceWarehouse::createMortarInterface(
 
   auto & periodic_map = on_displaced ? _displaced_periodic_map : _periodic_map;
   auto & debug_flag_map = on_displaced ? _displaced_debug_flag_map : _debug_flag_map;
+  auto & mortar_segment_triangulation_map = on_displaced
+                                                ? _displaced_mortar_segment_triangulation_map
+                                                : _mortar_segment_triangulation_map;
+  auto & triangulate_triangles_map =
+      on_displaced ? _displaced_triangulate_triangles_map : _triangulate_triangles_map;
   auto & mortar_interfaces = on_displaced ? _displaced_mortar_interfaces : _mortar_interfaces;
+  const auto parsed_options = parseTriangulationOptions(triangulation);
+  const auto & mortar_segment_triangulation_name = parsed_options.canonical_name;
+  const auto triangulation_mode = parsed_options.mode;
 
   // Periodic flag
   auto periodic_map_iterator = periodic_map.find(boundary_key);
@@ -60,6 +116,26 @@ MortarInterfaceWarehouse::createMortarInterface(
   else
     debug_flag_map.insert(debug_flag_map_iterator, std::make_pair(boundary_key, debug));
 
+  auto mortar_segment_triangulation_map_iterator =
+      mortar_segment_triangulation_map.find(boundary_key);
+  if (mortar_segment_triangulation_map_iterator != mortar_segment_triangulation_map.end() &&
+      mortar_segment_triangulation_map_iterator->second != mortar_segment_triangulation_name)
+    mooseError("We do not currently support multiple values of 'triangulation' on the same "
+               "boundary primary-secondary surface pair.");
+  else
+    mortar_segment_triangulation_map.insert(
+        mortar_segment_triangulation_map_iterator,
+        std::make_pair(boundary_key, mortar_segment_triangulation_name));
+
+  auto triangulate_triangles_map_iterator = triangulate_triangles_map.find(boundary_key);
+  if (triangulate_triangles_map_iterator != triangulate_triangles_map.end() &&
+      triangulate_triangles_map_iterator->second != triangulate_triangles)
+    mooseError("We do not currently support multiple values of 'triangulate_triangles' on the "
+               "same boundary primary-secondary surface pair.");
+  else
+    triangulate_triangles_map.insert(triangulate_triangles_map_iterator,
+                                     std::make_pair(boundary_key, triangulate_triangles));
+
   // Generate lower-d mesh
   if (mortar_interfaces.find(boundary_key) == mortar_interfaces.end())
   {
@@ -73,7 +149,9 @@ MortarInterfaceWarehouse::createMortarInterface(
                                                     periodic,
                                                     debug,
                                                     correct_edge_dropping,
-                                                    minimum_projection_angle));
+                                                    minimum_projection_angle,
+                                                    triangulation_mode,
+                                                    triangulate_triangles));
     if (inserted)
       it->second->initOutput();
   }

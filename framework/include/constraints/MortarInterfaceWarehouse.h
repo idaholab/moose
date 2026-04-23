@@ -16,10 +16,12 @@
 
 #include <unordered_map>
 #include <set>
+#include <string>
 
 class SubProblem;
 class MortarExecutorInterface;
 class AutomaticMortarGeneration;
+class MooseEnum;
 
 class MortarInterfaceWarehouse : public libMesh::ParallelObject
 {
@@ -39,6 +41,9 @@ public:
    * @param correct_edge_dropping edge dropping treatment selection
    * @param minimum_projection_angle minimum projection angle allowed for building mortar segment
    * mesh
+   * @param triangulation triangulation strategy used for clipped 3D mortar polygons
+   * @param triangulate_triangles whether a clipped polygon that is already a triangle should still
+   * be subdivided
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
@@ -47,7 +52,9 @@ public:
                              bool periodic,
                              const bool debug,
                              const bool correct_edge_dropping,
-                             const Real minimum_projection_angle);
+                             const Real minimum_projection_angle,
+                             const MooseEnum & triangulation,
+                             const bool triangulate_triangles);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
@@ -170,6 +177,18 @@ private:
 
   /// Map from displaced AMG key to whether the displaced AMG object is to output mortar segment mesh
   std::unordered_map<MortarKey, bool> _displaced_debug_flag_map;
+
+  /// Map from undisplaced AMG key to the selected mortar segment triangulation strategy
+  std::unordered_map<MortarKey, std::string> _mortar_segment_triangulation_map;
+
+  /// Map from displaced AMG key to the selected mortar segment triangulation strategy
+  std::unordered_map<MortarKey, std::string> _displaced_mortar_segment_triangulation_map;
+
+  /// Map from undisplaced AMG key to whether already-triangular polygons are further subdivided
+  std::unordered_map<MortarKey, bool> _triangulate_triangles_map;
+
+  /// Map from displaced AMG key to whether already-triangular polygons are further subdivided
+  std::unordered_map<MortarKey, bool> _displaced_triangulate_triangles_map;
 
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
   /// (e.g. the ids of the interior parents)

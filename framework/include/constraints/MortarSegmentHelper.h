@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MortarSegmentInfo.h"
+
 #include "libmesh/point.h"
 #include "libmesh/int_range.h"
 
@@ -28,7 +30,9 @@ class MortarSegmentHelper
 public:
   MortarSegmentHelper(const std::vector<Point> secondary_nodes,
                       const Point & center,
-                      const Point & normal);
+                      const Point & normal,
+                      const MortarSegmentTriangulationMode triangulation_mode,
+                      const bool triangulate_triangles);
 
   /**
    * Computes the intersection between line segments defined by point pairs (p1,p2) and (q1,q2)
@@ -49,13 +53,18 @@ public:
   bool isDisjoint(const std::vector<Point> & poly) const;
 
   /**
+   * Project a primary polygon into the helper plane while preserving the clipping orientation.
+   */
+  std::vector<Point> projectPrimaryPoly(const std::vector<Point> & primary_nodes) const;
+
+  /**
    * Clip secondary element (defined in instantiation) against given primary polygon
    * result is a set of 2D nodes defining clipped polygon
    */
   std::vector<Point> clipPoly(const std::vector<Point> & primary_nodes) const;
 
   /**
-   * Triangulate a polygon (currently uses center of polygon to define triangulation)
+   * Triangulate a polygon according to the configured mortar-segment triangulation mode.
    * @param poly_nodes List of 2D nodes defining polygon
    * @param offset Current size of 3D nodes array (not poly_nodes)
    * @return tri_map List of integer arrays defining which nodes belong to each triangle
@@ -131,6 +140,16 @@ private:
    * Tolerance for intersection and clipping
    */
   Real _tolerance = 1e-8;
+
+  /**
+   * Triangulation mode used for clipped polygons.
+   */
+  const MortarSegmentTriangulationMode _triangulation_mode;
+
+  /**
+   * Whether already-triangular polygons should still be centroid-subdivided.
+   */
+  const bool _triangulate_triangles;
 
   /**
    * Tolerance times secondary area for dimensional consistency

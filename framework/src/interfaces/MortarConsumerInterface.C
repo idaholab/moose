@@ -91,6 +91,38 @@ MortarConsumerInterface::validParams()
       "can result in mortar segments solving physics not meaningfully, and overprojection of "
       "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
       "intended for mortar mesh debugging purposes in two dimensions.");
+  MooseEnum triangulation(
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
+      "vertex centroid ear_clipping delaunay",
+#else
+      "vertex centroid ear_clipping",
+#endif
+      "vertex");
+  triangulation.addDocumentation(
+      "vertex",
+      "Triangulate clipped 3D mortar polygons by forming a fan from an existing polygon vertex.");
+  triangulation.addDocumentation(
+      "centroid",
+      "Triangulate clipped 3D mortar polygons by forming a fan from a polygon centroid.");
+  triangulation.addDocumentation(
+      "ear_clipping", "Triangulate clipped 3D mortar polygons with an ear-clipping algorithm.");
+#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
+  triangulation.addDocumentation(
+      "delaunay",
+      "Triangulate clipped 3D mortar polygons using libMesh's constrained-Delaunay PSLG "
+      "triangulation backend while preserving polygon boundary edges.");
+#endif
+  params.addParam<MooseEnum>(
+      "triangulation",
+      triangulation,
+      "Strategy used to triangulate clipped 3D mortar polygons into mortar segments.");
+  params.addParam<bool>(
+      "triangulate_triangles",
+      false,
+      "Whether a clipped 3D mortar polygon that is already a triangle should still be subdivided "
+      "during triangulation. When enabled, already-triangular polygons are subdivided with the "
+      "centroid-based path because the vertex-fan, ear-clipping, and Delaunay backends cannot "
+      "refine a triangle any further on their own.");
 
   params.addParam<bool>(
       "ghost_higher_d_neighbors",
@@ -141,7 +173,9 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<bool>("periodic"),
       moose_object->getParam<bool>("debug_mesh"),
       moose_object->getParam<bool>("correct_edge_dropping"),
-      moose_object->getParam<Real>("minimum_projection_angle"));
+      moose_object->getParam<Real>("minimum_projection_angle"),
+      moose_object->getParam<MooseEnum>("triangulation"),
+      moose_object->getParam<bool>("triangulate_triangles"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),

@@ -85,6 +85,66 @@
     abs_zero = 1.0e-5
     valgrind = 'none'
   []
+  [frictionless-mortar-3d-action-centroid-triangulation]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d-action.i'
+    capabilities = 'ad_size>=150 & method!=dbg'
+    cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=true '
+               'Contact/mortar/debug_mesh=true Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+               'Outputs/exodus=false Outputs/csv=false'
+    mesh_mode = 'REPLICATED' # see issue 24255
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall allow centroid-based 3D mortar triangulation through the '
+                  'contact action and explicitly subdivide already-triangular clipped polygons '
+                  'when triangulate_triangles is enabled.'
+    max_parallel = 1
+    valgrind = 'none'
+    prereq = 'frictionless-mortar-3d-action/first'
+  []
+  [frictionless-mortar-3d-action-centroid-triangulation-no-triangle-retessellation]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d-action.i'
+    capabilities = 'ad_size>=150 & method!=dbg'
+    cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=false '
+               'Contact/mortar/debug_mesh=true Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+               'Outputs/exodus=false Outputs/csv=false'
+    mesh_mode = 'REPLICATED' # see issue 24255
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall allow centroid-based 3D mortar triangulation through the '
+                  'contact action while leaving already-triangular clipped polygons intact when '
+                  'triangulate_triangles is disabled.'
+    max_parallel = 1
+    valgrind = 'none'
+    prereq = 'frictionless-mortar-3d-action-centroid-triangulation'
+  []
+  [frictionless-mortar-3d-action-ear-clipping-debug-mesh]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d-action.i'
+    capabilities = 'ad_size>=150 & method!=dbg'
+    cli_args = 'Contact/mortar/triangulation=ear_clipping Contact/mortar/debug_mesh=true '
+               'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false'
+    mesh_mode = 'REPLICATED' # see issue 24255
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall support the ear_clipping 3D mortar triangulation option '
+                  'through the contact action.'
+    max_parallel = 1
+    valgrind = 'none'
+    prereq = 'frictionless-mortar-3d-action/first'
+  []
+  [frictionless-mortar-3d-action-delaunay-debug-mesh]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d-action.i'
+    capabilities = 'ad_size>=150 & method!=dbg'
+    cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
+               'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false'
+    mesh_mode = 'REPLICATED' # see issue 24255
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall support the delaunay 3D mortar triangulation option through '
+                  'the contact action.'
+    max_parallel = 1
+    valgrind = 'none'
+    prereq = 'frictionless-mortar-3d-action/first'
+  []
   [frictionless-mortar-3d-debug-mesh]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
@@ -96,6 +156,92 @@
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
     prereq = 'frictionless-mortar-3d'
+  []
+  [frictionless-mortar-3d-debug-mesh-centroid-triangulation]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d.i'
+    capabilities = 'ad_size>=150'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+               'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+               'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+               'UserObjects/weighted_gap_uo/debug_mesh=true '
+               'Constraints/normal_lm/triangulation=centroid '
+               'Constraints/normal_x/triangulation=centroid '
+               'Constraints/normal_y/triangulation=centroid '
+               'Constraints/normal_z/triangulation=centroid '
+               'UserObjects/weighted_gap_uo/triangulation=centroid '
+               'Constraints/normal_lm/triangulate_triangles=true '
+               'Constraints/normal_x/triangulate_triangles=true '
+               'Constraints/normal_y/triangulate_triangles=true '
+               'Constraints/normal_z/triangulate_triangles=true '
+               'UserObjects/weighted_gap_uo/triangulate_triangles=true'
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall allow direct 3D mortar objects to use centroid triangulation '
+                  'and explicitly subdivide already-triangular clipped polygons.'
+    max_parallel = 1
+    prereq = 'frictionless-mortar-3d-debug-mesh'
+  []
+  [frictionless-mortar-3d-debug-mesh-centroid-triangulation-no-triangle-retessellation]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d.i'
+    capabilities = 'ad_size>=150'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+               'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+               'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+               'UserObjects/weighted_gap_uo/debug_mesh=true '
+               'Constraints/normal_lm/triangulation=centroid '
+               'Constraints/normal_x/triangulation=centroid '
+               'Constraints/normal_y/triangulation=centroid '
+               'Constraints/normal_z/triangulation=centroid '
+               'UserObjects/weighted_gap_uo/triangulation=centroid '
+               'Constraints/normal_lm/triangulate_triangles=false '
+               'Constraints/normal_x/triangulate_triangles=false '
+               'Constraints/normal_y/triangulate_triangles=false '
+               'Constraints/normal_z/triangulate_triangles=false '
+               'UserObjects/weighted_gap_uo/triangulate_triangles=false'
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall allow direct 3D mortar objects to use centroid triangulation '
+                  'while leaving already-triangular clipped polygons intact.'
+    max_parallel = 1
+    prereq = 'frictionless-mortar-3d-debug-mesh-centroid-triangulation'
+  []
+  [frictionless-mortar-3d-debug-mesh-ear-clipping]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d.i'
+    capabilities = 'ad_size>=150'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+               'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+               'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+               'UserObjects/weighted_gap_uo/debug_mesh=true '
+               'Constraints/normal_lm/triangulation=ear_clipping '
+               'Constraints/normal_x/triangulation=ear_clipping '
+               'Constraints/normal_y/triangulation=ear_clipping '
+               'Constraints/normal_z/triangulation=ear_clipping '
+               'UserObjects/weighted_gap_uo/triangulation=ear_clipping'
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall accept the ear_clipping 3D mortar triangulation for direct '
+                  'mortar objects.'
+    max_parallel = 1
+    prereq = 'frictionless-mortar-3d-debug-mesh'
+  []
+  [frictionless-mortar-3d-debug-mesh-delaunay]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d.i'
+    capabilities = 'ad_size>=150'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
+               'Constraints/normal_lm/debug_mesh=true Constraints/normal_x/debug_mesh=true '
+               'Constraints/normal_y/debug_mesh=true Constraints/normal_z/debug_mesh=true '
+               'UserObjects/weighted_gap_uo/debug_mesh=true '
+               'Constraints/normal_lm/triangulation=delaunay '
+               'Constraints/normal_x/triangulation=delaunay '
+               'Constraints/normal_y/triangulation=delaunay '
+               'Constraints/normal_z/triangulation=delaunay '
+               'UserObjects/weighted_gap_uo/triangulation=delaunay'
+    check_files = 'mortar_segment_mesh.e'
+    requirement = 'The system shall accept the delaunay 3D mortar triangulation for direct mortar '
+                  'objects.'
+    max_parallel = 1
+    prereq = 'frictionless-mortar-3d-debug-mesh'
   []
   [frictional-mortar-3d]
     type = 'Exodiff'
