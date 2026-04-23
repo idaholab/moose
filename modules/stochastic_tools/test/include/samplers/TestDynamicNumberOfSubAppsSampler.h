@@ -19,5 +19,5 @@ public:
   void executeSetUp() override;
 
 protected:
-  const dof_id_type _increment_rows;
+  dof_id_type _increment_rows = 0;
 };
