@@ -275,8 +275,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       1,
       _num_critic_neurons_per_layer,
       getParam<std::vector<std::string>>("critic_activation_functions"),
-      std::vector<Real>(),
-      std::vector<Real>(),
       torch::kCPU,
       torch::kDouble,
       true,

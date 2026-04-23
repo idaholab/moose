@@ -135,8 +135,6 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile(const InputParameters & p
                                                                    num_outputs,
                                                                    num_neurons_per_layer,
                                                                    activation_functions,
-                                                                   std::vector<Real>(),
-                                                                   std::vector<Real>(),
                                                                    torch::kCPU,
                                                                    torch::kDouble,
                                                                    true,

@@ -57,8 +57,6 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const unsigned int num_outputs,
     const std::vector<unsigned int> & num_neurons_per_layer,
     const std::vector<std::string> & activation_function,
-    const std::vector<Real> & minimum_values,
-    const std::vector<Real> & maximum_values,
     const torch::DeviceType device_type,
     const torch::ScalarType data_type,
     const bool build_on_construct,
@@ -77,9 +75,7 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _input_scaling_factors(
         normalizeAffineFactors(input_scaling_factors, num_inputs, 1.0, "input_scaling_factors")),
     _output_scaling_factors(
-        normalizeAffineFactors(output_scaling_factors, num_outputs, 1.0, "output_scaling_factors")),
-    _minimum_values(minimum_values),
-    _maximum_values(maximum_values)
+        normalizeAffineFactors(output_scaling_factors, num_outputs, 1.0, "output_scaling_factors"))
 {
   _activation_function = activation_function;
   initializeAffineBuffers();
@@ -89,29 +85,6 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
       (_activation_function.size() != _num_neurons_per_layer.size()))
     mooseError("The number of activation functions should be either one or the same as the number "
                "of hidden layers");
-
-  const bool has_minimum_values = !_minimum_values.empty();
-  const bool has_maximum_values = !_maximum_values.empty();
-  if (has_minimum_values != has_maximum_values)
-    mooseError("Bounded neural network outputs require both minimum_values and maximum_values.");
-
-  if (has_minimum_values)
-  {
-    if (_minimum_values.size() != _num_outputs || _maximum_values.size() != _num_outputs)
-      mooseError("The number of minimum_values and maximum_values entries must match the number "
-                 "of outputs.");
-
-    for (const auto i : make_range(_minimum_values.size()))
-      if (!(_maximum_values[i] > _minimum_values[i]))
-        mooseError("maximum_values entries must be strictly greater than minimum_values entries.");
-
-    auto min_value = _minimum_values;
-    LibtorchUtils::vectorToTensor(min_value, _min_tensor);
-    _min_tensor = _min_tensor.transpose(0, 1).to(_data_type).to(_device_type);
-    auto max_value = _maximum_values;
-    LibtorchUtils::vectorToTensor(max_value, _max_tensor);
-    _max_tensor = _max_tensor.transpose(0, 1).to(_data_type).to(_device_type);
-  }
 
   if (build_on_construct)
     constructNeuralNetwork();
@@ -129,9 +102,7 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _data_type(nn.dataType()),
     _input_shift_factors(nn.inputShiftFactors()),
     _input_scaling_factors(nn.inputScalingFactors()),
-    _output_scaling_factors(nn.outputScalingFactors()),
-    _minimum_values(nn.minValues()),
-    _maximum_values(nn.maxValues())
+    _output_scaling_factors(nn.outputScalingFactors())
 {
   initializeAffineBuffers();
 
@@ -149,16 +120,6 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     auto to_buffers = this->named_buffers();
     for (unsigned int buffer_i : make_range(from_buffers.size()))
       to_buffers[buffer_i].value().data() = from_buffers[buffer_i].value().data().clone();
-  }
-
-  if (_minimum_values.size())
-  {
-    auto min_value = _minimum_values;
-    LibtorchUtils::vectorToTensor(min_value, _min_tensor);
-    _min_tensor = _min_tensor.transpose(0, 1).to(_data_type).to(_device_type);
-    auto max_value = _maximum_values;
-    LibtorchUtils::vectorToTensor(max_value, _max_tensor);
-    _max_tensor = _max_tensor.transpose(0, 1).to(_data_type).to(_device_type);
   }
 }
 
@@ -306,17 +267,7 @@ LibtorchArtificialNeuralNet::forward(const torch::Tensor & x)
       output = _weights[i]->forward(output);
   }
 
-  if (_minimum_values.size())
-  {
-    output = torch::sigmoid(_weights[_weights.size() - 1]->forward(output));
-    const auto scale = _max_tensor - _min_tensor;
-    output = torch::mul(output, scale);
-    output = output + _min_tensor;
-  }
-  else
-    output = _weights[_weights.size() - 1]->forward(output);
-
-  return scaleOutput(output);
+  return scaleOutput(_weights[_weights.size() - 1]->forward(output));
 }
 
 void
@@ -435,16 +386,6 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
   for (unsigned int i = 0; i < afs; ++i)
     items[i] = nn->activationFunctions()[i];
 
-  // unsigned int nminv(nn->minValues().size());
-  // dataStore(stream, nminv, context);
-  std::vector<Real> minv(nn->minValues());
-  dataStore(stream, minv, context);
-
-  // unsigned int nmaxv(nn->minValues().size());
-  // dataStore(stream, nmaxv, context);
-  std::vector<Real> maxv(nn->maxValues());
-  dataStore(stream, maxv, context);
-
   dataStore(stream, items, context);
 
   auto device_type = static_cast<std::underlying_type<torch::DeviceType>::type>(nn->deviceType());
@@ -484,14 +425,6 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   activation_functions.resize(num_activation_items);
   dataLoad(stream, activation_functions, context);
 
-  std::vector<Real> min_values;
-  min_values.resize(num_outputs);
-  dataLoad(stream, min_values, context);
-
-  std::vector<Real> max_values;
-  max_values.resize(num_outputs);
-  dataLoad(stream, max_values, context);
-
   std::underlying_type<torch::DeviceType>::type device_type;
   dataLoad(stream, device_type, context);
   const torch::DeviceType divt(static_cast<torch::DeviceType>(device_type));
@@ -500,15 +433,8 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   dataLoad(stream, data_type, context);
   const torch::ScalarType datt(static_cast<torch::ScalarType>(data_type));
 
-  nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(name,
-                                                            num_inputs,
-                                                            num_outputs,
-                                                            num_neurons_per_layer,
-                                                            activation_functions,
-                                                            min_values,
-                                                            max_values,
-                                                            divt,
-                                                            datt);
+  nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
+      name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, divt, datt);
 
   Moose::loadLibtorchArtificialNeuralNetState(*nn, name);
 }

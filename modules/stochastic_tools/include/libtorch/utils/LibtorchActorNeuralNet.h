@@ -79,6 +79,8 @@ public:
   LibtorchBetaActionDistribution & betaActionDistribution();
 
   bool stateIndependentStd() const { return _state_independent_std; }
+  const std::vector<Real> & minValues() const { return _minimum_values; }
+  const std::vector<Real> & maxValues() const { return _maximum_values; }
 
   void resetDistributionParams(torch::Tensor input);
 
@@ -89,6 +91,8 @@ public:
   virtual void initializeNeuralNetwork() override;
 
 protected:
+  const std::vector<Real> _minimum_values;
+  const std::vector<Real> _maximum_values;
   const bool _state_independent_std;
   std::shared_ptr<LibtorchActionDistribution> _action_distribution;
 };

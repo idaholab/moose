@@ -227,16 +227,32 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
                                 num_outputs,
                                 num_neurons_per_layer,
                                 activation_function,
-                                minimum_values,
-                                maximum_values,
                                 device_type,
                                 data_type,
                                 false,
                                 input_shift_factors,
                                 input_scaling_factors,
                                 output_scaling_factors),
+    _minimum_values(minimum_values),
+    _maximum_values(maximum_values),
     _state_independent_std(state_independent_std)
 {
+  const bool has_minimum_values = !_minimum_values.empty();
+  const bool has_maximum_values = !_maximum_values.empty();
+  if (has_minimum_values != has_maximum_values)
+    mooseError("Bounded action distributions require both minimum_values and maximum_values.");
+
+  if (has_minimum_values)
+  {
+    if (_minimum_values.size() != _num_outputs || _maximum_values.size() != _num_outputs)
+      mooseError("The number of minimum_values and maximum_values entries must match the number "
+                 "of action outputs.");
+
+    for (const auto i : make_range(_minimum_values.size()))
+      if (!(_maximum_values[i] > _minimum_values[i]))
+        mooseError("maximum_values entries must be strictly greater than minimum_values entries.");
+  }
+
   if (build_on_construct)
     constructNeuralNetwork();
 }
@@ -244,6 +260,8 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(
 LibtorchActorNeuralNet::LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
                                                const bool build_on_construct)
   : LibtorchArtificialNeuralNet(dynamic_cast<const LibtorchArtificialNeuralNet &>(nn), false),
+    _minimum_values(nn.minValues()),
+    _maximum_values(nn.maxValues()),
     _state_independent_std(nn.stateIndependentStd())
 {
   // We construct the NN architecture

@@ -39,8 +39,6 @@ public:
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
                               const std::vector<std::string> & activation_function = {"relu"},
-                              const std::vector<Real> & minimum_values = {},
-                              const std::vector<Real> & maximum_values = {},
                               const torch::DeviceType device_type = torch::kCPU,
                               const torch::ScalarType scalar_type = torch::kDouble,
                               const bool build_on_construct = true,
@@ -103,10 +101,6 @@ public:
 
   virtual void initializeNeuralNetwork();
 
-  const std::vector<Real> & minValues() const { return _minimum_values; };
-
-  const std::vector<Real> & maxValues() const { return _maximum_values; };
-
   /// Store the network architecture in a json file (for debugging, visualization)
   void store(nlohmann::json & json) const;
 
@@ -147,14 +141,9 @@ protected:
   std::vector<Real> _input_scaling_factors;
   /// Multiplicative scaling applied after the network output is formed
   std::vector<Real> _output_scaling_factors;
-  ///
-  const std::vector<Real> _minimum_values;
-  const std::vector<Real> _maximum_values;
   torch::Tensor _input_shift_tensor;
   torch::Tensor _input_scale_tensor;
   torch::Tensor _output_scale_tensor;
-  torch::Tensor _min_tensor;
-  torch::Tensor _max_tensor;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
