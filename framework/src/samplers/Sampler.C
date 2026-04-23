@@ -109,9 +109,6 @@ Sampler::init()
     _generators[i] = std::make_unique<MooseRandomStateless>(gseed);
   }
 
-  // Save the initial state
-  saveGeneratorState();
-
   // Mark class as initialized, which locks out certain methods
   _initialized = true;
 }
@@ -211,11 +208,8 @@ Sampler::getGlobalSamples()
                ".");
 
   _next_local_row_requires_state_restore = true;
-  restoreGeneratorState();
-  sampleSetUp(SampleMode::GLOBAL);
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
-  sampleTearDown(SampleMode::GLOBAL);
   return output;
 }
 
@@ -239,10 +233,7 @@ Sampler::getLocalSamples()
     return output;
 
   _next_local_row_requires_state_restore = true;
-  restoreGeneratorState();
-  sampleSetUp(SampleMode::LOCAL);
   computeLocalSampleMatrix(output);
-  sampleTearDown(SampleMode::LOCAL);
   return output;
 }
 
@@ -253,9 +244,6 @@ Sampler::getNextLocalRow()
 
   if (_next_local_row_requires_state_restore)
   {
-    restoreGeneratorState();
-    sampleSetUp(SampleMode::LOCAL);
-    advanceGeneratorsInternal(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
 
     if (_n_cols > _limit_get_next_local_row)
@@ -274,8 +262,6 @@ Sampler::getNextLocalRow()
 
   if (_next_local_row == _local_row_end)
   {
-    advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
-    sampleTearDown(SampleMode::LOCAL);
     _next_local_row = _local_row_begin;
     _next_local_row_requires_state_restore = true;
   }
@@ -304,7 +290,6 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 {
   TIME_SECTION("computeLocalSampleMatrix", 2, "Computing Local Sample Matrix");
 
-  advanceGeneratorsInternal(_local_row_begin * _n_cols);
   for (dof_id_type i = _local_row_begin; i < _local_row_end; ++i)
   {
     std::vector<Real> row(_n_cols, 0);
@@ -315,7 +300,6 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
     std::copy(
         row.begin(), row.end(), matrix.get_values().begin() + ((i - _local_row_begin) * _n_cols));
   }
-  advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
 }
 
 void
