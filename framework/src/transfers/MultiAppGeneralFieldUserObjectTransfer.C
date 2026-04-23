@@ -178,3 +178,9 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
     i_pt++;
   }
 }
+
+std::string
+MultiAppGeneralFieldUserObjectTransfer::getDataSourceName(unsigned int /*var_index*/) const
+{
+  return "user object '" + _user_object_name + "'";
+}

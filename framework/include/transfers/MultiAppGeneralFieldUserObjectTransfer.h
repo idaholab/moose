@@ -34,6 +34,8 @@ protected:
                        const std::vector<std::pair<Point, unsigned int>> & incoming_points,
                        std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
+  virtual std::string getDataSourceName(unsigned int var_index) const override;
+
 private:
   bool usesMooseAppCoordTransform() const override { return true; }
   /*

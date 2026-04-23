@@ -2160,11 +2160,8 @@ MultiAppGeneralFieldTransfer::getGlobalStartAppPerProc() const
 std::string
 MultiAppGeneralFieldTransfer::getDataSourceName(unsigned int var_index) const
 {
-  if (_from_var_names.size())
-    return "variable '" + getFromVarName(var_index) + "'";
-  else if (isParamValid("source_user_object"))
-    return "user object '" + getParam<UserObjectName>("source_user_object") + "'";
-  return "unknown";
+  mooseAssert(var_index < _from_var_names.size(), "No source variable at this index");
+  return "variable '" + getFromVarName(var_index) + "'";
 }
 
 VariableName
