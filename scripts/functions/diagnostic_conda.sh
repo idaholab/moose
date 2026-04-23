@@ -45,7 +45,7 @@ function create_env()
     # shellcheck disable=SC1091
     source activate "${CTMP_DIR}"/_env || print_failure_and_exit 'activating environment'
     printf "\nThe following MOOSE packages were installed:\n\n"
-    ${INSTANCE_EXE} list | grep 'moose-mpi' | awk '{print $1" "$2" "$3}'
+    ${INSTANCE_EXE} list | grep 'moose-build' | awk '{print $1" "$2" "$3}'
 }
 
 function install_conda()

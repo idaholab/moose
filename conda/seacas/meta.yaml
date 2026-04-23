@@ -1,5 +1,5 @@
 # MAKE SURE THAT seacas_version and seacas_git_rev match if performing a version update!
-{% set build = "2" %}
+{% set build = "3" %}
 {% set seacas_version = "2025.10.14" %}
 {% set seacas_git_rev = "v" ~ seacas_version.replace(".", "-") %}
 {% set strbuild = "build_" + build|string %}
@@ -27,30 +27,32 @@ build:
     - NODE_EXTRA_CA_CERTS
 requirements:
   build:
-    - {{ moose_cc }}
-    - {{ moose_cxx }}
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
-    - xorg-libx11 1.8.9
-    - {{ moose_cmake }}
-    - make
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - {{ compiler("fortran") }}
+    - {{ stdlib("c") }}
     - automake
-  run:
-    - {{ moose_gfortran }}
-    - {{ moose_ccompiler }}
-    - {{ moose_cxxcompiler }}
+    - cmake
+    - make
+    - ninja
+  host:
+    - fmt
     - xorg-libx11
-    - python 3
+    - xorg-xorgproto
+    - zlib
+    - zstd
 
 test:
+  requires:
+    - python >=3.10
   commands:
+    - test "$SEACAS_DIR" == "${PREFIX}/moose-seacas"
     - exodiff --version
     - algebra
     - explore
     - grepos
     - gjoin -v
-    - python $PREFIX/seacas/lib/tests/test_exodus3.py
+    - python3 ${SEACAS_DIR}/lib/tests/test_exodus3.py
     - blot --help || test $? -eq 1
 
 about:

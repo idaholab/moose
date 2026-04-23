@@ -1,9 +1,9 @@
 #!/bin/bash
-set -eu
+set -eux
 
 # this function is called from conda/functions/retry_build.sh
 function do_build(){
-    export INSTALL_PATH="${PREFIX}/seacas"
+    export INSTALL_PATH="${PREFIX}/moose-seacas"
     rm -rf "${INSTALL_PATH:?}" "${SRC_DIR:?}/build"
 
     # Configure and build options
@@ -12,30 +12,21 @@ function do_build(){
     export H5VERSION=V112
     export NEEDS_ZLIB=YES
     export JOBS=${MOOSE_JOBS:-2}
-
-    # If on macOS, set COMPILER to clang
-    if [[ $(uname) == Darwin ]]; then
-        export COMPILER=clang
-        BUILD_LD_EXT=dylib
-    else
-        export COMPILER=gcc
-        BUILD_LD_EXT=so
-    fi
+    export COMPILER="unused"
 
     # Install third party libraries
-    ./install-tpl.sh
+    ./install-tpl.sh || return 1
 
     # Setup build location and configure there.
     mkdir -p "${SRC_DIR:?}/build" || exit 1
     cd "${SRC_DIR:?}/build" || exit 1
     ../cmake-config \
-        -DTPL_X11_LIBRARIES="${BUILD_PREFIX:?}"/lib/libX11."${BUILD_LD_EXT:?}" \
-        -DTPL_X11_INCLUDE_DIRS="${BUILD_PREFIX:?}"/include \
-        -DCMAKE_INSTALL_LIBDIR='lib' || return 1
-
+        $CMAKE_ARGS \
+        -DCMAKE_INSTALL_PREFIX="$INSTALL_PATH" \
+        -DCMAKE_PROGRAM_PATH="$BUILD_PREFIX/moose-secas/bin;$PREFIX/moose-seacas/bin" || return 1
     # Make and install
-    make -j "${JOBS:?}" || return 1
-    make install || return 1
+    cmake --build . --parallel "$JOBS" || return 1
+    cmake --install . || return 1
 }
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path
@@ -50,10 +41,10 @@ retry_build
 #   moose-mpich HDF5 bins if the user has both packages installed.
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
-export SEACAS_DIR=${PREFIX}/seacas
-export PATH=\${PATH}:${PREFIX}/seacas/bin
+export SEACAS_DIR=${PREFIX}/moose-seacas
+export PATH=\${PATH}:${PREFIX}/moose-seacas/bin
 EOF
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset SEACAS_DIR
-export PATH=\${PATH%":${PREFIX}/seacas/bin"}
+export PATH=\${PATH%":${PREFIX}/moose-seacas/bin"}
 EOF

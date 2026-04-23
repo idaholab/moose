@@ -8,24 +8,30 @@ package:
   name: moose-dev
   version: {{ version }}
 
-source:
-  path: ../moose-dev
-
 build:
   number: 0
   string: {{ mpi }}
-  skip: true  # [win]
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
     - NODE_EXTRA_CA_CERTS
+  run_exports:
+    # things that depend on this moose-dev must use the
+    # exact moose-* packages that this was built with
+    - moose-build __VERSIONER_BUILD_VERSION__ {{ mpi }}
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    - moose-tools __VERSIONER_TOOLS_VERSION__
+
 requirements:
   run:
-    - {{ mpi }}
-    - {{ moose_tools }}
-    - {{ moose_libmesh }}
-    - {{ moose_wasp }}
+    - moose-build __VERSIONER_BUILD_VERSION__ {{ mpi }}
+    - moose-libmesh __VERSIONER_LIBMESH_VERSION__ {{ mpi }}___VERSIONER_LIBMESH_BUILD_NUMBER__
+    - moose-wasp __VERSIONER_WASP_VERSION__ build___VERSIONER_WASP_BUILD_NUMBER__
+    - moose-tools __VERSIONER_TOOLS_VERSION__
+  run_constrained:
+    - {{ moose_python_constrained }}
 
 about:
   home: https://mooseframework.inl.gov/
