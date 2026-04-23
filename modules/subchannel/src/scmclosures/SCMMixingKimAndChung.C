@@ -35,6 +35,13 @@ SCMMixingKimAndChung::SCMMixingKimAndChung(const InputParameters & parameters)
     _P_soln(_subproblem.getVariable(0, "P")),
     _T_soln(_subproblem.getVariable(0, "T"))
 {
+  if (_is_tri_lattice)
+  {
+    const auto & tri_mesh = static_cast<const TriSubChannelMesh &>(_subchannel_mesh);
+    if (tri_mesh.getWireDiameter() != 0.0 || tri_mesh.getWireLeadLength() != 0.0)
+      mooseError("SCMMixingKimAndChung applies only to bare-pin assemblies and cannot be used "
+                 "with wire-wrapped triangular bundles.");
+  }
 }
 
 Real
