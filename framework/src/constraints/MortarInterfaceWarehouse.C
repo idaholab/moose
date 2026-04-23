@@ -19,8 +19,8 @@ namespace
 {
 struct ParsedMortarTriangulationOptions
 {
-  MortarSegmentTriangulationMode mode = MortarSegmentTriangulationMode::vertex;
-  std::string canonical_name = "vertex";
+  MortarSegmentTriangulationMode mode = MortarSegmentTriangulationMode::centroid;
+  std::string canonical_name = "centroid";
 };
 
 ParsedMortarTriangulationOptions
