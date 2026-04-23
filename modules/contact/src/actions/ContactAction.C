@@ -246,7 +246,7 @@ ContactAction::validParams()
 #else
       "vertex centroid ear_clipping",
 #endif
-      "vertex");
+      "centroid");
   triangulation.addDocumentation(
       "vertex",
       "Triangulate clipped 3D mortar polygons by forming a fan from an existing polygon vertex.");
@@ -264,7 +264,8 @@ ContactAction::validParams()
   params.addParam<MooseEnum>(
       "triangulation",
       triangulation,
-      "Strategy used to triangulate clipped 3D mortar polygons into mortar segments.");
+      "Strategy used to triangulate clipped 3D mortar polygons into mortar segments. The default "
+      "is 'centroid' to preserve the legacy 3D mortar segmentation behavior.");
   params.addParam<bool>(
       "triangulate_triangles",
       false,

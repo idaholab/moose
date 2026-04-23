@@ -28,7 +28,8 @@ In addition, face/face contact using a mortar method can also be specified using
 
 For 3D mortar contact, the triangulation of clipped overlap polygons can be selected with the
 `triangulation` parameter. The `triangulate_triangles` parameter controls whether polygons that
-are already triangles are left intact or centroid-subdivided again.
+are already triangles are left intact or centroid-subdivided again. By default, clipped polygons
+use centroid triangulation and already-triangular polygons are left intact.
 
 ## Constructed Objects
 
