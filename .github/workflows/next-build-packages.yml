@@ -1,0 +1,18 @@
+name: "Next: Build packages"
+
+on:
+  workflow_run:
+    workflows: ["Next: Precheck"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  build_moose_mpi:
+    name: "Build: moose-mpi"
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed packages
+        uses: actions/download-artifact@v7
+        with:
+          name: workflow-vars

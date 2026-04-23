@@ -1,0 +1,95 @@
+name: "Next: Precheck"
+
+on:
+  pull_request:
+    branches: [next]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  precheck:
+    name: Precheck
+    runs-on: ubuntu-slim
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Get changed packages
+        shell: bash
+        run: |
+          pip install --no-cache pyyaml jinja2
+
+          changed_summary="$(./scripts/versioner.py --changed-summary ${{ github.event.pull_request.base.sha }})" || exit $?
+
+          echo "$changed_summary" | jq -r 'to_entries[] | "\(.key)\t\(.value // "")"' |
+          while IFS=$'\t' read -r key value; do
+              echo "new_version_${key//-/_}=${value}" >> changed-packages.env
+          done
+          cat changed-packages.env
+      - name: Store changed packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: changed-packages
+          path: changed-packages.env
+
+  # build_moose_mpi:
+  #   name: "Build: moose-mpi"
+  #   needs: precheck
+  #   if: ${{ needs.precheck.outputs.new_version_mpi != '' }}
+  #   environment: ${{ (needs.precheck.outputs.new_version_mpi != '' && 'build-pr-containers') || '' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v6
+  #       with:
+  #         repository: ${{ github.event.pull_request.head.repo.full_name }}
+  #         ref: ${{ github.event.pull_request.head.ref }}
+  #     - name: Build moose-mpi
+  #       uses: docker/build-push-action@v7
+  #       with:
+  #         context: ./docker/moose-mpi
+
+  # build_moose_dev_openmpi:
+  #   name: "Build: moose-dev-openmpi"
+  #   needs:
+  #     - precheck
+  #     - build_moose_mpi
+  #   if: |
+  #     always() &&
+  #     (needs.build_moose_mpi.result == 'success' || needs.build_moose_mpi.result == 'skipped') &&
+  #     (needs.precheck.outputs.new_version_petsc != '' || needs.precheck.outputs.new_version_libmesh != '' || needs.precheck.outputs.new_version_moose_dev != '')
+  #   environment: ${{ ((needs.precheck.outputs.new_version_petsc != '' || needs.precheck.outputs.new_version_libmesh != '' || needs.precheck.outputs.new_version_moose_dev != '') && 'build-pr-containers') || '' }}
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - name: Build moose-petsc-openmpi
+  #       if: ${{ needs.precheck.outputs.new_version_petsc != '' }}
+  #       run: |
+  #         echo "building"
+  #     - name: Build moose-libmesh-openmpi
+  #       if: ${{ needs.precheck.outputs.new_version_libmesh != '' }}
+  #       run: |
+  #         echo "building"
+  #     - name: Build moose-dev-openmpi
+  #       if: ${{ needs.precheck.outputs.new_version_moose_dev != '' }}
+  #       run: |
+  #         echo "building"
+
+  # test:
+  #   name: "Test"
+  #   needs:
+  #     - precheck
+  #     - build_moose_dev_openmpi
+  #   if: |
+  #     always() &&
+  #     (needs.build_moose_dev_openmpi.result == 'success' || needs.build_moose_dev_openmpi.result == 'skipped')
+  #   runs-on: ubuntu-slim
+  #   steps:
+  #     - name: Test
+  #       shell: bash
+  #       run: |
+  #         echo "testing"
