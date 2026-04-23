@@ -41,7 +41,7 @@ public:
 
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
 
-  virtual void loadControlNeuralNetFromFile(const InputParameters & parameters) override;
+  virtual void loadControlNeuralNetFromFile() override;
 
 protected:
   /// The log probability of control signals from the last evaluation of the controller

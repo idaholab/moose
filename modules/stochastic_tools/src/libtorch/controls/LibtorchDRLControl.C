@@ -74,13 +74,10 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   // Fixing the RNG seed to make sure every experiment is the same.
   if (isParamValid("seed"))
     torch::manual_seed(getParam<unsigned int>("seed"));
-
-  if (parameters.isParamSetByUser("filename"))
-    loadControlNeuralNetFromFile(parameters);
 }
 
 void
-LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & parameters)
+LibtorchDRLControl::loadControlNeuralNetFromFile()
 {
   const auto & filename = getParam<std::string>("filename");
   if (getParam<bool>("torch_script_format"))
@@ -95,7 +92,7 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
     std::vector<unsigned int> num_neurons_per_layer =
         getParam<std::vector<unsigned int>>("num_neurons_per_layer");
     std::vector<std::string> activation_functions =
-        parameters.isParamSetByUser("activation_function")
+        isParamSetByUser("activation_function")
             ? getParam<std::vector<std::string>>("activation_function")
             : std::vector<std::string>({"relu"});
 

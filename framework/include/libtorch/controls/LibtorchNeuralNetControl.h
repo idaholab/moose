@@ -31,6 +31,9 @@ public:
   /// Construct using input parameters
   LibtorchNeuralNetControl(const InputParameters & parameters);
 
+  /// Load any file-backed controller state after full object construction
+  virtual void initialSetup() override;
+
   /// Execute neural network to determine the controllable parameter values
   virtual void execute() override;
 
@@ -51,7 +54,7 @@ public:
    */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
-  virtual void loadControlNeuralNetFromFile(const InputParameters & parameters);
+  virtual void loadControlNeuralNetFromFile();
 
   /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
