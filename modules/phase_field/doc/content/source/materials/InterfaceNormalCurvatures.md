@@ -6,7 +6,7 @@
 
 `InterfaceNormalCurvatures` is a `Material` object that computes the two **normal curvatures** of a diffuse interface defined by an order parameter $\eta$. The interface geometry is encoded entirely in the gradient and Hessian of $\eta$; no explicit surface mesh is required.
 
-The two normal curvatures characterise how the interface bends in two orthogonal tangent directions:
+The two normal curvatures characterize how the interface bends in two orthogonal tangent directions:
 
 | Property | Symbol | Direction |
 |---|---|---|
@@ -121,9 +121,6 @@ The mean curvature $\kappa = \nabla \cdot \hat{n}$ is also declared as a materia
 | `kappa1` | `Real` | Normal curvature $\kappa_1$ along the in-plane tangent $\hat{t}_1$ |
 | `kappa2` | `Real` | Normal curvature $\kappa_2$ along the out-of-plane tangent $\hat{t}_2$ |
 | `kappa_mean` | `Real` | Mean curvature $\kappa = \kappa_1 + \kappa_2 = \nabla\cdot\hat{n}$ |
-| `interface_normal` | `RealVectorValue` | Unit interface normal $\hat{n}$ |
-| `tangent1` | `RealVectorValue` | First tangent vector $\hat{t}_1$ (in-plane) |
-| `tangent2` | `RealVectorValue` | Second tangent vector $\hat{t}_2$ (binormal) |
 
 All property names can be prefixed by setting `base_name`.
 

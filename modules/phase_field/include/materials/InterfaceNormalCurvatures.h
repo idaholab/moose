@@ -13,25 +13,25 @@
 
 /**
  * Computes the two normal curvatures of a diffuse interface defined
- * by an order parameter η using n̂ = ∇η / |∇η|.
+ * by an order parameter eta using n = grad(eta) / | grad(eta) |.
  *
  * At every quadrature point the local frame is:
  *
- *   n̂  — unit interface normal   (= ∇η / |∇η|)
- *   t̂₁ — tangent in the xy-plane (= ẑ × n̂, normalised)
- *   t̂₂ — binormal                (= n̂ × t̂₁)
+ *   n  — unit interface normal   (grad(eta) / | grad(eta) |)
+ *   t_1 — tangent in the xy-plane (= z x n, normalized)
+ *   t_2 — binormal                (= n x t_1)
  *
  * The normal curvatures are then:
  *
- *   κ₁ = t̂₁ · S · t̂₁    (curvature along t̂₁, the in-plane tangent)
- *   κ₂ = t̂₂ · S · t̂₂    (curvature along t̂₂, the out-of-plane tangent)
+ *   kappa_1 = t_1 · S · t_1    (curvature along t_1, the in-plane tangent)
+ *   kappa_2 = t_2 · S · t_2    (curvature along t_2, the out-of-plane tangent)
  *
- * where  S = −∇n̂  is the shape operator (Weingarten map).
+ * where  S is the shape operator (Weingarten map).
  *
- * Note: κ₁ + κ₂ = mean curvature κ = ∇·n̂  (as a consistency check).
+ * Note: kappa_1 + kappa_2 = mean curvature kappa = div(n)  (as a consistency check).
  *
  * Requires second-order Lagrange (or higher) elements so that the
- * second derivatives of η are available.
+ * second derivatives of eta are available.
  */
 class InterfaceNormalCurvatures : public Material
 {
@@ -44,20 +44,17 @@ protected:
 
 private:
   // ── order parameter ────────────────────────────────────────
-  const VariableValue  & _eta;        ///< η
-  const VariableGradient & _grad_eta; ///< ∇η
-  const VariableSecond & _second_eta; ///< ∇∇η  (Hessian)
+  const VariableValue & _eta;
+  const VariableGradient & _grad_eta;
+  const VariableSecond & _second_eta;
 
   // ── user parameters ────────────────────────────────────────
-  const Real _eps;   ///< regularisation floor for |∇η| (avoids /0)
+  const Real _eps; /// regularization floor for grad(eta) (avoids /0)
 
   // ── material properties produced ───────────────────────────
-  MaterialProperty<Real> & _kappa1; ///< normal curvature along t̂₁
-  MaterialProperty<Real> & _kappa2; ///< normal curvature along t̂₂
+  MaterialProperty<Real> & _kappa1; /// normal curvature along t_1
+  MaterialProperty<Real> & _kappa2; /// normal curvature along t_2
 
   // ── optional diagnostics ───────────────────────────────────
-  MaterialProperty<Real>         & _kappa_mean;  ///< κ₁+κ₂  (= ∇·n̂)
-  MaterialProperty<RealVectorValue> & _normal;   ///< n̂
-  MaterialProperty<RealVectorValue> & _tangent1; ///< t̂₁
-  MaterialProperty<RealVectorValue> & _tangent2; ///< t̂₂
+  MaterialProperty<Real> & _kappa_mean;
 };
