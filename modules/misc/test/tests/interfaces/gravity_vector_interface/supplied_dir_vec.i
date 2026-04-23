@@ -1,9 +1,10 @@
 !include base.i
 
-[UserObjects]
+[Postprocessors]
   [test]
-    type = GravityVectorInterfaceTest
+    type = TestGravityVectorInterface
     gravity_direction = '0 0 -1'
     gravity_vector = '0 0 -9.8'
+    test_value = magnitude
   []
 []

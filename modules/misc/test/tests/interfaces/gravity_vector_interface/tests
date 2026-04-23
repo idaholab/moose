@@ -1,6 +1,6 @@
 [Tests]
   design = 'GravityVectorInterface.md'
-  issues = '#31843'
+  issues = '#31843 #32815'
   [error_reporting]
     requirement = 'The system shall report an error for the gravity vector interface if'
     [supplied_dir_vec]
@@ -23,6 +23,23 @@
       expect_err = "Either 'gravity_vector' or 'gravity_direction' must be specified"
       allow_test_objects = True
       detail = 'neither the vector nor direction are supplied.'
+    []
+  []
+  [zero_gravity]
+    requirement = 'The system shall give the correct gravity components and magnitude'
+    [supplied_dir]
+      type = CSVDiff
+      input = 'zero_gravity_direction.i'
+      csvdiff = 'zero_gravity_direction_out.csv'
+      allow_test_objects = True
+      detail = 'when a zero direction is supplied.'
+    []
+    [supplied_vec]
+      type = CSVDiff
+      input = 'zero_gravity_vector.i'
+      csvdiff = 'zero_gravity_vector_out.csv'
+      allow_test_objects = True
+      detail = 'when a zero vector is supplied.'
     []
   []
 []

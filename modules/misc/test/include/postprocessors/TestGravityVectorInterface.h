@@ -9,17 +9,18 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "GeneralPostprocessor.h"
 #include "GravityVectorInterface.h"
 
-class GravityVectorInterfaceTest : public GeneralUserObject, public GravityVectorInterface
+class TestGravityVectorInterface : public GeneralPostprocessor, public GravityVectorInterface
 {
 public:
   static InputParameters validParams();
 
-  GravityVectorInterfaceTest(const InputParameters & parameters);
+  TestGravityVectorInterface(const InputParameters & parameters);
 
   virtual void execute() override {}
   virtual void initialize() override {}
   virtual void finalize() override {}
+  virtual PostprocessorValue getValue() const override;
 };

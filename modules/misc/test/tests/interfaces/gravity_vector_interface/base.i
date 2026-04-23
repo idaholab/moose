@@ -1,3 +1,7 @@
+[GlobalParams]
+  execute_on = 'INITIAL'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
