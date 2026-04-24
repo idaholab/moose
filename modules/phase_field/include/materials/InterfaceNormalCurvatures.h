@@ -17,14 +17,14 @@
  *
  * At every quadrature point the local frame is:
  *
- *   n  — unit interface normal   (grad(eta) / | grad(eta) |)
- *   t_1 — tangent in the xy-plane (= z x n, normalized)
- *   t_2 — binormal                (= n x t_1)
+ *   n  - unit interface normal   (grad(eta) / | grad(eta) |)
+ *   t_1 - tangent in the xy-plane (= z x n, normalized)
+ *   t_2 - binormal                (= n x t_1)
  *
  * The normal curvatures are then:
  *
- *   kappa_1 = t_1 · S · t_1    (curvature along t_1, the in-plane tangent)
- *   kappa_2 = t_2 · S · t_2    (curvature along t_2, the out-of-plane tangent)
+ *   kappa_1 = t_1 S t_1    (curvature along t_1, the in-plane tangent)
+ *   kappa_2 = t_2 S t_2    (curvature along t_2, the out-of-plane tangent)
  *
  * where  S is the shape operator (Weingarten map).
  *
@@ -43,18 +43,18 @@ protected:
   virtual void computeQpProperties() override;
 
 private:
-  // ── order parameter ────────────────────────────────────────
+  // -- order parameter ----------------------------------------
   const VariableValue & _eta;
   const VariableGradient & _grad_eta;
   const VariableSecond & _second_eta;
 
-  // ── user parameters ────────────────────────────────────────
+  // -- user parameters ----------------------------------------
   const Real _eps; /// regularization floor for grad(eta) (avoids /0)
 
-  // ── material properties produced ───────────────────────────
+  // -- material properties produced ---------------------------
   MaterialProperty<Real> & _kappa1; /// normal curvature along t_1
   MaterialProperty<Real> & _kappa2; /// normal curvature along t_2
 
-  // ── optional diagnostics ───────────────────────────────────
+  // -- optional diagnostics -----------------------------------
   MaterialProperty<Real> & _kappa_mean;
 };

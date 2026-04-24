@@ -4,7 +4,7 @@
 
 ## Overview
 
-`InterfaceNormalCurvatures` is a `Material` object that computes the two **normal curvatures** of a diffuse interface defined by an order parameter $\eta$. The interface geometry is encoded entirely in the gradient and Hessian of $\eta$; no explicit surface mesh is required.
+`InterfaceNormalCurvatures` is a `Material` object that computes the two normal curvatures of a diffuse interface defined by an order parameter $\eta$. The interface geometry is encoded entirely in the gradient and Hessian of $\eta$; no explicit surface mesh is required.
 
 The two normal curvatures characterize how the interface bends in two orthogonal tangent directions:
 
@@ -28,7 +28,7 @@ The unit normal to the diffuse interface is defined from the order parameter gra
   \label{eq:normal}
 \end{equation}
 
-This is well-defined in the interfacial region where $|\nabla\eta| \neq 0$. A small regularisation floor $\varepsilon$ is added to the denominator throughout to prevent division by zero in bulk regions:
+This is well-defined in the interfacial region where $|\nabla\eta| \neq 0$. A small regularization floor $\varepsilon$ is added to the denominator throughout to prevent division by zero in bulk regions:
 
 \begin{equation}
   \hat{n} \approx \frac{\nabla\eta}{|\nabla\eta| + \varepsilon}
@@ -58,7 +58,7 @@ which is automatically unit length and orthogonal to both $\hat{n}$ and $\hat{t}
 
 ### Shape Operator
 
-The curvature of the interface is encoded in the **shape operator** (Weingarten map), defined as the negative surface gradient of the unit normal:
+The curvature of the interface is encoded in the shape operator (Weingarten map), defined as the negative surface gradient of the unit normal:
 
 \begin{equation}
   \mathbf{S} = -\nabla\hat{n}
@@ -72,7 +72,7 @@ Differentiating [eq:normal] with the quotient rule gives the full Jacobian of $\
   \label{eq:jacobian}
 \end{equation}
 
-where $H_{ij} = \partial^2\eta / \partial x_i \partial x_j$ is the **Hessian** of $\eta$.
+where $H_{ij} = \partial^2\eta / \partial x_i \partial x_j$ is the Hessian of $\eta$.
 
 In compact tensor notation:
 
@@ -82,7 +82,7 @@ In compact tensor notation:
 
 ### Normal Curvature
 
-The **normal curvature** in a direction $\hat{v}$ tangent to the interface is:
+The normal curvature in a direction $\hat{v}$ tangent to the interface is:
 
 \begin{equation}
   \kappa(\hat{v}) = \hat{v} \cdot \mathbf{S} \cdot \hat{v} = -\hat{v} \cdot (\nabla\hat{n}) \cdot \hat{v}
@@ -128,9 +128,9 @@ All property names can be prefixed by setting `base_name`.
 
 ## Requirements
 
-This object requires the **second spatial derivatives** of $\eta$ to be available at quadrature points. This is only possible when:
+This object requires the second spatial derivatives of $\eta$ to be available at quadrature points. This is only possible when:
 
-- $\eta$ uses **second-order (or higher) Lagrange** shape functions (family `LAGRANGE`, order `SECOND`), **or**
+- $\eta$ uses second-order (or higher) Lagrange shape functions (family `LAGRANGE`, order `SECOND`), or
 - $\eta$ uses a $C^1$-continuous basis (e.g. Hermite).
 
 First-order elements will yield zero Hessian values and should not be used with this material.
@@ -139,8 +139,8 @@ First-order elements will yield zero Hessian values and should not be used with 
 
 ## Example Input Syntax
 
-!listing test/tests/interface_curvature/interface_curvature_test.i
-         block=Materials/curvature
+!listing test/tests/misc/interface_normal_curvatures.i
+         block=Materials/curvatures
 
 A minimal `[Materials]` block:
 

@@ -43,29 +43,29 @@ InterfaceNormalCurvatures::InterfaceNormalCurvatures(const InputParameters & par
 void
 InterfaceNormalCurvatures::computeQpProperties()
 {
-  // ── 1.  Interface normal ─────────────────────────────────────────────────
+  // -- 1.  Interface normal -------------------------------------------------
   const RealVectorValue & g = _grad_eta[_qp];
   const Real g_mag = g.norm();
   const Real g_reg = g_mag + _eps;
 
   const RealVectorValue nhat = g / g_reg; // n  (unit normal)
 
-  // ── 2.  Tangent frame ────────────────────────────────────────────────────
+  // -- 2.  Tangent frame ----------------------------------------------------
   static const RealVectorValue ZHAT(0., 0., 1.);
   static const RealVectorValue XHAT(1., 0., 0.);
 
   RealVectorValue t1 = ZHAT.cross(nhat);
   const Real t1_mag = t1.norm();
   if (t1_mag < 1e-12)
-    t1 = XHAT; // n ≈ +/- z: choose x as in-plane tangent
+    t1 = XHAT; // n = +/- z: choose x as in-plane tangent
   else
     t1 /= t1_mag;
 
   const RealVectorValue t2 = nhat.cross(t1); // already unit length
 
-  // ── 3.  Shape operator  S ─────────────────────────────────────────
+  // -- 3.  Shape operator  S ------------------------------------------------
 
-  const RankTwoTensor & H = _second_eta[_qp]; // Hessian (3×3)
+  const RankTwoTensor & H = _second_eta[_qp]; // Hessian (3 x 3)
 
   RealVectorValue Hn;
   for (unsigned i = 0; i < 3; ++i)
@@ -85,7 +85,7 @@ InterfaceNormalCurvatures::computeQpProperties()
   _kappa1[_qp] = -vHv(t1) / g_reg; // in-plane tangent
   _kappa2[_qp] = -vHv(t2) / g_reg; // out-of-plane tangent
 
-  // ── 4.  Mean curvature ───────────────────────────────────────────
+  // -- 4.  Mean curvature ---------------------------------------------------
 
   const Real nHn = nhat * Hn;
   _kappa_mean[_qp] = -(H.tr() - nHn) / g_reg;
