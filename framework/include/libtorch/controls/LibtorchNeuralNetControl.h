@@ -60,7 +60,7 @@ public:
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
   /// Return true if the object already has a neural network.
-  bool hasControlNeuralNet() const { return (_nn != NULL); };
+  bool hasControlNeuralNet() const { return _nn != nullptr; };
 
 protected:
   /**
@@ -74,37 +74,37 @@ protected:
                                  bool should_be_defined = true);
 
   /// Refresh the current observation values from the linked postprocessors.
-  void updateCurrentResponse();
+  void updateCurrentObservation();
 
   /// Build the normalized input tensor passed into the controller neural network.
   torch::Tensor prepareInputTensor();
 
   /// The values of the current observed postprocessor values
-  std::vector<Real> _current_response;
+  std::vector<Real> _current_observation;
   /// This variable is populated if the controller needs access to older values of the
   /// observed postprocessor values
-  std::vector<std::vector<Real>> & _old_responses;
+  std::vector<std::vector<Real>> & _old_observations;
 
   /// The names of the controllable parameters
   const std::vector<std::string> & _control_names;
-  /// The control signals from the last evaluation of the controller
-  std::vector<Real> _current_control_signals;
+  /// The control signals from the last evaluation of the controller, saved for recover/restart.
+  std::vector<Real> & _current_control_signals;
 
   /// Names of the postprocessors which contain the observations of the system
-  const std::vector<PostprocessorName> & _response_names;
+  const std::vector<PostprocessorName> & _observation_names;
 
-  /// Links to the current response postprocessor values. This is necessary so that we can check
+  /// Links to the current observation postprocessor values. This is necessary so that we can check
   /// if the postprocessors exist.
-  std::vector<const Real *> _response_values;
+  std::vector<const Real *> _observation_values;
 
   /// Number of timesteps to use as input data from the reporters (this influences how many past
-  /// results are used, e.g. the size of _old_responses)
+  /// results are used, e.g. the size of _old_observations)
   const unsigned int _input_timesteps;
 
-  /// Shifting constants for the responses
-  const std::vector<Real> _response_shift_factors;
-  /// Scaling constants (multipliers) for the responses
-  const std::vector<Real> _response_scaling_factors;
+  /// Shifting constants for the observations
+  const std::vector<Real> _observation_shift_factors;
+  /// Scaling constants (multipliers) for the observations
+  const std::vector<Real> _observation_scaling_factors;
   /// Multipliers for the actions
   const std::vector<Real> _action_scaling_factors;
 

@@ -72,17 +72,17 @@ protected:
   /// Reset the stored rollout data after an update.
   void resetData();
 
-  /// Response reporter names
+  /// Observation reporter names
   const std::vector<ReporterName> _state_names;
 
-  /// Pointers to the current values of the responses
-  /// We can have multiple responses, multiple samples, multiple timesteps
+  /// Pointers to the current values of the observations
+  /// We can have multiple observations, multiple samples, multiple timesteps
   std::vector<const std::vector<std::vector<Real>> *> _state_value_pointers;
 
-  /// Shifting constants for the responses
+  /// Shifting constants for the observations
   const std::vector<Real> _state_shift_factors;
 
-  /// Scaling constants for the responses
+  /// Scaling constants for the observations
   const std::vector<Real> _state_scaling_factors;
 
   /// Control reporter names

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "LibtorchActorNeuralNet.h"
 #include "LibtorchNeuralNetControl.h"
 
@@ -28,6 +30,9 @@ public:
 
   /// Construct using input parameters
   LibtorchDRLControl(const InputParameters & parameters);
+
+  /// Restore any restartable controller state after base setup completes.
+  virtual void initialSetup() override;
 
   /// We compute the actions in this function together with the corresponding logarithmic probabilities.
   virtual void execute() override;
@@ -53,18 +58,26 @@ public:
 
 protected:
   /// The log probability of control signals from the last evaluation of the controller
-  std::vector<Real> _current_control_signal_log_probabilities;
+  std::vector<Real> & _current_control_signal_log_probabilities;
 
-  std::vector<Real> _previous_control_signal;
-  std::vector<Real> _current_smoothed_signal;
+  std::vector<Real> & _previous_control_signal;
+  std::vector<Real> & _current_smoothed_signal;
 
   std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
   at::Generator _policy_generator;
+  std::vector<std::uint8_t> & _policy_generator_state;
 
-  unsigned int _call_counter;
+  unsigned int & _call_counter;
   const unsigned int _num_steps_in_period;
   const Real _smoother;
   const bool _stochastic;
+
+private:
+  /// Restore the owned libtorch generator state from restartable storage.
+  void restorePolicyGeneratorState();
+
+  /// Mirror the owned libtorch generator state into restartable storage.
+  void savePolicyGeneratorState();
 };
 
 #endif

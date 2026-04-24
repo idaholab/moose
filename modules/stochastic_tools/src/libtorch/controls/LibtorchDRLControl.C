@@ -14,6 +14,8 @@
 #include "Transient.h"
 #include "LibtorchUtils.h"
 
+#include <mutex>
+
 registerMooseObject("StochasticToolsApp", LibtorchDRLControl);
 
 InputParameters
@@ -57,11 +59,16 @@ LibtorchDRLControl::validParams()
 
 LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   : LibtorchNeuralNetControl(parameters),
-    _current_control_signal_log_probabilities(std::vector<Real>(_control_names.size(), 0.0)),
-    _previous_control_signal(std::vector<Real>(_control_names.size(), 0.0)),
-    _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _current_control_signal_log_probabilities(declareRestartableData<std::vector<Real>>(
+        "current_control_signal_log_probabilities", std::vector<Real>(_control_names.size(), 0.0))),
+    _previous_control_signal(declareRestartableData<std::vector<Real>>(
+        "previous_control_signal", std::vector<Real>(_control_names.size(), 0.0))),
+    _current_smoothed_signal(declareRestartableData<std::vector<Real>>(
+        "current_smoothed_signal", std::vector<Real>(_control_names.size(), 0.0))),
     _policy_generator(Moose::makeLibtorchCPUGenerator()),
-    _call_counter(0),
+    _policy_generator_state(declareRestartableData<std::vector<std::uint8_t>>(
+        "policy_generator_state", std::vector<std::uint8_t>())),
+    _call_counter(declareRestartableData<unsigned int>("call_counter", 0)),
     _num_steps_in_period(parameters.isParamSetByUser("num_steps_in_period")
                              ? getParam<unsigned int>("num_steps_in_period")
                              : getParam<unsigned int>("num_stems_in_period")),
@@ -70,13 +77,23 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
 {
   if (isParamValid("seed"))
     setPolicySampleSeed(getParam<unsigned int>("seed"));
+
+  savePolicyGeneratorState();
+}
+
+void
+LibtorchDRLControl::initialSetup()
+{
+  LibtorchNeuralNetControl::initialSetup();
+  restorePolicyGeneratorState();
+  savePolicyGeneratorState();
 }
 
 void
 LibtorchDRLControl::loadControlNeuralNetFromFile()
 {
   const auto & filename = getParam<std::string>("filename");
-  unsigned int num_inputs = _response_names.size() * _input_timesteps;
+  unsigned int num_inputs = _observation_names.size() * _input_timesteps;
   unsigned int num_outputs = _control_names.size();
   std::vector<unsigned int> num_neurons_per_layer =
       getParam<std::vector<unsigned int>>("num_neurons_per_layer");
@@ -88,9 +105,9 @@ LibtorchDRLControl::loadControlNeuralNetFromFile()
   const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
   const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
   const auto input_shift_factors =
-      _observation_history.expandFeatureFactors(_response_shift_factors);
+      _observation_history.expandFeatureFactors(_observation_shift_factors);
   const auto input_scaling_factors =
-      _observation_history.expandFeatureFactors(_response_scaling_factors);
+      _observation_history.expandFeatureFactors(_observation_scaling_factors);
 
   _actor_nn =
       std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
@@ -124,12 +141,12 @@ LibtorchDRLControl::execute()
   const unsigned int n_controls = _control_names.size();
   const unsigned int num_old_timesteps = _input_timesteps - 1;
 
-  // Fill a vector with the current values of the responses.
-  updateCurrentResponse();
+  // Fill a vector with the current observation values.
+  updateCurrentObservation();
 
-  // Seed the response history with the initial response when the control first runs.
-  if (_old_responses.empty())
-    _old_responses.assign(num_old_timesteps, _current_response);
+  // Seed the observation history with the initial observation when the control first runs.
+  if (_old_observations.empty())
+    _old_observations.assign(num_old_timesteps, _current_observation);
 
   if (_call_counter % _num_steps_in_period == 0)
   {
@@ -139,6 +156,7 @@ LibtorchDRLControl::execute()
     if (_actor_nn)
     {
       action = _actor_nn->evaluate(input_tensor, _stochastic, _policy_generator);
+      savePolicyGeneratorState();
 
       if (_stochastic)
       {
@@ -173,10 +191,11 @@ LibtorchDRLControl::execute()
     setControllableValueByName<Real>(_control_names[control_i],
                                      _current_smoothed_signal[control_i]);
 
-  if (_old_responses.size())
+  if (_old_observations.size())
   {
-    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
-    _old_responses[0] = _current_response;
+    std::rotate(
+        _old_observations.rbegin(), _old_observations.rbegin() + 1, _old_observations.rend());
+    _old_observations[0] = _current_observation;
   }
 
   _call_counter++;
@@ -195,7 +214,41 @@ LibtorchDRLControl::loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNe
 void
 LibtorchDRLControl::setPolicySampleSeed(const uint64_t seed)
 {
-  _policy_generator.set_current_seed(seed);
+  {
+    std::lock_guard<std::mutex> lock(_policy_generator.mutex());
+    _policy_generator.set_current_seed(seed);
+  }
+  savePolicyGeneratorState();
+}
+
+void
+LibtorchDRLControl::restorePolicyGeneratorState()
+{
+  if (!_stochastic || _policy_generator_state.empty())
+    return;
+
+  auto state_tensor =
+      torch::from_blob(_policy_generator_state.data(),
+                       {static_cast<long>(_policy_generator_state.size())},
+                       torch::TensorOptions().dtype(torch::kUInt8).device(torch::kCPU))
+          .clone();
+  std::lock_guard<std::mutex> lock(_policy_generator.mutex());
+  _policy_generator.set_state(state_tensor);
+}
+
+void
+LibtorchDRLControl::savePolicyGeneratorState()
+{
+  if (!_stochastic)
+  {
+    _policy_generator_state.clear();
+    return;
+  }
+
+  std::lock_guard<std::mutex> lock(_policy_generator.mutex());
+  const auto state_tensor = _policy_generator.get_state().contiguous();
+  const auto * data = state_tensor.data_ptr<std::uint8_t>();
+  _policy_generator_state.assign(data, data + static_cast<std::size_t>(state_tensor.numel()));
 }
 
 Real

@@ -26,12 +26,12 @@ LibtorchNeuralNetControl::validParams()
   params.addRequiredParam<std::vector<std::string>>(
       "parameters", "Controllable input parameters driven by the network.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
-      "responses", "Postprocessors used as the current observation vector.");
+      "observations", "Postprocessors used as the current observation vector.");
   params.addParam<std::vector<Real>>(
-      "response_shift_factors",
+      "observation_shift_factors",
       "Optional offsets applied to the observation values before scaling.");
   params.addParam<std::vector<Real>>(
-      "response_scaling_factors",
+      "observation_scaling_factors",
       "Optional multipliers applied after shifting the observation values.");
   params.addParam<std::string>("filename", "Checkpoint file to load for the controller network.");
   params.addParam<bool>("torch_script_format",
@@ -56,21 +56,22 @@ LibtorchNeuralNetControl::validParams()
 
 LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & parameters)
   : Control(parameters),
-    _old_responses(declareRestartableData<std::vector<std::vector<Real>>>("old_responses")),
+    _old_observations(declareRestartableData<std::vector<std::vector<Real>>>("old_observations")),
     _control_names(getParam<std::vector<std::string>>("parameters")),
-    _current_control_signals(std::vector<Real>(_control_names.size(), 0.0)),
-    _response_names(getParam<std::vector<PostprocessorName>>("responses")),
+    _current_control_signals(declareRestartableData<std::vector<Real>>(
+        "current_control_signals", std::vector<Real>(_control_names.size(), 0.0))),
+    _observation_names(getParam<std::vector<PostprocessorName>>("observations")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _response_shift_factors(isParamValid("response_shift_factors")
-                                ? getParam<std::vector<Real>>("response_shift_factors")
-                                : std::vector<Real>(_response_names.size(), 0.0)),
-    _response_scaling_factors(isParamValid("response_scaling_factors")
-                                  ? getParam<std::vector<Real>>("response_scaling_factors")
-                                  : std::vector<Real>(_response_names.size(), 1.0)),
+    _observation_shift_factors(isParamValid("observation_shift_factors")
+                                   ? getParam<std::vector<Real>>("observation_shift_factors")
+                                   : std::vector<Real>(_observation_names.size(), 0.0)),
+    _observation_scaling_factors(isParamValid("observation_scaling_factors")
+                                     ? getParam<std::vector<Real>>("observation_scaling_factors")
+                                     : std::vector<Real>(_observation_names.size(), 1.0)),
     _action_scaling_factors(isParamValid("action_scaling_factors")
                                 ? getParam<std::vector<Real>>("action_scaling_factors")
                                 : std::vector<Real>(_control_names.size(), 1.0)),
-    _observation_history(_input_timesteps, _response_shift_factors, _response_scaling_factors)
+    _observation_history(_input_timesteps, _observation_shift_factors, _observation_scaling_factors)
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -78,14 +79,14 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
                             {"num_neurons_per_layer", "activation_function"},
                             !getParam<bool>("torch_script_format"));
 
-  if (_response_names.size() != _response_shift_factors.size())
-    paramError("response_shift_factors",
-               "The number of shift factors is not the same as the number of responses!");
+  if (_observation_names.size() != _observation_shift_factors.size())
+    paramError("observation_shift_factors",
+               "The number of shift factors is not the same as the number of observations!");
 
-  if (_response_names.size() != _response_scaling_factors.size())
-    paramError(
-        "response_scaling_factors",
-        "The number of normalization coefficients is not the same as the number of responses!");
+  if (_observation_names.size() != _observation_scaling_factors.size())
+    paramError("observation_scaling_factors",
+               "The number of normalization coefficients is not the same as the number of "
+               "observations!");
 
   if (_control_names.size() != _action_scaling_factors.size())
     paramError("action_scaling_factors",
@@ -94,8 +95,8 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
 
   // We link to the postprocessor values so that we can fetch them any time. This also raises
   // errors if we don't have the postprocessors requested in the input.
-  for (unsigned int resp_i = 0; resp_i < _response_names.size(); ++resp_i)
-    _response_values.push_back(&getPostprocessorValueByName(_response_names[resp_i]));
+  for (unsigned int obs_i = 0; obs_i < _observation_names.size(); ++obs_i)
+    _observation_values.push_back(&getPostprocessorValueByName(_observation_names[obs_i]));
 }
 
 void
@@ -115,7 +116,7 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile()
     _nn = std::make_shared<Moose::TorchScriptModule>(filename);
   else
   {
-    unsigned int num_inputs = _response_names.size() * _input_timesteps;
+    unsigned int num_inputs = _observation_names.size() * _input_timesteps;
     unsigned int num_outputs = _control_names.size();
     std::vector<unsigned int> num_neurons_per_layer =
         getParam<std::vector<unsigned int>>("num_neurons_per_layer");
@@ -124,9 +125,9 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile()
             ? getParam<std::vector<std::string>>("activation_function")
             : std::vector<std::string>({"relu"});
     const auto input_shift_factors =
-        _observation_history.expandFeatureFactors(_response_shift_factors);
+        _observation_history.expandFeatureFactors(_observation_shift_factors);
     const auto input_scaling_factors =
-        _observation_history.expandFeatureFactors(_response_scaling_factors);
+        _observation_history.expandFeatureFactors(_observation_scaling_factors);
     auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(filename,
                                                                    num_inputs,
                                                                    num_outputs,
@@ -165,12 +166,12 @@ LibtorchNeuralNetControl::execute()
   {
     const unsigned int n_controls = _control_names.size();
 
-    // Fetch current reporter values and populate _current_response
-    updateCurrentResponse();
+    // Fetch current observation values from the linked postprocessors.
+    updateCurrentObservation();
 
     // If this is the first timestep, we fill up the old values with the initial value
-    if (_old_responses.empty())
-      _observation_history.initializeHistory(_current_response, _old_responses);
+    if (_old_observations.empty())
+      _observation_history.initializeHistory(_current_observation, _old_observations);
 
     // Organize the old an current solution into a tensor so we can evaluate the neural net
     torch::Tensor input_tensor = prepareInputTensor();
@@ -187,8 +188,8 @@ LibtorchNeuralNetControl::execute()
 
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
-    if (_old_responses.size())
-      _observation_history.advanceHistory(_current_response, _old_responses);
+    if (_old_observations.size())
+      _observation_history.advanceHistory(_current_observation, _old_observations);
   }
 }
 
@@ -219,15 +220,14 @@ LibtorchNeuralNetControl::conditionalParameterError(
 }
 
 void
-LibtorchNeuralNetControl::updateCurrentResponse()
+LibtorchNeuralNetControl::updateCurrentObservation()
 {
-  // Gather the current response values from the reporters
-  std::vector<Real> raw_response;
-  raw_response.reserve(_response_names.size());
-  for (const auto & resp_i : index_range(_response_names))
-    raw_response.push_back(*_response_values[resp_i]);
+  std::vector<Real> raw_observation;
+  raw_observation.reserve(_observation_names.size());
+  for (const auto & obs_i : index_range(_observation_names))
+    raw_observation.push_back(*_observation_values[obs_i]);
 
-  _current_response = raw_response;
+  _current_observation = raw_observation;
 }
 
 void
@@ -239,7 +239,8 @@ LibtorchNeuralNetControl::loadControlNeuralNet(const Moose::LibtorchArtificialNe
 torch::Tensor
 LibtorchNeuralNetControl::prepareInputTensor()
 {
-  auto raw_input = _observation_history.stackCurrentObservation(_current_response, _old_responses);
+  auto raw_input =
+      _observation_history.stackCurrentObservation(_current_observation, _old_observations);
   torch::Tensor input_tensor;
   LibtorchUtils::vectorToTensor(raw_input, input_tensor);
 

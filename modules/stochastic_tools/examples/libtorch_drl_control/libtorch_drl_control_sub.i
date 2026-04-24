@@ -121,12 +121,12 @@ air_effective_k = 0.5 # W/(m K)
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"
-    responses = 'center_temp_tend'
+    observations = 'center_temp_tend'
 
     # keep consistent with LibtorchDRLControlTrainer
     input_timesteps = 1
-    response_scaling_factors = '0.03'
-    response_shift_factors = '290'
+    observation_scaling_factors = '0.03'
+    observation_shift_factors = '290'
     action_scaling_factors = 20
     stochastic = true
 
