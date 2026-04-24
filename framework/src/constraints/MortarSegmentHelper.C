@@ -747,6 +747,35 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
   if (poly_nodes.size() < 3)
     mooseError("Can't triangulate poly with fewer than 3 nodes");
 
+  // Legacy centroid path: when the default triangulation (centroid) is selected
+  // and triangle re-tessellation is not requested, reproduce the pre-PR
+  // algorithm byte-for-byte so existing mortar baselines remain valid.
+  // Uses the arithmetic mean of the vertices (not the area-weighted centroid),
+  // emits one triangle per polygon edge without degeneracy filtering, and skips
+  // the canonicalization pass which would drop near-degenerate vertices and
+  // perturb integration weights in downstream test baselines.
+  if (_triangulation_mode == MortarSegmentTriangulationMode::centroid &&
+      !_triangulate_triangles)
+  {
+    if (poly_nodes.size() == 3)
+    {
+      tri_map.push_back({offset + 0, offset + 1, offset + 2});
+      return;
+    }
+
+    const unsigned int n_verts = poly_nodes.size();
+    Point poly_center;
+    for (const auto & node : poly_nodes)
+      poly_center += node;
+    poly_center /= n_verts;
+
+    for (const auto i : make_range(n_verts))
+      tri_map.push_back({offset + i, offset + ((i + 1) % n_verts), offset + n_verts});
+
+    poly_nodes.push_back(poly_center);
+    return;
+  }
+
   canonicalize_polygon();
   if (poly_nodes.size() < 3)
     return;
