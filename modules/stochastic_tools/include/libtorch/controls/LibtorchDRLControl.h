@@ -48,6 +48,9 @@ public:
   /// Load the actor network from the configured checkpoint file.
   virtual void loadControlNeuralNetFromFile() override;
 
+  /// Reset the owned policy-sampling generator to a known seed.
+  void setPolicySampleSeed(uint64_t seed);
+
 protected:
   /// The log probability of control signals from the last evaluation of the controller
   std::vector<Real> _current_control_signal_log_probabilities;
@@ -56,12 +59,12 @@ protected:
   std::vector<Real> _current_smoothed_signal;
 
   std::shared_ptr<Moose::LibtorchActorNeuralNet> _actor_nn;
+  at::Generator _policy_generator;
 
   unsigned int _call_counter;
   const unsigned int _num_steps_in_period;
   const Real _smoother;
   const bool _stochastic;
-
 };
 
 #endif

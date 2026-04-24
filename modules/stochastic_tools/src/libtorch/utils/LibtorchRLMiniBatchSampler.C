@@ -18,7 +18,8 @@
 std::vector<LibtorchRLMiniBatch>
 LibtorchRLMiniBatchSampler::sample(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
                                    const unsigned int batch_size,
-                                   const bool standardize_advantage) const
+                                   const bool standardize_advantage,
+                                   const c10::optional<at::Generator> generator) const
 {
   std::vector<LibtorchRLMiniBatch> mini_batches;
 
@@ -28,7 +29,8 @@ LibtorchRLMiniBatchSampler::sample(const LibtorchRLTrajectoryBuffer::TensorBatch
   validateBatch(batch);
 
   const auto effective_batch_size = std::max<unsigned int>(1, batch_size);
-  auto permutation = torch::randperm(batch.size(), torch::TensorOptions().dtype(torch::kLong));
+  auto permutation =
+      at::randperm(batch.size(), generator, torch::TensorOptions().dtype(torch::kLong));
 
   for (std::int64_t batch_begin = 0; batch_begin < batch.size();
        batch_begin += effective_batch_size)

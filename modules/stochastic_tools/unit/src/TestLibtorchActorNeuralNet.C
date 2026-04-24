@@ -11,6 +11,7 @@
 
 #include "gtest/gtest.h"
 #include "LibtorchActorNeuralNet.h"
+#include "LibtorchRandomUtils.h"
 #include "MooseUnitUtils.h"
 
 #include <cmath>
@@ -191,6 +192,85 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorCanUseStateDependentStdWhenRequest
   EXPECT_GT(second_std, first_std);
 }
 
+TEST(LibtorchActorNeuralNetTest, explicitGeneratorKeepsGaussianSamplingStableAcrossCopies)
+{
+  TestableLibtorchActorNeuralNet original("test_gaussian",
+                                          1,
+                                          1,
+                                          {},
+                                          {"linear"},
+                                          {},
+                                          {},
+                                          torch::kCPU,
+                                          torch::kDouble,
+                                          true,
+                                          {0.0},
+                                          {1.0},
+                                          {1.0});
+
+  original.gaussianActionDistribution().meanModule()->weight.data().fill_(0.75);
+  original.gaussianActionDistribution().meanModule()->bias.data().fill_(1.25);
+  original.gaussianActionDistribution().stdModule()->weight.data().fill_(0.0);
+  original.gaussianActionDistribution().stdModule()->bias.data().fill_(std::log(0.5));
+
+  TestableLibtorchActorNeuralNet copied(original);
+
+  auto original_input = torch::tensor({{2.0}}, at::kDouble);
+  auto copied_input = torch::tensor({{2.0}}, at::kDouble);
+  auto original_generator = Moose::makeLibtorchCPUGenerator(12345);
+  auto copied_generator = Moose::makeLibtorchCPUGenerator(12345);
+
+  const auto original_action = original.evaluate(original_input, true, original_generator);
+  const auto copied_action = copied.evaluate(copied_input, true, copied_generator);
+
+  EXPECT_TRUE(torch::allclose(original_action, copied_action, /* rtol = */ 0.0, /* atol = */ 0.0));
+}
+
+TEST(LibtorchActorNeuralNetTest, explicitGeneratorMakesInitializationIndependentOfConstructionOrder)
+{
+  TestableLibtorchActorNeuralNet first("first_actor",
+                                       2,
+                                       1,
+                                       {3},
+                                       {"relu"},
+                                       {},
+                                       {},
+                                       torch::kCPU,
+                                       torch::kDouble,
+                                       true,
+                                       {0.0, 0.0},
+                                       {1.0, 1.0},
+                                       {1.0});
+  TestableLibtorchActorNeuralNet second("second_actor",
+                                        2,
+                                        1,
+                                        {3},
+                                        {"relu"},
+                                        {},
+                                        {},
+                                        torch::kCPU,
+                                        torch::kDouble,
+                                        true,
+                                        {0.0, 0.0},
+                                        {1.0, 1.0},
+                                        {1.0});
+
+  first.initializeNeuralNetwork(Moose::makeLibtorchCPUGenerator(2468));
+  second.initializeNeuralNetwork(Moose::makeLibtorchCPUGenerator(2468));
+
+  const auto first_parameters = first.named_parameters();
+  const auto second_parameters = second.named_parameters();
+  ASSERT_EQ(first_parameters.size(), second_parameters.size());
+  for (const auto i : index_range(first_parameters))
+  {
+    EXPECT_EQ(first_parameters[i].key(), second_parameters[i].key());
+    EXPECT_TRUE(torch::allclose(first_parameters[i].value(),
+                                second_parameters[i].value(),
+                                /* rtol = */ 0.0,
+                                /* atol = */ 0.0));
+  }
+}
+
 TEST(LibtorchActorNeuralNetTest, loadActorStateAcceptsTorchSaveArchive)
 {
   TestableLibtorchActorNeuralNet saved("saved_actor",
@@ -265,6 +345,78 @@ TEST(LibtorchActorNeuralNetTest, loadActorStateAcceptsTorchSaveArchive)
                               restored.evaluate(restored_input, false),
                               /*rtol=*/0.0,
                               /*atol=*/0.0));
+}
+
+TEST(LibtorchActorNeuralNetTest, loadActorStateRejectsHiddenLayerMismatch)
+{
+  TestableLibtorchActorNeuralNet saved("saved_actor",
+                                       2,
+                                       1,
+                                       {2},
+                                       {"linear"},
+                                       {},
+                                       {},
+                                       torch::kCPU,
+                                       torch::kDouble,
+                                       true,
+                                       {1.0, -2.0},
+                                       {0.5, 3.0},
+                                       {4.0});
+
+  Moose::UnitUtils::TempFile archive;
+  torch::save(std::make_shared<Moose::LibtorchActorNeuralNet>(saved), archive.path().string());
+
+  TestableLibtorchActorNeuralNet restored("restored_actor",
+                                          2,
+                                          1,
+                                          {3},
+                                          {"linear"},
+                                          {},
+                                          {},
+                                          torch::kCPU,
+                                          torch::kDouble,
+                                          true,
+                                          {1.0, -2.0},
+                                          {0.5, 3.0},
+                                          {4.0});
+
+  EXPECT_ANY_THROW(Moose::loadLibtorchActorNeuralNetState(restored, archive.path().string()));
+}
+
+TEST(LibtorchActorNeuralNetTest, loadActorStateRejectsBoundednessMismatch)
+{
+  TestableLibtorchActorNeuralNet saved("saved_actor",
+                                       1,
+                                       1,
+                                       {2},
+                                       {"linear"},
+                                       {},
+                                       {},
+                                       torch::kCPU,
+                                       torch::kDouble,
+                                       true,
+                                       {1.0},
+                                       {2.0},
+                                       {1.0});
+
+  Moose::UnitUtils::TempFile archive;
+  torch::save(std::make_shared<Moose::LibtorchActorNeuralNet>(saved), archive.path().string());
+
+  TestableLibtorchActorNeuralNet restored("restored_actor",
+                                          1,
+                                          1,
+                                          {2},
+                                          {"linear"},
+                                          {-2.0},
+                                          {2.0},
+                                          torch::kCPU,
+                                          torch::kDouble,
+                                          true,
+                                          {1.0},
+                                          {2.0},
+                                          {1.0});
+
+  EXPECT_ANY_THROW(Moose::loadLibtorchActorNeuralNetState(restored, archive.path().string()));
 }
 
 #endif

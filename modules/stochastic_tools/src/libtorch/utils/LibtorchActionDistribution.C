@@ -11,6 +11,7 @@
 
 #include "LibtorchActionDistribution.h"
 
+#include "LibtorchRandomUtils.h"
 #include "LibtorchUtils.h"
 #include "MooseError.h"
 
@@ -128,9 +129,9 @@ LibtorchGaussianActionDistribution::constructDistribution()
 }
 
 void
-LibtorchGaussianActionDistribution::initialize()
+LibtorchGaussianActionDistribution::initialize(const c10::optional<at::Generator> generator)
 {
-  torch::nn::init::orthogonal_(_mean_module->weight);
+  Moose::orthogonalInitializeTensor(_mean_module->weight, 1.0, generator);
   torch::nn::init::zeros_(_mean_module->bias);
 
   if (_state_independent_std)
@@ -140,7 +141,7 @@ LibtorchGaussianActionDistribution::initialize()
     return;
   }
 
-  torch::nn::init::orthogonal_(_std_module->weight);
+  Moose::orthogonalInitializeTensor(_std_module->weight, 1.0, generator);
   torch::nn::init::zeros_(_std_module->bias);
 }
 
@@ -165,9 +166,9 @@ LibtorchGaussianActionDistribution::reset(const torch::Tensor & input)
 }
 
 torch::Tensor
-LibtorchGaussianActionDistribution::sample() const
+LibtorchGaussianActionDistribution::sample(const c10::optional<at::Generator> generator) const
 {
-  return at::normal(_mean, _std_tensor) * actionScaleTensor();
+  return at::normal(_mean, _std_tensor, generator) * actionScaleTensor();
 }
 
 torch::Tensor
@@ -244,12 +245,12 @@ LibtorchBetaActionDistribution::constructDistribution()
 }
 
 void
-LibtorchBetaActionDistribution::initialize()
+LibtorchBetaActionDistribution::initialize(const c10::optional<at::Generator> generator)
 {
-  torch::nn::init::orthogonal_(_alpha_module->weight);
+  Moose::orthogonalInitializeTensor(_alpha_module->weight, 1.0, generator);
   torch::nn::init::zeros_(_alpha_module->bias);
 
-  torch::nn::init::orthogonal_(_beta_module->weight);
+  Moose::orthogonalInitializeTensor(_beta_module->weight, 1.0, generator);
   torch::nn::init::zeros_(_beta_module->bias);
 }
 
@@ -268,10 +269,10 @@ LibtorchBetaActionDistribution::reset(const torch::Tensor & input)
 }
 
 torch::Tensor
-LibtorchBetaActionDistribution::sample() const
+LibtorchBetaActionDistribution::sample(const c10::optional<at::Generator> generator) const
 {
-  const auto alpha_sample = at::_standard_gamma(_alpha_tensor);
-  const auto beta_sample = at::_standard_gamma(_beta_tensor);
+  const auto alpha_sample = at::_standard_gamma(_alpha_tensor, generator);
+  const auto beta_sample = at::_standard_gamma(_beta_tensor, generator);
   const auto sampled = alpha_sample / (alpha_sample + beta_sample);
   return (_min_tensor + (_max_tensor - _min_tensor) * sampled) * actionScaleTensor();
 }

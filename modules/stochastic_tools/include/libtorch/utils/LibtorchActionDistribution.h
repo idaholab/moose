@@ -44,7 +44,7 @@ public:
                              const std::vector<Real> & output_scaling_factors = {});
 
   /// Initialize the trainable distribution parameters.
-  virtual void initialize() = 0;
+  virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) = 0;
 
   /**
    * Refresh cached distribution parameters from the latest actor features.
@@ -56,7 +56,7 @@ public:
    * Draw a stochastic action sample in physical units.
    * @return Sampled action tensor.
    */
-  virtual torch::Tensor sample() const = 0;
+  virtual torch::Tensor sample(c10::optional<at::Generator> generator = c10::nullopt) const = 0;
 
   /**
    * Return the deterministic action used for evaluation.
@@ -127,11 +127,12 @@ public:
                                      const std::vector<Real> & output_scaling_factors = {},
                                      bool state_independent_std = true);
 
-  virtual void initialize() override;
+  virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) override;
 
   virtual void reset(const torch::Tensor & input) override;
 
-  virtual torch::Tensor sample() const override;
+  virtual torch::Tensor
+  sample(c10::optional<at::Generator> generator = c10::nullopt) const override;
 
   virtual torch::Tensor deterministicAction() const override;
 
@@ -187,11 +188,12 @@ public:
                                  bool build_on_construct = true,
                                  const std::vector<Real> & output_scaling_factors = {});
 
-  virtual void initialize() override;
+  virtual void initialize(c10::optional<at::Generator> generator = c10::nullopt) override;
 
   virtual void reset(const torch::Tensor & input) override;
 
-  virtual torch::Tensor sample() const override;
+  virtual torch::Tensor
+  sample(c10::optional<at::Generator> generator = c10::nullopt) const override;
 
   virtual torch::Tensor deterministicAction() const override;
 

@@ -10,7 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchDRLControl.h"
-#include "TorchScriptModule.h"
+#include "LibtorchRandomUtils.h"
 #include "Transient.h"
 #include "LibtorchUtils.h"
 
@@ -23,6 +23,7 @@ LibtorchDRLControl::validParams()
   params.addClassDescription(
       "Sets the value of multiple 'Real' input parameters and postprocessors based on a Deep "
       "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
+  params.suppressParameter<bool>("torch_script_format");
 
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
 
@@ -45,11 +46,6 @@ LibtorchDRLControl::validParams()
       "min_control_value", {}, "Optional lower bounds for each control signal.");
   params.addParam<std::vector<Real>>(
       "max_control_value", {}, "Optional upper bounds for each control signal.");
-  params.addParam<std::vector<Real>>(
-      "action_standard_deviations",
-      {},
-      "Deprecated compatibility parameter. Actor policies now learn their own action "
-      "distribution widths.");
   params.addParam<bool>(
       "state_independent_std",
       true,
@@ -64,6 +60,7 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _current_control_signal_log_probabilities(std::vector<Real>(_control_names.size(), 0.0)),
     _previous_control_signal(std::vector<Real>(_control_names.size(), 0.0)),
     _current_smoothed_signal(std::vector<Real>(_control_names.size(), 0.0)),
+    _policy_generator(Moose::makeLibtorchCPUGenerator()),
     _call_counter(0),
     _num_steps_in_period(parameters.isParamSetByUser("num_steps_in_period")
                              ? getParam<unsigned int>("num_steps_in_period")
@@ -71,72 +68,48 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _smoother(getParam<Real>("smoother")),
     _stochastic(getParam<bool>("stochastic"))
 {
-  // Fixing the RNG seed to make sure every experiment is the same.
   if (isParamValid("seed"))
-    torch::manual_seed(getParam<unsigned int>("seed"));
+    setPolicySampleSeed(getParam<unsigned int>("seed"));
 }
 
 void
 LibtorchDRLControl::loadControlNeuralNetFromFile()
 {
   const auto & filename = getParam<std::string>("filename");
-  if (getParam<bool>("torch_script_format"))
-  {
-    _actor_nn.reset();
-    _nn = std::make_shared<Moose::TorchScriptModule>(filename);
-  }
-  else
-  {
-    unsigned int num_inputs = _response_names.size() * _input_timesteps;
-    unsigned int num_outputs = _control_names.size();
-    std::vector<unsigned int> num_neurons_per_layer =
-        getParam<std::vector<unsigned int>>("num_neurons_per_layer");
-    std::vector<std::string> activation_functions =
-        isParamSetByUser("activation_function")
-            ? getParam<std::vector<std::string>>("activation_function")
-            : std::vector<std::string>({"relu"});
+  unsigned int num_inputs = _response_names.size() * _input_timesteps;
+  unsigned int num_outputs = _control_names.size();
+  std::vector<unsigned int> num_neurons_per_layer =
+      getParam<std::vector<unsigned int>>("num_neurons_per_layer");
+  std::vector<std::string> activation_functions =
+      isParamSetByUser("activation_function")
+          ? getParam<std::vector<std::string>>("activation_function")
+          : std::vector<std::string>({"relu"});
 
-    const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
-    const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
-    const auto input_shift_factors =
-        _observation_history.expandFeatureFactors(_response_shift_factors);
-    const auto input_scaling_factors =
-        _observation_history.expandFeatureFactors(_response_scaling_factors);
+  const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
+  const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
+  const auto input_shift_factors =
+      _observation_history.expandFeatureFactors(_response_shift_factors);
+  const auto input_scaling_factors =
+      _observation_history.expandFeatureFactors(_response_scaling_factors);
 
-    auto nn =
-        std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
-                                                        num_inputs,
-                                                        num_outputs,
-                                                        num_neurons_per_layer,
-                                                        activation_functions,
-                                                        minimum_values,
-                                                        maximum_values,
-                                                        torch::kCPU,
-                                                        torch::kDouble,
-                                                        true,
-                                                        input_shift_factors,
-                                                        input_scaling_factors,
-                                                        _action_scaling_factors,
-                                                        getParam<bool>("state_independent_std"));
+  _actor_nn =
+      std::make_shared<Moose::LibtorchActorNeuralNet>(filename,
+                                                      num_inputs,
+                                                      num_outputs,
+                                                      num_neurons_per_layer,
+                                                      activation_functions,
+                                                      minimum_values,
+                                                      maximum_values,
+                                                      torch::kCPU,
+                                                      torch::kDouble,
+                                                      true,
+                                                      input_shift_factors,
+                                                      input_scaling_factors,
+                                                      _action_scaling_factors,
+                                                      getParam<bool>("state_independent_std"));
 
-    try
-    {
-      if (Moose::isLegacyLibtorchActorArchive(filename))
-        Moose::loadLegacyLibtorchActorNeuralNetState(
-            *nn, filename, getParam<std::vector<Real>>("action_standard_deviations"));
-      else
-        Moose::loadLibtorchActorNeuralNetState(*nn, filename);
-    }
-    catch (const c10::Error & e)
-    {
-      mooseError("The requested pytorch parameter file could not be loaded for the control neural "
-                 "net.\n",
-                 e.msg());
-    }
-
-    _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*nn);
-    _nn = _actor_nn;
-  }
+  Moose::loadLibtorchActorNeuralNetState(*_actor_nn, filename);
+  _nn = _actor_nn;
 }
 
 void
@@ -165,7 +138,7 @@ LibtorchDRLControl::execute()
 
     if (_actor_nn)
     {
-      action = _actor_nn->evaluate(input_tensor, _stochastic);
+      action = _actor_nn->evaluate(input_tensor, _stochastic, _policy_generator);
 
       if (_stochastic)
       {
@@ -215,8 +188,14 @@ LibtorchDRLControl::loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNe
   const auto * check = dynamic_cast<const Moose::LibtorchActorNeuralNet *>(&input_nn);
   if (!check)
     mooseError("This needs to be a LibtorchActorNeuralNet!");
-  _nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*check);
   _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*check);
+  _nn = _actor_nn;
+}
+
+void
+LibtorchDRLControl::setPolicySampleSeed(const uint64_t seed)
+{
+  _policy_generator.set_current_seed(seed);
 }
 
 Real
