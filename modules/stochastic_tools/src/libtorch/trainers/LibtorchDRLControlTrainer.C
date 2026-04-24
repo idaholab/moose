@@ -26,12 +26,12 @@ LibtorchDRLControlTrainer::validParams()
       "Trains a neural network controller using fixed-horizon PPO on top of the libtorch RL core.");
 
   params.addRequiredParam<std::vector<ReporterName>>(
-      "response", "Reporter values containing the response values from the model.");
+      "observation", "Reporter values containing the observation values from the model.");
   params.addParam<std::vector<Real>>(
-      "response_shift_factors",
+      "observation_shift_factors",
       "Optional offsets applied to the observed state values before scaling.");
   params.addParam<std::vector<Real>>(
-      "response_scaling_factors",
+      "observation_scaling_factors",
       "Optional multipliers applied after shifting the observed state values.");
   params.addRequiredParam<std::vector<ReporterName>>(
       "control",
@@ -136,12 +136,12 @@ LibtorchDRLControlTrainer::validParams()
 
 LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
-    _state_names(getParam<std::vector<ReporterName>>("response")),
-    _state_shift_factors(isParamValid("response_shift_factors")
-                             ? getParam<std::vector<Real>>("response_shift_factors")
+    _state_names(getParam<std::vector<ReporterName>>("observation")),
+    _state_shift_factors(isParamValid("observation_shift_factors")
+                             ? getParam<std::vector<Real>>("observation_shift_factors")
                              : std::vector<Real>(_state_names.size(), 0.0)),
-    _state_scaling_factors(isParamValid("response_scaling_factors")
-                               ? getParam<std::vector<Real>>("response_scaling_factors")
+    _state_scaling_factors(isParamValid("observation_scaling_factors")
+                               ? getParam<std::vector<Real>>("observation_scaling_factors")
                                : std::vector<Real>(_state_names.size(), 1.0)),
     _action_names(getParam<std::vector<ReporterName>>("control")),
     _action_scaling_factors(isParamValid("action_scaling_factors")
@@ -182,13 +182,13 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _ppo_loss(_clip_param, _entropy_coeff)
 {
   if (_state_names.size() != _state_shift_factors.size())
-    paramError("response_shift_factors",
-               "The number of shift factors is not the same as the number of responses!");
+    paramError("observation_shift_factors",
+               "The number of shift factors is not the same as the number of observations!");
 
   if (_state_names.size() != _state_scaling_factors.size())
-    paramError(
-        "response_scaling_factors",
-        "The number of normalization coefficients is not the same as the number of responses!");
+    paramError("observation_scaling_factors",
+               "The number of normalization coefficients is not the same as the number of "
+               "observations!");
 
   if (_action_names.size() != _log_probability_names.size())
     paramError("log_probability",

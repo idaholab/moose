@@ -93,11 +93,11 @@
     seed = 11
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    responses = 'center_temp env_temp'
+    observations = 'center_temp env_temp'
 
     input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
+    observation_scaling_factors = '0.03 0.03'
+    observation_shift_factors = '270 270'
     action_scaling_factors = 100
 
     filename = 'mynet_control.net'
@@ -109,11 +109,11 @@
   [src_control_empty]
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    responses = 'center_temp env_temp'
+    observations = 'center_temp env_temp'
 
     input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
+    observation_scaling_factors = '0.03 0.03'
+    observation_shift_factors = '270 270'
     action_scaling_factors = 100
 
     execute_on = 'TIMESTEP_BEGIN'

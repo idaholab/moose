@@ -28,32 +28,32 @@ public:
 
   unsigned int inputTimesteps() const { return _input_timesteps; }
 
-  std::vector<Real> normalize(const std::vector<Real> & response) const;
+  std::vector<Real> normalize(const std::vector<Real> & observation) const;
 
-  void normalizeInPlace(std::vector<Real> & response) const;
+  void normalizeInPlace(std::vector<Real> & observation) const;
 
-  void normalizeTrajectoryInPlace(std::vector<std::vector<Real>> & response_trajectories) const;
+  void normalizeTrajectoryInPlace(std::vector<std::vector<Real>> & observation_trajectories) const;
 
-  void initializeHistory(const std::vector<Real> & normalized_response,
-                         std::vector<std::vector<Real>> & old_responses) const;
+  void initializeHistory(const std::vector<Real> & normalized_observation,
+                         std::vector<std::vector<Real>> & old_observations) const;
 
-  void advanceHistory(const std::vector<Real> & normalized_response,
-                      std::vector<std::vector<Real>> & old_responses) const;
+  void advanceHistory(const std::vector<Real> & normalized_observation,
+                      std::vector<std::vector<Real>> & old_observations) const;
 
   std::vector<Real> expandFeatureFactors(const std::vector<Real> & feature_factors) const;
 
-  std::vector<Real> stackCurrentObservation(
-      const std::vector<Real> & normalized_response,
-      const std::vector<std::vector<Real>> & old_responses) const;
+  std::vector<Real>
+  stackCurrentObservation(const std::vector<Real> & normalized_observation,
+                          const std::vector<std::vector<Real>> & old_observations) const;
 
   std::vector<Real> stackTrajectoryObservation(
-      const std::vector<std::vector<Real>> & normalized_response_trajectories,
+      const std::vector<std::vector<Real>> & normalized_observation_trajectories,
       unsigned int time_index) const;
 
 private:
   void validateFeatureCount(std::size_t feature_count) const;
   void validateTrajectoryShape(
-      const std::vector<std::vector<Real>> & normalized_response_trajectories) const;
+      const std::vector<std::vector<Real>> & normalized_observation_trajectories) const;
 
   const unsigned int _input_timesteps;
   const std::vector<Real> _shift_factors;

@@ -35,7 +35,7 @@
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    response = 'storage/r_transfer:T_reporter:center_temp_tend:value storage/r_transfer:T_reporter:env_temp:value'
+    observation = 'storage/r_transfer:T_reporter:center_temp_tend:value storage/r_transfer:T_reporter:env_temp:value'
     control = 'storage/r_transfer:T_reporter:left_flux:value'
     log_probability = 'storage/r_transfer:T_reporter:log_prob_left_flux:value'
     reward = 'storage/r_transfer:T_reporter:reward:value'
@@ -54,8 +54,8 @@
 
     # keep consistent with LibtorchNeuralNetControl
     input_timesteps = 2
-    response_scaling_factors = '0.03 0.03'
-    response_shift_factors = '270 270'
+    observation_scaling_factors = '0.03 0.03'
+    observation_shift_factors = '270 270'
     action_scaling_factors = 100
 
     read_from_file = false
