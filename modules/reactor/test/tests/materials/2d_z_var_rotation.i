@@ -33,6 +33,10 @@
     family = MONOMIAL
     order = CONSTANT
   []
+  [prop2]
+    family = MONOMIAL
+    order = CONSTANT
+  []
   [var]
     initial_condition = 250
   []
@@ -46,14 +50,21 @@
     property = k
     execute_on = timestep_end
   []
+  [set_prop2]
+    type = MaterialRealAux
+    block = '2 3'
+    variable = prop2
+    property = t
+    execute_on = timestep_end
+  []
 []
 
 [Materials]
   [segment_properties]
     type = GenericConstantMaterial
     block = '2 3'
-    prop_names = 'seg1 seg4'
-    prop_values = '100 400'
+    prop_names = 'seg1 seg4 aseg1 aseg2 aseg3 aseg4'
+    prop_values = '100 400 1 2 3 4'
   []
   [segment2_property]
     type = ParsedMaterial
@@ -72,11 +83,11 @@
   [rotate_mat]
     type = ControlDrumMaterial
     block = '2 3'
-    drum_material_property = k
+    drum_material_properties = 'k t'
     rotation_centers = '0 0 0 11 0 0'
     rotation_angle_functors = '11.25 30'
     segment_angles = '45 90 180 45'
-    segment_material_properties = 'seg1 seg2 seg3 seg4'
+    segment_material_properties = 'seg1 seg2 seg3 seg4; aseg1 aseg2 aseg3 aseg4'
   []
 []
 

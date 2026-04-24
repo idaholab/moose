@@ -33,10 +33,12 @@ ControlDrumMaterial::validParams()
       "axis.\n"
       "All rotation centers share the same segment angles.");
 
+  params.addRequiredParam<std::vector<std::vector<MaterialPropertyName>>>(
+      "segment_material_properties",
+      "Material properties for all the rotation segments corresponding to drum material "
+      "properties");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
-      "segment_material_properties", "Material properties for all the rotation segments");
-  params.addRequiredParam<MaterialPropertyName>("drum_material_property",
-                                                "Material property for the drums");
+      "drum_material_properties", "Material property names for the drums");
 
   params.addClassDescription("Evaluate a material property based on the material properties of all "
                              "segments of a rotating drum.");
@@ -52,8 +54,7 @@ ControlDrumMaterial::ControlDrumMaterial(const InputParameters & parameters)
                           ? parameters.get<std::vector<Real>>("rotation_angle_offsets")
                           : std::vector<Real>(_rotation_centers.size(), 0.0)),
     _segment_angles(parameters.get<std::vector<Real>>("segment_angles")),
-    _n_segments(_segment_angles.size()),
-    _drum_property(declareProperty<Real>("drum_material_property"))
+    _n_segments(_segment_angles.size())
 {
   if (_rotation_axis == "x" || _rotation_axis == "-x")
     _dir = 0;
@@ -106,15 +107,29 @@ ControlDrumMaterial::ControlDrumMaterial(const InputParameters & parameters)
       parameters.paramError("rotation_centers",
                             "Must have zero coordinate in the rotation direction");
 
-  const auto prop_names =
-      getParam<std::vector<MaterialPropertyName>>("segment_material_properties");
-  if (prop_names.size() != _n_segments)
-    parameters.paramError("segment_material_properties",
-                          "Number of materal properties must be equal to the number of segments (",
-                          _n_segments,
-                          ")");
-  for (const auto & prop_name : prop_names)
-    _segment_properties.push_back(&getMaterialPropertyByName<Real>(prop_name));
+  const auto drum_props = getParam<std::vector<MaterialPropertyName>>("drum_material_properties");
+  for (const auto & prop_name : drum_props)
+    _drum_properties.push_back(&declareProperty<Real>(prop_name));
+
+  const auto all_prop_names =
+      getParam<std::vector<std::vector<MaterialPropertyName>>>("segment_material_properties");
+  if (all_prop_names.size() != drum_props.size())
+    paramError(
+        "segment_material_properties",
+        "Leading size of the 2D array must be equal to the size of 'drum_material_properties'");
+  for (const auto & prop_names : all_prop_names)
+  {
+    if (prop_names.size() != _n_segments)
+      paramError("segment_material_properties",
+                 "Number of segment materal properties of one drum material property must be equal "
+                 "to the number of segments (",
+                 _n_segments,
+                 ")");
+    std::vector<const MaterialProperty<Real> *> props;
+    for (const auto & prop_name : prop_names)
+      props.push_back(&getMaterialPropertyByName<Real>(prop_name));
+    _segment_properties.push_back(props);
+  }
 }
 
 void
@@ -182,8 +197,9 @@ ControlDrumMaterial::computeQpProperties()
     upper_angle += _segment_angles[seg_id];
   }
 
-  // assign material property
+  // assign material properties
   // Note: we do not attempt adjust the value considering the weight with the location
   //       of the segment interface.
-  _drum_property[_qp] = (*_segment_properties[seg_id])[_qp];
+  for (const auto i : index_range(_drum_properties))
+    (*_drum_properties[i])[_qp] = (*_segment_properties[i][seg_id])[_qp];
 }

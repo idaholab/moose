@@ -69,7 +69,7 @@
   [rotate_mat]
     type = ControlDrumMaterial
     block = '2 3'
-    drum_material_property = k
+    drum_material_properties = k
     rotation_centers = '0 0 0 11 0 0'
     rotation_angle_functors = 'func pp'
     segment_angles = '45 90 180 45'
