@@ -139,22 +139,6 @@ public:
   libMesh::Parallel::Communicator & getLocalComm() { return _local_comm; }
 
 protected:
-  /**
-   * Enum describing the type of parallel communication to perform.
-   *
-   * Some routines require specific communication methods that not all processors
-   * see, these IDs will determine how that routine is performed:
-   *  - NONE routine is not distrubuted and things all can happen locally
-   *  - LOCAL routine is distributed on all processors
-   *  - SEMI_LOCAL routine is distributed only on processors that own rows
-   */
-  enum CommMethod
-  {
-    NONE = 0,
-    LOCAL = 1,
-    SEMI_LOCAL = 2
-  };
-
   // The following methods are the basic methods that should be utilized my most application
   // developers that are creating a custom Sampler.
 
@@ -241,16 +225,6 @@ protected:
   virtual void advanceGenerators(const dof_id_type count);
   virtual void advanceGenerator(const unsigned int seed_index, const dof_id_type count);
   void setAutoAdvanceGenerators(const bool state);
-
-  /**
-   * Helper for shuffling a vector of data in-place; the default assumes data is distributed
-   *
-   * NOTE: This will advance the generator by the size of the supplied vector.
-   */
-  template <typename T>
-  void shuffle(std::vector<T> & data,
-               const std::size_t seed_index = 0,
-               const CommMethod method = CommMethod::LOCAL);
 
   //@{
   /**
@@ -367,9 +341,3 @@ private:
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;
 };
-
-template <typename T>
-void
-Sampler::shuffle(std::vector<T> &, const std::size_t, const CommMethod)
-{
-}
