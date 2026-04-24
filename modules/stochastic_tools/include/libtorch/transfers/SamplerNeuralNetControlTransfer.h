@@ -22,13 +22,18 @@ class SamplerNeuralNetControlTransfer : public StochasticToolsTransfer, public S
 public:
   static InputParameters validParams();
 
+  /**
+   * Build the transfer that pushes a trained controller into subapps.
+   * @param parameters Input parameters for the transfer.
+   */
   SamplerNeuralNetControlTransfer(const InputParameters & parameters);
 
+  /// Execute the transfer in the standard non-batch path.
   virtual void execute() override;
 
   ///@{
   /**
-   * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
+   * Methods used when running in batch mode (see SamplerFullSolveMultiApp).
    */
   virtual void initialSetup() override;
   virtual void initializeFromMultiapp() override;

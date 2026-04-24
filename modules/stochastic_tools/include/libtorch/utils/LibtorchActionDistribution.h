@@ -27,6 +27,15 @@ namespace Moose
 class LibtorchActionDistribution : public torch::nn::Module
 {
 public:
+  /**
+   * Build an action-distribution module for an actor network.
+   * @param name Module name used for registration and serialization.
+   * @param num_inputs Number of actor features feeding the distribution.
+   * @param num_outputs Number of action dimensions produced by the distribution.
+   * @param device_type Torch device used by the module.
+   * @param scalar_type Torch scalar type used by the module.
+   * @param output_scaling_factors Optional per-action scaling applied in physical units.
+   */
   LibtorchActionDistribution(const std::string & name,
                              unsigned int num_inputs,
                              unsigned int num_outputs,
@@ -34,20 +43,47 @@ public:
                              torch::ScalarType scalar_type = torch::kDouble,
                              const std::vector<Real> & output_scaling_factors = {});
 
+  /// Initialize the trainable distribution parameters.
   virtual void initialize() = 0;
 
+  /**
+   * Refresh cached distribution parameters from the latest actor features.
+   * @param input Feature tensor coming from the actor body.
+   */
   virtual void reset(const torch::Tensor & input) = 0;
 
+  /**
+   * Draw a stochastic action sample in physical units.
+   * @return Sampled action tensor.
+   */
   virtual torch::Tensor sample() const = 0;
 
+  /**
+   * Return the deterministic action used for evaluation.
+   * @return Deterministic action tensor.
+   */
   virtual torch::Tensor deterministicAction() const = 0;
 
+  /**
+   * Evaluate the log-probability of an action under the current distribution.
+   * @param action Action tensor in physical units.
+   * @return Log-probability tensor for the action.
+   */
   virtual torch::Tensor logProbability(const torch::Tensor & action) const = 0;
 
+  /**
+   * Compute the entropy of the current distribution.
+   * @return Entropy tensor.
+   */
   virtual torch::Tensor entropy() const = 0;
 
+  /**
+   * Tell callers whether the distribution enforces explicit action bounds.
+   * @return True for bounded distributions, false for unbounded ones.
+   */
   virtual bool isBounded() const = 0;
 
+  /// Sync cached scaling metadata from the registered buffers after loading state.
   void synchronizeScalingFactorsFromBuffer();
 
 protected:
@@ -71,6 +107,17 @@ protected:
 class LibtorchGaussianActionDistribution : public LibtorchActionDistribution
 {
 public:
+  /**
+   * Build the Gaussian action distribution used for unbounded controls.
+   * @param name Module name used for registration and serialization.
+   * @param num_inputs Number of actor features feeding the distribution.
+   * @param num_outputs Number of action dimensions produced by the distribution.
+   * @param device_type Torch device used by the module.
+   * @param scalar_type Torch scalar type used by the module.
+   * @param build_on_construct Whether to build the torch modules right away.
+   * @param output_scaling_factors Optional per-action scaling applied in physical units.
+   * @param state_independent_std Whether the learned std should ignore the current state.
+   */
   LibtorchGaussianActionDistribution(const std::string & name,
                                      unsigned int num_inputs,
                                      unsigned int num_outputs,
@@ -118,6 +165,18 @@ private:
 class LibtorchBetaActionDistribution : public LibtorchActionDistribution
 {
 public:
+  /**
+   * Build the Beta action distribution used for bounded controls.
+   * @param name Module name used for registration and serialization.
+   * @param num_inputs Number of actor features feeding the distribution.
+   * @param num_outputs Number of action dimensions produced by the distribution.
+   * @param minimum_values Lower action bounds in physical units.
+   * @param maximum_values Upper action bounds in physical units.
+   * @param device_type Torch device used by the module.
+   * @param scalar_type Torch scalar type used by the module.
+   * @param build_on_construct Whether to build the torch modules right away.
+   * @param output_scaling_factors Optional extra per-action scaling in physical units.
+   */
   LibtorchBetaActionDistribution(const std::string & name,
                                  unsigned int num_inputs,
                                  unsigned int num_outputs,

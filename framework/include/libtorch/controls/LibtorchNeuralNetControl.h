@@ -40,7 +40,7 @@ public:
   /**
    * Get the (signal_index)-th signal of the control neural net
    * @param signal_index The index of the queried control signal
-   * @return The (signal_index)-th constol signal
+   * @return The requested control signal.
    */
   Real getSignal(const unsigned int signal_index) const;
 
@@ -48,41 +48,40 @@ public:
   unsigned int numberOfControlSignals() const { return _control_names.size(); }
 
   /**
-   * Function responsible for loading the neural network for the controller. This function is used
-   * when copying the neural network from a main app which trains it.
-   * @param input_nn Reference to a neural network which will be copied into this object
+   * Copy a trained neural network into the controller.
+   * @param input_nn Neural network that should replace the currently stored controller.
    */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
+  /// Load the controller neural network from the configured file on disk.
   virtual void loadControlNeuralNetFromFile();
 
-  /// Return a reference to the stored neural network
+  /// Return a reference to the stored neural network.
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
-  /// Return true if the object already has a neural netwok
+  /// Return true if the object already has a neural network.
   bool hasControlNeuralNet() const { return (_nn != NULL); };
 
 protected:
   /**
-   * Function responsible for checking for potential user errors in the input file
-   * @param param_name The name of the main parameter
-   * @param conditional_param Vector parameter names that depend on the main parameter
-   * @param should_be_defined If the conditional parameters should be defined when the main
-   * parameter is defined
+   * Check one conditional-parameter rule and raise an input error if it is violated.
+   * @param param_name Main parameter that controls the rule.
+   * @param conditional_param Parameters that depend on the main parameter.
+   * @param should_be_defined Whether the dependent parameters should be present or absent.
    */
   void conditionalParameterError(const std::string & param_name,
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);
 
-  /// Function that updates the values of the current response
+  /// Refresh the current observation values from the linked postprocessors.
   void updateCurrentResponse();
 
-  /// Function that prepares the input tensor for the controller neural network
+  /// Build the normalized input tensor passed into the controller neural network.
   torch::Tensor prepareInputTensor();
 
   /// The values of the current observed postprocessor values
   std::vector<Real> _current_response;
-  /// This variable is populated if the controller needs acess to older values of the
+  /// This variable is populated if the controller needs access to older values of the
   /// observed postprocessor values
   std::vector<std::vector<Real>> & _old_responses;
 

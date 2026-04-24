@@ -23,16 +23,25 @@
 namespace Moose
 {
 
-// A class that describes a simple feed-forward neural net.
+/**
+ * Simple feed-forward neural net with optional affine input and output scaling.
+ */
 class LibtorchArtificialNeuralNet : public torch::nn::Module, public LibtorchNeuralNetBase
 {
 public:
   /**
-   * Construct using input parameters
-   * @param name Name of the neural network
-   * @param num_inputs The number of input neurons/parameters
-   * @param num_neurons_per_layer Number of neurons per hidden layer
-   * @param num_outputs The number of output neurons
+   * Build a plain feed-forward neural network.
+   * @param name Name of the neural network module.
+   * @param num_inputs Number of input neurons or parameters.
+   * @param num_outputs Number of output neurons.
+   * @param num_neurons_per_layer Hidden-layer widths.
+   * @param activation_function Hidden-layer activation names.
+   * @param device_type Torch device used by the module.
+   * @param scalar_type Torch scalar type used by the module.
+   * @param build_on_construct Whether to build the torch modules right away.
+   * @param input_shift_factors Optional affine input shifts.
+   * @param input_scaling_factors Optional affine input scales.
+   * @param output_scaling_factors Optional output scaling factors.
    */
   LibtorchArtificialNeuralNet(const std::string name,
                               const unsigned int num_inputs,
@@ -47,25 +56,25 @@ public:
                               const std::vector<Real> & output_scaling_factors = {});
 
   /**
-   * Copy construct an artificial neural network
-   * @param nn The neural network which needs to be copied
+   * Copy-construct a feed-forward neural network.
+   * @param nn Neural network to copy.
+   * @param build_on_construct Whether to rebuild the module structure during the copy.
    */
   LibtorchArtificialNeuralNet(const Moose::LibtorchArtificialNeuralNet & nn,
                               const bool build_on_construct = true);
 
   /**
-   * Add layers to the neural network
-   * @param layer_name The name of the layer to be added
-   * @param parameters A map of parameter names and the corresponding values which
-   *                   describe the neural net layer architecture
+   * Add one linear layer to the network.
+   * @param layer_name Name of the layer to add.
+   * @param parameters Small parameter map that describes the layer shape.
    */
   virtual void addLayer(const std::string & layer_name,
                         const std::unordered_map<std::string, unsigned int> & parameters);
 
   /**
-   * Overriding the forward substitution function for the neural network, unfortunately
-   * this cannot be const since it creates a graph in the background
-   * @param x Input tensor for the evaluation
+   * Run a forward pass through the network.
+   * @param x Input tensor for the evaluation.
+   * @return Network output tensor.
    */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
@@ -97,24 +106,50 @@ public:
   /// Update cached affine metadata vectors from the registered libtorch buffers.
   void synchronizeAffineFactorsFromBuffers();
 
+  /**
+   * Map an activation name to the orthogonal-initialization gain we want to use.
+   * @param activation Activation name to look up.
+   * @return Gain used for orthogonal initialization.
+   */
   Real determineGain(const std::string & activation);
 
+  /// Initialize the trainable weights and biases.
   virtual void initializeNeuralNetwork();
 
   /// Store the network architecture in a json file (for debugging, visualization)
   void store(nlohmann::json & json) const;
 
 protected:
+  /**
+   * Normalize affine metadata and fill in defaults when needed.
+   * @param factors User-provided affine factors.
+   * @param expected_size Expected number of entries.
+   * @param default_value Default value used when the vector is empty.
+   * @param factor_name Name used in error messages.
+   * @param forbid_zero Whether zero entries should be rejected.
+   * @return Normalized affine-factor vector.
+   */
   static std::vector<Real> normalizeAffineFactors(const std::vector<Real> & factors,
                                                   unsigned int expected_size,
                                                   Real default_value,
                                                   const std::string & factor_name,
                                                   bool forbid_zero = false);
 
+  /// Initialize the registered affine metadata buffers used by serialization.
   void initializeAffineBuffers();
 
+  /**
+   * Apply affine preprocessing to the raw input tensor.
+   * @param x Raw input tensor.
+   * @return Preprocessed input tensor.
+   */
   virtual torch::Tensor preprocessInput(const torch::Tensor & x) const;
 
+  /**
+   * Apply the configured output scaling to a network output tensor.
+   * @param y Raw network output tensor.
+   * @return Scaled output tensor.
+   */
   virtual torch::Tensor scaleOutput(const torch::Tensor & y) const;
 
   /// Name of the neural network

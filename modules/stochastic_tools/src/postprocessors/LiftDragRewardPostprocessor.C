@@ -19,14 +19,21 @@ LiftDragRewardPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
 
-  params.addRequiredParam<PostprocessorName>("lift", "Lift coeff");
-  params.addRequiredParam<PostprocessorName>("drag", "Drag coeff");
+  params.addRequiredParam<PostprocessorName>(
+      "lift", "Postprocessor that supplies the current lift coefficient.");
+  params.addRequiredParam<PostprocessorName>(
+      "drag", "Postprocessor that supplies the current drag coefficient.");
 
-  params.addParam<unsigned int>("averaging_window", 1, "The window");
-  params.addParam<Real>("coeff_1", 1.59, "Coeff 1");
-  params.addParam<Real>("coeff_2", 0.2, "Coeff 2");
+  params.addParam<unsigned int>(
+      "averaging_window",
+      1,
+      "Number of timesteps to include in the rolling lift and drag averages.");
+  params.addParam<Real>(
+      "coeff_1", 1.59, "Baseline reward offset before drag and lift penalties are applied.");
+  params.addParam<Real>("coeff_2", 0.2, "Multiplier applied to the absolute-value lift penalty.");
 
-  params.addClassDescription("Blabla.");
+  params.addClassDescription(
+      "Turns rolling lift and drag coefficients into a simple scalar reward signal.");
 
   return params;
 }

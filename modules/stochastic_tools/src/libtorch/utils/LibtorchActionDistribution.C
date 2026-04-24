@@ -21,6 +21,12 @@
 namespace
 {
 
+/**
+ * Fill in default action scaling and catch shape mistakes early.
+ * @param factors User-provided scaling factors.
+ * @param expected_size Number of action outputs expected by the distribution.
+ * @return A fully populated scaling-factor vector.
+ */
 std::vector<Real>
 normalizeActionScalingFactors(const std::vector<Real> & factors, const unsigned int expected_size)
 {

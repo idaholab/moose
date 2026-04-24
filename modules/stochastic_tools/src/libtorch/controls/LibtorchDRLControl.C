@@ -42,9 +42,9 @@ LibtorchDRLControl::validParams()
       "If true, sample from the policy distribution; otherwise use the deterministic action.");
 
   params.addParam<std::vector<Real>>(
-      "min_control_value", {}, "The minimum values of the control signal.");
+      "min_control_value", {}, "Optional lower bounds for each control signal.");
   params.addParam<std::vector<Real>>(
-      "max_control_value", {}, "The maximum values of the control signal.");
+      "max_control_value", {}, "Optional upper bounds for each control signal.");
   params.addParam<std::vector<Real>>(
       "action_standard_deviations",
       {},
