@@ -65,6 +65,7 @@
 [AuxVariables]
   [T]
     type = MooseVariable
+    block = '0 1'
   []
 []
 
@@ -75,6 +76,7 @@
     use_xyzt = true
     expression = '1250.0+1000.0*(x/1.5)'
     execute_on = 'INITIAL'
+    block = '0 1'
   []
 []
 

@@ -21,10 +21,6 @@ SubChannelAddVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Adds the variables associated with the subchannel problem");
-  params.addParam<bool>(
-      "deformation",
-      false,
-      "Boolean that activates the deformation effect based on values for: displacement, Dpin");
   params.addParam<bool>("full_output", false, "Add optional subchannel output variables");
   return params;
 }

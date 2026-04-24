@@ -37,7 +37,7 @@ AddPrimarySpeciesAction::act()
   auto type = AddVariableAction::variableType(fe_type);
   auto var_params = _factory.getValidParams(type);
 
-  var_params.applySpecificParameters(_pars, {"family", "order", "scaling"});
+  var_params.applySpecificParameters(_pars, {"family", "order", "scaling", "block"});
 
   for (auto & var : _vars)
     _problem->addVariable(type, var, var_params);

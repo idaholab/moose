@@ -35,7 +35,7 @@ AddSecondarySpeciesAction::act()
   auto type = AddVariableAction::variableType(fe_type);
   auto var_params = _factory.getValidParams(type);
 
-  var_params.applySpecificParameters(_pars, {"family", "order"});
+  var_params.applySpecificParameters(_pars, {"family", "order", "block"});
 
   for (auto & secondary_specimen : _secondary_species)
     _problem->addAuxVariable(type, secondary_specimen, var_params);
