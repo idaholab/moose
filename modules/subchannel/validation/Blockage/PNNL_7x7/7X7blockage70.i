@@ -7,7 +7,7 @@ P_out = 101325 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 8
     ny = 8
     n_cells = 36
@@ -27,34 +27,34 @@ P_out = 101325 # Pa
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
+    block = subchannel
   []
   [SumWij]
-    block = sub_channel
+    block = subchannel
   []
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [DP]
-    block = sub_channel
+    block = subchannel
   []
   [h]
-    block = sub_channel
+    block = subchannel
   []
   [T]
-    block = sub_channel
+    block = subchannel
   []
   [rho]
-    block = sub_channel
+    block = subchannel
   []
   [mu]
-    block = sub_channel
+    block = subchannel
   []
   [S]
-    block = sub_channel
+    block = subchannel
   []
   [w_perim]
-    block = sub_channel
+    block = subchannel
   []
 []
 
@@ -78,6 +78,7 @@ P_out = 101325 # Pa
   interpolation_scheme = 'upwind'
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
@@ -88,6 +89,9 @@ P_out = 101325 # Pa
     type = SCMMixingConstantBeta
     beta = 0.006
     CT = 2.6
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SCMQuadPinMeshGenerator.md'
+  design = 'SCMQuadAssemblyMeshGenerator.md'
   issues = '#29241'
   [coords]
     type = Exodiff

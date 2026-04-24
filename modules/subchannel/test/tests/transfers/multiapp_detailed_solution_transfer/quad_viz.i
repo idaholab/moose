@@ -8,20 +8,15 @@
 []
 
 [Mesh]
-  [sub_channel]
-    type = SCMDetailedQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMDetailedQuadAssemblyMeshGenerator
     side_gap = 0.1
-  []
-
-  [fuel_pins]
-    type = SCMDetailedQuadPinMeshGenerator
-    input = sub_channel
   []
 []
 
 [AuxVariables]
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [T]
     block = fuel_pins

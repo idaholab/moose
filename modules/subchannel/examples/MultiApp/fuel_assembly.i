@@ -235,7 +235,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     variable = 'mdot SumWij P DP h T rho mu S'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Tpin q_prime'
   []

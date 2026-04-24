@@ -9,8 +9,8 @@
   []
 
   [Mesh]
-    [subchannel]
-      type = SCMDetailedQuadSubChannelMeshGenerator
+    [assembly]
+      type = SCMDetailedQuadAssemblyMeshGenerator
     []
   []
 
@@ -54,4 +54,3 @@
   [Executioner]
     type = Steady
   []
-

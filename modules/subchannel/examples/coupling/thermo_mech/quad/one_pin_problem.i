@@ -19,13 +19,8 @@ heated_length = 1.0
 []
 
 [QuadSubChannelMesh]
-    [sub_channel]
-        type = SCMQuadSubChannelMeshGenerator
-    []
-
-    [fuel_pins]
-        type = SCMQuadPinMeshGenerator
-        input = sub_channel
+    [subchannel]
+        type = SCMQuadAssemblyMeshGenerator
     []
 []
 
@@ -55,6 +50,7 @@ heated_length = 1.0
   verbose_subchannel = true
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
@@ -65,6 +61,9 @@ heated_length = 1.0
     type = SCMMixingConstantBeta
     beta = 0.006
     CT = 2.6
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
@@ -241,7 +240,8 @@ heated_length = 1.0
     []
 
     [pin_transfer]
-        type = SCMPinSolutionTransfer
+        type = SCMSolutionTransfer
+        transfer_type = pin
         to_multi_app = viz
         variable = 'Tpin Dpin q_prime'
     []

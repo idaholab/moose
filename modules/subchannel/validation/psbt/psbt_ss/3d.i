@@ -1,23 +1,12 @@
 [Mesh]
-  [subchannel]
-    type = SCMDetailedQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMDetailedQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 20
     pitch = 0.0126
     pin_diameter = 0.00950
     side_gap = 0.00095
-    heated_length = 1.0
-  []
-
-  [fuel_pins]
-    type = SCMDetailedQuadPinMeshGenerator
-    input = subchannel
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    pin_diameter = 0.00950
     heated_length = 1.0
   []
 []

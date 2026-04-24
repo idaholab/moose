@@ -2,7 +2,7 @@ T_in = 359.15
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = 10

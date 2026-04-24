@@ -230,7 +230,8 @@ unheated_length_exit = 0.855 #m
     variable = 'mdot SumWij P DP h T rho mu S displacement'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Dpin Tpin q_prime'
   []

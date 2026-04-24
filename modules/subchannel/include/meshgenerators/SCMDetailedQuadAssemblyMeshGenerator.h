@@ -13,17 +13,18 @@
 #include "SubChannelEnums.h"
 
 /**
- * Mesh generator that builds a 3D mesh representing quadrilateral subchannels
+ * Mesh generator that builds a detailed 3D mesh representing quadrilateral subchannels and pins
  */
-class SCMDetailedQuadSubChannelMeshGenerator : public MeshGenerator
+class SCMDetailedQuadAssemblyMeshGenerator : public MeshGenerator
 {
 public:
-  SCMDetailedQuadSubChannelMeshGenerator(const InputParameters & parameters);
+  SCMDetailedQuadAssemblyMeshGenerator(const InputParameters & parameters);
   virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
-  std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
+
+  void generatePin(std::unique_ptr<MeshBase> & mesh_base, const Point & center);
 
   /// unheated length of the fuel Pin at the entry of the assembly
   const Real _unheated_length_entry;
@@ -51,12 +52,17 @@ protected:
    * distance(edge pin center, duct wall) = pitch / 2 + side_gap [m].
    */
   const Real _side_gap;
+  /// Number of radial parts in each pin cross section
+  const unsigned int _num_radial_parts;
+  /// Subdomain IDs used for mesh blocks
+  const unsigned int _subchannel_block_id;
+  const unsigned int _pin_block_id;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the subchannel centroids
   std::vector<std::vector<Real>> _subchannel_position;
-  /// Subdomain ID used for the mesh block
-  const unsigned int & _block_id;
+  /// Counter for element numbering
+  dof_id_type _elem_id;
 
 public:
   static InputParameters validParams();

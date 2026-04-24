@@ -8,7 +8,7 @@ P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 50
@@ -50,6 +50,7 @@ P_out = 4.923e6 # Pa
   skip_additional_restart_data = true
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
@@ -60,6 +61,9 @@ P_out = 4.923e6 # Pa
     type = SCMMixingConstantBeta
     beta = 0.006
     CT = 2.0
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 

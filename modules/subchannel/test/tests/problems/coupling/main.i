@@ -4,7 +4,7 @@ heated_length = 1.0
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 2
     ny = 2
     n_cells = 10
@@ -14,16 +14,6 @@ heated_length = 1.0
     heated_length = ${heated_length}
     spacer_z = '0.0'
     spacer_k = '0.0'
-  []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 2
-    ny = 2
-    n_cells = 10
-    pitch = 0.014605
-    heated_length = ${heated_length}
   []
 []
 
@@ -211,7 +201,8 @@ heated_length = 1.0
   []
 
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Tpin q_prime Dpin'
     execute_on = 'timestep_end'

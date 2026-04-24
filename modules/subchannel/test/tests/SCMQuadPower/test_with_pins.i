@@ -7,25 +7,13 @@ length = 0.5
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = ${num_cells}
     pitch = 0.25
     pin_diameter = 0.125
     side_gap = 0.1
-    unheated_length_entry = 0.5
-    heated_length = 0.5
-    unheated_length_exit = 0.5
-  []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 3
-    ny = 3
-    n_cells = ${num_cells}
-    pitch = 0.25
     unheated_length_entry = 0.5
     heated_length = 0.5
     unheated_length_exit = 0.5

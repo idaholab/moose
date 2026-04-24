@@ -6,8 +6,8 @@ height = ${fparse unheated_length_entry + heated_length + unheated_length_exit}
 n_cells = 20
 
 [Mesh]
-  [subchannel]
-    type = SCMDetailedQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMDetailedQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = '${n_cells}'

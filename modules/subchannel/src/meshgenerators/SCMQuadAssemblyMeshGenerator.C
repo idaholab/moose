@@ -264,70 +264,78 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
       const unsigned int i_ch = _nx * iy + ix;
-
-      if (iy == 0 && ix == 0)
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
-      else if (iy == _ny - 1 && ix == 0)
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
-      else if (iy == 0 && ix == _nx - 1)
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
-      else if (iy == _ny - 1 && ix == _nx - 1)
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
-      else if (iy == 0)
-      {
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
-      }
-      else if (iy == _ny - 1)
-      {
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
-      }
-      else if (ix == 0)
-      {
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
-      }
-      else if (ix == _nx - 1)
-      {
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
-      }
-      else
-      {
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
-        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
-      }
-
       const Real offset_x = (_nx - 1) * _pitch / 2.0;
       const Real offset_y = (_ny - 1) * _pitch / 2.0;
       _subchannel_position[i_ch][0] = _pitch * ix - offset_x;
       _subchannel_position[i_ch][1] = _pitch * iy - offset_y;
     }
 
-  for (unsigned int ig = 0; ig < _n_gaps; ig++)
+  if (_n_pins > 0)
   {
-    const auto i_ch = _gap_to_chan_map[ig].first;
-    const auto j_ch = _gap_to_chan_map[ig].second;
-    const auto & i_pins = _chan_to_pin_map[i_ch];
-    const auto & j_pins = _chan_to_pin_map[j_ch];
+    for (unsigned int iy = 0; iy < _ny; iy++)
+      for (unsigned int ix = 0; ix < _nx; ix++)
+      {
+        const unsigned int i_ch = _nx * iy + ix;
 
-    _gap_to_pin_map[ig] = {10000, 10000};
-
-    for (unsigned int i : i_pins)
-      for (unsigned int j : j_pins)
-        if (i == j)
+        if (iy == 0 && ix == 0)
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+        else if (iy == _ny - 1 && ix == 0)
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+        else if (iy == 0 && ix == _nx - 1)
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+        else if (iy == _ny - 1 && ix == _nx - 1)
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+        else if (iy == 0)
         {
-          if (_gap_to_pin_map[ig].first == 10000)
-          {
-            _gap_to_pin_map[ig].first = i;
-            _gap_to_pin_map[ig].second = i;
-          }
-          else
-            _gap_to_pin_map[ig].second = i;
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
         }
+        else if (iy == _ny - 1)
+        {
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+        }
+        else if (ix == 0)
+        {
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+        }
+        else if (ix == _nx - 1)
+        {
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+        }
+        else
+        {
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+          _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+        }
+      }
+
+    for (unsigned int ig = 0; ig < _n_gaps; ig++)
+    {
+      const auto i_ch = _gap_to_chan_map[ig].first;
+      const auto j_ch = _gap_to_chan_map[ig].second;
+      const auto & i_pins = _chan_to_pin_map[i_ch];
+      const auto & j_pins = _chan_to_pin_map[j_ch];
+
+      _gap_to_pin_map[ig] = {10000, 10000};
+
+      for (unsigned int i : i_pins)
+        for (unsigned int j : j_pins)
+          if (i == j)
+          {
+            if (_gap_to_pin_map[ig].first == 10000)
+            {
+              _gap_to_pin_map[ig].first = i;
+              _gap_to_pin_map[ig].second = i;
+            }
+            else
+              _gap_to_pin_map[ig].second = i;
+          }
+    }
   }
 
   for (auto & gap : _chan_to_gap_map)
@@ -465,7 +473,7 @@ SCMQuadAssemblyMeshGenerator::transferMetadata(QuadSubChannelMesh & sch_mesh)
   sch_mesh._subch_type = _subch_type;
 
   sch_mesh._duct_mesh_exist = false;
-  sch_mesh._pin_mesh_exist = true;
+  sch_mesh._pin_mesh_exist = (_n_pins > 0);
 }
 
 std::unique_ptr<MeshBase>
@@ -477,7 +485,9 @@ SCMQuadAssemblyMeshGenerator::generate()
   mesh_base->set_spatial_dimension(3);
 
   buildSubchannelMesh(*mesh_base, boundary_info);
-  buildPinMesh(*mesh_base);
+
+  if (_n_pins > 0)
+    buildPinMesh(*mesh_base);
 
   boundary_info.sideset_name(0) = "inlet";
   boundary_info.sideset_name(1) = "outlet";

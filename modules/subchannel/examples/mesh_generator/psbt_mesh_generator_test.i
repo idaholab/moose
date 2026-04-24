@@ -5,7 +5,7 @@ P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 20
@@ -16,15 +16,47 @@ P_out = 4.923e6 # Pa
     spacer_z = '0.5'
     spacer_k = '0.5'
   []
+[]
 
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    heated_length = 1.00
+[AuxVariables]
+  [mdot]
+    block = subchannel
+  []
+  [SumWij]
+    block = subchannel
+  []
+  [P]
+    block = subchannel
+  []
+  [DP]
+    block = subchannel
+  []
+  [h]
+    block = subchannel
+  []
+  [T]
+    block = subchannel
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
+  []
+  [rho]
+    block = subchannel
+  []
+  [mu]
+    block = subchannel
+  []
+  [S]
+    block = subchannel
+  []
+  [w_perim]
+    block = subchannel
+  []
+  [q_prime]
+    block = subchannel
   []
 []
 

@@ -17,13 +17,52 @@ T_in = 297.039 # K
 P_out = 101325 # Pa
 
 [QuadSubChannelMesh]
-  [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMQuadAssemblyMeshGenerator
+    subchannel_block_id = 0
+    pin_block_id = 1
   []
+[]
 
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
+[AuxVariables]
+  [mdot]
+    block = subchannel
+  []
+  [SumWij]
+    block = subchannel
+  []
+  [P]
+    block = subchannel
+  []
+  [DP]
+    block = subchannel
+  []
+  [h]
+    block = subchannel
+  []
+  [T]
+    block = subchannel
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
+  []
+  [rho]
+    block = subchannel
+  []
+  [mu]
+    block = subchannel
+  []
+  [S]
+    block = subchannel
+  []
+  [w_perim]
+    block = subchannel
+  []
+  [q_prime]
+    block = fuel_pins
   []
 []
 
@@ -279,7 +318,8 @@ P_out = 101325 # Pa
     variable = 'mdot SumWij P DP h T rho mu S'
   []
   [pin_transfer]
-    type = SCMPinSolutionTransfer
+    type = SCMSolutionTransfer
+    transfer_type = pin
     to_multi_app = viz
     variable = 'Tpin q_prime'
   []

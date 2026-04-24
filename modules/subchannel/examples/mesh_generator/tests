@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SCMQuadSubChannelMeshGenerator.md'
+  design = 'SCMQuadAssemblyMeshGenerator.md'
   issues = '#28497'
   [check_syntax_psbt]
     type = 'RunApp'

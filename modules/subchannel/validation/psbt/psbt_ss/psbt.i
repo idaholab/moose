@@ -8,7 +8,7 @@ mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
 P_out = 14.72e6 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+    type = SCMQuadAssemblyMeshGenerator
     nx = 6
     ny = 6
     n_cells = 20
@@ -19,51 +19,41 @@ P_out = 14.72e6 # Pa
     spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
     spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
   []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    heated_length = 3.658
-  []
 []
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
+    block = subchannel
   []
   [SumWij]
-    block = sub_channel
+    block = subchannel
   []
   [P]
-    block = sub_channel
+    block = subchannel
   []
   [DP]
-    block = sub_channel
+    block = subchannel
   []
   [h]
-    block = sub_channel
+    block = subchannel
   []
   [T]
-    block = sub_channel
+    block = subchannel
   []
   [Tpin]
     block = fuel_pins
   []
   [rho]
-    block = sub_channel
+    block = subchannel
   []
   [mu]
-    block = sub_channel
+    block = subchannel
   []
   [S]
-    block = sub_channel
+    block = subchannel
   []
   [w_perim]
-    block = sub_channel
+    block = subchannel
   []
   [q_prime]
     block = fuel_pins
