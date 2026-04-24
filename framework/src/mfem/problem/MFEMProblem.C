@@ -765,7 +765,13 @@ std::string
 Problem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num))
 {
   mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
-  return getProblemData().jacobian_solver->type();
+  const auto & solver = getProblemData().jacobian_solver;
+  if (!solver)
+  {
+    mooseAssert(!shouldSolve(), "jacobian_solver is null but Problem/solve is not false");
+    return "none";
+  }
+  return solver->type();
 }
 
 bool

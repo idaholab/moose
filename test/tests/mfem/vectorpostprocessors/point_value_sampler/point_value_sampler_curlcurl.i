@@ -93,14 +93,12 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHypreGMRES
     preconditioner = ams

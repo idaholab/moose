@@ -41,7 +41,7 @@ MUMPS::constructSolver()
 }
 
 void
-MUMPS::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+MUMPS::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("MUMPS solver does not support LOR solve");

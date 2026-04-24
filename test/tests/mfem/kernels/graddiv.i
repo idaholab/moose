@@ -96,14 +96,12 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ADS]
     type = MFEMHypreADS
     fespace = HDivFESpace
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMCGSolver
     preconditioner = ADS

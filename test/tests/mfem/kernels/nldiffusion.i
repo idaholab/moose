@@ -39,6 +39,14 @@
 []
 
 [Solvers]
+  inactive = 'jacobi'
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+    print_level = 0
+  []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
+  []
   [newton]
     type = MFEMNewtonNonlinearSolver
     max_its = 100
@@ -85,15 +93,6 @@
   []
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-    print_level = 0
-  []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-  []
-[]
 
 [Executioner]
   type = MFEMSteady

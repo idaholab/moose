@@ -42,7 +42,7 @@ OperatorJacobiSmoother::constructSolver()
 }
 
 void
-OperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+OperatorJacobiSmoother::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {

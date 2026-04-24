@@ -25,9 +25,21 @@
 namespace Moose::MFEM
 {
 
+class LinearSolverBase;
+
 /**
- * Class to store weak form components (bilinear and linear forms, and optionally
- * mixed and nonlinear forms) and build methods
+ * Owns the weak-form mathematics of a MOOSE MFEM problem.
+ *
+ * An EquationSystem stores and assembles the weak-form components (bilinear, linear,
+ * mixed-bilinear, and nonlinear forms) contributed by kernels and boundary conditions,
+ * and presents the assembled result as an mfem::Operator.  It is responsible for
+ * applying essential-DoF constraints and, via prepareLinearSolver(), propagating the
+ * assembled operator (and bilinear form, for LOR) to the configured solver tree.
+ *
+ * EquationSystem is *not* responsible for grid-function bookkeeping, time stepping, or
+ * solver selection — those belong to the ProblemOperator layer.
+ *
+ * @see ProblemOperatorBase for the conceptual split between the two layers.
  */
 class EquationSystem : public mfem::Operator
 {
@@ -47,8 +59,11 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level);
   /**
-   * Assemble the linear part of the operator, assemble the right-hand side, apply essential and
-   * eliminated-variable constraints, and populate the true-DoF vectors used by the solve.
+   * Build all weak-form components via BuildEquationSystem(), then assemble the linear operator,
+   * apply essential constraints, and populate the true-DoF vectors used by the solve.
+   *
+   * This is the single public entry point for callers that want a fully assembled system.
+   * Subclasses customise the assembly step by overriding BuildEquationSystem(), not FormSystem().
    */
   void FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
   /// Compute residual y = Mu
@@ -105,6 +120,13 @@ public:
    * The returned array has size == pmesh.bdr_attributes.Max() with 1 at essential boundaries.
    */
   mfem::Array<int> buildEssentialBoundaryMarkers(const std::string & var_name) const;
+
+  /**
+   * Propagate the assembled system operator to the given linear solver (and its preconditioner).
+   * Calls the bilinear-form overload first (a no-op for non-LOR solvers) then the operator-level
+   * overload once the assembled matrix is available.
+   */
+  virtual void prepareLinearSolver(LinearSolverBase & solver);
 
 protected:
   /// Add coupled variable to EquationSystem.
@@ -288,7 +310,6 @@ protected:
   bool _solver_requires_gradient = false;
 
 private:
-  friend class EquationSystemProblemOperator;
   friend class ProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;

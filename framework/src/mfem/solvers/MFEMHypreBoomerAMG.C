@@ -65,7 +65,7 @@ HypreBoomerAMG::constructSolver()
 }
 
 void
-HypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreBoomerAMG::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {

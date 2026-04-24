@@ -62,6 +62,7 @@ ComplexEquationSystemProblemOperator::Solve()
                     {
                       if (_problem_data.jacobian_solver->isLOR())
                         mooseError("LOR solve is not supported for complex equation systems.");
+                      GetEquationSystem()->prepareLinearSolver(*_problem_data.jacobian_solver);
                     });
 
   GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);

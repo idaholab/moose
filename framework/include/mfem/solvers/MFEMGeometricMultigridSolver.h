@@ -72,7 +72,7 @@ public:
   void updateSolver(mfem::Operator & op, mfem::Array<int> & tdofs) override;
 
   /// No-op: operator-level updateSolver handles setup for this solver.
-  void updateSolver(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) override {}
+  void setupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) override {}
 
 private:
   /// Map assembly-level string ("legacy", "full", "element", "partial", "none")

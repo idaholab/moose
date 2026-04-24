@@ -1,6 +1,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
+#include "MFEMLinearSolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -294,6 +295,13 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
     trueX.GetBlock(i).SyncAliasMemory(trueX);
     _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
+}
+
+void
+ComplexEquationSystem::prepareLinearSolver(LinearSolverBase & solver)
+{
+  if (auto * linear_op = _linear_operator.Ptr())
+    solver.updateSolver(*linear_op, _ess_tdof_lists.at(0));
 }
 
 }

@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystem.h"
+#include "MFEMLinearSolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -377,6 +378,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 void
 EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
+  BuildEquationSystem();
   height = trueX.Size();
   width = trueRHS.Size();
   // Store block offsets
@@ -754,6 +756,15 @@ EquationSystem::buildEssentialBoundaryMarkers(const std::string & var_name) cons
         global_markers[i] = std::max(global_markers[i], bc_markers[i]);
     }
   return global_markers;
+}
+
+void
+EquationSystem::prepareLinearSolver(LinearSolverBase & solver)
+{
+  if (solver.isLOR())
+    solver.setupLOR(*_blfs.Get(_test_var_names.at(0)), _ess_tdof_lists.at(0));
+  if (auto * linear_op = _linear_operator.Ptr())
+    solver.updateSolver(*linear_op, _ess_tdof_lists.at(0));
 }
 
 } // namespace Moose::MFEM

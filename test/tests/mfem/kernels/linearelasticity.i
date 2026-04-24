@@ -65,16 +65,14 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
     l_max_its = 500
     l_tol = 1e-8
     print_level = 2
   []
-[]
-
-[Solvers]
   [main]
     type = MFEMHyprePCG
     #preconditioner = boomeramg

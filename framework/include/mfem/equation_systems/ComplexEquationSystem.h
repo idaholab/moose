@@ -69,6 +69,8 @@ public:
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS) override;
 
+  virtual void prepareLinearSolver(LinearSolverBase & solver) override;
+
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const override;
 

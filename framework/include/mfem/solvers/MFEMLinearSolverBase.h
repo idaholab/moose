@@ -30,10 +30,10 @@ public:
   template <typename T>
   void setPreconditioner(T & solver);
 
-  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or
-  /// algebraic solver is needed. Default no-op; override for solvers that need the bilinear form
-  /// (e.g., LOR solvers).
-  virtual void updateSolver(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) {}
+  /// Rebuild any Low-Order-Refined components from the unreduced bilinear form. Called only when
+  /// isLOR() is true, before the assembled operator is available. Default no-op; override in
+  /// solvers or preconditioners that construct their internals from the bilinear form.
+  virtual void setupLOR(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) {}
 
   /// Updates the solver at the operator level. Default implementation propagates to the
   /// preconditioner (if any). Override in solvers that build their hierarchy from the operator

@@ -40,7 +40,7 @@ SuperLU::constructSolver()
 }
 
 void
-SuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+SuperLU::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("SuperLU solver does not support LOR solve");
