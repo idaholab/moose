@@ -58,7 +58,7 @@ CSGRegion::checkRegionEquality(const std::vector<PostfixTokenVariant> & other_to
     return false;
 
   // Loop through all tokens and check equality
-  for (const auto i : make_range(tokens.size()))
+  for (const auto i : index_range(tokens))
   {
     const auto & token = tokens[i];
     const auto & other_token = other_tokens[i];
