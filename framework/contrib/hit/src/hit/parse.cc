@@ -375,6 +375,8 @@ Node::type() const
     return NodeType::Section;
   else if (_hnv.type() == wasp::KEYED_VALUE || _hnv.type() == wasp::ARRAY)
     return NodeType::Field;
+  else if (_hnv.type() == wasp::FILE)
+    return NodeType::Include;
   return NodeType::Other;
 }
 
@@ -552,6 +554,26 @@ void
 Comment::setInline(bool is_inline)
 {
   _isinline = is_inline;
+}
+
+Include::Include(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNodeView hnv)
+  : Node(dhi, hnv)
+{
+}
+
+std::string
+Include::render(int indent, const std::string & indent_text, int /*maxlen*/) const
+{
+  return "\n" + strRepeat(indent_text, indent) + _hnv.data();
+}
+
+Node *
+Include::clone(bool absolute_path)
+{
+  auto n = new Include(_dhi, _hnv);
+  if (absolute_path)
+    n->setOverridePath(fullpath());
+  return n;
 }
 
 Section::Section(const std::string & path) : Node(path) {}
@@ -1024,7 +1046,8 @@ Field::strVal() const
 Node *
 parse(const std::string & fname,
       const std::string & input,
-      std::vector<ErrorMessage> * syntax_errors /* = nullptr */)
+      std::vector<ErrorMessage> * syntax_errors /* = nullptr */,
+      const ParseOptions & options /* = ParseOptions{} */)
 {
   std::stringstream input_errors;
   std::shared_ptr<wasp::DefaultHITInterpreter> interpreter =
@@ -1056,7 +1079,8 @@ parse(const std::string & fname,
   {
     std::string starting_file = interpreter->root().node_pool()->stream_name();
     std::size_t starting_line = interpreter->root().line();
-    buildHITTree(interpreter, interpreter->root(), root.get(), starting_file, starting_line);
+    buildHITTree(
+        interpreter, interpreter->root(), root.get(), starting_file, starting_line, options);
   }
 
   return root.release();
@@ -1186,7 +1210,10 @@ Formatter::Formatter(const std::string & fname, const std::string & hit_config)
 std::string
 Formatter::format(const std::string & fname, const std::string & input)
 {
-  std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+  // formatting should parse the document without included content expanded
+  ParseOptions options;
+  options.expand_includes = false;
+  std::unique_ptr<hit::Node> root(hit::parse(fname, input, nullptr, options));
   format(root.get());
   return root->render(0, indent_string, line_length);
 }
@@ -1311,112 +1338,138 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
              wasp::HITNodeView hnv_parent,
              Node * hit_parent,
              std::string & previous_file,
-             std::size_t & previous_line)
+             std::size_t & previous_line,
+             const ParseOptions & options)
 {
   if (hnv_parent.is_null())
     return;
 
-  for (const auto & hnv_child : hnv_parent)
+  // do range-based traversal in normal conditions to expand included files
+  // do index-based traversal for format to not descend into included files
+  auto walk_children = [](wasp::HITNodeView hnv_parent, bool expand_includes, auto visit)
   {
-    // create and add comment node as terminal leaf but do not recurse deeper
-    if (hnv_child.type() == wasp::COMMENT)
-    {
-      // add blank line if needed between previous node line and this node line
-      if (hnv_child.node_pool()->stream_name() == previous_file &&
-          hnv_child.line() > previous_line + 1)
-        hit_parent->addChild(new Blank());
+    if (expand_includes)
+      for (const auto & hnv_child : hnv_parent)
+        visit(hnv_child);
+    else
+      for (std::size_t i = 0, count = hnv_parent.child_count(); i < count; i++)
+        visit(hnv_parent.child_at(i));
+  };
 
-      auto hit_child = new Comment(interpreter, hnv_child);
-      if (hnv_child.node_pool()->stream_name() == previous_file &&
-          hnv_child.line() == previous_line && hit_parent->children().size() > 0)
+  walk_children(
+      hnv_parent,
+      options.expand_includes,
+      [&](const auto & hnv_child)
       {
-        hit_child->setInline(true);
-        hit_parent->children().back()->addChild(hit_child);
-      }
-      else
-      {
-        hit_child->setInline(false);
-        hit_parent->addChild(hit_child);
-      }
-      previous_file = hnv_child.node_pool()->stream_name();
-      previous_line = hnv_child.last_line();
-    }
-
-    // create and add field node depending on conflicts but recurse no deeper
-    else if (hnv_child.type() == wasp::KEYED_VALUE || hnv_child.type() == wasp::ARRAY)
-    {
-      // check if tree has field conflict and overrides need to be considered
-      if (auto found_field = hit_parent->find(hnv_child.name());
-          found_field && found_field->type() == NodeType::Field)
-      {
-        // capture any override settings used for both existing and new field
-        bool override_for_old_node = wasp::is_override(found_field->getNodeView());
-        bool override_for_new_node = wasp::is_override(hnv_child);
-
-        // use overrides of conflicting fields to decide which has precedence
-        if (!override_for_old_node && !override_for_new_node)
+        // create and add comment node as terminal leaf but do not recurse deeper
+        if (hnv_child.type() == wasp::COMMENT)
         {
-          // neither has override so add new next to existing for error later
-          hit_parent->addChild(new Field(interpreter, hnv_child));
+          // add blank line if needed between previous node line and this node line
+          if (hnv_child.node_pool()->stream_name() == previous_file &&
+              hnv_child.line() > previous_line + 1)
+            hit_parent->addChild(new Blank());
+
+          auto hit_child = new Comment(interpreter, hnv_child);
+          if (hnv_child.node_pool()->stream_name() == previous_file &&
+              hnv_child.line() == previous_line && hit_parent->children().size() > 0)
+          {
+            hit_child->setInline(true);
+            hit_parent->children().back()->addChild(hit_child);
+          }
+          else
+          {
+            hit_child->setInline(false);
+            hit_parent->addChild(hit_child);
+          }
           previous_file = hnv_child.node_pool()->stream_name();
           previous_line = hnv_child.last_line();
         }
-        else if (!override_for_old_node && override_for_new_node)
+
+        // create and add field node depending on conflicts but recurse no deeper
+        else if (hnv_child.type() == wasp::KEYED_VALUE || hnv_child.type() == wasp::ARRAY)
         {
-          // only new field has override so remove existing field and replace
-          const auto & hit_siblings = hit_parent->children();
-          for (std::size_t index = 0; index < hit_siblings.size(); index++)
-            if (hit_siblings[index] == found_field)
+          // check if tree has field conflict and overrides need to be considered
+          if (auto found_field = hit_parent->find(hnv_child.name());
+              found_field && found_field->type() == NodeType::Field)
+          {
+            // capture any override settings used for both existing and new field
+            bool override_for_old_node = wasp::is_override(found_field->getNodeView());
+            bool override_for_new_node = wasp::is_override(hnv_child);
+
+            // use overrides of conflicting fields to decide which has precedence
+            if (!override_for_old_node && !override_for_new_node)
             {
-              hit_parent->insertChild(index, new Field(interpreter, hnv_child));
-              delete found_field;
-              break;
+              // neither has override so add new next to existing for error later
+              hit_parent->addChild(new Field(interpreter, hnv_child));
+              previous_file = hnv_child.node_pool()->stream_name();
+              previous_line = hnv_child.last_line();
             }
+            else if (!override_for_old_node && override_for_new_node)
+            {
+              // only new field has override so remove existing field and replace
+              const auto & hit_siblings = hit_parent->children();
+              for (std::size_t index = 0; index < hit_siblings.size(); index++)
+                if (hit_siblings[index] == found_field)
+                {
+                  hit_parent->insertChild(index, new Field(interpreter, hnv_child));
+                  delete found_field;
+                  break;
+                }
+            }
+            else if (override_for_old_node && override_for_new_node)
+              // both fields have override and this is not allowed so throw error
+              throw Error("'" + found_field->fullpath() +
+                              "' specified more than once with override syntax",
+                          found_field);
+          }
+          else
+          {
+            // no conflict so add blank line if necessary then add new field node
+            if (hnv_child.node_pool()->stream_name() == previous_file &&
+                hnv_child.line() > previous_line + 1)
+              hit_parent->addChild(new Blank());
+            hit_parent->addChild(new Field(interpreter, hnv_child));
+            previous_file = hnv_child.node_pool()->stream_name();
+            previous_line = hnv_child.last_line();
+          }
         }
-        else if (override_for_old_node && override_for_new_node)
-          // both fields have override and this is not allowed so throw error
-          throw Error("'" + found_field->fullpath() +
-                          "' specified more than once with override syntax",
-                      found_field);
-      }
-      else
-      {
-        // no conflict so add blank line if necessary then add new field node
-        if (hnv_child.node_pool()->stream_name() == previous_file &&
-            hnv_child.line() > previous_line + 1)
-          hit_parent->addChild(new Blank());
-        hit_parent->addChild(new Field(interpreter, hnv_child));
-        previous_file = hnv_child.node_pool()->stream_name();
-        previous_line = hnv_child.last_line();
-      }
-    }
 
-    // create and add section node if not found in tree then recurse children
-    else if (hnv_child.type() == wasp::OBJECT || hnv_child.type() == wasp::DOCUMENT_ROOT)
-    {
-      // recurse using section if found and do not create or add anything new
-      if (auto hit_child = hit_parent->find(hnv_child.name());
-          hit_child && hit_child->type() == NodeType::Section)
-        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
+        else if (hnv_child.type() == wasp::FILE)
+        {
+          if (hnv_child.node_pool()->stream_name() == previous_file &&
+              hnv_child.line() > previous_line + 1)
+            hit_parent->addChild(new Blank());
+          hit_parent->addChild(new Include(interpreter, hnv_child));
+          previous_file = hnv_child.node_pool()->stream_name();
+          previous_line = hnv_child.last_line();
+        }
 
-      // create and add new section node if not found then recurse using node
-      else
-      {
-        // add blank line if needed between previous node line and this node line
-        if (hnv_child.node_pool()->stream_name() == previous_file &&
-            hnv_child.line() > previous_line + 1)
-          hit_parent->addChild(new Blank());
+        // create and add section node if not found in tree then recurse children
+        else if (hnv_child.type() == wasp::OBJECT || hnv_child.type() == wasp::DOCUMENT_ROOT)
+        {
+          // recurse using section if found and do not create or add anything new
+          if (auto hit_child = hit_parent->find(hnv_child.name());
+              hit_child && hit_child->type() == NodeType::Section)
+            buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line, options);
 
-        hit_child = new Section(interpreter, hnv_child);
-        hit_parent->addChild(hit_child);
-        previous_file = hnv_child.node_pool()->stream_name();
-        previous_line = hnv_child.line();
-        buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line);
-        previous_file = hnv_child.node_pool()->stream_name();
-        previous_line = hnv_child.last_line();
-      }
-    }
-  }
+          // create and add new section node if not found then recurse using node
+          else
+          {
+            // add blank line if needed between previous node line and this node line
+            if (hnv_child.node_pool()->stream_name() == previous_file &&
+                hnv_child.line() > previous_line + 1)
+              hit_parent->addChild(new Blank());
+
+            hit_child = new Section(interpreter, hnv_child);
+            hit_parent->addChild(hit_child);
+            previous_file = hnv_child.node_pool()->stream_name();
+            previous_line = hnv_child.line();
+            buildHITTree(interpreter, hnv_child, hit_child, previous_file, previous_line, options);
+            previous_file = hnv_child.node_pool()->stream_name();
+            previous_line = hnv_child.last_line();
+          }
+        }
+      });
 }
 
 } // namespace hit

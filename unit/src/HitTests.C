@@ -1249,3 +1249,48 @@ FILE-A:3.3: 'Block/param_01' specified more than once with override syntax
   // delete extra file which was put on disk to be parsed from base include
   std::remove("file_b.i");
 }
+
+// test formatter on input with includes to make sure they are not expanded
+TEST(HitTests, FormatIncludes)
+{
+  // base input string includes one file within block and one at root level
+  std::string base_input = R"INPUT(
+[Block01] param01a=value01a
+!include include_file_01.i
+param01c=value01c []
+param02a=value02a
+!include include_file_02.i
+param02c=value02c
+)INPUT";
+
+  // write include file 01 to disk that is included within base input block
+  std::ofstream include_file_01("include_file_01.i");
+  include_file_01 << "param01b = value01b";
+  include_file_01.close();
+
+  // write include file 02 to disk that is included from root of base input
+  std::ofstream include_file_02("include_file_02.i");
+  include_file_02 << "param02b = value02b";
+  include_file_02.close();
+
+  // format base input string that has includes then delete files from disk
+  hit::Formatter formatter;
+  std::string formatted_actual = formatter.format("TESTCASE", base_input);
+  std::remove("include_file_01.i");
+  std::remove("include_file_02.i");
+
+  // expected formatted input with include directives not expanded contents
+  std::string formatted_expect = R"INPUT(
+[Block01]
+  param01a = value01a
+  !include include_file_01.i
+  param01c = value01c
+[]
+param02a = value02a
+!include include_file_02.i
+param02c = value02c
+)INPUT";
+
+  // check formatted input is as expected and does not expand include files
+  EXPECT_EQ(formatted_expect, "\n" + formatted_actual + "\n");
+}
