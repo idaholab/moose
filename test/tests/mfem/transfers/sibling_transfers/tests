@@ -99,7 +99,20 @@
       compute_devices = 'cpu'
       recover = false
       restep = false
-      detail = 'and between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types.'
+      detail = 'between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types,'
+    []
+    [1_to_N_nodal_parallel]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/1toN_nodal_nodal_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/1toN_nodal_nodal Transfers/active='libmesh_to_mfem_nodal_nodal'
+                  MultiApps/mfem_sub/positions_objects=mfem_locs
+                  MultiApps/mfem_sub/cli_args=VectorPostprocessors/active=nodal_sample"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
     []    
   []
   [MFEM_to_MFEM_sibling_transfers]

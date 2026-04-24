@@ -10,22 +10,10 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorUtils.h"
+#include "libmesh/int_range.h"
 
 namespace Moose::MFEM
 {
-inline size_t
-MFEMIndex(const size_t i_dim,
-          const size_t i_point,
-          const size_t num_dims,
-          const size_t num_points,
-          const mfem::Ordering::Type ordering)
-{
-  if (ordering == mfem::Ordering::byNODES)
-    return mfem::Ordering::Map<mfem::Ordering::byNODES>(num_points, num_dims, i_point, i_dim);
-  else
-    return mfem::Ordering::Map<mfem::Ordering::byVDIM>(num_points, num_dims, i_point, i_dim);
-}
-
 libMesh::Point
 libMeshPointFromMFEMVector(const mfem::Vector & vec)
 {
@@ -39,8 +27,8 @@ libMeshPointsToMFEMVector(const std::vector<libMesh::Point> & points,
 {
   const unsigned int num_points = points.size();
   mfem::Vector mfem_points(num_points * num_dims);
-  for (const auto i_point : make_range(num_points))
-    for (const auto i_dim : make_range(num_dims))
+  for (const auto i_point : libMesh::make_range(num_points))
+    for (const auto i_dim : libMesh::make_range(num_dims))
       mfem_points(MFEMIndex(i_dim, i_point, num_dims, num_points, ordering)) =
           points[i_point](i_dim);
 

@@ -126,56 +126,41 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   local_meshfuns.init();
   local_meshfuns.enable_out_of_mesh_mode(getMFEMOutOfMeshValue());
 
-  // Gather all of the evaluations, pick out the best ones for each point, and apply them to the
-  // solution vector. Fill values and app ids for incoming points. We are responsible to compute
-  // values for these incoming points
+  // Evaluate interpolated values at incoming points.
   auto gather_functor =
       [this, &local_meshfuns](processor_id_type /*pid*/,
                               const std::vector<Point> & incoming_points,
                               std::vector<mfem::real_t> & vals_for_incoming_points)
   {
     vals_for_incoming_points.resize(incoming_points.size(), getMFEMOutOfMeshValue());
+    // Compute interpolation values of the libMesh variable at all requested points
     for (const auto i_pt : index_range(incoming_points))
     {
-      // Loop until we've found the lowest-ranked app that actually contains
-      // the quadrature point, and compute interpolation values
       Point pt = incoming_points[i_pt];
-      if (vals_for_incoming_points[i_pt] == getMFEMOutOfMeshValue())
-        vals_for_incoming_points[i_pt] = local_meshfuns(pt);
+      vals_for_incoming_points[i_pt] = local_meshfuns(pt);
     }
   };
-  // Incoming values for outgoing points
-  std::map<processor_id_type, std::vector<mfem::real_t>> incoming_vals;
-  // Copy data out to incoming_vals
-  auto action_functor = [&incoming_vals](processor_id_type pid,
-                                         const std::vector<Point> & /*my_outgoing_points*/,
-                                         const std::vector<mfem::real_t> & vals_for_outgoing_points)
+  // Copy data out to interp_vals
+  auto action_functor =
+      [&interp_vals, this](processor_id_type /*pid*/,
+                           const std::vector<Point> & /*my_outgoing_points*/,
+                           const std::vector<mfem::real_t> & vals_for_outgoing_points)
   {
-    // This lambda function might be called multiple times
-    incoming_vals[pid].reserve(vals_for_outgoing_points.size());
-    // Copy data for processor 'pid'
-    std::copy(vals_for_outgoing_points.begin(),
-              vals_for_outgoing_points.end(),
-              std::back_inserter(incoming_vals[pid]));
+    for (const auto i : make_range(interp_vals.Size()))
+    {
+      const auto val = vals_for_outgoing_points[i];
+      if (val == getMFEMOutOfMeshValue())
+        continue;
+      interp_vals(i) = val;
+    }
   };
-
-  // We assume incoming_vals is ordered in the same way as outgoing_points
-  const mfem::real_t * ex = nullptr;
-  libMesh::Parallel::pull_parallel_vector_data(
-      comm(), outgoing_points, gather_functor, action_functor, ex);
 
   // Set interpolated field values at points on local processor
   interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
-  for (const auto i : make_range(interp_vals.Size()))
-  {
-    for (auto & group : incoming_vals)
-    {
-      const auto val = group.second[i];
-      if (val == getMFEMOutOfMeshValue())
-        continue;
-      interp_vals[i] = val;
-    }
-  }
+  // We assume incoming_vals is ordered in the same way as outgoing_points
+  const mfem::real_t * val = nullptr;
+  libMesh::Parallel::pull_parallel_vector_data(
+      comm(), outgoing_points, gather_functor, action_functor, val);
 }
 
 #endif
