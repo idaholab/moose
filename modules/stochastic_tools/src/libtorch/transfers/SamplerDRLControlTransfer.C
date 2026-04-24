@@ -9,20 +9,20 @@
 
 #ifdef MOOSE_LIBTORCH_ENABLED
 
-#include "SamplerNeuralNetControlTransfer.h"
+#include "SamplerDRLControlTransfer.h"
 #include "LibtorchDRLControl.h"
-#include "LibtorchNeuralNetControl.h"
 
-registerMooseObject("StochasticToolsApp", SamplerNeuralNetControlTransfer);
+registerMooseObject("StochasticToolsApp", SamplerDRLControlTransfer);
 
 InputParameters
-SamplerNeuralNetControlTransfer::validParams()
+SamplerDRLControlTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
   params += SurrogateModelInterface::validParams();
 
-  params.addClassDescription("Copies a neural network from a trainer object on the main app to a "
-                             "LibtorchNeuralNetControl object on the subapp.");
+  params.addClassDescription(
+      "Copies a DRL actor from a trainer object on the main app to a LibtorchDRLControl object "
+      "on the subapp.");
 
   params.suppressParameter<MultiAppName>("from_multi_app");
 
@@ -32,7 +32,7 @@ SamplerNeuralNetControlTransfer::validParams()
   return params;
 }
 
-SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(const InputParameters & parameters)
+SamplerDRLControlTransfer::SamplerDRLControlTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     SurrogateModelInterface(this),
     _control_name(getParam<std::string>("control_name")),
@@ -42,12 +42,12 @@ SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(const InputPara
 }
 
 void
-SamplerNeuralNetControlTransfer::initialSetup()
+SamplerDRLControlTransfer::initialSetup()
 {
 }
 
 void
-SamplerNeuralNetControlTransfer::execute()
+SamplerDRLControlTransfer::execute()
 {
   const auto n = getToMultiApp()->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
@@ -63,11 +63,10 @@ SamplerNeuralNetControlTransfer::execute()
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
       auto & control_warehouse = app_problem.getControlWarehouse();
       std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
-      LibtorchNeuralNetControl * control_object =
-          dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
+      LibtorchDRLControl * control_object = dynamic_cast<LibtorchDRLControl *>(control_ptr.get());
 
       if (!control_object)
-        paramError("control_name", "The given control is not a LibtorchNeuralNetrControl!");
+        paramError("control_name", "The given control is not a LibtorchDRLControl!");
 
       // Copy and the neural net and execute it to get the initial values
       control_object->loadControlNeuralNet(trainer_nn);
@@ -87,27 +86,27 @@ SamplerNeuralNetControlTransfer::execute()
 }
 
 void
-SamplerNeuralNetControlTransfer::initializeFromMultiapp()
+SamplerDRLControlTransfer::initializeFromMultiapp()
 {
 }
 
 void
-SamplerNeuralNetControlTransfer::executeFromMultiapp()
+SamplerDRLControlTransfer::executeFromMultiapp()
 {
 }
 
 void
-SamplerNeuralNetControlTransfer::finalizeFromMultiapp()
+SamplerDRLControlTransfer::finalizeFromMultiapp()
 {
 }
 
 void
-SamplerNeuralNetControlTransfer::initializeToMultiapp()
+SamplerDRLControlTransfer::initializeToMultiapp()
 {
 }
 
 void
-SamplerNeuralNetControlTransfer::executeToMultiapp()
+SamplerDRLControlTransfer::executeToMultiapp()
 {
   if (getToMultiApp()->hasLocalApp(_app_index))
   {
@@ -125,22 +124,20 @@ SamplerNeuralNetControlTransfer::executeToMultiapp()
     FEProblemBase & app_problem = _multi_app->appProblemBase(_app_index);
     auto & control_warehouse = app_problem.getControlWarehouse();
     std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
-    LibtorchNeuralNetControl * control_object =
-        dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
+    LibtorchDRLControl * control_object = dynamic_cast<LibtorchDRLControl *>(control_ptr.get());
 
     if (!control_object)
-      paramError("control_name", "The given control is not a LibtorchNeuralNetrControl!");
+      paramError("control_name", "The given control is not a LibtorchDRLControl!");
 
     // Copy and the neural net and execute it to get the initial values
     control_object->loadControlNeuralNet(trainer_nn);
-    if (auto * drl_control = dynamic_cast<LibtorchDRLControl *>(control_object))
-      drl_control->setPolicySampleSeed(sample_seed);
+    control_object->setPolicySampleSeed(sample_seed);
     control_object->execute();
   }
 }
 
 void
-SamplerNeuralNetControlTransfer::finalizeToMultiapp()
+SamplerDRLControlTransfer::finalizeToMultiapp()
 {
 }
 

@@ -98,12 +98,10 @@
     input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
-    action_standard_deviations = '0.1'
-    action_scaling_factors = 200
+    action_scaling_factors = 100
 
     filename = 'mynet_control.net'
-    torch_script_format = false
-    num_neurons_per_layer = '16 6'
+    num_neurons_per_layer = '4 2'
     activation_function = 'relu'
 
     execute_on = 'TIMESTEP_BEGIN'
@@ -116,7 +114,6 @@
     input_timesteps = 2
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
-    action_standard_deviations = '0.1'
     action_scaling_factors = 100
 
     execute_on = 'TIMESTEP_BEGIN'

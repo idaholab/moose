@@ -57,7 +57,6 @@
     response_scaling_factors = '0.03 0.03'
     response_shift_factors = '270 270'
     action_scaling_factors = 100
-    action_standard_deviations = '0.1'
 
     read_from_file = false
     shift_outputs = false
