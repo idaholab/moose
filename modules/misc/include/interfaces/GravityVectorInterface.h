@@ -13,7 +13,7 @@
 #include "libmesh/vector_value.h"
 
 /**
- * Interface for specifying gravity at the component level
+ * Interface for specifying gravity vector
  */
 class GravityVectorInterface
 {

@@ -18,6 +18,8 @@ where
 Note that this formulation is only exact if the density does not change between
 $\mathbf{r}_\text{ref}$ and $\mathbf{r}$.
 
+!template load file=GravityVectorInterface_specifying_gravity.md.template system_and_class=Functions/HydrostaticPressureFunction
+
 !syntax parameters /Functions/HydrostaticPressureFunction
 
 !syntax inputs /Functions/HydrostaticPressureFunction
