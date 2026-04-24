@@ -15,6 +15,13 @@
 namespace
 {
 
+/**
+ * Try to read one tensor from a plain libtorch archive.
+ * @param archive Archive being read.
+ * @param key Serialized tensor name.
+ * @param tensor Tensor that receives the loaded data.
+ * @return True when the tensor was found and loaded.
+ */
 bool
 readArchiveTensor(torch::serialize::InputArchive & archive,
                   const std::string & key,
@@ -31,12 +38,24 @@ readArchiveTensor(torch::serialize::InputArchive & archive,
   }
 }
 
+/**
+ * Copy a stored tensor into an existing parameter or buffer.
+ * @param destination Tensor owned by the current module.
+ * @param source Tensor read from disk.
+ */
 void
 copyTensor(torch::Tensor & destination, const torch::Tensor & source)
 {
   destination.data().copy_(source.to(destination.options()));
 }
 
+/**
+ * Read an actor tensor, while still accepting the legacy action_head.* prefix.
+ * @param archive Archive being read.
+ * @param key Serialized tensor name expected by the current actor.
+ * @param tensor Tensor that receives the loaded data.
+ * @return True when the tensor was found and loaded.
+ */
 bool
 readActorStateTensor(torch::serialize::InputArchive & archive,
                      const std::string & key,
@@ -51,6 +70,7 @@ readActorStateTensor(torch::serialize::InputArchive & archive,
   return false;
 }
 
+/// Return true for actor buffers that older checkpoints may legitimately omit.
 bool
 isOptionalActorBuffer(const std::string & key)
 {
@@ -58,12 +78,20 @@ isOptionalActorBuffer(const std::string & key)
          key == "action_head.action_scale";
 }
 
+/// Return true for actor parameters that older checkpoints may legitimately omit.
 bool
 isOptionalActorParameter(const std::string & key)
 {
   return key == "action_head.mean.bias" || key == "action_head.std.bias";
 }
 
+/**
+ * Look up one named tensor in a torch named-parameter or named-buffer list.
+ * @param tensors Torch named tensor list.
+ * @param key Tensor name to search for.
+ * @param tensor Tensor that receives the match.
+ * @return True when the requested tensor exists.
+ */
 template <typename NamedTensorList>
 bool
 findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
@@ -78,6 +106,13 @@ findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch:
   return false;
 }
 
+/**
+ * Read one tensor from a scripted actor checkpoint, with legacy action_head.* fallback.
+ * @param tensors Scripted parameter or buffer list.
+ * @param key Serialized tensor name expected by the current actor.
+ * @param tensor Tensor that receives the loaded data.
+ * @return True when the tensor was found and loaded.
+ */
 template <typename NamedTensorList>
 bool
 readScriptedActorStateTensor(const NamedTensorList & tensors,
@@ -93,6 +128,13 @@ readScriptedActorStateTensor(const NamedTensorList & tensors,
   return false;
 }
 
+/**
+ * Load actor parameters and buffers from a plain libtorch archive.
+ * @param nn Actor that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ * @param error Human-readable error string filled on failure.
+ * @return True when the actor was loaded successfully.
+ */
 bool
 loadActorStateFromArchive(Moose::LibtorchActorNeuralNet & nn,
                           const std::string & filename,
@@ -147,6 +189,13 @@ loadActorStateFromArchive(Moose::LibtorchActorNeuralNet & nn,
   }
 }
 
+/**
+ * Load actor parameters and buffers from a scripted Torch module.
+ * @param nn Actor that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ * @param error Human-readable error string filled on failure.
+ * @return True when the actor was loaded successfully.
+ */
 bool
 loadActorStateFromTorchScript(Moose::LibtorchActorNeuralNet & nn,
                               const std::string & filename,

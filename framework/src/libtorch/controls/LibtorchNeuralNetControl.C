@@ -23,40 +23,33 @@ LibtorchNeuralNetControl::validParams()
   InputParameters params = Control::validParams();
   params.addClassDescription("Controls the value of multiple controllable input parameters using a "
                              "Libtorch-based neural network.");
-  params.addRequiredParam<std::vector<std::string>>("parameters",
-                                                    "The input parameter(s) to control.");
+  params.addRequiredParam<std::vector<std::string>>(
+      "parameters", "Controllable input parameters driven by the network.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
-      "responses", "The responses (prostprocessors) which are used for the control.");
+      "responses", "Postprocessors used as the current observation vector.");
   params.addParam<std::vector<Real>>(
       "response_shift_factors",
-      "Constants which will be used to shift the response values. This is used for the "
-      "manipulation of the neural net inputs for better training efficiency.");
+      "Optional offsets applied to the observation values before scaling.");
   params.addParam<std::vector<Real>>(
       "response_scaling_factors",
-      "Constants which will be used to multiply the shifted response values. This is used for "
-      "the manipulation of the neural net inputs for better training efficiency.");
-  params.addParam<std::string>("filename",
-                               "Define if the neural net is supposed to be loaded from a file.");
+      "Optional multipliers applied after shifting the observation values.");
+  params.addParam<std::string>("filename", "Checkpoint file to load for the controller network.");
   params.addParam<bool>("torch_script_format",
                         false,
-                        "If we want to load the neural net using the torch-script format.");
+                        "Whether the checkpoint should be read as a scripted Torch module.");
   params.addParam<unsigned int>(
-      "input_timesteps",
-      1,
-      "Number of time steps to use in the input data, if larger than 1, "
-      "data from the previous timesteps will be used as well as inputs in the training.");
-  params.addParam<std::vector<unsigned int>>("num_neurons_per_layer",
-                                             "The number of neurons on each hidden layer.");
+      "input_timesteps", 1, "Number of recent timesteps to stack into each network input.");
+  params.addParam<std::vector<unsigned int>>(
+      "num_neurons_per_layer", "Hidden-layer widths used when constructing the controller.");
   params.addParam<std::vector<std::string>>(
       "activation_function",
       std::vector<std::string>({"relu"}),
-      "The type of activation functions to use. It is either one value "
-      "or one value per hidden layer.");
+      "Activation name for each hidden layer, or one shared value for all layers.");
 
   params.addParam<std::vector<Real>>(
       "action_scaling_factors",
-      "Scale factors embedded into constructed neural-network outputs so checkpointed policies "
-      "carry their physical-unit action scaling.");
+      "Per-action scaling embedded in the controller outputs so saved checkpoints stay in "
+      "physical units.");
 
   return params;
 }

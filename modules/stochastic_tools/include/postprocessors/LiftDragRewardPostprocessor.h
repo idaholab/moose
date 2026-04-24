@@ -16,11 +16,22 @@ class LiftDragRewardPostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
+
+  /**
+   * Build the rolling lift/drag reward postprocessor.
+   * @param parameters Input parameters for the postprocessor.
+   */
   LiftDragRewardPostprocessor(const InputParameters & parameters);
 
+  /// Update the rolling lift and drag averages.
   virtual void execute() override;
   virtual void initialize() override {}
   using Postprocessor::getValue;
+
+  /**
+   * Return the current reward value.
+   * @return Reward built from the rolling drag penalty and lift penalty.
+   */
   virtual Real getValue() const override;
 
 protected:

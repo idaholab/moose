@@ -18,6 +18,13 @@
 namespace
 {
 
+/**
+ * Try to read one tensor from a plain libtorch archive.
+ * @param archive Archive being read.
+ * @param key Serialized tensor name.
+ * @param tensor Tensor that receives the loaded data.
+ * @return True when the tensor was found and loaded.
+ */
 bool
 readArchiveTensor(torch::serialize::InputArchive & archive,
                   const std::string & key,
@@ -34,18 +41,31 @@ readArchiveTensor(torch::serialize::InputArchive & archive,
   }
 }
 
+/**
+ * Copy a stored tensor into an existing parameter or buffer.
+ * @param destination Tensor owned by the current module.
+ * @param source Tensor read from disk.
+ */
 void
 copyTensor(torch::Tensor & destination, const torch::Tensor & source)
 {
   destination.data().copy_(source.to(destination.options()));
 }
 
+/// Return true for affine-metadata buffers that older checkpoints may omit.
 bool
 isOptionalArtificialNeuralNetBuffer(const std::string & key)
 {
   return key == "input_shift" || key == "input_scale" || key == "output_scale";
 }
 
+/**
+ * Look up one named tensor in a torch named-parameter or named-buffer list.
+ * @param tensors Torch named tensor list.
+ * @param key Tensor name to search for.
+ * @param tensor Tensor that receives the match.
+ * @return True when the requested tensor exists.
+ */
 template <typename NamedTensorList>
 bool
 findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
@@ -60,6 +80,13 @@ findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch:
   return false;
 }
 
+/**
+ * Load ANN parameters and buffers from a plain libtorch archive.
+ * @param nn Neural network that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ * @param error Human-readable error string filled on failure.
+ * @return True when the network was loaded successfully.
+ */
 bool
 loadArtificialNeuralNetStateFromArchive(Moose::LibtorchArtificialNeuralNet & nn,
                                         const std::string & filename,
@@ -107,6 +134,13 @@ loadArtificialNeuralNetStateFromArchive(Moose::LibtorchArtificialNeuralNet & nn,
   }
 }
 
+/**
+ * Load ANN parameters and buffers from a scripted Torch module.
+ * @param nn Neural network that receives the loaded state.
+ * @param filename Checkpoint file to read.
+ * @param error Human-readable error string filled on failure.
+ * @return True when the network was loaded successfully.
+ */
 bool
 loadArtificialNeuralNetStateFromTorchScript(Moose::LibtorchArtificialNeuralNet & nn,
                                             const std::string & filename,

@@ -25,15 +25,13 @@ SamplerNeuralNetControlTransfer::validParams()
 
   params.suppressParameter<MultiAppName>("from_multi_app");
 
-  params.addRequiredParam<UserObjectName>("trainer_name",
-                                          "Trainer object that contains the neural networks."
-                                          " for different samples.");
+  params.addRequiredParam<UserObjectName>(
+      "trainer_name", "Trainer object that owns the latest controller network.");
   params.addRequiredParam<std::string>("control_name", "Controller object name.");
   return params;
 }
 
-SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(
-    const InputParameters & parameters)
+SamplerNeuralNetControlTransfer::SamplerNeuralNetControlTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
     SurrogateModelInterface(this),
     _control_name(getParam<std::string>("control_name")),
@@ -53,7 +51,8 @@ SamplerNeuralNetControlTransfer::execute()
   const auto n = getToMultiApp()->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
-    // std::cout << "Do I have this app? " << i << " " << getToMultiApp()->hasLocalApp(i) << std::endl;
+    // std::cout << "Do I have this app? " << i << " " << getToMultiApp()->hasLocalApp(i) <<
+    // std::endl;
     if (getToMultiApp()->hasLocalApp(i))
     {
       // Get the control neural net from the trainer
@@ -64,7 +63,7 @@ SamplerNeuralNetControlTransfer::execute()
       auto & control_warehouse = app_problem.getControlWarehouse();
       std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
       LibtorchNeuralNetControl * control_object =
-      dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
+          dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
 
       if (!control_object)
         paramError("control_name", "The given control is not a LibtorchNeuralNetrControl!");
@@ -79,7 +78,8 @@ SamplerNeuralNetControlTransfer::execute()
       //   // We cast the parameters into a 1D vector
       //   std::cout << "Transferring " << Moose::stringify(std::vector<Real>(
       //       named_params[param_i].value().data_ptr<Real>(),
-      //       named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel())) << std::endl;
+      //       named_params[param_i].value().data_ptr<Real>() +
+      //       named_params[param_i].value().numel())) << std::endl;
       // }
     }
   }
@@ -127,7 +127,7 @@ SamplerNeuralNetControlTransfer::executeToMultiapp()
     auto & control_warehouse = app_problem.getControlWarehouse();
     std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
     LibtorchNeuralNetControl * control_object =
-    dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
+        dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
 
     if (!control_object)
       paramError("control_name", "The given control is not a LibtorchNeuralNetrControl!");

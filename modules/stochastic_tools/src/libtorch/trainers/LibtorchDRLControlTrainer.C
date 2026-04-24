@@ -28,12 +28,10 @@ LibtorchDRLControlTrainer::validParams()
       "response", "Reporter values containing the response values from the model.");
   params.addParam<std::vector<Real>>(
       "response_shift_factors",
-      "A shift constant which will be used to shift the response values. This is used for the "
-      "manipulation of the neural net inputs for better training efficiency.");
+      "Optional offsets applied to the observed state values before scaling.");
   params.addParam<std::vector<Real>>(
       "response_scaling_factors",
-      "A normalization constant which will be used to divide the response values. This is used for "
-      "the manipulation of the neural net inputs for better training efficiency.");
+      "Optional multipliers applied after shifting the observed state values.");
   params.addRequiredParam<std::vector<ReporterName>>(
       "control",
       "Reporters containing the values of the controlled quantities (control signals) from the "
@@ -60,34 +58,29 @@ LibtorchDRLControlTrainer::validParams()
 
   params.addRequiredParam<unsigned int>("num_epochs", "Number of epochs for the training.");
 
-  params.addRequiredRangeCheckedParam<Real>(
-      "critic_learning_rate",
-      "0<critic_learning_rate",
-      "Learning rate (relaxation) for the emulator training.");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "num_critic_neurons_per_layer", "Number of neurons per layer in the emulator neural net.");
+  params.addRequiredRangeCheckedParam<Real>("critic_learning_rate",
+                                            "0<critic_learning_rate",
+                                            "Learning rate used by the critic optimizer.");
+  params.addRequiredParam<std::vector<unsigned int>>("num_critic_neurons_per_layer",
+                                                     "Hidden-layer widths for the critic network.");
   params.addParam<std::vector<std::string>>(
       "critic_activation_functions",
       std::vector<std::string>({"relu"}),
-      "The type of activation functions to use in the emulator neural net. It is either one value "
-      "or one value per hidden layer.");
+      "Activation name for each critic hidden layer, or one shared value for all layers.");
 
-  params.addRequiredRangeCheckedParam<Real>(
-      "control_learning_rate",
-      "0<control_learning_rate",
-      "Learning rate (relaxation) for the control neural net training.");
+  params.addRequiredRangeCheckedParam<Real>("control_learning_rate",
+                                            "0<control_learning_rate",
+                                            "Learning rate used by the actor optimizer.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_control_neurons_per_layer",
       "Number of neurons per layer for the control neural network.");
   params.addParam<std::vector<std::string>>(
       "control_activation_functions",
       std::vector<std::string>({"relu"}),
-      "The type of activation functions to use in the control neural net. It "
-      "is either one value "
-      "or one value per hidden layer.");
+      "Activation name for each actor hidden layer, or one shared value for all layers.");
 
   params.addParam<std::string>("filename_base",
-                               "Filename used to output the neural net parameters.");
+                               "Base filename used when writing actor and critic checkpoints.");
 
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
@@ -104,8 +97,7 @@ LibtorchDRLControlTrainer::validParams()
       "decay_factor",
       1.0,
       "0.0<=decay_factor<=1.0",
-      "Decay factor for calculating the return. This accounts for decreased "
-      "reward values from the later steps.");
+      "Discount factor used when building PPO return and GAE targets.");
 
   params.addRangeCheckedParam<Real>("lambda_factor", 1.0, "0.0<=lambda_factor<=1.0", "GAE lambda.");
 
@@ -114,20 +106,18 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<bool>(
       "shift_outputs",
       true,
-      "If we would like to shift the outputs the realign the input-output pairs.");
+      "Whether to shift rollout outputs so observations and actions line up in time.");
   params.addParam<bool>(
       "standardize_advantage",
       true,
       "Switch to enable the shifting and normalization of the advantages in the PPO algorithm.");
-  params.addParam<unsigned int>("loss_print_frequency",
-                                0,
-                                "The frequency which is used to print the loss values. If 0, the "
-                                "loss values are not printed.");
-  params.addParam<unsigned int>("batch_size", 100, "Batch size");
+  params.addParam<unsigned int>(
+      "loss_print_frequency", 0, "Print PPO loss values every N updates. Use 0 to stay quiet.");
+  params.addParam<unsigned int>("batch_size", 100, "Number of flattened samples per mini-batch.");
   params.addParam<std::vector<Real>>(
-      "min_control_value", {}, "The minimum values of the control signal.");
+      "min_control_value", {}, "Optional lower bounds for each control signal.");
   params.addParam<std::vector<Real>>(
-      "max_control_value", {}, "The maximum values of the control signal.");
+      "max_control_value", {}, "Optional upper bounds for each control signal.");
   params.addParam<std::vector<Real>>(
       "action_standard_deviations",
       {},

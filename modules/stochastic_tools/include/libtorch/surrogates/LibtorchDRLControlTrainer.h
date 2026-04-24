@@ -32,32 +32,44 @@ class LibtorchDRLControlTrainer : public SurrogateTrainerBase
 public:
   static InputParameters validParams();
 
-  /// construct using input parameters
+  /**
+   * Build the PPO-based DRL trainer.
+   * @param parameters Input parameters for the trainer.
+   */
   LibtorchDRLControlTrainer(const InputParameters & parameters);
 
+  /// Pull fresh rollout data from the reporters and trigger training when ready.
   virtual void execute() override;
 
   /**
-   * Function which returns the current average episodic reward. It is only updated
-   * at the end of every episode.
+   * Return the current average episodic reward.
+   * @return Average episodic reward over the latest training window.
    */
   Real averageEpisodeReward() { return _average_episode_reward; }
+  /// Return the current episodic reward standard deviation.
   Real stdEpisodeReward() { return _std_episode_reward; }
 
+  /// Return per-sample mean episodic rewards from the latest update window.
   std::vector<Real> sampleAverageEpsiodeRewards() { return _sample_average_episode_reward; }
+  /// Return per-sample episodic reward standard deviations from the latest update window.
   std::vector<Real> sampleStdEpsiodeRewards() { return _sample_std_episode_reward; }
 
-  /// The condensed training function
+  /**
+   * Run the PPO update on a flattened on-policy batch.
+   * @param batch Flattened trajectory batch to train on.
+   */
   void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
 
+  /// Return the current actor network.
   const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
+  /// Return the trainer seed used for sampling and shuffling.
   unsigned int seed() const { return _seed; }
 
 protected:
-  /// Compute the average eposiodic reward
+  /// Compute the average episodic reward statistics for the latest samples.
   void computeEpisodeRewardStatistics();
 
-  /// Reset data after updating the neural network
+  /// Reset the stored rollout data after an update.
   void resetData();
 
   /// Response reporter names
@@ -177,14 +189,31 @@ protected:
   std::unique_ptr<torch::optim::Adam> _critic_optimizer;
 
 private:
-  /// Getting reporter pointers with given names
+  /**
+   * Resolve reporter names into cached pointer storage.
+   * @param reporter_names Reporter names to look up.
+   * @param pointer_storage Output vector that receives the reporter pointers.
+   */
   void getReporterPointers(const std::vector<ReporterName> & reporter_names,
                            std::vector<const std::vector<std::vector<Real>> *> & pointer_storage);
 
+  /// Pull trajectories out of the reporters and append them to the trajectory buffer.
   void collectTrajectoriesFromReporters();
 
+  /**
+   * Figure out how many aligned transitions a raw reporter sequence contains.
+   * @param raw_sequence_size Number of raw time entries in the reporter sequence.
+   * @return Number of valid transitions after history stacking and downsampling.
+   */
   unsigned int computeNumTransitions(std::size_t raw_sequence_size) const;
 
+  /**
+   * Downsample one raw reporter sequence into the aligned rollout sequence we train on.
+   * @param sample Raw reporter sequence.
+   * @param offset Starting offset used for the aligned sequence.
+   * @param num_entries Number of aligned entries to extract.
+   * @return Downsampled sequence.
+   */
   std::vector<Real> extractDownsampledSequence(const std::vector<Real> & sample,
                                                unsigned int offset,
                                                unsigned int num_entries) const;
