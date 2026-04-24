@@ -61,7 +61,6 @@ The purpose of these lists is two fold:
 - [cats](https://github.com/aladshaw3/cats) - Catalysis And Treatment Simulations (CATS) library for MOOSE
 - [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration.
 
-
 ### Geomechanics, Ground Flow, and Earth Sciences
 
 - [FalCon](https://github.com/idaholab/falcon) - Fracturing and liquid conservation; geothermal reservoir simulation and analysis code for coupled and fully implicit Thermo-Hydro-Mechanical-Chemical (THMC) geosystems
@@ -71,6 +70,7 @@ The purpose of these lists is two fold:
 ### Miscellaneous
 
 - [moopy](https://github.com/aurora-multiphysics/moopy) - Python interface that simplifies (ish) the creation of MOOSE inputs
+- [Phoenix](https://github.com/rnpratoori/phoenix) - Polymer-to-HOst Evolution via INterface eXchange is a reaction-diffusion based framework to study the evolution of polymer scaffold into a neotissue under various conditions
 - [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins.
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
@@ -89,7 +89,7 @@ These applications require a license. Many of them can be obtained through the [
 - [Grizzly](https://inlsoftware.inl.gov/product/grizzly) - Nuclear Plant Component Degradation Modeling
 - [MARMOT](https://inlsoftware.inl.gov/product/marmot) - Nuclear materials phase field and mechanics application
 - [PRONGHORN](https://inlsoftware.inl.gov/product/pronghorn) - Transient prismatic and pebble bed reactor analysis code
-- [RELAP7](https://inlsoftware.inl.gov/product/relap7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
+- [RELAP-7](https://inlsoftware.inl.gov/product/relap-7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
 - [SAM](https://www.anl.gov/nse/system-analysis-module) - Advanced nuclear reactor system analysis code (weakly-compressible flow), developed at ANL
 - [Sockeye](https://inlsoftware.inl.gov/product/sockeye) - Multi-fidelity studies of heat pipes for nuclear applications
 - SWIFT - A thermo-chemistry tool for metal hydride moderators, developed at LANL
@@ -107,6 +107,7 @@ Combined applications
 - MONARCH - Radiation damage modeling in semiconductors, developed at LANL
 - GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
 - [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
+- Fizzy - Couples FISPACT-II to MOOSE and Cardinal for radiation activation calculations
 
 
 ## Legacy software
@@ -134,7 +135,6 @@ Plasma and fusion sciences
 
 Fluid dynamics and Thermal hydraulics
 
-- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
 
 Miscellaneous
@@ -144,6 +144,7 @@ Miscellaneous
 
 ### Closed source
 
+- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - BIGHORN - Compressible fluid dynamics code
 - ELK - Former application for the electromagnetics module
 - FENIX - Advanced fission reactor multiphysics simulation suite with Griffin and Pronghorn, notably to model Xenon and Samarium fission product transients
