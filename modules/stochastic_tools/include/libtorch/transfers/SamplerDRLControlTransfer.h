@@ -17,7 +17,7 @@
 #include "StochasticToolsTransfer.h"
 #include "SurrogateModelInterface.h"
 
-class SamplerNeuralNetControlTransfer : public StochasticToolsTransfer, public SurrogateModelInterface
+class SamplerDRLControlTransfer : public StochasticToolsTransfer, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -26,7 +26,7 @@ public:
    * Build the transfer that pushes a trained controller into subapps.
    * @param parameters Input parameters for the transfer.
    */
-  SamplerNeuralNetControlTransfer(const InputParameters & parameters);
+  SamplerDRLControlTransfer(const InputParameters & parameters);
 
   /// Execute the transfer in the standard non-batch path.
   virtual void execute() override;

@@ -19,7 +19,7 @@
 
 [Transfers]
   [nn_transfer]
-    type = SamplerNeuralNetControlTransfer
+    type = SamplerDRLControlTransfer
     to_multi_app = runner
     trainer_name = nn_trainer
     control_name = src_control
