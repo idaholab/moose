@@ -12,6 +12,7 @@
 #include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 #include "DisplacedProblem.h"
+#include "libmesh/int_range.h"
 
 InputParameters
 MFEMMultiAppTransfer::validParams()

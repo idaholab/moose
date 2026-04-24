@@ -130,58 +130,37 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   // solution vector. Fill values and app ids for incoming points. We are responsible to compute
   // values for these incoming points
   auto gather_functor =
-      [this,
-       &local_meshfuns](processor_id_type /*pid*/,
-                        const std::vector<Point> & incoming_points,
-                        std::vector<std::pair<Real, unsigned int>> & vals_ids_for_incoming_points)
+      [this, &local_meshfuns](processor_id_type /*pid*/,
+                              const std::vector<Point> & incoming_points,
+                              std::vector<mfem::real_t> & vals_for_incoming_points)
   {
-    vals_ids_for_incoming_points.resize(incoming_points.size(),
-                                        std::make_pair(getMFEMOutOfMeshValue(), 0));
+    vals_for_incoming_points.resize(incoming_points.size(), getMFEMOutOfMeshValue());
     for (const auto i_pt : index_range(incoming_points))
     {
-      Point pt = incoming_points[i_pt];
       // Loop until we've found the lowest-ranked app that actually contains
-      // the quadrature point.
-      if (vals_ids_for_incoming_points[i_pt].first == getMFEMOutOfMeshValue())
-      {
-        // Use mesh function to compute interpolation values
-        vals_ids_for_incoming_points[i_pt].first = local_meshfuns(pt);
-        // Record problem ID as well
-        switch (_current_direction)
-        {
-          case FROM_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = getActiveFromProblemGlobalAppIndex();
-            break;
-          case TO_MULTIAPP:
-            vals_ids_for_incoming_points[i_pt].second = getActiveToProblemGlobalAppIndex();
-            break;
-          case BETWEEN_MULTIAPP:
-            break;
-          default:
-            mooseError("Unsupported direction");
-        }
-      }
+      // the quadrature point, and compute interpolation values
+      Point pt = incoming_points[i_pt];
+      if (vals_for_incoming_points[i_pt] == getMFEMOutOfMeshValue())
+        vals_for_incoming_points[i_pt] = local_meshfuns(pt);
     }
   };
-  // Incoming values and APP ids for outgoing points
-  std::map<processor_id_type, std::vector<std::pair<Real, unsigned int>>> incoming_vals_ids;
-  // Copy data out to incoming_vals_ids
-  auto action_functor =
-      [&incoming_vals_ids](
-          processor_id_type pid,
-          const std::vector<Point> & /*my_outgoing_points*/,
-          const std::vector<std::pair<Real, unsigned int>> & vals_ids_for_outgoing_points)
+  // Incoming values for outgoing points
+  std::map<processor_id_type, std::vector<mfem::real_t>> incoming_vals;
+  // Copy data out to incoming_vals
+  auto action_functor = [&incoming_vals](processor_id_type pid,
+                                         const std::vector<Point> & /*my_outgoing_points*/,
+                                         const std::vector<mfem::real_t> & vals_for_outgoing_points)
   {
     // This lambda function might be called multiple times
-    incoming_vals_ids[pid].reserve(vals_ids_for_outgoing_points.size());
+    incoming_vals[pid].reserve(vals_for_outgoing_points.size());
     // Copy data for processor 'pid'
-    std::copy(vals_ids_for_outgoing_points.begin(),
-              vals_ids_for_outgoing_points.end(),
-              std::back_inserter(incoming_vals_ids[pid]));
+    std::copy(vals_for_outgoing_points.begin(),
+              vals_for_outgoing_points.end(),
+              std::back_inserter(incoming_vals[pid]));
   };
 
-  // We assume incoming_vals_ids is ordered in the same way as outgoing_points
-  const std::pair<Real, unsigned int> * ex = nullptr;
+  // We assume incoming_vals is ordered in the same way as outgoing_points
+  const mfem::real_t * ex = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
       comm(), outgoing_points, gather_functor, action_functor, ex);
 
@@ -189,9 +168,9 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
   for (const auto i : make_range(interp_vals.Size()))
   {
-    for (auto & group : incoming_vals_ids)
+    for (auto & group : incoming_vals)
     {
-      const auto val = group.second[i].first;
+      const auto val = group.second[i];
       if (val == getMFEMOutOfMeshValue())
         continue;
       interp_vals[i] = val;

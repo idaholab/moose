@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMNodalProjector.h"
+#include "MFEMVectorUtils.h"
 #include "MooseError.h"
 
 void

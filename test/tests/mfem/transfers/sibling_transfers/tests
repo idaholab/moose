@@ -6,8 +6,8 @@
     [nodal_nodal]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'nodal_nodal_libmesh_sub0.e'
-      cli_args = "Outputs/file_base=nodal_nodal Transfers/active='mfem_to_libmesh_nodal_nodal'"
+      exodiff = 'OutputData/nodal_nodal_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal Transfers/active='mfem_to_libmesh_nodal_nodal'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -17,8 +17,8 @@
     [elem_elem]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'elem_elem_libmesh_sub0.e'
-      cli_args = "Outputs/file_base=elem_elem Transfers/active='mfem_to_libmesh_elem_elem'"
+      exodiff = 'OutputData/elem_elem_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/elem_elem Transfers/active='mfem_to_libmesh_elem_elem'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -28,8 +28,8 @@
     [nodal_elem]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'nodal_elem_libmesh_sub0.e'
-      cli_args = "Outputs/file_base=nodal_elem Transfers/active='mfem_to_libmesh_nodal_elem'"
+      exodiff = 'OutputData/nodal_elem_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/nodal_elem Transfers/active='mfem_to_libmesh_nodal_elem'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -39,8 +39,8 @@
     [1_to_N_nodal]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'mfem_to_libmesh_nodal_1toN_libmesh_sub0.e mfem_to_libmesh_nodal_1toN_libmesh_sub1.e'
-      cli_args = "Outputs/file_base=mfem_to_libmesh_nodal_1toN
+      exodiff = 'OutputData/mfem_to_libmesh_nodal_1toN_libmesh_sub0.e OutputData/mfem_to_libmesh_nodal_1toN_libmesh_sub1.e'
+      cli_args = "Outputs/file_base=OutputData/mfem_to_libmesh_nodal_1toN
                   MultiApps/libmesh_sub/positions_objects=libmesh_locs
                   Transfers/active='mfem_to_libmesh_nodal_nodal'"
       capabilities = 'mfem'
@@ -55,9 +55,9 @@
     [nodal_nodal]
       type = CSVDiff
       input = main_between_multiapp.i
-      csvdiff = 'nodal_nodal_mfem_sub0_nodal_sample_0001.csv'
-      cli_args = "Outputs/file_base=nodal_nodal Transfers/active='libmesh_to_mfem_nodal_nodal'
-                  MultiApps/mfem_sub/cli_args='Outputs/file_base=nodal_nodal_mfem_sub0;VectorPostprocessors/active=nodal_sample'"
+      csvdiff = 'OutputData/nodal_nodal_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal Transfers/active='libmesh_to_mfem_nodal_nodal'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/nodal_nodal_mfem_sub0;VectorPostprocessors/active=nodal_sample'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -67,9 +67,9 @@
     [elem_elem]
       type = CSVDiff
       input = main_between_multiapp.i
-      csvdiff = 'elem_elem_mfem_sub0_elem_sample_0001.csv'
-      cli_args = "Outputs/file_base=elem_elem Transfers/active='libmesh_to_mfem_elem_elem'
-                  MultiApps/mfem_sub/cli_args='Outputs/file_base=elem_elem_mfem_sub0;VectorPostprocessors/active=elem_sample'"
+      csvdiff = 'OutputData/elem_elem_mfem_sub0_elem_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/elem_elem Transfers/active='libmesh_to_mfem_elem_elem'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/elem_elem_mfem_sub0'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -79,9 +79,9 @@
     [nodal_elem]
       type = CSVDiff
       input = main_between_multiapp.i
-      csvdiff = 'nodal_elem_mfem_sub0_elem_sample_0001.csv'
-      cli_args = "Outputs/file_base=nodal_elem Transfers/active='libmesh_to_mfem_nodal_elem'
-                  MultiApps/mfem_sub/cli_args='Outputs/file_base=nodal_elem_mfem_sub0;VectorPostprocessors/active=elem_sample'"
+      csvdiff = 'OutputData/nodal_elem_mfem_sub0_elem_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_elem Transfers/active='libmesh_to_mfem_nodal_elem'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/nodal_elem_mfem_sub0'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -91,9 +91,9 @@
     [nodal_mixed_mesh]
       type = CSVDiff
       input = main_between_multiapp.i
-      csvdiff = 'nodal_nodal_mixed_mfem_sub0_nodal_sample_0001.csv'
-      cli_args = "Outputs/file_base=nodal_nodal_mixed Transfers/active='libmesh_to_mfem_nodal_nodal'
-                   MultiApps/mfem_sub/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=nodal_nodal_mixed_mfem_sub0
+      csvdiff = 'OutputData/nodal_nodal_mixed_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal_mixed Transfers/active='libmesh_to_mfem_nodal_nodal'
+                   MultiApps/mfem_sub/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=OutputData/nodal_nodal_mixed_mfem_sub0
                    MultiApps/libmesh_sub/cli_args='Mesh/file=../../mesh/square_mixed.e'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
@@ -107,8 +107,8 @@
     [nodal_nodal]
       type = CSVDiff
       input = mfem_main_between_multiapp.i
-      csvdiff = 'nodal_nodal_mfem_recv0_nodal_sample_0002.csv'
-      cli_args = "Outputs/file_base=nodal_nodal"
+      csvdiff = 'OutputData/nodal_nodal_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
@@ -147,9 +147,9 @@
     [nodal_mixed_mesh]
       type = CSVDiff
       input = mfem_main_between_multiapp.i
-      csvdiff = 'nodal_nodal_mixed_mfem_recv0_nodal_sample_0002.csv'
-      cli_args = "Outputs/file_base=nodal_nodal_mixed
-                   MultiApps/mfem_recv/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=nodal_nodal_mixed_mfem_recv0;Outputs/inactive=''
+      csvdiff = 'OutputData/nodal_nodal_mixed_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal_mixed
+                   MultiApps/mfem_recv/cli_args='Mesh/file=../../mesh/square_mixed.e'
                    MultiApps/mfem_send/cli_args='Mesh/file=../../mesh/square_mixed.e'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
