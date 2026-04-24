@@ -14,7 +14,7 @@
 #   smoothers     = chebyshev  (Chebyshev smoother at the fine level; SPD by construction)
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 

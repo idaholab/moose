@@ -2,7 +2,7 @@
 # global loop voltage constraint.
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/embedded_concentric_torus.e
 []
 

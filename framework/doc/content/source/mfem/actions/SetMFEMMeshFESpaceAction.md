@@ -11,8 +11,8 @@ Sets the nodal mesh FESpace to use the same FESpace as the
 
 Action called to set the nodal mesh FESpace to use the same FESpace as the variable used to describe
 node displacements in problems involving deformed meshes, parsing content inside the `Mesh` block in
-the user input. Only has an effect if the `Problem` type is set to [MFEMProblem.md], the `Mesh` type
-is set to [MFEMMesh.md] and the `displacement` field is set.
+the user input. Only has an effect if the `Problem` type is set to [MFEMProblem.md], the mesh is an
+[MFEMFileMesh.md] or [MFEMMeshGeneratorMesh.md], and the `displacement` field is set.
 
 ## Example Input File Syntax
 

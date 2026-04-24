@@ -15,12 +15,10 @@
 
 #include <fstream>
 
-registerMooseObject("MooseApp", MFEMMesh);
-
 InputParameters
 MFEMMesh::validParams()
 {
-  InputParameters params = FileMesh::validParams();
+  InputParameters params = MooseMesh::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -41,14 +39,10 @@ MFEMMesh::validParams()
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
                         "Only Hilbert sorting is supported at present.");
 
-  params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
-
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
-
-MFEMMesh::~MFEMMesh() {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
 
 void
 MFEMMesh::init()
@@ -79,15 +73,14 @@ MFEMMesh::init()
 void
 MFEMMesh::buildMesh()
 {
-  TIME_SECTION("buildMesh", 2, "Reading Mesh");
+  TIME_SECTION("buildMesh", 2, "Building MFEM Mesh");
 
   // Build the MFEM ParMesh from a serial MFEM mesh
-  mfem::Mesh mfem_ser_mesh(getFileName());
+  mfem::Mesh mfem_ser_mesh = buildSerialMFEMMesh();
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
-    paramError(
-        "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
-        "are the same variable). Please choose one.\n");
+    paramError("serial_refine",
+               "Cannot set both serial_refine and uniform_refine at the same time.");
 
   uniformRefinement(mfem_ser_mesh,
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
@@ -110,9 +103,7 @@ MFEMMesh::buildMesh()
   if (getParam<bool>("nonconforming"))
     mfem_ser_mesh.EnsureNCMesh(true);
 
-  // multi app should take the mpi comm from moose so is split correctly??
-  auto comm = this->comm().get();
-  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), mfem_ser_mesh);
 
   // Perform parallel refinements
   uniformRefinement(*_mfem_par_mesh, getParam<unsigned int>("parallel_refine"));
@@ -145,14 +136,14 @@ void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
 {
   _mfem_par_mesh->EnsureNodes();
-  mfem::GridFunction * nodes = _mfem_par_mesh->GetNodes();
-
-  *nodes += displacement;
+  *_mfem_par_mesh->GetNodes() += displacement;
 }
 
 void
 MFEMMesh::buildDummyMooseMesh()
 {
+  // The libMesh placeholder is always replicated, independently of the distributed MFEM mesh.
+  setParallelType(ParallelType::REPLICATED);
   auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
   MeshTools::Generation::build_point(dummy);
   if (dimension() >= 2)
@@ -164,12 +155,6 @@ MFEMMesh::uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const
 {
   for (unsigned int i = 0; i < nref; ++i)
     mesh.UniformRefinement();
-}
-
-std::unique_ptr<MooseMesh>
-MFEMMesh::safeClone() const
-{
-  return _app.getFactory().copyConstruct(*this);
 }
 
 #endif

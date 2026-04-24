@@ -3,7 +3,7 @@
 []
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/stacked_hexes.e
 []
 
