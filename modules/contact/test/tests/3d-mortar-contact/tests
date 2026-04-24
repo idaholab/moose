@@ -122,7 +122,8 @@
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=ear_clipping Contact/mortar/debug_mesh=true '
-               'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false'
+               'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+               'Outputs/exodus=false Outputs/csv=false'
     mesh_mode = 'REPLICATED' # see issue 24255
     check_files = 'mortar_segment_mesh.e'
     requirement = 'The system shall support the ear_clipping 3D mortar triangulation option '
@@ -136,7 +137,8 @@
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
-               'Executioner/end_time=0 Outputs/exodus=false Outputs/csv=false'
+               'Executioner/end_time=0.5 Executioner/dtmin=0.5 '
+               'Outputs/exodus=false Outputs/csv=false'
     mesh_mode = 'REPLICATED' # see issue 24255
     check_files = 'mortar_segment_mesh.e'
     requirement = 'The system shall support the delaunay 3D mortar triangulation option through '
