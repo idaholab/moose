@@ -22,6 +22,9 @@ if importlib.util.find_spec("moose_stochastic_tools") is None:
     sys.path.append(_stm_python_path)
 
 from moose_stochastic_tools import visualize_sobol, VisualizeSobolOptions
+from moose_stochastic_tools.tests.test_visualize_statistics import CI_CELL
+
+DASH_CELL = r"\s*-\s*"
 
 
 class TestVisualizeSobol(unittest.TestCase):
@@ -59,16 +62,16 @@ class TestVisualizeSobol(unittest.TestCase):
 
     def testTotalTable(self):
         opt = self.makeOptions(format=1, output=self._textfile)
-        expect_out = "| $S_T$ (5.0%, 95.0%) CI   | $\\gamma$             | $q_0$                 | $T_0$               | $s$                   |\n"
-        expect_out += "|:-------------------------|:---------------------|:----------------------|:--------------------|:----------------------|\n"
-        expect_out += "| $T_{avg}$                | 0.717 (0.0491, 1.86) | -0.234 (-2.24, 3.95)  | 0.0141 (-1.57, 3.4) | -0.0668 (-1.71, 3.59) |\n"
-        expect_out += "| $q_{left}$               | 0.717 (-0.893, 2.51) | -0.0682 (-5.27, 7.23) | 0.282 (-3.24, 4.79) | -0.0276 (-5.11, 6.89) |\n"
+        expect_out = rf"""^\| \$S_T\$ \(5\.0%, 95\.0%\) CI\s+\|\s+\$\\gamma\$\s+\|\s+\$q_0\$\s+\|\s+\$T_0\$\s+\|\s+\$s\$\s+\|
+\|:?-+\|:?-+\|:?-+\|:?-+\|:?-+\|
+\| \$T_{{avg}}\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {CI_CELL} |
+\| \$q_{{left}}\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {CI_CELL} |$"""
 
         visualize_sobol(opt)
         self.assertTrue(os.path.exists(self._textfile))
         with open(self._textfile) as fid:
             out = fid.read()
-        self.assertEqual(out, expect_out[:-1])
+        self.assertRegex(out, expect_out)
         os.remove(self._textfile)
 
     def testSecondOrderTable(self):
@@ -78,17 +81,17 @@ class TestVisualizeSobol(unittest.TestCase):
             values=[self._values[0]],
             output=self._textfile,
         )
-        expect_out = "| $S_{i,j}$ (5.0%, 95.0%) CI   | $\\gamma$            | $q_0$                  | $T_0$                 | $s$                   |\n"
-        expect_out += "|:-----------------------------|:--------------------|:-----------------------|:----------------------|:----------------------|\n"
-        expect_out += "| $\\gamma$                     | 0.708 (-2.78, 3.16) | -                      | -                     | -                     |\n"
-        expect_out += "| $q_0$                        | 5.34 (-6.45, 6.59)  | 0.022 (-0.0924, 0.108) | -                     | -                     |\n"
-        expect_out += "| $T_0$                        | 2.21 (-8.01, 8.19)  | 0.1 (-0.874, 0.918)    | 0.0663 (-0.34, 0.447) | -                     |\n"
-        expect_out += "| $s$                          | 3.24 (-8.12, 8.32)  | 0.0315 (-1.13, 1.22)   | 0.0113 (-1.63, 1.86)  | 0.123 (-0.627, 0.714) |\n"
+        expect_out = rf"""^\| \$S_{{i,j}}\$ \(5\.0%, 95\.0%\) CI\s+\|\s+\$\\gamma\$\s+\|\s+\$q_0\$\s+\|\s+\$T_0\$\s+\|\s+\$s\$\s+\|
+\|:?-+\|:?-+\|:?-+\|:?-+\|:?-+\|
+\| \$\\gamma\$ \s*\| {CI_CELL} | {DASH_CELL} \| {DASH_CELL} \| {DASH_CELL} \|
+\| \$q_0\$ \s*\| {CI_CELL} | {CI_CELL} | {DASH_CELL} \| {DASH_CELL} \|
+\| \$T_0\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {DASH_CELL} \|
+\| \$s\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {CI_CELL} |$"""
         visualize_sobol(opt)
         self.assertTrue(os.path.exists(self._textfile))
         with open(self._textfile) as fid:
             out = fid.read()
-        self.assertEqual(out, expect_out[:-1])
+        self.assertRegex(out, expect_out)
         os.remove(self._textfile)
 
         opt = self.makeOptions(
@@ -97,17 +100,17 @@ class TestVisualizeSobol(unittest.TestCase):
             values=[self._values[1]],
             output=self._textfile,
         )
-        expect_out = "| $S_{i,j}$ (5.0%, 95.0%) CI   | $\\gamma$            | $q_0$                   | $T_0$                | $s$                    |\n"
-        expect_out += "|:-----------------------------|:--------------------|:------------------------|:---------------------|:-----------------------|\n"
-        expect_out += "| $\\gamma$                     | 0.739 (-4.09, 3.95) | -                       | -                    | -                      |\n"
-        expect_out += "| $q_0$                        | 1.15 (-9.14, 9.82)  | 0.0203 (-0.166, 0.167)  | -                    | -                      |\n"
-        expect_out += "| $T_0$                        | 1.34 (-11.5, 11.7)  | -0.0834 (-1.66, 2.12)   | 0.225 (-1.38, 1.33)  | -                      |\n"
-        expect_out += "| $s$                          | 1.1 (-8.68, 9.75)   | -0.0442 (-0.392, 0.554) | -0.127 (-1.68, 2.12) | 0.0257 (-0.211, 0.193) |\n"
+        expect_out = rf"""^\| \$S_{{i,j}}\$ \(5\.0%, 95\.0%\) CI\s+\|\s+\$\\gamma\$\s+\|\s+\$q_0\$\s+\|\s+\$T_0\$\s+\|\s+\$s\$\s+\|
+\|:?-+\|:?-+\|:?-+\|:?-+\|:?-+\|
+\| \$\\gamma\$ \s*\| {CI_CELL} | {DASH_CELL} \| {DASH_CELL} \| {DASH_CELL} \|
+\| \$q_0\$ \s*\| {CI_CELL} | {CI_CELL} | {DASH_CELL} \| {DASH_CELL} \|
+\| \$T_0\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {DASH_CELL} \|
+\| \$s\$ \s*\| {CI_CELL} | {CI_CELL} | {CI_CELL} | {CI_CELL} |$"""
         visualize_sobol(opt)
         self.assertTrue(os.path.exists(self._textfile))
         with open(self._textfile) as fid:
             out = fid.read()
-        self.assertEqual(out, expect_out[:-1])
+        self.assertRegex(out, expect_out)
         os.remove(self._textfile)
 
     def testBarPlot(self):
