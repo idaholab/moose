@@ -1,0 +1,59 @@
+[Tests]
+  [rotation]
+    design = 'ControlDrumMaterial.md'
+    requirement = 'The system shall compute material properties in heterogeneous control drums'
+    issues = '#32765'
+
+    [2d_z]
+      type = 'Exodiff'
+      input = '2d_z_rotation.i'
+      exodiff = '2d_z_rotation_out.e'
+      detail = 'rotating around +z axis'
+    []
+
+    [2d_z_var]
+      type = 'Exodiff'
+      input = '2d_z_var_rotation.i'
+      exodiff = '2d_z_var_rotation_out.e'
+      detail = 'coupling segment material properties in different types'
+    []
+
+    [2d_minus_z]
+      type = 'Exodiff'
+      input = '2d_z_rotation.i'
+      cli_args = 'Materials/rotate_mat/rotation_axis=-z Outputs/file_base=2d_minus_z_out'
+      exodiff = '2d_minus_z_out.e'
+      detail = 'rotating around -z axis'
+    []
+
+    [2d_x]
+      type = 'Exodiff'
+      input = '2d_x_rotation.i'
+      exodiff = '2d_x_rotation_out.e'
+      detail = 'rotating around +x axis'
+    []
+
+    [2d_minus_x]
+      type = 'Exodiff'
+      input = '2d_x_rotation.i'
+      cli_args = 'Materials/rotate_mat/rotation_axis=-x Outputs/file_base=2d_minus_x_out'
+      exodiff = '2d_minus_x_out.e'
+      detail = 'rotating around -x axis'
+    []
+
+    [2d_y]
+      type = 'Exodiff'
+      input = '2d_y_rotation.i'
+      exodiff = '2d_y_rotation_out.e'
+      detail = 'rotating around +y axis'
+    []
+
+    [2d_minus_y]
+      type = 'Exodiff'
+      input = '2d_y_rotation.i'
+      cli_args = 'Materials/rotate_mat/rotation_axis=-y Outputs/file_base=2d_minus_y_out'
+      exodiff = '2d_minus_y_out.e'
+      detail = 'rotating around -y axis'
+    []
+  []
+[]
