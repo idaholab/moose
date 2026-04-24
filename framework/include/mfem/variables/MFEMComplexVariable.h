@@ -26,6 +26,9 @@ public:
   /// Returns a reference to the fespace used by the gridfunction.
   inline const FESpace & getFESpace() const { return _fespace; }
 
+  /// Returns true if the variable lives on a scalar (vdim == 1) finite element space.
+  inline bool isScalar() const { return _fespace.isScalar(); }
+
 protected:
   const FESpace & _fespace;
 

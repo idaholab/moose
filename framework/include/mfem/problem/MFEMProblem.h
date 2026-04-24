@@ -73,6 +73,14 @@ public:
    * Add an MFEM FESpace to the problem.
    */
   void addFESpace(const std::string & type, const std::string & name, InputParameters & parameters);
+
+  /**
+   * Add an MFEM FESpaceHierarchy to the problem.
+   */
+  void addFESpaceHierarchy(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters);
+
   /**
    * Set the device to use to solve the FE problem.
    */
@@ -201,12 +209,6 @@ public:
                               const std::string & name,
                               InputParameters & parameters) override;
 
-  /**
-   * Method called in AddMFEMPreconditionerAction which will create the solver.
-   */
-  void addMFEMPreconditioner(const std::string & user_object_name,
-                             const std::string & name,
-                             InputParameters & parameters);
   /**
    * Override of FEProblemBase::addIndicator. Creates the Moose::MFEM::Indicator used when setting
    * up adaptive mesh refinement later.

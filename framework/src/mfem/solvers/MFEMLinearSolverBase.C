@@ -61,6 +61,15 @@ template void LinearSolverBase::setPreconditioner(mfem::patched::HypreGMRES &);
 template void LinearSolverBase::setPreconditioner(mfem::patched::HyprePCG &);
 
 void
+LinearSolverBase::updateSolver(mfem::Operator & op, mfem::Array<int> & tdofs)
+{
+  if (_solver)
+    _solver->SetOperator(op);
+  if (_preconditioner)
+    _preconditioner->updateSolver(op, tdofs);
+}
+
+void
 LinearSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
   if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))

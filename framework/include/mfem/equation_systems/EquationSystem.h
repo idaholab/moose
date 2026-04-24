@@ -77,6 +77,35 @@ public:
    */
   bool nonlinear() const { return _non_linear; }
 
+  /**
+   * Build a fresh ParBilinearForm on the given FESpace using the same kernels as the main
+   * system's bilinear form for var_name. Caller owns the returned form.
+   */
+  std::shared_ptr<mfem::ParBilinearForm>
+  buildBilinearFormForFESpace(const std::string & var_name,
+                              mfem::ParFiniteElementSpace & fespace,
+                              mfem::AssemblyLevel assembly_level);
+
+  /**
+   * Build a fresh ParNonlinearForm on the given FESpace using the same kernels as the main
+   * system's nonlinear form for var_name. Caller owns the returned form.
+   */
+  std::shared_ptr<mfem::ParNonlinearForm>
+  buildNonlinearFormForFESpace(const std::string & var_name,
+                               mfem::ParFiniteElementSpace & fespace,
+                               mfem::AssemblyLevel assembly_level);
+
+  /**
+   * Returns true if the equation system has active mixed bilinear form contributions for var_name.
+   */
+  bool hasMixedBilinearForms(const std::string & var_name) const;
+
+  /**
+   * Build and return the essential boundary attribute marker array for a given trial variable.
+   * The returned array has size == pmesh.bdr_attributes.Max() with 1 at essential boundaries.
+   */
+  mfem::Array<int> buildEssentialBoundaryMarkers(const std::string & var_name) const;
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);

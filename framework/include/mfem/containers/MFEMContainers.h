@@ -16,6 +16,13 @@
 #include <string>
 #include <vector>
 
+// Forward declaration — full header (mfem/fem/fespacehierarchy.hpp) included by
+// translation units that create or directly access FESpaceHierarchies.
+namespace mfem
+{
+class ParFiniteElementSpaceHierarchy;
+}
+
 namespace Moose::MFEM
 {
 
@@ -230,6 +237,8 @@ using FESpaces = NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using SubMeshes = NamedFieldsMap<mfem::ParSubMesh>;
 using GridFunctions = NamedFieldsMap<mfem::ParGridFunction>;
 using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
+
+using FESpaceHierarchies = NamedFieldsMap<mfem::ParFiniteElementSpaceHierarchy>;
 
 } // namespace Moose::MFEM
 

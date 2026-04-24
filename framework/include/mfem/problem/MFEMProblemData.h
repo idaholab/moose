@@ -42,6 +42,7 @@ public:
 
   FECollections fecs;
   FESpaces fespaces;
+  FESpaceHierarchies fespace_hierarchies;
   GridFunctions gridfunctions;
   TimeDerivativeMap time_derivative_map;
   ComplexGridFunctions cmplx_gridfunctions;

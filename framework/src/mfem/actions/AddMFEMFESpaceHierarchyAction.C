@@ -9,30 +9,29 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "AddMFEMPreconditionerAction.h"
-#include "MFEMProblem.h"
+#include "AddMFEMFESpaceHierarchyAction.h"
 
-registerMooseAction("MooseApp", AddMFEMPreconditionerAction, "add_mfem_preconditioner");
+registerMooseAction("MooseApp", AddMFEMFESpaceHierarchyAction, "add_mfem_fespace_hierarchies");
 
 InputParameters
-AddMFEMPreconditionerAction::validParams()
+AddMFEMFESpaceHierarchyAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a preconditioner to the MFEM problem.");
+  params.addClassDescription("Add a Moose::MFEM::FESpaceHierarchy object to the simulation.");
   return params;
 }
 
-AddMFEMPreconditionerAction::AddMFEMPreconditionerAction(const InputParameters & parameters)
+AddMFEMFESpaceHierarchyAction::AddMFEMFESpaceHierarchyAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
 
 void
-AddMFEMPreconditionerAction::act()
+AddMFEMFESpaceHierarchyAction::act()
 {
   Moose::MFEM::Problem * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
   if (mfem_problem)
-    mfem_problem->addMFEMPreconditioner(_type, _name, _moose_object_pars);
+    mfem_problem->addFESpaceHierarchy(_type, _name, _moose_object_pars);
 }
 
 #endif

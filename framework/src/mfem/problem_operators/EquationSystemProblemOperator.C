@@ -36,9 +36,15 @@ EquationSystemProblemOperator::Solve()
         if (_problem_data.jacobian_solver->isLOR() &&
             GetEquationSystem()->GetTestVarNames().size() > 1)
           mooseError("LOR solve is only supported for single-variable systems");
+        // Bilinear-form-level update: used by LOR solvers.
         _problem_data.jacobian_solver->updateSolver(
             *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
             GetEquationSystem()->_ess_tdof_lists.at(0));
+        // Operator-level update: propagates to preconditioners such as
+        // GeometricMultigridSolver that build their hierarchy from the operator.
+        if (auto * linear_op = GetEquationSystem()->_linear_operator.Ptr())
+          _problem_data.jacobian_solver->updateSolver(*linear_op,
+                                                      GetEquationSystem()->_ess_tdof_lists.at(0));
       });
 
   GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);

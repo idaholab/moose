@@ -17,6 +17,7 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMSubMeshTransfer.h"
 #include "MFEMExecutedObject.h"
+#include "MFEMFESpaceHierarchy.h"
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"
@@ -86,14 +87,6 @@ Problem::setMesh()
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();
   getProblemData().myid = pmesh->GetMyRank();
-}
-
-void
-Problem::addMFEMPreconditioner(const std::string & user_object_name,
-                               const std::string & name,
-                               InputParameters & parameters)
-{
-  addObject<SolverBase>(user_object_name, name, parameters);
 }
 
 void
@@ -207,11 +200,42 @@ Problem::addFESpace(const std::string & type,
                     const std::string & name,
                     InputParameters & parameters)
 {
+  if (getProblemData().fespace_hierarchies.Has(name))
+    mooseError("Cannot add FESpace '",
+               name,
+               "': a FESpaceHierarchy with the same name already exists. "
+               "FESpaces and FESpaceHierarchies share the fespaces namespace.");
+
   auto & mfem_fespace = *addObject<FESpace>(type, name, parameters).front();
 
   // Register fespace and associated fe collection.
   getProblemData().fecs.Register(name, mfem_fespace.getFEC());
   getProblemData().fespaces.Register(name, mfem_fespace.getFESpace());
+}
+
+void
+Problem::addFESpaceHierarchy(const std::string & type,
+                             const std::string & name,
+                             InputParameters & parameters)
+{
+  if (getProblemData().fespaces.Has(name))
+    mooseError("Cannot add FESpaceHierarchy '",
+               name,
+               "': a FESpace with the same name already exists. "
+               "FESpaces and FESpaceHierarchies share the fespaces namespace.");
+
+  auto hierarchy_obj = addObject<FESpaceHierarchy>(type, name, parameters).front();
+  auto hierarchy_shared = hierarchy_obj->getHierarchyShared();
+  // Register the hierarchy for co-ownership by solvers.
+  getProblemData().fespace_hierarchies.Register(name, hierarchy_shared);
+  // Register the finest-level FESpace in fespaces under the hierarchy name so that
+  // variables can say `fespace = <hierarchy_name>` without a separate FESpace definition.
+  // The aliasing shared_ptr keeps the hierarchy alive as long as this entry lives.
+  auto finest = std::shared_ptr<mfem::ParFiniteElementSpace>(
+      hierarchy_shared,
+      &static_cast<mfem::ParFiniteElementSpace &>(
+          hierarchy_obj->getHierarchy().GetFinestFESpace()));
+  getProblemData().fespaces.Register(name, finest);
 }
 
 void
@@ -262,7 +286,7 @@ Problem::addGridFunction(const std::string & var_type,
   {
     ComplexVariable & mfem_variable = getMFEMObject<ComplexVariable>("MooseVariableBase", var_name);
     getProblemData().cmplx_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
-    if (mfem_variable.getFESpace().isScalar())
+    if (mfem_variable.isScalar())
     {
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
           var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
@@ -281,7 +305,7 @@ Problem::addGridFunction(const std::string & var_type,
   {
     Variable & mfem_variable = getMFEMObject<Variable>("MooseVariableBase", var_name);
     getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
-    if (mfem_variable.getFESpace().isScalar())
+    if (mfem_variable.isScalar())
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
           var_name, mfem_variable.getGridFunction().get());
     else

@@ -31,8 +31,14 @@ public:
   void setPreconditioner(T & solver);
 
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or
-  /// algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
+  /// algebraic solver is needed. Default no-op; override for solvers that need the bilinear form
+  /// (e.g., LOR solvers).
+  virtual void updateSolver(mfem::ParBilinearForm & /*a*/, mfem::Array<int> & /*tdofs*/) {}
+
+  /// Updates the solver at the operator level. Default implementation propagates to the
+  /// preconditioner (if any). Override in solvers that build their hierarchy from the operator
+  /// (e.g., Moose::MFEM::GeometricMultigridSolver).
+  virtual void updateSolver(mfem::Operator & op, mfem::Array<int> & tdofs);
 
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
