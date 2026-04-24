@@ -36,9 +36,6 @@ public:
   /// Configure the linear solver used inside the nonlinear solve.
   virtual void SetLinearSolver(mfem::Solver & solver) = 0;
 
-  /// Solve the nonlinear system for the provided right-hand side and solution vector.
-  virtual void Mult(const mfem::Vector & rhs, mfem::Vector & x) = 0;
-
   /// Return whether this nonlinear solver requires Jacobian/gradient information from the operator.
   virtual bool RequiresGradient() const = 0;
 

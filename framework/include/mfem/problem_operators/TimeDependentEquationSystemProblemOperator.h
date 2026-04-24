@@ -44,8 +44,8 @@ public:
   }
 
 protected:
-  /// Add kernels/bcs and assemble the linear part of the equation system
-  void BuildEquationSystemOperator(mfem::real_t dt);
+  /// Form equation-system state for the current implicit time step.
+  void FormEquationSystemOperator(mfem::real_t dt);
 
 private:
   std::shared_ptr<Moose::MFEM::TimeDependentEquationSystem> _equation_system{nullptr};

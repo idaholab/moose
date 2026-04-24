@@ -550,6 +550,9 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_solver", "add_mfem_fespace_hierarchies");
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
   addTaskDependency("add_mfem_solver", "add_variable");
+  registerTask("resolve_mfem_solvers", true);
+  addTaskDependency("resolve_mfem_solvers", "add_mfem_solver");
+  addTaskDependency("init_problem", "resolve_mfem_solvers");
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
@@ -833,7 +836,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexKernelComponentAction", "Kernels/*/*", "add_mfem_complex_kernel_components");
   registerSyntaxTask(
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
-  registerSyntaxTask("AddMFEMSolverAction", "Preconditioner/*", "add_mfem_solver");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
 #endif

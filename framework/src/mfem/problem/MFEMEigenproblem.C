@@ -39,23 +39,6 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
 }
 
 void
-MFEMEigenproblem::addMFEMSolver(const std::string & type,
-                                const std::string & name,
-                                InputParameters & parameters,
-                                const bool select_as_problem_solver)
-{
-  auto solver = addObject<Moose::MFEM::LinearSolverBase>(type, name, parameters).front();
-  if (!select_as_problem_solver || !parameters.get<bool>("problem_solver"))
-    return;
-
-  getProblemData().jacobian_solver = solver;
-
-  if (!std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(getProblemData().jacobian_solver))
-    mooseError("The selected solver '" + name +
-               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
-}
-
-void
 MFEMEigenproblem::addVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & parameters)
@@ -87,6 +70,23 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
 
   for (int i = 0; i < num_modes; ++i)
     addGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
+}
+
+void
+MFEMEigenproblem::resolveMFEMSolvers()
+{
+  MFEMProblem::resolveMFEMSolvers();
+
+  if (getProblemData().nonlinear_solver)
+    mooseError("MFEMEigenproblem does not support nonlinear solver '",
+               getProblemData().nonlinear_solver->name(),
+               "'.");
+
+  if (getProblemData().jacobian_solver &&
+      !std::dynamic_pointer_cast<Moose::MFEM::EigensolverBase>(getProblemData().jacobian_solver))
+    mooseError("The selected solver '",
+               getProblemData().jacobian_solver->name(),
+               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }
 
 #endif

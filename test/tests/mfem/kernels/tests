@@ -17,7 +17,7 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solvers/active=cg Executioner/assembly_level=partial'
+    cli_args = 'Solvers/active="cg matrix_free_ams" Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a partially assembled definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -82,7 +82,8 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+    cli_args = 'Solvers/inactive="boomeramg" '
+               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     abs_zero = 8e-10
@@ -96,7 +97,8 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+    cli_args = 'Solvers/inactive="boomeramg" '
+               'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
@@ -110,7 +112,7 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/DiffusionPartialMPI.csv'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" '
                'Executioner/assembly_level=partial '
                'Executioner/gpu_aware_mpi=true '
                'Outputs/active=csv Outputs/csv=true '
@@ -127,7 +129,7 @@
     type = CSVDiff
     input = diffusion.i
     csvdiff = 'OutputData/DiffusionPartialMPI.csv'
-    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+    cli_args = 'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi Solvers/inactive="boomeramg" '
                'Executioner/assembly_level=partial '
                'Executioner/gpu_aware_mpi=false '
                'Outputs/active=csv Outputs/csv=true '
@@ -177,6 +179,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
+               'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
@@ -196,6 +199,7 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
+               'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'

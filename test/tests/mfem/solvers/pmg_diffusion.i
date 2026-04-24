@@ -79,12 +79,10 @@
 [Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-    problem_solver = false
     print_level = 0
   []
   [coarse]
     type = MFEMCGSolver
-    problem_solver = false
     preconditioner = boomeramg
     l_max_its = 10
     l_tol = 1e-2
@@ -92,12 +90,10 @@
   []
   [chebyshev]
     type = MFEMOperatorChebyshevSmoother
-    problem_solver = false
     order = 2
   []
   [pmg]
     type = MFEMGeometricMultigridSolver
-    problem_solver = false
     variable = concentration
     fespace_hierarchy = h1_hierarchy
     smoothers = 'chebyshev'

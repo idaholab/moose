@@ -24,12 +24,23 @@
 
 namespace Moose::MFEM
 {
-class LinearSolverBase;
 class CoefficientManager;
+class SolverBase;
 
 /**
- * Class to store weak form components (bilinear and linear forms, and optionally
- * mixed and nonlinear forms) and build methods
+ * Owns the weak-form mathematics of a MOOSE MFEM problem.
+ *
+ * An EquationSystem stores weak-form components (bilinear, linear, mixed-bilinear,
+ * and nonlinear forms) contributed by kernels and boundary conditions.  It forms the
+ * constrained linear part, keeps nonlinear action forms for residual/Jacobian
+ * evaluation, and exposes the solve interface as an mfem::Operator.  It is responsible
+ * for applying essential-DoF constraints and propagating either itself or the assembled
+ * linear operator (and bilinear form, for LOR) to the configured solver tree.
+ *
+ * EquationSystem is *not* responsible for grid-function bookkeeping, time stepping, or
+ * solver selection - those belong to the ProblemOperator layer.
+ *
+ * @see ProblemOperatorBase for the conceptual split between the two layers.
  */
 class EquationSystem : public mfem::Operator
 {
@@ -49,8 +60,15 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level);
   /**
-   * Assemble the linear part of the operator, assemble the right-hand side, apply essential and
-   * eliminated-variable constraints, and populate the true-DoF vectors used by the solve.
+   * Build all weak-form components via BuildEquationSystem(), form the constrained linear part of
+   * the system, and populate the true-DoF vectors used by the solve.
+   *
+   * For nonlinear problems, nonlinear forms are registered here but are not folded into the
+   * assembled linear operator. Their residual action is evaluated by Mult(), and any Jacobian
+   * contribution is formed at the current nonlinear iterate by GetGradient().
+   *
+   * This is the single public entry point for callers that want the equation system prepared for a
+   * solve. Subclasses customize the form-building step by overriding BuildEquationSystem().
    */
   void FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
   /// Compute residual y = Mu
@@ -87,11 +105,12 @@ public:
   bool Nonlinear() const { return _non_linear; }
 
   /**
-   * Prepare the provided linear solver. First calls SetupLOR on the solver if it's using a Low
-   * Order Refined methodology and then calls SetOperator on the solver with the assembled linear
-   * operator
+   * Provide the operator to the provided solver. For a nonlinear solver, the operator is \p this
+   * object. For a linear solver, the operator is the assembled linear operator. Note that for a
+   * linear solver, using a Low Order Refined methodology, this method first calls SetupLOR before
+   * setting the solver's general operator.
    */
-  void PrepareLinearSolver(LinearSolverBase & solver);
+  void ProvideOperator(SolverBase & solver);
 
   /// The true-DoF vector used for the most recent Jacobian linearization.
   const mfem::Vector & GetLinearizationPoint() const;
@@ -317,7 +336,6 @@ protected:
   CoefficientManager * _coefficient_manager = nullptr;
 
 private:
-  friend class EquationSystemProblemOperator;
   friend class ::MFEMProblemSolve;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;

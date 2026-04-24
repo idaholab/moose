@@ -76,22 +76,10 @@ MFEMPetscNonlinearSolver::ConstructSolver()
 }
 
 void
-MFEMPetscNonlinearSolver::SetOperator(mfem::Operator & op)
-{
-  GetSolver().SetOperator(op);
-}
-
-void
 MFEMPetscNonlinearSolver::SetLinearSolver(mfem::Solver &)
 {
   mooseError("MFEMPetscNonlinearSolver does not support an external MFEM linear solver. "
              "Configure PETSc KSP/PC behavior through PETSc options instead.");
-}
-
-void
-MFEMPetscNonlinearSolver::Mult(const mfem::Vector & rhs, mfem::Vector & x)
-{
-  GetSolver().Mult(rhs, x);
 }
 #endif
 

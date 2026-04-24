@@ -28,13 +28,13 @@ MFEMGeometricMultigridSolver::validParams()
   params.addRequiredParam<std::string>(
       "fespace_hierarchy",
       "Name of the Moose::MFEM::FESpaceHierarchy that defines the level structure.");
-  params.addRequiredParam<std::vector<std::string>>(
+  params.addRequiredParam<std::vector<MFEMSolverName>>(
       "smoothers",
       "Names of LinearSolverBase objects used as smoothers on the interior levels "
       "(levels 1 to N-1). May have length 1 (broadcast to all interior levels) or "
       "N-1 (one per interior level, ordered coarse-to-fine).");
-  params.addRequiredParam<std::string>("coarse_solver",
-                                       "Name of the LinearSolverBase used on the coarsest level.");
+  params.addRequiredParam<MFEMSolverName>(
+      "coarse_solver", "Name of the LinearSolverBase used on the coarsest level.");
   params.addRequiredParam<std::vector<std::string>>(
       "assembly_levels",
       "Assembly level for each level in the hierarchy. Valid values: 'legacy', 'full', "
@@ -45,8 +45,8 @@ MFEMGeometricMultigridSolver::validParams()
 MFEMGeometricMultigridSolver::MFEMGeometricMultigridSolver(const InputParameters & parameters)
   : Moose::MFEM::LinearSolverBase(parameters),
     _var_name(getParam<std::string>("variable")),
-    _smoother_names(getParam<std::vector<std::string>>("smoothers")),
-    _coarse_solver_name(getParam<std::string>("coarse_solver"))
+    _smoother_names(getParam<std::vector<MFEMSolverName>>("smoothers")),
+    _coarse_solver_name(getParam<MFEMSolverName>("coarse_solver"))
 {
   // Co-own the hierarchy so it outlives this solver.
   const auto & hierarchy_name = getParam<std::string>("fespace_hierarchy");
@@ -131,7 +131,8 @@ MFEMGeometricMultigridSolver::BuildMultigrid(const mfem::Operator & op)
 
   const int N = _hierarchy->GetNumLevels();
   if (N < 1)
-    mooseError("GeometricMultigridSolver '", name(), "': hierarchy must contain at least one level.");
+    mooseError(
+        "GeometricMultigridSolver '", name(), "': hierarchy must contain at least one level.");
   const int finest_level = N - 1;
 
   // Validate smoother vector length (levels 1 to N-1 each need a smoother).

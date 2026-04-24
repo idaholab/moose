@@ -24,7 +24,7 @@ EquationSystemProblemOperator::SetGridFunctions()
 void
 EquationSystemProblemOperator::Solve()
 {
-  BuildEquationSystemOperator();
+  FormEquationSystemOperator();
 
   auto * const es = GetEquationSystem();
   SolveWithOperator(*es, _true_rhs, _true_x);
@@ -33,9 +33,8 @@ EquationSystemProblemOperator::Solve()
 }
 
 void
-EquationSystemProblemOperator::BuildEquationSystemOperator()
+EquationSystemProblemOperator::FormEquationSystemOperator()
 {
-  GetEquationSystem()->BuildEquationSystem();
   GetEquationSystem()->FormSystem(_true_x, _true_rhs);
 }
 

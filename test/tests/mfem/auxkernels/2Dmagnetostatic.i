@@ -103,13 +103,10 @@
   []
 []
 
-[Preconditioner]
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solvers]
   [PCG]
     type = MFEMHyprePCG
     preconditioner = boomeramg

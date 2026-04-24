@@ -98,10 +98,7 @@ private:
       }
     }
 
-    void SetOperator(const mfem::Operator & op) override
-    {
-      _owner.BuildMultigrid(op);
-    }
+    void SetOperator(const mfem::Operator & op) override { _owner.BuildMultigrid(op); }
 
     void Mult(const mfem::Vector & x, mfem::Vector & y) const override
     {
@@ -117,8 +114,8 @@ private:
   // ---- parameters (resolved at construction) ----
   const std::string _var_name;
   std::shared_ptr<mfem::ParFiniteElementSpaceHierarchy> _hierarchy;
-  const std::vector<std::string> _smoother_names; ///< Names of interior-level smoothers
-  const std::string _coarse_solver_name;
+  const std::vector<MFEMSolverName> _smoother_names; ///< Names of interior-level smoothers
+  const MFEMSolverName _coarse_solver_name;
   std::vector<mfem::AssemblyLevel> _assembly_levels; ///< Per-level; broadcast if length 1
 
   MGProxy * _mg_proxy = nullptr; ///< Non-owning pointer into _solver

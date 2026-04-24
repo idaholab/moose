@@ -16,7 +16,21 @@
 
 namespace Moose::MFEM
 {
-/// Steady-state problem operator with an equation system.
+/**
+ * Steady-state ProblemOperator that prepares and solves a single EquationSystem each step.
+ *
+ * On each call to Solve() this class:
+ *   1. Forms equation-system data (kernels -> weak forms -> constrained linear part and
+ *      nonlinear action forms).
+ *   2. Calls EquationSystem::ProvideOperator() to pass either the EquationSystem itself or
+ *      the assembled linear operator (and the bilinear form for LOR preconditioners) to the
+ *      configured solver tree.
+ *   3. Dispatches to the linear or nonlinear solve path via SolveWithOperator().
+ *   4. Scatters the true-DoF solution back to the grid functions.
+ *
+ * @see EquationSystem for the class that owns the weak-form mathematics.
+ * @see ProblemOperatorBase for the block-vector bookkeeping and solve-dispatch infrastructure.
+ */
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
@@ -35,8 +49,8 @@ public:
   }
 
 protected:
-  /// Add kernels/bcs and assemble the linear part of the equation system
-  void BuildEquationSystemOperator();
+  /// Form equation-system state used by Solve().
+  void FormEquationSystemOperator();
 
 private:
   std::shared_ptr<EquationSystem> _equation_system{nullptr};

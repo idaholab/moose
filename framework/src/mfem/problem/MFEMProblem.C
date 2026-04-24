@@ -20,17 +20,45 @@
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
 #include "MFEMNonlinearSolverBase.h"
+#include "DependencyResolver.h"
+#include "MooseUtils.h"
 
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
 #include <algorithm>
 #include <map>
-#include <set>
 #include <deque>
 #include <sstream>
 
 registerMooseObject("MooseApp", MFEMProblem);
+
+namespace
+{
+std::vector<MFEMSolverName>
+getMFEMSolverDependencies(const InputParameters & parameters)
+{
+  std::vector<MFEMSolverName> dependencies;
+
+  for (const auto & [param_name, value] : parameters)
+  {
+    libmesh_ignore(value);
+
+    if (parameters.isPrivate(param_name) || !parameters.isParamValid(param_name))
+      continue;
+
+    if (parameters.have_parameter<MFEMSolverName>(param_name))
+      dependencies.push_back(parameters.get<MFEMSolverName>(param_name));
+    else if (parameters.have_parameter<std::vector<MFEMSolverName>>(param_name))
+    {
+      const auto & names = parameters.get<std::vector<MFEMSolverName>>(param_name);
+      dependencies.insert(dependencies.end(), names.begin(), names.end());
+    }
+  }
+
+  return dependencies;
+}
+}
 
 InputParameters
 MFEMProblem::validParams()
@@ -111,44 +139,98 @@ MFEMProblem::addMarker(const std::string & marker_type,
 void
 MFEMProblem::addMFEMSolver(const std::string & solver_type,
                            const std::string & name,
-                           InputParameters & parameters,
-                           const bool select_as_problem_solver)
+                           InputParameters & parameters)
 {
-  auto object = addObject<Moose::MFEM::SolverBase>(solver_type, name, parameters).front();
+  if (!_mfem_solver_definitions.emplace(name, MFEMSolverDefinition{solver_type, &parameters})
+           .second)
+    mooseError("Multiple MFEM solvers named '", name, "' were provided.");
+}
+
+void
+MFEMProblem::resolveMFEMSolvers()
+{
+  if (_mfem_solver_definitions.empty())
+    return;
+
+  DependencyResolver<std::string> resolver;
+
+  for (auto & [solver_name, definition] : _mfem_solver_definitions)
+  {
+    const auto dependencies = getMFEMSolverDependencies(*definition.parameters);
+    if (dependencies.empty())
+      resolver.addNode(solver_name);
+
+    for (const auto & dependency_name : dependencies)
+    {
+      auto dependency_it = _mfem_solver_definitions.find(dependency_name);
+      if (dependency_it == _mfem_solver_definitions.end())
+        mooseError("MFEM solver '",
+                   solver_name,
+                   "' references MFEM solver '",
+                   dependency_name,
+                   "', but no solver with that name was provided in the [Solvers] block.");
+
+      dependency_it->second.referenced = true;
+      resolver.addEdge(dependency_name, solver_name);
+    }
+  }
+
+  const std::vector<std::string> * sorted_solver_names = nullptr;
+  try
+  {
+    sorted_solver_names = &resolver.getSortedValues();
+  }
+  catch (CyclicDependencyException<std::string> & e)
+  {
+    mooseError("Cyclic MFEM solver dependency detected: ",
+               MooseUtils::join(e.getCyclicDependencies(), " <- "));
+  }
+
   auto & problem_data = getProblemData();
-  const bool problem_solver =
-      select_as_problem_solver && parameters.get<bool>("problem_solver");
+  problem_data.jacobian_solver = nullptr;
+  problem_data.nonlinear_solver = nullptr;
 
-  if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(object))
+  for (const auto & solver_name : *sorted_solver_names)
   {
-    if (!problem_solver)
-      return;
+    auto & definition = libmesh_map_find(_mfem_solver_definitions, solver_name);
+    auto solver =
+        addObject<Moose::MFEM::SolverBase>(definition.type, solver_name, *definition.parameters)
+            .front();
 
-    if (problem_data.jacobian_solver)
-      mooseError("Multiple linear solvers provided. '",
-                 problem_data.jacobian_solver->name(),
-                 "' and '",
-                 lin_solver->name(),
-                 "'");
-    problem_data.jacobian_solver = lin_solver;
-  }
-  else if (auto nonlinear_solver =
-               std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(object);
-           nonlinear_solver)
-  {
-    if (!problem_solver)
-      return;
+    if (definition.referenced)
+      continue;
 
-    if (problem_data.nonlinear_solver)
-      mooseError("Multiple nonlinear solvers provided. '",
-                 problem_data.nonlinear_solver->name(),
-                 "' and '",
-                 nonlinear_solver->name(),
-                 "'");
-    problem_data.nonlinear_solver = nonlinear_solver;
+    if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(solver))
+    {
+      if (problem_data.jacobian_solver)
+        mooseError("Multiple MFEM linear solver drivers provided. '",
+                   problem_data.jacobian_solver->name(),
+                   "' and '",
+                   lin_solver->name(),
+                   "' are not referenced by another MFEM solver.");
+      problem_data.jacobian_solver = lin_solver;
+    }
+    else if (auto nonlinear_solver =
+                 std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(solver);
+             nonlinear_solver)
+    {
+      if (problem_data.nonlinear_solver)
+        mooseError("Multiple MFEM nonlinear solver drivers provided. '",
+                   problem_data.nonlinear_solver->name(),
+                   "' and '",
+                   nonlinear_solver->name(),
+                   "' are not referenced by another MFEM solver.");
+      problem_data.nonlinear_solver = nonlinear_solver;
+    }
+    else
+      mooseError("Unsupported MFEM solver object type '",
+                 solver->type(),
+                 "' for solver '",
+                 solver->name(),
+                 "'.");
   }
-  else
-    mooseError("Unsupported MFEM solver object type '", solver_type, "' for solver '", name, "'.");
+
+  _mfem_solver_definitions.clear();
 }
 
 void

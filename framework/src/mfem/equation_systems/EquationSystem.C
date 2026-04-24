@@ -12,6 +12,7 @@
 #include "EquationSystem.h"
 #include "MFEMLinearSolverBase.h"
 #include "CoefficientManager.h"
+#include "MFEMNonlinearSolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -373,6 +374,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 void
 EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
+  BuildEquationSystem();
   height = trueX.Size();
   width = trueRHS.Size();
   // Store block offsets
@@ -711,27 +713,37 @@ EquationSystem::ApplyBoundaryNLFIntegrators(
 }
 
 void
-EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
+EquationSystem::ProvideOperator(SolverBase & solver)
 {
-  if (solver.IsLOR())
+  if (auto * linear_solver = dynamic_cast<LinearSolverBase *>(&solver))
   {
-    if (Complex())
-      mooseError("LOR solve is not supported for complex equation systems.");
-    if (_test_var_names.size() > 1)
-      mooseError("LOR solve is only supported for single-variable systems");
+    if (linear_solver->IsLOR())
+    {
+      if (Complex())
+        mooseError("LOR solve is not supported for complex equation systems.");
+      if (_test_var_names.size() > 1)
+        mooseError("LOR solve is only supported for single-variable systems");
 
-    const auto & test_var_name = _test_var_names.at(0);
-    const auto & trial_var_name = _trial_var_names.at(0);
-    mfem::ParGridFunction & trial_gf = _gfuncs->GetRef(trial_var_name);
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    solver.SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
+      const auto & test_var_name = _test_var_names.at(0);
+      const auto & trial_var_name = _trial_var_names.at(0);
+      mfem::ParGridFunction & trial_gf = _gfuncs->GetRef(trial_var_name);
+      mfem::Array<int> global_ess_markers(
+          trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+      global_ess_markers = 0;
+      ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
+      linear_solver->SetupLOR(*_blfs.Get(test_var_name), global_ess_markers);
+    }
+
+    mooseAssert(_linear_operator.Ptr(),
+                "If we are preparing a linear solver, we better have a linear operator");
+    linear_solver->SetOperator(*_linear_operator);
   }
-
-  mooseAssert(_linear_operator.Ptr(),
-              "If we are preparing a linear solver, we better have a linear operator");
-  solver.SetOperator(*_linear_operator);
+  else
+  {
+    mooseAssert(dynamic_cast<NonlinearSolverBase *>(&solver),
+                "If not a linear solver, the solver should be a nonlinear solver");
+    solver.SetOperator(*this);
+  }
 }
 
 const mfem::Vector &
