@@ -3,7 +3,7 @@
 # https://www.firedrakeproject.org/Irksome/demos/demo_mixed_heat.py.html
 
 [Mesh]
-  type = MFEMMesh
+  type = MFEMFileMesh
   file = ../mesh/square.e
 []
 

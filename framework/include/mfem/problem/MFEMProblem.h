@@ -42,8 +42,8 @@ public:
   virtual void syncSolutions(Direction) override {}
 
   /**
-   * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * MFEMMesh.
+   * Overwritten mesh() method to retrieve the MFEM mesh interface, accepting
+   * both MFEMMesh (file-based) and MFEMMeshGeneratorMesh (generator-based).
    */
   virtual MFEMMesh & mesh() override;
   virtual const MFEMMesh & mesh() const override;
