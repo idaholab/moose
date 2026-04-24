@@ -26,11 +26,12 @@ The code also allows users to choose the rotation axis with [!param](/Materials/
 Only z or -z are allowed for a two-dimensional mesh.
 The rotation follows the right-thumb rule, i.e. z represents counter-clock-wise rotation while -z is for clock-wise rotation.
 
-A material property, whose name is specified with [!param](/Materials/ControlDrumMaterial/drum_material_property), is evaluated from coupled material properties of all segments whose names are listed in [!param](/Materials/ControlDrumMaterial/segment_material_properties).
+Multiple material properties, whose name is specified with [!param](/Materials/ControlDrumMaterial/drum_material_properties), are evaluated from coupled material properties of all segments whose names are listed in a two-dimensional parameter [!param](/Materials/ControlDrumMaterial/segment_material_properties).
+The leading size of [!param](/Materials/ControlDrumMaterial/segment_material_properties) must be equal to the number of property names in [!param](/Materials/ControlDrumMaterial/drum_material_properties).
 When the code visits a quadrature point in an element, it first determines which drum the element belongs to.
 Then it evaluates the angle between the line connecting the quadrature point and the rotation center and the base coordinate axis (x when [!param](/Materials/ControlDrumMaterial/rotation_axis) is equal to $\pm z$ for example).
 Then, it determines which segment this quadrature point belongs to based on the angle, the current rotation position by [!param](/Materials/ControlDrumMaterial/rotation_angle_functors) and [!param](/Materials/ControlDrumMaterial/rotation_angle_offsets).
-Finally, it assigns the drum material property with the segment material property in [!param](/Materials/ControlDrumMaterial/segment_material_properties).
+Finally, it assigns the drum material properties with the corresponding segment material properties in [!param](/Materials/ControlDrumMaterial/segment_material_properties).
 
 !alert note
 The material requires that material properties of all segments are available on all quadrature points in its mesh subdomain although only one of them is chosen for the drum material property at a particular quadrature point.

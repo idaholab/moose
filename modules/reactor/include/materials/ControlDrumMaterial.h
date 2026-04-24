@@ -44,15 +44,15 @@ protected:
   /// Number of rod segments
   const unsigned int _n_segments;
 
-  /// The property this material evaluates
-  MaterialProperty<Real> & _drum_property;
-
   /// Rotation direction (x/y/z - 0/1/2)
   unsigned int _dir;
 
   /// Rotation angle functors of all drums
   std::vector<const Moose::Functor<Real> *> _rotation_functors;
 
+  /// The properties this material evaluates
+  std::vector<MaterialProperty<Real> *> _drum_properties;
+
   /// Material properties of all segments
-  std::vector<const MaterialProperty<Real> *> _segment_properties;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _segment_properties;
 };
