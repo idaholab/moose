@@ -212,4 +212,12 @@ INSFEMaterial::computeTau()
   _tauc[_qp] = 1. / std::sqrt(sqrt_term_pspg);
   _taum[_qp] = 1. / std::sqrt(sqrt_term_supg + visc_term * visc_term);
   _taue[_qp] = 1. / std::sqrt(sqrt_term_supg + diff_term * diff_term);
+
+  // add lower and upper bounds
+  Real tau_base = std::min(_hsupg[_qp] / (2 * _scaling_velocity), _dt / 2);
+  _tauc[_qp] = std::clamp(_tauc[_qp], 0.005 * tau_base, tau_base);
+
+  tau_base = std::min(_hsupg[_qp] / (2 * _vel_mag), _dt / 2);
+  _taum[_qp] = std::clamp(_taum[_qp], 0.01 * tau_base, 2.0 * tau_base);
+  _taue[_qp] = std::clamp(_taue[_qp], 0.01 * tau_base, 2.0 * tau_base);
 }
