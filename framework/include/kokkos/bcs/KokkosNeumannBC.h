@@ -21,7 +21,7 @@ public:
   template <typename Derived>
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int, AssemblyDatum &) const;
 
-private:
+protected:
   /// Value of grad(u) on the boundary.
   const Real _value;
 };
