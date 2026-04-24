@@ -86,7 +86,7 @@
     valgrind = 'none'
   []
   [frictionless-mortar-3d-action-centroid-triangulation]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=true '
@@ -102,7 +102,7 @@
     prereq = 'frictionless-mortar-3d-action/first'
   []
   [frictionless-mortar-3d-action-centroid-triangulation-no-triangle-retessellation]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=centroid Contact/mortar/triangulate_triangles=false '
@@ -118,7 +118,7 @@
     prereq = 'frictionless-mortar-3d-action-centroid-triangulation'
   []
   [frictionless-mortar-3d-action-ear-clipping-debug-mesh]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=ear_clipping Contact/mortar/debug_mesh=true '
@@ -132,7 +132,7 @@
     prereq = 'frictionless-mortar-3d-action/first'
   []
   [frictionless-mortar-3d-action-delaunay-debug-mesh]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d-action.i'
     capabilities = 'ad_size>=150 & method!=dbg'
     cli_args = 'Contact/mortar/triangulation=delaunay Contact/mortar/debug_mesh=true '
@@ -158,7 +158,7 @@
     prereq = 'frictionless-mortar-3d'
   []
   [frictionless-mortar-3d-debug-mesh-centroid-triangulation]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d.i'
     capabilities = 'ad_size>=150'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
@@ -182,7 +182,7 @@
     prereq = 'frictionless-mortar-3d-debug-mesh'
   []
   [frictionless-mortar-3d-debug-mesh-centroid-triangulation-no-triangle-retessellation]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d.i'
     capabilities = 'ad_size>=150'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
@@ -206,7 +206,7 @@
     prereq = 'frictionless-mortar-3d-debug-mesh-centroid-triangulation'
   []
   [frictionless-mortar-3d-debug-mesh-ear-clipping]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d.i'
     capabilities = 'ad_size>=150'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
@@ -225,7 +225,7 @@
     prereq = 'frictionless-mortar-3d-debug-mesh'
   []
   [frictionless-mortar-3d-debug-mesh-delaunay]
-    type = 'RunApp'
+    type = 'CheckFiles'
     input = 'frictionless-mortar-3d.i'
     capabilities = 'ad_size>=150'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Outputs/exodus=false Outputs/csv=false '
