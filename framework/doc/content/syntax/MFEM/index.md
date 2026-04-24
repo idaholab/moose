@@ -29,7 +29,9 @@ First of all, we must specify that the type of problem we wish to solve is an [M
 
 ### Geometry - Mesh and Finite Element Spaces
 
-Given that we wish to utilize MFEM as the backend, the mesh we import into the problem must be of [MFEMMesh.md] type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
+Given that we wish to utilize MFEM as the backend, the mesh we import into the problem must be an
+[MFEMFileMesh.md]. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the
+`Mesh` block.
 
 !listing test/tests/mfem/kernels/diffusion.i block=/Mesh
 

@@ -268,9 +268,26 @@ SetupMeshAction::act()
         // been provided
         if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
         {
-          _type = "MeshGeneratorMesh";
+          // Auto-select MFEMMeshGeneratorMesh when any generator carries the MFEM flag.
+          // Guarded at compile time so non-MFEM builds incur zero overhead.
+          bool has_mfem_generator = false;
+#ifdef MOOSE_MFEM_ENABLED
+          for (const auto & gen_action_ptr : generator_actions)
+          {
+            const auto * gen_action = dynamic_cast<const AddMeshGeneratorAction *>(gen_action_ptr);
+            if (gen_action &&
+                gen_action->getObjectParams().have_parameter<bool>("_mfem_mesh_generator") &&
+                gen_action->getObjectParams().get<bool>("_mfem_mesh_generator"))
+            {
+              has_mfem_generator = true;
+              break;
+            }
+          }
+#endif
+
+          _type = has_mfem_generator ? "MFEMMeshGeneratorMesh" : "MeshGeneratorMesh";
           auto original_params = _moose_object_pars;
-          _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+          _moose_object_pars = _factory.getValidParams(_type);
 
           // Since we changing the type on the fly, we'll have to manually extract parameters again
           // from the input file object.
