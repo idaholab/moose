@@ -76,7 +76,7 @@ MFEMPetscNonlinearSolver::ConstructSolver()
 }
 
 void
-MFEMPetscNonlinearSolver::SetOperator(const mfem::Operator & op)
+MFEMPetscNonlinearSolver::SetOperator(mfem::Operator & op)
 {
   GetSolver().SetOperator(op);
 }

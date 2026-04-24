@@ -1,0 +1,15 @@
+[Tests]
+  design = 'MFEMGeometricMultigridSolver.md MFEMFESpaceHierarchy.md'
+  issues = '#32771'
+  [MFEMPMGDiffusion]
+    type = CSVDiff
+    input = pmg_diffusion.i
+    csvdiff = 'OutputData/PMGDiffusion.csv'
+    requirement = 'The system shall have the ability to solve a diffusion problem using a '
+                  'p-multigrid (geometric multigrid) preconditioner with MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu'
+    recover = false
+    abs_zero = 1e-6
+  []
+[]

@@ -31,7 +31,8 @@ void
 AddMFEMSolverAction::act()
 {
   if (_problem->feBackend() == Moose::FEBackend::MFEM)
-    static_cast<MFEMProblem &>(*_problem).addMFEMSolver(_type, _name, _moose_object_pars);
+    static_cast<MFEMProblem &>(*_problem).addMFEMSolver(
+        _type, _name, _moose_object_pars, _registered_identifier == "Solvers/*");
 }
 
 #endif

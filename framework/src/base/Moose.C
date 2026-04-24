@@ -510,9 +510,17 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
   appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
   addTaskDependency("add_mfem_fespaces", "add_mfem_submeshes");
-  addTaskDependency("add_variable", "add_mfem_fespaces");
-  addTaskDependency("add_aux_variable", "add_mfem_fespaces");
-  addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
+
+  // add FESpace hierarchies (must come after fespaces so the base fespace is available)
+  registerMooseObjectTask("add_mfem_fespace_hierarchies", MFEMFESpaceHierarchy, false);
+  addTaskDependency("add_mfem_fespace_hierarchies", "add_mfem_fespaces");
+
+  // variables must wait for hierarchies since a variable may reference a hierarchy's
+  // finest level via fespace_hierarchy = ...
+  addTaskDependency("add_variable", "add_mfem_fespace_hierarchies");
+  addTaskDependency("add_aux_variable", "add_mfem_fespace_hierarchies");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_fespace_hierarchies");
+  // kernels only need fespaces, not hierarchies
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
   // add QuadratureFunctions
@@ -537,15 +545,11 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  // add preconditioning.
-  registerMooseObjectTask("add_mfem_preconditioner", Moose::MFEM::SolverBase, false);
-  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
-  addTaskDependency("add_mfem_preconditioner", "add_variable");
-
   // add solver objects.
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
-  addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
+  addTaskDependency("add_mfem_solver", "add_mfem_fespace_hierarchies");
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
+  addTaskDependency("add_mfem_solver", "add_variable");
 #endif
 
   // Linear FV kernels fetch FVInterpolationMethod instances in their constructors. Some Physics
@@ -824,10 +828,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask(
       "AddMFEMQuadratureFunctionAction", "QuadratureFunctions/*", "add_mfem_quadrature_functions");
   registerSyntaxTask(
+      "AddMFEMFESpaceHierarchyAction", "FESpaceHierarchies/*", "add_mfem_fespace_hierarchies");
+  registerSyntaxTask(
       "AddMFEMComplexKernelComponentAction", "Kernels/*/*", "add_mfem_complex_kernel_components");
   registerSyntaxTask(
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
-  registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
+  registerSyntaxTask("AddMFEMSolverAction", "Preconditioner/*", "add_mfem_solver");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
 #endif

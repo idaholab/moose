@@ -24,18 +24,15 @@ public:
   MFEMHypreLOBPCG(const InputParameters & parameters);
 
   /// Sets the operator for the eigensolver and propagates it to the preconditioner.
-  virtual void SetOperator(mfem::OperatorHandle & op) override
+  virtual void SetOperator(mfem::Operator & op) override
   {
     if (_preconditioner)
       _preconditioner->SetOperator(op);
-    _eigensolver->SetOperator(*op);
+    _eigensolver->SetOperator(op);
   }
 
   /// Sets the mass matrix for the eigensolver
-  virtual void SetMassMatrix(mfem::OperatorHandle & mass) override
-  {
-    _eigensolver->SetMassMatrix(*mass);
-  }
+  virtual void SetMassMatrix(mfem::Operator & mass) override { _eigensolver->SetMassMatrix(mass); }
 
   /// Solves the eigenvalue problem
   virtual void Solve() override { _eigensolver->Solve(); }

@@ -33,7 +33,7 @@ public:
   void SetPreconditioner(T & solver);
 
   /// Returns this solver's preconditioner
-  LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); };
+  LinearSolverBase * GetPreconditioner() { return _preconditioner.get(); }
 
   /// Rebuild any Low-Order-Refined components from the unreduced bilinear form. Called only when
   /// IsLOR() is true, before the assembled linear operator has been set via SetOperator. Default
@@ -43,7 +43,7 @@ public:
 
   /// Updates the solver at the operator level. Default implementation sets the operator on the
   /// wrapped MFEM solver
-  virtual void SetOperator(mfem::OperatorHandle & op);
+  virtual void SetOperator(mfem::Operator & op) override;
 
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool IsLOR() const { return _lor || (_preconditioner && _preconditioner->IsLOR()); }

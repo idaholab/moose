@@ -33,9 +33,6 @@ public:
 
   void ConstructSolver() override = 0;
 
-  /// Configure the nonlinear solver with the residual/Jacobian operator.
-  virtual void SetOperator(const mfem::Operator & op) = 0;
-
   /// Configure the linear solver used inside the nonlinear solve.
   virtual void SetLinearSolver(mfem::Solver & solver) = 0;
 

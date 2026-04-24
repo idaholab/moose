@@ -93,6 +93,38 @@ public:
    */
   void PrepareLinearSolver(LinearSolverBase & solver);
 
+  /// The true-DoF vector used for the most recent Jacobian linearization.
+  const mfem::Vector & GetLinearizationPoint() const;
+
+  /**
+   * Build a fresh ParBilinearForm on the given FESpace using the same kernels as the main
+   * system's bilinear form for var_name. Caller owns the returned form.
+   */
+  std::shared_ptr<mfem::ParBilinearForm>
+  BuildBilinearFormForFESpace(const std::string & var_name,
+                              mfem::ParFiniteElementSpace & fespace,
+                              mfem::AssemblyLevel assembly_level);
+
+  /**
+   * Build a fresh ParNonlinearForm on the given FESpace using the same kernels as the main
+   * system's nonlinear form for var_name. Caller owns the returned form.
+   */
+  std::shared_ptr<mfem::ParNonlinearForm>
+  BuildNonlinearFormForFESpace(const std::string & var_name,
+                               mfem::ParFiniteElementSpace & fespace,
+                               mfem::AssemblyLevel assembly_level);
+
+  /**
+   * Returns true if the equation system has active mixed bilinear form contributions for var_name.
+   */
+  bool HasMixedBilinearForms(const std::string & var_name) const;
+
+  /**
+   * Build and return the essential boundary attribute marker array for a given trial variable.
+   * The returned array has size == pmesh.bdr_attributes.Max() with 1 at essential boundaries.
+   */
+  mfem::Array<int> BuildEssentialBoundaryMarkers(const std::string & var_name) const;
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -274,6 +306,8 @@ protected:
   Moose::MFEM::GridFunctions * _gfuncs;
   // Array storing block offsets of solution and residual vector
   mfem::Array<int> _block_true_offsets;
+  // Non-owning pointer to the vector passed into the most recent GetGradient() call.
+  mutable const mfem::Vector * _linearization_point = nullptr;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
   // Whether a nonlinear solver exists and whether it requires Jacobian/gradient information.

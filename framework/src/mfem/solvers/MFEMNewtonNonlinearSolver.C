@@ -41,7 +41,7 @@ MFEMNewtonNonlinearSolver::ConstructSolver()
 }
 
 void
-MFEMNewtonNonlinearSolver::SetOperator(const mfem::Operator & op)
+MFEMNewtonNonlinearSolver::SetOperator(mfem::Operator & op)
 {
   GetSolver().SetOperator(op);
 }

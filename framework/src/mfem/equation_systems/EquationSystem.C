@@ -273,11 +273,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   if (_assembly_level == mfem::AssemblyLevel::LEGACY)
     FormSystemMatrix(op, trueX, trueRHS);
   else
-  {
-    mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
-                "Non-legacy assembly is only supported for single test and trial variable systems");
     FormSystemOperator(op, trueX, trueRHS);
-  }
 }
 
 void
@@ -285,6 +281,9 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
                                    mfem::BlockVector & trueX,
                                    mfem::BlockVector & trueRHS)
 {
+  mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+              "Non-legacy assembly is only supported for single test and trial variable systems");
+
   auto & test_var_name = _test_var_names.at(0);
   mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
@@ -456,6 +455,8 @@ EquationSystem::FormJacobianMatrix(const mfem::Vector & u)
 mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & u) const
 {
+  _linearization_point = &u;
+
   if (_non_linear)
   {
     if (_assembly_level != mfem::AssemblyLevel::LEGACY)
@@ -730,7 +731,64 @@ EquationSystem::PrepareLinearSolver(LinearSolverBase & solver)
 
   mooseAssert(_linear_operator.Ptr(),
               "If we are preparing a linear solver, we better have a linear operator");
-  solver.SetOperator(_linear_operator);
+  solver.SetOperator(*_linear_operator);
+}
+
+const mfem::Vector &
+EquationSystem::GetLinearizationPoint() const
+{
+  if (!_linearization_point)
+    mooseError("EquationSystem::GetLinearizationPoint() called before GetGradient().");
+  return *_linearization_point;
+}
+
+std::shared_ptr<mfem::ParBilinearForm>
+EquationSystem::BuildBilinearFormForFESpace(const std::string & var_name,
+                                            mfem::ParFiniteElementSpace & fespace,
+                                            mfem::AssemblyLevel assembly_level)
+{
+  auto blf = std::make_shared<mfem::ParBilinearForm>(&fespace);
+  blf->SetAssemblyLevel(assembly_level);
+  ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _integrated_bc_map);
+  ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(var_name, var_name, blf, _kernels_map);
+  blf->Assemble();
+  return blf;
+}
+
+std::shared_ptr<mfem::ParNonlinearForm>
+EquationSystem::BuildNonlinearFormForFESpace(const std::string & var_name,
+                                             mfem::ParFiniteElementSpace & fespace,
+                                             mfem::AssemblyLevel /*assembly_level*/)
+{
+  auto nlf = std::make_shared<mfem::ParNonlinearForm>(&fespace);
+  ApplyDomainNLFIntegrators(var_name, nlf, _kernels_map, std::nullopt);
+  ApplyBoundaryNLFIntegrators(var_name, nlf, _integrated_bc_map, std::nullopt);
+  return nlf;
+}
+
+bool
+EquationSystem::HasMixedBilinearForms(const std::string & var_name) const
+{
+  if (!_mblfs.Has(var_name))
+    return false;
+  return _mblfs.GetRef(var_name).begin() != _mblfs.GetRef(var_name).end();
+}
+
+mfem::Array<int>
+EquationSystem::BuildEssentialBoundaryMarkers(const std::string & var_name) const
+{
+  const int n_bdr = _gfuncs->Get(var_name)->ParFESpace()->GetParMesh()->bdr_attributes.Max();
+  mfem::Array<int> global_markers(n_bdr);
+  global_markers = 0;
+
+  if (_essential_bc_map.Has(var_name))
+    for (const auto & bc : _essential_bc_map.GetRef(var_name))
+    {
+      const mfem::Array<int> & bc_markers = bc->getBoundaryMarkers();
+      for (int i = 0; i < n_bdr; ++i)
+        global_markers[i] = std::max(global_markers[i], bc_markers[i]);
+    }
+  return global_markers;
 }
 
 } // namespace Moose::MFEM

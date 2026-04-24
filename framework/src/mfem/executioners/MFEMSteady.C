@@ -92,7 +92,7 @@ MFEMSteady::init()
   for (const auto & problem_operator : getProblemOperators())
   {
     problem_operator->SetGridFunctions();
-    problem_operator->Init(_mfem_problem_data.f);
+    problem_operator->Init(_mfem_problem_data.true_solution);
   }
 }
 

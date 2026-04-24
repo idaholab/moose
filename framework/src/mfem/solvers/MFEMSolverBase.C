@@ -25,6 +25,11 @@ SolverBase::validParams()
                         false,
                         "Whether to preserve the current MFEM solution vector as the initial "
                         "guess for an iterative solver.");
+  params.addParam<bool>(
+      "problem_solver",
+      true,
+      "Whether this solver should be used as the problem's linear or nonlinear solve driver. Set "
+      "to false for helper solvers that are only referenced by other solvers.");
   return params;
 }
 

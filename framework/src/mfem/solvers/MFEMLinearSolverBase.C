@@ -67,10 +67,10 @@ template void LinearSolverBase::SetPreconditioner(mfem::HypreLOBPCG &);
 template void LinearSolverBase::SetPreconditioner(mfem::HypreAME &);
 
 void
-LinearSolverBase::SetOperator(mfem::OperatorHandle & op)
+LinearSolverBase::SetOperator(mfem::Operator & op)
 {
   mooseAssert(_solver, "setOperator called before the solver was constructed");
-  _solver->SetOperator(*op);
+  _solver->SetOperator(op);
 }
 
 void

@@ -26,7 +26,8 @@ public:
    */
   virtual void addMFEMSolver(const std::string & user_object_name,
                              const std::string & name,
-                             InputParameters & parameters) override;
+                             InputParameters & parameters,
+                             bool select_as_problem_solver) override;
 
   /**
    * Override of MFEMProblem::addVariable. Sets a

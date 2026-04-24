@@ -16,6 +16,11 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMExecutedObject.h"
 #include "MFEMVectorUtils.h"
+#include "MFEMFESpaceHierarchy.h"
+#include "Postprocessor.h"
+#include "VectorPostprocessor.h"
+#include "MFEMNonlinearSolverBase.h"
+
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -85,43 +90,40 @@ MFEMProblem::setMesh()
 }
 
 void
-MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
-                                   const std::string & name,
-                                   InputParameters & parameters)
-{
-  addObject<Moose::MFEM::SolverBase>(user_object_name, name, parameters);
-}
-
-void
-MFEMProblem::addIndicator(const std::string & user_object_name,
+MFEMProblem::addIndicator(const std::string & indicator_type,
                           const std::string & name,
                           InputParameters & parameters)
 {
-  auto estimator = addObject<MFEMIndicator>(user_object_name, name, parameters).front();
+  auto estimator = addObject<MFEMIndicator>(indicator_type, name, parameters).front();
 
   // construct the estimator itself
   estimator->createEstimator();
 }
 
 void
-MFEMProblem::addMarker(const std::string & user_object_name,
+MFEMProblem::addMarker(const std::string & marker_type,
                        const std::string & name,
                        InputParameters & parameters)
 {
-  getProblemData().refiner =
-      addObject<MFEMRefinementMarker>(user_object_name, name, parameters).front();
+  getProblemData().refiner = addObject<MFEMRefinementMarker>(marker_type, name, parameters).front();
 }
 
 void
-MFEMProblem::addMFEMSolver(const std::string & user_object_name,
+MFEMProblem::addMFEMSolver(const std::string & solver_type,
                            const std::string & name,
-                           InputParameters & parameters)
+                           InputParameters & parameters,
+                           const bool select_as_problem_solver)
 {
-  auto object = addObject<Moose::MFEM::SolverBase>(user_object_name, name, parameters).front();
+  auto object = addObject<Moose::MFEM::SolverBase>(solver_type, name, parameters).front();
   auto & problem_data = getProblemData();
+  const bool problem_solver =
+      select_as_problem_solver && parameters.get<bool>("problem_solver");
 
   if (auto lin_solver = std::dynamic_pointer_cast<Moose::MFEM::LinearSolverBase>(object))
   {
+    if (!problem_solver)
+      return;
+
     if (problem_data.jacobian_solver)
       mooseError("Multiple linear solvers provided. '",
                  problem_data.jacobian_solver->name(),
@@ -134,6 +136,9 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                std::dynamic_pointer_cast<Moose::MFEM::NonlinearSolverBase>(object);
            nonlinear_solver)
   {
+    if (!problem_solver)
+      return;
+
     if (problem_data.nonlinear_solver)
       mooseError("Multiple nonlinear solvers provided. '",
                  problem_data.nonlinear_solver->name(),
@@ -143,8 +148,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
     problem_data.nonlinear_solver = nonlinear_solver;
   }
   else
-    mooseError(
-        "Unsupported MFEM solver object type '", user_object_name, "' for solver '", name, "'.");
+    mooseError("Unsupported MFEM solver object type '", solver_type, "' for solver '", name, "'.");
 }
 
 void
@@ -225,11 +229,42 @@ MFEMProblem::addFESpace(const std::string & type,
                         const std::string & name,
                         InputParameters & parameters)
 {
+  if (getProblemData().fespace_hierarchies.Has(name))
+    mooseError("Cannot add FESpace '",
+               name,
+               "': a FESpaceHierarchy with the same name already exists. "
+               "FESpaces and FESpaceHierarchies share the fespaces namespace.");
+
   auto & mfem_fespace = *addObject<MFEMFESpace>(type, name, parameters).front();
 
   // Register fespace and associated fe collection.
   getProblemData().fecs.Register(name, mfem_fespace.getFEC());
   getProblemData().fespaces.Register(name, mfem_fespace.getFESpace());
+}
+
+void
+MFEMProblem::addFESpaceHierarchy(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  if (getProblemData().fespaces.Has(name))
+    mooseError("Cannot add FESpaceHierarchy '",
+               name,
+               "': a FESpace with the same name already exists. "
+               "FESpaces and FESpaceHierarchies share the fespaces namespace.");
+
+  auto hierarchy_obj = addObject<MFEMFESpaceHierarchy>(type, name, parameters).front();
+  auto hierarchy_shared = hierarchy_obj->getHierarchyShared();
+  // Register the hierarchy for co-ownership by solvers.
+  getProblemData().fespace_hierarchies.Register(name, hierarchy_shared);
+  // Register the finest-level FESpace in fespaces under the hierarchy name so that
+  // variables can say `fespace = <hierarchy_name>` without a separate FESpace definition.
+  // The aliasing shared_ptr keeps the hierarchy alive as long as this entry lives.
+  auto finest = std::shared_ptr<mfem::ParFiniteElementSpace>(
+      hierarchy_shared,
+      &static_cast<mfem::ParFiniteElementSpace &>(
+          hierarchy_obj->getHierarchy().GetFinestFESpace()));
+  getProblemData().fespaces.Register(name, finest);
 }
 
 void

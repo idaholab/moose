@@ -31,6 +31,9 @@ public:
   /// Override in derived classes to construct and set the solver options.
   virtual void ConstructSolver() = 0;
 
+  /// Set the operator for the solver
+  virtual void SetOperator(mfem::Operator & op) = 0;
+
 protected:
   /// Solver to be used for the problem
   std::unique_ptr<mfem::Solver> _solver;
