@@ -40,7 +40,7 @@ public:
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
   /// For eigensolvers, this method calls the underlying Solve method
-  virtual void Solve() { mooseError("Solve method not used in this solver type."); }
+  virtual void solve() { mooseError("'solve' method not used in this solver type."); }
 
 protected:
   /// Override in derived classes to construct and set the solver options.

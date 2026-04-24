@@ -58,14 +58,10 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
 {
 
   if (var_type == "MFEMVariable")
-  {
     // Add MFEM variable directly.
     addObject<MFEMVariable>(var_type, var_name, parameters);
-  }
   else if (var_type == "MFEMComplexVariable")
-  {
     mooseError("Complex variables are not currently supported for eigenproblems.");
-  }
   else
   {
     // Add MOOSE variable.

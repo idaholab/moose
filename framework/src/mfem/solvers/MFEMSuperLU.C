@@ -42,9 +42,7 @@ void
 MFEMSuperLU::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
 {
   if (_lor)
-  {
-    mooseError("SuperLU solver does not support LOR solve");
-  }
+mooseError("SuperLU solver does not support LOR solve");
   else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
   {
     mfem::SuperLUSolver * solver = new mfem::SuperLUSolver(getMFEMProblem().getComm());

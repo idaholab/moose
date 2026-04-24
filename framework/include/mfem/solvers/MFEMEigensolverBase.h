@@ -36,7 +36,7 @@ public:
   virtual const mfem::HypreParVector & getEigenvector(int index) const = 0;
 
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
-  virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {};
+  virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {}
 
 protected:
   /// Mass matrix for eigensolver
