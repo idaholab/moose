@@ -12,12 +12,10 @@
 #include "MFEMMesh.h"
 #include "libmesh/mesh_generation.h"
 
-registerMooseObject("MooseApp", MFEMMesh);
-
 InputParameters
 MFEMMesh::validParams()
 {
-  InputParameters params = FileMesh::validParams();
+  InputParameters params = MooseMesh::validParams();
   params.addParam<unsigned int>(
       "serial_refine",
       0,
@@ -25,67 +23,50 @@ MFEMMesh::validParams()
   params.addParam<unsigned int>(
       "uniform_refine",
       0,
-      "Number of serial refinements to perform on the mesh. Equivalent to serial_refine");
+      "Number of serial refinements to perform on the mesh. Equivalent to serial_refine.");
   params.addParam<unsigned int>(
-      "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
-  params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
+      "parallel_refine", 0, "Number of parallel refinements to perform after partitioning.");
   params.addParam<bool>("nonconforming",
                         false,
                         "Ensures the mesh is non-conforming: necessary for refining quad/hex "
                         "meshes and load (re)balancing.");
   params.addParam<bool>("reorder_mesh",
                         false,
-                        "Determines whether we reorder the mesh to improve dynamic partitioning. "
-                        "Only Hilbert sorting is supported at present.");
-
-  params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
-
+                        "Reorder elements with Hilbert space-filling curve ordering before "
+                        "partitioning, to improve dynamic load balancing.");
+  params.addParam<std::string>("displacement",
+                               "Optional variable name to use for mesh displacement.");
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
-
-MFEMMesh::~MFEMMesh() {}
+MFEMMesh::MFEMMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
 
 void
 MFEMMesh::buildMesh()
 {
-  TIME_SECTION("buildMesh", 2, "Reading Mesh");
+  TIME_SECTION("buildMesh", 2, "Building MFEM Mesh");
 
-  // Build the MFEM ParMesh from a serial MFEM mesh
-  mfem::Mesh mfem_ser_mesh(getFileName());
+  mfem::Mesh ser_mesh = buildSerialMFEMMesh();
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
-    paramError(
-        "Cannot define serial_refine and uniform_refine to be nonzero at the same time (they "
-        "are the same variable). Please choose one.\n");
+    paramError("serial_refine",
+               "Cannot set both serial_refine and uniform_refine at the same time.");
 
-  uniformRefinement(mfem_ser_mesh,
+  uniformRefinement(ser_mesh,
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
 
-  // MFEM supports load balancing of parallel non-conforming meshes
-  // with a space-filling curve partitioning, and we can improve it
-  // by re-ordering the mesh. For now, we only support the Hilbert
-  // ordering, although there is one other option.
   if (getParam<bool>("reorder_mesh"))
   {
     mfem::Array<int> ordering;
-    mfem_ser_mesh.GetHilbertElementOrdering(ordering);
-    mfem_ser_mesh.ReorderElements(ordering);
+    ser_mesh.GetHilbertElementOrdering(ordering);
+    ser_mesh.ReorderElements(ordering);
   }
 
-  // Make sure mesh is in non-conforming mode to enable local refinement of
-  // quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument (true/false)
-  // determines whether a simplex mesh is considered to be non-conforming.
   if (getParam<bool>("nonconforming"))
-    mfem_ser_mesh.EnsureNCMesh(true);
+    ser_mesh.EnsureNCMesh(true);
 
-  // multi app should take the mpi comm from moose so is split correctly??
-  auto comm = this->comm().get();
-  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
-
-  // Perform parallel refinements
+  _mfem_par_mesh = std::make_shared<mfem::ParMesh>(this->comm().get(), ser_mesh);
   uniformRefinement(*_mfem_par_mesh, getParam<unsigned int>("parallel_refine"));
 
   if (isParamSetByUser("displacement"))
@@ -99,14 +80,15 @@ void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
 {
   _mfem_par_mesh->EnsureNodes();
-  mfem::GridFunction * nodes = _mfem_par_mesh->GetNodes();
-
-  *nodes += displacement;
+  *_mfem_par_mesh->GetNodes() += displacement;
 }
 
 void
 MFEMMesh::buildDummyMooseMesh()
 {
+  // The mesh generator pipeline supplies an always-replicated MFEMMeshCarrier. Replace it with a
+  // placeholder matching the requested libMesh parallel type before MOOSE performs mesh setup.
+  setMeshBase(buildMeshBaseObject(dimension()));
   auto & dummy = static_cast<UnstructuredMesh &>(getMesh());
   MeshTools::Generation::build_point(dummy);
   if (dimension() >= 2)
@@ -118,12 +100,6 @@ MFEMMesh::uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const
 {
   for (unsigned int i = 0; i < nref; ++i)
     mesh.UniformRefinement();
-}
-
-std::unique_ptr<MooseMesh>
-MFEMMesh::safeClone() const
-{
-  return _app.getFactory().copyConstruct(*this);
 }
 
 #endif
