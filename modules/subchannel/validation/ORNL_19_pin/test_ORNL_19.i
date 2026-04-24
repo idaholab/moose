@@ -48,7 +48,6 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind

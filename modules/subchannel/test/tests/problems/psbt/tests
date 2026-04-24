@@ -23,17 +23,6 @@
     max_threads = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using the non-default friction/mixing model.'
   []
-  [psbt_regression_test_explicit_staggered]
-    type = CSVDiff
-    input = psbt_explicit_staggered.i
-    csvdiff = psbt_explicit_staggered_out.csv
-    capabilities = 'method!=dbg'
-    valgrind = NONE
-    recover = false
-    abs_zero = 1e-6
-    max_threads = 1
-    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm and a staggered pressure formulation.'
-  []
   [psbt_regression_test_implicit]
     type = CSVDiff
     input = psbt_implicit.i

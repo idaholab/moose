@@ -231,8 +231,6 @@ protected:
   const Real _dir_grav;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
-  /// Flag to define the usage of staggered or collocated pressure
-  const bool _staggered_pressure_bool;
   /// Segregated solve
   const bool _segregated_bool;
   /// Boolean to printout information related to subchannel solve

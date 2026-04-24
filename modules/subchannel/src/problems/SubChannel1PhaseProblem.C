@@ -83,9 +83,6 @@ SubChannel1PhaseProblem::validParams()
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
-  params.addParam<bool>("staggered_pressure",
-                        false,
-                        "Boolean to define the use of staggered or collocated pressure.");
   params.addParam<bool>(
       "segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>(
@@ -143,7 +140,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
     _implicit_bool(getParam<bool>("implicit")),
-    _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _deformation(getParam<bool>("deformation")),
@@ -1101,228 +1097,98 @@ SubChannel1PhaseProblem::computeP(int iblock)
   const unsigned int first_node = iblock * _block_size + 1;
   if (!_implicit_bool)
   {
-    if (!_staggered_pressure_bool)
+    for (unsigned int iz = last_node; iz > first_node - 1; iz--)
     {
-      for (unsigned int iz = last_node; iz > first_node - 1; iz--)
+      // Calculate pressure in the inlet of the cell assuming known outlet
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
-        // Calculate pressure in the inlet of the cell assuming known outlet
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          // update Pressure solution
-          _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out));
-        }
-      }
-    }
-    else
-    {
-      for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-      {
-        // Calculate pressure in the inlet of the cell assuming known outlet
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          // update Pressure solution
-          // Note: assuming uniform axial discretization in the curren code
-          // We will need to update this later if we allow non-uniform refinements in the axial
-          // direction
-          PetscScalar Pe = 0.5;
-          auto alpha = computeInterpolationCoefficients(Pe);
-          if (iz == last_node)
-          {
-            _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out) / 2.0);
-          }
-          else
-          {
-            _P_soln->set(node_in,
-                         (*_P_soln)(node_out) + (1.0 - alpha) * (*_DP_soln)(node_out) +
-                             alpha * (*_DP_soln)(node_in));
-          }
-        }
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        // update Pressure solution
+        _P_soln->set(node_in, (*_P_soln)(node_out) + (*_DP_soln)(node_out));
       }
     }
   }
   else
   {
-    if (!_staggered_pressure_bool)
+    LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
+    for (unsigned int iz = last_node; iz > first_node - 1; iz--)
     {
-      LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
-      for (unsigned int iz = last_node; iz > first_node - 1; iz--)
+      auto iz_ind = iz - first_node;
+      // Calculate pressure in the inlet of the cell assuming known outlet
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
-        auto iz_ind = iz - first_node;
-        // Calculate pressure in the inlet of the cell assuming known outlet
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+
+        // inlet, outlet, and interpolated axial surface area
+        auto S_in = (*_S_flow_soln)(node_in);
+        auto S_out = (*_S_flow_soln)(node_out);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
+
+        // Creating matrix of coefficients
+        PetscInt row = i_ch + _n_channels * iz_ind;
+        PetscInt col = i_ch + _n_channels * iz_ind;
+        PetscScalar value = -1.0 * S_interp;
+        LibmeshPetscCall(
+            MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
+
+        if (iz == last_node)
         {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-
-          // inlet, outlet, and interpolated axial surface area
-          auto S_in = (*_S_flow_soln)(node_in);
-          auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
-
-          // Creating matrix of coefficients
+          PetscScalar value = -1.0 * (*_P_soln)(node_out)*S_interp;
           PetscInt row = i_ch + _n_channels * iz_ind;
-          PetscInt col = i_ch + _n_channels * iz_ind;
-          PetscScalar value = -1.0 * S_interp;
+          LibmeshPetscCall(VecSetValues(_amc_pressure_force_rhs, 1, &row, &value, ADD_VALUES));
+        }
+        else
+        {
+          PetscInt row = i_ch + _n_channels * iz_ind;
+          PetscInt col = i_ch + _n_channels * (iz_ind + 1);
+          PetscScalar value = 1.0 * S_interp;
           LibmeshPetscCall(
               MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
-
-          if (iz == last_node)
-          {
-            PetscScalar value = -1.0 * (*_P_soln)(node_out)*S_interp;
-            PetscInt row = i_ch + _n_channels * iz_ind;
-            LibmeshPetscCall(VecSetValues(_amc_pressure_force_rhs, 1, &row, &value, ADD_VALUES));
-          }
-          else
-          {
-            PetscInt row = i_ch + _n_channels * iz_ind;
-            PetscInt col = i_ch + _n_channels * (iz_ind + 1);
-            PetscScalar value = 1.0 * S_interp;
-            LibmeshPetscCall(
-                MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
-          }
-
-          if (_segregated_bool)
-          {
-            auto dp_out = (*_DP_soln)(node_out);
-            PetscScalar value_v = -1.0 * dp_out * S_interp;
-            PetscInt row_v = i_ch + _n_channels * iz_ind;
-            LibmeshPetscCall(
-                VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES));
-          }
         }
-      }
-      // Solving pressure problem
-      LibmeshPetscCall(MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
-      LibmeshPetscCall(MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
-      if (_segregated_bool)
-      {
-        KSP ksploc;
-        PC pc;
-        Vec sol;
-        LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-        LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
-        LibmeshPetscCall(KSPGetPC(ksploc, &pc));
-        LibmeshPetscCall(PCSetType(pc, PCJACOBI));
-        LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-        LibmeshPetscCall(KSPSetFromOptions(ksploc));
-        LibmeshPetscCall(KSPSolve(ksploc, _amc_pressure_force_rhs, sol));
-        PetscScalar * xx;
-        LibmeshPetscCall(VecGetArray(sol, &xx));
-        // update Pressure solution
-        for (unsigned int iz = last_node; iz > first_node - 1; iz--)
+
+        if (_segregated_bool)
         {
-          auto iz_ind = iz - first_node;
-          for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-          {
-            auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-            PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-            _P_soln->set(node_in, value);
-          }
+          auto dp_out = (*_DP_soln)(node_out);
+          PetscScalar value_v = -1.0 * dp_out * S_interp;
+          PetscInt row_v = i_ch + _n_channels * iz_ind;
+          LibmeshPetscCall(VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES));
         }
-        LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
-        LibmeshPetscCall(KSPDestroy(&ksploc));
-        LibmeshPetscCall(VecDestroy(&sol));
       }
     }
-    else
+    // Solving pressure problem
+    LibmeshPetscCall(MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
+    if (_segregated_bool)
     {
-      LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
+      KSP ksploc;
+      PC pc;
+      Vec sol;
+      LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
+      LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
+      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
+      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
+      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetFromOptions(ksploc));
+      LibmeshPetscCall(KSPSolve(ksploc, _amc_pressure_force_rhs, sol));
+      PetscScalar * xx;
+      LibmeshPetscCall(VecGetArray(sol, &xx));
+      // update Pressure solution
       for (unsigned int iz = last_node; iz > first_node - 1; iz--)
       {
         auto iz_ind = iz - first_node;
-        // Calculate pressure in the inlet of the cell assuming known outlet
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
           auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-
-          // inlet, outlet, and interpolated axial surface area
-          auto S_in = (*_S_flow_soln)(node_in);
-          auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, 0.5);
-
-          // Creating matrix of coefficients
-          PetscInt row = i_ch + _n_channels * iz_ind;
-          PetscInt col = i_ch + _n_channels * iz_ind;
-          PetscScalar value = -1.0 * S_interp;
-          LibmeshPetscCall(
-              MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
-
-          if (iz == last_node)
-          {
-            PetscScalar value = -1.0 * (*_P_soln)(node_out)*S_interp;
-            PetscInt row = i_ch + _n_channels * iz_ind;
-            LibmeshPetscCall(VecSetValues(_amc_pressure_force_rhs, 1, &row, &value, ADD_VALUES));
-
-            auto dp_out = (*_DP_soln)(node_out);
-            PetscScalar value_v = -1.0 * dp_out / 2.0 * S_interp;
-            PetscInt row_v = i_ch + _n_channels * iz_ind;
-            LibmeshPetscCall(
-                VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES));
-          }
-          else
-          {
-            PetscInt row = i_ch + _n_channels * iz_ind;
-            PetscInt col = i_ch + _n_channels * (iz_ind + 1);
-            PetscScalar value = 1.0 * S_interp;
-            LibmeshPetscCall(
-                MatSetValues(_amc_pressure_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
-
-            if (_segregated_bool)
-            {
-              auto dp_in = (*_DP_soln)(node_in);
-              auto dp_out = (*_DP_soln)(node_out);
-              auto dp_interp = computeInterpolatedValue(dp_out, dp_in, 0.5);
-              PetscScalar value_v = -1.0 * dp_interp * S_interp;
-              PetscInt row_v = i_ch + _n_channels * iz_ind;
-              LibmeshPetscCall(
-                  VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES));
-            }
-          }
+          PetscScalar value = xx[iz_ind * _n_channels + i_ch];
+          _P_soln->set(node_in, value);
         }
       }
-      // Solving pressure problem
-      LibmeshPetscCall(MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
-      LibmeshPetscCall(MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY));
-      if (_verbose_subchannel)
-        _console << "Block: " << iblock << " - Axial momentum pressure force matrix assembled"
-                 << std::endl;
-
-      if (_segregated_bool)
-      {
-        KSP ksploc;
-        PC pc;
-        Vec sol;
-        LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-        LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
-        LibmeshPetscCall(KSPGetPC(ksploc, &pc));
-        LibmeshPetscCall(PCSetType(pc, PCJACOBI));
-        LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-        LibmeshPetscCall(KSPSetFromOptions(ksploc));
-        LibmeshPetscCall(KSPSolve(ksploc, _amc_pressure_force_rhs, sol));
-        PetscScalar * xx;
-        LibmeshPetscCall(VecGetArray(sol, &xx));
-        // update Pressure solution
-        for (unsigned int iz = last_node; iz > first_node - 1; iz--)
-        {
-          auto iz_ind = iz - first_node;
-          for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-          {
-            auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-            PetscScalar value = xx[iz_ind * _n_channels + i_ch];
-            _P_soln->set(node_in, value);
-          }
-        }
-        LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
-        LibmeshPetscCall(KSPDestroy(&ksploc));
-        LibmeshPetscCall(VecDestroy(&sol));
-      }
+      LibmeshPetscCall(VecZeroEntries(_amc_pressure_force_rhs));
+      LibmeshPetscCall(KSPDestroy(&ksploc));
+      LibmeshPetscCall(VecDestroy(&sol));
     }
   }
 }
@@ -1579,53 +1445,36 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         // Assembling pressure force
         alpha = computeInterpolationCoefficients(Pe);
+        PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
+        PetscInt row_pf = i_gap + _n_gaps * iz_ind;
+        PetscInt col_pf = i_ch + _n_channels * iz_ind;
+        PetscScalar value_pf = -1.0 * alpha * pressure_factor;
+        LibmeshPetscCall(
+            MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
+        col_pf = j_ch + _n_channels * iz_ind;
+        value_pf = alpha * pressure_factor;
+        LibmeshPetscCall(
+            MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
 
-        if (!_staggered_pressure_bool)
+        if (iz == last_node)
         {
-          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
-          PetscInt col_pf = i_ch + _n_channels * iz_ind;
-          PetscScalar value_pf = -1.0 * alpha * pressure_factor;
+          PetscScalar value_pf = (1.0 - alpha) * pressure_factor * (*_P_soln)(node_out_i);
           LibmeshPetscCall(
-              MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
-          col_pf = j_ch + _n_channels * iz_ind;
-          value_pf = alpha * pressure_factor;
+              VecSetValues(_cmc_pressure_force_rhs, 1, &row_pf, &value_pf, ADD_VALUES));
+          value_pf = -1.0 * (1.0 - alpha) * pressure_factor * (*_P_soln)(node_out_j);
           LibmeshPetscCall(
-              MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
-
-          if (iz == last_node)
-          {
-            PetscInt row_pf = i_gap + _n_gaps * iz_ind;
-            PetscScalar value_pf = (1.0 - alpha) * pressure_factor * (*_P_soln)(node_out_i);
-            LibmeshPetscCall(
-                VecSetValues(_cmc_pressure_force_rhs, 1, &row_pf, &value_pf, ADD_VALUES));
-            value_pf = -1.0 * (1.0 - alpha) * pressure_factor * (*_P_soln)(node_out_j);
-            LibmeshPetscCall(
-                VecSetValues(_cmc_pressure_force_rhs, 1, &row_pf, &value_pf, ADD_VALUES));
-          }
-          else
-          {
-            row_pf = i_gap + _n_gaps * iz_ind;
-            col_pf = i_ch + _n_channels * (iz_ind + 1);
-            value_pf = -1.0 * (1.0 - alpha) * pressure_factor;
-            LibmeshPetscCall(MatSetValues(
-                _cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
-            col_pf = j_ch + _n_channels * (iz_ind + 1);
-            value_pf = (1.0 - alpha) * pressure_factor;
-            LibmeshPetscCall(MatSetValues(
-                _cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
-          }
+              VecSetValues(_cmc_pressure_force_rhs, 1, &row_pf, &value_pf, ADD_VALUES));
         }
         else
         {
-          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
-          PetscInt row_pf = i_gap + _n_gaps * iz_ind;
-          PetscInt col_pf = i_ch + _n_channels * iz_ind;
-          PetscScalar value_pf = -1.0 * pressure_factor;
+          row_pf = i_gap + _n_gaps * iz_ind;
+          col_pf = i_ch + _n_channels * (iz_ind + 1);
+          value_pf = -1.0 * (1.0 - alpha) * pressure_factor;
           LibmeshPetscCall(
               MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
-          col_pf = j_ch + _n_channels * iz_ind;
-          value_pf = pressure_factor;
+          col_pf = j_ch + _n_channels * (iz_ind + 1);
+          value_pf = (1.0 - alpha) * pressure_factor;
           LibmeshPetscCall(
               MatSetValues(_cmc_pressure_force_mat, 1, &row_pf, 1, &col_pf, &value_pf, ADD_VALUES));
         }
