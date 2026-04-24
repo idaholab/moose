@@ -289,10 +289,7 @@ LibtorchActorNeuralNet::initializeNeuralNetwork()
     const auto & activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     const Real gain = determineGain(activation);
-
-    auto sizes = _weights[i]->weight.sizes();
-    auto max_dim_size = *std::max_element(sizes.begin(), sizes.end());
-    torch::nn::init::orthogonal_(_weights[i]->weight, gain / max_dim_size);
+    torch::nn::init::orthogonal_(_weights[i]->weight, gain);
     torch::nn::init::zeros_(_weights[i]->bias);
   }
 

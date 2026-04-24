@@ -14,7 +14,6 @@
 #include "LibtorchUtils.h"
 #include "MooseError.h"
 
-#include <algorithm>
 #include <cmath>
 #include <limits>
 #include "libmesh/utility.h"
@@ -125,9 +124,7 @@ LibtorchGaussianActionDistribution::constructDistribution()
 void
 LibtorchGaussianActionDistribution::initialize()
 {
-  const auto mean_sizes = _mean_module->weight.sizes();
-  const auto mean_max_dim_size = *std::max_element(mean_sizes.begin(), mean_sizes.end());
-  torch::nn::init::orthogonal_(_mean_module->weight, 1.0 / mean_max_dim_size);
+  torch::nn::init::orthogonal_(_mean_module->weight);
   torch::nn::init::zeros_(_mean_module->bias);
 
   if (_state_independent_std)
@@ -137,9 +134,7 @@ LibtorchGaussianActionDistribution::initialize()
     return;
   }
 
-  const auto std_sizes = _std_module->weight.sizes();
-  const auto std_max_dim_size = *std::max_element(std_sizes.begin(), std_sizes.end());
-  torch::nn::init::orthogonal_(_std_module->weight, 1.0 / std_max_dim_size);
+  torch::nn::init::orthogonal_(_std_module->weight);
   torch::nn::init::zeros_(_std_module->bias);
 }
 
@@ -245,14 +240,10 @@ LibtorchBetaActionDistribution::constructDistribution()
 void
 LibtorchBetaActionDistribution::initialize()
 {
-  const auto alpha_sizes = _alpha_module->weight.sizes();
-  const auto alpha_max_dim_size = *std::max_element(alpha_sizes.begin(), alpha_sizes.end());
-  torch::nn::init::orthogonal_(_alpha_module->weight, 1.0 / alpha_max_dim_size);
+  torch::nn::init::orthogonal_(_alpha_module->weight);
   torch::nn::init::zeros_(_alpha_module->bias);
 
-  const auto beta_sizes = _beta_module->weight.sizes();
-  const auto beta_max_dim_size = *std::max_element(beta_sizes.begin(), beta_sizes.end());
-  torch::nn::init::orthogonal_(_beta_module->weight, 1.0 / beta_max_dim_size);
+  torch::nn::init::orthogonal_(_beta_module->weight);
   torch::nn::init::zeros_(_beta_module->bias);
 }
 
