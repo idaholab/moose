@@ -48,9 +48,11 @@ public:
    * @param standardize_advantage Whether to normalize the advantages inside each chunk.
    * @return Vector of sampled mini-batches.
    */
-  std::vector<LibtorchRLMiniBatch> sample(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
-                                          unsigned int batch_size,
-                                          bool standardize_advantage) const;
+  std::vector<LibtorchRLMiniBatch>
+  sample(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
+         unsigned int batch_size,
+         bool standardize_advantage,
+         c10::optional<at::Generator> generator = c10::nullopt) const;
 
 private:
   /**

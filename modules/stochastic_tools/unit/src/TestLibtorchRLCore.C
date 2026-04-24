@@ -14,6 +14,7 @@
 #include "LibtorchActorNeuralNet.h"
 #include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchObservationHistory.h"
+#include "LibtorchRandomUtils.h"
 #include "LibtorchRLMiniBatchSampler.h"
 #include "LibtorchRLPPOLoss.h"
 #include "LibtorchRLTrajectoryBuffer.h"
@@ -123,6 +124,39 @@ TEST(LibtorchRLCoreTest, MiniBatchSamplerStandardizesAdvantagesPerBatch)
   {
     ASSERT_EQ(mini_batch.size(), 2);
     EXPECT_NEAR(mini_batch.advantages.mean().item<Real>(), 0.0, 1e-12);
+  }
+}
+
+TEST(LibtorchRLCoreTest, MiniBatchSamplerUsesExplicitGeneratorForDeterministicShuffling)
+{
+  LibtorchRLTrajectoryBuffer::TensorBatch batch;
+  batch.observations =
+      torch::tensor({{0.0}, {1.0}, {2.0}, {3.0}}, torch::TensorOptions().dtype(torch::kDouble));
+  batch.actions =
+      torch::tensor({{0.1}, {0.2}, {0.3}, {0.4}}, torch::TensorOptions().dtype(torch::kDouble));
+  batch.log_probabilities =
+      torch::tensor({{-1.0}, {-1.1}, {-1.2}, {-1.3}}, torch::TensorOptions().dtype(torch::kDouble));
+  batch.value_targets =
+      torch::tensor({{1.0}, {2.0}, {3.0}, {4.0}}, torch::TensorOptions().dtype(torch::kDouble));
+  batch.advantages =
+      torch::tensor({{1.0}, {2.0}, {3.0}, {4.0}}, torch::TensorOptions().dtype(torch::kDouble));
+
+  LibtorchRLMiniBatchSampler sampler;
+  const auto first_batches = sampler.sample(batch, 2, false, Moose::makeLibtorchCPUGenerator(9876));
+  const auto second_batches =
+      sampler.sample(batch, 2, false, Moose::makeLibtorchCPUGenerator(9876));
+
+  ASSERT_EQ(first_batches.size(), second_batches.size());
+  for (const auto i : index_range(first_batches))
+  {
+    EXPECT_TRUE(torch::allclose(first_batches[i].observations,
+                                second_batches[i].observations,
+                                /* rtol = */ 0.0,
+                                /* atol = */ 0.0));
+    EXPECT_TRUE(torch::allclose(first_batches[i].actions,
+                                second_batches[i].actions,
+                                /* rtol = */ 0.0,
+                                /* atol = */ 0.0));
   }
 }
 

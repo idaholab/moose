@@ -114,7 +114,7 @@ public:
   Real determineGain(const std::string & activation);
 
   /// Initialize the trainable weights and biases.
-  virtual void initializeNeuralNetwork();
+  virtual void initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt);
 
   /// Store the network architecture in a json file (for debugging, visualization)
   void store(nlohmann::json & json) const;

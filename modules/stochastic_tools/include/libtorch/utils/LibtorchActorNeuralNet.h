@@ -12,7 +12,6 @@
 #pragma once
 
 #include <torch/torch.h>
-#include <torch/script.h>
 #include "LibtorchActionDistribution.h"
 #include "LibtorchArtificialNeuralNet.h"
 
@@ -75,13 +74,15 @@ public:
    * @param sampled Whether to draw a stochastic sample.
    * @return Action tensor produced by the actor.
    */
-  virtual torch::Tensor evaluate(torch::Tensor & input, bool sampled);
+  virtual torch::Tensor evaluate(torch::Tensor & input,
+                                 bool sampled,
+                                 c10::optional<at::Generator> generator = c10::nullopt);
 
   /**
    * Sample an action from the already-reset distribution.
    * @return Sampled action tensor.
    */
-  virtual torch::Tensor sample();
+  virtual torch::Tensor sample(c10::optional<at::Generator> generator = c10::nullopt);
 
   /// Build the hidden layers and the matching action-distribution module.
   virtual void constructNeuralNetwork() override;
@@ -128,7 +129,8 @@ public:
   torch::Tensor entropy();
 
   /// Initialize the hidden layers and action-distribution parameters.
-  virtual void initializeNeuralNetwork() override;
+  virtual void
+  initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt) override;
 
 protected:
   const std::vector<Real> _minimum_values;
@@ -145,29 +147,12 @@ protected:
 void to_json(nlohmann::json & json, const Moose::LibtorchActorNeuralNet * const & network);
 
 /**
- * Load an actor checkpoint written either as a state archive or TorchScript module.
+ * Load an actor checkpoint written as a native libtorch state archive.
  * @param nn Actor network that receives the loaded state.
  * @param filename Checkpoint file to read.
  */
 void loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
                                      const std::string & filename);
-
-/**
- * Check whether a checkpoint comes from the older serialized-parameter layout.
- * @param filename Checkpoint file to inspect.
- * @return True if the file matches the legacy actor format.
- */
-bool isLegacyLibtorchActorArchive(const std::string & filename);
-
-/**
- * Load a checkpoint that still uses the legacy actor serialization layout.
- * @param nn Actor network that receives the loaded state.
- * @param filename Checkpoint file to read.
- * @param action_standard_deviations Fallback std values for older Gaussian checkpoints.
- */
-void loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
-                                           const std::string & filename,
-                                           const std::vector<Real> & action_standard_deviations);
 
 }
 

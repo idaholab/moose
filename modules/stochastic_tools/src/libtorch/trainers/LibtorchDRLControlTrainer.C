@@ -10,6 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchDRLControlTrainer.h"
+#include "LibtorchRandomUtils.h"
 
 #include <cmath>
 #include <numeric>
@@ -118,11 +119,6 @@ LibtorchDRLControlTrainer::validParams()
       "min_control_value", {}, "Optional lower bounds for each control signal.");
   params.addParam<std::vector<Real>>(
       "max_control_value", {}, "Optional upper bounds for each control signal.");
-  params.addParam<std::vector<Real>>(
-      "action_standard_deviations",
-      {},
-      "Deprecated compatibility parameter. Actor policies now learn their own action "
-      "distribution widths.");
   params.addParam<bool>(
       "state_independent_std",
       true,
@@ -209,10 +205,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   getReporterPointers(_action_names, _action_value_pointers);
   getReporterPointers(_log_probability_names, _log_probability_value_pointers);
 
-  // Fixing the RNG seed to make sure every experiment is the same.
-  // Otherwise sampling / stochastic gradient descent would be different.
-  torch::manual_seed(_seed);
-
   bool filename_valid = isParamValid("filename_base");
   const auto input_shift_factors = _observation_history.expandFeatureFactors(_state_shift_factors);
   const auto input_scaling_factors =
@@ -238,22 +230,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   // We read parameters for the control neural net if it is requested
   if (_read_from_file)
   {
-    try
-    {
-      if (Moose::isLegacyLibtorchActorArchive(_control_nn->name()))
-        Moose::loadLegacyLibtorchActorNeuralNetState(
-            *_control_nn,
-            _control_nn->name(),
-            getParam<std::vector<Real>>("action_standard_deviations"));
-      else
-        Moose::loadLibtorchActorNeuralNetState(*_control_nn, _control_nn->name());
-      _console << "Loaded requested .pt file." << std::endl;
-    }
-    catch (const c10::Error & e)
-    {
-      mooseError("The requested pytorch file could not be loaded for the control neural net.\n",
-                 e.msg());
-    }
+    Moose::loadLibtorchActorNeuralNetState(*_control_nn, _control_nn->name());
+    _console << "Loaded requested .pt file." << std::endl;
   }
   else if (filename_valid)
     torch::save(_control_nn, _control_nn->name());
@@ -293,8 +271,10 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   else if (filename_valid)
     torch::save(_critic_nn, _critic_nn->name());
 
-  _control_nn->initializeNeuralNetwork();
-  _critic_nn->initializeNeuralNetwork();
+  _control_nn->initializeNeuralNetwork(
+      Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed)));
+  _critic_nn->initializeNeuralNetwork(
+      Moose::makeLibtorchCPUGenerator(static_cast<uint64_t>(_seed) + 1));
 }
 
 void
@@ -386,15 +366,13 @@ LibtorchDRLControlTrainer::trainController(const LibtorchRLTrajectoryBuffer::Ten
   // fetch the local threads which are available.
   if (processor_id() == 0)
   {
-    // Reset the mini-batch RNG for each outer training step so optimizer shuffling remains
-    // independent of how rollout sampling happened to be partitioned across MPI ranks.
-    torch::manual_seed(static_cast<uint64_t>(_seed) +
-                       static_cast<uint64_t>(_fe_problem.timeStep()));
+    auto shuffle_generator = Moose::makeLibtorchCPUGenerator(
+        static_cast<uint64_t>(_seed) + static_cast<uint64_t>(_fe_problem.timeStep()));
 
     for (unsigned int epoch = 0; epoch < _num_epochs; ++epoch)
     {
-      const auto mini_batches =
-          _sampler.sample(batch, getParam<unsigned int>("batch_size"), _standardize_advantage);
+      const auto mini_batches = _sampler.sample(
+          batch, getParam<unsigned int>("batch_size"), _standardize_advantage, shuffle_generator);
       bool printed_losses = false;
       for (const auto & mini_batch : mini_batches)
       {

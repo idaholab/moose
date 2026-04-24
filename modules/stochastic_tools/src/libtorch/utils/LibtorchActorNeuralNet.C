@@ -10,244 +10,49 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchActorNeuralNet.h"
+#include "LibtorchRandomUtils.h"
 #include "MooseError.h"
+#include "libmesh/utility.h"
 
 namespace
 {
 
-/**
- * Try to read one tensor from a plain libtorch archive.
- * @param archive Archive being read.
- * @param key Serialized tensor name.
- * @param tensor Tensor that receives the loaded data.
- * @return True when the tensor was found and loaded.
- */
-bool
-readArchiveTensor(torch::serialize::InputArchive & archive,
-                  const std::string & key,
-                  torch::Tensor & tensor)
+template <typename NamedTensorList>
+auto
+captureTensorShapes(const NamedTensorList & tensors)
 {
-  try
-  {
-    archive.read(key, tensor);
-    return true;
-  }
-  catch (const c10::Error &)
-  {
-    return false;
-  }
+  std::vector<std::pair<std::string, std::vector<int64_t>>> shapes;
+  shapes.reserve(tensors.size());
+
+  for (const auto & tensor : tensors)
+    shapes.emplace_back(
+        tensor.key(),
+        std::vector<int64_t>(tensor.value().sizes().begin(), tensor.value().sizes().end()));
+
+  return shapes;
 }
 
-/**
- * Copy a stored tensor into an existing parameter or buffer.
- * @param destination Tensor owned by the current module.
- * @param source Tensor read from disk.
- */
+template <typename NamedTensorList>
 void
-copyTensor(torch::Tensor & destination, const torch::Tensor & source)
+verifyTensorShapes(const NamedTensorList & tensors,
+                   const std::vector<std::pair<std::string, std::vector<int64_t>>> & expected,
+                   const char * tensor_kind)
 {
-  destination.data().copy_(source.to(destination.options()));
-}
+  if (tensors.size() != expected.size())
+    mooseError("The loaded DRL actor ", tensor_kind, " count does not match the generated schema.");
 
-/**
- * Read an actor tensor, while still accepting the legacy action_head.* prefix.
- * @param archive Archive being read.
- * @param key Serialized tensor name expected by the current actor.
- * @param tensor Tensor that receives the loaded data.
- * @return True when the tensor was found and loaded.
- */
-bool
-readActorStateTensor(torch::serialize::InputArchive & archive,
-                     const std::string & key,
-                     torch::Tensor & tensor)
-{
-  if (readArchiveTensor(archive, key, tensor))
-    return true;
-
-  if (key.rfind("action_head.", 0) == 0)
-    return readArchiveTensor(archive, key.substr(std::string("action_head.").size()), tensor);
-
-  return false;
-}
-
-/// Return true for actor buffers that older checkpoints may legitimately omit.
-bool
-isOptionalActorBuffer(const std::string & key)
-{
-  return key == "input_shift" || key == "input_scale" || key == "output_scale" ||
-         key == "action_head.action_scale";
-}
-
-/// Return true for actor parameters that older checkpoints may legitimately omit.
-bool
-isOptionalActorParameter(const std::string & key)
-{
-  return key == "action_head.mean.bias" || key == "action_head.std.bias";
-}
-
-/**
- * Look up one named tensor in a torch named-parameter or named-buffer list.
- * @param tensors Torch named tensor list.
- * @param key Tensor name to search for.
- * @param tensor Tensor that receives the match.
- * @return True when the requested tensor exists.
- */
-template <typename NamedTensorList>
-bool
-findNamedTensor(const NamedTensorList & tensors, const std::string & key, torch::Tensor & tensor)
-{
-  for (const auto & entry : tensors)
-    if (entry.name == key)
-    {
-      tensor = entry.value;
-      return true;
-    }
-
-  return false;
-}
-
-/**
- * Read one tensor from a scripted actor checkpoint, with legacy action_head.* fallback.
- * @param tensors Scripted parameter or buffer list.
- * @param key Serialized tensor name expected by the current actor.
- * @param tensor Tensor that receives the loaded data.
- * @return True when the tensor was found and loaded.
- */
-template <typename NamedTensorList>
-bool
-readScriptedActorStateTensor(const NamedTensorList & tensors,
-                             const std::string & key,
-                             torch::Tensor & tensor)
-{
-  if (findNamedTensor(tensors, key, tensor))
-    return true;
-
-  if (key.rfind("action_head.", 0) == 0)
-    return findNamedTensor(tensors, key.substr(std::string("action_head.").size()), tensor);
-
-  return false;
-}
-
-/**
- * Load actor parameters and buffers from a plain libtorch archive.
- * @param nn Actor that receives the loaded state.
- * @param filename Checkpoint file to read.
- * @param error Human-readable error string filled on failure.
- * @return True when the actor was loaded successfully.
- */
-bool
-loadActorStateFromArchive(Moose::LibtorchActorNeuralNet & nn,
-                          const std::string & filename,
-                          std::string & error)
-{
-  try
+  for (const auto tensor_i : make_range(tensors.size()))
   {
-    torch::serialize::InputArchive archive;
-    archive.load_from(filename);
+    const auto actual_shape = std::vector<int64_t>(tensors[tensor_i].value().sizes().begin(),
+                                                   tensors[tensor_i].value().sizes().end());
 
-    for (auto & parameter : nn.named_parameters())
-    {
-      torch::Tensor stored_tensor;
-      if (!readActorStateTensor(archive, parameter.key(), stored_tensor))
-      {
-        if (isOptionalActorParameter(parameter.key()))
-        {
-          parameter.value().data().zero_();
-          continue;
-        }
-
-        error = "Missing serialized parameter: " + parameter.key();
-        return false;
-      }
-
-      copyTensor(parameter.value(), stored_tensor);
-    }
-
-    for (auto & buffer : nn.named_buffers())
-    {
-      torch::Tensor stored_tensor;
-      if (!readActorStateTensor(archive, buffer.key(), stored_tensor))
-      {
-        if (isOptionalActorBuffer(buffer.key()))
-          continue;
-
-        error = "Missing serialized buffer: " + buffer.key();
-        return false;
-      }
-
-      copyTensor(buffer.value(), stored_tensor);
-    }
-
-    nn.synchronizeAffineFactorsFromBuffers();
-    nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
-    return true;
-  }
-  catch (const c10::Error & e)
-  {
-    error = e.msg();
-    return false;
-  }
-}
-
-/**
- * Load actor parameters and buffers from a scripted Torch module.
- * @param nn Actor that receives the loaded state.
- * @param filename Checkpoint file to read.
- * @param error Human-readable error string filled on failure.
- * @return True when the actor was loaded successfully.
- */
-bool
-loadActorStateFromTorchScript(Moose::LibtorchActorNeuralNet & nn,
-                              const std::string & filename,
-                              std::string & error)
-{
-  try
-  {
-    const auto scripted = torch::jit::load(filename);
-    const auto scripted_parameters = scripted.named_parameters();
-    const auto scripted_buffers = scripted.named_buffers();
-
-    for (auto & parameter : nn.named_parameters())
-    {
-      torch::Tensor stored_tensor;
-      if (!readScriptedActorStateTensor(scripted_parameters, parameter.key(), stored_tensor))
-      {
-        if (isOptionalActorParameter(parameter.key()))
-        {
-          parameter.value().data().zero_();
-          continue;
-        }
-
-        error = "Missing scripted parameter: " + parameter.key();
-        return false;
-      }
-
-      copyTensor(parameter.value(), stored_tensor);
-    }
-
-    for (auto & buffer : nn.named_buffers())
-    {
-      torch::Tensor stored_tensor;
-      if (!readScriptedActorStateTensor(scripted_buffers, buffer.key(), stored_tensor))
-      {
-        if (isOptionalActorBuffer(buffer.key()))
-          continue;
-
-        error = "Missing scripted buffer: " + buffer.key();
-        return false;
-      }
-
-      copyTensor(buffer.value(), stored_tensor);
-    }
-
-    nn.synchronizeAffineFactorsFromBuffers();
-    nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
-    return true;
-  }
-  catch (const c10::Error & e)
-  {
-    error = e.msg();
-    return false;
+    if (tensors[tensor_i].key() != expected[tensor_i].first ||
+        actual_shape != expected[tensor_i].second)
+      mooseError("The loaded DRL actor ",
+                 tensor_kind,
+                 " '",
+                 tensors[tensor_i].key(),
+                 "' does not match the generated schema.");
   }
 }
 
@@ -331,18 +136,18 @@ LibtorchActorNeuralNet::LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralN
 }
 
 void
-LibtorchActorNeuralNet::initializeNeuralNetwork()
+LibtorchActorNeuralNet::initializeNeuralNetwork(const c10::optional<at::Generator> generator)
 {
   for (unsigned int i = 0; i < numHiddenLayers(); ++i)
   {
     const auto & activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     const Real gain = determineGain(activation);
-    torch::nn::init::orthogonal_(_weights[i]->weight, gain);
+    Moose::orthogonalInitializeTensor(_weights[i]->weight, gain, generator);
     torch::nn::init::zeros_(_weights[i]->bias);
   }
 
-  _action_distribution->initialize();
+  _action_distribution->initialize(generator);
 }
 
 void
@@ -488,7 +293,9 @@ LibtorchActorNeuralNet::forward(const torch::Tensor & x)
 }
 
 torch::Tensor
-LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
+LibtorchActorNeuralNet::evaluate(torch::Tensor & x,
+                                 const bool sampled,
+                                 const c10::optional<at::Generator> generator)
 {
   torch::Tensor output = forward(x);
 
@@ -496,15 +303,15 @@ LibtorchActorNeuralNet::evaluate(torch::Tensor & x, bool sampled)
   resetDistributionParams(output);
 
   if (sampled)
-    return sample();
+    return sample(generator);
 
   return _action_distribution->deterministicAction();
 }
 
 torch::Tensor
-LibtorchActorNeuralNet::sample()
+LibtorchActorNeuralNet::sample(const c10::optional<at::Generator> generator)
 {
-  return _action_distribution->sample();
+  return _action_distribution->sample(generator);
 }
 
 torch::Tensor
@@ -516,107 +323,27 @@ LibtorchActorNeuralNet::logProbability(const torch::Tensor & action)
 void
 loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn, const std::string & filename)
 {
-  std::string archive_error;
-  if (loadActorStateFromArchive(nn, filename, archive_error))
-    return;
-
-  std::string torchscript_error;
-  if (loadActorStateFromTorchScript(nn, filename, torchscript_error))
-    return;
-
-  mooseError("The requested pytorch parameter file could not be loaded. This can either be "
-             "the result of the file not existing or a misalignment in the generated "
-             "container and the data in the file. Make sure the dimensions of the generated "
-             "neural net are the same as the dimensions of the parameters in the input file!\n"
-             "InputArchive load failed with: ",
-             archive_error,
-             "\nTorchScript load failed with: ",
-             torchscript_error);
-}
-
-bool
-isLegacyLibtorchActorArchive(const std::string & filename)
-{
   try
   {
-    const auto scripted = torch::jit::load(filename);
-    const auto parameters = scripted.named_parameters();
+    const auto expected_parameters = captureTensorShapes(nn.named_parameters());
+    const auto expected_buffers = captureTensorShapes(nn.named_buffers());
 
-    torch::Tensor ignored;
-    return findNamedTensor(parameters, "output_layer_.weight", ignored) &&
-           !findNamedTensor(parameters, "action_head.mean.weight", ignored);
+    torch::serialize::InputArchive archive;
+    archive.load_from(filename);
+    nn.load(archive);
+
+    verifyTensorShapes(nn.named_parameters(), expected_parameters, "parameter");
+    verifyTensorShapes(nn.named_buffers(), expected_buffers, "buffer");
+
+    nn.synchronizeAffineFactorsFromBuffers();
+    nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
   }
-  catch (const c10::Error &)
+  catch (const c10::Error & e)
   {
-    return false;
+    mooseError("The requested DRL actor checkpoint could not be loaded as a native libtorch "
+               "archive. Make sure the file exists and matches the generated actor schema.\n",
+               e.msg());
   }
-}
-
-void
-loadLegacyLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
-                                      const std::string & filename,
-                                      const std::vector<Real> & action_standard_deviations)
-{
-  if (nn.actionDistribution().isBounded())
-    mooseError("Legacy deterministic DRL checkpoints are only supported for unbounded actors.");
-
-  const auto legacy_std = action_standard_deviations.empty()
-                              ? std::vector<Real>(nn.numOutputs(), 1e-12)
-                              : action_standard_deviations;
-
-  if (legacy_std.size() != nn.numOutputs())
-    mooseError("The number of action_standard_deviations entries must match the number of action "
-               "outputs when loading a legacy deterministic DRL checkpoint.");
-
-  for (const auto std_value : legacy_std)
-    if (!(std_value > 0.0))
-      mooseError("Legacy action_standard_deviations entries must be strictly positive.");
-
-  const auto scripted = torch::jit::load(filename);
-  const auto legacy_parameters = scripted.named_parameters();
-
-  for (auto & parameter : nn.named_parameters())
-  {
-    const auto & key = parameter.key();
-    torch::Tensor stored_tensor;
-
-    if (key == "action_head.mean.weight")
-    {
-      if (!findNamedTensor(legacy_parameters, "output_layer_.weight", stored_tensor))
-        mooseError("Legacy deterministic DRL checkpoint is missing output_layer_.weight.");
-      copyTensor(parameter.value(), stored_tensor);
-      continue;
-    }
-
-    if (key == "action_head.mean.bias")
-    {
-      if (!findNamedTensor(legacy_parameters, "output_layer_.bias", stored_tensor))
-        mooseError("Legacy deterministic DRL checkpoint is missing output_layer_.bias.");
-      copyTensor(parameter.value(), stored_tensor);
-      continue;
-    }
-
-    if (key == "action_head.std.weight")
-    {
-      parameter.value().data().zero_();
-      continue;
-    }
-
-    if (key == "action_head.std.bias")
-    {
-      auto log_std = torch::log(torch::tensor(legacy_std, parameter.value().options()));
-      copyTensor(parameter.value(), log_std);
-      continue;
-    }
-
-    if (!findNamedTensor(legacy_parameters, key, stored_tensor))
-      mooseError("Legacy deterministic DRL checkpoint is missing serialized parameter: ", key);
-
-    copyTensor(parameter.value(), stored_tensor);
-  }
-
-  nn.synchronizeAffineFactorsFromBuffers();
-  nn.actionDistribution().synchronizeScalingFactorsFromBuffer();
 }
 
 }

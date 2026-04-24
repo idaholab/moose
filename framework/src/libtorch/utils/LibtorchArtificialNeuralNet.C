@@ -10,6 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchArtificialNeuralNet.h"
+#include "LibtorchRandomUtils.h"
 #include "MooseError.h"
 #include "LibtorchUtils.h"
 
@@ -278,18 +279,18 @@ LibtorchArtificialNeuralNet::determineGain(const std::string & activation)
 }
 
 void
-LibtorchArtificialNeuralNet::initializeNeuralNetwork()
+LibtorchArtificialNeuralNet::initializeNeuralNetwork(const c10::optional<at::Generator> generator)
 {
   for (unsigned int i = 0; i < numHiddenLayers(); ++i)
   {
     const auto & activation =
         _activation_function.size() > 1 ? _activation_function[i] : _activation_function[0];
     const Real gain = determineGain(activation);
-    torch::nn::init::orthogonal_(_weights[i]->weight, gain);
+    Moose::orthogonalInitializeTensor(_weights[i]->weight, gain, generator);
     torch::nn::init::zeros_(_weights[i]->bias);
   }
 
-  torch::nn::init::orthogonal_(_weights.back()->weight);
+  Moose::orthogonalInitializeTensor(_weights.back()->weight, 1.0, generator);
   torch::nn::init::zeros_(_weights.back()->bias);
 }
 

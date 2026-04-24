@@ -10,6 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "SamplerNeuralNetControlTransfer.h"
+#include "LibtorchDRLControl.h"
 #include "LibtorchNeuralNetControl.h"
 
 registerMooseObject("StochasticToolsApp", SamplerNeuralNetControlTransfer);
@@ -117,8 +118,6 @@ SamplerNeuralNetControlTransfer::executeToMultiapp()
                                  static_cast<uint64_t>(_global_index) +
                                  static_cast<uint64_t>(_sampler_ptr->getNumberOfRows()) *
                                      static_cast<uint64_t>(_fe_problem.timeStep());
-    torch::manual_seed(sample_seed);
-
     // Get the control neural net from the trainer
     const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
@@ -134,6 +133,8 @@ SamplerNeuralNetControlTransfer::executeToMultiapp()
 
     // Copy and the neural net and execute it to get the initial values
     control_object->loadControlNeuralNet(trainer_nn);
+    if (auto * drl_control = dynamic_cast<LibtorchDRLControl *>(control_object))
+      drl_control->setPolicySampleSeed(sample_seed);
     control_object->execute();
   }
 }
