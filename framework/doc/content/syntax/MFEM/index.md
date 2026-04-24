@@ -29,7 +29,11 @@ First of all, we must specify that the type of problem we wish to solve is an [M
 
 ### Geometry - Mesh and Finite Element Spaces
 
-Given that we wish to utilize MFEM as the backend, the mesh we import into the problem must be of [MFEMMesh.md] type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
+Given that we wish to utilize MFEM as the backend, the mesh we provide to the problem must be an
+MFEM mesh type. MFEM-MOOSE supports reading meshes from file via [MFEMFileMesh.md] or generating
+them via [MFEMMeshGeneratorMesh.md] (which can use MFEM mesh generators such as
+[MFEMGeneratedMeshGenerator.md]). `MFEMFileMesh` meshes should explicitly set [!param](/Mesh/type) within the `Mesh` block; the `MFEMMeshGeneratorMesh` type will be automatically deduced if
+MFEM mesh generators are used.
 
 !listing test/tests/mfem/kernels/diffusion.i block=/Mesh
 

@@ -11,24 +11,25 @@
 
 #pragma once
 
-#include "FileMesh.h"
+#include "MooseMesh.h"
 
 /**
- * MFEMMesh inherits a MOOSE mesh class which allows us to work with
- * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
+ * Abstract MooseMesh base for all MFEM-backed mesh types (MFEMFileMesh,
+ * MFEMMeshGeneratorMesh). Holds the mfem::ParMesh and provides common
+ * operations (refinement, reordering, partitioning, displacement, recovery).
+ * Subclasses implement buildSerialMFEMMesh() to supply the serial mesh;
+ * buildMesh() applies the common operations using the template-method pattern.
  */
-class MFEMMesh : public FileMesh
+class MFEMMesh : public MooseMesh
 {
 public:
   static InputParameters validParams();
 
   MFEMMesh(const InputParameters & parameters);
 
-  virtual ~MFEMMesh();
-
   /**
    * Accessors for the _mfem_par_mesh object. If the mesh has
-   * not been build, the methods will call the appropriate protected methods to
+   * not been built, the methods will call the appropriate protected methods to
    * build them.
    */
   mfem::ParMesh & getMFEMParMesh() { return *_mfem_par_mesh; }
@@ -40,17 +41,11 @@ public:
   std::shared_ptr<mfem::ParMesh> getMFEMParMeshPtr() { return _mfem_par_mesh; }
 
   /**
-   * Build MFEM ParMesh and a placeholder MOOSE mesh.
+   * Initialize the MFEM ParMesh and placeholder MOOSE mesh.
    */
   void init() override;
-  void buildMesh() override;
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
-
-  /**
-   * Clones the mesh.
-   */
-  std::unique_ptr<MooseMesh> safeClone() const override;
 
   /**
    * Returns true if mesh displacement is required.
@@ -78,9 +73,16 @@ public:
   dof_id_type nActiveElem() const override { return _mfem_par_mesh->GetGlobalNE(); }
   dof_id_type nActiveLocalElem() const override { return _mfem_par_mesh->GetNE(); }
 
-private:
+  void buildMesh() override final;
+
+protected:
   /**
-   * Builds a placeholder mesh when no MOOSE mesh is required.
+   * Build and return the serial mfem::Mesh for this object.
+   */
+  virtual mfem::Mesh buildSerialMFEMMesh() = 0;
+
+  /**
+   * Builds a dimension-compatible libMesh placeholder after initializing the MFEM mesh.
    */
   void buildDummyMooseMesh();
 
@@ -95,7 +97,7 @@ private:
   std::optional<std::string> _mesh_displacement_variable;
 
   /**
-   * Smart pointers to mfem::ParMesh object. Do not access directly.
+   * Smart pointer to mfem::ParMesh object. Do not access directly.
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
