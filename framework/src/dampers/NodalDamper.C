@@ -40,13 +40,9 @@ NodalDamper::NodalDamper(const InputParameters & parameters)
     _u_increment(_var.increment()),
     _u(_var.dofValues())
 {
-  // Assertion is currently inactive because _var(_sys.getFieldVariable<Real>(_tid,
-  // parameters.get<NonlinearVariableName>("variable")))
-  // call is specifically asking for a scalar Real field variable. Commented out but it could become
-  // an issue if var object gets constructed in differen way.
-  // mooseAssert(_var.count() == 1,
-  //            "NodalDamper only supports scalar variables. Variable '" + _var.name() +
-  //                "' has multiple components.");
+  mooseAssert(_var.count() == 1,
+              "NodalDamper only supports scalar variables. Variable '" + _var.name() +
+                  "' has multiple components.");
 }
 
 Real
@@ -63,8 +59,5 @@ NodalDamper::variableDefinedOnNode(const Node * node) const
 
   const unsigned int n_comp = node->n_comp(sys_num, var_num);
 
-  if (n_comp == 0)
-    return false;
-
-  return node->n_dofs(sys_num, var_num) > 0;
+  return n_comp;
 }
