@@ -61,7 +61,6 @@ The purpose of these lists is two fold:
 - [cats](https://github.com/aladshaw3/cats) - Catalysis And Treatment Simulations (CATS) library for MOOSE
 - [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration.
 
-
 ### Geomechanics, Ground Flow, and Earth Sciences
 
 - [FalCon](https://github.com/idaholab/falcon) - Fracturing and liquid conservation; geothermal reservoir simulation and analysis code for coupled and fully implicit Thermo-Hydro-Mechanical-Chemical (THMC) geosystems
@@ -71,6 +70,7 @@ The purpose of these lists is two fold:
 ### Miscellaneous
 
 - [moopy](https://github.com/aurora-multiphysics/moopy) - Python interface that simplifies (ish) the creation of MOOSE inputs
+- [Phoenix](https://github.com/rnpratoori/phoenix) - Polymer-to-HOst Evolution via INterface eXchange is a reaction-diffusion based framework to study the evolution of polymer scaffold into a neotissue under various conditions
 - [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins.
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
@@ -135,7 +135,6 @@ Plasma and fusion sciences
 
 Fluid dynamics and Thermal hydraulics
 
-- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
 
 Miscellaneous
@@ -145,6 +144,7 @@ Miscellaneous
 
 ### Closed source
 
+- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - BIGHORN - Compressible fluid dynamics code
 - ELK - Former application for the electromagnetics module
 - FENIX - Advanced fission reactor multiphysics simulation suite with Griffin and Pronghorn, notably to model Xenon and Samarium fission product transients
