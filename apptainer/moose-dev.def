@@ -232,6 +232,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYTORCH_CONDA_ENV=pytorch_build
     conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
     source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
+    # Make sure that pip matches the python version we requested above
+    conda install -yq pip
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
     # Require CUDA if we have cuda available
