@@ -29,9 +29,11 @@ LibtorchDRLControlTrainer::validParams()
       "observation", "Reporter values containing the observation values from the model.");
   params.addParam<std::vector<Real>>(
       "observation_shift_factors",
+      {},
       "Optional offsets applied to the observed state values before scaling.");
   params.addParam<std::vector<Real>>(
       "observation_scaling_factors",
+      {},
       "Optional multipliers applied after shifting the observed state values.");
   params.addRequiredParam<std::vector<ReporterName>>(
       "control",
@@ -39,6 +41,7 @@ LibtorchDRLControlTrainer::validParams()
       "model simulations.");
   params.addParam<std::vector<Real>>(
       "action_scaling_factors",
+      {},
       "Scale factors embedded into the trained policy outputs so transferred and checkpointed "
       "controllers operate in physical units.");
   params.addRequiredParam<std::vector<ReporterName>>(
@@ -137,14 +140,14 @@ LibtorchDRLControlTrainer::validParams()
 LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
     _state_names(getParam<std::vector<ReporterName>>("observation")),
-    _state_shift_factors(isParamValid("observation_shift_factors")
+    _state_shift_factors(isParamSetByUser("observation_shift_factors")
                              ? getParam<std::vector<Real>>("observation_shift_factors")
                              : std::vector<Real>(_state_names.size(), 0.0)),
-    _state_scaling_factors(isParamValid("observation_scaling_factors")
+    _state_scaling_factors(isParamSetByUser("observation_scaling_factors")
                                ? getParam<std::vector<Real>>("observation_scaling_factors")
                                : std::vector<Real>(_state_names.size(), 1.0)),
     _action_names(getParam<std::vector<ReporterName>>("control")),
-    _action_scaling_factors(isParamValid("action_scaling_factors")
+    _action_scaling_factors(isParamSetByUser("action_scaling_factors")
                                 ? getParam<std::vector<Real>>("action_scaling_factors")
                                 : std::vector<Real>(_action_names.size(), 1.0)),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
@@ -177,7 +180,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _entropy_coeff(getParam<Real>("entropy_coeff")),
     _update_counter(_update_frequency),
     _timestep_window(getParam<unsigned int>("timestep_window")),
-    _observation_history(_input_timesteps, _state_shift_factors, _state_scaling_factors),
+    _observation_history(_input_timesteps),
     _value_estimator(_decay_factor, _lambda_factor),
     _ppo_loss(_clip_param, _entropy_coeff)
 {
@@ -206,9 +209,10 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   getReporterPointers(_log_probability_names, _log_probability_value_pointers);
 
   bool filename_valid = isParamValid("filename_base");
-  const auto input_shift_factors = _observation_history.expandFeatureFactors(_state_shift_factors);
+  const auto input_shift_factors =
+      _observation_history.expandObservationFactors(_state_shift_factors);
   const auto input_scaling_factors =
-      _observation_history.expandFeatureFactors(_state_scaling_factors);
+      _observation_history.expandObservationFactors(_state_scaling_factors);
 
   // Initializing the control neural net so that the control can grab it right away
   _control_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
@@ -435,9 +439,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     if (!num_transitions)
       continue;
 
-    std::vector<std::vector<Real>> normalized_responses(_state_names.size());
+    std::vector<std::vector<Real>> observation_trajectories(_state_names.size());
     for (const auto state_i : index_range(_state_value_pointers))
-      normalized_responses[state_i] = extractDownsampledSequence(
+      observation_trajectories[state_i] = extractDownsampledSequence(
           (*_state_value_pointers[state_i])[sample_i], 0, num_transitions + 1);
 
     LibtorchRLTrajectoryBuffer::Trajectory trajectory;
@@ -454,9 +458,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     for (const auto step_i : make_range(num_transitions))
     {
       trajectory.observations.push_back(
-          _observation_history.stackTrajectoryObservation(normalized_responses, step_i));
+          _observation_history.stackTrajectoryObservation(observation_trajectories, step_i));
       trajectory.next_observations.push_back(
-          _observation_history.stackTrajectoryObservation(normalized_responses, step_i + 1));
+          _observation_history.stackTrajectoryObservation(observation_trajectories, step_i + 1));
     }
 
     for (const auto action_i : index_range(_action_value_pointers))
