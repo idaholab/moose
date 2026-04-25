@@ -215,11 +215,11 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     _device_type(device_type),
     _data_type(data_type),
     _input_shift_factors(
-        normalizeAffineFactors(input_shift_factors, num_inputs, 0.0, "input_shift_factors")),
+        setAffineFactors(input_shift_factors, num_inputs, 0.0, "input_shift_factors")),
     _input_scaling_factors(
-        normalizeAffineFactors(input_scaling_factors, num_inputs, 1.0, "input_scaling_factors")),
+        setAffineFactors(input_scaling_factors, num_inputs, 1.0, "input_scaling_factors")),
     _output_scaling_factors(
-        normalizeAffineFactors(output_scaling_factors, num_outputs, 1.0, "output_scaling_factors"))
+        setAffineFactors(output_scaling_factors, num_outputs, 1.0, "output_scaling_factors"))
 {
   _activation_function = activation_function;
   initializeAffineBuffers();
@@ -295,24 +295,18 @@ LibtorchArtificialNeuralNet::initializeNeuralNetwork(const c10::optional<at::Gen
 }
 
 std::vector<Real>
-LibtorchArtificialNeuralNet::normalizeAffineFactors(const std::vector<Real> & factors,
-                                                    const unsigned int expected_size,
-                                                    const Real default_value,
-                                                    const std::string & factor_name,
-                                                    const bool forbid_zero)
+LibtorchArtificialNeuralNet::setAffineFactors(const std::vector<Real> & factors,
+                                              const unsigned int expected_size,
+                                              const Real default_value,
+                                              const std::string & factor_name)
 {
-  const auto normalized =
+  const auto resolved_factors =
       factors.empty() ? std::vector<Real>(expected_size, default_value) : factors;
 
-  if (normalized.size() != expected_size)
+  if (resolved_factors.size() != expected_size)
     mooseError("The number of ", factor_name, " entries must match ", expected_size, ".");
 
-  if (forbid_zero)
-    for (const auto factor : normalized)
-      if (std::abs(factor) == 0.0)
-        mooseError("The ", factor_name, " entries must be non-zero.");
-
-  return normalized;
+  return resolved_factors;
 }
 
 void

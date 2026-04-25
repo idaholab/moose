@@ -29,16 +29,21 @@ LibtorchNeuralNetControl::validParams()
       "observations", "Postprocessors used as the current observation vector.");
   params.addParam<std::vector<Real>>(
       "observation_shift_factors",
+      {},
       "Optional offsets applied to the observation values before scaling.");
   params.addParam<std::vector<Real>>(
       "observation_scaling_factors",
+      {},
       "Optional multipliers applied after shifting the observation values.");
   params.addParam<std::string>("filename", "Checkpoint file to load for the controller network.");
   params.addParam<bool>("torch_script_format",
                         false,
                         "Whether the checkpoint should be read as a scripted Torch module.");
-  params.addParam<unsigned int>(
-      "input_timesteps", 1, "Number of recent timesteps to stack into each network input.");
+  params.addRangeCheckedParam<unsigned int>(
+      "input_timesteps",
+      1,
+      "1<=input_timesteps",
+      "Number of recent timesteps to stack into each network input.");
   params.addParam<std::vector<unsigned int>>(
       "num_neurons_per_layer", "Hidden-layer widths used when constructing the controller.");
   params.addParam<std::vector<std::string>>(
@@ -48,6 +53,7 @@ LibtorchNeuralNetControl::validParams()
 
   params.addParam<std::vector<Real>>(
       "action_scaling_factors",
+      {},
       "Per-action scaling embedded in the controller outputs so saved checkpoints stay in "
       "physical units.");
 
@@ -62,16 +68,16 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
         "current_control_signals", std::vector<Real>(_control_names.size(), 0.0))),
     _observation_names(getParam<std::vector<PostprocessorName>>("observations")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _observation_shift_factors(isParamValid("observation_shift_factors")
+    _observation_shift_factors(isParamSetByUser("observation_shift_factors")
                                    ? getParam<std::vector<Real>>("observation_shift_factors")
                                    : std::vector<Real>(_observation_names.size(), 0.0)),
-    _observation_scaling_factors(isParamValid("observation_scaling_factors")
+    _observation_scaling_factors(isParamSetByUser("observation_scaling_factors")
                                      ? getParam<std::vector<Real>>("observation_scaling_factors")
                                      : std::vector<Real>(_observation_names.size(), 1.0)),
-    _action_scaling_factors(isParamValid("action_scaling_factors")
+    _action_scaling_factors(isParamSetByUser("action_scaling_factors")
                                 ? getParam<std::vector<Real>>("action_scaling_factors")
                                 : std::vector<Real>(_control_names.size(), 1.0)),
-    _observation_history(_input_timesteps, _observation_shift_factors, _observation_scaling_factors)
+    _observation_history(_input_timesteps)
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -125,9 +131,9 @@ LibtorchNeuralNetControl::loadControlNeuralNetFromFile()
             ? getParam<std::vector<std::string>>("activation_function")
             : std::vector<std::string>({"relu"});
     const auto input_shift_factors =
-        _observation_history.expandFeatureFactors(_observation_shift_factors);
+        _observation_history.expandObservationFactors(_observation_shift_factors);
     const auto input_scaling_factors =
-        _observation_history.expandFeatureFactors(_observation_scaling_factors);
+        _observation_history.expandObservationFactors(_observation_scaling_factors);
     auto nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(filename,
                                                                    num_inputs,
                                                                    num_outputs,

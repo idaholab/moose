@@ -105,9 +105,9 @@ LibtorchDRLControl::loadControlNeuralNetFromFile()
   const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
   const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
   const auto input_shift_factors =
-      _observation_history.expandFeatureFactors(_observation_shift_factors);
+      _observation_history.expandObservationFactors(_observation_shift_factors);
   const auto input_scaling_factors =
-      _observation_history.expandFeatureFactors(_observation_scaling_factors);
+      _observation_history.expandObservationFactors(_observation_scaling_factors);
 
   _actor_nn =
       std::make_shared<Moose::LibtorchActorNeuralNet>(filename,

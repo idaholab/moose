@@ -109,7 +109,7 @@ protected:
   /// Multipliers for the actions
   const std::vector<Real> _action_scaling_factors;
 
-  /// Shared observation normalization and history stacking helper
+  /// Shared observation history stacking and factor-expansion helper
   const LibtorchObservationHistory _observation_history;
 
   /// Pointer to the neural net object which is supposed to be used to control

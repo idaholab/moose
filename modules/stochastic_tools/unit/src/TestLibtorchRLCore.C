@@ -27,21 +27,59 @@ namespace
 
 TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
 {
-  LibtorchObservationHistory history(3, {10.0, -2.0}, {0.5, 2.0});
+  LibtorchObservationHistory history(3);
 
-  const auto normalized = history.normalize({16.0, -1.0});
-  EXPECT_DOUBLE_EQ(normalized[0], 3.0);
-  EXPECT_DOUBLE_EQ(normalized[1], 2.0);
+  const auto expanded_observation_factors = history.expandObservationFactors({0.5, 2.0});
+  EXPECT_EQ(expanded_observation_factors, std::vector<Real>({0.5, 2.0, 0.5, 2.0, 0.5, 2.0}));
 
-  std::vector<std::vector<Real>> old_responses;
-  history.initializeHistory({1.0, 6.0}, old_responses);
+  std::vector<std::vector<Real>> old_observations;
+  history.initializeHistory({1.0, 6.0}, old_observations);
 
-  const auto stacked_current = history.stackCurrentObservation(normalized, old_responses);
+  const auto stacked_current = history.stackCurrentObservation({3.0, 2.0}, old_observations);
   EXPECT_EQ(stacked_current, std::vector<Real>({3.0, 2.0, 1.0, 6.0, 1.0, 6.0}));
 
-  std::vector<std::vector<Real>> trajectories = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-  const auto stacked_trajectory = history.stackTrajectoryObservation(trajectories, 2);
+  std::vector<std::vector<Real>> observation_trajectories = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  const auto stacked_trajectory = history.stackTrajectoryObservation(observation_trajectories, 2);
   EXPECT_EQ(stacked_trajectory, std::vector<Real>({3.0, 6.0, 2.0, 5.0, 1.0, 4.0}));
+}
+
+TEST(LibtorchRLCoreTest, ObservationHistoryRejectsMalformedStoredHistory)
+{
+  LibtorchObservationHistory history(3);
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          history.stackCurrentObservation({3.0, 2.0}, {{1.0, 6.0}});
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Observation history must contain 2 stored entries, but got 1.");
+          throw;
+        }
+      },
+      std::exception);
+}
+
+TEST(LibtorchRLCoreTest, ObservationHistoryRejectsZeroTimesteps)
+{
+  EXPECT_THROW(
+      {
+        try
+        {
+          LibtorchObservationHistory history(0);
+          static_cast<void>(history);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_EQ(std::string(e.what()),
+                    "Observation history requires at least one input timestep.");
+          throw;
+        }
+      },
+      std::exception);
 }
 
 TEST(LibtorchRLCoreTest, ValueEstimatorComputesGAETargets)

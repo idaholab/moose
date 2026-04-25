@@ -16,48 +16,68 @@
 #include <vector>
 
 /**
- * Shared observation normalization and history stacking logic for libtorch-based controls and
+ * Shared observation history stacking and factor-expansion logic for libtorch-based controls and
  * trainers.
  */
 class LibtorchObservationHistory
 {
 public:
-  LibtorchObservationHistory(unsigned int input_timesteps,
-                             const std::vector<Real> & shift_factors = {},
-                             const std::vector<Real> & scaling_factors = {});
+  /**
+   * Build an observation-history helper for libtorch inputs.
+   * @param input_timesteps Number of timesteps to stack into each flattened input.
+   */
+  LibtorchObservationHistory(unsigned int input_timesteps);
 
+  /// Return the number of timesteps stacked into each flattened input.
   unsigned int inputTimesteps() const { return _input_timesteps; }
 
-  std::vector<Real> normalize(const std::vector<Real> & observation) const;
-
-  void normalizeInPlace(std::vector<Real> & observation) const;
-
-  void normalizeTrajectoryInPlace(std::vector<std::vector<Real>> & observation_trajectories) const;
-
-  void initializeHistory(const std::vector<Real> & normalized_observation,
+  /**
+   * Fill the history buffer with copies of the current observation.
+   * @param observation Current observation.
+   * @param old_observations History buffer that stores previous observations.
+   */
+  void initializeHistory(const std::vector<Real> & observation,
                          std::vector<std::vector<Real>> & old_observations) const;
 
-  void advanceHistory(const std::vector<Real> & normalized_observation,
+  /**
+   * Advance the history buffer by inserting the latest observation.
+   * @param observation Current observation.
+   * @param old_observations History buffer ordered from newest to oldest.
+   */
+  void advanceHistory(const std::vector<Real> & observation,
                       std::vector<std::vector<Real>> & old_observations) const;
 
-  std::vector<Real> expandFeatureFactors(const std::vector<Real> & feature_factors) const;
+  /**
+   * Repeat per-observation-entry factors across all stacked timesteps.
+   * @param observation_factors Per-entry factors for one observation vector.
+   */
+  std::vector<Real> expandObservationFactors(const std::vector<Real> & observation_factors) const;
 
+  /**
+   * Flatten the current observation together with its stored history.
+   * @param observation Current observation.
+   * @param old_observations History buffer ordered from newest to oldest.
+   */
   std::vector<Real>
-  stackCurrentObservation(const std::vector<Real> & normalized_observation,
+  stackCurrentObservation(const std::vector<Real> & observation,
                           const std::vector<std::vector<Real>> & old_observations) const;
 
-  std::vector<Real> stackTrajectoryObservation(
-      const std::vector<std::vector<Real>> & normalized_observation_trajectories,
-      unsigned int time_index) const;
+  /**
+   * Flatten one time slice of observation-component trajectories with causal history.
+   * @param observation_trajectories Observation trajectories indexed as [component][time].
+   * @param time_index Time index to stack.
+   */
+  std::vector<Real>
+  stackTrajectoryObservation(const std::vector<std::vector<Real>> & observation_trajectories,
+                             unsigned int time_index) const;
 
 private:
-  void validateFeatureCount(std::size_t feature_count) const;
-  void validateTrajectoryShape(
-      const std::vector<std::vector<Real>> & normalized_observation_trajectories) const;
+  /// Check that all observation-component trajectories have a consistent shape.
+  void
+  validateTrajectoryShape(const std::vector<std::vector<Real>> & observation_trajectories) const;
 
+  /// Number of timesteps stacked into each flattened observation.
   const unsigned int _input_timesteps;
-  const std::vector<Real> _shift_factors;
-  const std::vector<Real> _scaling_factors;
 };
 
 #endif

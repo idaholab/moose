@@ -74,7 +74,6 @@ public:
   /**
    * Run a forward pass through the network.
    * @param x Input tensor for the evaluation.
-   * @return Network output tensor.
    */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
@@ -109,7 +108,6 @@ public:
   /**
    * Map an activation name to the orthogonal-initialization gain we want to use.
    * @param activation Activation name to look up.
-   * @return Gain used for orthogonal initialization.
    */
   Real determineGain(const std::string & activation);
 
@@ -121,19 +119,16 @@ public:
 
 protected:
   /**
-   * Normalize affine metadata and fill in defaults when needed.
+   * Set affine metadata by either accepting the user values or filling defaults.
    * @param factors User-provided affine factors.
    * @param expected_size Expected number of entries.
    * @param default_value Default value used when the vector is empty.
    * @param factor_name Name used in error messages.
-   * @param forbid_zero Whether zero entries should be rejected.
-   * @return Normalized affine-factor vector.
    */
-  static std::vector<Real> normalizeAffineFactors(const std::vector<Real> & factors,
-                                                  unsigned int expected_size,
-                                                  Real default_value,
-                                                  const std::string & factor_name,
-                                                  bool forbid_zero = false);
+  static std::vector<Real> setAffineFactors(const std::vector<Real> & factors,
+                                            unsigned int expected_size,
+                                            Real default_value,
+                                            const std::string & factor_name);
 
   /// Initialize the registered affine metadata buffers used by serialization.
   void initializeAffineBuffers();
@@ -141,14 +136,12 @@ protected:
   /**
    * Apply affine preprocessing to the raw input tensor.
    * @param x Raw input tensor.
-   * @return Preprocessed input tensor.
    */
   virtual torch::Tensor preprocessInput(const torch::Tensor & x) const;
 
   /**
    * Apply the configured output scaling to a network output tensor.
    * @param y Raw network output tensor.
-   * @return Scaled output tensor.
    */
   virtual torch::Tensor scaleOutput(const torch::Tensor & y) const;
 
@@ -176,8 +169,11 @@ protected:
   std::vector<Real> _input_scaling_factors;
   /// Multiplicative scaling applied after the network output is formed
   std::vector<Real> _output_scaling_factors;
+  /// Registered libtorch buffer holding the affine input shifts
   torch::Tensor _input_shift_tensor;
+  /// Registered libtorch buffer holding the affine input scaling factors
   torch::Tensor _input_scale_tensor;
+  /// Registered libtorch buffer holding the output scaling factors
   torch::Tensor _output_scale_tensor;
 };
 

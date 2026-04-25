@@ -223,6 +223,7 @@ private:
 
   unsigned int _timestep_window;
 
+  /// Shared observation history stacking and factor-expansion helper
   const LibtorchObservationHistory _observation_history;
   LibtorchRLTrajectoryBuffer _trajectory_buffer;
   const LibtorchRLMiniBatchSampler _sampler;
