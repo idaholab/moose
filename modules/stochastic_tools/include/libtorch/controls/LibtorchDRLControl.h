@@ -38,19 +38,14 @@ public:
   virtual void execute() override;
 
   /**
-   * Return the log-probability of one control signal from the latest actor evaluation.
-   * @param signal_index Index of the queried control signal.
-   * @return Log-probability of the queried signal.
+   * Get the logarithmic probability of (signal_index)-th signal of the control neural net
+   * @param signal_index The index of the signal
+   * @return The logarithmic probability of the (signal_index)-th signal
    */
   Real getSignalLogProbability(const unsigned int signal_index) const;
 
-  /**
-   * Copy a trained actor into the controller.
-   * @param input_nn Actor network that should replace the currently stored controller.
-   */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn) override;
 
-  /// Load the actor network from the configured checkpoint file.
   virtual void loadControlNeuralNetFromFile() override;
 
   /// Reset the owned policy-sampling generator to a known seed.
