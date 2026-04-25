@@ -44,17 +44,21 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   std::set<MooseVariable *> damped_vars;
 
-  const auto & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
+  const auto & ndampers = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & damper : ndampers)
-    damped_vars.insert(damper->getVariable());
+    if (damper->variableDefinedOnNode(node))
+      damped_vars.insert(damper->getVariable());
 
-  _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
+  if (!damped_vars.empty())
+    _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
 
-  const auto & objects = _nodal_dampers.getActiveObjects(_tid);
-  for (const auto & obj : objects)
+  for (const auto & damper : ndampers)
   {
-    Real cur_damping = obj->computeDamping();
-    obj->checkMinDamping(cur_damping);
+    if (!damper->variableDefinedOnNode(node))
+      continue;
+
+    Real cur_damping = damper->computeDamping();
+    damper->checkMinDamping(cur_damping);
     if (cur_damping < _damping)
       _damping = cur_damping;
   }
