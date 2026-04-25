@@ -9,6 +9,7 @@
 
 #include "GravityVectorInterface.h"
 #include "PhysicalConstants.h"
+#include "MooseUtils.h"
 #include "MooseObject.h"
 
 InputParameters
@@ -37,8 +38,28 @@ GravityVectorInterface::GravityVectorInterface(const MooseObject * moose_object)
           "gravity_direction",
           "The parameters 'gravity_vector' and 'gravity_direction' are mutually exclusive.");
 
-    _gravity_direction = moose_object->getParam<RealVectorValue>("gravity_direction").unit();
     _gravity_magnitude = moose_object->getParam<Real>("gravity_magnitude");
+
+    // Direction is normalized below
+    _gravity_direction = moose_object->getParam<RealVectorValue>("gravity_direction");
+
+    // If gravity is zero, direction is the zero vector (which is initial value)
+    if (MooseUtils::absoluteFuzzyEqual(_gravity_direction.norm(), 0.0))
+    {
+      if (!MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+        mooseError("If 'gravity_direction' is zero, then 'gravity_magnitude' must also be zero.");
+    }
+    else
+    {
+      // Right now, _gravity_direction doesn't matter so long as _gravity_magnitude
+      // and _gravity_vector are right, but we'll use the convention that _gravity_direction
+      // is (0,0,0) for zero gravity.
+      if (MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+        _gravity_direction = RealVectorValue(0, 0, 0);
+      else
+        _gravity_direction = _gravity_direction.unit();
+    }
+
     _gravity_vector = _gravity_magnitude * _gravity_direction;
   }
   else if (moose_object->isParamValid("gravity_vector"))
@@ -50,7 +71,10 @@ GravityVectorInterface::GravityVectorInterface(const MooseObject * moose_object)
 
     _gravity_vector = moose_object->getParam<RealVectorValue>("gravity_vector");
     _gravity_magnitude = _gravity_vector.norm();
-    _gravity_direction = _gravity_vector / _gravity_magnitude;
+
+    // If gravity is zero, direction is the zero vector (which is initial value)
+    if (!MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+      _gravity_direction = _gravity_vector / _gravity_magnitude;
   }
   else
     moose_object->paramError("gravity_vector",

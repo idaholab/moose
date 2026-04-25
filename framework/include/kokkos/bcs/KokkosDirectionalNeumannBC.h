@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Implements a flux boundary condition grad(u).n = V.n, where the
  * vector V is specifed by the user. This differs from NeumannBC,
  * where the user instead specifies the _scalar_ value g = grad(u).n.
  */
-class KokkosDirectionalNeumannBC : public Moose::Kokkos::IntegratedBC
+class KokkosDirectionalNeumannBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -24,11 +24,9 @@ public:
   KokkosDirectionalNeumannBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
   {
-    return -_test(datum, i, qp) * (_value * datum.normals(qp));
+    return -_value * datum.normals(qp);
   }
 
 protected:

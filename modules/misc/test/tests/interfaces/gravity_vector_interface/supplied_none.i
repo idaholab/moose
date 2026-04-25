@@ -1,7 +1,8 @@
 !include base.i
 
-[UserObjects]
+[Postprocessors]
   [test]
-    type = GravityVectorInterfaceTest
+    type = TestGravityVectorInterface
+    test_value = magnitude
   []
 []

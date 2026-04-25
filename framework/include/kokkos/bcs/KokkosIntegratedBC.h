@@ -197,10 +197,12 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   AssemblyDatum datum(
       elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   bc.computeResidualInternal(bc, datum);
 }
@@ -209,10 +211,12 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   AssemblyDatum datum(
       elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   bc.computeJacobianInternal(bc, datum);
 }
@@ -221,15 +225,17 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 2));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+  auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 1)];
 
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
   AssemblyDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+
+  datum.set_local_parallel(_thread(tid, 0), _thread.size(0));
 
   bc.computeOffDiagJacobianInternal(bc, datum);
 }
@@ -254,16 +260,11 @@ IntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum)
 {
   ResidualObject::computeJacobianInternal(
       datum,
-      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int ij = ijb; ij < ije; ++ij)
-          {
-            unsigned int i = ij % datum.n_jdofs();
-            unsigned int j = ij / datum.n_jdofs();
-
-            local_ke[ij] += datum.JxW(qp) * bc.template computeQpJacobian<Derived>(i, j, qp, datum);
-          }
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += datum.JxW(qp) * bc.template computeQpJacobian<Derived>(i, j, qp, datum);
       });
 }
 
@@ -273,17 +274,12 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
 {
   ResidualObject::computeJacobianInternal(
       datum,
-      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-          for (unsigned int ij = ijb; ij < ije; ++ij)
-          {
-            unsigned int i = ij % datum.n_jdofs();
-            unsigned int j = ij / datum.n_jdofs();
-
-            local_ke[ij] += datum.JxW(qp) * bc.template computeQpOffDiagJacobian<Derived>(
-                                                i, j, datum.jvar(), qp, datum);
-          }
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += datum.JxW(qp) * bc.template computeQpOffDiagJacobian<Derived>(
+                                               i, j, datum.jvar(), qp, datum);
       });
 }
 

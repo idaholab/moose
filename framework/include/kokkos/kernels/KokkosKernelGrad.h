@@ -21,9 +21,9 @@ namespace Moose::Kokkos
  *
  * i.e. the gradient of the test function $(\nabla\psi_i)$ can be factored out for optimization.
  *
- * The user should still define computeQpResidual() and computeQpJacobian(), but their signatures
- * are different from the base class. The signature of computeQpResidual() expected to be defined in
- * the derived class is as follows:
+ * The user should still define computeQpResidual(), computeQpJacobian(), and
+ * computeQpOffDiagJacobian(), but their signatures are different from the base class. The signature
+ * of computeQpResidual() expected to be defined in the derived class is as follows:
  *
  * @tparam Derived The object type
  * @param qp The local quadrature point index
@@ -35,8 +35,8 @@ namespace Moose::Kokkos
  * KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
  *                                         AssemblyDatum & datum) const;
  *
- * The signature of computeQpJacobian() can be found in the code below. The definition of
- * computeQpOffDiagJacobian() is still the same with the original Kokkos kernel.
+ * The signature of computeQpJacobian() and computeQpOffDiagJacobian() can be found in the code
+ * below.
  */
 class KernelGrad : public Kernel
 {
@@ -72,6 +72,28 @@ public:
 
     return Real3(0);
   }
+  /**
+   * Compute off-diagonal Jacobian contribution on a quadrature point
+   * @tparam Derived The object type
+   * @param j The trial function DOF index
+   * @param jvar The variable number for column
+   * @param qp The local quadrature point index
+   * @param datum The AssemblyDatum object of the current thread
+   * @returns The vector component of the off-diagonal Jacobian contribution that will be multiplied
+   * by the gradient of the test function
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION Real3 computeQpOffDiagJacobian(const unsigned int /* j */,
+                                                 const unsigned int /* jvar */,
+                                                 const unsigned int /* qp */,
+                                                 AssemblyDatum & /* datum */) const
+  {
+    ::Kokkos::abort(
+        "Default computeQpOffDiagJacobian() should never be called. Make sure you properly "
+        "redefined this method in your class without typos.");
+
+    return Real3(0);
+  }
   ///@}
 
   /**
@@ -85,6 +107,11 @@ public:
   {
     return &KernelGrad::computeQpJacobian<Derived>;
   }
+  template <typename Derived>
+  static auto defaultOffDiagJacobian()
+  {
+    return &KernelGrad::computeQpOffDiagJacobian<Derived>;
+  }
   ///@}
 
   /**
@@ -96,6 +123,9 @@ public:
   KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
   template <typename Derived>
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
+                                                      AssemblyDatum & datum) const;
   ///@}
 };
 
@@ -121,29 +151,35 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
-  Real3 value;
-
   ResidualObject::computeJacobianInternal(
       datum,
-      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
       {
         for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
         {
-          unsigned int j_old = libMesh::invalid_uint;
+          Real3 value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
 
-          for (unsigned int ij = ijb; ij < ije; ++ij)
-          {
-            unsigned int i = ij % datum.n_jdofs();
-            unsigned int j = ij / datum.n_jdofs();
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += value * _grad_test(datum, i, qp);
+        }
+      });
+}
 
-            if (j != j_old)
-            {
-              value = datum.JxW(qp) * kernel.template computeQpJacobian<Derived>(j, qp, datum);
-              j_old = j;
-            }
+template <typename Derived>
+KOKKOS_FUNCTION void
+KernelGrad::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
+{
+  ResidualObject::computeJacobianInternal(
+      datum,
+      [&](Real * local_ke, const unsigned int ib, const unsigned int ie, const unsigned int j)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          Real3 value = datum.JxW(qp) * kernel.template computeQpOffDiagJacobian<Derived>(
+                                            j, datum.jvar(), qp, datum);
 
-            local_ke[ij] += value * _grad_test(datum, i, qp);
-          }
+          for (unsigned int i = ib; i < ie; ++i)
+            local_ke[i] += value * _grad_test(datum, i, qp);
         }
       });
 }

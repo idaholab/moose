@@ -14,7 +14,7 @@ registerKokkosResidualObject("HeatTransferApp", KokkosConvectiveHeatFluxBC);
 InputParameters
 KokkosConvectiveHeatFluxBC::validParams()
 {
-  InputParameters params = IntegratedBC::validParams();
+  InputParameters params = IntegratedBCValue::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties.");
@@ -31,7 +31,7 @@ KokkosConvectiveHeatFluxBC::validParams()
 }
 
 KokkosConvectiveHeatFluxBC::KokkosConvectiveHeatFluxBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
+  : IntegratedBCValue(parameters),
     _T_infinity(getKokkosMaterialProperty<Real>("T_infinity")),
     _htc(getKokkosMaterialProperty<Real>("heat_transfer_coefficient")),
     _htc_dT(getKokkosMaterialProperty<Real>("heat_transfer_coefficient_dT"))

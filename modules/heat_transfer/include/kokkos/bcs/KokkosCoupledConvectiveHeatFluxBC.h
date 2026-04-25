@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "KokkosIntegratedBC.h"
+#include "KokkosIntegratedBCValue.h"
 
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by auxiliary variables.  Typically used in multi-app coupling scenario. It is possible to
  * couple in a vector variable where each entry corresponds to a "phase".
  */
-class KokkosCoupledConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
+class KokkosCoupledConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBCValue
 {
 public:
   static InputParameters validParams();
@@ -24,12 +24,9 @@ public:
   KokkosCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                          const unsigned int qp,
                                          AssemblyDatum & datum) const;
 
@@ -48,21 +45,19 @@ private:
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
-                                                     const unsigned int qp,
+KokkosCoupledConvectiveHeatFluxBC::computeQpResidual(const unsigned int qp,
                                                      AssemblyDatum & datum) const
 {
   Real q = 0;
   Real u = _u(datum, qp);
   for (unsigned int c = 0; c < _n_components; c++)
     q += _alpha(datum, qp, c) * _htc(datum, qp, c) * (u - _T_infinity(datum, qp, c));
-  return _test(datum, i, qp) * q * _scale_factor(datum, qp);
+  return q * _scale_factor(datum, qp);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosCoupledConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
-                                                     const unsigned int j,
+KokkosCoupledConvectiveHeatFluxBC::computeQpJacobian(const unsigned int j,
                                                      const unsigned int qp,
                                                      AssemblyDatum & datum) const
 {
@@ -70,5 +65,5 @@ KokkosCoupledConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
   Real phi = _phi(datum, j, qp);
   for (unsigned int c = 0; c < _n_components; c++)
     dq += _alpha(datum, qp, c) * _htc(datum, qp, c) * phi;
-  return _test(datum, i, qp) * dq * _scale_factor(datum, qp);
+  return dq * _scale_factor(datum, qp);
 }

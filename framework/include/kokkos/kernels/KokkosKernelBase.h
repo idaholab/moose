@@ -38,6 +38,12 @@ public:
    * Copy constructor for parallel dispatch
    */
   KernelBase(const KernelBase & object);
+
+protected:
+  /**
+   * Number of threads for local DOF parallelization
+   */
+  const unsigned int _num_local_threads;
 };
 
 } // namespace Moose::Kokkos
