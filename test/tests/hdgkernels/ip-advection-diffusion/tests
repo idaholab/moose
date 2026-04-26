@@ -27,36 +27,42 @@
       input = test.py
       test_case = TestMonomialTri
       detail = 'simplex elements with a monomial basis for the interior variable,'
+      min_slots = 2
     []
     [monomial_quad]
       type = MMSTest
       input = test.py
       test_case = TestMonomialQuad
       detail = 'tensor-product elements with a monomial basis for the interior variable,'
+      min_slots = 2
     []
     [lagrange_tri]
       type = MMSTest
       input = test.py
       test_case = TestLagrangeTri
       detail = 'simplex elements with a L2 lagrange basis for the interior variable,'
+      min_slots = 2
     []
     [lagrange_quad]
       type = MMSTest
       input = test.py
       test_case = TestLagrangeQuad
       detail = 'tensor-product elements with a L2 lagrange basis for the interior variable,'
+      min_slots = 2
     []
     [hierarchic_tri]
       type = MMSTest
       input = test.py
       test_case = TestHierarchicTri
       detail = 'simplex elements with a L2 hierarchic basis for the interior variable, and'
+      min_slots = 2
     []
     [hierarchic_quad]
       type = MMSTest
       input = test.py
       test_case = TestHierarchicQuad
       detail = 'tensor-product elements with a L2 hierarchic basis for the interior variable.'
+      min_slots = 2
     []
   []
   [simple_advection]
