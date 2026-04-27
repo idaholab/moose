@@ -25,16 +25,23 @@
       detail = 'neither the vector nor direction are supplied.'
     []
   []
-  [zero_gravity]
-    requirement = 'The system shall give the correct gravity components and magnitude'
-    [supplied_dir]
+  [values]
+    requirement = 'The system shall give the correct gravity components, direction components, and magnitude'
+    [nonzero_supplied_vec]
+      type = CSVDiff
+      input = 'nonzero_gravity_vector.i'
+      csvdiff = 'nonzero_gravity_vector_out.csv'
+      allow_test_objects = True
+      detail = 'when a nonzero vector is supplied.'
+    []
+    [zero_supplied_dir]
       type = CSVDiff
       input = 'zero_gravity_direction.i'
       csvdiff = 'zero_gravity_direction_out.csv'
       allow_test_objects = True
       detail = 'when a zero direction is supplied.'
     []
-    [supplied_vec]
+    [zero_supplied_vec]
       type = CSVDiff
       input = 'zero_gravity_vector.i'
       csvdiff = 'zero_gravity_vector_out.csv'

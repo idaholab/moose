@@ -1,2 +1,2 @@
-time,g_norm,g_x,g_y,g_z
-0,0,0,0,0
+time,dir_x,dir_y,dir_z,g_norm,g_x,g_y,g_z
+0,0,0,0,0,0,0,0
