@@ -152,6 +152,7 @@
     input = 'test_json.py'
     test_case = "TestFull"
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file syntax in JSON format.'
@@ -162,6 +163,7 @@
     input = 'test_json.py'
     test_case = "TestNoTestObjects"
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump input file syntax in JSON format and exclude test object syntax.'
@@ -173,6 +175,7 @@
     input = 'test_json.py'
     test_case = "TestSearch"
     max_buffer_size = -1
+    min_slots = 2 # memory heavy
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
     requirement = 'The system shall be able to dump a subset of JSON formatted syntax.'
