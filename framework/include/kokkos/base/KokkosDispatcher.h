@@ -391,18 +391,6 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
 
-#define registerKokkosKernel(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosKernelAliased(app, classname, alias)                                         \
-  registerKokkosResidualObjectAliased(app, classname, alias)
-
-#define registerKokkosNodalKernel(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosNodalKernelAliased(app, classname, alias)                                    \
-  registerKokkosResidualObjectAliased(app, classname, alias)
-
-#define registerKokkosBoundaryCondition(app, classname) registerKokkosResidualObject(app, classname)
-#define registerKokkosBoundaryConditionAliased(app, classname, alias)                              \
-  registerKokkosResidualObjectAliased(app, classname, alias)
-
 // AD Kernel, NodalKernel, BC
 
 #define callRegisterKokkosADResidualObjectFunction(classname, objectname)                          \
@@ -425,19 +413,6 @@ private:
 #define registerKokkosADResidualObjectAliased(app, classname, alias)                               \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosADResidualObjectFunction(classname, alias)
-
-#define registerKokkosADKernel(app, classname) registerKokkosADResidualObject(app, classname)
-#define registerKokkosADKernelAliased(app, classname, alias)                                       \
-  registerKokkosADResidualObjectAliased(app, classname, alias)
-
-#define registerKokkosADNodalKernel(app, classname) registerKokkosADResidualObject(app, classname)
-#define registerKokkosADNodalKernelAliased(app, classname, alias)                                  \
-  registerKokkosADResidualObjectAliased(app, classname, alias)
-
-#define registerKokkosADBoundaryCondition(app, classname)                                          \
-  registerKokkosADResidualObject(app, classname)
-#define registerKokkosADBoundaryConditionAliased(app, classname, alias)                            \
-  registerKokkosADResidualObjectAliased(app, classname, alias)
 
 // Material
 

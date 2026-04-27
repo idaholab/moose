@@ -13,7 +13,7 @@ Kokkos-MOOSE kernels do not support coupling with scalar variables yet.
 The Kokkos-MOOSE kernels are designed to resemble the original MOOSE kernels as much as possible for easier porting and adaptation.
 However, some differences still exist due to the fundamentally different programming paradigm between CPU and GPU.
 You can create your own kernel by subclassing `Moose::Kokkos::Kernel` as is done in the original MOOSE by inheriting `Kernel`.
-However, your kernel should now be registered with either `registerKokkosKernel()` or `registerKokkosResidualObject()` instead of `registerMooseObject()`.
+However, your kernel should now be registered with `registerKokkosResidualObject()` instead of `registerMooseObject()`.
 Also, the signatures of hook methods are different.
 In the original MOOSE, the following virtual functions should or optionally have been overriden:
 
@@ -201,7 +201,7 @@ See the following source codes of `KokkosCoupledTimeDerivative` for an example o
 ## Automatic Differentiation id=kokkos_ad_kernel
 
 Kokkos-MOOSE kernels also support [automatic differentiation (AD)](automatic_differentiation/index.md).
-AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with either `registerKokkosADKernel()` or `registerKokkosADResidualObject()`.
+AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with `registerKokkosADResidualObject()`.
 AD kernels requires `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
 
 ```cpp

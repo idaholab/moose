@@ -9,7 +9,7 @@
 
 #include "KokkosDirectionalNeumannBC.h"
 
-registerKokkosBoundaryCondition("MooseApp", KokkosDirectionalNeumannBC);
+registerKokkosResidualObject("MooseApp", KokkosDirectionalNeumannBC);
 
 InputParameters
 KokkosDirectionalNeumannBC::validParams()

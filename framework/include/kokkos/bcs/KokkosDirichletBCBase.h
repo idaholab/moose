@@ -115,9 +115,9 @@ typedef DirichletBCBaseTempl<true> ADDirichletBCBase;
 } // namespace Moose::Kokkos
 
 #define registerKokkosDirichletBC(app, classname)                                                  \
-  registerKokkosBoundaryCondition(app, classname);                                                 \
+  registerKokkosResidualObject(app, classname);                                                    \
   registerKokkosAdditionalOperation(classname, PresetLoop)
 
 #define registerKokkosADDirichletBC(app, classname)                                                \
-  registerKokkosADBoundaryCondition(app, classname);                                               \
+  registerKokkosADResidualObject(app, classname);                                                  \
   registerKokkosAdditionalOperation(classname, PresetLoop)

@@ -9,7 +9,7 @@
 
 #include "KokkosADDiffusion.h"
 
-registerKokkosADKernel("MooseApp", KokkosADDiffusion);
+registerKokkosADResidualObject("MooseApp", KokkosADDiffusion);
 
 InputParameters
 KokkosADDiffusion::validParams()
