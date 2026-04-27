@@ -285,10 +285,12 @@ CoarsenBlockGenerator::recursiveCoarsen(const std::vector<subdomain_id_type> & b
       // Form a parent, of a low order type as we only have the extreme vertex nodes
       std::unique_ptr<Elem> parent = Elem::build(Elem::first_order_equivalent_type(elem_type));
 
-      // Get subdomain id, mapping, p_level, etc.
-      parent->inherit_data_from(*current_elem);
-
       auto parent_ptr = mesh_copy->add_elem(parent.release());
+
+      // Copy processor_id, mapping, etc.  Do this *after* add_elem
+      // for serialized DistributedMesh compatibility.
+      parent_ptr->inherit_data_from(*current_elem);
+
       coarse_elems.insert(parent_ptr);
 
       // Set the nodes to the coarse element
