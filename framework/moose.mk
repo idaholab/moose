@@ -211,6 +211,10 @@ else
 	PYMOD_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
 
+# Deduplicate rpath flags accumulated from wasp, MFEM, NEML2, etc. to suppress
+# duplicate -rpath linker warnings on macOS when dependencies share an install prefix.
+libmesh_LDFLAGS := $(shell printf '%s\n' $(libmesh_LDFLAGS) | awk '!seen[$$0]++' | tr '\n' ' ')
+
 $(pyhit_srcfiles) $(hit_CLI_srcfiles): | prebuild
 
 pyhit_LIB          := $(HIT_DIR)/hit.$(PYMOD_EXTENSION)
