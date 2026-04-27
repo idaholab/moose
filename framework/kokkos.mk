@@ -71,7 +71,7 @@ endif
 ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_DEVICE     := CUDA
   KOKKOS_ARCH       := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
-  KOKKOS_COMPILER   := GPU
+  KOKKOS_COMPILER   := NVCC
   KOKKOS_CXX         = $(CUDA_COMPILER)
   KOKKOS_CXXFLAGS    = -arch=sm_$(CUDA_ARCH) --extended-lambda
   KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
@@ -81,7 +81,7 @@ ifneq ($(PETSC_HAVE_CUDA),)
 else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
   KOKKOS_DEVICE     := HIP
   KOKKOS_ARCH       :=
-  KOKKOS_COMPILER   := GPU
+  KOKKOS_COMPILER   := HIPCC
   KOKKOS_CXX         = $(HIP_COMPILER)
   KOKKOS_CXXFLAGS    =
   KOKKOS_CPPFLAGS    =
@@ -89,7 +89,7 @@ else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
 else ifneq ($(PETSC_HAVE_SYCL),) # To be determined for SYCL
   KOKKOS_DEVICE     := SYCL
   KOKKOS_ARCH       :=
-  KOKKOS_COMPILER   := GPU
+  KOKKOS_COMPILER   := DPCPP
   KOKKOS_CXX         = $(SYCL_COMPILER)
   KOKKOS_CXXFLAGS    = -fsycl
   KOKKOS_CPPFLAGS    =
