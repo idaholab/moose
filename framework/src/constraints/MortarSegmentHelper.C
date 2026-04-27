@@ -754,8 +754,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
   // emits one triangle per polygon edge without degeneracy filtering, and skips
   // the canonicalization pass which would drop near-degenerate vertices and
   // perturb integration weights in downstream test baselines.
-  if (_triangulation_mode == MortarSegmentTriangulationMode::centroid &&
-      !_triangulate_triangles)
+  if (_triangulation_mode == MortarSegmentTriangulationMode::centroid && !_triangulate_triangles)
   {
     if (poly_nodes.size() == 3)
     {
