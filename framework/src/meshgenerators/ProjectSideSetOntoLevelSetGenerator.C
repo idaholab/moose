@@ -128,13 +128,17 @@ ProjectSideSetOntoLevelSetGenerator::generate()
     for (const auto i : make_range(n_nodes))
       new_elem->set_node(i, new_nodes[i]);
 
+    auto new_elem_ptr = new_mesh->add_elem(std::move(new_elem));
+
     // User-selected block name: same for all element types for now
     // But if our side_elem inherited any other special data (like
     // mapping type) from its interior elem, we'll want to copy that.
-    new_elem->inherit_data_from(*side_elem);
-    new_elem->subdomain_id() = projection_block_id;
+    //
+    // Do this *after* add_elem for serialized DistributedMesh
+    // compatibility.
+    new_elem_ptr->inherit_data_from(*side_elem);
 
-    new_mesh->add_elem(std::move(new_elem));
+    new_elem_ptr->subdomain_id() = projection_block_id;
   }
 
   new_mesh->subdomain_name(projection_block_id) = getParam<SubdomainName>("subdomain_name");

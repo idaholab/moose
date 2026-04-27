@@ -71,10 +71,12 @@ hexElemSplitter(MeshBase & mesh,
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
 
-    // Copy subdomain id, processor_id, mapping, etc.
-    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
-
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
+
+    // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+    // serialized DistributedMesh compatibility.
+    elems_Tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
@@ -136,10 +138,12 @@ prismElemSplitter(MeshBase & mesh,
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
 
-    // Copy subdomain id, processor_id, mapping, etc.
-    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
-
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
+
+    // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+    // serialized DistributedMesh compatibility.
+    elems_Tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
@@ -199,10 +203,12 @@ pyramidElemSplitter(MeshBase & mesh,
     new_elem->set_node(2, const_cast<Node *>(optimized_node_list[i][2]));
     new_elem->set_node(3, const_cast<Node *>(optimized_node_list[i][3]));
 
-    // Copy subdomain id, processor_id, mapping, etc.
-    new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
-
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
+
+    // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+    // serialized DistributedMesh compatibility.
+    elems_Tet4.back()->inherit_data_from(*mesh.elem_ptr(elem_id));
+
     converted_elems_ids.push_back(elems_Tet4.back()->id());
 
     for (unsigned int j = 0; j < 4; j++)
@@ -843,13 +849,16 @@ createUnitPyramid5FromHex8(MeshBase & mesh,
   new_elem->set_node(3, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(0));
   new_elem->set_node(4, const_cast<Node *>(new_node));
 
-  // Copy processor_id, mapping, etc.
-  new_elem->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr = mesh.add_elem(std::move(new_elem));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base * 2;
+  new_elem_ptr->subdomain_id() =
+      mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base * 2;
 
-  auto new_elem_ptr = mesh.add_elem(std::move(new_elem));
   retainEEID(mesh, elem_id, new_elem_ptr);
   for (const auto & bid : side_info)
     mesh.get_boundary_info().add_side(new_elem_ptr, 4, bid);
@@ -888,13 +897,15 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
 
-  // Copy processor_id, mapping, etc.
-  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr_0->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+  new_elem_ptr_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
   auto new_elem_1 = std::make_unique<Tet4>();
@@ -912,13 +923,15 @@ createUnitTet4FromHex8(MeshBase & mesh,
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, const_cast<Node *>(new_node));
 
-  // Copy processor_id, mapping, etc.
-  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr_1->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+  new_elem_ptr_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-  auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
   for (const auto & bid : side_info)
@@ -993,13 +1006,15 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                            ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, const_cast<Node *>(new_node));
 
-  // Copy processor_id, mapping, etc.
-  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr_0->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+  new_elem_ptr_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
   Elem * new_elem_ptr_1 = nullptr;
@@ -1020,13 +1035,16 @@ createUnitTet4FromPrism6(MeshBase & mesh,
                              ->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
     new_elem_1->set_node(3, const_cast<Node *>(new_node));
 
-    // Copy processor_id, mapping, etc.
-    new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+    new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
+
+    // Copy processor_id, mapping, etc.  Do this *after* add_elem for
+    // serialized DistributedMesh compatibility.
+    new_elem_ptr_1->inherit_data_from(*mesh.elem_ptr(elem_id));
 
     // But override subdomain_id to get a new block
-    new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+    new_elem_ptr_1->subdomain_id() =
+        mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-    new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
     retainEEID(mesh, elem_id, new_elem_ptr_1);
   }
 
@@ -1077,13 +1095,15 @@ convertPyramid5Elem(MeshBase & mesh,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_0->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
 
-  // Copy processor_id, mapping, etc.
-  new_elem_0->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem, for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr_0->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+  new_elem_ptr_0->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-  auto new_elem_ptr_0 = mesh.add_elem(std::move(new_elem_0));
   retainEEID(mesh, elem_id, new_elem_ptr_0);
 
   auto new_elem_1 = std::make_unique<Tet4>();
@@ -1098,13 +1118,15 @@ convertPyramid5Elem(MeshBase & mesh,
       mesh.elem_ptr(elem_id)->side_ptr(4)->node_ptr(MathUtils::euclideanMod(0 - lid_index % 2, 4)));
   new_elem_1->set_node(3, mesh.elem_ptr(elem_id)->node_ptr(4));
 
-  // Copy processor_id, mapping, etc.
-  new_elem_1->inherit_data_from(*mesh.elem_ptr(elem_id));
+  auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
+
+  // Copy processor_id, mapping, etc.  Do this *after* add_elem, for
+  // serialized DistributedMesh compatibility.
+  new_elem_ptr_1->inherit_data_from(*mesh.elem_ptr(elem_id));
 
   // But override subdomain_id to get a new block
-  new_elem_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
+  new_elem_ptr_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base;
 
-  auto new_elem_ptr_1 = mesh.add_elem(std::move(new_elem_1));
   retainEEID(mesh, elem_id, new_elem_ptr_1);
 
   for (const auto & bid : elem_side_info[0])
