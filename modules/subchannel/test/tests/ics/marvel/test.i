@@ -5,7 +5,7 @@
 heated_length = 0.51
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMTriSubChannelMeshGenerator
+    type = SCMTriAssemblyMeshGenerator
     nrings = 4
     n_cells = 40
     flat_to_flat = 0.22

@@ -33,6 +33,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _hwire(other_mesh._hwire),
     _duct_to_pin_gap(other_mesh._duct_to_pin_gap),
     _nodes(other_mesh._nodes),
+    _pin_nodes(other_mesh._pin_nodes),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _gap_to_pin_map(other_mesh._gap_to_pin_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),

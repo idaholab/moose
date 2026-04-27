@@ -11,8 +11,8 @@ P_out = 2.0e5 # Pa
 []
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
     hwire = 0.0833
@@ -21,7 +21,7 @@ P_out = 2.0e5 # Pa
   []
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = sub_channel
+    input = subchannel
   []
 []
 
@@ -44,6 +44,7 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   duct_HTC_closure = 'gnielinski'
+  pin_HTC_closure = 'Dittus-Boelter'
   friction_closure = 'cheng'
   mixing_closure = 'cheng_todreas'
 []
@@ -58,6 +59,9 @@ P_out = 2.0e5 # Pa
   [cheng_todreas]
     type = SCMMixingChengTodreas
   []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [ICs]
@@ -68,6 +72,12 @@ P_out = 2.0e5 # Pa
     variable = q_prime
     power = 1000.0 # W
     filename = "pin_power_profile19.txt"
+  []
+
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 0.01
   []
 
   [T_ic]
@@ -202,7 +212,7 @@ P_out = 2.0e5 # Pa
   [Total_power]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
-    block = sub_channel
+    block = fuel_pins
   []
   [mdot-8]
     type = SubChannelPointValue

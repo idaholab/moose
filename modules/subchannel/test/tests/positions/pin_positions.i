@@ -31,8 +31,8 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 ###################################################
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     flat_to_flat = '${fparse duct_inside}'
@@ -47,20 +47,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     spacer_k = '0.5 0.5'
   []
 
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = '${fparse n_rings}'
-    n_cells = ${n_cells}
-    unheated_length_entry = '${fparse length_entry_fuel}'
-    heated_length = '${fparse length_heated_fuel}'
-    unheated_length_exit = '${fparse length_outlet_fuel}'
-    pitch = '${fparse fuel_pin_pitch}'
-  []
-
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = fuel_pins
+    input = subchannel
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     flat_to_flat = '${fparse duct_inside}'
@@ -73,23 +62,23 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
+    block = subchannel
   []
   [SumWij]
-    block = sub_channel
+    block = subchannel
   []
   [P]
-    block = sub_channel
+    block = subchannel
     initial_condition = 0
   []
   [DP]
-    block = sub_channel
+    block = subchannel
   []
   [h]
-    block = sub_channel
+    block = subchannel
   []
   [T]
-    block = sub_channel
+    block = subchannel
   []
   [Tpin]
     block = fuel_pins
@@ -98,28 +87,28 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = fuel_pins
   []
   [rho]
-    block = sub_channel
+    block = subchannel
   []
   [S]
-    block = sub_channel
+    block = subchannel
   []
   [w_perim]
-    block = sub_channel
+    block = subchannel
   []
   [displacement]
-    block = sub_channel
+    block = subchannel
   []
   [ff]
-    block = sub_channel
+    block = subchannel
   []
   [HTC]
-    block = sub_channel
+    block = subchannel
   []
   [q_prime]
     block = fuel_pins
   []
   [mu]
-    block = sub_channel
+    block = subchannel
   []
   [duct_heat_flux]
     block = duct

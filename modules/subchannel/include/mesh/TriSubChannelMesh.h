@@ -220,10 +220,9 @@ public:
   static void
   pinPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
 
-  friend class SCMTriSubChannelMeshGenerator;
+  friend class SCMTriAssemblyMeshGenerator;
   friend class SCMTriDuctMeshGenerator;
-  friend class SCMTriPinMeshGenerator;
-  friend class SCMDetailedTriPinMeshGenerator;
+  friend class SCMDetailedTriAssemblyMeshGenerator;
 
   /// number of corners in the duct x-sec
   static const unsigned int N_CORNERS = 6;

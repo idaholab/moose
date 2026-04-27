@@ -107,7 +107,8 @@ SCMSolutionTransfer::transferToMultiApps()
   if (from_mesh == nullptr)
     mooseError("This transfer works only with SubChannelMesh classes.");
   if (_pin_transfer && !from_mesh->pinMeshExist())
-    mooseError("This transfer was configured for pin variables, but the source mesh has no pin mesh.");
+    mooseError(
+        "This transfer was configured for pin variables, but the source mesh has no pin mesh.");
 
   for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
     if (getToMultiApp()->hasLocalApp(i))
@@ -176,7 +177,8 @@ SCMSolutionTransfer::transferNodalVars(unsigned int app_idx)
 Node *
 SCMSolutionTransfer::getFromNode(const SubChannelMesh & from_mesh, const Point & src_node)
 {
-  unsigned int sch_idx = _pin_transfer ? from_mesh.pinIndex(src_node) : from_mesh.channelIndex(src_node);
+  unsigned int sch_idx =
+      _pin_transfer ? from_mesh.pinIndex(src_node) : from_mesh.channelIndex(src_node);
   unsigned iz = from_mesh.getZIndex(src_node);
   return _pin_transfer ? from_mesh.getPinNode(sch_idx, iz) : from_mesh.getChannelNode(sch_idx, iz);
 }

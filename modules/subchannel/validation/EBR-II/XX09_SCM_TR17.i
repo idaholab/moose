@@ -24,8 +24,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = ${n_rings}
     n_cells = 50
     flat_to_flat = ${inner_duct_in}
@@ -39,15 +39,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     spacer_k = '0.0'
   []
 
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = ${n_rings}
-    n_cells = 50
-    unheated_length_exit = ${unheated_length_exit}
-    heated_length = ${heated_length}
-    pitch = ${fuel_pin_pitch}
-  []
 []
 
 [FluidProperties]
@@ -198,7 +189,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

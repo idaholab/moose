@@ -34,7 +34,7 @@ pin_diameter = 0.00950
 
   # [fuel_pins]
   #   type = SCMQuadAssemblyMeshGenerator
-  #   input = sub_channel
+  #   input = subchannel
   #   nx = 6
   #   ny = 6
   #   n_cells = 10

@@ -5,8 +5,8 @@ P_out = 2.0e5 # Pa
 length = 0.5
 num_cells = 40
 [TriSubChannelMesh]
-  [sub_channel]
-    type = SCMTriSubChannelMeshGenerator
+  [subchannel]
+    type = SCMTriAssemblyMeshGenerator
     nrings = 3
     n_cells = ${num_cells}
     flat_to_flat = 3.41e-2
@@ -17,17 +17,6 @@ num_cells = 40
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
-  []
-
-  [fuel_pins]
-    type = SCMTriPinMeshGenerator
-    input = sub_channel
-    nrings = 3
-    n_cells = ${num_cells}
-    heated_length = 0.5
-    unheated_length_entry = 0.4
-    unheated_length_exit = 0.1
-    pitch = 7.26e-3
   []
 []
 

@@ -16,7 +16,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
 [TriSubChannelMesh]
   [subchannel]
-    type = SCMDetailedTriSubChannelMeshGenerator
+    type = SCMDetailedTriAssemblyMeshGenerator
     nrings = '${n_rings}'
     n_cells = 50
     flat_to_flat = '${inner_duct_in}'
@@ -26,16 +26,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     pitch = '${fuel_pin_pitch}'
   []
 
-  [fuel_pins]
-    type = SCMDetailedTriPinMeshGenerator
-    input = subchannel
-    nrings = '${n_rings}'
-    n_cells = 50
-    unheated_length_exit = '${unheated_length_exit}'
-    heated_length = '${heated_length}'
-    pin_diameter = '${fuel_pin_diameter}'
-    pitch = '${fuel_pin_pitch}'
-  []
 []
 
 [AuxVariables]
