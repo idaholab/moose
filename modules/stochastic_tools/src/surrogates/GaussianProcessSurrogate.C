@@ -75,6 +75,9 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
               "Number of parameters provided for evaluation does not match number of parameters "
               "used for training.");
   const unsigned int n_outputs = _gp.getCovarFunction().numOutputs();
+  const unsigned int n_train = _training_params.rows();
+  const unsigned int n_virt = _gp.virtualParams().rows();
+  const unsigned int n_total = n_train + n_virt;
 
   y = std::vector<Real>(n_outputs, 0.0);
   std = std::vector<Real>(n_outputs, 0.0);
@@ -85,28 +88,59 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
-  RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
+  // Build K_train_test: (n_total x n_outputs) — extended with derivative rows if needed
+  RealEigenMatrix K_train_test(n_total * n_outputs, n_outputs);
 
-  _gp.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, _training_params, test_points, false);
+  // Standard rows: Cov[f(X_train), f(x*)]
+  RealEigenMatrix K_ff_test(n_train * n_outputs, n_outputs);
+  _gp.getCovarFunction().computeCovarianceMatrix(K_ff_test, _training_params, test_points, false);
+  K_train_test.topRows(n_train * n_outputs) = K_ff_test;
+
+  // Derivative rows: Cov[df(x_d^j)/dx_{k_j}, f(x*)] — only for single-output GP
+  if (n_virt > 0)
+  {
+    for (unsigned int j = 0; j < n_virt; ++j)
+    {
+      RealEigenMatrix xd_j = _gp.virtualParams().row(j);
+      RealEigenMatrix K_df_j(1, 1);
+      _gp.getCovarFunction().computeCovarianceDf(
+          K_df_j, xd_j, test_points, _gp.virtualDerivDims()[j]);
+      K_train_test(n_train + j, 0) = K_df_j(0, 0);
+    }
+  }
+
+  // Self-covariance at test point
   RealEigenMatrix K_test(n_outputs, n_outputs);
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
-  // Compute the predicted mean value (centered)
+  // Predicted mean in standardized z-space
   RealEigenMatrix pred_value = (K_train_test.transpose() * _gp.getKResultsSolve()).transpose();
-  // De-center/scale the value and store for return
+
+  // De-standardize to z-space (post-link, pre-inverse-link)
   _gp.getDataStandardizer().getDestandardized(pred_value);
 
+  // Posterior variance: K_** - k_*^T K_aug^{-1} k_*
   RealEigenMatrix pred_var =
       K_test - (K_train_test.transpose() * _gp.getKCholeskyDecomp().solve(K_train_test));
 
-  // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
   _gp.getDataStandardizer().getDescaled(std_dev_mat);
 
   for (const auto output_i : make_range(n_outputs))
   {
-    y[output_i] = pred_value(0, output_i);
-    std[output_i] = std_dev_mat(output_i, output_i);
+    const Real mu_z = pred_value(0, output_i);
+    const Real sigma_z = std_dev_mat(output_i, output_i);
+
+    if (_gp.hasLinkFunction())
+    {
+      // Apply inverse link to mean; propagate uncertainty via delta method
+      y[output_i] = _gp.applyInvLink(mu_z);
+      std[output_i] = std::abs(_gp.invLinkDeriv(mu_z)) * sigma_z;
+    }
+    else
+    {
+      y[output_i] = mu_z;
+      std[output_i] = sigma_z;
+    }
   }
 }

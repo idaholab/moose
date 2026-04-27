@@ -77,6 +77,76 @@ public:
                                const std::string & hyper_param_name,
                                unsigned int ind) const;
 
+  /**
+   * Compute the cross-covariance between function values and derivatives:
+   *   K_fd[i,j] = Cov[f(x_i), df(xd_j)/dx'_{dim}] = dK(x_i, xd_j)/dx'_{dim}
+   * For SE kernel: K_fd[i,j] = K(x_i,xd_j) * (x_{i,dim} - xd_{j,dim}) / ell_dim^2
+   * Default implementation calls mooseError; override in kernels that support
+   * derivative observations.
+   * @param K_fd  Output matrix of size (x.rows() x xd.rows())
+   * @param x     Function-value observation locations
+   * @param xd    Derivative observation locations
+   * @param dim   Input dimension for the derivative
+   */
+  virtual void computeCovarianceFD(RealEigenMatrix & K_fd,
+                                   const RealEigenMatrix & x,
+                                   const RealEigenMatrix & xd,
+                                   unsigned int dim) const;
+
+  /**
+   * Compute the cross-covariance between derivatives and function values:
+   *   K_df[i,j] = Cov[df(xd_i)/dx_{dim}, f(xp_j)] = dK(xd_i, xp_j)/dx_{d,dim}
+   * For SE kernel: K_df[i,j] = K(xd_i,xp_j) * (xp_{j,dim} - xd_{i,dim}) / ell_dim^2
+   * Note: K_df = K_fd^T when xd and xp are swapped.
+   * Default implementation calls mooseError.
+   * @param K_df  Output matrix of size (xd.rows() x xp.rows())
+   * @param xd    Derivative observation locations
+   * @param xp    Function-value locations (e.g. test points)
+   * @param dim   Input dimension for the derivative
+   */
+  virtual void computeCovarianceDf(RealEigenMatrix & K_df,
+                                   const RealEigenMatrix & xd,
+                                   const RealEigenMatrix & xp,
+                                   unsigned int dim) const;
+
+  /**
+   * Compute the covariance between two sets of derivative observations:
+   *   K_dd[i,j] = Cov[df(xd_i)/dx_{dim_i}, df(xdp_j)/dx'_{dim_j}]
+   *             = d^2 K(xd_i, xdp_j) / (dx_{dim_i} dx'_{dim_j})
+   * For SE kernel when dim_i == dim_j:
+   *   = K(xd_i,xdp_j) * [1/ell_k^2 - (xd_{i,k}-xdp_{j,k})^2/ell_k^4]
+   * For SE kernel when dim_i != dim_j:
+   *   = K(xd_i,xdp_j) * [-(xd_{i,ki}-xdp_{j,ki})*(xd_{i,kj}-xdp_{j,kj})/(ell_ki^2*ell_kj^2)]
+   * Default implementation calls mooseError.
+   * @param K_dd   Output matrix of size (xd.rows() x xdp.rows())
+   * @param xd     First set of derivative observation locations
+   * @param xdp    Second set of derivative observation locations
+   * @param dim_i  Derivative dimension for the first set
+   * @param dim_j  Derivative dimension for the second set
+   */
+  virtual void computeCovarianceDD(RealEigenMatrix & K_dd,
+                                   const RealEigenMatrix & xd,
+                                   const RealEigenMatrix & xdp,
+                                   unsigned int dim_i,
+                                   unsigned int dim_j) const;
+
+  /**
+   * Compute dK_cross/dhp: the derivative of the cross-covariance K(x, xc) with
+   * respect to a hyperparameter. Used in the penalty constraint gradient.
+   * For kernels that do not implement this, the default returns a zero matrix
+   * (penalty loss is computed but no gradient contribution is added).
+   * @param dKdhp      Output matrix of size (x.rows() x xc.rows())
+   * @param x          Training point locations (batch)
+   * @param xc         Constraint point location (1 x d)
+   * @param hp_name    Hyperparameter name (prefixed with covariance object name)
+   * @param ind        Index within vector hyperparameter (0 for scalars)
+   */
+  virtual void computedKdhyper_cross(RealEigenMatrix & dKdhp,
+                                     const RealEigenMatrix & x,
+                                     const RealEigenMatrix & xc,
+                                     const std::string & hp_name,
+                                     unsigned int ind) const;
+
   /// Check if a given parameter is tunable
   /// @param The name of the hyperparameter
   virtual bool isTunable(const std::string & name) const;

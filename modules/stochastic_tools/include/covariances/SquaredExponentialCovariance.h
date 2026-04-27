@@ -44,6 +44,32 @@ public:
                            const Real sigma_f_squared,
                            const int ind);
 
+  /// Cross-covariance K_fd[i,j] = Cov[f(x_i), df(xd_j)/dx'_{dim}] = dK(x_i,xd_j)/dx'_{dim}
+  void computeCovarianceFD(RealEigenMatrix & K_fd,
+                           const RealEigenMatrix & x,
+                           const RealEigenMatrix & xd,
+                           unsigned int dim) const override;
+
+  /// Cross-covariance K_df[i,j] = Cov[df(xd_i)/dx_{dim}, f(xp_j)] = dK(xd_i,xp_j)/dx_{d,dim}
+  void computeCovarianceDf(RealEigenMatrix & K_df,
+                           const RealEigenMatrix & xd,
+                           const RealEigenMatrix & xp,
+                           unsigned int dim) const override;
+
+  /// Second-derivative covariance K_dd[i,j] = d^2K/(dx_{dim_i} dx'_{dim_j})
+  void computeCovarianceDD(RealEigenMatrix & K_dd,
+                           const RealEigenMatrix & xd,
+                           const RealEigenMatrix & xdp,
+                           unsigned int dim_i,
+                           unsigned int dim_j) const override;
+
+  /// dK_cross(x, xc)/dhp: derivative of cross-covariance w.r.t. hyperparameters for penalty gradient
+  void computedKdhyper_cross(RealEigenMatrix & dKdhp,
+                             const RealEigenMatrix & x,
+                             const RealEigenMatrix & xc,
+                             const std::string & hp_name,
+                             unsigned int ind) const override;
+
 protected:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   const std::vector<Real> & _length_factor;
