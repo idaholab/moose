@@ -39,30 +39,5 @@ KokkosParsedMaterial::KokkosParsedMaterial(const InputParameters & parameters)
     addScalar("dt", &dt);
   }
 
-  const auto & constant_names = getParam<std::vector<std::string>>("constant_names");
-  const auto & postprocessor_names =
-      getParam<std::vector<PostprocessorName>>("postprocessor_names");
-  const auto & variable_names = coupledNames("coupled_variables");
-  const auto & property_names =
-      getParam<std::vector<MaterialPropertyName>>("material_property_names");
-  const auto & function_names = getParam<std::vector<FunctionName>>("function_names");
-
-  const auto & constant_expressions = parameters.get<std::vector<Real>>("constant_expressions");
-
-  for (const auto i : make_range(constant_names.size()))
-    addConstant(constant_names[i], constant_expressions[i]);
-
-  for (const auto & pp : postprocessor_names)
-    addScalar(pp, &getPostprocessorValueByName(pp));
-
-  for (const auto i : make_range(variable_names.size()))
-    addField(variable_names[i], kokkosCoupledValue("coupled_variables", i));
-
-  for (const auto & prop : property_names)
-    addProperty(prop, getKokkosMaterialPropertyByName<Real>(prop));
-
-  for (const auto & func : function_names)
-    addFunction(func, getKokkosFunctionByName(func));
-
-  finalize();
+  initParsed(this, coupledNames("coupled_variables"));
 }

@@ -68,6 +68,13 @@ protected:
   void finalize();
 
   /**
+   * Initialize symbols from parsed parameters. variable_names must be supplied by
+   * the caller because Coupleable::coupledNames() is protected.
+   */
+  template <typename T>
+  void initParsed(T * obj, const std::vector<VariableName> & variable_names);
+
+  /**
    * Parsed expression
    */
   const std::string & _expression;
@@ -122,6 +129,37 @@ ParsedObjectBase::checkDuplicateSymbols(const std::vector<T> symbols, const std:
 
     _all_symbols.insert(symbol);
   }
+}
+
+template <typename T>
+void
+ParsedObjectBase::initParsed(T * obj, const std::vector<VariableName> & variable_names)
+{
+  const auto & constant_names = obj->template getParam<std::vector<std::string>>("constant_names");
+  const auto & postprocessor_names =
+      obj->template getParam<std::vector<PostprocessorName>>("postprocessor_names");
+  const auto & property_names =
+      obj->template getParam<std::vector<MaterialPropertyName>>("material_property_names");
+  const auto & function_names = obj->template getParam<std::vector<FunctionName>>("function_names");
+  const auto & constant_expressions =
+      obj->template getParam<std::vector<Real>>("constant_expressions");
+
+  for (const auto i : make_range(constant_names.size()))
+    addConstant(constant_names[i], constant_expressions[i]);
+
+  for (const auto & pp : postprocessor_names)
+    addScalar(pp, &obj->getPostprocessorValueByName(pp));
+
+  for (const auto i : make_range(variable_names.size()))
+    addField(variable_names[i], obj->kokkosCoupledValue("coupled_variables", i));
+
+  for (const auto & prop : property_names)
+    addProperty(prop, obj->template getKokkosMaterialPropertyByName<Real>(prop));
+
+  for (const auto & func : function_names)
+    addFunction(func, obj->getKokkosFunctionByName(func));
+
+  finalize();
 }
 
 } // namespace Moose::Kokkos
