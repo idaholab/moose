@@ -13,6 +13,7 @@
     input = test.py
     test_case = TestMultipleTimeIntegrators
     prereq = test
+    min_slots = 2 # Memory heavy
   []
   [jac]
     type = PetscJacobianTester
