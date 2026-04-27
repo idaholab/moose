@@ -113,7 +113,7 @@
       recover = false
       restep = false
       detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
-    []    
+    []
   []
   [MFEM_to_MFEM_sibling_transfers]
     requirement = "The system shall support multiapp sibling transfers from MFEM to MFEM sub-apps via shape function evaluations"
@@ -137,7 +137,7 @@
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Run0.pvd
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
                   OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Run0.pvd
-                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu'                 
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu'
       capabilities = 'mfem'
       compute_devices = 'cpu'
       max_parallel = 1 # XML schemadiff with multiple ranks

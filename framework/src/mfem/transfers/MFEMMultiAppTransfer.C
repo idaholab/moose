@@ -37,8 +37,7 @@ MFEMMultiAppTransfer::MFEMMultiAppTransfer(InputParameters const & params)
 void
 MFEMMultiAppTransfer::execute()
 {
-  TIME_SECTION(
-      "MFEMMultiAppTransfer::execute", 5, "Perform transfer to and/or from an MFEMProblem.");
+  TIME_SECTION("MFEMMultiAppTransfer::execute", 5, "Perform transfer to and/or from subapps.");
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -47,7 +46,7 @@ MFEMMultiAppTransfer::execute()
         {
           setActiveToProblem(getToMultiApp()->appProblemBase(i), i);
           setActiveFromProblem(getToMultiApp()->problemBase(), 0);
-          transferVariables(true);
+          transferVariables(/*is_target_local=*/true);
         }
       break;
     case FROM_MULTIAPP:
@@ -56,26 +55,21 @@ MFEMMultiAppTransfer::execute()
         {
           setActiveToProblem(getFromMultiApp()->problemBase(), 0);
           setActiveFromProblem(getFromMultiApp()->appProblemBase(i), i);
-          transferVariables(true);
+          transferVariables(/*is_target_local=*/true);
         }
       break;
     case BETWEEN_MULTIAPP:
-      int transfers_done = 0;
+      bool transfers_done = false;
       for (const auto from_app_id : make_range(getFromMultiApp()->numGlobalApps()))
-        for (const auto to_app_id : make_range(getToMultiApp()->numGlobalApps()))
-          if (getFromMultiApp()->hasLocalApp(from_app_id))
+        if (getFromMultiApp()->hasLocalApp(from_app_id))
+          for (const auto to_app_id : make_range(getToMultiApp()->numGlobalApps()))
           {
+            bool is_target_local = getToMultiApp()->hasLocalApp(to_app_id);
             setActiveFromProblem(getFromMultiApp()->appProblemBase(from_app_id), from_app_id);
-            if (getToMultiApp()->hasLocalApp(to_app_id))
-            {
+            if (is_target_local)
               setActiveToProblem(getToMultiApp()->appProblemBase(to_app_id), to_app_id);
-              transferVariables(true);
-              ++transfers_done;
-            }
-            else
-            {
-              transferVariables(false);
-            }
+            transferVariables(is_target_local);
+            transfers_done |= is_target_local;
           }
       if (!transfers_done)
         mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "

@@ -36,21 +36,12 @@ MFEMNodalProjector::extractNodePositions(const mfem::ParFiniteElementSpace & fes
 
     mfem::DenseMatrix pos;
     fespace.GetElementTransformation(i)->Transform(ir, pos);
-    mfem::Vector rowx, rowy, rowz;
+    mfem::Vector row;
 
-    switch (dim)
+    for (const auto d : make_range(dim))
     {
-      case 3:
-        rowz.SetDataAndSize(node_positions.GetData() + nodal_offset + 2 * nnodes, nqpt);
-        pos.GetRow(2, rowz);
-        [[fallthrough]];
-      case 2:
-        rowy.SetDataAndSize(node_positions.GetData() + nodal_offset + 1 * nnodes, nqpt);
-        pos.GetRow(1, rowy);
-        [[fallthrough]];
-      case 1:
-        rowx.SetDataAndSize(node_positions.GetData() + nodal_offset + 0 * nnodes, nqpt);
-        pos.GetRow(0, rowx);
+      row.SetDataAndSize(node_positions.GetData() + nodal_offset + d * nnodes, nqpt);
+      pos.GetRow(d, row);
     }
 
     nodal_offset += nqpt;

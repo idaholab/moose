@@ -35,11 +35,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::MultiApplibMeshToMFEMShapeEvaluati
 MFEMProblem &
 MultiApplibMeshToMFEMShapeEvaluationTransfer::getActiveToProblem()
 {
-  MFEMProblem * mfem_to_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
-  if (!mfem_to_problem)
-    mooseError("Transfer destination problem is not an MFEM problem");
-  return *mfem_to_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
 }
 
 void
@@ -70,22 +66,13 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::transferVariables(bool is_target_l
       const int nnodes = vxyz.Size() / dim;
       for (const auto i : make_range(nnodes))
       {
+        libMesh::Point point_in_target_frame;
+        for (const auto d : make_range(dim))
+          point_in_target_frame(d) = vxyz[i + d * nnodes];
+
+        const auto point_in_source_frame = mapPointToActiveSourceFrame(point_in_target_frame);
         for (const auto i_proc : make_range(n_processors()))
-        {
-          libMesh::Point point_in_target_frame;
-          switch (dim)
-          {
-            case 3:
-              point_in_target_frame(2) = vxyz[i + 2 * nnodes];
-              [[fallthrough]];
-            case 2:
-              point_in_target_frame(1) = vxyz[i + nnodes];
-              [[fallthrough]];
-            case 1:
-              point_in_target_frame(0) = vxyz[i];
-          }
-          outgoing_points[i_proc].push_back(mapPointToActiveSourceFrame(point_in_target_frame));
-        }
+          outgoing_points[i_proc].push_back(point_in_source_frame);
       }
       interp_vals.SetSize(nnodes);
     }
@@ -135,10 +122,7 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
     vals_for_incoming_points.resize(incoming_points.size(), getMFEMOutOfMeshValue());
     // Compute interpolation values of the libMesh variable at all requested points
     for (const auto i_pt : index_range(incoming_points))
-    {
-      Point pt = incoming_points[i_pt];
-      vals_for_incoming_points[i_pt] = local_meshfuns(pt);
-    }
+      vals_for_incoming_points[i_pt] = local_meshfuns(incoming_points[i_pt]);
   };
   // Copy data out to interp_vals
   auto action_functor =
@@ -158,9 +142,8 @@ MultiApplibMeshToMFEMShapeEvaluationTransfer::interpolatelibMeshVariable(
   // Set interpolated field values at points on local processor
   interp_vals = getMFEMOutOfMeshValue(); // default to the out-of-mesh value
   // We assume incoming_vals is ordered in the same way as outgoing_points
-  const mfem::real_t * val = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
-      comm(), outgoing_points, gather_functor, action_functor, val);
+      comm(), outgoing_points, gather_functor, action_functor, (mfem::real_t *)(nullptr));
 }
 
 #endif

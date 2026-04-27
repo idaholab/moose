@@ -30,21 +30,13 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
 MFEMProblem &
 MultiAppMFEMCopyTransfer::getActiveFromProblem()
 {
-  MFEMProblem * mfem_from_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
-  if (!mfem_from_problem)
-    mooseError("Transfer source problem is not an MFEM problem");
-  return *mfem_from_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
 }
 
 MFEMProblem &
 MultiAppMFEMCopyTransfer::getActiveToProblem()
 {
-  MFEMProblem * mfem_to_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
-  if (!mfem_to_problem)
-    mooseError("Transfer destination problem is not an MFEM problem");
-  return *mfem_to_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
 }
 
 void
@@ -79,7 +71,7 @@ MultiAppMFEMCopyTransfer::checkSiblingsTransferSupported() const
   if (getFromMultiApp()->numGlobalApps() == getToMultiApp()->numGlobalApps())
   {
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-      if (getFromMultiApp()->hasLocalApp(i) + getToMultiApp()->hasLocalApp(i) == 1)
+      if (getFromMultiApp()->hasLocalApp(i) != getToMultiApp()->hasLocalApp(i))
         mooseError("Child application allocation on parallel processes must be the same to support "
                    "siblings variable field copy transfer");
   }

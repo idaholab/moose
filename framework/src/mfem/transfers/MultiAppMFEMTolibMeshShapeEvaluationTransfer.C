@@ -34,11 +34,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::MultiAppMFEMTolibMeshShapeEvaluati
 MFEMProblem &
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::getActiveFromProblem()
 {
-  MFEMProblem * mfem_from_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
-  if (!mfem_from_problem)
-    mooseError("Transfer source problem is not an MFEM problem");
-  return *mfem_from_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
 }
 
 /// Extract locations from libMesh-based MooseVariable at which projection will take place
@@ -61,23 +57,17 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::extractlibMeshNodePositions(
                "CONSTANT are not supported.");
   else if (is_nodal)
   {
+    // Consider nodes the variable has dofs at.
     for (const auto & node : to_mesh.local_node_ptr_range())
-    {
-      // Skip this node if the variable has no dofs at it.
-      if (node->n_dofs(sys_num, var_num) < 1)
-        continue;
-      outgoing_libmesh_points.push_back(*node);
-    }
+      if (node->n_dofs(sys_num, var_num))
+        outgoing_libmesh_points.push_back(*node);
   }
   else // Elemental, constant monomial
   {
+    // Consider elements the variable has dofs at.
     for (const auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
-    {
-      // Skip this element if the variable has no dofs at it.
-      if (elem->n_dofs(sys_num, var_num) < 1)
-        continue;
-      outgoing_libmesh_points.push_back(elem->vertex_average());
-    }
+      if (elem->n_dofs(sys_num, var_num))
+        outgoing_libmesh_points.push_back(elem->vertex_average());
   }
 }
 
@@ -86,12 +76,12 @@ void
 MultiAppMFEMTolibMeshShapeEvaluationTransfer::projectlibMeshNodalValues(
     libMesh::System & to_sys, const MooseVariableFieldBase & to_var, mfem::Vector & interp_vals)
 {
-  // Update libMesh solution DoFs with interpolated MFEM values libMesh mesh
+  // libMesh mesh
+  const MeshBase & to_mesh = getActiveToProblem().mesh(_displaced_target_mesh).getMesh();
   auto var_num = to_var.number();
   auto sys_num = to_sys.number();
   auto & fe_type = to_var.feType();
   bool is_nodal = to_var.isNodal();
-  const MeshBase & to_mesh = getActiveToProblem().mesh(_displaced_target_mesh).getMesh();
 
   unsigned int mfem_point_index = 0;
   if (fe_type.order > CONSTANT && !is_nodal)
@@ -99,33 +89,31 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::projectlibMeshNodalValues(
                "CONSTANT are not supported.");
   else if (is_nodal)
   {
+    // Consider nodes the variable has dofs at.
     for (const auto & node : to_mesh.local_node_ptr_range())
-    {
-      // Skip this node if the variable has no dofs at it.
-      if (node->n_dofs(sys_num, var_num) < 1)
-        continue;
-      const auto dof_object_id = node->id();
-      const DofObject * dof_object = to_mesh.node_ptr(dof_object_id);
-      const auto dof = dof_object->dof_number(sys_num, var_num, 0);
-      const auto val = interp_vals[mfem_point_index];
-      to_sys.solution->set(dof, val);
-      mfem_point_index++;
-    }
+      if (node->n_dofs(sys_num, var_num))
+      {
+        const auto dof_object_id = node->id();
+        const DofObject * dof_object = to_mesh.node_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = interp_vals[mfem_point_index];
+        to_sys.solution->set(dof, val);
+        mfem_point_index++;
+      }
   }
   else // Elemental, constant monomial
   {
+    // Consider elements the variable has dofs at.
     for (const auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
-    {
-      // Skip this element if the variable has no dofs at it.
-      if (elem->n_dofs(sys_num, var_num) < 1)
-        continue;
-      const auto dof_object_id = elem->id();
-      const DofObject * dof_object = to_mesh.elem_ptr(dof_object_id);
-      const auto dof = dof_object->dof_number(sys_num, var_num, 0);
-      const auto val = interp_vals[mfem_point_index];
-      to_sys.solution->set(dof, val);
-      mfem_point_index++;
-    }
+      if (elem->n_dofs(sys_num, var_num))
+      {
+        const auto dof_object_id = elem->id();
+        const DofObject * dof_object = to_mesh.elem_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = interp_vals[mfem_point_index];
+        to_sys.solution->set(dof, val);
+        mfem_point_index++;
+      }
   }
   to_sys.solution->close();
   // Sync local solutions
@@ -168,7 +156,6 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::transferVariables(bool is_target_l
       extractlibMeshNodePositions(to_sys, to_var, outgoing_libmesh_points);
       const MeshBase & to_mesh = to_problem.mesh(_displaced_target_mesh).getMesh();
       // Perform interpolation of MFEM variable
-      const mfem::Ordering::Type ordering = mfem::Ordering::byVDIM;
       for (auto & point : outgoing_libmesh_points)
         point = mapPointToActiveSourceFrame(point);
       outgoing_mfem_points = Moose::MFEM::libMeshPointsToMFEMVector(

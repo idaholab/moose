@@ -32,21 +32,13 @@ MultiAppMFEMShapeEvaluationTransfer::MultiAppMFEMShapeEvaluationTransfer(
 MFEMProblem &
 MultiAppMFEMShapeEvaluationTransfer::getActiveFromProblem()
 {
-  MFEMProblem * mfem_from_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveFromProblem());
-  if (!mfem_from_problem)
-    mooseError("Transfer source problem is not an MFEM problem");
-  return *mfem_from_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveFromProblem());
 }
 
 MFEMProblem &
 MultiAppMFEMShapeEvaluationTransfer::getActiveToProblem()
 {
-  MFEMProblem * mfem_to_problem =
-      dynamic_cast<MFEMProblem *>(&MFEMMultiAppTransfer::getActiveToProblem());
-  if (!mfem_to_problem)
-    mooseError("Transfer destination problem is not an MFEM problem");
-  return *mfem_to_problem;
+  return static_cast<MFEMProblem &>(MFEMMultiAppTransfer::getActiveToProblem());
 }
 
 void
@@ -61,22 +53,12 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
     for (const auto i : make_range(n_points))
     {
       Point point_in_target_frame;
-      switch (dimension)
-      {
-        case 3:
-          point_in_target_frame(2) = point_coordinates[i + 2 * n_points];
-          [[fallthrough]];
-        case 2:
-          point_in_target_frame(1) = point_coordinates[i + n_points];
-          [[fallthrough]];
-        case 1:
-          point_in_target_frame(0) = point_coordinates[i];
-      }
+      for (const auto d : make_range(dimension))
+        point_in_target_frame(d) = point_coordinates[i + d * n_points];
+
       const auto point_in_source_frame = mapPointToActiveSourceFrame(point_in_target_frame);
-      point_coordinates[i] = point_in_source_frame(0);
-      point_coordinates[i + n_points] = point_in_source_frame(1);
-      if (dimension == 3)
-        point_coordinates[i + 2 * n_points] = point_in_source_frame(2);
+      for (const auto d : make_range(dimension))
+        point_coordinates[i + d * n_points] = point_in_source_frame(d);
     }
   };
 
@@ -93,7 +75,7 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
     if (problem.getProblemData().cmplx_gridfunctions.Has(name))
     {
       is_complex = true;
-      return problem.getProblemData().cmplx_gridfunctions.Get(name)->real();
+      return problem.getComplexGridFunction(name)->real();
     }
     mooseError("No real or complex variable named '", name, "' found.");
   };
@@ -149,13 +131,11 @@ MultiAppMFEMShapeEvaluationTransfer::transferVariables(bool is_target_local)
       {
         // Get remaining imaginary component of destination GridFunction
         mfem::ParGridFunction & to_gf_im =
-            getActiveToProblem().getProblemData().cmplx_gridfunctions.Get(getToVarName(v))->imag();
+            getActiveToProblem().getComplexGridFunction(getToVarName(v))->imag();
         if (is_from_complex)
         {
-          mfem::ParGridFunction & from_gf_im = getActiveFromProblem()
-                                                   .getProblemData()
-                                                   .cmplx_gridfunctions.Get(getFromVarName(v))
-                                                   ->imag();
+          mfem::ParGridFunction & from_gf_im =
+              getActiveFromProblem().getComplexGridFunction(getFromVarName(v))->imag();
           _mfem_interpolator.Interpolate(
               vxyz, from_gf_im, interp_vals, point_ordering, to_pfespace.GetOrdering());
           _mfem_projector.projectNodalValues(interp_vals, to_pfespace.GetOrdering(), to_gf_im);
