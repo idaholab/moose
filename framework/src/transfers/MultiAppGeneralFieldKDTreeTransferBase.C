@@ -277,14 +277,14 @@ MultiAppGeneralFieldKDTreeTransferBase::checkRestrictionsForSource(const Point &
 void
 MultiAppGeneralFieldKDTreeTransferBase::evaluateNearestNodeFromKDTrees(
     const Point & pt,
-    unsigned int mesh_div,
+    unsigned int source_index,
     std::pair<Real, Real> & outgoing_val,
     bool & point_found)
 {
   // First pass: find the nearest neighbor value across all local sources
   for (const auto i_from : make_range(_num_sources))
   {
-    if (!checkRestrictionsForSource(pt, mesh_div, i_from))
+    if (!checkRestrictionsForSource(pt, source_index, i_from))
       continue;
 
     // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
@@ -320,7 +320,7 @@ MultiAppGeneralFieldKDTreeTransferBase::evaluateNearestNodeFromKDTrees(
 
     for (const auto i_from : make_range(_num_sources))
     {
-      if (!checkRestrictionsForSource(pt, mesh_div, i_from))
+      if (!checkRestrictionsForSource(pt, source_index, i_from))
         continue;
 
       // TODO: Pre-allocate these two work arrays. They will be regularly resized by the searches
@@ -376,8 +376,7 @@ MultiAppGeneralFieldKDTreeTransferBase::evaluateNearestNodeFromKDTrees(
         }
 
         // Compare to the selected value found after looking at all the problems
-        if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),
-                                           outgoing_val.second))
+        if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(), outgoing_val.second))
         {
           num_equidistant_problems++;
           if (num_equidistant_problems > 1)

@@ -99,7 +99,7 @@ protected:
    * @param point_found  Set to true when at least one non-empty KD-tree contributes a value
    */
   void evaluateNearestNodeFromKDTrees(const Point & pt,
-                                      unsigned int mesh_div,
+                                      unsigned int source_index,
                                       std::pair<Real, Real> & outgoing_val,
                                       bool & point_found);
 
