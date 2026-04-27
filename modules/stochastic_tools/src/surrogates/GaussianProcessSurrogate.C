@@ -76,6 +76,9 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
               "Number of parameters provided for evaluation does not match number of parameters "
               "used for training.");
   const unsigned int n_outputs = _gp.getCovarFunction().numOutputs();
+  const unsigned int n_train = _training_params.size(0);
+  const unsigned int n_virt = _gp.virtualParams().size(0);
+  const unsigned int n_total = n_train + n_virt;
 
   y = std::vector<Real>(n_outputs, 0.0);
   std = std::vector<Real>(n_outputs, 0.0);
@@ -90,11 +93,29 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
+  // Build K_train_test: (n_total x n_outputs) — extended with derivative rows if needed
   torch::Tensor K_train_test =
-      torch::empty({_training_params.sizes()[0] * n_outputs, n_outputs}, options);
+      torch::empty({(long)(n_total * n_outputs), (long)n_outputs}, options);
 
-  _gp.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, _training_params, test_points, false);
+  // Standard rows: Cov[f(X_train), f(x*)]
+  torch::Tensor K_ff_test; // computeCovarianceMatrix reassigns its output argument
+  _gp.getCovarFunction().computeCovarianceMatrix(K_ff_test, _training_params, test_points, false);
+  K_train_test.narrow(0, 0, n_train * n_outputs).copy_(K_ff_test);
+
+  // Derivative rows: Cov[df(x_d^j)/dx_{k_j}, f(x*)] — only for single-output GP
+  if (n_virt > 0)
+  {
+    const auto virtual_params = _gp.virtualParams();
+    for (unsigned int j = 0; j < n_virt; ++j)
+    {
+      torch::Tensor K_df_j; // computeCovarianceDf reassigns its output argument
+      _gp.getCovarFunction().computeCovarianceDf(
+          K_df_j, virtual_params.narrow(0, j, 1), test_points, _gp.virtualDerivDims()[j]);
+      K_train_test.narrow(0, n_train + j, 1).copy_(K_df_j);
+    }
+  }
+
+  // Self-covariance at test point
   torch::Tensor K_test = torch::empty({n_outputs, n_outputs}, options);
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
@@ -120,8 +141,20 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   for (const auto output_i : make_range(n_outputs))
   {
-    y[output_i] = pred_value_accessor[0][output_i];
-    std[output_i] = std_accessor[0][output_i];
+    const Real mu_z = pred_value_accessor[0][output_i];
+    const Real sigma_z = std_accessor[0][output_i];
+
+    if (_gp.hasLinkFunction())
+    {
+      // Apply inverse link to mean; propagate uncertainty via delta method
+      y[output_i] = _gp.applyInvLink(mu_z);
+      std[output_i] = std::abs(_gp.invLinkDeriv(mu_z)) * sigma_z;
+    }
+    else
+    {
+      y[output_i] = mu_z;
+      std[output_i] = sigma_z;
+    }
   }
 }
 

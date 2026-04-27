@@ -91,6 +91,51 @@ CovarianceFunctionBase::computedKdhyper(torch::Tensor & /*dKdhp*/,
              "computedKdhyper() to compute gradient.");
 }
 
+void
+CovarianceFunctionBase::computeCovarianceFD(torch::Tensor & /*K_fd*/,
+                                            const torch::Tensor & /*x*/,
+                                            const torch::Tensor & /*xd*/,
+                                            unsigned int /*dim*/) const
+{
+  mooseError("Derivative covariance (function vs. derivative) not implemented for '",
+             type(),
+             "'. Override computeCovarianceFD() to use derivative observations.");
+}
+
+void
+CovarianceFunctionBase::computeCovarianceDf(torch::Tensor & /*K_df*/,
+                                            const torch::Tensor & /*xd*/,
+                                            const torch::Tensor & /*xp*/,
+                                            unsigned int /*dim*/) const
+{
+  mooseError("Derivative covariance (derivative vs. function) not implemented for '",
+             type(),
+             "'. Override computeCovarianceDf() to use derivative observations.");
+}
+
+void
+CovarianceFunctionBase::computeCovarianceDD(torch::Tensor & /*K_dd*/,
+                                            const torch::Tensor & /*xd*/,
+                                            const torch::Tensor & /*xdp*/,
+                                            unsigned int /*dim_i*/,
+                                            unsigned int /*dim_j*/) const
+{
+  mooseError("Second-derivative covariance not implemented for '",
+             type(),
+             "'. Override computeCovarianceDD() to use derivative observations with this kernel.");
+}
+
+void
+CovarianceFunctionBase::computedKdhyper_cross(torch::Tensor & dKdhp,
+                                              const torch::Tensor & x,
+                                              const torch::Tensor & xc,
+                                              const std::string & /*hp_name*/,
+                                              unsigned int /*ind*/) const
+{
+  // Default: zero matrix — penalty gradient is not added for this kernel type
+  dKdhp = torch::zeros({x.size(0), xc.size(0)}, x.options().dtype(at::kDouble));
+}
+
 torch::Tensor &
 CovarianceFunctionBase::addRealHyperParameter(const std::string & name,
                                               const Real value,
