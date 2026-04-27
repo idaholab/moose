@@ -30,11 +30,9 @@ MooseParsedFunctionBase::validParams()
       "Use 'symbol_values' instead.");
   params.addParam<std::vector<std::string>>(
       "symbol_names",
-      std::vector<std::string>(),
       "Symbols (excluding t,x,y,z) that are bound to the values provided by the corresponding "
       "items in the vals vector.");
   params.addParam<std::vector<std::string>>("symbol_values",
-                                            std::vector<std::string>(),
                                             "Constant numeric values, postprocessor names, "
                                             "function names, and scalar variables corresponding to"
                                             " the symbols in symbol_names.");

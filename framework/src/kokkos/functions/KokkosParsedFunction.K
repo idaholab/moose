@@ -37,7 +37,10 @@ KokkosParsedFunction::KokkosParsedFunction(const InputParameters & parameters)
 {
   _builder->addDefaultVariables();
 
-  const auto & symbol_names = getParam<std::vector<std::string>>("symbol_names");
+  std::vector<std::string> symbol_names;
+
+  if (isParamValid("symbol_names"))
+    symbol_names = getParam<std::vector<std::string>>("symbol_names");
 
   for (const auto & name : symbol_names)
     _builder->addVariable(name);
@@ -65,8 +68,13 @@ KokkosParsedFunction::KokkosParsedFunction(const KokkosParsedFunction & function
 void
 KokkosParsedFunction::initialSetup()
 {
-  const auto & symbol_names = getParam<std::vector<std::string>>("symbol_names");
-  const auto & symbol_values = getParam<std::vector<std::string>>("symbol_values");
+  std::vector<std::string> symbol_names;
+  std::vector<std::string> symbol_values;
+
+  if (isParamValid("symbol_names"))
+    symbol_names = getParam<std::vector<std::string>>("symbol_names");
+  if (isParamValid("symbol_values"))
+    symbol_values = getParam<std::vector<std::string>>("symbol_values");
 
   _symbol_values.reserve(symbol_values.size());
   _symbol_functions.reserve(symbol_values.size());

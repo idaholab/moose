@@ -9,6 +9,8 @@
 
 #include "KokkosParsedObjectBase.h"
 
+#include "FEProblemBase.h"
+
 namespace Moose::Kokkos
 {
 
@@ -21,6 +23,8 @@ ParsedObjectBase::validParams()
       "use_xyzt",
       false,
       "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
+  params.addParam<bool>(
+      "use_dt", false, "Make time step (dt) variable available in the function expression.");
 
   // Constants and their values
   params.addParam<std::vector<std::string>>("constant_names",
@@ -34,24 +38,24 @@ ParsedObjectBase::validParams()
   params.addParam<std::vector<PostprocessorName>>(
       "postprocessor_names",
       std::vector<PostprocessorName>(),
-      "Vector of postprocessor names used in the parsed function");
+      "Vector of postprocessor names used in the parsed function.");
 
   // Field variables
-  params.addCoupledVar("coupled_variables", "Vector of variables used in the parsed function");
+  params.addCoupledVar("coupled_variables", "Vector of variables used in the parsed function.");
 
   // Material properties
   params.addParam<std::vector<MaterialPropertyName>>(
       "material_property_names",
       std::vector<MaterialPropertyName>(),
-      "Vector of material properties used in the parsed function");
+      "Vector of material properties used in the parsed function.");
 
   // Functions
   params.addParam<std::vector<FunctionName>>("function_names",
                                              std::vector<FunctionName>(),
-                                             "Vector of functions used in the parsed function");
+                                             "Vector of functions used in the parsed function.");
 
   // Function expression
-  params.addParam<std::string>("expression", "Parsed function expression for the parsed material");
+  params.addParam<std::string>("expression", "Parsed function expression.");
 
   return params;
 }
@@ -71,6 +75,13 @@ ParsedObjectBase::ParsedObjectBase(const MooseObject * object)
     _all_symbols.insert("y");
     _all_symbols.insert("z");
     _all_symbols.insert("t");
+  }
+
+  if (parameters.get<bool>("use_dt"))
+  {
+    addScalar("dt", object->getMooseApp().feProblem().dt());
+
+    _all_symbols.insert("dt");
   }
 
   const auto & constant_names = parameters.get<std::vector<std::string>>("constant_names");
@@ -96,16 +107,14 @@ ParsedObjectBase::addConstant(const std::string & name, const Real constant)
   _builder->addVariable(name);
 
   _constants[name] = constant;
-  _builder->associateScalar(name, &_constants.at(name));
 }
 
 void
-ParsedObjectBase::addScalar(const std::string & name, const Real * scalar)
+ParsedObjectBase::addScalar(const std::string & name, const Real & scalar)
 {
   _builder->addVariable(name);
 
-  _scalars[name] = scalar;
-  _builder->associateScalar(name, _scalars.at(name));
+  _scalars.insert({name, scalar});
 }
 
 void
@@ -114,7 +123,6 @@ ParsedObjectBase::addField(const std::string & name, const VariableValue & field
   _builder->addVariable(name);
 
   _fields[name] = field;
-  _builder->associateField(name, &_fields.at(name));
 }
 
 void
@@ -123,7 +131,6 @@ ParsedObjectBase::addProperty(const std::string & name, const MaterialProperty<R
   _builder->addVariable(name);
 
   _properties[name] = property;
-  _builder->associateProperty(name, &_properties.at(name));
 }
 
 void
@@ -132,12 +139,26 @@ ParsedObjectBase::addFunction(const std::string & name, const Function & functio
   _builder->addVariable(name);
 
   _functions.insert({name, function});
-  _builder->associateFunction(name, &_functions.at(name));
 }
 
 void
 ParsedObjectBase::finalize()
 {
+  for (const auto & [name, constant] : _constants)
+    _builder->associateScalar(name, &constant);
+
+  for (const auto & [name, scalar] : _scalars)
+    _builder->associateScalar(name, &scalar.get());
+
+  for (const auto & [name, field] : _fields)
+    _builder->associateField(name, &field);
+
+  for (const auto & [name, property] : _properties)
+    _builder->associateProperty(name, &property);
+
+  for (const auto & [name, function] : _functions)
+    _builder->associateFunction(name, &function);
+
   _builder->build();
   _builder->finalize();
 

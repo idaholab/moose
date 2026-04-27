@@ -19,8 +19,6 @@ KokkosParsedMaterial::validParams()
 
   params.addRequiredParam<MaterialPropertyName>("property_name",
                                                 "Name of the parsed material property");
-  params.addParam<bool>(
-      "use_dt", false, "Make  time step (dt) variable available in the function expression.");
   params.addClassDescription("Evaluates a property with a parsed expression.");
 
   return params;
@@ -31,13 +29,5 @@ KokkosParsedMaterial::KokkosParsedMaterial(const InputParameters & parameters)
     ParsedObjectBase(this),
     _prop(declareKokkosProperty<Real>("property_name"))
 {
-  if (getParam<bool>("use_dt"))
-  {
-    checkDuplicateSymbols(std::vector<std::string>{"dt"}, "use_dt");
-
-    auto & dt = *_dt;
-    addScalar("dt", &dt);
-  }
-
   initParsed(this, coupledNames("coupled_variables"));
 }

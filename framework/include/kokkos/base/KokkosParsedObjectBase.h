@@ -30,7 +30,7 @@ protected:
    * @param param The parameter name containing symbols
    */
   template <typename T>
-  void checkDuplicateSymbols(const std::vector<T> symbols, const std::string param);
+  void checkDuplicateSymbols(const std::vector<T> & symbols, const std::string & param);
 
   /**
    * Add a constant
@@ -43,7 +43,7 @@ protected:
    * @param name The variable name
    * @param scalar The pointer to the scalar variable
    */
-  void addScalar(const std::string & name, const Real * scalar);
+  void addScalar(const std::string & name, const Real & scalar);
   /**
    * Add a field variable
    * @param name The variable name
@@ -57,18 +57,14 @@ protected:
    */
   void addProperty(const std::string & name, const MaterialProperty<Real> & property);
   /**
-   * Add a material property
+   * Add a function
    * @param name The variable name
    * @param function The function
    */
   void addFunction(const std::string & name, const Function & function);
-  /**
-   * Finalize parsed function
-   */
-  void finalize();
 
   /**
-   * Initialize symbols from parsed parameters. variable_names must be supplied by
+   * Initialize symbols from parsed parameters. \p variable_names must be supplied by
    * the caller because Coupleable::coupledNames() is protected.
    */
   template <typename T>
@@ -89,25 +85,30 @@ protected:
   /**
    * Constants used in the parsed expression
    */
-  std::map<std::string, Real> _constants;
+  std::unordered_map<std::string, Real> _constants;
   /**
    * Scalar variables used in the parsed expression
    */
-  std::map<std::string, const Real *> _scalars;
+  std::unordered_map<std::string, std::reference_wrapper<const Real>> _scalars;
   /**
    * Field variables used in the parsed expression
    */
-  std::map<std::string, VariableValue> _fields;
+  std::unordered_map<std::string, VariableValue> _fields;
   /**
    * Material properties used in the parsed expression
    */
-  std::map<std::string, MaterialProperty<Real>> _properties;
+  std::unordered_map<std::string, MaterialProperty<Real>> _properties;
   /**
    * Functions used in the parsed expression
    */
-  std::map<std::string, Function> _functions;
+  std::unordered_map<std::string, Function> _functions;
 
 private:
+  /**
+   * Finalize parsed function
+   */
+  void finalize();
+
   /**
    * Parsed object
    */
@@ -120,7 +121,7 @@ private:
 
 template <typename T>
 void
-ParsedObjectBase::checkDuplicateSymbols(const std::vector<T> symbols, const std::string param)
+ParsedObjectBase::checkDuplicateSymbols(const std::vector<T> & symbols, const std::string & param)
 {
   for (const auto & symbol : symbols)
   {
@@ -148,7 +149,7 @@ ParsedObjectBase::initParsed(T * obj, const std::vector<VariableName> & variable
     addConstant(constant_names[i], constant_expressions[i]);
 
   for (const auto & pp : postprocessor_names)
-    addScalar(pp, &obj->getPostprocessorValueByName(pp));
+    addScalar(pp, obj->getPostprocessorValueByName(pp));
 
   for (const auto i : make_range(variable_names.size()))
     addField(variable_names[i], obj->kokkosCoupledValue("coupled_variables", i));

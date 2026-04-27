@@ -82,7 +82,6 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'PJFNK'
   end_time = 10
 []
