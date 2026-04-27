@@ -32,6 +32,7 @@
     file_name = 'confg.csv'
     execute_on = 'PRE_MULTIAPP_SETUP timestep_end'
     seed = 2547
+    num_random_seeds = 100
   []
 []
 

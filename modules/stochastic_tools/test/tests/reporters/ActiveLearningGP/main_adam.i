@@ -26,6 +26,7 @@
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
     seed = 5
+    num_random_seeds = 100
     num_samples = 20
     execute_on = 'initial timestep_begin'
   []

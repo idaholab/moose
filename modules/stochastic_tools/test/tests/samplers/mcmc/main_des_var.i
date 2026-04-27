@@ -36,6 +36,7 @@
     file_name = 'confg.csv'
     execute_on = 'PRE_MULTIAPP_SETUP TIMESTEP_END'
     seed = 2547
+    num_random_seeds = 100
     initial_values = '0.1 0.1'
     previous_state = 'mcmc_reporter/inputs'
     previous_state_var = 'mcmc_reporter/variance'

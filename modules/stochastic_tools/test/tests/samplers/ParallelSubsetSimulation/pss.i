@@ -24,6 +24,7 @@
     output_reporter = 'constant/reporter_transfer:average:value'
     inputs_reporter = 'adaptive_MC/inputs'
     seed = 1012
+    num_random_seeds = 200
     execute_on = 'initial timestep_end'
   []
 []

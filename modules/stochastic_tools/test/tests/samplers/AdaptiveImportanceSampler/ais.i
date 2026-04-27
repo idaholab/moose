@@ -27,6 +27,7 @@
     inputs_reporter = 'adaptive_MC/inputs'
     use_absolute_value = true
     seed = 1012
+    num_random_seeds = 100
   []
 []
 

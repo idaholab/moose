@@ -28,6 +28,7 @@
     use_absolute_value = true
     flag_sample = 'conditional/flag_sample'
     seed = 9874
+    num_random_seeds = 100
   []
 []
 
