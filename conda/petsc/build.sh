@@ -103,7 +103,14 @@ done
 # Strip GCC runtime libs on mac
 if [[ $(uname) == Darwin ]]; then
   echo "Stripping GCC runtime libs"
-  sed -i '' 's/-lemutls_w//g; s/-lheapt_w//g; s/-lgcc_s\.1[^ ]*//g' "$PREFIX"/lib/pkgconfig/PETSc.pc "$PREFIX"/lib/petsc/conf/petscvariables
+  sed -i '' 's/-lemutls_w//g; s/-lheapt_w//g; s/-lgcc_s\.1[^ ]*//g' \
+    "$PREFIX"/lib/pkgconfig/PETSc.pc \
+    "$PREFIX"/lib/petsc/conf/petscvariables \
+    "$PREFIX"/lib/cmake/scalapack-*/scalapack-targets.cmake
+  # scalapack-targets.cmake also embeds absolute paths from the CI build machine
+  # that conda relocation doesn't reach; strip any -rpath/-L not under $PREFIX
+  perl -i -pe "s|-Wl,-rpath,(?!\Q${PREFIX}\E)\S+||g; s|-L(?!\Q${PREFIX}\E)/\S+||g" \
+    "$PREFIX"/lib/cmake/scalapack-*/scalapack-targets.cmake
 fi
 
 echo "Removing example files"
