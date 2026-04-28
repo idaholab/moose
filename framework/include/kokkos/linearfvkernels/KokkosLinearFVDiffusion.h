@@ -12,8 +12,6 @@
 #include "KokkosLinearFVKernel.h"
 #include "KokkosFunction.h"
 
-class KokkosLinearFVAdvectionDiffusionFunctorDirichletBC;
-
 class KokkosLinearFVDiffusion : public Moose::Kokkos::LinearFVFluxKernel
 {
 public:
@@ -30,14 +28,8 @@ public:
 private:
   KOKKOS_FUNCTION Real faceConductance(const AssemblyDatum & datum) const;
 
-  KOKKOS_FUNCTION int dirichletIndex(const BoundaryID boundary_id) const;
-
   /// Diffusion coefficient
   const Moose::Kokkos::Function _diffusion_coeff;
-  /// The boundary IDs on which Dirichlet boundary conditions exist
-  Moose::Kokkos::Array<BoundaryID> _dirichlet_boundary_ids;
-  /// The function providing the Dirichlet values for each boundary ID
-  Moose::Kokkos::Array<Moose::Kokkos::Function> _dirichlet_values;
 };
 
 KOKKOS_FUNCTION inline Real
@@ -47,7 +39,7 @@ KokkosLinearFVDiffusion::computeMatrixContribution(const AssemblyDatum & datum) 
     return faceConductance(datum);
 
   const auto boundary_id = datum.mesh().getFaceBoundaryID(datum.elemID(), datum.side());
-  return dirichletIndex(boundary_id) >= 0 ? faceConductance(datum) : 0;
+  return _kokkos_var.hasBoundaryCondition(boundary_id) ? faceConductance(datum) : 0;
 }
 
 KOKKOS_FUNCTION inline Real
@@ -63,13 +55,13 @@ KokkosLinearFVDiffusion::computeRightHandSideContribution(const AssemblyDatum & 
     return 0;
 
   const auto boundary_id = datum.mesh().getFaceBoundaryID(datum.elemID(), datum.side());
-  const auto index = dirichletIndex(boundary_id);
+  const auto index = _kokkos_var.boundaryConditionIndex(boundary_id);
   if (index < 0)
     return 0;
 
   return faceConductance(datum) *
-         _dirichlet_values[index].value(_t,
-                                        datum.mesh().getFaceCentroid(datum.elemID(), datum.side()));
+         _kokkos_var.boundaryConditionValue(index).value(
+             _t, datum.mesh().getFaceCentroid(datum.elemID(), datum.side()));
 }
 
 KOKKOS_FUNCTION inline Real
@@ -79,14 +71,4 @@ KokkosLinearFVDiffusion::faceConductance(const AssemblyDatum & datum) const
   return _diffusion_coeff.value(_t, face_centroid) *
          datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
          datum.mesh().getFaceDCNMag(datum.elemID(), datum.side());
-}
-
-KOKKOS_FUNCTION inline int
-KokkosLinearFVDiffusion::dirichletIndex(const BoundaryID boundary_id) const
-{
-  for (std::size_t i = 0; i < _dirichlet_boundary_ids.size(); ++i)
-    if (_dirichlet_boundary_ids[i] == boundary_id)
-      return static_cast<int>(i);
-
-  return -1;
 }

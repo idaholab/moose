@@ -60,12 +60,11 @@ LinearSystem::addKokkosKernel(const std::string & kernel_name,
 {
   auto kernel = _factory.create<Moose::Kokkos::LinearFVKernel>(kernel_name, name, parameters);
 
-  if (std::dynamic_pointer_cast<Moose::Kokkos::LinearFVElementalKernel>(kernel))
-    _fe_problem.theWarehouse().add(kernel);
-  else if (std::dynamic_pointer_cast<Moose::Kokkos::LinearFVFluxKernel>(kernel))
-    _fe_problem.theWarehouse().add(kernel);
-  else
+  if (!std::dynamic_pointer_cast<Moose::Kokkos::LinearFVElementalKernel>(kernel) &&
+      !std::dynamic_pointer_cast<Moose::Kokkos::LinearFVFluxKernel>(kernel))
     mooseError("Unknown Kokkos LinearFVKernel type for object named ", kernel->name());
+
+  _fe_problem.theWarehouse().add(kernel);
 }
 
 void
@@ -84,6 +83,10 @@ LinearSystem::addKokkosBoundaryCondition(const std::string & bc_name,
 void
 LinearSystem::initialSetupKokkosLinearFV()
 {
+  // Kokkos objects are currently instantiated only for thread 0 (single copy per object).
+  // All three queries below use AttribThread(0) for this reason. If Kokkos objects are ever
+  // allowed to be multi-threaded, this function will need to loop over threads and each kernel's
+  // initialSetup will work correctly via its own _tid member.
   std::vector<Moose::Kokkos::LinearFVElementalKernel *> elemental_kernels;
   _fe_problem.theWarehouse()
       .query()

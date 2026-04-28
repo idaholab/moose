@@ -55,8 +55,7 @@ KokkosLinearFVDiffusion::initialSetup()
 
     auto * dirichlet = dynamic_cast<KokkosLinearFVAdvectionDiffusionFunctorDirichletBC *>(bc);
     if (!dirichlet)
-      mooseError("KokkosLinearFVDiffusion currently only supports ",
-                 "KokkosLinearFVAdvectionDiffusionFunctorDirichletBC boundary conditions.");
+      continue;
 
     for (const auto boundary_id : dirichlet->boundaryIDs())
     {
@@ -68,17 +67,5 @@ KokkosLinearFVDiffusion::initialSetup()
     }
   }
 
-  _dirichlet_boundary_ids.create(boundary_ids.size());
-  // Kokkos functions do not have default constructors, so we allocate here and do placement new
-  // later
-  _dirichlet_values.create<false>(values.size());
-
-  for (const auto i : index_range(boundary_ids))
-  {
-    _dirichlet_boundary_ids[i] = boundary_ids[i];
-    new (&_dirichlet_values[i]) Moose::Kokkos::Function(values[i]);
-  }
-
-  _dirichlet_boundary_ids.moveToDevice();
-  _dirichlet_values.moveToDevice();
+  _kokkos_var.initBoundaryConditions(boundary_ids, values);
 }

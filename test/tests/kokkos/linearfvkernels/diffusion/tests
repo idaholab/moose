@@ -1,5 +1,5 @@
 [Tests]
-  design = 'LinearFVDiffusion.md'
+  design = 'KokkosLinearFVDiffusion.md'
   issues = '#30655'
   [mms-kokkos-diffusion-2d-orthogonal]
     type = MMSTest

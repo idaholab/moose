@@ -109,7 +109,7 @@ LinearSystem::preInit()
   SolverSystem::preInit();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     _sys.get_dof_map().full_sparsity_pattern_needed();
 #endif
 }
@@ -240,6 +240,9 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     computeGradients();
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  // Kokkos assembly runs first: it accumulates via device-side atomics and syncs
+  // back to PETSc before the CPU path writes. The CPU queries below filter out
+  // Kokkos objects via AttribKokkos(false) so there is no double-counting.
   if (_fe_problem.hasKokkosResidualObjects())
     computeKokkosLinearSystem(vector_tags, matrix_tags);
 #endif

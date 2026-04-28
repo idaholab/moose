@@ -13,7 +13,6 @@
 #include "KokkosVariable.h"
 
 #include "BoundaryRestrictableRequired.h"
-#include "DistributionInterface.h"
 #include "GeometricSearchInterface.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseVariableDependencyInterface.h"
@@ -25,7 +24,6 @@ namespace Moose::Kokkos
 
 class LinearFVBoundaryCondition : public LinearSystemContributionObject,
                                   public BoundaryRestrictableRequired,
-                                  public DistributionInterface,
                                   public GeometricSearchInterface,
                                   public MooseVariableDependencyInterface,
                                   public NonADFunctorInterface,
