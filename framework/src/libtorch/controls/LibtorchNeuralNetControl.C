@@ -228,12 +228,9 @@ LibtorchNeuralNetControl::conditionalParameterError(
 void
 LibtorchNeuralNetControl::updateCurrentObservation()
 {
-  std::vector<Real> raw_observation;
-  raw_observation.reserve(_observation_names.size());
-  for (const auto & obs_i : index_range(_observation_names))
-    raw_observation.push_back(*_observation_values[obs_i]);
-
-  _current_observation = raw_observation;
+  _current_observation.resize(_observation_names.size());
+  for (const auto obs_i : index_range(_observation_names))
+    _current_observation[obs_i] = *_observation_values[obs_i];
 }
 
 void

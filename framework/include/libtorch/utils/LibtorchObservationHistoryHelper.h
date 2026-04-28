@@ -19,14 +19,14 @@
  * Shared observation history stacking and factor-expansion logic for libtorch-based controls and
  * trainers.
  */
-class LibtorchObservationHistory
+class LibtorchObservationHistoryHelper
 {
 public:
   /**
    * Build an observation-history helper for libtorch inputs.
    * @param input_timesteps Number of timesteps to stack into each flattened input.
    */
-  LibtorchObservationHistory(unsigned int input_timesteps);
+  LibtorchObservationHistoryHelper(unsigned int input_timesteps);
 
   /// Return the number of timesteps stacked into each flattened input.
   unsigned int inputTimesteps() const { return _input_timesteps; }
