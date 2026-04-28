@@ -26,13 +26,13 @@ LibtorchObservationHistoryHelper::LibtorchObservationHistoryHelper(
 
 void
 LibtorchObservationHistoryHelper::validateTrajectoryShape(
-    const std::vector<std::vector<Real>> & observation_trajectories) const
+    const std::vector<std::vector<Real>> & component_trajectories) const
 {
-  if (observation_trajectories.empty())
+  if (component_trajectories.empty())
     return;
 
-  const auto trajectory_size = observation_trajectories.front().size();
-  for (const auto & trajectory : observation_trajectories)
+  const auto trajectory_size = component_trajectories.front().size();
+  for (const auto & trajectory : component_trajectories)
     if (trajectory.size() != trajectory_size)
       mooseError("Observation trajectories must all have the same number of timesteps.");
 }
@@ -105,26 +105,26 @@ LibtorchObservationHistoryHelper::stackCurrentObservation(
 
 std::vector<Real>
 LibtorchObservationHistoryHelper::stackTrajectoryObservation(
-    const std::vector<std::vector<Real>> & observation_trajectories,
+    const std::vector<std::vector<Real>> & component_trajectories,
     const unsigned int time_index) const
 {
-  validateTrajectoryShape(observation_trajectories);
+  validateTrajectoryShape(component_trajectories);
 
-  if (observation_trajectories.empty())
+  if (component_trajectories.empty())
     return {};
 
-  const auto trajectory_size = observation_trajectories.front().size();
+  const auto trajectory_size = component_trajectories.front().size();
   if (time_index >= trajectory_size)
     mooseError("Requested observation time index is out of range.");
 
   std::vector<Real> stacked;
-  stacked.reserve(observation_trajectories.size() * _input_timesteps);
+  stacked.reserve(component_trajectories.size() * _input_timesteps);
 
   for (const auto lag : make_range(_input_timesteps))
   {
     const auto source_index = time_index > lag ? time_index - lag : 0;
-    for (const auto component_i : make_range(observation_trajectories.size()))
-      stacked.push_back(observation_trajectories[component_i][source_index]);
+    for (const auto component_i : make_range(component_trajectories.size()))
+      stacked.push_back(component_trajectories[component_i][source_index]);
   }
 
   return stacked;

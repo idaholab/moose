@@ -29,10 +29,13 @@ protected:
   /// The reward values which will be saved
   Real & _average_reward;
 
+  /// The standard deviation of the reward values which will be saved
   Real & _std_reward;
 
+  /// The per-sample average reward values which will be saved
   std::vector<Real> & _sample_average_reward;
 
+  /// The per-sample reward standard deviations which will be saved
   std::vector<Real> & _sample_std_reward;
 
   /// The DRL trainer which computes the reward values

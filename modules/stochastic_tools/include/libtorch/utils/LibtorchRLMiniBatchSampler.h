@@ -45,8 +45,8 @@ public:
    * Shuffle a flattened rollout batch into PPO-sized chunks.
    * @param batch Flattened rollout tensors ready for PPO updates.
    * @param batch_size Preferred number of rows per mini-batch.
-   * @param standardize_advantage Whether to normalize the advantages inside each chunk.
-   * @return Vector of sampled mini-batches.
+   * @param standardize_advantage Whether to normalize the advantages inside each mini-batch.
+   * @param generator Optional random-number generator used for the row permutation.
    */
   std::vector<LibtorchRLMiniBatch>
   sample(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
@@ -66,7 +66,6 @@ private:
    * @param batch Flattened rollout tensors.
    * @param indices Row indices assigned to this mini-batch.
    * @param standardize_advantage Whether to normalize the advantages in this slice.
-   * @return One PPO mini-batch.
    */
   static LibtorchRLMiniBatch makeMiniBatch(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
                                            const torch::Tensor & indices,

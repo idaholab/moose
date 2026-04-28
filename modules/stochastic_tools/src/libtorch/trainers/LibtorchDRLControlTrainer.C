@@ -439,9 +439,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     if (!num_transitions)
       continue;
 
-    std::vector<std::vector<Real>> observation_trajectories(_state_names.size());
+    std::vector<std::vector<Real>> component_trajectories(_state_names.size());
     for (const auto state_i : index_range(_state_value_pointers))
-      observation_trajectories[state_i] = extractDownsampledSequence(
+      component_trajectories[state_i] = extractDownsampledSequence(
           (*_state_value_pointers[state_i])[sample_i], 0, num_transitions + 1);
 
     LibtorchRLTrajectoryBuffer::Trajectory trajectory;
@@ -458,9 +458,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     for (const auto step_i : make_range(num_transitions))
     {
       trajectory.observations.push_back(
-          _observation_history.stackTrajectoryObservation(observation_trajectories, step_i));
+          _observation_history.stackTrajectoryObservation(component_trajectories, step_i));
       trajectory.next_observations.push_back(
-          _observation_history.stackTrajectoryObservation(observation_trajectories, step_i + 1));
+          _observation_history.stackTrajectoryObservation(component_trajectories, step_i + 1));
     }
 
     for (const auto action_i : index_range(_action_value_pointers))

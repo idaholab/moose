@@ -17,7 +17,9 @@
 #include <vector>
 
 /**
- * Computes GAE advantages and value targets for an on-policy trajectory buffer.
+ * Computes generalized-advantage estimates and value targets for an on-policy trajectory buffer,
+ * following Schulman et al., "High-Dimensional Continuous Control Using Generalized Advantage
+ * Estimation."
  */
 class LibtorchRLValueEstimator
 {
@@ -49,7 +51,6 @@ public:
    * Compute value targets and advantages for one trajectory.
    * @param trajectory Trajectory to evaluate.
    * @param value_network Critic used for target estimation.
-   * @return Advantage and value-target vectors for the trajectory.
    */
   Targets estimate(const LibtorchRLTrajectoryBuffer::Trajectory & trajectory,
                    Moose::LibtorchArtificialNeuralNet & value_network) const;
@@ -59,12 +60,13 @@ private:
    * Evaluate the critic on a batch of observations.
    * @param observations Observation matrix to feed through the critic.
    * @param value_network Critic used for the evaluation.
-   * @return One value estimate per observation row.
    */
   std::vector<Real> evaluate(const std::vector<std::vector<Real>> & observations,
                              Moose::LibtorchArtificialNeuralNet & value_network) const;
 
+  /// Reward discount factor used in the temporal-difference recursion.
   const Real _discount_factor;
+  /// GAE lambda factor used in the reverse-time advantage recursion.
   const Real _lambda_factor;
 };
 
