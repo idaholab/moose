@@ -1,0 +1,36 @@
+[Tests]
+  design = 'INTERFOAM_PARITY_IMPLEMENTATION_PLAN.md'
+  issues = '#single_phase_mixture_model'
+  [sharp_interface_vof_subcycles]
+    type = Exodiff
+    input = '1d-sharp-vof-subcycles.i'
+    exodiff = '1d-sharp-vof-subcycles_out.e'
+    requirement = 'The system shall support bounded sharp-interface volume-fraction transport with full alpha donor-plus-correction subcycling in the reduced-pressure segregated solver.'
+    max_threads = 1
+    recover = false
+  []
+  [sharp_interface_vof_boundedness]
+    type = CSVDiff
+    input = '1d-sharp-vof-boundedness.i'
+    csvdiff = '1d-sharp-vof-boundedness_out.csv'
+    requirement = 'The system shall keep the transported sharp-interface volume fraction bounded while using multiple limiter iterations and alpha subcycles.'
+    max_threads = 1
+    recover = false
+  []
+  [sharp_interface_vof_step]
+    type = Exodiff
+    input = '1d-sharp-vof-step.i'
+    exodiff = '1d-sharp-vof-step_out.e'
+    requirement = 'The system shall transport a discontinuous sharp-interface volume-fraction step with bounded donor-plus-limited-correction subcycling.'
+    max_threads = 1
+    recover = false
+  []
+  [sharp_interface_hydrostatic_column]
+    type = CSVDiff
+    input = '2d-hydrostatic-column.i'
+    csvdiff = '2d-hydrostatic-column_out.csv'
+    requirement = 'The system shall keep a quiescent sharp-interface hydrostatic column stable under the reduced-pressure segregated sharp-interface flow path.'
+    max_threads = 1
+    recover = false
+  []
+[]

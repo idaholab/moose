@@ -43,6 +43,17 @@ public:
 protected:
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
+  virtual void addMomentumPredictorExplicitForcing(const unsigned int system_i,
+                                                   NumericVector<Number> & rhs);
+  virtual void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
+                                                    NumericVector<Number> & rhs);
+  virtual bool auditMomentumPredictorRebuild() const { return false; }
+  void printMomentumPredictorPreSolveAudit(const unsigned int system_i,
+                                           const NumericVector<Number> & solution,
+                                           SparseMatrix<Number> & mmat,
+                                           const NumericVector<Number> & rhs,
+                                           const NumericVector<Number> * rhs_base,
+                                           const Real norm_factor) const;
 
   /// Computes new velocity field based on computed pressure gradients
   /// @param subtract_updated_pressure If we need to subtract the updated
@@ -189,4 +200,7 @@ protected:
 
   // Handler object for CHT problems
   NS::FV::CHTHandler _cht;
+
+  /// Current outer SIMPLE/PIMPLE iteration, set by derived executioners when relevant.
+  unsigned int _current_outer_iteration = 0;
 };

@@ -12,6 +12,7 @@
 #include "LinearFVFluxKernel.h"
 #include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
+#include "libmesh/numeric_vector.h"
 
 #include <array>
 
@@ -53,6 +54,11 @@ public:
    * @param face_info The face info which will be used as current face info
    */
   virtual void setupFaceData(const FaceInfo * face_info) override;
+
+  /// Accumulate the current-face residual contributions split into advection and stress pieces.
+  void accumulateCurrentFaceResidualContributions(const NumericVector<Number> & solution,
+                                                 NumericVector<Number> & advection_residual,
+                                                 NumericVector<Number> & stress_residual);
 
 protected:
   /// Computes the matrix contribution of the advective flux on the element side of current face

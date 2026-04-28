@@ -19,6 +19,11 @@
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVPressureCorrectionDiffusion.h"
+#include "LinearFVPressureFluxBC.h"
+#include "LinearFVPressureSymmetryBC.h"
+
+#include <algorithm>
+#include <cmath>
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -69,6 +74,18 @@ RhieChowMassFlux::validParams()
       "pressure_diffusion_interpolation",
       MooseEnum("average harmonic", "average"),
       "The face interpolation method for Ainv in the pressure correction diffusion term.");
+  params.addParam<bool>(
+      "use_cached_momentum_predictor_operator",
+      false,
+      "Whether to use a cached assembled/relaxed momentum predictor operator as the starting "
+      "point for HbyA/Ainv construction instead of rebuilding that base state from the live "
+      "system on demand.");
+  params.addParam<bool>(
+      "split_momentum_predictor_operator",
+      false,
+      "Whether the assembled momentum predictor operator already excludes explicit pressure-"
+      "gradient and body-force terms, so HbyA should use that operator directly instead of "
+      "subtracting those terms back out.");
   return params;
 }
 
@@ -82,10 +99,19 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
         &UserObject::_subproblem.getVariable(0, getParam<VariableName>(NS::pressure)))),
     _vel(_dim, nullptr),
     _HbyA_flux(_moose_mesh, blockIDs(), "HbyA_flux"),
+    _phiHbyA_flux(_moose_mesh, blockIDs(), "phiHbyA_flux"),
+    _phig_flux(_moose_mesh, blockIDs(), "phig_flux"),
     _Ainv(_moose_mesh, blockIDs(), "Ainv"),
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
+    _pressure_equation_flux(_moose_mesh, blockIDs(), "pressure_equation_flux"),
+    _pressure_boundary_normal_gradient(
+        _moose_mesh, blockIDs(), "pressure_boundary_normal_gradient"),
+    _boundary_velocity_face_values(_dim),
+    _use_cached_momentum_predictor_operator(
+        getParam<bool>("use_cached_momentum_predictor_operator")),
+    _split_momentum_predictor_operator(getParam<bool>("split_momentum_predictor_operator")),
     _body_force_kernel_names(
         getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
@@ -115,6 +141,11 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
   {
     UserObject::_subproblem.addFunctor("Ainv", _Ainv, tid);
     UserObject::_subproblem.addFunctor("HbyA", _HbyA_flux, tid);
+    UserObject::_subproblem.addFunctor("phiHbyA", _phiHbyA_flux, tid);
+    UserObject::_subproblem.addFunctor("phig", _phig_flux, tid);
+    UserObject::_subproblem.addFunctor("pressure_equation_flux", _pressure_equation_flux, tid);
+    UserObject::_subproblem.addFunctor(
+        "pressure_boundary_normal_gradient", _pressure_boundary_normal_gradient, tid);
   }
 
   if (!dynamic_cast<SIMPLE *>(getMooseApp().getExecutioner()) &&
@@ -148,8 +179,21 @@ void
 RhieChowMassFlux::meshChanged()
 {
   _HbyA_flux.clear();
+  _phiHbyA_flux.clear();
+  _phig_flux.clear();
   _Ainv.clear();
   _face_mass_flux.clear();
+  _pressure_equation_flux.clear();
+  _pressure_boundary_normal_gradient.clear();
+  _pressure_predictor_flux_adjustment.clear();
+  _pressure_predictor_base_flux.clear();
+  _pressure_equation_flux_valid = false;
+  _pressure_boundary_normal_gradient_valid = false;
+  _pressure_predictor_face_state_valid = false;
+  for (auto & component_face_values : _boundary_velocity_face_values)
+    component_face_values.clear();
+  _velocity_boundary_state_valid = false;
+  clearMomentumPredictorOperatorCache();
   setupMeshInformation();
 }
 
@@ -231,6 +275,13 @@ RhieChowMassFlux::setupMeshInformation()
     if (hasBlocks(fi->elemPtr()->subdomain_id()) ||
         (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id())))
       _flow_face_info.push_back(fi);
+
+  for (const auto * fi : _flow_face_info)
+  {
+    _pressure_boundary_normal_gradient[fi->id()] = 0.0;
+    _pressure_predictor_flux_adjustment[fi->id()] = 0.0;
+    _pressure_predictor_base_flux[fi->id()] = 0.0;
+  }
 }
 
 void
@@ -239,8 +290,31 @@ RhieChowMassFlux::initialize()
   for (const auto & pair : _HbyA_flux)
     _HbyA_flux[pair.first] = 0;
 
+  for (const auto & pair : _phiHbyA_flux)
+    _phiHbyA_flux[pair.first] = 0;
+
+  for (const auto & pair : _phig_flux)
+    _phig_flux[pair.first] = 0;
+
   for (const auto & pair : _Ainv)
     _Ainv[pair.first] = 0;
+
+  for (const auto & pair : _pressure_equation_flux)
+    _pressure_equation_flux[pair.first] = 0;
+
+  for (const auto & pair : _pressure_boundary_normal_gradient)
+    _pressure_boundary_normal_gradient[pair.first] = 0;
+
+  _pressure_predictor_flux_adjustment.clear();
+  for (const auto * fi : _flow_face_info)
+    _pressure_predictor_flux_adjustment[fi->id()] = 0.0;
+
+  _pressure_equation_flux_valid = false;
+  _pressure_boundary_normal_gradient_valid = false;
+  _pressure_predictor_face_state_valid = false;
+  for (auto & component_face_values : _boundary_velocity_face_values)
+    component_face_values.clear();
+  _velocity_boundary_state_valid = false;
 }
 
 void
@@ -287,7 +361,7 @@ RhieChowMassFlux::initFaceMassFlux()
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
         density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
-                                        raw_value((*_vel[dim_i])(boundary_face, time_arg));
+                                        boundaryVelocityValue(fi, dim_i, time_arg);
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -330,18 +404,130 @@ RhieChowMassFlux::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
   return getVolumetricFaceFlux(fi);
 }
 
-void
-RhieChowMassFlux::computeFaceMassFlux()
+Real
+RhieChowMassFlux::boundaryMassFluxImbalance() const
+{
+  Real imbalance = 0.0;
+
+  for (const auto * fi : _flow_face_info)
+    if (!_vel[0]->isInternalFace(*fi))
+      imbalance += libmesh_map_find(_face_mass_flux, fi->id());
+
+  return imbalance;
+}
+
+Real
+RhieChowMassFlux::maxBoundaryMassFluxMagnitude() const
+{
+  Real max_boundary_flux = 0.0;
+
+  for (const auto * fi : _flow_face_info)
+    if (!_vel[0]->isInternalFace(*fi))
+      max_boundary_flux =
+          std::max(max_boundary_flux, std::abs(libmesh_map_find(_face_mass_flux, fi->id())));
+
+  return max_boundary_flux;
+}
+
+Real
+RhieChowMassFlux::faceMassFluxL2Norm() const
+{
+  Real squared_sum = 0.0;
+
+  for (const auto * fi : _flow_face_info)
+  {
+    const Real flux = libmesh_map_find(_face_mass_flux, fi->id());
+    squared_sum += flux * flux;
+  }
+
+  return std::sqrt(squared_sum);
+}
+
+RhieChowMassFlux::FaceMassFluxConsistencyAudit
+RhieChowMassFlux::faceMassFluxConsistencyAudit() const
 {
   using namespace Moose::FV;
 
+  FaceMassFluxConsistencyAudit audit;
   const auto time_arg = Moose::currentState();
+
+  Real squared_sum = 0.0;
+  Real internal_squared_sum = 0.0;
+  Real boundary_squared_sum = 0.0;
+
+  for (const auto * fi : _flow_face_info)
+  {
+    Real reconstructed_flux = 0.0;
+
+    if (_vel[0]->isInternalFace(*fi))
+    {
+      RealVectorValue density_times_velocity;
+      const auto & elem_info = *fi->elemInfo();
+      const auto & neighbor_info = *fi->neighborInfo();
+
+      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
+      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
+
+      for (const auto dim_i : index_range(_vel))
+        interpolate(InterpMethod::Average,
+                    density_times_velocity(dim_i),
+                    _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
+                    _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
+                    *fi,
+                    true);
+
+      reconstructed_flux = density_times_velocity * fi->normal();
+    }
+    else
+      reconstructed_flux = boundaryMassFluxTarget(fi, time_arg);
+
+    const Real stored_flux = libmesh_map_find(_face_mass_flux, fi->id());
+    const Real mismatch = stored_flux - reconstructed_flux;
+    const Real abs_mismatch = std::abs(mismatch);
+
+    squared_sum += mismatch * mismatch;
+
+    const bool is_boundary = !_vel[0]->isInternalFace(*fi);
+    if (is_boundary)
+    {
+      boundary_squared_sum += mismatch * mismatch;
+      audit.max_abs_boundary_mismatch =
+          std::max(audit.max_abs_boundary_mismatch, abs_mismatch);
+    }
+    else
+    {
+      internal_squared_sum += mismatch * mismatch;
+      audit.max_abs_internal_mismatch =
+          std::max(audit.max_abs_internal_mismatch, abs_mismatch);
+    }
+
+    if (!audit.has_worst_face || abs_mismatch > audit.max_abs_mismatch)
+    {
+      audit.has_worst_face = true;
+      audit.max_abs_mismatch = abs_mismatch;
+      audit.worst_face_id = fi->id();
+      audit.worst_face_is_boundary = is_boundary;
+      audit.worst_face_centroid = fi->faceCentroid();
+      audit.worst_face_normal = fi->normal();
+    }
+  }
+
+  audit.l2_norm = std::sqrt(squared_sum);
+  audit.internal_l2_norm = std::sqrt(internal_squared_sum);
+  audit.boundary_l2_norm = std::sqrt(boundary_squared_sum);
+  return audit;
+}
+
+void
+RhieChowMassFlux::cachePressureEquationFlux()
+{
+  using namespace Moose::FV;
 
   // Petsc vector reader to make the repeated reading from the vector faster
   PetscVectorReader p_reader(*_pressure_system->system().current_local_solution);
 
-  // We loop through the faces and compute the face fluxes using the pressure gradient
-  // and the momentum matrix/right hand side
+  // We loop through the faces and compute the exact discrete pressure-equation face flux
+  // from the solved pressure field.
   for (auto & fi : _flow_face_info)
   {
     // Making sure the kernel knows which face we are on
@@ -386,7 +572,8 @@ RhieChowMassFlux::computeFaceMassFlux()
 
       const ElemInfo & elem_info =
           hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
-      const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
+      const auto elem_dof = elem_info.dofIndices()[_global_pressure_system_number][0];
+      const auto p_elem_value = p_reader(elem_dof);
       const auto matrix_contribution =
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
       const auto rhs_contribution =
@@ -395,9 +582,43 @@ RhieChowMassFlux::computeFaceMassFlux()
       // On the boundary, only the element side has a contribution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
     }
-    // Compute the new face flux
-    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
+    _pressure_equation_flux[fi->id()] = p_grad_flux;
   }
+
+  _pressure_equation_flux_valid = true;
+}
+
+Real
+RhieChowMassFlux::pressurePredictorFlux(const FaceInfo * fi) const
+{
+  return libmesh_map_find(_phiHbyA_flux, fi->id());
+}
+
+void
+RhieChowMassFlux::updatePressurePredictorFaceState()
+{
+  for (const auto * fi : _flow_face_info)
+  {
+    const auto face_id = fi->id();
+    _phig_flux[face_id] = 0.0;
+    _pressure_predictor_base_flux[face_id] = _HbyA_flux[face_id];
+    _phiHbyA_flux[face_id] = _pressure_predictor_base_flux[face_id];
+  }
+
+  _pressure_predictor_face_state_valid = true;
+}
+
+void
+RhieChowMassFlux::computeFaceMassFlux()
+{
+  if (!_pressure_predictor_face_state_valid)
+    updatePressurePredictorFaceState();
+
+  if (!_pressure_equation_flux_valid)
+    cachePressureEquationFlux();
+
+  for (auto & fi : _flow_face_info)
+    _face_mass_flux[fi->id()] = -_phiHbyA_flux[fi->id()] + _pressure_equation_flux[fi->id()];
 }
 
 void
@@ -418,6 +639,394 @@ RhieChowMassFlux::computeCellVelocity()
     _momentum_systems[system_i]->setSolution(
         *_momentum_implicit_systems[system_i]->current_local_solution);
   }
+
+  _velocity_boundary_state_valid = false;
+}
+
+void
+RhieChowMassFlux::clearMomentumPredictorOperatorCache()
+{
+  _cached_predictor_operator_base_raw.clear();
+  _cached_predictor_diagonal_raw.clear();
+  _cached_predictor_explicit_force_raw.clear();
+  _cached_predictor_body_force_raw.clear();
+  _cached_predictor_operator_valid = false;
+}
+
+void
+RhieChowMassFlux::addMomentumPredictorExplicitForcing(const unsigned int /*system_i*/,
+                                                      NumericVector<Number> & /*rhs*/) const
+{
+}
+
+void
+RhieChowMassFlux::addMomentumPredictorBodyForceForcing(const unsigned int /*system_i*/,
+                                                       NumericVector<Number> & /*rhs*/) const
+{
+}
+
+bool
+RhieChowMassFlux::canUseCachedMomentumPredictorOperator() const
+{
+  if (!_use_cached_momentum_predictor_operator || !_cached_predictor_operator_valid)
+    return false;
+
+  if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size() ||
+      _cached_predictor_diagonal_raw.size() != _momentum_systems.size())
+    return false;
+
+  if (_split_momentum_predictor_operator &&
+      _cached_predictor_explicit_force_raw.size() != _momentum_systems.size())
+    return false;
+  if (_split_momentum_predictor_operator &&
+      _cached_predictor_body_force_raw.size() != _momentum_systems.size())
+    return false;
+
+  return std::all_of(_cached_predictor_operator_base_raw.begin(),
+                     _cached_predictor_operator_base_raw.end(),
+                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
+         std::all_of(_cached_predictor_diagonal_raw.begin(),
+                     _cached_predictor_diagonal_raw.end(),
+                     [](const auto & vec) { return static_cast<bool>(vec); }) &&
+         (!_split_momentum_predictor_operator ||
+          std::all_of(_cached_predictor_explicit_force_raw.begin(),
+                      _cached_predictor_explicit_force_raw.end(),
+                      [](const auto & vec) { return static_cast<bool>(vec); })) &&
+         (!_split_momentum_predictor_operator ||
+          std::all_of(_cached_predictor_body_force_raw.begin(),
+                      _cached_predictor_body_force_raw.end(),
+                      [](const auto & vec) { return static_cast<bool>(vec); }));
+}
+
+void
+RhieChowMassFlux::computePredictorOperatorBase(const unsigned int system_i,
+                                               NumericVector<Number> & base_raw,
+                                               NumericVector<Number> & diagonal_raw,
+                                               const NumericVector<Number> * rhs_override) const
+{
+  mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
+              "The requested momentum component is not linked to RhieChowMassFlux.");
+
+  auto * momentum_system = _momentum_implicit_systems[system_i];
+  auto * mmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system->matrix);
+  mooseAssert(mmat,
+              "The matrices used in the RhieChowMassFlux objects need to be convertible to "
+              "PetscMatrix.");
+
+  const NumericVector<Number> & rhs = rhs_override ? *rhs_override : *(momentum_system->rhs);
+  NumericVector<Number> & solution = *(momentum_system->current_local_solution);
+
+  mmat->get_diagonal(diagonal_raw);
+
+  auto working_vector = solution.zero_clone();
+  auto * working_vector_petsc = dynamic_cast<PetscVector<Number> *>(working_vector.get());
+  mooseAssert(working_vector_petsc,
+              "The vectors used in the RhieChowMassFlux objects need to be convertible to "
+              "PetscVectors.");
+
+  mmat->vector_mult(base_raw, solution);
+  working_vector_petsc->pointwise_mult(diagonal_raw, solution);
+  base_raw.add(-1.0, *working_vector_petsc);
+  base_raw.add(-1.0, rhs);
+}
+
+void
+RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
+                                                 const NumericVector<Number> * rhs_override,
+                                                 const NumericVector<Number> * explicit_force,
+                                                 const NumericVector<Number> * body_force)
+{
+  if (!_use_cached_momentum_predictor_operator)
+    return;
+
+  mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
+              "The requested momentum component is not linked to RhieChowMassFlux.");
+
+  if (_cached_predictor_operator_base_raw.size() != _momentum_systems.size())
+    _cached_predictor_operator_base_raw.resize(_momentum_systems.size());
+  if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
+    _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
+  if (_cached_predictor_explicit_force_raw.size() != _momentum_systems.size())
+    _cached_predictor_explicit_force_raw.resize(_momentum_systems.size());
+  if (_cached_predictor_body_force_raw.size() != _momentum_systems.size())
+    _cached_predictor_body_force_raw.resize(_momentum_systems.size());
+
+  auto * momentum_system = _momentum_implicit_systems[system_i];
+  NumericVector<Number> & current_local_solution = *(momentum_system->current_local_solution);
+
+  _cached_predictor_operator_base_raw[system_i] = current_local_solution.zero_clone();
+  _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
+
+  computePredictorOperatorBase(
+      system_i,
+      *_cached_predictor_operator_base_raw[system_i],
+      *_cached_predictor_diagonal_raw[system_i],
+      rhs_override);
+
+  if (_split_momentum_predictor_operator)
+  {
+    _cached_predictor_explicit_force_raw[system_i] = current_local_solution.zero_clone();
+    if (explicit_force)
+      *_cached_predictor_explicit_force_raw[system_i] = *explicit_force;
+    else
+      _cached_predictor_explicit_force_raw[system_i]->zero();
+    _cached_predictor_explicit_force_raw[system_i]->close();
+
+    _cached_predictor_body_force_raw[system_i] = current_local_solution.zero_clone();
+    if (body_force)
+      *_cached_predictor_body_force_raw[system_i] = *body_force;
+    else
+      _cached_predictor_body_force_raw[system_i]->zero();
+    _cached_predictor_body_force_raw[system_i]->close();
+  }
+  else
+  {
+    _cached_predictor_explicit_force_raw[system_i].reset();
+    _cached_predictor_body_force_raw[system_i].reset();
+  }
+
+  _cached_predictor_operator_valid =
+      _cached_predictor_operator_base_raw.size() == _momentum_systems.size() &&
+      _cached_predictor_diagonal_raw.size() == _momentum_systems.size() &&
+      (!_split_momentum_predictor_operator ||
+       (_cached_predictor_explicit_force_raw.size() == _momentum_systems.size() &&
+        _cached_predictor_body_force_raw.size() == _momentum_systems.size())) &&
+      std::all_of(_cached_predictor_operator_base_raw.begin(),
+                  _cached_predictor_operator_base_raw.end(),
+                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
+      std::all_of(_cached_predictor_diagonal_raw.begin(),
+                  _cached_predictor_diagonal_raw.end(),
+                  [](const auto & vec) { return static_cast<bool>(vec); }) &&
+      (!_split_momentum_predictor_operator ||
+       std::all_of(_cached_predictor_explicit_force_raw.begin(),
+                   _cached_predictor_explicit_force_raw.end(),
+                   [](const auto & vec) { return static_cast<bool>(vec); })) &&
+      (!_split_momentum_predictor_operator ||
+       std::all_of(_cached_predictor_body_force_raw.begin(),
+                   _cached_predictor_body_force_raw.end(),
+                   [](const auto & vec) { return static_cast<bool>(vec); }));
+}
+
+void
+RhieChowMassFlux::updateVelocityBoundaryState()
+{
+  const auto time_arg = Moose::currentState();
+
+  for (auto & component_face_values : _boundary_velocity_face_values)
+    component_face_values.clear();
+
+  for (const auto * fi : _flow_face_info)
+  {
+    if (_vel[0]->isInternalFace(*fi))
+      continue;
+
+    RealVectorValue density_times_velocity;
+    const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+    const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
+    const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
+    const Moose::FaceArg boundary_face{
+        fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+    const Real face_rho = _rho(boundary_face, time_arg);
+
+    for (const auto component : index_range(_vel))
+    {
+      if (!fi->boundaryIDs().empty())
+      {
+        mooseAssert(fi->boundaryIDs().size() == 1,
+                    "Expected at most one physical boundary id on a FV boundary face.");
+      }
+
+      if (!fi->boundaryIDs().empty() &&
+          _vel[component]->getBoundaryCondition(*fi->boundaryIDs().begin()))
+      {
+        auto * bc_pointer = _vel[component]->getBoundaryCondition(*fi->boundaryIDs().begin());
+        bc_pointer->setupFaceData(
+            fi,
+            fi->faceType(
+                std::make_pair(_vel[component]->number(), _vel[component]->sys().number())));
+        _boundary_velocity_face_values[component][fi->id()] = bc_pointer->computeBoundaryValue();
+      }
+      else
+      {
+        const ElemInfo & elem_info =
+            hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+        _boundary_velocity_face_values[component][fi->id()] =
+            _vel[component]->getElemValue(elem_info, time_arg);
+      }
+
+      density_times_velocity(component) =
+          boundary_normal_multiplier * face_rho * _boundary_velocity_face_values[component][fi->id()];
+    }
+
+    // Re-publish the boundary face mass flux from the refreshed patch state so
+    // the next outer momentum predictor sees a boundary phi consistent with the
+    // corrected boundary velocity values.
+    _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
+  }
+
+  _velocity_boundary_state_valid = true;
+}
+
+Real
+RhieChowMassFlux::boundaryVelocityValue(const FaceInfo * fi,
+                                        const unsigned int component,
+                                        const Moose::StateArg & time_arg) const
+{
+  mooseAssert(fi, "FaceInfo should not be null when evaluating a boundary velocity.");
+  mooseAssert(component < _vel.size(), "Velocity component index out of range.");
+  mooseAssert(!_vel[component]->isInternalFace(*fi),
+              "boundaryVelocityValue should only be called on boundary faces.");
+
+  if (_velocity_boundary_state_valid)
+    if (const auto it = _boundary_velocity_face_values[component].find(fi->id());
+        it != _boundary_velocity_face_values[component].end())
+      return it->second;
+
+  if (!fi->boundaryIDs().empty())
+  {
+    mooseAssert(fi->boundaryIDs().size() == 1,
+                "Expected at most one physical boundary id on a FV boundary face.");
+
+    if (auto * bc_pointer = _vel[component]->getBoundaryCondition(*fi->boundaryIDs().begin()))
+    {
+      bc_pointer->setupFaceData(
+          fi,
+          fi->faceType(
+              std::make_pair(_vel[component]->number(), _vel[component]->sys().number())));
+      return bc_pointer->computeBoundaryValue();
+    }
+  }
+
+  const ElemInfo & elem_info =
+      hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+  return _vel[component]->getElemValue(elem_info, time_arg);
+}
+
+Real
+RhieChowMassFlux::boundaryMassFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const
+{
+  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
+              "boundaryMassFluxTarget should only be called on boundary faces.");
+
+  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+  const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
+  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
+  const Moose::FaceArg boundary_face{
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
+
+  const Real face_rho = _rho(boundary_face, time_arg);
+  RealVectorValue density_times_velocity;
+  for (const auto component : index_range(_vel))
+    density_times_velocity(component) =
+        boundary_normal_multiplier * face_rho * boundaryVelocityValue(fi, component, time_arg);
+
+  return density_times_velocity * fi->normal();
+}
+
+Real
+RhieChowMassFlux::boundaryNormalAinv(const FaceInfo * fi) const
+{
+  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
+              "boundaryNormalAinv should only be called on boundary faces.");
+
+  const auto & face_ainv = libmesh_map_find(_Ainv, fi->id());
+  const auto & normal = fi->normal();
+
+  Real normal_ainv = 0.0;
+  for (const auto dim_i : make_range(_dim))
+    normal_ainv += face_ainv(dim_i) * normal(dim_i) * normal(dim_i);
+
+  return normal_ainv;
+}
+
+bool
+RhieChowMassFlux::isAdjustablePressureBoundaryFace(const FaceInfo * fi) const
+{
+  if (!fi || _vel[0]->isInternalFace(*fi) || fi->boundaryIDs().empty())
+    return false;
+
+  mooseAssert(fi->boundaryIDs().size() == 1, "Expected a single boundary id on a FV boundary face.");
+  if (const auto * bc_pointer = _p->getBoundaryCondition(*fi->boundaryIDs().begin()))
+    return dynamic_cast<const LinearFVPressureFluxBC *>(bc_pointer) ||
+           dynamic_cast<const LinearFVPressureSymmetryBC *>(bc_pointer);
+
+  return false;
+}
+
+Real
+RhieChowMassFlux::pressurePredictorFluxAdjustment(const FaceInfo * fi) const
+{
+  if (!fi)
+    return 0.0;
+
+  const auto it = _pressure_predictor_flux_adjustment.find(fi->id());
+  return it == _pressure_predictor_flux_adjustment.end() ? 0.0 : it->second;
+}
+
+void
+RhieChowMassFlux::updatePressureBoundaryNormalGradients(const bool apply_reference_adjustment)
+{
+  if (!_pressure_predictor_face_state_valid)
+    updatePressurePredictorFaceState();
+
+  const auto time_arg = Moose::currentState();
+
+  for (const auto * fi : _flow_face_info)
+  {
+    _pressure_predictor_flux_adjustment[fi->id()] = 0.0;
+    _phiHbyA_flux[fi->id()] = _pressure_predictor_base_flux[fi->id()];
+    if (!_vel[0]->isInternalFace(*fi))
+      _pressure_boundary_normal_gradient[fi->id()] = 0.0;
+  }
+
+  // Local adjustPhi analogue for the pressure-reference branch: shift the predictor source
+  // on adjustable fixed-flux patches so the integrated predictor boundary flux matches the
+  // boundary mass-flux target before the pressure solve.
+  if (apply_reference_adjustment)
+  {
+    Real integrated_source_imbalance = 0.0;
+    Real adjustable_measure = 0.0;
+
+    for (const auto * fi : _flow_face_info)
+      if (isAdjustablePressureBoundaryFace(fi))
+      {
+        const Real face_measure = fi->faceArea() * fi->faceCoord();
+        integrated_source_imbalance +=
+            (_pressure_predictor_base_flux[fi->id()] + boundaryMassFluxTarget(fi, time_arg)) *
+            face_measure;
+        adjustable_measure += face_measure;
+      }
+
+    if (adjustable_measure > libMesh::TOLERANCE)
+    {
+      const Real uniform_source_adjustment = -integrated_source_imbalance / adjustable_measure;
+      for (const auto * fi : _flow_face_info)
+        if (isAdjustablePressureBoundaryFace(fi))
+        {
+          _pressure_predictor_flux_adjustment[fi->id()] = uniform_source_adjustment;
+          _phiHbyA_flux[fi->id()] = _pressure_predictor_base_flux[fi->id()] +
+                                    uniform_source_adjustment;
+        }
+    }
+  }
+
+  for (const auto * fi : _flow_face_info)
+  {
+    if (_vel[0]->isInternalFace(*fi))
+      continue;
+
+    const Real normal_ainv = boundaryNormalAinv(fi);
+    if (std::abs(normal_ainv) <= libMesh::TOLERANCE)
+    {
+      _pressure_boundary_normal_gradient[fi->id()] = 0.0;
+      continue;
+    }
+
+    const Real required_pressure_flux = _phiHbyA_flux[fi->id()] + boundaryMassFluxTarget(fi, time_arg);
+    _pressure_boundary_normal_gradient[fi->id()] = -required_pressure_flux / normal_ainv;
+  }
+
+  _pressure_boundary_normal_gradient_valid = true;
 }
 
 void
@@ -430,6 +1039,8 @@ RhieChowMassFlux::initCouplingField()
   {
     _Ainv[fi->id()];
     _HbyA_flux[fi->id()];
+    _phiHbyA_flux[fi->id()];
+    _phig_flux[fi->id()];
   }
 }
 
@@ -517,7 +1128,7 @@ RhieChowMassFlux::populateCouplingFunctors(
           face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
 
-          if (!_body_force_kernel_names.empty())
+          if (!_split_momentum_predictor_operator && !_body_force_kernel_names.empty())
             for (const auto & force_kernel : _body_force_kernels[dim_i])
             {
               force_kernel->setCurrentElemInfo(&elem_info);
@@ -560,7 +1171,16 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
   mooseAssert(_momentum_implicit_systems.size() && _momentum_implicit_systems[0],
               "The momentum system shall be linked before calling this function!");
 
+  _pressure_equation_flux_valid = false;
+  _pressure_boundary_normal_gradient_valid = false;
+  _pressure_predictor_face_state_valid = false;
+
   auto & pressure_gradient = selectPressureGradient(with_updated_pressure);
+  const bool use_cached_predictor_operator = canUseCachedMomentumPredictorOperator();
+  const bool split_predictor_operator = _split_momentum_predictor_operator;
+
+  if (verbose && use_cached_predictor_operator)
+    _console << "Using cached assembled momentum predictor operator for HbyA/Ainv." << std::endl;
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
@@ -583,29 +1203,28 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
       mmat->print();
     }
 
-    // First, we extract the diagonal and we will hold on to it for a little while
-    _Ainv_raw.push_back(current_local_solution.zero_clone());
-    NumericVector<Number> & Ainv = *(_Ainv_raw.back());
-
-    mmat->get_diagonal(Ainv);
-
     if (verbose)
     {
       _console << "Velocity solution in H(u)" << std::endl;
       solution.print();
     }
 
-    // Time to create H(u) = M_{offdiag} * u - b_{nonpressure}
-    _HbyA_raw.push_back(current_local_solution.zero_clone());
+    if (use_cached_predictor_operator)
+    {
+      _Ainv_raw.push_back(_cached_predictor_diagonal_raw[system_i]->clone());
+      _HbyA_raw.push_back(_cached_predictor_operator_base_raw[system_i]->clone());
+    }
+    else
+    {
+      _Ainv_raw.push_back(current_local_solution.zero_clone());
+      _HbyA_raw.push_back(current_local_solution.zero_clone());
+      computePredictorOperatorBase(system_i, *(_HbyA_raw.back()), *(_Ainv_raw.back()));
+    }
+
+    NumericVector<Number> & Ainv = *(_Ainv_raw.back());
     NumericVector<Number> & HbyA = *(_HbyA_raw.back());
 
-    // We start with the matrix product part, we will do
-    // M*u - A*u for 2 reasons:
-    // 1, We assume A*u petsc operation is faster than setting the matrix diagonal to 0
-    // 2, In PISO loops we need to reuse the matrix so we can't just set the diagonals to 0
-
-    // We create a working vector to ease some of the operations, we initialize its values
-    // with the current solution values to have something for the A*u term
+    // We create a working vector to ease some of the operations.
     auto working_vector = momentum_system->current_local_solution->zero_clone();
     PetscVector<Number> * working_vector_petsc =
         dynamic_cast<PetscVector<Number> *>(working_vector.get());
@@ -613,31 +1232,50 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
                 "The vectors used in the RhieChowMassFlux objects need to be convertable "
                 "to PetscVectors!");
 
-    mmat->vector_mult(HbyA, solution);
-    working_vector_petsc->pointwise_mult(Ainv, solution);
-    HbyA.add(-1.0, *working_vector_petsc);
-
-    if (verbose)
+    if (!split_predictor_operator)
     {
-      _console << " H(u)" << std::endl;
-      HbyA.print();
+      // The legacy predictor operator includes explicit pressure/body-force
+      // terms in the assembled RHS, so HbyA has to remove pressure and then
+      // restore explicit body-force sources.
+      working_vector_petsc->pointwise_mult(*pressure_gradient[system_i], *_cell_volumes);
+      HbyA.add(-1.0, *working_vector_petsc);
+
+      if (!_body_force_kernels.empty())
+      {
+        auto explicit_body_force_rhs = current_local_solution.zero_clone();
+        for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
+          if (hasBlocks(elem_info->subdomain_id()))
+          {
+            const auto elem_dof =
+                elem_info->dofIndices()[_global_momentum_system_numbers[system_i]][0];
+
+            Real rhs_contribution = 0.0;
+            for (const auto & force_kernel : _body_force_kernels[system_i])
+            {
+              force_kernel->setCurrentElemInfo(elem_info);
+              rhs_contribution += force_kernel->computeRightHandSideContribution();
+            }
+
+            explicit_body_force_rhs->set(elem_dof, rhs_contribution);
+          }
+
+        explicit_body_force_rhs->close();
+        HbyA.add(1.0, *explicit_body_force_rhs);
+      }
     }
-
-    // We continue by adding the momentum right hand side contributions
-    HbyA.add(-1.0, rhs);
-
-    // Unfortunately, the pressure forces are included in the momentum RHS
-    // so we have to correct them back
-    working_vector_petsc->pointwise_mult(*pressure_gradient[system_i], *_cell_volumes);
-    HbyA.add(-1.0, *working_vector_petsc);
 
     if (verbose)
     {
       _console << "total RHS" << std::endl;
       rhs.print();
-      _console << "pressure RHS" << std::endl;
-      pressure_gradient[system_i]->print();
-      _console << " H(u)-rhs-relaxation_source" << std::endl;
+      if (!split_predictor_operator)
+      {
+        _console << "pressure RHS" << std::endl;
+        pressure_gradient[system_i]->print();
+        _console << " predictor_base - pressure + explicit_body_force" << std::endl;
+      }
+      else
+        _console << " predictor_base (split operator)" << std::endl;
       HbyA.print();
     }
 
@@ -733,7 +1371,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 std::vector<std::unique_ptr<NumericVector<Number>>> &
 RhieChowMassFlux::selectPressureGradient(const bool updated_pressure)
 {
-  if (updated_pressure)
+  if (updated_pressure || _grad_p_current.empty())
   {
     _grad_p_current.clear();
     for (const auto & component : _pressure_system->linearFVGradientContainer())

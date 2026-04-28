@@ -12,6 +12,11 @@
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
 #include "Executioner.h"
+#include "LinearFVElementalKernel.h"
+#include "LinearFVTimeDerivative.h"
+#include "LinearWCNSFVMomentumFlux.h"
+
+#include <limits>
 
 using namespace libMesh;
 
@@ -287,6 +292,9 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   // Solve the momentum equations.
   // TO DO: These equations are VERY similar. If we can store the differences (things coming from
   // BCs for example) separately, it is enough to construct one matrix.
+  if (_rc_uo)
+    _rc_uo->clearMomentumPredictorOperatorCache();
+
   for (const auto system_i : index_range(_momentum_systems))
   {
     _problem.setCurrentLinearSystem(_momentum_system_numbers[system_i]);
@@ -308,9 +316,35 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     NS::FV::relaxMatrix(mmat, _momentum_equation_relaxation, *diff_diagonal);
     NS::FV::relaxRightHandSide(rhs, solution, *diff_diagonal);
 
+    std::unique_ptr<NumericVector<Number>> predictor_rhs_base;
+    std::unique_ptr<NumericVector<Number>> predictor_explicit_force;
+    std::unique_ptr<NumericVector<Number>> predictor_body_force;
+    if (_rc_uo && _rc_uo->splitMomentumPredictorOperator())
+    {
+      predictor_rhs_base = rhs.clone();
+      *predictor_rhs_base = rhs;
+      predictor_rhs_base->close();
+
+      predictor_body_force = rhs.clone();
+      predictor_body_force->zero();
+      addMomentumPredictorBodyForceForcing(system_i, *predictor_body_force);
+      predictor_body_force->close();
+
+      addMomentumPredictorExplicitForcing(system_i, rhs);
+
+      predictor_explicit_force = rhs.clone();
+      *predictor_explicit_force = rhs;
+      predictor_explicit_force->add(-1.0, *predictor_rhs_base);
+      predictor_explicit_force->close();
+    }
+
     // The normalization factor depends on the right hand side so we need to recompute it for this
     // component
     Real norm_factor = NS::FV::computeNormalizationFactor(solution, mmat, rhs);
+
+    if (auditMomentumPredictorRebuild())
+      printMomentumPredictorPreSolveAudit(
+          system_i, solution, mmat, rhs, predictor_rhs_base.get(), norm_factor);
 
     // Very important, for deciding the convergence, we need the unpreconditioned
     // norms in the linear solve
@@ -323,6 +357,13 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     // We solve the equation
     auto its_resid_pair = momentum_solver.solve(mmat, mmat, solution, rhs);
     momentum_system.update();
+
+    if (_rc_uo)
+      _rc_uo->cacheMomentumPredictorOperator(
+          system_i,
+          predictor_rhs_base.get(),
+          predictor_explicit_force.get(),
+          predictor_body_force.get());
 
     // We will reuse the preconditioner for every momentum system
     if (system_i == 0)
@@ -366,6 +407,211 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;
+}
+
+void
+LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
+    const unsigned int system_i,
+    const NumericVector<Number> & solution,
+    SparseMatrix<Number> & mmat,
+    const NumericVector<Number> & rhs,
+    const NumericVector<Number> * rhs_base,
+    const Real norm_factor) const
+{
+  auto residual = solution.zero_clone();
+  mmat.vector_mult(*residual, solution);
+  residual->add(-1.0, rhs);
+
+  Real explicit_force_l2 = 0.0;
+  std::unique_ptr<NumericVector<Number>> explicit_force;
+  if (rhs_base)
+  {
+    explicit_force = rhs.zero_clone();
+    *explicit_force = rhs;
+    explicit_force->add(-1.0, *rhs_base);
+    explicit_force_l2 = explicit_force->l2_norm();
+  }
+
+  _console << "Momentum predictor rebuild audit: outer_iter=" << _current_outer_iteration
+           << ", component=" << system_i
+           << ", |U|_2=" << solution.l2_norm()
+           << ", |rhs|_2=" << rhs.l2_norm()
+           << ", |A*U-rhs|_2=" << residual->l2_norm()
+           << ", |A*U-rhs|_inf=" << residual->linfty_norm()
+           << ", normalized_pre_solve_residual="
+           << residual->l2_norm() / std::max(norm_factor, std::numeric_limits<Real>::min());
+
+  if (rhs_base)
+    _console << ", |rhs_base|_2=" << rhs_base->l2_norm()
+             << ", |explicit_force_rhs|_2=" << explicit_force_l2;
+
+  _console << std::endl;
+
+  const auto momentum_sys_num = _momentum_system_numbers[system_i];
+  auto time_residual = solution.zero_clone();
+  auto other_elemental_residual = solution.zero_clone();
+  auto advection_residual = solution.zero_clone();
+  auto stress_residual = solution.zero_clone();
+  time_residual->zero();
+  other_elemental_residual->zero();
+  advection_residual->zero();
+  stress_residual->zero();
+
+  std::vector<LinearFVElementalKernel *> elemental_kernels;
+  _problem.theWarehouse()
+      .query()
+      .condition<AttribSysNum>(momentum_sys_num)
+      .condition<AttribSystem>("LinearFVElementalKernel")
+      .condition<AttribThread>(0)
+      .queryInto(elemental_kernels);
+
+  for (const auto & elem_info : _problem.mesh().elemInfoVector())
+  {
+    if (!elem_info)
+      continue;
+
+    const auto & dofs = elem_info->dofIndices()[momentum_sys_num];
+    if (dofs.empty())
+      continue;
+
+    const auto subdomain_id = elem_info->subdomain_id();
+    const auto dof = dofs[0];
+    const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
+
+    for (auto * kernel : elemental_kernels)
+    {
+      const auto & blocks = kernel->blockIDs();
+      if (!blocks.empty() && !blocks.count(subdomain_id))
+        continue;
+
+      kernel->setCurrentElemInfo(elem_info);
+      kernel->setCurrentElemVolume(elem_volume);
+      const Real residual_contribution =
+          kernel->computeMatrixContribution() * solution(dof) -
+          kernel->computeRightHandSideContribution();
+
+      if (dynamic_cast<LinearFVTimeDerivative *>(kernel))
+        time_residual->add(dof, residual_contribution);
+      else
+        other_elemental_residual->add(dof, residual_contribution);
+    }
+  }
+
+  std::vector<LinearWCNSFVMomentumFlux *> momentum_flux_kernels;
+  {
+    std::vector<LinearFVFluxKernel *> flux_kernels;
+    _problem.theWarehouse()
+        .query()
+        .condition<AttribSysNum>(momentum_sys_num)
+        .condition<AttribSystem>("LinearFVFluxKernel")
+        .condition<AttribThread>(0)
+        .queryInto(flux_kernels);
+
+    for (auto * kernel : flux_kernels)
+      if (auto * momentum_flux = dynamic_cast<LinearWCNSFVMomentumFlux *>(kernel))
+        momentum_flux_kernels.push_back(momentum_flux);
+  }
+
+  for (const auto * fi : _problem.mesh().faceInfo())
+  {
+    if (!fi)
+      continue;
+
+    const auto elem_subdomain = fi->elem().subdomain_id();
+    const auto neighbor_subdomain = fi->neighborPtr() ? fi->neighbor().subdomain_id() : elem_subdomain;
+    const Real face_area = fi->faceArea() * fi->faceCoord();
+
+    for (auto * kernel : momentum_flux_kernels)
+    {
+      const auto & blocks = kernel->blockIDs();
+      if (!blocks.empty() && !blocks.count(elem_subdomain) && !blocks.count(neighbor_subdomain))
+        continue;
+
+      kernel->setupFaceData(fi);
+      kernel->setCurrentFaceArea(face_area);
+      kernel->accumulateCurrentFaceResidualContributions(
+          solution, *advection_residual, *stress_residual);
+    }
+  }
+
+  time_residual->close();
+  other_elemental_residual->close();
+  advection_residual->close();
+  stress_residual->close();
+  if (explicit_force)
+    explicit_force->close();
+
+  auto reconstructed_residual = solution.zero_clone();
+  *reconstructed_residual = *time_residual;
+  reconstructed_residual->add(1.0, *other_elemental_residual);
+  reconstructed_residual->add(1.0, *advection_residual);
+  reconstructed_residual->add(1.0, *stress_residual);
+  if (explicit_force)
+    reconstructed_residual->add(-1.0, *explicit_force);
+  reconstructed_residual->close();
+
+  auto unexplained_residual = solution.zero_clone();
+  *unexplained_residual = *residual;
+  unexplained_residual->add(-1.0, *reconstructed_residual);
+  unexplained_residual->close();
+
+  const auto print_term_summary =
+      [&](const std::string & label, const NumericVector<Number> & term_vector)
+  {
+    bool found_entry = false;
+    dof_id_type max_dof = 0;
+    Real max_value = 0.0;
+    Point max_centroid;
+
+    for (const auto & elem_info : _problem.mesh().elemInfoVector())
+    {
+      if (!elem_info)
+        continue;
+
+      const auto & dofs = elem_info->dofIndices()[momentum_sys_num];
+      if (dofs.empty())
+        continue;
+
+      const auto dof = dofs[0];
+      const Real value = term_vector(dof);
+      if (!found_entry || std::abs(value) > std::abs(max_value))
+      {
+        found_entry = true;
+        max_dof = dof;
+        max_value = value;
+        max_centroid = elem_info->centroid();
+      }
+    }
+
+    _console << "  " << label << ": |.|_2=" << term_vector.l2_norm()
+             << ", |.|_inf=" << term_vector.linfty_norm();
+    if (found_entry)
+      _console << ", max_entry=" << max_value << " @ dof " << max_dof
+               << " centroid=" << Moose::stringify(max_centroid);
+    _console << std::endl;
+  };
+
+  _console << "  Predictor term breakdown:" << std::endl;
+  print_term_summary("time_term_residual", *time_residual);
+  print_term_summary("other_elemental_residual", *other_elemental_residual);
+  print_term_summary("face_advection_residual", *advection_residual);
+  print_term_summary("face_stress_residual", *stress_residual);
+  if (explicit_force)
+    print_term_summary("explicit_force_rhs", *explicit_force);
+  print_term_summary("reconstructed_residual", *reconstructed_residual);
+  print_term_summary("unexplained_residual", *unexplained_residual);
+}
+
+void
+LinearAssemblySegregatedSolve::addMomentumPredictorExplicitForcing(const unsigned int /*system_i*/,
+                                                                   NumericVector<Number> & /*rhs*/)
+{
+}
+
+void
+LinearAssemblySegregatedSolve::addMomentumPredictorBodyForceForcing(const unsigned int /*system_i*/,
+                                                                    NumericVector<Number> & /*rhs*/)
+{
 }
 
 void
@@ -432,6 +678,9 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   }
 
   _pressure_system.setSolution(current_local_solution);
+
+  if (_rc_uo)
+    _rc_uo->cachePressureEquationFlux();
 
   const auto residuals =
       std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
