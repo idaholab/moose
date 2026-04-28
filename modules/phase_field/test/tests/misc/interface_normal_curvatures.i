@@ -59,19 +59,13 @@
   []
 []
 
+[Problem]
+  solve = false
+  kernel_coverage_check = false
+[]
+
 [Executioner]
   type = Transient
-  scheme = 'bdf2'
-
-  solve_type = 'NEWTON'
-
-  l_max_its = 30
-  l_tol = 1.0e-4
-  nl_max_its = 10
-  nl_rel_tol = 1.0e-10
-
-  start_time = 0.0
-  dt = 1e-5
   num_steps = 1
 []
 
