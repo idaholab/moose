@@ -158,8 +158,8 @@ CrackMeshCut3DUserObject::initialize()
           _is_mesh_modified = true;
           growFront();
           sortFrontNodes();
-          if (_inactive_boundary_pos.size() != 0)
-            findFrontIntersection();
+          // if (_inactive_boundary_pos.size() != 0)
+          //   findFrontIntersection();
           refineFront();
           triangulation();
           joinBoundary();
@@ -852,6 +852,67 @@ CrackMeshCut3DUserObject::growFront()
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_increment;
 
+      // For inactive boundary nodes (index[j] == -1): if the displaced position x (= P_I)
+      // landed inside the FEM volume, project it back to just outside the surface.
+      // Ray: from the adjacent active crack-front node A through P_I, extended beyond P_I
+      // to find where the ray exits the FEM mesh. Place the node at that exit point +
+      // libMesh::TOLERANCE outward so it stays just outside the surface.
+      if (index[j] == -1)
+      {
+        std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+        pl->enable_out_of_mesh_mode();
+        bool x_inside = ((*pl)(x) != nullptr);
+        if (x_inside)
+        {
+          bool at_start = (j == 0 && index.size() > 1 && index[1] != -1);
+          bool at_end = (j == i2 - 1 && index.size() > 1 && index[i2 - 2] != -1);
+          if (at_start || at_end)
+          {
+            unsigned int j_active = at_start ? 1 : (i2 - 2);
+            Node * active_nd = _cutter_mesh->node_ptr(_active_boundary[i][j_active]);
+            mooseAssert(active_nd, "Active neighbor node is NULL");
+            // A = current (pre-growth) position of the adjacent active crack-front node
+            Point A = *active_nd;
+
+            // Ray direction from A through P_I (x)
+            Point ray_dir = x - A;
+            Real ray_len = ray_dir.norm();
+            if (ray_len > libMesh::TOLERANCE)
+              ray_dir /= ray_len;
+
+            // Find where the ray from A through x exits the FEM surface (beyond x)
+            ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
+            Real best_dist = std::numeric_limits<Real>::max();
+            bool surface_found = false;
+            Point best_pt;
+
+            for (const auto & belem : bnd_range)
+            {
+              const Elem * elem = belem->_elem;
+              std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
+              std::vector<Point> vertices;
+              for (unsigned int k = 0; k < curr_side->n_nodes(); ++k)
+                vertices.push_back(*(curr_side->node_ptr(k)));
+
+              Point pt;
+              if (findIntersection(A, x, vertices, pt))
+              {
+                Real dist = (pt - A).norm();
+                if (dist < best_dist)
+                {
+                  best_dist = dist;
+                  best_pt = pt;
+                  surface_found = true;
+                }
+              }
+            }
+
+            if (surface_found)
+              x = best_pt + ray_dir * libMesh::TOLERANCE;
+          }
+        }
+      }
+
       // Classify each neighbor as producing a degenerate triangle (below tol) or not.
       // - If all neighbors degenerate: push only orig_id (node fully stuck, e.g. node 8).
       // - If some degenerate: create new node, push both orig_id and new id; orig goes on the
@@ -1066,6 +1127,14 @@ CrackMeshCut3DUserObject::refineFront()
     if (_inactive_boundary_pos.size() == 0)
       i1 = _front[ifront].size();
 
+    // When there are inactive boundary nodes, determine which segment indices are
+    // adjacent to the boundary endpoints (first and last in the segment).
+    // Refinement nodes on those segments may land outside the FEM mesh and be
+    // incorrectly classified as inactive endpoints on the next step.
+    bool has_inactive = (_inactive_boundary_pos.size() != 0);
+    unsigned int first_boundary_i = 1;                      // segment between pos 0 and 1
+    unsigned int last_boundary_i = _front[ifront].size() - 1; // segment between pos size-2 and size-1
+
     for (unsigned int i = i1; i >= 1; --i)
     {
       unsigned int i2 = i;
@@ -1108,6 +1177,17 @@ CrackMeshCut3DUserObject::refineFront()
           // Skip if both triangles with old boundary node would be degenerate
           if (!isTriAreaAboveTol(x, p1, ab_pt) && !isTriAreaAboveTol(x, p2, ab_pt))
             continue;
+
+          // For segments adjacent to inactive boundary endpoints, skip refinement nodes
+          // that are outside the FEM mesh.  A node outside would be classified as an
+          // inactive endpoint on the next step, corrupting the active boundary structure.
+          if (has_inactive && (i == first_boundary_i || i == last_boundary_i))
+          {
+            std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+            pl->enable_out_of_mesh_mode();
+            if ((*pl)(x) == nullptr) // outside the FEM mesh
+              continue;
+          }
 
           Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
           _cutter_mesh->add_node(this_node);

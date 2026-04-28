@@ -8,8 +8,7 @@
 [Functions]
   [growth_func_x]
     type = ParsedFunction
-    expression = 'if(x>0, 0.2, -0.2)'
-    # expression = 'if(t<3,0,if(x>0, 0.2, -0.2))'
+    expression = '0.2*(x-${offset})/abs(${rad})'
   []
   [growth_func_y]
     type = ParsedFunction
@@ -29,7 +28,6 @@
   [cut_mesh]
     type = CrackMeshCut3DUserObject
     mesh_generator_name = mesh_cutter
-    # growth_dir_method = MAX_HOOP_STRESS
     growth_dir_method = FUNCTION
     growth_direction_x = growth_func_x
     growth_direction_y = growth_func_y
@@ -41,6 +39,7 @@
 []
 
 [Outputs]
+  file_base = face_crack_function_off_${offset}_spin_${spin}
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh
