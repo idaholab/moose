@@ -4,7 +4,8 @@
 []
 
 rad=0.1
-
+offset = 0
+spin = 10
 [Mesh]
   #---- CUTTER MESH
   [cicle_outline]
@@ -21,9 +22,15 @@ rad=0.1
     desired_area = 0.001
     output_subdomain_id = 1
   []
-  [circle_rotate]
+  [circle_spin]
     type = TransformGenerator
     input = circle_surface
+    transform = ROTATE
+    vector_value = '0 0 ${spin}'
+  []
+  [circle_rotate]
+    type = TransformGenerator
+    input = circle_spin
     transform = ROTATE
     vector_value = '0 90 0'
   []
@@ -31,7 +38,7 @@ rad=0.1
     type = TransformGenerator
     input = circle_rotate
     transform = TRANSLATE
-    vector_value = '0 0 -0.01'
+    vector_value = '${offset} 0 -0.01'
     save_with_name = mesh_cutter
   []
   #---- FEM MESH
@@ -56,7 +63,14 @@ rad=0.1
     coord = '${fparse 2*rad} ${fparse -rad} ${fparse rad}'
     use_closest_node = true
   []
-  final_generator = pin
+  [center]
+    type = ExtraNodesetGenerator
+    input = pin
+    new_boundary = 'center'
+    coord = '0 ${fparse rad} 0'
+    use_closest_node = true
+  []
+  final_generator = center
 []
 
 [Physics/SolidMechanics/QuasiStatic]
@@ -72,7 +86,7 @@ rad=0.1
     type = DirichletBC
     boundary = left
     variable = disp_x
-    value = -1e-3
+    value = 0.0
   []
   [right_x]
     type = DirichletBC
@@ -80,11 +94,21 @@ rad=0.1
     variable = disp_x
     value = 0.0
   []
+  # Ramp traction in z so KI varies along the crack front:
+  # near z=0 (surface, inactive nodes): below k_low -> no growth
+  # mid-front: transition zone -> moderate growth
+  # deepest nodes (z~0.09): above k_high -> max growth
   [top_y]
-    type = DirichletBC
+    type = FunctionNeumannBC
     boundary = top
     variable = disp_y
-    value = 0.0
+    function = '20 + 500 * z'
+  []
+  [bottom_y]
+    type = DirichletBC
+    boundary = bottom
+    variable = disp_y
+    value = 0
   []
   [pin_z]
     type = DirichletBC
