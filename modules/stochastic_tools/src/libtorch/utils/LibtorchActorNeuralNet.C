@@ -286,7 +286,6 @@ LibtorchActorNeuralNet::forward(const torch::Tensor & x)
     else if (activation == "linear")
       output = _weights[i]->forward(output);
 
-    // std::cout << "midresult" << i << output << std::endl;
   }
 
   return output;
@@ -299,7 +298,6 @@ LibtorchActorNeuralNet::evaluate(torch::Tensor & x,
 {
   torch::Tensor output = forward(x);
 
-  // std::cout << "midresult" << output << std::endl;
   resetDistributionParams(output);
 
   if (sampled)

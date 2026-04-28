@@ -26,10 +26,10 @@ namespace
  * Fill in default action scaling and catch shape mistakes early.
  * @param factors User-provided scaling factors.
  * @param expected_size Number of action outputs expected by the distribution.
- * @return A fully populated scaling-factor vector.
+ * @return A fully populated and validated scaling-factor vector.
  */
 std::vector<Real>
-normalizeActionScalingFactors(const std::vector<Real> & factors, const unsigned int expected_size)
+setActionScalingFactors(const std::vector<Real> & factors, const unsigned int expected_size)
 {
   const auto normalized = factors.empty() ? std::vector<Real>(expected_size, 1.0) : factors;
 
@@ -61,7 +61,7 @@ LibtorchActionDistribution::LibtorchActionDistribution(
     _num_outputs(num_outputs),
     _device_type(device_type),
     _data_type(data_type),
-    _output_scaling_factors(normalizeActionScalingFactors(output_scaling_factors, num_outputs))
+    _output_scaling_factors(setActionScalingFactors(output_scaling_factors, num_outputs))
 {
   auto action_scale = _output_scaling_factors;
   LibtorchUtils::vectorToTensor(action_scale, _action_scale_tensor);

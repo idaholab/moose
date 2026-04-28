@@ -14,6 +14,7 @@
 #include "MooseError.h"
 
 #include <algorithm>
+#include <string_view>
 
 std::vector<LibtorchRLMiniBatch>
 LibtorchRLMiniBatchSampler::sample(const LibtorchRLTrajectoryBuffer::TensorBatch & batch,
@@ -53,7 +54,7 @@ LibtorchRLMiniBatchSampler::validateBatch(const LibtorchRLTrajectoryBuffer::Tens
                "targets, and advantages before mini-batch sampling.");
 
   const auto batch_size = batch.size();
-  const auto validate_rows = [batch_size](const torch::Tensor & tensor, const char * name)
+  const auto validate_rows = [batch_size](const torch::Tensor & tensor, std::string_view name)
   {
     if (!tensor.defined() || tensor.size(0) != batch_size)
       mooseError(
