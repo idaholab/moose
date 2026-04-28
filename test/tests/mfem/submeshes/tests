@@ -76,6 +76,8 @@
     min_slots = 2 # memory heavy
   []
   [MFEMBoundaryFluxCutTransitionSubMesh]
+    design = 'MFEMVectorBoundaryFluxIntegralPostprocessor.md'
+    issues = '#32851'
     type = CSVDiff
     input = av_magnetostatic.i
     cli_args = 'SubMeshes/inactive="" '
