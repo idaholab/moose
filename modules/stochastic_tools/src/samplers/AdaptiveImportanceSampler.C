@@ -94,10 +94,6 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
      MCMC algorithm and proposing the next sample.*/
   _prev_value.resize(_distributions.size());
 
-  // `check_step` is a member variable for ensuring that the MCMC algorithm proceeds in a sequential
-  // fashion.
-  _check_step = 0;
-
   // Storage for means of input values for proposing the next sample
   _mean_sto.resize(_distributions.size());
 
@@ -105,12 +101,13 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
   _std_sto.resize(_distributions.size());
 
   setNumberOfRandomSeeds(_num_random_seeds);
+  setAutoAdvanceGenerators(false);
 }
 
-Real
-AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+void
+AdaptiveImportanceSampler::executeSetUp()
 {
-  const bool sample = _t_step > 1 && col_index == 0 && _check_step != _t_step;
+  const bool sample = _t_step > 1;
   const bool gp_flag = _gp_flag ? (*_gp_flag)[0] : false;
 
   if (sample && _is_sampling_completed)
@@ -174,7 +171,10 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
   // to increase the total number of steps taken.
   if (sample && gp_flag && _t_step > _num_samples_train)
     ++_retraining_steps;
+}
 
-  _check_step = _t_step;
+Real
+AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+{
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }

@@ -29,6 +29,7 @@
     flag_sample = 'conditional/flag_sample'
     seed = 9874
     num_random_seeds = 100
+    execute_on = 'initial multiapp_fixed_point_begin'
   []
 []
 

@@ -52,6 +52,7 @@ public:
   virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
 
 protected:
+  virtual void executeSetUp() override;
   /// Return the sample for the given row (the sample index) and column (the parameter index)
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
@@ -88,9 +89,6 @@ protected:
 private:
   /// Storage for the inputs vector obtained from the reporter
   const std::vector<std::vector<Real>> & _inputs;
-
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
 
   /// For proposing the next sample in the MCMC algorithm
   std::vector<Real> _prev_value;

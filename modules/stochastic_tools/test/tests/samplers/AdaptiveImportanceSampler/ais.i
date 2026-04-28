@@ -28,6 +28,7 @@
     use_absolute_value = true
     seed = 1012
     num_random_seeds = 100
+    execute_on = 'initial multiapp_fixed_point_begin'
   []
 []
 
