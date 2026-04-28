@@ -1,0 +1,34 @@
+name: Setup utils
+description: Setup action utilities
+
+runs:
+  using: composite
+  steps:
+    - name: Setup utilities
+      shell: bash
+      run: |
+        UTILS_PATH="$RUNNER_TEMP/utils.sh"
+        cat > "$UTILS_PATH" << 'EOF'
+        function prefix_pwd()
+        {
+          local p="$PWD/"
+          local work_dir="/home/runner/work/"
+          local new_pwd=${p/#$br/WORK/}
+          local docker_work_dir=/__w/
+          new_pwd=${p/#$docker_work_dir/WORK_DOCKER/}
+          echo "${new_pwd}"
+        }
+
+        function print_command()
+        {
+          echo -e "\033[33m$(prefix_pwd)\033[0m: \033[34m$*\033[0m"
+        }
+
+        function print_and_run()
+        {
+          print_command "$@"
+          "$@"
+          return $?
+        }
+        EOF
+        echo "BASH_ENV=$RUNNER_TEMP/utils.sh" >> "$GITHUB_ENV"

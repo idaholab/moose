@@ -1,0 +1,222 @@
+name: Checkout event
+description: Checks out a pull request if on a pull request and rebases it on devel, otherwise checks out a push event and stores the base
+
+inputs:
+  pr_base_sha:
+    description: The base SHA to force when using a pull request instead of pulling on top of pr_base_branch
+    required: false
+    default: ''
+  pr_base_branch:
+    description: The branch to use as a base for pull requests
+    required: false
+    default: devel
+  pr_target_branch:
+    description: The allowed target branch for pull requests
+    required: false
+    default: next
+
+outputs:
+  base_sha:
+    description: The base SHA, either for a pull request or a push event
+    value: ${{ steps.determine_base.outputs.base_sha }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v6
+      name: Checkout
+      with:
+        fetch-depth: 0
+    - uses: idaholab/moose/setup-utils@actions
+      name: Setup utils
+    #
+    # Input checks
+    #
+    - name: "Check event"
+      if: github.event_name != 'pull_request' && github.event_name != 'push'
+      shell: bash
+      run: |
+        echo "::error::Event is not pull_request or push"
+        exit 1
+    - name: "Check input: pr_base_sha"
+      if: github.event_name == 'pull_request' && inputs.pr_base_sha != ''
+      shell: bash
+      run: |
+        echo "::group::Check pr_base_sha"
+        pr_base_sha="${{ inputs.pr_base_sha }}"
+        if ! [[ "$pr_base_sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error::Input pr_base_sha="$pr_base_sha" is not a valid commit"
+          exit 1
+        fi
+        echo "pr_base_sha=${{ inputs.pr_base_sha }} is a valid commit"
+        echo "::endgroup::"
+    - name: "Fix git ownership"
+      shell: bash
+      run: |
+        echo "::group::Fix git ownership"
+        if [ "$(whoami)" == "root" ]; then
+          print_and_run git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        else
+          echo "Not running as root; nothing to fix"
+        fi
+        echo "::endgroup::"
+    - name: "Check input: pr_head_sha"
+      if: github.event_name == 'pull_request' && inputs.pr_head_sha != ''
+      shell: bash
+      run: |
+        echo "::group::Check pr_head_sha"
+        pr_head_sha="${{ inputs.pr_head_sha }}"
+        if ! [[ "$pr_head_sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error::Input pr_head_sha="$pr_head_sha" is not a valid SHA"
+          exit 1
+        fi
+        echo "pr_base_sha=pr_head_sha is a valid commit"
+        echo "::endgroup::"
+    - name: "Check inputs: pr_[base,target]_branch"
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        echo "::group::Check pr_base_branch"
+        pr_base_branch="${{ inputs.pr_base_branch }}"
+        if ! /usr/bin/git show-ref --verify --quiet "refs/remotes/origin/${pr_base_branch}"; then
+          echo "::error::Input pr_base_branch=${pr_base_branch} branch does not exist"
+          exit 1
+        fi
+        echo "pr_base_branch=${pr_base_branch} branch exists"
+        echo "::endgroup::"
+
+        echo "::group::Check pr_target_branch"
+        pr_target_branch="${{ inputs.pr_target_branch }}"
+        if ! /usr/bin/git show-ref --verify --quiet "refs/remotes/origin/${pr_target_branch}"; then
+          echo "::error::Input pr_target_branch=${pr_target_branch} branch does not exist"
+          exit 1
+        fi
+        echo "pr_target_branch=${pr_target_branch} branch exists"
+        echo "::endgroup::"
+
+    - name: "PR: Check base"
+      if: github.event_name == 'pull_request' && github.base_ref != inputs.pr_target_branch
+      shell: bash
+      run: |
+        echo "::error::Pull request target is not branch ${{ inputs.pr_target_branch }}"
+        exit 1
+
+    #
+    # PR: Checkout either the base branch or the base as a sha, depending on
+    # whether or not we have a head sha from a previous request
+    #
+    - name: "PR: Checkout base branch"
+      if: github.event_name == 'pull_request' && inputs.pr_base_sha == ''
+      shell: bash
+      run: |
+        echo "::group::Checkout base branch"
+        pr_base_branch="${{ inputs.pr_base_branch }}"
+        print_and_run /usr/bin/git checkout -b test "origin/${pr_base_branch}"
+        echo "::endgroup::"
+    - name: "PR: Checkout base at commit"
+      if: github.event_name == 'pull_request' && inputs.pr_base_sha != ''
+      shell: bash
+      run: |
+        echo "::group::Checkout base at commit"
+        pr_base_sha="${{ inputs.pr_base_sha }}"
+        print_and_run /usr/bin/git checkout -b test "$pr_base_sha"
+        echo "::endgroup::"
+
+    #
+    # PR: Pull pull request into the base
+    #
+    - name: "PR: Pull pull request"
+      if: github.event_name == 'pull_request'
+      shell: bash
+      id: pr_pull_pull_request
+      run: |
+        pr_head_sha="${{ github.event.pull_request.head.sha }}"
+        pr_number="${{ github.event.pull_request.number }}"
+
+        echo "::group::Fetch pull request"
+        print_and_run /usr/bin/git fetch origin "refs/pull/${pr_number}/head"
+        echo "::endgroup::"
+
+        echo "::group::Check pull request head"
+        if [ "$(/usr/bin/git rev-parse FETCH_HEAD)" != "$pr_head_sha" ]; then
+          echo "::error::Pull request head has changed"
+          exit 1
+        fi
+        echo "::endgroup::"
+
+        from_repo="${{ github.event.pull_request.head.repo.full_name }}:${{ github.head_ref }}"
+
+        echo "::group::Merging ${from_repo} into base"
+
+        print_and_run /usr/bin/git config user.name "github-actions[bot]"
+        print_and_run /usr/bin/git config user.email "github-actions[bot]@users.noreply.github.com"
+        pull_passed=0
+        print_and_run /usr/bin/git merge FETCH_HEAD && pull_passed=1
+        echo "::endgroup::"
+
+        if [ $pull_passed == 0 ]; then
+          echo "::error::Failed to pull PR; are there conflicts?"
+          exit 1
+        fi
+
+        base_sha="${{ inputs.pr_base_sha }}"
+        if [ -z "$base_sha" ]; then
+          echo "::group::Determine new pull request base"
+          base_sha="$(/usr/bin/git rev-parse "origin/${{ inputs.pr_base_branch }}")"
+          git_log="$(/usr/bin/git log "${base_sha}..${pr_head_sha}" --format="%H")"
+          for commit_sha in $git_log; do
+            if $(/usr/bin/git merge-base --is-ancestor "$commit_sha" "origin/${{ github.base_ref }}"); then
+              base_sha="$commit_sha"
+              break
+            fi
+          done
+          echo "::endgroup::"
+        fi
+
+        if ! [[ "$base_sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error::Invalid base_sha=${base_sha}"
+          exit 1
+        fi
+
+        echo "::group::Output base commit"
+        base_sha_output="base_sha=${base_sha}"
+        echo "$base_sha_output" >> $GITHUB_OUTPUT
+        echo "$base_sha_output"
+        echo "::endgroup::"
+    - name: "Determine base"
+      shell: bash
+      id: determine_base
+      run: |
+        base_sha=
+        if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+          pr_base_sha="${{ inputs.pr_base_sha }}"
+          if [ -n "$pr_base_sha" ]; then
+            base_sha="$pr_base_sha"
+          else
+            base_sha="${{ steps.pr_pull_pull_request.outputs.base_sha }}"
+          fi
+        elif [ "$GITHUB_EVENT_NAME" == "push" ]; then
+          base_sha="${{ github.event.before }}"
+        fi
+        if ! [[ "$base_sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "::error::Invalid base_sha=${base_sha}"
+          exit 1
+        fi
+        if ! /usr/bin/git rev-parse --verify "$base_sha" > /dev/null; then
+          echo "::error::Output base_sha=${base_sha} commit does not exist"
+          exit 1
+        fi
+
+        echo "::group::Output base commit"
+        value="base_sha=${base_sha}"
+        echo "$value"
+        echo "$value" >> $GITHUB_OUTPUT
+        echo "::endgroup::"
+
+        echo "::group::Show base commit"
+        /usr/bin/git log -1 "$base_sha"
+        echo "::endgroup::"
+
+        echo "::group::Show new commits"
+        /usr/bin/git log --pretty="format:%h %d %s, %ar by %aN" "${base_sha}..HEAD"
+        echo "::endgroup::"

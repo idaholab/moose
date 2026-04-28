@@ -1,0 +1,83 @@
+name: Build docker
+description: Builds a docker container
+
+inputs:
+  registry_token:
+    description: The token for pushing to the registry
+    required: true
+  variant:
+    description: The variant to build (suffix to add to the container name)
+    required: false
+    default: ''
+  from:
+    description: The base container to build from
+    required: true
+  uri_prefix:
+    description: The uri prefix for the tag
+    required: true
+  tag:
+    description: The container tag
+    required: true
+  build_args:
+    description: Extra build args to pass
+    required: false
+    default: ""
+  context:
+    description: Context for the build
+    required: false
+    default: "./"
+  file:
+    description: The path to the dockerfile
+    required: false
+    default: Dockerfile
+
+outputs:
+  uri:
+    description: The URI of the built image
+    value: ${{ steps.get_uri.outcome.uri }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get URI
+      id: get_uri
+      shell: bash
+      run: |
+        echo "::group::Determine uri"
+        uri_suffix=
+        if [ -n "${{ inputs.variant }}" ]; then
+          uri_suffix="-${{ inputs.variant }}"
+        fi
+        uri="${{ inputs.uri_prefix }}${uri_suffix}:${{ inputs.tag }}"
+        echo "::endgroup::"
+
+        echo "::group::Output uri"
+        value="uri=${uri}"
+        echo "$value" >> $GITHUB_OUTPUT
+        echo "$value"
+        echo "::endgroup::"
+    - name: Log in to GHCR
+      uses: docker/login-action@v4
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ inputs.registry_token }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver: docker-container
+    - name: Build and push
+      uses: docker/build-push-action@v7
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.file }}
+        push: true
+        tags: ${{ steps.get_uri.outputs.uri }}
+        cache-from: |
+          type=registry,ref=${{ steps.get_uri.outputs.uri }}-cache
+          type=registry,ref=${{ steps.get_uri.outputs.uri }}
+        cache-to: type=registry,ref=${{ steps.get_uri.outputs.uri }}-cache,mode=max
+        build-args: |
+          BUILD_JOBS=4
+          BASE_IMAGE=${{ inputs.from }}
+          ${{ inputs.build_args }}

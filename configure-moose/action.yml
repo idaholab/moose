@@ -1,0 +1,34 @@
+name: Configure MOOSE
+description: Configures a moose application
+
+inputs:
+  args:
+    description: "Arguments to pass to configure"
+    required: true
+  source_env:
+    description: Whether or not to source the moose environment
+    type: boolean
+    required: false
+    default: true
+
+
+runs:
+  using: composite
+  steps:
+    - uses: idaholab/moose/setup-utils@actions
+      name: Setup utils
+    - name: Configure
+      shell: bash
+      run: |
+        echo "::group::Setting environment"
+        if [ "${{ inputs.source_env }}" == "true" ]; then
+          source /moose_env.sh
+          echo "Sourced /moose_env.sh environmnt"
+        else
+          echo "Not sourcing /moose_env.sh environmnt"
+        fi
+        echo "::endgroup::"
+
+        echo "::group::Configure"
+        print_and_run ./configure ${{ inputs.args }}
+        echo "::endgroup::"
