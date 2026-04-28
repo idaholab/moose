@@ -54,14 +54,14 @@
     cli_args = 'Kernels/inactive=auxvar_source '
                'Outputs/ParaViewDataCollection/file_base=OutputData/MagnetostaticSimplified '
                'Outputs/ParaViewDataCollection/scalar_coefficients="electric_potential a_field_curl_mag electric_potential_grad_mag b_field_mag b_field_div" '
-               'Outputs/ParaViewDataCollection/vector_coefficients="a_field_curl electric_potential_grad"'               
+               'Outputs/ParaViewDataCollection/vector_coefficients="a_field_curl electric_potential_grad"'
     ignored_items = "root['VTKFile']['UnstructuredGrid']['Piece']['PointData']['DataArray'][0]['#text']" # ignore vector potential
     requirement = 'MOOSE shall have the ability to support source terms defined via functions of coupled variables, and output those functions for visualization.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
-  []  
+  []
   [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
@@ -74,6 +74,23 @@
     recover = false
     valgrind = heavy
     min_slots = 2 # memory heavy
+  []
+  [MFEMBoundaryFluxCutTransitionSubMesh]
+    type = CSVDiff
+    input = av_magnetostatic.i
+    cli_args = 'SubMeshes/inactive="" '
+               'FESpaces/inactive="" '
+               'AuxVariables/inactive="" '
+               'FunctorMaterials/inactive="" '
+               'Transfers/inactive="" '
+               'Postprocessors/inactive="CoilPower" '
+               'Outputs/ReportedPostprocessors/file_base=OutputData/AVMagnetostaticClosedCoilBoundaryFluxCSV'
+    csvdiff = 'OutputData/AVMagnetostaticClosedCoilBoundaryFluxCSV.csv'
+    requirement = 'MOOSE shall have the ability to determine the flux through an internal or external MFEM boundary surface'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    valgrind = heavy
   []
   [MFEMVacuumCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
