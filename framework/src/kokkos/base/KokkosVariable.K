@@ -124,4 +124,23 @@ Variable::init(const std::vector<Real> & values, CoupleableKey)
   _default_value = values;
 }
 
+void
+Variable::initBoundaryConditions(const std::vector<BoundaryID> & ids,
+                                 const std::vector<Moose::Kokkos::Function> & values)
+{
+  mooseAssert(ids.size() == values.size(), "BC ids and values must have the same length");
+
+  _boundary_ids.create(ids.size());
+  _boundary_values.create<false>(values.size());
+
+  for (std::size_t i = 0; i < ids.size(); ++i)
+  {
+    _boundary_ids[i] = ids[i];
+    new (&_boundary_values[i]) Moose::Kokkos::Function(values[i]);
+  }
+
+  _boundary_ids.copyToDevice();
+  _boundary_values.copyToDevice();
+}
+
 } // namespace Moose::Kokkos

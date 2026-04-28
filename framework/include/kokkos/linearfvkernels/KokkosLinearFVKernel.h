@@ -163,6 +163,14 @@ public:
     const auto [elem, side] = kokkosBlockElementSideID(tid);
     AssemblyDatum datum(
         elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+    if (!datum.hasNeighbor())
+    {
+      const auto boundary_id = datum.mesh().getFaceBoundaryID(elem, side);
+      if (!_force_boundary_execution && !_kokkos_var.hasBoundaryCondition(boundary_id))
+        return;
+    }
+
     const auto & sys = kokkosSystem(_sys.number());
     kernel.accumulateTaggedVector(kernel.computeRightHandSideContributionShim(kernel, datum),
                                   sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var()));
@@ -174,6 +182,14 @@ public:
     const auto [elem, side] = kokkosBlockElementSideID(tid);
     AssemblyDatum datum(
         elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+    if (!datum.hasNeighbor())
+    {
+      const auto boundary_id = datum.mesh().getFaceBoundaryID(elem, side);
+      if (!_force_boundary_execution && !_kokkos_var.hasBoundaryCondition(boundary_id))
+        return;
+    }
+
     const auto & sys = kokkosSystem(_sys.number());
     const auto row = sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var());
     kernel.accumulateTaggedMatrix(kernel.computeMatrixContributionShim(kernel, datum),

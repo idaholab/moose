@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosTypes.h"
+#include "KokkosFunction.h"
 
 #include "MooseTypes.h"
 #include "MooseVariableBase.h"
@@ -191,6 +192,45 @@ public:
     return _default_value[comp];
   }
 
+  /**
+   * Register boundary conditions for this variable, moving them to device.
+   * Called from a flux kernel's initialSetup() after collecting BCs from the warehouse.
+   * @param ids The boundary IDs covered by the BCs
+   * @param values The function providing the BC value on each boundary
+   */
+  void initBoundaryConditions(const std::vector<BoundaryID> & ids,
+                              const std::vector<Moose::Kokkos::Function> & values);
+
+  /**
+   * Return whether a BC is registered for the given boundary ID
+   * @param id The boundary ID to query
+   */
+  KOKKOS_FUNCTION bool hasBoundaryCondition(BoundaryID id) const
+  {
+    return boundaryConditionIndex(id) >= 0;
+  }
+
+  /**
+   * Return the index of the BC registered for the given boundary ID, or -1 if absent
+   * @param id The boundary ID to query
+   */
+  KOKKOS_FUNCTION int boundaryConditionIndex(BoundaryID id) const
+  {
+    for (std::size_t i = 0; i < _boundary_ids.size(); ++i)
+      if (_boundary_ids[i] == id)
+        return static_cast<int>(i);
+    return -1;
+  }
+
+  /**
+   * Return the BC function at the given index (from boundaryConditionIndex())
+   * @param index The BC index
+   */
+  KOKKOS_FUNCTION const Moose::Kokkos::Function & boundaryConditionValue(int index) const
+  {
+    return _boundary_values[index];
+  }
+
 private:
   /**
    * Whether the variable is initialized
@@ -236,6 +276,14 @@ private:
    * Default value of each component when the variable is not coupled
    */
   Array<Real> _default_value;
+  /**
+   * Boundary IDs for which a BC has been registered (populated by initBoundaryConditions())
+   */
+  Array<BoundaryID> _boundary_ids;
+  /**
+   * BC function values indexed in parallel with _boundary_ids
+   */
+  Array<Moose::Kokkos::Function> _boundary_values;
 };
 
 } // namespace Moose::Kokkos

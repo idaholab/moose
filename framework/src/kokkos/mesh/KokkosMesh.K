@@ -323,6 +323,15 @@ Mesh::initLinearFV()
       _linearfv_face_d_cn_mag(side, eid) = d_cn.norm();
 
       const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
+      if (boundary_ids.size() > 1)
+        mooseError("KokkosLinearFV does not support multiple boundary IDs on a single face. "
+                   "Element ",
+                   eid,
+                   " side ",
+                   side,
+                   " has ",
+                   boundary_ids.size(),
+                   " boundary IDs.");
       if (!boundary_ids.empty())
         _linearfv_face_boundary_id(side, eid) = boundary_ids.front();
     }

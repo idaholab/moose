@@ -27,7 +27,6 @@ LinearFVBoundaryCondition::validParams()
 LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & parameters)
   : LinearSystemContributionObject(parameters),
     BoundaryRestrictableRequired(this, false),
-    DistributionInterface(this),
     GeometricSearchInterface(this),
     MooseVariableDependencyInterface(this),
     NonADFunctorInterface(this),
@@ -47,7 +46,6 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
 LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object)
   : LinearSystemContributionObject(object),
     BoundaryRestrictableRequired(object, {}),
-    DistributionInterface(object, {}),
     GeometricSearchInterface(object, {}),
     MooseVariableDependencyInterface(object, {}),
     NonADFunctorInterface(object, {}),
