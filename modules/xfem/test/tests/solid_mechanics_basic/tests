@@ -116,12 +116,41 @@
       capabilities = 'unique_id'
       detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction, or'
     []
-    [face_cut]
+    [face_cut_mid_function]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
-      exodiff = 'face_crack_3d_xfem_function_xfemcutter_XFEMCutMeshOutput.e'
+      cli_args = 'offset=0 spin=0'
+      exodiff = 'face_crack_function_off_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume.'
+      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume using a prescribed function growth direction, or'
+    []
+    [face_cut_mid_hoopStress]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_hoopStress.i'
+      cli_args = 'offset=0 spin=0'
+      exodiff = 'face_crack_hoopStress_off_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' properly moving crack front nodes outside the FEM volume using the maximum hoop stress growth direction, or'
+    []
+    [face_cut_mid_scc]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
+      cli_args = 'offset=0 spin=0'
+      exodiff = 'face_crack_scc_off_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' properly moving crack front nodes outside the FEM volume using SCC-driven non-uniform growth.'
+    []
+    [face_cut_corner_scc]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
+      cli_args = 'offset=0.21 spin=0'
+      exodiff = 'face_crack_scc_off_0.21_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' properly moving crack front nodes outside the FEM volume using SCC-driven non-uniform growth.'
     []
   []
   [penny_crack]
