@@ -14,7 +14,7 @@
 #include "MFEMVectorPostprocessor.h"
 
 /**
- * Compute the L2 error for a variable.
+ * Exports eigenvalues from an eigensolver.
  */
 class MFEMEigenvaluesPostprocessor : public MFEMVectorPostprocessor
 {
@@ -26,7 +26,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
 
-  std::reference_wrapper<VectorPostprocessorValue> _eigenvalues;
+  VectorPostprocessorValue & _eigenvalues;
 };
 
 #endif

@@ -39,7 +39,7 @@ public:
   }
 
   /// Solves the eigenvalue problem
-  virtual void Solve() override { _eigensolver->Solve(); }
+  virtual void solve() override { _eigensolver->Solve(); }
 
   /// Retrieves the computed eigenvalues
   virtual void getEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const override
@@ -59,12 +59,6 @@ protected:
 
   /// Eigensolver to be used for the problem
   std::unique_ptr<mfem::HypreAME> _eigensolver;
-
-  /// Mass matrix for eigensolver
-  std::unique_ptr<mfem::HypreParMatrix> _M;
-
-  /// Mass matrix coefficient
-  mfem::Coefficient & _coef;
 };
 
 #endif

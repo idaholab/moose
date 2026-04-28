@@ -29,8 +29,7 @@ EquationSystemEigenproblemOperator::Solve()
   auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver);
   eigensolver->setMassMatrix(_mass_rhs);
   eigensolver->setOperator(GetEquationSystem()->_jacobian);
-  eigensolver->Solve();
-  mfem::Array<mfem::real_t> eigenvalues;
+  eigensolver->solve();
   GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.eigen_gridfunctions,
                                                    eigensolver.get());
 }

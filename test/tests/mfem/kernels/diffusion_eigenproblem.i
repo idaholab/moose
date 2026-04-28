@@ -1,8 +1,8 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/star.mesh
-  serial_refine = 3
-  dim = 3
+  dim = 2
+  serial_refine = 1
 []
 
 [Problem]
@@ -51,10 +51,9 @@
   type = MFEMHypreLOBPCG
   preconditioner = boomeramg
   print_level = 0
-  coefficient = 1.0
   l_tol = 1e-10
   l_max_its = 300
-  random_seed = 11
+  random_seed = 75
 []
 
 [Executioner]

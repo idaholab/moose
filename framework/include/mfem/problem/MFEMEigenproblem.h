@@ -37,7 +37,7 @@ public:
                            InputParameters & parameters) override;
 
   /** Registers a gridfunction to hold an eigenvector solution of an eigenproblem */
-  virtual void addEigenGridFunction(const std::string & var_type,
+  void addEigenGridFunction(const std::string & var_type,
                                     const std::string & var_name,
                                     InputParameters & parameters);
 };

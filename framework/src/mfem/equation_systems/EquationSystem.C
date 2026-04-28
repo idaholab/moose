@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystem.h"
+#include "MFEMEigensolverBase.h"
 #include "libmesh/int_range.h"
 
 namespace Moose::MFEM
@@ -276,9 +277,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
               "Number of test and trial variables must be the same for block matrix assembly.");
 
   if (_assembly_level == mfem::AssemblyLevel::LEGACY)
-  {
     FormSystemMatrix(op, trueX, trueRHS);
-  }
   else
   {
     mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),

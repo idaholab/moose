@@ -44,10 +44,10 @@ MFEMEigenvaluesPostprocessor::execute()
   eigensolver->getEigenvalues(eigenvalues);
 
   const auto ev_dim = getMFEMProblem().getParam<int>("num_modes");
-  _eigenvalues.get().resize(ev_dim);
+  _eigenvalues.resize(ev_dim);
 
   for (int i = 0; i < ev_dim; i++)
-    _eigenvalues.get()[i] = eigenvalues[i];
+    _eigenvalues[i] = eigenvalues[i];
 }
 
 #endif

@@ -39,8 +39,6 @@ public:
   virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {}
 
 protected:
-  /// Mass matrix for eigensolver
-  std::unique_ptr<mfem::HypreParMatrix> _M;
 
   /// Number of eigenmodes to compute
   int _num_modes;

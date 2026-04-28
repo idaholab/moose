@@ -1,8 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/beam-tet.mesh
-  serial_refine = 2
-  parallel_refine = 1
   dim = 3
 []
 
@@ -54,7 +52,6 @@
   type = MFEMHypreAME
   preconditioner = ams
   print_level = 0
-  coefficient = 1.0
   l_tol = 1e-8
   l_max_its = 100
 []
