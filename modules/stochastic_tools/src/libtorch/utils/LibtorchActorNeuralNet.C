@@ -285,7 +285,6 @@ LibtorchActorNeuralNet::forward(const torch::Tensor & x)
       output = torch::gelu(_weights[i]->forward(output));
     else if (activation == "linear")
       output = _weights[i]->forward(output);
-
   }
 
   return output;
