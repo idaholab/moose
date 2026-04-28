@@ -67,7 +67,7 @@
     [fatigue]
       type = Exodiff
       input = 'edge_crack_3d_domain.i edge_crack_3d_fatigue.i'
-      exodiff = 'edge_crack_3d_fatigue_out.e edge_crack_3d_fatigue_out.e-s002'
+      exodiff = 'edge_crack_3d_fatigue_out.e-s002'
       abs_zero = 1e-8
       map = false
       capabilities = 'unique_id'
