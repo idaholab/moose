@@ -158,8 +158,6 @@ CrackMeshCut3DUserObject::initialize()
           _is_mesh_modified = true;
           growFront();
           sortFrontNodes();
-          // if (_inactive_boundary_pos.size() != 0)
-          //   findFrontIntersection();
           refineFront();
           triangulation();
           joinBoundary();
@@ -1005,115 +1003,6 @@ void
 CrackMeshCut3DUserObject::sortFrontNodes()
 // TBD; it is not needed for current problems but will be useful for fracture growth
 {
-}
-
-void
-CrackMeshCut3DUserObject::findFrontIntersection()
-{
-  ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
-
-  for (unsigned int i = 0; i < _front.size(); ++i)
-  {
-    if (_front[i].size() < 2)
-      continue;
-
-    // Project the first front node along the crack front edge tangent to the FEM surface
-    // _front[i][0] is the grown boundary node (may be outside)
-    // _front[i][1] is its interior neighbor (should be inside)
-    Node * bd_node1 = _cutter_mesh->node_ptr(_front[i][0]);
-    mooseAssert(bd_node1, "Node is NULL");
-    Node * in_node1 = _cutter_mesh->node_ptr(_front[i][1]);
-    mooseAssert(in_node1, "Node is NULL");
-
-    if ((*pl)(*bd_node1) == nullptr && (*pl)(*in_node1) != nullptr)
-    {
-      Point inside_pt = *in_node1;
-      Point outside_pt = *bd_node1;
-
-      Real best_dist = std::numeric_limits<Real>::max();
-      Point best_intersection;
-      bool found = false;
-
-      for (const auto & belem : range)
-      {
-        const Elem * elem = belem->_elem;
-        std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
-        std::vector<Point> vertices;
-        for (unsigned int j = 0; j < curr_side->n_nodes(); ++j)
-          vertices.push_back(*(curr_side->node_ptr(j)));
-
-        Point pt;
-        if (intersectWithEdge(inside_pt, outside_pt, vertices, pt))
-        {
-          Real dist = (pt - outside_pt).norm();
-          if (dist < best_dist)
-          {
-            best_dist = dist;
-            best_intersection = pt;
-            found = true;
-          }
-        }
-      }
-
-      if (found)
-      {
-        Point direction = (outside_pt - best_intersection);
-        Real dir_norm = direction.norm();
-        if (dir_norm > libMesh::TOLERANCE)
-          direction /= dir_norm;
-        *bd_node1 = best_intersection + direction * _const_intersection;
-      }
-    }
-
-    // Project the last front node along the crack front edge tangent to the FEM surface
-    Node * bd_node2 = _cutter_mesh->node_ptr(_front[i].back());
-    mooseAssert(bd_node2, "Node is NULL");
-    Node * in_node2 = _cutter_mesh->node_ptr(_front[i][_front[i].size() - 2]);
-    mooseAssert(in_node2, "Node is NULL");
-
-    if ((*pl)(*bd_node2) == nullptr && (*pl)(*in_node2) != nullptr)
-    {
-      Point inside_pt = *in_node2;
-      Point outside_pt = *bd_node2;
-
-      Real best_dist = std::numeric_limits<Real>::max();
-      Point best_intersection;
-      bool found = false;
-
-      for (const auto & belem : range)
-      {
-        const Elem * elem = belem->_elem;
-        std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
-        std::vector<Point> vertices;
-        for (unsigned int j = 0; j < curr_side->n_nodes(); ++j)
-          vertices.push_back(*(curr_side->node_ptr(j)));
-
-        Point pt;
-        if (intersectWithEdge(inside_pt, outside_pt, vertices, pt))
-        {
-          Real dist = (pt - outside_pt).norm();
-          if (dist < best_dist)
-          {
-            best_dist = dist;
-            best_intersection = pt;
-            found = true;
-          }
-        }
-      }
-
-      if (found)
-      {
-        Point direction = (outside_pt - best_intersection);
-        Real dir_norm = direction.norm();
-        if (dir_norm > libMesh::TOLERANCE)
-          direction /= dir_norm;
-        *bd_node2 = best_intersection + direction * _const_intersection;
-      }
-    }
-  }
 }
 
 void
