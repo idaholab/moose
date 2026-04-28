@@ -64,7 +64,7 @@ EigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
 
 void
 EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
-                                                     mfem::OperatorHandle & massRHS)
+                                                      mfem::OperatorHandle & massRHS)
 {
   mooseAssert(_test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) &&
                   (_test_var_names.at(0) == _trial_var_names.at(0)),
@@ -79,7 +79,7 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
 
 void
 EigenproblemEquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                                       MFEMEigensolverBase * eigensolver)
+                                                        MFEMEigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
   eigensolver->getEigenvalues(eigenvalues);
