@@ -33,9 +33,9 @@ GrainTrackerDislocations::validParams()
 
 GrainTrackerDislocations::GrainTrackerDislocations(const InputParameters & parameters)
   : GrainDataTracker<Real>(parameters),
-    _default_density_grains(getParam<bool>("add_default_density_grains")),
+    _use_default_density(getParam<bool>("add_default_density_grains")),
     _default_density(getParam<Real>("default_density")),
-    _density(getUserObject<DislocationDensityFileReader>("dislocation_density_reader"))
+    _density_reader(getUserObject<DislocationDensityFileReader>("dislocation_density_reader"))
 {
 }
 
@@ -58,11 +58,11 @@ GrainTrackerDislocations::newGrain(unsigned int new_grain_id)
 {
   Real grain_density;
 
-  if (new_grain_id < _density.getGrainNum())
-    grain_density = _density.getDensity(new_grain_id);
+  if (new_grain_id < _density_reader.getGrainNum())
+    grain_density = _density_reader.getDensity(new_grain_id);
   else
   {
-    if (_default_density_grains)
+    if (_use_default_density)
       grain_density = _default_density;
 
     else

@@ -31,8 +31,7 @@
   [../]
   [./dislocation_density_file]
     type = DislocationDensityFileReader
-    file_name = test.txt
-    lines_to_skip = 0
+    file_name = dislocation.txt
   [../]
   [./grain_tracker]
     type = GrainTrackerDislocations

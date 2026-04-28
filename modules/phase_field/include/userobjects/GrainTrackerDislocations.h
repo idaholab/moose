@@ -35,13 +35,13 @@ protected:
   Real newGrain(unsigned int new_grain_id);
 
   /// If grains are added with a default supplied density or not
-  const bool _default_density_grains;
+  const bool _use_default_density;
 
   /// dislocation density default
   const Real _default_density;
 
   /// File Reader to grab dislocation densities
-  const DislocationDensityFileReader & _density;
+  const DislocationDensityFileReader & _density_reader;
 
   /// additional per-grain formation time data
   std::vector<Real> _formation_data;

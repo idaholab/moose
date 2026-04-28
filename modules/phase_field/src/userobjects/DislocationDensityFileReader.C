@@ -20,7 +20,7 @@ DislocationDensityFileReader::validParams()
   params.addClassDescription(
       "Read dislocation density data from a file and provide it to other objects.");
   params.addRequiredParam<FileName>("file_name", "dislocation density data file name");
-  params.addParam<unsigned int>("lines_to_skip", 4, "number of header lines to skip in the file");
+  params.addParam<unsigned int>("lines_to_skip", 0, "number of header lines to skip in the file");
 
   return params;
 }
