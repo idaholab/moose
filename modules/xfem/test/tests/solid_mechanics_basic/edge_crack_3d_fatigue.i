@@ -4,7 +4,7 @@
     growth_increment_name = "growth_increment"
     cycles_to_max_growth_increment_name = "fatigue"
     crackMeshCut3DUserObject_name = cut_mesh
-    max_growth_increment = 0.1
+    max_growth_increment = 0.1001
     paris_law_c = 1e-13
     paris_law_m = 2.5
   []
@@ -68,5 +68,4 @@
 
 [Outputs]
   file_base = edge_crack_3d_fatigue_out
-  json = true
 []
