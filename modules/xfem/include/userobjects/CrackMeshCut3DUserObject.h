@@ -235,11 +235,6 @@ protected:
   void sortFrontNodes();
 
   /**
-    Find front-structure intersections
-   */
-  void findFrontIntersection();
-
-  /**
     Refine the mesh at the front
    */
   void refineFront();

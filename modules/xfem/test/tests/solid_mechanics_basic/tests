@@ -132,7 +132,7 @@
       exodiff = 'face_crack_hoopStress_off_0_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' properly moving crack front nodes outside the FEM volume using the maximum hoop stress growth direction, or'
+      detail = ' properly moving crack front nodes using the maximum hoop stress growth direction, or'
     []
     [face_cut_mid_scc]
       type = Exodiff
@@ -141,7 +141,7 @@
       exodiff = 'face_crack_scc_off_0_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' properly moving crack front nodes outside the FEM volume using SCC-driven non-uniform growth.'
+      detail = ' properly moving crack front nodes using SCC-driven non-uniform growth, or'
     []
     [face_cut_corner_scc]
       type = Exodiff
@@ -150,7 +150,25 @@
       exodiff = 'face_crack_scc_off_0.21_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' properly moving crack front nodes outside the FEM volume using SCC-driven non-uniform growth.'
+      detail = ' properly moving crack front nodes for a corner crack using SCC-driven non-uniform growth, or'
+    []
+    [inactive_refine]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
+      cli_args = 'offset=0 spin=25 Executioner/end_time=2'
+      exodiff = 'face_crack_scc_off_0_spin_25_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' properly refining surface cutting crack front if refinement occurs inside volume, or'
+    []
+    [inactive_no_refine]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
+      cli_args = 'offset=0 spin=15 Executioner/end_time=2'
+      exodiff = 'face_crack_scc_off_0_spin_15_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' not refining surface cutting crack front if refinement occurs outside volume.'
     []
   []
   [penny_crack]
