@@ -24,8 +24,7 @@ MFEMHypreAME::validParams()
   return params;
 }
 
-MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
-  : MFEMEigensolverBase(parameters)
+MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters) : MFEMEigensolverBase(parameters)
 {
   constructSolver();
 }
@@ -40,19 +39,6 @@ MFEMHypreAME::constructSolver()
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
   setPreconditioner(*_eigensolver);
-}
-
-void
-MFEMHypreAME::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
-{
-  if (_lor)
-    mooseError("Eigensolver cannot use LOR method");
-
-  if (_preconditioner)
-  {
-    _preconditioner->updateSolver(a, tdofs);
-    setPreconditioner(*_eigensolver);
-  }
 }
 
 #endif

@@ -23,11 +23,13 @@ public:
 
   MFEMHypreLOBPCG(const InputParameters & parameters);
 
-  /// Updates the solver with the given bilinear form and essential dof list.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
-
-  /// Sets the operator for the eigensolver
-  virtual void setOperator(mfem::OperatorHandle & op) override { _eigensolver->SetOperator(*op); }
+  /// Sets the operator for the eigensolver and propagates it to the preconditioner.
+  virtual void setOperator(mfem::OperatorHandle & op) override
+  {
+    if (_preconditioner)
+      _preconditioner->setOperator(op);
+    _eigensolver->SetOperator(*op);
+  }
 
   /// Sets the mass matrix for the eigensolver
   virtual void setMassMatrix(mfem::OperatorHandle & mass) override

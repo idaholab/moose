@@ -36,6 +36,11 @@ public:
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
+  /// Sets an already-assembled operator on the wrapped solver. Used by callers that
+  /// manage operator assembly themselves (e.g. the eigenproblem operator), bypassing
+  /// the bilinear-form-based updateSolver() path.
+  virtual void setOperator(mfem::OperatorHandle & op);
+
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 

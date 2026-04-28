@@ -24,7 +24,7 @@ public:
   MFEMEigensolverBase(const InputParameters & parameters);
 
   /// Sets the operator for the eigensolver in derived classes
-  virtual void setOperator(mfem::OperatorHandle & op) = 0;
+  virtual void setOperator(mfem::OperatorHandle & op) override = 0;
 
   /// Sets the mass matrix for the eigensolver in derived classes
   virtual void setMassMatrix(mfem::OperatorHandle & mass) = 0;
@@ -39,7 +39,6 @@ public:
   virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {}
 
 protected:
-
   /// Number of eigenmodes to compute
   int _num_modes;
 };

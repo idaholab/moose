@@ -67,6 +67,13 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreLOBPCG &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreAME &);
 
 void
+MFEMSolverBase::setOperator(mfem::OperatorHandle & op)
+{
+  mooseAssert(_solver, "setOperator called before the solver was constructed");
+  _solver->SetOperator(*op);
+}
+
+void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
   if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))

@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMHypreBoomerAMG.h"
-#include "MFEMEigenproblem.h"
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
@@ -82,21 +81,6 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
       lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
 
     _solver.reset(lor_solver);
-  }
-  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
-  {
-    _assembled_matrix.reset(a.ParallelAssemble());
-    auto solver = new mfem::HypreBoomerAMG(*_assembled_matrix);
-    solver->SetTol(getParam<mfem::real_t>("l_tol"));
-    solver->SetMaxIter(getParam<int>("l_max_its"));
-    solver->SetPrintLevel(getParam<int>("print_level"));
-    solver->SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
-
-    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
-    if (_mfem_fespace && !mfem::HypreUsingGPU())
-      solver->SetElasticityOptions(_mfem_fespace.get());
-
-    _solver.reset(solver);
   }
 }
 
