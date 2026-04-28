@@ -62,15 +62,4 @@ ElementUserObject::compute()
     computeUserObject();
 }
 
-void
-ElementUserObject::computeUserObject()
-{
-  Policy policy(0, numKokkosBlockElements());
-
-  if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
-
-  _dispatcher->parallelFor(policy);
-}
-
 } // namespace Moose::Kokkos

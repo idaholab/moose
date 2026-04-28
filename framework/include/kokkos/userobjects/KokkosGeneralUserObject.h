@@ -33,6 +33,11 @@ public:
    * Copy constructor for parallel dispatch
    */
   GeneralUserObject(const GeneralUserObject & object);
+
+private:
+  // General user objects are not dispatched
+  virtual void computeUserObject() override final {}
+  virtual ThreadID numUserObjectThreads() const override final { return 0; }
 };
 
 } // namespace Moose::Kokkos

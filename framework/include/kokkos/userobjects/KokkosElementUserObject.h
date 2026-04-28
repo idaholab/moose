@@ -51,7 +51,7 @@ public:
   using ElementReducer::operator();
 
 protected:
-  virtual void computeUserObject();
+  virtual ThreadID numUserObjectThreads() const override { return numKokkosBlockElements(); }
 };
 
 template <typename Derived>

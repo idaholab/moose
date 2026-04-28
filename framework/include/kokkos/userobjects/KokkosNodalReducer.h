@@ -29,7 +29,10 @@ public:
    */
   NodalReducer(const NodalReducer & object);
 
-  virtual void computeReducer() override;
+  virtual ThreadID numReducerThreads() const override
+  {
+    return _bnd ? numKokkosBoundaryNodes() : numKokkosBlockNodes();
+  }
 
   /**
    * The parallel computation entry function called by Kokkos
