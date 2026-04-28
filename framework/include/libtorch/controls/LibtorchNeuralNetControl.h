@@ -12,7 +12,7 @@
 #pragma once
 
 #include "LibtorchArtificialNeuralNet.h"
-#include "LibtorchObservationHistory.h"
+#include "LibtorchObservationHistoryHelper.h"
 #include "Control.h"
 
 /**
@@ -54,6 +54,9 @@ public:
    */
   virtual void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
+  /**
+   * Load the controller neural network from the configured checkpoint file.
+   */
   virtual void loadControlNeuralNetFromFile();
 
   /// Return a reference to the stored neural network
@@ -110,7 +113,7 @@ protected:
   const std::vector<Real> _action_scaling_factors;
 
   /// Shared observation history stacking and factor-expansion helper
-  const LibtorchObservationHistory _observation_history;
+  const LibtorchObservationHistoryHelper _observation_history;
 
   /// Pointer to the neural net object which is supposed to be used to control
   /// the parameter values. The controller owns this object, but it can be read

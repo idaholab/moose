@@ -9,14 +9,15 @@
 
 #ifdef MOOSE_LIBTORCH_ENABLED
 
-#include "LibtorchObservationHistory.h"
+#include "LibtorchObservationHistoryHelper.h"
 
 #include "MooseError.h"
 
 #include <algorithm>
 #include "libmesh/utility.h"
 
-LibtorchObservationHistory::LibtorchObservationHistory(const unsigned int input_timesteps)
+LibtorchObservationHistoryHelper::LibtorchObservationHistoryHelper(
+    const unsigned int input_timesteps)
   : _input_timesteps(input_timesteps)
 {
   if (_input_timesteps == 0)
@@ -24,7 +25,7 @@ LibtorchObservationHistory::LibtorchObservationHistory(const unsigned int input_
 }
 
 void
-LibtorchObservationHistory::validateTrajectoryShape(
+LibtorchObservationHistoryHelper::validateTrajectoryShape(
     const std::vector<std::vector<Real>> & observation_trajectories) const
 {
   if (observation_trajectories.empty())
@@ -37,15 +38,15 @@ LibtorchObservationHistory::validateTrajectoryShape(
 }
 
 void
-LibtorchObservationHistory::initializeHistory(
+LibtorchObservationHistoryHelper::initializeHistory(
     const std::vector<Real> & observation, std::vector<std::vector<Real>> & old_observations) const
 {
   old_observations.assign(_input_timesteps - 1, observation);
 }
 
 void
-LibtorchObservationHistory::advanceHistory(const std::vector<Real> & observation,
-                                           std::vector<std::vector<Real>> & old_observations) const
+LibtorchObservationHistoryHelper::advanceHistory(
+    const std::vector<Real> & observation, std::vector<std::vector<Real>> & old_observations) const
 {
   if (old_observations.empty())
     return;
@@ -55,7 +56,7 @@ LibtorchObservationHistory::advanceHistory(const std::vector<Real> & observation
 }
 
 std::vector<Real>
-LibtorchObservationHistory::expandObservationFactors(
+LibtorchObservationHistoryHelper::expandObservationFactors(
     const std::vector<Real> & observation_factors) const
 {
   if (observation_factors.empty())
@@ -74,7 +75,7 @@ LibtorchObservationHistory::expandObservationFactors(
 }
 
 std::vector<Real>
-LibtorchObservationHistory::stackCurrentObservation(
+LibtorchObservationHistoryHelper::stackCurrentObservation(
     const std::vector<Real> & observation,
     const std::vector<std::vector<Real>> & old_observations) const
 {
@@ -103,7 +104,7 @@ LibtorchObservationHistory::stackCurrentObservation(
 }
 
 std::vector<Real>
-LibtorchObservationHistory::stackTrajectoryObservation(
+LibtorchObservationHistoryHelper::stackTrajectoryObservation(
     const std::vector<std::vector<Real>> & observation_trajectories,
     const unsigned int time_index) const
 {

@@ -13,7 +13,7 @@
 
 #include "LibtorchActorNeuralNet.h"
 #include "LibtorchArtificialNeuralNet.h"
-#include "LibtorchObservationHistory.h"
+#include "LibtorchObservationHistoryHelper.h"
 #include "LibtorchRandomUtils.h"
 #include "LibtorchRLMiniBatchSampler.h"
 #include "LibtorchRLPPOLoss.h"
@@ -27,7 +27,7 @@ namespace
 
 TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
 {
-  LibtorchObservationHistory history(3);
+  LibtorchObservationHistoryHelper history(3);
 
   const auto expanded_observation_factors = history.expandObservationFactors({0.5, 2.0});
   EXPECT_EQ(expanded_observation_factors, std::vector<Real>({0.5, 2.0, 0.5, 2.0, 0.5, 2.0}));
@@ -45,7 +45,7 @@ TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
 
 TEST(LibtorchRLCoreTest, ObservationHistoryRejectsMalformedStoredHistory)
 {
-  LibtorchObservationHistory history(3);
+  LibtorchObservationHistoryHelper history(3);
 
   EXPECT_THROW(
       {
@@ -69,7 +69,7 @@ TEST(LibtorchRLCoreTest, ObservationHistoryRejectsZeroTimesteps)
       {
         try
         {
-          LibtorchObservationHistory history(0);
+          LibtorchObservationHistoryHelper history(0);
           static_cast<void>(history);
         }
         catch (const std::exception & e)

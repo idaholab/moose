@@ -111,7 +111,10 @@ public:
    */
   Real determineGain(const std::string & activation);
 
-  /// Initialize the trainable weights and biases.
+  /**
+   * Initialize the trainable weights and biases.
+   * @param generator Optional torch random-number generator used for reproducible initialization.
+   */
   virtual void initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt);
 
   /// Store the network architecture in a json file (for debugging, visualization)

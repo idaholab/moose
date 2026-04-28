@@ -13,7 +13,7 @@
 
 #include <torch/torch.h>
 #include "LibtorchActorNeuralNet.h"
-#include "LibtorchObservationHistory.h"
+#include "LibtorchObservationHistoryHelper.h"
 #include "LibtorchRLMiniBatchSampler.h"
 #include "LibtorchRLPPOLoss.h"
 #include "LibtorchRLTrajectoryBuffer.h"
@@ -224,7 +224,7 @@ private:
   unsigned int _timestep_window;
 
   /// Shared observation history stacking and factor-expansion helper
-  const LibtorchObservationHistory _observation_history;
+  const LibtorchObservationHistoryHelper _observation_history;
   LibtorchRLTrajectoryBuffer _trajectory_buffer;
   const LibtorchRLMiniBatchSampler _sampler;
   const LibtorchRLValueEstimator _value_estimator;
