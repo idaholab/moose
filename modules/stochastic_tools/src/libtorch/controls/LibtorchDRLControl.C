@@ -202,13 +202,19 @@ LibtorchDRLControl::execute()
 }
 
 void
+LibtorchDRLControl::loadControlNeuralNet(const Moose::LibtorchActorNeuralNet & input_nn)
+{
+  _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(input_nn);
+  _nn = _actor_nn;
+}
+
+void
 LibtorchDRLControl::loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn)
 {
   const auto * check = dynamic_cast<const Moose::LibtorchActorNeuralNet *>(&input_nn);
   if (!check)
     mooseError("This needs to be a LibtorchActorNeuralNet!");
-  _actor_nn = std::make_shared<Moose::LibtorchActorNeuralNet>(*check);
-  _nn = _actor_nn;
+  loadControlNeuralNet(*check);
 }
 
 void

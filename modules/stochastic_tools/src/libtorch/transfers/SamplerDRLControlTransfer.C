@@ -57,7 +57,7 @@ SamplerDRLControlTransfer::execute()
     if (getToMultiApp()->hasLocalApp(i))
     {
       // Get the control neural net from the trainer
-      const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
+      const Moose::LibtorchActorNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
       // Get the control object from the other app
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
@@ -118,7 +118,7 @@ SamplerDRLControlTransfer::executeToMultiapp()
                                  static_cast<uint64_t>(_sampler_ptr->getNumberOfRows()) *
                                      static_cast<uint64_t>(_fe_problem.timeStep());
     // Get the control neural net from the trainer
-    const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
+    const Moose::LibtorchActorNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
     // Get the control object from the other app
     FEProblemBase & app_problem = _multi_app->appProblemBase(_app_index);

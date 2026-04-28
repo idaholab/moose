@@ -64,17 +64,19 @@ public:
 
   /**
    * Flatten one time slice of observation-component trajectories with causal history.
-   * @param observation_trajectories Observation trajectories indexed as [component][time].
+   * This uses [component][time] because the trainer receives reporter data one observation
+   * component at a time, so keeping that layout avoids building an extra transposed
+   * [time][component] container before stacking.
+   * @param component_trajectories Observation trajectories indexed as [component][time].
    * @param time_index Time index to stack.
    */
   std::vector<Real>
-  stackTrajectoryObservation(const std::vector<std::vector<Real>> & observation_trajectories,
+  stackTrajectoryObservation(const std::vector<std::vector<Real>> & component_trajectories,
                              unsigned int time_index) const;
 
 private:
   /// Check that all observation-component trajectories have a consistent shape.
-  void
-  validateTrajectoryShape(const std::vector<std::vector<Real>> & observation_trajectories) const;
+  void validateTrajectoryShape(const std::vector<std::vector<Real>> & component_trajectories) const;
 
   /// Number of timesteps stacked into each flattened observation.
   const unsigned int _input_timesteps;

@@ -43,7 +43,6 @@ public:
    * @param policy_network Actor network used for the policy term.
    * @param value_network Critic network used for the value term.
    * @param batch Mini-batch pulled from the on-policy trajectory buffer.
-   * @return The three loss components for the mini-batch.
    */
   LibtorchRLPPOLossOutput compute(Moose::LibtorchActorNeuralNet & policy_network,
                                   Moose::LibtorchArtificialNeuralNet & value_network,
@@ -53,11 +52,12 @@ private:
   /**
    * Collapse multi-action log-probabilities or entropies into one column tensor.
    * @param tensor Action-wise tensor to reduce.
-   * @return Column tensor with one value per row in the mini-batch.
    */
   static torch::Tensor reduceActionDimension(const torch::Tensor & tensor);
 
+  /// PPO clipping width used in the actor surrogate objective.
   const Real _clip_parameter;
+  /// Weight applied to the entropy bonus inside the actor loss.
   const Real _entropy_coeff;
 };
 

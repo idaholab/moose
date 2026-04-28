@@ -18,6 +18,9 @@
 namespace Moose
 {
 
+/**
+ * Feed-forward actor network coupled to a Gaussian or Beta action distribution.
+ */
 class LibtorchActorNeuralNet : public LibtorchArtificialNeuralNet
 {
 public:
@@ -61,18 +64,13 @@ public:
   LibtorchActorNeuralNet(const Moose::LibtorchActorNeuralNet & nn,
                          const bool build_on_construct = true);
 
-  /**
-   * Run the actor forward pass and return a sampled action.
-   * @param x Input tensor for the evaluation.
-   * @return Action tensor produced by the actor.
-   */
   virtual torch::Tensor forward(const torch::Tensor & x) override;
 
   /**
    * Evaluate the actor and either sample from it or use its deterministic action.
    * @param input Input tensor for the evaluation.
    * @param sampled Whether to draw a stochastic sample.
-   * @return Action tensor produced by the actor.
+   * @param generator Optional random-number generator used for sampling.
    */
   virtual torch::Tensor evaluate(torch::Tensor & input,
                                  bool sampled,
@@ -80,33 +78,40 @@ public:
 
   /**
    * Sample an action from the already-reset distribution.
-   * @return Sampled action tensor.
+   * @param generator Optional random-number generator used for sampling.
    */
   virtual torch::Tensor sample(c10::optional<at::Generator> generator = c10::nullopt);
 
-  /// Build the hidden layers and the matching action-distribution module.
   virtual void constructNeuralNetwork() override;
 
   /// Return the active action distribution as the common base type.
   const LibtorchActionDistribution & actionDistribution() const { return *_action_distribution; }
+  /// Return the active action distribution as the common base type.
   LibtorchActionDistribution & actionDistribution() { return *_action_distribution; }
 
   /// Return the Gaussian action distribution pointer, or nullptr for bounded actors.
   const LibtorchGaussianActionDistribution * gaussianActionDistributionPtr() const;
+  /// Return the Gaussian action distribution pointer, or nullptr for bounded actors.
   LibtorchGaussianActionDistribution * gaussianActionDistributionPtr();
   /// Return the Gaussian action distribution reference. Errors if the actor is bounded.
   const LibtorchGaussianActionDistribution & gaussianActionDistribution() const;
+  /// Return the Gaussian action distribution reference. Errors if the actor is bounded.
   LibtorchGaussianActionDistribution & gaussianActionDistribution();
 
   /// Return the Beta action distribution pointer, or nullptr for Gaussian actors.
   const LibtorchBetaActionDistribution * betaActionDistributionPtr() const;
+  /// Return the Beta action distribution pointer, or nullptr for Gaussian actors.
   LibtorchBetaActionDistribution * betaActionDistributionPtr();
   /// Return the Beta action distribution reference. Errors if the actor is unbounded.
   const LibtorchBetaActionDistribution & betaActionDistribution() const;
+  /// Return the Beta action distribution reference. Errors if the actor is unbounded.
   LibtorchBetaActionDistribution & betaActionDistribution();
 
+  /// Return whether the Gaussian std ignores the current actor features.
   bool stateIndependentStd() const { return _state_independent_std; }
+  /// Return the configured lower action bounds.
   const std::vector<Real> & minValues() const { return _minimum_values; }
+  /// Return the configured upper action bounds.
   const std::vector<Real> & maxValues() const { return _maximum_values; }
 
   /**
@@ -118,24 +123,23 @@ public:
   /**
    * Evaluate the log-probability of an action under the current actor state.
    * @param other Action tensor in physical units.
-   * @return Log-probability tensor.
    */
   torch::Tensor logProbability(const torch::Tensor & other);
 
-  /**
-   * Compute the entropy of the current action distribution.
-   * @return Entropy tensor.
-   */
+  /// Compute the entropy of the current action distribution.
   torch::Tensor entropy();
 
-  /// Initialize the hidden layers and action-distribution parameters.
   virtual void
   initializeNeuralNetwork(c10::optional<at::Generator> generator = c10::nullopt) override;
 
 protected:
+  /// Lower action bounds used by bounded actor distributions.
   const std::vector<Real> _minimum_values;
+  /// Upper action bounds used by bounded actor distributions.
   const std::vector<Real> _maximum_values;
+  /// Whether the Gaussian std ignores the current actor features.
   const bool _state_independent_std;
+  /// Action-distribution module attached to the actor output.
   std::shared_ptr<LibtorchActionDistribution> _action_distribution;
 };
 
@@ -156,11 +160,23 @@ void loadLibtorchActorNeuralNetState(Moose::LibtorchActorNeuralNet & nn,
 
 }
 
+/**
+ * Serialize the actor-network metadata needed for restart.
+ * @param stream Stream that receives the serialized data.
+ * @param nn Actor network shared pointer to serialize.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchActorNeuralNet>(std::ostream & stream,
                                               std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
                                               void * context);
 
+/**
+ * Deserialize the actor-network metadata needed for restart.
+ * @param stream Stream that provides the serialized data.
+ * @param nn Actor network shared pointer to populate.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchActorNeuralNet>(std::istream & stream,
                                              std::shared_ptr<Moose::LibtorchActorNeuralNet> & nn,
@@ -169,11 +185,23 @@ void dataLoad<Moose::LibtorchActorNeuralNet>(std::istream & stream,
 // This is needed because the reporter which is used to output the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
 // we are only interested in the JSON output and we don't want to output everything
+/**
+ * Placeholder serializer for reporter-only actor pointers.
+ * @param stream Stream that would receive the serialized data.
+ * @param nn Reporter actor pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataStore<Moose::LibtorchActorNeuralNet const>(std::ostream & stream,
                                                     Moose::LibtorchActorNeuralNet const *& nn,
                                                     void * context);
 
+/**
+ * Placeholder deserializer for reporter-only actor pointers.
+ * @param stream Stream that would provide the serialized data.
+ * @param nn Reporter actor pointer.
+ * @param context Serialization context passed through MOOSE data I/O.
+ */
 template <>
 void dataLoad<Moose::LibtorchActorNeuralNet const>(std::istream & stream,
                                                    Moose::LibtorchActorNeuralNet const *& nn,

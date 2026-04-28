@@ -38,8 +38,8 @@ TEST(LibtorchRLCoreTest, ObservationHistoryStacksCurrentAndTrajectoryData)
   const auto stacked_current = history.stackCurrentObservation({3.0, 2.0}, old_observations);
   EXPECT_EQ(stacked_current, std::vector<Real>({3.0, 2.0, 1.0, 6.0, 1.0, 6.0}));
 
-  std::vector<std::vector<Real>> observation_trajectories = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-  const auto stacked_trajectory = history.stackTrajectoryObservation(observation_trajectories, 2);
+  std::vector<std::vector<Real>> component_trajectories = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+  const auto stacked_trajectory = history.stackTrajectoryObservation(component_trajectories, 2);
   EXPECT_EQ(stacked_trajectory, std::vector<Real>({3.0, 6.0, 2.0, 5.0, 1.0, 4.0}));
 }
 

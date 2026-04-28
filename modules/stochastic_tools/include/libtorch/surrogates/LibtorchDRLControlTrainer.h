@@ -61,7 +61,7 @@ public:
   void trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch);
 
   /// Return the current actor network.
-  const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
+  const Moose::LibtorchActorNeuralNet & controlNeuralNet() const { return *_control_nn; }
   /// Return the trainer seed used for sampling and shuffling.
   unsigned int seed() const { return _seed; }
 
@@ -140,6 +140,7 @@ protected:
 
   /// Decaying factor that is used when calculating the return from the reward
   const Real _decay_factor;
+  /// GAE lambda factor used while estimating advantages and returns.
   const Real _lambda_factor;
 
   /// Name of the pytorch output file. This is used for loading and storing
@@ -158,9 +159,12 @@ protected:
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
+  /// Storage for the current episode reward standard deviation
   Real _std_episode_reward;
 
+  /// Per-sample mean episodic rewards over the latest update window
   std::vector<Real> _sample_average_episode_reward;
+  /// Per-sample episodic reward standard deviations over the latest update window
   std::vector<Real> _sample_std_episode_reward;
 
   /// Switch to enable the standardization of the advantages
@@ -172,9 +176,9 @@ protected:
   /// Base seed for stochastic optimizers and policy sampling.
   const unsigned int _seed;
 
-  /// min
+  /// Optional lower bounds for each control signal
   std::vector<Real> _min_values;
-  /// max
+  /// Optional upper bounds for each control signal
   std::vector<Real> _max_values;
 
   /// Pointer to the control (or actor) neural net object
@@ -182,10 +186,14 @@ protected:
   /// Pointer to the critic neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _critic_nn;
 
+  /// Best average episode reward seen so far while training
   Real _highest_reward;
+  /// Entropy bonus coefficient used in the PPO actor loss
   Real _entropy_coeff;
 
+  /// Adam optimizer used to update the actor network
   std::unique_ptr<torch::optim::Adam> _actor_optimizer;
+  /// Adam optimizer used to update the critic network
   std::unique_ptr<torch::optim::Adam> _critic_optimizer;
 
 private:
@@ -221,13 +229,18 @@ private:
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
 
+  /// Reporter downsampling stride used while assembling rollout trajectories
   unsigned int _timestep_window;
 
   /// Shared observation history stacking and factor-expansion helper
   const LibtorchObservationHistoryHelper _observation_history;
+  /// Accumulated on-policy rollout data waiting to be flattened and trained on
   LibtorchRLTrajectoryBuffer _trajectory_buffer;
+  /// Mini-batch sampler used to split flattened rollout data for PPO updates
   const LibtorchRLMiniBatchSampler _sampler;
+  /// Helper that builds value targets and advantages from collected trajectories
   const LibtorchRLValueEstimator _value_estimator;
+  /// PPO loss helper for the actor and critic updates
   const LibtorchRLPPOLoss _ppo_loss;
 };
 
