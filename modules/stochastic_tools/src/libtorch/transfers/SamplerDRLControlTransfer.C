@@ -52,8 +52,6 @@ SamplerDRLControlTransfer::execute()
   const auto n = getToMultiApp()->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
-    // std::cout << "Do I have this app? " << i << " " << getToMultiApp()->hasLocalApp(i) <<
-    // std::endl;
     if (getToMultiApp()->hasLocalApp(i))
     {
       // Get the control neural net from the trainer
@@ -71,16 +69,6 @@ SamplerDRLControlTransfer::execute()
       // Copy and the neural net and execute it to get the initial values
       control_object->loadControlNeuralNet(trainer_nn);
       control_object->execute();
-
-      // const auto & named_params = trainer_nn.named_parameters();
-      // for (const auto & param_i : make_range(named_params.size()))
-      // {
-      //   // We cast the parameters into a 1D vector
-      //   std::cout << "Transferring " << Moose::stringify(std::vector<Real>(
-      //       named_params[param_i].value().data_ptr<Real>(),
-      //       named_params[param_i].value().data_ptr<Real>() +
-      //       named_params[param_i].value().numel())) << std::endl;
-      // }
     }
   }
 }

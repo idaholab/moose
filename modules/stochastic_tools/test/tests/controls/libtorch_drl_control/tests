@@ -46,4 +46,12 @@
                   "initialized in it."
     capabilities = 'libtorch'
   []
+  [invalid-execute-on]
+    type = RunException
+    input = libtorch_drl_control.i
+    cli_args = "Controls/src_control/execute_on='TIMESTEP_END'"
+    expect_err = "LibtorchDRLControl only supports 'TIMESTEP_BEGIN' for 'execute_on'."
+    requirement = "The system shall reject DRL controller execute flags other than timestep begin."
+    capabilities = 'libtorch'
+  []
 []

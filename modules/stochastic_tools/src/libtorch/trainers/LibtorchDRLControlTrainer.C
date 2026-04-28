@@ -55,10 +55,6 @@ LibtorchDRLControlTrainer::validParams()
       "1<=input_timesteps",
       "Number of time steps to use in the input data, if larger than 1, "
       "data from the previous timesteps will be used as inputs in the training.");
-  params.addParam<unsigned int>("skip_num_rows",
-                                1,
-                                "Unused compatibility parameter reserved for future reporter-row "
-                                "offset handling.");
 
   params.addRequiredParam<unsigned int>("num_epochs", "Number of epochs for the training.");
 

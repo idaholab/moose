@@ -73,9 +73,9 @@ protected:
   /// Restartable serialized state for the owned policy-sampling generator.
   std::vector<std::uint8_t> & _policy_generator_state;
 
-  /// Number of controller executions since initialization or restart.
-  unsigned int & _call_counter;
-  /// Number of executions to reuse a sampled action before evaluating the policy again.
+  /// Number of controller executions remaining before the next policy evaluation.
+  unsigned int & _executions_until_next_policy_evaluation;
+  /// Number of controller executions between policy evaluations.
   const unsigned int _num_steps_in_period;
   /// Relaxation factor applied while smoothing control updates.
   const Real _smoother;
@@ -83,6 +83,9 @@ protected:
   const bool _stochastic;
 
 private:
+  /// Advance the reuse schedule and report whether this execution should evaluate the policy.
+  bool shouldEvaluatePolicy();
+
   /// Restore the owned libtorch generator state from restartable storage.
   void restorePolicyGeneratorState();
 

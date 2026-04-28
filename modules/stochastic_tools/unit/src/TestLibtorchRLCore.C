@@ -107,8 +107,6 @@ TEST(LibtorchRLCoreTest, ValueEstimatorComputesGAETargets)
 
 TEST(LibtorchRLCoreTest, PPOLossUsesStoredLogProbabilityAndValueTarget)
 {
-  constexpr Real pi = 3.14159265358979323846;
-
   Moose::LibtorchActorNeuralNet policy_network("policy", 1, 1, {}, {"linear"});
   policy_network.gaussianActionDistribution().meanModule()->weight.data().fill_(0.0);
   policy_network.gaussianActionDistribution().meanModule()->bias.data().fill_(0.0);
@@ -124,14 +122,15 @@ TEST(LibtorchRLCoreTest, PPOLossUsesStoredLogProbabilityAndValueTarget)
   batch.observations = torch::zeros({1, 1}, torch::TensorOptions().dtype(torch::kDouble));
   batch.actions = torch::zeros({1, 1}, torch::TensorOptions().dtype(torch::kDouble));
   batch.old_log_probabilities =
-      torch::tensor({{-0.5 * std::log(2.0 * pi)}}, torch::TensorOptions().dtype(torch::kDouble));
+      torch::tensor({{-0.5 * std::log(2.0 * libMesh::pi)}},
+                    torch::TensorOptions().dtype(torch::kDouble));
   batch.value_targets = torch::tensor({{1.5}}, torch::TensorOptions().dtype(torch::kDouble));
   batch.advantages = torch::tensor({{2.0}}, torch::TensorOptions().dtype(torch::kDouble));
 
   LibtorchRLPPOLoss loss(0.2, 0.01);
   const auto loss_values = loss.compute(policy_network, value_network, batch);
 
-  const Real expected_entropy = 0.5 * std::log(2.0 * pi) + 0.5;
+  const Real expected_entropy = 0.5 * std::log(2.0 * libMesh::pi) + 0.5;
   const Real expected_actor_loss = -(2.0 + 0.01 * expected_entropy);
   const Real expected_critic_loss = 0.25;
 

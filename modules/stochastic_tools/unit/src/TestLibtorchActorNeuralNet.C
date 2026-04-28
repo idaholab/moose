@@ -141,10 +141,9 @@ TEST(LibtorchActorNeuralNetTest, gaussianActorUsesPhysicalActionScalingAndStateI
 
   const Real unscaled_mean = expected_deterministic_action / action_scale;
   const Real unscaled_action = physical_action / action_scale;
-  constexpr Real pi = 3.14159265358979323846;
   const Real expected_log_probability =
       -std::pow(unscaled_action - unscaled_mean, 2) / (2.0 * 4.0) - log_std -
-      0.5 * std::log(2.0 * pi) - std::log(action_scale);
+      0.5 * std::log(2.0 * libMesh::pi) - std::log(action_scale);
 
   auto action = torch::tensor({{physical_action}}, at::kDouble);
   const Real actual_log_probability = network.logProbability(action).item<Real>();

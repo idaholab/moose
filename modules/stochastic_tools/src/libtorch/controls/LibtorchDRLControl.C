@@ -25,17 +25,16 @@ LibtorchDRLControl::validParams()
   params.addClassDescription(
       "Sets the value of multiple 'Real' input parameters and postprocessors based on a Deep "
       "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   params.suppressParameter<bool>("torch_script_format");
 
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
 
-  params.addParam<unsigned int>(
+  params.addRangeCheckedParam<unsigned int>(
       "num_steps_in_period",
       1,
-      "Preferred spelling for the number of timesteps to reuse the most recent sampled "
-      "action before evaluating the policy again.");
-  params.addParam<unsigned int>(
-      "num_stems_in_period", 1, "Deprecated compatibility spelling for num_steps_in_period.");
+      "1<=num_steps_in_period",
+      "Number of controller executions between policy evaluations.");
   params.addParam<Real>(
       "smoother", 1.0, "Relaxation factor applied when smoothing control updates.");
 
@@ -68,13 +67,16 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
     _policy_generator(Moose::makeLibtorchCPUGenerator()),
     _policy_generator_state(declareRestartableData<std::vector<std::uint8_t>>(
         "policy_generator_state", std::vector<std::uint8_t>())),
-    _call_counter(declareRestartableData<unsigned int>("call_counter", 0)),
-    _num_steps_in_period(parameters.isParamSetByUser("num_steps_in_period")
-                             ? getParam<unsigned int>("num_steps_in_period")
-                             : getParam<unsigned int>("num_stems_in_period")),
+    _executions_until_next_policy_evaluation(
+        declareRestartableData<unsigned int>("executions_until_next_policy_evaluation", 0)),
+    _num_steps_in_period(getParam<unsigned int>("num_steps_in_period")),
     _smoother(getParam<Real>("smoother")),
     _stochastic(getParam<bool>("stochastic"))
 {
+  const auto & execute_on = getParam<ExecFlagEnum>("execute_on");
+  if (execute_on.size() != 1 || !execute_on.contains(EXEC_TIMESTEP_BEGIN))
+    paramError("execute_on", "LibtorchDRLControl only supports 'TIMESTEP_BEGIN' for 'execute_on'.");
+
   if (isParamValid("seed"))
     setPolicySampleSeed(getParam<unsigned int>("seed"));
 
@@ -132,51 +134,44 @@ LibtorchDRLControl::loadControlNeuralNetFromFile()
 void
 LibtorchDRLControl::execute()
 {
-  if (!_actor_nn && !_nn)
+  if (!_actor_nn)
+  {
+    mooseAssert(!_nn, "LibtorchDRLControl should not store a non-actor controller network.");
     return;
+  }
 
-  if (_current_execute_flag != EXEC_TIMESTEP_BEGIN)
-    return;
+  mooseAssert(_current_execute_flag == EXEC_TIMESTEP_BEGIN,
+              "LibtorchDRLControl should only execute on TIMESTEP_BEGIN.");
 
   const unsigned int n_controls = _control_names.size();
-  const unsigned int num_old_timesteps = _input_timesteps - 1;
+  const bool first_control_execution = _old_observations.empty();
 
   // Fill a vector with the current observation values.
   updateCurrentObservation();
 
   // Seed the observation history with the initial observation when the control first runs.
-  if (_old_observations.empty())
-    _old_observations.assign(num_old_timesteps, _current_observation);
+  if (first_control_execution)
+    _observation_history.initializeHistory(_current_observation, _old_observations);
 
-  if (_call_counter % _num_steps_in_period == 0)
+  if (shouldEvaluatePolicy())
   {
     torch::Tensor input_tensor = prepareInputTensor();
-    torch::Tensor action;
+    torch::Tensor action = _actor_nn->evaluate(input_tensor, _stochastic, _policy_generator);
+    savePolicyGeneratorState();
 
-    if (_actor_nn)
+    if (_stochastic)
     {
-      action = _actor_nn->evaluate(input_tensor, _stochastic, _policy_generator);
-      savePolicyGeneratorState();
-
-      if (_stochastic)
-      {
-        torch::Tensor log_probability = _actor_nn->logProbability(action);
-        _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
-                                                     log_probability.data_ptr<Real>() +
-                                                         log_probability.size(1)};
-      }
-      else
-        _current_control_signal_log_probabilities.assign(n_controls, 0.0);
+      torch::Tensor log_probability = _actor_nn->logProbability(action);
+      _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
+                                                   log_probability.data_ptr<Real>() +
+                                                       log_probability.size(1)};
     }
     else
-    {
-      action = _nn->forward(input_tensor);
       _current_control_signal_log_probabilities.assign(n_controls, 0.0);
-    }
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
 
-    if (_call_counter == 0)
+    if (first_control_execution)
       _current_smoothed_signal = _current_control_signals;
   }
 
@@ -191,14 +186,7 @@ LibtorchDRLControl::execute()
     setControllableValueByName<Real>(_control_names[control_i],
                                      _current_smoothed_signal[control_i]);
 
-  if (_old_observations.size())
-  {
-    std::rotate(
-        _old_observations.rbegin(), _old_observations.rbegin() + 1, _old_observations.rend());
-    _old_observations[0] = _current_observation;
-  }
-
-  _call_counter++;
+  _observation_history.advanceHistory(_current_observation, _old_observations);
 }
 
 void
@@ -225,6 +213,19 @@ LibtorchDRLControl::setPolicySampleSeed(const uint64_t seed)
     _policy_generator.set_current_seed(seed);
   }
   savePolicyGeneratorState();
+}
+
+bool
+LibtorchDRLControl::shouldEvaluatePolicy()
+{
+  if (_executions_until_next_policy_evaluation == 0)
+  {
+    _executions_until_next_policy_evaluation = _num_steps_in_period - 1;
+    return true;
+  }
+
+  --_executions_until_next_policy_evaluation;
+  return false;
 }
 
 void
