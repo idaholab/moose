@@ -24,6 +24,7 @@
     test_case = TestDiffusion2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically using a linear finite volume system with Robin boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2 # Memory heavy
   []
 
   [advection-2d-robin]
@@ -32,6 +33,7 @@
     test_case = TestAdvection2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically using a linear finite volume system with Robin boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2 # Memory heavy
   []
 
   [diffusion-2d-robin-nonorthogonal]
@@ -40,6 +42,7 @@
     test_case = TestDiffusion2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically on non-orthogonal cells using a linear finite volume system with Robin boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2 # Memory heavy
   []
 
   [advection-2d-robin-nonorthogonal]
@@ -48,5 +51,6 @@
     test_case = TestAdvection2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically on non-orthogonal cells using a linear finite volume system with Robin boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2 # Memory heavy
   []
 []
