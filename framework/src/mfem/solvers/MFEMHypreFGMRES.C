@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMHypreFGMRES.h"
-#include "MFEMEigenproblem.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMHypreFGMRES);
@@ -69,16 +68,6 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
 
     _solver.reset(lor_solver);
-  }
-  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
-  {
-    auto solver = new mfem::HypreFGMRES(*a.ParallelAssemble());
-    solver->SetTol(getParam<mfem::real_t>("l_tol"));
-    solver->SetMaxIter(getParam<int>("l_max_its"));
-    solver->SetKDim(getParam<int>("kdim"));
-    solver->SetPrintLevel(getParam<int>("print_level"));
-
-    _solver.reset(solver);
   }
 }
 

@@ -32,8 +32,6 @@ protected:
 
 private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
-  /// Assembled matrix used by the solver for eigenproblem setups. Stored to manage its lifetime.
-  std::unique_ptr<mfem::HypreParMatrix> _assembled_matrix;
 };
 
 #endif

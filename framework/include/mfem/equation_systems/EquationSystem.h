@@ -65,7 +65,7 @@ public:
 
   /// Update eigenvectors from solution after eigensolve
   void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                           MFEMEigensolverBase * eigensolver);
+                                   MFEMEigensolverBase * eigensolver);
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.

@@ -18,7 +18,7 @@ InputParameters
 MFEMHypreLOBPCG::validParams()
 {
   InputParameters params = MFEMEigensolverBase::validParams();
-  
+
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
   params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
@@ -44,19 +44,6 @@ MFEMHypreLOBPCG::constructSolver()
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
   setPreconditioner(*_eigensolver);
-}
-
-void
-MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
-{
-  if (_lor)
-    mooseError("Eigensolver cannot use LOR method");
-
-  if (_preconditioner)
-  {
-    _preconditioner->updateSolver(a, tdofs);
-    setPreconditioner(*_eigensolver);
-  }
 }
 
 #endif

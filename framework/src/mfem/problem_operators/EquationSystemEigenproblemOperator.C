@@ -22,10 +22,6 @@ EquationSystemEigenproblemOperator::Solve()
   if (GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("Eigenproblems are only supported in single-variable systems");
 
-  _problem_data.jacobian_solver->updateSolver(
-      *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
-      GetEquationSystem()->_ess_tdof_lists.at(0));
-
   auto eigensolver = std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver);
   eigensolver->setMassMatrix(_mass_rhs);
   eigensolver->setOperator(GetEquationSystem()->_jacobian);

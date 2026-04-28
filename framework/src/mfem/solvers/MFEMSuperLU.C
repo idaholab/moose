@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMSuperLU.h"
-#include "MFEMEigenproblem.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMSuperLU);
@@ -35,24 +34,17 @@ MFEMSuperLU::constructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
   solver->SetDeviceOffload(mfem::Device::IsAvailable());
+  solver->SetSymmetricPattern(true);
+  solver->SetPrintStatistics(false);
+  solver->SetColumnPermutation(mfem::superlu::PARMETIS);
   _solver = std::move(solver);
 }
 
 void
-MFEMSuperLU::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
+MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
-mooseError("SuperLU solver does not support LOR solve");
-  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
-  {
-    mfem::SuperLUSolver * solver = new mfem::SuperLUSolver(getMFEMProblem().getComm());
-    mfem::SuperLURowLocMatrix * Arow = new mfem::SuperLURowLocMatrix(*a.ParallelAssemble());
-    solver->SetSymmetricPattern(true);
-    solver->SetPrintStatistics(false);
-    solver->SetColumnPermutation(mfem::superlu::PARMETIS);
-    solver->SetOperator(*Arow);
-    _solver.reset(solver);
-  }
+    mooseError("SuperLU solver does not support LOR solve");
 }
 
 #endif

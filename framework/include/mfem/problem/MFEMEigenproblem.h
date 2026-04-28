@@ -38,8 +38,8 @@ public:
 
   /** Registers a gridfunction to hold an eigenvector solution of an eigenproblem */
   void addEigenGridFunction(const std::string & var_type,
-                                    const std::string & var_name,
-                                    InputParameters & parameters);
+                            const std::string & var_name,
+                            InputParameters & parameters);
 };
 
 #endif
