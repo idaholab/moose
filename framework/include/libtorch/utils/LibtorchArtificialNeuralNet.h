@@ -184,7 +184,6 @@ void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * c
 
 void loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
                                           const std::string & filename);
-
 }
 
 template <>

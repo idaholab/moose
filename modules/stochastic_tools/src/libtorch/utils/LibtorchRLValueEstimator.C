@@ -25,9 +25,8 @@ valueEstimatorMatrixToTensor(const std::vector<std::vector<Real>> & rows)
     return {};
 
   const auto num_columns = rows.front().size();
-  auto tensor = torch::zeros(
-      {static_cast<long>(rows.size()), static_cast<long>(num_columns)},
-      torch::TensorOptions().dtype(torch::kDouble));
+  auto tensor = torch::zeros({static_cast<long>(rows.size()), static_cast<long>(num_columns)},
+                             torch::TensorOptions().dtype(torch::kDouble));
   auto accessor = tensor.accessor<Real, 2>();
 
   for (const auto row_i : make_range(rows.size()))
@@ -46,8 +45,8 @@ LibtorchRLValueEstimator::LibtorchRLValueEstimator(const Real discount_factor,
 }
 
 void
-LibtorchRLValueEstimator::computeValueTargets(LibtorchRLTrajectoryBuffer & buffer,
-                                              Moose::LibtorchArtificialNeuralNet & value_network) const
+LibtorchRLValueEstimator::computeValueTargets(
+    LibtorchRLTrajectoryBuffer & buffer, Moose::LibtorchArtificialNeuralNet & value_network) const
 {
   for (auto & trajectory : buffer.trajectories())
   {

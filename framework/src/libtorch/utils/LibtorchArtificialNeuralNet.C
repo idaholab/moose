@@ -472,7 +472,6 @@ loadLibtorchArtificialNeuralNetState(Moose::LibtorchArtificialNeuralNet & nn,
              "\nTorchScript load error: ",
              scripted_error);
 }
-
 }
 
 template <>

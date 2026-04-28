@@ -31,8 +31,10 @@ DRLRewardReporter::DRLRewardReporter(const InputParameters & parameters)
     SurrogateModelInterface(this),
     _average_reward(declareValueByName<Real>("average_reward", REPORTER_MODE_ROOT)),
     _std_reward(declareValueByName<Real>("std_reward", REPORTER_MODE_ROOT)),
-    _sample_average_reward(declareValueByName<std::vector<Real>>("sample_average_reward", REPORTER_MODE_ROOT)),
-    _sample_std_reward(declareValueByName<std::vector<Real>>("sample_std_reward", REPORTER_MODE_ROOT)),
+    _sample_average_reward(
+        declareValueByName<std::vector<Real>>("sample_average_reward", REPORTER_MODE_ROOT)),
+    _sample_std_reward(
+        declareValueByName<std::vector<Real>>("sample_std_reward", REPORTER_MODE_ROOT)),
     _trainer(getSurrogateTrainer<LibtorchDRLControlTrainer>("drl_trainer_name"))
 {
 }
