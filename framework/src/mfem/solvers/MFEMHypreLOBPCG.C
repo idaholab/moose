@@ -18,16 +18,16 @@ InputParameters
 MFEMHypreLOBPCG::validParams()
 {
   InputParameters params = MFEMEigensolverBase::validParams();
+  
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient", "Name of the scalar coefficient for the mass matrix.");
   params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
 
   return params;
 }
 
 MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
-  : MFEMEigensolverBase(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMEigensolverBase(parameters)
 {
   constructSolver();
 }

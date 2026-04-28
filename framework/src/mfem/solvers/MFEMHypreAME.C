@@ -19,15 +19,13 @@ MFEMHypreAME::validParams()
 {
   InputParameters params = MFEMEigensolverBase::validParams();
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient", "Name of the scalar coefficient for the mass matrix.");
   params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;
 }
 
 MFEMHypreAME::MFEMHypreAME(const InputParameters & parameters)
-  : MFEMEigensolverBase(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMEigensolverBase(parameters)
 {
   constructSolver();
 }

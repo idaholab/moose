@@ -15,7 +15,7 @@
 
 namespace Moose::MFEM
 {
-/// Steady-state problem operator with an equation system.
+/// Steady-state eigenproblem operator with an equation system.
 class EquationSystemEigenproblemOperator : public EquationSystemProblemOperator
 {
 public:

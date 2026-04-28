@@ -77,6 +77,7 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
     lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
     lor_solver->GetSolver().SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
 
+    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
     if (_mfem_fespace && !mfem::HypreUsingGPU())
       lor_solver->GetSolver().SetElasticityOptions(_mfem_fespace.get());
 
@@ -91,6 +92,7 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
     solver->SetPrintLevel(getParam<int>("print_level"));
     solver->SetStrengthThresh(getParam<mfem::real_t>("strength_threshold"));
 
+    /// HypreBoomerAMG options for elasticity problems are not compatible with GPU execution
     if (_mfem_fespace && !mfem::HypreUsingGPU())
       solver->SetElasticityOptions(_mfem_fespace.get());
 
