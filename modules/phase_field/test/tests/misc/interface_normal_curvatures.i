@@ -7,12 +7,12 @@
   nx = 8
   ny = 8
   nz = 8
-  xmin = 0
-  xmax = 20
-  ymin = -10
-  ymax = 10
-  zmin = 0
-  zmax = 20
+  xmin = 8
+  xmax = 12
+  ymin = -2
+  ymax = 2
+  zmin = 8
+  zmax = 12
 []
 
 [Modules]
@@ -68,12 +68,11 @@
   l_max_its = 30
   l_tol = 1.0e-4
   nl_max_its = 10
-  nl_rel_tol = 1.0e-9
-  nl_abs_tol = 1.0e-11
+  nl_rel_tol = 1.0e-10
 
   start_time = 0.0
-  end_time = 0.001
-  dt = 0.001
+  dt = 1e-5
+  num_steps = 1
 []
 
 [Outputs]

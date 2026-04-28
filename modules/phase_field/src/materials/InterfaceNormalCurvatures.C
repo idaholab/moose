@@ -20,10 +20,10 @@ InterfaceNormalCurvatures::validParams()
       "Computes the two normal curvatures kappa_1 and kappa_2 of a diffuse interface "
       "from an order parameter eta.");
   params.addRequiredCoupledVar("eta", "Order parameter that defines the interface");
-  params.addParam<Real>("regularization",
-                        1e-8,
-                        "Floor added to |grad(eta)| before division to prevent singularities in "
-                        "bulk regions");
+  params.addParam<Real>(
+      "gradient_threshold",
+      1e-6,
+      "If |grad(eta)| is less than this threshold at a point, curvatures are set to zero there.");
   params.addParam<std::string>("base_name", "", "Optional prefix for all material property names");
   return params;
 }
@@ -33,7 +33,7 @@ InterfaceNormalCurvatures::InterfaceNormalCurvatures(const InputParameters & par
     _eta(coupledValue("eta")),
     _grad_eta(coupledGradient("eta")),
     _second_eta(coupledSecond("eta")),
-    _eps(getParam<Real>("regularization")),
+    _grad_threshold(getParam<Real>("gradient_threshold")),
     _kappa1(declareProperty<Real>(getParam<std::string>("base_name") + "kappa1")),
     _kappa2(declareProperty<Real>(getParam<std::string>("base_name") + "kappa2")),
     _kappa_mean(declareProperty<Real>(getParam<std::string>("base_name") + "kappa_mean"))
@@ -46,47 +46,50 @@ InterfaceNormalCurvatures::computeQpProperties()
   // -- 1.  Interface normal -------------------------------------------------
   const RealVectorValue & g = _grad_eta[_qp];
   const Real g_mag = g.norm();
-  const Real g_reg = g_mag + _eps;
-
-  const RealVectorValue nhat = g / g_reg; // n  (unit normal)
-
-  // -- 2.  Tangent frame ----------------------------------------------------
-  static const RealVectorValue ZHAT(0., 0., 1.);
-  static const RealVectorValue XHAT(1., 0., 0.);
-
-  RealVectorValue t1 = ZHAT.cross(nhat);
-  const Real t1_mag = t1.norm();
-  if (t1_mag < 1e-12)
-    t1 = XHAT; // n = +/- z: choose x as in-plane tangent
+  if (g_mag < _grad_threshold)
+    _kappa1[_qp] = _kappa2[_qp] = _kappa_mean[_qp] = 0;
   else
-    t1 /= t1_mag;
-
-  const RealVectorValue t2 = nhat.cross(t1); // already unit length
-
-  // -- 3.  Shape operator  S ------------------------------------------------
-
-  const RankTwoTensor & H = _second_eta[_qp]; // Hessian (3 x 3)
-
-  RealVectorValue Hn;
-  for (unsigned i = 0; i < 3; ++i)
-    for (unsigned j = 0; j < 3; ++j)
-      Hn(i) += H(i, j) * nhat(j);
-
-  // Normal curvature along a unit tangent v:
-  auto vHv = [&](const RealVectorValue & v) -> Real
   {
-    Real val = 0.;
+    const RealVectorValue nhat = g / g_mag; // n  (unit normal)
+
+    // -- 2.  Tangent frame ----------------------------------------------------
+    static const RealVectorValue ZHAT(0., 0., 1.);
+    static const RealVectorValue XHAT(1., 0., 0.);
+
+    RealVectorValue t1 = ZHAT.cross(nhat);
+    const Real t1_mag = t1.norm();
+    if (t1_mag < 1e-12)
+      t1 = XHAT; // n = +/- z: choose x as in-plane tangent
+    else
+      t1 /= t1_mag;
+
+    const RealVectorValue t2 = nhat.cross(t1); // already unit length
+
+    // -- 3.  Shape operator  S ------------------------------------------------
+
+    const RankTwoTensor & H = _second_eta[_qp]; // Hessian (3 x 3)
+
+    RealVectorValue Hn;
     for (unsigned i = 0; i < 3; ++i)
       for (unsigned j = 0; j < 3; ++j)
-        val += v(i) * H(i, j) * v(j);
-    return val;
-  };
+        Hn(i) += H(i, j) * nhat(j);
 
-  _kappa1[_qp] = -vHv(t1) / g_reg; // in-plane tangent
-  _kappa2[_qp] = -vHv(t2) / g_reg; // out-of-plane tangent
+    // Normal curvature along a unit tangent v:
+    auto vHv = [&](const RealVectorValue & v) -> Real
+    {
+      Real val = 0.;
+      for (unsigned i = 0; i < 3; ++i)
+        for (unsigned j = 0; j < 3; ++j)
+          val += v(i) * H(i, j) * v(j);
+      return val;
+    };
 
-  // -- 4.  Mean curvature ---------------------------------------------------
+    _kappa1[_qp] = -vHv(t1) / g_mag; // in-plane tangent
+    _kappa2[_qp] = -vHv(t2) / g_mag; // out-of-plane tangent
 
-  const Real nHn = nhat * Hn;
-  _kappa_mean[_qp] = -(H.tr() - nHn) / g_reg;
+    // -- 4.  Mean curvature ---------------------------------------------------
+
+    const Real nHn = nhat * Hn;
+    _kappa_mean[_qp] = -(H.tr() - nHn) / g_mag / 2;
+  }
 }

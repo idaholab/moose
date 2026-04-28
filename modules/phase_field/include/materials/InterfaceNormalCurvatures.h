@@ -49,7 +49,7 @@ private:
   const VariableSecond & _second_eta;
 
   // -- user parameters ----------------------------------------
-  const Real _eps; /// regularization floor for grad(eta) (avoids /0)
+  const Real _grad_threshold; /// threshold for grad(eta) (avoids /0)
 
   // -- material properties produced ---------------------------
   MaterialProperty<Real> & _kappa1; /// normal curvature along t_1

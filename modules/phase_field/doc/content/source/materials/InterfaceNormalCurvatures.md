@@ -106,10 +106,10 @@ This is the key formula implemented at each quadrature point. The two scalar out
 
 ### Mean Curvature (Diagnostic)
 
-The mean curvature $\kappa = \nabla \cdot \hat{n}$ is also declared as a material property for verification. It equals the trace of the shape operator:
+The mean curvature $\kappa = \frac{1}{2} \nabla \cdot \hat{n}$ is also declared as a material property for verification. It equals the trace of the shape operator:
 
 \begin{equation}
-  \kappa = \kappa_1 + \kappa_2 = -\frac{\mathrm{tr}(\mathbf{H}) - \hat{n} \cdot \mathbf{H} \cdot \hat{n}}{|\nabla\eta|}
+  \kappa = \frac{1}{2} (\kappa_1 + \kappa_2) = -\frac{1}{2} \left( \frac{\mathrm{tr}(\mathbf{H}) - \hat{n} \cdot \mathbf{H} \cdot \hat{n}}{|\nabla\eta|} \right)
 \end{equation}
 
 ---
@@ -120,7 +120,7 @@ The mean curvature $\kappa = \nabla \cdot \hat{n}$ is also declared as a materia
 |---|---|---|
 | `kappa1` | `Real` | Normal curvature $\kappa_1$ along the in-plane tangent $\hat{t}_1$ |
 | `kappa2` | `Real` | Normal curvature $\kappa_2$ along the out-of-plane tangent $\hat{t}_2$ |
-| `kappa_mean` | `Real` | Mean curvature $\kappa = \kappa_1 + \kappa_2 = \nabla\cdot\hat{n}$ |
+| `kappa_mean` | `Real` | Mean curvature $\kappa =  \frac{1}{2} (\kappa_1 + \kappa_2) =  \frac{1}{2} \nabla\cdot\hat{n}$ |
 
 All property names can be prefixed by setting `base_name`.
 
