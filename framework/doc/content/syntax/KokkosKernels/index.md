@@ -110,7 +110,7 @@ See the following source codes of `KokkosCoupledForce` for another example of a 
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
 
-## Optimized Kernel Objects
+## Optimized Kernel Objects id=kokkos_kernel_optimized
 
 [Similarly to the original MOOSE](syntax/Kernels/index.md#optimized), Kokkos-MOOSE provides `Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` for creating an optimized kernel by factoring out test functions in residual and Jacobian calculations.
 It is strongly encouraged to leverage these optimized kernel objects whenever possible for best performance.
