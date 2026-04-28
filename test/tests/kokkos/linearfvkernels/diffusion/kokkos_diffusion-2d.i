@@ -49,13 +49,16 @@
     value = 1.0
   []
   [coeff_func_kokkos]
-    type = KokkosLinearFV2DDiffusionCoefficient
+    type = KokkosParsedFunction
+    expression = '1.0 + 0.5*x*y'
   []
   [source_func_kokkos]
-    type = KokkosLinearFV2DSourceFunction
+    type = KokkosParsedFunction
+    expression = '2*(1.5-y*y) + 2*x*y*(1.5-y*y) + 2*(1.5-x*x) + 2*x*y*(1.5-x*x)'
   []
   [analytic_solution_kokkos]
-    type = KokkosLinearFV2DExactSolution
+    type = KokkosParsedFunction
+    expression = '(1.5-x*x)*(1.5-y*y)'
   []
   [analytic_solution]
     type = ParsedFunction
