@@ -28,7 +28,7 @@ public:
    */
   SideReducer(const SideReducer & object);
 
-  virtual void computeReducer() override;
+  virtual ThreadID numReducerThreads() const override { return numKokkosBoundarySides(); }
 
   /**
    * The parallel computation entry function called by Kokkos

@@ -59,15 +59,4 @@ NodalUserObject::compute()
     computeUserObject();
 }
 
-void
-NodalUserObject::computeUserObject()
-{
-  Policy policy = _bnd ? Policy(0, numKokkosBoundaryNodes()) : Policy(0, numKokkosBlockNodes());
-
-  if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
-
-  _dispatcher->parallelFor(policy);
-}
-
 } // namespace Moose::Kokkos

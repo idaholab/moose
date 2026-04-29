@@ -60,15 +60,4 @@ SideUserObject::compute()
     computeUserObject();
 }
 
-void
-SideUserObject::computeUserObject()
-{
-  Policy policy(0, numKokkosBoundarySides());
-
-  if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
-
-  _dispatcher->parallelFor(policy);
-}
-
 } // namespace Moose::Kokkos

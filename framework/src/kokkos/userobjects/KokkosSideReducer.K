@@ -29,18 +29,4 @@ SideReducer::SideReducer(const SideReducer & object)
 {
 }
 
-void
-SideReducer::computeReducer()
-{
-  if (!_reduction_buffer.is_allocated())
-    mooseError("Reduction buffer was not allocated.");
-
-  Policy policy(0, numKokkosBoundarySides());
-
-  if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<ReducerLoop>(_reducer_object, _reducer_object->type());
-
-  _dispatcher->parallelReduce(policy, _reduction_buffer);
-}
-
 } // namespace Moose::Kokkos

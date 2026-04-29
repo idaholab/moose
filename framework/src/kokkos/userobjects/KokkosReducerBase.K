@@ -30,4 +30,19 @@ ReducerBase::ReducerBase(const ReducerBase & reducer)
 {
 }
 
+void
+ReducerBase::computeReducer()
+{
+  if (!_reduction_buffer.is_allocated())
+    _reducer_object->mooseError("Reduction buffer was not allocated.");
+
+  Policy policy(0, numReducerThreads());
+
+  if (!_reducer_dispatcher)
+    _reducer_dispatcher =
+        DispatcherRegistry::build<ReducerLoop>(_reducer_object, _reducer_object->type());
+
+  _reducer_dispatcher->parallelReduce(policy, _reduction_buffer);
+}
+
 } // namespace Moose::Kokkos

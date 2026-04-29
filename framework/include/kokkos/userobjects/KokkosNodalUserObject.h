@@ -47,7 +47,10 @@ public:
   using NodalReducer::operator();
 
 protected:
-  virtual void computeUserObject();
+  virtual ThreadID numUserObjectThreads() const override
+  {
+    return _bnd ? numKokkosBoundaryNodes() : numKokkosBlockNodes();
+  }
 };
 
 template <typename Derived>

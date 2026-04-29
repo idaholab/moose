@@ -45,18 +45,4 @@ NodalReducer::NodalReducer(const NodalReducer & object)
 {
 }
 
-void
-NodalReducer::computeReducer()
-{
-  if (!_reduction_buffer.is_allocated())
-    mooseError("Reduction buffer was not allocated.");
-
-  Policy policy = _bnd ? Policy(0, numKokkosBoundaryNodes()) : Policy(0, numKokkosBlockNodes());
-
-  if (!_dispatcher)
-    _dispatcher = DispatcherRegistry::build<ReducerLoop>(_reducer_object, _reducer_object->type());
-
-  _dispatcher->parallelReduce(policy, _reduction_buffer);
-}
-
 } // namespace Moose::Kokkos
