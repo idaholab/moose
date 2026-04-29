@@ -32,6 +32,7 @@
 #include "libmesh/libmesh_logging.h"
 #include "libmesh/mesh_communication.h"
 #include "libmesh/mesh_modification.h"
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/remote_elem.h"
@@ -467,7 +468,12 @@ AdvancedExtruderGenerator::generate()
 
   std::unique_ptr<MeshBase> extrusion_curve;
   if (_extrude_along_curve)
+  {
     extrusion_curve = std::move(_extrusion_curve);
+
+    // We must serialize the curve to know how to extrude across all ranks
+    libMesh::MeshSerializer serial(*extrusion_curve);
+  }
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
