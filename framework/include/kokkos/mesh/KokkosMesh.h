@@ -214,10 +214,32 @@ public:
     return _linearfv_face_centroid(side, elem);
   }
   /**
-   * Get the distance vector between adjacent cell centers for an element side
+   * Get the cell-center to face-center distance vector for an element side (all faces)
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The centroid-to-centroid distance vector
+   * @returns The cell-to-face distance vector
+   */
+  KOKKOS_FUNCTION Real3 getFaceDCF(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cf(side, elem);
+  }
+  /**
+   * Get the cell-center to face-center distance magnitude for an element side (all faces)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-face distance magnitude
+   */
+  KOKKOS_FUNCTION Real getFaceDCFMag(ContiguousElementID elem, unsigned int side) const
+  {
+    KOKKOS_ASSERT(_linearfv_initialized);
+    return _linearfv_face_d_cf_mag(side, elem);
+  }
+  /**
+   * Get the cell-center to neighbor-center distance vector for an element side (internal faces only)
+   * @param elem The contiguous element ID
+   * @param side The side index
+   * @returns The cell-to-neighbor distance vector
    */
   KOKKOS_FUNCTION Real3 getFaceDCN(ContiguousElementID elem, unsigned int side) const
   {
@@ -225,10 +247,11 @@ public:
     return _linearfv_face_d_cn(side, elem);
   }
   /**
-   * Get the centroid-to-centroid distance magnitude for an element side
+   * Get the cell-center to neighbor-center distance magnitude for an element side (internal faces
+   * only)
    * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The centroid-to-centroid distance magnitude
+   * @returns The cell-to-neighbor distance magnitude
    */
   KOKKOS_FUNCTION Real getFaceDCNMag(ContiguousElementID elem, unsigned int side) const
   {
@@ -481,6 +504,8 @@ private:
   Array<Real3> _linearfv_elem_centroid;
   Array2D<Real> _linearfv_face_area;
   Array2D<Real3> _linearfv_face_centroid;
+  Array2D<Real3> _linearfv_face_d_cf;
+  Array2D<Real> _linearfv_face_d_cf_mag;
   Array2D<Real3> _linearfv_face_d_cn;
   Array2D<Real> _linearfv_face_d_cn_mag;
   Array2D<BoundaryID> _linearfv_face_boundary_id;

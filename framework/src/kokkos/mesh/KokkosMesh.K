@@ -20,10 +20,21 @@ namespace Moose::Kokkos
 void
 Mesh::update()
 {
+  // Snapshot whether the LFV geometry cache was populated before this mesh change.
+  // After rebuilding the base mesh data below, we re-run initLinearFV() if it was,
+  // because the cached face areas, centroids, and distances are now stale.
+  const bool had_linearfv_data = _linearfv_initialized;
+
   initMap();
   initElement();
 
   _initialized = true;
+
+  if (had_linearfv_data)
+  {
+    _linearfv_initialized = false;
+    initLinearFV();
+  }
 }
 
 void
@@ -284,6 +295,8 @@ Mesh::initLinearFV()
   _linearfv_elem_centroid.create(num_elems);
   _linearfv_face_area.create(max_sides, num_elems);
   _linearfv_face_centroid.create(max_sides, num_elems);
+  _linearfv_face_d_cf.create(max_sides, num_elems);
+  _linearfv_face_d_cf_mag.create(max_sides, num_elems);
   _linearfv_face_d_cn.create(max_sides, num_elems);
   _linearfv_face_d_cn_mag.create(max_sides, num_elems);
   _linearfv_face_boundary_id.create(max_sides, num_elems);
@@ -292,6 +305,8 @@ Mesh::initLinearFV()
   _linearfv_elem_centroid = Real3();
   _linearfv_face_area = 0;
   _linearfv_face_centroid = Real3();
+  _linearfv_face_d_cf = Real3();
+  _linearfv_face_d_cf_mag = 0;
   _linearfv_face_d_cn = Real3();
   _linearfv_face_d_cn_mag = 0;
   _linearfv_face_boundary_id = Moose::INVALID_BOUNDARY_ID;
@@ -312,15 +327,17 @@ Mesh::initLinearFV()
       const auto face_centroid = face.vertex_average();
       const auto neighbor = elem->neighbor_ptr(side);
       const auto neighbor_eid = _elem_neighbor(side, eid);
-      const auto d_cn = (neighbor && neighbor != libMesh::remote_elem &&
-                         neighbor_eid != libMesh::DofObject::invalid_id)
-                            ? neighbor->vertex_average() - elem_centroid
-                            : face_centroid - elem_centroid;
+      const auto d_cf = face_centroid - elem_centroid;
+      const bool has_neighbor = (neighbor && neighbor != libMesh::remote_elem &&
+                                 neighbor_eid != libMesh::DofObject::invalid_id);
+      const auto d_cn = has_neighbor ? neighbor->vertex_average() - elem_centroid : Real3();
 
       _linearfv_face_area(side, eid) = face.volume();
       _linearfv_face_centroid(side, eid) = face_centroid;
+      _linearfv_face_d_cf(side, eid) = d_cf;
+      _linearfv_face_d_cf_mag(side, eid) = d_cf.norm();
       _linearfv_face_d_cn(side, eid) = d_cn;
-      _linearfv_face_d_cn_mag(side, eid) = d_cn.norm();
+      _linearfv_face_d_cn_mag(side, eid) = has_neighbor ? d_cn.norm() : Real(0);
 
       const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
       if (boundary_ids.size() > 1)
@@ -341,6 +358,8 @@ Mesh::initLinearFV()
   _linearfv_elem_centroid.moveToDevice();
   _linearfv_face_area.moveToDevice();
   _linearfv_face_centroid.moveToDevice();
+  _linearfv_face_d_cf.moveToDevice();
+  _linearfv_face_d_cf_mag.moveToDevice();
   _linearfv_face_d_cn.moveToDevice();
   _linearfv_face_d_cn_mag.moveToDevice();
   _linearfv_face_boundary_id.moveToDevice();

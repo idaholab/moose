@@ -68,7 +68,9 @@ KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::faceConductance(const AssemblyDatum & datum) const
 {
   const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
+  const auto d_mag = datum.hasNeighbor()
+                         ? datum.mesh().getFaceDCNMag(datum.elemID(), datum.side())
+                         : datum.mesh().getFaceDCFMag(datum.elemID(), datum.side());
   return _diffusion_coeff.value(_t, face_centroid) *
-         datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
-         datum.mesh().getFaceDCNMag(datum.elemID(), datum.side());
+         datum.mesh().getFaceArea(datum.elemID(), datum.side()) / d_mag;
 }
