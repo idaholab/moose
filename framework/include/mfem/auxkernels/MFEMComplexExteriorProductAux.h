@@ -13,6 +13,8 @@
 
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Project \f$ s \vec u \wedge \vec v* \f$ onto a complex vector MFEM auxvariable.
  *
@@ -21,13 +23,13 @@
  *  - The target variable's FE Space must be L2.
  *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
-class MFEMComplexExteriorProductAux : public MFEMComplexAuxKernel
+class ComplexExteriorProductAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexExteriorProductAux(const InputParameters & parameters);
-  ~MFEMComplexExteriorProductAux() override = default;
+  ComplexExteriorProductAux(const InputParameters & parameters);
+  ~ComplexExteriorProductAux() override = default;
 
   void execute() override;
 
@@ -51,4 +53,5 @@ protected:
   mfem::VectorSumCoefficient _final_coef_imag;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

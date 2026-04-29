@@ -16,13 +16,15 @@
 #include "MFEMContainers.h"
 #include "Function.h"
 
-class MFEMBoundaryCondition : public MFEMObject, public MFEMBoundaryRestrictable
+namespace Moose::MFEM
+{
+class BoundaryCondition : public Object, public BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMBoundaryCondition(const InputParameters & parameters);
-  virtual ~MFEMBoundaryCondition() = default;
+  BoundaryCondition(const InputParameters & parameters);
+  virtual ~BoundaryCondition() = default;
 
   /// Get name of the test variable labelling the weak form this bc is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
@@ -32,4 +34,5 @@ protected:
   const VariableName & _test_var_name;
 };
 
+} // namespace Moose::MFEM
 #endif

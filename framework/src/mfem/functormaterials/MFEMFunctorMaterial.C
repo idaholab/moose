@@ -12,12 +12,14 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMFunctorMaterial::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params += MFEMBlockRestrictable::validParams();
-  params += MFEMBoundaryRestrictable::validParams();
+InputParameters
+FunctorMaterial::validParams()
+{
+  InputParameters params = Object::validParams();
+  params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
 
   params.addClassDescription(
       "Base class for declaration of material properties to add to MFEM problems.");
@@ -29,21 +31,22 @@ MFEMFunctorMaterial::validParams()
 }
 
 libMesh::Point
-MFEMFunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
+FunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
 {
   return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
 }
 
-MFEMFunctorMaterial::MFEMFunctorMaterial(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+FunctorMaterial::FunctorMaterial(const InputParameters & parameters)
+  : Object(parameters),
+    BlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    BoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _properties(getMFEMProblem().getCoefficients())
 {
   if (isSubdomainRestricted() && isBoundaryRestricted())
     paramError("boundary", "Cannot specify both block and boundary parameters");
 }
 
-MFEMFunctorMaterial::~MFEMFunctorMaterial() {}
+FunctorMaterial::~FunctorMaterial() {}
 
+} // namespace Moose::MFEM
 #endif

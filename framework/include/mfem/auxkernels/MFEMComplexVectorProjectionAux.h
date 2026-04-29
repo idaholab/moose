@@ -13,17 +13,19 @@
 
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Projects a vector coefficient onto a vector-valued auxvariable.
  */
-class MFEMComplexVectorProjectionAux : public MFEMComplexAuxKernel
+class ComplexVectorProjectionAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexVectorProjectionAux(const InputParameters & parameters);
+  ComplexVectorProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMComplexVectorProjectionAux() = default;
+  virtual ~ComplexVectorProjectionAux() = default;
 
   virtual void execute() override;
 
@@ -34,4 +36,5 @@ protected:
   mfem::VectorCoefficient & _vec_coef_imag;
 };
 
+} // namespace Moose::MFEM
 #endif

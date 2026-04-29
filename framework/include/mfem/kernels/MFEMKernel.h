@@ -15,17 +15,19 @@
 #include "MFEMContainers.h"
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to construct an MFEM integrator to apply to the equation system.
  */
-class MFEMKernel : public MFEMObject, public MFEMBlockRestrictable
+class Kernel : public Object, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMKernel(const InputParameters & parameters);
+  Kernel(const InputParameters & parameters);
 
-  virtual ~MFEMKernel() = default;
+  virtual ~Kernel() = default;
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
@@ -46,4 +48,5 @@ protected:
   const VariableName & _test_var_name;
 };
 
+} // namespace Moose::MFEM
 #endif

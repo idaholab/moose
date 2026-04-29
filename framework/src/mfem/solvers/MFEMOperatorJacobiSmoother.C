@@ -12,31 +12,37 @@
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
+registerMooseMFEMObject("MooseApp", OperatorJacobiSmoother);
 
-InputParameters
-MFEMOperatorJacobiSmoother::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+OperatorJacobiSmoother::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
-
+  params.addParam<double>(
+      "damping",
+      1.0,
+      "Damping factor omega for the scaled-Jacobi iteration y = omega * D^{-1} * x. "
+      "When used as a multigrid smoother, omega must satisfy omega < 2/lambda_max(D^{-1}A).");
   return params;
 }
 
-MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
-  : MFEMSolverBase(parameters)
+OperatorJacobiSmoother::OperatorJacobiSmoother(const InputParameters & parameters)
+  : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMOperatorJacobiSmoother::constructSolver()
+OperatorJacobiSmoother::constructSolver()
 {
-  _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
+  _solver = std::make_unique<mfem::OperatorJacobiSmoother>(getParam<double>("damping"));
 }
 
 void
-MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+OperatorJacobiSmoother::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
@@ -45,4 +51,5 @@ MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<
   }
 }
 
+} // namespace Moose::MFEM
 #endif

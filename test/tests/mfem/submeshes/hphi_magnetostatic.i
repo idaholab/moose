@@ -165,17 +165,17 @@ vacuum_permeability = 1.0
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 100
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-8
+    l_max_its = 100
+  []
 []
 
 [Executioner]

@@ -70,16 +70,16 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-12
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-12
+  []
 []
 
 [Executioner]

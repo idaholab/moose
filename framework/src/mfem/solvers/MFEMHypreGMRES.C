@@ -11,13 +11,16 @@
 
 #include "MFEMHypreGMRES.h"
 #include "MFEMProblem.h"
+#include "MFEMHyprePatch.h"
 
-registerMooseObject("MooseApp", MFEMHypreGMRES);
+registerMooseMFEMObject("MooseApp", HypreGMRES);
 
-InputParameters
-MFEMHypreGMRES::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+HypreGMRES::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the generalized minimal residual method.");
 
@@ -26,18 +29,19 @@ MFEMHypreGMRES::validParams()
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<Moose::MFEM::SolverName>("preconditioner",
+                                           "Optional choice of preconditioner to use.");
 
   return params;
 }
 
-MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
+HypreGMRES::HypreGMRES(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMHypreGMRES::constructSolver()
+HypreGMRES::constructSolver()
 {
   auto solver = std::make_unique<mfem::patched::HypreGMRES>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
@@ -50,14 +54,14 @@ MFEMHypreGMRES::constructSolver()
 }
 
 void
-MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreGMRES::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
+    _preconditioner->setupLOR(a, tdofs);
     setPreconditioner(static_cast<mfem::HypreGMRES &>(*_solver));
   }
   else if (_lor)
@@ -75,4 +79,5 @@ MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs
   }
 }
 
+} // namespace Moose::MFEM
 #endif

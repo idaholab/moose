@@ -13,17 +13,19 @@
 
 #include "MFEMMixedBilinearFormKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k \vec \nabla u, \vec v)
  * \f]
  */
-class MFEMMixedVectorGradientKernel : public MFEMMixedBilinearFormKernel
+class MixedVectorGradientKernel : public MixedBilinearFormKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMMixedVectorGradientKernel(const InputParameters & parameters);
+  MixedVectorGradientKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
@@ -31,4 +33,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

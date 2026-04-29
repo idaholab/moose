@@ -30,18 +30,20 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
 
   bc_complex_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_normal_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_normal_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_normal_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_normal_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
-  MFEMBoundaryNormalIntegratedBC & normal_integrated_bc = addObject<MFEMBoundaryNormalIntegratedBC>(
-      "MFEMBoundaryNormalIntegratedBC", "bc1", bc_normal_params);
-  MFEMComplexIntegratedBC & complex_integrated_bc = addObject<MFEMComplexIntegratedBC>(
-      "MFEMComplexIntegratedBC", "bc_complex", bc_complex_params);
+  Moose::MFEM::BoundaryNormalIntegratedBC & normal_integrated_bc =
+      addObject<Moose::MFEM::BoundaryNormalIntegratedBC>(
+          "MFEMBoundaryNormalIntegratedBC", "bc1", bc_normal_params);
+  Moose::MFEM::ComplexIntegratedBC & complex_integrated_bc =
+      addObject<Moose::MFEM::ComplexIntegratedBC>(
+          "MFEMComplexIntegratedBC", "bc_complex", bc_complex_params);
 
   complex_integrated_bc.setRealBC(
-      std::dynamic_pointer_cast<MFEMIntegratedBC>(normal_integrated_bc.getSharedPtr()));
+      std::dynamic_pointer_cast<Moose::MFEM::IntegratedBC>(normal_integrated_bc.getSharedPtr()));
   complex_integrated_bc.setImagBC(
-      std::dynamic_pointer_cast<MFEMIntegratedBC>(normal_integrated_bc.getSharedPtr()));
+      std::dynamic_pointer_cast<Moose::MFEM::IntegratedBC>(normal_integrated_bc.getSharedPtr()));
 
   // Test the complex integrated BC returns integrators of the expected type
   auto lf_real =
@@ -79,22 +81,23 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedBilinearFormBC)
   // Construct boundary condition
   InputParameters flux_bc_params = _factory.getValidParams("MFEMConvectiveHeatFluxBC");
   flux_bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  flux_bc_params.set<MFEMScalarCoefficientName>("heat_transfer_coefficient") = "htc";
-  flux_bc_params.set<MFEMScalarCoefficientName>("T_infinity") = "Tinf";
+  flux_bc_params.set<Moose::MFEM::ScalarCoefficientName>("heat_transfer_coefficient") = "htc";
+  flux_bc_params.set<Moose::MFEM::ScalarCoefficientName>("T_infinity") = "Tinf";
   flux_bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
   InputParameters bc_complex_params = _factory.getValidParams("MFEMComplexIntegratedBC");
   bc_complex_params.set<VariableName>("variable") = "test_cmplx_variable_name";
 
-  MFEMConvectiveHeatFluxBC & flux_bc =
-      addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", flux_bc_params);
-  MFEMComplexIntegratedBC & complex_integrated_bc = addObject<MFEMComplexIntegratedBC>(
-      "MFEMComplexIntegratedBC", "bc_complex", bc_complex_params);
+  Moose::MFEM::ConvectiveHeatFluxBC & flux_bc = addObject<Moose::MFEM::ConvectiveHeatFluxBC>(
+      "MFEMConvectiveHeatFluxBC", "bc1", flux_bc_params);
+  Moose::MFEM::ComplexIntegratedBC & complex_integrated_bc =
+      addObject<Moose::MFEM::ComplexIntegratedBC>(
+          "MFEMComplexIntegratedBC", "bc_complex", bc_complex_params);
 
   complex_integrated_bc.setRealBC(
-      std::dynamic_pointer_cast<MFEMIntegratedBC>(flux_bc.getSharedPtr()));
+      std::dynamic_pointer_cast<Moose::MFEM::IntegratedBC>(flux_bc.getSharedPtr()));
   complex_integrated_bc.setImagBC(
-      std::dynamic_pointer_cast<MFEMIntegratedBC>(flux_bc.getSharedPtr()));
+      std::dynamic_pointer_cast<Moose::MFEM::IntegratedBC>(flux_bc.getSharedPtr()));
 
   // Test the complex integrated BC returns integrators of the expected type
   auto lf_real =

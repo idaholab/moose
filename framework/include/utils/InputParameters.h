@@ -2487,8 +2487,8 @@ template <typename T>
 constexpr bool
 isMFEMFunctorNameTypeHelper(T *)
 {
-  return std::is_same_v<T, MFEMScalarCoefficientName> ||
-         std::is_same_v<T, MFEMVectorCoefficientName>;
+  return std::is_same_v<T, Moose::MFEM::ScalarCoefficientName> ||
+         std::is_same_v<T, Moose::MFEM::VectorCoefficientName>;
 }
 
 template <typename T, typename A>
@@ -2506,7 +2506,7 @@ isScalarFunctorNameTypeHelper(T *)
 {
   return std::is_same_v<T, MooseFunctorName>
 #ifdef MOOSE_MFEM_ENABLED
-         || std::is_same_v<T, MFEMScalarCoefficientName>
+         || std::is_same_v<T, Moose::MFEM::ScalarCoefficientName>
 #endif
       ;
 }
@@ -2523,7 +2523,7 @@ constexpr bool
 isVectorFunctorNameTypeHelper(T *)
 {
 #ifdef MOOSE_MFEM_ENABLED
-  return std::is_same_v<T, MFEMVectorCoefficientName>;
+  return std::is_same_v<T, Moose::MFEM::VectorCoefficientName>;
 #else
   return false;
 #endif

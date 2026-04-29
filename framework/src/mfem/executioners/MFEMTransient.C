@@ -14,38 +14,46 @@
 #include "TimeDependentEquationSystemProblemOperator.h"
 #include "TimeStepper.h"
 
-registerMooseObject("MooseApp", MFEMTransient);
+registerMooseMFEMObject("MooseApp", Transient);
 
-InputParameters
-MFEMTransient::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMProblemSolve::validParams();
+InputParameters
+Transient::validParams()
+{
+  InputParameters params = ProblemSolve::validParams();
   params += TransientBase::validParams();
   params.addClassDescription("Executioner for transient MFEM problems.");
   return params;
 }
 
-MFEMTransient::MFEMTransient(const InputParameters & params)
+Transient::Transient(const InputParameters & params)
   : TransientBase(params),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem(dynamic_cast<Problem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
     _mfem_problem_solve(*this, getProblemOperators())
 {
+  _fixed_point_solve->setInnerSolve(_mfem_problem_solve);
+
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
-        _mfem_problem_data.time_derivative_map);
+    _mfem_problem_data.eqn_system =
+        std::make_shared<TimeDependentEquationSystem>(_mfem_problem_data.time_derivative_map);
     auto problem_operator =
-        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(_mfem_problem);
+        std::make_shared<TimeDependentEquationSystemProblemOperator>(_mfem_problem);
     addProblemOperator(std::move(problem_operator));
   }
 }
 
 void
-MFEMTransient::init()
+Transient::init()
 {
   TransientBase::init();
+
+  if (_mfem_problem_data.nonlinear_solver)
+    _mfem_problem_data.eqn_system->SetSolverRequiresGradient(
+        _mfem_problem_data.nonlinear_solver->requiresGradient());
 
   // Set up initial conditions
   _mfem_problem_data.eqn_system->Init(
@@ -58,10 +66,12 @@ MFEMTransient::init()
     problem_operator->SetGridFunctions();
     problem_operator->Init(_mfem_problem_data.f);
   }
+
+  _mfem_problem_solve.initialSetup();
 }
 
 void
-MFEMTransient::takeStep(Real input_dt)
+Transient::takeStep(Real input_dt)
 {
   _dt_old = _dt;
 
@@ -106,4 +116,5 @@ MFEMTransient::takeStep(Real input_dt)
   _time_stepper->postSolve();
 }
 
+} // namespace Moose::MFEM
 #endif

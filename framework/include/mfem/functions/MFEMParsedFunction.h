@@ -30,8 +30,8 @@ public:
   void initialSetup() override;
 
 protected:
-  /// reference to the MFEMProblem instance
-  MFEMProblem & _mfem_problem;
+  /// reference to the Moose::MFEM::Problem instance
+  Moose::MFEM::Problem & _mfem_problem;
   /// function parser object
   SymFunctionPtr _sym_function;
   /// coordinate and time variable names

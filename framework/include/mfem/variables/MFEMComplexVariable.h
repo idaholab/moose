@@ -5,15 +5,17 @@
 #include "MFEMFESpace.h"
 #include "MFEMObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParComplexGridFunction object.
  */
-class MFEMComplexVariable : public MFEMObject
+class ComplexVariable : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexVariable(const InputParameters & parameters);
+  ComplexVariable(const InputParameters & parameters);
 
   /// Returns a shared pointer to the constructed gridfunction.
   inline std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction() const
@@ -22,10 +24,13 @@ public:
   }
 
   /// Returns a reference to the fespace used by the gridfunction.
-  inline const MFEMFESpace & getFESpace() const { return _fespace; }
+  inline const FESpace & getFESpace() const { return _fespace; }
+
+  /// Returns true if the variable lives on a scalar (vdim == 1) finite element space.
+  inline bool isScalar() const { return _fespace.isScalar(); }
 
 protected:
-  const MFEMFESpace & _fespace;
+  const FESpace & _fespace;
 
 private:
   /// Constructs the gridfunction.
@@ -35,4 +40,5 @@ private:
   const std::shared_ptr<mfem::ParComplexGridFunction> _cmplx_gridfunction{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

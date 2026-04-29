@@ -11,20 +11,22 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 
+namespace Moose::MFEM
+{
 /**
  * Wrapper for mfem::HypreBoomerAMG solver.
  */
-class MFEMHypreBoomerAMG : public MFEMSolverBase
+class HypreBoomerAMG : public LinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMHypreBoomerAMG(const InputParameters &);
+  HypreBoomerAMG(const InputParameters &);
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
+  void setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
 protected:
   void constructSolver() override;
@@ -33,4 +35,5 @@ private:
   std::shared_ptr<mfem::ParFiniteElementSpace> _mfem_fespace{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

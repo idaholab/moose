@@ -13,6 +13,8 @@
 
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Project \f$ s \vec u \cdot \vec v* \f$ onto a complex scalar MFEM auxvariable.
  *
@@ -20,13 +22,13 @@
  *  - The target variable's FE Space must be L2.
  *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
-class MFEMComplexInnerProductAux : public MFEMComplexAuxKernel
+class ComplexInnerProductAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexInnerProductAux(const InputParameters & parameters);
-  ~MFEMComplexInnerProductAux() override = default;
+  ComplexInnerProductAux(const InputParameters & parameters);
+  ~ComplexInnerProductAux() override = default;
 
   void execute() override;
 
@@ -50,4 +52,5 @@ protected:
   mfem::SumCoefficient _final_coef_imag;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

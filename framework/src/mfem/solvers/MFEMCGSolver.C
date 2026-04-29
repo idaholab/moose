@@ -12,12 +12,14 @@
 #include "MFEMCGSolver.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMCGSolver);
+registerMooseMFEMObject("MooseApp", CGSolver);
 
-InputParameters
-MFEMCGSolver::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+CGSolver::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the conjugate gradient method.");
 
@@ -25,18 +27,19 @@ MFEMCGSolver::validParams()
   params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<Moose::MFEM::SolverName>("preconditioner",
+                                           "Optional choice of preconditioner to use.");
 
   return params;
 }
 
-MFEMCGSolver::MFEMCGSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
+CGSolver::CGSolver(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMCGSolver::constructSolver()
+CGSolver::constructSolver()
 {
   auto solver = std::make_unique<mfem::CGSolver>(getMFEMProblem().getComm());
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
@@ -48,14 +51,14 @@ MFEMCGSolver::constructSolver()
 }
 
 void
-MFEMCGSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+CGSolver::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
+    _preconditioner->setupLOR(a, tdofs);
     setPreconditioner(static_cast<mfem::CGSolver &>(*_solver));
   }
   else if (_lor)
@@ -71,4 +74,5 @@ MFEMCGSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   }
 }
 
+} // namespace Moose::MFEM
 #endif

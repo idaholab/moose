@@ -17,16 +17,18 @@
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
 
-class MFEMProblem;
+namespace Moose::MFEM
+{
+class Problem;
 
 /**
  * Thin base for MFEM objects backed directly by MooseObject instead of UserObject.
  */
-class MFEMObject : public MooseObject,
-                   protected FunctionInterface,
-                   protected PostprocessorInterface,
-                   protected VectorPostprocessorInterface,
-                   protected ReporterInterface
+class Object : public MooseObject,
+               protected FunctionInterface,
+               protected PostprocessorInterface,
+               protected VectorPostprocessorInterface,
+               protected ReporterInterface
 {
 public:
   /**
@@ -37,29 +39,31 @@ public:
   /**
    * Construct an MFEM object backed directly by MooseObject.
    */
-  MFEMObject(const InputParameters & parameters);
+  Object(const InputParameters & parameters);
 
   /**
    * Return the owning MFEM problem.
    */
-  MFEMProblem & getMFEMProblem() { return _mfem_problem; }
+  Problem & getMFEMProblem() { return _mfem_problem; }
   /**
    * Return the owning MFEM problem.
    */
-  const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
+  const Problem & getMFEMProblem() const { return _mfem_problem; }
 
   /**
    * Retrieve a scalar MFEM coefficient by its declared name.
    */
-  mfem::Coefficient & getScalarCoefficientByName(const MFEMScalarCoefficientName & name);
+  mfem::Coefficient & getScalarCoefficientByName(const Moose::MFEM::ScalarCoefficientName & name);
   /**
    * Retrieve a vector MFEM coefficient by its declared name.
    */
-  mfem::VectorCoefficient & getVectorCoefficientByName(const MFEMVectorCoefficientName & name);
+  mfem::VectorCoefficient &
+  getVectorCoefficientByName(const Moose::MFEM::VectorCoefficientName & name);
   /**
    * Retrieve a matrix MFEM coefficient by its declared name.
    */
-  mfem::MatrixCoefficient & getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name);
+  mfem::MatrixCoefficient &
+  getMatrixCoefficientByName(const Moose::MFEM::MatrixCoefficientName & name);
   /**
    * Retrieve a scalar MFEM coefficient using the value of an input parameter.
    */
@@ -75,7 +79,8 @@ public:
 
 private:
   /// Owning MFEM problem for this object.
-  MFEMProblem & _mfem_problem;
+  Problem & _mfem_problem;
 };
 
+} // namespace Moose::MFEM
 #endif

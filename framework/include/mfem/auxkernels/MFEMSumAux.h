@@ -19,14 +19,16 @@
 /*
  * Class to scale and sum an arbitrary number of MFEM variables into an auxiliary variable.
  */
-class MFEMSumAux : public MFEMAuxKernel
+namespace Moose::MFEM
+{
+class SumAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMSumAux(const InputParameters & parameters);
+  SumAux(const InputParameters & parameters);
 
-  virtual ~MFEMSumAux() = default;
+  virtual ~SumAux() = default;
 
   // Computes the auxvariable.
   virtual void execute() override;
@@ -40,4 +42,5 @@ protected:
   std::vector<const mfem::ParGridFunction *> _summed_vars;
 };
 
+} // namespace Moose::MFEM
 #endif

@@ -12,29 +12,32 @@
 #include "MFEMVectorDomainLFKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMVectorDomainLFKernel);
+registerMooseMFEMObject("MooseApp", VectorDomainLFKernel);
 
-InputParameters
-MFEMVectorDomainLFKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+VectorDomainLFKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
                              "$(\\vec f, \\vec v)_\\Omega$ "
                              "arising from the weak form of the forcing term $\\vec f$.");
-  params.addParam<MFEMVectorCoefficientName>(
+  params.addParam<Moose::MFEM::VectorCoefficientName>(
       "vector_coefficient", "1. 1. 1.", "Name of body force density f.");
   return params;
 }
 
-MFEMVectorDomainLFKernel::MFEMVectorDomainLFKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+VectorDomainLFKernel::VectorDomainLFKernel(const InputParameters & parameters)
+  : Kernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 
 mfem::LinearFormIntegrator *
-MFEMVectorDomainLFKernel::createLFIntegrator()
+VectorDomainLFKernel::createLFIntegrator()
 {
   return new mfem::VectorDomainLFIntegrator(_vec_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

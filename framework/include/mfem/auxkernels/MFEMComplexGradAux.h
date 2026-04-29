@@ -16,17 +16,19 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to set an H(curl) auxvariable to be the gradient of a complex H1 scalar variable.
  */
-class MFEMComplexGradAux : public MFEMComplexAuxKernel
+class ComplexGradAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexGradAux(const InputParameters & parameters);
+  ComplexGradAux(const InputParameters & parameters);
 
-  virtual ~MFEMComplexGradAux() = default;
+  virtual ~ComplexGradAux() = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -35,7 +37,7 @@ public:
   virtual void update() override;
 
 protected:
-  /// Name of source MFEMVariable to take the gradient of.
+  /// Name of source Moose::MFEM::Variable to take the gradient of.
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   mfem::ParComplexGridFunction & _source_var;
@@ -46,4 +48,5 @@ protected:
   mfem::common::ParDiscreteGradOperator _grad;
 };
 
+} // namespace Moose::MFEM
 #endif

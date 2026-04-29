@@ -13,12 +13,14 @@
 
 #include "MFEMSimplifiedFESpace.h"
 
-class MFEMVectorFESpace : public MFEMSimplifiedFESpace
+namespace Moose::MFEM
+{
+class VectorFESpace : public SimplifiedFESpace
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFESpace(const InputParameters & parameters);
+  VectorFESpace(const InputParameters & parameters);
 
   virtual bool isScalar() const override { return false; }
 
@@ -40,4 +42,5 @@ private:
   const int _range_dim;
 };
 
+} // namespace Moose::MFEM
 #endif

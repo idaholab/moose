@@ -11,16 +11,16 @@
 
 #include "MFEMEssentialBC.h"
 
-InputParameters
-MFEMEssentialBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
+InputParameters
+EssentialBC::validParams()
+{
+  InputParameters params = BoundaryCondition::validParams();
   return params;
 }
 
-MFEMEssentialBC::MFEMEssentialBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters)
-{
-}
+EssentialBC::EssentialBC(const InputParameters & parameters) : BoundaryCondition(parameters) {}
 
+} // namespace Moose::MFEM
 #endif

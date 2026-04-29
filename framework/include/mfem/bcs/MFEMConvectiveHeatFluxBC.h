@@ -13,17 +13,19 @@
 
 #include "MFEMIntegratedBC.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (h (T-T_\infty), T')
  * \f]
  */
-class MFEMConvectiveHeatFluxBC : public MFEMIntegratedBC
+class ConvectiveHeatFluxBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMConvectiveHeatFluxBC(const InputParameters & parameters);
+  ConvectiveHeatFluxBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
@@ -37,4 +39,5 @@ protected:
   mfem::ProductCoefficient & _external_heat_flux_coef;
 };
 
+} // namespace Moose::MFEM
 #endif

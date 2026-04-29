@@ -11,33 +11,36 @@
 
 #include "MFEMComplexVectorProjectionAux.h"
 
-registerMooseObject("MooseApp", MFEMComplexVectorProjectionAux);
+registerMooseMFEMObject("MooseApp", ComplexVectorProjectionAux);
 
-InputParameters
-MFEMComplexVectorProjectionAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexVectorProjectionAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Projects a a real and imaginary vector coefficient onto a complex vector MFEM auxvariable.");
-  params.addRequiredParam<MFEMVectorCoefficientName>(
+  params.addRequiredParam<Moose::MFEM::VectorCoefficientName>(
       "vector_coefficient_real", "Name of the real part of the vector coefficient to project.");
-  params.addRequiredParam<MFEMVectorCoefficientName>(
+  params.addRequiredParam<Moose::MFEM::VectorCoefficientName>(
       "vector_coefficient_imag",
       "Name of the imaginary part of the vector coefficient to project.");
   return params;
 }
 
-MFEMComplexVectorProjectionAux::MFEMComplexVectorProjectionAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexVectorProjectionAux::ComplexVectorProjectionAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _vec_coef_real(getVectorCoefficient("vector_coefficient_real")),
     _vec_coef_imag(getVectorCoefficient("vector_coefficient_imag"))
 {
 }
 
 void
-MFEMComplexVectorProjectionAux::execute()
+ComplexVectorProjectionAux::execute()
 {
   _result_var.ProjectCoefficient(_vec_coef_real, _vec_coef_imag);
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -12,27 +12,29 @@
 #include "MFEMGenericFunctorMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMGenericFunctorMaterial);
+registerMooseMFEMObject("MooseApp", GenericFunctorMaterial);
 
-InputParameters
-MFEMGenericFunctorMaterial::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMFunctorMaterial::validParams();
+InputParameters
+GenericFunctorMaterial::validParams()
+{
+  InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Declares material scalar properties based on names and coefficients "
                              "prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
       "prop_names", "The names of the properties this material will have");
-  params.addRequiredParam<std::vector<MFEMScalarCoefficientName>>(
+  params.addRequiredParam<std::vector<Moose::MFEM::ScalarCoefficientName>>(
       "prop_values",
       "The corresponding names of coefficients associated with the named properties");
 
   return params;
 }
 
-MFEMGenericFunctorMaterial::MFEMGenericFunctorMaterial(const InputParameters & parameters)
-  : MFEMFunctorMaterial(parameters),
+GenericFunctorMaterial::GenericFunctorMaterial(const InputParameters & parameters)
+  : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(getParam<std::vector<MFEMScalarCoefficientName>>("prop_values"))
+    _prop_values(getParam<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values"))
 {
   if (_prop_names.size() != _prop_values.size())
     paramError("prop_names", "Must match the size of prop_values");
@@ -44,6 +46,7 @@ MFEMGenericFunctorMaterial::MFEMGenericFunctorMaterial(const InputParameters & p
                                       _prop_values[i]);
 }
 
-MFEMGenericFunctorMaterial::~MFEMGenericFunctorMaterial() {}
+GenericFunctorMaterial::~GenericFunctorMaterial() {}
 
+} // namespace Moose::MFEM
 #endif

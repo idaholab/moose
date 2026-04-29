@@ -12,12 +12,14 @@
 #include "MFEMTimeDerivativeMassKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMTimeDerivativeMassKernel);
+registerMooseMFEMObject("MooseApp", TimeDerivativeMassKernel);
 
-InputParameters
-MFEMTimeDerivativeMassKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMMassKernel::validParams();
+InputParameters
+TimeDerivativeMassKernel::validParams()
+{
+  InputParameters params = MassKernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k \\dot{u}, v)_\\Omega$ "
                              "arising from the weak form of the operator "
@@ -25,11 +27,12 @@ MFEMTimeDerivativeMassKernel::validParams()
   return params;
 }
 
-MFEMTimeDerivativeMassKernel::MFEMTimeDerivativeMassKernel(const InputParameters & parameters)
-  : MFEMMassKernel(parameters),
+TimeDerivativeMassKernel::TimeDerivativeMassKernel(const InputParameters & parameters)
+  : MassKernel(parameters),
     _var_dot_name(
         getMFEMProblem().getProblemData().time_derivative_map.getTimeDerivativeName(_test_var_name))
 {
 }
 
+} // namespace Moose::MFEM
 #endif

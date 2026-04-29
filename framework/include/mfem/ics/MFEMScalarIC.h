@@ -13,15 +13,18 @@
 
 #include "MFEMInitialCondition.h"
 
+namespace Moose::MFEM
+{
 /**
- * Class used to set the initial value(s) on a scalar valued MFEMVariable.
+ * Class used to set the initial value(s) on a scalar valued Moose::MFEM::Variable.
  */
-class MFEMScalarIC : public MFEMInitialCondition
+class ScalarIC : public InitialCondition
 {
 public:
   static InputParameters validParams();
-  MFEMScalarIC(const InputParameters & params);
+  ScalarIC(const InputParameters & params);
   virtual void execute() override;
 };
 
+} // namespace Moose::MFEM
 #endif

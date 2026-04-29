@@ -11,27 +11,29 @@
 
 #include "MFEMComplexVectorNormalDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMComplexVectorNormalDirichletBC);
+registerMooseMFEMObject("MooseApp", ComplexVectorNormalDirichletBC);
 
-InputParameters
-MFEMComplexVectorNormalDirichletBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexVectorDirichletBCBase::validParams();
+InputParameters
+ComplexVectorNormalDirichletBC::validParams()
+{
+  InputParameters params = ComplexVectorDirichletBCBase::validParams();
   params.addClassDescription(
       "Applies a complex Dirichlet condition to the normal components of a vector variable.");
   return params;
 }
 
-MFEMComplexVectorNormalDirichletBC::MFEMComplexVectorNormalDirichletBC(
-    const InputParameters & parameters)
-  : MFEMComplexVectorDirichletBCBase(parameters)
+ComplexVectorNormalDirichletBC::ComplexVectorNormalDirichletBC(const InputParameters & parameters)
+  : ComplexVectorDirichletBCBase(parameters)
 {
 }
 
 void
-MFEMComplexVectorNormalDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
+ComplexVectorNormalDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficientNormal(_vec_coef_real, _vec_coef_imag, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

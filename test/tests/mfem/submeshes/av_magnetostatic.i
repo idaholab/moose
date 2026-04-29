@@ -103,18 +103,18 @@
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
   []
-[]
-
-[Solver]
-  type = MFEMHyprePCG
-  preconditioner = ams
-  l_tol = 1e-14
-  l_max_its = 1000
+  [main]
+    type = MFEMHyprePCG
+    preconditioner = ams
+    l_tol = 1e-14
+    l_max_its = 1000
+  []
 []
 
 [Executioner]

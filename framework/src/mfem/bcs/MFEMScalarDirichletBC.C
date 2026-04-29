@@ -11,27 +11,30 @@
 
 #include "MFEMScalarDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMScalarDirichletBC);
+registerMooseMFEMObject("MooseApp", ScalarDirichletBC);
 
-InputParameters
-MFEMScalarDirichletBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMEssentialBC::validParams();
+InputParameters
+ScalarDirichletBC::validParams()
+{
+  InputParameters params = EssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "0.", "The coefficient setting the values on the essential boundary");
   return params;
 }
 
-MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
-  : MFEMEssentialBC(parameters), _coef(getScalarCoefficient("coefficient"))
+ScalarDirichletBC::ScalarDirichletBC(const InputParameters & parameters)
+  : EssentialBC(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 void
-MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
+ScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficient(_coef, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -13,17 +13,19 @@
 
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Projects a scalar coefficient onto a scalar-valued auxvariable.
  */
-class MFEMComplexScalarProjectionAux : public MFEMComplexAuxKernel
+class ComplexScalarProjectionAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexScalarProjectionAux(const InputParameters & parameters);
+  ComplexScalarProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMComplexScalarProjectionAux() = default;
+  virtual ~ComplexScalarProjectionAux() = default;
 
   virtual void execute() override;
 
@@ -34,4 +36,5 @@ protected:
   mfem::Coefficient & _coef_imag;
 };
 
+} // namespace Moose::MFEM
 #endif

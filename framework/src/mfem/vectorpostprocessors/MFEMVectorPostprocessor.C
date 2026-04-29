@@ -11,24 +11,27 @@
 
 #include "MFEMVectorPostprocessor.h"
 
-InputParameters
-MFEMVectorPostprocessor::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMExecutedObject::validParams();
-  params += VectorPostprocessor::validParams();
-  params.registerSystemAttributeName("MFEMExecutedObject");
+InputParameters
+VectorPostprocessor::validParams()
+{
+  InputParameters params = ExecutedObject::validParams();
+  params += ::VectorPostprocessor::validParams();
+  params.registerSystemAttributeName("Moose::MFEM::ExecutedObject");
   return params;
 }
 
-MFEMVectorPostprocessor::MFEMVectorPostprocessor(const InputParameters & parameters)
-  : MFEMExecutedObject(parameters), VectorPostprocessor(this)
+VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
+  : ExecutedObject(parameters), ::VectorPostprocessor(this)
 {
 }
 
 std::optional<std::string>
-MFEMVectorPostprocessor::suppliedVectorPostprocessorName() const
+VectorPostprocessor::suppliedVectorPostprocessorName() const
 {
   return name();
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

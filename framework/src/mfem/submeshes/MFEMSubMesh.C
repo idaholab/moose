@@ -12,15 +12,18 @@
 #include "MFEMSubMesh.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMSubMesh::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params.registerBase("MFEMSubMesh");
-  params.registerSystemAttributeName("MFEMSubMesh");
+InputParameters
+SubMesh::validParams()
+{
+  InputParameters params = Object::validParams();
+  params.registerBase("Moose::MFEM::SubMesh");
+  params.registerSystemAttributeName("Moose::MFEM::SubMesh");
   return params;
 }
 
-MFEMSubMesh::MFEMSubMesh(const InputParameters & parameters) : MFEMObject(parameters) {}
+SubMesh::SubMesh(const InputParameters & parameters) : Object(parameters) {}
 
+} // namespace Moose::MFEM
 #endif

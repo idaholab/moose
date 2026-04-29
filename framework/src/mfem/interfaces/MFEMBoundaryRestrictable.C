@@ -11,8 +11,10 @@
 
 #include "MFEMBoundaryRestrictable.h"
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMBoundaryRestrictable::validParams()
+BoundaryRestrictable::validParams()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
@@ -24,8 +26,8 @@ MFEMBoundaryRestrictable::validParams()
   return params;
 }
 
-MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & parameters,
-                                                   const mfem::ParMesh & mfem_mesh)
+BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters,
+                                           const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _boundary_names(parameters.get<std::vector<BoundaryName>>("boundary")),
     _boundary_attributes(boundariesToAttributes())
@@ -36,7 +38,7 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
 }
 
 mfem::Array<int>
-MFEMBoundaryRestrictable::boundariesToAttributes()
+BoundaryRestrictable::boundariesToAttributes()
 {
   mfem::Array<int> attributes(_boundary_names.size());
   auto & mesh = getMesh();
@@ -65,7 +67,7 @@ MFEMBoundaryRestrictable::boundariesToAttributes()
 }
 
 std::vector<std::string>
-MFEMBoundaryRestrictable::boundariesToStrings()
+BoundaryRestrictable::boundariesToStrings()
 {
   const auto & attrs = _boundary_attributes;
   std::vector<std::string> strs(attrs.Size());
@@ -73,4 +75,5 @@ MFEMBoundaryRestrictable::boundariesToStrings()
   return strs;
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -14,17 +14,19 @@
 #include "MFEMSubMesh.h"
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
  * interior surface on one side, and constructs and stores an mfem::ParSubMesh object
  * associated with it.
  * Access using the getSubMesh() accessor.
  */
-class MFEMCutTransitionSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
+class CutTransitionSubMesh : public SubMesh, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
-  MFEMCutTransitionSubMesh(const InputParameters & parameters);
+  CutTransitionSubMesh(const InputParameters & parameters);
 
 protected:
   virtual void buildSubMesh() override;
@@ -52,4 +54,5 @@ protected:
   mfem::Vector _cut_normal;
 };
 
+} // namespace Moose::MFEM
 #endif

@@ -12,17 +12,19 @@
 #include "MFEMComplexCurlAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexCurlAux);
+registerMooseMFEMObject("MooseApp", ComplexCurlAux);
 
-InputParameters
-MFEMComplexCurlAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexCurlAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Calculates the curl of a complex H(curl) conforming ND source variable and stores the result"
       " on an H(div) conforming RT result complex auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "source", "Vector H(curl) MFEMComplexVariable to take the curl of.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(curl) Moose::MFEM::ComplexVariable to take the curl of.");
   params.addParam<mfem::real_t>(
       "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
   params.addParam<mfem::real_t>(
@@ -30,8 +32,8 @@ MFEMComplexCurlAux::validParams()
   return params;
 }
 
-MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexCurlAux::ComplexCurlAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getComplexGridFunction(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
@@ -45,7 +47,7 @@ MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
 
 // Computes the auxvariable.
 void
-MFEMComplexCurlAux::execute()
+ComplexCurlAux::execute()
 {
   update();
   _curl.AddMult(_source_var.real(), _result_var.real() = 0);
@@ -55,7 +57,7 @@ MFEMComplexCurlAux::execute()
 }
 
 void
-MFEMComplexCurlAux::update()
+ComplexCurlAux::update()
 {
   if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
   {
@@ -66,4 +68,5 @@ MFEMComplexCurlAux::update()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

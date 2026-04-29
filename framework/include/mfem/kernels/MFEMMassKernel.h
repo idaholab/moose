@@ -13,17 +13,19 @@
 
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k u, v)
  * \f]
  */
-class MFEMMassKernel : public MFEMKernel
+class MassKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMMassKernel(const InputParameters & parameters);
+  MassKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
@@ -31,4 +33,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

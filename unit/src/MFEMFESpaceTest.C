@@ -33,14 +33,15 @@ public:
     InputParameters mesh_params = _factory.getValidParams("MFEMMesh");
     mesh_params.set<MeshFileName>("file") =
         "../test/tests/mfem/mesh/" + std::get<0>(this->GetParam());
-    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMMesh", "moose_mesh", mesh_params);
+    _mfem_mesh_ptr =
+        _factory.createUnique<Moose::MFEM::Mesh>("MFEMMesh", "moose_mesh", mesh_params);
     _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
     _mfem_mesh_ptr->buildMesh();
 
     InputParameters problem_params = _factory.getValidParams("MFEMProblem");
     problem_params.set<MooseMesh *>("mesh") = _mfem_mesh_ptr.get();
     problem_params.set<std::string>(MooseBase::name_param) = "name2";
-    _mfem_problem = _factory.create<MFEMProblem>("MFEMProblem", "problem", problem_params);
+    _mfem_problem = _factory.create<Moose::MFEM::Problem>("MFEMProblem", "problem", problem_params);
 
     _app->actionWarehouse().problemBase() = _mfem_problem;
   }
@@ -75,16 +76,16 @@ public:
         mesh_name, std::make_tuple(input_params...), expected_fec, expected_vdim, expected_scalar);
   }
 
-  std::shared_ptr<MFEMFESpace> fespace;
+  std::shared_ptr<Moose::MFEM::FESpace> fespace;
 
 protected:
-  std::unique_ptr<MFEMMesh> _mfem_mesh_ptr;
+  std::unique_ptr<Moose::MFEM::Mesh> _mfem_mesh_ptr;
   std::shared_ptr<MooseApp> _app;
   Factory & _factory;
-  std::shared_ptr<MFEMProblem> _mfem_problem;
+  std::shared_ptr<Moose::MFEM::Problem> _mfem_problem;
 };
 
-class GenericFESpaceTest : public MFEMFESpaceUnitTest<MFEMGenericFESpace, std::string, int>
+class GenericFESpaceTest : public MFEMFESpaceUnitTest<Moose::MFEM::GenericFESpace, std::string, int>
 {
   virtual std::string GetFESpaceClass() const override { return "MFEMGenericFESpace"; }
 
@@ -132,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(
         GenericFESpaceTest::makeParam(
             "ref-segment.mesh", "H1_Trace_2D_P4", 2, "H1_Trace_2D_P4", 2, false)));
 
-class ScalarFESpaceTest : public MFEMFESpaceUnitTest<MFEMScalarFESpace, std::string, int>
+class ScalarFESpaceTest : public MFEMFESpaceUnitTest<Moose::MFEM::ScalarFESpace, std::string, int>
 {
   virtual std::string GetFESpaceClass() const override { return "MFEMScalarFESpace"; }
 
@@ -177,7 +178,8 @@ INSTANTIATE_TEST_SUITE_P(
         ScalarFESpaceTest::makeParam("ref-square.mesh", "L2Int", 3, "L2Int_2D_P3", 1, true),
         ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 4, "L2Int_3D_P4", 1, true)));
 
-class VectorFESpaceTest : public MFEMFESpaceUnitTest<MFEMVectorFESpace, std::string, int, int>
+class VectorFESpaceTest
+  : public MFEMFESpaceUnitTest<Moose::MFEM::VectorFESpace, std::string, int, int>
 {
   virtual std::string GetFESpaceClass() const override { return "MFEMVectorFESpace"; }
 

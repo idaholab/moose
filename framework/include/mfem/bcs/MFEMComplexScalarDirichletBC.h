@@ -13,12 +13,14 @@
 
 #include "MFEMComplexEssentialBC.h"
 
-class MFEMComplexScalarDirichletBC : public MFEMComplexEssentialBC
+namespace Moose::MFEM
+{
+class ComplexScalarDirichletBC : public ComplexEssentialBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexScalarDirichletBC(const InputParameters & parameters);
+  ComplexScalarDirichletBC(const InputParameters & parameters);
 
   void ApplyBC(mfem::ParComplexGridFunction & gridfunc) override;
 
@@ -27,4 +29,5 @@ protected:
   mfem::Coefficient & _coef_imag;
 };
 
+} // namespace Moose::MFEM
 #endif

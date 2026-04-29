@@ -13,17 +13,19 @@
 
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * - (k \vec u, \vec \nabla v)
  * \f]
  */
-class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel
+class VectorFEWeakDivergenceKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEWeakDivergenceKernel(const InputParameters & parameters);
+  VectorFEWeakDivergenceKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
@@ -31,4 +33,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

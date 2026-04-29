@@ -13,15 +13,20 @@
 #include "MFEMProblem.h"
 #include "MooseVariableBase.h"
 
-registerMooseObject("MooseApp", MFEMVariable);
+registerMooseMFEMObject("MooseApp", Variable);
 
-InputParameters
-MFEMVariable::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  // Create user-facing 'boundary' input for restricting inheriting object to boundaries.
-  params.addRequiredParam<MFEMFESpaceName>("fespace",
-                                           "The finite element space this variable is defined on.");
+InputParameters
+Variable::validParams()
+{
+  InputParameters params = Object::validParams();
+  params.addParam<Moose::MFEM::FESpaceName>(
+      "fespace", "The finite element space this variable is defined on.");
+  params.addParam<std::string>(
+      "fespace_hierarchy",
+      "Name of a FESpaceHierarchy; the variable lives on its finest level. "
+      "Mutually exclusive with 'fespace'.");
   // Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
@@ -34,11 +39,8 @@ MFEMVariable::validParams()
   return params;
 }
 
-MFEMVariable::MFEMVariable(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<MFEMFESpaceName>("fespace"))),
-    _gridfunction(buildGridFunction()),
+Variable::Variable(const InputParameters & parameters)
+  : Object(parameters),
     _time_derivative_name(
         isParamValid("time_derivative")
             ? getParam<VariableName>("time_derivative")
@@ -46,13 +48,43 @@ MFEMVariable::MFEMVariable(const InputParameters & parameters)
                   getMFEMProblem().getProblemData().time_derivative_map.createTimeDerivativeName(
                       name())))
 {
+  const bool has_fespace = isParamSetByUser("fespace");
+  const bool has_hierarchy = isParamSetByUser("fespace_hierarchy");
+
+  if (has_fespace == has_hierarchy)
+    mooseError("Variable '",
+               name(),
+               "': exactly one of 'fespace' or 'fespace_hierarchy' must be provided.");
+
+  if (has_fespace)
+  {
+    _fespace_ptr = &getMFEMProblem().getMFEMObject<FESpace>(
+        "Moose::MFEM::FESpace", getParam<Moose::MFEM::FESpaceName>("fespace"));
+    _par_fespace = _fespace_ptr->getFESpace();
+  }
+  else
+  {
+    const auto & hierarchy_name = getParam<std::string>("fespace_hierarchy");
+    _par_fespace = getMFEMProblem().getProblemData().fespaces.GetShared(hierarchy_name);
+  }
+
+  _gridfunction = buildGridFunction();
   *_gridfunction = 0.0;
 }
 
-const std::shared_ptr<mfem::ParGridFunction>
-MFEMVariable::buildGridFunction()
+bool
+Variable::isScalar() const
 {
-  return std::make_shared<mfem::ParGridFunction>(_fespace.getFESpace().get());
+  if (_fespace_ptr)
+    return _fespace_ptr->isScalar();
+  return _par_fespace->GetVDim() == 1;
 }
 
+const std::shared_ptr<mfem::ParGridFunction>
+Variable::buildGridFunction()
+{
+  return std::make_shared<mfem::ParGridFunction>(_par_fespace.get());
+}
+
+} // namespace Moose::MFEM
 #endif

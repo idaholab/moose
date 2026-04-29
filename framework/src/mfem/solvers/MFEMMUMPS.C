@@ -12,12 +12,14 @@
 #include "MFEMMUMPS.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMMUMPS);
+registerMooseMFEMObject("MooseApp", MUMPS);
 
-InputParameters
-MFEMMUMPS::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+MUMPS::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the MUMPS library.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
@@ -25,13 +27,13 @@ MFEMMUMPS::validParams()
   return params;
 }
 
-MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : MFEMSolverBase(parameters)
+MUMPS::MUMPS(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMMUMPS::constructSolver()
+MUMPS::constructSolver()
 {
   auto solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
   solver->SetPrintLevel(getParam<int>("print_level"));
@@ -39,10 +41,11 @@ MFEMMUMPS::constructSolver()
 }
 
 void
-MFEMMUMPS::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+MUMPS::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("MUMPS solver does not support LOR solve");
 }
 
+} // namespace Moose::MFEM
 #endif

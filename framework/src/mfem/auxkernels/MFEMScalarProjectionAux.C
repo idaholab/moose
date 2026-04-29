@@ -11,27 +11,30 @@
 
 #include "MFEMScalarProjectionAux.h"
 
-registerMooseObject("MooseApp", MFEMScalarProjectionAux);
+registerMooseMFEMObject("MooseApp", ScalarProjectionAux);
 
-InputParameters
-MFEMScalarProjectionAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+ScalarProjectionAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Projects a scalar coefficient onto a scalar MFEM auxvariable");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient",
-                                                     "Name of the scalar coefficient to project.");
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>(
+      "coefficient", "Name of the scalar coefficient to project.");
   return params;
 }
 
-MFEMScalarProjectionAux::MFEMScalarProjectionAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+ScalarProjectionAux::ScalarProjectionAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 void
-MFEMScalarProjectionAux::execute()
+ScalarProjectionAux::execute()
 {
   _result_var.ProjectCoefficient(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

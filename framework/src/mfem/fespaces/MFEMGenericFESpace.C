@@ -12,12 +12,14 @@
 #include "MFEMGenericFESpace.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMGenericFESpace);
+registerMooseMFEMObject("MooseApp", GenericFESpace);
 
-InputParameters
-MFEMGenericFESpace::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMFESpace::validParams();
+InputParameters
+GenericFESpace::validParams()
+{
+  InputParameters params = FESpace::validParams();
   params.addClassDescription("Class for creating arbitrary MFEM finite element spaces. It requires "
                              "the user to have some knowledge of how MFEM works.");
   params.addRequiredParam<std::string>("fec_name",
@@ -27,33 +29,33 @@ MFEMGenericFESpace::validParams()
   return params;
 }
 
-MFEMGenericFESpace::MFEMGenericFESpace(const InputParameters & parameters)
-  : MFEMFESpace(parameters),
+GenericFESpace::GenericFESpace(const InputParameters & parameters)
+  : FESpace(parameters),
     _fec_name(parameters.get<std::string>("fec_name")),
     _vdim(parameters.get<int>("vdim"))
 {
 }
 
 std::string
-MFEMGenericFESpace::getFECName() const
+GenericFESpace::getFECName() const
 {
   return _fec_name;
 }
 
 int
-MFEMGenericFESpace::getVDim() const
+GenericFESpace::getVDim() const
 {
   return _vdim;
 }
 
 bool
-MFEMGenericFESpace::isScalar() const
+GenericFESpace::isScalar() const
 {
   return !isVector();
 }
 
 bool
-MFEMGenericFESpace::isVector() const
+GenericFESpace::isVector() const
 {
   std::string fec = getFECName();
   if (!strncmp(fec.c_str(), "RT", 2) || !strncmp(fec.c_str(), "ND", 2))
@@ -62,4 +64,5 @@ MFEMGenericFESpace::isVector() const
   return getVDim() > 1;
 }
 
+} // namespace Moose::MFEM
 #endif

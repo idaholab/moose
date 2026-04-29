@@ -18,7 +18,7 @@ InputParameters
 AddMFEMSolverAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Set the Moose::MFEM solver and the solver options.");
+  params.addClassDescription("Add a Moose::MFEM linear or nonlinear solver object.");
   return params;
 }
 
@@ -30,7 +30,7 @@ AddMFEMSolverAction::AddMFEMSolverAction(const InputParameters & parameters)
 void
 AddMFEMSolverAction::act()
 {
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  Moose::MFEM::Problem * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
   if (mfem_problem)
     mfem_problem->addMFEMSolver(_type, _name, _moose_object_pars);
 }

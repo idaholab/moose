@@ -13,16 +13,18 @@
 
 #include "MFEMFESpace.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParFiniteElementSpace object. Access using the
  * getFESpace() accessor.
  */
-class MFEMGenericFESpace : public MFEMFESpace
+class GenericFESpace : public FESpace
 {
 public:
   static InputParameters validParams();
 
-  MFEMGenericFESpace(const InputParameters & parameters);
+  GenericFESpace(const InputParameters & parameters);
 
   virtual bool isScalar() const override;
 
@@ -44,4 +46,5 @@ private:
   const int _vdim;
 };
 
+} // namespace Moose::MFEM
 #endif

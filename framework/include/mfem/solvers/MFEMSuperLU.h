@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 
 namespace Moose::MFEM
 {
@@ -36,23 +36,23 @@ private:
   std::unique_ptr<mfem::SuperLURowLocMatrix> _a_superlu{nullptr};
   std::unique_ptr<mfem::SuperLUSolver> _s_superlu{nullptr};
 };
-} // namespace Moose::MFEM
 
 /**
- * Wrapper for Moose::MFEM::SuperLUSolver.
+ * Wrapper for SuperLUSolver.
  */
-class MFEMSuperLU : public MFEMSolverBase
+class SuperLU : public LinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMSuperLU(const InputParameters & parameters);
+  SuperLU(const InputParameters & parameters);
 
 protected:
   void constructSolver() override;
 
   /// Updates the solver with the bilinear form in case LOR solve is required
-  void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
+  void setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 };
+} // namespace Moose::MFEM
 
 #endif

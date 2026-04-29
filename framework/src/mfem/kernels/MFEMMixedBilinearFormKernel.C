@@ -11,10 +11,12 @@
 
 #include "MFEMMixedBilinearFormKernel.h"
 
-InputParameters
-MFEMMixedBilinearFormKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+MixedBilinearFormKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Base class for mixed bilinear form kernels, allowing different trial and test variables.");
   params.addParam<VariableName>(
@@ -26,8 +28,8 @@ MFEMMixedBilinearFormKernel::validParams()
   return params;
 }
 
-MFEMMixedBilinearFormKernel::MFEMMixedBilinearFormKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
+MixedBilinearFormKernel::MixedBilinearFormKernel(const InputParameters & parameters)
+  : Kernel(parameters),
     _trial_var_name(isParamValid("trial_variable") ? getParam<VariableName>("trial_variable")
                                                    : _test_var_name),
     _transpose(getParam<bool>("transpose"))
@@ -35,14 +37,15 @@ MFEMMixedBilinearFormKernel::MFEMMixedBilinearFormKernel(const InputParameters &
 }
 
 const VariableName &
-MFEMMixedBilinearFormKernel::getTrialVariableName() const
+MixedBilinearFormKernel::getTrialVariableName() const
 {
   return _trial_var_name;
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedBilinearFormKernel::createBFIntegrator()
+MixedBilinearFormKernel::createBFIntegrator()
 {
   return _transpose ? new mfem::TransposeIntegrator(createMBFIntegrator()) : createMBFIntegrator();
 }
+} // namespace Moose::MFEM
 #endif

@@ -13,16 +13,18 @@
 
 #include "MFEMExecutedObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to transfer MFEM variable data to or from a restricted copy of the variable defined on an a
- * subspace of an MFEMMesh, represented as an MFEMSubMesh.
+ * subspace of an Moose::MFEM::Mesh, represented as an Moose::MFEM::SubMesh.
  */
-class MFEMSubMeshTransfer : public MFEMExecutedObject
+class SubMeshTransfer : public ExecutedObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMSubMeshTransfer(const InputParameters & parameters);
+  SubMeshTransfer(const InputParameters & parameters);
 
   virtual std::optional<std::string> suppliedVariableName() const override;
 
@@ -30,14 +32,15 @@ public:
   virtual void execute() override;
 
 private:
-  /// Name of source MFEMVariable to transfer DoF data from.
+  /// Name of source Moose::MFEM::Variable to transfer DoF data from.
   const VariableName & _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParGridFunction & _source_var;
-  /// Name of MFEMVariable to store the transferred output in.
+  /// Name of Moose::MFEM::Variable to store the transferred output in.
   const VariableName & _result_var_name;
   /// Reference to result gridfunction.
   mfem::ParGridFunction & _result_var;
 };
 
+} // namespace Moose::MFEM
 #endif

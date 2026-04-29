@@ -13,13 +13,15 @@
 
 #include "MFEMBoundaryCondition.h"
 
-class MFEMComplexEssentialBC : public MFEMBoundaryCondition
+namespace Moose::MFEM
+{
+class ComplexEssentialBC : public BoundaryCondition
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexEssentialBC(const InputParameters & parameters);
-  virtual ~MFEMComplexEssentialBC() = default;
+  ComplexEssentialBC(const InputParameters & parameters);
+  virtual ~ComplexEssentialBC() = default;
 
   /// Get name of the trial variable (gridfunction) the bc acts on.
   /// Defaults to the name of the test variable labelling the weak form.
@@ -29,4 +31,5 @@ public:
   virtual void ApplyBC(mfem::ParComplexGridFunction & gridfunc) = 0;
 };
 
+} // namespace Moose::MFEM
 #endif

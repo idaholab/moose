@@ -23,7 +23,7 @@ class TimeDependentEquationSystemProblemOperator : public TimeDependentProblemOp
                                                    public EquationSystemInterface
 {
 public:
-  TimeDependentEquationSystemProblemOperator(MFEMProblem & problem)
+  TimeDependentEquationSystemProblemOperator(Problem & problem)
     : TimeDependentProblemOperator(problem),
       _equation_system(
           std::dynamic_pointer_cast<TimeDependentEquationSystem>(_problem_data.eqn_system))
@@ -35,8 +35,7 @@ public:
   virtual void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override;
   virtual void Solve() override;
 
-  [[nodiscard]] virtual Moose::MFEM::TimeDependentEquationSystem *
-  GetEquationSystem() const override
+  [[nodiscard]] virtual TimeDependentEquationSystem * GetEquationSystem() const override
   {
     mooseAssert(_equation_system,
                 "No TimeDependentEquationSystem in TimeDependentEquationSystemProblemOperator.");
@@ -48,7 +47,7 @@ protected:
   void BuildEquationSystemOperator(mfem::real_t dt);
 
 private:
-  std::shared_ptr<Moose::MFEM::TimeDependentEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
 } // namespace Moose::MFEM

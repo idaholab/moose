@@ -13,16 +13,18 @@
 
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to construct an MFEM mixed bilinear form integrator to apply to the equation system.
  */
-class MFEMMixedBilinearFormKernel : public MFEMKernel
+class MixedBilinearFormKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMMixedBilinearFormKernel(const InputParameters & parameters);
-  ~MFEMMixedBilinearFormKernel() = default;
+  MixedBilinearFormKernel(const InputParameters & parameters);
+  ~MixedBilinearFormKernel() = default;
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
@@ -41,4 +43,5 @@ protected:
   bool _transpose;
 };
 
+} // namespace Moose::MFEM
 #endif

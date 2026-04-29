@@ -11,12 +11,14 @@
 
 #include "MFEMScalarFESpace.h"
 
-registerMooseObject("MooseApp", MFEMScalarFESpace);
+registerMooseMFEMObject("MooseApp", ScalarFESpace);
 
-InputParameters
-MFEMScalarFESpace::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSimplifiedFESpace::validParams();
+InputParameters
+ScalarFESpace::validParams()
+{
+  InputParameters params = SimplifiedFESpace::validParams();
   params.addClassDescription("Convenience class to construct scalar finite element spaces.");
   MooseEnum fec_types("H1 L2 L2Int", "H1");
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
@@ -32,13 +34,13 @@ MFEMScalarFESpace::validParams()
   return params;
 }
 
-MFEMScalarFESpace::MFEMScalarFESpace(const InputParameters & parameters)
-  : MFEMSimplifiedFESpace(parameters), _fec_type(getParam<MooseEnum>("fec_type"))
+ScalarFESpace::ScalarFESpace(const InputParameters & parameters)
+  : SimplifiedFESpace(parameters), _fec_type(getParam<MooseEnum>("fec_type"))
 {
 }
 
 std::string
-MFEMScalarFESpace::getFECName() const
+ScalarFESpace::getFECName() const
 {
   std::string basis =
       _fec_type == "L2" || _fec_type == "L2Int"
@@ -50,9 +52,10 @@ MFEMScalarFESpace::getFECName() const
 }
 
 int
-MFEMScalarFESpace::getVDim() const
+ScalarFESpace::getVDim() const
 {
   return 1;
 }
 
+} // namespace Moose::MFEM
 #endif

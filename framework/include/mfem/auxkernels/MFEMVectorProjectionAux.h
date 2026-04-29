@@ -13,17 +13,19 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Projects a vector coefficient onto a vector-valued auxvariable.
  */
-class MFEMVectorProjectionAux : public MFEMAuxKernel
+class VectorProjectionAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorProjectionAux(const InputParameters & parameters);
+  VectorProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMVectorProjectionAux() = default;
+  virtual ~VectorProjectionAux() = default;
 
   virtual void execute() override;
 
@@ -32,4 +34,5 @@ protected:
   mfem::VectorCoefficient & _vec_coef;
 };
 
+} // namespace Moose::MFEM
 #endif

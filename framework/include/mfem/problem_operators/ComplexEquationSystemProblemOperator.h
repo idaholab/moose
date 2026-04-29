@@ -20,17 +20,16 @@ class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperato
 {
 
 public:
-  ComplexEquationSystemProblemOperator(MFEMProblem & problem)
+  ComplexEquationSystemProblemOperator(Problem & problem)
     : EquationSystemProblemOperator(problem),
-      _equation_system{
-          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_problem_data.eqn_system)}
+      _equation_system{std::dynamic_pointer_cast<ComplexEquationSystem>(_problem_data.eqn_system)}
   {
   }
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override;
 
-  [[nodiscard]] virtual Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
+  [[nodiscard]] virtual ComplexEquationSystem * GetEquationSystem() const override
   {
     mooseAssert(_equation_system,
                 "No ComplexEquationSystem in ComplexEquationSystemProblemOperator.");
@@ -38,7 +37,7 @@ public:
   }
 
 private:
-  std::shared_ptr<Moose::MFEM::ComplexEquationSystem> _equation_system{nullptr};
+  std::shared_ptr<ComplexEquationSystem> _equation_system{nullptr};
   std::vector<mfem::ParComplexGridFunction *> _cmplx_trial_variables;
   std::vector<mfem::ParComplexGridFunction *> _cmplx_test_variables;
 };

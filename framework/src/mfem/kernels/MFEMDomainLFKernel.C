@@ -12,29 +12,32 @@
 #include "MFEMDomainLFKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDomainLFKernel);
+registerMooseMFEMObject("MooseApp", DomainLFKernel);
 
-InputParameters
-MFEMDomainLFKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+DomainLFKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar coefficient $f$.");
   return params;
 }
 
-MFEMDomainLFKernel::MFEMDomainLFKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+DomainLFKernel::DomainLFKernel(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::LinearFormIntegrator *
-MFEMDomainLFKernel::createLFIntegrator()
+DomainLFKernel::createLFIntegrator()
 {
   return new mfem::DomainLFIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

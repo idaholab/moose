@@ -12,15 +12,17 @@
 #include "MFEMHypreAMS.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMHypreAMS);
+registerMooseMFEMObject("MooseApp", HypreAMS);
 
-InputParameters
-MFEMHypreAMS::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+HypreAMS::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space Maxwell solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
-  params.addParam<MFEMFESpaceName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
+  params.addParam<Moose::MFEM::FESpaceName>("fespace", "H(curl) FESpace to use in HypreAMS setup.");
   params.addParam<bool>("singular",
                         false,
                         "Declare that the system is singular; use when solving curl-curl problem "
@@ -30,16 +32,16 @@ MFEMHypreAMS::validParams()
   return params;
 }
 
-MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                              getParam<MFEMFESpaceName>("fespace")))
+HypreAMS::HypreAMS(const InputParameters & parameters)
+  : LinearSolverBase(parameters),
+    _mfem_fespace(getMFEMProblem().getMFEMObject<FESpace>(
+        "Moose::MFEM::FESpace", getParam<Moose::MFEM::FESpaceName>("fespace")))
 {
   constructSolver();
 }
 
 void
-MFEMHypreAMS::constructSolver()
+HypreAMS::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
@@ -51,7 +53,7 @@ MFEMHypreAMS::constructSolver()
 }
 
 void
-MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreAMS::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
@@ -69,4 +71,5 @@ MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   }
 }
 
+} // namespace Moose::MFEM
 #endif

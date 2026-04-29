@@ -14,6 +14,8 @@
 #include "MFEMKernel.h"
 
 // clang-format off
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (c_{ikjl} \nabla u_j, \nabla v_i),
@@ -25,12 +27,12 @@
  * \f$ \nu \f$ is Poisson's ratio
  */
 // clang-format on
-class MFEMLinearElasticityKernel : public MFEMKernel
+class LinearElasticityKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMLinearElasticityKernel(const InputParameters & parameters);
+  LinearElasticityKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
@@ -39,4 +41,5 @@ protected:
   mfem::Coefficient & _mu;
 };
 
+} // namespace Moose::MFEM
 #endif

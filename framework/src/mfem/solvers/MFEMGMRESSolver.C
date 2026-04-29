@@ -12,12 +12,14 @@
 #include "MFEMGMRESSolver.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMGMRESSolver);
+registerMooseMFEMObject("MooseApp", GMRESSolver);
 
-InputParameters
-MFEMGMRESSolver::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+GMRESSolver::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM native solver for the iterative solution of MFEM equation "
                              "systems using the generalized minimal residual method.");
 
@@ -25,18 +27,19 @@ MFEMGMRESSolver::validParams()
   params.addParam<mfem::real_t>("l_abs_tol", 1e-50, "Set the absolute tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<Moose::MFEM::SolverName>("preconditioner",
+                                           "Optional choice of preconditioner to use.");
 
   return params;
 }
 
-MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters) : MFEMSolverBase(parameters)
+GMRESSolver::GMRESSolver(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMGMRESSolver::constructSolver()
+GMRESSolver::constructSolver()
 {
   auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
@@ -48,14 +51,14 @@ MFEMGMRESSolver::constructSolver()
 }
 
 void
-MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+GMRESSolver::setupLOR(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
-    _preconditioner->updateSolver(a, tdofs);
+    _preconditioner->setupLOR(a, tdofs);
     setPreconditioner(static_cast<mfem::GMRESSolver &>(*_solver));
   }
   else if (_lor)
@@ -71,4 +74,5 @@ MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   }
 }
 
+} // namespace Moose::MFEM
 #endif

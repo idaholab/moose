@@ -13,17 +13,19 @@
 
 #include "MFEMKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k \vec \nabla \cdot \vec u, \vec \nabla \cdot \vec v)
  * \f]
  */
-class MFEMDivDivKernel : public MFEMKernel
+class DivDivKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMDivDivKernel(const InputParameters & parameters);
+  DivDivKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
@@ -31,4 +33,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

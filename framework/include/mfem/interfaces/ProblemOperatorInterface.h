@@ -17,8 +17,8 @@ namespace Moose::MFEM
 {
 /**
  * Interface required for MFEM executioners to add and get ProblemOperators:
- * - MFEMTransient
- * - MFEMSteady
+ * - Moose::MFEM::Transient
+ * - Moose::MFEM::Steady
  */
 class ProblemOperatorInterface
 {

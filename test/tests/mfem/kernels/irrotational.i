@@ -87,17 +87,17 @@ centre_y = 0.1
   []
 []
 
-[Preconditioner]
+
+[Solvers]
   [boomeramg]
     type = MFEMHypreBoomerAMG
   []
-[]
-
-[Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-16
-  l_max_its = 1000
+  [main]
+    type = MFEMHypreGMRES
+    preconditioner = boomeramg
+    l_tol = 1e-16
+    l_max_its = 1000
+  []
 []
 
 [Executioner]

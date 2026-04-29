@@ -26,15 +26,18 @@ EquationSystemProblemOperator::Solve()
 {
   BuildEquationSystemOperator();
 
-  if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
-    mooseError("LOR solve is only supported for single-variable systems");
-  _problem_data.jacobian_solver->updateSolver(
-      *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
-      GetEquationSystem()->_ess_tdof_lists.at(0));
-
-  _problem_data.nonlinear_solver->SetPreconditioner(_problem_data.jacobian_solver->getSolver());
-  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+  SolveWithOperator(
+      *GetEquationSystem(),
+      _true_rhs,
+      _true_x,
+      GetEquationSystem()->nonlinear(),
+      [this]()
+      {
+        if (_problem_data.jacobian_solver->isLOR() &&
+            GetEquationSystem()->GetTestVarNames().size() > 1)
+          mooseError("LOR solve is only supported for single-variable systems");
+        GetEquationSystem()->prepareLinearSolver(*_problem_data.jacobian_solver);
+      });
 
   GetEquationSystem()->SetTrialVariablesFromTrueVectors(_true_x);
 }
@@ -42,7 +45,6 @@ EquationSystemProblemOperator::Solve()
 void
 EquationSystemProblemOperator::BuildEquationSystemOperator()
 {
-  GetEquationSystem()->BuildEquationSystem();
   GetEquationSystem()->FormSystem(_true_x, _true_rhs);
 }
 

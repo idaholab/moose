@@ -14,17 +14,18 @@
 #include "MFEMPostprocessor.h"
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Compute the integral of the innter product between two MFEM vector FE variables, scaled by an
  * optional scalar coefficient.
  */
-class MFEMVectorFEInnerProductIntegralPostprocessor : public MFEMPostprocessor,
-                                                      public MFEMBlockRestrictable
+class VectorFEInnerProductIntegralPostprocessor : public Postprocessor, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEInnerProductIntegralPostprocessor(const InputParameters & parameters);
+  VectorFEInnerProductIntegralPostprocessor(const InputParameters & parameters);
 
   /**
    * Evaluate integral.
@@ -43,4 +44,5 @@ private:
   mfem::ParLinearForm _subdomain_integrator;
 };
 
+} // namespace Moose::MFEM
 #endif

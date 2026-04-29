@@ -16,19 +16,20 @@
 #include "MFEMBoundaryRestrictable.h"
 #include "CoefficientManager.h"
 
-class MFEMFunctorMaterial : public MFEMObject,
-                            public MFEMBlockRestrictable,
-                            public MFEMBoundaryRestrictable
+namespace Moose::MFEM
+{
+class FunctorMaterial : public Object, public BlockRestrictable, public BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
   static libMesh::Point pointFromMFEMVector(const mfem::Vector & vec);
 
-  MFEMFunctorMaterial(const InputParameters & parameters);
-  virtual ~MFEMFunctorMaterial();
+  FunctorMaterial(const InputParameters & parameters);
+  virtual ~FunctorMaterial();
 
 protected:
-  Moose::MFEM::CoefficientManager & _properties;
+  CoefficientManager & _properties;
 };
 
+} // namespace Moose::MFEM
 #endif

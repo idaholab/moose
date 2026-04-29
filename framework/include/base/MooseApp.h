@@ -66,7 +66,10 @@ class RelationshipManager;
 class SolutionInvalidity;
 class MultiApp;
 #ifdef MOOSE_MFEM_ENABLED
-class MFEMProblemSolve;
+namespace Moose::MFEM
+{
+class ProblemSolve;
+}
 #endif
 
 namespace libMesh
@@ -1082,7 +1085,7 @@ public:
    * Create/configure the MFEM device with the provided \p device_string. More than one device can
    * be configured. If supplying multiple devices, they should be comma separated
    */
-  void setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>);
+  void setMFEMDevice(const std::string & device_string, Moose::PassKey<Moose::MFEM::ProblemSolve>);
 
   /**
    * Get the MFEM device object

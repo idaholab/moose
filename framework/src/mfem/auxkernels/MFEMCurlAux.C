@@ -12,23 +12,25 @@
 #include "MFEMCurlAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMCurlAux);
+registerMooseMFEMObject("MooseApp", CurlAux);
 
-InputParameters
-MFEMCurlAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+CurlAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Calculates the curl of an H(curl) conforming ND source variable and stores the result"
       " on an H(div) conforming RT result auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "source", "Vector H(curl) MFEMVariable to take the curl of.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(curl) Moose::MFEM::Variable to take the curl of.");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
   return params;
 }
 
-MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
+CurlAux::CurlAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getGridFunction(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
@@ -41,14 +43,14 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
 
 // Computes the auxvariable.
 void
-MFEMCurlAux::execute()
+CurlAux::execute()
 {
   update();
   _curl.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 void
-MFEMCurlAux::update()
+CurlAux::update()
 {
   if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
   {
@@ -59,4 +61,5 @@ MFEMCurlAux::update()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

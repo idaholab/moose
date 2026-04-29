@@ -13,33 +13,41 @@
 #include "NLBoundaryConvectiveHeatFluxIntegrator.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMNLConvectiveHeatFluxBC);
+registerMooseMFEMObject("MooseApp", NLConvectiveHeatFluxBC);
 
-InputParameters
-MFEMNLConvectiveHeatFluxBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMIntegratedBC::validParams();
+InputParameters
+NLConvectiveHeatFluxBC::validParams()
+{
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties to add to MFEM problems.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "T_infinity", "0.", "Name of a coefficient specifying the far-field temperature");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "heat_transfer_coefficient",
       "1.",
       "Name of the coefficient specifying the heat transfer coefficient");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "d_heat_transfer_dT_coefficient",
       "0.",
       "Name of the coefficient specifying the derivative of the heat transfer coefficient with "
       "respect to temperature");
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
+      "d_T_infinity_dT_coefficient",
+      "0.",
+      "Name of the coefficient specifying the derivative of the far-field temperature with "
+      "respect to temperature");
   return params;
 }
 
-MFEMNLConvectiveHeatFluxBC::MFEMNLConvectiveHeatFluxBC(const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters),
+NLConvectiveHeatFluxBC::NLConvectiveHeatFluxBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _heat_transfer_coef(getScalarCoefficient("heat_transfer_coefficient")),
     _d_heat_transfer_dT_coef(getScalarCoefficient("d_heat_transfer_dT_coefficient")),
+    _d_T_inf_dT_coef(getScalarCoefficient("d_T_infinity_dT_coefficient")),
     _T_inf_coef(getScalarCoefficient("T_infinity")),
     _T_coef(getScalarCoefficientByName((getTrialVariableName())))
 {
@@ -47,10 +55,11 @@ MFEMNLConvectiveHeatFluxBC::MFEMNLConvectiveHeatFluxBC(const InputParameters & p
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::NonlinearFormIntegrator *
-MFEMNLConvectiveHeatFluxBC::createNLIntegrator()
+NLConvectiveHeatFluxBC::createNLIntegrator()
 {
-  return new Moose::MFEM::NLBoundaryConvectiveHeatFluxIntegrator(
-      _heat_transfer_coef, _d_heat_transfer_dT_coef, _T_inf_coef, _T_coef);
+  return new NLBoundaryConvectiveHeatFluxIntegrator(
+      _heat_transfer_coef, _d_heat_transfer_dT_coef, _d_T_inf_dT_coef, _T_inf_coef, _T_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

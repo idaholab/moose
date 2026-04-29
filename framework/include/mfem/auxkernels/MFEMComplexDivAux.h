@@ -16,17 +16,19 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMComplexAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to set an L2 auxvariable to be the divergence of an H(div) vector variable.
  */
-class MFEMComplexDivAux : public MFEMComplexAuxKernel
+class ComplexDivAux : public ComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexDivAux(const InputParameters & parameters);
+  ComplexDivAux(const InputParameters & parameters);
 
-  virtual ~MFEMComplexDivAux() = default;
+  virtual ~ComplexDivAux() = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -35,7 +37,7 @@ public:
   virtual void update() override;
 
 protected:
-  /// Name of source MFEMComplexVariable to take the divergence of.
+  /// Name of source Moose::MFEM::ComplexVariable to take the divergence of.
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   mfem::ParComplexGridFunction & _source_var;
@@ -45,4 +47,5 @@ protected:
   mfem::common::ParDiscreteDivOperator _div;
 };
 
+} // namespace Moose::MFEM
 #endif

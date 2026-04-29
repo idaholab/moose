@@ -12,10 +12,12 @@
 #include "MFEMIndicator.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMIndicator::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
+InputParameters
+Indicator::validParams()
+{
+  InputParameters params = Object::validParams();
   params.registerBase("Indicator");
   params.registerSystemAttributeName("Indicator");
 
@@ -24,12 +26,13 @@ MFEMIndicator::validParams()
   return params;
 }
 
-MFEMIndicator::MFEMIndicator(const InputParameters & params)
-  : MFEMObject(params),
+Indicator::Indicator(const InputParameters & params)
+  : Object(params),
     _var_name(getParam<VariableName>("variable")),
     _kernel_name(getParam<std::string>("kernel")),
     _fespace(*getMFEMProblem().getGridFunction(_var_name)->ParFESpace())
 {
 }
 
+} // namespace Moose::MFEM
 #endif

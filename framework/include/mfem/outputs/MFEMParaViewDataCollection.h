@@ -13,15 +13,17 @@
 
 #include "MFEMDataCollection.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class for output information saved in MFEM ParaViewDataCollections
  */
-class MFEMParaViewDataCollection : public MFEMDataCollection
+class ParaViewDataCollection : public DataCollection
 {
 public:
   static InputParameters validParams();
 
-  MFEMParaViewDataCollection(const InputParameters & parameters);
+  ParaViewDataCollection(const InputParameters & parameters);
 
   virtual mfem::DataCollection & getDataCollection() override { return _pv_dc; }
 
@@ -32,4 +34,5 @@ protected:
   const mfem::VTKFormat _vtk_format;
 };
 
+} // namespace Moose::MFEM
 #endif

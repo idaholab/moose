@@ -229,6 +229,7 @@ framework/contrib/asio/
 *.cpr
 *.cpa.gz-*
 *.cpr-*
+*_cp/
 
 # Ignore petsc arch
 petsc/arch-*/*
@@ -312,6 +313,9 @@ share/
 .vscode/*
 *.code-workspace
 .cache
+
+# Ignore Claude Code project context
+.claude/
 
 # test harness --sep-files output
 *.runner_run_out.txt

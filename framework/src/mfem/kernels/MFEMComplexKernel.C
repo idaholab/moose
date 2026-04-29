@@ -13,18 +13,21 @@
 #include "MFEMProblem.h"
 #include "ScaleIntegrator.h"
 
-registerMooseObject("MooseApp", MFEMComplexKernel);
+registerMooseMFEMObject("MooseApp", ComplexKernel);
 
-InputParameters
-MFEMComplexKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+ComplexKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
-      "Holds MFEMKernel objects for the real and imaginary parts of a complex kernel.");
+      "Holds Moose::MFEM::Kernel objects for the real and imaginary parts of a complex kernel.");
 
   return params;
 }
 
-MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters) : MFEMKernel(parameters) {}
+ComplexKernel::ComplexKernel(const InputParameters & parameters) : Kernel(parameters) {}
 
+} // namespace Moose::MFEM
 #endif

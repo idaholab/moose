@@ -12,36 +12,39 @@
 #include "MFEMSuperLU.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMSuperLU);
+registerMooseMFEMObject("MooseApp", SuperLU);
 
-InputParameters
-MFEMSuperLU::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+SuperLU::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
 
   return params;
 }
 
-MFEMSuperLU::MFEMSuperLU(const InputParameters & parameters) : MFEMSolverBase(parameters)
+SuperLU::SuperLU(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMSuperLU::constructSolver()
+SuperLU::constructSolver()
 {
-  auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
+  auto solver = std::make_unique<SuperLUSolver>(getMFEMProblem().getComm());
   solver->SetDeviceOffload(mfem::Device::IsAvailable());
   _solver = std::move(solver);
 }
 
 void
-MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+SuperLU::setupLOR(mfem::ParBilinearForm &, mfem::Array<int> &)
 {
   if (_lor)
     mooseError("SuperLU solver does not support LOR solve");
 }
 
+} // namespace Moose::MFEM
 #endif

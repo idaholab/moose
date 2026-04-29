@@ -15,11 +15,13 @@
 #include "mfem/miniapps/common/mesh_extras.hpp"
 #include "libmesh/restore_warnings.h"
 
-InputParameters
-MFEMKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params += MFEMBlockRestrictable::validParams();
+InputParameters
+Kernel::validParams()
+{
+  InputParameters params = Object::validParams();
+  params += BlockRestrictable::validParams();
   params.registerBase("Kernel");
   params.registerSystemAttributeName("Kernel");
   params.addParam<VariableName>("variable",
@@ -27,12 +29,13 @@ MFEMKernel::validParams()
   return params;
 }
 
-MFEMKernel::MFEMKernel(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    MFEMBlockRestrictable(parameters,
-                          getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
+Kernel::Kernel(const InputParameters & parameters)
+  : Object(parameters),
+    BlockRestrictable(parameters,
+                      getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _test_var_name(getParam<VariableName>("variable"))
 {
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -14,15 +14,18 @@
 #include "MFEMInitialCondition.h"
 #include "MFEMBoundaryRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
- * Class used to set the initial value(s) on a scalar valued MFEMVariable.
+ * Class used to set the initial value(s) on a scalar valued Moose::MFEM::Variable.
  */
-class MFEMScalarBoundaryIC : public MFEMInitialCondition, public MFEMBoundaryRestrictable
+class ScalarBoundaryIC : public InitialCondition, public BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
-  MFEMScalarBoundaryIC(const InputParameters & params);
+  ScalarBoundaryIC(const InputParameters & params);
   virtual void execute() override;
 };
 
+} // namespace Moose::MFEM
 #endif

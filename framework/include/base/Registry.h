@@ -48,6 +48,14 @@
 
 #define registerADMooseObject(app, classname) registerMooseObject(app, classname)
 
+/// Add a Moose::MFEM object to the registry. classname is the unqualified class name within the
+/// Moose::MFEM namespace (e.g. DiffusionKernel). The C++ class is Moose::MFEM::classname and the
+/// input file type is MFEMclassname (e.g. MFEMDiffusionKernel).
+#define registerMooseMFEMObject(app, classname)                                                    \
+  static char combineNames(dummyvar_for_registering_obj_MFEM##classname, __COUNTER__) =            \
+      Registry::add<Moose::MFEM::classname>(                                                       \
+          {app, "Moose::MFEM::" #classname, "", "MFEM" #classname, __FILE__, __LINE__, "", ""})
+
 /// Add a MooseObject to the registry with the given app name/label under an alternate alias/name
 /// (quoted string) instead of the classname.
 #define registerMooseObjectAliased(app, classname, alias)                                          \

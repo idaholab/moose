@@ -11,12 +11,14 @@
 
 #include "MFEMParaViewDataCollection.h"
 
-registerMooseObject("MooseApp", MFEMParaViewDataCollection);
+registerMooseMFEMObject("MooseApp", ParaViewDataCollection);
 
-InputParameters
-MFEMParaViewDataCollection::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMDataCollection::validParams();
+InputParameters
+ParaViewDataCollection::validParams()
+{
+  InputParameters params = DataCollection::validParams();
   params.addClassDescription("Output for controlling export to an mfem::ParaViewDataCollection.");
   params.addParam<unsigned int>("refinements",
                                 0,
@@ -38,8 +40,8 @@ MFEMParaViewDataCollection::validParams()
   return params;
 }
 
-MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & parameters)
-  : MFEMDataCollection(parameters),
+ParaViewDataCollection::ParaViewDataCollection(const InputParameters & parameters)
+  : DataCollection(parameters),
     _pv_dc((_file_base + std::string("/Run") + std::to_string(getFileNumber())).c_str(), &_pmesh),
     _high_order_output(getParam<bool>("high_order_output")),
     _refinements(getParam<unsigned int>("refinements")),
@@ -52,4 +54,5 @@ MFEMParaViewDataCollection::MFEMParaViewDataCollection(const InputParameters & p
   registerFields();
 }
 
+} // namespace Moose::MFEM
 #endif

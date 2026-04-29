@@ -38,6 +38,31 @@
   []
 []
 
+[Solvers]
+  inactive = 'jacobi'
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+    print_level = 0
+  []
+  [jacobi]
+    type = MFEMOperatorJacobiSmoother
+  []
+  [newton]
+    type = MFEMNewtonNonlinearSolver
+    max_its = 100
+    abs_tol = 1.0e-10
+    rel_tol = 1.0e-9
+    print_level = 1
+  []
+  [linear]
+     type = MFEMHypreGMRES
+     preconditioner = boomeramg
+     print_level = 1
+     l_tol = 1e-16
+     l_max_its = 1000
+  []
+[]
+
 [BCs]
   [top]
     type = MFEMScalarDirichletBC
@@ -68,31 +93,10 @@
   []
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-    print_level = 0
-  []
-  [jacobi]
-    type = MFEMOperatorJacobiSmoother
-  []
-[]
-
-[Solver]
-   type = MFEMHypreGMRES
-   preconditioner = boomeramg
-   print_level = 1
-   l_tol = 1e-16
-   l_max_its = 1000
-[]
 
 [Executioner]
   type = MFEMSteady
   device = cpu
-  nl_max_its = 100
-  nl_abs_tol = 1.0e-10
-  nl_rel_tol = 1.0e-9
-  print_level = 1
 []
 
 [Outputs]

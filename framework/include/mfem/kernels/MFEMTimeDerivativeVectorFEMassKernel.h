@@ -13,17 +13,19 @@
 
 #include "MFEMVectorFEMassKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * \f[
  * (k du/dt, v)
  * \f]
  */
-class MFEMTimeDerivativeVectorFEMassKernel : public MFEMVectorFEMassKernel
+class TimeDerivativeVectorFEMassKernel : public VectorFEMassKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMTimeDerivativeVectorFEMassKernel(const InputParameters & parameters);
+  TimeDerivativeVectorFEMassKernel(const InputParameters & parameters);
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
@@ -34,4 +36,5 @@ protected:
   const VariableName _var_dot_name;
 };
 
+} // namespace Moose::MFEM
 #endif

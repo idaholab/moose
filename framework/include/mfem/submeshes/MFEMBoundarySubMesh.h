@@ -14,19 +14,22 @@
 #include "MFEMSubMesh.h"
 #include "MFEMBoundaryRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParSubMesh object as
  * as a restriction of the parent mesh to the set of user-specified boundaries.
  * Access using the getSubMesh() accessor.
  */
-class MFEMBoundarySubMesh : public MFEMSubMesh, public MFEMBoundaryRestrictable
+class BoundarySubMesh : public SubMesh, public BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
-  MFEMBoundarySubMesh(const InputParameters & parameters);
+  BoundarySubMesh(const InputParameters & parameters);
 
 protected:
   virtual void buildSubMesh() override;
 };
 
+} // namespace Moose::MFEM
 #endif

@@ -13,13 +13,15 @@
 
 #include "MFEMBoundaryCondition.h"
 
-class MFEMIntegratedBC : public MFEMBoundaryCondition
+namespace Moose::MFEM
+{
+class IntegratedBC : public BoundaryCondition
 {
 public:
   static InputParameters validParams();
 
-  MFEMIntegratedBC(const InputParameters & parameters);
-  virtual ~MFEMIntegratedBC() = default;
+  IntegratedBC(const InputParameters & parameters);
+  virtual ~IntegratedBC() = default;
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; };
@@ -35,4 +37,5 @@ public:
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 };
 
+} // namespace Moose::MFEM
 #endif

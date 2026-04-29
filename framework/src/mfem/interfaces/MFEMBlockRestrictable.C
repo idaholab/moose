@@ -11,8 +11,10 @@
 
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMBlockRestrictable::validParams()
+BlockRestrictable::validParams()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
@@ -26,8 +28,8 @@ MFEMBlockRestrictable::validParams()
   return params;
 }
 
-MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
-                                             const mfem::ParMesh & mfem_mesh)
+BlockRestrictable::BlockRestrictable(const InputParameters & parameters,
+                                     const mfem::ParMesh & mfem_mesh)
   : _mfem_mesh(mfem_mesh),
     _subdomain_names(parameters.get<std::vector<SubdomainName>>("block")),
     _subdomain_attributes(subdomainsToAttributes())
@@ -38,7 +40,7 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
 }
 
 mfem::Array<int>
-MFEMBlockRestrictable::subdomainsToAttributes()
+BlockRestrictable::subdomainsToAttributes()
 {
   mfem::Array<int> attributes;
   auto & mesh = getMesh();
@@ -63,7 +65,7 @@ MFEMBlockRestrictable::subdomainsToAttributes()
 }
 
 std::vector<std::string>
-MFEMBlockRestrictable::subdomainsToStrings()
+BlockRestrictable::subdomainsToStrings()
 {
   const auto & attrs = _subdomain_attributes;
   std::vector<std::string> strs(attrs.Size());
@@ -71,4 +73,5 @@ MFEMBlockRestrictable::subdomainsToStrings()
   return strs;
 }
 
+} // namespace Moose::MFEM
 #endif

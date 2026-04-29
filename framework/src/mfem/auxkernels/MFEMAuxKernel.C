@@ -12,10 +12,12 @@
 #include "MFEMAuxKernel.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMAuxKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMExecutedObject::validParams();
+InputParameters
+AuxKernel::validParams()
+{
+  InputParameters params = ExecutedObject::validParams();
   params.registerBase("AuxKernel");
   params.addClassDescription("Base class for MFEM objects that update auxiliary variables outside "
                              "of the main solve step.");
@@ -24,17 +26,18 @@ MFEMAuxKernel::validParams()
   return params;
 }
 
-MFEMAuxKernel::MFEMAuxKernel(const InputParameters & parameters)
-  : MFEMExecutedObject(parameters),
+AuxKernel::AuxKernel(const InputParameters & parameters)
+  : ExecutedObject(parameters),
     _result_var_name(getParam<AuxVariableName>("variable")),
     _result_var(*getMFEMProblem().getGridFunction(_result_var_name))
 {
 }
 
 std::optional<std::string>
-MFEMAuxKernel::suppliedVariableName() const
+AuxKernel::suppliedVariableName() const
 {
   return _result_var_name;
 }
 
+} // namespace Moose::MFEM
 #endif
