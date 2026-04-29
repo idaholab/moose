@@ -43,7 +43,6 @@ private:
   friend class EquationSystemEigenproblemOperator;
 
   mfem::Array<int> _global_ess_markers;
-
 };
 
 } // namespace Moose::MFEM

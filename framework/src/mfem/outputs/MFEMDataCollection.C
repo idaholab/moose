@@ -36,43 +36,37 @@ MFEMDataCollection::registerFields()
 {
   // Save real fields
   mfem::DataCollection & dc(getDataCollection());
-  if (dynamic_cast<MFEMEigenproblem *>(_problem_ptr))
-  {
-    for (auto const & [gf_name, gf_ptr] : _problem_data.eigen_gridfunctions)
-    {
-      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
-        dc.RegisterField(gf_name, gf_ptr.get());
-      else
-        mooseInfo("The variable ",
-                  gf_name,
-                  " is not defined on the same mesh as the output DataCollection.");
-    }
-  }
-  else
-  {
-    for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
-    {
-      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
-        dc.RegisterField(gf_name, gf_ptr.get());
-      else
-        mooseInfo("The variable ",
-                  gf_name,
-                  " is not defined on the same mesh as the output DataCollection.");
-    }
+  // For eigenproblems, the bare trial variable holds only initial-guess / essential-BC values
+  // rather than a mode solution, so skip it; modes are stored under suffixed names.
+  static const std::vector<std::string> empty_names;
+  const std::vector<std::string> & skip_names = dynamic_cast<MFEMEigenproblem *>(_problem_ptr)
+                                                    ? _problem_data.eqn_system->GetTrialVarNames()
+                                                    : empty_names;
 
-    // Save complex fields
-    for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
+  for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
+  {
+    if (std::find(skip_names.begin(), skip_names.end(), gf_name) != skip_names.end())
+      continue;
+    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+      dc.RegisterField(gf_name, gf_ptr.get());
+    else
+      mooseInfo("The variable ",
+                gf_name,
+                " is not defined on the same mesh as the output DataCollection.");
+  }
+
+  // Save complex fields
+  for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
+  {
+    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
     {
-      if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
-      {
-        dc.RegisterField(gf_name + "_real", &gf_ptr->real());
-        dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
-      }
-      else
-        mooseInfo("The variable ",
-                  gf_name,
-                  " is not defined on the same mesh as the output DataCollection.");
+      dc.RegisterField(gf_name + "_real", &gf_ptr->real());
+      dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
     }
+    else
+      mooseInfo("The variable ",
+                gf_name,
+                " is not defined on the same mesh as the output DataCollection.");
   }
 }
 
