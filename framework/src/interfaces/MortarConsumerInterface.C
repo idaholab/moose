@@ -91,6 +91,23 @@ MortarConsumerInterface::validParams()
       "can result in mortar segments solving physics not meaningfully, and overprojection of "
       "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
       "intended for mortar mesh debugging purposes in two dimensions.");
+  params += MortarConsumerInterface::triangulationParams();
+
+  params.addParam<bool>(
+      "ghost_higher_d_neighbors",
+      false,
+      "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
+      "second order mortar with finite volume primal variables, because in order for the method to "
+      "be second order we must use cell gradients, which couples in the neighbor cells.");
+
+  return params;
+}
+
+InputParameters
+MortarConsumerInterface::triangulationParams()
+{
+  InputParameters params = emptyInputParameters();
+
   MooseEnum triangulation(
 #if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
       "vertex centroid ear_clipping delaunay",
@@ -124,13 +141,6 @@ MortarConsumerInterface::validParams()
       "during triangulation. When enabled, already-triangular polygons are subdivided with the "
       "centroid-based path because the vertex-fan, ear-clipping, and Delaunay backends cannot "
       "refine a triangle any further on their own.");
-
-  params.addParam<bool>(
-      "ghost_higher_d_neighbors",
-      false,
-      "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
-      "second order mortar with finite volume primal variables, because in order for the method to "
-      "be second order we must use cell gradients, which couples in the neighbor cells.");
 
   return params;
 }

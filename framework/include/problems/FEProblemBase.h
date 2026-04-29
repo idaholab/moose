@@ -29,6 +29,7 @@
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
+#include "MortarInterfaceWarehouse.h"
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
@@ -1989,8 +1990,7 @@ public:
                      bool on_displaced);
   ///@}
 
-  const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                           std::unique_ptr<AutomaticMortarGeneration>> &
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, MortarInterfaceConfig> &
   getMortarInterfaces(bool on_displaced) const;
 
   virtual void possiblyRebuildGeomSearchPatches();

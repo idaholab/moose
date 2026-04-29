@@ -27,10 +27,10 @@ using libMesh::Real;
 
 enum class MortarSegmentTriangulationMode : unsigned char
 {
-  delaunay,
-  centroid,
-  ear_clipping,
-  vertex
+  Delaunay,
+  Centroid,
+  EarClipping,
+  Vertex
 };
 
 /**

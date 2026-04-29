@@ -14,6 +14,7 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 #include "MortarConstraintBase.h"
+#include "MortarConsumerInterface.h"
 #include "NonlinearSystemBase.h"
 #include "Parser.h"
 #include "AugmentedLagrangianContactProblem.h"
@@ -240,39 +241,7 @@ ContactAction::validParams()
       "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
       "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
       "contributions will be set (strongly) to 0.");
-  MooseEnum triangulation(
-#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
-      "vertex centroid ear_clipping delaunay",
-#else
-      "vertex centroid ear_clipping",
-#endif
-      "centroid");
-  triangulation.addDocumentation(
-      "vertex",
-      "Triangulate clipped 3D mortar polygons by forming a fan from an existing polygon vertex.");
-  triangulation.addDocumentation(
-      "centroid",
-      "Triangulate clipped 3D mortar polygons by forming a fan from a polygon centroid.");
-  triangulation.addDocumentation(
-      "ear_clipping", "Triangulate clipped 3D mortar polygons with an ear-clipping algorithm.");
-#if defined(LIBMESH_HAVE_TRIANGLE) || defined(LIBMESH_HAVE_POLY2TRI)
-  triangulation.addDocumentation(
-      "delaunay",
-      "Triangulate clipped 3D mortar polygons using libMesh's constrained-Delaunay PSLG "
-      "triangulation backend while preserving polygon boundary edges.");
-#endif
-  params.addParam<MooseEnum>(
-      "triangulation",
-      triangulation,
-      "Strategy used to triangulate clipped 3D mortar polygons into mortar segments. The default "
-      "is 'centroid' to preserve the legacy 3D mortar segmentation behavior.");
-  params.addParam<bool>(
-      "triangulate_triangles",
-      false,
-      "Whether a clipped 3D mortar polygon that is already a triangle should still be subdivided "
-      "during triangulation. When enabled, already-triangular polygons are subdivided with the "
-      "centroid-based path because the vertex-fan, ear-clipping, and Delaunay backends cannot "
-      "refine a triangle any further on their own.");
+  params += MortarConsumerInterface::triangulationParams();
   params.addParam<bool>(
       "generate_mortar_mesh",
       true,
