@@ -3,7 +3,7 @@
 !if! function=hasCapability('mfem')
 
 Allows transfers of [MFEM variables](MFEMVariable.md) from MFEM-based applications to libMesh-based [MooseVariables](MooseVariable.md) via local
-evaluation of shape functions at target nodal projection points. This class supports transfers between different meshes, from scalar MFEM GridFunctions to first and second LAGRANGE and constant MONOMIAL libMesh variable types.
+evaluation of shape functions at target nodal projection points. This class supports transfers between different meshes, from scalar MFEM GridFunctions to first and second order LAGRANGE and constant MONOMIAL libMesh variable types.
 
 For transfers in the opposite direction, from libMesh-based applications to MFEM-based applications, please see [MultiApplibMeshToMFEMShapeEvaluationTransfer](MultiApplibMeshToMFEMShapeEvaluationTransfer.md).
 
