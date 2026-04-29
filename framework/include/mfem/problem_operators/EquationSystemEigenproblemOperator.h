@@ -38,12 +38,11 @@ public:
 
 private:
   void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                 MFEMEigensolverBase * eigensolver);
+                                   MFEMEigensolverBase * eigensolver);
 
 protected:
   /// Add kernels/bcs and assemble the linear part of the equation system
   void BuildEquationSystemOperator();
-
 };
 
 } // namespace Moose::MFEM

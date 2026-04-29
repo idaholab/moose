@@ -21,11 +21,19 @@ MFEMEigenproblem::validParams()
   params.addClassDescription("Problem type for building and solving a finite element eigenproblem "
                              "using the MFEM finite element library.");
   params.addParam<int>("num_modes", 1, "Set the number of lowest eigenmodes to compute.");
+  params.addParam<std::string>(
+      "mode_separator",
+      "_",
+      "Separator string inserted between a variable name and its eigenmode index when "
+      "registering the gridfunction that stores the corresponding eigenvector.");
 
   return params;
 }
 
-MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params) {}
+MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params)
+{
+  getProblemData().mode_separator = getParam<std::string>("mode_separator");
+}
 
 void
 MFEMEigenproblem::addMFEMSolver(const std::string & user_object_name,
@@ -45,10 +53,33 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
                               const std::string & var_name,
                               InputParameters & parameters)
 {
+  // Reject names that would collide with the mode-suffix convention or with any
+  // already-registered eigenmode storage entry.
+  const auto num_modes = getParam<int>("num_modes");
+  const auto & sep = getProblemData().mode_separator;
+  if (getProblemData().gridfunctions.Has(var_name))
+    mooseError("MFEM variable '",
+               var_name,
+               "' clashes with an existing gridfunction (likely an eigenmode entry from another "
+               "variable). Choose a different variable name or set 'mode_separator' to a string "
+               "that avoids the clash.");
+
+  for (int i = 0; i < num_modes; ++i)
+  {
+    const auto mode_name = var_name + sep + std::to_string(i);
+    if (getProblemData().gridfunctions.Has(mode_name))
+      mooseError("Eigenmode storage name '",
+                 mode_name,
+                 "' for variable '",
+                 var_name,
+                 "' clashes with an already-registered variable. Set 'mode_separator' to a "
+                 "string that avoids the clash, or rename the conflicting variable.");
+  }
+
   addGridFunction(var_type, var_name, parameters);
 
-  for (int i = 0; i < getParam<int>("num_modes"); ++i)
-    addEigenGridFunction(var_type, var_name + "_" + std::to_string(i), parameters);
+  for (int i = 0; i < num_modes; ++i)
+    addEigenGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
 }
 
 void
@@ -74,7 +105,7 @@ MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
 
   // Register gridfunction.
   MFEMVariable & mfem_variable = getMFEMObject<MFEMVariable>("MooseVariableBase", var_name);
-  getProblemData().eigen_gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
   if (mfem_variable.getFESpace().isScalar())
     getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         var_name, mfem_variable.getGridFunction().get());

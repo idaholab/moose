@@ -14,8 +14,11 @@ where $A$ is the stiffness matrix assembled from the problem kernels and $M$ is 
 constructed by the eigensolver using the provided scalar coefficient.
 
 For each variable declared in the `[Variables]` block, `MFEMEigenproblem` automatically creates
-`num_modes` additional grid functions (named `<variable>_0`, `<variable>_1`, etc.) to store the
-computed eigenvectors. The solver must be an eigensolver derived from `MFEMEigensolverBase`, such
+`num_modes` additional grid functions (named `<variable><mode_separator><index>`, e.g. `u_0`,
+`u_1`, etc. with the default separator `_`) to store the computed eigenvectors. The separator can
+be changed via the `mode_separator` parameter when the default would clash with names already in
+use (for example, names used for components of vector fields). The solver must be an eigensolver
+derived from `MFEMEigensolverBase`, such
 as [MFEMHypreLOBPCG](solvers/MFEMHypreLOBPCG.md) or [MFEMHypreAME](solvers/MFEMHypreAME.md);
 specifying a non-eigensolver will result in an error.
 
