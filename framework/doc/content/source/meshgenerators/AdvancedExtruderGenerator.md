@@ -28,6 +28,25 @@ Boundary ID remapping also works similarly to subdomain ID remapping. During ext
 
 The other categories of the boundaries that can be defined are the interfaces between subdomains in different elevations, as well as the top/bottom surfaces of the subdomains. As each elevation interface (or top/bottom surface) is simply a duplicate of the `input` mesh, these interface (or top/bottom surface) boundaries correspond to the subdomains of the `input` mesh, which are referred to as `source_blocks`. Also, due to the nature of sidesets, they can be defined on either side of the elevation interface. Thus, both `upward` and `downward` boundaries can be defined. Here `upward` means the normal vector of the sideset has the "same-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector; `downward` means the normal vector of the sideset has the "opposite-ish" direction as the [!param](/Mesh/AdvancedExtruderGenerator/direction) vector.
 
+## Extrusion along a line mesh / curve
+
+Instead of a fixed direction, the mesh can be extruded following a line mesh. The extrusion is performed following the direction of the line mesh.
+The direction is computed locally for every node as:
+
+- the [!param](/Mesh/AdvancedExtruderGenerator/start_extrusion_direction) if specified at the first curve node, else the direction from the first to the second node
+- the direction from the previous node to the next node (ignoring the current node) for every other curve node
+- the [!param](/Mesh/AdvancedExtruderGenerator/end_extrusion_direction) if specified at the last curve node, else the direction from the last but one to the last node
+
+!alert note
+When extruding along an line mesh curve, specifying the biases, heights, number of layers and directions is not currently supported.
+
+## Radial growth during extrusion
+
+By setting the [!param](/Mesh/AdvancedExtruderGenerator/end_radial_extent), the radial extent of the extruded mesh can be expanded or
+diminished progressively throughout the extrusion process. The [!param](/Mesh/AdvancedExtruderGenerator/radial_growth_method) can be
+set to a linear or cubic radial profile. The `cubic` option allows for specifying the derivative of the radial growth factor at
+the beginning and end of the extrusion using the [!param](/Mesh/AdvancedExtruderGenerator/start_radial_growth_rate) and
+[!param](/Mesh/AdvancedExtruderGenerator/end_radial_growth_rate) parameters respectively.
 
 ## Helicoidal extrusion
 
