@@ -187,20 +187,6 @@
       expect_err = 'direction cannot be set if extruding along curve!'
       detail = 'the extrusion direction is specified along with a curve to extrude along,'
     []
-    [param_start_extrusion_direction]
-      type = RunException
-      input = extrude_along_curve_2D_bare.i
-      cli_args = "Mesh/ext_along_curve/end_extrusion_direction='1 2 3' --mesh-only"
-      expect_err = 'If extruding along curve, start_extrusion_direction must be set!'
-      detail = 'the extrusion direction to follow at the end of the curve is not specified along with a curve to extrude along,'
-    []
-    [param_end_extrusion_direction]
-      type = RunException
-      input = extrude_along_curve_2D_bare.i
-      cli_args = "Mesh/ext_along_curve/start_extrusion_direction='1 2 3' --mesh-only"
-      expect_err = 'If extruding along curve, end_extrusion_direction must be set!'
-      detail = 'the extrusion direction to follow at the start of the curve is not specified along with a curve to extrude along,'
-    []
   []
   [named_boundaries]
     type = Exodiff

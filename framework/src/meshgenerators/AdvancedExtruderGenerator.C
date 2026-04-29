@@ -99,7 +99,10 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<Point>("direction",
                          "A vector that points in the direction to extrude (note, this will be "
                          "normalized internally - so don't worry about it here)");
-  params.addParam<MeshGeneratorName>("extrusion_curve", "Name of curve to be extruded along.");
+  params.addParam<MeshGeneratorName>(
+      "extrusion_curve",
+      "Name of the mesh generator providing the line mesh curve to be extruded along. The "
+      "extrusion path follows the node order in the line mesh");
   params.addParam<Point>(
       "start_extrusion_direction",
       "A vector that points in the starting direction for extruding along a curve. This vector "
@@ -221,12 +224,6 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
     if (isParamValid("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
-    if (!isParamSetByUser("start_extrusion_direction"))
-      paramError("start_extrusion_direction",
-                 "If extruding along curve, start_extrusion_direction must be set!");
-    if (!isParamSetByUser("end_extrusion_direction"))
-      paramError("end_extrusion_direction",
-                 "If extruding along curve, end_extrusion_direction must be set!");
   }
   else
   {
@@ -556,7 +553,10 @@ AdvancedExtruderGenerator::generate()
     // otherwise
     RealVectorValue reference_direction;
     if (_extrude_along_curve)
-      reference_direction = _start_extrusion_direction;
+      reference_direction =
+          _start_extrusion_direction.norm_sq() > 0
+              ? RealVectorValue(_start_extrusion_direction)
+              : (*(extrusion_curve->node_ptr(1)) - *(extrusion_curve->node_ptr(0))).unit();
     else
       reference_direction = _direction;
 
@@ -641,7 +641,9 @@ AdvancedExtruderGenerator::generate()
                 intersecting_plane_normal_vec = *P_next - *P_prev;
               }
               else
-                intersecting_plane_normal_vec = _end_extrusion_direction;
+                intersecting_plane_normal_vec = (_end_extrusion_direction.norm_sq() > 0)
+                                                    ? RealVectorValue(_end_extrusion_direction)
+                                                    : (*P_current - *P_prev);
               intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm();
 
               // normal vector to the current plane
