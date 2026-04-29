@@ -56,6 +56,10 @@ canonicalEdgeHelper(const unsigned int a, const unsigned int b)
   return {{std::min(a, b), std::max(a, b)}};
 }
 
+// Reorder the three vertex indices (a, b, c) so the resulting triangle is wound
+// counter-clockwise (CCW) in the 2D plane spanned by \p nodes. Many of the
+// triangulation paths (orientation tests, area accumulation, ear-clipping
+// validity checks) assume CCW input, so we normalize before emitting triangles.
 std::array<unsigned int, 3>
 makeCCWTriangleHelper(const std::vector<Point> & nodes,
                       const unsigned int a,
@@ -187,25 +191,19 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
 
   triangulator.triangulate();
 
-  std::vector<const Node *> sorted_nodes;
-  sorted_nodes.reserve(triangulation_mesh.n_nodes());
-  for (const auto & node : triangulation_mesh.node_ptr_range())
-    sorted_nodes.push_back(node);
-  std::sort(sorted_nodes.begin(),
-            sorted_nodes.end(),
-            [](const Node * const left, const Node * const right)
-            { return left->id() < right->id(); });
-
-  for (const auto * const node : sorted_nodes)
+  // node_ptr_range() and active_element_ptr_range() iterate in id order on this
+  // serial ReplicatedMesh, so no explicit sort is needed.
+  for (const auto * const node : triangulation_mesh.node_ptr_range())
     if (!node_id_to_local_index.count(node->id()))
     {
-      const Point node_point((*node)(0), (*node)(1), 0);
+      // Node inherits from Point and the triangulator operates on a 2D mesh, so
+      // the libMesh node already lives at z = 0 and we can use it directly.
       unsigned int matched_index = libMesh::invalid_uint;
       Real best_distance = std::numeric_limits<Real>::max();
 
       for (const auto i : index_range(poly_nodes))
       {
-        const Real distance = (node_point - poly_nodes[i]).norm();
+        const Real distance = (*node - poly_nodes[i]).norm();
         if (distance <= length_tol && distance < best_distance)
         {
           matched_index = i;
@@ -216,7 +214,7 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
       if (matched_index == libMesh::invalid_uint)
       {
         matched_index = static_cast<unsigned int>(poly_nodes.size());
-        poly_nodes.push_back(node_point);
+        poly_nodes.push_back(*node);
       }
 
       node_id_to_local_index.emplace(node->id(), matched_index);
@@ -225,24 +223,15 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
   std::vector<std::array<unsigned int, 3>> triangles;
   triangles.reserve(triangulation_mesh.n_elem());
 
-  std::vector<const Elem *> sorted_elems;
-  sorted_elems.reserve(triangulation_mesh.n_elem());
-  for (const auto & elem : triangulation_mesh.active_element_ptr_range())
-    sorted_elems.push_back(elem);
-  std::sort(sorted_elems.begin(),
-            sorted_elems.end(),
-            [](const Elem * const left, const Elem * const right)
-            { return left->id() < right->id(); });
-
-  for (const auto * const elem : sorted_elems)
+  for (const auto * const elem : triangulation_mesh.active_element_ptr_range())
   {
-    if (elem->type() != TRI3)
-      mooseError("The delaunay mortar triangulation backend produced a non-TRI3 element: ",
-                 static_cast<int>(elem->type()));
+    mooseAssert(elem->type() == TRI3,
+                "The delaunay mortar triangulation backend produced a non-TRI3 element: "
+                    << static_cast<int>(elem->type()));
 
     std::array<unsigned int, 3> local_triangle;
-    for (const auto i : make_range(3u))
-      local_triangle[i] = node_id_to_local_index.at(elem->node_id(i));
+    for (const auto i : index_range(local_triangle))
+      local_triangle[i] = libmesh_map_find(node_id_to_local_index, elem->node_id(i));
 
     const Real orientation = orient2dHelper(poly_nodes[local_triangle[0]],
                                             poly_nodes[local_triangle[1]],
