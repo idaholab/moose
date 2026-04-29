@@ -106,8 +106,8 @@
 [Transfers]
   [from_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variable = electric_potential
-    variable = electric_potential
+    source_variables = electric_potential
+    variables = electric_potential
     from_multi_app = subapp
   []
 []

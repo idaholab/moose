@@ -19,6 +19,7 @@
 #include "MFEMExecutedObject.h"
 #include "Postprocessor.h"
 #include "VectorPostprocessor.h"
+#include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -403,13 +404,6 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
   parent_ptr->setImagBC(bc_ptr);
 }
 
-libMesh::Point
-pointFromMFEMVector(const mfem::Vector & vec)
-{
-  return libMesh::Point(
-      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
-}
-
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
@@ -491,7 +485,7 @@ MFEMProblem::addFunction(const std::string & type,
     getCoefficients().declareScalar<mfem::FunctionCoefficient>(
         name,
         [&func](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
-        { return func.value(t, pointFromMFEMVector(p)); });
+        { return func.value(t, Moose::MFEM::libMeshPointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
@@ -501,7 +495,8 @@ MFEMProblem::addFunction(const std::string & type,
         dim,
         [&func, dim](const mfem::Vector & p, mfem::real_t t, mfem::Vector & u)
         {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          libMesh::RealVectorValue vector_value =
+              func.vectorValue(t, Moose::MFEM::libMeshPointFromMFEMVector(p));
           for (int i = 0; i < dim; i++)
           {
             u[i] = vector_value(i);
