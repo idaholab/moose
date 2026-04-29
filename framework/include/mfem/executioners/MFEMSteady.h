@@ -17,12 +17,14 @@
 #include "EquationSystemProblemOperator.h"
 #include "ComplexEquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner, public Moose::MFEM::ProblemOperatorInterface
+namespace Moose::MFEM
+{
+class Steady : public Executioner, public ProblemOperatorInterface
 {
 public:
   static InputParameters validParams();
 
-  explicit MFEMSteady(const InputParameters & params);
+  explicit Steady(const InputParameters & params);
 
   virtual void init() override;
   virtual void execute() override;
@@ -31,9 +33,9 @@ public:
   virtual bool lastSolveConverged() const override { return _last_solve_converged; };
 
 private:
-  MFEMProblem & _mfem_problem;
-  MFEMProblemData & _mfem_problem_data;
-  MFEMProblemSolve _mfem_problem_solve;
+  Problem & _mfem_problem;
+  ProblemData & _mfem_problem_data;
+  ProblemSolve _mfem_problem_solve;
 
   // Time variables used for consistency with MOOSE, needed for outputs.
   // Important for future synchronisation of solves in MultiApps
@@ -45,4 +47,5 @@ private:
   bool _last_solve_converged;
 };
 
+} // namespace Moose::MFEM
 #endif

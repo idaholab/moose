@@ -13,8 +13,10 @@
 #include "MFEMProblem.h"
 #include "SubProblem.h"
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMObject::validParams()
+Object::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params += FunctionInterface::validParams();
@@ -25,51 +27,52 @@ MFEMObject::validParams()
   return params;
 }
 
-MFEMObject::MFEMObject(const InputParameters & parameters)
+Object::Object(const InputParameters & parameters)
   : MooseObject(parameters),
     FunctionInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     ReporterInterface(this),
     _mfem_problem(
-        static_cast<MFEMProblem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")))
+        static_cast<Problem &>(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")))
 {
 }
 
 mfem::Coefficient &
-MFEMObject::getScalarCoefficientByName(const MFEMScalarCoefficientName & name)
+Object::getScalarCoefficientByName(const Moose::MFEM::ScalarCoefficientName & name)
 {
   return getMFEMProblem().getCoefficients().getScalarCoefficient(name);
 }
 
 mfem::VectorCoefficient &
-MFEMObject::getVectorCoefficientByName(const MFEMVectorCoefficientName & name)
+Object::getVectorCoefficientByName(const Moose::MFEM::VectorCoefficientName & name)
 {
   return getMFEMProblem().getCoefficients().getVectorCoefficient(name);
 }
 
 mfem::MatrixCoefficient &
-MFEMObject::getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name)
+Object::getMatrixCoefficientByName(const Moose::MFEM::MatrixCoefficientName & name)
 {
   return getMFEMProblem().getCoefficients().getMatrixCoefficient(name);
 }
 
 mfem::Coefficient &
-MFEMObject::getScalarCoefficient(const std::string & name)
+Object::getScalarCoefficient(const std::string & name)
 {
-  return getScalarCoefficientByName(getParam<MFEMScalarCoefficientName>(name));
+  return getScalarCoefficientByName(getParam<Moose::MFEM::ScalarCoefficientName>(name));
 }
 
 mfem::VectorCoefficient &
-MFEMObject::getVectorCoefficient(const std::string & name)
+Object::getVectorCoefficient(const std::string & name)
 {
-  return getVectorCoefficientByName(getParam<MFEMVectorCoefficientName>(name));
+  return getVectorCoefficientByName(getParam<Moose::MFEM::VectorCoefficientName>(name));
 }
 
 mfem::MatrixCoefficient &
-MFEMObject::getMatrixCoefficient(const std::string & name)
+Object::getMatrixCoefficient(const std::string & name)
 {
-  return getMatrixCoefficientByName(getParam<MFEMMatrixCoefficientName>(name));
+  return getMatrixCoefficientByName(getParam<Moose::MFEM::MatrixCoefficientName>(name));
 }
 
+} // namespace Moose::MFEM
 #endif

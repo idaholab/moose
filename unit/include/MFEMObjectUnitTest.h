@@ -72,14 +72,15 @@ protected:
   {
     InputParameters mesh_params = _factory.getValidParams("MFEMMesh");
     mesh_params.set<MeshFileName>("file") = "../test/tests/mfem/mesh/beam-tet.mesh";
-    _mfem_mesh_ptr = _factory.createUnique<MFEMMesh>("MFEMMesh", "moose_mesh", mesh_params);
+    _mfem_mesh_ptr =
+        _factory.createUnique<Moose::MFEM::Mesh>("MFEMMesh", "moose_mesh", mesh_params);
     _mfem_mesh_ptr->setMeshBase(_mfem_mesh_ptr->buildMeshBaseObject());
     _mfem_mesh_ptr->buildMesh();
 
     InputParameters problem_params = _factory.getValidParams("MFEMProblem");
     problem_params.set<MooseMesh *>("mesh") = _mfem_mesh_ptr.get();
     problem_params.set<std::string>(MooseBase::name_param) = "name2";
-    _mfem_problem = _factory.create<MFEMProblem>("MFEMProblem", "problem", problem_params);
+    _mfem_problem = _factory.create<Moose::MFEM::Problem>("MFEMProblem", "problem", problem_params);
 
     _app->actionWarehouse().problemBase() = _mfem_problem;
   }
@@ -87,10 +88,10 @@ protected:
   template <typename T>
   T & addObject(const std::string & type, const std::string & name, InputParameters & params);
 
-  std::unique_ptr<MFEMMesh> _mfem_mesh_ptr;
+  std::unique_ptr<Moose::MFEM::Mesh> _mfem_mesh_ptr;
   std::shared_ptr<MooseApp> _app;
   Factory & _factory;
-  std::shared_ptr<MFEMProblem> _mfem_problem;
+  std::shared_ptr<Moose::MFEM::Problem> _mfem_problem;
 };
 
 template <typename T>

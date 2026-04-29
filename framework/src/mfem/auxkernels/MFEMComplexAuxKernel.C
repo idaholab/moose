@@ -12,10 +12,12 @@
 #include "MFEMComplexAuxKernel.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMComplexAuxKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMExecutedObject::validParams();
+InputParameters
+ComplexAuxKernel::validParams()
+{
+  InputParameters params = ExecutedObject::validParams();
   params.registerBase("AuxKernel");
   params.addClassDescription("Base class for MFEM objects that update auxiliary variables outside "
                              "of the main solve step.");
@@ -24,29 +26,29 @@ MFEMComplexAuxKernel::validParams()
   return params;
 }
 
-MFEMComplexAuxKernel::MFEMComplexAuxKernel(const InputParameters & parameters)
-  : MFEMExecutedObject(parameters),
+ComplexAuxKernel::ComplexAuxKernel(const InputParameters & parameters)
+  : ExecutedObject(parameters),
     _result_var_name(getParam<AuxVariableName>("variable")),
     _result_var(*getMFEMProblem().getComplexGridFunction(_result_var_name))
 {
 }
 
 std::optional<std::string>
-MFEMComplexAuxKernel::suppliedVariableName() const
+ComplexAuxKernel::suppliedVariableName() const
 {
   return _result_var_name;
 }
 
 void
-MFEMComplexAuxKernel::complexAdd(mfem::ParComplexGridFunction & a,
-                                 const mfem::ParComplexGridFunction & b,
-                                 const std::complex<mfem::real_t> scale)
+ComplexAuxKernel::complexAdd(mfem::ParComplexGridFunction & a,
+                             const mfem::ParComplexGridFunction & b,
+                             const std::complex<mfem::real_t> scale)
 {
   // a += scale * b
 
   // check that the parfespaces match
   if (a.ParFESpace() != b.ParFESpace())
-    mooseError("MFEMComplexAuxKernel::complexAdd: ParFESpaces of input variables do not match.");
+    mooseError("ComplexAuxKernel::complexAdd: ParFESpaces of input variables do not match.");
 
   a.real().Add(scale.real(), b.real());
   a.real().Add(-scale.imag(), b.imag());
@@ -55,8 +57,8 @@ MFEMComplexAuxKernel::complexAdd(mfem::ParComplexGridFunction & a,
 }
 
 void
-MFEMComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
-                                   const std::complex<mfem::real_t> scale)
+ComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
+                               const std::complex<mfem::real_t> scale)
 {
   // a *= scale
 
@@ -66,4 +68,5 @@ MFEMComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
   complexAdd(a, b, scale - 1);
 }
 
+} // namespace Moose::MFEM
 #endif

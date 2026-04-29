@@ -11,13 +11,16 @@
 
 #include "MFEMConduitDataCollection.h"
 
-registerMooseObject("MooseApp", MFEMConduitDataCollection);
+registerMooseMFEMObject("MooseApp", ConduitDataCollection);
 
-InputParameters
-MFEMConduitDataCollection::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMDataCollection::validParams();
-  params.addClassDescription("Output for controlling MFEMConduitDataCollection inherited data.");
+InputParameters
+ConduitDataCollection::validParams()
+{
+  InputParameters params = DataCollection::validParams();
+  params.addClassDescription(
+      "Output for controlling Moose::MFEM::ConduitDataCollection inherited data.");
   MooseEnum protocol("hdf5 json conduit_json conduit_bin", "hdf5", false);
   params.addParam<MooseEnum>("protocol",
                              protocol,
@@ -26,8 +29,8 @@ MFEMConduitDataCollection::validParams()
   return params;
 }
 
-MFEMConduitDataCollection::MFEMConduitDataCollection(const InputParameters & parameters)
-  : MFEMDataCollection(parameters),
+ConduitDataCollection::ConduitDataCollection(const InputParameters & parameters)
+  : DataCollection(parameters),
     _conduit_dc((_file_base).c_str(), &_pmesh),
     _protocol(getParam<MooseEnum>("protocol"))
 {
@@ -35,4 +38,5 @@ MFEMConduitDataCollection::MFEMConduitDataCollection(const InputParameters & par
   registerFields();
 }
 
+} // namespace Moose::MFEM
 #endif

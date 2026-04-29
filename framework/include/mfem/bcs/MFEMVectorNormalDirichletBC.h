@@ -13,13 +13,16 @@
 
 #include "MFEMVectorDirichletBCBase.h"
 
-class MFEMVectorNormalDirichletBC : public MFEMVectorDirichletBCBase
+namespace Moose::MFEM
+{
+class VectorNormalDirichletBC : public VectorDirichletBCBase
 {
 public:
   static InputParameters validParams();
-  MFEMVectorNormalDirichletBC(const InputParameters & parameters);
-  ~MFEMVectorNormalDirichletBC() override = default;
+  VectorNormalDirichletBC(const InputParameters & parameters);
+  ~VectorNormalDirichletBC() override = default;
   void ApplyBC(mfem::GridFunction & gridfunc) override;
 };
 
+} // namespace Moose::MFEM
 #endif

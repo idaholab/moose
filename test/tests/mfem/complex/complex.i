@@ -90,8 +90,10 @@ kappa_i = -7.86151377757423297509831172647
   []
 []
 
-[Solver]
-  type = MFEMSuperLU
+[Solvers]
+  [main]
+    type = MFEMSuperLU
+  []
 []
 
 [Executioner]

@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "MFEMProblemData.h"
 #include "ProblemOperatorBase.h"
 
 namespace Moose::MFEM
@@ -21,7 +20,7 @@ namespace Moose::MFEM
 class TimeDependentProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase
 {
 public:
-  TimeDependentProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
+  TimeDependentProblemOperator(Problem & problem) : ProblemOperatorBase(problem) {}
 
   virtual void SetGridFunctions() override;
   virtual void Solve() override {}

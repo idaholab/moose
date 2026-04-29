@@ -11,10 +11,12 @@
 
 #include "MFEMInitialCondition.h"
 
-InputParameters
-MFEMInitialCondition::validParams()
+namespace Moose::MFEM
 {
-  auto params = MFEMExecutedObject::validParams();
+InputParameters
+InitialCondition::validParams()
+{
+  auto params = ExecutedObject::validParams();
   params.addRequiredParam<VariableName>("variable",
                                         "The variable to apply the initial condition on.");
   params.registerBase("InitialCondition");
@@ -28,15 +30,13 @@ MFEMInitialCondition::validParams()
   return params;
 }
 
-MFEMInitialCondition::MFEMInitialCondition(const InputParameters & params)
-  : MFEMExecutedObject(params)
-{
-}
+InitialCondition::InitialCondition(const InputParameters & params) : ExecutedObject(params) {}
 
 std::optional<std::string>
-MFEMInitialCondition::suppliedVariableName() const
+InitialCondition::suppliedVariableName() const
 {
   return getParam<VariableName>("variable");
 }
 
+} // namespace Moose::MFEM
 #endif

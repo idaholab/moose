@@ -95,11 +95,11 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexScalarDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "1.";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "1.";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_real") = "1.";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_imag") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<Moose::MFEM::ComplexScalarDirichletBC>(
+      "MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
@@ -135,11 +135,11 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexScalarDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "func1";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "func1";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_real") = "func1";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_imag") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<Moose::MFEM::ComplexScalarDirichletBC>(
+      "MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
@@ -176,10 +176,10 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorNormalDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::ComplexVectorNormalDirichletBC>(
       "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
@@ -230,10 +230,10 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorNormalDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "func2";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_real") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_imag") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::ComplexVectorNormalDirichletBC>(
       "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
@@ -286,10 +286,10 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletConstantB
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorTangentialDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexVectorTangentialDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::ComplexVectorTangentialDirichletBC>(
       "MFEMComplexVectorTangentialDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
@@ -343,10 +343,10 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorTangentialDirichletBC");
   bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "func2";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_imag") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_real") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexVectorTangentialDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::ComplexVectorTangentialDirichletBC>(
       "MFEMComplexVectorTangentialDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");

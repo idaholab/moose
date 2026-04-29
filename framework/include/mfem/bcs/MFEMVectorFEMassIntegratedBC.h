@@ -13,12 +13,14 @@
 
 #include "MFEMIntegratedBC.h"
 
-class MFEMVectorFEMassIntegratedBC : public MFEMIntegratedBC
+namespace Moose::MFEM
+{
+class VectorFEMassIntegratedBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEMassIntegratedBC(const InputParameters & parameters);
+  VectorFEMassIntegratedBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator();
@@ -27,4 +29,5 @@ protected:
   mfem::Coefficient & _coef;
 };
 
+} // namespace Moose::MFEM
 #endif

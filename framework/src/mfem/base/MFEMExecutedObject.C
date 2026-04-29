@@ -11,43 +11,45 @@
 
 #include "MFEMExecutedObject.h"
 
-InputParameters
-MFEMExecutedObject::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
+InputParameters
+ExecutedObject::validParams()
+{
+  InputParameters params = Object::validParams();
   params += SetupInterface::validParams();
-  params.registerSystemAttributeName("MFEMExecutedObject");
+  params.registerSystemAttributeName("Moose::MFEM::ExecutedObject");
   params.addPrivateParam<std::vector<std::string>>("_mfem_dependency_param_names", {});
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_END;
   params.addClassDescription("Base class for executed MFEM objects.");
   return params;
 }
 
-MFEMExecutedObject::MFEMExecutedObject(const InputParameters & parameters)
-  : MFEMObject(parameters), SetupInterface(this), DependencyResolverInterface()
+ExecutedObject::ExecutedObject(const InputParameters & parameters)
+  : Object(parameters), SetupInterface(this), DependencyResolverInterface()
 {
 }
 
 std::optional<std::string>
-MFEMExecutedObject::suppliedVariableName() const
-{
-  return std::nullopt;
-}
-
-std::optional<std::string>
-MFEMExecutedObject::suppliedPostprocessorName() const
+ExecutedObject::suppliedVariableName() const
 {
   return std::nullopt;
 }
 
 std::optional<std::string>
-MFEMExecutedObject::suppliedVectorPostprocessorName() const
+ExecutedObject::suppliedPostprocessorName() const
+{
+  return std::nullopt;
+}
+
+std::optional<std::string>
+ExecutedObject::suppliedVectorPostprocessorName() const
 {
   return std::nullopt;
 }
 
 const std::set<std::string> &
-MFEMExecutedObject::getRequestedItems()
+ExecutedObject::getRequestedItems()
 {
   if (_requested_items)
     return *_requested_items;
@@ -77,7 +79,7 @@ MFEMExecutedObject::getRequestedItems()
 }
 
 const std::set<std::string> &
-MFEMExecutedObject::getSuppliedItems()
+ExecutedObject::getSuppliedItems()
 {
   if (_supplied_items)
     return *_supplied_items;
@@ -95,28 +97,29 @@ MFEMExecutedObject::getSuppliedItems()
 }
 
 std::string
-MFEMExecutedObject::variableDependencyKey(const std::string & name)
+ExecutedObject::variableDependencyKey(const std::string & name)
 {
   return "variable:" + name;
 }
 
 std::string
-MFEMExecutedObject::postprocessorDependencyKey(const std::string & name)
+ExecutedObject::postprocessorDependencyKey(const std::string & name)
 {
   return "postprocessor:" + name;
 }
 
 std::string
-MFEMExecutedObject::vectorPostprocessorDependencyKey(const std::string & name)
+ExecutedObject::vectorPostprocessorDependencyKey(const std::string & name)
 {
   return "vector_postprocessor:" + name;
 }
 
 void
-MFEMExecutedObject::appendDependencyParam(InputParameters & params, const std::string & param_name)
+ExecutedObject::appendDependencyParam(InputParameters & params, const std::string & param_name)
 {
   auto & param_names = params.set<std::vector<std::string>>("_mfem_dependency_param_names");
   param_names.push_back(param_name);
 }
 
+} // namespace Moose::MFEM
 #endif

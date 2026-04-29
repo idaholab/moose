@@ -37,37 +37,39 @@ MultiAppMFEMCopyTransfer::MultiAppMFEMCopyTransfer(InputParameters const & param
 {
   auto bad_problem = [this]()
   {
-    mooseError(type(),
-               " only works with MFEMProblem based applications. Check that all your inputs "
-               "involved in this transfer are MFEMProblem based");
+    mooseError(
+        type(),
+        " only works with Moose::MFEM::Problem based applications. Check that all your inputs "
+        "involved in this transfer are Moose::MFEM::Problem based");
   };
   if (hasToMultiApp())
   {
-    if (!dynamic_cast<MFEMProblem *>(&getToMultiApp()->problemBase()))
+    if (!dynamic_cast<Moose::MFEM::Problem *>(&getToMultiApp()->problemBase()))
       bad_problem();
     for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
       if (getToMultiApp()->hasLocalApp(i) &&
-          !dynamic_cast<MFEMProblem *>(&getToMultiApp()->appProblemBase(i)))
+          !dynamic_cast<Moose::MFEM::Problem *>(&getToMultiApp()->appProblemBase(i)))
         bad_problem();
   }
   if (hasFromMultiApp())
   {
-    if (!dynamic_cast<MFEMProblem *>(&getFromMultiApp()->problemBase()))
+    if (!dynamic_cast<Moose::MFEM::Problem *>(&getFromMultiApp()->problemBase()))
       bad_problem();
     for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
       if (getFromMultiApp()->hasLocalApp(i) &&
-          !dynamic_cast<MFEMProblem *>(&getFromMultiApp()->appProblemBase(i)))
+          !dynamic_cast<Moose::MFEM::Problem *>(&getFromMultiApp()->appProblemBase(i)))
         bad_problem();
   }
 }
 
 void
-MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_problem)
+MultiAppMFEMCopyTransfer::transfer(Moose::MFEM::Problem & to_problem,
+                                   Moose::MFEM::Problem & from_problem)
 {
   if (numToVar() != numFromVar())
     mooseError("Number of variables transferred must be same in both systems.");
 
-  auto getGF = [&](MFEMProblem & problem, const std::string & name) -> mfem::Vector &
+  auto getGF = [&](Moose::MFEM::Problem & problem, const std::string & name) -> mfem::Vector &
   {
     if (problem.getProblemData().gridfunctions.Has(name))
       return *problem.getGridFunction(name);
@@ -98,8 +100,8 @@ MultiAppMFEMCopyTransfer::execute()
     {
       if (getToMultiApp()->hasLocalApp(i))
       {
-        transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
-                 static_cast<MFEMProblem &>(getToMultiApp()->problemBase()));
+        transfer(static_cast<Moose::MFEM::Problem &>(getToMultiApp()->appProblemBase(i)),
+                 static_cast<Moose::MFEM::Problem &>(getToMultiApp()->problemBase()));
       }
     }
   }
@@ -109,8 +111,8 @@ MultiAppMFEMCopyTransfer::execute()
     {
       if (getFromMultiApp()->hasLocalApp(i))
       {
-        transfer(static_cast<MFEMProblem &>(getFromMultiApp()->problemBase()),
-                 static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
+        transfer(static_cast<Moose::MFEM::Problem &>(getFromMultiApp()->problemBase()),
+                 static_cast<Moose::MFEM::Problem &>(getFromMultiApp()->appProblemBase(i)));
       }
     }
   }
@@ -121,8 +123,8 @@ MultiAppMFEMCopyTransfer::execute()
     {
       if (getFromMultiApp()->hasLocalApp(i) && getToMultiApp()->hasLocalApp(i))
       {
-        transfer(static_cast<MFEMProblem &>(getToMultiApp()->appProblemBase(i)),
-                 static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
+        transfer(static_cast<Moose::MFEM::Problem &>(getToMultiApp()->appProblemBase(i)),
+                 static_cast<Moose::MFEM::Problem &>(getFromMultiApp()->appProblemBase(i)));
         ++transfers_done;
       }
     }

@@ -14,27 +14,29 @@
 #include "MFEMFESpace.h"
 #include "MFEMObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParGridFunction object.
  */
-class MFEMVariable : public MFEMObject
+class Variable : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMVariable(const InputParameters & parameters);
+  Variable(const InputParameters & parameters);
 
   /// Returns a shared pointer to the constructed gridfunction.
   inline std::shared_ptr<mfem::ParGridFunction> getGridFunction() const { return _gridfunction; }
 
   /// Returns a reference to the fespace used by the gridfunction.
-  inline const MFEMFESpace & getFESpace() const { return _fespace; }
+  inline const FESpace & getFESpace() const { return _fespace; }
 
-  /// Returns the variable name corresponding to the time derivative of the MFEMVariable.
+  /// Returns the variable name corresponding to the time derivative of the Moose::MFEM::Variable.
   inline const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
 
 protected:
-  const MFEMFESpace & _fespace;
+  const FESpace & _fespace;
 
 private:
   /// Constructs the gridfunction.
@@ -47,4 +49,5 @@ private:
   const VariableName _time_derivative_name;
 };
 
+} // namespace Moose::MFEM
 #endif

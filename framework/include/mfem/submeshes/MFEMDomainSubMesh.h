@@ -14,19 +14,22 @@
 #include "MFEMSubMesh.h"
 #include "MFEMBlockRestrictable.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParSubMesh object as
  * as a restriction of the parent mesh to the set of user-specified subdomains.
  * Access using the getSubMesh() accessor.
  */
-class MFEMDomainSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
+class DomainSubMesh : public SubMesh, public BlockRestrictable
 {
 public:
   static InputParameters validParams();
-  MFEMDomainSubMesh(const InputParameters & parameters);
+  DomainSubMesh(const InputParameters & parameters);
 
 protected:
   virtual void buildSubMesh() override;
 };
 
+} // namespace Moose::MFEM
 #endif

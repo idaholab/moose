@@ -12,32 +12,36 @@
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMMixedVectorGradientKernel);
+registerMooseMFEMObject("MooseApp", MixedVectorGradientKernel);
 
-InputParameters
-MFEMMixedVectorGradientKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMMixedBilinearFormKernel::validParams();
+InputParameters
+MixedVectorGradientKernel::validParams()
+{
+  InputParameters params = MixedBilinearFormKernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(k\\vec\\nabla u, \\vec v)_\\Omega$ "
       "arising from the weak form of the gradient operator "
       "$k\\vec \\nabla u$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
+      "coefficient", "1.", "Name of property k to use.");
   return params;
 }
 
-MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+MixedVectorGradientKernel::MixedVectorGradientKernel(const InputParameters & parameters)
+  : MixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedVectorGradientKernel::createMBFIntegrator()
+MixedVectorGradientKernel::createMBFIntegrator()
 {
   return new mfem::MixedVectorGradientIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

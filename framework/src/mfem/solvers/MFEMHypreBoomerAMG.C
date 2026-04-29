@@ -13,18 +13,20 @@
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMHypreBoomerAMG);
+registerMooseMFEMObject("MooseApp", HypreBoomerAMG);
 
-InputParameters
-MFEMHypreBoomerAMG::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+HypreBoomerAMG::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre BoomerAMG solver and preconditioner for the iterative solution "
                              "of MFEM equation systems.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMFESpaceName>(
+  params.addParam<Moose::MFEM::FESpaceName>(
       "fespace", "H1 FESpace to use in HypreBoomerAMG setup for elasticity problems.");
   params.addParam<mfem::real_t>(
       "strength_threshold", 0.25, "HypreBoomerAMG strong threshold. Defaults to 0.25.");
@@ -33,20 +35,20 @@ MFEMHypreBoomerAMG::validParams()
   return params;
 }
 
-MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _mfem_fespace(
-        isParamSetByUser("fespace")
-            ? getMFEMProblem()
-                  .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<MFEMFESpaceName>("fespace"))
-                  .getFESpace()
-            : nullptr)
+HypreBoomerAMG::HypreBoomerAMG(const InputParameters & parameters)
+  : LinearSolverBase(parameters),
+    _mfem_fespace(isParamSetByUser("fespace")
+                      ? getMFEMProblem()
+                            .getMFEMObject<FESpace>("Moose::MFEM::FESpace",
+                                                    getParam<Moose::MFEM::FESpaceName>("fespace"))
+                            .getFESpace()
+                      : nullptr)
 {
   constructSolver();
 }
 
 void
-MFEMHypreBoomerAMG::constructSolver()
+HypreBoomerAMG::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 
@@ -63,7 +65,7 @@ MFEMHypreBoomerAMG::constructSolver()
 }
 
 void
-MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
@@ -81,4 +83,5 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
   }
 }
 
+} // namespace Moose::MFEM
 #endif

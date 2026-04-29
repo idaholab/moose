@@ -12,10 +12,12 @@
 #include "MFEMMesh.h"
 #include "libmesh/mesh_generation.h"
 
-registerMooseObject("MooseApp", MFEMMesh);
+registerMooseMFEMObject("MooseApp", Mesh);
 
+namespace Moose::MFEM
+{
 InputParameters
-MFEMMesh::validParams()
+Mesh::validParams()
 {
   InputParameters params = FileMesh::validParams();
   params.addParam<unsigned int>(
@@ -43,12 +45,12 @@ MFEMMesh::validParams()
   return params;
 }
 
-MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters) {}
+Mesh::Mesh(const InputParameters & parameters) : FileMesh(parameters) {}
 
-MFEMMesh::~MFEMMesh() {}
+Mesh::~Mesh() {}
 
 void
-MFEMMesh::buildMesh()
+Mesh::buildMesh()
 {
   TIME_SECTION("buildMesh", 2, "Reading Mesh");
 
@@ -96,7 +98,7 @@ MFEMMesh::buildMesh()
 }
 
 void
-MFEMMesh::displace(mfem::GridFunction const & displacement)
+Mesh::displace(mfem::GridFunction const & displacement)
 {
   _mfem_par_mesh->EnsureNodes();
   mfem::GridFunction * nodes = _mfem_par_mesh->GetNodes();
@@ -105,22 +107,23 @@ MFEMMesh::displace(mfem::GridFunction const & displacement)
 }
 
 void
-MFEMMesh::buildDummyMooseMesh()
+Mesh::buildDummyMooseMesh()
 {
   MeshTools::Generation::build_point(static_cast<UnstructuredMesh &>(getMesh()));
 }
 
 void
-MFEMMesh::uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const
+Mesh::uniformRefinement(mfem::Mesh & mesh, const unsigned int nref) const
 {
   for (unsigned int i = 0; i < nref; ++i)
     mesh.UniformRefinement();
 }
 
 std::unique_ptr<MooseMesh>
-MFEMMesh::safeClone() const
+Mesh::safeClone() const
 {
   return _app.getFactory().copyConstruct(*this);
 }
 
+} // namespace Moose::MFEM
 #endif

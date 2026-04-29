@@ -86,9 +86,35 @@ DerivativeStringToJSON(LinearSystemName);
 DerivativeStringToJSON(SolverSystemName);
 DerivativeStringToJSON(CLIArgString);
 #ifdef MOOSE_MFEM_ENABLED
-DerivativeStringToJSON(MFEMScalarCoefficientName);
-DerivativeStringToJSON(MFEMVectorCoefficientName);
-DerivativeStringToJSON(MFEMMatrixCoefficientName);
-DerivativeStringToJSON(MFEMFESpaceName);
-DerivativeStringToJSON(MFEMSolverName);
+namespace nlohmann
+{
+void
+adl_serializer<Moose::MFEM::ScalarCoefficientName>::to_json(
+    json & j, const Moose::MFEM::ScalarCoefficientName & v)
+{
+  j = static_cast<std::string>(v);
+}
+void
+adl_serializer<Moose::MFEM::VectorCoefficientName>::to_json(
+    json & j, const Moose::MFEM::VectorCoefficientName & v)
+{
+  j = static_cast<std::string>(v);
+}
+void
+adl_serializer<Moose::MFEM::MatrixCoefficientName>::to_json(
+    json & j, const Moose::MFEM::MatrixCoefficientName & v)
+{
+  j = static_cast<std::string>(v);
+}
+void
+adl_serializer<Moose::MFEM::FESpaceName>::to_json(json & j, const Moose::MFEM::FESpaceName & v)
+{
+  j = static_cast<std::string>(v);
+}
+void
+adl_serializer<Moose::MFEM::SolverName>::to_json(json & j, const Moose::MFEM::SolverName & v)
+{
+  j = static_cast<std::string>(v);
+}
+}
 #endif

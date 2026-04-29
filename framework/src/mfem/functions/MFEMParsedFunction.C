@@ -27,7 +27,7 @@ MFEMParsedFunction::validParams()
 MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
   : MooseParsedFunction(parameters),
     FunctionParserUtils(parameters),
-    _mfem_problem(static_cast<MFEMProblem &>(_pfb_feproblem)),
+    _mfem_problem(static_cast<Moose::MFEM::Problem &>(_pfb_feproblem)),
     _sym_function(std::make_shared<SymFunction>()),
     _xyzt({"x", "y", "z", "t"})
 {

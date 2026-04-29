@@ -11,17 +11,19 @@
 
 #pragma once
 
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
 
+namespace Moose::MFEM
+{
 /**
  * Wrapper for mfem::MUMPSSolver
  */
-class MFEMMUMPS : public MFEMSolverBase
+class MUMPS : public LinearSolverBase
 {
 public:
   static InputParameters validParams();
 
-  MFEMMUMPS(const InputParameters & parameters);
+  MUMPS(const InputParameters & parameters);
 
 protected:
   void constructSolver() override;
@@ -30,4 +32,5 @@ protected:
   void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 };
 
+} // namespace Moose::MFEM
 #endif

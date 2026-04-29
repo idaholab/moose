@@ -13,12 +13,14 @@
 
 #include "MFEMSimplifiedFESpace.h"
 
-class MFEMScalarFESpace : public MFEMSimplifiedFESpace
+namespace Moose::MFEM
+{
+class ScalarFESpace : public SimplifiedFESpace
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarFESpace(const InputParameters & parameters);
+  ScalarFESpace(const InputParameters & parameters);
 
   virtual bool isScalar() const override { return true; }
 
@@ -37,4 +39,5 @@ private:
   const std::string _fec_type;
 };
 
+} // namespace Moose::MFEM
 #endif

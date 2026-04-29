@@ -5,14 +5,16 @@
 #include "MFEMProblem.h"
 #include "MFEMFESpace.h"
 
-registerMooseObject("MooseApp", MFEMComplexVariable);
+registerMooseMFEMObject("MooseApp", ComplexVariable);
 
-InputParameters
-MFEMComplexVariable::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params.addRequiredParam<MFEMFESpaceName>("fespace",
-                                           "The finite element space this variable is defined on.");
+InputParameters
+ComplexVariable::validParams()
+{
+  InputParameters params = Object::validParams();
+  params.addRequiredParam<Moose::MFEM::FESpaceName>(
+      "fespace", "The finite element space this variable is defined on.");
   params += MooseVariableBase::validParams();
   params.addClassDescription(
       "Class for adding complex MFEM variables to the problem (`mfem::ParComplexGridFunction`s).");
@@ -22,19 +24,20 @@ MFEMComplexVariable::validParams()
   return params;
 }
 
-MFEMComplexVariable::MFEMComplexVariable(const InputParameters & parameters)
-  : MFEMObject(parameters),
-    _fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                         getParam<MFEMFESpaceName>("fespace"))),
+ComplexVariable::ComplexVariable(const InputParameters & parameters)
+  : Object(parameters),
+    _fespace(getMFEMProblem().getMFEMObject<FESpace>(
+        "Moose::MFEM::FESpace", getParam<Moose::MFEM::FESpaceName>("fespace"))),
     _cmplx_gridfunction(buildComplexGridFunction())
 {
   *_cmplx_gridfunction = 0.0;
 }
 
 const std::shared_ptr<mfem::ParComplexGridFunction>
-MFEMComplexVariable::buildComplexGridFunction()
+ComplexVariable::buildComplexGridFunction()
 {
   return std::make_shared<mfem::ParComplexGridFunction>(_fespace.getFESpace().get());
 }
 
+} // namespace Moose::MFEM
 #endif

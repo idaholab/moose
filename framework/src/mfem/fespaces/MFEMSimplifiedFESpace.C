@@ -13,10 +13,12 @@
 #include "MFEMProblem.h"
 #include "AddVariableAction.h"
 
-InputParameters
-MFEMSimplifiedFESpace::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMFESpace::validParams();
+InputParameters
+SimplifiedFESpace::validParams()
+{
+  InputParameters params = FESpace::validParams();
   params.addClassDescription("Base class for the simplified interfaces to build MFEM finite "
                              "element spaces. It provides the common parameters.");
   params.addParam<MooseEnum>("fec_order",
@@ -25,15 +27,16 @@ MFEMSimplifiedFESpace::validParams()
   return params;
 }
 
-MFEMSimplifiedFESpace::MFEMSimplifiedFESpace(const InputParameters & parameters)
-  : MFEMFESpace(parameters), _fec_order(parameters.get<MooseEnum>("fec_order"))
+SimplifiedFESpace::SimplifiedFESpace(const InputParameters & parameters)
+  : FESpace(parameters), _fec_order(parameters.get<MooseEnum>("fec_order"))
 {
 }
 
 int
-MFEMSimplifiedFESpace::getProblemDim() const
+SimplifiedFESpace::getProblemDim() const
 {
   return _pmesh.Dimension();
 }
 
+} // namespace Moose::MFEM
 #endif

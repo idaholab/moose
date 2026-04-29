@@ -14,16 +14,18 @@
 #include "MFEMExecutedObject.h"
 #include "MFEMContainers.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to construct an auxiliary solver used to update a real auxvariable.
  */
-class MFEMAuxKernel : public MFEMExecutedObject
+class AuxKernel : public ExecutedObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMAuxKernel(const InputParameters & parameters);
-  virtual ~MFEMAuxKernel() = default;
+  AuxKernel(const InputParameters & parameters);
+  virtual ~AuxKernel() = default;
 
   /// Method called to update any owned objects upon an FE space update
   virtual void update() {}
@@ -41,4 +43,5 @@ protected:
   long _sequence{0};
 };
 
+} // namespace Moose::MFEM
 #endif

@@ -18,8 +18,8 @@ AddMFEMComplexBCComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription(
-      "Add an MFEMIntegratedBC to serve as the real or imaginary component of "
-      "an MFEMComplexIntegratedBC.");
+      "Add an Moose::MFEM::IntegratedBC to serve as the real or imaginary component of "
+      "an Moose::MFEM::ComplexIntegratedBC.");
   return params;
 }
 
@@ -33,7 +33,7 @@ AddMFEMComplexBCComponentAction::act()
 {
   std::vector<std::string> elements;
   MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  Moose::MFEM::Problem * mfem_problem = dynamic_cast<Moose::MFEM::Problem *>(_problem.get());
 
   if (mfem_problem && _name == "RealComponent")
     mfem_problem->addRealComponentToBC(_type, elements[elements.size() - 2], _moose_object_pars);

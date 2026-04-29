@@ -13,16 +13,19 @@
 
 #include "MFEMEssentialBC.h"
 
-class MFEMVectorDirichletBCBase : public MFEMEssentialBC
+namespace Moose::MFEM
+{
+class VectorDirichletBCBase : public EssentialBC
 {
 public:
   static InputParameters validParams();
 
-  ~MFEMVectorDirichletBCBase() override = default;
+  ~VectorDirichletBCBase() override = default;
 
 protected:
-  MFEMVectorDirichletBCBase(const InputParameters & parameters);
+  VectorDirichletBCBase(const InputParameters & parameters);
   mfem::VectorCoefficient & _vec_coef;
 };
 
+} // namespace Moose::MFEM
 #endif

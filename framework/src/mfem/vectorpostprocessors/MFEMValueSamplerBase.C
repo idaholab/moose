@@ -73,12 +73,14 @@ MFEMVectorToPostprocessorPoints(
 }
 }
 
-InputParameters
-MFEMValueSamplerBase::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMVectorPostprocessor::validParams();
+InputParameters
+ValueSamplerBase::validParams()
+{
+  InputParameters params = VectorPostprocessor::validParams();
 
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "variable", "The names of the variables that this VectorPostprocessor operates on");
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>(
@@ -87,9 +89,9 @@ MFEMValueSamplerBase::validParams()
   return params;
 }
 
-MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
-                                           const std::vector<Point> & points)
-  : MFEMVectorPostprocessor(parameters),
+ValueSamplerBase::ValueSamplerBase(const InputParameters & parameters,
+                                   const std::vector<Point> & points)
+  : VectorPostprocessor(parameters),
     _var_name(getParam<VariableName>("variable")),
     _var(*getMFEMProblem().getGridFunction(_var_name)),
     _mesh(const_cast<mfem::ParMesh &>(getMFEMProblem().getMFEMVariableMesh(_var_name))),
@@ -100,7 +102,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _interp_vals(points.size())
 {
   if (getMFEMProblem().mesh().shouldDisplace())
-    mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+    mooseError("Moose::MFEM::ValueSamplerBase does not yet support problems with displacement.");
 
   // set up points vector
   _mesh.EnsureNodes();
@@ -113,7 +115,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   {
     if (point_codes[i] > 1)
     {
-      mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+      mooseError("Moose::MFEM::ValueSamplerBase could not find point at ", points[i], ".");
     }
   }
 
@@ -139,13 +141,13 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
 }
 
 void
-MFEMValueSamplerBase::execute()
+ValueSamplerBase::execute()
 {
   _finder.Interpolate(_var, _interp_vals);
 }
 
 void
-MFEMValueSamplerBase::finalize()
+ValueSamplerBase::finalize()
 {
   _interp_vals.HostReadWrite();
   _points.HostReadWrite();
@@ -165,4 +167,5 @@ MFEMValueSamplerBase::finalize()
   }
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

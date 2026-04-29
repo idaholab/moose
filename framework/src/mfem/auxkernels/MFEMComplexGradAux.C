@@ -12,17 +12,19 @@
 #include "MFEMComplexGradAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexGradAux);
+registerMooseMFEMObject("MooseApp", ComplexGradAux);
 
-InputParameters
-MFEMComplexGradAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexGradAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Calculates the gradient of an H1 conforming source variable and stores the result"
       " on an H(curl) conforming ND result auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "source", "Scalar H1 MFEMVariable to take the gradient of.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Scalar H1 Moose::MFEM::Variable to take the gradient of.");
   params.addParam<mfem::real_t>(
       "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
   params.addParam<mfem::real_t>(
@@ -30,8 +32,8 @@ MFEMComplexGradAux::validParams()
   return params;
 }
 
-MFEMComplexGradAux::MFEMComplexGradAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexGradAux::ComplexGradAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getComplexGridFunction(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
@@ -45,7 +47,7 @@ MFEMComplexGradAux::MFEMComplexGradAux(const InputParameters & parameters)
 
 // Computes the auxvariable.
 void
-MFEMComplexGradAux::execute()
+ComplexGradAux::execute()
 {
   update();
   _grad.AddMult(_source_var.real(), _result_var.real() = 0);
@@ -55,7 +57,7 @@ MFEMComplexGradAux::execute()
 }
 
 void
-MFEMComplexGradAux::update()
+ComplexGradAux::update()
 {
   if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
   {
@@ -66,4 +68,5 @@ MFEMComplexGradAux::update()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

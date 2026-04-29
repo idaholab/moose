@@ -12,29 +12,31 @@
 #include "MFEMComplexVectorPeriodAveragedPostprocessor.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexVectorPeriodAveragedPostprocessor);
+registerMooseMFEMObject("MooseApp", ComplexVectorPeriodAveragedPostprocessor);
 
-InputParameters
-MFEMComplexVectorPeriodAveragedPostprocessor::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMPostprocessor::validParams();
-  params += MFEMBlockRestrictable::validParams();
+InputParameters
+ComplexVectorPeriodAveragedPostprocessor::validParams()
+{
+  InputParameters params = Postprocessor::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription("Calculates the time average of the inner product between two "
                              "complex MFEM vector FE variables, scaled by an optional scalar "
                              "coefficient.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "primal_variable", "Name of the first complex vector variable in the inner product.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "dual_variable", "Name of the second complex vector variable in the inner product.");
   return params;
 }
 
-MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPostprocessor(
+ComplexVectorPeriodAveragedPostprocessor::ComplexVectorPeriodAveragedPostprocessor(
     const InputParameters & parameters)
-  : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(
+  : Postprocessor(parameters),
+    BlockRestrictable(
         parameters,
         getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("primal_variable"))),
     _l2_fec(getMFEMProblem()
@@ -66,7 +68,7 @@ MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPos
 }
 
 void
-MFEMComplexVectorPeriodAveragedPostprocessor::execute()
+ComplexVectorPeriodAveragedPostprocessor::execute()
 {
   _scalar_var.ProjectCoefficient(_scalar_coef);
   _subdomain_integrator.Assemble();
@@ -74,9 +76,10 @@ MFEMComplexVectorPeriodAveragedPostprocessor::execute()
 }
 
 PostprocessorValue
-MFEMComplexVectorPeriodAveragedPostprocessor::getValue() const
+ComplexVectorPeriodAveragedPostprocessor::getValue() const
 {
   return _integral;
 }
 
+} // namespace Moose::MFEM
 #endif

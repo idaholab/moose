@@ -11,12 +11,14 @@
 
 #include "MFEMVectorFESpace.h"
 
-registerMooseObject("MooseApp", MFEMVectorFESpace);
+registerMooseMFEMObject("MooseApp", VectorFESpace);
 
-InputParameters
-MFEMVectorFESpace::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSimplifiedFESpace::validParams();
+InputParameters
+VectorFESpace::validParams()
+{
+  InputParameters params = SimplifiedFESpace::validParams();
   params.addClassDescription(
       "Convenience class to construct vector finite element spaces, abstracting away some of the "
       "mathematical complexity of specifying the dimensions.");
@@ -48,15 +50,15 @@ MFEMVectorFESpace::validParams()
   return params;
 }
 
-MFEMVectorFESpace::MFEMVectorFESpace(const InputParameters & parameters)
-  : MFEMSimplifiedFESpace(parameters),
+VectorFESpace::VectorFESpace(const InputParameters & parameters)
+  : SimplifiedFESpace(parameters),
     _fec_type(getParam<MooseEnum>("fec_type")),
     _range_dim(getParam<int>("range_dim"))
 {
 }
 
 std::string
-MFEMVectorFESpace::getFECName() const
+VectorFESpace::getFECName() const
 {
   const int pdim = getProblemDim();
   std::string actual_type = _fec_type;
@@ -90,7 +92,7 @@ MFEMVectorFESpace::getFECName() const
 }
 
 int
-MFEMVectorFESpace::getVDim() const
+VectorFESpace::getVDim() const
 {
   if (_fec_type == "H1" || _fec_type == "L2" || _fec_type == "L2Int")
   {
@@ -102,4 +104,5 @@ MFEMVectorFESpace::getVDim() const
   }
 }
 
+} // namespace Moose::MFEM
 #endif

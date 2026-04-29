@@ -15,39 +15,43 @@
 #include "ComplexEquationSystem.h"
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
-#include "MFEMSolverBase.h"
+#include "MFEMLinearSolverBase.h"
+#include "MFEMNonlinearSolverBase.h"
 #include "MFEMRefinementMarker.h"
 
+namespace Moose::MFEM
+{
 /// Base problem data struct.
-struct MFEMProblemData
+struct ProblemData
 {
 public:
-  MFEMProblemData() = default;
-  virtual ~MFEMProblemData() { ode_solver.reset(); };
+  ProblemData() = default;
+  virtual ~ProblemData() { ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> pmesh{nullptr};
-  Moose::MFEM::SubMeshes submeshes;
-  Moose::MFEM::CoefficientManager coefficients;
+  SubMeshes submeshes;
+  CoefficientManager coefficients;
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
   mfem::BlockVector f;
 
-  std::shared_ptr<Moose::MFEM::EquationSystem> eqn_system{nullptr};
-  std::shared_ptr<mfem::IterativeSolver> nonlinear_solver{nullptr};
+  std::shared_ptr<EquationSystem> eqn_system{nullptr};
+  std::shared_ptr<NonlinearSolverBase> nonlinear_solver{nullptr};
 
-  std::shared_ptr<MFEMSolverBase> jacobian_solver{nullptr};
+  std::shared_ptr<LinearSolverBase> jacobian_solver{nullptr};
 
-  Moose::MFEM::FECollections fecs;
-  Moose::MFEM::FESpaces fespaces;
-  Moose::MFEM::GridFunctions gridfunctions;
-  Moose::MFEM::TimeDerivativeMap time_derivative_map;
-  Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
+  FECollections fecs;
+  FESpaces fespaces;
+  GridFunctions gridfunctions;
+  TimeDerivativeMap time_derivative_map;
+  ComplexGridFunctions cmplx_gridfunctions;
 
-  std::shared_ptr<MFEMRefinementMarker> refiner;
+  std::shared_ptr<RefinementMarker> refiner;
 
   MPI_Comm comm;
   int myid;
   int num_procs;
 };
+} // namespace Moose::MFEM
 
 #endif

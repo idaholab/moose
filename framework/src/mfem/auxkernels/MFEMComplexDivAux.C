@@ -12,17 +12,19 @@
 #include "MFEMComplexDivAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexDivAux);
+registerMooseMFEMObject("MooseApp", ComplexDivAux);
 
-InputParameters
-MFEMComplexDivAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexDivAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription("Calculates the divergence of a complex H(div) conforming RT source "
                              "variable and stores the result"
                              " on an L2 conforming result complex auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
-      params, "source", "Vector H(div) MFEMComplexVariable to take the divergence of.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
+      params, "source", "Vector H(div) Moose::MFEM::ComplexVariable to take the divergence of.");
   params.addParam<mfem::real_t>(
       "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
   params.addParam<mfem::real_t>(
@@ -31,8 +33,8 @@ MFEMComplexDivAux::validParams()
   return params;
 }
 
-MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexDivAux::ComplexDivAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getComplexGridFunction(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
@@ -46,7 +48,7 @@ MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
 
 // Computes the auxvariable.
 void
-MFEMComplexDivAux::execute()
+ComplexDivAux::execute()
 {
   update();
   _div.AddMult(_source_var.real(), _result_var.real() = 0);
@@ -56,7 +58,7 @@ MFEMComplexDivAux::execute()
 }
 
 void
-MFEMComplexDivAux::update()
+ComplexDivAux::update()
 {
   if (long sequence = _source_var.GetSequence() + _result_var.GetSequence() > _sequence)
   {
@@ -67,4 +69,5 @@ MFEMComplexDivAux::update()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -22,6 +22,10 @@
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
 
+#ifdef MOOSE_MFEM_ENABLED
+#include "MFEMSolverBase.h"
+#endif
+
 #include "hit/parse.h"
 
 #include <unistd.h>
@@ -444,15 +448,14 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
 
   // add SubMeshes
-  registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
+  registerMooseObjectTask("add_mfem_submeshes", Moose::MFEM::SubMesh, false);
   addTaskDependency("add_mfem_submeshes", "create_problem_complete");
 
   // add SubMesh transfers
-  appendMooseObjectTask("add_transfer", MFEMSubMeshTransfer);
+  appendMooseObjectTask("add_transfer", Moose::MFEM::SubMeshTransfer);
 
   // add FESpaces
-  registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
-  appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
+  registerMooseObjectTask("add_mfem_fespaces", Moose::MFEM::FESpace, false);
   addTaskDependency("add_mfem_fespaces", "add_mfem_submeshes");
   addTaskDependency("add_variable", "add_mfem_fespaces");
   addTaskDependency("add_aux_variable", "add_mfem_fespaces");
@@ -473,12 +476,12 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
   // add preconditioning.
-  registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
+  registerMooseObjectTask("add_mfem_preconditioner", Moose::MFEM::SolverBase, false);
   addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
   addTaskDependency("add_mfem_preconditioner", "add_variable");
 
-  // add solver.
-  registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
+  // add solver objects.
+  registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
   addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
 #endif
@@ -756,7 +759,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask(
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
-  registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
+  registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
+  syntax.registerSyntaxType("Solvers/*", "UserObjectName");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

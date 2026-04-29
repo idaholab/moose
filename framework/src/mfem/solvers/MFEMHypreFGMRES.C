@@ -12,30 +12,33 @@
 #include "MFEMHypreFGMRES.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMHypreFGMRES);
+registerMooseMFEMObject("MooseApp", HypreFGMRES);
 
-InputParameters
-MFEMHypreFGMRES::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+HypreFGMRES::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the flexible generalized minimal residual method.");
   params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
+  params.addParam<Moose::MFEM::SolverName>("preconditioner",
+                                           "Optional choice of preconditioner to use.");
 
   return params;
 }
 
-MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
+HypreFGMRES::HypreFGMRES(const InputParameters & parameters) : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMHypreFGMRES::constructSolver()
+HypreFGMRES::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreFGMRES>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
@@ -47,7 +50,7 @@ MFEMHypreFGMRES::constructSolver()
 }
 
 void
-MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
@@ -71,4 +74,5 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   }
 }
 
+} // namespace Moose::MFEM
 #endif

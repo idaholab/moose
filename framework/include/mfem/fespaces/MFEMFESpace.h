@@ -13,16 +13,18 @@
 
 #include "MFEMObject.h"
 
+namespace Moose::MFEM
+{
 /**
  * Constructs and stores an mfem::ParFiniteElementSpace object. Access using the
  * getFESpace() accessor.
  */
-class MFEMFESpace : public MFEMObject
+class FESpace : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMFESpace(const InputParameters & parameters);
+  FESpace(const InputParameters & parameters);
 
   // Note: The simplest way to handle the boilerplate of constructing
   // FiniteElementCollection and FiniteElementSpace objects in the
@@ -64,7 +66,7 @@ protected:
   virtual int getVDim() const = 0;
 
   /// Mesh FESpace is defined with respect to. May differ from main problem mesh if
-  /// FESpace is defined on an MFEMSubMesh.
+  /// FESpace is defined on an Moose::MFEM::SubMesh.
   mfem::ParMesh & _pmesh;
 
 private:
@@ -79,4 +81,5 @@ private:
   mutable std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

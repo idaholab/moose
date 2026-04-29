@@ -11,27 +11,30 @@
 
 #include "MFEMComplexVectorTangentialDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMComplexVectorTangentialDirichletBC);
+registerMooseMFEMObject("MooseApp", ComplexVectorTangentialDirichletBC);
 
-InputParameters
-MFEMComplexVectorTangentialDirichletBC::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexVectorDirichletBCBase::validParams();
+InputParameters
+ComplexVectorTangentialDirichletBC::validParams()
+{
+  InputParameters params = ComplexVectorDirichletBCBase::validParams();
   params.addClassDescription(
       "Applies a complex Dirichlet condition to the tangential components of a vector variable.");
   return params;
 }
 
-MFEMComplexVectorTangentialDirichletBC::MFEMComplexVectorTangentialDirichletBC(
+ComplexVectorTangentialDirichletBC::ComplexVectorTangentialDirichletBC(
     const InputParameters & parameters)
-  : MFEMComplexVectorDirichletBCBase(parameters)
+  : ComplexVectorDirichletBCBase(parameters)
 {
 }
 
 void
-MFEMComplexVectorTangentialDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
+ComplexVectorTangentialDirichletBC::ApplyBC(mfem::ParComplexGridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficientTangent(_vec_coef_real, _vec_coef_imag, getBoundaryMarkers());
 }
 
+} // namespace Moose::MFEM
 #endif

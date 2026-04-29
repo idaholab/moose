@@ -12,30 +12,33 @@
 #include "MFEMMassKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMMassKernel);
+registerMooseMFEMObject("MooseApp", MassKernel);
 
-InputParameters
-MFEMMassKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+MassKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k u, v)_\\Omega$ "
                              "arising from the weak form of the mass operator "
                              "$ku$.");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of property for the mass coefficient k.");
   return params;
 }
 
-MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+MassKernel::MassKernel(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMassKernel::createBFIntegrator()
+MassKernel::createBFIntegrator()
 {
   return new mfem::MassIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

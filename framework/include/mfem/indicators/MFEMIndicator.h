@@ -19,14 +19,16 @@
  * Wrapper class for mfem::ErrorEstimator objects. To keep the
  * naming consistent with MOOSE, we refer to it as an Indicator.
  */
-class MFEMIndicator : public MFEMObject
+namespace Moose::MFEM
+{
+class Indicator : public Object
 {
 public:
   static InputParameters validParams();
 
-  MFEMIndicator(const InputParameters & params);
+  Indicator(const InputParameters & params);
 
-  virtual ~MFEMIndicator() = default;
+  virtual ~Indicator() = default;
 
   /// Create the estimator internally.
   virtual void createEstimator() = 0;
@@ -55,11 +57,12 @@ protected:
 };
 
 inline std::shared_ptr<mfem::ErrorEstimator>
-MFEMIndicator::getEstimator() const
+Indicator::getEstimator() const
 {
   mooseAssert(_error_estimator,
               "Attempting to retrieve error estimator before it's been constructed");
   return _error_estimator;
 }
 
+} // namespace Moose::MFEM
 #endif

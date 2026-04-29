@@ -13,15 +13,17 @@
 
 #include "MFEMPostprocessor.h"
 
+namespace Moose::MFEM
+{
 /**
  * Compute the L2 error for a vector variable.
  */
-class MFEMVectorL2Error : public MFEMPostprocessor
+class VectorL2Error : public Postprocessor
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorL2Error(const InputParameters & parameters);
+  VectorL2Error(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -36,4 +38,5 @@ private:
   mfem::GridFunction & _var;
 };
 
+} // namespace Moose::MFEM
 #endif

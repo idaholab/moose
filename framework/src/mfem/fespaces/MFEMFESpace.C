@@ -12,12 +12,14 @@
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
 
-InputParameters
-MFEMFESpace::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMObject::validParams();
-  params.registerBase("MFEMFESpace");
-  params.registerSystemAttributeName("MFEMFESpace");
+InputParameters
+FESpace::validParams()
+{
+  InputParameters params = Object::validParams();
+  params.registerBase("Moose::MFEM::FESpace");
+  params.registerSystemAttributeName("Moose::MFEM::FESpace");
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params.addParam<int>("vdim", 1, "The number of degrees of freedom per basis function.");
@@ -26,8 +28,8 @@ MFEMFESpace::validParams()
   return params;
 }
 
-MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
-  : MFEMObject(parameters),
+FESpace::FESpace(const InputParameters & parameters)
+  : Object(parameters),
     _ordering(parameters.get<MooseEnum>("ordering")),
     _pmesh(
         parameters.isParamValid("submesh")
@@ -37,17 +39,18 @@ MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
 }
 
 void
-MFEMFESpace::buildFEC() const
+FESpace::buildFEC() const
 {
   _fec = std::shared_ptr<mfem::FiniteElementCollection>(
       mfem::FiniteElementCollection::New(getFECName().c_str()));
 }
 
 void
-MFEMFESpace::buildFESpace() const
+FESpace::buildFESpace() const
 {
   _fespace =
       std::make_shared<mfem::ParFiniteElementSpace>(&_pmesh, getFEC().get(), getVDim(), _ordering);
 }
 
+} // namespace Moose::MFEM
 #endif

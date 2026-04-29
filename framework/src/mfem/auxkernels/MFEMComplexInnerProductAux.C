@@ -12,17 +12,19 @@
 #include "MFEMComplexInnerProductAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexInnerProductAux);
+registerMooseMFEMObject("MooseApp", ComplexInnerProductAux);
 
-InputParameters
-MFEMComplexInnerProductAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexInnerProductAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Projects $s \\vec u \\cdot \\vec v*$ onto a complex scalar MFEM auxvariable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "first_source_vec", "Complex vector variable");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "second_source_vec", "Complex vector variable");
   params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of constant multiplier");
   params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of constant multiplier");
@@ -30,8 +32,8 @@ MFEMComplexInnerProductAux::validParams()
   return params;
 }
 
-MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexInnerProductAux::ComplexInnerProductAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
                   getParam<mfem::real_t>("scale_factor_imag")),
     _u_coef_real(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_real")),
@@ -50,20 +52,22 @@ MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & p
 
   // Must be scalar L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()) || fes->GetVDim() != 1)
-    mooseError("MFEMComplexInnerProductAux requires the target variable to be scalar L2.");
+    mooseError("Moose::MFEM::ComplexInnerProductAux requires the target variable to be scalar L2.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMComplexInnerProductAux currently supports only L2 spaces with interior DOFs "
-               "(no shared/constrained DOFs).");
+    mooseError(
+        "Moose::MFEM::ComplexInnerProductAux currently supports only L2 spaces with interior DOFs "
+        "(no shared/constrained DOFs).");
 }
 
 void
-MFEMComplexInnerProductAux::execute()
+ComplexInnerProductAux::execute()
 {
   _result_var.ProjectCoefficient(_final_coef_real, _final_coef_imag);
 
   complexScale(_result_var, _scale_factor);
 }
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

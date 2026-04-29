@@ -12,31 +12,33 @@
 #include "MFEMOperatorJacobiSmoother.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMOperatorJacobiSmoother);
+registerMooseMFEMObject("MooseApp", OperatorJacobiSmoother);
 
-InputParameters
-MFEMOperatorJacobiSmoother::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+OperatorJacobiSmoother::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
 
   return params;
 }
 
-MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & parameters)
-  : MFEMSolverBase(parameters)
+OperatorJacobiSmoother::OperatorJacobiSmoother(const InputParameters & parameters)
+  : LinearSolverBase(parameters)
 {
   constructSolver();
 }
 
 void
-MFEMOperatorJacobiSmoother::constructSolver()
+OperatorJacobiSmoother::constructSolver()
 {
   _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
 }
 
 void
-MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+OperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
@@ -45,4 +47,5 @@ MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<
   }
 }
 
+} // namespace Moose::MFEM
 #endif

@@ -16,14 +16,16 @@
 /*
 Class to construct an MFEM integrator to apply to the equation system.
 */
-class MFEMComplexKernel : public MFEMKernel
+namespace Moose::MFEM
+{
+class ComplexKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexKernel(const InputParameters & parameters);
+  ComplexKernel(const InputParameters & parameters);
 
-  virtual ~MFEMComplexKernel() = default;
+  virtual ~ComplexKernel() = default;
 
   virtual mfem::LinearFormIntegrator * getRealLFIntegrator()
   {
@@ -42,11 +44,12 @@ public:
     return _imag_kernel ? _imag_kernel->createBFIntegrator() : nullptr;
   }
 
-  virtual void setRealKernel(std::shared_ptr<MFEMKernel> kernel) { _real_kernel = kernel; }
-  virtual void setImagKernel(std::shared_ptr<MFEMKernel> kernel) { _imag_kernel = kernel; }
+  virtual void setRealKernel(std::shared_ptr<Kernel> kernel) { _real_kernel = kernel; }
+  virtual void setImagKernel(std::shared_ptr<Kernel> kernel) { _imag_kernel = kernel; }
 
-  std::shared_ptr<MFEMKernel> _real_kernel{nullptr};
-  std::shared_ptr<MFEMKernel> _imag_kernel{nullptr};
+  std::shared_ptr<Kernel> _real_kernel{nullptr};
+  std::shared_ptr<Kernel> _imag_kernel{nullptr};
 };
 
+} // namespace Moose::MFEM
 #endif

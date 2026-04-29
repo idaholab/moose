@@ -13,49 +13,54 @@
 #include "MFEMProblem.h"
 #include "MFEMKernel.h"
 
-registerMooseObject("MooseApp", MFEML2ZienkiewiczZhuIndicator);
+registerMooseMFEMObject("MooseApp", L2ZienkiewiczZhuIndicator);
 
-InputParameters
-MFEML2ZienkiewiczZhuIndicator::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMIndicator::validParams();
-  params.addParam<MFEMFESpaceName>("flux_fespace", "FE space to write the flux into");
-  params.addParam<MFEMFESpaceName>("smooth_flux_fespace", "FE space to write the smooth flux into");
+InputParameters
+L2ZienkiewiczZhuIndicator::validParams()
+{
+  InputParameters params = Indicator::validParams();
+  params.addParam<Moose::MFEM::FESpaceName>("flux_fespace", "FE space to write the flux into");
+  params.addParam<Moose::MFEM::FESpaceName>("smooth_flux_fespace",
+                                            "FE space to write the smooth flux into");
   return params;
 }
 
 // Make sure we don't do this until all the grid functions etc are set up!
-MFEML2ZienkiewiczZhuIndicator::MFEML2ZienkiewiczZhuIndicator(const InputParameters & params)
-  : MFEMIndicator(params)
+L2ZienkiewiczZhuIndicator::L2ZienkiewiczZhuIndicator(const InputParameters & params)
+  : Indicator(params)
 {
   if (isParamSetByUser("flux_fespace"))
   {
     // fetch the flux_fespace from the object system
     auto object_ptr =
         getMFEMProblem()
-            .getMFEMObject<MFEMFESpace>("MFEMFESpace", getParam<MFEMFESpaceName>("flux_fespace"))
+            .getMFEMObject<FESpace>("Moose::MFEM::FESpace",
+                                    getParam<Moose::MFEM::FESpaceName>("flux_fespace"))
             .getSharedPtr();
-    auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
+    auto fespace_ptr = std::dynamic_pointer_cast<const FESpace>(object_ptr);
     _flux_fes = fespace_ptr->getFESpace();
   }
 
   if (isParamSetByUser("smooth_flux_fespace"))
   {
     // fetch the smooth_flux_fespace from the object system
-    auto object_ptr = getMFEMProblem()
-                          .getMFEMObject<MFEMFESpace>(
-                              "MFEMFESpace", getParam<MFEMFESpaceName>("smooth_flux_fespace"))
-                          .getSharedPtr();
-    auto fespace_ptr = std::dynamic_pointer_cast<const MFEMFESpace>(object_ptr);
+    auto object_ptr =
+        getMFEMProblem()
+            .getMFEMObject<FESpace>("Moose::MFEM::FESpace",
+                                    getParam<Moose::MFEM::FESpaceName>("smooth_flux_fespace"))
+            .getSharedPtr();
+    auto fespace_ptr = std::dynamic_pointer_cast<const FESpace>(object_ptr);
     _smooth_flux_fes = fespace_ptr->getFESpace();
   }
 }
 
 void
-MFEML2ZienkiewiczZhuIndicator::createEstimator()
+L2ZienkiewiczZhuIndicator::createEstimator()
 {
   // fetch the kernel first so we can build an auxiliary blf integrator
-  MFEMKernel & kernel = getMFEMProblem().getMFEMObject<MFEMKernel>("Kernel", _kernel_name);
+  Kernel & kernel = getMFEMProblem().getMFEMObject<Kernel>("Kernel", _kernel_name);
   _integ = std::unique_ptr<mfem::BilinearFormIntegrator>(kernel.createBFIntegrator());
 
   // Next, we need to check that this integrator is supported by mfem::L2ZienkiewiczZhuEstimator
@@ -69,8 +74,8 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
   is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(_integ.get()) != nullptr);
 
   if (!is_supported)
-    mooseError("MFEML2ZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, "
-               "MFEMCurlCurlKernel and MFEMLinearElasticityKernel");
+    mooseError("Moose::MFEM::L2ZienkiewiczZhuIndicator only supports Moose::MFEM::DiffusionKernel, "
+               "Moose::MFEM::CurlCurlKernel and Moose::MFEM::LinearElasticityKernel");
 
   int order = getFESpace().GetMaxElementOrder();
   int dim = getParMesh().Dimension();
@@ -99,4 +104,5 @@ MFEML2ZienkiewiczZhuIndicator::createEstimator()
       *_integ, *gridfunction, *_flux_fes, *_smooth_flux_fes);
 }
 
+} // namespace Moose::MFEM
 #endif

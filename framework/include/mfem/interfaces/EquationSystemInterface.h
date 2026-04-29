@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include "MFEMProblemData.h"
-
 namespace Moose::MFEM
 {
 /**

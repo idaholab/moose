@@ -13,15 +13,17 @@
 
 #include "MFEMDataCollection.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class for output information saved in MFEM ConduitDataCollections
  */
-class MFEMConduitDataCollection : public MFEMDataCollection
+class ConduitDataCollection : public DataCollection
 {
 public:
   static InputParameters validParams();
 
-  MFEMConduitDataCollection(const InputParameters & parameters);
+  ConduitDataCollection(const InputParameters & parameters);
 
   virtual mfem::DataCollection & getDataCollection() override { return _conduit_dc; }
 
@@ -30,4 +32,5 @@ protected:
   const MooseEnum _protocol;
 };
 
+} // namespace Moose::MFEM
 #endif

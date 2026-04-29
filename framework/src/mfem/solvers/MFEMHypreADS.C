@@ -12,30 +12,32 @@
 #include "MFEMHypreADS.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMHypreADS);
+registerMooseMFEMObject("MooseApp", HypreADS);
 
-InputParameters
-MFEMHypreADS::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSolverBase::validParams();
+InputParameters
+HypreADS::validParams()
+{
+  InputParameters params = LinearSolverBase::validParams();
   params.addClassDescription("Hypre auxiliary-space divergence solver and preconditioner for the "
                              "iterative solution of MFEM equation systems.");
-  params.addParam<MFEMFESpaceName>("fespace", "H(div) FESpace to use in HypreADS setup.");
+  params.addParam<Moose::MFEM::FESpaceName>("fespace", "H(div) FESpace to use in HypreADS setup.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
 
   return params;
 }
 
-MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _mfem_fespace(getMFEMProblem().getMFEMObject<MFEMFESpace>("MFEMFESpace",
-                                                              getParam<MFEMFESpaceName>("fespace")))
+HypreADS::HypreADS(const InputParameters & parameters)
+  : LinearSolverBase(parameters),
+    _mfem_fespace(getMFEMProblem().getMFEMObject<FESpace>(
+        "Moose::MFEM::FESpace", getParam<Moose::MFEM::FESpaceName>("fespace")))
 {
   constructSolver();
 }
 
 void
-MFEMHypreADS::constructSolver()
+HypreADS::constructSolver()
 {
   auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   solver->SetPrintLevel(getParam<int>("print_level"));
@@ -44,7 +46,7 @@ MFEMHypreADS::constructSolver()
 }
 
 void
-MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+HypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
@@ -59,4 +61,5 @@ MFEMHypreADS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   }
 }
 
+} // namespace Moose::MFEM
 #endif

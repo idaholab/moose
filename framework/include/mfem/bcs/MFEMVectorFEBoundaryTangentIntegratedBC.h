@@ -13,12 +13,14 @@
 
 #include "MFEMIntegratedBC.h"
 
-class MFEMVectorFEBoundaryTangentIntegratedBC : public MFEMIntegratedBC
+namespace Moose::MFEM
+{
+class VectorFEBoundaryTangentIntegratedBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorFEBoundaryTangentIntegratedBC(const InputParameters & parameters);
+  VectorFEBoundaryTangentIntegratedBC(const InputParameters & parameters);
 
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator();
@@ -27,4 +29,5 @@ protected:
   mfem::VectorCoefficient & _vec_coef;
 };
 
+} // namespace Moose::MFEM
 #endif

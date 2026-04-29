@@ -13,13 +13,16 @@
 
 #include "MFEMComplexVectorDirichletBCBase.h"
 
-class MFEMComplexVectorTangentialDirichletBC : public MFEMComplexVectorDirichletBCBase
+namespace Moose::MFEM
+{
+class ComplexVectorTangentialDirichletBC : public ComplexVectorDirichletBCBase
 {
 public:
   static InputParameters validParams();
-  MFEMComplexVectorTangentialDirichletBC(const InputParameters & parameters);
-  ~MFEMComplexVectorTangentialDirichletBC() override = default;
+  ComplexVectorTangentialDirichletBC(const InputParameters & parameters);
+  ~ComplexVectorTangentialDirichletBC() override = default;
   void ApplyBC(mfem::ParComplexGridFunction & gridfunc) override;
 };
 
+} // namespace Moose::MFEM
 #endif

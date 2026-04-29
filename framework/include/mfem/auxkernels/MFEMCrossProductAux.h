@@ -13,6 +13,8 @@
 
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Project \f$ s \vec u \times \vec v \f$ onto a vector MFEM auxvariable.
  *
@@ -21,13 +23,13 @@
  *  - The target variable's FE Space must be L2.
  *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
-class MFEMCrossProductAux : public MFEMAuxKernel
+class CrossProductAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMCrossProductAux(const InputParameters & parameters);
-  ~MFEMCrossProductAux() override = default;
+  CrossProductAux(const InputParameters & parameters);
+  ~CrossProductAux() override = default;
 
   void execute() override;
 
@@ -39,4 +41,5 @@ protected:
   mfem::ScalarVectorProductCoefficient _scaled_cross;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

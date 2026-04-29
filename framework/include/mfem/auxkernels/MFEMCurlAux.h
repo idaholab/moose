@@ -16,17 +16,19 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMAuxKernel.h"
 
+namespace Moose::MFEM
+{
 /**
  * Class to set an H(div) auxvariable to be the curl of an H(curl) vector variable.
  */
-class MFEMCurlAux : public MFEMAuxKernel
+class CurlAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMCurlAux(const InputParameters & parameters);
+  CurlAux(const InputParameters & parameters);
 
-  virtual ~MFEMCurlAux() = default;
+  virtual ~CurlAux() = default;
 
   /// Computes the auxvariable.
   virtual void execute() override;
@@ -35,7 +37,7 @@ public:
   virtual void update() override;
 
 protected:
-  /// Name of source MFEMVariable to take the curl of.
+  /// Name of source Moose::MFEM::Variable to take the curl of.
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParGridFunction & _source_var;
@@ -45,4 +47,5 @@ protected:
   mfem::common::ParDiscreteCurlOperator _curl;
 };
 
+} // namespace Moose::MFEM
 #endif

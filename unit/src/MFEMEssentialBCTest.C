@@ -108,9 +108,10 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "1.";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<Moose::MFEM::ScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -137,9 +138,10 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMScalarCoefficientName>("coefficient") = "func1";
+  bc_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<Moose::MFEM::ScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -167,9 +169,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<Moose::MFEM::VectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -202,9 +205,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<Moose::MFEM::VectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -240,10 +244,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMVectorNormalDirichletBC>("MFEMVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<Moose::MFEM::VectorNormalDirichletBC>(
+      "MFEMVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -278,10 +282,10 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMVectorNormalDirichletBC>("MFEMVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<Moose::MFEM::VectorNormalDirichletBC>(
+      "MFEMVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -318,9 +322,9 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletConstantBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorTangentialDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorTangentialDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::VectorTangentialDirichletBC>(
       "MFEMVectorTangentialDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
@@ -357,9 +361,9 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorTangentialDirichletBC)
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMVectorTangentialDirichletBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func2";
+  bc_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorTangentialDirichletBC>(
+  auto & essential_bc = addObject<Moose::MFEM::VectorTangentialDirichletBC>(
       "MFEMVectorTangentialDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");

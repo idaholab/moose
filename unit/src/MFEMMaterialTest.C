@@ -94,7 +94,7 @@ TEST_F(MFEMFunctorScalarMaterialTest, MFEMGenericFunctorMaterial)
 {
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2", "coef3"};
-  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {
+  coef_params.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {
       "func1", "func2", "1.0"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
@@ -133,13 +133,14 @@ TEST_F(MFEMFunctorScalarMaterialTest, MFEMGenericFunctorMaterial_PW)
 {
   InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params1.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2", "coef3"};
-  coef_params1.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {
+  coef_params1.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {
       "func1", "func2", "1."};
   coef_params1.set<std::vector<SubdomainName>>("block") = {"1"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params1);
   InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params2.set<std::vector<std::string>>("prop_names") = {"coef1", "coef3"};
-  coef_params2.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func2", "4."};
+  coef_params2.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {"func2",
+                                                                                      "4."};
   coef_params2.set<std::vector<SubdomainName>>("block") = {"2"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material2", coef_params2);
 
@@ -191,17 +192,17 @@ TEST_F(MFEMFunctorScalarMaterialTest, MFEMGenericFunctorMaterial_Exception)
 {
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1"};
+  coef_params.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {"func1"};
   EXPECT_THROW(
       _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
       std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func1", "76"};
+  coef_params.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {"func1", "76"};
   EXPECT_THROW(
       _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
       std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"func3"};
+  coef_params.set<std::vector<Moose::MFEM::ScalarCoefficientName>>("prop_values") = {"func3"};
   EXPECT_THROW(
       _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params),
       std::runtime_error);
@@ -215,7 +216,7 @@ TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial)
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {
       "coef1", "coef2", "constant1", "constant2"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {
       "func1", "func2", "{0.", "1.", "2.}", "{1.5}"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params);
   mfem::Vector a({0., 1., 2.}), b({1.5, 2.5, 3.5}), c({0., 0., 0.}), d({0.5, 1., 1.5}), e({1.5});
@@ -267,13 +268,13 @@ TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial_PW)
   InputParameters coef_params1 = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params1.set<std::vector<std::string>>("prop_names") = {
       "coef1", "coef2", "constant1", "constant2"};
-  coef_params1.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {
+  coef_params1.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {
       "func1", "func2", "{0.", "1.", "2.}", "{0.5", "1.", "1.5}"};
   coef_params1.set<std::vector<SubdomainName>>("block") = {"1"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorVectorMaterial", "material1", coef_params1);
   InputParameters coef_params2 = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params2.set<std::vector<std::string>>("prop_names") = {"coef1", "constant1"};
-  coef_params2.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {
+  coef_params2.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {
       "func2", "{1.5", "2.5", "3.5}"};
   coef_params2.set<std::vector<SubdomainName>>("block") = {"2"};
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorVectorMaterial", "material2", coef_params2);
@@ -343,27 +344,28 @@ TEST_F(MFEMFunctorVectorMaterialTest, MFEMGenericFunctorVectorMaterial_Exception
 {
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorVectorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1", "coef2"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1"};
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {"func1"};
   EXPECT_THROW(_mfem_problem->addFunctorMaterial(
                    "MFEMGenericFunctorVectorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func1", "45."};
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {"func1",
+                                                                                     "45."};
   EXPECT_THROW(_mfem_problem->addFunctorMaterial(
                    "MFEMGenericFunctorVectorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"func3"};
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {"func3"};
   EXPECT_THROW(_mfem_problem->addFunctorMaterial(
                    "MFEMGenericFunctorVectorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {"{123", "234"};
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {"{123", "234"};
   EXPECT_THROW(_mfem_problem->addFunctorMaterial(
                    "MFEMGenericFunctorVectorMaterial", "material1", coef_params),
                std::runtime_error);
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<MFEMVectorCoefficientName>>("prop_values") = {
+  coef_params.set<std::vector<Moose::MFEM::VectorCoefficientName>>("prop_values") = {
       "{123", "{234", "345}}"};
   EXPECT_THROW(_mfem_problem->addFunctorMaterial(
                    "MFEMGenericFunctorVectorMaterial", "material1", coef_params),

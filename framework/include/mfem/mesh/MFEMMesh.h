@@ -13,18 +13,20 @@
 
 #include "FileMesh.h"
 
+namespace Moose::MFEM
+{
 /**
- * MFEMMesh inherits a MOOSE mesh class which allows us to work with
+ * Moose::MFEM::Mesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
  */
-class MFEMMesh : public FileMesh
+class Mesh : public FileMesh
 {
 public:
   static InputParameters validParams();
 
-  MFEMMesh(const InputParameters & parameters);
+  Mesh(const InputParameters & parameters);
 
-  virtual ~MFEMMesh();
+  virtual ~Mesh();
 
   /**
    * Accessors for the _mfem_par_mesh object. If the mesh has
@@ -99,9 +101,10 @@ private:
 };
 
 inline const mfem::ParMesh &
-MFEMMesh::getMFEMParMesh() const
+Mesh::getMFEMParMesh() const
 {
-  return const_cast<MFEMMesh *>(this)->getMFEMParMesh();
+  return const_cast<Mesh *>(this)->getMFEMParMesh();
 }
 
+} // namespace Moose::MFEM
 #endif

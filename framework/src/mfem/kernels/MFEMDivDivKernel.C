@@ -12,33 +12,36 @@
 #include "MFEMDivDivKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDivDivKernel);
+registerMooseMFEMObject("MooseApp", DivDivKernel);
 
-InputParameters
-MFEMDivDivKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+DivDivKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the bilinear form "
       "$(k\\vec\\nabla \\cdot \\vec u, \\vec\\nabla \\cdot \\vec v)_\\Omega$ "
       "arising from the weak form of the grad-div operator "
       "$-\\vec\\nabla \\left( k \\vec\\nabla \\cdot \\vec u \\right)$.");
 
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient", "1.", "Name of property k to multiply the integrator by");
 
   return params;
 }
 
-MFEMDivDivKernel::MFEMDivDivKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+DivDivKernel::DivDivKernel(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMDivDivKernel::createBFIntegrator()
+DivDivKernel::createBFIntegrator()
 {
   return new mfem::DivDivIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

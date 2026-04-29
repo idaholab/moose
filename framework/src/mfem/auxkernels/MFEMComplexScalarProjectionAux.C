@@ -11,32 +11,35 @@
 
 #include "MFEMComplexScalarProjectionAux.h"
 
-registerMooseObject("MooseApp", MFEMComplexScalarProjectionAux);
+registerMooseMFEMObject("MooseApp", ComplexScalarProjectionAux);
 
-InputParameters
-MFEMComplexScalarProjectionAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexScalarProjectionAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Projects a real and imaginary scalar coefficient onto a complex scalar MFEM auxvariable");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient_real", "Name of the real part of the scalar coefficient to project.");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
+  params.addRequiredParam<Moose::MFEM::ScalarCoefficientName>(
       "coefficient_imag", "Name of the imaginary part of the scalar coefficient to project.");
   return params;
 }
 
-MFEMComplexScalarProjectionAux::MFEMComplexScalarProjectionAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexScalarProjectionAux::ComplexScalarProjectionAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _coef_real(getScalarCoefficient("coefficient_real")),
     _coef_imag(getScalarCoefficient("coefficient_imag"))
 {
 }
 
 void
-MFEMComplexScalarProjectionAux::execute()
+ComplexScalarProjectionAux::execute()
 {
   _result_var.ProjectCoefficient(_coef_real, _coef_imag);
 }
 
+} // namespace Moose::MFEM
 #endif

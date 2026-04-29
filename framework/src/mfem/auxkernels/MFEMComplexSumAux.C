@@ -12,17 +12,19 @@
 #include "MFEMComplexSumAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexSumAux);
+registerMooseMFEMObject("MooseApp", ComplexSumAux);
 
-InputParameters
-MFEMComplexSumAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMComplexAuxKernel::validParams();
+InputParameters
+ComplexSumAux::validParams()
+{
+  InputParameters params = ComplexAuxKernel::validParams();
   params.addClassDescription(
       "Calculates the sum of an arbitrary number of complex variables sharing an FE space, each "
       "optionally scaled by a complex constant, and stores the result in an auxiliary complex "
       "variable.");
-  MFEMExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
+  ExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
       params, "source_variables", "The names of the MFEM complex variables to sum");
   params.addParam<std::vector<mfem::real_t>>(
       "scale_factors_real",
@@ -34,8 +36,8 @@ MFEMComplexSumAux::validParams()
   return params;
 }
 
-MFEMComplexSumAux::MFEMComplexSumAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters),
+ComplexSumAux::ComplexSumAux(const InputParameters & parameters)
+  : ComplexAuxKernel(parameters),
     _var_names(getParam<std::vector<VariableName>>("source_variables")),
     _scale_factors_real(parameters.isParamValid("scale_factors_real")
                             ? getParam<std::vector<mfem::real_t>>("scale_factors_real")
@@ -69,7 +71,7 @@ MFEMComplexSumAux::MFEMComplexSumAux(const InputParameters & parameters)
 }
 
 void
-MFEMComplexSumAux::execute()
+ComplexSumAux::execute()
 {
   // result = sum_i ((_scale_factor_i_real+i*scale_factor_i_imag) * _summed_var_i)
   _result_var.real() = 0.0;
@@ -81,4 +83,5 @@ MFEMComplexSumAux::execute()
   }
 }
 
+} // namespace Moose::MFEM
 #endif

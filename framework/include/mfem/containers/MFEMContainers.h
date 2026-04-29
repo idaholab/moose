@@ -225,11 +225,11 @@ private:
   const std::string null_str;
 };
 
-using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
-using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
-using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
-using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
-using ComplexGridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction>;
+using FECollections = NamedFieldsMap<mfem::FiniteElementCollection>;
+using FESpaces = NamedFieldsMap<mfem::ParFiniteElementSpace>;
+using SubMeshes = NamedFieldsMap<mfem::ParSubMesh>;
+using GridFunctions = NamedFieldsMap<mfem::ParGridFunction>;
+using ComplexGridFunctions = NamedFieldsMap<mfem::ParComplexGridFunction>;
 
 } // namespace Moose::MFEM
 

@@ -12,43 +12,46 @@
 #include "MFEMVectorL2Error.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMVectorL2Error);
+registerMooseMFEMObject("MooseApp", VectorL2Error);
 
-InputParameters
-MFEMVectorL2Error::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMPostprocessor::validParams();
+InputParameters
+VectorL2Error::validParams()
+{
+  InputParameters params = Postprocessor::validParams();
   params.addClassDescription(
       "Computes L2 error $\\left\\Vert \\vec u_{ex} - \\vec u_{h}\\right\\Vert_{\\rm L2}$ for "
       "vector gridfunctions.");
-  params.addParam<MFEMVectorCoefficientName>("function",
-                                             "The analytic solution to compare against.");
-  MFEMExecutedObject::addRequiredDependencyParam<VariableName>(
+  params.addParam<Moose::MFEM::VectorCoefficientName>("function",
+                                                      "The analytic solution to compare against.");
+  ExecutedObject::addRequiredDependencyParam<VariableName>(
       params, "variable", "Name of the vector variable of which to find the norm of the error.");
   return params;
 }
 
-MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
-  : MFEMPostprocessor(parameters),
+VectorL2Error::VectorL2Error(const InputParameters & parameters)
+  : Postprocessor(parameters),
     _vec_coeff(getVectorCoefficient("function")),
     _var(*getMFEMProblem().getGridFunction(getParam<VariableName>("variable")))
 {
 }
 
 void
-MFEMVectorL2Error::initialize()
+VectorL2Error::initialize()
 {
 }
 
 void
-MFEMVectorL2Error::execute()
+VectorL2Error::execute()
 {
 }
 
 PostprocessorValue
-MFEMVectorL2Error::getValue() const
+VectorL2Error::getValue() const
 {
   return _var.ComputeL2Error(_vec_coeff);
 }
 
+} // namespace Moose::MFEM
 #endif

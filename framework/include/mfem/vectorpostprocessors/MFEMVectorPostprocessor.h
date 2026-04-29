@@ -18,14 +18,17 @@
  * Vector postprocessor for MFEM results. Must inherit from VectorPostprocessor
  * in order for MOOSE to call it.
  */
-class MFEMVectorPostprocessor : public MFEMExecutedObject, public VectorPostprocessor
+namespace Moose::MFEM
+{
+class VectorPostprocessor : public ExecutedObject, public ::VectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorPostprocessor(const InputParameters & parameters);
+  VectorPostprocessor(const InputParameters & parameters);
 
   virtual std::optional<std::string> suppliedVectorPostprocessorName() const override;
 };
 
+} // namespace Moose::MFEM
 #endif // MOOSE_MFEM_ENABLED

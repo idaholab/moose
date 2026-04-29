@@ -12,24 +12,26 @@
 #include "MFEMSumAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMSumAux);
+registerMooseMFEMObject("MooseApp", SumAux);
 
-InputParameters
-MFEMSumAux::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMAuxKernel::validParams();
+InputParameters
+SumAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Calculates the sum of an arbitrary number of variables sharing an FE space, each "
       "optionally scaled by a real constant, and stores the result in an auxiliary variable.");
-  MFEMExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
+  ExecutedObject::addRequiredDependencyParam<std::vector<VariableName>>(
       params, "source_variables", "The names of the MFEM variables to sum");
   params.addParam<std::vector<mfem::real_t>>(
       "scale_factors", "The factors to scale each MFEM variable by during summation");
   return params;
 }
 
-MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
+SumAux::SumAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _var_names(getParam<std::vector<VariableName>>("source_variables")),
     _scale_factors(parameters.isParamValid("scale_factors")
                        ? getParam<std::vector<mfem::real_t>>("scale_factors")
@@ -54,7 +56,7 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
 }
 
 void
-MFEMSumAux::execute()
+SumAux::execute()
 {
   // result = sum_i (_scale_factor_i * _summed_var_i)
   _result_var = 0.0;
@@ -62,4 +64,5 @@ MFEMSumAux::execute()
     _result_var.Add(_scale_factors[i], *_summed_vars[i]);
 }
 
+} // namespace Moose::MFEM
 #endif

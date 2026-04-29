@@ -11,30 +11,34 @@
 
 #include "MFEMMixedVectorMassKernel.h"
 
-registerMooseObject("MooseApp", MFEMMixedVectorMassKernel);
+registerMooseMFEMObject("MooseApp", MixedVectorMassKernel);
 
-InputParameters
-MFEMMixedVectorMassKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMMixedBilinearFormKernel::validParams();
+InputParameters
+MixedVectorMassKernel::validParams()
+{
+  InputParameters params = MixedBilinearFormKernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(k\\vec u, \\vec v)_\\Omega$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
+      "coefficient", "1.", "Name of property k to use.");
   return params;
 }
 
-MFEMMixedVectorMassKernel::MFEMMixedVectorMassKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+MixedVectorMassKernel::MixedVectorMassKernel(const InputParameters & parameters)
+  : MixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedVectorMassKernel::createMBFIntegrator()
+MixedVectorMassKernel::createMBFIntegrator()
 {
   return new mfem::MixedVectorMassIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

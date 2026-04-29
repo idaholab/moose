@@ -13,13 +13,16 @@
 
 #include "MFEMComplexVectorDirichletBCBase.h"
 
-class MFEMComplexVectorNormalDirichletBC : public MFEMComplexVectorDirichletBCBase
+namespace Moose::MFEM
+{
+class ComplexVectorNormalDirichletBC : public ComplexVectorDirichletBCBase
 {
 public:
   static InputParameters validParams();
-  MFEMComplexVectorNormalDirichletBC(const InputParameters & parameters);
-  ~MFEMComplexVectorNormalDirichletBC() override = default;
+  ComplexVectorNormalDirichletBC(const InputParameters & parameters);
+  ~ComplexVectorNormalDirichletBC() override = default;
   void ApplyBC(mfem::ParComplexGridFunction & gridfunc) override;
 };
 
+} // namespace Moose::MFEM
 #endif

@@ -10,10 +10,12 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
+#include "EquationSystem.h"
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMDiffusionKernel.h"
 #include "MFEMDivDivKernel.h"
 #include "MFEMLinearElasticityKernel.h"
+#include "MFEMMixedBilinearFormKernel.h"
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMVectorDomainLFKernel.h"
@@ -21,17 +23,135 @@
 #include "MFEMVectorFEMassKernel.h"
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 
+namespace
+{
+class ZeroNonlinearIntegrator : public mfem::NonlinearFormIntegrator
+{
+public:
+  void AssembleElementVector(const mfem::FiniteElement & el,
+                             mfem::ElementTransformation &,
+                             const mfem::Vector &,
+                             mfem::Vector & elvect) override
+  {
+    elvect.SetSize(el.GetDof());
+    elvect = 0.0;
+  }
+
+  void AssembleElementGrad(const mfem::FiniteElement & el,
+                           mfem::ElementTransformation &,
+                           const mfem::Vector &,
+                           mfem::DenseMatrix & elmat) override
+  {
+    elmat.SetSize(el.GetDof());
+    elmat = 0.0;
+  }
+};
+
+class TestOffDiagonalLinearKernel : public Moose::MFEM::MixedBilinearFormKernel
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = Moose::MFEM::MixedBilinearFormKernel::validParams();
+    params.addClassDescription("Test-only MFEM mixed kernel with a linear off-diagonal mass term.");
+    return params;
+  }
+
+  TestOffDiagonalLinearKernel(const InputParameters & parameters)
+    : Moose::MFEM::MixedBilinearFormKernel(parameters)
+  {
+  }
+
+  mfem::BilinearFormIntegrator * createMBFIntegrator() override
+  {
+    return new mfem::MixedScalarMassIntegrator;
+  }
+};
+
+class TestOffDiagonalNonlinearKernel : public Moose::MFEM::MixedBilinearFormKernel
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = Moose::MFEM::MixedBilinearFormKernel::validParams();
+    params.addClassDescription(
+        "Test-only MFEM mixed kernel with an off-diagonal nonlinear contribution.");
+    return params;
+  }
+
+  TestOffDiagonalNonlinearKernel(const InputParameters & parameters)
+    : Moose::MFEM::MixedBilinearFormKernel(parameters)
+  {
+  }
+
+  mfem::NonlinearFormIntegrator * createNLIntegrator() override
+  {
+    return new ZeroNonlinearIntegrator();
+  }
+};
+
+class TestDiagonalNonlinearKernel : public Moose::MFEM::Kernel
+{
+public:
+  static InputParameters validParams()
+  {
+    auto params = Moose::MFEM::Kernel::validParams();
+    params.addClassDescription("Test-only MFEM kernel with a diagonal nonlinear contribution.");
+    return params;
+  }
+
+  TestDiagonalNonlinearKernel(const InputParameters & parameters) : Moose::MFEM::Kernel(parameters)
+  {
+  }
+
+  mfem::NonlinearFormIntegrator * createNLIntegrator() override
+  {
+    return new ZeroNonlinearIntegrator();
+  }
+};
+
+class TestEquationSystem : public Moose::MFEM::EquationSystem
+{
+public:
+  void initAndBuild(Moose::MFEM::GridFunctions & gridfunctions,
+                    Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
+                    mfem::AssemblyLevel assembly_level)
+  {
+    Init(gridfunctions, cmplx_gridfunctions, assembly_level);
+    BuildEquationSystem();
+  }
+
+  void setAssemblyLevel(mfem::AssemblyLevel assembly_level) { _assembly_level = assembly_level; }
+};
+}
+
+registerMooseObject("MooseUnitApp", TestOffDiagonalLinearKernel);
+registerMooseObject("MooseUnitApp", TestOffDiagonalNonlinearKernel);
+registerMooseObject("MooseUnitApp", TestDiagonalNonlinearKernel);
+
 class MFEMKernelTest : public MFEMObjectUnitTest
 {
 public:
   MFEMKernelTest() : MFEMObjectUnitTest("MooseUnitApp")
   {
-    // Register a dummy (Par)GridFunction for kernels to apply to
+    // Register dummy (Par)GridFunctions for kernels to apply to
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
     mfem::common::H1_FESpace fe(pm, 1);
     mfem::GridFunction gf(&fe);
-    auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
-    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "test_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+    _mfem_problem->getProblemData().gridfunctions.Register(
+        "trial_variable_name", std::make_shared<mfem::ParGridFunction>(pm, &gf));
+  }
+
+protected:
+  template <typename T>
+  std::shared_ptr<T>
+  addSharedObject(const std::string & type, const std::string & name, InputParameters & params)
+  {
+    auto objects = _mfem_problem->addObject<T>(type, name, params);
+    mooseAssert(objects.size() == 1, "Doesn't work with threading");
+    return objects[0];
   }
 };
 
@@ -43,9 +163,9 @@ TEST_F(MFEMKernelTest, MFEMCurlCurlKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMCurlCurlKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  MFEMCurlCurlKernel & kernel =
-      addObject<MFEMCurlCurlKernel>("MFEMCurlCurlKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  Moose::MFEM::CurlCurlKernel & kernel =
+      addObject<Moose::MFEM::CurlCurlKernel>("MFEMCurlCurlKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::CurlCurlIntegrator *>(kernel.createBFIntegrator());
@@ -61,10 +181,10 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDiffusionKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
   kernel_params.set<std::vector<SubdomainName>>("block") = {"2"};
-  MFEMDiffusionKernel & kernel =
-      addObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "kernel1", kernel_params);
+  Moose::MFEM::DiffusionKernel & kernel =
+      addObject<Moose::MFEM::DiffusionKernel>("MFEMDiffusionKernel", "kernel1", kernel_params);
   // Test MFEMKernel marker array has been constructed as expected
   ASSERT_EQ(kernel.getSubdomainMarkers(), mfem::Array<int>({0, 1}));
   // Test MFEMKernel returns an integrator of the expected type
@@ -81,8 +201,9 @@ TEST_F(MFEMKernelTest, MFEMDivDivKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMDivDivKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  auto & kernel = addObject<MFEMDivDivKernel>("MFEMDivDivKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  auto & kernel =
+      addObject<Moose::MFEM::DivDivKernel>("MFEMDivDivKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::DivDivIntegrator *>(kernel.createBFIntegrator());
@@ -98,10 +219,10 @@ TEST_F(MFEMKernelTest, MFEMLinearElasticityKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMLinearElasticityKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("lambda") = "2.0";
-  kernel_params.set<MFEMScalarCoefficientName>("mu") = "3.0";
-  MFEMLinearElasticityKernel & kernel =
-      addObject<MFEMLinearElasticityKernel>("MFEMLinearElasticityKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("lambda") = "2.0";
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("mu") = "3.0";
+  Moose::MFEM::LinearElasticityKernel & kernel = addObject<Moose::MFEM::LinearElasticityKernel>(
+      "MFEMLinearElasticityKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::ElasticityIntegrator *>(kernel.createBFIntegrator());
@@ -117,9 +238,10 @@ TEST_F(MFEMKernelTest, MFEMMixedVectorGradientKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedVectorGradientKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  MFEMMixedVectorGradientKernel & kernel = addObject<MFEMMixedVectorGradientKernel>(
-      "MFEMMixedVectorGradientKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  Moose::MFEM::MixedVectorGradientKernel & kernel =
+      addObject<Moose::MFEM::MixedVectorGradientKernel>(
+          "MFEMMixedVectorGradientKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator =
@@ -138,11 +260,11 @@ TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorDomainLFKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMVectorCoefficientName>("vector_coefficient") =
+  kernel_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") =
       std::to_string(expected1[0]) + " " + std::to_string(expected1[1]) + " " +
       std::to_string(expected1[2]);
-  MFEMVectorDomainLFKernel & kernel =
-      addObject<MFEMVectorDomainLFKernel>("MFEMVectorDomainLFKernel", "kernel1", kernel_params);
+  Moose::MFEM::VectorDomainLFKernel & kernel = addObject<Moose::MFEM::VectorDomainLFKernel>(
+      "MFEMVectorDomainLFKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::VectorDomainLFIntegrator *>(kernel.createLFIntegrator());
@@ -158,9 +280,9 @@ TEST_F(MFEMKernelTest, MFEMVectorFEDomainLFKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEDomainLFKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
-  MFEMVectorFEDomainLFKernel & kernel =
-      addObject<MFEMVectorFEDomainLFKernel>("MFEMVectorFEDomainLFKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
+  Moose::MFEM::VectorFEDomainLFKernel & kernel = addObject<Moose::MFEM::VectorFEDomainLFKernel>(
+      "MFEMVectorFEDomainLFKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::VectorFEDomainLFIntegrator *>(kernel.createLFIntegrator());
@@ -176,9 +298,9 @@ TEST_F(MFEMKernelTest, MFEMVectorFEMassKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEMassKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  MFEMVectorFEMassKernel & kernel =
-      addObject<MFEMVectorFEMassKernel>("MFEMVectorFEMassKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  Moose::MFEM::VectorFEMassKernel & kernel = addObject<Moose::MFEM::VectorFEMassKernel>(
+      "MFEMVectorFEMassKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::VectorFEMassIntegrator *>(kernel.createBFIntegrator());
@@ -195,9 +317,10 @@ TEST_F(MFEMKernelTest, MFEMVectorFEWeakDivergenceKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorFEWeakDivergenceKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  MFEMVectorFEWeakDivergenceKernel & kernel = addObject<MFEMVectorFEWeakDivergenceKernel>(
-      "MFEMVectorFEWeakDivergenceKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  Moose::MFEM::VectorFEWeakDivergenceKernel & kernel =
+      addObject<Moose::MFEM::VectorFEWeakDivergenceKernel>(
+          "MFEMVectorFEWeakDivergenceKernel", "kernel1", kernel_params);
 
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator =
@@ -215,9 +338,9 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   InputParameters kernel_params = _factory.getValidParams("MFEMMixedScalarCurlKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<VariableName>("trial_variable") = "trial_variable_name";
-  kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "2.0";
-  MFEMMixedScalarCurlKernel & kernel =
-      addObject<MFEMMixedScalarCurlKernel>("MFEMMixedScalarCurlKernel", "kernel1", kernel_params);
+  kernel_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "2.0";
+  Moose::MFEM::MixedScalarCurlKernel & kernel = addObject<Moose::MFEM::MixedScalarCurlKernel>(
+      "MFEMMixedScalarCurlKernel", "kernel1", kernel_params);
 
   // Test the trial variable name is different from the test variable name
   const std::string trial_name = kernel.getTrialVariableName();
@@ -228,6 +351,117 @@ TEST_F(MFEMKernelTest, MFEMMixedScalarCurlKernel)
   auto integrator = dynamic_cast<mfem::MixedScalarCurlIntegrator *>(kernel.createBFIntegrator());
   ASSERT_NE(integrator, nullptr);
   delete integrator;
+}
+
+TEST_F(MFEMKernelTest, RejectsOffDiagonalNonlinearKernelWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters nonlinear_params = _factory.getValidParams("TestOffDiagonalNonlinearKernel");
+  nonlinear_params.set<VariableName>("variable") = "test_variable_name";
+  nonlinear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+
+  auto diag_test = addSharedObject<Moose::MFEM::DiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_test", diag_test_params);
+  auto nonlinear = addSharedObject<TestOffDiagonalNonlinearKernel>(
+      "TestOffDiagonalNonlinearKernel", "nonlinear_offdiag", nonlinear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  eqn_system.AddKernel(nonlinear);
+  eqn_system.SetSolverRequiresGradient(true);
+
+  try
+  {
+    eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                            _mfem_problem->getProblemData().cmplx_gridfunctions,
+                            mfem::AssemblyLevel::LEGACY);
+    FAIL() << "Expected off-diagonal nonlinear MFEM kernel to be rejected";
+  }
+  catch (const std::runtime_error & error)
+  {
+    const std::string message(error.what());
+    EXPECT_TRUE(message.find("off-diagonal MFEM nonlinear domain integrators") !=
+                std::string::npos);
+    EXPECT_TRUE(message.find("requires a gradient") != std::string::npos);
+  }
+}
+
+TEST_F(MFEMKernelTest, AcceptsLinearOffDiagonalKernelWhenBuildingEquationSystem)
+{
+  InputParameters diag_test_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_test_params.set<VariableName>("variable") = "test_variable_name";
+  diag_test_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters diag_trial_params = _factory.getValidParams("MFEMDiffusionKernel");
+  diag_trial_params.set<VariableName>("variable") = "trial_variable_name";
+  diag_trial_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters linear_params = _factory.getValidParams("TestOffDiagonalLinearKernel");
+  linear_params.set<VariableName>("variable") = "test_variable_name";
+  linear_params.set<VariableName>("trial_variable") = "trial_variable_name";
+
+  auto diag_test = addSharedObject<Moose::MFEM::DiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_test_2", diag_test_params);
+  auto diag_trial = addSharedObject<Moose::MFEM::DiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_trial_2", diag_trial_params);
+  auto linear = addSharedObject<TestOffDiagonalLinearKernel>(
+      "TestOffDiagonalLinearKernel", "linear_offdiag", linear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(diag_test);
+  // Keep a diagonal contribution on the trial variable so this exercises the supported mixed
+  // 2x2 system path rather than a case where trial_variable_name is only an eliminated coupling.
+  eqn_system.AddKernel(diag_trial);
+  eqn_system.AddKernel(linear);
+
+  EXPECT_NO_THROW(eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                                          _mfem_problem->getProblemData().cmplx_gridfunctions,
+                                          mfem::AssemblyLevel::LEGACY));
+}
+
+TEST_F(MFEMKernelTest, RejectsGetGradientForModernAssemblyWhenGradientIsRequired)
+{
+  InputParameters linear_params = _factory.getValidParams("MFEMDiffusionKernel");
+  linear_params.set<VariableName>("variable") = "test_variable_name";
+  linear_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient") = "1.0";
+
+  InputParameters nonlinear_params = _factory.getValidParams("TestDiagonalNonlinearKernel");
+  nonlinear_params.set<VariableName>("variable") = "test_variable_name";
+
+  auto linear = addSharedObject<Moose::MFEM::DiffusionKernel>(
+      "MFEMDiffusionKernel", "diag_linear", linear_params);
+  auto nonlinear = addSharedObject<TestDiagonalNonlinearKernel>(
+      "TestDiagonalNonlinearKernel", "diag_nonlinear", nonlinear_params);
+
+  TestEquationSystem eqn_system;
+  eqn_system.AddKernel(linear);
+  eqn_system.AddKernel(nonlinear);
+  eqn_system.SetSolverRequiresGradient(true);
+  eqn_system.initAndBuild(_mfem_problem->getProblemData().gridfunctions,
+                          _mfem_problem->getProblemData().cmplx_gridfunctions,
+                          mfem::AssemblyLevel::LEGACY);
+  eqn_system.setAssemblyLevel(mfem::AssemblyLevel::FULL);
+
+  // The GetGradient() guard fires before the vector argument is accessed, so a
+  // default-constructed (empty) vector is sufficient to reach it. Skipping
+  // AssembleSystem avoids putting _h_blocks and _linear_operator into the
+  // mixed-level state that caused teardown failures in earlier iterations of
+  // this test, allowing eqn_system to be stack-allocated and destroyed normally.
+  const mfem::Vector dummy;
+  try
+  {
+    eqn_system.GetGradient(dummy);
+    FAIL() << "Expected GetGradient to reject modern assembly when a gradient is required";
+  }
+  catch (const std::runtime_error & error)
+  {
+    const std::string message(error.what());
+    EXPECT_TRUE(message.find("require GetGradient()") != std::string::npos);
+    EXPECT_TRUE(message.find("require legacy assembly") != std::string::npos);
+  }
 }
 
 #endif

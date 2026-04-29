@@ -12,31 +12,34 @@
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMVectorFEWeakDivergenceKernel);
+registerMooseMFEMObject("MooseApp", VectorFEWeakDivergenceKernel);
 
-InputParameters
-MFEMVectorFEWeakDivergenceKernel::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMKernel::validParams();
+InputParameters
+VectorFEWeakDivergenceKernel::validParams()
+{
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Adds the domain integrator to an MFEM problem for the mixed bilinear form "
       "$(-k\\vec u, \\vec\\nabla v)_\\Omega$ "
       "arising from the weak form of the divergence operator "
       "$\\vec \\nabla \\cdot (k\\vec u)$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<Moose::MFEM::ScalarCoefficientName>(
+      "coefficient", "1.", "Name of property k to use.");
   return params;
 }
 
-MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
-    const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+VectorFEWeakDivergenceKernel::VectorFEWeakDivergenceKernel(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMVectorFEWeakDivergenceKernel::createBFIntegrator()
+VectorFEWeakDivergenceKernel::createBFIntegrator()
 {
   return new mfem::VectorFEWeakDivergenceIntegrator(_coef);
 }
 
+} // namespace Moose::MFEM
 #endif

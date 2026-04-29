@@ -18,12 +18,12 @@
 #include <optional>
 #include <set>
 
+namespace Moose::MFEM
+{
 /**
  * Base class for MFEM objects that participate in execution ordering but are not UserObjects.
  */
-class MFEMExecutedObject : public MFEMObject,
-                           public SetupInterface,
-                           public DependencyResolverInterface
+class ExecutedObject : public Object, public SetupInterface, public DependencyResolverInterface
 {
 public:
   /**
@@ -34,7 +34,7 @@ public:
   /**
    * Construct an executed MFEM object and materialize its dependency metadata.
    */
-  MFEMExecutedObject(const InputParameters & parameters);
+  ExecutedObject(const InputParameters & parameters);
 
   /**
    * Perform any pre-execution setup for this object.
@@ -109,9 +109,9 @@ private:
 
 template <typename T>
 void
-MFEMExecutedObject::addDependencyParam(InputParameters & params,
-                                       const std::string & param_name,
-                                       const std::string & doc_string)
+ExecutedObject::addDependencyParam(InputParameters & params,
+                                   const std::string & param_name,
+                                   const std::string & doc_string)
 {
   params.addParam<T>(param_name, doc_string);
   appendDependencyParam(params, param_name);
@@ -119,12 +119,13 @@ MFEMExecutedObject::addDependencyParam(InputParameters & params,
 
 template <typename T>
 void
-MFEMExecutedObject::addRequiredDependencyParam(InputParameters & params,
-                                               const std::string & param_name,
-                                               const std::string & doc_string)
+ExecutedObject::addRequiredDependencyParam(InputParameters & params,
+                                           const std::string & param_name,
+                                           const std::string & doc_string)
 {
   params.addRequiredParam<T>(param_name, doc_string);
   appendDependencyParam(params, param_name);
 }
 
+} // namespace Moose::MFEM
 #endif

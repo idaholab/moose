@@ -12,15 +12,18 @@
 #include "MFEMCutTransitionSubMesh.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMCutTransitionSubMesh);
+registerMooseMFEMObject("MooseApp", CutTransitionSubMesh);
 
-InputParameters
-MFEMCutTransitionSubMesh::validParams()
+namespace Moose::MFEM
 {
-  InputParameters params = MFEMSubMesh::validParams();
-  params += MFEMBlockRestrictable::validParams();
+InputParameters
+CutTransitionSubMesh::validParams()
+{
+  InputParameters params = SubMesh::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription(
-      "Class to construct an MFEMSubMesh formed from the set of elements that have least one "
+      "Class to construct an Moose::MFEM::SubMesh formed from the set of elements that have least "
+      "one "
       "vertex on the specified cut plane, that lie on one side of the plane, "
       "and that are restricted to the set of user-specified subdomains.");
   params.addRequiredParam<BoundaryName>("cut_boundary",
@@ -39,9 +42,9 @@ MFEMCutTransitionSubMesh::validParams()
   return params;
 }
 
-MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & parameters)
-  : MFEMSubMesh(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+CutTransitionSubMesh::CutTransitionSubMesh(const InputParameters & parameters)
+  : SubMesh(parameters),
+    BlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
     _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
         getMesh(), getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
@@ -53,7 +56,7 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
 }
 
 void
-MFEMCutTransitionSubMesh::buildSubMesh()
+CutTransitionSubMesh::buildSubMesh()
 {
   labelMesh(const_cast<mfem::ParMesh &>(getMesh()));
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
@@ -67,7 +70,7 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 }
 
 void
-MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
+CutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
   int mpi_comm_rank = getMFEMProblem().getProblemData().myid;
   int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
@@ -161,10 +164,10 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 }
 
 mfem::Vector
-MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
+CutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
 {
   if (mesh.SpaceDimension() != 3)
-    mooseError("MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
+    mooseError("Moose::MFEM::CutTransitionSubMesh only works in 3-dimensional meshes!");
   mfem::Vector normal;
   mfem::Array<int> face_verts;
   std::vector<mfem::Vector> v;
@@ -188,9 +191,9 @@ MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int &
 }
 
 bool
-MFEMCutTransitionSubMesh::isPositiveSideOfCut(const int & el,
-                                              const int & el_vertex_on_cut,
-                                              mfem::ParMesh & parent_mesh)
+CutTransitionSubMesh::isPositiveSideOfCut(const int & el,
+                                          const int & el_vertex_on_cut,
+                                          mfem::ParMesh & parent_mesh)
 {
   const int sdim = parent_mesh.SpaceDimension();
   mfem::Vector el_center(3);
@@ -203,8 +206,7 @@ MFEMCutTransitionSubMesh::isPositiveSideOfCut(const int & el,
 }
 
 void
-MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
-                                        mfem::Array<int> & transition_els)
+CutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh, mfem::Array<int> & transition_els)
 {
   // Generate a set of local new attributes for transition region elements
   const int old_max_attr = parent_mesh.attributes.Max();
@@ -251,9 +253,9 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
 }
 
 bool
-MFEMCutTransitionSubMesh::isInDomain(const int & element,
-                                     const mfem::Array<int> & subdomains,
-                                     const mfem::ParMesh & mesh)
+CutTransitionSubMesh::isInDomain(const int & element,
+                                 const mfem::Array<int> & subdomains,
+                                 const mfem::ParMesh & mesh)
 {
   // element<0 for ghost elements
   if (element < 0)
@@ -265,4 +267,5 @@ MFEMCutTransitionSubMesh::isInDomain(const int & element,
   return false;
 }
 
+} // namespace Moose::MFEM
 #endif

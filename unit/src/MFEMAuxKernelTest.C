@@ -89,7 +89,8 @@ TEST_F(MFEMAuxKernelTest, MFEMSumAux)
         "source_variable_1", "source_variable_2", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0, 5.0};
 
-    MFEMSumAux & auxkernel = addObject<MFEMSumAux>("MFEMSumAux", "auxkernel1", auxkernel_params);
+    Moose::MFEM::SumAux & auxkernel =
+        addObject<Moose::MFEM::SumAux>("MFEMSumAux", "auxkernel1", auxkernel_params);
     auxkernel.execute();
 
     // Check the value of the output gridfunction is the scaled sum of the components
@@ -102,7 +103,7 @@ TEST_F(MFEMAuxKernelTest, MFEMSumAux)
     auxkernel_params.set<std::vector<VariableName>>("source_variables") = {
         "source_variable_1", "source_ho_variable", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0, 5.0};
-    EXPECT_THROW(addObject<MFEMSumAux>("MFEMSumAux", "failed_auxkernel", auxkernel_params),
+    EXPECT_THROW(addObject<Moose::MFEM::SumAux>("MFEMSumAux", "failed_auxkernel", auxkernel_params),
                  std::runtime_error);
   }
   {
@@ -112,8 +113,9 @@ TEST_F(MFEMAuxKernelTest, MFEMSumAux)
     auxkernel_params.set<std::vector<VariableName>>("source_variables") = {
         "source_variable_1", "source_variable_2", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0};
-    EXPECT_THROW(addObject<MFEMSumAux>("MFEMSumAux", "failed_scaled_auxkernel", auxkernel_params),
-                 std::runtime_error);
+    EXPECT_THROW(
+        addObject<Moose::MFEM::SumAux>("MFEMSumAux", "failed_scaled_auxkernel", auxkernel_params),
+        std::runtime_error);
   }
 }
 
@@ -155,8 +157,8 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0, 5.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0, -1.0};
 
-    MFEMComplexSumAux & auxkernel =
-        addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "auxkernel1", auxkernel_params);
+    Moose::MFEM::ComplexSumAux & auxkernel =
+        addObject<Moose::MFEM::ComplexSumAux>("MFEMComplexSumAux", "auxkernel1", auxkernel_params);
     auxkernel.execute();
 
     // Check the value of the output gridfunction is the scaled sum of the components
@@ -171,9 +173,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
         "source_variable_1", "source_ho_variable", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0, 5.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0, -1.0};
-    EXPECT_THROW(
-        addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "failed_auxkernel", auxkernel_params),
-        std::runtime_error);
+    EXPECT_THROW(addObject<Moose::MFEM::ComplexSumAux>(
+                     "MFEMComplexSumAux", "failed_auxkernel", auxkernel_params),
+                 std::runtime_error);
   }
   {
     // Check for failure if an inconsistent number of scale factors are provided
@@ -183,7 +185,7 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
         "source_variable_1", "source_variable_2", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0};
-    EXPECT_THROW(addObject<MFEMComplexSumAux>(
+    EXPECT_THROW(addObject<Moose::MFEM::ComplexSumAux>(
                      "MFEMComplexSumAux", "failed_scaled_auxkernel", auxkernel_params),
                  std::runtime_error);
   }
@@ -217,8 +219,8 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexGradAux)
     auxkernel_grad_params.set<mfem::real_t>("scale_factor_real") = 1.0;
     auxkernel_grad_params.set<mfem::real_t>("scale_factor_imag") = 1.0;
 
-    MFEMComplexGradAux & auxkernel_grad =
-        addObject<MFEMComplexGradAux>("MFEMComplexGradAux", "auxkernel", auxkernel_grad_params);
+    Moose::MFEM::ComplexGradAux & auxkernel_grad = addObject<Moose::MFEM::ComplexGradAux>(
+        "MFEMComplexGradAux", "auxkernel", auxkernel_grad_params);
     auxkernel_grad.execute();
 
     // Check we get the right grad
@@ -257,8 +259,8 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCurlAux)
     auxkernel_curl_params.set<AuxVariableName>("variable") = "output_variable_curl";
     auxkernel_curl_params.set<VariableName>("source") = "source_variable";
 
-    MFEMComplexCurlAux & auxkernel_curl =
-        addObject<MFEMComplexCurlAux>("MFEMComplexCurlAux", "auxkernel", auxkernel_curl_params);
+    Moose::MFEM::ComplexCurlAux & auxkernel_curl = addObject<Moose::MFEM::ComplexCurlAux>(
+        "MFEMComplexCurlAux", "auxkernel", auxkernel_curl_params);
     auxkernel_curl.execute();
 
     // Check we get the right result
@@ -297,8 +299,8 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexDivAux)
     auxkernel_div_params.set<AuxVariableName>("variable") = "output_variable_div";
     auxkernel_div_params.set<VariableName>("source") = "source_variable_vec";
 
-    MFEMComplexDivAux & auxkernel_div =
-        addObject<MFEMComplexDivAux>("MFEMComplexDivAux", "auxkernel", auxkernel_div_params);
+    Moose::MFEM::ComplexDivAux & auxkernel_div = addObject<Moose::MFEM::ComplexDivAux>(
+        "MFEMComplexDivAux", "auxkernel", auxkernel_div_params);
     auxkernel_div.execute();
 
     // Check the value of the output gridfunction is the correct div
@@ -347,8 +349,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexInnerProductAux)
     auxkernel_inner_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_inner_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexInnerProductAux & auxkernel_inner = addObject<MFEMComplexInnerProductAux>(
-        "MFEMComplexInnerProductAux", "auxkernel", auxkernel_inner_params);
+    Moose::MFEM::ComplexInnerProductAux & auxkernel_inner =
+        addObject<Moose::MFEM::ComplexInnerProductAux>(
+            "MFEMComplexInnerProductAux", "auxkernel", auxkernel_inner_params);
     auxkernel_inner.execute();
 
     // Check we get the right inner product
@@ -398,8 +401,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexExteriorProductAux)
     auxkernel_exterior_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_exterior_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexExteriorProductAux & auxkernel_exterior = addObject<MFEMComplexExteriorProductAux>(
-        "MFEMComplexExteriorProductAux", "auxkernel", auxkernel_exterior_params);
+    Moose::MFEM::ComplexExteriorProductAux & auxkernel_exterior =
+        addObject<Moose::MFEM::ComplexExteriorProductAux>(
+            "MFEMComplexExteriorProductAux", "auxkernel", auxkernel_exterior_params);
     auxkernel_exterior.execute();
 
     // Check we get the right exterior product
@@ -437,11 +441,14 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexScalarProjectionAux)
     InputParameters auxkernel_scalar_params =
         _factory.getValidParams("MFEMComplexScalarProjectionAux");
     auxkernel_scalar_params.set<AuxVariableName>("variable") = "output_variable_scalar";
-    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_real") = "coef_real";
-    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "coef_imag";
+    auxkernel_scalar_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_real") =
+        "coef_real";
+    auxkernel_scalar_params.set<Moose::MFEM::ScalarCoefficientName>("coefficient_imag") =
+        "coef_imag";
 
-    MFEMComplexScalarProjectionAux & auxkernel_scalar = addObject<MFEMComplexScalarProjectionAux>(
-        "MFEMComplexScalarProjectionAux", "auxkernel", auxkernel_scalar_params);
+    Moose::MFEM::ComplexScalarProjectionAux & auxkernel_scalar =
+        addObject<Moose::MFEM::ComplexScalarProjectionAux>(
+            "MFEMComplexScalarProjectionAux", "auxkernel", auxkernel_scalar_params);
     auxkernel_scalar.execute();
 
     // Check we get the right projection
@@ -477,13 +484,14 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexVectorProjectionAux)
     InputParameters auxkernel_vector_params =
         _factory.getValidParams("MFEMComplexVectorProjectionAux");
     auxkernel_vector_params.set<AuxVariableName>("variable") = "output_variable_vector";
-    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") =
+    auxkernel_vector_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_real") =
         "vec_coef_real";
-    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") =
+    auxkernel_vector_params.set<Moose::MFEM::VectorCoefficientName>("vector_coefficient_imag") =
         "vec_coef_imag";
 
-    MFEMComplexVectorProjectionAux & auxkernel_vector = addObject<MFEMComplexVectorProjectionAux>(
-        "MFEMComplexVectorProjectionAux", "auxkernel", auxkernel_vector_params);
+    Moose::MFEM::ComplexVectorProjectionAux & auxkernel_vector =
+        addObject<Moose::MFEM::ComplexVectorProjectionAux>(
+            "MFEMComplexVectorProjectionAux", "auxkernel", auxkernel_vector_params);
     auxkernel_vector.execute();
 
     // Check we get the right projection
