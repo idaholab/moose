@@ -291,8 +291,7 @@ NonlinearSystemBase::initialSetup()
     {
       // go over mortar interfaces and construct functors
       const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
-      for (const auto & [primary_secondary_boundary_pair, mortar_generation_ptr] :
-           mortar_interfaces)
+      for (const auto & [primary_secondary_boundary_pair, interface_config] : mortar_interfaces)
       {
         if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, displaced))
           continue;
@@ -309,7 +308,7 @@ NonlinearSystemBase::initialSetup()
 
         mortar_functors.emplace(primary_secondary_boundary_pair,
                                 ComputeMortarFunctor(mortar_constraints,
-                                                     *mortar_generation_ptr,
+                                                     *interface_config.amg,
                                                      subproblem,
                                                      _fe_problem,
                                                      displaced,

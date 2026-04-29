@@ -65,12 +65,15 @@ public:
 
   /**
    * Triangulate a polygon according to the configured mortar-segment triangulation mode.
-   * @param poly_nodes List of 2D nodes defining polygon
-   * @param offset Current size of 3D nodes array (not poly_nodes)
-   * @return tri_map List of integer arrays defining which nodes belong to each triangle
+   * @param poly_nodes List of 2D nodes defining polygon. May be augmented with extra interior
+   *                   nodes (e.g. centroid) by triangulation modes that require them; callers
+   *                   should append the result to their nodes list before applying the offset
+   *                   to \p tri_map.
+   * @param tri_map Output triangle list expressed in indices local to \p poly_nodes (i.e. starting
+   *                at 0). Callers are responsible for shifting these indices into the global node
+   *                numbering.
    */
   void triangulatePoly(std::vector<Point> & poly_nodes,
-                       const unsigned int offset,
                        std::vector<std::vector<unsigned int>> & tri_map) const;
 
   /**
