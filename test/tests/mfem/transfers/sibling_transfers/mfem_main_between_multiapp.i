@@ -11,7 +11,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../../mesh/square_quad.e
+  file = ../../mesh/square_quad9.e
 []
 
 [MultiApps]

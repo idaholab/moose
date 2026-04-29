@@ -65,7 +65,7 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/square_quad.e '
+      cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
     []  
@@ -78,7 +78,7 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/square_quad.e '
+      cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad_order_2 '
                 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '
