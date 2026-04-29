@@ -12,9 +12,7 @@ mass_flux_in = '${fparse 2786}' # kg/(m2.s)
 ###################################################
 # Geometric parameters
 ###################################################
-
 n_cells = 50
-
 # units are cm - do not forget to convert to meter
 scale_factor = 0.01
 fuel_element_pitch = '${fparse 14.598*scale_factor}'

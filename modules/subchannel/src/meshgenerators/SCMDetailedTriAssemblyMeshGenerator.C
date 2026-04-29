@@ -27,7 +27,9 @@ SCMDetailedTriAssemblyMeshGenerator::validParams()
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
-  params.addRequiredParam<unsigned int>("nrings", "Number of fuel Pin rings per assembly [-]");
+  params.addRequiredParam<unsigned int>(
+      "nrings",
+      "Number of fuel-pin rings per assembly, counting the center pin as the first ring [-]");
   params.addRequiredParam<Real>("flat_to_flat",
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
@@ -63,6 +65,11 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _verbose(getParam<bool>("verbose_flag")),
     _elem_id(0)
 {
+  if (_n_rings < 2)
+    mooseError(name(),
+               ": 'nrings' must be at least 2. In this mesh generator, the center pin counts as "
+               "the first ring, so a 7-pin bundle uses nrings = 2.");
+
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
@@ -293,18 +300,6 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
     }
-
-    /// Special case _n_rings == 1
-    if (_n_rings == 1)
-    {
-      for (unsigned int i = 0; i < _n_channels; i++)
-      {
-        Real angle = (2 * i + 1) * libMesh::pi / 6.0;
-        _subch_type[i] = EChannelType::CORNER;
-        _subchannel_position[i][0] = std::cos(angle) * _flat_to_flat / 2.0;
-        _subchannel_position[i][1] = std::sin(angle) * _flat_to_flat / 2.0;
-      }
-    }
   }
 }
 
@@ -399,19 +394,9 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
   }
 
   // specify number and type of sub-channel
-  unsigned int n_center, n_side, n_corner;
-  if (_n_rings == 1)
-  {
-    n_corner = 6;
-    n_side = 0;
-    n_center = _n_channels - n_side - n_corner;
-  }
-  else
-  {
-    n_corner = 6;
-    n_side = (_n_rings - 1) * 6;
-    n_center = _n_channels - n_side - n_corner;
-  }
+  unsigned int n_corner = 6;
+  unsigned int n_side = (_n_rings - 1) * 6;
+  unsigned int n_center = _n_channels - n_side - n_corner;
   if (_verbose)
   {
     _console << "Centers: " << n_center << std::endl;

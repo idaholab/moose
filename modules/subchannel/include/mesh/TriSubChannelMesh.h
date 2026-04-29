@@ -49,7 +49,7 @@ public:
   const Real & getDuctToPinGap() const { return _duct_to_pin_gap; }
 
   /**
-   * Return the number of rings
+   * Return the number of fuel-pin rings, counting the center pin as the first ring
    */
   const unsigned int & getNumOfRings() const { return _n_rings; }
 
@@ -147,7 +147,7 @@ public:
   unsigned int pinIndex(const Point & p) const override;
 
 protected:
-  /// number of rings of fuel pins
+  /// number of fuel-pin rings, counting the center pin as the first ring
   unsigned int _n_rings;
   /// number of subchannels
   unsigned int _n_channels;

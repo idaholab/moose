@@ -211,11 +211,57 @@ unheated_length_exit = 0.855 #m
   []
 []
 
-[Outputs]
-  exodus = true
+[Postprocessors]
+  [center_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 96
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner_S]
+    type = SubChannelPointValue
+    variable = S
+    index = 97
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [center_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 96
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner_w_perim]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 97
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
 []
 
 [Executioner]
   type = Steady
+[]
+
+[Outputs]
+  exodus = false
+  csv = true
 []
 

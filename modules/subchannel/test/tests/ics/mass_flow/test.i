@@ -37,6 +37,30 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
   []
 []
 
+[Postprocessors]
+  [center]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 4
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [edge]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 1
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+  [corner]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 0
+    execute_on = 'timestep_end'
+    height = 0.5
+  []
+[]
+
 [Problem]
   solve = false
 []
@@ -46,5 +70,6 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
+  csv = true
 []

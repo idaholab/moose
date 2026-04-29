@@ -19,28 +19,6 @@ pin_diameter = 0.00950
     subchannel_block_id = 0
     pin_block_id = 1
   []
-  # [sub_channel]
-  #   type = SCMQuadAssemblyMeshGenerator
-  #   nx = 6
-  #   ny = 6
-  #   n_cells = 10
-  #   pitch = 0.0126
-  #   pin_diameter = ${pin_diameter}
-  #   side_gap = 0.00095
-  #   heated_length = 1.0
-  #   spacer_z = '0.0'
-  #   spacer_k = '0.0'
-  # []
-
-  # [fuel_pins]
-  #   type = SCMQuadAssemblyMeshGenerator
-  #   input = subchannel
-  #   nx = 6
-  #   ny = 6
-  #   n_cells = 10
-  #   pitch = 0.0126
-  #   heated_length = 1.0
-  # []
 []
 
 [FluidProperties]
