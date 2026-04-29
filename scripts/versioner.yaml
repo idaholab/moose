@@ -25,7 +25,7 @@ packages:
       - conda/build
   # dependers: moose-dev
   mpi:
-    version: 2026.04.21
+    version: 2026.04.29
     influential:
       - apptainer/mpi.def
       - apptainer/files/mpi
@@ -44,7 +44,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.24.6
-    build_number: 0
+    build_number: 1
     conda: conda/petsc
     templates:
       conda/petsc/meta.yaml.template: conda/petsc/meta.yaml
@@ -63,7 +63,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2026.04.13_0185b8b
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/meta.yaml.template: conda/libmesh/meta.yaml
@@ -111,7 +111,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.04.21
+    version: 2026.04.29
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
@@ -128,7 +128,7 @@ packages:
       - apptainer/moose-dev.def
       - apptainer/remove_channels.def
       # files that are included within moose-dev.def
-      - apptainer/files/moose-dev
+      # - apptainer/files/moose-dev
       # wasp
       - scripts/configure_wasp.sh
       - scripts/update_and_rebuild_wasp.sh

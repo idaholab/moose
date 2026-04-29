@@ -1,0 +1,27 @@
+name: "Branch next: Check"
+
+on:
+  pull_request:
+    branches: [next]
+  push:
+    branches: [next]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-slim
+    steps:
+      - name: Do nothing
+        shell: bash
+        run: exit 0
+      # - uses: actions/checkout@v6
+      #   name: Checkout
+      #   with:
+      #     submodules: false
+      # - name: Checkout optional submodules
+      #   shell: bash
+      #   run: git submodule update --init --checkout
