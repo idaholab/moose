@@ -29,10 +29,6 @@ public:
   /// Build eigenproblem system, with essential boundary conditions accounted for
   void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
 
-  /// Update eigenvectors from solution after eigensolve
-  void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                   MFEMEigensolverBase * eigensolver);
-
 protected:
   /// Mark external boundaries as essential for eigenproblem BC elimination
   virtual void ApplyEssentialBCs() override;
@@ -45,6 +41,9 @@ protected:
 
 private:
   friend class EquationSystemEigenproblemOperator;
+
+  mfem::Array<int> _global_ess_markers;
+
 };
 
 } // namespace Moose::MFEM

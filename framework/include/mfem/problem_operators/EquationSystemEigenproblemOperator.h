@@ -36,9 +36,14 @@ public:
 
   mfem::OperatorHandle _mass_rhs;
 
+private:
+  void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
+                                 MFEMEigensolverBase * eigensolver);
+
 protected:
   /// Add kernels/bcs and assemble the linear part of the equation system
   void BuildEquationSystemOperator();
+
 };
 
 } // namespace Moose::MFEM

@@ -20,16 +20,13 @@ void
 EigenproblemEquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_trial_var_names.size());
-  for (const auto i : index_range(_trial_var_names))
-  {
-    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
-    _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    _global_ess_markers = 0;
-    trial_gf.Update();
-    trial_gf = _gfuncs->GetRef(_trial_var_names.at(i));
-    trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(i));
-  }
+  mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
+  _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+  _global_ess_markers = 0;
+  trial_gf.Update();
+  trial_gf = _gfuncs->GetRef(_trial_var_names.at(0));
+  trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
+  trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(0));
 }
 
 void
@@ -75,21 +72,6 @@ EigenproblemEquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX,
   ApplyEssentialBCs();
   FormEigenproblemMatrix(_jacobian);
   FormMassMatrix(massRHS);
-}
-
-void
-EigenproblemEquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
-                                                        MFEMEigensolverBase * eigensolver)
-{
-  mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->getEigenvalues(eigenvalues);
-
-  for (int i = 0; i < eigenvalues.Size(); ++i)
-  {
-    auto & trial_var_name = _trial_var_names.at(0);
-    gridfunctions.Get(trial_var_name + "_" + std::to_string(i))
-        ->Distribute(eigensolver->getEigenvector(i));
-  }
 }
 
 } // namespace Moose::MFEM
