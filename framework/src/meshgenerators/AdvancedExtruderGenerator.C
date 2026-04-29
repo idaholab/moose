@@ -232,8 +232,6 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
   {
     if (!_direction.norm())
       paramError("direction", "Must have some length!");
-
-    // Normalize it
     _direction /= _direction.norm();
   }
 
@@ -600,6 +598,7 @@ AdvancedExtruderGenerator::generate()
       // k is the element layer ordering within each elevation layer
       for (const auto k : make_range(total_extrap_heights))
       {
+        // Compute current_step, the update vector
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
           current_step.zero();
@@ -609,32 +608,70 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
-          // Calculate initial node step
+          // Compute current_step before any transformation
           Real step_size = 0;
           if (_extrude_along_curve)
           {
-            const Node * P_current =
-                extrusion_curve->node_ptr(k); // current point in extrusion curve
-            const Node * P_prev =
-                extrusion_curve->node_ptr(k - 1); // previous point in extrusion curve
+            // current point in extrusion curve
+            const Node * P_current = extrusion_curve->node_ptr(k);
+            // previous point in extrusion curve
+            const Node * P_prev = extrusion_curve->node_ptr(k - 1);
 
-            // // Select the extrusion direction based on the curve or the user parameters
-            // if (k == 1)
-            // {
-            //   const auto P_next = extrusion_curve->node_ptr(k + 1);
-            //   intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
-            // }
-            // else if (k < order * num_layers - 1)
-            // {
-            //   const auto P_next = extrusion_curve->node_ptr(k + 1);
-            //   intersecting_plane_normal_vec =
-            //       *P_next - *P_prev; // this approximates the derivative at the spline point
-            // }
-            // else
-            //   intersecting_plane_normal_vec = _end_extrusion_direction;
+            // Convenience vectors
+            RealVectorValue a_vec = *P_current - *P_prev;
+            RealVectorValue b_vec = old_step + *node - *P_prev;
+            Real prev_node_distance_to_spline = b_vec.norm();
 
-            // intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
+            // Node does not lie exactly on the extrusion curve we are following
+            if (prev_node_distance_to_spline > libMesh::TOLERANCE)
+            {
+              // normal vector to the plane to extrude the point into
+              RealVectorValue intersecting_plane_normal_vec;
+
+              // Select the extrusion direction based on the curve or the user parameters
+              if (k == 1)
+              {
+                const auto P_next = extrusion_curve->node_ptr(k + 1);
+                intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+              }
+              else if (k < order * num_layers - 1)
+              {
+                const auto P_next = extrusion_curve->node_ptr(k + 1);
+                // this approximates the derivative at the spline point
+                intersecting_plane_normal_vec = *P_next - *P_prev;
+              }
+              else
+                intersecting_plane_normal_vec = _end_extrusion_direction;
+              intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm();
+
+              // normal vector to the current plane
+              RealVectorValue current_plane_normal_vec = a_vec.cross(b_vec);
+              current_plane_normal_vec /= current_plane_normal_vec.norm();
+
+              // calculate the line of intersection's slope
+              RealVectorValue dir_along_line =
+                  current_plane_normal_vec.cross(intersecting_plane_normal_vec);
+              dir_along_line /= dir_along_line.norm();
+
+              libMesh::Point new_node_point =
+                  *P_current + prev_node_distance_to_spline * dir_along_line;
+              current_step = new_node_point - *node;
+            }
+            // Point is on the axis of the line
+            else
+            {
+              _direction = *P_current - *P_prev;
+              _direction /= _direction.norm();
+              mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
+                          "Norm of direction vector is not 1!");
+
+              // Calculate step size.
+              // Note: old_step + *node is the vector description of the previously-created node
+              step_size = ((*P_current - (old_step + *node)) * _direction);
+              current_step = old_step + _direction * step_size;
+            }
           }
+          // Extruding in a fixed direction (not along a curve)
           else
           {
             step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
@@ -713,7 +750,7 @@ AdvancedExtruderGenerator::generate()
             }
             else
             {
-              // We can't use old and current step because they have been "twisted"
+              // We can't use old and current step updates because they have been "twisted"
               extrusion_axis_at_elevation = reference_point + _direction * cumulative_step_size;
               prev_extrusion_axis_at_elevation =
                   reference_point + _direction * (cumulative_step_size - step_size);
@@ -746,6 +783,7 @@ AdvancedExtruderGenerator::generate()
         new_node->set_unique_id(uid);
 #endif
 
+        // Add the new node to the extruded boundaries
         input_boundary_info.boundary_ids(node, ids_to_copy);
         if (_boundary_swap_pairs.empty())
           boundary_info.add_node(new_node, ids_to_copy);
@@ -774,6 +812,7 @@ AdvancedExtruderGenerator::generate()
   // fix that.
   input->comm().max(next_side_id);
 
+  // Build the extruded elements
   for (const auto & elem : input->element_ptr_range())
   {
     const ElemType etype = elem->type();
