@@ -53,8 +53,35 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondi
     _var(object._var),
     _kokkos_var(object._kokkos_var),
     _var_num(object._var_num),
-    _sys_num(object._sys_num)
+    _sys_num(object._sys_num),
+    _bc_data_matrix(object._bc_data_matrix),
+    _bc_data_rhs(object._bc_data_rhs)
 {
+}
+
+void
+LinearFVBoundaryCondition::initBCData(const LinearFVFluxKernel::BoundaryFaceData & data)
+{
+  _bc_data_matrix = data.matrix_coeff;
+  _bc_data_rhs = data.rhs_coeff;
+}
+
+void
+LinearFVBoundaryCondition::computeRightHandSide()
+{
+  Policy policy(0, numKokkosBoundarySides());
+  if (!_rhs_dispatcher)
+    _rhs_dispatcher = DispatcherRegistry::build<RightHandSideLoop>(this, type());
+  _rhs_dispatcher->parallelFor(policy);
+}
+
+void
+LinearFVBoundaryCondition::computeMatrix()
+{
+  Policy policy(0, numKokkosBoundarySides());
+  if (!_matrix_dispatcher)
+    _matrix_dispatcher = DispatcherRegistry::build<MatrixLoop>(this, type());
+  _matrix_dispatcher->parallelFor(policy);
 }
 
 bool

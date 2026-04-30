@@ -19,8 +19,6 @@ public:
 
   KokkosLinearFVDiffusion(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-
   KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeNeighborMatrixContribution(const AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
@@ -35,11 +33,8 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::computeMatrixContribution(const AssemblyDatum & datum) const
 {
-  if (datum.hasNeighbor())
-    return faceConductance(datum);
-
-  const auto boundary_id = datum.mesh().getFaceBoundaryID(datum.elemID(), datum.side());
-  return _kokkos_var.hasBoundaryCondition(boundary_id) ? faceConductance(datum) : 0;
+  return datum.hasNeighbor() ? faceConductance(datum)
+                             : _bc_data.matrix_coeff(datum.side(), datum.elemID());
 }
 
 KOKKOS_FUNCTION inline Real
@@ -51,17 +46,7 @@ KokkosLinearFVDiffusion::computeNeighborMatrixContribution(const AssemblyDatum &
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVDiffusion::computeRightHandSideContribution(const AssemblyDatum & datum) const
 {
-  if (datum.hasNeighbor())
-    return 0;
-
-  const auto boundary_id = datum.mesh().getFaceBoundaryID(datum.elemID(), datum.side());
-  const auto index = _kokkos_var.boundaryConditionIndex(boundary_id);
-  if (index < 0)
-    return 0;
-
-  return faceConductance(datum) *
-         _kokkos_var.boundaryConditionValue(index).value(
-             _t, datum.mesh().getFaceCentroid(datum.elemID(), datum.side()));
+  return datum.hasNeighbor() ? 0 : _bc_data.rhs_coeff(datum.side(), datum.elemID());
 }
 
 KOKKOS_FUNCTION inline Real

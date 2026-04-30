@@ -439,9 +439,27 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosLinearFVKernelFunction(classname, alias)
 
-#define registerKokkosLinearFVBoundaryCondition(app, classname) registerMooseObject(app, classname)
+#define callRegisterKokkosLinearFVBoundaryConditionFunction(classname, objectname)                  \
+  static char registerKokkosLinearFVBC##classname()                                                \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::RightHandSideLoop, classname>(objectname);        \
+    DispatcherRegistry::addDispatcher<classname::MatrixLoop, classname>(objectname);               \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_linearfvbc_##classname, __COUNTER__) =               \
+      registerKokkosLinearFVBC##classname()
+
+#define registerKokkosLinearFVBoundaryCondition(app, classname)                                    \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosLinearFVBoundaryConditionFunction(classname, #classname)
+
 #define registerKokkosLinearFVBoundaryConditionAliased(app, classname, alias)                      \
-  registerMooseObjectAliased(app, classname, alias)
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosLinearFVBoundaryConditionFunction(classname, alias)
 
 // Material
 

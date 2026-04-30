@@ -1,9 +1,15 @@
+# 2D diffusion MMS test with mixed Dirichlet (left/right) and Neumann (top/bottom) BCs.
+# Exact solution:  u = (1.5 - x^2)(1.5 - y^2)
+# Diffusion coeff: D = 1 + 0.5*x*y
+# Neumann flux on bottom (n = -y): -D * du/dy|_{y=0} = 0  (du/dy = 0 at y=0)
+# Neumann flux on top   (n = +y):  D * du/dy|_{y=ymax}    (outward normal flux)
+
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 2
-    ny = 1
+    ny = 2
     ymax = 0.5
   []
 []
@@ -35,12 +41,24 @@
 []
 
 [LinearFVBCs]
-  [dir]
+  [dirichlet_lr]
     type = KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
-    boundary = "left right top bottom"
+    boundary = 'left right'
     diffusion_coeff = coeff_func_kokkos
     functor = analytic_solution_kokkos
+  []
+  [neumann_bottom]
+    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = u
+    boundary = 'bottom'
+    functor = neumann_bottom_flux
+  []
+  [neumann_top]
+    type = KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = u
+    boundary = 'top'
+    functor = neumann_top_flux
   []
 []
 
@@ -64,6 +82,19 @@
   [analytic_solution]
     type = ParsedFunction
     expression = '(1.5-x*x)*(1.5-y*y)'
+  []
+  # Outward normal flux on bottom (n = -y): flux = -D * du/dy|_{y=0}
+  # du/dy = (1.5-x^2)*(-2y), at y=0: du/dy = 0, so flux = 0
+  [neumann_bottom_flux]
+    type = KokkosConstantFunction
+    value = 0.0
+  []
+  # Outward normal flux on top (n = +y): flux = D * du/dy|_{y=ymax}
+  # D = 1+0.5*x*ymax, du/dy = (1.5-x^2)*(-2*ymax)
+  # flux = (1+0.5*x*ymax)*(1.5-x^2)*(-2*ymax)
+  [neumann_top_flux]
+    type = KokkosParsedFunction
+    expression = '(1.0 + 0.5*x*0.5)*(1.5-x*x)*(-2.0*0.5)'
   []
 []
 

@@ -170,13 +170,36 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
       .template condition<AttribMatrixTags>(matrix_tags)
       .queryInto(flux_after_matrices);
 
+  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs_after_vectors;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(number())
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribKokkos>(true)
+      .template condition<AttribThread>(0)
+      .template condition<AttribVectorTags>(vector_tags)
+      .queryInto(bcs_after_vectors);
+
+  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs_after_matrices;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(number())
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribKokkos>(true)
+      .template condition<AttribThread>(0)
+      .template condition<AttribMatrixTags>(matrix_tags)
+      .queryInto(bcs_after_matrices);
+
   std::vector<Moose::Kokkos::LinearFVElementalKernel *> elemental_kernels;
   MooseUtils::getUnion(elemental_after_vectors, elemental_after_matrices, elemental_kernels);
 
   std::vector<Moose::Kokkos::LinearFVFluxKernel *> flux_kernels;
   MooseUtils::getUnion(flux_after_vectors, flux_after_matrices, flux_kernels);
 
-  if (elemental_kernels.empty() && flux_kernels.empty())
+  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs;
+  MooseUtils::getUnion(bcs_after_vectors, bcs_after_matrices, bcs);
+
+  if (elemental_kernels.empty() && flux_kernels.empty() && bcs.empty())
     return;
 
   auto & systems = _fe_problem.getKokkosSystems();
@@ -193,6 +216,7 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   updateDependencies(
       elemental_kernels, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
   updateDependencies(flux_kernels, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
+  updateDependencies(bcs, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
 
   if (needed_mat_props.size())
   {
@@ -217,10 +241,14 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
     _fe_problem.reinitKokkosMaterials();
   }
 
+  for (auto bc : bcs_after_matrices)
+    bc->computeMatrix();
   for (auto kernel : elemental_after_matrices)
     kernel->computeMatrix();
   for (auto kernel : flux_after_matrices)
     kernel->computeMatrix();
+  for (auto bc : bcs_after_vectors)
+    bc->computeRightHandSide();
   for (auto kernel : elemental_after_vectors)
     kernel->computeRightHandSide();
   for (auto kernel : flux_after_vectors)
