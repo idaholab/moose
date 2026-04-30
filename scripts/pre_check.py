@@ -48,7 +48,32 @@ def _checkable_path(path: str) -> bool:
     )
 
 
-def git_file_entries(*patterns: str) -> list[tuple[str, str]]:
+def changed_files(log_from: str, log_to: str) -> set[str]:
+    """Return paths touched by the change range and still present at HEAD."""
+    try:
+        cp = subprocess.run(
+            [
+                "git",
+                "diff",
+                "--name-only",
+                "-z",
+                "--diff-filter=ACMRT",
+                f"{log_from}..{log_to}",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        print("Git error output:", e.stderr)
+        raise
+
+    return {p for p in cp.stdout.split("\x00") if p}
+
+
+def git_file_entries(
+    *patterns: str, touched_files: set[str] | None = None
+) -> list[tuple[str, str]]:
     """Return (mode, path) for tracked regular files matching glob patterns."""
     try:
         cp = subprocess.run(
@@ -68,15 +93,17 @@ def git_file_entries(*patterns: str) -> list[tuple[str, str]]:
 
         metadata, path = entry.split("\t", 1)
         mode = metadata.split(" ", 1)[0]
+        if touched_files is not None and path not in touched_files:
+            continue
         if _is_regular_git_file(mode) and _checkable_path(path):
             entries.append((mode, path))
 
     return entries
 
 
-def git_files(*patterns: str) -> list[str]:
+def git_files(*patterns: str, touched_files: set[str] | None = None) -> list[str]:
     """Return tracked regular files matching glob patterns, excluding contrib/."""
-    return [path for _, path in git_file_entries(*patterns)]
+    return [path for _, path in git_file_entries(*patterns, touched_files=touched_files)]
 
 
 def read_text(path: str) -> str:
@@ -105,24 +132,28 @@ def ticket_references(log_from: str, log_to: str) -> str:
 # --------------------------- File set helpers ---------------------------
 
 
-def files_for_tabs_except_input() -> list[str]:
-    return git_files("*.[Ch]", "*.py")
+def files_for_tabs_except_input(touched_files: set[str] | None = None) -> list[str]:
+    return git_files("*.[Ch]", "*.py", touched_files=touched_files)
 
 
-def files_for_tabs() -> list[str]:
-    return git_files("*.[Chi]", "*.py")
+def files_for_tabs(touched_files: set[str] | None = None) -> list[str]:
+    return git_files("*.[Chi]", "*.py", touched_files=touched_files)
 
 
-def files_for_whitespace(check_cpp: bool, check_fortran: bool) -> list[str]:
+def files_for_whitespace(
+    check_cpp: bool,
+    check_fortran: bool,
+    touched_files: set[str] | None = None,
+) -> list[str]:
     """Get files to check for trailing whitespace."""
     files = ["*.[Cchi]", "*.py"] if check_cpp else ["*.i", "*.py"]
     if check_fortran:
         files += ["*.[FfH]", "*.f90", "*.F90", "*.FF90"]
-    return git_files(*files)
+    return git_files(*files, touched_files=touched_files)
 
 
-def files_for_headers() -> list[str]:
-    return git_files("*.h")
+def files_for_headers(touched_files: set[str] | None = None) -> list[str]:
+    return git_files("*.h", touched_files=touched_files)
 
 
 # --------------------------- Individual checks ---------------------------
@@ -133,10 +164,10 @@ def find_tabs(files: Iterable[str]) -> list[str]:
     return [f for f in files if "\t" in read_text(f)]
 
 
-def banned_keywords() -> list[str]:
+def banned_keywords(touched_files: set[str] | None = None) -> list[str]:
     r"""Return C/C++ files containing banned keywords (std::cout, std::cerr, printf, sleep, print_trace)."""
     bad = []
-    for f in git_files("*.[Ch]"):
+    for f in git_files("*.[Ch]", touched_files=touched_files):
         text = read_text(f)
         if "std::cout" in text or "std::cerr" in text:
             bad.append(f)
@@ -149,7 +180,7 @@ def banned_keywords() -> list[str]:
     return bad
 
 
-def banned_funcs() -> list[str]:
+def banned_funcs(touched_files: set[str] | None = None) -> list[str]:
     r"""Return files containing deprecated MOOSE function calls (mooseError2, mooseWarning2, etc.)."""
     pat_file_ok = re.compile(r"Moose(Error|Object)\.(h|C)$")
     pat = re.compile(
@@ -157,17 +188,17 @@ def banned_funcs() -> list[str]:
     )
     return [
         f
-        for f in git_files("*.[Ch]")
+        for f in git_files("*.[Ch]", touched_files=touched_files)
         if not pat_file_ok.search(f) and pat.search(read_text(f))
     ]
 
 
-def classified_keywords() -> list[str]:
+def classified_keywords(touched_files: set[str] | None = None) -> list[str]:
     r"""Return files containing classified or proprietary keywords."""
     pat_prop = re.compile(r"p\s*r\s*o\s*p\s*r\s*i\s*e\s*t\s*a\s*r\s*y", re.IGNORECASE)
     pat_class = re.compile(r"c\s*l\s*a\s*s\s*s\s*i\s*f\s*i\s*e\s*d", re.IGNORECASE)
     bad = []
-    for f in git_files("*.[Chi]", "*.py"):
+    for f in git_files("*.[Chi]", "*.py", touched_files=touched_files):
         if f.endswith("pre_check.py"):
             continue
         text = read_text(f)
@@ -186,10 +217,10 @@ def trailing_whitespace_files(files: Iterable[str]) -> list[str]:
     return bad
 
 
-def no_newline_at_eof_files() -> list[str]:
+def no_newline_at_eof_files(touched_files: set[str] | None = None) -> list[str]:
     """Return files missing a newline at end of file."""
     bad = []
-    for f in git_files("*.[Chi]", "*.py"):
+    for f in git_files("*.[Chi]", "*.py", touched_files=touched_files):
         with open(f, "rb") as fh:
             fh.seek(0, 2)
             if fh.tell() == 0:
@@ -200,13 +231,13 @@ def no_newline_at_eof_files() -> list[str]:
     return bad
 
 
-def find_bad_executables() -> list[str]:
+def find_bad_executables(touched_files: set[str] | None = None) -> list[str]:
     """Return files with incorrect executable permissions.
 
     Scripts (.py, .js, .sh, .pl) and extensionless files are allowed to be executable.
     """
     bad = []
-    for mode, f in git_file_entries():
+    for mode, f in git_file_entries(touched_files=touched_files):
         if f.endswith((".pl", ".py", ".js", ".sh")) or "." not in Path(f).name:
             continue
         if _is_executable_git_file(mode):
@@ -214,26 +245,30 @@ def find_bad_executables() -> list[str]:
     return bad
 
 
-def style_files() -> list[str]:
+def style_files(touched_files: set[str] | None = None) -> list[str]:
     r"""Return C/C++ files containing control keywords without a space before '('.
 
-    Detects `if(`, `for(`, `while(`, `switch(` — keywords that should be
+    Detects `if(`, `for(`, `while(`, `switch(` - keywords that should be
     written `if (`, `for (`, etc. per MOOSE coding standards.
     """
     pat = re.compile(r"\b(if|for|while|switch)\(")
-    return [f for f in git_files("*.[Ch]") if pat.search(read_text(f))]
+    return [
+        f
+        for f in git_files("*.[Ch]", touched_files=touched_files)
+        if pat.search(read_text(f))
+    ]
 
 
-def include_guard_files() -> list[str]:
+def include_guard_files(touched_files: set[str] | None = None) -> list[str]:
     """Return header files using old-style #ifndef/#define include guards."""
     pat = re.compile(r"^#ifndef\s+(\S+_H_?)\s*\n#define\s+\1", re.M)
-    return [f for f in files_for_headers() if pat.search(read_text(f))]
+    return [f for f in files_for_headers(touched_files) if pat.search(read_text(f))]
 
 
-def windows_line_endings() -> list[str]:
+def windows_line_endings(touched_files: set[str] | None = None) -> list[str]:
     """Return files with Windows-style (CRLF) line endings."""
     bad = []
-    for f in git_files("*.[Chi]", "*.py", "*.md"):
+    for f in git_files("*.[Chi]", "*.py", "*.md", touched_files=touched_files):
         with open(f, "rb") as fh:
             if b"\r\n" in fh.read():
                 bad.append(f)
@@ -339,11 +374,11 @@ def _get_line_col(text: str, index: int) -> tuple[int, int]:
     return line, col
 
 
-def unicode_files() -> tuple[list[str], list[str]]:
+def unicode_files(touched_files: set[str] | None = None) -> tuple[list[str], list[str]]:
     """Return (bad_files, detailed_locations) for files containing disallowed Unicode."""
     bad = []
     locations = []
-    for f in git_files("*.[Chi]", "*.py"):
+    for f in git_files("*.[Chi]", "*.py", touched_files=touched_files):
         text = read_text(f)
         disallowed = _disallowed_spans(text)
         if disallowed:
@@ -384,6 +419,22 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0") == "1"
     check_banned_funcs = os.environ.get("CHECK_BANNED_FUNCS", "0") == "1"
     check_style        = os.environ.get("CHECK_STYLE",        "1") == "1"
+    file_checks_enabled = any(
+        [
+            check_keywords,
+            check_eof,
+            check_exes,
+            check_whitespace,
+            check_tabs,
+            check_classified,
+            check_unicode,
+            check_include_guards,
+            check_windows,
+            check_banned_funcs,
+            check_style,
+        ]
+    )
+    touched_files = changed_files(log_from, log_to) if file_checks_enabled else set()
 
     # --- Run checks ---
     ticket_reference = ""
@@ -407,32 +458,34 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     if check_whitespace:
         whitespace_bad = trailing_whitespace_files(
-            files_for_whitespace(check_cpp_whitespace, check_f_whitespace)
+            files_for_whitespace(
+                check_cpp_whitespace, check_f_whitespace, touched_files
+            )
         )
     if check_tabs:
         tab_bad = find_tabs(
-            files_for_tabs_except_input()
+            files_for_tabs_except_input(touched_files)
             if check_tabs_except_input
-            else files_for_tabs()
+            else files_for_tabs(touched_files)
         )
     if check_classified:
-        classified_bad = classified_keywords()
+        classified_bad = classified_keywords(touched_files)
     if check_keywords:
-        keyword_bad = banned_keywords()
+        keyword_bad = banned_keywords(touched_files)
     if check_style:
-        style_bad = style_files()
+        style_bad = style_files(touched_files)
     if check_eof:
-        eof_bad = no_newline_at_eof_files()
+        eof_bad = no_newline_at_eof_files(touched_files)
     if check_exes:
-        exe_bad = find_bad_executables()
+        exe_bad = find_bad_executables(touched_files)
     if check_banned_funcs:
-        banned_func_bad = banned_funcs()
+        banned_func_bad = banned_funcs(touched_files)
     if check_unicode:
-        unicode_bad, unicode_locations = unicode_files()
+        unicode_bad, unicode_locations = unicode_files(touched_files)
     if check_include_guards:
-        include_guard_bad = include_guard_files()
+        include_guard_bad = include_guard_files(touched_files)
     if check_windows:
-        windows_bad = windows_line_endings()
+        windows_bad = windows_line_endings(touched_files)
 
     # --- Tabulate results ---
     # Each entry: (enabled, files, pass_msg, disabled_msg, error_header, extra_error, locations)
