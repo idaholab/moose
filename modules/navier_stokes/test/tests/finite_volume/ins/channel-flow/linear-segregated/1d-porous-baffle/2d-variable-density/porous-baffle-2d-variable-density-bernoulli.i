@@ -7,7 +7,7 @@ nx_right = 30
 ny = 11
 
 epsilon_left = 1.0
-epsilon_right = 1.0
+epsilon_right = 0.5
 u_in = 1.0
 p_out = 0.0
 mu = 1e-3
