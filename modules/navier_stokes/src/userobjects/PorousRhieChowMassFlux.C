@@ -1122,9 +1122,8 @@ PorousRhieChowMassFlux::computeCellVelocity()
             const Real grad_neighbor =
                 neighbor_active ? (*_grad_w_prev[comp_index][dir_index])(neighbor_dof) : grad_elem;
             const Real grad_face =
-                one_sided_face
-                    ? grad_elem
-                    : (neighbor_active ? 0.5 * (grad_elem + grad_neighbor) : grad_elem);
+                one_sided_face ? grad_elem
+                               : (neighbor_active ? 0.5 * (grad_elem + grad_neighbor) : grad_elem);
             comp_val += grad_face * dPf(dir_index);
           }
           grad_times_dpf[comp_index] = comp_val;
