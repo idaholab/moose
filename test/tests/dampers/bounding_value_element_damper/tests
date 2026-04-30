@@ -1,7 +1,7 @@
 [Tests]
-  issues = '#7856'
   design = 'source/dampers/BoundingValueElementDamper.md'
   [./bounding_value_max]
+    issues = '#7856'
     type = 'RunException'
     input = 'bounding_value_max_test.i'
     expect_out = 'Damping factor: 0.2388'
@@ -9,11 +9,19 @@
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a maximum value on elements."
   [../]
   [./bounding_value_min]
+    issues = '#7856'
     type = 'RunException'
     input = 'bounding_value_max_test.i'
     cli_args = "Kernels/source/function='-t'"
     expect_out = 'Damping factor: 0.2388'
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     requirement = "The system shall include the ability to reduce the change in nonlinear residual based on a minimum value on elements."
+  [../]
+  [./bounding_value_block_restricted]
+    issues = '#32058'
+    type = 'RunApp'
+    input = 'bounding_value_element_block_restricted_test.i'
+    cli_args = '--n-threads=2'
+    requirement = "The system shall not evaluate an elemental bounding-value damper on elements where a block-restricted variable to damp is undefined."
   [../]
 []
