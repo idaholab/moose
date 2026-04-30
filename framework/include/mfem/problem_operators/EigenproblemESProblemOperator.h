@@ -17,10 +17,10 @@
 namespace Moose::MFEM
 {
 /// Steady-state eigenproblem operator with an equation system.
-class EquationSystemEigenproblemOperator : public EquationSystemProblemOperator
+class EigenproblemESProblemOperator : public EquationSystemProblemOperator
 {
 public:
-  EquationSystemEigenproblemOperator(MFEMProblem & problem) : EquationSystemProblemOperator(problem)
+  EigenproblemESProblemOperator(MFEMProblem & problem) : EquationSystemProblemOperator(problem)
   {
     mooseAssert(std::dynamic_pointer_cast<EigenproblemEquationSystem>(_problem_data.eqn_system),
                 "MFEMProblemData::eqn_system is not an EigenproblemEquationSystem.");
