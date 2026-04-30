@@ -261,6 +261,9 @@ TriSubChannel1PhaseProblem::initializeSolution()
 Real
 TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const
 {
+  if (!_pin_mesh_exist)
+    return 0.0;
+
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
   auto z1 = _z_grid[iz - 1];
@@ -271,41 +274,32 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
   {
     // Compute the height of this element.
     auto dz = z2 - z1;
-    if (_pin_mesh_exist)
+    double factor;
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    switch (subch_type)
     {
-      double factor;
-      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-      switch (subch_type)
-      {
-        case EChannelType::CENTER:
-          factor = 1.0 / 6.0;
-          break;
-        case EChannelType::EDGE:
-          factor = 1.0 / 4.0;
-          break;
-        case EChannelType::CORNER:
-          factor = 1.0 / 6.0;
-          break;
-        default:
-          return 0.0; // handle invalid subch_type if needed
-      }
-      double heat_rate_in = 0.0;
-      double heat_rate_out = 0.0;
-      for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
-      {
-        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
-        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-        heat_rate_out += factor * (*_q_prime_soln)(node_out);
-        heat_rate_in += factor * (*_q_prime_soln)(node_in);
-      }
-      return (heat_rate_in + heat_rate_out) * dz / 2.0;
+      case EChannelType::CENTER:
+        factor = 1.0 / 6.0;
+        break;
+      case EChannelType::EDGE:
+        factor = 1.0 / 4.0;
+        break;
+      case EChannelType::CORNER:
+        factor = 1.0 / 6.0;
+        break;
+      default:
+        return 0.0; // handle invalid subch_type if needed
     }
-    else
+    double heat_rate_in = 0.0;
+    double heat_rate_out = 0.0;
+    for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
     {
-      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+      auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+      auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+      heat_rate_out += factor * (*_q_prime_soln)(node_out);
+      heat_rate_in += factor * (*_q_prime_soln)(node_in);
     }
+    return (heat_rate_in + heat_rate_out) * dz / 2.0;
   }
   else
     return 0.0;

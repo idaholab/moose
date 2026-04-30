@@ -10,6 +10,6 @@
   [subchannel]
     type = SCMDetailedTriAssemblyMeshGenerator
     pin_diameter = 0.01
-    verbose_flag = false
+    verbose_flag = true
   []
 []

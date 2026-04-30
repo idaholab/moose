@@ -874,16 +874,3 @@ SCMDetailedTriAssemblyMeshGenerator::rotatePoint(Point b, Real theta)
 
   return rotated_vector;
 }
-
-Point
-SCMDetailedTriAssemblyMeshGenerator::translatePoint(Point & b, Point & translation_vector)
-{
-  // Translating point
-  Point translated_vector = Point(0.0, 0.0, 0.0);
-  for (unsigned int i = 0; i < 3; i++)
-  {
-    translated_vector(i) = b(i) + translation_vector(i);
-  }
-
-  return translated_vector;
-}

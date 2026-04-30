@@ -18,8 +18,8 @@ SCMTriPowerIC::validParams()
 {
   InputParameters params = TriSubChannelBaseIC::validParams();
   params.addClassDescription(
-      "Computes axial power rate (W/m) that goes into the subchannel cells "
-      "or is assigned to the fuel pins, in a triangular lattice arrangement");
+      "Computes axial power rate (W/m) assigned to the fuel pins in a triangular lattice "
+      "arrangement");
   params.addRequiredParam<PostprocessorName>(
       "power", "The postprocessor or Real to use for the total power of the subassembly [W]");
   params.addRequiredParam<std::string>(
@@ -40,6 +40,9 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 {
   if (processor_id() > 0)
     return;
+
+  if (!_mesh.pinMeshExist())
+    mooseError(name(), ": This object requires a pin mesh.");
 
   auto n_pins = _mesh.getNumOfPins();
   auto heated_length = _mesh.getHeatedLength();
@@ -156,53 +159,17 @@ SCMTriPowerIC::initialSetup()
 Real
 SCMTriPowerIC::value(const Point & p)
 {
-  auto heat_rate = 0.0;
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
   Point P = p - p1;
-  auto pin_mesh_exist = _mesh.pinMeshExist();
 
   /// assign power to the nodes located inside the heated section
   if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
       MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    if (pin_mesh_exist)
-    {
-      // project axial heat rate on pins
-      auto i_pin = _mesh.getPinIndexFromPoint(p);
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    }
-    else
-    {
-      // Determine which subchannel this point is in.
-      auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
-      auto subch_type = _mesh.getSubchannelType(i_ch);
-      // project axial heat rate on subchannels
-      {
-        double factor;
-        switch (subch_type)
-        {
-          case EChannelType::CENTER:
-            factor = 1.0 / 6.0;
-            break;
-          case EChannelType::EDGE:
-            factor = 1.0 / 4.0;
-            break;
-          case EChannelType::CORNER:
-            factor = 1.0 / 6.0;
-            break;
-          default:
-            return 0.0; // handle invalid subch_type if needed
-        }
-        for (auto i_pin : _mesh.getChannelPins(i_ch))
-        {
-          heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                       _axial_heat_rate.value(_t, P);
-        }
-        return heat_rate;
-      }
-    }
+    auto i_pin = _mesh.getPinIndexFromPoint(p);
+    return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
   }
   else
     return 0.0;
