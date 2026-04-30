@@ -446,6 +446,9 @@ MultiAppGeneralFieldFunctorTransfer::evaluateValues(
             if (_functor_is_variable[var_index] &&
                 elem->processor_id() != _from_problems[app_index]->processor_id())
               continue;
+            // Avoid evaluating outside of element
+            if (!elem->contains_point(app_local_pt, libMesh::TOLERANCE * libMesh::TOLERANCE))
+              continue;
             Moose::ElemPointArg elem_pt_arg = {elem, app_local_pt, /*correct skewness*/ false};
             Moose::StateArg time_arg(0, Moose::SolutionIterationType::Time);
             value += functor(elem_pt_arg, time_arg);
