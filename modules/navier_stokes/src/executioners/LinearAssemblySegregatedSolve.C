@@ -574,6 +574,14 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
   auto its_res_pair = solver.solve(mmat, mmat, solution, rhs);
   system.update();
 
+  if (_solid_energy_field_relaxation != 1.0)
+  {
+    auto & old_local_solution = *(_solid_energy_system->solutionPreviousNewton());
+    NS::FV::relaxSolutionUpdate(
+        current_local_solution, old_local_solution, _solid_energy_field_relaxation);
+    old_local_solution = current_local_solution;
+  }
+
   if (_print_fields)
   {
     _console << " rhs when we solve solid energy " << std::endl;
