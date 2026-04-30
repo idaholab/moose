@@ -24,6 +24,7 @@ import stat
 import subprocess
 import textwrap
 import unicodedata
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
@@ -248,6 +249,27 @@ def _get_line_col(text: str, index: int) -> tuple[int, int]:
 
 def _fmt_files(files: list[str]) -> str:
     return "\n".join(f"\t{f}" for f in files)
+
+
+@dataclass
+class CheckResult:
+    """Validation result and output strings for one precheck."""
+
+    enabled: bool
+    files: list[str]
+    pass_msg: str
+    disabled_msg: str
+    error_header: str
+    extra_error: str = ""
+    locations: list[str] = field(default_factory=list)
+
+    @property
+    def failed(self) -> bool:
+        return self.enabled and bool(self.files)
+
+    @property
+    def passed(self) -> bool:
+        return self.enabled and not self.files
 
 
 class PreCheck:
@@ -513,122 +535,102 @@ class PreCheck:
             else "Your patch contains no tabs."
         )
         file_checks = [
-            (
-                self.check_whitespace,
-                whitespace_bad,
-                "Your patch contains no trailing whitespace.",
-                "Whitespace check disabled.",
-                "ERROR: The following files contain trailing whitespace after applying your patch:",
-                'Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
-                [],
+            CheckResult(
+                enabled=self.check_whitespace,
+                files=whitespace_bad,
+                pass_msg="Your patch contains no trailing whitespace.",
+                disabled_msg="Whitespace check disabled.",
+                error_header="ERROR: The following files contain trailing whitespace after applying your patch:",
+                extra_error='Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
             ),
-            (
-                self.check_classified,
-                classified_bad,
-                "Your patch contains no proprietary or classified keywords.",
-                "Classified keyword check disabled.",
-                "ERROR: The following files contain classified or proprietary keywords:",
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_classified,
+                files=classified_bad,
+                pass_msg="Your patch contains no proprietary or classified keywords.",
+                disabled_msg="Classified keyword check disabled.",
+                error_header="ERROR: The following files contain classified or proprietary keywords:",
             ),
-            (
-                self.check_tabs,
-                tab_bad,
-                tabs_pass_msg,
-                "Tabs check disabled.",
-                "ERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:",
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_tabs,
+                files=tab_bad,
+                pass_msg=tabs_pass_msg,
+                disabled_msg="Tabs check disabled.",
+                error_header="ERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:",
             ),
-            (
-                self.check_eof,
-                eof_bad,
-                "Your patch contains no files without newlines before EOF.",
-                "EOF check disabled",
-                "ERROR: The following files do not contain a newline character before EOF:",
-                'Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
-                [],
+            CheckResult(
+                enabled=self.check_eof,
+                files=eof_bad,
+                pass_msg="Your patch contains no files without newlines before EOF.",
+                disabled_msg="EOF check disabled",
+                error_header="ERROR: The following files do not contain a newline character before EOF:",
+                extra_error='Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.',
             ),
-            (
-                self.check_exes,
-                exe_bad,
-                "Your patch contains no bad executable files.",
-                "Executable file check disabled",
-                "ERROR: The following files are executable but shouldn't be:",
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_exes,
+                files=exe_bad,
+                pass_msg="Your patch contains no bad executable files.",
+                disabled_msg="Executable file check disabled",
+                error_header="ERROR: The following files are executable but shouldn't be:",
             ),
-            (
-                self.check_banned_funcs,
-                banned_func_bad,
-                "Your patch contains no banned functions.",
-                "Banned function check disabled",
-                "ERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.)\n"
+            CheckResult(
+                enabled=self.check_banned_funcs,
+                files=banned_func_bad,
+                pass_msg="Your patch contains no banned functions.",
+                disabled_msg="Banned function check disabled",
+                error_header="ERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.)\n"
                 "Use mooseError, mooseWarning, etc. instead:",
-                "",
-                [],
             ),
-            (
-                self.check_keywords,
-                keyword_bad,
-                "Your patch contains no banned keywords.",
-                "Keywords check disabled",
-                "ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):",
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_keywords,
+                files=keyword_bad,
+                pass_msg="Your patch contains no banned keywords.",
+                disabled_msg="Keywords check disabled",
+                error_header="ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):",
             ),
-            (
-                self.check_style,
-                style_bad,
-                "Your patch contains proper spacing after control keywords.",
-                "Style check disabled",
-                "ERROR: The following files contain control keywords without proper spacing"
+            CheckResult(
+                enabled=self.check_style,
+                files=style_bad,
+                pass_msg="Your patch contains proper spacing after control keywords.",
+                disabled_msg="Style check disabled",
+                error_header="ERROR: The following files contain control keywords without proper spacing"
                 " (if, for, while, or switch):",
-                "",
-                [],
             ),
-            (
-                self.check_unicode,
-                unicode_bad,
-                "Your patch contains no disallowed unicode characters.",
-                "Unicode check disabled",
-                "ERROR: The following files contain disallowed unicode characters:",
-                "",
-                unicode_locations,
+            CheckResult(
+                enabled=self.check_unicode,
+                files=unicode_bad,
+                pass_msg="Your patch contains no disallowed unicode characters.",
+                disabled_msg="Unicode check disabled",
+                error_header="ERROR: The following files contain disallowed unicode characters:",
+                locations=unicode_locations,
             ),
-            (
-                self.check_include_guards,
-                include_guard_bad,
-                "Your patch contains no old style C++ include guards.",
-                "Include Guard check disabled",
-                'ERROR: The following files contain include guards, MOOSE uses "#pragma once":',
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_include_guards,
+                files=include_guard_bad,
+                pass_msg="Your patch contains no old style C++ include guards.",
+                disabled_msg="Include Guard check disabled",
+                error_header='ERROR: The following files contain include guards, MOOSE uses "#pragma once":',
             ),
-            (
-                self.check_windows,
-                windows_bad,
-                "Your patch contains no windows line endings.",
-                "Windows line ending check disabled",
-                "ERROR: The following files contain windows line endings:",
-                "",
-                [],
+            CheckResult(
+                enabled=self.check_windows,
+                files=windows_bad,
+                pass_msg="Your patch contains no windows line endings.",
+                disabled_msg="Windows line ending check disabled",
+                error_header="ERROR: The following files contain windows line endings:",
             ),
         ]
 
         ticket_failed = self.check_ticket and not ticket_reference
-        failed = ticket_failed or any(
-            enabled and files for enabled, files, *_ in file_checks
-        )
+        failed = ticket_failed or any(check.failed for check in file_checks)
         any_passed = (self.check_ticket and bool(ticket_reference)) or any(
-            enabled and not files for enabled, files, *_ in file_checks
+            check.passed for check in file_checks
         )
 
         if any_passed or self.file_checks_enabled:
             info_msgs = []
             if self.file_checks_enabled:
                 info_msgs.append(
-                    f"Checking {len(self.file_entries)} touched files in this PR."
+                    f"Checking {len(self.file_entries)} checkable files out of "
+                    f"{len(self.touched_files)} touched files in this PR."
                 )
             if self.check_ticket:
                 if ticket_reference:
@@ -636,12 +638,12 @@ class PreCheck:
             else:
                 info_msgs.append("Ticket reference check disabled.")
 
-            for enabled, files, pass_msg, disabled_msg, *_ in file_checks:
-                if enabled:
-                    if not files:
-                        info_msgs.append(pass_msg)
+            for check in file_checks:
+                if check.enabled:
+                    if not check.files:
+                        info_msgs.append(check.pass_msg)
                 else:
-                    info_msgs.append(disabled_msg)
+                    info_msgs.append(check.disabled_msg)
 
             print("\n" + "#" * 74)
             for msg in info_msgs:
@@ -664,23 +666,15 @@ class PreCheck:
                 )
                 error_output += cp.stdout + "\n"
 
-            for (
-                enabled,
-                files,
-                _,
-                __,
-                error_header,
-                extra_error,
-                locations,
-            ) in file_checks:
-                if not (enabled and files):
+            for check in file_checks:
+                if not check.failed:
                     continue
-                error_output += f"\n{error_header}\n{_fmt_files(files)}\n"
-                if extra_error:
-                    error_output += f"\n{extra_error}\n"
-                if locations:
+                error_output += f"\n{check.error_header}\n{_fmt_files(check.files)}\n"
+                if check.extra_error:
+                    error_output += f"\n{check.extra_error}\n"
+                if check.locations:
                     error_output += (
-                        f"\nDetailed locations:\n" + "\n".join(locations) + "\n"
+                        f"\nDetailed locations:\n" + "\n".join(check.locations) + "\n"
                     )
 
             error_output += "#" * 74 + "\n"
