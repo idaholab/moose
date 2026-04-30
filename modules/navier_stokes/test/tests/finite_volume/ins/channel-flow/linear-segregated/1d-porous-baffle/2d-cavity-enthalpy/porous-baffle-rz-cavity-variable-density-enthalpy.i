@@ -16,7 +16,7 @@ k_fluid = 0.025
 T_ref = 300
 T_initial = 300
 T_right = 300
-q_middle = 2e4
+q_middle = 2e3
 gravity_y = -9.81
 
 forch_coeff = 30
@@ -74,18 +74,21 @@ advected_interp_method = 'upwind'
 
     pressure_baffle_sidesets = 'baffle_lower baffle_upper'
     baffle_form_loss = '${form_factor} ${form_factor}'
-    pressure_baffle_relaxation = 0.1
+    pressure_baffle_relaxation = 0.05
 
     debug_baffle = false
 
     use_flux_velocity_reconstruction = true
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
+    reconstructed_pressure_gradient_feedback_relaxation = 0.1
 
-    # flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
+    flux_velocity_reconstruction_zero_flux_sidesets = 'left right top bottom'
 
     use_interpolated_density_in_bernoulli_jump = true
     use_corrected_pressure_gradient = true
+
+    body_force_kernel_names = 'r_buoyancy; z_buoyancy'
   []
 []
 
@@ -108,7 +111,7 @@ advected_interp_method = 'upwind'
   [h_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${fparse cp_fluid * T_initial}
+    initial_condition = '${fparse cp_fluid * T_initial}'
   []
 []
 
@@ -154,6 +157,14 @@ advected_interp_method = 'upwind'
     rhie_chow_user_object = rc
     porosity = 'porosity'
     use_corrected_gradient = true
+  []
+  [r_buoyancy]
+    type = LinearFVMomentumBuoyancy
+    variable = superficial_r
+    rho = 'rho'
+    reference_rho = ${rho_ref}
+    gravity = '0 ${gravity_y} 0'
+    momentum_component = 'x'
   []
   [z_buoyancy]
     type = LinearFVMomentumBuoyancy
@@ -395,7 +406,7 @@ advected_interp_method = 'upwind'
   energy_system = energy_system
   momentum_equation_relaxation = 0.2
   pressure_variable_relaxation = 0.1
-  energy_equation_relaxation = 0.3
+  energy_equation_relaxation = 0.2
   num_iterations = 3000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
