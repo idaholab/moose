@@ -39,17 +39,7 @@ public:
    * @param rounds Number of Feistel rounds. More rounds improve mixing at the
    *               cost of throughput; 8 is sufficient for sampling applications.
    */
-  MooseRandomPerturbation(uint64_t seed, unsigned int n, unsigned int rounds = 8)
-    : _k0(static_cast<uint32_t>(seed)),
-      _k1(static_cast<uint32_t>(seed >> 32)),
-      _n(n),
-      _half_bits((ceilLog2(n) + 1) / 2),
-      _half_mask((uint32_t(1) << _half_bits) - 1),
-      _rounds(rounds)
-  {
-    mooseAssert(_n > 0, "n must be > 0");
-    mooseAssert(_rounds > 0, "rounds must be greater than 0.");
-  }
+  MooseRandomPerturbation(uint64_t seed, unsigned int n, unsigned int rounds = 8);
 
   /**
    * Map \p x to its permuted index in [0, n).
@@ -61,18 +51,7 @@ public:
    * @return   A unique index in [0, n). Calling permute for every x in [0, n)
    *           yields each value in [0, n) exactly once.
    */
-  uint32_t permute(uint32_t x) const
-  {
-    mooseAssert(x < _n, "x must be < n");
-
-    uint32_t y = x;
-    do
-    {
-      y = permutePadded(y);
-    } while (y >= _n);
-
-    return y;
-  }
+  uint32_t permute(uint32_t x) const;
 
   /**
    * Recover the original index from a permuted value, i.e. invert(permute(x)) == x.
@@ -82,18 +61,7 @@ public:
    * @param y  Permuted index; must satisfy y < n.
    * @return   The unique x in [0, n) such that permute(x) == y.
    */
-  uint32_t invert(uint32_t y) const
-  {
-    mooseAssert(y < _n, "y must be < n");
-
-    uint32_t x = y;
-    do
-    {
-      x = invertPadded(x);
-    } while (x >= _n);
-
-    return x;
-  }
+  uint32_t invert(uint32_t y) const;
 
 private:
   /**
@@ -104,24 +72,7 @@ private:
    * @param x  Input value in the padded domain.
    * @return   Permuted value in the padded domain.
    */
-  uint32_t permutePadded(uint32_t x) const
-  {
-    // Split x into the upper (L) and lower (R) half_bits-wide halves.
-    uint32_t L = (x >> _half_bits) & _half_mask;
-    uint32_t R = x & _half_mask;
-
-    for (unsigned int r = 0; r < _rounds; ++r)
-    {
-      // Standard balanced Feistel step: new_L = R, new_R = L XOR F(R).
-      const uint32_t F = roundFunction(R, r);
-      const uint32_t newL = R;
-      const uint32_t newR = (L ^ F) & _half_mask;
-      L = newL;
-      R = newR;
-    }
-
-    return ((L & _half_mask) << _half_bits) | (R & _half_mask);
-  }
+  uint32_t permutePadded(uint32_t x) const;
 
   /**
    * Invert one full pass of the Feistel network by running rounds in reverse.
@@ -129,23 +80,7 @@ private:
    * @param y  Value in the padded domain produced by permutePadded.
    * @return   The original input to permutePadded that produced \p y.
    */
-  uint32_t invertPadded(uint32_t y) const
-  {
-    uint32_t L = (y >> _half_bits) & _half_mask;
-    uint32_t R = y & _half_mask;
-
-    // Run rounds in reverse; recover prev_R = L then prev_L = R XOR F(prev_R).
-    for (int r = static_cast<int>(_rounds) - 1; r >= 0; --r)
-    {
-      const uint32_t prevR = L;
-      const uint32_t F = roundFunction(prevR, static_cast<unsigned int>(r));
-      const uint32_t prevL = (R ^ F) & _half_mask;
-      L = prevL;
-      R = prevR;
-    }
-
-    return ((L & _half_mask) << _half_bits) | (R & _half_mask);
-  }
+  uint32_t invertPadded(uint32_t y) const;
 
   /**
    * Keyed round function F(half, round) used in each Feistel step.
@@ -158,15 +93,7 @@ private:
    * @param round  Zero-based round index, used to vary the constant each round.
    * @return       Mixed value masked to \p _half_bits width.
    */
-  uint32_t roundFunction(uint32_t half, unsigned int round) const
-  {
-    uint32_t x = half;
-    x ^= _k0;
-    x += 0x9e3779b9U * static_cast<uint32_t>(round + 1); // round-dependent constant
-    x ^= _k1;
-    x = mix32(x);
-    return x & _half_mask;
-  }
+  uint32_t roundFunction(uint32_t half, unsigned int round) const;
 
   /**
    * Return the number of bits needed to represent values in [0, n-1], i.e.
@@ -174,19 +101,7 @@ private:
    *
    * @param n  Must be > 0.
    */
-  static unsigned int ceilLog2(uint32_t n)
-  {
-    mooseAssert(n > 0, "n must be > 0");
-
-    unsigned int bits = 0;
-    uint32_t v = n - 1;
-    while (v > 0)
-    {
-      ++bits;
-      v >>= 1;
-    }
-    return bits;
-  }
+  static unsigned int ceilLog2(uint32_t n);
 
   /**
    * Bijective 32-bit avalanche hash (finalizer from Murmur3 / degski hash).
@@ -195,15 +110,7 @@ private:
    * @param x  32-bit input.
    * @return   Hashed 32-bit output; the mapping is invertible.
    */
-  static uint32_t mix32(uint32_t x)
-  {
-    x ^= x >> 16;
-    x *= 0x7feb352dU;
-    x ^= x >> 15;
-    x *= 0x846ca68bU;
-    x ^= x >> 16;
-    return x;
-  }
+  static uint32_t mix32(uint32_t x);
 
   /// Lower 32 bits of the seed, used as the first subkey in the round function
   const uint32_t _k0;
