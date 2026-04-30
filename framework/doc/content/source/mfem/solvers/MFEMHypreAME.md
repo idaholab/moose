@@ -10,8 +10,7 @@ Eigensolver) is designed specifically for Maxwell eigenproblems discretized with
 elements in $H(\mathrm{curl})$ spaces, and should be used in conjunction with an
 [MFEMHypreAMS](solvers/MFEMHypreAMS.md) preconditioner.
 
-`MFEMHypreAME` requires a scalar coefficient to construct the mass matrix, specified via the
-[!param](/Solver/MFEMHypreAME/coefficient) parameter. When solving a Maxwell eigenproblem, the
+When solving a Maxwell eigenproblem, the
 `MFEMHypreAMS` preconditioner should be constructed with `singular = true` to account for the
 kernel of the curl-curl operator.
 
