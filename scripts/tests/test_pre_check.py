@@ -508,7 +508,7 @@ class TestPrecheckErrors(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertIn(
-            "INFO: Checking 2 touched files in this PR.",
+            "INFO: Checking 2 checkable files out of 3 touched files in this PR.",
             mock_stdout.getvalue(),
         )
         self.assertEqual(mock_run.call_count, 2)
