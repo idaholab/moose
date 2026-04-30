@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDataCollection.h"
-#include "MFEMEigenproblem.h"
 
 InputParameters
 MFEMDataCollection::validParams()
@@ -38,10 +37,7 @@ MFEMDataCollection::registerFields()
   mfem::DataCollection & dc(getDataCollection());
   // For eigenproblems, the bare trial variable holds only initial-guess / essential-BC values
   // rather than a mode solution, so skip it; modes are stored under suffixed names.
-  static const std::vector<std::string> empty_names;
-  const std::vector<std::string> & skip_names = dynamic_cast<MFEMEigenproblem *>(_problem_ptr)
-                                                    ? _problem_data.eqn_system->GetTrialVarNames()
-                                                    : empty_names;
+  const auto & skip_names = _problem_data.eigenmode_parent_var_names;
 
   for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {

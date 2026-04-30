@@ -44,6 +44,7 @@ public:
   Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
 
   std::string mode_separator{"_"};
+  std::vector<std::string> eigenmode_parent_var_names;
 
   std::shared_ptr<MFEMRefinementMarker> refiner;
 

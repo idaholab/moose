@@ -11,6 +11,7 @@
 
 #include "MFEMEigenvaluesPostprocessor.h"
 #include "MFEMEigenproblem.h"
+#include "MFEMEigensolverBase.h"
 
 registerMooseObject("MooseApp", MFEMEigenvaluesPostprocessor);
 

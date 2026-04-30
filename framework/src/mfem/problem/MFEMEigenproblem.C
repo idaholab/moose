@@ -11,6 +11,7 @@
 
 #include "MFEMEigenproblem.h"
 #include "MFEMVariable.h"
+#include "MFEMEigensolverBase.h"
 
 registerMooseObject("MooseApp", MFEMEigenproblem);
 
@@ -77,6 +78,9 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
   }
 
   addGridFunction(var_type, var_name, parameters);
+
+  /// Add raw variable name to list so it doesn't get added to output
+  getProblemData().eigenmode_parent_var_names.push_back(var_name);
 
   for (int i = 0; i < num_modes; ++i)
     addEigenGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
