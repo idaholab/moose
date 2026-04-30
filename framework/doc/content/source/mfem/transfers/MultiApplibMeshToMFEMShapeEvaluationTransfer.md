@@ -2,7 +2,7 @@
 
 !if! function=hasCapability('mfem')
 
-Allows transfers of libMesh-based [MooseVariables](MooseVariable.md) to 
+Allows transfers of libMesh-based [MooseVariables](MooseVariable.md) to
 [MFEM variables](MFEMVariable.md),
 via local evaluation of shape functions at target nodal projection points. This class supports
 transfers between different meshes, from first and second order LAGRANGE and constant MONOMIAL libMesh
@@ -28,7 +28,7 @@ For transfers in the opposite direction, from MFEM-based applications to libMesh
 All libMesh to MFEM transfers executed from this class should be able to support:
 
 - transfers from lowest order scalar LAGRANGE and MONOMIAL variables
-- transfers from second order scalar LAGRANGE variables 
+- transfers from second order scalar LAGRANGE variables
 - transfers between variables belonging to dissimilar meshes
 - arbitrary number of parallel processes for both the source and target application
 - transfers between parent and child applications
