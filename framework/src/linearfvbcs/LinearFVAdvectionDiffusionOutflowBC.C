@@ -45,7 +45,7 @@ LinearFVAdvectionDiffusionOutflowBC::computeBoundaryNormalGradient() const
 
   const Real sign = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  return _var.gradSln(*elem_info) * (sign * _current_face_info->normal());
+  return _var.gradSln(*elem_info, determineState()) * (sign * _current_face_info->normal());
 }
 
 Real
