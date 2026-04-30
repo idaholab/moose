@@ -5,12 +5,14 @@
     nx = 4
     ny = 4
   []
-
   [stl]
-    type = STLSubdomainGenerator
+    type = FileMeshGenerator
+    file = cube_ascii.stl
+  []
+  [apply]
+    type = ManifoldSubdomainGenerator
     input = gmg
-    stl_file = cube_ascii.stl
-    translation = '0.5 0.5 0.0'
+    manifold = stl
     block_id = 1
   []
 []

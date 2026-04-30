@@ -1,0 +1,68 @@
+[Tests]
+  design = 'meshgenerators/ManifoldSubdomainGenerator.md'
+  issues = '#32763'
+
+  [stl_manifold]
+    [basic_inside]
+      type = RunApp
+      input = basic.i
+      requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie inside a closed STL manifold.'
+    []
+    [outside]
+      type = RunApp
+      input = basic.i
+      cli_args = 'Mesh/apply/location=OUTSIDE expected="8 56"'
+      requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie outside a closed STL manifold.'
+    []
+    [restricted]
+      type = RunApp
+      input = restricted.i
+      requirement = 'The system shall restrict manifold subdomain assignment to selected existing subdomains.'
+    []
+    [rotated_translated]
+      type = RunApp
+      input = basic.i
+      cli_args = 'Mesh/rotate/vector_value="0 0 45" expected="56 8"'
+      requirement = 'The system shall support rigid-body rotation and translation of the STL containment geometry.'
+    []
+    [scaled]
+      type = RunApp
+      input = basic.i
+      cli_args = 'Mesh/scale/vector_value="2 2 2" expected="64"'
+      requirement = 'The system shall support scaling STL geometry before rotation and translation for unit conversion workflows.'
+    []
+  []
+
+  [errors]
+    [invalid_input_dimension]
+      type = RunException
+      input = invalid_input_dimension.i
+      expect_err = 'Only 3D meshes are supported.'
+      requirement = 'The system shall report an error if manifold subdomain assignment is requested on a non-3D mesh.'
+    []
+    [invalid_manifold_dimension]
+      type = RunException
+      input = invalid_manifold_dimension.i
+      expect_err = 'Only 2D meshes are supported.'
+      requirement = 'The system shall report an error if manifold subdomain assignment is requested using non-2D manifold mesh.'
+    []
+    [open_surface]
+      type = RunException
+      input = open_surface.i
+      expect_err = 'At least one triangle without three neighbors was found.'
+      requirement = 'The system shall report an error if the surface is open or non-manifold.'
+    []
+    [non_tri]
+      type = RunException
+      input = non_tri.i
+      expect_err = "At least one non-Tri3 element was found."
+      requirement = 'The system shall report an error if the manifold has non-TRI elements.'
+    []
+    [distributed]
+      type = RunException
+      input = distributed.i
+      expect_err = "Manifold mesh must NOT be distributed."
+      requirement = 'The system shall report an error if the manifold mesh is not serialized.'
+    []
+  []
+[]

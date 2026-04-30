@@ -12,24 +12,24 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class STLManifold;
+class TriangleManifold;
 
 /**
  * MeshGenerator for defining a subdomain based on whether element vertex averages lie within a
- * closed STL manifold.
+ * closed manifold.
  *
  * The generator intentionally uses Elem::vertex_average() rather than the true geometric centroid
  * to mirror the inexpensive point-sampling behavior of other subdomain tagging mesh generators in
- * MOOSE. The STL geometry is transformed in the order scale, then rotation, then translation.
+ * MOOSE.
  */
-class STLSubdomainGenerator : public MeshGenerator
+class ManifoldSubdomainGenerator : public MeshGenerator
 {
 public:
   /// Declare the input parameters for STL-based subdomain assignment.
   static InputParameters validParams();
 
   /// Construct the mesh generator from user input.
-  STLSubdomainGenerator(const InputParameters & parameters);
+  ManifoldSubdomainGenerator(const InputParameters & parameters);
 
   /// Apply STL-based subdomain tagging using element vertex averages as the query points.
   std::unique_ptr<MeshBase> generate() override;
@@ -37,6 +37,9 @@ public:
 protected:
   /// Input mesh to modify in place.
   std::unique_ptr<MeshBase> & _input;
+
+  /// Surface mesh that defines the closed manifold.
+  std::unique_ptr<MeshBase> & _manifold;
 
   /// Whether to tag the interior or exterior of the STL manifold.
   const MooseEnum _location;
@@ -46,18 +49,6 @@ protected:
 
   /// Whether retagging is limited to a subset of existing subdomains.
   const bool _has_restriction;
-
-  /// STL file that defines the closed manifold.
-  const FileName _stl_file;
-
-  /// Per-axis scaling applied before rotation and translation.
-  const RealVectorValue _scale;
-
-  /// Extrinsic Euler rotation applied after scaling.
-  const RealVectorValue _rotation;
-
-  /// Translation applied after scaling and rotation.
-  const RealVectorValue _translation;
 
   /// Absolute tolerance used by the manifold classifier; choose relative to geometry scale/noise.
   const Real _surface_tolerance;
