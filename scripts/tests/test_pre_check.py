@@ -365,6 +365,11 @@ class TestUnicodeChecks(unittest.TestCase):
         self.assertTrue(pre_check._is_allowed_manual("ł"))  # Latin Extended-A
         self.assertTrue(pre_check._is_allowed_manual("ș"))  # Latin Extended-A
 
+    def test_is_allowed_manual_rejects_invisible_latin1(self):
+        """Test _is_allowed_manual() rejects hidden Latin-1 characters"""
+        self.assertFalse(pre_check._is_allowed_manual("\u00a0"))  # No-break space
+        self.assertFalse(pre_check._is_allowed_manual("\u00ad"))  # Soft hyphen
+
     def test_is_allowed_manual_greek(self):
         """Test _is_allowed_manual() with Greek characters"""
         self.assertTrue(pre_check._is_allowed_manual("α"))
@@ -523,17 +528,36 @@ class TestMainFunction(unittest.TestCase):
     @patch("pre_check.subprocess.run")
     @patch("pre_check.precheck_errors")
     @patch("sys.stderr")
-    def test_main_merge_base_origin_devel(self, mock_stderr, mock_precheck, mock_run):
-        """Test main() uses origin/devel first when no --base provided"""
+    def test_main_merge_base_upstream_devel(self, mock_stderr, mock_precheck, mock_run):
+        """Test main() uses upstream/devel first when no --base provided"""
         mock_run.return_value = MagicMock(stdout="abc123\n", returncode=0)
         mock_precheck.return_value = 0
 
         result = pre_check.main(["pre_check.py"])
         self.assertEqual(result, 0)
         mock_precheck.assert_called_once_with("abc123", "HEAD")
-        # Confirm origin/devel was tried first
+        # Confirm upstream/devel was tried first
         first_call_args = mock_run.call_args_list[0][0][0]
-        self.assertIn("origin/devel", first_call_args)
+        self.assertIn("upstream/devel", first_call_args)
+
+    @patch("pre_check.subprocess.run")
+    @patch("pre_check.precheck_errors")
+    @patch("sys.stderr")
+    def test_main_merge_base_fallback_to_origin_devel(
+        self, mock_stderr, mock_precheck, mock_run
+    ):
+        """Test main() falls back to origin/devel when upstream/devel is unavailable"""
+        mock_run.side_effect = [
+            MagicMock(returncode=1, stdout="", stderr=""),  # upstream/devel fails
+            MagicMock(returncode=0, stdout="def456\n"),  # origin/devel succeeds
+        ]
+        mock_precheck.return_value = 0
+
+        result = pre_check.main(["pre_check.py"])
+        self.assertEqual(result, 0)
+        mock_precheck.assert_called_once_with("def456", "HEAD")
+        second_call_args = mock_run.call_args_list[1][0][0]
+        self.assertIn("origin/devel", second_call_args)
 
     @patch("pre_check.subprocess.run")
     @patch("pre_check.precheck_errors")
@@ -541,8 +565,9 @@ class TestMainFunction(unittest.TestCase):
     def test_main_merge_base_fallback_to_local_devel(
         self, mock_stderr, mock_precheck, mock_run
     ):
-        """Test main() falls back to local devel when origin/devel is unavailable"""
+        """Test main() falls back to local devel when remote devel refs are unavailable"""
         mock_run.side_effect = [
+            MagicMock(returncode=1, stdout="", stderr=""),  # upstream/devel fails
             MagicMock(returncode=1, stdout="", stderr=""),  # origin/devel fails
             MagicMock(returncode=0, stdout="def456\n"),  # devel succeeds
         ]
@@ -555,7 +580,7 @@ class TestMainFunction(unittest.TestCase):
     @patch("pre_check.subprocess.run")
     @patch("sys.stderr")
     def test_main_merge_base_failure(self, mock_stderr, mock_run):
-        """Test main() when both origin/devel and devel are unavailable"""
+        """Test main() when all default devel refs are unavailable"""
         mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="")
 
         result = pre_check.main(["pre_check.py"])

@@ -215,7 +215,10 @@ def _in_superscripts_subscripts(ch: str) -> bool:
 
 def _in_latin_extended(ch: str) -> bool:
     """Latin-1 Supplement (U+00A0 - U+00FF) and Latin Extended-A/B (U+0100 - U+024F)."""
-    return 0x00A0 <= ord(ch) <= 0x024F
+    return 0x00A0 <= ord(ch) <= 0x024F and unicodedata.category(ch)[0] in {
+        "L",
+        "M",
+    }
 
 
 def _is_allowed_manual(ch: str) -> bool:
@@ -712,7 +715,7 @@ def main(argv: list[str]) -> int:
     if args.base:
         log_from = args.base
     else:
-        for ref in ("origin/devel", "devel"):
+        for ref in ("upstream/devel", "origin/devel", "devel"):
             cp = subprocess.run(
                 ["git", "merge-base", ref, "HEAD"],
                 capture_output=True,
@@ -728,7 +731,7 @@ def main(argv: list[str]) -> int:
         else:
             print(
                 textwrap.dedent("""\
-                    ERROR: Could not determine merge-base with origin/devel or devel.
+                    ERROR: Could not determine merge-base with upstream/devel, origin/devel, or devel.
 
                     Specify a base commit explicitly:
                       pre_check.py --base HEAD~1
