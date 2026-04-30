@@ -68,7 +68,7 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
       torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0), 2);
   K = sigma_f_squared * torch::exp(-scaled_distance / 2.0);
   if (is_self_covariance)
-    torch::diagonal(K) += sigma_n_squared;
+    K = K + sigma_n_squared * torch::eye(K.size(0), K.options());
 }
 
 bool
@@ -122,29 +122,18 @@ SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
                                            const torch::Tensor & sigma_f_squared,
                                            const int ind)
 {
-  unsigned int num_samples_x = x.sizes()[0];
-  unsigned int num_params_x = x.sizes()[1];
-
   mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
-  const auto length_factor_accessor = length_factor.accessor<Real, 1>();
-  const auto sigma_f_squared_value = sigma_f_squared.item<Real>();
-  auto K_accessor = K.accessor<Real, 2>();
-  auto x_accessor = x.accessor<Real, 2>();
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_x; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_squared_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_squared_scaled +=
-            std::pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor_accessor[kk], 2);
-      K_accessor[ii][jj] = sigma_f_squared_value * std::exp(-r_squared_scaled / 2.0);
-      K_accessor[ii][jj] = std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /
-                           std::pow(length_factor_accessor[ind], 3) * K_accessor[ii][jj];
-    }
-  }
+  const auto l_factor = length_factor.unsqueeze(0);
+  const auto scaled_distance_squared =
+      torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(x, l_factor), 2.0), 2);
+  const auto base_covariance = sigma_f_squared * torch::exp(-scaled_distance_squared / 2.0);
+  const auto coordinate = x.select(1, ind);
+  const auto coordinate_distance_squared =
+      torch::pow(coordinate.unsqueeze(1) - coordinate.unsqueeze(0), 2);
+  const auto length_factor_ind = length_factor.select(0, ind);
+
+  K = coordinate_distance_squared / torch::pow(length_factor_ind, 3) * base_covariance;
 }
 
 #endif

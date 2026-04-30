@@ -71,7 +71,7 @@ ExponentialCovariance::ExponentialFunction(torch::Tensor & K,
       torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
   K = sigma_f_squared * torch::exp(-torch::pow(scaled_distance, gamma));
   if (is_self_covariance)
-    torch::diagonal(K) += sigma_n_squared;
+    K = K + sigma_n_squared * torch::eye(K.size(0), K.options());
 }
 
 bool
@@ -128,37 +128,24 @@ ExponentialCovariance::computedKdlf(torch::Tensor & K,
                                     const torch::Tensor & gamma,
                                     const int ind)
 {
-  const auto length_factor_accessor = length_factor.accessor<Real, 1>();
-  const auto sigma_f_squared_value = sigma_f_squared.item<Real>();
-  const auto gamma_value = gamma.item<Real>();
-  auto K_accessor = K.accessor<Real, 2>();
-  auto x_accessor = x.accessor<Real, 2>();
-
-  unsigned int num_samples_x = x.sizes()[0];
-  unsigned int num_params_x = x.sizes()[1];
-
   mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_x; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor_accessor[kk], 2);
-      r_scaled = sqrt(r_scaled);
-      if (r_scaled != 0)
-      {
-        K_accessor[ii][jj] = gamma_value * std::pow(r_scaled, gamma_value - 2) *
-                             sigma_f_squared_value * std::exp(-pow(r_scaled, gamma_value));
-        K_accessor[ii][jj] = std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /
-                             std::pow(length_factor_accessor[ind], 3) * K_accessor[ii][jj];
-      }
-      else // avoid div by 0. 0/0=0 scenario.
-        K_accessor[ii][jj] = 0;
-    }
-  }
+  const auto l_factor = length_factor.unsqueeze(0);
+  const auto scaled_distance = torch::cdist(torch::div(x, l_factor), torch::div(x, l_factor), 2.0);
+  const auto nonzero_distance = scaled_distance > 0;
+  const auto safe_scaled_distance =
+      torch::where(nonzero_distance, scaled_distance, torch::ones_like(scaled_distance));
+  const auto coordinate = x.select(1, ind);
+  const auto coordinate_distance_squared =
+      torch::pow(coordinate.unsqueeze(1) - coordinate.unsqueeze(0), 2);
+  const auto length_factor_ind = length_factor.select(0, ind);
+
+  const auto dK_dlength_factor = coordinate_distance_squared / torch::pow(length_factor_ind, 3) *
+                                 gamma * torch::pow(safe_scaled_distance, gamma - 2.0) *
+                                 sigma_f_squared *
+                                 torch::exp(-torch::pow(safe_scaled_distance, gamma));
+
+  K = torch::where(nonzero_distance, dK_dlength_factor, torch::zeros_like(dK_dlength_factor));
 }
 
 #endif
