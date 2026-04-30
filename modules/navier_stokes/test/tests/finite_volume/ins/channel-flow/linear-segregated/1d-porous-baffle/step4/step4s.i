@@ -82,7 +82,7 @@ advected_interp_method = 'upwind'
     p_diffusion_kernel = p_diffusion
 
     pressure_baffle_sidesets = 'baffle'
-    pressure_baffle_relaxation = 0.05
+    pressure_baffle_relaxation = 0.5
 
     debug_baffle = false
 
@@ -97,7 +97,7 @@ advected_interp_method = 'upwind'
     # pressure_gradient_limiter = 'baffle'
     # pressure_gradient_limiter_blend = 1.0
     use_corrected_pressure_gradient = true
-    pressure_projection_method = standard
+    pressure_projection_method = consistent
   []
 []
 
@@ -110,8 +110,8 @@ advected_interp_method = 'upwind'
   rhie_chow_user_object = rc
   momentum_systems = 'u_system v_system'
   pressure_system = pressure_system
-  momentum_equation_relaxation = 0.05
-  pressure_variable_relaxation = 0.1
+  momentum_equation_relaxation = 0.1
+  pressure_variable_relaxation = 1.0
   num_iterations = 12000
   pressure_absolute_tolerance = 1e-7
   # The radial residual is normalized by a near-zero exact radial velocity in this 1D RZ setup,
@@ -127,7 +127,7 @@ advected_interp_method = 'upwind'
   energy_system = energy_system
   energy_l_abs_tol = 1e-12
   energy_l_tol = 0
-  energy_equation_relaxation = 0.25
+  energy_equation_relaxation = 0.9
   energy_field_relaxation = 1.0
   energy_absolute_tolerance = 1e-7
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -323,6 +323,12 @@ advected_interp_method = 'upwind'
     boundary = top
     variable = superficial_v
     functor = -${flow_vel}
+  []
+  [inlet_rho]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = top
+    variable = rho_aux
+    functor = ${rho_f}
   []
 
   [pressure-extrapolation]
