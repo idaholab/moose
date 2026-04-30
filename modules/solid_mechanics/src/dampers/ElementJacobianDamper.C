@@ -17,26 +17,19 @@
 
 // C++
 #include <algorithm>
+#include <cstring> // for "Jacobian" exception test
 #include <limits>
 
 registerMooseObject("SolidMechanicsApp", ElementJacobianDamper);
 
 namespace
 {
-bool
-isRecoverableProbeException(const std::string & message)
-{
-  return message.find("Jacobian") != std::string::npos ||
-         message.find("singular") != std::string::npos ||
-         message.find("det != 0") != std::string::npos;
-}
-
 void
 restoreNodes(Elem & elem, const std::vector<Point> & point_copies)
 {
   mooseAssert(elem.n_nodes() == point_copies.size(), "Node restore cache is the wrong size");
 
-  for (unsigned int i = 0; i < elem.n_nodes(); ++i)
+  for (const auto i : make_range(elem.n_nodes()))
     elem.node_ref(i) = point_copies[i];
 }
 }
@@ -55,8 +48,9 @@ ElementJacobianDamper::validParams()
   params.addParam<bool>(
       "use_backtracking",
       false,
-      "If true, iteratively cut back the probed Newton update until the displaced mesh remains "
-      "nondegenerate and the Jacobian increment stays within max_increment.");
+      "If true, iteratively cut back the probed Newton update when a full trial update would "
+      "create a degenerate displaced element map. The accepted trial must also satisfy "
+      "max_increment.");
   params.addRangeCheckedParam<Real>(
       "backtrack_factor",
       0.5,
@@ -77,7 +71,7 @@ ElementJacobianDamper::ElementJacobianDamper(const InputParameters & parameters)
     _JxW(_assembly.JxW()),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _displaced_problem(_fe_problem.getDisplacedProblem()),
-    _max_jacobian_diff(parameters.get<Real>("max_increment")),
+    _max_jacobian_diff(getParam<Real>("max_increment")),
     _use_backtracking(getParam<bool>("use_backtracking")),
     _backtrack_factor(getParam<Real>("backtrack_factor")),
     _max_backtrack_steps(getParam<unsigned int>("max_backtrack_steps"))
@@ -109,24 +103,19 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   auto probe_trial =
       [&](const Real trial_damping, Real & max_difference, std::string & error_message)
   {
-    const bool valid_local = probeDamping(update, trial_damping, max_difference, error_message);
+    const bool trial_nondegenerate_local =
+        probeDamping(update, trial_damping, max_difference, error_message);
 
     _communicator.max(max_difference);
 
-    int invalid_local = valid_local ? 0 : 1;
-    std::vector<int> invalid_ranks(_communicator.size());
-    _communicator.allgather(invalid_local, invalid_ranks);
+    unsigned int invalid_local = trial_nondegenerate_local ? 0 : 1;
+    processor_id_type first_invalid_processor = 0;
+    _communicator.maxloc(invalid_local, first_invalid_processor);
 
-    processor_id_type invalid_processor = 0;
-    const auto invalid_it = std::find(invalid_ranks.begin(), invalid_ranks.end(), 1);
-    const bool invalid_global = invalid_it != invalid_ranks.end();
-    if (invalid_global)
-      invalid_processor = std::distance(invalid_ranks.begin(), invalid_it);
+    if (invalid_local)
+      _communicator.broadcast(error_message, first_invalid_processor);
 
-    if (invalid_global)
-      _communicator.broadcast(error_message, invalid_processor);
-
-    return !invalid_global;
+    return !invalid_local;
   };
 
   if (!_use_backtracking)
@@ -151,25 +140,21 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   Real damping = 1.0;
   std::string error_message;
 
+  // Try 1 step, then at most max_backtrack_steps extra steps
   for (unsigned int step = 0; step <= _max_backtrack_steps; ++step)
   {
     Real max_difference = 0.0;
-    bool valid = false;
+    bool trial_nondegenerate = false;
 
-    PARALLEL_TRY { valid = probe_trial(damping, max_difference, error_message); }
+    PARALLEL_TRY { trial_nondegenerate = probe_trial(damping, max_difference, error_message); }
     PARALLEL_CATCH;
 
-    unsigned int has_exception = _fe_problem.hasException() ? 1 : 0;
-    _communicator.max(has_exception);
-    if (has_exception)
-      return damping;
-
-    if (valid && max_difference <= _max_jacobian_diff)
+    if (trial_nondegenerate && max_difference <= _max_jacobian_diff)
       return damping;
 
     if (damping <= minimum_trial_damping || step == _max_backtrack_steps)
     {
-      if (!valid)
+      if (!trial_nondegenerate)
         _fe_problem.setException(error_message.empty()
                                      ? "ElementJacobianDamper could not find a nondegenerate "
                                        "trial update."
@@ -178,10 +163,13 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
         _fe_problem.setException("ElementJacobianDamper could not reduce the relative Jacobian "
                                  "increment below max_increment without driving the damping "
                                  "factor below a usable threshold.");
+
+      // The exception flag will abort the nonlinear step after the damper returns, so return the
+      // last trial damping only to satisfy the interface.
       return damping;
     }
 
-    if (!valid)
+    if (!trial_nondegenerate)
       damping *= _backtrack_factor;
     else
       damping =
@@ -239,7 +227,8 @@ ElementJacobianDamper::probeDamping(const NumericVector<Number> & update,
         restoreNodes(*current_elem, point_copies);
 
         // Degenerate-map failures mean this trial damping is too aggressive
-        if (isRecoverableProbeException(e.what()))
+        if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular") ||
+            strstr(e.what(), "det != 0"))
         {
           error_message = e.what();
           return false;
@@ -257,7 +246,8 @@ ElementJacobianDamper::probeDamping(const NumericVector<Number> & update,
       }
       catch (const std::exception & e)
       {
-        if (isRecoverableProbeException(e.what()))
+        if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular") ||
+            strstr(e.what(), "det != 0"))
         {
           error_message = e.what();
           return false;
@@ -280,11 +270,7 @@ ElementJacobianDamper::probeDamping(const NumericVector<Number> & update,
   catch (const MooseException & e)
   {
     error_message = e.what();
-
-    if (isRecoverableProbeException(error_message))
-      return false;
-
-    _fe_problem.setException(error_message);
+    _fe_problem.setException(e.what());
     return false;
   }
 

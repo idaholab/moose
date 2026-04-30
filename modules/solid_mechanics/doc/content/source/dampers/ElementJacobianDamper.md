@@ -4,7 +4,9 @@
 
 This damper limits the change in the Jacobians of elements. The damper becomes active if the relative change in Jacobian of any element exceeds the user defined maximum. This damper must be run on the displaced mesh.
 
-Set `use_backtracking = true` to have the damper iteratively cut back a trial nonlinear update when probing it would otherwise produce a degenerate element map.
+Set [!param](/Dampers/ElementJacobianDamper/use_backtracking) to true to have the damper
+iteratively cut back a trial nonlinear update when probing. Without backtracking, a trial update
+that creates a degenerate element map will immediately raise an exception.
 
 !syntax parameters /Dampers/ElementJacobianDamper
 
