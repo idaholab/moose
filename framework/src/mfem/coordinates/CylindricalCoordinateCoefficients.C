@@ -11,7 +11,7 @@
 
 #include "CylindricalCoordinateCoefficients.h"
 
-registerMooseObject("MooseApp", CylindricalCoordinateCoefficients);
+registerMooseObject("MooseApp", Cylindrical);
 
 namespace
 {
@@ -36,7 +36,7 @@ private:
 } // anonymous namespace
 
 InputParameters
-CylindricalCoordinateCoefficients::validParams()
+Cylindrical::validParams()
 {
   InputParameters params = MFEMCoordinateCoefficients::validParams();
   params.addClassDescription(
@@ -44,14 +44,13 @@ CylindricalCoordinateCoefficients::validParams()
   return params;
 }
 
-CylindricalCoordinateCoefficients::CylindricalCoordinateCoefficients(
-    const InputParameters & parameters)
+Cylindrical::Cylindrical(const InputParameters & parameters)
   : MFEMCoordinateCoefficients(parameters)
 {
 }
 
 void
-CylindricalCoordinateCoefficients::build()
+Cylindrical::build()
 {
   if (_r_coeff)
     return;
@@ -71,7 +70,7 @@ CylindricalCoordinateCoefficients::build()
 }
 
 const mfem::Coefficient *
-CylindricalCoordinateCoefficients::getBuiltinCoefficient(const std::string & name) const
+Cylindrical::getBuiltinCoefficient(const std::string & name) const
 {
   if (name == "r")
     return _r_coeff.get();
