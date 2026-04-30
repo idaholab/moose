@@ -10,7 +10,7 @@
 
 [Coordinates]
     [cylindrical]
-        type = CylindricalCoordinateCoefficients
+        type = Cylindrical
         inv_r_eps = 1e-100
     []
 []
