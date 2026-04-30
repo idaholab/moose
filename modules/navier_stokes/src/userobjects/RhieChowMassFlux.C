@@ -1109,6 +1109,7 @@ RhieChowMassFlux::computeHbyA(bool verbose)
       Ainv_full->add(-1.0, Ainv);
       working_vector_petsc->pointwise_mult(*Ainv_full, *coupling_pressure_gradient[system_i]);
       working_vector_petsc->pointwise_mult(*working_vector_petsc, *_cell_volumes);
+      applyCellPorosityScaling(*working_vector_petsc);
       HbyA.add(-1.0, *working_vector_petsc);
 
       // Correct Ainv
