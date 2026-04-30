@@ -230,8 +230,10 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _debug(debug),
     _on_displaced(on_displaced),
     _periodic(periodic),
-    // We always ghost the entire mortar interface when it is allowed to displace
-    _distributed(_on_displaced ? false : !_mesh.is_replicated()),
+    // 3D mortar always builds the mortar segment mesh distributedly (each rank adds only its local
+    // secondary elements). For 2D, we ghost the entire mortar interface when displaced, so
+    // displaced meshes are always replicated; otherwise follow the parent mesh.
+    _distributed(_mesh.mesh_dimension() == 3 ? true : (!_on_displaced && !_mesh.is_replicated())),
     _correct_edge_dropping(correct_edge_dropping),
     _minimum_projection_angle(minimum_projection_angle)
 {
@@ -243,9 +245,11 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
   _secondary_boundary_subdomain_ids.insert(subdomain_key.second);
 
   if (_distributed)
-    _mortar_segment_mesh = std::make_unique<DistributedMesh>(_mesh.comm());
+    _mortar_segment_mesh =
+        std::make_unique<DistributedMesh>(_mesh.comm(), _mesh.spatial_dimension());
   else
-    _mortar_segment_mesh = std::make_unique<ReplicatedMesh>(_mesh.comm());
+    _mortar_segment_mesh =
+        std::make_unique<ReplicatedMesh>(_mesh.comm(), _mesh.spatial_dimension());
 }
 
 void
@@ -944,7 +948,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
   auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  dof_id_type local_id_index = 0;
+  // Use rank-based offsets for node and element IDs so that IDs are globally unique across
+  // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
+  // The main mesh max IDs are global (replicated mesh) and serve as a safe stride since the
+  // mortar segment mesh is always far smaller than the main mesh.
+  dof_id_type next_node_id = _mesh.processor_id() * (_mesh.max_node_id() + 1);
+  dof_id_type local_id_index = _mesh.processor_id() * (_mesh.max_elem_id() + 1);
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
@@ -1250,7 +1259,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           std::vector<Node *> new_nodes;
           for (auto pt : nodal_points)
             new_nodes.push_back(_mortar_segment_mesh->add_point(
-                pt, _mortar_segment_mesh->max_node_id(), secondary_side_elem->processor_id()));
+                pt, next_node_id++, secondary_side_elem->processor_id()));
 
           // Loop through triangular elements in map
           for (auto el : index_range(elem_to_node_map))
@@ -1321,6 +1330,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
   _mortar_segment_mesh->cache_elem_data();
 
+  // The mesh was built distributedly (each rank owns only its local elements), so mark it
+  // as such so MeshSerializer correctly gathers it to proc 0 for Exodus output.
+  _mortar_segment_mesh->set_distributed();
+
   // Output mortar segment mesh
   if (_debug)
   {
@@ -1348,11 +1361,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // Print mortar segment mesh statistics
   if (_debug)
   {
-    if (_mesh.n_processors() == 1)
-      msmStatistics();
-    else
-      mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
-                   "parallel will only provide statistics for local mortar segment mesh.");
+    msmStatistics();
   }
 }
 
@@ -1430,8 +1439,10 @@ AutomaticMortarGeneration::buildCouplingInformation()
 void
 AutomaticMortarGeneration::msmStatistics()
 {
-  // Print boundary pairs
-  Moose::out << "Mortar Interface Statistics:" << std::endl;
+  const bool is_root = _mesh.processor_id() == 0;
+
+  if (is_root)
+    Moose::out << "Mortar Interface Statistics:" << std::endl;
 
   // Count number of elements on primary and secondary sides
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
@@ -1439,27 +1450,27 @@ AutomaticMortarGeneration::msmStatistics()
     const auto primary_subd_id = pr.first;
     const auto secondary_subd_id = pr.second;
 
-    // Allocate statistics vectors for primary lower, secondary lower, and msm meshes
-    StatisticsVector<Real> primary;   // primary.reserve(mesh.n_elem());
-    StatisticsVector<Real> secondary; // secondary.reserve(mesh.n_elem());
-    StatisticsVector<Real> msm;       // msm.reserve(mortar_segment_mesh->n_elem());
+    StatisticsVector<Real> primary;
+    StatisticsVector<Real> secondary;
 
     for (auto * el : _mesh.active_element_ptr_range())
     {
-      // Add secondary and primary elem volumes to statistics vector
       if (el->subdomain_id() == secondary_subd_id)
         secondary.push_back(el->volume());
       else if (el->subdomain_id() == primary_subd_id)
         primary.push_back(el->volume());
     }
 
+    // Gather mortar segment element volumes from all ranks to rank 0
     // Note: when we allow more than one primary secondary pair will need to make
     // separate mortar segment mesh for each
+    StatisticsVector<Real> msm;
     for (auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
-    {
-      // Add msm elem volume to statistic vector
       msm.push_back(msm_elem->volume());
-    }
+    _mesh.comm().gather(0, static_cast<std::vector<Real> &>(msm));
+
+    if (!is_root)
+      continue;
 
     // Create table
     std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median"};

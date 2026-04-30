@@ -95,7 +95,6 @@
                'Constraints/normal_z/debug_mesh=true UserObjects/weighted_gap_uo/debug_mesh=true'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes.'
-    max_parallel = 1
     prereq = 'frictionless-mortar-3d'
   []
   [frictional-mortar-3d]
