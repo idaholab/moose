@@ -218,9 +218,6 @@ protected:
 
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
-   *
-   * TODO: This should be updated if the If the random number generator is updated to type that
-   * supports native advancing.
    */
   virtual void advanceGenerators(const dof_id_type count);
   virtual void advanceGenerator(const unsigned int seed_index, const dof_id_type count);
@@ -231,7 +228,7 @@ protected:
    * Callbacks for before and after execute.
    *
    * These were added to support of dynamic sampler sizes. Recall that execute is simply to advance
-   * the state of the generator such that the next sample will be unique. These methods allow
+   * the state of the generators such that the next sample will be unique. These methods allow
    * operations before and after the call to generator advancement.
    */
   virtual void executeSetUp() {}
@@ -270,11 +267,8 @@ private:
                                         const std::string & name,
                                         InputParameters & parameters);
   /**
-   * Store the state of the MooseRandom generator so that new calls to
-   * getGlobalSamples/getLocalSamples methods will create new numbers.
-   *
-   * The execute() method is called in the init() method of this class and
-   * FEProblemBase::executeSamplers; it should not be called elsewhere.
+   * Advance MooseRandomStateless generators so that new calls to
+   * sample methods will create new numbers.
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
@@ -289,7 +283,7 @@ private:
    */
   void advanceGeneratorsInternal(const dof_id_type count);
 
-  /// Random number generator, don't give users access. Control it via the interface from this class.
+  /// Random number generators, don't give users access. Control it via the interface from this class.
   std::vector<std::unique_ptr<MooseRandomStateless>> _generators;
 
   /// Number of rows for this processor
