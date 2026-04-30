@@ -790,6 +790,12 @@ CrackMeshCut3DUserObject::growFront()
 {
   _front.clear();
 
+  mooseAssert(!(_cfd && _active_boundary.size() != 1),
+              "crack-front-definition using the cutter mesh only supports one active crack front "
+              "segment for now");
+
+  const std::vector<int> front_point_index = _cfd ? getFrontPointsIndex() : std::vector<int>();
+
   // Track already-grown boundary nodes to avoid duplicates when a boundary node
   // appears in two active segments (as the last node of one and the first of the next)
   std::map<dof_id_type, dof_id_type> grown_node_map;
@@ -799,7 +805,6 @@ CrackMeshCut3DUserObject::growFront()
     std::vector<dof_id_type> temp;
 
     unsigned int i2 = _active_boundary[i].size();
-    std::vector<int> index = getFrontPointsIndex();
     for (unsigned int j = 0; j < i2; ++j)
     {
       dof_id_type orig_id = _active_boundary[i][j];
@@ -817,185 +822,223 @@ CrackMeshCut3DUserObject::growFront()
       Point & this_point = *this_node;
       Point dir = _active_direction[i][j];
 
+      const Real growth_increment = computeGrowthIncrement(j, i2, front_point_index);
+
       Point x;
-      Real growth_increment = 0;
-      switch (_growth_increment_method)
-      {
-        case GrowthRateEnum::FUNCTION:
-        {
-          growth_increment = _func_v->value(_t, Point(0, 0, 0));
-          break;
-        }
-        case GrowthRateEnum::REPORTER:
-        {
-          int ind = index[j];
-          if (ind == -1)
-          {
-            // Boundary node: use increment from nearest active neighbor
-            if (j == 0 && index.size() > 1 && index[1] != -1)
-              growth_increment = _growth_inc_reporter->at(index[1]);
-            else if (j == i2 - 1 && index.size() > 1 && index[i2 - 2] != -1)
-              growth_increment = _growth_inc_reporter->at(index[i2 - 2]);
-          }
-          else
-            growth_increment = _growth_inc_reporter->at(ind);
-          break;
-        }
-        default:
-        {
-          mooseError("This growth_increment_method is not pre-defined!");
-          break;
-        }
-      }
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_increment;
 
-      // For inactive boundary nodes (index[j] == -1): if the displaced position x (= P_I)
-      // landed inside the FEM volume, project it back to just outside the surface.
-      // Ray: from the adjacent active crack-front node A through P_I, extended beyond P_I
-      // to find where the ray exits the FEM mesh. Place the node at that exit point +
-      // libMesh::TOLERANCE outward so it stays just outside the surface.
-      if (index[j] == -1)
-      {
-        std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-        pl->enable_out_of_mesh_mode();
-        bool x_inside = ((*pl)(x) != nullptr);
-        if (x_inside)
-        {
-          bool at_start = (j == 0 && index.size() > 1 && index[1] != -1);
-          bool at_end = (j == i2 - 1 && index.size() > 1 && index[i2 - 2] != -1);
-          if (at_start || at_end)
-          {
-            unsigned int j_active = at_start ? 1 : (i2 - 2);
-            Node * active_nd = _cutter_mesh->node_ptr(_active_boundary[i][j_active]);
-            mooseAssert(active_nd, "Active neighbor node is NULL");
-            // A = current (pre-growth) position of the adjacent active crack-front node
-            Point A = *active_nd;
+      x = projectInteriorInactiveEndpoint(i, j, i2, x);
 
-            // Ray direction from A through P_I (x)
-            Point ray_dir = x - A;
-            Real ray_len = ray_dir.norm();
-            if (ray_len > libMesh::TOLERANCE)
-              ray_dir /= ray_len;
-
-            // Find where the ray from A through x exits the FEM surface (beyond x)
-            ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
-            Real best_dist = std::numeric_limits<Real>::max();
-            bool surface_found = false;
-            Point best_pt;
-
-            for (const auto & belem : bnd_range)
-            {
-              const Elem * elem = belem->_elem;
-              std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
-              std::vector<Point> vertices;
-              for (unsigned int k = 0; k < curr_side->n_nodes(); ++k)
-                vertices.push_back(*(curr_side->node_ptr(k)));
-
-              Point pt;
-              if (findIntersection(A, x, vertices, pt))
-              {
-                Real dist = (pt - A).norm();
-                if (dist < best_dist)
-                {
-                  best_dist = dist;
-                  best_pt = pt;
-                  surface_found = true;
-                }
-              }
-            }
-
-            if (surface_found)
-              x = best_pt + ray_dir * libMesh::TOLERANCE;
-          }
-        }
-      }
-
-      // Classify each neighbor as producing a degenerate triangle (below tol) or not.
-      // - If all neighbors degenerate: push only orig_id (node fully stuck, e.g. node 8).
-      // - If some degenerate: create new node, push both orig_id and new id; orig goes on the
-      //   non-degenerate side, new goes on the degenerate side.
-      // - If none degenerate: push only new id (normal advancement).
-      // Only consider neighbors that are within the active segment; neighbors on the full
-      // boundary outside this active segment are handled by the inactive-bordering logic
-      // elsewhere and should not trigger interleaving here.
-      dof_id_type prev_id = (j > 0) ? _active_boundary[i][j - 1] : DofObject::invalid_id;
-      dof_id_type next_id = (j + 1 < i2) ? _active_boundary[i][j + 1] : DofObject::invalid_id;
-
-      bool prev_degenerate = false;
-      unsigned int n_relevant_neighbors = 0;
-      unsigned int n_degenerate = 0;
-
-      auto map_it = _boundary_map.find(orig_id);
-      if (map_it != _boundary_map.end())
-      {
-        for (dof_id_type neighbor_id : map_it->second)
-        {
-          if (neighbor_id != prev_id && neighbor_id != next_id)
-            continue;
-          ++n_relevant_neighbors;
-          Point neighbor_pt = *_cutter_mesh->node_ptr(neighbor_id);
-          if (!isTriAreaAboveTol(this_point, neighbor_pt, x))
-          {
-            ++n_degenerate;
-            if (neighbor_id == prev_id)
-              prev_degenerate = true;
-          }
-        }
-      }
-
-      const bool all_degenerate =
-          (n_relevant_neighbors > 0 && n_degenerate == n_relevant_neighbors);
-      const bool some_degenerate = (n_degenerate > 0 && !all_degenerate);
-
-      dof_id_type id;
-      if (all_degenerate)
-      {
-        id = orig_id;
-        temp.push_back(orig_id);
-      }
-      else
-      {
-        this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
-        _cutter_mesh->add_node(this_node);
-        id = _cutter_mesh->n_nodes() - 1;
-
-        if (some_degenerate)
-        {
-          // Place orig adjacent to the degenerate (stuck) neighbor, new adjacent to the
-          // non-degenerate neighbor, so triangulation pairs the right nodes on each edge.
-          if (prev_degenerate)
-          {
-            temp.push_back(orig_id);
-            temp.push_back(id);
-          }
-          else // next_degenerate
-          {
-            temp.push_back(id);
-            temp.push_back(orig_id);
-          }
-        }
-        else
-        {
-          temp.push_back(id);
-        }
-      }
+      const dof_id_type id =
+          appendAdvancedFrontNodeCheckingDegenerateTriangles(i, j, orig_id, x, temp);
       grown_node_map[orig_id] = id;
-
-      if (_cfd)
-      {
-        auto it = std::find(_tracked_crack_front_points.begin(),
-                            _tracked_crack_front_points.end(),
-                            _active_boundary[0][j]);
-        if (it != _tracked_crack_front_points.end())
-        {
-          unsigned int pos = std::distance(_tracked_crack_front_points.begin(), it);
-          _tracked_crack_front_points[pos] = id;
-        }
-      }
+      updateTrackedCrackFrontPoint(orig_id, id);
     }
 
     _front.push_back(temp);
+  }
+}
+
+bool
+CrackMeshCut3DUserObject::isInactiveEndpoint(unsigned int front_node_index,
+                                             unsigned int front_size) const
+{
+  return _inactive_boundary_pos.size() != 0 &&
+         (front_node_index == 0 || front_node_index + 1 == front_size);
+}
+
+Real
+CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
+                                                 unsigned int front_size,
+                                                 const std::vector<int> & front_point_index) const
+{
+  switch (_growth_increment_method)
+  {
+    case GrowthRateEnum::FUNCTION:
+      return _func_v->value(_t, Point(0, 0, 0));
+
+    case GrowthRateEnum::REPORTER:
+    {
+      mooseAssert(!front_point_index.empty(),
+                  "Crack-front indices must be available for reporter-based growth.");
+
+      if (isInactiveEndpoint(front_node_index, front_size))
+      {
+        const bool has_adjacent_front_point = front_point_index.size() > 1;
+        const bool is_first_inactive_endpoint =
+            front_node_index == 0 && has_adjacent_front_point && front_point_index[1] != -1;
+        const bool is_last_inactive_endpoint =
+            front_node_index + 1 == front_size && has_adjacent_front_point &&
+            front_point_index[front_size - 2] != -1;
+        // Boundary node: use increment from nearest active neighbor
+        if (is_first_inactive_endpoint)
+          return _growth_inc_reporter->at(front_point_index[1]);
+        if (is_last_inactive_endpoint)
+          return _growth_inc_reporter->at(front_point_index[front_size - 2]);
+
+        mooseError("Inactive crackfront node is not connected to a neighbor.");
+      }
+
+      return _growth_inc_reporter->at(front_point_index[front_node_index]);
+    }
+  }
+
+  mooseError("This growth_increment_method is not pre-defined!");
+}
+
+Point
+CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_index,
+                                                          unsigned int front_node_index,
+                                                          unsigned int front_size,
+                                                          const Point & candidate_point) const
+{
+  if (!isInactiveEndpoint(front_node_index, front_size))
+    return candidate_point;
+
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
+  if ((*pl)(candidate_point) == nullptr)
+    return candidate_point;
+
+  const bool at_start_of_crack_front = (front_node_index == 0 && front_size > 1);
+  const bool at_end_of_crack_front = (front_node_index + 1 == front_size && front_size > 1);
+  if (!(at_start_of_crack_front || at_end_of_crack_front))
+    return candidate_point;
+
+  const unsigned int active_neighbor_index = at_start_of_crack_front ? 1 : (front_size - 2);
+  Node * active_nd = _cutter_mesh->node_ptr(_active_boundary[segment_index][active_neighbor_index]);
+  mooseAssert(active_nd, "Active neighbor node is NULL");
+
+  Point projected_point = candidate_point;
+  const Point A = *active_nd;
+  Point ray_dir = projected_point - A;
+  const Real ray_len = ray_dir.norm();
+  if (ray_len <= libMesh::TOLERANCE)
+    return projected_point;
+  ray_dir /= ray_len;
+
+  ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
+  Real best_dist = std::numeric_limits<Real>::max();
+  bool surface_found = false;
+  Point best_pt;
+
+  for (const auto & belem : bnd_range)
+  {
+    const Elem * elem = belem->_elem;
+    std::unique_ptr<const Elem> curr_side = elem->side_ptr(belem->_side);
+    std::vector<Point> vertices;
+    for (unsigned int i = 0; i < curr_side->n_nodes(); ++i)
+      vertices.push_back(*(curr_side->node_ptr(i)));
+
+    Point pt;
+    if (findIntersection(A, projected_point, vertices, pt))
+    {
+      const Real dist = (pt - A).norm();
+      if (dist < best_dist)
+      {
+        best_dist = dist;
+        best_pt = pt;
+        surface_found = true;
+      }
+    }
+  }
+
+  if (surface_found)
+    projected_point = best_pt + ray_dir * libMesh::TOLERANCE;
+
+  return projected_point;
+}
+
+dof_id_type
+CrackMeshCut3DUserObject::appendAdvancedFrontNodeCheckingDegenerateTriangles(
+    unsigned int segment_index,
+    unsigned int front_node_index,
+    dof_id_type orig_id,
+    const Point & candidate_point,
+    std::vector<dof_id_type> & front_nodes)
+{
+  Node * this_node = _cutter_mesh->node_ptr(orig_id);
+  mooseAssert(this_node, "Node is NULL");
+  const Point & this_point = *this_node;
+
+  const unsigned int front_size = _active_boundary[segment_index].size();
+  const dof_id_type prev_id = (front_node_index > 0)
+                                  ? _active_boundary[segment_index][front_node_index - 1]
+                                  : DofObject::invalid_id;
+  const dof_id_type next_id = (front_node_index + 1 < front_size)
+                                  ? _active_boundary[segment_index][front_node_index + 1]
+                                  : DofObject::invalid_id;
+
+  bool prev_degenerate = false;
+  unsigned int n_relevant_neighbors = 0;
+  unsigned int n_degenerate = 0;
+
+  if (prev_id != DofObject::invalid_id)
+  {
+    ++n_relevant_neighbors;
+    Point prev_pt = *_cutter_mesh->node_ptr(prev_id);
+    if (!isTriAreaAboveTol(this_point, prev_pt, candidate_point))
+    {
+      ++n_degenerate;
+      prev_degenerate = true;
+    }
+  }
+
+  if (next_id != DofObject::invalid_id)
+  {
+    ++n_relevant_neighbors;
+    Point next_pt = *_cutter_mesh->node_ptr(next_id);
+    if (!isTriAreaAboveTol(this_point, next_pt, candidate_point))
+      ++n_degenerate;
+  }
+
+  const bool all_degenerate = (n_relevant_neighbors > 0 && n_degenerate == n_relevant_neighbors);
+  const bool some_degenerate = (n_degenerate > 0 && !all_degenerate);
+
+  if (all_degenerate)
+  {
+    front_nodes.push_back(orig_id);
+    return orig_id;
+  }
+
+  Node * new_node = Node::build(candidate_point, _cutter_mesh->n_nodes()).release();
+  _cutter_mesh->add_node(new_node);
+  const dof_id_type new_id = _cutter_mesh->n_nodes() - 1;
+
+  if (some_degenerate)
+  {
+    // Place orig adjacent to the degenerate (stuck) neighbor, new adjacent to the non-degenerate
+    // neighbor, so triangulation pairs the right nodes on each edge.
+    if (prev_degenerate)
+    {
+      front_nodes.push_back(orig_id);
+      front_nodes.push_back(new_id);
+    }
+    else
+    {
+      front_nodes.push_back(new_id);
+      front_nodes.push_back(orig_id);
+    }
+  }
+  else
+    front_nodes.push_back(new_id);
+
+  return new_id;
+}
+
+void
+CrackMeshCut3DUserObject::updateTrackedCrackFrontPoint(dof_id_type orig_id, dof_id_type new_id)
+{
+  if (!_cfd)
+    return;
+
+  auto it =
+      std::find(_tracked_crack_front_points.begin(), _tracked_crack_front_points.end(), orig_id);
+  if (it != _tracked_crack_front_points.end())
+  {
+    const unsigned int pos = std::distance(_tracked_crack_front_points.begin(), it);
+    _tracked_crack_front_points[pos] = new_id;
   }
 }
 
