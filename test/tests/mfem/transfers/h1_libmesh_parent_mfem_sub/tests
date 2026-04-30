@@ -36,8 +36,8 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/square_tri.e '
-                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+      cli_args = 'Mesh/file=../../mesh/square_tri6.e '
+                'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris '
     []
     [H1TriSecondOrder]
@@ -49,11 +49,11 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/square_tri.e '
+      cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tris_order_2 '
                 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '
-                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+                'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
     []
     [H1TriToQuad]
@@ -66,7 +66,7 @@
       recover = false
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
-                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+                'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
     []  
     [H1TriToQuadSecondOrder]
@@ -82,7 +82,7 @@
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad_order_2 '
                 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '
-                'mfem_app0:Mesh/file=../../mesh/square_tri.e '
+                'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
     []
     [H1Hex]
@@ -125,10 +125,10 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+      cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets '
-                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+                'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
     []
     [H1TetSecondOrder]
       type = CSVDiff
@@ -139,12 +139,12 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+      cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'BCs/sides/boundary=Sides '
                 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '               
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets_order_2 '
-                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+                'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '               
     []
     [H1TetToHex]
@@ -159,7 +159,7 @@
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex '
-                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+                'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
     []
     [H1TetToHexSecondOrder]
       type = CSVDiff
@@ -175,7 +175,7 @@
                 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '               
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex_order_2 '
-                'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e '
+                'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '               
     []  
   []
