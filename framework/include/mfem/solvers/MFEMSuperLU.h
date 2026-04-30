@@ -30,10 +30,6 @@ public:
     _s_superlu->SetOperator(*_a_superlu.get());
   }
   void Mult(const mfem::Vector & x, mfem::Vector & y) const override { _s_superlu->Mult(x, y); }
-  void SetDeviceOffload(bool offload) { _s_superlu->SetDeviceOffload(offload); }
-  void SetSymmetricPattern(bool sym) { _s_superlu->SetSymmetricPattern(sym); }
-  void SetPrintStatistics(bool print) { _s_superlu->SetPrintStatistics(print); }
-  void SetColumnPermutation(mfem::superlu::ColPerm cp) { _s_superlu->SetColumnPermutation(cp); }
 
 private:
   std::unique_ptr<mfem::SuperLURowLocMatrix> _a_superlu{nullptr};
