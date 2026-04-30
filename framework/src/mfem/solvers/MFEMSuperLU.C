@@ -20,7 +20,6 @@ MFEMSuperLU::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
-
   return params;
 }
 
@@ -33,10 +32,6 @@ void
 MFEMSuperLU::constructSolver()
 {
   auto solver = std::make_unique<Moose::MFEM::SuperLUSolver>(getMFEMProblem().getComm());
-  solver->SetDeviceOffload(mfem::Device::IsAvailable());
-  solver->SetSymmetricPattern(true);
-  solver->SetPrintStatistics(false);
-  solver->SetColumnPermutation(mfem::superlu::PARMETIS);
   _solver = std::move(solver);
 }
 
