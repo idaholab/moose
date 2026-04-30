@@ -16,14 +16,17 @@ InputParameters
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::validParams()
 {
   InputParameters params = Moose::Kokkos::LinearFVBoundaryCondition::validParams();
+  params.addRequiredParam<FunctionName>("diffusion_coeff", "The diffusion coefficient.");
   params.addRequiredParam<FunctionName>("functor", "The boundary-value function.");
   params.addClassDescription(
-      "Kokkos LinearFV Dirichlet boundary condition provider for advection-diffusion kernels.");
+      "Kokkos LinearFV Dirichlet boundary condition for advection-diffusion kernels.");
   return params;
 }
 
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::
     KokkosLinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters)
-  : Moose::Kokkos::LinearFVBoundaryCondition(parameters), _functor(getKokkosFunction("functor"))
+  : Moose::Kokkos::LinearFVBoundaryCondition(parameters),
+    _diffusion_coeff(getKokkosFunction("diffusion_coeff")),
+    _functor(getKokkosFunction("functor"))
 {
 }

@@ -20,12 +20,39 @@ public:
 
   KokkosLinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters);
 
-  virtual void computeRightHandSide() override {}
-  virtual void computeMatrix() override {}
-
-  const Moose::Kokkos::Function & functor() const { return _functor; }
+  KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
 
 private:
-  /// The functor providing the Dirichlet value(s) on a boundary
+  KOKKOS_FUNCTION Real faceConductance(const AssemblyDatum & datum) const;
+
+  /// Diffusion coefficient (same functor as the paired diffusion kernel)
+  const Moose::Kokkos::Function _diffusion_coeff;
+  /// The functor providing the Dirichlet value on the boundary
   const Moose::Kokkos::Function _functor;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
+    const AssemblyDatum & datum) const
+{
+  return faceConductance(datum);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeRightHandSideContribution(
+    const AssemblyDatum & datum) const
+{
+  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
+  return faceConductance(datum) * _functor.value(_t, face_centroid);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceConductance(
+    const AssemblyDatum & datum) const
+{
+  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
+  return _diffusion_coeff.value(_t, face_centroid) *
+         datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
+         datum.mesh().getFaceDCFMag(datum.elemID(), datum.side());
+}

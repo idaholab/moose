@@ -8,12 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosLinearFVDiffusion.h"
-#include "KokkosLinearFVAdvectionDiffusionFunctorDirichletBC.h"
-#include "Attributes.h"
-#include "FEProblemBase.h"
-
-#include <set>
-#include <vector>
 
 registerKokkosLinearFVKernel("MooseApp", KokkosLinearFVDiffusion);
 
@@ -30,42 +24,4 @@ KokkosLinearFVDiffusion::KokkosLinearFVDiffusion(const InputParameters & paramet
   : Moose::Kokkos::LinearFVFluxKernel(parameters),
     _diffusion_coeff(getKokkosFunction("diffusion_coeff"))
 {
-}
-
-void
-KokkosLinearFVDiffusion::initialSetup()
-{
-  std::vector<Moose::Kokkos::LinearFVBoundaryCondition *> bcs;
-  auto query = _fe_problem.theWarehouse()
-                   .query()
-                   .template condition<AttribSystem>("LinearFVBoundaryCondition")
-                   .template condition<AttribKokkos>(true)
-                   .template condition<AttribThread>(_tid)
-                   .template condition<AttribSysNum>(_sys.number());
-  query.queryInto(bcs);
-
-  std::vector<BoundaryID> boundary_ids;
-  std::vector<Moose::Kokkos::Function> values;
-  std::set<BoundaryID> seen;
-
-  for (auto * bc : bcs)
-  {
-    if (bc->variable().number() != _var_num)
-      continue;
-
-    auto * dirichlet = dynamic_cast<KokkosLinearFVAdvectionDiffusionFunctorDirichletBC *>(bc);
-    if (!dirichlet)
-      continue;
-
-    for (const auto boundary_id : dirichlet->boundaryIDs())
-    {
-      if (!seen.insert(boundary_id).second)
-        mooseError("Duplicate Kokkos LinearFV boundary condition on boundary ", boundary_id, ".");
-
-      boundary_ids.push_back(boundary_id);
-      values.push_back(dirichlet->functor());
-    }
-  }
-
-  _kokkos_var.initBoundaryConditions(boundary_ids, values);
 }

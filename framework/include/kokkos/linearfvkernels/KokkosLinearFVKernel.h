@@ -130,6 +130,13 @@ public:
   virtual void computeRightHandSide() override;
   virtual void computeMatrix() override;
   virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+  virtual void initialSetup() override;
+
+  struct BoundaryFaceData
+  {
+    Array2D<Real> matrix_coeff;
+    Array2D<Real> rhs_coeff;
+  };
 
   KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum &) const { return 0; }
   KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum &) const { return 0; }
@@ -163,14 +170,8 @@ public:
     const auto [elem, side] = kokkosBlockElementSideID(tid);
     AssemblyDatum datum(
         elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
-
-    if (!datum.hasNeighbor())
-    {
-      const auto boundary_id = datum.mesh().getFaceBoundaryID(elem, side);
-      if (!_force_boundary_execution && !_kokkos_var.hasBoundaryCondition(boundary_id))
-        return;
-    }
-
+    if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
+      return;
     const auto & sys = kokkosSystem(_sys.number());
     kernel.accumulateTaggedVector(kernel.computeRightHandSideContributionShim(kernel, datum),
                                   sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var()));
@@ -182,14 +183,8 @@ public:
     const auto [elem, side] = kokkosBlockElementSideID(tid);
     AssemblyDatum datum(
         elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
-
-    if (!datum.hasNeighbor())
-    {
-      const auto boundary_id = datum.mesh().getFaceBoundaryID(elem, side);
-      if (!_force_boundary_execution && !_kokkos_var.hasBoundaryCondition(boundary_id))
-        return;
-    }
-
+    if (!datum.hasNeighbor() && !_bc_data.matrix_coeff.isAlloc())
+      return;
     const auto & sys = kokkosSystem(_sys.number());
     const auto row = sys.getElemLocalDofIndex(elem, 0, _kokkos_var.var());
     kernel.accumulateTaggedMatrix(kernel.computeMatrixContributionShim(kernel, datum),
@@ -204,7 +199,7 @@ public:
   }
 
 protected:
-  const bool _force_boundary_execution;
+  BoundaryFaceData _bc_data;
 };
 
 } // namespace Moose::Kokkos

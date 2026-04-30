@@ -8,6 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosLinearFVKernel.h"
+#include "KokkosLinearFVBoundaryCondition.h"
+
+#include "Attributes.h"
+#include "FEProblemBase.h"
 
 namespace Moose::Kokkos
 {
@@ -92,25 +96,42 @@ InputParameters
 LinearFVFluxKernel::validParams()
 {
   auto params = LinearFVKernel::validParams();
-  params.addParam<bool>("force_boundary_execution",
-                        false,
-                        "Whether to force execution of this object on all external boundaries.");
   params.registerSystemAttributeName("LinearFVFluxKernel");
   return params;
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const InputParameters & parameters)
-  : LinearFVKernel(parameters),
-    FaceArgProducerInterface(),
-    _force_boundary_execution(getParam<bool>("force_boundary_execution"))
+  : LinearFVKernel(parameters), FaceArgProducerInterface()
 {
 }
 
 LinearFVFluxKernel::LinearFVFluxKernel(const LinearFVFluxKernel & object)
-  : LinearFVKernel(object),
-    FaceArgProducerInterface(),
-    _force_boundary_execution(object._force_boundary_execution)
+  : LinearFVKernel(object), FaceArgProducerInterface(), _bc_data(object._bc_data)
 {
+}
+
+void
+LinearFVFluxKernel::initialSetup()
+{
+  const auto n_elems = static_cast<dof_id_type>(kokkosMesh().getNumLocalElements());
+  const auto max_sides = static_cast<dof_id_type>(_mesh.getMaxSidesPerElem());
+  _bc_data.matrix_coeff.create(max_sides, n_elems);
+  _bc_data.rhs_coeff.create(max_sides, n_elems);
+  _bc_data.matrix_coeff = 0;
+  _bc_data.rhs_coeff = 0;
+
+  std::vector<LinearFVBoundaryCondition *> bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_sys.number())
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribKokkos>(true)
+      .template condition<AttribThread>(0)
+      .queryInto(bcs);
+
+  for (auto * bc : bcs)
+    if (bc->variable().number() == _var.number())
+      bc->initBCData(_bc_data);
 }
 
 void
