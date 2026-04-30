@@ -10,6 +10,10 @@
 #pragma once
 
 #include "KokkosTypes.h"
+#include "KokkosVariableValue.h"
+#include "KokkosMaterialProperty.h"
+#include "KokkosMaterialPropertyValue.h"
+#include "KokkosFunction.h"
 
 #include "ConsoleStreamInterface.h"
 
@@ -153,8 +157,16 @@ public:
   {
     // Variable index
     unsigned int idx;
-    // Pointer to variable value
-    const Real * value = nullptr;
+    // Pointer to a scalar value
+    const Real * scalar = nullptr;
+    // Pointer to a field variable
+    const VariableValue * field = nullptr;
+    // Pointer to a material property
+    const MaterialProperty<Real> * property = nullptr;
+    // Pointer to a function
+    const Function * function = nullptr;
+    // Whether the variable was associated
+    bool associated() const { return scalar || field || property || function; }
   };
 
   /**
@@ -200,11 +212,29 @@ public:
    */
   unsigned int addVariable(const std::string & name);
   /**
-   * Associate a variable with a value
+   * Associate a variable with a scalar value
    * @param name The variable name
-   * @param value The pointer to the variable value
+   * @param value The pointer to the scalar value
    */
-  void associateValue(const std::string & name, const Real * value);
+  void associateScalar(const std::string & name, const Real * scalar);
+  /**
+   * Associate a variable with a field variable
+   * @param name The variable name
+   * @param variable The pointer to the field variable
+   */
+  void associateField(const std::string & name, const VariableValue * field);
+  /**
+   * Associate a variable with a material property
+   * @param name The variable name
+   * @param variable The pointer to the material property
+   */
+  void associateProperty(const std::string & name, const MaterialProperty<Real> * property);
+  /**
+   * Associate a variable with a function
+   * @param name The variable name
+   * @param function The pointer to the function
+   */
+  void associateFunction(const std::string & name, const Function * function);
 
   /**
    * Get numbers used in the expression
@@ -332,9 +362,14 @@ public:
    * Evaluate RPN at point (t,x,y,z)
    * @param t The time
    * @param p The location in space (x,y,z)
+   * @param qp The local quadrature point index
+   * @param datum The Datum object of the current thread
    * @returns The evaluated value
    */
-  KOKKOS_FUNCTION Real eval(const Real t, const Real3 p) const;
+  KOKKOS_FUNCTION Real eval(const Real t,
+                            const Real3 p,
+                            const unsigned int qp = 0,
+                            Datum * datum = nullptr) const;
 
 private:
   /**
@@ -347,6 +382,16 @@ private:
     // Constant of variable index
     unsigned int arg = libMesh::invalid_uint;
   };
+  /**
+   * Types of variables
+   */
+  enum class VariableType
+  {
+    SCALAR,
+    FIELD,
+    MATERIAL,
+    FUNCTION
+  };
 
   /**
    * RPN sequence
@@ -357,9 +402,46 @@ private:
    */
   Array<Real> _numbers;
   /**
-   * Variables used in the function
+   * Scalar variables used in the function
    */
-  Array<::Kokkos::pair<const Real *, Real>> _variables;
+  Array<Real> _scalars;
+  /**
+   * Field variables used in the function
+   */
+  Array<VariableValue> _fields;
+  /**
+   * Material properties used in the function
+   */
+  Array<MaterialProperty<Real>> _properties;
+  /**
+   * Functions used in the function
+   */
+  Array<Function> _functions;
+  /**
+   * Types of variables and indices
+   */
+  Array<::Kokkos::pair<VariableType, unsigned int>> _variables;
+  /**
+   * Pointers to the associated quantities of variables
+   */
+  std::vector<const void *> _pointers;
+
+  /**
+   * Number of scalar variables
+   */
+  unsigned int _num_scalars = 0;
+  /**
+   * Number of field variables
+   */
+  unsigned int _num_fields = 0;
+  /**
+   * Number of material properties
+   */
+  unsigned int _num_properties = 0;
+  /**
+   * Number of functions
+   */
+  unsigned int _num_functions = 0;
 
   /**
    * Fixed stack size
@@ -400,7 +482,7 @@ private:
     break
 
 KOKKOS_FUNCTION inline Real
-RPNEvaluator::eval(const Real t, const Real3 p) const
+RPNEvaluator::eval(const Real t, const Real3 p, const unsigned int qp, Datum * datum) const
 {
   Real stack[_stack_size];
 
@@ -409,11 +491,6 @@ RPNEvaluator::eval(const Real t, const Real3 p) const
 
   for (unsigned int pos = 0; pos < _rpn.size(); ++pos)
   {
-    KOKKOS_IF_ON_HOST(if (head == _stack_size)
-                          mooseError("Kokkos parsed function error: pre-allocated stack size (",
-                                     _stack_size,
-                                     ") is insufficient.");)
-
     KOKKOS_ASSERT(head < _stack_size);
 
     const auto inst = _rpn[pos];
@@ -430,7 +507,34 @@ RPNEvaluator::eval(const Real t, const Real3 p) const
         else if (inst.arg == 3)
           stack[head] = t;
         else
-          stack[head] = _variables[inst.arg].second;
+        {
+          const auto type = _variables[inst.arg].first;
+          const auto idx = _variables[inst.arg].second;
+
+          switch (type)
+          {
+            case VariableType::SCALAR:
+              stack[head] = _scalars[idx];
+              break;
+            case VariableType::FIELD:
+            {
+              KOKKOS_ASSERT(datum);
+
+              stack[head] = _fields[idx](*datum, qp);
+              break;
+            }
+            case VariableType::MATERIAL:
+            {
+              KOKKOS_ASSERT(datum);
+
+              stack[head] = _properties[idx](*datum, qp);
+              break;
+            }
+            case VariableType::FUNCTION:
+              stack[head] = _functions[idx].value(t, p);
+              break;
+          }
+        }
         ++head;
         break;
       case Opcode::NEG:
@@ -502,10 +606,7 @@ RPNEvaluator::eval(const Real t, const Real3 p) const
     }
   }
 
-  KOKKOS_IF_ON_HOST(if (head != 1) mooseError("Kokkos parsed function error: stack was not fully "
-                                              "consumed after parsing (",
-                                              head - 1,
-                                              " remaining). This is likely a parser bug.");)
+  KOKKOS_ASSERT(head == 1);
 
   return stack[head - 1];
 }

@@ -37,6 +37,11 @@ public:
   Real computeDamping();
 
   /**
+   * Check whether this damper's variable has DOFs on the given node
+   */
+  bool variableDefinedOnNode(const Node * node) const;
+
+  /**
    * Get the variable this damper is acting on
    */
   MooseVariable * getVariable() { return &_var; }

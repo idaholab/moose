@@ -1,5 +1,3 @@
-## Specifying the Gravity Vector
-
 There are two options for specifying the gravity vector:
 
 - Provide the direction via [!param](/{{system_and_class}}/gravity_direction).
@@ -9,7 +7,3 @@ There are two options for specifying the gravity vector:
 - Provide the gravity vector directly via [!param](/{{system_and_class}}/gravity_vector).
   In this case you may not additionally provide [!param](/{{system_and_class}}/gravity_direction)
   or [!param](/{{system_and_class}}/gravity_magnitude).
-
-!alert note title=Zero gravity
-To specify zero gravity, the [!param](/{{system_and_class}}/gravity_vector) option must be used:
-`gravity_vector = '0 0 0'`.

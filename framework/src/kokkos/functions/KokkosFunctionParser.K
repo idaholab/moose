@@ -219,17 +219,79 @@ RPNBuilder::addVariable(const std::string & name)
 }
 
 void
-RPNBuilder::associateValue(const std::string & name, const Real * value)
+RPNBuilder::associateScalar(const std::string & name, const Real * scalar)
 {
   checkFinalized();
 
   auto it = _variables.find(name);
   if (it == _variables.end())
-    mooseError("Kokkos parsed function error: variable ",
+    mooseError("Kokkos parsed function error: variable '",
                name,
-               " was not added but attempted to associate a value.");
+               "' was not added but attempted to associate a value.");
 
-  _variables[name].value = value;
+  if (it->second.associated())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' is already associated and cannot associate another value.");
+
+  it->second.scalar = scalar;
+}
+
+void
+RPNBuilder::associateProperty(const std::string & name, const MaterialProperty<Real> * property)
+{
+  checkFinalized();
+
+  auto it = _variables.find(name);
+  if (it == _variables.end())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' was not added but attempted to associate a material property.");
+
+  if (it->second.associated())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' is already associated and cannot associate another material property.");
+
+  it->second.property = property;
+}
+
+void
+RPNBuilder::associateField(const std::string & name, const VariableValue * field)
+{
+  checkFinalized();
+
+  auto it = _variables.find(name);
+  if (it == _variables.end())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' was not added but attempted to associate a field variable.");
+
+  if (it->second.associated())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' is already associated and cannot associate another field variable.");
+
+  it->second.field = field;
+}
+
+void
+RPNBuilder::associateFunction(const std::string & name, const Function * function)
+{
+  checkFinalized();
+
+  auto it = _variables.find(name);
+  if (it == _variables.end())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' was not added but attempted to associate a function.");
+
+  if (it->second.associated())
+    mooseError("Kokkos parsed function error: variable '",
+               name,
+               "' is already associated and cannot associate another function.");
+
+  it->second.function = function;
 }
 
 void
@@ -249,13 +311,43 @@ RPNBuilder::checkFinalized()
 }
 
 RPNEvaluator::RPNEvaluator(const RPNEvaluator & evaluator)
-  : _rpn(evaluator._rpn), _numbers(evaluator._numbers), _variables(evaluator._variables)
+  : _rpn(evaluator._rpn),
+    _numbers(evaluator._numbers),
+    _variables(evaluator._variables),
+    _num_scalars(evaluator._num_scalars),
+    _num_fields(evaluator._num_fields),
+    _num_properties(evaluator._num_properties),
+    _num_functions(evaluator._num_functions)
 {
-  for (const auto i : make_range(_variables.size()))
-    if (_variables[i].first)
-      _variables[i].second = *_variables[i].first;
+  _scalars.create(_num_scalars);
+  _fields.create(_num_fields);
+  _properties.create<false>(_num_properties);
+  _functions.create<false>(_num_functions);
 
-  _variables.copyToDevice();
+  for (const auto i : make_range(_variables.size()))
+  {
+    auto ptr = evaluator._pointers[i];
+    if (!ptr)
+      continue;
+
+    const auto type = _variables[i].first;
+    const auto idx = _variables[i].second;
+
+    if (type == VariableType::SCALAR)
+      _scalars[idx] = *static_cast<const Real *>(ptr);
+    else if (type == VariableType::FIELD)
+      _fields[idx] = *static_cast<const VariableValue *>(ptr);
+    else if (type == VariableType::MATERIAL)
+      new (&_properties[idx])
+          MaterialProperty<Real>(*static_cast<const MaterialProperty<Real> *>(ptr));
+    else if (type == VariableType::FUNCTION)
+      new (&_functions[idx]) Function(*static_cast<const Function *>(ptr));
+  }
+
+  _scalars.copyToDevice();
+  _fields.copyToDevice();
+  _properties.copyToDevice();
+  _functions.copyToDevice();
 }
 
 void
@@ -272,10 +364,45 @@ RPNEvaluator::init(const RPNBuilder & builder)
   _numbers = numbers;
 
   _variables.create(variables.size() + (builder.hasDefaultVariables() ? 0 : 4));
-  _variables = {nullptr, 0};
+  _pointers.resize(_variables.size(), nullptr);
 
-  for (const auto & [_, var] : variables)
-    _variables[var.idx].first = var.value;
+  _num_scalars = 0;
+  _num_fields = 0;
+  _num_properties = 0;
+  _num_functions = 0;
+
+  for (const auto & [name, var] : variables)
+  {
+    if (var.scalar)
+    {
+      _variables[var.idx].first = VariableType::SCALAR;
+      _variables[var.idx].second = _num_scalars++;
+      _pointers[var.idx] = var.scalar;
+    }
+    else if (var.field)
+    {
+      _variables[var.idx].first = VariableType::FIELD;
+      _variables[var.idx].second = _num_fields++;
+      _pointers[var.idx] = var.field;
+    }
+    else if (var.property)
+    {
+      _variables[var.idx].first = VariableType::MATERIAL;
+      _variables[var.idx].second = _num_properties++;
+      _pointers[var.idx] = var.property;
+    }
+    else if (var.function)
+    {
+      _variables[var.idx].first = VariableType::FUNCTION;
+      _variables[var.idx].second = _num_functions++;
+      _pointers[var.idx] = var.function;
+    }
+    else if (var.idx >= 4)
+      mooseError(
+          "Kokkos parsed function error: variable '", name, "' was not associated with any value.");
+  }
+
+  _variables.copyToDevice();
 
   _rpn.create(rpn.size());
 

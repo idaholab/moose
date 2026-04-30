@@ -16,7 +16,7 @@ TestGravityVectorInterface::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params += GravityVectorInterface::validParams();
-  MooseEnum test_value("magnitude x y z");
+  MooseEnum test_value("magnitude x y z dir_x dir_y dir_z");
   params.addRequiredParam<MooseEnum>("test_value", test_value, "Test value to get");
   return params;
 }
@@ -38,6 +38,12 @@ TestGravityVectorInterface::getValue() const
     return gravityVector()(1);
   else if (test_value == "z")
     return gravityVector()(2);
+  else if (test_value == "dir_x")
+    return gravityDirection()(0);
+  else if (test_value == "dir_y")
+    return gravityDirection()(1);
+  else if (test_value == "dir_z")
+    return gravityDirection()(2);
   else
     mooseError("Invalid value");
 }

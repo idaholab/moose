@@ -31,15 +31,15 @@ public:
                                           AssemblyDatum & datum) const;
 
 private:
-  Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient;
-  Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient_dT;
+  Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
+  Moose::Kokkos::MaterialProperty<Real> _d_thermal_conductivity_dT;
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION Moose::Kokkos::Real3
 KokkosHeatConduction::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
-  return _diffusion_coefficient(datum, qp) * _grad_u(datum, qp);
+  return _thermal_conductivity(datum, qp) * _grad_u(datum, qp);
 }
 
 template <typename Derived>
@@ -48,8 +48,8 @@ KokkosHeatConduction::computeQpJacobian(const unsigned int j,
                                         const unsigned int qp,
                                         AssemblyDatum & datum) const
 {
-  Real3 jac = _diffusion_coefficient(datum, qp) * _grad_phi(datum, j, qp);
-  if (_diffusion_coefficient_dT)
-    jac += _diffusion_coefficient_dT(datum, qp) * _phi(datum, j, qp) * _grad_u(datum, qp);
+  Real3 jac = _thermal_conductivity(datum, qp) * _grad_phi(datum, j, qp);
+  if (_d_thermal_conductivity_dT)
+    jac += _d_thermal_conductivity_dT(datum, qp) * _phi(datum, j, qp) * _grad_u(datum, qp);
   return jac;
 }

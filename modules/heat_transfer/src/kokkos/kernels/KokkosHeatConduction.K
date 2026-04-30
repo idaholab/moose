@@ -17,13 +17,12 @@ KokkosHeatConduction::validParams()
   InputParameters params = KernelGrad::validParams();
   params.addClassDescription("Diffusive heat conduction term $-\\nabla\\cdot(k\\nabla T)$ of the "
                              "thermal energy conservation equation");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient",
-                                        "thermal_conductivity",
-                                        "Property name of the diffusion coefficient");
   params.addParam<MaterialPropertyName>(
-      "diffusion_coefficient_dT",
-      "thermal_conductivity_dT",
-      "Property name of the derivative of the diffusion coefficient with respect "
+      "thermal_conductivity", "thermal_conductivity", "Property name of the thermal conductivity");
+  params.addParam<MaterialPropertyName>(
+      "d_thermal_conductivity_dT",
+      "d_thermal_conductivity_dT",
+      "Property name of the derivative of the thermal conductivity with respect "
       "to the variable");
   return params;
 }
@@ -31,8 +30,8 @@ KokkosHeatConduction::validParams()
 KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
   : KernelGrad(parameters)
 {
-  _diffusion_coefficient = getKokkosMaterialProperty<Real>("diffusion_coefficient");
+  _thermal_conductivity = getKokkosMaterialProperty<Real>("thermal_conductivity");
 
-  if (hasKokkosMaterialProperty<Real>("diffusion_coefficient_dT"))
-    _diffusion_coefficient_dT = getKokkosMaterialProperty<Real>("diffusion_coefficient_dT");
+  if (hasKokkosMaterialProperty<Real>("d_thermal_conductivity_dT"))
+    _d_thermal_conductivity_dT = getKokkosMaterialProperty<Real>("d_thermal_conductivity_dT");
 }

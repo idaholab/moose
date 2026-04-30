@@ -1,0 +1,32 @@
+[Tests]
+  design = 'KokkosParsedAux.md'
+  issues = '#30655'
+
+  [test]
+    requirement = 'The Kokkos system shall be capable of computing parsed expressions to set an auxiliary variable'
+    [variable]
+      type = 'Exodiff'
+      input = 'kokkos_parsed_aux_test.i'
+      exodiff = 'kokkos_parsed_aux_test_out.e'
+      detail = 'using field variables,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [matprop]
+      type = 'Exodiff'
+      input = 'kokkos_parsed_aux_mat_test.i'
+      exodiff = 'kokkos_parsed_aux_mat_test_out.e'
+      detail = 'using material properties,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [xyzt]
+      type = 'Exodiff'
+      input = 'kokkos_xyzt.i'
+      exodiff = 'kokkos_xyzt_out.e'
+      detail = 'using quadrature/nodal point coordinates and time.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

@@ -21,6 +21,18 @@
     type = TestGravityVectorInterface
     test_value = z
   []
+  [dir_x]
+    type = TestGravityVectorInterface
+    test_value = dir_x
+  []
+  [dir_y]
+    type = TestGravityVectorInterface
+    test_value = dir_y
+  []
+  [dir_z]
+    type = TestGravityVectorInterface
+    test_value = dir_z
+  []
 []
 
 [Outputs]

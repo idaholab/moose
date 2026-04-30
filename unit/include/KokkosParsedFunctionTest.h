@@ -25,7 +25,7 @@ public:
     for (const auto & it : constants)
     {
       _builder.addVariable(it.first);
-      _builder.associateValue(it.first, &it.second);
+      _builder.associateScalar(it.first, &it.second);
     }
 
     _builder.build();

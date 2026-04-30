@@ -40,10 +40,24 @@ NodalDamper::NodalDamper(const InputParameters & parameters)
     _u_increment(_var.increment()),
     _u(_var.dofValues())
 {
+  mooseAssert(_var.count() == 1,
+              "NodalDamper only supports scalar variables. Variable '" + _var.name() +
+                  "' has multiple components.");
 }
 
 Real
 NodalDamper::computeDamping()
 {
   return computeQpDamping();
+}
+
+bool
+NodalDamper::variableDefinedOnNode(const Node * node) const
+{
+  const unsigned int sys_num = _var.sys().number();
+  const unsigned int var_num = _var.number();
+
+  const unsigned int n_comp = node->n_comp(sys_num, var_num);
+
+  return n_comp;
 }

@@ -14,6 +14,8 @@
 
 #include "MooseParsedFunctionBase.h"
 
+class FEProblemBase;
+
 class KokkosParsedFunction : public Moose::Kokkos::FunctionBase, public MooseParsedFunctionBase
 {
 public:
@@ -45,7 +47,14 @@ protected:
    */
   Moose::Kokkos::RPNEvaluator _evaluator;
   /**
-   * Constant values of symbols
+   * Constant values associated with symbols
    */
   std::vector<Real> _symbol_values;
+  /**
+   * Functions associated with symbols
+   */
+  std::vector<Moose::Kokkos::Function> _symbol_functions;
+
+private:
+  FEProblemBase & _problem;
 };

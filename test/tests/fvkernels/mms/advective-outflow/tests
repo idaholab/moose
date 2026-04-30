@@ -82,6 +82,7 @@
       input = test.py
       test_case = KTLimitedCD
       detail = 'with central difference interpolation of face values and resulting second order convergence'
+      min_slots = 2 # memory heavy
     []
     [KTLimitedUpwind]
       type = MMSTest
