@@ -29,11 +29,30 @@ from typing import Iterable
 # --------------------------- Helpers ---------------------------
 
 
-def git_files(*patterns: str) -> list[str]:
-    """Return repo-tracked files matching glob patterns, excluding contrib/."""
+def _is_regular_git_file(mode: str) -> bool:
+    """Return whether a git index mode represents a regular file."""
+    return stat.S_ISREG(int(mode, 8))
+
+
+def _is_executable_git_file(mode: str) -> bool:
+    """Return whether a git index mode represents an executable file."""
+    return bool(stat.S_IMODE(int(mode, 8)) & stat.S_IXUSR)
+
+
+def _checkable_path(path: str) -> bool:
+    """Return whether a tracked path should be included in precheck scans."""
+    return (
+        not path.startswith("contrib/")
+        and "/contrib/" not in path
+        and not path.endswith("/test_pre_check.py")
+    )
+
+
+def git_file_entries(*patterns: str) -> list[tuple[str, str]]:
+    """Return (mode, path) for tracked regular files matching glob patterns."""
     try:
         cp = subprocess.run(
-            ["git", "ls-files", "-z", *patterns],
+            ["git", "ls-files", "-z", "--stage", "--cached", "--", *patterns],
             capture_output=True,
             text=True,
             check=True,
@@ -42,14 +61,22 @@ def git_files(*patterns: str) -> list[str]:
         print("Git error output:", e.stderr)
         raise
 
-    return [
-        p
-        for p in cp.stdout.split("\x00")
-        if p
-        and not p.startswith("contrib/")
-        and "/contrib/" not in p
-        and not p.endswith("/test_pre_check.py")
-    ]
+    entries = []
+    for entry in cp.stdout.split("\x00"):
+        if not entry:
+            continue
+
+        metadata, path = entry.split("\t", 1)
+        mode = metadata.split(" ", 1)[0]
+        if _is_regular_git_file(mode) and _checkable_path(path):
+            entries.append((mode, path))
+
+    return entries
+
+
+def git_files(*patterns: str) -> list[str]:
+    """Return tracked regular files matching glob patterns, excluding contrib/."""
+    return [path for _, path in git_file_entries(*patterns)]
 
 
 def read_text(path: str) -> str:
@@ -179,11 +206,10 @@ def find_bad_executables() -> list[str]:
     Scripts (.py, .js, .sh, .pl) and extensionless files are allowed to be executable.
     """
     bad = []
-    for f in git_files():
+    for mode, f in git_file_entries():
         if f.endswith((".pl", ".py", ".js", ".sh")) or "." not in Path(f).name:
             continue
-        st = os.stat(f)
-        if stat.S_ISREG(st.st_mode) and os.access(f, os.X_OK):
+        if _is_executable_git_file(mode):
             bad.append(f)
     return bad
 
