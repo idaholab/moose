@@ -40,6 +40,30 @@ class TestHelpers(unittest.TestCase):
     """Test helper functions"""
 
     @patch("pre_check.subprocess.run")
+    def test_changed_files(self, mock_run):
+        """Test changed_files() returns paths touched by the requested range"""
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=["git", "diff"],
+            returncode=0,
+            stdout="file1.py\x00dir/file2.C\x00",
+        )
+        files = pre_check.changed_files("base", "HEAD")
+        self.assertEqual(files, {"file1.py", "dir/file2.C"})
+        mock_run.assert_called_once_with(
+            [
+                "git",
+                "diff",
+                "--name-only",
+                "-z",
+                "--diff-filter=ACMRT",
+                "base..HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+    @patch("pre_check.subprocess.run")
     def test_git_files(self, mock_run):
         """Test git_files() function"""
         mock_run.return_value = subprocess.CompletedProcess(
@@ -78,6 +102,23 @@ class TestHelpers(unittest.TestCase):
             text=True,
             check=True,
         )
+
+    @patch("pre_check.subprocess.run")
+    def test_git_files_filters_touched_files(self, mock_run):
+        """Test git_files() only returns requested touched files"""
+        mock_run.return_value = subprocess.CompletedProcess(
+            args=["git", "ls-files"],
+            returncode=0,
+            stdout=(
+                "100644 abc123 0\tfile1.py\x00"
+                "100644 abc123 0\tfile2.C\x00"
+                "120000 abc123 0\tlink.py\x00"
+            ),
+        )
+        files = pre_check.git_files(
+            "*.py", "*.[Ch]", touched_files={"file2.C", "link.py"}
+        )
+        self.assertEqual(files, ["file2.C"])
 
     def test_read_text(self):
         """Test read_text() function"""
@@ -118,7 +159,7 @@ class TestFileSetHelpers(unittest.TestCase):
         """Test files_for_tabs_except_input()"""
         mock_git_files.return_value = ["file1.C", "file2.py"]
         result = pre_check.files_for_tabs_except_input()
-        mock_git_files.assert_called_once_with("*.[Ch]", "*.py")
+        mock_git_files.assert_called_once_with("*.[Ch]", "*.py", touched_files=None)
         self.assertEqual(result, ["file1.C", "file2.py"])
 
     @patch("pre_check.git_files")
@@ -126,14 +167,14 @@ class TestFileSetHelpers(unittest.TestCase):
         """Test files_for_tabs()"""
         mock_git_files.return_value = ["file1.C", "file2.i", "file3.py"]
         pre_check.files_for_tabs()
-        mock_git_files.assert_called_once_with("*.[Chi]", "*.py")
+        mock_git_files.assert_called_once_with("*.[Chi]", "*.py", touched_files=None)
 
     @patch("pre_check.git_files")
     def test_files_for_whitespace_cpp_enabled(self, mock_git_files):
         """Test files_for_whitespace() with C++ files"""
         mock_git_files.return_value = ["file1.C", "file2.py"]
         pre_check.files_for_whitespace(True, False)
-        mock_git_files.assert_called_once_with("*.[Cchi]", "*.py")
+        mock_git_files.assert_called_once_with("*.[Cchi]", "*.py", touched_files=None)
 
     @patch("pre_check.git_files")
     def test_files_for_whitespace_fortran_enabled(self, mock_git_files):
@@ -141,7 +182,13 @@ class TestFileSetHelpers(unittest.TestCase):
         mock_git_files.return_value = ["file1.F", "file2.f90"]
         pre_check.files_for_whitespace(False, True)
         mock_git_files.assert_called_once_with(
-            "*.i", "*.py", "*.[FfH]", "*.f90", "*.F90", "*.FF90"
+            "*.i",
+            "*.py",
+            "*.[FfH]",
+            "*.f90",
+            "*.F90",
+            "*.FF90",
+            touched_files=None,
         )
 
 
@@ -353,41 +400,57 @@ class TestPrecheckErrors(unittest.TestCase):
     """Test main precheck_errors() function"""
 
     @patch.dict(os.environ, ALL_CHECKS_OFF)
-    def test_precheck_errors_all_disabled(self):
+    @patch("pre_check.changed_files")
+    def test_precheck_errors_all_disabled(self, mock_changed_files):
         """Test precheck_errors() with all checks disabled"""
         result = pre_check.precheck_errors("HEAD~1", "HEAD")
         self.assertEqual(result, 0)
+        mock_changed_files.assert_not_called()
 
     @patch.dict(os.environ, {**ALL_CHECKS_OFF, "CHECK_TICKET_REFERENCE": "1"})
     @patch("pre_check.ticket_references")
+    @patch("pre_check.changed_files")
     @patch("sys.stdout")
-    def test_precheck_errors_ticket_pass(self, mock_stdout, mock_ticket):
+    def test_precheck_errors_ticket_pass(
+        self, mock_stdout, mock_changed_files, mock_ticket
+    ):
         """Test precheck_errors() with valid ticket reference"""
         mock_ticket.return_value = "Fix #1234"
         result = pre_check.precheck_errors("HEAD~1", "HEAD")
         self.assertEqual(result, 0)
+        mock_changed_files.assert_not_called()
 
     @patch.dict(os.environ, {**ALL_CHECKS_OFF, "CHECK_TICKET_REFERENCE": "1"})
     @patch("pre_check.ticket_references")
+    @patch("pre_check.changed_files")
     @patch("pre_check.subprocess.run")
     @patch("sys.stdout")
-    def test_precheck_errors_ticket_fail(self, mock_stdout, mock_run, mock_ticket):
+    def test_precheck_errors_ticket_fail(
+        self, mock_stdout, mock_run, mock_changed_files, mock_ticket
+    ):
         """Test precheck_errors() without ticket reference"""
         mock_ticket.return_value = ""
         mock_run.return_value = MagicMock(stdout="commit message")
         result = pre_check.precheck_errors("HEAD~1", "HEAD")
         self.assertEqual(result, 1)
+        mock_changed_files.assert_not_called()
 
     @patch.dict(os.environ, {**ALL_CHECKS_OFF, "CHECK_TABS": "1"})
+    @patch("pre_check.changed_files")
     @patch("pre_check.find_tabs")
     @patch("pre_check.files_for_tabs")
     @patch("sys.stdout")
-    def test_precheck_errors_tabs_fail(self, mock_stdout, mock_files, mock_find):
+    def test_precheck_errors_tabs_fail(
+        self, mock_stdout, mock_files, mock_find, mock_changed_files
+    ):
         """Test precheck_errors() with tab characters"""
+        mock_changed_files.return_value = {"file1.C"}
         mock_files.return_value = ["file1.C"]
         mock_find.return_value = ["file1.C"]
         result = pre_check.precheck_errors("HEAD~1", "HEAD")
         self.assertEqual(result, 1)
+        mock_changed_files.assert_called_once_with("HEAD~1", "HEAD")
+        mock_files.assert_called_once_with({"file1.C"})
 
 
 class TestMainFunction(unittest.TestCase):
