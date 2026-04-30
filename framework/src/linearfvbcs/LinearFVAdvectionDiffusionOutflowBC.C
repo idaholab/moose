@@ -21,7 +21,7 @@ LinearFVAdvectionDiffusionOutflowBC::validParams()
                              "with advection-diffusion problems.");
   params.addParam<bool>(
       "assume_fully_developed_flow",
-      false,
+      true,
       "Flag to assume a zero normal gradient (fully developed flow) at the boundary.");
   return params;
 }
