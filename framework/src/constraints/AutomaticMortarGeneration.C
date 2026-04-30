@@ -611,7 +611,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (info->xi1_a == xi1 || xi1 == info->xi1_b)
       continue;
 
-    const auto new_id = _mortar_segment_mesh->max_node_id() + 1;
+    const auto new_id = _mortar_segment_mesh->max_node_id();
     mooseAssert(_mortar_segment_mesh->comm().verify(new_id),
                 "new_id must be the same on all processes");
     Node * const new_node =
@@ -753,7 +753,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
                                current_mortar_segment->point(n);
 
-      const auto new_interior_left_id = _mortar_segment_mesh->max_node_id() + 1;
+      const auto new_interior_left_id = _mortar_segment_mesh->max_node_id();
       mooseAssert(_mortar_segment_mesh->comm().verify(new_interior_left_id),
                   "new_id must be the same on all processes");
       Node * const new_interior_node_left = _mortar_segment_mesh->add_point(
@@ -774,7 +774,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
                                 current_mortar_segment->point(n);
 
-      const auto new_interior_id_right = _mortar_segment_mesh->max_node_id() + 1;
+      const auto new_interior_id_right = _mortar_segment_mesh->max_node_id();
       mooseAssert(_mortar_segment_mesh->comm().verify(new_interior_id_right),
                   "new_id must be the same on all processes");
       Node * const new_interior_node_right = _mortar_segment_mesh->add_point(
@@ -952,8 +952,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
   // The main mesh max IDs are global (replicated mesh) and serve as a safe stride since the
   // mortar segment mesh is always far smaller than the main mesh.
-  dof_id_type next_node_id = _mesh.processor_id() * (_mesh.max_node_id() + 1);
-  dof_id_type local_id_index = _mesh.processor_id() * (_mesh.max_elem_id() + 1);
+  dof_id_type next_node_id = _mesh.processor_id() * _mesh.max_node_id();
+  dof_id_type local_id_index = _mesh.processor_id() * _mesh.max_elem_id();
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
