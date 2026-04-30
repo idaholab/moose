@@ -72,10 +72,10 @@ jobs:
             fi
             package_tag="$head_version"
             package_uri="${uri_prefix}/${package_container}"
-            package_build=
+            package_build="false"
 
             if [ "$base_version" != "$head_version" ]; then
-              package_build=1
+              package_build="true"
 
               if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
                 package_tag="pr-${{ github.event.pull_request.number }}"
@@ -132,135 +132,139 @@ jobs:
           done
           echo "::endgroup::"
 
-  # delete_images:
-  #   name: "Delete images"
-  #   if: github.event_name == 'pull_request'
-  #   runs-on: ubuntu-slim
-  #   permissions:
-  #     packages: write
-  #   env:
-  #     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  #   steps:
-  #     - uses: actions/delete-package-versions@v5
-  #       name: Delete pr-moose-mpi
-  #       with:
-  #         package-name: moose/pr-moose-mpi
-  #         package-type: container
-  #         min-versions-to-keep: 0
-  #         ignore-versions: '^(?!pr-${{ github.event.pull_request.number }})'
-  #     - uses: actions/delete-package-versions@v5
-  #       name: Delete pr-moose-petsc-mpich
-  #       with:
-  #         owner: ${{ github.repository_owner }}
-  #         package-name: pr-moose-petsc-mpich
-  #         package-type: container
-  #         min-versions-to-keep: 0
-  #         ignore-versions: '^(?!pr-${{ github.event.pull_request.number }})'
-  #     - uses: actions/delete-package-versions@v5
-  #       name: Delete pr-moose-libmesh-mpich
-  #       with:
-  #         owner: ${{ github.repository_owner }}
-  #         package-name: pr-moose-libmesh-mpich
-  #         package-type: container
-  #         min-versions-to-keep: 0
-  #         ignore-versions: '^(?!pr-${{ github.event.pull_request.number }})'
-
-  build_moose_mpi_clang:
-    name: "Build moose-mpi-clang"
+  build_clang_mpich:
+    name: "Build clang-mpich"
     needs: [prepare]
     if: >-
       !cancelled()
-      && needs.prepare.outputs.mpi_build
+      && (needs.prepare.outputs.mpi_build == 'true' || needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
     uses: ./.github/workflows/reusable-build-docker.yml
     with:
       base_sha: ${{ needs.prepare.outputs.base_sha }}
-      from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.1_2026.04.14
-      file: docker/moose-mpi/Dockerfile
-      uri: "${{ needs.prepare.outputs.mpi_uri }}-clang:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.1_2026.04.14
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-clang:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: ${{ needs.prepare.outputs.mpi_build == 'true' }}
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-clang-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-clang-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-clang-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
 
-  build_moose_mpi_clang_min:
-    name: "Build moose-mpi-clang_min"
-    needs:
-      - prepare
+  build_clang_min_mpich:
+    name: "Build clang_min-mpich"
+    needs: [prepare]
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.prepare.result)
-      && needs.prepare.outputs.mpi_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.mpi_build == 'true' || needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.1_2026.04.12
-          file: docker/moose-mpi/Dockerfile
-          variant: clang_min
-          uri_prefix: ${{ needs.prepare.outputs.mpi_uri }}
-          tag: ${{ needs.prepare.outputs.mpi_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.1_2026.04.12
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-clang_min:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: ${{ needs.prepare.outputs.mpi_build == 'true' }}
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-clang_min-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-clang_min-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-clang_min-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
+        LIBTORCH_SKIP=1
+        NEML2_SKIP=1
 
-  build_moose_mpi_gcc_min:
-    name: "Build moose-mpi-gcc_min"
-    needs:
-      - prepare
+  build_gcc_min_mpich:
+    name: "Build gcc_min-mpich"
+    needs: [prepare]
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.prepare.result)
-      && needs.prepare.outputs.mpi_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.mpi_build == 'true' || needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.1_2026.04.12
-          file: docker/moose-mpi/Dockerfile
-          variant: gcc_min
-          uri_prefix: ${{ needs.prepare.outputs.mpi_uri }}
-          tag: ${{ needs.prepare.outputs.mpi_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.1_2026.04.12
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-gcc_min:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: ${{ needs.prepare.outputs.mpi_build == 'true' }}
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-gcc_min-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-gcc_min-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-gcc_min-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
+        LIBTORCH_SKIP=1
+        NEML2_SKIP=1
 
-  build_moose_mpi_intel:
-    name: "Build moose-mpi-intel"
-    needs:
-      - prepare
+  build_intel_mpich:
+    name: "Build intel-mpich"
+    needs: [prepare]
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.prepare.result)
-      && needs.prepare.outputs.mpi_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.mpi_build == 'true' || needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.3-mpich4.3.2_2026.04.12
-          file: docker/moose-mpi/Dockerfile
-          variant: intel
-          uri_prefix: ${{ needs.prepare.outputs.mpi_uri }}
-          tag: ${{ needs.prepare.outputs.mpi_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.3-mpich4.3.2_2026.04.12
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-intel:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: ${{ needs.prepare.outputs.mpi_build == 'true' }}
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-intel-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-intel-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-intel-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
+        LIBTORCH_SKIP=1
 
   build_moose_mpi_rocky8:
     name: "Build moose-mpi-rocky8"
@@ -289,700 +293,106 @@ jobs:
           tag: ${{ needs.prepare.outputs.mpi_tag }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
 
-  build_moose_mpi_rocky9:
-    name: "Build moose-mpi-rocky9"
-    needs:
-      - prepare
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.prepare.result)
-      && needs.prepare.outputs.mpi_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10_2026.04.12
-          file: docker/moose-mpi/Dockerfile
-          variant: rocky9
-          uri_prefix: ${{ needs.prepare.outputs.mpi_uri }}
-          tag: ${{ needs.prepare.outputs.mpi_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_petsc_clang_mpich:
-    name: "Build moose-petsc-clang-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_clang
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_clang.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-clang:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: clang-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_petsc_clang_min_mpich:
-    name: "Build moose-petsc-clang_min-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_clang_min
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_clang_min.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-clang_min:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: clang_min-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_petsc_gcc_min_mpich:
-    name: "Build moose-petsc-gcc_min-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_gcc_min
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_gcc_min.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-gcc_min:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: gcc_min-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_petsc_intel_mpich:
-    name: "Build moose-petsc-intel-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_intel
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_intel.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-intel:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: intel-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_petsc_rocky8_mpich:
-    name: "Build moose-petsc-rocky8-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_rocky8
+  build_rocky8_mpich:
+    name: "Build rocky8-mpich"
+    needs: [prepare, build_moose_mpi_rocky8]
     if: >-
       !cancelled()
       && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_rocky8.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-rocky8:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: rocky8-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: unused
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-rocky8:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: false
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-rocky8-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-rocky8-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
 
-  build_moose_petsc_rocky8_openmpi:
-    name: "Build moose-petsc-rocky8-openmpi"
-    needs:
-      - prepare
-      - build_moose_mpi_rocky8
+  build_rocky8_openmpi:
+    name: "Build rocky8-openmpi"
+    needs: [prepare, build_moose_mpi_rocky8]
     if: >-
       !cancelled()
       && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_rocky8.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-rocky8:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: rocky8-openmpi
-          build_args: |
-            MPI_FLAVOUR=openmpi
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: unused
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-rocky8:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: false
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-rocky8-openmpi:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=openmpi
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-rocky8-openmpi:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-openmpi:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
 
-  build_moose_petsc_rocky9_mpich:
-    name: "Build moose-petsc-rocky9-mpich"
-    needs:
-      - prepare
-      - build_moose_mpi_rocky9
+  build_rocky9_mpich:
+    name: "Build rocky9-mpich"
+    needs: [prepare]
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi_rocky9.result)
-      && needs.prepare.outputs.petsc_build
-    runs-on: ubuntu-24.04
+      && (needs.prepare.outputs.mpi_build == 'true' || needs.prepare.outputs.petsc_build == 'true' || needs.prepare.outputs.libmesh_build == 'true' || needs.prepare.outputs.moose_dev_build == 'true')
     permissions:
       contents: read
       packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.mpi_uri }}-rocky9:${{ needs.prepare.outputs.mpi_tag }}"
-          file: docker/moose-petsc/Dockerfile
-          variant: rocky9-mpich
-          build_args: |
-            MPI_FLAVOUR=mpich
-            PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.petsc_uri }}
-          tag: ${{ needs.prepare.outputs.petsc_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_clang_mpich:
-    name: "Build moose-libmesh-clang-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_clang_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_clang_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-clang-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: clang-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_clang_min_mpich:
-    name: "Build moose-libmesh-clang_min-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_clang_min_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_clang_min_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-clang_min-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: clang_min-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_gcc_min_mpich:
-    name: "Build moose-libmesh-gcc_min-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_gcc_min_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_gcc_min_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-gcc_min-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: gcc_min-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_intel_mpich:
-    name: "Build moose-libmesh-intel-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_intel_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_intel_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-intel-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: intel-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_rocky8_mpich:
-    name: "Build moose-libmesh-rocky8-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_rocky8_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_rocky8_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-rocky8-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: rocky8-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_rocky8_openmpi:
-    name: "Build moose-libmesh-rocky8-openmpi"
-    needs:
-      - prepare
-      - build_moose_petsc_rocky8_openmpi
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_rocky8_openmpi.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-rocky8-openmpi:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: rocky8-openmpi
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_libmesh_rocky9_mpich:
-    name: "Build moose-libmesh-rocky9-mpich"
-    needs:
-      - prepare
-      - build_moose_petsc_rocky9_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc_rocky9_mpich.result)
-      && needs.prepare.outputs.libmesh_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.petsc_uri }}-rocky9-mpich:${{ needs.prepare.outputs.petsc_tag }}"
-          file: docker/moose-libmesh/Dockerfile
-          variant: rocky9-mpich
-          build_args: |
-            LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
-            VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
-          uri_prefix: ${{ needs.prepare.outputs.libmesh_uri }}
-          tag: ${{ needs.prepare.outputs.libmesh_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_clang_mpich:
-    name: "Build moose-dev-clang-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_clang_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_clang_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-clang-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: clang-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_clang_min_mpich:
-    name: "Build moose-dev-clang_min-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_clang_min_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_clang_min_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-clang_min-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: clang_min-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-            LIBTORCH_SKIP=1
-            NEML2_SKIP=1
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_gcc_min_mpich:
-    name: "Build moose-dev-gcc_min-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_gcc_min_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_gcc_min_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-gcc_min-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: gcc_min-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-            NEML2_SKIP=1
-            LIBTORCH_SKIP=1
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_intel_mpich:
-    name: "Build moose-dev-intel-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_intel_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_intel_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-intel-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: intel-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-            LIBTORCH_SKIP=1
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_rocky8_mpich:
-    name: "Build moose-dev-rocky8-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_rocky8_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_rocky8_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-rocky8-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: rocky8-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_rocky8_openmpi:
-    name: "Build moose-dev-rocky8-openmpi"
-    needs:
-      - prepare
-      - build_moose_libmesh_rocky8_openmpi
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_rocky8_openmpi.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-rocky8-openmpi:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: rocky8-openmpi
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_moose_dev_rocky9_mpich:
-    name: "Build moose-dev-rocky9-mpich"
-    needs:
-      - prepare
-      - build_moose_libmesh_rocky9_mpich
-    if: >-
-      !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh_rocky9_mpich.result)
-      && needs.prepare.outputs.moose_dev_build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: idaholab/moose/checkout@actions
-        name: Checkout
-        with:
-          pr_base_sha: ${{ needs.prepare.outputs.base_sha }}
-      - uses: idaholab/moose/build-docker@actions
-        name: Build and push
-        with:
-          from: "${{ needs.prepare.outputs.libmesh_uri }}-rocky9-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
-          file: docker/moose-dev/Dockerfile
-          variant: rocky9-mpich
-          build_args: |
-            CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
-            MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
-            NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
-            WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
-          uri_prefix: ${{ needs.prepare.outputs.moose_dev_uri }}
-          tag: ${{ needs.prepare.outputs.moose_dev_tag }}
-          registry_token: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/reusable-build-docker.yml
+    with:
+      base_sha: ${{ needs.prepare.outputs.base_sha }}
+      mpi_from: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.10_2026.04.12
+      mpi_to: "${{ needs.prepare.outputs.mpi_uri }}-rocky9:${{ needs.prepare.outputs.mpi_tag }}"
+      mpi_build: ${{ needs.prepare.outputs.mpi_build == 'true' }}
+      petsc_to: "${{ needs.prepare.outputs.petsc_uri }}-rocky9-mpich:${{ needs.prepare.outputs.petsc_tag }}"
+      petsc_build: ${{ needs.prepare.outputs.petsc_build == 'true' }}
+      petsc_build_args: |
+        MPI_FLAVOUR=mpich
+        PETSC_GIT_REF=${{ needs.prepare.outputs.petsc_sha }}
+      libmesh_to: "${{ needs.prepare.outputs.libmesh_uri }}-rocky9-mpich:${{ needs.prepare.outputs.libmesh_tag }}"
+      libmesh_build: ${{ needs.prepare.outputs.libmesh_build == 'true' }}
+      libmesh_build_args: |
+        LIBMESH_GIT_REF=${{ needs.prepare.outputs.libmesh_sha }}
+        VTK_VERSION=${{ needs.prepare.outputs.vtk_version }}
+      moose_dev_to: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky9-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
+      moose_dev_build: ${{ needs.prepare.outputs.moose_dev_build == 'true' }}
+      moose_dev_build_args: |
+        CONDUIT_GIT_REF=${{ needs.prepare.outputs.conduit_sha }}
+        MFEM_GIT_REF=${{ needs.prepare.outputs.mfem_sha }}
+        NEML2_GIT_REF=${{ needs.prepare.outputs.neml2_sha }}
+        WASP_GIT_REF=${{ needs.prepare.outputs.wasp_sha }}
 
   #
   # Modules, with moose-dev-rocky8-mpich
@@ -992,11 +402,11 @@ jobs:
     name: "Modules"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
       && !always()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-slim
     steps:
       - name: Test
@@ -1008,10 +418,10 @@ jobs:
     name: "Modules debug"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-24.04
     container:
       image: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
@@ -1042,11 +452,11 @@ jobs:
     name: "Modules parallel"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
       && !always()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-slim
     steps:
       - name: Test
@@ -1058,11 +468,11 @@ jobs:
     name: "Modules recover"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
       && !always()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-slim
     steps:
       - name: Test
@@ -1074,11 +484,11 @@ jobs:
     name: "Modules restep"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
       && !always()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-slim
     steps:
       - name: Test
@@ -1090,11 +500,11 @@ jobs:
     name: "Fluid properties apps"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
       && !always()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-slim
     steps:
       - name: Test
@@ -1111,10 +521,10 @@ jobs:
     name: "Sweeps"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
       && (github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'CI\u003A sweeps')))
     runs-on: ubuntu-24.04
     strategy:
@@ -1173,10 +583,10 @@ jobs:
     name: "Clang"
     needs:
       - prepare
-      - build_moose_dev_clang_mpich
+      - build_clang_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_clang_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_clang_mpich.result)
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -1233,10 +643,10 @@ jobs:
     name: "Clang min"
     needs:
       - prepare
-      - build_moose_dev_clang_min_mpich
+      - build_clang_min_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_clang_min_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_clang_min_mpich.result)
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -1293,10 +703,10 @@ jobs:
     name: "GCC min"
     needs:
       - prepare
-      - build_moose_dev_gcc_min_mpich
+      - build_gcc_min_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_gcc_min_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_gcc_min_mpich.result)
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -1353,10 +763,10 @@ jobs:
     name: "Intel"
     needs:
       - prepare
-      - build_moose_dev_intel_mpich
+      - build_intel_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_intel_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_intel_mpich.result)
     runs-on: ubuntu-24.04
     steps:
       - uses: idaholab/moose/checkout@actions
@@ -1388,10 +798,10 @@ jobs:
     name: "Heavy"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-24.04
     container:
       image: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
@@ -1432,10 +842,10 @@ jobs:
     name: "No optional"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-24.04
     container:
       image: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
@@ -1480,10 +890,10 @@ jobs:
     name: "No unity"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-24.04
     container:
       image: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
@@ -1512,10 +922,10 @@ jobs:
     name: "Python"
     needs:
       - prepare
-      - build_moose_dev_rocky8_mpich
+      - build_rocky8_mpich
     if: >-
       !cancelled()
-      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_dev_rocky8_mpich.result)
+      && contains(fromJSON('["success", "skipped"]'), needs.build_rocky8_mpich.result)
     runs-on: ubuntu-24.04
     container:
       image: "${{ needs.prepare.outputs.moose_dev_uri }}-rocky8-mpich:${{ needs.prepare.outputs.moose_dev_tag }}"
