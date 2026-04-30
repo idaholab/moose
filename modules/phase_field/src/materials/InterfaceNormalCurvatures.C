@@ -56,10 +56,10 @@ InterfaceNormalCurvatures::computeQpProperties()
     static const RealVectorValue ZHAT(0., 0., 1.);
     static const RealVectorValue XHAT(1., 0., 0.);
 
-    RealVectorValue t1 = ZHAT.cross(nhat);
+    RealVectorValue t1 = ZHAT.cross(nhat); // chosen to lie in xy-plane
     const Real t1_mag = t1.norm();
     if (t1_mag < 1e-12)
-      t1 = XHAT; // n = +/- z: choose x as in-plane tangent
+      t1 = XHAT; // if n = +/- z, choose x to be in-plane tangent t_1
     else
       t1 /= t1_mag;
 
@@ -84,8 +84,8 @@ InterfaceNormalCurvatures::computeQpProperties()
       return val;
     };
 
-    _kappa1[_qp] = -vHv(t1) / g_mag; // in-plane tangent
-    _kappa2[_qp] = -vHv(t2) / g_mag; // out-of-plane tangent
+    _kappa1[_qp] = -vHv(t1) / g_mag; // curvature in t_1 direction
+    _kappa2[_qp] = -vHv(t2) / g_mag; // curvature in t_2 direction
 
     // -- 4.  Mean curvature ---------------------------------------------------
 

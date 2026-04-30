@@ -4,16 +4,16 @@
 
 ## Overview
 
-`InterfaceNormalCurvatures` is a `Material` object that computes the two normal curvatures of a diffuse interface defined by an order parameter $\eta$. The interface geometry is encoded entirely in the gradient and Hessian of $\eta$; no explicit surface mesh is required.
+`InterfaceNormalCurvatures` is a `Material` object that computes two normal curvatures of a diffuse interface defined by an order parameter $\eta$.
 
-The two normal curvatures characterize how the interface bends in two orthogonal tangent directions:
+The two normal curvatures characterize how the interface bends in two orthogonal directions tangent to the surface defined by the level set of $\eta$.
 
 | Property | Symbol | Direction |
 |---|---|---|
-| `kappa1` | $\kappa_1$ | In-plane tangent $\hat{t}_1$ (projection of $\hat{z}$ onto the surface) |
+| `kappa1` | $\kappa_1$ | In-plane tangent $\hat{t}_1$ ($\hat{t}_1$ is chosen to lie in the $xy$-plane) |
 | `kappa2` | $\kappa_2$ | Out-of-plane tangent $\hat{t}_2 = \hat{n} \times \hat{t}_1$ |
 
-As a consistency check, their sum equals the mean curvature: $\kappa_1 + \kappa_2 = \kappa = \nabla \cdot \hat{n}$.
+As a consistency check, their mean equals the mean curvature: $\frac{1}{2} \left(\kappa_1 + \kappa_2 \right) = \kappa_{mean} = \frac{1}{2} \left( \nabla \cdot \hat{n} \right)$.
 
 ---
 
@@ -28,11 +28,7 @@ The unit normal to the diffuse interface is defined from the order parameter gra
   \label{eq:normal}
 \end{equation}
 
-This is well-defined in the interfacial region where $|\nabla\eta| \neq 0$. A small regularization floor $\varepsilon$ is added to the denominator throughout to prevent division by zero in bulk regions:
-
-\begin{equation}
-  \hat{n} \approx \frac{\nabla\eta}{|\nabla\eta| + \varepsilon}
-\end{equation}
+This is well-defined in the interfacial region where $|\nabla\eta| \neq 0$. To prevent unreliable calculations when $|\nabla\eta| \approx 0$, curvatures are set to zero when $|\nabla\eta|$ is less than the user-settable input parameter `gradient_threshold`.
 
 ### Local Tangent Frame
 
@@ -106,10 +102,10 @@ This is the key formula implemented at each quadrature point. The two scalar out
 
 ### Mean Curvature (Diagnostic)
 
-The mean curvature $\kappa = \frac{1}{2} \nabla \cdot \hat{n}$ is also declared as a material property for verification. It equals the trace of the shape operator:
+The mean curvature $\kappa_{mean} = \frac{1}{2} \left( \nabla \cdot \hat{n} \right)$ is also declared as a material property for verification. It equals the trace of the shape operator:
 
 \begin{equation}
-  \kappa = \frac{1}{2} (\kappa_1 + \kappa_2) = -\frac{1}{2} \left( \frac{\mathrm{tr}(\mathbf{H}) - \hat{n} \cdot \mathbf{H} \cdot \hat{n}}{|\nabla\eta|} \right)
+  \kappa_{mean} = \frac{1}{2} (\kappa_1 + \kappa_2) = -\frac{1}{2} \left( \frac{\mathrm{tr}(\mathbf{H}) - \hat{n} \cdot \mathbf{H} \cdot \hat{n}}{|\nabla\eta|} \right)
 \end{equation}
 
 ---
@@ -118,9 +114,9 @@ The mean curvature $\kappa = \frac{1}{2} \nabla \cdot \hat{n}$ is also declared 
 
 | Name | Type | Description |
 |---|---|---|
-| `kappa1` | `Real` | Normal curvature $\kappa_1$ along the in-plane tangent $\hat{t}_1$ |
+| `kappa1` | `Real` | Normal curvature $\kappa_1$ along the tangent $\hat{t}_1$ (lies in $xy$-plane) |
 | `kappa2` | `Real` | Normal curvature $\kappa_2$ along the out-of-plane tangent $\hat{t}_2$ |
-| `kappa_mean` | `Real` | Mean curvature $\kappa =  \frac{1}{2} (\kappa_1 + \kappa_2) =  \frac{1}{2} \nabla\cdot\hat{n}$ |
+| `kappa_mean` | `Real` | Mean curvature $\kappa_{mean} =  \frac{1}{2} (\kappa_1 + \kappa_2) =  \frac{1}{2} \left( \nabla\cdot\hat{n} \right)$ |
 
 All property names can be prefixed by setting `base_name`.
 

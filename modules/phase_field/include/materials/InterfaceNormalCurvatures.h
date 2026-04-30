@@ -12,7 +12,7 @@
 #include "Material.h"
 
 /**
- * Computes the two normal curvatures of a diffuse interface defined
+ * Computes two normal curvatures of a diffuse interface defined
  * by an order parameter eta using n = grad(eta) / | grad(eta) |.
  *
  * At every quadrature point the local frame is:
@@ -26,9 +26,9 @@
  *   kappa_1 = t_1 S t_1    (curvature along t_1, the in-plane tangent)
  *   kappa_2 = t_2 S t_2    (curvature along t_2, the out-of-plane tangent)
  *
- * where  S is the shape operator (Weingarten map).
+ * where S is the shape operator (Weingarten map).
  *
- * Note: kappa_1 + kappa_2 = mean curvature kappa = div(n)  (as a consistency check).
+ * Note: kappa_1 + kappa_2 = 1/2 * mean curvature (as a consistency check).
  *
  * Requires second-order Lagrange (or higher) elements so that the
  * second derivatives of eta are available.
@@ -55,6 +55,6 @@ private:
   MaterialProperty<Real> & _kappa1; /// normal curvature along t_1
   MaterialProperty<Real> & _kappa2; /// normal curvature along t_2
 
-  // -- optional diagnostics -----------------------------------
+  // -- diagnostics --------------------------------------------
   MaterialProperty<Real> & _kappa_mean;
 };
