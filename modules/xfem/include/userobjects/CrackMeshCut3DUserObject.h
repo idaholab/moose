@@ -230,6 +230,63 @@ protected:
   void growFront();
 
   /**
+    Determine whether a front node is an inactive endpoint of an active boundary segment.
+    @param front_node_index index of the node within the active boundary segment
+    @param front_size number of nodes in the active boundary segment
+    @return true if the node is an inactive endpoint
+   */
+  bool isInactiveEndpoint(unsigned int front_node_index, unsigned int front_size) const;
+
+  /**
+    Compute the crack growth increment for a front node.
+    @param front_node_index index of the node within the active boundary segment
+    @param front_size number of nodes in the active boundary segment
+    @param front_point_index mapping from active boundary nodes to crack-front-definition points
+    @return the growth increment applied to the node
+   */
+  Real computeGrowthIncrement(unsigned int front_node_index,
+                              unsigned int front_size,
+                              const std::vector<int> & front_point_index) const;
+
+  /**
+    Project an inactive endpoint back outside the structural mesh if its proposed position lands
+    inside the volume.
+    @param segment_index index of the active boundary segment
+    @param front_node_index index of the node within the active boundary segment
+    @param front_size number of nodes in the active boundary segment
+    @param candidate_point proposed grown node position
+    @return the adjusted point position
+   */
+  Point projectInteriorInactiveEndpoint(unsigned int segment_index,
+                                        unsigned int front_node_index,
+                                        unsigned int front_size,
+                                        const Point & candidate_point) const;
+
+  /**
+    Add a grown front node while checking whether the newly formed crack-front triangles are
+    degenerate.
+    @param segment_index index of the active boundary segment
+    @param front_node_index index of the node within the active boundary segment
+    @param orig_id original boundary node id
+    @param candidate_point proposed grown node position
+    @param front_nodes output front-node ordering for the current active segment
+    @return the id that should represent this node on the grown front
+   */
+  dof_id_type appendAdvancedFrontNodeCheckingDegenerateTriangles(
+      unsigned int segment_index,
+      unsigned int front_node_index,
+      dof_id_type orig_id,
+      const Point & candidate_point,
+      std::vector<dof_id_type> & front_nodes);
+
+  /**
+    Update the tracked crack-front-definition node when a front node advances.
+    @param orig_id original crack front node id
+    @param new_id replacement node id after growth
+   */
+  void updateTrackedCrackFrontPoint(dof_id_type orig_id, dof_id_type new_id);
+
+  /**
     Sort the front nodes
    */
   void sortFrontNodes();
