@@ -115,6 +115,8 @@ protected:
   void computeMdot(int iblock);
   /// Computes turbulent crossflow per gap for block iblock
   void computeWijPrime(int iblock);
+  /// Computes and validates the turbulent mixing parameter
+  Real computeMixingParameter(unsigned int i_gap, unsigned int iz, bool sweep_flow = false) const;
   /// Computes Pressure Drop per channel for block iblock
   void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock

@@ -432,14 +432,14 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             //(the other would be the i_ch) sweep enthalpy flows into i_ch
             if ((ii_ch == sweep_donor) || (jj_ch == sweep_donor))
             {
-              sweep_enthalpy += _mixing_closure->computeMixingParameter(i_gap, iz, true) *
-                                edge_flux_ave * Sij * (*_h_soln)(node_sweep_donor);
+              sweep_enthalpy += computeMixingParameter(i_gap, iz, true) * edge_flux_ave * Sij *
+                                (*_h_soln)(node_sweep_donor);
             }
             // else sweep enthalpy flows out of i_ch
             else
             {
-              sweep_enthalpy -= _mixing_closure->computeMixingParameter(i_gap, iz, true) *
-                                edge_flux_ave * Sij * (*_h_soln)(node_in);
+              sweep_enthalpy -= computeMixingParameter(i_gap, iz, true) * edge_flux_ave * Sij *
+                                (*_h_soln)(node_in);
             }
           }
           // Inner gap
@@ -1008,11 +1008,11 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             {
               if ((ii_ch == sweep_donor) || (jj_ch == sweep_donor))
               {
-                beta_in = _mixing_closure->computeMixingParameter(i_gap, iz, true);
+                beta_in = computeMixingParameter(i_gap, iz, true);
               }
               else
               {
-                beta_out = _mixing_closure->computeMixingParameter(i_gap, iz, true);
+                beta_out = computeMixingParameter(i_gap, iz, true);
               }
             }
           }

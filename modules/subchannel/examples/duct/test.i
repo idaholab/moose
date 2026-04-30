@@ -93,6 +93,22 @@ P_out = 2.0e5 # Pa
   staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
+  duct_HTC_closure = 'gnielinski'
+  friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
+  [gnielinski]
+    type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 1.0
+  []
 []
 
 [ICs]

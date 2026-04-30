@@ -1800,7 +1800,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-      auto beta = _mixing_closure->computeMixingParameter(i_gap, iz);
+      auto beta = computeMixingParameter(i_gap, iz);
 
       if (!_implicit_bool)
       {
@@ -1868,6 +1868,25 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
     LibmeshPetscCall(VecDestroy(&loc_prod));
     LibmeshPetscCall(VecDestroy(&loc_Wij));
   }
+}
+
+Real
+SubChannel1PhaseProblem::computeMixingParameter(unsigned int i_gap,
+                                                unsigned int iz,
+                                                bool sweep_flow) const
+{
+  auto beta = _mixing_closure->computeMixingParameter(i_gap, iz, sweep_flow);
+  if (!std::isfinite(beta) || beta < 0.0)
+    mooseError(name(),
+               ": Mixing closure returned invalid beta = ",
+               beta,
+               " for gap ",
+               i_gap,
+               " at axial index ",
+               iz,
+               ". Beta must be finite and non-negative.");
+
+  return beta;
 }
 
 libMesh::DenseVector<Real>
