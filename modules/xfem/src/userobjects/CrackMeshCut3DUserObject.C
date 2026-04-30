@@ -919,9 +919,6 @@ CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_i
   ray_dir /= ray_len;
 
   ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
-  Real best_dist = std::numeric_limits<Real>::max();
-  bool surface_found = false;
-  Point best_pt;
 
   for (const auto & belem : bnd_range)
   {
@@ -933,19 +930,8 @@ CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_i
 
     Point pt;
     if (findIntersection(A, projected_point, vertices, pt))
-    {
-      const Real dist = (pt - A).norm();
-      if (dist < best_dist)
-      {
-        best_dist = dist;
-        best_pt = pt;
-        surface_found = true;
-      }
-    }
+      return pt + ray_dir * libMesh::TOLERANCE;
   }
-
-  if (surface_found)
-    projected_point = best_pt + ray_dir * libMesh::TOLERANCE;
 
   return projected_point;
 }
