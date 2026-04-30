@@ -45,7 +45,15 @@ class TestHelpers(unittest.TestCase):
         mock_run.return_value = subprocess.CompletedProcess(
             args=["git", "ls-files"],
             returncode=0,
-            stdout="file1.py\x00file2.C\x00contrib/skip.py\x00dir/contrib/skip.C\x00file3.h\x00",
+            stdout=(
+                "100644 abc123 0\tfile1.py\x00"
+                "100755 abc123 0\tfile2.C\x00"
+                "100644 abc123 0\tcontrib/skip.py\x00"
+                "100644 abc123 0\tdir/contrib/skip.C\x00"
+                "100644 abc123 0\tfile3.h\x00"
+                "120000 abc123 0\tlink.py\x00"
+                "160000 abc123 0\tsubmodule\x00"
+            ),
         )
         files = pre_check.git_files("*.py", "*.[Ch]")
         self.assertIn("file1.py", files)
@@ -53,6 +61,23 @@ class TestHelpers(unittest.TestCase):
         self.assertIn("file3.h", files)
         self.assertNotIn("contrib/skip.py", files)
         self.assertNotIn("dir/contrib/skip.C", files)
+        self.assertNotIn("link.py", files)
+        self.assertNotIn("submodule", files)
+        mock_run.assert_called_once_with(
+            [
+                "git",
+                "ls-files",
+                "-z",
+                "--stage",
+                "--cached",
+                "--",
+                "*.py",
+                "*.[Ch]",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
     def test_read_text(self):
         """Test read_text() function"""
@@ -202,19 +227,23 @@ class TestIndividualChecks(unittest.TestCase):
             result = pre_check.no_newline_at_eof_files()
             self.assertEqual(result, ["file1.py", "file2.py"])
 
-    @patch("pre_check.git_files")
+    @patch("pre_check.git_file_entries")
     @patch("os.stat")
     @patch("os.access")
-    def test_find_bad_executables(self, mock_access, mock_stat, mock_git_files):
+    def test_find_bad_executables(self, mock_access, mock_stat, mock_entries):
         """Test find_bad_executables() detects incorrectly executable files"""
-        mock_git_files.return_value = ["file1.txt", "script.py", "README.md"]
-        mock_stat.return_value = MagicMock(st_mode=0o100755)
-        mock_access.return_value = True
+        mock_entries.return_value = [
+            ("100755", "file1.txt"),
+            ("100755", "script.py"),
+            ("100644", "README.md"),
+        ]
 
         result = pre_check.find_bad_executables()
         self.assertIn("file1.txt", result)
-        self.assertIn("README.md", result)
         self.assertNotIn("script.py", result)
+        self.assertNotIn("README.md", result)
+        mock_stat.assert_not_called()
+        mock_access.assert_not_called()
 
     @patch("pre_check.git_files")
     @patch("pre_check.read_text")
