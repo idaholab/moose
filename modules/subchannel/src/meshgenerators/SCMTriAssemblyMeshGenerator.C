@@ -63,7 +63,7 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
-    _subchannel_block_id(isParamValid("subchannel_block_id")
+    _subchannel_block_id(params.isParamSetByUser("subchannel_block_id")
                              ? getParam<unsigned int>("subchannel_block_id")
                              : getParam<unsigned int>("block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id")),
@@ -88,20 +88,31 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
     _n_gaps(0),
     _elem_id(0)
 {
+  const Real total_length = _unheated_length_entry + _heated_length + _unheated_length_exit;
+
   if (_n_rings < 2)
     mooseError(name(),
                ": 'nrings' must be at least 2. In this mesh generator, the center pin counts as "
                "the first ring, so a 7-pin bundle uses nrings = 2.");
 
+  if (_n_cells == 0)
+    mooseError(name(), ": The number of axial cells must be greater than zero");
+
+  if (total_length <= 0.0)
+    mooseError(name(), ": Total bundle length must be greater than zero");
+
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
 
-  if (_spacer_z.size() &&
-      _spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
-    mooseError(name(), ": Location of spacers should be less than the total bundle length");
+  for (const auto spacer_z : _spacer_z)
+    if (spacer_z < 0.0 || spacer_z > total_length)
+      mooseError(name(), ": Location of spacers should be between zero and total bundle length");
 
   if (_z_blockage.size() != 2)
     mooseError(name(), ": Size of vector z_blockage must be 2");
+
+  if (_z_blockage.front() > _z_blockage.back())
+    mooseError(name(), ": z_blockage inlet location must not exceed outlet location");
 
   if (*max_element(_reduction_blockage.begin(), _reduction_blockage.end()) > 1)
     mooseError(name(), ": The area reduction of the blocked subchannels cannot be more than 1");
@@ -117,7 +128,7 @@ SCMTriAssemblyMeshGenerator::SCMTriAssemblyMeshGenerator(const InputParameters &
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
 
   // Defining the total length from 3 axial sections
-  Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+  Real L = total_length;
 
   // Defining the position of the spacer grid in the numerical solution array
   std::vector<int> spacer_cell;

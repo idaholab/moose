@@ -83,23 +83,45 @@ SCMQuadAssemblyMeshGenerator::SCMQuadAssemblyMeshGenerator(const InputParameters
     _n_cells(getParam<unsigned int>("n_cells")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _n_channels(_nx * _ny),
-    _n_gaps((_nx - 1) * _ny + (_ny - 1) * _nx),
-    _n_pins((_nx - 1) * (_ny - 1)),
+    _n_channels(0),
+    _n_gaps(0),
+    _n_pins(0),
     _side_gap(getParam<Real>("side_gap")),
     _subchannel_block_id(getParam<unsigned int>("subchannel_block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id"))
 {
-  if (_spacer_z.size() != _spacer_k.size())
-    mooseError(name(), ": Size of vector spacer_z should equal size of spacer_k");
+  const Real total_length = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
-  if (_z_blockage.size() != 2)
-    mooseError(name(), ": Size of vector z_blockage must be 2");
+  if (_n_cells == 0)
+    mooseError(name(), ": The number of axial cells must be greater than zero");
+
+  if (total_length <= 0.0)
+    mooseError(name(), ": Total bundle length must be greater than zero");
+
+  if (_nx == 0 || _ny == 0)
+    mooseError(name(), ": The number of subchannels must be greater than zero in each direction");
 
   if (_nx < 2 && _ny < 2)
     mooseError(name(),
                ": The number of subchannels cannot be less than 2 in both directions. "
                "Smallest assembly allowed is either 2X1 or 1X2.");
+
+  _n_channels = _nx * _ny;
+  _n_gaps = (_nx - 1) * _ny + (_ny - 1) * _nx;
+  _n_pins = (_nx - 1) * (_ny - 1);
+
+  if (_spacer_z.size() != _spacer_k.size())
+    mooseError(name(), ": Size of vector spacer_z should equal size of spacer_k");
+
+  for (const auto spacer_z : _spacer_z)
+    if (spacer_z < 0.0 || spacer_z > total_length)
+      mooseError(name(), ": Spacer locations must be between zero and total bundle length");
+
+  if (_z_blockage.size() != 2)
+    mooseError(name(), ": Size of vector z_blockage must be 2");
+
+  if (_z_blockage.front() > _z_blockage.back())
+    mooseError(name(), ": z_blockage inlet location must not exceed outlet location");
 
   if (!_index_blockage.empty() &&
       *std::max_element(_index_blockage.begin(), _index_blockage.end()) > (_n_channels - 1))
@@ -121,10 +143,6 @@ SCMQuadAssemblyMeshGenerator::SCMQuadAssemblyMeshGenerator(const InputParameters
 
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
-
-  if (_spacer_z.size() &&
-      _spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
-    mooseError(name(), ": Location of spacers must be less than total bundle length");
 
   initializeChannelData();
 }

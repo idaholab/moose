@@ -63,7 +63,7 @@ SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
     _n_cells(getParam<unsigned int>("n_cells")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _n_channels(_nx * _ny),
+    _n_channels(0),
     _side_gap(isParamValid("side_gap") ? getParam<Real>("side_gap") : getParam<Real>("gap")),
     _num_radial_parts(getParam<unsigned int>("num_radial_parts")),
     _subchannel_block_id(getParam<unsigned int>("subchannel_block_id")),
@@ -71,6 +71,23 @@ SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
     _elem_id(0)
 {
   const Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+
+  if (_n_cells == 0)
+    mooseError(name(), ": The number of axial cells must be greater than zero");
+
+  if (L <= 0.0)
+    mooseError(name(), ": Total bundle length must be greater than zero");
+
+  if (_nx == 0 || _ny == 0)
+    mooseError(name(), ": The number of subchannels must be greater than zero in each direction");
+
+  if (_nx < 2 && _ny < 2)
+    mooseError(name(),
+               ": The number of subchannels cannot be less than 2 in both directions. "
+               "Smallest assembly allowed is either 2X1 or 1X2.");
+
+  _n_channels = _nx * _ny;
+
   const Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     _z_grid.push_back(dz * i);

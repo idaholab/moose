@@ -9,6 +9,13 @@
     recover = false
     requirement = 'The system will create a detailed mesh of the subchannels and fuel pins for quadrilateral assemblies (3x3)'
   []
+  [subchannel_number]
+    type = 'RunException'
+    input = 'coords.i'
+    cli_args = 'Mesh/assembly/nx=1 Mesh/assembly/ny=1'
+    expect_err = "The number of subchannels cannot be less than 2 in both directions\. Smallest assembly allowed is either 2X1 or 1X2\."
+    requirement = 'The system shall check the minimum number of subchannels for detailed quadrilateral assemblies'
+  []
 
   [1x2]
     type = Exodiff

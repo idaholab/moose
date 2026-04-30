@@ -55,7 +55,7 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _num_radial_parts(getParam<unsigned int>("num_radial_parts")),
-    _subchannel_block_id(isParamValid("subchannel_block_id")
+    _subchannel_block_id(parameters.isParamSetByUser("subchannel_block_id")
                              ? getParam<unsigned int>("subchannel_block_id")
                              : getParam<unsigned int>("block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id")),
@@ -65,12 +65,19 @@ SCMDetailedTriAssemblyMeshGenerator::SCMDetailedTriAssemblyMeshGenerator(
     _verbose(getParam<bool>("verbose_flag")),
     _elem_id(0)
 {
+  const Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+
   if (_n_rings < 2)
     mooseError(name(),
                ": 'nrings' must be at least 2. In this mesh generator, the center pin counts as "
                "the first ring, so a 7-pin bundle uses nrings = 2.");
 
-  Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+  if (_n_cells == 0)
+    mooseError(name(), ": The number of axial cells must be greater than zero");
+
+  if (L <= 0.0)
+    mooseError(name(), ": Total bundle length must be greater than zero");
+
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     _z_grid.push_back(dz * i);

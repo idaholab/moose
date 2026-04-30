@@ -171,6 +171,9 @@ QuadSubChannelMesh::channelIndex(const Point & pt) const
 unsigned int
 QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 {
+  if (_n_pins == 0)
+    mooseError(name(), ": Cannot compute a pin index because this mesh has no pins.");
+
   Real offset_x = (_nx - 2) * _pitch / 2.0;
   Real offset_y = (_ny - 2) * _pitch / 2.0;
   unsigned int i = (p(0) + offset_x) / _pitch;
@@ -181,6 +184,9 @@ QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 unsigned int
 QuadSubChannelMesh::pinIndex(const Point & p) const
 {
+  if (_n_pins == 0)
+    mooseError(name(), ": Cannot compute a pin index because this mesh has no pins.");
+
   Real offset_x = (_nx - 2) * _pitch / 2.0;
   Real offset_y = (_ny - 2) * _pitch / 2.0;
   unsigned int i = (p(0) + offset_x) / _pitch;
