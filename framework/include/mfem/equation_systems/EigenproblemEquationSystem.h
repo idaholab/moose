@@ -40,7 +40,7 @@ protected:
   void FormMassMatrix(mfem::OperatorHandle & op);
 
 private:
-  friend class EquationSystemEigenproblemOperator;
+  friend class EigenproblemESProblemOperator;
 
   mfem::Array<int> _global_ess_markers;
 };

@@ -9,13 +9,13 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "EquationSystemEigenproblemOperator.h"
+#include "EigenproblemESProblemOperator.h"
 
 namespace Moose::MFEM
 {
 
 void
-EquationSystemEigenproblemOperator::Solve()
+EigenproblemESProblemOperator::Solve()
 {
   BuildEquationSystemOperator();
 
@@ -30,14 +30,14 @@ EquationSystemEigenproblemOperator::Solve()
 }
 
 void
-EquationSystemEigenproblemOperator::BuildEquationSystemOperator()
+EigenproblemESProblemOperator::BuildEquationSystemOperator()
 {
   GetEquationSystem()->BuildEquationSystem();
   GetEquationSystem()->BuildEigenproblemJacobian(_true_x, _mass_rhs);
 }
 
 void
-EquationSystemEigenproblemOperator::RecoverEigenproblemSolution(
+EigenproblemESProblemOperator::RecoverEigenproblemSolution(
     Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
