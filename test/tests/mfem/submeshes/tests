@@ -23,10 +23,9 @@
     recover = false
   []
   [MFEMDomainSubMeshTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = domain_submesh_transfer.i
-    xmldiff = 'OutputData/DomainPotentialTransfer/Run0/Run0.pvd
-                OutputData/DomainPotentialTransfer/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/DomainSubmeshTransfer/potential_line_sample_0001.csv'
     requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
