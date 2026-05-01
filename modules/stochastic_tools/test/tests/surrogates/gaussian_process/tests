@@ -87,6 +87,15 @@
       detail = 'a Matern half integer kernel using Adam with mini-batch sampling;'
       capabilities = 'libtorch'
     []
+    [GP_squared_exponential_tuned_legacy_adam]
+      type = CSVDiff
+      input = GP_squared_exponential_tuned_adam.i
+      cli_args = "Trainers/GP_avg_trainer/optimizer=legacy_adam Outputs/out/file_base='GP_squared_exponential_tuned_legacy_adam'"
+      allow_test_objects = true
+      csvdiff = 'GP_squared_exponential_tuned_legacy_adam_samp_avg_0002.csv GP_squared_exponential_tuned_legacy_adam_results_0002.csv GP_squared_exponential_tuned_legacy_adam_hyperparams_0002.csv'
+      detail = 'a squared exponential kernel using legacy-compatible Adam with manually supplied gradients;'
+      capabilities = 'libtorch'
+    []
   []
   [errors]
     requirement = 'The system shall throw an error when '
