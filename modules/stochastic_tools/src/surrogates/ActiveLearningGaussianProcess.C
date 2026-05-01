@@ -34,6 +34,10 @@ ActiveLearningGaussianProcess::validParams()
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
+  params.addParam<MooseEnum>(
+      "optimizer",
+      MooseEnum("adam=0 legacy_adam=1", "adam"),
+      "The Adam optimizer semantics to use for Gaussian process hyperparameter tuning.");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
       0,
@@ -58,7 +62,13 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate")))
+        getParam<Real>("learning_rate"),
+        0.9,
+        0.999,
+        1e-7,
+        1e-4,
+        getParam<MooseEnum>("optimizer")
+            .getEnum<StochasticTools::GaussianProcess::OptimizerType>()))
 {
   _gp.initialize(getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),
                  getParam<std::vector<std::string>>("tune_parameters"),
