@@ -33,11 +33,9 @@
     recover = false
   []
   [MFEMCoupledVariableSource]
-    type = XMLDiff
+    type = CSVDiff
     input = magnetostatic.i
-    xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
-                OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['UnstructuredGrid']['Piece']['PointData']['DataArray'][0]['#text']" # ignore vector potential
+    csvdiff = 'OutputData/Magnetostatic/electric_potential_line_sample_0001.csv'
     requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables external to the equation system.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
