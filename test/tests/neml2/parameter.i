@@ -14,23 +14,16 @@
     verbose = true
     device = 'cpu'
 
-    moose_input_types = 'VARIABLE MATERIAL'
-    moose_inputs = '     a        b'
-    neml2_inputs = '     forces/A forces/B'
+    # use moose data as model parameters
+    parameter_types = 'MATERIAL VARIABLE'
+    parameters = '     p1       p2'
 
-    moose_parameter_types = 'MATERIAL VARIABLE'
-    moose_parameters = '     p1_mat   p2_var'
-    neml2_parameters = '     p1       p2'
+    # request derivatives (must be pairs of two)
+    # derivative name follow moose convention, e.g., 'doutput/dinput'
+    derivatives = 'product A'
 
-    moose_output_types = 'MATERIAL           MATERIAL'
-    moose_outputs = '     neml2_sum          neml2_product'
-    neml2_outputs = '     state/internal/sum state/internal/product'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_dproduct_da'
-    neml2_derivatives = 'state/internal/product forces/A'
-
-    export_outputs = 'neml2_sum neml2_product neml2_dproduct_da'
+    # output to exodus
+    export_outputs = 'sum product dproduct/dA'
     export_output_targets = 'exodus; exodus; exodus'
   []
 []
@@ -48,46 +41,46 @@
   [reaction_1]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_sum
+    reaction_rate = sum
   []
   [reaction_2]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_product
+    reaction_rate = product
   []
   [reaction_3]
     type = MatReaction
     variable = u
-    reaction_rate = neml2_dproduct_da
+    reaction_rate = dproduct/dA
   []
 []
 
 [AuxVariables]
-  [a]
+  [A]
   []
-  [p2_var]
+  [p2]
     initial_condition = 2
   []
 []
 
 [ICs]
-  [a]
+  [A]
     type = FunctionIC
-    variable = a
+    variable = A
     function = 'x'
   []
 []
 
 [Materials]
-  [b]
+  [B]
     type = GenericFunctionMaterial
-    prop_names = 'b'
+    prop_names = 'B'
     prop_values = 'y+t'
     outputs = 'exodus'
   []
-  [p1_mat]
+  [p1]
     type = GenericConstantMaterial
-    prop_names = 'p1_mat'
+    prop_names = 'p1'
     prop_values = 3
   []
 []

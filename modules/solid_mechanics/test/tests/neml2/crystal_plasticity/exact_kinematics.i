@@ -34,42 +34,22 @@ N = 2
     model = 'model'
     verbose = true
     device = 'cpu'
-
-    moose_input_types = 'MATERIAL             MATERIAL             POSTPROCESSOR POSTPROCESSOR MATERIAL          MATERIAL'
-    moose_inputs = '     deformation_gradient initial_orientation  time          time          plastic_defgrad   crss'
-    neml2_inputs = '     forces/F             forces/r             forces/t      old_forces/t  old_state/Fp      old_state/tauc'
-
-    moose_output_types = 'MATERIAL          MATERIAL        MATERIAL'
-    moose_outputs = '     neml2_pk2_stress  plastic_defgrad crss'
-    neml2_outputs = '     state/full_S      state/Fp        state/tauc'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = '     neml2_pk2_jacobian'
-    neml2_derivatives = '     state/full_S forces/F'
-
-    initialize_outputs = '      plastic_defgrad'
+    derivatives = 'neml2_stress deformation_gradient'
+    initialize_outputs = 'plastic_deformation_gradient'
     initialize_output_values = 'initial_plastic_defgrad'
-  []
-[]
-
-[Postprocessors]
-  [time]
-    type = TimePostprocessor
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    outputs = 'none'
   []
 []
 
 [Materials]
   [copy]
     type = ComputeLagrangianStressCustomPK2
-    custom_pk2_stress = 'neml2_pk2_stress'
-    custom_pk2_jacobian = 'neml2_pk2_jacobian'
+    custom_pk2_stress = 'neml2_stress'
+    custom_pk2_jacobian = 'dneml2_stress/ddeformation_gradient'
     large_kinematics = true
   []
   [initial_orientation]
     type = GenericConstantRealVectorValue
-    vector_name = 'initial_orientation'
+    vector_name = 'orientation'
     vector_values = '-0.54412095 -0.34931944 0.12600655'
   []
   [initial_plastic_defgrad]

@@ -72,9 +72,6 @@ protected:
   /// Fill input variables and model parameters using the gatherers
   virtual void fillInputs();
 
-  /// Apply the predictor to set current trial state
-  virtual void applyPredictor();
-
   /// Perform the material update
   virtual bool solve();
 
@@ -84,14 +81,14 @@ protected:
   /// Expand tensor shapes if necessary to conformal sizes
   virtual void expandInputs();
 
-  /// Update cached inputs/outputs for on-device state advance
-  void advanceDeviceCaches();
+  /// Save stateful variables for on-device state advance
+  void advanceState();
 
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
 
   /// Advance state on device (rather than via MOSOE material properties)
-  const bool _keep_tensors_on_device;
+  const bool _manage_state_advance;
 
   /// Dump input tensor info on failure to aid debugging
   const bool _debug_inputs_on_failure;
@@ -108,17 +105,11 @@ protected:
   /// The output variables of the material model
   neml2::ValueMap _out;
 
-  /// Cached state outputs from the last successful step (for on-device advance)
-  neml2::ValueMap _device_state_cache;
-
-  /// Cached force inputs from the last successful step (for on-device advance)
-  neml2::ValueMap _device_forces_cache;
+  /// Cached variables from the last successful step (for on-device advance)
+  neml2::ValueMap _state_vars;
 
   /// The derivative of the output variables w.r.t. the input variables
   neml2::DerivMap _dout_din;
-
-  // set of variables to skip
-  std::set<neml2::VariableName> _skip_vars;
 
   // set of gathered NEML2 input variables
   std::set<neml2::VariableName> _gathered_variable_names;
@@ -128,6 +119,7 @@ protected:
 
   /// MOOSE data gathering user objects
   std::vector<const MOOSEToNEML2 *> _gatherers;
+  std::vector<const MOOSEToNEML2 *> _param_gatherers;
 
   /// set of output variables that were retrieved (by other objects)
   mutable neml2::ValueMap _retrieved_outputs;
@@ -138,12 +130,6 @@ protected:
   /// set of parameter derivatives that were retrieved (by other objects)
   mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
       _retrieved_parameter_derivatives;
-
-  /// Whether the model has any state variable
-  bool _has_state = false;
-
-  /// Whether the model has any old state variable
-  bool _has_old_state = false;
 
 private:
   /// Whether an error was encountered

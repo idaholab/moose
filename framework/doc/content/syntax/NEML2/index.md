@@ -35,29 +35,21 @@ In each sub-block, there are a total of 6 groups of parameters that can be speci
 
 The configuration of model is controlled by parameters such as [!param](/NEML2/model), [!param](/NEML2/verbose), [!param](/NEML2/device), etc., each of which is explained in the syntax documentation at the bottom of the page.
 
-The other 5 groups of parameters are all related to data transfer between MOOSE and NEML2. The 2nd and the 3rd groups of parameters correspond to the transfer of data +from MOOSE to NEML2+. The 4th, 5th and the 6th groups of parameters correspond to the transfer of data +from NEML2 to MOOSE+.
+[!param](/NEML2/input_types) is a list of enums denoting the type of the MOOSE data structure used to hold the input variables. The following enums are supported
 
-Each group has three parameters in the following form:
-
-- `moose_<*>_types`: List of types denoting the type of the MOOSE data structure.
-- `moose_<*>s`: Names of quantities to be transferred from/to MOOSE.
-- `neml2_<*>s`: Names of quantities to be transferred from/to NEML2.
-
-where `<*>` are placeholders representing the data being transferred, e.g., `input`, `parameter`, `output`, `derivative`, `parameter_derivative`. Using `input` as an example, the three parameters are
-
-- `moose_input_types`
-- `moose_inputs`
-- `neml2_inputs`
-
-The length of the three lists must be the same. [!param](/NEML2/moose_input_types) is a list of enums denoting the type of the MOOSE data structure used to hold the input variables. The following enums are supported
-
-- `MATERIAL`: The input variables are retrieved from material properties stored at each quadrature point.
+- `TIME`: Simulation time.
+- `SCALAR`: The input variables are retrieved from a scalar variable and broadcast to all quadrature points.
+- `FUNCTION`: The input variables are retrieved from a function evaluated at each quadrature points.
 - `VARIABLE`: The input variables are retrieved from (auxiliary) variables interpolated at each quadrature point.
-- `POSTPROCESSOR`: The input variables are retrieved from a postprocessor and broadcast to all quadrature points.
+- `MATERIAL`: The input variables are retrieved from material properties stored at each quadrature point.
 
-Currently, for the groups of parameters that control the data transfer from NEML2 to MOOSE, only the `MATERIAL` is supported, i.e., NEML2 output variables and derivatives can only be transferred to MOOSE material properties.
+All NEML2 input variables are automatically retrieved from the host MOOSE simulation. Quantities with the same name as each input variable are retrieved. An error is raised if ambiguity exists, in which case [!param](/NEML2/input_types) and [!param](/NEML2/inputs) can be used to explicitly specify the type of quantities to be retrieved.
 
-It is worth noting that for [!param](/NEML2/neml2_derivatives) and [!param](/NEML2/neml2_parameter_derivatives), a pair of names must be specified for each entry. The first name in the pair denotes the quantity (NEML2 output variable) to take derivative of, and the second name in the pair denotes the quantity (NEML2 input variable or model parameter) to take derivative with respect to.
+All NEML2 output variables are retrieved and stored as MOOSE material properties after each evaluation, unless [!param](/NEML2/auto_output) is set to `false`.
+
+For stateful variables, i.e., input variables needing values from previous time steps (usually with suffix `~N` with `N` being the number of steps backward in time), the corresponding MOOSE quantities from previous time steps are automatically retrieved. The advance of stateful variables is managed by the MOOSE native material system, unless [!param](/NEML2/manage_state_advance) is set to true, in which case NEML2 handles the storage and advance of stateful variables. Note that currently `manage_state_advance = true` is not compatible with mesh change events.
+
+It is worth noting that for [!param](/NEML2/neml2_derivatives) and [!param](/NEML2/neml2_parameter_derivatives), a pair of names must be specified for each entry. The first name in the pair denotes the quantity (NEML2 output variable) to take derivative of, and the second name in the pair denotes the quantity (NEML2 input variable or model parameter) to take derivative with respect to. Pairs are delimited by `;`.
 
 ## Inspect NEML2 information
 

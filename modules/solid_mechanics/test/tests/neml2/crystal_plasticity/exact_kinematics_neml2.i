@@ -26,43 +26,37 @@
   # Orientation remains constant as we work with the reference configuration
   [euler_rodrigues]
     type = RotationMatrix
-    from = 'forces/r'
-    to = 'forces/R'
+    from = 'orientation'
+    to = 'orientation_matrix'
   []
   # Hardening (this is just a very simple hardening model)
   [slip_strength]
     type = SingleSlipStrengthMap
     constant_strength = 50.0
-    slip_hardening = 'state/tauc'
-    slip_strengths = 'state/tauc_i'
   []
   [voce_hardening]
     type = VoceSingleSlipHardeningRule
     initial_slope = 500.0
     saturated_hardening = 50.0
-    slip_hardening_rate = 'state/tauc_rate'
-    slip_hardening = 'state/tauc'
-    sum_slip_rates = 'state/gamma_rate'
   []
   # Elasticity: St. Venant-Kirchhoff with Green-Lagrange strain
   [mult_decomp]
     type = R2Multiplication
-    A = 'forces/F'
-    B = 'state/Fp'
-    to = 'state/Fe'
+    A = 'deformation_gradient'
+    B = 'plastic_deformation_gradient'
+    to = 'elastic_deformation_gradient'
     invert_B = true
   []
   [gl_strain]
     type = GreenLagrangeStrain
-    deformation_gradient = 'state/Fe'
-    strain = 'state/E'
+    deformation_gradient = 'elastic_deformation_gradient'
+    strain = 'elastic_strain'
   []
   [svk]
     type = LinearIsotropicElasticity
     coefficients = '1e5 0.25'
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
-    strain = 'state/E'
-    stress = 'state/S'
+    strain = 'elastic_strain'
   []
   [elasticity]
     type = ComposedModel
@@ -71,43 +65,32 @@
   # CP flow rule
   [resolved_shear]
     type = ResolvedShear
-    resolved_shears = 'state/tau_i'
-    stress = 'state/S'
-    orientation = 'forces/R'
   []
   [slip_rule]
     type = PowerLawSlipRule
     n = 2.0
     gamma0 = 2.0e-1
-    slip_rates = 'state/gamma_rate_i'
-    resolved_shears = 'state/tau_i'
-    slip_strengths = 'state/tauc_i'
   []
   [sum_slip_rates]
     type = SumSlipRates
-    slip_rates = 'state/gamma_rate_i'
-    sum_slip_rates = 'state/gamma_rate'
   []
   [plastic_velgrad]
     type = PlasticSpatialVelocityGradient
-    plastic_spatial_velocity_gradient = 'state/Lp'
-    slip_rates = 'state/gamma_rate_i'
-    orientation = 'forces/R'
   []
   [plastic_defgrad_rate]
     type = R2Multiplication
-    A = 'state/Lp'
-    B = 'state/Fp'
-    to = 'state/Fp_rate'
+    A = 'plastic_spatial_velocity_gradient'
+    B = 'plastic_deformation_gradient'
+    to = 'plastic_deformation_gradient_rate'
   []
   # Definition of residuals
   [integrate_slip_hardening]
     type = ScalarBackwardEulerTimeIntegration
-    variable = 'state/tauc'
+    variable = 'slip_hardening'
   []
   [integrate_plastic_defgrad]
     type = R2BackwardEulerTimeIntegration
-    variable = 'state/Fp'
+    variable = 'plastic_deformation_gradient'
   []
   # The implicit model that we solve for
   [implicit_rate]
@@ -123,6 +106,7 @@
   [eq_sys]
     type = NonlinearSystem
     model = 'implicit_rate'
+    unknowns = 'slip_hardening plastic_deformation_gradient'
   []
 []
 
@@ -138,20 +122,26 @@
 []
 
 [Models]
+  [predictor]
+    type = ConstantExtrapolationPredictor
+    unknowns_R2 = 'plastic_deformation_gradient'
+    unknowns_Scalar = 'slip_hardening'
+  []
   [model_without_stress]
     type = ImplicitUpdate
     equation_system = 'eq_sys'
     solver = 'newton'
+    predictor = 'predictor'
   []
   # Convert PK2 stress to a full second order tensor
   [full_stress]
-    type = SR2toR2
-    input = 'state/S'
-    output = 'state/full_S'
+    type = SR2ToR2
+    input = 'stress'
+    output = 'neml2_stress'
   []
   [model]
     type = ComposedModel
     models = 'model_without_stress elasticity full_stress'
-    additional_outputs = 'state/Fp'
+    additional_outputs = 'plastic_deformation_gradient'
   []
 []
