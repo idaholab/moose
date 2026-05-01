@@ -69,6 +69,21 @@ public:
   {
     return &UserObject::execute<Derived>;
   }
+
+protected:
+  /**
+   * Dispatch parallel operation
+   */
+  virtual void computeUserObject();
+  /**
+   * Get the number of threads
+   */
+  virtual ThreadID numUserObjectThreads() const = 0;
+
+  /**
+   * Kokkos functor dispatcher
+   */
+  std::unique_ptr<DispatcherBase> _user_object_dispatcher;
 };
 
 } // namespace Moose::Kokkos

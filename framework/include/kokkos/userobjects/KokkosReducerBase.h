@@ -31,11 +31,6 @@ public:
   ReducerBase(const ReducerBase & reducer);
 
   /**
-   * Dispatch reduction operation
-   */
-  virtual void computeReducer() = 0;
-
-  /**
    * Kokkos function tag
    */
   struct ReducerLoop
@@ -78,17 +73,13 @@ public:
 
 protected:
   /**
-   * MOOSE object
+   * Dispatch reduction operation
    */
-  const MooseObject * _reducer_object;
+  virtual void computeReducer();
   /**
-   * Kokkos functor dispatcher
+   * Get the number of threads
    */
-  std::unique_ptr<DispatcherBase> _dispatcher;
-  /**
-   * Reduction buffer
-   */
-  ::Kokkos::View<Real *, ::Kokkos::HostSpace> _reduction_buffer;
+  virtual ThreadID numReducerThreads() const = 0;
   /**
    * Allocate reduction buffer
    */
@@ -96,6 +87,19 @@ protected:
   {
     ::Kokkos::realloc(_reduction_buffer, size);
   }
+
+  /**
+   * MOOSE object
+   */
+  const MooseObject * _reducer_object;
+  /**
+   * Kokkos functor dispatcher
+   */
+  std::unique_ptr<DispatcherBase> _reducer_dispatcher;
+  /**
+   * Reduction buffer
+   */
+  ::Kokkos::View<Real *, ::Kokkos::HostSpace> _reduction_buffer;
 };
 
 } // namespace Moose::Kokkos

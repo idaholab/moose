@@ -28,7 +28,7 @@ public:
    */
   ElementReducer(const ElementReducer & object);
 
-  virtual void computeReducer() override;
+  virtual ThreadID numReducerThreads() const override { return numKokkosBlockElements(); }
 
   /**
    * The parallel computation entry function called by Kokkos

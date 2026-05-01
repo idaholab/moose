@@ -28,4 +28,15 @@ UserObject::UserObject(const InputParameters & parameters) : ::UserObjectBase(pa
 
 UserObject::UserObject(const UserObject & object) : ::UserObjectBase(object, {}) {}
 
+void
+UserObject::computeUserObject()
+{
+  Policy policy(0, numUserObjectThreads());
+
+  if (!_user_object_dispatcher)
+    _user_object_dispatcher = DispatcherRegistry::build<DefaultLoop>(this, type());
+
+  _user_object_dispatcher->parallelFor(policy);
+}
+
 } // namespace Moose::Kokkos
