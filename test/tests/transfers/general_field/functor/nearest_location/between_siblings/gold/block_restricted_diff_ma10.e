@@ -1,0 +1,1 @@
+../../../../nearest_node/between_siblings/gold/block_restricted_diff_ma10.e

@@ -375,12 +375,10 @@ MultiAppProjectionTransfer::execute()
       {
         if (local_bboxes[i_from].contains_point(qpt))
         {
-          const auto from_global_num =
-              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
-          outgoing_evals_ids[pid][qp].first =
-              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(qpt));
+          outgoing_evals_ids[pid][qp].first = (local_meshfuns[i_from])(
+              getPointInSourceAppFrame(qpt, i_from, "Projection transfer evaluation"));
           if (_current_direction == FROM_MULTIAPP)
-            outgoing_evals_ids[pid][qp].second = from_global_num;
+            outgoing_evals_ids[pid][qp].second = getGlobalSourceAppIndex(i_from);
         }
       }
     }
