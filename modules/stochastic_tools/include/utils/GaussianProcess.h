@@ -31,6 +31,12 @@ public:
 
   GaussianProcess();
 
+  enum class OptimizerType
+  {
+    Adam,
+    LegacyAdam
+  };
+
   /**
    * Initializes the most important structures in the Gaussian Process: the
    * covariance function and a tuning map which is used if the user requires
@@ -61,7 +67,8 @@ public:
      * @param b1 Tuning constant for the Adam algorithm
      * @param b2 Tuning constant for the Adam algorithm
      * @param eps Tuning constant for the Adam algorithm
-     * @param lambda Tuning constant for the Adam algorithm
+     * @param lambda Legacy MOOSE shrink constant for the Adam algorithm
+     * @param optimizer_type The Adam optimizer mode to use
      */
     GPOptimizerOptions(const unsigned int show_every_nth_iteration = 0,
                        const unsigned int num_iter = 1000,
@@ -70,7 +77,8 @@ public:
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
                        const Real eps = 1e-7,
-                       const Real lambda = 1e-4);
+                       const Real lambda = 1e-4,
+                       const OptimizerType optimizer_type = OptimizerType::Adam);
 
     /// Switch to enable verbose output for parameter tuning at every n-th iteration
     const unsigned int show_every_nth_iteration = 0;
@@ -86,8 +94,10 @@ public:
     const Real b2 = 0.999;
     /// Tuning parameter from the paper
     const Real eps = 1e-7;
-    /// Tuning parameter from the paper
+    /// Legacy MOOSE shrink parameter
     const Real lambda = 1e-4;
+    /// Adam optimizer mode to use
+    const OptimizerType optimizer_type = OptimizerType::Adam;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -139,7 +149,7 @@ public:
    */
   void standardizeData(torch::Tensor & data, bool keep_moments = false);
 
-  // Tune hyperparameters using Adam
+  // Tune hyperparameters using Adam with manually supplied gradients
   void tuneHyperParamsAdam(const torch::Tensor & training_params,
                            const torch::Tensor & training_data,
                            const GPOptimizerOptions & opts);

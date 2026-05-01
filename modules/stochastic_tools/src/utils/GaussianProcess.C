@@ -22,6 +22,8 @@
 #include "MooseRandom.h"
 #include "Shuffle.h"
 
+#include <torch/optim/adam.h>
+
 namespace StochasticTools
 {
 
@@ -95,7 +97,8 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const unsigned int show_
                                                         const Real b1,
                                                         const Real b2,
                                                         const Real eps,
-                                                        const Real lambda)
+                                                        const Real lambda,
+                                                        const OptimizerType optimizer_type)
   : show_every_nth_iteration(show_every_nth_iteration),
     num_iter(num_iter),
     batch_size(batch_size),
@@ -103,7 +106,8 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const unsigned int show_
     b1(b1),
     b2(b2),
     eps(eps),
-    lambda(lambda)
+    lambda(lambda),
+    optimizer_type(optimizer_type)
 {
 }
 
@@ -226,32 +230,35 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
                                      const torch::Tensor & training_data,
                                      const GPOptimizerOptions & opts)
 {
-  std::vector<Real> theta(_num_tunable, 0.0);
+  std::vector<Real> theta_values(_num_tunable, 0.0);
   _hyperparam_map.clear();
   _covariance_function->buildHyperParamMap(_hyperparam_map);
 
-  mapToVec(_tuning_data, _hyperparam_map, theta);
+  mapToVec(_tuning_data, _hyperparam_map, theta_values);
 
-  // Internal params for Adam; set to the recommended values in the paper
-  Real b1 = opts.b1;
-  Real b2 = opts.b2;
-  Real eps = opts.eps;
-  const Real lambda = opts.lambda;
+  auto theta = torch::from_blob(theta_values.data(),
+                                {static_cast<long>(_num_tunable)},
+                                torch::TensorOptions().dtype(at::kDouble))
+                   .clone();
 
-  std::vector<Real> m0(_num_tunable, 0.0);
-  std::vector<Real> v0(_num_tunable, 0.0);
+  auto adam_options = torch::optim::AdamOptions(opts.learning_rate);
+  adam_options.betas(std::make_tuple(opts.b1, opts.b2));
+  adam_options.eps(opts.eps);
+  // The legacy MOOSE shrink term is decoupled and not learning-rate-scaled, so it cannot be
+  // represented by Adam's coupled weight_decay option.
+  adam_options.weight_decay(0.0);
+  torch::optim::Adam optimizer({theta}, adam_options);
 
-  Real new_val;
-  Real m_hat;
-  Real v_hat;
   Real store_loss = 0.0;
-  std::vector<Real> grad1;
+  std::vector<Real> grad_values;
+  const bool use_legacy_update = opts.optimizer_type == OptimizerType::LegacyAdam;
 
-  // Preserve the existing deterministic shuffle sequence, but let libtorch gather the batch.
+  // Preserve the existing deterministic shuffle sequence, but use tensor indexing for the batch.
   std::vector<unsigned int> v_sequence(training_params.sizes()[0]);
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   if (opts.show_every_nth_iteration)
-    Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
+    Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING "
+               << (use_legacy_update ? "legacy-compatible Adam" : "Adam") << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
     MooseRandom generator;
@@ -268,45 +275,58 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     store_loss = getLoss(inputs, outputs);
     if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
       Moose::out << "Iteration: " << ss + 1 << " LOSS: " << store_loss << std::endl;
-    grad1 = getGradient(inputs);
-    for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-    {
-      const auto first_index = std::get<0>(iter->second);
-      const auto num_entries = std::get<1>(iter->second);
-      for (unsigned int ii = 0; ii < num_entries; ++ii)
-      {
-        const auto global_index = first_index + ii;
-        m0[global_index] = b1 * m0[global_index] + (1 - b1) * grad1[global_index];
-        v0[global_index] =
-            b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
-        m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
-        v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
-        new_val =
-            theta[global_index] - 1.0 * (opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps) +
-                                         lambda * theta[global_index]);
 
+    grad_values = getGradient(inputs);
+    auto grad = torch::from_blob(grad_values.data(),
+                                 {static_cast<long>(_num_tunable)},
+                                 torch::TensorOptions().dtype(at::kDouble))
+                    .clone();
+    optimizer.zero_grad();
+    theta.mutable_grad() = grad;
+    torch::Tensor theta_before_step;
+    if (use_legacy_update)
+      theta_before_step = theta.detach().clone();
+    optimizer.step();
+
+    {
+      torch::NoGradGuard no_grad;
+      if (use_legacy_update)
+        theta -= opts.lambda * theta_before_step;
+      auto theta_accessor = theta.accessor<Real, 1>();
+      for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
+      {
+        const auto first_index = std::get<0>(iter->second);
+        const auto num_entries = std::get<1>(iter->second);
         const auto min_value = std::get<2>(iter->second);
         const auto max_value = std::get<3>(iter->second);
-
-        theta[global_index] = std::min(std::max(new_val, min_value), max_value);
+        for (unsigned int ii = 0; ii < num_entries; ++ii)
+        {
+          const auto global_index = first_index + ii;
+          theta_accessor[global_index] =
+              std::min(std::max(theta_accessor[global_index], min_value), max_value);
+        }
       }
     }
-    vecToMap(_tuning_data, _hyperparam_map, theta);
+
+    const auto theta_export = theta.detach().contiguous();
+    const auto * theta_data = theta_export.data_ptr<Real>();
+    theta_values.assign(theta_data, theta_data + theta_export.numel());
+    vecToMap(_tuning_data, _hyperparam_map, theta_values);
     _covariance_function->loadHyperParamMap(_hyperparam_map);
   }
   if (opts.show_every_nth_iteration)
   {
     Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
-    Moose::out << Moose::stringify(theta) << std::endl;
+    Moose::out << Moose::stringify(theta_values) << std::endl;
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
   }
 
-  if (theta.size() > 0)
+  if (theta_values.size() > 0)
   {
     unsigned int count = 1;
     _length_scales.resize(_num_tunable - count);
     for (unsigned int i = 0; i < _num_tunable - count; ++i)
-      _length_scales[i] = theta[i + 1];
+      _length_scales[i] = theta_values[i + 1];
   }
 }
 
