@@ -108,14 +108,19 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
 
     _communicator.max(max_difference);
 
-    unsigned int invalid_local = trial_nondegenerate_local ? 0 : 1;
-    processor_id_type first_invalid_processor = 0;
-    _communicator.maxloc(invalid_local, first_invalid_processor);
+    const unsigned int invalid_local = trial_nondegenerate_local ? 0 : 1;
+    unsigned int invalid = invalid_local;
+    _communicator.max(invalid);
 
-    if (invalid_local)
+    if (invalid)
+    {
+      processor_id_type first_invalid_processor =
+          invalid_local ? _communicator.rank() : std::numeric_limits<processor_id_type>::max();
+      _communicator.min(first_invalid_processor);
       _communicator.broadcast(error_message, first_invalid_processor);
+    }
 
-    return !invalid_local;
+    return !invalid;
   };
 
   if (!_use_backtracking)
