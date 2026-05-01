@@ -25,7 +25,7 @@ where $\varepsilon$ is specified by the `inv_r_eps` input parameter.
 
 ## Example Input File Syntax
 
-!listing graddiv.i block=Coordinates
+!listing test/tests/mfem/coordinates/cylindrical_coefficients.i block=Coordinates
 
 !syntax parameters /Coordinates/Cylindrical
 
