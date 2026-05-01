@@ -14,8 +14,6 @@
 #ifdef NEML2_ENABLED
 
 #include "neml2/tensors/tensors.h"
-#include "neml2/base/LabeledAxisAccessor.h"
-#include "neml2/base/Parser.h"
 #include "neml2/base/Factory.h"
 #include "neml2/models/Model.h"
 #include "RankTwoTensor.h"
@@ -34,6 +32,19 @@ namespace NEML2Utils
 {
 #ifdef NEML2_ENABLED
 
+enum class MOOSEIOType
+{
+  // unbatched
+  TIME,
+  SCALAR,
+  // batched
+  FUNCTION,
+  VARIABLE,
+  MATERIAL
+};
+
+std::string stringify(MOOSEIOType type);
+
 /**
  * @brief Get the NEML2 Model
  *
@@ -43,15 +54,6 @@ namespace NEML2Utils
  */
 std::shared_ptr<neml2::Model>
 getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype = neml2::kFloat64);
-
-/// Assert that the NEML2 variable name sits on either the forces or the state subaxis
-void assertVariable(const neml2::VariableName &);
-
-/// Assert that the NEML2 variable name sits on either the old_forces or the old_state subaxis
-void assertOldVariable(const neml2::VariableName &);
-
-/// Parse a raw string into NEML2 variable name
-neml2::VariableName parseVariableName(const std::string &);
 
 template <typename T>
 struct Layout

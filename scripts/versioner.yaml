@@ -112,7 +112,7 @@ packages:
       conda/pyhit/meta.yaml.template: conda/pyhit/meta.yaml
   # dependers: none
   moose-dev:
-    version: 2026.06.07
+    version: 2026.06.10
     conda: conda/moose-dev
     templates:
       conda/moose-dev/meta.yaml.template: conda/moose-dev/meta.yaml
@@ -136,6 +136,7 @@ packages:
       # libtorch
       - framework/contrib/pytorch
       - scripts/configure_libtorch.sh
+      - scripts/update_and_rebuild_libtorch.sh
       # neml2
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh

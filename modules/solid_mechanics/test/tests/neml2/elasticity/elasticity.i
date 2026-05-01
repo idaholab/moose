@@ -34,18 +34,7 @@ N = 2
     model = 'model'
     verbose = true
     device = 'cpu'
-
-    moose_input_types = 'MATERIAL'
-    moose_inputs = 'neml2_strain'
-    neml2_inputs = 'forces/E'
-
-    moose_output_types = 'MATERIAL'
-    moose_outputs = 'neml2_stress'
-    neml2_outputs = 'state/S'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_jacobian'
-    neml2_derivatives = 'state/S forces/E'
+    derivatives = 'neml2_stress neml2_strain'
   []
 []
 
@@ -58,7 +47,7 @@ N = 2
   [stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
     custom_small_stress = 'neml2_stress'
-    custom_small_jacobian = 'neml2_jacobian'
+    custom_small_jacobian = 'dneml2_stress/dneml2_strain'
   []
 []
 

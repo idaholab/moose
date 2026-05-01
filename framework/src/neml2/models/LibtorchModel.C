@@ -26,13 +26,13 @@ OptionSet
 LibtorchModel::expected_options()
 {
   auto options = Model::expected_options();
-  options.set<std::vector<VariableName>>("inputs");
-  options.set<std::vector<VariableName>>("outputs");
-  options.set("outputs").doc() = "The scaled neural network output";
-  options.set<std::string>("file_path");
+  options.add<std::vector<VariableName>>("inputs", "The input variables for the neural network");
+  options.add<std::vector<VariableName>>("outputs",
+                                         "The (scaled) output variables for the neural network");
+  options.add<std::string>("file_path", "The path to the neural network file");
   // No jitting :/
-  options.set<bool>("jit") = false;
-  options.set("jit").suppressed() = true;
+  options.set<bool>("jit", false);
+  options.suppress("jit");
   return options;
 }
 

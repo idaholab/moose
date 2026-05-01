@@ -46,22 +46,9 @@
   device = 'cpu'
   [all]
     model = 'forward_elasticity_model'
-
-    moose_input_types = 'MATERIAL'
-    moose_inputs = 'neml2_strain'
-    neml2_inputs = 'forces/E'
-
-    moose_parameter_types = 'MATERIAL'
-    moose_parameters = 'E_material'
-    neml2_parameters = 'E'
-
-    moose_output_types = 'MATERIAL'
-    moose_outputs = 'neml2_stress'
-    neml2_outputs = 'state/S'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_jacobian'
-    neml2_derivatives = 'state/S forces/E'
+    parameter_types = 'MATERIAL'
+    parameters = 'E'
+    derivatives = 'forward_stress forward_strain'
   []
 []
 
@@ -96,17 +83,12 @@
   [convert_strain]
     type = RankTwoTensorToSymmetricRankTwoTensor
     from = 'mechanical_strain'
-    to = 'neml2_strain'
+    to = 'forward_strain'
   []
   [stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
-    custom_small_stress = 'neml2_stress'
-    custom_small_jacobian = 'neml2_jacobian'
-  []
-  [E_material]
-    type = GenericFunctionMaterial
-    prop_names = 'E_material'
-    prop_values = 'E'
+    custom_small_stress = 'forward_stress'
+    custom_small_jacobian = 'dforward_stress/dforward_strain'
   []
 []
 

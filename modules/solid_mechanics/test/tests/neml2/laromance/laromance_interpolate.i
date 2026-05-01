@@ -76,7 +76,7 @@ sample_file = "models/sampled_combinations.csv"
 [Materials]
   [in_materials]
     type = GenericFunctionMaterial
-    prop_names = 'vmStress temperature epStrain celldd walldd env'
+    prop_names = 'von_mises_stress temperature equivalent_plastic_strain cell_dislocation_density wall_dislocation_density env_factor'
     prop_values = 'vmStress_fcn temperature_fcn epStrain_fcn celldd_fcn walldd_fcn env_fcn'
   []
 []
@@ -87,14 +87,6 @@ sample_file = "models/sampled_combinations.csv"
     model = 'combined_model'
     verbose = true
     device = 'cpu'
-
-    moose_input_types = 'MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL MATERIAL'
-    moose_inputs =      'epStrain vmStress temperature celldd walldd env'
-    neml2_inputs =      'state/ep state/s forces/T forces/cell_dd forces/wall_dd forces/env_fac'
-
-    moose_output_types = 'MATERIAL MATERIAL MATERIAL'
-    moose_outputs = 'ep_rate cell_rate wall_rate'
-    neml2_outputs = 'state/ep_rate state/cell_rate state/wall_rate'
   []
 []
 
@@ -102,7 +94,7 @@ sample_file = "models/sampled_combinations.csv"
   type = Transient
   nl_abs_tol = 1e-1 # Nothing is really being solved here, so loose tolerances are okay
   dt = 1
-  dtmin=1
+  dtmin = 1
   end_time = 40
   timestep_tolerance = 1e-3
 []
@@ -110,15 +102,15 @@ sample_file = "models/sampled_combinations.csv"
 [Postprocessors]
   [cell_rate_pp]
     type = ElementAverageMaterialProperty
-    mat_prop = cell_rate
+    mat_prop = cell_dislocation_density_rate
   []
   [wall_rate_pp]
     type = ElementAverageMaterialProperty
-    mat_prop = wall_rate
+    mat_prop = wall_dislocation_density_rate
   []
   [creep_rate_pp]
     type = ElementAverageMaterialProperty
-    mat_prop = ep_rate
+    mat_prop = equivalent_plastic_strain_rate
   []
 []
 

@@ -61,17 +61,15 @@ NEML2ToMOOSEMaterialProperty<T>::NEML2ToMOOSEMaterialProperty(const InputParamet
     _prop0(isParamValid("moose_material_property_init")
                ? &getMaterialProperty<T>("moose_material_property_init")
                : nullptr),
-    _value(
-        !isParamValid("neml2_input_derivative")
-            ? (!isParamValid("neml2_parameter_derivative")
-                   ? _execute_neml2_model.getOutput(
-                         NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")))
-                   : _execute_neml2_model.getOutputParameterDerivative(
-                         NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")),
-                         getParam<std::string>("neml2_parameter_derivative")))
-            : _execute_neml2_model.getOutputDerivative(
-                  NEML2Utils::parseVariableName(getParam<std::string>("from_neml2")),
-                  NEML2Utils::parseVariableName(getParam<std::string>("neml2_input_derivative"))))
+    _value(!isParamValid("neml2_input_derivative")
+               ? (!isParamValid("neml2_parameter_derivative")
+                      ? _execute_neml2_model.getOutput(getParam<std::string>("from_neml2"))
+                      : _execute_neml2_model.getOutputParameterDerivative(
+                            getParam<std::string>("from_neml2"),
+                            getParam<std::string>("neml2_parameter_derivative")))
+               : _execute_neml2_model.getOutputDerivative(
+                     getParam<std::string>("from_neml2"),
+                     getParam<std::string>("neml2_input_derivative")))
 #endif
 {
   NEML2Utils::assertNEML2Enabled();
@@ -96,7 +94,10 @@ NEML2ToMOOSEMaterialProperty<T>::computeProperties()
   // look up start index for current element
   const auto i = _execute_neml2_model.getBatchIndex(_current_elem->id());
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
+    if (_value.batch_dim())
+      NEML2Utils::copyTensorToMOOSEData(_value.batch_index({neml2::Size(i + _qp)}), _prop[_qp]);
+    else
+      NEML2Utils::copyTensorToMOOSEData(_value, _prop[_qp]);
 }
 #endif
 

@@ -34,26 +34,7 @@ N = 2
     model = 'model'
     verbose = true
     device = 'cpu'
-
-    moose_input_types = 'MATERIAL     POSTPROCESSOR POSTPROCESSOR MATERIAL              MATERIAL                  MATERIAL'
-    moose_inputs = '     neml2_strain time          time          plastic_strain        equivalent_plastic_strain kinematic_plastic_strain'
-    neml2_inputs = '     forces/E     forces/t      old_forces/t  old_state/internal/Ep old_state/internal/ep     old_state/internal/Kp'
-
-    moose_output_types = 'MATERIAL     MATERIAL          MATERIAL                  MATERIAL'
-    moose_outputs = '     neml2_stress plastic_strain    equivalent_plastic_strain kinematic_plastic_strain'
-    neml2_outputs = '     state/S      state/internal/Ep state/internal/ep         state/internal/Kp'
-
-    moose_derivative_types = 'MATERIAL'
-    moose_derivatives = 'neml2_jacobian'
-    neml2_derivatives = 'state/S forces/E'
-  []
-[]
-
-[Postprocessors]
-  [time]
-    type = TimePostprocessor
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    outputs = 'none'
+    derivatives = 'neml2_stress neml2_strain'
   []
 []
 
@@ -66,7 +47,7 @@ N = 2
   [stress]
     type = ComputeLagrangianObjectiveCustomSymmetricStress
     custom_small_stress = 'neml2_stress'
-    custom_small_jacobian = 'neml2_jacobian'
+    custom_small_jacobian = 'dneml2_stress/dneml2_strain'
   []
 []
 
