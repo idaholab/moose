@@ -15,6 +15,7 @@
 #include "LinearFVElementalKernel.h"
 #include "LinearFVTimeDerivative.h"
 #include "LinearWCNSFVMomentumFlux.h"
+#include "SharpInterfaceRhieChowMassFlux.h"
 
 #include <limits>
 
@@ -141,9 +142,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
         getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
     _cht(ex.parameters())
 {
-  if (!_should_solve_momentum && _should_solve_pressure)
-    paramError("should_solve_momentum",
-               "Pressure correction requires solving the momentum equations.");
   if (_should_solve_momentum && !_should_solve_pressure)
     paramError("should_solve_pressure",
                "Solving momentum without a pressure corrector is not supported.");
@@ -151,13 +149,18 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     paramError("should_solve_solid_energy",
                "Solid energy solve cannot be enabled when the fluid energy solve is disabled.");
 
-  // We fetch the systems and their numbers for the momentum equations only if we solve them
-  if (_should_solve_momentum)
+  // Even when the explicit momentum predictor solve is disabled, the pressure
+  // corrector still needs the assembled momentum operator to build the local
+  // UEqn analog (HbyA/rAU/transient projection). So we always fetch the
+  // momentum systems when the pressure solve is active, but only add them to
+  // the solve list if we actually execute the predictor solve.
+  if (_should_solve_momentum || _should_solve_pressure)
     for (auto system_i : index_range(_momentum_system_names))
     {
       _momentum_system_numbers.push_back(_problem.linearSysNum(_momentum_system_names[system_i]));
       _momentum_systems.push_back(&_problem.getLinearSystem(_momentum_system_numbers[system_i]));
-      _systems_to_solve.push_back(_momentum_systems.back());
+      if (_should_solve_momentum)
+        _systems_to_solve.push_back(_momentum_systems.back());
     }
 
   if (_should_solve_pressure)
@@ -262,7 +265,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 void
 LinearAssemblySegregatedSolve::linkRhieChowUserObject()
 {
-  if (!_should_solve_momentum)
+  if (_momentum_systems.empty())
     return;
 
   _rc_uo =
@@ -600,6 +603,89 @@ LinearAssemblySegregatedSolve::printMomentumPredictorPreSolveAudit(
     print_term_summary("explicit_force_rhs", *explicit_force);
   print_term_summary("reconstructed_residual", *reconstructed_residual);
   print_term_summary("unexplained_residual", *unexplained_residual);
+
+  if (auto * sharp_rc = dynamic_cast<SharpInterfaceRhieChowMassFlux *>(_rc_uo))
+  {
+    const auto & watched_faces = sharp_rc->watchedInternalFaceIds();
+    bool printed_header = false;
+    for (const auto face_id : watched_faces)
+    {
+      if (face_id == DofObject::invalid_id)
+        continue;
+
+      const FaceInfo * watched_face = nullptr;
+      for (const auto * fi : _problem.mesh().faceInfo())
+        if (fi && fi->id() == face_id)
+        {
+          watched_face = fi;
+          break;
+        }
+
+      if (!watched_face || !watched_face->neighborPtr())
+        continue;
+
+      if (!printed_header)
+      {
+        _console << "  Predictor watched-face cell audit:" << std::endl;
+        printed_header = true;
+      }
+
+      _console << "    face_id=" << face_id
+               << " centroid=" << Moose::stringify(watched_face->faceCentroid())
+               << " normal=" << Moose::stringify(watched_face->normal())
+               << " elem_id=" << watched_face->elem().id()
+               << " neighbor_id=" << watched_face->neighbor().id() << std::endl;
+
+      if (!momentum_flux_kernels.empty())
+      {
+        auto * kernel = momentum_flux_kernels.front();
+        kernel->setupFaceData(watched_face);
+        const auto interp_coeffs = kernel->currentAdvectedInterpCoeffs();
+        _console << "      face_advection_state:"
+                 << " predictor_mass_flux=" << kernel->currentFaceMassFlux()
+                 << " raw_rhie_chow_mass_flux=" << sharp_rc->rawRhieChowMassFlux(*watched_face);
+        if (sharp_rc->hasVOFRhoPhiFunctor())
+          _console << " vof_rho_phi_mass_flux=" << sharp_rc->vofRhoPhiMassFlux(*watched_face);
+        _console << " advected_interp_elem=" << interp_coeffs.first
+                 << " advected_interp_neighbor=" << interp_coeffs.second << std::endl;
+      }
+
+      const std::array<const ElemInfo *, 2> cell_infos = {
+          watched_face->elemInfo(), watched_face->neighborInfo()};
+      const std::array<const char *, 2> labels = {"elem", "neighbor"};
+
+      for (const auto side : make_range(cell_infos.size()))
+      {
+        const auto * elem_info = cell_infos[side];
+        if (!elem_info)
+          continue;
+
+        const auto & dofs = elem_info->dofIndices()[momentum_sys_num];
+        if (dofs.empty())
+          continue;
+
+        const auto dof = dofs[0];
+        _console << "      " << labels[side]
+                 << ": dof=" << dof
+                 << " centroid=" << Moose::stringify(elem_info->centroid())
+                 << " U=" << solution(dof)
+                 << " rhs=" << rhs(dof);
+        if (rhs_base)
+          _console << " rhs_base=" << (*rhs_base)(dof);
+        if (explicit_force)
+          _console << " explicit_force_rhs=" << (*explicit_force)(dof);
+        _console << " time_term=" << (*time_residual)(dof)
+                 << " other_elemental=" << (*other_elemental_residual)(dof)
+                 << " advection=" << (*advection_residual)(dof)
+                 << " stress=" << (*stress_residual)(dof)
+                 << " reconstructed=" << (*reconstructed_residual)(dof)
+                 << " residual=" << (*residual)(dof)
+                 << " unexplained=" << (*unexplained_residual)(dof)
+                 << " HbyA_raw=" << sharp_rc->cellHbyARaw(system_i, dof)
+                 << " Ainv_raw=" << sharp_rc->cellAinvRaw(system_i, dof) << std::endl;
+      }
+    }
+  }
 }
 
 void

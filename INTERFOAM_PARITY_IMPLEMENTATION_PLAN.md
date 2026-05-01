@@ -834,3 +834,40 @@ Highest-value target:
 
 - get the post-`pEqn` `U` writeback to be the exact `interFoam` handoff state the next momentum
   predictor expects
+
+### Current Thorough Port Steps
+
+The remaining `1000:1` dam-break instability is now isolated enough that the next work should
+proceed as a literal post-`pEqn` handoff port instead of more BC tuning.
+
+1. `modules/navier_stokes/src/userobjects/SharpInterfaceRhieChowMassFlux.C`
+   - stop using the corrected face-velocity field as the source of truth for cell `U`
+   - restore cell writeback to the local analog of
+     `U = HbyA + rAU*reconstruct((phig - pEqnFlux)/rAUf)`
+   - keep the corrected face-velocity field only as a secondary outlet/boundary cache derived
+     after cell writeback
+
+2. `modules/navier_stokes/include/utils/FaceCenteredMapFunctor.h`
+3. `modules/navier_stokes/src/utils/FaceCenteredMapFunctor.C`
+   - reuse the existing Weller-style face-to-cell reconstruction as the local analog of
+     `fvc::reconstruct`
+   - keep the reconstruction source field face-scalar in spirit, represented locally as a
+     face-vector field `psi_f * n_f`
+
+4. `modules/navier_stokes/src/userobjects/RhieChowMassFlux.C`
+   - keep `phi`, `phiHbyA`, `phig`, `pEqnFlux`, and `pressure_boundary_normal_gradient` as the only
+     pressure-corrector source of truth
+   - audit `|phi - phi(U)|` after each writeback stage and treat internal mismatch, not outlet
+     flux, as the primary acceptance gate
+
+5. `modules/navier_stokes/src/userobjects/SharpInterfaceRhieChowMassFlux.C`
+   - once the reconstruct-based writeback is in place, rebuild the corrected outlet face cache from
+     the final written-back cell field plus the solved face-normal flux, not the other way around
+
+6. Acceptance gates
+   - `2d-hydrostatic-column.i`: unchanged
+   - `2d-dam-break-smoke.i`, low ratio: unchanged stable branch
+   - `2d-dam-break-smoke.i`, `rho_l:rho_g = 1000:1`, one step:
+     - `|phi - phi(U)|_2` must drop materially
+     - the worst mismatch must stop being dominated by internal faces
+     - top outlet target-flux sum must stay bounded through timestep 1

@@ -1,0 +1,9 @@
+[Tests]
+  design = 'INTERFOAM_PARITY_IMPLEMENTATION_PLAN.md'
+  [unsteady_coupled_alpha_ns]
+    type = MMSTest
+    input = 'test.py'
+    test_case = TestUnsteadyCoupledAlphaNS
+    requirement = 'The split reduced-pressure sharp-interface finite-volume solver shall exhibit second-order spatial convergence in alpha, velocity, and the reconstructed pressure-coupled velocity correction for a smooth one-step unsteady manufactured solution that couples alpha transport to rho(alpha) and mu(alpha) in the momentum-pressure solve.'
+  []
+[]

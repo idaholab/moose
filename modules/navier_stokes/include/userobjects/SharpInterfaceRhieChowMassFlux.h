@@ -19,6 +19,24 @@ class LinearSystem;
 class SharpInterfaceRhieChowMassFlux : public RhieChowMassFlux
 {
 public:
+  struct MomentumProbeSample
+  {
+    bool valid = false;
+    dof_id_type elem_id = DofObject::invalid_id;
+    Point centroid;
+    Real rho = 0.0;
+    Real pressure = 0.0;
+    RealVectorValue grad_p;
+    RealVectorValue pressure_force;
+    RealVectorValue body_force;
+    RealVectorValue total_force;
+    RealVectorValue hbya_raw;
+    RealVectorValue predictor_velocity;
+    RealVectorValue pressure_coupled_delta_velocity;
+    RealVectorValue writeback_velocity;
+    RealVectorValue current_velocity;
+  };
+
   static InputParameters validParams();
 
   SharpInterfaceRhieChowMassFlux(const InputParameters & params);
@@ -26,6 +44,9 @@ public:
   void meshChanged() override;
   void initialSetup() override;
   void initialize() override;
+  void initFaceMassFlux() override;
+  void computeFaceMassFlux() override;
+  void computeCellVelocity() override;
   Real getMassFlux(const FaceInfo & fi) const override;
   Real getVolumetricFaceFlux(const FaceInfo & fi) const override;
   Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
@@ -35,6 +56,9 @@ public:
                              bool subtract_mesh_velocity) const override;
   void setUseVOFRhoPhi(const bool use_vof_rho_phi) { _use_vof_rho_phi = use_vof_rho_phi; }
   bool useVOFRhoPhi() const { return _use_vof_rho_phi; }
+  void freezeOuterIterationConvectiveState();
+  void clearOuterIterationConvectiveState();
+  bool hasOuterIterationConvectiveState() const { return _outer_iteration_convective_state_valid; }
   bool useFaceBasedPredictorBodyForce() const { return _use_face_based_predictor_body_force; }
   bool seedHydrostaticPressure(LinearSystem & pressure_system,
                                const dof_id_type pressure_pin_dof,
@@ -43,15 +67,14 @@ public:
                                            NumericVector<Number> & rhs) const override;
   void addMomentumPredictorBodyForceForcing(const unsigned int system_i,
                                             NumericVector<Number> & rhs) const override;
+  void updateVelocityBoundaryState() override;
 
   /// Update the additional pressure-equation source-flux functors before the pressure solve.
   void updateAdditionalPressureFluxFunctors(const bool with_updated_pressure, const bool verbose);
 
   /// Apply the physical counterpart of the additional source fluxes to the final face mass flux.
   void applyAdditionalFaceMassFluxCorrection();
-
-  /// Apply any matching cell-velocity correction after the base cell velocity update.
-  void applyAdditionalCellVelocityCorrection();
+  void computeProvisionalCellVelocity();
 
   void setSuppressExplicitHydrostaticPressureFlux(
       const bool suppress_explicit_hydrostatic_pressure_flux)
@@ -62,17 +85,46 @@ public:
   {
     return _suppress_explicit_hydrostatic_pressure_flux;
   }
+  void setSuppressStartupPressurePredictorFluxSources(
+      const bool suppress_startup_pressure_predictor_flux_sources)
+  {
+    _suppress_startup_pressure_predictor_flux_sources =
+        suppress_startup_pressure_predictor_flux_sources;
+  }
+  bool suppressStartupPressurePredictorFluxSources() const
+  {
+    return _suppress_startup_pressure_predictor_flux_sources;
+  }
   void auditRepresentativeHorizontalFaceReconstruction();
   void auditRepresentativePredictorBodyForce() const;
+  void collectMomentumProbeSamples(const std::vector<const ElemInfo *> & elem_infos,
+                                   std::vector<MomentumProbeSample> & samples) const;
   void clearPressureCoupledVelocityCorrectionAudit();
   void printPressureCoupledVelocityCorrectionAudit(const std::string & label) const;
+  Real rawRhieChowMassFlux(const FaceInfo & fi) const;
+  Real predictorOperatorFaceMassFlux(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
+  Real pressureCoupledWritebackMassFlux(const FaceInfo & fi) const;
+  RealVectorValue pressureCoupledCellVelocityDelta(const ElemInfo & elem_info,
+                                                   const Moose::StateArg & time_arg) const;
+  Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
+  bool hasVOFRhoPhiFunctor() const { return _vof_rho_phi != nullptr; }
+  Real vofRhoPhiMassFlux(const FaceInfo & fi) const;
+  const std::array<dof_id_type, 3> & watchedInternalFaceIds() const
+  {
+    return _last_pressure_coupled_velocity_worst_internal_face_ids;
+  }
 
 protected:
+  using FaceScalarField =
+      FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>;
   using FaceVectorField =
       FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>;
 
   void initializeAdditionalPressureFluxStorage();
   void rebuildSharpInterfaceFaceInfo();
+  void cacheCurrentCorrectedVolumetricFlux();
+  void syncPredictorConvectiveStateFromCurrentFluxes();
+  void updatePredictorOperatorPhiField(const Moose::StateArg & time_arg);
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
                                      const Moose::StateArg * limiter_state = nullptr) const;
@@ -80,6 +132,7 @@ protected:
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
+  RealVectorValue interpolateFaceRau(const FaceInfo * fi) const;
 
   RealVectorValue evaluateFaceVectorFunctor(const Moose::Functor<RealVectorValue> * functor,
                                             const FaceInfo * fi,
@@ -135,14 +188,35 @@ protected:
       const ElemInfo * elem_info,
       const Moose::StateArg & time_arg,
       const FaceVectorField * face_field) const;
+  Real pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
+  RealVectorValue reconstructPressureCoupledCellCorrectionSource(
+      const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   RealVectorValue reconstructPressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
+  void solveGlobalWritebackProjection(const Moose::StateArg & time_arg);
+  void updateCorrectedFaceVelocityField(const Moose::StateArg & time_arg);
+  void printPressureCoupledVelocityCorrectionInternalFaceAudit(const std::string & label) const;
+  RealVectorValue referenceFaceVelocityState(const FaceInfo * fi,
+                                             const Moose::StateArg & time_arg) const;
+  bool shouldUseCorrectedBoundaryVelocityState(const FaceInfo * fi) const;
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _transient_projection_flux;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _capillary_hydrostatic_flux;
+  FaceScalarField _predictor_convective_mass_flux;
+  FaceScalarField _predictor_convective_phi;
+  FaceScalarField _predictor_operator_phi;
+  FaceScalarField _pressure_predictor_base_phi;
+  FaceScalarField _sharp_pressure_predictor_flux;
+  FaceScalarField _reference_face_mass_flux_for_writeback;
+  FaceScalarField _corrected_face_phi;
+  FaceScalarField _outer_iteration_rho_phi;
+  FaceScalarField _outer_iteration_phi;
+  FaceScalarField _pressure_coupled_velocity_correction_scalar;
   FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
       _pressure_coupled_velocity_correction_face;
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _corrected_face_velocity;
 
   std::vector<const FaceInfo *> _sharp_interface_face_info;
 
@@ -166,11 +240,17 @@ protected:
   const Moose::Functor<RealVectorValue> * const _hydrostatic_density_gradient_cell_acceleration;
   const Moose::Functor<Real> * _vof_rho_phi;
   bool _use_vof_rho_phi = false;
+  bool _outer_iteration_convective_state_valid = false;
   bool _suppress_explicit_hydrostatic_pressure_flux = false;
+  bool _suppress_startup_pressure_predictor_flux_sources = false;
   bool _pressure_coupled_velocity_correction_valid = false;
+  bool _corrected_face_velocity_valid = false;
   bool _pressure_coupled_velocity_correction_audit_valid = false;
+  std::unique_ptr<NumericVector<Number>> _global_writeback_scalar_raw;
   Real _last_pressure_coupled_velocity_delta_l2 = 0.0;
   Real _last_pressure_coupled_velocity_delta_max = 0.0;
   dof_id_type _last_pressure_coupled_velocity_worst_elem_id = 0;
   Point _last_pressure_coupled_velocity_worst_centroid;
+  mutable std::array<dof_id_type, 3> _last_pressure_coupled_velocity_worst_internal_face_ids{
+      DofObject::invalid_id, DofObject::invalid_id, DofObject::invalid_id};
 };

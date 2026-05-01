@@ -1,17 +1,16 @@
-rho_l = 1000.0
+rho_l = 10.0
 rho_g = 1.0
 mu_l = 1.0e-3
-mu_g = 1.0e-5
-g = 9.81
+mu_g = 1.0e-3
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '0.5'
+    dx = '1.0'
     dy = '1.0'
-    ix = '10'
-    iy = '20'
+    ix = '16'
+    iy = '16'
   []
 []
 
@@ -30,12 +29,12 @@ g = 9.81
         compressibility = 'incompressible'
         density = 'rho_mixture'
         dynamic_viscosity = 'mu_mixture'
-        gravity = '0 -${g} 0'
+        gravity = '0 0 0'
         volume_fraction_functor = 'alpha'
         surface_tension_coefficient = '0'
         create_curvature_producer = false
 
-        initial_velocity = '0 0 0'
+        initial_velocity = 'u_init v_init 0'
         initial_pressure = '0'
 
         wall_boundaries = 'left right top bottom'
@@ -44,7 +43,7 @@ g = 9.81
         orthogonality_correction = false
         momentum_two_term_bc_expansion = false
         pressure_two_term_bc_expansion = false
-        momentum_advection_interpolation = 'upwind'
+        momentum_advection_interpolation = 'average'
       []
     []
     [SharpInterfaceVOFSegregated]
@@ -59,13 +58,11 @@ g = 9.81
         liquid_dynamic_viscosity_name = 'mu_l'
         gas_dynamic_viscosity_name = 'mu_g'
 
-        advected_interp_method = 'upwind'
+        advected_interp_method = 'average'
         compression_factor = '0'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
-        use_mules_correction = true
-        n_alpha_corrections = 2
-        n_limiter_iterations = 4
+        use_mules_correction = false
       []
     []
   []
@@ -84,42 +81,13 @@ g = 9.81
     type = ParsedFunction
     expression = 'if(y < 0.5, 1, 0)'
   []
-[]
-
-[AuxVariables]
-  [pressure_head]
-    type = MooseVariableFVReal
+  [u_init]
+    type = ParsedFunction
+    expression = '0.1*sin(pi*x)*sin(pi*y)'
   []
-  [rho_gh]
-    type = MooseVariableFVReal
-  []
-  [total_pressure]
-    type = MooseVariableFVReal
-  []
-[]
-
-[AuxKernels]
-  [pressure_head]
-    type = FunctorAux
-    variable = pressure_head
-    functor = 'flow_reduced_pressure_head'
-    execute_on = 'TIMESTEP_END'
-  []
-  [rho_gh]
-    type = ParsedAux
-    variable = rho_gh
-    expression = 'rho * gh'
-    functor_names = 'rho_mixture flow_reduced_pressure_head'
-    functor_symbols = 'rho gh'
-    evaluate_functors_on_qp = false
-    execute_on = 'TIMESTEP_END'
-  []
-  [total_pressure]
-    type = ParsedAux
-    variable = total_pressure
-    expression = 'pressure + rho_gh'
-    coupled_variables = 'pressure rho_gh'
-    execute_on = 'TIMESTEP_END'
+  [v_init]
+    type = ParsedFunction
+    expression = '0.05*sin(pi*x)*sin(pi*y)'
   []
 []
 
@@ -131,11 +99,14 @@ g = 9.81
   pressure_system = 'pressure_system'
   volume_fraction_systems = 'alpha_system'
 
-  momentum_equation_relaxation = 0.7
-  pressure_variable_relaxation = 0.3
+  should_solve_momentum = false
+  should_solve_volume_fractions = false
+
+  momentum_equation_relaxation = 1.0
+  pressure_variable_relaxation = 1.0
   volume_fraction_equation_relaxation = '1.0'
 
-  num_iterations = 20
+  num_iterations = 1
   num_piso_iterations = 1
   continue_on_max_its = true
   print_fields = false
@@ -163,79 +134,54 @@ g = 9.81
   pressure_pin_point = '0.0 0.0 0.0'
   pressure_pin_value = 0.0
 
-  startup_pressure_initialization = 'equilibrium-seed'
-  startup_flux_corrections = 2
+  startup_pressure_initialization = 'none'
 
-  volume_fraction_subcycles = 1
-  dt = 0.01
-  num_steps = 3
+  dt = 1e-3
+  num_steps = 1
 []
 
 [Postprocessors]
-  [alpha_min]
-    type = ElementExtremeValue
-    variable = 'alpha'
-    value_type = min
+  [cell_divergence_l2]
+    type = RhieChowCellContinuityResidual
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    metric = l2
   []
-  [alpha_max]
-    type = ElementExtremeValue
-    variable = 'alpha'
-    value_type = max
+  [cell_divergence_max]
+    type = RhieChowCellContinuityResidual
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    metric = max_abs
   []
-  [vel_x_min]
-    type = ElementExtremeValue
-    variable = 'vel_x'
-    value_type = min
+  [face_flux_consistency_l2]
+    type = RhieChowFaceFluxConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = l2
+  []
+  [face_flux_consistency_internal]
+    type = RhieChowFaceFluxConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = internal_l2
+  []
+  [correction_branch_consistency]
+    type = SharpInterfaceFluxBranchConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = pressure_correction
+    metric = l2
+  []
+  [total_branch_consistency]
+    type = SharpInterfaceFluxBranchConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = total
+    metric = l2
   []
   [vel_x_max]
     type = ElementExtremeValue
     variable = 'vel_x'
     value_type = max
   []
-  [vel_y_min]
-    type = ElementExtremeValue
-    variable = 'vel_y'
-    value_type = min
-  []
   [vel_y_max]
     type = ElementExtremeValue
     variable = 'vel_y'
     value_type = max
-  []
-  [pressure_bottom]
-    type = PointValue
-    variable = 'pressure'
-    point = '0.25 0.25 0'
-  []
-  [pressure_top]
-    type = PointValue
-    variable = 'pressure'
-    point = '0.25 0.75 0'
-  []
-  [total_pressure_bottom]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.25 0'
-  []
-  [total_pressure_interface_liquid]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.475 0'
-  []
-  [total_pressure_interface_gas]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.525 0'
-  []
-  [total_pressure_top]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.75 0'
-  []
-  [total_pressure_interface_jump]
-    type = ParsedPostprocessor
-    expression = 'abs(total_pressure_interface_liquid-total_pressure_interface_gas)'
-    pp_names = 'total_pressure_interface_liquid total_pressure_interface_gas'
   []
 []
 

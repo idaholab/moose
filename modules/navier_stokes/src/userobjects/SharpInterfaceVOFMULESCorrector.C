@@ -10,6 +10,8 @@
 #include "SharpInterfaceVOFMULESCorrector.h"
 
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionExtrapolatedBC.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 #include "LinearSystem.h"
 #include "MooseLinearVariableFV.h"
 #include "MooseFunctorArguments.h"
@@ -66,6 +68,11 @@ SharpInterfaceVOFMULESCorrector::validParams()
       1.0,
       "correction_relaxation>0 & correction_relaxation<=1",
       "Under-relaxation applied to each bounded explicit correction update.");
+  params.addParam<bool>(
+      "alpha_apply_prev_corr",
+      true,
+      "Whether to reuse the previous limited correction flux as the initial correction guess on "
+      "the next alpha solve, mirroring interFoam's alphaApplyPrevCorr lifecycle.");
   params.addParam<Real>("min_value", 0.0, "Lower admissible volume-fraction bound.");
   params.addParam<Real>("max_value", 1.0, "Upper admissible volume-fraction bound.");
   params.addParam<bool>("debug_dump_subcycle",
@@ -129,6 +136,7 @@ SharpInterfaceVOFMULESCorrector::SharpInterfaceVOFMULESCorrector(const InputPara
     _correction_relaxation(getParam<Real>("correction_relaxation")),
     _min_value(getParam<Real>("min_value")),
     _max_value(getParam<Real>("max_value")),
+    _alpha_apply_prev_corr(getParam<bool>("alpha_apply_prev_corr")),
     _debug_dump_subcycle(getParam<bool>("debug_dump_subcycle")),
     _debug_only_first_subcycle(getParam<bool>("debug_only_first_subcycle")),
     _debug_dump_max_faces(getParam<unsigned int>("debug_dump_max_faces")),
@@ -172,6 +180,15 @@ void
 SharpInterfaceVOFMULESCorrector::initialSetup()
 {
   cacheSystemData();
+  initializeFluxStorage();
+}
+
+void
+SharpInterfaceVOFMULESCorrector::meshChanged()
+{
+  cacheSystemData();
+  initializeFluxStorage();
+  invalidatePreviousCorrectionFluxes();
 }
 
 void
@@ -189,6 +206,31 @@ SharpInterfaceVOFMULESCorrector::cacheSystemData()
   _alpha_var->computeCellLimitedGradients(Moose::FV::GradientLimiterType::Venkatakrishnan);
 }
 
+void
+SharpInterfaceVOFMULESCorrector::initializeFluxStorage()
+{
+  for (const auto * fi : _fe_problem.mesh().faceInfo())
+  {
+    _alpha_phi_bd[fi->id()] = 0.0;
+    _alpha_phi_ho[fi->id()] = 0.0;
+    _alpha_phi_comp[fi->id()] = 0.0;
+    _alpha_phi_corr_raw[fi->id()] = 0.0;
+    _alpha_phi_corr[fi->id()] = 0.0;
+    _alpha_phi_limited[fi->id()] = 0.0;
+    _rho_phi[fi->id()] = 0.0;
+    _alpha_phi_corr_prev.try_emplace(fi->id(), 0.0);
+  }
+}
+
+void
+SharpInterfaceVOFMULESCorrector::invalidatePreviousCorrectionFluxes()
+{
+  for (auto & pair : _alpha_phi_corr_prev)
+    pair.second = 0.0;
+
+  _previous_correction_flux_valid = false;
+}
+
 Real
 SharpInterfaceVOFMULESCorrector::cellVolume(const ElemInfo & elem_info) const
 {
@@ -202,16 +244,139 @@ SharpInterfaceVOFMULESCorrector::faceMeasure(const FaceInfo & fi) const
 }
 
 Real
+SharpInterfaceVOFMULESCorrector::solutionAlpha(const NumericVector<Number> & solution,
+                                               const ElemInfo & elem_info) const
+{
+  const auto dof = elem_info.dofIndices()[_sys_num][_var_num];
+  if (dof == DofObject::invalid_id)
+    return 0.0;
+
+  return std::min(_max_value, std::max(_min_value, static_cast<Real>(solution(dof))));
+}
+
+Real
+SharpInterfaceVOFMULESCorrector::integrateLiquidVolume(const NumericVector<Number> & solution) const
+{
+  Real local_liquid_volume = 0.0;
+
+  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
+  {
+    if (!elem_info || !hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const auto * const elem = elem_info->elem();
+    if (!elem || elem->processor_id() != processor_id())
+      continue;
+
+    local_liquid_volume += solutionAlpha(solution, *elem_info) * cellVolume(*elem_info);
+  }
+
+  _communicator.sum(local_liquid_volume);
+  return local_liquid_volume;
+}
+
+Real
 SharpInterfaceVOFMULESCorrector::cellAlpha(const ElemInfo & elem_info) const
 {
   return std::min(_max_value,
                   std::max(_min_value, _alpha_var->getElemValue(elem_info, Moose::currentState())));
 }
 
+SharpInterfaceVOFMULESCorrector::LiquidVolumeAudit
+SharpInterfaceVOFMULESCorrector::liquidVolumeAudit() const
+{
+  LiquidVolumeAudit audit;
+  if (!_system)
+    return audit;
+
+  audit.current = integrateLiquidVolume(*(_system->system().current_local_solution));
+  audit.timestep_old = integrateLiquidVolume(_system->solutionOld());
+
+  if (_system->hasSolutionState(1, Moose::SolutionIterationType::Nonlinear))
+  {
+    audit.previous_outer = integrateLiquidVolume(
+        _system->solutionState(1, Moose::SolutionIterationType::Nonlinear));
+    audit.has_previous_outer = true;
+  }
+
+  return audit;
+}
+
+SharpInterfaceVOFMULESCorrector::RhoPhiConsistencyAudit
+SharpInterfaceVOFMULESCorrector::rhoPhiConsistencyAudit() const
+{
+  RhoPhiConsistencyAudit audit;
+
+  Real local_rho_phi_mismatch_sq_sum = 0.0;
+  Real local_max_abs_mismatch = 0.0;
+
+  for (const auto * fi : _fe_problem.mesh().faceInfo())
+  {
+    if (!fi || fi->processor_id() != processor_id())
+      continue;
+
+    const auto face_type = fi->faceType(std::make_pair(_var_num, _sys_num));
+    if (face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+      continue;
+
+    if (!hasBlocks(fi->elemSubdomainID()) &&
+        !(fi->neighborPtr() && hasBlocks(fi->neighborSubdomainID())))
+      continue;
+
+    const auto face_id = fi->id();
+    const bool have_rho_phi = _rho_phi.count(face_id);
+    const bool have_limited_alpha_flux = _alpha_phi_limited.count(face_id);
+    if (!have_rho_phi && !have_limited_alpha_flux)
+      continue;
+
+    const Real stored_rho_phi = have_rho_phi ? libmesh_map_find(_rho_phi, face_id) : 0.0;
+    const Real limited_alpha_flux =
+        have_limited_alpha_flux ? libmesh_map_find(_alpha_phi_limited, face_id) : 0.0;
+    const Real gas_density = faceFunctorAverage(*fi, _gas_density);
+    const Real liquid_density = faceFunctorAverage(*fi, _liquid_density);
+    const Real volumetric_phi = _mass_flux_provider.getVolumetricFaceFlux(*fi);
+    const Real reconstructed_rho_phi =
+        volumetric_phi * faceMeasure(*fi) * gas_density +
+        (liquid_density - gas_density) * limited_alpha_flux;
+    const Real mismatch = stored_rho_phi - reconstructed_rho_phi;
+    const Real abs_mismatch = std::abs(mismatch);
+
+    local_rho_phi_mismatch_sq_sum += mismatch * mismatch;
+
+    if (abs_mismatch > local_max_abs_mismatch)
+    {
+      local_max_abs_mismatch = abs_mismatch;
+      audit.has_worst_face = true;
+      audit.worst_face_id = face_id;
+      audit.worst_face_centroid = fi->faceCentroid();
+      audit.stored_rho_phi = stored_rho_phi;
+      audit.reconstructed_rho_phi = reconstructed_rho_phi;
+      audit.volumetric_phi = volumetric_phi;
+      audit.limited_alpha_flux = limited_alpha_flux;
+      audit.gas_density = gas_density;
+      audit.liquid_density = liquid_density;
+    }
+  }
+
+  _communicator.sum(local_rho_phi_mismatch_sq_sum);
+  audit.l2_norm = std::sqrt(local_rho_phi_mismatch_sq_sum);
+
+  processor_id_type worst_face_pid = processor_id();
+  _communicator.maxloc(local_max_abs_mismatch, worst_face_pid);
+  audit.max_abs_mismatch = local_max_abs_mismatch;
+  if (worst_face_pid != processor_id())
+    audit.has_worst_face = false;
+
+  return audit;
+}
+
 void
 SharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
 {
   _subcycle_counter = 0;
+  // Mirror OpenFOAM's createAlphaFluxes.H lifecycle: clear the working
+  // current-solve alpha/rhoPhi accumulators, but keep the previous limited
+  // correction flux stored for the next alpha solve.
   for (auto & pair : _alpha_phi_bd)
     pair.second = 0.0;
   for (auto & pair : _alpha_phi_ho)
@@ -228,20 +393,30 @@ SharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
     pair.second = 0.0;
 }
 
-Real
-SharpInterfaceVOFMULESCorrector::boundaryValue(const FaceInfo & fi,
-                                               FaceInfo::VarFaceNeighbors face_type) const
+LinearFVBoundaryCondition *
+SharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & fi) const
 {
   for (const auto bnd_id : fi.boundaryIDs())
     if (const auto & bc_map = _alpha_var->getBoundaryConditionMap();
         bc_map.find(bnd_id) != bc_map.end())
-    {
-      auto * bc = bc_map.at(bnd_id);
-      bc->setupFaceData(&fi, face_type);
-      return std::min(_max_value, std::max(_min_value, bc->computeBoundaryValue()));
-    }
+      return bc_map.at(bnd_id);
 
-  return 0.0;
+  return nullptr;
+}
+
+Real
+SharpInterfaceVOFMULESCorrector::boundaryValue(const FaceInfo & fi,
+                                               FaceInfo::VarFaceNeighbors face_type) const
+{
+  if (auto * bc = boundaryCondition(fi))
+  {
+    bc->setupFaceData(&fi, face_type);
+    return std::min(_max_value, std::max(_min_value, bc->computeBoundaryValue()));
+  }
+
+  const auto * fluid_info = face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ? fi.neighborInfo()
+                                                                               : fi.elemInfo();
+  return fluid_info ? cellAlpha(*fluid_info) : 0.0;
 }
 
 Real
@@ -273,12 +448,19 @@ SharpInterfaceVOFMULESCorrector::highOrderFlux(const FaceInfo & fi) const
 
   const Real volumetric_flux = _mass_flux_provider.getVolumetricFaceFlux(fi);
   const bool upwind_is_elem = volumetric_flux >= 0.0;
+  auto * bc = boundaryCondition(fi);
 
   Real high_order_alpha = 0.0;
   if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
     high_order_alpha = limitedUpwindFaceValue(fi, upwind_is_elem);
-  else if (_alpha_var->isDirichletBoundaryFace(fi))
+  else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
+  {
+    (void)dirichlet_bc;
     high_order_alpha = upwind_is_elem ? limitedUpwindFaceValue(fi, true) : boundaryValue(fi, face_type);
+  }
+  else if (upwind_is_elem &&
+           dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
+    high_order_alpha = boundaryValue(fi, face_type);
   else
     return donorFlux(fi);
 
@@ -296,6 +478,51 @@ SharpInterfaceVOFMULESCorrector::limitedUpwindFaceValue(const FaceInfo & fi, con
   const Point & upwind_centroid = upwind_is_elem ? fi.elemCentroid() : fi.neighborCentroid();
   const Real reconstructed = alpha_upwind + grad_upwind * (fi.faceCentroid() - upwind_centroid);
   return std::min(_max_value, std::max(_min_value, reconstructed));
+}
+
+SharpInterfaceVOFMULESCorrector::BoundaryFaceKind
+SharpInterfaceVOFMULESCorrector::classifyBoundaryFace(const FaceInfo & fi,
+                                                      const FaceInfo::VarFaceNeighbors face_type,
+                                                      const Real volumetric_flux) const
+{
+  if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    return BoundaryFaceKind::Internal;
+
+  if (std::abs(volumetric_flux) <= libMesh::TOLERANCE)
+    return BoundaryFaceKind::Closed;
+
+  auto * bc = boundaryCondition(fi);
+  if (!bc)
+    return BoundaryFaceKind::Closed;
+
+  if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
+    return volumetric_flux >= 0.0 ? BoundaryFaceKind::DirichletOutflow
+                                  : BoundaryFaceKind::DirichletInflow;
+
+  if (dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
+    return volumetric_flux >= 0.0 ? BoundaryFaceKind::OpenOutflow : BoundaryFaceKind::Closed;
+
+  return BoundaryFaceKind::Closed;
+}
+
+const char *
+SharpInterfaceVOFMULESCorrector::boundaryFaceKindName(const BoundaryFaceKind kind) const
+{
+  switch (kind)
+  {
+    case BoundaryFaceKind::Internal:
+      return "internal";
+    case BoundaryFaceKind::DirichletInflow:
+      return "dirichlet_inflow";
+    case BoundaryFaceKind::DirichletOutflow:
+      return "dirichlet_outflow";
+    case BoundaryFaceKind::OpenOutflow:
+      return "open_outflow";
+    case BoundaryFaceKind::Closed:
+      return "closed";
+  }
+
+  return "unknown";
 }
 
 Real
@@ -326,9 +553,21 @@ SharpInterfaceVOFMULESCorrector::faceFunctorAverage(const FaceInfo & fi,
                                                     const Moose::Functor<Real> & functor) const
 {
   const auto state = Moose::currentState();
-  const Real elem_value = MetaPhysicL::raw_value(functor(Moose::ElemArg{fi.elemPtr(), false}, state));
   if (!fi.neighborPtr())
-    return elem_value;
+  {
+    const Elem * fluid_elem = fi.elemPtr();
+    if (!hasBlocks(fluid_elem->subdomain_id()) && fi.neighborPtr())
+      fluid_elem = fi.neighborPtr();
+    const Moose::FaceArg face_arg{&fi,
+                                  Moose::FV::LimiterType::CentralDifference,
+                                  true,
+                                  false,
+                                  fluid_elem,
+                                  nullptr};
+    return MetaPhysicL::raw_value(functor(face_arg, state));
+  }
+
+  const Real elem_value = MetaPhysicL::raw_value(functor(Moose::ElemArg{fi.elemPtr(), false}, state));
 
   const Real neighbor_value =
       MetaPhysicL::raw_value(functor(Moose::ElemArg{fi.neighborPtr(), false}, state));
@@ -364,10 +603,11 @@ SharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceInfo & fi) co
   data.high_order_flux = highOrderFlux(fi);
 
   const Real volumetric_flux = _mass_flux_provider.getVolumetricFaceFlux(fi);
-  const bool upwind_is_elem = volumetric_flux >= 0.0;
   const Real elem_alpha = cellAlpha(*fi.elemInfo());
+  data.boundary_kind = classifyBoundaryFace(fi, face_type, volumetric_flux);
+  data.boundary_face = data.boundary_kind != BoundaryFaceKind::Internal;
 
-  if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  if (data.boundary_kind == BoundaryFaceKind::Internal)
   {
     const Real neighbor_alpha = cellAlpha(*fi.neighborInfo());
     data.compressive_flux = compressionFlux(fi, elem_alpha, neighbor_alpha);
@@ -376,16 +616,17 @@ SharpInterfaceVOFMULESCorrector::buildFaceCorrectionData(const FaceInfo & fi) co
     return data;
   }
 
-  if (!_alpha_var->isDirichletBoundaryFace(fi))
-    return data;
+  // Phase-7 boundary policy:
+  // - prescribed inflow alpha remains donor-only in the explicit correction stage
+  // - prescribed outflow alpha may reuse its one-sided advective face value, but no compression
+  // - extrapolated/open outlets remain donor-only in the explicit correction stage
+  // - closed boundaries remain donor-only in the explicit correction stage
+  if (data.boundary_kind == BoundaryFaceKind::DirichletOutflow)
+  {
+    data.advective_correction_flux = data.high_order_flux - data.donor_flux;
+    data.correction_flux = data.advective_correction_flux;
+  }
 
-  const Real bc_alpha = boundaryValue(fi, face_type);
-  if (!upwind_is_elem)
-    return data;
-
-  data.compressive_flux = compressionFlux(fi, elem_alpha, bc_alpha);
-  data.advective_correction_flux = data.high_order_flux - data.donor_flux;
-  data.correction_flux = data.advective_correction_flux + data.compressive_flux;
   return data;
 }
 
@@ -434,6 +675,7 @@ SharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, const Real subcy
   std::vector<Real> published_accepted_lambda;
   std::unordered_map<dof_id_type, Real> alpha_before_correction;
   std::unordered_map<dof_id_type, Real> alpha_after_correction;
+  const bool use_previous_correction_flux = _alpha_apply_prev_corr && _previous_correction_flux_valid;
 
   for (const auto correction_it : make_range(_num_alpha_corrections))
   {
@@ -473,6 +715,13 @@ SharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, const Real subcy
       raw_correction_flux[i] = face_corrections[i].correction_flux;
       accepted_lambda[i] = std::abs(raw_correction_flux[i]) > libMesh::TOLERANCE ? 1.0 : 0.0;
     }
+
+    if (correction_it == 0 && use_previous_correction_flux)
+      for (const auto i : index_range(face_corrections))
+      {
+        raw_correction_flux[i] += _alpha_phi_corr_prev[face_corrections[i].face->id()];
+        accepted_lambda[i] = std::abs(raw_correction_flux[i]) > libMesh::TOLERANCE ? 1.0 : 0.0;
+      }
 
     if (_debug_dump_subcycle && correction_it == 0)
     {
@@ -628,6 +877,14 @@ SharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, const Real subcy
                       published_raw_correction_fluxes,
                       published_limited_correction_fluxes,
                       subcycle_fraction);
+
+    for (auto & pair : _alpha_phi_corr_prev)
+      pair.second = 0.0;
+    for (const auto i : index_range(published_face_corrections))
+      _alpha_phi_corr_prev[published_face_corrections[i].face->id()] =
+          published_limited_correction_fluxes[i];
+    _previous_correction_flux_valid = true;
+
     if (_debug_dump_subcycle && (!_debug_only_first_subcycle || _subcycle_counter == 1))
       dumpFaceDebug(published_face_corrections,
                     published_accepted_lambda,
@@ -635,6 +892,8 @@ SharpInterfaceVOFMULESCorrector::applyCorrection(const Real dt, const Real subcy
                     alpha_after_correction,
                     _subcycle_counter);
   }
+  else
+    invalidatePreviousCorrectionFluxes();
 
   _system->computeGradients();
 }
@@ -683,7 +942,7 @@ SharpInterfaceVOFMULESCorrector::dumpFaceDebug(
     if (data.has_neighbor)
       _console << " neighbor_dof=" << data.neighbor_dof;
     else
-      _console << " boundary_face=1";
+      _console << " boundary_face=1 boundary_kind=" << boundaryFaceKindName(data.boundary_kind);
     _console << " donor_flux=" << data.donor_flux << " high_order_flux=" << data.high_order_flux
              << " compressive_flux=" << data.compressive_flux
              << " correction_flux=" << data.correction_flux

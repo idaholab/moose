@@ -1,17 +1,17 @@
-rho_l = 1000.0
+rho_l = 10.0
 rho_g = 1.0
 mu_l = 1.0e-3
-mu_g = 1.0e-5
+mu_g = 1.0e-3
 g = 9.81
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '0.5'
-    dy = '1.0'
-    ix = '10'
-    iy = '20'
+    dx = '1.6'
+    dy = '0.8'
+    ix = '32'
+    iy = '16'
   []
 []
 
@@ -32,14 +32,19 @@ g = 9.81
         dynamic_viscosity = 'mu_mixture'
         gravity = '0 -${g} 0'
         volume_fraction_functor = 'alpha'
+        reference_pressure_point = '0 0.8 0'
         surface_tension_coefficient = '0'
         create_curvature_producer = false
 
         initial_velocity = '0 0 0'
-        initial_pressure = '0'
+        initial_pressure = 'pressure_init'
 
-        wall_boundaries = 'left right top bottom'
-        momentum_wall_types = 'noslip noslip noslip noslip'
+        wall_boundaries = 'left right bottom'
+        momentum_wall_types = 'noslip noslip noslip'
+
+        outlet_boundaries = 'top'
+        momentum_outlet_types = 'fixed-pressure'
+        pressure_functors = '0'
 
         orthogonality_correction = false
         momentum_two_term_bc_expansion = false
@@ -60,12 +65,12 @@ g = 9.81
         gas_dynamic_viscosity_name = 'mu_g'
 
         advected_interp_method = 'upwind'
-        compression_factor = '0'
+        compression_factor = '2'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
         use_mules_correction = true
-        n_alpha_corrections = 2
-        n_limiter_iterations = 4
+        n_alpha_corrections = 3
+        n_limiter_iterations = 6
       []
     []
   []
@@ -82,44 +87,11 @@ g = 9.81
 [Functions]
   [alpha_init]
     type = ParsedFunction
-    expression = 'if(y < 0.5, 1, 0)'
+    expression = 'if(x < 0.4 & y < 0.6, 1, 0)'
   []
-[]
-
-[AuxVariables]
-  [pressure_head]
-    type = MooseVariableFVReal
-  []
-  [rho_gh]
-    type = MooseVariableFVReal
-  []
-  [total_pressure]
-    type = MooseVariableFVReal
-  []
-[]
-
-[AuxKernels]
-  [pressure_head]
-    type = FunctorAux
-    variable = pressure_head
-    functor = 'flow_reduced_pressure_head'
-    execute_on = 'TIMESTEP_END'
-  []
-  [rho_gh]
-    type = ParsedAux
-    variable = rho_gh
-    expression = 'rho * gh'
-    functor_names = 'rho_mixture flow_reduced_pressure_head'
-    functor_symbols = 'rho gh'
-    evaluate_functors_on_qp = false
-    execute_on = 'TIMESTEP_END'
-  []
-  [total_pressure]
-    type = ParsedAux
-    variable = total_pressure
-    expression = 'pressure + rho_gh'
-    coupled_variables = 'pressure rho_gh'
-    execute_on = 'TIMESTEP_END'
+  [pressure_init]
+    type = ParsedFunction
+    expression = 'if(x < 0.4 & y < 0.6, -(${rho_l}-${rho_g})*${g}*0.2, 0)'
   []
 []
 
@@ -135,18 +107,18 @@ g = 9.81
   pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
 
-  num_iterations = 20
-  num_piso_iterations = 1
+  num_iterations = 15
+  num_piso_iterations = 0
   continue_on_max_its = true
   print_fields = false
 
-  momentum_absolute_tolerance = 1e-12
-  pressure_absolute_tolerance = 1e-12
-  volume_fraction_absolute_tolerance = '1e-12'
+  momentum_absolute_tolerance = 1e-10
+  pressure_absolute_tolerance = 1e-10
+  volume_fraction_absolute_tolerance = '1e-10'
 
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  volume_fraction_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-12
+  pressure_l_abs_tol = 1e-12
+  volume_fraction_l_abs_tol = 1e-12
 
   momentum_l_tol = 0
   pressure_l_tol = 0
@@ -160,18 +132,21 @@ g = 9.81
   volume_fraction_petsc_options_value = 'lu'
 
   pin_pressure = true
-  pressure_pin_point = '0.0 0.0 0.0'
-  pressure_pin_value = 0.0
+  pressure_pin_point = '0.0 0.8 0.0'
 
-  startup_pressure_initialization = 'equilibrium-seed'
+  startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
 
-  volume_fraction_subcycles = 1
-  dt = 0.01
-  num_steps = 3
+  volume_fraction_subcycles = 3
+  dt = 0.0002
+  num_steps = 100
 []
 
 [Postprocessors]
+  [alpha_average]
+    type = ElementAverageValue
+    variable = 'alpha'
+  []
   [alpha_min]
     type = ElementExtremeValue
     variable = 'alpha'
@@ -202,44 +177,30 @@ g = 9.81
     variable = 'vel_y'
     value_type = max
   []
-  [pressure_bottom]
+  [alpha_front_near]
     type = PointValue
-    variable = 'pressure'
-    point = '0.25 0.25 0'
+    variable = 'alpha'
+    point = '0.45 0.05 0'
   []
-  [pressure_top]
+  [alpha_front_mid]
     type = PointValue
-    variable = 'pressure'
-    point = '0.25 0.75 0'
+    variable = 'alpha'
+    point = '0.75 0.05 0'
   []
-  [total_pressure_bottom]
+  [alpha_front_far]
     type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.25 0'
+    variable = 'alpha'
+    point = '1.05 0.05 0'
   []
-  [total_pressure_interface_liquid]
+  [alpha_column_top]
     type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.475 0'
-  []
-  [total_pressure_interface_gas]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.525 0'
-  []
-  [total_pressure_top]
-    type = PointValue
-    variable = 'total_pressure'
-    point = '0.25 0.75 0'
-  []
-  [total_pressure_interface_jump]
-    type = ParsedPostprocessor
-    expression = 'abs(total_pressure_interface_liquid-total_pressure_interface_gas)'
-    pp_names = 'total_pressure_interface_liquid total_pressure_interface_gas'
+    variable = 'alpha'
+    point = '0.20 0.55 0'
   []
 []
 
 [Outputs]
   execute_on = 'TIMESTEP_END'
   csv = true
+  exodus = false
 []

@@ -1,0 +1,2 @@
+time,cell_divergence_l2,cell_divergence_max,correction_branch_consistency,face_flux_consistency_internal,face_flux_consistency_l2,total_branch_consistency,vel_x_max,vel_y_max
+0.001,4.6137544124369e-14,5.3368420793731e-13,1.2786683453673,5.1148624706263,5.1148624706263,1.1311999937935,0.099449287753383,0.049872113544957

@@ -14,6 +14,7 @@
 #include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "LinearFVElementalKernel.h"
+#include <string>
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -24,6 +25,7 @@ class MooseMesh;
 class INSFVVelocityVariable;
 class INSFVPressureVariable;
 class LinearFVPressureCorrectionDiffusion;
+class Function;
 namespace libMesh
 {
 class Elem;
@@ -68,23 +70,33 @@ public:
                                      bool subtract_mesh_velocity) const override;
 
   /// Initialize the container for face velocities
-  void initFaceMassFlux();
+  virtual void initFaceMassFlux();
   /// Initialize the coupling fields (HbyA and Ainv)
   void initCouplingField();
   /// Cache the exact pressure-equation face flux from the current solved pressure field.
   void cachePressureEquationFlux();
+  /// Evaluate the discrete internal-face pressure-equation flux for a supplied exact pressure.
+  Real exactInternalPressureEquationFlux(const FaceInfo & fi, const Function & exact_pressure) const;
+  /// Access the currently stored pressure-equation face flux.
+  Real storedPressureEquationFlux(const FaceInfo & fi) const;
   /// Signed sum of boundary mass fluxes for audit purposes.
   Real boundaryMassFluxImbalance() const;
   /// Maximum absolute boundary mass flux for audit purposes.
   Real maxBoundaryMassFluxMagnitude() const;
   /// L2 norm of all current face mass fluxes for audit purposes.
   Real faceMassFluxL2Norm() const;
+  /// Access the active flow faces used by this Rhie-Chow object for audit postprocessors.
+  const std::vector<const FaceInfo *> & flowFacesForAudit() const { return _flow_face_info; }
   /// Compare the stored face mass fluxes against the flux implied by the current cell/boundary U.
   FaceMassFluxConsistencyAudit faceMassFluxConsistencyAudit() const;
   /// Update the values of the face velocities in the containers
-  void computeFaceMassFlux();
+  virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
-  void computeCellVelocity();
+  virtual void computeCellVelocity();
+  /// Debug accessor for the current cell HbyA state.
+  Real cellHbyARaw(const unsigned int system_i, const dof_id_type dof) const;
+  /// Debug accessor for the current cell Ainv state.
+  Real cellAinvRaw(const unsigned int system_i, const dof_id_type dof) const;
   /// Cache the assembled/relaxed momentum predictor operator for one component.
   void cacheMomentumPredictorOperator(const unsigned int system_i,
                                       const NumericVector<Number> * rhs_override = nullptr,
@@ -102,8 +114,10 @@ public:
   bool splitMomentumPredictorOperator() const { return _split_momentum_predictor_operator; }
   /// Update boundary pressure gradients from the current predictor and boundary velocity state.
   void updatePressureBoundaryNormalGradients(const bool apply_reference_adjustment);
+  /// Audit representative top/left pressure-boundary constraint state.
+  void auditPressureBoundaryGradientState(const std::string & stage_label) const;
   /// Refresh boundary-face velocity values from the active FV velocity BC objects.
-  void updateVelocityBoundaryState();
+  virtual void updateVelocityBoundaryState();
 
   virtual void meshChanged() override;
   virtual void initialize() override;

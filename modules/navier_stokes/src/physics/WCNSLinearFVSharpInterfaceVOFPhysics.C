@@ -100,6 +100,11 @@ WCNSLinearFVSharpInterfaceVOFPhysics::validParams()
       1.0,
       "mules_correction_relaxation>0 & mules_correction_relaxation<=1",
       "Under-relaxation factor applied to the bounded explicit correction.");
+  params.addParam<bool>(
+      "alpha_apply_prev_corr",
+      true,
+      "Whether to reuse the previous limited correction flux as the initial bounded-correction "
+      "guess on the next alpha solve, matching interFoam's alphaApplyPrevCorr lifecycle.");
   params.addParam<bool>("debug_dump_subcycle",
                         false,
                         "Forwarded to SharpInterfaceVOFMULESCorrector for targeted interface-face "
@@ -291,6 +296,7 @@ WCNSLinearFVSharpInterfaceVOFPhysics::addUserObjects()
   params.set<unsigned int>("n_limiter_iterations") =
       getParam<unsigned int>("n_limiter_iterations");
   params.set<Real>("correction_relaxation") = getParam<Real>("mules_correction_relaxation");
+  params.set<bool>("alpha_apply_prev_corr") = getParam<bool>("alpha_apply_prev_corr");
   params.set<MooseFunctorName>("liquid_density") = _liquid_density_name;
   params.set<MooseFunctorName>("gas_density") = _gas_density_name;
   params.set<MooseFunctorName>("alpha_phi_bd_functor_name") =

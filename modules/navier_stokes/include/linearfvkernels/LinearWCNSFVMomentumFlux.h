@@ -60,6 +60,10 @@ public:
                                                  NumericVector<Number> & advection_residual,
                                                  NumericVector<Number> & stress_residual);
 
+  /// Audit accessors for the currently prepared face state.
+  Real currentFaceMassFlux() const { return _face_mass_flux; }
+  std::pair<Real, Real> currentAdvectedInterpCoeffs() const { return _advected_interp_coeffs; }
+
 protected:
   /// Computes the matrix contribution of the advective flux on the element side of current face
   /// when the face is an internal face (doesn't have associated boundary conditions).
@@ -101,6 +105,10 @@ protected:
 
   /// The Rhie-Chow user object that provides us with the face velocity
   const RhieChowMassFlux & _mass_flux_provider;
+
+  /// Optional face-centered mass-flux functor used to freeze one convective state per outer
+  /// iteration on the sharp-interface parity path.
+  const Moose::Functor<Real> * const _mass_flux_functor;
 
   /// The functor for the dynamic viscosity
   const Moose::Functor<Real> & _mu;
