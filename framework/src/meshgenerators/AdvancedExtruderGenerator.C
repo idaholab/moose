@@ -597,12 +597,11 @@ AdvancedExtruderGenerator::generate()
         bias = _biases[e];
       }
 
-      unsigned int total_extrap_heights =
-          order * num_layers +
-          (e == 0 ? 1 : 0); // total number of extrapolations steps to take per node
+      // In first layer we also add the base nodes, hence the "plus one"
+      unsigned int num_heights_at_elevation = order * num_layers + (e == 0 ? 1 : 0);
 
       // k is the element layer ordering within each elevation layer
-      for (const auto k : make_range(total_extrap_heights))
+      for (const auto k : make_range(num_heights_at_elevation))
       {
         // Compute current_step, the update vector
         // For the first layer we don't need to move
@@ -612,7 +611,6 @@ AdvancedExtruderGenerator::generate()
         {
           // Shift the previous position by a certain fraction of 'height' along the extrusion
           // direction to get the new position.
-          auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
           // Compute current_step before any transformation
           Real step_size = 0;
@@ -682,6 +680,9 @@ AdvancedExtruderGenerator::generate()
           // Extruding in a fixed direction (not along a curve)
           else
           {
+            // Divide by the order to avoid applying the bias to the nodes within a higher order
+            // element
+            auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
             step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
                             ? height / (Real)num_layers / (Real)order
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
@@ -698,8 +699,8 @@ AdvancedExtruderGenerator::generate()
           {
             // How far along we are in the extrusion
             // TODO: this assumes equi-distance of the nodes!!
-            Real tm1 = (Real)(k - 1) / (Real)(total_extrap_heights - 1);
-            Real t = (Real)k / (Real)(total_extrap_heights - 1);
+            Real tm1 = (Real)(current_node_layer - 1) / (Real)(total_num_layers);
+            Real t = (Real)current_node_layer / (Real)(total_num_layers);
 
             // Direction of radial expansion.
             RealVectorValue node_to_extrusion_axis;
@@ -736,12 +737,13 @@ AdvancedExtruderGenerator::generate()
               twist1 /= twist1.norm();
             const RealVectorValue twist2 = twist1.cross(_direction);
 
-            auto twist = (cos(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
-                          cos(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
-                             twist2 +
-                         (sin(2. * libMesh::pi * layer_index * step_size / _twist_pitch) -
-                          sin(2. * libMesh::pi * (layer_index - 1) * step_size / _twist_pitch)) *
-                             twist1;
+            auto twist =
+                (cos(2. * libMesh::pi * current_node_layer * step_size / _twist_pitch) -
+                 cos(2. * libMesh::pi * (current_node_layer - 1) * step_size / _twist_pitch)) *
+                    twist2 +
+                (sin(2. * libMesh::pi * current_node_layer * step_size / _twist_pitch) -
+                 sin(2. * libMesh::pi * (current_node_layer - 1) * step_size / _twist_pitch)) *
+                    twist1;
 
             // If we normalize twist, we must multiply by 2 * sin(libMesh::pi * step_size /
             // _twist_pitch) if (!MooseUtils::absoluteFuzzyEqual(twist.norm(), .0))
