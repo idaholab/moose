@@ -17,16 +17,16 @@ KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::validParams()
 {
   InputParameters params = Moose::Kokkos::LinearFVBoundaryCondition::validParams();
   params.addRequiredParam<FunctionName>("functor",
-                                       "The outward normal flux function on the boundary.");
+                                        "The outward normal flux function on the boundary.");
   params.addClassDescription(
       "Kokkos LinearFV Neumann boundary condition for advection-diffusion kernels. "
       "Applies a prescribed outward normal flux (positive = outflow).");
   return params;
 }
 
-KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::
-    KokkosLinearFVAdvectionDiffusionFunctorNeumannBC(const InputParameters & parameters)
+KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::KokkosLinearFVAdvectionDiffusionFunctorNeumannBC(
+    const InputParameters & parameters)
   : Moose::Kokkos::LinearFVBoundaryCondition(parameters),
-    _flux_functor(getKokkosFunction("functor"))
+    _flux_functor(getKokkosFunction<KokkosParsedFunction>("functor"))
 {
 }

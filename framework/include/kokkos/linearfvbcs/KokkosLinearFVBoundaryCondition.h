@@ -15,8 +15,6 @@
 
 #include "BoundaryRestrictableRequired.h"
 #include "GeometricSearchInterface.h"
-#include "MooseLinearVariableFV.h"
-#include "MooseVariableDependencyInterface.h"
 #include "NonADFunctorInterface.h"
 #include "FaceArgInterface.h"
 
@@ -28,7 +26,6 @@ namespace Moose::Kokkos
 class LinearFVBoundaryCondition : public LinearSystemContributionObject,
                                   public BoundaryRestrictableRequired,
                                   public GeometricSearchInterface,
-                                  public MooseVariableDependencyInterface,
                                   public NonADFunctorInterface,
                                   public FaceArgProducerInterface
 {
@@ -38,7 +35,6 @@ public:
   LinearFVBoundaryCondition(const InputParameters & parameters);
   LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object);
 
-  virtual const MooseLinearVariableFV<Real> & variable() const { return _var; }
   virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
   struct RightHandSideLoop
@@ -52,48 +48,19 @@ public:
   virtual void computeMatrix();
   void initBCData(const LinearFVFluxKernel::BoundaryFaceData & data);
 
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum &) const { return 0; }
-  KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum &) const { return 0; }
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(RightHandSideLoop, const ThreadID tid, const Derived & bc) const;
 
   template <typename Derived>
-  KOKKOS_FUNCTION Real computeRightHandSideContributionShim(const Derived & bc,
-                                                            const AssemblyDatum & datum) const
-  {
-    return bc.computeRightHandSideContribution(datum);
-  }
+  KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const;
 
-  template <typename Derived>
-  KOKKOS_FUNCTION Real computeMatrixContributionShim(const Derived & bc,
-                                                     const AssemblyDatum & datum) const
-  {
-    return bc.computeMatrixContribution(datum);
-  }
+  const MooseLinearVariableFV<Real> & mooseVariable() const { return _moose_var; }
 
-  template <typename Derived>
-  KOKKOS_FUNCTION void
-  operator()(RightHandSideLoop, const ThreadID tid, const Derived & bc) const
-  {
-    const auto [elem, side] = kokkosBoundaryElementSideID(tid);
-    AssemblyDatum datum(
-        elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
-    _bc_data_rhs(side, elem) = bc.computeRightHandSideContributionShim(bc, datum);
-  }
-
-  template <typename Derived>
-  KOKKOS_FUNCTION void operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const
-  {
-    const auto [elem, side] = kokkosBoundaryElementSideID(tid);
-    AssemblyDatum datum(
-        elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
-    _bc_data_matrix(side, elem) = bc.computeMatrixContributionShim(bc, datum);
-  }
+  Variable variable() const { return _var; }
 
 protected:
-  MooseLinearVariableFV<Real> & _var;
-  Variable _kokkos_var;
-
-  const unsigned int _var_num;
-  const unsigned int _sys_num;
+  const MooseLinearVariableFV<Real> & _moose_var;
+  Variable _var;
 
   std::unique_ptr<DispatcherBase> _rhs_dispatcher;
   std::unique_ptr<DispatcherBase> _matrix_dispatcher;
@@ -102,5 +69,25 @@ protected:
   Array2D<Real> _bc_data_matrix;
   Array2D<Real> _bc_data_rhs;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+LinearFVBoundaryCondition::operator()(RightHandSideLoop,
+                                      const ThreadID tid,
+                                      const Derived & bc) const
+{
+  const auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  FVDatum datum(elem, side, kokkosMesh());
+  _bc_data_rhs(side, elem) = bc.template computeRightHandSideContribution<Derived>(datum);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+LinearFVBoundaryCondition::operator()(MatrixLoop, const ThreadID tid, const Derived & bc) const
+{
+  const auto [elem, side] = kokkosBoundaryElementSideID(tid);
+  FVDatum datum(elem, side, kokkosMesh());
+  _bc_data_matrix(side, elem) = bc.template computeMatrixContribution<Derived>(datum);
+}
 
 } // namespace Moose::Kokkos

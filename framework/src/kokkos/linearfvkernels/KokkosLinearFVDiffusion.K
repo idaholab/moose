@@ -22,6 +22,6 @@ KokkosLinearFVDiffusion::validParams()
 
 KokkosLinearFVDiffusion::KokkosLinearFVDiffusion(const InputParameters & parameters)
   : Moose::Kokkos::LinearFVFluxKernel(parameters),
-    _diffusion_coeff(getKokkosFunction("diffusion_coeff"))
+    _diffusion_coeff(getKokkosFunction<KokkosParsedFunction>("diffusion_coeff"))
 {
 }

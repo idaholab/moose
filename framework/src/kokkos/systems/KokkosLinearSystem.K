@@ -13,45 +13,11 @@
 #include "KokkosLinearFVKernel.h"
 #include "KokkosLinearFVBoundaryCondition.h"
 #include "MooseUtils.h"
-#include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
-#include "MooseVariableDependencyInterface.h"
 #include "MaterialBase.h"
-
 #include "FEProblemBase.h"
-#include "MooseVariableFieldBase.h"
 
-namespace
-{
-template <typename T>
-void
-updateDependencies(const std::vector<T *> & objects,
-                   std::set<MooseVariableFieldBase *> & needed_moose_vars,
-                   std::set<TagID> & needed_fe_var_vector_tags,
-                   std::unordered_set<unsigned int> & needed_mat_props)
-{
-  for (const auto * object : objects)
-  {
-    if (const auto * mvdi = dynamic_cast<const MooseVariableDependencyInterface *>(object))
-    {
-      const auto & mv_deps = mvdi->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-
-    if (const auto * coupleable = dynamic_cast<const Coupleable *>(object))
-    {
-      const auto & tag_deps = coupleable->getFEVariableCoupleableVectorTags();
-      needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
-    }
-
-    if (const auto * mpi = dynamic_cast<const MaterialPropertyInterface *>(object))
-    {
-      const auto & mp_deps = mpi->getMatPropDependencies();
-      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
-    }
-  }
-}
-}
+#include "libmesh/equation_systems.h"
 
 void
 LinearSystem::addKokkosKernel(const std::string & kernel_name,
@@ -76,7 +42,7 @@ LinearSystem::addKokkosBoundaryCondition(const std::string & bc_name,
   _fe_problem.theWarehouse().add(bc);
 
   const auto & boundary_ids = bc->boundaryIDs();
-  auto bc_var = dynamic_cast<const MooseVariableFieldBase *>(&bc->variable());
+  const auto * const bc_var = &bc->mooseVariable();
   _vars[0].addBoundaryVar(boundary_ids, bc_var);
 }
 
@@ -202,44 +168,24 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   if (elemental_kernels.empty() && flux_kernels.empty() && bcs.empty())
     return;
 
-  auto & systems = _fe_problem.getKokkosSystems();
-  systems[number()].setActiveResidualTags(vector_tags);
-  systems[number()].setActiveMatrixTags(matrix_tags);
+  auto & our_kokkos_system = _fe_problem.getKokkosSystem(number());
+  our_kokkos_system.setActiveResidualTags(vector_tags);
+  our_kokkos_system.setActiveMatrixTags(matrix_tags);
 
-  std::set<MooseVariableFieldBase *> needed_moose_vars;
-  std::set<TagID> needed_fe_var_vector_tags;
-  std::unordered_set<unsigned int> needed_mat_props;
+  std::set<TagID> needed_solution_vector_tags;
 
   for (const auto & tag : _fe_problem.getVectorTags(Moose::VECTOR_TAG_SOLUTION))
-    needed_fe_var_vector_tags.insert(tag._id);
+    needed_solution_vector_tags.insert(tag._id);
 
-  updateDependencies(
-      elemental_kernels, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
-  updateDependencies(flux_kernels, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
-  updateDependencies(bcs, needed_moose_vars, needed_fe_var_vector_tags, needed_mat_props);
+  auto & kokkos_systems = _fe_problem.getKokkosSystems();
+  for (const auto i : index_range(kokkos_systems))
+    if (kokkos_systems.isSlotConstructed(i))
+    {
+      kokkos_systems[i].setActiveSolutionTags(needed_solution_vector_tags);
+      kokkos_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+    }
 
-  if (needed_mat_props.size())
-  {
-    _fe_problem.getKokkosMaterialsWarehouse().updateVariableDependency(needed_moose_vars);
-    _fe_problem.getKokkosMaterialsWarehouse().updateFEVariableCoupledVectorTagDependency(
-        needed_fe_var_vector_tags);
-  }
-
-  for (auto & system : systems)
-  {
-    system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
-    system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
-    system.reinit();
-  }
-
-  systems.copyToDevice();
-
-  if (needed_mat_props.size())
-  {
-    _fe_problem.prepareKokkosMaterials(needed_mat_props);
-    _fe_problem.reinitKokkosMaterials();
-  }
+  kokkos_systems.copyToDevice();
 
   for (auto bc : bcs_after_matrices)
     bc->computeMatrix();
@@ -254,15 +200,17 @@ LinearSystem::computeKokkosLinearSystem(const std::set<TagID> & vector_tags,
   for (auto kernel : flux_after_vectors)
     kernel->computeRightHandSide();
 
-  for (auto & system : systems)
-    system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+  for (const auto i : index_range(kokkos_systems))
+    if (kokkos_systems.isSlotConstructed(i))
+      kokkos_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-  systems[number()].clearActiveResidualTags();
-  systems[number()].clearActiveMatrixTags();
+  our_kokkos_system.clearActiveResidualTags();
+  our_kokkos_system.clearActiveMatrixTags();
 
-  for (auto & system : systems)
-  {
-    system.clearActiveVariables();
-    system.clearActiveSolutionTags();
-  }
+  for (const auto i : index_range(kokkos_systems))
+    if (kokkos_systems.isSlotConstructed(i))
+    {
+      kokkos_systems[i].clearActiveVariables();
+      kokkos_systems[i].clearActiveSolutionTags();
+    }
 }

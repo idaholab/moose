@@ -98,7 +98,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
             _coupled_fv_moose_vars.push_back(tmp_var);
           }
           else if (auto * tmp_var = dynamic_cast<MooseLinearVariableFV<Real> *>(moose_var))
+          {
+            tmp_var->requireQpComputations();
             _coupled_fv_moose_vars.push_back(tmp_var);
+          }
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
         }

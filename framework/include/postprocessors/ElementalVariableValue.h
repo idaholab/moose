@@ -34,7 +34,8 @@ public:
 
 protected:
   const MooseMesh & _mesh;
-  const std::string & _var_name;
+  MooseVariableField<Real> & _var;
+  const VariableValue & _var_sln;
   const Elem * _element;
   Real _value;
 };

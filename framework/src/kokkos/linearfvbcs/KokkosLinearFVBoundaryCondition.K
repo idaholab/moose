@@ -28,32 +28,25 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
   : LinearSystemContributionObject(parameters),
     BoundaryRestrictableRequired(this, false),
     GeometricSearchInterface(this),
-    MooseVariableDependencyInterface(this),
     NonADFunctorInterface(this),
     FaceArgProducerInterface(),
-    _var(libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
-        _subproblem.getVariable(_tid,
+    _moose_var(libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
+        _subproblem.getVariable(0,
                                 getParam<LinearVariableName>("variable"),
                                 Moose::VarKindType::VAR_SOLVER,
-                                Moose::VarFieldType::VAR_FIELD_STANDARD))),
-    _var_num(_var.number()),
-    _sys_num(_sys.number())
+                                Moose::VarFieldType::VAR_FIELD_STANDARD)))
 {
-  addMooseVariableDependency(&_var);
-  _kokkos_var.init(_var, Moose::SOLUTION_TAG);
+  _var.init(_moose_var, Moose::SOLUTION_TAG);
 }
 
 LinearFVBoundaryCondition::LinearFVBoundaryCondition(const LinearFVBoundaryCondition & object)
   : LinearSystemContributionObject(object),
     BoundaryRestrictableRequired(object, {}),
     GeometricSearchInterface(object, {}),
-    MooseVariableDependencyInterface(object, {}),
     NonADFunctorInterface(object, {}),
     FaceArgProducerInterface(),
+    _moose_var(object._moose_var),
     _var(object._var),
-    _kokkos_var(object._kokkos_var),
-    _var_num(object._var_num),
-    _sys_num(object._sys_num),
     _bc_data_matrix(object._bc_data_matrix),
     _bc_data_rhs(object._bc_data_rhs)
 {
@@ -87,7 +80,7 @@ LinearFVBoundaryCondition::computeMatrix()
 bool
 LinearFVBoundaryCondition::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(std::make_pair(_var_num, _sys_num));
+  const auto ft = fi.faceType(std::make_pair(_var.var(), _var.sys()));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else

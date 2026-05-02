@@ -28,6 +28,7 @@ class LinearFVKernel;
 class LinearFVElementalKernel;
 class LinearFVFluxKernel;
 class LinearFVBoundaryCondition;
+class System;
 }
 
 // libMesh forward declarations

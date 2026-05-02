@@ -34,6 +34,9 @@ public:
   MooseVariableScalar(const InputParameters & parameters);
   virtual ~MooseVariableScalar();
 
+  bool computesQpData() const override { return false; }
+  bool doesTrueFVAssembly() const override { return false; }
+
   /**
    * Fill out the VariableValue arrays from the system solution vector
    * @param reinit_for_derivative_reordering A flag indicating whether we are reinitializing for the

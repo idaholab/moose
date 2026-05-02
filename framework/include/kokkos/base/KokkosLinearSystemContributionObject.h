@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "KokkosAssembly.h"
 #include "KokkosDispatcher.h"
 #include "KokkosMesh.h"
 #include "KokkosSystem.h"
+#include "KokkosVariable.h"
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
@@ -21,19 +21,13 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
-#include "RandomInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "LinearSystemContributionObject.h"
 
-#include "libmesh/linear_implicit_system.h"
-
-class FEProblemBase;
 class InputParameters;
-class MooseMesh;
-class SubProblem;
-class SystemBase;
+class FEProblemBase;
 
 namespace Moose::Kokkos
 {
@@ -45,12 +39,10 @@ class LinearSystemContributionObject : public MooseObject,
                                        public TransientInterface,
                                        public PostprocessorInterface,
                                        public VectorPostprocessorInterface,
-                                       public RandomInterface,
                                        public Restartable,
                                        public MeshChangedInterface,
                                        public TaggingInterface,
                                        public MeshHolder,
-                                       public AssemblyHolder,
                                        public SystemHolder
 {
 public:
@@ -64,12 +56,12 @@ protected:
   KOKKOS_FUNCTION void accumulateTaggedMatrix(Real value, dof_id_type row, dof_id_type col) const;
 
 protected:
-  SubProblem & _subproblem;
   FEProblemBase & _fe_problem;
-  SystemBase & _sys;
-  libMesh::LinearImplicitSystem & _linear_system;
-  const THREAD_ID _tid;
-  MooseMesh & _mesh;
+
+  /**
+   * Kokkos variable
+   */
+  Variable _kokkos_var;
 
   Array<TagID> _vector_tags;
   Array<TagID> _matrix_tags;
@@ -88,7 +80,8 @@ LinearSystemContributionObject::accumulateTaggedVector(const Real value,
   if (!value)
     return;
 
-  auto & sys = kokkosSystem(_sys.number());
+  KOKKOS_ASSERT(_kokkos_var.components() == 1);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
   for (dof_id_type index = 0; index < _vector_tags.size(); ++index)
   {
     const auto tag = _vector_tags[index];
@@ -105,7 +98,8 @@ LinearSystemContributionObject::accumulateTaggedMatrix(const Real value,
   if (!value)
     return;
 
-  auto & sys = kokkosSystem(_sys.number());
+  KOKKOS_ASSERT(_kokkos_var.components() == 1);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
   for (dof_id_type index = 0; index < _matrix_tags.size(); ++index)
   {
     const auto tag = _matrix_tags[index];

@@ -26,7 +26,7 @@ KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::validParams()
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::
     KokkosLinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters)
   : Moose::Kokkos::LinearFVBoundaryCondition(parameters),
-    _diffusion_coeff(getKokkosFunction("diffusion_coeff")),
-    _functor(getKokkosFunction("functor"))
+    _diffusion_coeff(getKokkosFunction<KokkosParsedFunction>("diffusion_coeff")),
+    _functor(getKokkosFunction<KokkosParsedFunction>("functor"))
 {
 }

@@ -22,37 +22,26 @@ LinearFVKernel::validParams()
   auto params = LinearSystemContributionObject::validParams();
   params += BlockRestrictable::validParams();
   params += NonADFunctorInterface::validParams();
-  params += FVRelationshipManagerInterface::validParams();
   params.registerBase("LinearFVKernel");
   return params;
 }
 
 LinearFVKernel::LinearFVKernel(const InputParameters & parameters)
-  : LinearSystemContributionObject(parameters),
-    BlockRestrictable(this),
-    NonADFunctorInterface(this),
-    MooseVariableDependencyInterface(this),
-    _var(libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
-        _subproblem.getVariable(_tid,
-                                getParam<LinearVariableName>("variable"),
-                                Moose::VarKindType::VAR_SOLVER,
-                                Moose::VarFieldType::VAR_FIELD_STANDARD))),
-    _var_num(_var.number()),
-    _sys_num(_sys.number())
+  : LinearSystemContributionObject(parameters), BlockRestrictable(this), NonADFunctorInterface(this)
 {
-  addMooseVariableDependency(&_var);
-  _kokkos_var.init(_var, Moose::SOLUTION_TAG);
+  const auto & var = libMesh::cast_ref<MooseLinearVariableFV<Real> &>(
+      _subproblem.getVariable(0,
+                              getParam<LinearVariableName>("variable"),
+                              Moose::VarKindType::VAR_SOLVER,
+                              Moose::VarFieldType::VAR_FIELD_STANDARD));
+  _kokkos_var.init(var, Moose::SOLUTION_TAG);
 }
 
 LinearFVKernel::LinearFVKernel(const LinearFVKernel & object)
   : LinearSystemContributionObject(object),
     BlockRestrictable(object, {}),
     NonADFunctorInterface(object, {}),
-    MooseVariableDependencyInterface(object, {}),
-    _var(object._var),
-    _kokkos_var(object._kokkos_var),
-    _var_num(object._var_num),
-    _sys_num(object._sys_num)
+    _kokkos_var(object._kokkos_var)
 {
 }
 
@@ -114,7 +103,7 @@ void
 LinearFVFluxKernel::initialSetup()
 {
   const auto n_elems = static_cast<dof_id_type>(kokkosMesh().getNumLocalElements());
-  const auto max_sides = static_cast<dof_id_type>(_mesh.getMaxSidesPerElem());
+  const auto max_sides = static_cast<dof_id_type>(_subproblem.mesh().getMaxSidesPerElem());
   _bc_data.matrix_coeff.create(max_sides, n_elems);
   _bc_data.rhs_coeff.create(max_sides, n_elems);
   _bc_data.matrix_coeff = 0;
@@ -123,14 +112,14 @@ LinearFVFluxKernel::initialSetup()
   std::vector<LinearFVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSysNum>(_sys.number())
+      .template condition<AttribSysNum>(_kokkos_var.sys())
       .template condition<AttribSystem>("LinearFVBoundaryCondition")
       .template condition<AttribKokkos>(true)
       .template condition<AttribThread>(0)
       .queryInto(bcs);
 
   for (auto * bc : bcs)
-    if (bc->variable().number() == _var.number())
+    if (bc->variable().var() == _kokkos_var.var())
       bc->initBCData(_bc_data);
 }
 
@@ -155,7 +144,7 @@ LinearFVFluxKernel::computeMatrix()
 bool
 LinearFVFluxKernel::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
 {
-  const auto ft = fi.faceType(std::make_pair(_var_num, _sys_num));
+  const auto ft = fi.faceType(std::make_pair(_kokkos_var.var(), _kokkos_var.sys()));
   if (fi_elem_side)
     return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
   else

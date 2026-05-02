@@ -32,7 +32,7 @@ namespace Moose::Kokkos
 {
 class ResidualObject;
 class LinearSystemContributionObject;
-class System;
+class FESystem;
 }
 #endif
 
@@ -83,7 +83,7 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
+    friend class Moose::Kokkos::FESystem;
     friend class Moose::Kokkos::LinearSystemContributionObject;
 #endif
 
@@ -104,7 +104,7 @@ public:
     friend class MooseObjectTagWarehouse;
 #ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
-    friend class Moose::Kokkos::System;
+    friend class Moose::Kokkos::FESystem;
     friend class Moose::Kokkos::LinearSystemContributionObject;
 #endif
 

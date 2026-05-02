@@ -28,6 +28,8 @@ public:
   void computeNeighborValuesFace() override;
   void computeNeighborValues() override;
   void requireQpComputations() const override { _qp_calculations = true; }
+  bool computesQpData() const override { return _qp_calculations; }
+  bool doesTrueFVAssembly() const override { return true; }
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
   virtual void meshChanged() override;

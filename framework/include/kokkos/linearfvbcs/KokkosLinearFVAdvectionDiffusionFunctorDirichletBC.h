@@ -10,7 +10,7 @@
 #pragma once
 
 #include "KokkosLinearFVBoundaryCondition.h"
-#include "KokkosFunction.h"
+#include "KokkosParsedFunction.h"
 
 class KokkosLinearFVAdvectionDiffusionFunctorDirichletBC
   : public Moose::Kokkos::LinearFVBoundaryCondition
@@ -20,39 +20,40 @@ public:
 
   KokkosLinearFVAdvectionDiffusionFunctorDirichletBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum & datum) const;
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
-  KOKKOS_FUNCTION Real faceConductance(const AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real faceConductance(const FVDatum & datum) const;
 
   /// Diffusion coefficient (same functor as the paired diffusion kernel)
-  const Moose::Kokkos::Function _diffusion_coeff;
+  const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _diffusion_coeff;
   /// The functor providing the Dirichlet value on the boundary
-  const Moose::Kokkos::Function _functor;
+  const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _functor;
 };
 
+template <typename Derived>
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeMatrixContribution(
-    const AssemblyDatum & datum) const
+    const FVDatum & datum) const
 {
   return faceConductance(datum);
 }
 
+template <typename Derived>
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::computeRightHandSideContribution(
-    const AssemblyDatum & datum) const
+    const FVDatum & datum) const
 {
-  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
-  return faceConductance(datum) * _functor.value(_t, face_centroid);
+  const auto face_centroid = datum.faceCentroid();
+  return faceConductance(datum) * _functor->value(_t, face_centroid);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceConductance(
-    const AssemblyDatum & datum) const
+KokkosLinearFVAdvectionDiffusionFunctorDirichletBC::faceConductance(const FVDatum & datum) const
 {
-  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
-  return _diffusion_coeff.value(_t, face_centroid) *
-         datum.mesh().getFaceArea(datum.elemID(), datum.side()) /
-         datum.mesh().getFaceDCFMag(datum.elemID(), datum.side());
+  const auto face_centroid = datum.faceCentroid();
+  return _diffusion_coeff->value(_t, face_centroid) * datum.faceArea() / datum.faceDCFMag();
 }
