@@ -10,7 +10,7 @@
 #pragma once
 
 #include "KokkosLinearFVKernel.h"
-#include "KokkosFunction.h"
+#include "KokkosParsedFunction.h"
 
 class KokkosLinearFVSource : public Moose::Kokkos::LinearFVElementalKernel
 {
@@ -19,22 +19,26 @@ public:
 
   KokkosLinearFVSource(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum &) const { return 0; }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum &) const
+  {
+    return 0;
+  }
 
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
   /// The source density
-  const Moose::Kokkos::Function _source_density;
+  const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _source_density;
   /// Coefficient for multiplying the surface density
-  const Moose::Kokkos::Function _scale;
+  const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _scale;
 };
 
+template <typename Derived>
 KOKKOS_FUNCTION inline Real
-KokkosLinearFVSource::computeRightHandSideContribution(const AssemblyDatum & datum) const
+KokkosLinearFVSource::computeRightHandSideContribution(const FVDatum & datum) const
 {
-  const auto elem = datum.elemID();
-  const auto centroid = datum.mesh().getElementCentroid(elem);
-  return _scale.value(_t, centroid) * _source_density.value(_t, centroid) *
-         datum.mesh().getElementVolume(elem);
+  const auto centroid = datum.elementCentroid();
+  return _scale->value(_t, centroid) * _source_density->value(_t, centroid) * datum.elementVolume();
 }

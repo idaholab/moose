@@ -25,7 +25,7 @@ GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
     AssemblyHolder(_fe_problem.kokkosAssembly()),
-    SystemHolder(_fe_problem.getKokkosSystems()),
+    FESystemHolder(_fe_problem.getKokkosFESystems()),
     ::MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     ::TransientInterface(this)
 {
@@ -35,7 +35,7 @@ GeneralUserObject::GeneralUserObject(const GeneralUserObject & object)
   : UserObject(object),
     MeshHolder(object),
     AssemblyHolder(object),
-    SystemHolder(object),
+    FESystemHolder(object),
     ::MaterialPropertyInterface(object, {}),
     ::TransientInterface(object, {})
 {

@@ -126,6 +126,19 @@ public:
   virtual bool hasDoFsOnNodes() const { mooseError("Base class cannot determine this"); };
 
   /**
+   * Whether this variable computes values at quadrature points. Returns true for FE variables
+   * and for FV variables that have been opted in via requireQpComputations(). Returns false for
+   * linear FV variables by default and for scalar variables.
+   */
+  virtual bool computesQpData() const;
+
+  /**
+   * Whether this variable assembles via the FV path (ElemInfo/FaceInfo loops, no QP reinit).
+   * Static, per-class property — never toggled by requireQpComputations().
+   */
+  virtual bool doesTrueFVAssembly() const;
+
+  /**
    * Return the continuity of this variable
    */
   virtual libMesh::FEContinuity getContinuity() const

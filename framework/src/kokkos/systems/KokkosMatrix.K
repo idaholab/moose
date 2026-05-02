@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosMatrix.h"
-#include "KokkosSystem.h"
+#include "KokkosFESystem.h"
 
 namespace Moose::Kokkos
 {

@@ -31,33 +31,25 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     TransientInterface(this),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this, false),
-    RandomInterface(parameters,
-                    *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
-                    parameters.get<THREAD_ID>("_tid"),
-                    false),
     Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     MeshHolder(
         *parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->mesh().getKokkosMesh()),
-    AssemblyHolder(
-        parameters.getCheckedPointerParam<SystemBase *>("_sys")->feProblem().kokkosAssembly()),
     SystemHolder(
-        parameters.getCheckedPointerParam<SystemBase *>("_sys")->feProblem().getKokkosSystems()),
-    _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _mesh(_subproblem.mesh()),
+        parameters.getCheckedPointerParam<::SystemBase *>("_sys")->feProblem().getKokkosSystems()),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
-  _vector_tags = getVectorTags({});
-  _matrix_tags = getMatrixTags({});
+  const auto * const subproblem = parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
+  _kokkos_var.init(subproblem->getVariable(0,
+                                           getParam<LinearVariableName>("variable"),
+                                           Moose::VarKindType::VAR_SOLVER,
+                                           Moose::VarFieldType::VAR_FIELD_STANDARD));
 }
 
 LinearSystemContributionObject::LinearSystemContributionObject(
@@ -69,27 +61,25 @@ LinearSystemContributionObject::LinearSystemContributionObject(
     TransientInterface(object, {}),
     PostprocessorInterface(object, {}),
     VectorPostprocessorInterface(object, {}),
-    RandomInterface(object, {}),
     Restartable(object, {}),
     MeshChangedInterface(object, {}),
     TaggingInterface(object, {}),
     MeshHolder(object),
-    AssemblyHolder(object),
     SystemHolder(object),
-    _subproblem(object._subproblem),
     _fe_problem(object._fe_problem),
-    _sys(object._sys),
-    _linear_system(object._linear_system),
-    _tid(object._tid),
-    _mesh(object._mesh),
+    _kokkos_var(object._kokkos_var),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
     _dt_old(object._dt_old)
 {
-  _vector_tags = object._vector_tags;
-  _matrix_tags = object._matrix_tags;
+  // Tags may be added to the governing tag sets held by the TaggingInterface later than the time
+  // that the primary constructor is run. So it's more robust to build our tag set, immediately
+  // before being dispatched to device, from the governing TaggingInterface set instead of relying
+  // on copying the tag set from object's \p _vector_tags and \p _matrix_tags arrays
+  _vector_tags = object.getVectorTags({});
+  _matrix_tags = object.getMatrixTags({});
 }
 
 } // namespace Moose::Kokkos

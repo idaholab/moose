@@ -64,8 +64,8 @@
 
 [Functions]
   [unit_fn]
-    type = KokkosConstantFunction
-    value = 1.0
+    type = KokkosParsedFunction
+    expression = 1.0
   []
   [coeff_func_kokkos]
     type = KokkosParsedFunction
@@ -86,8 +86,8 @@
   # Outward normal flux on bottom (n = -y): flux = -D * du/dy|_{y=0}
   # du/dy = (1.5-x^2)*(-2y), at y=0: du/dy = 0, so flux = 0
   [neumann_bottom_flux]
-    type = KokkosConstantFunction
-    value = 0.0
+    type = KokkosParsedFunction
+    expression = 0.0
   []
   # Outward normal flux on top (n = +y): flux = D * du/dy|_{y=ymax}
   # D = 1+0.5*x*ymax, du/dy = (1.5-x^2)*(-2*ymax)

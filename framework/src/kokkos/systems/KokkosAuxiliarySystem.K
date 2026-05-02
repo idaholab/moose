@@ -35,7 +35,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
       !_kokkos_nodal_aux_storage[type].hasActiveObjects())
     return;
 
-  auto & systems = _fe_problem.getKokkosSystems();
+  auto & systems = _fe_problem.getKokkosFESystems();
 
   // Resolve dependencies
 
@@ -71,20 +71,22 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
-  for (auto & system : systems)
-  {
-    system.setActiveVariables(needed_moose_vars);
-    system.setActiveSolutionTags(needed_fe_var_vector_tags);
+  auto & kokkos_fe_systems = _fe_problem.getKokkosFESystems();
+  for (const auto i : index_range(kokkos_fe_systems))
+    if (kokkos_fe_systems.isSlotConstructed(i))
+    {
+      kokkos_fe_systems[i].setActiveVariables(needed_moose_vars);
+      kokkos_fe_systems[i].setActiveSolutionTags(needed_fe_var_vector_tags);
 
-    {
-      TIME_SECTION("KokkosCopy", 1);
-      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+      {
+        TIME_SECTION("KokkosCopy", 1);
+        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
+      }
+      {
+        TIME_SECTION("KokkosReinit", 1);
+        kokkos_fe_systems[i].reinit();
+      }
     }
-    {
-      TIME_SECTION("KokkosReinit", 1);
-      system.reinit();
-    }
-  }
 
   systems.copyToDevice();
 
@@ -117,8 +119,9 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
   {
     TIME_SECTION("KokkosCopy", 1);
 
-    for (auto & system : systems)
-      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
+    for (const auto i : index_range(kokkos_fe_systems))
+      if (kokkos_fe_systems.isSlotConstructed(i))
+        kokkos_fe_systems[i].sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
     systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
@@ -127,11 +130,12 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   // Clear
 
-  for (auto & system : systems)
-  {
-    system.clearActiveVariables();
-    system.clearActiveSolutionTags();
-  }
+  for (const auto i : index_range(kokkos_fe_systems))
+    if (kokkos_fe_systems.isSlotConstructed(i))
+    {
+      kokkos_fe_systems[i].clearActiveVariables();
+      kokkos_fe_systems[i].clearActiveSolutionTags();
+    }
 
   disassociateVectorFromTag(solution(), solution_tag);
 }

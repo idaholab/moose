@@ -172,6 +172,13 @@ public:
    */
   unsigned int useCount() const { return _counter.use_count(); }
 
+  /**
+   * Get whether slot i has been initialized (via emplace or new[])
+   * @param i The slot index
+   * @returns true if the slot has been constructed
+   */
+  bool isSlotConstructed(index_type i) const;
+
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether the array was allocated either on host or device
@@ -348,6 +355,15 @@ public:
   {
     createInternal<false, true, false>(n...);
   }
+  /**
+   * Placement-new construct slot i from args, recording initialization
+   * @param i The slot index
+   * @param args Arguments forwarded to T's constructor
+   * @returns Reference to the constructed element
+   */
+  template <typename... Args>
+  T & emplace(index_type i, Args &&... args);
+
   /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
@@ -583,6 +599,10 @@ private:
    */
   std::shared_ptr<unsigned int> _counter;
   /**
+   * Non-null only for malloc-allocated arrays; tracks which slots have been emplace-constructed
+   */
+  std::shared_ptr<std::vector<bool>> _slots_constructed;
+  /**
    * Flag whether array was initialized
    */
   bool _is_init = false;
@@ -621,6 +641,36 @@ private:
 };
 
 template <typename T, unsigned int dimension, typename index_type>
+bool
+ArrayBase<T, dimension, index_type>::isSlotConstructed(index_type i) const
+{
+  mooseAssert(i < _size, "isSlotConstructed index out of bounds");
+
+  if (!_slots_constructed)
+    return _is_host_alloc;
+
+  return (*_slots_constructed)[i];
+}
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, unsigned int dimension, typename index_type>
+template <typename... Args>
+T &
+ArrayBase<T, dimension, index_type>::emplace(index_type i, Args &&... args)
+{
+  mooseAssert(_is_host_alloc && _is_malloc,
+              "emplace requires a malloc-allocated array (create<false>)");
+  mooseAssert(i < _size, "emplace index out of bounds");
+  mooseAssert(_slots_constructed, "_slots_constructed must exist for malloc arrays");
+
+  new (_host_data + i) T(std::forward<Args>(args)...);
+  (*_slots_constructed)[i] = true;
+
+  return _host_data[i];
+}
+#endif // MOOSE_KOKKOS_SCOPE
+
+template <typename T, unsigned int dimension, typename index_type>
 void
 ArrayBase<T, dimension, index_type>::freeHost()
 {
@@ -640,8 +690,9 @@ ArrayBase<T, dimension, index_type>::freeHost()
     else
     {
       // Allocated by malloc
-      for (index_type i = 0; i < _size; ++i)
-        _host_data[i].~T();
+      for (const auto i : make_range(_size))
+        if (isSlotConstructed(i))
+          _host_data[i].~T();
 
       std::free(_host_data);
     }
@@ -705,6 +756,7 @@ ArrayBase<T, dimension, index_type>::destroy()
   _is_device_alias = false;
 
   _counter.reset();
+  _slots_constructed.reset();
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -717,6 +769,7 @@ ArrayBase<T, dimension, index_type>::shallowCopy(const ArrayBase<T, dimension, i
   destroy();
 
   _counter = array._counter;
+  _slots_constructed = array._slots_constructed;
 
   _size = array._size;
 
@@ -787,7 +840,10 @@ ArrayBase<T, dimension, index_type>::allocHost()
     _host_data = new T[_size];
   }
   else
+  {
     _host_data = static_cast<T *>(std::malloc(_size * sizeof(T)));
+    _slots_constructed = std::make_shared<std::vector<bool>>(_size, false);
+  }
 
   _is_host_alloc = true;
   _is_malloc = !initialize;

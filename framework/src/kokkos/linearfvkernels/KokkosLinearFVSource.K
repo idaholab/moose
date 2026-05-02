@@ -23,7 +23,7 @@ KokkosLinearFVSource::validParams()
 
 KokkosLinearFVSource::KokkosLinearFVSource(const InputParameters & parameters)
   : Moose::Kokkos::LinearFVElementalKernel(parameters),
-    _source_density(getKokkosFunction("source_density")),
-    _scale(getKokkosFunction("scaling_factor"))
+    _source_density(getKokkosFunction<KokkosParsedFunction>("source_density")),
+    _scale(getKokkosFunction<KokkosParsedFunction>("scaling_factor"))
 {
 }

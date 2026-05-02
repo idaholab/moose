@@ -487,6 +487,9 @@ public:
    */
   virtual void requireQpComputations() const {}
 
+  bool computesQpData() const override { return true; }
+  bool doesTrueFVAssembly() const override { return false; }
+
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base
    * implementation we only inspect the face information object for whether there are Dirichlet

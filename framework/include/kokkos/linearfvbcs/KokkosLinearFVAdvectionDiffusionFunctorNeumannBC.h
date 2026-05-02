@@ -10,7 +10,7 @@
 #pragma once
 
 #include "KokkosLinearFVBoundaryCondition.h"
-#include "KokkosFunction.h"
+#include "KokkosParsedFunction.h"
 
 class KokkosLinearFVAdvectionDiffusionFunctorNeumannBC
   : public Moose::Kokkos::LinearFVBoundaryCondition
@@ -20,19 +20,25 @@ public:
 
   KokkosLinearFVAdvectionDiffusionFunctorNeumannBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeMatrixContribution(const AssemblyDatum &) const { return 0; }
-  KOKKOS_FUNCTION Real computeRightHandSideContribution(const AssemblyDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeMatrixContribution(const FVDatum &) const
+  {
+    return 0;
+  }
+
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeRightHandSideContribution(const FVDatum & datum) const;
 
 private:
   /// The functor providing the outward normal flux on the boundary (positive = outflow)
-  const Moose::Kokkos::Function _flux_functor;
+  const Moose::Kokkos::ReferenceWrapper<const KokkosParsedFunction> _flux_functor;
 };
 
+template <typename Derived>
 KOKKOS_FUNCTION inline Real
 KokkosLinearFVAdvectionDiffusionFunctorNeumannBC::computeRightHandSideContribution(
-    const AssemblyDatum & datum) const
+    const FVDatum & datum) const
 {
-  const auto face_centroid = datum.mesh().getFaceCentroid(datum.elemID(), datum.side());
-  return _flux_functor.value(_t, face_centroid) *
-         datum.mesh().getFaceArea(datum.elemID(), datum.side());
+  const auto face_centroid = datum.faceCentroid();
+  return _flux_functor->value(_t, face_centroid) * datum.faceArea();
 }

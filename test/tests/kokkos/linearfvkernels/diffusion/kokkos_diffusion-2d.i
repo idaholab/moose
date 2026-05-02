@@ -46,8 +46,8 @@
 
 [Functions]
   [unit_fn]
-    type = KokkosConstantFunction
-    value = 1.0
+    type = KokkosParsedFunction
+    expression = 1.0
   []
   [coeff_func_kokkos]
     type = KokkosParsedFunction
