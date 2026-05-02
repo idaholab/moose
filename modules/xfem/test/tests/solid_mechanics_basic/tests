@@ -168,7 +168,16 @@
       exodiff = 'face_crack_scc_off_0_spin_15_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' not refining surface cutting crack front if refinement occurs outside volume.'
+      detail = ' not refining surface cutting crack front if refinement occurs outside volume, or'
+    []
+    [double_cut_edge]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'offset=0 spin=4'
+      exodiff = 'face_crack_radialFunc_off_0_spin_4_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' growing the crack front and double cutting a volume element edge.'
     []
   []
   [penny_crack]

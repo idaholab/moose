@@ -272,12 +272,12 @@ protected:
     @param front_nodes output front-node ordering for the current active segment
     @return the id that should represent this node on the grown front
    */
-  dof_id_type appendAdvancedFrontNodeCheckingDegenerateTriangles(
-      unsigned int segment_index,
-      unsigned int front_node_index,
-      dof_id_type orig_id,
-      const Point & candidate_point,
-      std::vector<dof_id_type> & front_nodes);
+  dof_id_type
+  appendAdvancedFrontNodeCheckingDegenerateTriangles(unsigned int segment_index,
+                                                     unsigned int front_node_index,
+                                                     dof_id_type orig_id,
+                                                     const Point & candidate_point,
+                                                     std::vector<dof_id_type> & front_nodes);
 
   /**
     Update the tracked crack-front-definition node when a front node advances.

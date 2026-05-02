@@ -868,9 +868,9 @@ CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
         const bool has_adjacent_front_point = front_point_index.size() > 1;
         const bool is_first_inactive_endpoint =
             front_node_index == 0 && has_adjacent_front_point && front_point_index[1] != -1;
-        const bool is_last_inactive_endpoint =
-            front_node_index + 1 == front_size && has_adjacent_front_point &&
-            front_point_index[front_size - 2] != -1;
+        const bool is_last_inactive_endpoint = front_node_index + 1 == front_size &&
+                                               has_adjacent_front_point &&
+                                               front_point_index[front_size - 2] != -1;
         // Boundary node: use increment from nearest active neighbor
         if (is_first_inactive_endpoint)
           return _growth_inc_reporter->at(front_point_index[1]);
@@ -1048,7 +1048,7 @@ CrackMeshCut3DUserObject::refineFront()
     // When there are inactive boundary nodes, determine which segment indices are
     // adjacent to the boundary endpoints (first and last in the segment).
     // Refinement nodes on those segments may land outside the FEM mesh and be
-    // incorrectly classified as inactive endpoints on the next step.
+    // incorrectly treated as inactive endpoints on the next step.
     bool has_inactive = (_inactive_boundary_pos.size() != 0);
     unsigned int first_boundary_i = 1;                      // segment between pos 0 and 1
     unsigned int last_boundary_i = _front[ifront].size() - 1; // segment between pos size-2 and size-1
@@ -1097,7 +1097,7 @@ CrackMeshCut3DUserObject::refineFront()
             continue;
 
           // For segments adjacent to inactive boundary endpoints, skip refinement nodes
-          // that are outside the FEM mesh.  A node outside would be classified as an
+          // that are outside the FEM mesh.  A node outside would be treated as an
           // inactive endpoint on the next step, corrupting the active boundary structure.
           if (has_inactive && (i == first_boundary_i || i == last_boundary_i))
           {
