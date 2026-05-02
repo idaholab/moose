@@ -161,7 +161,6 @@ private:
                             unsigned int edge_id,
                             double position,
                             EFANode * from_node,
-                            EFANode * embedded_node,
                             EFANode *& local_embedded);
   void mapParametricCoordinateFrom2DTo3D(unsigned int face_id,
                                          std::vector<double> & xi_2d,

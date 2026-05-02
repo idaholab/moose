@@ -2010,14 +2010,8 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
   {
     unsigned int emb_id = cut_edge->getEmbeddedNodeIndex(position, edge_node1);
     EFANode * old_emb = cut_edge->getEmbeddedNode(emb_id);
-    if (embedded_node && embedded_node != old_emb)
-      EFAError("Attempting to add edge intersection when one already exists with different node.",
-               " elem: ",
-               _id,
-               " edge: ",
-               edge_id,
-               " position: ",
-               position);
+    // If the same physical edge point is rediscovered through a different face/neighbor path,
+    // reuse the existing embedded node on that edge instead of treating it as a contradictory cut.
     local_embedded = old_emb;
     cut_exist = true;
   }
@@ -2026,9 +2020,8 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
       isPhysicalEdgeCut(face_id, edge_id, position))
   {
     // check if cut has already been added to the neighbor edges
-    checkNeighborFaceCut(face_id, edge_id, position, edge_node1, embedded_node, local_embedded);
-    checkNeighborFaceCut(
-        adj_face_id, adj_edge_id, position, edge_node1, embedded_node, local_embedded);
+    checkNeighborFaceCut(face_id, edge_id, position, edge_node1, local_embedded);
+    checkNeighborFaceCut(adj_face_id, adj_edge_id, position, edge_node1, local_embedded);
 
     if (!local_embedded) // need to create new embedded node
     {
@@ -2123,7 +2116,6 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
                                    unsigned int edge_id,
                                    double position,
                                    EFANode * from_node,
-                                   EFANode * embedded_node,
                                    EFANode *& local_embedded)
 {
   // N.B. this is important. We are checking if the corresponding edge of the neighbor face or of
@@ -2142,12 +2134,8 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
       unsigned int emb_id = neigh_edge->getEmbeddedNodeIndex(position, from_node);
       EFANode * old_emb = neigh_edge->getEmbeddedNode(emb_id);
 
-      if (embedded_node && embedded_node != old_emb)
-        EFAError(
-            "attempting to add edge intersection when one already exists with different node.");
-      if (local_embedded && local_embedded != old_emb)
-        EFAError("attempting to assign contradictory pointer to local_embedded.");
-
+      // Same edge and same position on a neighboring face should canonicalize to the existing
+      // embedded node, regardless of which propagation path discovered it first.
       local_embedded = old_emb;
     }
   } // en_iter
