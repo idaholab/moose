@@ -149,6 +149,11 @@ protected:
   void updatePressurePredictorFaceState();
   /// Optional per-face adjustment added to the predictor flux for reference-pressure compatibility.
   Real pressurePredictorFluxAdjustment(const FaceInfo * fi) const;
+  /// Target boundary flux for the active pressure-correction space.
+  virtual Real pressureBoundaryTargetFlux(const FaceInfo * fi,
+                                          const Moose::StateArg & time_arg) const;
+  /// Normal diffusion coefficient for the active pressure-correction space.
+  virtual Real pressureBoundaryNormalAinv(const FaceInfo * fi) const;
   /// Evaluate or fetch the boundary face value for a velocity component.
   Real boundaryVelocityValue(const FaceInfo * fi,
                             const unsigned int component,

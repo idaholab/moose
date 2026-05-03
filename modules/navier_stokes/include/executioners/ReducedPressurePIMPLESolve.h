@@ -50,6 +50,7 @@ private:
   void advanceSystemOuterIterationHistory(const std::vector<LinearSystem *> & systems) const;
   void advanceMomentumOuterIterationHistory() const;
   void advanceVolumeFractionOuterIterationHistory() const;
+  unsigned int computeVolumeFractionSubcycles() const;
   NonlinearSolutionStateSnapshots snapshotMomentumNonlinearSolutionStates() const;
   void restoreMomentumNonlinearSolutionStates(
       const NonlinearSolutionStateSnapshots & snapshots) const;
@@ -88,6 +89,7 @@ private:
   const Real _volume_fraction_min_value;
   const Real _volume_fraction_max_value;
   const unsigned int _volume_fraction_subcycles;
+  const Real _volume_fraction_max_courant;
   const bool _volume_fraction_outer_corrections;
   std::string _startup_pressure_initialization;
   const bool _suppress_explicit_hydrostatic_flux_during_seeded_startup;

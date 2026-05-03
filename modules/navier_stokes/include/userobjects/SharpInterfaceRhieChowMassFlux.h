@@ -104,6 +104,7 @@ public:
   Real rawRhieChowMassFlux(const FaceInfo & fi) const;
   Real predictorOperatorFaceMassFlux(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
   Real pressureCoupledWritebackMassFlux(const FaceInfo & fi) const;
+  Real maxVolumeFractionCourant(const Real dt) const;
   RealVectorValue pressureCoupledCellVelocityDelta(const ElemInfo & elem_info,
                                                    const Moose::StateArg & time_arg) const;
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
@@ -120,16 +121,23 @@ protected:
   using FaceVectorField =
       FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>;
 
-  void initializeAdditionalPressureFluxStorage();
+  void initializeAdditionalPressureFluxStorage(const bool preserve_corrected_face_phi = false);
   void rebuildSharpInterfaceFaceInfo();
   void cacheCurrentCorrectedVolumetricFlux();
   void syncPredictorConvectiveStateFromCurrentFluxes();
   void updatePredictorOperatorPhiField(const Moose::StateArg & time_arg);
+  Real transportMassFluxDensityFromVolumetricPhi(const FaceInfo * fi,
+                                                 const Real volumetric_phi,
+                                                 const Moose::StateArg & time_arg) const;
+  Real transportIntegratedRhoPhiFromVolumetricPhi(const FaceInfo * fi,
+                                                  const Real volumetric_phi,
+                                                  const Moose::StateArg & time_arg) const;
 
   Moose::FaceArg makeCenteredFaceArg(const FaceInfo * fi,
                                      const Moose::StateArg * limiter_state = nullptr) const;
 
   Real interpolateFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
+  Real predictorFaceDensity(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
 
   RealVectorValue interpolateFaceRawAinv(const FaceInfo * fi) const;
   RealVectorValue interpolateFaceRau(const FaceInfo * fi) const;
@@ -164,6 +172,8 @@ protected:
                                       const RealVectorValue & face_normal) const;
   Real computeFaceNormalRawAinv(const RealVectorValue & face_ainv_raw,
                                 const RealVectorValue & face_normal) const;
+  Real massFluxDensityToVolumetricNormalFlux(const FaceInfo * fi,
+                                             const Real mass_flux_density) const;
   Real computeFaceNormalDensityGradient(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   Real computeHydrostaticFaceMassFlux(const FaceInfo * fi,
                                       const Real face_rho,
@@ -190,23 +200,40 @@ protected:
       const FaceVectorField * face_field) const;
   Real pressureVelocityWritebackFluxDensity(const FaceInfo * fi) const;
   void updatePressureCoupledVelocityCorrectionFaceField(const Moose::StateArg & time_arg);
+  RealVectorValue reconstructMatchedPressureCoupledCellCorrectionSource(
+      const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   RealVectorValue reconstructPressureCoupledCellCorrectionSource(
+      const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
+  RealVectorValue matchedSourcePressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   RealVectorValue reconstructPressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
+  void populateVelocityDeltaFromPressurePotential(
+      const NumericVector<Number> & potential_raw,
+      std::vector<std::unique_ptr<NumericVector<Number>>> & velocity_delta_raw);
+  void solveScalarResidualWritebackCorrection(const Moose::StateArg & time_arg);
   void solveGlobalWritebackProjection(const Moose::StateArg & time_arg);
   void updateCorrectedFaceVelocityField(const Moose::StateArg & time_arg);
   void printPressureCoupledVelocityCorrectionInternalFaceAudit(const std::string & label) const;
+  bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const;
   RealVectorValue referenceFaceVelocityState(const FaceInfo * fi,
                                              const Moose::StateArg & time_arg) const;
+  Real referenceFaceMassFluxState(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   bool shouldUseCorrectedBoundaryVelocityState(const FaceInfo * fi) const;
+  Real pressureBoundaryTargetFlux(const FaceInfo * fi,
+                                  const Moose::StateArg & time_arg) const override;
+  Real pressureBoundaryNormalAinv(const FaceInfo * fi) const override;
 
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _transient_projection_flux;
   FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> _capillary_hydrostatic_flux;
+  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _pressure_Ainv;
   FaceScalarField _predictor_convective_mass_flux;
   FaceScalarField _predictor_convective_phi;
   FaceScalarField _predictor_operator_phi;
   FaceScalarField _pressure_predictor_base_phi;
+  FaceScalarField _pressure_equation_volumetric_flux;
+  FaceScalarField _pressure_correction_phi;
   FaceScalarField _sharp_pressure_predictor_flux;
   FaceScalarField _reference_face_mass_flux_for_writeback;
   FaceScalarField _corrected_face_phi;
@@ -232,6 +259,9 @@ protected:
   const MooseFunctorName _hydrostatic_density_gradient_face_acceleration_name;
   const MooseFunctorName _hydrostatic_density_gradient_cell_acceleration_name;
   const MooseFunctorName _vof_rho_phi_name;
+  const MooseFunctorName _vof_alpha_phi_limited_name;
+  const MooseFunctorName _liquid_density_name;
+  const MooseFunctorName _gas_density_name;
 
   const Moose::Functor<RealVectorValue> * const _transient_projection_face_acceleration;
   const Moose::Functor<RealVectorValue> * const _surface_tension_face_acceleration;
@@ -239,14 +269,26 @@ protected:
   const Moose::Functor<RealVectorValue> * const _hydrostatic_density_gradient_face_acceleration;
   const Moose::Functor<RealVectorValue> * const _hydrostatic_density_gradient_cell_acceleration;
   const Moose::Functor<Real> * _vof_rho_phi;
+  const Moose::Functor<Real> * _vof_alpha_phi_limited;
+  const Moose::Functor<Real> * _liquid_density;
+  const Moose::Functor<Real> * _gas_density;
+  const bool _use_scalar_residual_writeback_correction;
+  const Real _scalar_residual_writeback_beta_multiplier;
+  const bool _use_global_writeback_projection;
+  const Real _global_writeback_projection_beta_multiplier;
   bool _use_vof_rho_phi = false;
   bool _outer_iteration_convective_state_valid = false;
+  bool _corrected_face_phi_seeded = false;
   bool _suppress_explicit_hydrostatic_pressure_flux = false;
   bool _suppress_startup_pressure_predictor_flux_sources = false;
   bool _pressure_coupled_velocity_correction_valid = false;
   bool _corrected_face_velocity_valid = false;
   bool _pressure_coupled_velocity_correction_audit_valid = false;
-  std::unique_ptr<NumericVector<Number>> _global_writeback_scalar_raw;
+  std::unique_ptr<NumericVector<Number>> _scalar_residual_writeback_potential_raw;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _scalar_residual_writeback_velocity_delta_raw;
+  bool _scalar_residual_writeback_valid = false;
+  std::vector<std::unique_ptr<NumericVector<Number>>> _global_writeback_velocity_delta_raw;
+  bool _global_writeback_velocity_delta_valid = false;
   Real _last_pressure_coupled_velocity_delta_l2 = 0.0;
   Real _last_pressure_coupled_velocity_delta_max = 0.0;
   dof_id_type _last_pressure_coupled_velocity_worst_elem_id = 0;

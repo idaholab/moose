@@ -107,6 +107,20 @@ WCNSLinearFVSharpInterfaceFlowPhysics::validParams()
       "Whether to reconstruct the reduced-pressure momentum-predictor explicit forcing from the "
       "sharp-interface face operators instead of the legacy cell-based pressure-gradient / "
       "momentum-source path.");
+  params.transferParam<bool>(SharpInterfaceRhieChowMassFlux::validParams(),
+                             "use_scalar_residual_writeback_correction");
+  params.transferParam<Real>(SharpInterfaceRhieChowMassFlux::validParams(),
+                             "scalar_residual_writeback_beta_multiplier");
+  params.transferParam<bool>(SharpInterfaceRhieChowMassFlux::validParams(),
+                             "use_global_writeback_projection");
+  params.transferParam<Real>(SharpInterfaceRhieChowMassFlux::validParams(),
+                             "global_writeback_projection_beta_multiplier");
+  params.transferParam<MooseFunctorName>(SharpInterfaceRhieChowMassFlux::validParams(),
+                                         "vof_alpha_phi_limited_functor");
+  params.transferParam<MooseFunctorName>(SharpInterfaceRhieChowMassFlux::validParams(),
+                                         "liquid_density_functor");
+  params.transferParam<MooseFunctorName>(SharpInterfaceRhieChowMassFlux::validParams(),
+                                         "gas_density_functor");
 
   params.addParam<MooseFunctorName>(
       "transient_projection_face_acceleration",
@@ -534,7 +548,7 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addPressureCorrectionKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<MooseFunctorName>("diffusion_tensor") = "Ainv";
+    params.set<MooseFunctorName>("diffusion_tensor") = "sharp_pressure_Ainv";
     params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
@@ -547,7 +561,7 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addPressureCorrectionKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<MooseFunctorName>("face_flux") = "HbyA";
+    params.set<MooseFunctorName>("face_flux") = "pressure_predictor_base_phi";
     params.set<bool>("force_boundary_execution") = true;
 
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
@@ -585,12 +599,12 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addPressureCorrectionKernels()
 void
 WCNSLinearFVSharpInterfaceFlowPhysics::addMomentumTimeKernels()
 {
-  const std::string kernel_type = "LinearFVTimeDerivative";
+  const std::string kernel_type = "LinearWCNSFVMomentumTimeDerivative";
   const std::string kernel_name = prefix() + "ins_momentum_time";
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>("factor") = _density_name;
+  params.set<MooseFunctorName>(NS::density) = _density_name;
 
   for (const auto d : make_range(dimension()))
   {
@@ -986,8 +1000,8 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addOutletBC()
         pressure_params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
             "pressure_boundary_normal_gradient";
         pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
-        pressure_params.set<MooseFunctorName>("HbyA_flux") = "HbyA";
-        pressure_params.set<MooseFunctorName>("Ainv") = "Ainv";
+        pressure_params.set<MooseFunctorName>("HbyA_flux") = "pressure_predictor_base_phi";
+        pressure_params.set<MooseFunctorName>("Ainv") = "sharp_pressure_Ainv";
         getProblem().addLinearFVBC(
             pressure_bc_type, _pressure_name + "_outlet_flux_" + outlet_bdy, pressure_params);
       }
@@ -1044,8 +1058,8 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC()
       pressure_params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
           "pressure_boundary_normal_gradient";
       pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
-      pressure_params.set<MooseFunctorName>("HbyA_flux") = "HbyA";
-      pressure_params.set<MooseFunctorName>("Ainv") = "Ainv";
+      pressure_params.set<MooseFunctorName>("HbyA_flux") = "pressure_predictor_base_phi";
+      pressure_params.set<MooseFunctorName>("Ainv") = "sharp_pressure_Ainv";
       pressure_params.set<std::vector<MooseFunctorName>>("additional_face_fluxes") =
           wall_pressure_source_fluxes;
       getProblem().addLinearFVBC(
@@ -1077,8 +1091,8 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC()
         params.set<MooseFunctorName>("constrained_pressure_normal_gradient") =
             "pressure_boundary_normal_gradient";
         params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
-        params.set<MooseFunctorName>("HbyA_flux") = "HbyA";
-        params.set<MooseFunctorName>("Ainv") = "Ainv";
+        params.set<MooseFunctorName>("HbyA_flux") = "pressure_predictor_base_phi";
+        params.set<MooseFunctorName>("Ainv") = "sharp_pressure_Ainv";
         params.set<std::vector<MooseFunctorName>>("additional_face_fluxes") =
             symmetry_pressure_source_fluxes;
         getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
@@ -1245,6 +1259,20 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addRhieChowUserObjects()
   params.set<bool>("add_capillary_hydrostatic_flux") = _add_capillary_hydrostatic_flux;
   params.set<bool>("use_face_based_predictor_body_force") =
       _use_face_based_predictor_body_force;
+  params.set<bool>("use_scalar_residual_writeback_correction") =
+      getParam<bool>("use_scalar_residual_writeback_correction");
+  params.set<Real>("scalar_residual_writeback_beta_multiplier") =
+      getParam<Real>("scalar_residual_writeback_beta_multiplier");
+  params.set<bool>("use_global_writeback_projection") =
+      getParam<bool>("use_global_writeback_projection");
+  params.set<Real>("global_writeback_projection_beta_multiplier") =
+      getParam<Real>("global_writeback_projection_beta_multiplier");
+  params.set<MooseFunctorName>("vof_alpha_phi_limited_functor") =
+      getParam<MooseFunctorName>("vof_alpha_phi_limited_functor");
+  params.set<MooseFunctorName>("liquid_density_functor") =
+      getParam<MooseFunctorName>("liquid_density_functor");
+  params.set<MooseFunctorName>("gas_density_functor") =
+      getParam<MooseFunctorName>("gas_density_functor");
 
   if (!_split_momentum_predictor_operator && _solve_for_dynamic_pressure &&
       _pressure_formulation == "reduced" &&

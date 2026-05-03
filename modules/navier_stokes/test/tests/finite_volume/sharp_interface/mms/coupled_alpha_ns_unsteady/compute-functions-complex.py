@@ -28,14 +28,14 @@ mu = mu_g + (mu_l - mu_g) * alpha
 
 forcing_alpha = s.expand(s.diff(alpha, t) + s.diff(u * alpha, x) + s.diff(v * alpha, y))
 forcing_u = s.expand(
-    rho * s.diff(u, t)
+    s.diff(rho * u, t)
     + s.diff(rho * u * u, x)
     + s.diff(rho * v * u, y)
     - s.diff(mu * s.diff(u, x), x)
     - s.diff(mu * s.diff(u, y), y)
 )
 forcing_v = s.expand(
-    rho * s.diff(v, t)
+    s.diff(rho * v, t)
     + s.diff(rho * u * v, x)
     + s.diff(rho * v * v, y)
     - s.diff(mu * s.diff(v, x), x)

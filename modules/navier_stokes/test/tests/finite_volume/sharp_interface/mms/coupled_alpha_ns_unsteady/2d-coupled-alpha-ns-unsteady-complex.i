@@ -114,11 +114,23 @@ mu_g = 1.0e-2
     functor_names = 'rho_l rho_g mu_l mu_g'
     property_name = 'forcing_u'
   []
+  [forcing_u_conservative_time]
+    type = ParsedFunctorMaterial
+    expression = '(rho_l - rho_g) * ((-1.0/5.0) * pi * sin(pi*x)^3 * sin(pi*y) * sin(t) * cos(t) * cos(pi*y)^2 + (1.0/10.0) * pi * sin(pi*x)^2 * sin(2*pi*x) * sin(pi*y) * sin(2*pi*y) * cos(t)^2 * cos(pi*y))'
+    functor_names = 'rho_l rho_g'
+    property_name = 'forcing_u_conservative_time'
+  []
   [forcing_v]
     type = ParsedFunctorMaterial
     expression = '(1.0/5.0)*pi^3*mu_g*sin(t)*sin(pi*x)^2*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(2*pi*x) + (3.0/5.0)*pi^3*mu_g*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(pi*x) - 2.0/5.0*pi^3*mu_g*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(pi*y)*cos(t)*cos(pi*x)*cos(pi*y)*cos(2*pi*y) - 1.0/5.0*pi^3*mu_g*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(2*pi*y)*cos(t)*cos(pi*x)*cos(pi*y)^2 - 1.0/5.0*pi^3*mu_g*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(pi*x)^2*cos(2*pi*x) + (9.0/5.0)*pi^3*mu_g*sin(pi*x)^2*sin(pi*y)^2*cos(t)^2*cos(pi*x)*cos(pi*y) - 2.0/5.0*pi^3*mu_g*sin(pi*x)^2*cos(t)^2*cos(pi*x)*cos(pi*y)^3 - 6*pi^3*mu_g*sin(pi*x)*sin(pi*y)^2*cos(t)*cos(pi*x) + 2*pi^3*mu_g*sin(pi*x)*cos(t)*cos(pi*x)*cos(pi*y)^2 - 1.0/5.0*pi^3*mu_g*sin(pi*y)^2*cos(t)^2*cos(pi*x)^3*cos(pi*y) - 1.0/5.0*pi^3*mu_l*sin(t)*sin(pi*x)^2*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(2*pi*x) - 3.0/5.0*pi^3*mu_l*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(pi*x) + (2.0/5.0)*pi^3*mu_l*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(pi*y)*cos(t)*cos(pi*x)*cos(pi*y)*cos(2*pi*y) + (1.0/5.0)*pi^3*mu_l*sin(t)*sin(pi*x)*sin(2*pi*x)*sin(2*pi*y)*cos(t)*cos(pi*x)*cos(pi*y)^2 + (1.0/5.0)*pi^3*mu_l*sin(pi*y)^2*sin(2*pi*y)*cos(t)*cos(pi*x)^2*cos(2*pi*x) - 9.0/5.0*pi^3*mu_l*sin(pi*x)^2*sin(pi*y)^2*cos(t)^2*cos(pi*x)*cos(pi*y) + (2.0/5.0)*pi^3*mu_l*sin(pi*x)^2*cos(t)^2*cos(pi*x)*cos(pi*y)^3 - 6*pi^3*mu_l*sin(pi*x)*sin(pi*y)^2*cos(t)*cos(pi*x) + 2*pi^3*mu_l*sin(pi*x)*cos(t)*cos(pi*x)*cos(pi*y)^2 + (1.0/5.0)*pi^3*mu_l*sin(pi*y)^2*cos(t)^2*cos(pi*x)^3*cos(pi*y) - 1.0/10.0*pi*rho_g*sin(t)^2*sin(pi*x)*sin(2*pi*x)*sin(pi*y)^2*sin(2*pi*y)*cos(pi*x) - 1.0/5.0*pi^3*rho_g*sin(t)*sin(pi*x)^4*sin(2*pi*x)*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*y) + (2.0/5.0)*pi^3*rho_g*sin(t)*sin(pi*x)^3*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*x)*cos(2*pi*x)*cos(pi*y) - 2.0/5.0*pi^3*rho_g*sin(t)*sin(pi*x)^2*sin(2*pi*x)*sin(pi*y)^4*cos(t)^2*cos(pi*x)^2*cos(2*pi*y) - 1.0/5.0*pi^3*rho_g*sin(t)*sin(pi*x)^2*sin(2*pi*x)*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*x)^2*cos(pi*y) - 1.0/5.0*pi*rho_g*sin(t)*sin(pi*x)^2*sin(pi*y)^2*cos(t)*cos(pi*x)*cos(pi*y) + pi*rho_g*sin(t)*sin(pi*x)*sin(pi*y)^2*cos(pi*x) - 2.0/5.0*pi^3*rho_g*sin(pi*x)^5*sin(pi*y)^3*cos(t)^3*cos(pi*y)^2 + 2*pi^3*rho_g*sin(pi*x)^4*sin(pi*y)^3*cos(t)^2*cos(pi*y) + (2.0/5.0)*pi^3*rho_g*sin(pi*x)^3*sin(pi*y)^5*cos(t)^3*cos(pi*x)^2 + 2*pi^3*rho_g*sin(pi*x)^2*sin(pi*y)^3*cos(t)^2*cos(pi*x)^2*cos(pi*y) + (1.0/10.0)*pi*rho_l*sin(t)^2*sin(pi*x)*sin(2*pi*x)*sin(pi*y)^2*sin(2*pi*y)*cos(pi*x) + (1.0/5.0)*pi^3*rho_l*sin(t)*sin(pi*x)^4*sin(2*pi*x)*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*y) - 2.0/5.0*pi^3*rho_l*sin(t)*sin(pi*x)^3*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*x)*cos(2*pi*x)*cos(pi*y) + (2.0/5.0)*pi^3*rho_l*sin(t)*sin(pi*x)^2*sin(2*pi*x)*sin(pi*y)^4*cos(t)^2*cos(pi*x)^2*cos(2*pi*y) + (1.0/5.0)*pi^3*rho_l*sin(t)*sin(pi*x)^2*sin(2*pi*x)*sin(pi*y)^3*sin(2*pi*y)*cos(t)^2*cos(pi*x)^2*cos(pi*y) + (1.0/5.0)*pi*rho_l*sin(t)*sin(pi*x)^2*sin(pi*y)^2*cos(t)*cos(pi*x)*cos(pi*y) + pi*rho_l*sin(t)*sin(pi*x)*sin(pi*y)^2*cos(pi*x) + (2.0/5.0)*pi^3*rho_l*sin(pi*x)^5*sin(pi*y)^3*cos(t)^3*cos(pi*y)^2 + 2*pi^3*rho_l*sin(pi*x)^4*sin(pi*y)^3*cos(t)^2*cos(pi*y) - 2.0/5.0*pi^3*rho_l*sin(pi*x)^3*sin(pi*y)^5*cos(t)^3*cos(pi*x)^2 + 2*pi^3*rho_l*sin(pi*x)^2*sin(pi*y)^3*cos(t)^2*cos(pi*x)^2*cos(pi*y)'
     functor_names = 'rho_l rho_g mu_l mu_g'
     property_name = 'forcing_v'
+  []
+  [forcing_v_conservative_time]
+    type = ParsedFunctorMaterial
+    expression = '(rho_l - rho_g) * ((1.0/5.0) * pi * sin(pi*x)^2 * sin(pi*y)^2 * sin(t) * cos(t) * cos(pi*x) * cos(pi*y) - (1.0/10.0) * pi * sin(pi*x) * sin(2*pi*x) * sin(pi*y)^2 * sin(2*pi*y) * cos(t)^2 * cos(pi*x))'
+    functor_names = 'rho_l rho_g'
+    property_name = 'forcing_v_conservative_time'
   []
 []
 
@@ -133,10 +145,20 @@ mu_g = 1.0e-2
     variable = vel_x
     source_density = forcing_u
   []
+  [u_source_conservative_time]
+    type = LinearFVSource
+    variable = vel_x
+    source_density = forcing_u_conservative_time
+  []
   [v_source]
     type = LinearFVSource
     variable = vel_y
     source_density = forcing_v
+  []
+  [v_source_conservative_time]
+    type = LinearFVSource
+    variable = vel_y
+    source_density = forcing_v_conservative_time
   []
 []
 

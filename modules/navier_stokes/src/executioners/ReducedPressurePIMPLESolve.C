@@ -10,6 +10,7 @@
 #include "libmesh/petsc_linear_solver.h"
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 
@@ -129,6 +130,13 @@ ReducedPressurePIMPLESolve::validParams()
       1,
       "volume_fraction_subcycles>0",
       "Number of full alpha transport subcycles used by the bounded volume-fraction update.");
+  params.addRangeCheckedParam<Real>(
+      "volume_fraction_max_courant",
+      1.0,
+      "volume_fraction_max_courant>0",
+      "Maximum allowed alpha Courant number during subcycling. The executioner increases the "
+      "alpha subcycle count as needed so the current transported volumetric flux satisfies this "
+      "limit.");
   params.addParam<bool>(
       "volume_fraction_outer_corrections",
       false,
@@ -310,6 +318,7 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _volume_fraction_min_value(getParam<Real>("volume_fraction_min_value")),
     _volume_fraction_max_value(getParam<Real>("volume_fraction_max_value")),
     _volume_fraction_subcycles(getParam<unsigned int>("volume_fraction_subcycles")),
+    _volume_fraction_max_courant(getParam<Real>("volume_fraction_max_courant")),
     _volume_fraction_outer_corrections(getParam<bool>("volume_fraction_outer_corrections")),
     _suppress_explicit_hydrostatic_flux_during_seeded_startup(
         getParam<bool>("suppress_explicit_hydrostatic_flux_during_seeded_startup")),
@@ -556,6 +565,18 @@ ReducedPressurePIMPLESolve::solve()
       // stack every predictor solve; for parity work we only want to advance it
       // once per outer SIMPLE iteration.
       advanceMomentumOuterIterationHistory();
+
+    // When alpha/rhoPhi is not being solved in this executioner step, the
+    // momentum predictor still needs a fresh convective state built from the
+    // latest corrected flow fluxes. The startup path seeds a raw state before
+    // any pressure cleanup, so resynchronize here on every outer iteration.
+    if ((!_has_volume_fraction_systems || !_should_solve_volume_fractions) &&
+        sharpInterfaceRC())
+    {
+      auto * sharp_rc = sharpInterfaceRC();
+      sharp_rc->setUseVOFRhoPhi(false);
+      sharp_rc->clearOuterIterationConvectiveState();
+    }
 
     // Mirror interFoam's outer-loop choreography by doing the alpha subcycling
     // and mixture/rhoPhi refresh inside the outer loop, just before the
@@ -1338,6 +1359,25 @@ ReducedPressurePIMPLESolve::advanceVolumeFractionOuterIterationHistory() const
   advanceSystemOuterIterationHistory(_volume_fraction_systems);
 }
 
+unsigned int
+ReducedPressurePIMPLESolve::computeVolumeFractionSubcycles() const
+{
+  unsigned int subcycles = _volume_fraction_subcycles;
+
+  if (const auto * sharp_rc = sharpInterfaceRC())
+  {
+    const Real alpha_courant = sharp_rc->maxVolumeFractionCourant(_problem.dt());
+    if (std::isfinite(alpha_courant) && alpha_courant > _volume_fraction_max_courant)
+    {
+      const auto required_subcycles = static_cast<unsigned int>(
+          std::ceil(alpha_courant / _volume_fraction_max_courant));
+      subcycles = std::max(subcycles, std::max(required_subcycles, 1u));
+    }
+  }
+
+  return std::max(subcycles, 1u);
+}
+
 void
 ReducedPressurePIMPLESolve::restoreMomentumNonlinearSolutionStates(
     const NonlinearSolutionStateSnapshots & snapshots) const
@@ -1536,7 +1576,13 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
   const Real global_dt = _problem.dt();
   const Real global_time = _problem.time();
   const Real global_time_old = _problem.timeOld();
-  const Real subcycle_dt = global_dt / _volume_fraction_subcycles;
+  const unsigned int num_subcycles = computeVolumeFractionSubcycles();
+  const Real subcycle_dt = global_dt / num_subcycles;
+
+  if (num_subcycles > _volume_fraction_subcycles)
+    _console << name() << ": increasing alpha subcycles from " << _volume_fraction_subcycles
+             << " to " << num_subcycles << " to keep alpha CFL <= "
+             << _volume_fraction_max_courant << " at dt=" << global_dt << std::endl;
 
   for (const auto i : index_range(_volume_fraction_system_names))
   {
@@ -1559,7 +1605,7 @@ ReducedPressurePIMPLESolve::solveVolumeFractionSystems(const SolverParams & /*so
     if (corrector)
       corrector->resetSubcycleFluxes();
 
-    for (const auto subcycle : make_range(_volume_fraction_subcycles))
+    for (const auto subcycle : make_range(num_subcycles))
     {
       _problem.dt() = subcycle_dt;
       _problem.timeOld() = global_time_old + subcycle * subcycle_dt;
