@@ -19,24 +19,6 @@ class LinearSystem;
 class SharpInterfaceRhieChowMassFlux : public RhieChowMassFlux
 {
 public:
-  struct MomentumProbeSample
-  {
-    bool valid = false;
-    dof_id_type elem_id = DofObject::invalid_id;
-    Point centroid;
-    Real rho = 0.0;
-    Real pressure = 0.0;
-    RealVectorValue grad_p;
-    RealVectorValue pressure_force;
-    RealVectorValue body_force;
-    RealVectorValue total_force;
-    RealVectorValue hbya_raw;
-    RealVectorValue predictor_velocity;
-    RealVectorValue pressure_coupled_delta_velocity;
-    RealVectorValue writeback_velocity;
-    RealVectorValue current_velocity;
-  };
-
   static InputParameters validParams();
 
   SharpInterfaceRhieChowMassFlux(const InputParameters & params);
@@ -95,12 +77,6 @@ public:
   {
     return _suppress_startup_pressure_predictor_flux_sources;
   }
-  void auditRepresentativeHorizontalFaceReconstruction();
-  void auditRepresentativePredictorBodyForce() const;
-  void collectMomentumProbeSamples(const std::vector<const ElemInfo *> & elem_infos,
-                                   std::vector<MomentumProbeSample> & samples) const;
-  void clearPressureCoupledVelocityCorrectionAudit();
-  void printPressureCoupledVelocityCorrectionAudit(const std::string & label) const;
   Real rawRhieChowMassFlux(const FaceInfo & fi) const;
   Real predictorOperatorFaceMassFlux(const FaceInfo & fi, const Moose::StateArg & time_arg) const;
   Real pressureCoupledWritebackMassFlux(const FaceInfo & fi) const;
@@ -110,10 +86,6 @@ public:
   Real predictorVelocityComponent(const ElemInfo & elem_info, const unsigned int component) const;
   bool hasVOFRhoPhiFunctor() const { return _vof_rho_phi != nullptr; }
   Real vofRhoPhiMassFlux(const FaceInfo & fi) const;
-  const std::array<dof_id_type, 3> & watchedInternalFaceIds() const
-  {
-    return _last_pressure_coupled_velocity_worst_internal_face_ids;
-  }
 
 protected:
   using FaceScalarField =
@@ -165,6 +137,9 @@ protected:
   Real evaluateBoundaryAwareScalarFunctor(const Moose::Functor<Real> * functor,
                                           const FaceInfo * fi,
                                           const Moose::StateArg & time_arg) const;
+  Real evaluateCellBasedFaceScalarFunctor(const Moose::Functor<Real> * functor,
+                                          const FaceInfo * fi,
+                                          const Moose::StateArg & time_arg) const;
 
   Real projectPhysicalMassFluxDensity(const Real face_rho,
                                       const RealVectorValue & face_ainv_raw,
@@ -208,13 +183,7 @@ protected:
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
   RealVectorValue reconstructPressureCoupledCellVelocityDelta(
       const ElemInfo * elem_info, const Moose::StateArg & time_arg) const;
-  void populateVelocityDeltaFromPressurePotential(
-      const NumericVector<Number> & potential_raw,
-      std::vector<std::unique_ptr<NumericVector<Number>>> & velocity_delta_raw);
-  void solveScalarResidualWritebackCorrection(const Moose::StateArg & time_arg);
-  void solveGlobalWritebackProjection(const Moose::StateArg & time_arg);
   void updateCorrectedFaceVelocityField(const Moose::StateArg & time_arg);
-  void printPressureCoupledVelocityCorrectionInternalFaceAudit(const std::string & label) const;
   bool useConstrainedBoundaryPredictorState(const FaceInfo * fi) const;
   RealVectorValue referenceFaceVelocityState(const FaceInfo * fi,
                                              const Moose::StateArg & time_arg) const;
@@ -272,10 +241,6 @@ protected:
   const Moose::Functor<Real> * _vof_alpha_phi_limited;
   const Moose::Functor<Real> * _liquid_density;
   const Moose::Functor<Real> * _gas_density;
-  const bool _use_scalar_residual_writeback_correction;
-  const Real _scalar_residual_writeback_beta_multiplier;
-  const bool _use_global_writeback_projection;
-  const Real _global_writeback_projection_beta_multiplier;
   bool _use_vof_rho_phi = false;
   bool _outer_iteration_convective_state_valid = false;
   bool _corrected_face_phi_seeded = false;
@@ -283,16 +248,4 @@ protected:
   bool _suppress_startup_pressure_predictor_flux_sources = false;
   bool _pressure_coupled_velocity_correction_valid = false;
   bool _corrected_face_velocity_valid = false;
-  bool _pressure_coupled_velocity_correction_audit_valid = false;
-  std::unique_ptr<NumericVector<Number>> _scalar_residual_writeback_potential_raw;
-  std::vector<std::unique_ptr<NumericVector<Number>>> _scalar_residual_writeback_velocity_delta_raw;
-  bool _scalar_residual_writeback_valid = false;
-  std::vector<std::unique_ptr<NumericVector<Number>>> _global_writeback_velocity_delta_raw;
-  bool _global_writeback_velocity_delta_valid = false;
-  Real _last_pressure_coupled_velocity_delta_l2 = 0.0;
-  Real _last_pressure_coupled_velocity_delta_max = 0.0;
-  dof_id_type _last_pressure_coupled_velocity_worst_elem_id = 0;
-  Point _last_pressure_coupled_velocity_worst_centroid;
-  mutable std::array<dof_id_type, 3> _last_pressure_coupled_velocity_worst_internal_face_ids{
-      DofObject::invalid_id, DofObject::invalid_id, DofObject::invalid_id};
 };

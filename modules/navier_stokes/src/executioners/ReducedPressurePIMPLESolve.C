@@ -11,62 +11,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <iomanip>
-
 using namespace libMesh;
-
-namespace
-{
-struct StartupPressureCutAuditRow
-{
-  dof_id_type elem_id = DofObject::invalid_id;
-  Point centroid;
-  Real alpha = 0.0;
-  Real rho_mixture = 0.0;
-  Real reduced_pressure = 0.0;
-  Real hydrostatic_shift = 0.0;
-  Real total_pressure = 0.0;
-};
-
-struct MomentumProbeAuditPointSelection
-{
-  const ElemInfo * elem_info = nullptr;
-  Point requested_point;
-  Real distance = std::numeric_limits<Real>::max();
-};
-
-bool
-elementIntersectsHorizontalCut(const Elem & elem, const unsigned int dim, const Real cut_y, const Real cut_z)
-{
-  Real min_y = std::numeric_limits<Real>::max();
-  Real max_y = -std::numeric_limits<Real>::max();
-  Real min_z = std::numeric_limits<Real>::max();
-  Real max_z = -std::numeric_limits<Real>::max();
-
-  for (const auto & node : elem.node_ref_range())
-  {
-    min_y = std::min(min_y, node(1));
-    max_y = std::max(max_y, node(1));
-
-    if (dim > 2)
-    {
-      min_z = std::min(min_z, node(2));
-      max_z = std::max(max_z, node(2));
-    }
-  }
-
-  const bool matches_y = cut_y >= min_y - TOLERANCE && cut_y <= max_y + TOLERANCE;
-  const bool matches_z = dim <= 2 || (cut_z >= min_z - TOLERANCE && cut_z <= max_z + TOLERANCE);
-  return matches_y && matches_z;
-}
-
-Real
-clampUnitInterval(const Real value)
-{
-  return std::max(0.0, std::min(1.0, value));
-}
-} // namespace
 
 InputParameters
 ReducedPressurePIMPLESolve::validParams()
@@ -170,112 +115,6 @@ ReducedPressurePIMPLESolve::validParams()
       "startup_flux_corrections>0",
       "Number of pressure-only startup cleanup / projection corrections applied when "
       "startup_pressure_initialization is not 'none'.");
-  params.addParam<bool>(
-      "audit_outer_handoff_stages",
-      false,
-      "Whether to print stage-by-stage audits of the outer-loop handoff around the momentum "
-      "predictor and pressure correction.");
-  params.addRangeCheckedParam<unsigned int>(
-      "audit_outer_handoff_after_outer",
-      0,
-      "audit_outer_handoff_after_outer>=0",
-      "Start stage-by-stage outer-loop handoff audits after this completed outer iteration. "
-      "For example, 2 audits the handoff into outer iteration 3.");
-  params.addParam<bool>(
-      "audit_stage_diagnostics",
-      false,
-      "Whether to print stage-by-stage reduced-pressure / sharp-interface diagnostics on every "
-      "outer iteration, independent of the handoff-debug outer counter.");
-  params.addRangeCheckedParam<Real>(
-      "audit_stage_diagnostics_start_time",
-      0.0,
-      "audit_stage_diagnostics_start_time>=0",
-      "Start printing the per-outer stage diagnostics once the physical simulation time reaches "
-      "this value.");
-  params.addParam<bool>(
-      "startup_pressure_cut_audit",
-      false,
-      "Whether to dump an explicit horizontal pressure cut directly from the executioner around "
-      "the startup CorrectPhi / continuity cleanup path.");
-  params.addParam<std::string>(
-      "startup_pressure_cut_audit_file_base",
-      "",
-      "File base for the explicit startup pressure-cut audit CSVs. The executioner appends the "
-      "stage label and '.csv'.");
-  params.addParam<Real>(
-      "startup_pressure_cut_audit_y",
-      0.0,
-      "Y coordinate of the explicit startup pressure-cut audit.");
-  params.addParam<Real>(
-      "startup_pressure_cut_audit_z",
-      0.0,
-      "Z coordinate of the explicit startup pressure-cut audit for 3D cases.");
-  params.addParam<Real>(
-      "startup_pressure_cut_audit_reference_pressure",
-      0.0,
-      "Reference total pressure added to the hydrostatic reconstruction in the explicit startup "
-      "pressure-cut audit.");
-  params.addParam<Real>(
-      "startup_pressure_cut_audit_liquid_density",
-      0.0,
-      "Liquid density used to reconstruct total pressure in the explicit startup pressure-cut "
-      "audit.");
-  params.addParam<Real>(
-      "startup_pressure_cut_audit_gas_density",
-      0.0,
-      "Gas density used to reconstruct total pressure in the explicit startup pressure-cut "
-      "audit.");
-  params.addParam<RealVectorValue>(
-      "startup_pressure_cut_audit_gravity",
-      RealVectorValue(0, 0, 0),
-      "Gravity vector used to reconstruct total pressure in the explicit startup pressure-cut "
-      "audit.");
-  params.addParam<Point>(
-      "startup_pressure_cut_audit_reference_pressure_point",
-      Point(),
-      "Reference point at which the hydrostatic contribution is zero in the explicit startup "
-      "pressure-cut audit.");
-  params.addParam<bool>("momentum_probe_audit",
-                        false,
-                        "Whether to write per-stage momentum-term probe diagnostics for selected "
-                        "cells to a CSV file.");
-  params.addParam<std::string>("momentum_probe_audit_file_base",
-                               "",
-                               "File base for the momentum probe audit CSV.");
-  params.addParam<std::vector<Point>>(
-      "momentum_probe_points",
-      {},
-      "Probe points whose nearest cell centroids are sampled in the momentum audit.");
-  params.addRangeCheckedParam<Real>("momentum_probe_audit_start_time",
-                                    0.0,
-                                    "momentum_probe_audit_start_time>=0",
-                                    "Only emit momentum-probe rows at or after this time.");
-  params.addRangeCheckedParam<unsigned int>(
-      "skip_momentum_predictor_after_outer",
-      0,
-      "skip_momentum_predictor_after_outer>=0",
-      "Debug hook that skips the momentum predictor after the specified completed outer "
-      "iteration. A value of 0 disables the hook.");
-  params.addRangeCheckedParam<unsigned int>(
-      "freeze_alpha_after_outer",
-      0,
-      "freeze_alpha_after_outer>=0",
-      "Debug hook that freezes alpha/rhoPhi refreshes after the specified completed outer "
-      "iteration. A value of 0 disables the hook.");
-  params.addRangeCheckedParam<unsigned int>(
-      "skip_pressure_velocity_writeback_from_outer",
-      0,
-      "skip_pressure_velocity_writeback_from_outer>=0",
-      "Debug hook that keeps the pressure-corrected face flux but skips the reconstructed "
-      "cell-velocity writeback from the specified outer iteration onward. A value of 0 "
-      "disables the hook.");
-  params.addParam<bool>(
-      "use_vof_rho_phi_during_momentum_predictor",
-      false,
-      "Debug hook that keeps alpha-consistent rhoPhi enabled during the sharp-interface "
-      "momentum predictor after alpha has been solved. The default keeps the current parity "
-      "branch, which temporarily falls back to the raw Rhie-Chow mass flux during the "
-      "predictor.");
   params.addParamNamesToGroup(
       "volume_fraction_systems volume_fraction_equation_relaxation volume_fraction_petsc_options "
       "volume_fraction_petsc_options_iname volume_fraction_petsc_options_value "
@@ -285,23 +124,6 @@ ReducedPressurePIMPLESolve::validParams()
       "startup_pressure_initialization perform_startup_hydrostatic_initialization "
       "suppress_explicit_hydrostatic_flux_during_seeded_startup startup_flux_corrections",
       "Volume Fraction Equations");
-  params.addParamNamesToGroup("startup_pressure_cut_audit startup_pressure_cut_audit_file_base "
-                              "startup_pressure_cut_audit_y startup_pressure_cut_audit_z "
-                              "startup_pressure_cut_audit_reference_pressure "
-                              "startup_pressure_cut_audit_liquid_density "
-                              "startup_pressure_cut_audit_gas_density "
-                              "startup_pressure_cut_audit_gravity "
-                              "startup_pressure_cut_audit_reference_pressure_point",
-                              "Pressure Audit");
-  params.addParamNamesToGroup("momentum_probe_audit momentum_probe_audit_file_base "
-                              "momentum_probe_points momentum_probe_audit_start_time",
-                              "Pressure Audit");
-  params.addParamNamesToGroup("audit_outer_handoff_stages audit_outer_handoff_after_outer "
-                              "audit_stage_diagnostics audit_stage_diagnostics_start_time "
-                              "skip_momentum_predictor_after_outer freeze_alpha_after_outer "
-                              "skip_pressure_velocity_writeback_from_outer "
-                              "use_vof_rho_phi_during_momentum_predictor",
-                              "Parity Debug");
   return params;
 }
 
@@ -322,34 +144,7 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
     _volume_fraction_outer_corrections(getParam<bool>("volume_fraction_outer_corrections")),
     _suppress_explicit_hydrostatic_flux_during_seeded_startup(
         getParam<bool>("suppress_explicit_hydrostatic_flux_during_seeded_startup")),
-    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections")),
-    _audit_outer_handoff_stages(getParam<bool>("audit_outer_handoff_stages")),
-    _audit_outer_handoff_after_outer(getParam<unsigned int>("audit_outer_handoff_after_outer")),
-    _audit_stage_diagnostics(getParam<bool>("audit_stage_diagnostics")),
-    _audit_stage_diagnostics_start_time(getParam<Real>("audit_stage_diagnostics_start_time")),
-    _startup_pressure_cut_audit(getParam<bool>("startup_pressure_cut_audit")),
-    _startup_pressure_cut_audit_file_base(getParam<std::string>("startup_pressure_cut_audit_file_base")),
-    _startup_pressure_cut_audit_y(getParam<Real>("startup_pressure_cut_audit_y")),
-    _startup_pressure_cut_audit_z(getParam<Real>("startup_pressure_cut_audit_z")),
-    _startup_pressure_cut_audit_reference_pressure(
-        getParam<Real>("startup_pressure_cut_audit_reference_pressure")),
-    _startup_pressure_cut_audit_liquid_density(
-        getParam<Real>("startup_pressure_cut_audit_liquid_density")),
-    _startup_pressure_cut_audit_gas_density(getParam<Real>("startup_pressure_cut_audit_gas_density")),
-    _startup_pressure_cut_audit_gravity(getParam<RealVectorValue>("startup_pressure_cut_audit_gravity")),
-    _startup_pressure_cut_audit_reference_pressure_point(
-        getParam<Point>("startup_pressure_cut_audit_reference_pressure_point")),
-    _momentum_probe_audit(getParam<bool>("momentum_probe_audit")),
-    _momentum_probe_audit_file_base(getParam<std::string>("momentum_probe_audit_file_base")),
-    _momentum_probe_points(getParam<std::vector<Point>>("momentum_probe_points")),
-    _momentum_probe_audit_start_time(getParam<Real>("momentum_probe_audit_start_time")),
-    _skip_momentum_predictor_after_outer(
-        getParam<unsigned int>("skip_momentum_predictor_after_outer")),
-    _freeze_alpha_after_outer(getParam<unsigned int>("freeze_alpha_after_outer")),
-    _skip_pressure_velocity_writeback_from_outer(
-        getParam<unsigned int>("skip_pressure_velocity_writeback_from_outer")),
-    _use_vof_rho_phi_during_momentum_predictor(
-        getParam<bool>("use_vof_rho_phi_during_momentum_predictor"))
+    _startup_flux_corrections(getParam<unsigned int>("startup_flux_corrections"))
 {
   _startup_pressure_initialization =
       getParam<MooseEnum>("startup_pressure_initialization").operator std::string();
@@ -360,35 +155,6 @@ ReducedPressurePIMPLESolve::ReducedPressurePIMPLESolve(Executioner & ex)
   if (_volume_fraction_min_value > _volume_fraction_max_value)
     paramError("volume_fraction_max_value",
                "volume_fraction_max_value must be >= volume_fraction_min_value.");
-
-  if (_startup_pressure_cut_audit)
-  {
-    if (_startup_pressure_cut_audit_file_base.empty())
-      paramError("startup_pressure_cut_audit_file_base",
-                 "startup_pressure_cut_audit_file_base must be provided when "
-                 "startup_pressure_cut_audit=true.");
-
-    if (_startup_pressure_cut_audit_liquid_density <= 0.0)
-      paramError("startup_pressure_cut_audit_liquid_density",
-                 "startup_pressure_cut_audit_liquid_density must be positive when "
-                 "startup_pressure_cut_audit=true.");
-
-    if (_startup_pressure_cut_audit_gas_density <= 0.0)
-      paramError("startup_pressure_cut_audit_gas_density",
-                 "startup_pressure_cut_audit_gas_density must be positive when "
-                 "startup_pressure_cut_audit=true.");
-  }
-
-  if (_momentum_probe_audit)
-  {
-    if (_momentum_probe_audit_file_base.empty())
-      paramError("momentum_probe_audit_file_base",
-                 "momentum_probe_audit_file_base must be provided when momentum_probe_audit=true.");
-
-    if (_momentum_probe_points.empty())
-      paramError("momentum_probe_points",
-                 "At least one point must be provided when momentum_probe_audit=true.");
-  }
 
   if (_has_volume_fraction_systems)
   {
@@ -440,18 +206,6 @@ bool
 ReducedPressurePIMPLESolve::useEquilibriumStartupPressureInitialization() const
 {
   return _startup_pressure_initialization == "equilibrium-seed";
-}
-
-bool
-ReducedPressurePIMPLESolve::startupPressureCutAuditEnabled() const
-{
-  return _startup_pressure_cut_audit;
-}
-
-bool
-ReducedPressurePIMPLESolve::momentumProbeAuditEnabled() const
-{
-  return _momentum_probe_audit;
 }
 
 SharpInterfaceVOFMULESCorrector *
@@ -550,14 +304,6 @@ ReducedPressurePIMPLESolve::solve()
   {
     simple_iteration_counter++;
     _current_outer_iteration = simple_iteration_counter;
-    const bool stage_diagnostics = shouldPrintStageDiagnostics(simple_iteration_counter);
-    const bool probe_stage = momentumProbeAuditEnabled() &&
-                             _problem.time() >= _momentum_probe_audit_start_time;
-
-    if (stage_diagnostics)
-      printOuterIterationDiagnostics(simple_iteration_counter, "outer_entry");
-    else if (probe_stage)
-      writeMomentumProbeAudit(simple_iteration_counter, "outer_entry");
 
     if (_should_solve_momentum)
       // Keep the full nonlinear history on the previous outer-corrector state
@@ -588,52 +334,32 @@ ReducedPressurePIMPLESolve::solve()
     if (_has_volume_fraction_systems && _should_solve_volume_fractions &&
         (simple_iteration_counter == 1 || _volume_fraction_outer_corrections || sharpInterfaceRC()))
     {
-      const bool freeze_alpha =
-          _freeze_alpha_after_outer && simple_iteration_counter > _freeze_alpha_after_outer;
+      // Keep the true timestep-old alpha in solutionOld(), but advance the
+      // nonlinear-state stack once per outer iteration so we have a separate
+      // previous-outer iterate available, analogous to interFoam's prevIter().
+      advanceVolumeFractionOuterIterationHistory();
 
-      if (!freeze_alpha)
+      if (auto * sharp_rc = sharpInterfaceRC())
       {
-        // Keep the true timestep-old alpha in solutionOld(), but advance the
-        // nonlinear-state stack once per outer iteration so we have a separate
-        // previous-outer iterate available, analogous to interFoam's prevIter().
-        advanceVolumeFractionOuterIterationHistory();
-
-        if (auto * sharp_rc = sharpInterfaceRC())
-        {
-          sharp_rc->setUseVOFRhoPhi(false);
-          sharp_rc->clearOuterIterationConvectiveState();
-        }
-
-        _problem.execute(EXEC_NONLINEAR);
-        Moose::PetscSupport::petscSetOptions(_volume_fraction_petsc_options, solver_params);
-        const auto vf_residuals = solveVolumeFractionSystems(solver_params);
-
-        vof_rho_phi_ready = true;
-        if (auto * sharp_rc = sharpInterfaceRC())
-        {
-          sharp_rc->freezeOuterIterationConvectiveState();
-          sharp_rc->setUseVOFRhoPhi(vof_rho_phi_ready);
-        }
-
-        _problem.execute(EXEC_NONLINEAR);
-        for (const auto i : index_range(vf_residuals))
-          ns_residuals[volume_fraction_indices[i]] = vf_residuals[i];
+        sharp_rc->setUseVOFRhoPhi(false);
+        sharp_rc->clearOuterIterationConvectiveState();
       }
-      else
+
+      _problem.execute(EXEC_NONLINEAR);
+      Moose::PetscSupport::petscSetOptions(_volume_fraction_petsc_options, solver_params);
+      const auto vf_residuals = solveVolumeFractionSystems(solver_params);
+
+      vof_rho_phi_ready = true;
+      if (auto * sharp_rc = sharpInterfaceRC())
       {
-        for (const auto i : index_range(_volume_fraction_systems))
-          ns_residuals[volume_fraction_indices[i]] = std::make_pair(0u, 0.0);
-        if (stage_diagnostics)
-          _console << "Outer-loop handoff audit: outer_iter=" << simple_iteration_counter
-                   << " freezing alpha/rhoPhi refresh after outer iteration "
-                   << _freeze_alpha_after_outer << std::endl;
+        sharp_rc->freezeOuterIterationConvectiveState();
+        sharp_rc->setUseVOFRhoPhi(vof_rho_phi_ready);
       }
+
+      _problem.execute(EXEC_NONLINEAR);
+      for (const auto i : index_range(vf_residuals))
+        ns_residuals[volume_fraction_indices[i]] = vf_residuals[i];
     }
-
-    if (stage_diagnostics)
-      printOuterIterationDiagnostics(simple_iteration_counter, "after_alpha");
-    else if (probe_stage)
-      writeMomentumProbeAudit(simple_iteration_counter, "after_alpha");
 
     if (_should_solve_momentum)
       Moose::PetscSupport::petscSetOptions(_momentum_petsc_options, solver_params);
@@ -645,40 +371,15 @@ ReducedPressurePIMPLESolve::solve()
 
     if (_should_solve_momentum)
     {
-      const bool skip_momentum =
-          _skip_momentum_predictor_after_outer &&
-          simple_iteration_counter > _skip_momentum_predictor_after_outer;
-      if (!skip_momentum)
-      {
-        auto momentum_residual = solveMomentumPredictor();
-        for (const auto system_i : index_range(momentum_residual))
-          ns_residuals[momentum_indices[system_i]] = momentum_residual[system_i];
-      }
-      else
-      {
-        for (const auto system_i : index_range(_momentum_systems))
-          ns_residuals[momentum_indices[system_i]] = std::make_pair(0u, 0.0);
-        if (stage_diagnostics)
-          _console << "Outer-loop handoff audit: outer_iter=" << simple_iteration_counter
-                   << " skipping momentum predictor after outer iteration "
-                   << _skip_momentum_predictor_after_outer << std::endl;
-      }
+      auto momentum_residual = solveMomentumPredictor();
+      for (const auto system_i : index_range(momentum_residual))
+        ns_residuals[momentum_indices[system_i]] = momentum_residual[system_i];
     }
     else if (_should_solve_pressure && !_momentum_systems.empty() && _rc_uo)
       assembleMomentumPredictorOnly();
 
-    if (stage_diagnostics)
-      printOuterIterationDiagnostics(simple_iteration_counter, "after_predictor");
-    else if (probe_stage)
-      writeMomentumProbeAudit(simple_iteration_counter, "after_predictor");
-
     if (_should_solve_pressure)
       ns_residuals[pressure_index] = correctVelocity(true, true, solver_params);
-
-    if (_print_fields || stage_diagnostics)
-      printOuterIterationDiagnostics(simple_iteration_counter, "after_pressure");
-    else if (probe_stage)
-      writeMomentumProbeAudit(simple_iteration_counter, "after_pressure");
 
     if (_has_energy_system && _should_solve_energy)
     {
@@ -812,8 +513,7 @@ ReducedPressurePIMPLESolve::solveMomentumPredictor()
   auto * const sharp_rc = sharpInterfaceRC();
   const bool restore_vof_rho_phi_for_predictor =
       sharp_rc && _current_outer_iteration > 1 && sharp_rc->useVOFRhoPhi() &&
-      !sharp_rc->hasOuterIterationConvectiveState() &&
-      !_use_vof_rho_phi_during_momentum_predictor;
+      !sharp_rc->hasOuterIterationConvectiveState();
 
   // Once alpha transport has published and frozen an outer-iteration rhoPhi/phi
   // pair, keep the momentum predictor on that same convective branch for the
@@ -835,7 +535,7 @@ ReducedPressurePIMPLESolve::solveMomentumPredictor()
 bool
 ReducedPressurePIMPLESolve::auditMomentumPredictorRebuild() const
 {
-  return shouldPrintStageDiagnostics(_current_outer_iteration);
+  return false;
 }
 
 void
@@ -901,8 +601,7 @@ ReducedPressurePIMPLESolve::assembleMomentumPredictorOnly()
   auto * const sharp_rc = sharpInterfaceRC();
   const bool restore_vof_rho_phi_for_predictor =
       sharp_rc && _current_outer_iteration > 1 && sharp_rc->useVOFRhoPhi() &&
-      !sharp_rc->hasOuterIterationConvectiveState() &&
-      !_use_vof_rho_phi_during_momentum_predictor;
+      !sharp_rc->hasOuterIterationConvectiveState();
 
   // Mirror solveMomentumPredictor(): predictor assembly should stay on the
   // frozen outer-iteration convective state once alpha has published it.
@@ -1011,16 +710,10 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
   // corrections before the first outer iteration.
   if (!_momentum_systems.empty() && _rc_uo)
   {
-    if (startupPressureCutAuditEnabled())
-      writeStartupPressureCutAudit("startup_before_corrections");
-
     assembleMomentumPredictorOnly();
     _rc_uo->initFaceMassFlux();
     performStartupContinuityCorrections(solver_params);
     synchronizeSystemState(_pressure_system);
-
-    if (startupPressureCutAuditEnabled())
-      writeStartupPressureCutAudit("startup_after_corrections");
   }
   else
   {
@@ -1054,232 +747,9 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
   {
     (void)startup_it;
     (void)correctStartupContinuityOnce(true, true, solver_params);
-
-    if (startupPressureCutAuditEnabled())
-      writeStartupPressureCutAudit("startup_after_correction_" + std::to_string(startup_it + 1));
   }
 
   _problem.execute(EXEC_NONLINEAR);
-}
-
-void
-ReducedPressurePIMPLESolve::writeStartupPressureCutAudit(const std::string & label) const
-{
-  if (!startupPressureCutAuditEnabled())
-    return;
-
-  if (_problem.comm().size() > 1)
-    mooseWarning("startup_pressure_cut_audit currently writes only locally-owned cells. Run the "
-                 "audit in serial for a complete cut.");
-
-  const auto & pressure_solution = *(_pressure_system.system().current_local_solution);
-  const auto pressure_system_number = _pressure_system.number();
-
-  const LinearSystem * alpha_system =
-      _volume_fraction_systems.empty() ? nullptr : _volume_fraction_systems.front();
-  const NumericVector<Number> * alpha_solution =
-      alpha_system ? alpha_system->system().current_local_solution.get() : nullptr;
-  const unsigned int alpha_system_number = alpha_system ? alpha_system->number() : invalid_uint;
-
-  std::vector<StartupPressureCutAuditRow> rows;
-  rows.reserve(_problem.mesh().elemInfoVector().size());
-
-  const auto dim = _problem.mesh().dimension();
-  for (const auto & elem_info : _problem.mesh().elemInfoVector())
-  {
-    if (!elem_info)
-      continue;
-
-    const auto * const elem = elem_info->elem();
-    if (!elem || elem->processor_id() != _problem.processor_id())
-      continue;
-
-    if (!elementIntersectsHorizontalCut(*elem, dim, _startup_pressure_cut_audit_y, _startup_pressure_cut_audit_z))
-      continue;
-
-    const auto & dof_indices = elem_info->dofIndices();
-    if (pressure_system_number >= dof_indices.size() || dof_indices[pressure_system_number].empty())
-      continue;
-
-    const auto pressure_dof = dof_indices[pressure_system_number][0];
-    if (pressure_dof == DofObject::invalid_id)
-      continue;
-
-    StartupPressureCutAuditRow row;
-    row.elem_id = elem->id();
-    row.centroid = elem->vertex_average();
-    row.reduced_pressure = pressure_solution(pressure_dof);
-
-    if (alpha_solution && alpha_system_number < dof_indices.size() && !dof_indices[alpha_system_number].empty())
-    {
-      const auto alpha_dof = dof_indices[alpha_system_number][0];
-      if (alpha_dof != DofObject::invalid_id)
-        row.alpha = clampUnitInterval((*alpha_solution)(alpha_dof));
-    }
-
-    row.rho_mixture = row.alpha * _startup_pressure_cut_audit_liquid_density +
-                      (1.0 - row.alpha) * _startup_pressure_cut_audit_gas_density;
-    const Point offset = row.centroid - _startup_pressure_cut_audit_reference_pressure_point;
-    row.hydrostatic_shift = _startup_pressure_cut_audit_reference_pressure +
-                            row.rho_mixture *
-                                (_startup_pressure_cut_audit_gravity(0) * offset(0) +
-                                 _startup_pressure_cut_audit_gravity(1) * offset(1) +
-                                 _startup_pressure_cut_audit_gravity(2) * offset(2));
-    row.total_pressure = row.reduced_pressure + row.hydrostatic_shift;
-    rows.push_back(row);
-  }
-
-  std::sort(rows.begin(),
-            rows.end(),
-            [](const StartupPressureCutAuditRow & lhs, const StartupPressureCutAuditRow & rhs)
-            {
-              if (lhs.centroid(0) != rhs.centroid(0))
-                return lhs.centroid(0) < rhs.centroid(0);
-              if (lhs.centroid(1) != rhs.centroid(1))
-                return lhs.centroid(1) < rhs.centroid(1);
-              return lhs.elem_id < rhs.elem_id;
-            });
-
-  if (_problem.comm().rank() != 0)
-    return;
-
-  std::ofstream out(_startup_pressure_cut_audit_file_base + "_" + label + ".csv");
-  if (!out.is_open())
-    mooseError("Unable to open startup pressure-cut audit file base '",
-               _startup_pressure_cut_audit_file_base,
-               "' for stage '",
-               label,
-               "'.");
-
-  out << std::setprecision(17);
-  out << "elem_id,x,y,z,alpha,rho_mixture,reduced_pressure,hydrostatic_shift,total_pressure\n";
-  for (const auto & row : rows)
-    out << row.elem_id << ',' << row.centroid(0) << ',' << row.centroid(1) << ','
-        << row.centroid(2) << ',' << row.alpha << ',' << row.rho_mixture << ','
-        << row.reduced_pressure << ',' << row.hydrostatic_shift << ',' << row.total_pressure
-        << '\n';
-}
-
-void
-ReducedPressurePIMPLESolve::writeMomentumProbeAudit(const unsigned int simple_iteration_counter,
-                                                    const std::string & stage_label) const
-{
-  if (!momentumProbeAuditEnabled() || _problem.time() < _momentum_probe_audit_start_time)
-    return;
-
-  auto * const sharp_rc = sharpInterfaceRC();
-  if (!sharp_rc)
-    return;
-
-  if (_problem.comm().size() > 1 && !_momentum_probe_audit_parallel_warning_emitted)
-  {
-    mooseWarning("momentum_probe_audit currently selects probe cells from locally-owned elements. "
-                 "Run in serial for deterministic probe selection.");
-    _momentum_probe_audit_parallel_warning_emitted = true;
-  }
-
-  std::vector<MomentumProbeAuditPointSelection> selections(_momentum_probe_points.size());
-  for (const auto probe_i : index_range(_momentum_probe_points))
-    selections[probe_i].requested_point = _momentum_probe_points[probe_i];
-
-  for (const auto & elem_info : _problem.mesh().elemInfoVector())
-  {
-    if (!elem_info)
-      continue;
-
-    const auto * const elem = elem_info->elem();
-    if (!elem || elem->processor_id() != _problem.processor_id())
-      continue;
-
-    const Point centroid = elem->vertex_average();
-    for (const auto probe_i : index_range(_momentum_probe_points))
-    {
-      const Real distance = (centroid - _momentum_probe_points[probe_i]).norm();
-      if (distance < selections[probe_i].distance)
-      {
-        selections[probe_i].elem_info = elem_info;
-        selections[probe_i].distance = distance;
-      }
-    }
-  }
-
-  std::vector<const ElemInfo *> elem_infos;
-  elem_infos.reserve(selections.size());
-  for (const auto & selection : selections)
-    elem_infos.push_back(selection.elem_info);
-
-  std::vector<SharpInterfaceRhieChowMassFlux::MomentumProbeSample> samples;
-  sharp_rc->collectMomentumProbeSamples(elem_infos, samples);
-
-  const LinearSystem * alpha_system =
-      _volume_fraction_systems.empty() ? nullptr : _volume_fraction_systems.front();
-  const NumericVector<Number> * alpha_solution =
-      alpha_system ? alpha_system->system().current_local_solution.get() : nullptr;
-  const unsigned int alpha_system_number = alpha_system ? alpha_system->number() : invalid_uint;
-
-  const auto mode =
-      _momentum_probe_audit_header_written ? std::ios::out | std::ios::app : std::ios::out;
-  std::ofstream out(_momentum_probe_audit_file_base + ".csv", mode);
-  if (!out.is_open())
-    mooseError("Unable to open momentum probe audit file base '",
-               _momentum_probe_audit_file_base,
-               "'.");
-
-  out << std::setprecision(17);
-  if (!_momentum_probe_audit_header_written)
-  {
-    out << "time,timestep,outer_iteration,stage,probe_index,requested_x,requested_y,requested_z,"
-           "elem_id,centroid_x,centroid_y,centroid_z,distance,alpha,rho,pressure,"
-           "grad_p_x,grad_p_y,grad_p_z,pressure_force_x,pressure_force_y,pressure_force_z,"
-           "body_force_x,body_force_y,body_force_z,total_force_x,total_force_y,total_force_z,"
-           "hbya_raw_x,hbya_raw_y,hbya_raw_z,predictor_velocity_x,predictor_velocity_y,"
-           "predictor_velocity_z,pressure_delta_u_x,pressure_delta_u_y,pressure_delta_u_z,"
-           "writeback_velocity_x,writeback_velocity_y,writeback_velocity_z,current_velocity_x,"
-           "current_velocity_y,current_velocity_z\n";
-    _momentum_probe_audit_header_written = true;
-  }
-
-  for (const auto probe_i : index_range(samples))
-  {
-    const auto & selection = selections[probe_i];
-    const auto & sample = samples[probe_i];
-    Real alpha = 0.0;
-    if (sample.valid && alpha_solution && selection.elem_info &&
-        alpha_system_number < selection.elem_info->dofIndices().size())
-    {
-      const auto & alpha_dofs = selection.elem_info->dofIndices()[alpha_system_number];
-      if (!alpha_dofs.empty())
-        alpha = clampUnitInterval((*alpha_solution)(alpha_dofs[0]));
-    }
-
-    out << _problem.time() << ',' << _problem.timeStep() << ',' << simple_iteration_counter << ','
-        << stage_label << ',' << probe_i << ',' << selection.requested_point(0) << ','
-        << selection.requested_point(1) << ',' << selection.requested_point(2) << ',';
-
-    if (!sample.valid)
-    {
-      out << DofObject::invalid_id << ",0,0,0," << selection.distance
-          << ",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n";
-      continue;
-    }
-
-    out << sample.elem_id << ',' << sample.centroid(0) << ',' << sample.centroid(1) << ','
-        << sample.centroid(2) << ',' << selection.distance << ',' << alpha << ',' << sample.rho
-        << ',' << sample.pressure << ',' << sample.grad_p(0) << ',' << sample.grad_p(1) << ','
-        << sample.grad_p(2) << ',' << sample.pressure_force(0) << ','
-        << sample.pressure_force(1) << ',' << sample.pressure_force(2) << ','
-        << sample.body_force(0) << ',' << sample.body_force(1) << ','
-        << sample.body_force(2) << ',' << sample.total_force(0) << ','
-        << sample.total_force(1) << ',' << sample.total_force(2) << ',' << sample.hbya_raw(0)
-        << ',' << sample.hbya_raw(1) << ',' << sample.hbya_raw(2) << ','
-        << sample.predictor_velocity(0) << ',' << sample.predictor_velocity(1) << ','
-        << sample.predictor_velocity(2) << ',' << sample.pressure_coupled_delta_velocity(0) << ','
-        << sample.pressure_coupled_delta_velocity(1) << ','
-        << sample.pressure_coupled_delta_velocity(2) << ',' << sample.writeback_velocity(0) << ','
-        << sample.writeback_velocity(1) << ',' << sample.writeback_velocity(2) << ','
-        << sample.current_velocity(0) << ',' << sample.current_velocity(1) << ','
-        << sample.current_velocity(2) << '\n';
-  }
 }
 
 void
@@ -1310,12 +780,6 @@ ReducedPressurePIMPLESolve::reconstructPressureCoupledStateFromCurrentPressure(
     sharp_rc->applyAdditionalFaceMassFluxCorrection();
 
   _rc_uo->computeCellVelocity();
-
-  if (auto * sharp_rc = sharpInterfaceRC())
-  {
-    if (_print_fields || sharp_rc->suppressExplicitHydrostaticPressureFlux())
-      sharp_rc->auditRepresentativeHorizontalFaceReconstruction();
-  }
 
   _rc_uo->updateVelocityBoundaryState();
 }
@@ -1414,157 +878,6 @@ ReducedPressurePIMPLESolve::snapshotMomentumNonlinearSolutionStates() const
     }
 
   return snapshots;
-}
-
-void
-ReducedPressurePIMPLESolve::printOuterIterationDiagnostics(const unsigned int simple_iteration_counter,
-                                                           const std::string & stage_label) const
-{
-  _console << "Outer iteration " << simple_iteration_counter << " state audit (" << stage_label
-           << "): time=" << _problem.time() << " dt=" << _problem.dt()
-           << " timestep=" << _problem.timeStep() << std::endl;
-
-  for (const auto system_i : index_range(_momentum_systems))
-  {
-    const auto & current_solution = *(_momentum_systems[system_i]->system().current_local_solution);
-    _console << "  Momentum system " << _momentum_systems[system_i]->name()
-             << " |state0|=" << current_solution.l2_norm()
-             << " |state0-stateOld|="
-             << current_solution.l2_norm_diff(_momentum_systems[system_i]->solutionOld());
-
-    if (_momentum_systems[system_i]->hasSolutionState(1, Moose::SolutionIterationType::Nonlinear))
-      _console << " |state0-state1|="
-               << current_solution.l2_norm_diff(_momentum_systems[system_i]->solutionState(
-                      1, Moose::SolutionIterationType::Nonlinear));
-
-    if (_momentum_systems[system_i]->hasSolutionState(2, Moose::SolutionIterationType::Nonlinear))
-      _console << " |state1-state2|="
-               << _momentum_systems[system_i]
-                      ->solutionState(1, Moose::SolutionIterationType::Nonlinear)
-                      .l2_norm_diff(_momentum_systems[system_i]->solutionState(
-                          2, Moose::SolutionIterationType::Nonlinear));
-
-    if (auto * previous_solution = _momentum_systems[system_i]->solutionPreviousNewton())
-      _console << " |state0-statePrev|=" << current_solution.l2_norm_diff(*previous_solution);
-
-    _console << std::endl;
-  }
-
-  for (const auto system_i : index_range(_volume_fraction_systems))
-  {
-    const auto & current_solution =
-        *(_volume_fraction_systems[system_i]->system().current_local_solution);
-    _console << "  Volume-fraction system " << _volume_fraction_systems[system_i]->name()
-             << " |state0-stateOld|="
-             << current_solution.l2_norm_diff(_volume_fraction_systems[system_i]->solutionOld());
-
-    if (_volume_fraction_systems[system_i]->hasSolutionState(1, Moose::SolutionIterationType::Nonlinear))
-      _console << " |state0-state1|="
-               << current_solution.l2_norm_diff(_volume_fraction_systems[system_i]->solutionState(
-                      1, Moose::SolutionIterationType::Nonlinear));
-
-    if (_volume_fraction_systems[system_i]->hasSolutionState(2, Moose::SolutionIterationType::Nonlinear))
-      _console << " |state1-state2|="
-               << _volume_fraction_systems[system_i]
-                      ->solutionState(1, Moose::SolutionIterationType::Nonlinear)
-                      .l2_norm_diff(_volume_fraction_systems[system_i]->solutionState(
-                          2, Moose::SolutionIterationType::Nonlinear));
-
-    if (auto * previous_solution = _volume_fraction_systems[system_i]->solutionPreviousNewton())
-      _console << " |state0-statePrev|=" << current_solution.l2_norm_diff(*previous_solution);
-
-    _console << std::endl;
-  }
-
-  const auto & pressure_current_solution = *(_pressure_system.system().current_local_solution);
-  _console << "  Pressure system " << _pressure_system.name()
-           << " |state0|=" << pressure_current_solution.l2_norm()
-           << " |state0-stateOld|="
-           << pressure_current_solution.l2_norm_diff(_pressure_system.solutionOld());
-  if (auto * previous_pressure = _pressure_system.solutionPreviousNewton())
-    _console << " |state0-statePrev|="
-             << pressure_current_solution.l2_norm_diff(*previous_pressure);
-  _console << std::endl;
-
-  if (_rc_uo)
-  {
-    _console << "  Boundary mass-flux imbalance=" << _rc_uo->boundaryMassFluxImbalance()
-             << " max|boundary flux|=" << _rc_uo->maxBoundaryMassFluxMagnitude()
-             << " |phi|_2=" << _rc_uo->faceMassFluxL2Norm() << std::endl;
-
-    const auto flux_consistency = _rc_uo->faceMassFluxConsistencyAudit();
-    _console << "  Face-mass-flux consistency |phi-phi(U)|_2=" << flux_consistency.l2_norm
-             << " |internal|_2=" << flux_consistency.internal_l2_norm
-             << " |boundary|_2=" << flux_consistency.boundary_l2_norm
-             << " max|phi-phi(U)|=" << flux_consistency.max_abs_mismatch
-             << " max|internal|=" << flux_consistency.max_abs_internal_mismatch
-             << " max|boundary|=" << flux_consistency.max_abs_boundary_mismatch;
-
-    if (flux_consistency.has_worst_face)
-      _console << " worst_face_id=" << flux_consistency.worst_face_id
-               << " worst_face_boundary=" << flux_consistency.worst_face_is_boundary
-               << " centroid=" << flux_consistency.worst_face_centroid
-               << " normal=" << flux_consistency.worst_face_normal;
-
-    _console << std::endl;
-  }
-
-  for (const auto & system_name : _volume_fraction_system_names)
-    if (auto * corrector = sharpInterfaceVOFCorrector(system_name))
-    {
-      const auto liquid_volume_audit = corrector->liquidVolumeAudit();
-      _console << "  VOF liquid-volume audit " << corrector->systemName()
-               << ": liquid_volume=" << liquid_volume_audit.current
-               << " delta_timestep_old="
-               << liquid_volume_audit.current - liquid_volume_audit.timestep_old;
-      if (std::abs(liquid_volume_audit.timestep_old) > libMesh::TOLERANCE)
-        _console << " rel_delta_timestep_old="
-                 << (liquid_volume_audit.current - liquid_volume_audit.timestep_old) /
-                        liquid_volume_audit.timestep_old;
-      if (liquid_volume_audit.has_previous_outer)
-      {
-        _console << " delta_prev_outer="
-                 << liquid_volume_audit.current - liquid_volume_audit.previous_outer;
-        if (std::abs(liquid_volume_audit.previous_outer) > libMesh::TOLERANCE)
-          _console << " rel_delta_prev_outer="
-                   << (liquid_volume_audit.current - liquid_volume_audit.previous_outer) /
-                          liquid_volume_audit.previous_outer;
-      }
-      _console << std::endl;
-
-      const auto rho_phi_audit = corrector->rhoPhiConsistencyAudit();
-      _console << "  VOF rhoPhi audit " << corrector->systemName()
-               << ": |rhoPhi-rhoPhi(phi,alphaPhi)|_2=" << rho_phi_audit.l2_norm
-               << " max|mismatch|=" << rho_phi_audit.max_abs_mismatch;
-      if (rho_phi_audit.has_worst_face)
-        _console << " worst_face_id=" << rho_phi_audit.worst_face_id
-                 << " centroid=" << rho_phi_audit.worst_face_centroid
-                 << " stored_rho_phi=" << rho_phi_audit.stored_rho_phi
-                 << " reconstructed_rho_phi=" << rho_phi_audit.reconstructed_rho_phi
-                 << " volumetric_phi=" << rho_phi_audit.volumetric_phi
-                 << " limited_alpha_flux=" << rho_phi_audit.limited_alpha_flux
-                 << " gas_density=" << rho_phi_audit.gas_density
-                 << " liquid_density=" << rho_phi_audit.liquid_density;
-      _console << std::endl;
-    }
-
-  if (auto * sharp_rc = sharpInterfaceRC())
-  {
-    sharp_rc->printPressureCoupledVelocityCorrectionAudit(stage_label);
-    if (stage_label == "after_alpha" && sharp_rc->useFaceBasedPredictorBodyForce())
-      sharp_rc->auditRepresentativePredictorBodyForce();
-  }
-
-  writeMomentumProbeAudit(simple_iteration_counter, stage_label);
-}
-
-bool
-ReducedPressurePIMPLESolve::shouldPrintStageDiagnostics(
-    const unsigned int simple_iteration_counter) const
-{
-  return (_audit_outer_handoff_stages &&
-          simple_iteration_counter > _audit_outer_handoff_after_outer) ||
-         (_audit_stage_diagnostics && _problem.time() >= _audit_stage_diagnostics_start_time);
 }
 
 std::vector<std::pair<unsigned int, Real>>
@@ -1766,11 +1079,7 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
     _rc_uo->computeFaceMassFlux();
 
     if (sharp_rc)
-    {
       sharp_rc->applyAdditionalFaceMassFluxCorrection();
-      if (_print_fields || sharp_rc->suppressExplicitHydrostaticPressureFlux())
-        sharp_rc->auditRepresentativeHorizontalFaceReconstruction();
-    }
   }
 
   // Restore the user/equilibrium startup reduced-pressure field. Startup
@@ -1806,21 +1115,7 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
                                                 const bool recompute_face_mass_flux,
                                                 const SolverParams & solver_params)
 {
-  const bool audit_stage = shouldPrintStageDiagnostics(_current_outer_iteration);
-  const bool probe_stage =
-      momentumProbeAuditEnabled() && _problem.time() >= _momentum_probe_audit_start_time;
-  if (auto * sharp_rc = sharpInterfaceRC())
-    sharp_rc->clearPressureCoupledVelocityCorrectionAudit();
-
-  const bool skip_pressure_velocity_writeback =
-      _current_outer_iteration &&
-      _skip_pressure_velocity_writeback_from_outer &&
-      _current_outer_iteration >= _skip_pressure_velocity_writeback_from_outer;
-
   preparePressureCorrectorState(subtract_updated_pressure);
-
-  if (audit_stage)
-    _rc_uo->auditPressureBoundaryGradientState("after_boundary_gradient_update");
 
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
@@ -1833,58 +1128,20 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
 
   _pressure_system.computeGradients();
 
-  if (audit_stage)
-    printOuterIterationDiagnostics(_current_outer_iteration, "after_pressure_solve");
-  else if (probe_stage)
-    writeMomentumProbeAudit(_current_outer_iteration, "after_pressure_solve");
-
   if (recompute_face_mass_flux)
   {
     _rc_uo->computeFaceMassFlux();
 
     if (auto * sharp_rc = sharpInterfaceRC())
       sharp_rc->applyAdditionalFaceMassFluxCorrection();
-
-    if (audit_stage)
-      printOuterIterationDiagnostics(_current_outer_iteration, "after_face_mass_flux");
-    else if (probe_stage)
-      writeMomentumProbeAudit(_current_outer_iteration, "after_face_mass_flux");
   }
 
-  if (!skip_pressure_velocity_writeback)
-  {
-    if (auto * sharp_rc = sharpInterfaceRC())
-      sharp_rc->computeProvisionalCellVelocity();
-    else
-      _rc_uo->computeCellVelocity();
+  if (auto * sharp_rc = sharpInterfaceRC())
+    sharp_rc->computeProvisionalCellVelocity();
+  else
+    _rc_uo->computeCellVelocity();
 
-    if (audit_stage)
-      printOuterIterationDiagnostics(_current_outer_iteration, "after_pressure_velocity_writeback");
-    else if (probe_stage)
-      writeMomentumProbeAudit(_current_outer_iteration, "after_pressure_velocity_writeback");
-
-    if (auto * sharp_rc = sharpInterfaceRC())
-    {
-      if (audit_stage)
-        sharp_rc->auditRepresentativeHorizontalFaceReconstruction();
-      if (_print_fields || sharp_rc->suppressExplicitHydrostaticPressureFlux())
-        sharp_rc->auditRepresentativeHorizontalFaceReconstruction();
-    }
-
-    _rc_uo->updateVelocityBoundaryState();
-
-    if (audit_stage)
-      _rc_uo->auditPressureBoundaryGradientState("after_boundary_refresh");
-
-    if (audit_stage)
-      printOuterIterationDiagnostics(_current_outer_iteration, "after_boundary_refresh");
-    else if (probe_stage)
-      writeMomentumProbeAudit(_current_outer_iteration, "after_boundary_refresh");
-  }
-  else if (audit_stage)
-    _console << "Outer-loop handoff audit: outer_iter=" << _current_outer_iteration
-             << " skipping post-pEqn cell-velocity writeback from outer iteration "
-             << _skip_pressure_velocity_writeback_from_outer << std::endl;
+  _rc_uo->updateVelocityBoundaryState();
 
   // Mirror interFoam's pEqn.H ordering: use the exact pressure correction to
   // update phi/U, then under-relax pressure only for the next momentum
@@ -1895,9 +1152,6 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
   _pressure_system.computeGradients();
-
-  if (audit_stage)
-    _rc_uo->auditPressureBoundaryGradientState("after_pressure_relaxation");
 
   return residuals;
 }

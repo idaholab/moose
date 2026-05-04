@@ -107,14 +107,6 @@ WCNSLinearFVSharpInterfaceFlowPhysics::validParams()
       "Whether to reconstruct the reduced-pressure momentum-predictor explicit forcing from the "
       "sharp-interface face operators instead of the legacy cell-based pressure-gradient / "
       "momentum-source path.");
-  params.transferParam<bool>(SharpInterfaceRhieChowMassFlux::validParams(),
-                             "use_scalar_residual_writeback_correction");
-  params.transferParam<Real>(SharpInterfaceRhieChowMassFlux::validParams(),
-                             "scalar_residual_writeback_beta_multiplier");
-  params.transferParam<bool>(SharpInterfaceRhieChowMassFlux::validParams(),
-                             "use_global_writeback_projection");
-  params.transferParam<Real>(SharpInterfaceRhieChowMassFlux::validParams(),
-                             "global_writeback_projection_beta_multiplier");
   params.transferParam<MooseFunctorName>(SharpInterfaceRhieChowMassFlux::validParams(),
                                          "vof_alpha_phi_limited_functor");
   params.transferParam<MooseFunctorName>(SharpInterfaceRhieChowMassFlux::validParams(),
@@ -1259,14 +1251,6 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addRhieChowUserObjects()
   params.set<bool>("add_capillary_hydrostatic_flux") = _add_capillary_hydrostatic_flux;
   params.set<bool>("use_face_based_predictor_body_force") =
       _use_face_based_predictor_body_force;
-  params.set<bool>("use_scalar_residual_writeback_correction") =
-      getParam<bool>("use_scalar_residual_writeback_correction");
-  params.set<Real>("scalar_residual_writeback_beta_multiplier") =
-      getParam<Real>("scalar_residual_writeback_beta_multiplier");
-  params.set<bool>("use_global_writeback_projection") =
-      getParam<bool>("use_global_writeback_projection");
-  params.set<Real>("global_writeback_projection_beta_multiplier") =
-      getParam<Real>("global_writeback_projection_beta_multiplier");
   params.set<MooseFunctorName>("vof_alpha_phi_limited_functor") =
       getParam<MooseFunctorName>("vof_alpha_phi_limited_functor");
   params.set<MooseFunctorName>("liquid_density_functor") =
