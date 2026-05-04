@@ -176,9 +176,17 @@ System::setupDofs()
 void
 System::setupSparsity()
 {
-  auto pattern = _dof_map.get_sparsity_pattern();
+  auto * const pattern = _dof_map.get_sparsity_pattern();
+  bool have_pattern = pattern;
 
-  if (!pattern)
+  // Make sure to check whether the sparsity pattern graph returned by
+  // pattern->get_sparsity_pattern() is non-empty
+  getComm().verify(have_pattern);
+  if (!have_pattern)
+    return;
+  have_pattern = !pattern->get_sparsity_pattern().empty();
+  getComm().max(have_pattern);
+  if (!have_pattern)
     return;
 
   std::vector<PetscInt> col_idx;
