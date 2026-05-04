@@ -5,9 +5,7 @@ Licensed under the MIT License.
 
 # AGENTS.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
 ## 1. Think Before Coding
 
@@ -68,15 +66,6 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## 5. Simple changesets
-
-**When a task has many subtasks, solve subtasks one at a time.**
-
-When proposing changes:
-- Changesets should each completely add a feature or a test or fix a bug.
-- Distinct features/tests/bugfixes should be in separate changesets.
-- Separate test coverage should be added for each change.
 
 ---
 
