@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#32225'
+  design = 'syntax/Kokkos/index.md'
+  [fe_read_from_fv]
+    requirement = 'The system shall be able to execute quadrature point based Kokkos postprocessors on linear finite volume variables whose solution has been solved for via Kokkos linear finite volume kernels and boundary conditions.'
+    type = CSVDiff
+    input = aux-read-from-fv.i
+    csvdiff = aux-read-from-fv_csv.csv
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
