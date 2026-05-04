@@ -1118,6 +1118,31 @@ InputParameters::applyParameters(const InputParameters & common,
 }
 
 void
+InputParameters::applyCommonUserSetParameters(const InputParameters & common,
+                                              const std::vector<std::string> & exclude,
+                                              const bool allow_private)
+{
+  for (const auto & it : common)
+  {
+    const std::string & common_name = it.first;
+    if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
+      continue;
+    if (!common.isParamSetByUser(common_name))
+      continue;
+    applyParameter(common, common_name, allow_private);
+  }
+
+  for (const auto & var_name : common._coupled_vars)
+  {
+    if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
+      continue;
+    if (!common.isParamSetByUser(var_name))
+      continue;
+    applyCoupledVar(common, var_name);
+  }
+}
+
+void
 InputParameters::applySpecificParameters(const InputParameters & common,
                                          const std::vector<std::string> & include,
                                          bool allow_private)
