@@ -29,7 +29,9 @@ Before implementing:
 - If existing functionality can accomplish a subtask, use it, don't
   reimplement it.
 - If existing functionality is nearly capable of a subtask, prefer
-  short extensions of it over long rewrites of it.
+  short extensions or bug fixes of it over long rewrites of it.
+- Don't be afraid to cross into submodules for feature additions or bug
+  fixes, especially if it aids in the 'Simplicity First' principle.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
