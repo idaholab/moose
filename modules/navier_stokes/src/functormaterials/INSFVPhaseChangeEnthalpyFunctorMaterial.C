@@ -130,275 +130,515 @@ INSFVPhaseChangeEnthalpyFunctorMaterial::INSFVPhaseChangeEnthalpyFunctorMaterial
   // h(T): specific enthalpy from the provided temperature functor.
   // Reference: h(T_solidus) = 0.
   // ------------------------------------------------------------
-  addFunctorProperty<Real>(
-      h_from_p_T_name,
-      [this](const auto & r, const auto & state) -> Real
-      {
-        const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
+//   addFunctorProperty<Real>(
+//       h_from_p_T_name,
+//       [this](const auto & r, const auto & state) -> Real
+//       {
+//         const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
 
-        const Real T_sol = _T_solidus(r, state);
-        const Real T_liq = _T_liquidus(r, state);
-        const Real L = _L(r, state);
-        const Real T = _temperature_in(r, state);
+//         const Real T_sol = _T_solidus(r, state);
+//         const Real T_liq = _T_liquidus(r, state);
+//         const Real L = _L(r, state);
+//         const Real T = _temperature_in(r, state);
 
-        const Real dT_pc = T_liq - T_sol;
+//         const Real dT_pc = T_liq - T_sol;
 
-        // Degenerate mushy interval: sharp jump at T_solidus
-        if (dT_pc <= 0.0)
-        {
-          if (T < T_sol)
-          {
-            if (_integrate_cp_over_T)
-              return PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
-                  *_cp_solid_T_function, time, T_sol, T, _cp_integration_subintervals);
-            else
-              return _cp_s(r, state) * (T - T_sol);
-          }
-          else
-          {
-            if (_integrate_cp_over_T)
-              return L + PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
-                             *_cp_liquid_T_function, time, T_sol, T, _cp_integration_subintervals);
-            else
-              return L + _cp_l(r, state) * (T - T_sol);
-          }
-        }
+//         // Degenerate mushy interval: sharp jump at T_solidus
+//         if (dT_pc <= 0.0)
+//         {
+//           if (T < T_sol)
+//           {
+//             if (_integrate_cp_over_T)
+//               return PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
+//                   *_cp_solid_T_function, time, T_sol, T, _cp_integration_subintervals);
+//             else
+//               return _cp_s(r, state) * (T - T_sol);
+//           }
+//           else
+//           {
+//             if (_integrate_cp_over_T)
+//               return L + PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
+//                              *_cp_liquid_T_function, time, T_sol, T, _cp_integration_subintervals);
+//             else
+//               return L + _cp_l(r, state) * (T - T_sol);
+//           }
+//         }
 
-        // Non-degenerate mushy interval
-        if (T <= T_sol)
-        {
-          if (_integrate_cp_over_T)
-            return PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
-                *_cp_solid_T_function, time, T_sol, T, _cp_integration_subintervals);
-          else
-            return _cp_s(r, state) * (T - T_sol);
-        }
-        else if (T >= T_liq)
-        {
-          if (_integrate_cp_over_T)
-            return L + PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
-                           *_cp_liquid_T_function, time, T_liq, T, _cp_integration_subintervals);
-          else
-            return L + _cp_l(r, state) * (T - T_liq);
-        }
-        else
-        {
-          // Mushy: latent only, linear liquid fraction
-          return (L > 0.0) ? L * (T - T_sol) / dT_pc : 0.0;
-        }
-      });
+//         // Non-degenerate mushy interval
+//         if (T <= T_sol)
+//         {
+//           if (_integrate_cp_over_T)
+//             return PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
+//                 *_cp_solid_T_function, time, T_sol, T, _cp_integration_subintervals);
+//           else
+//             return _cp_s(r, state) * (T - T_sol);
+//         }
+//         else if (T >= T_liq)
+//         {
+//           if (_integrate_cp_over_T)
+//             return L + PhaseChangeEnthalpyUtils::integrateTemperatureFunctionSimpson(
+//                            *_cp_liquid_T_function, time, T_liq, T, _cp_integration_subintervals);
+//           else
+//             return L + _cp_l(r, state) * (T - T_liq);
+//         }
+//         else
+//         {
+//           // Mushy: latent only, linear liquid fraction
+//           return (L > 0.0) ? L * (T - T_sol) / dT_pc : 0.0;
+//         }
+//       });
 
-  // ------------------------------------------------------------
-  // T(h): temperature from the provided enthalpy functor.
-  // ------------------------------------------------------------
-  const auto T_from_h_eval = [this](const auto & r, const auto & state) -> Real
+//   // ------------------------------------------------------------
+//   // T(h): temperature from the provided enthalpy functor.
+//   // ------------------------------------------------------------
+//   const auto T_from_h_eval = [this](const auto & r, const auto & state) -> Real
+//   {
+//     const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
+
+//     const Real T_sol = _T_solidus(r, state);
+//     const Real T_liq = _T_liquidus(r, state);
+//     const Real L = _L(r, state);
+//     const Real h = _enthalpy_in(r, state);
+
+//     const Real dT_pc = T_liq - T_sol;
+
+//     // Degenerate mushy interval: sharp jump at T_solidus
+//     if (dT_pc <= 0.0)
+//     {
+//       if (h < 0.0)
+//       {
+//         if (_integrate_cp_over_T)
+//           return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
+//               *_cp_solid_T_function,
+//               time,
+//               T_sol,
+//               h,
+//               _cp_integration_subintervals,
+//               _cp_inversion_max_its,
+//               _cp_inversion_rel_tol,
+//               _cp_inversion_abs_tol);
+//         else
+//         {
+//           const Real cp = _cp_s(r, state);
+//           return (cp != 0.0) ? (T_sol + h / cp) : T_sol;
+//         }
+//       }
+//       else if (h > L)
+//       {
+//         if (_integrate_cp_over_T)
+//           return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
+//               *_cp_liquid_T_function,
+//               time,
+//               T_sol,
+//               h - L,
+//               _cp_integration_subintervals,
+//               _cp_inversion_max_its,
+//               _cp_inversion_rel_tol,
+//               _cp_inversion_abs_tol);
+//         else
+//         {
+//           const Real cp = _cp_l(r, state);
+//           return (cp != 0.0) ? (T_sol + (h - L) / cp) : T_sol;
+//         }
+//       }
+//       else
+//         // Any h in [0, L] maps to T = T_solidus for a sharp interface
+//         return T_sol;
+//     }
+
+//     // Non-degenerate mushy interval
+//     if (h <= 0.0)
+//     {
+//       if (_integrate_cp_over_T)
+//         return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
+//             *_cp_solid_T_function,
+//             time,
+//             T_sol,
+//             h,
+//             _cp_integration_subintervals,
+//             _cp_inversion_max_its,
+//             _cp_inversion_rel_tol,
+//             _cp_inversion_abs_tol);
+//       else
+//       {
+//         const Real cp = _cp_s(r, state);
+//         return (cp != 0.0) ? (T_sol + h / cp) : T_sol;
+//       }
+//     }
+//     else if (h >= L)
+//     {
+//       if (_integrate_cp_over_T)
+//         return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
+//             *_cp_liquid_T_function,
+//             time,
+//             T_liq,
+//             h - L,
+//             _cp_integration_subintervals,
+//             _cp_inversion_max_its,
+//             _cp_inversion_rel_tol,
+//             _cp_inversion_abs_tol);
+//       else
+//       {
+//         const Real cp = _cp_l(r, state);
+//         return (cp != 0.0) ? (T_liq + (h - L) / cp) : T_liq;
+//       }
+//     }
+//     else
+//     {
+//       // Mushy: invert h = L * (T - T_sol) / (T_liq - T_sol)
+//       return (L > 0.0) ? (T_sol + dT_pc * (h / L)) : T_sol;
+//     }
+//   };
+
+//   addFunctorProperty<Real>(T_from_p_h_name, T_from_h_eval);
+
+//   // Provide an explicit temperature functor (alias of T_from_p_h)
+//   addFunctorProperty<Real>(temperature_name, T_from_h_eval);
+
+//   // ------------------------------------------------------------
+//   // Liquid fraction: f_l = clamp(h/L, 0, 1)
+//   // ------------------------------------------------------------
+//   addFunctorProperty<Real>(
+//       liquid_fraction_name,
+//       [this](const auto & r, const auto & state) -> Real
+//       {
+//         const Real L = _L(r, state);
+//         if (L <= 0.0)
+//           return 0.0;
+
+//         const Real h = _enthalpy_in(r, state);
+//         if (h <= 0.0)
+//           return 0.0;
+//         if (h >= L)
+//           return 1.0;
+//         return h / L;
+//       });
+
+//   // ------------------------------------------------------------
+//   // dT/dh: used to rewrite k*grad(T) as (k*dTdh)*grad(h)
+//   // ------------------------------------------------------------
+//   addFunctorProperty<Real>(
+//       dTdh_name,
+//       [this, T_from_h_eval](const auto & r, const auto & state) -> Real
+//       {
+//         const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
+
+//         const Real T_sol = _T_solidus(r, state);
+//         const Real T_liq = _T_liquidus(r, state);
+//         const Real L = _L(r, state);
+//         const Real h = _enthalpy_in(r, state);
+
+//         const Real dT_pc = T_liq - T_sol;
+
+//         // Degenerate mushy interval: sharp interface
+//         if (dT_pc <= 0.0)
+//         {
+//           if (h < 0.0)
+//           {
+//             if (_integrate_cp_over_T)
+//             {
+//               const Real T = T_from_h_eval(r, state);
+//               const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
+//                   *_cp_solid_T_function, time, T);
+//               return (cp > 0.0) ? 1.0 / cp : 0.0;
+//             }
+//             else
+//             {
+//               const Real cp = _cp_s(r, state);
+//               return (cp != 0.0) ? 1.0 / cp : 0.0;
+//             }
+//           }
+//           else if (h > L)
+//           {
+//             if (_integrate_cp_over_T)
+//             {
+//               const Real T = T_from_h_eval(r, state);
+//               const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
+//                   *_cp_liquid_T_function, time, T);
+//               return (cp > 0.0) ? 1.0 / cp : 0.0;
+//             }
+//             else
+//             {
+//               const Real cp = _cp_l(r, state);
+//               return (cp != 0.0) ? 1.0 / cp : 0.0;
+//             }
+//           }
+//           else
+//             return 0.0;
+//         }
+
+//         // Non-degenerate mushy interval
+//         if (h <= 0.0)
+//         {
+//           if (_integrate_cp_over_T)
+//           {
+//             const Real T = T_from_h_eval(r, state);
+//             const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
+//                 *_cp_solid_T_function, time, T);
+//             return (cp > 0.0) ? 1.0 / cp : 0.0;
+//           }
+//           else
+//           {
+//             const Real cp = _cp_s(r, state);
+//             return (cp != 0.0) ? 1.0 / cp : 0.0;
+//           }
+//         }
+//         else if (h >= L)
+//         {
+//           if (_integrate_cp_over_T)
+//           {
+//             const Real T = T_from_h_eval(r, state);
+//             const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
+//                 *_cp_liquid_T_function, time, T);
+//             return (cp > 0.0) ? 1.0 / cp : 0.0;
+//           }
+//           else
+//           {
+//             const Real cp = _cp_l(r, state);
+//             return (cp != 0.0) ? 1.0 / cp : 0.0;
+//           }
+//         }
+//         else
+//           return (L > 0.0) ? dT_pc / L : 0.0;
+//       });
+// }
+
+const auto clamp01 = [](const Real x) -> Real
+{
+  return std::max(0.0, std::min(1.0, x));
+};
+
+const auto smoothstep01 = [clamp01](const Real x) -> Real
+{
+  const Real xi = clamp01(x);
+  return xi * xi * (3.0 - 2.0 * xi); // 3 xi^2 - 2 xi^3
+};
+
+const auto dsmoothstep01 = [clamp01](const Real x) -> Real
+{
+  const Real xi = clamp01(x);
+  return 6.0 * xi * (1.0 - xi); // d/dxi of smoothstep
+};
+
+// ------------------------------------------------------------
+// H(T): total enthalpy from temperature
+//
+// Reference: H(T_sol) = 0
+//
+// In the mushy interval:
+//   xi      = (T - T_sol)/dT_pc
+//   f(xi)   = 3 xi^2 - 2 xi^3
+//   cp_mix  = (1 - f) cp_s + f cp_l
+//   H(T)    = integral(cp_mix dT) + L f
+//
+// For constant cp_s and cp_l, this becomes
+//   H(T) = cp_s dT_pc xi
+//        + (cp_l - cp_s) dT_pc (xi^3 - 0.5 xi^4)
+//        + L (3 xi^2 - 2 xi^3)
+// ------------------------------------------------------------
+const auto h_from_T_eval = [this, smoothstep01](const auto & r,
+                                                const auto & state,
+                                                const Real T) -> Real
+{
+  const Real T_sol = _T_solidus(r, state);
+  const Real T_liq = _T_liquidus(r, state);
+  const Real L = _L(r, state);
+
+  const Real cp_s = _cp_s(r, state);
+  const Real cp_l = _cp_l(r, state);
+
+  const Real dT_pc = T_liq - T_sol;
+
+  // Degenerate mushy interval: sharp jump at T_solidus
+  if (dT_pc <= 0.0)
   {
-    const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
-
-    const Real T_sol = _T_solidus(r, state);
-    const Real T_liq = _T_liquidus(r, state);
-    const Real L = _L(r, state);
-    const Real h = _enthalpy_in(r, state);
-
-    const Real dT_pc = T_liq - T_sol;
-
-    // Degenerate mushy interval: sharp jump at T_solidus
-    if (dT_pc <= 0.0)
-    {
-      if (h < 0.0)
-      {
-        if (_integrate_cp_over_T)
-          return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
-              *_cp_solid_T_function,
-              time,
-              T_sol,
-              h,
-              _cp_integration_subintervals,
-              _cp_inversion_max_its,
-              _cp_inversion_rel_tol,
-              _cp_inversion_abs_tol);
-        else
-        {
-          const Real cp = _cp_s(r, state);
-          return (cp != 0.0) ? (T_sol + h / cp) : T_sol;
-        }
-      }
-      else if (h > L)
-      {
-        if (_integrate_cp_over_T)
-          return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
-              *_cp_liquid_T_function,
-              time,
-              T_sol,
-              h - L,
-              _cp_integration_subintervals,
-              _cp_inversion_max_its,
-              _cp_inversion_rel_tol,
-              _cp_inversion_abs_tol);
-        else
-        {
-          const Real cp = _cp_l(r, state);
-          return (cp != 0.0) ? (T_sol + (h - L) / cp) : T_sol;
-        }
-      }
-      else
-        // Any h in [0, L] maps to T = T_solidus for a sharp interface
-        return T_sol;
-    }
-
-    // Non-degenerate mushy interval
-    if (h <= 0.0)
-    {
-      if (_integrate_cp_over_T)
-        return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
-            *_cp_solid_T_function,
-            time,
-            T_sol,
-            h,
-            _cp_integration_subintervals,
-            _cp_inversion_max_its,
-            _cp_inversion_rel_tol,
-            _cp_inversion_abs_tol);
-      else
-      {
-        const Real cp = _cp_s(r, state);
-        return (cp != 0.0) ? (T_sol + h / cp) : T_sol;
-      }
-    }
-    else if (h >= L)
-    {
-      if (_integrate_cp_over_T)
-        return PhaseChangeEnthalpyUtils::invertIntegratedCpBisection(
-            *_cp_liquid_T_function,
-            time,
-            T_liq,
-            h - L,
-            _cp_integration_subintervals,
-            _cp_inversion_max_its,
-            _cp_inversion_rel_tol,
-            _cp_inversion_abs_tol);
-      else
-      {
-        const Real cp = _cp_l(r, state);
-        return (cp != 0.0) ? (T_liq + (h - L) / cp) : T_liq;
-      }
-    }
+    if (T < T_sol)
+      return cp_s * (T - T_sol);
     else
+      return L + cp_l * (T - T_sol);
+  }
+
+  // NOTE:
+  // Even with smoothing, H(T_liq) is still:
+  //   h_liq = 0.5 * (cp_s + cp_l) * dT_pc + L
+  // because average(smoothstep) on [0,1] is 1/2.
+  const Real h_liq = 0.5 * (cp_s + cp_l) * dT_pc + L;
+
+  if (T <= T_sol)
+    return cp_s * (T - T_sol);
+  else if (T >= T_liq)
+    return h_liq + cp_l * (T - T_liq);
+  else
+  {
+    const Real xi = (T - T_sol) / dT_pc;
+    const Real xi2 = xi * xi;
+    const Real xi3 = xi2 * xi;
+    const Real xi4 = xi2 * xi2;
+
+    const Real dcp = cp_l - cp_s;
+    const Real f = smoothstep01(xi);
+
+    return cp_s * dT_pc * xi
+         + dcp * dT_pc * (xi3 - 0.5 * xi4)
+         + L * f;
+  }
+};
+
+addFunctorProperty<Real>(
+    h_from_p_T_name,
+    [this, h_from_T_eval](const auto & r, const auto & state) -> Real
     {
-      // Mushy: invert h = L * (T - T_sol) / (T_liq - T_sol)
-      return (L > 0.0) ? (T_sol + dT_pc * (h / L)) : T_sol;
+      const Real T = _temperature_in(r, state);
+      return h_from_T_eval(r, state, T);
+    });
+
+// ------------------------------------------------------------
+// T(H): temperature from total enthalpy
+//
+// NOTE:
+// With smoothing, the mushy H(T) is no longer quadratic.
+// So the old closed-form inversion is not valid.
+// We invert in the mushy interval with bisection.
+// ------------------------------------------------------------
+const auto T_from_h_eval = [this, h_from_T_eval](const auto & r, const auto & state) -> Real
+{
+  const Real T_sol = _T_solidus(r, state);
+  const Real T_liq = _T_liquidus(r, state);
+  const Real L = _L(r, state);
+  const Real h = _enthalpy_in(r, state);
+
+  const Real cp_s = _cp_s(r, state);
+  const Real cp_l = _cp_l(r, state);
+
+  const Real dT_pc = T_liq - T_sol;
+
+  // Degenerate mushy interval: sharp jump at T_solidus
+  if (dT_pc <= 0.0)
+  {
+    if (h < 0.0)
+      return (cp_s != 0.0) ? (T_sol + h / cp_s) : T_sol;
+    else if (h > L)
+      return (cp_l != 0.0) ? (T_sol + (h - L) / cp_l) : T_sol;
+    else
+      return T_sol;
+  }
+
+  const Real h_liq = 0.5 * (cp_s + cp_l) * dT_pc + L;
+
+  if (h <= 0.0)
+    return (cp_s != 0.0) ? (T_sol + h / cp_s) : T_sol;
+  else if (h >= h_liq)
+    return (cp_l != 0.0) ? (T_liq + (h - h_liq) / cp_l) : T_liq;
+  else
+  {
+    // Mushy interval inversion by bisection on [T_sol, T_liq]
+    const Real tol = std::max(_cp_inversion_abs_tol,
+                              _cp_inversion_rel_tol * std::max(std::abs(h), std::abs(h_liq)));
+
+    Real T_low = T_sol;
+    Real T_high = T_liq;
+
+    for (unsigned int it = 0; it < _cp_inversion_max_its; ++it)
+    {
+      const Real T_mid = 0.5 * (T_low + T_high);
+      const Real h_mid = h_from_T_eval(r, state, T_mid);
+
+      if (std::abs(h_mid - h) <= tol)
+        return T_mid;
+
+      if (h_mid < h)
+        T_low = T_mid;
+      else
+        T_high = T_mid;
     }
-  };
 
-  addFunctorProperty<Real>(T_from_p_h_name, T_from_h_eval);
+    return 0.5 * (T_low + T_high);
+  }
+};
 
-  // Provide an explicit temperature functor (alias of T_from_p_h)
-  addFunctorProperty<Real>(temperature_name, T_from_h_eval);
+addFunctorProperty<Real>(T_from_p_h_name, T_from_h_eval);
+addFunctorProperty<Real>(temperature_name, T_from_h_eval);
 
-  // ------------------------------------------------------------
-  // Liquid fraction: f_l = clamp(h/L, 0, 1)
-  // ------------------------------------------------------------
-  addFunctorProperty<Real>(
-      liquid_fraction_name,
-      [this](const auto & r, const auto & state) -> Real
+// ------------------------------------------------------------
+// Liquid fraction
+//
+// NOTE:
+// For non-degenerate phase change, this is now the smoothed f(T),
+// not the old linear xi and not h/L.
+// ------------------------------------------------------------
+addFunctorProperty<Real>(
+    liquid_fraction_name,
+    [this, T_from_h_eval, clamp01, smoothstep01](const auto & r, const auto & state) -> Real
+    {
+      const Real T_sol = _T_solidus(r, state);
+      const Real T_liq = _T_liquidus(r, state);
+      const Real L = _L(r, state);
+      const Real h = _enthalpy_in(r, state);
+
+      if (L <= 0.0)
+        return 0.0;
+
+      const Real dT_pc = T_liq - T_sol;
+
+      // Sharp interface: keep old convention
+      if (dT_pc <= 0.0)
+        return clamp01(h / L);
+
+      const Real T = T_from_h_eval(r, state);
+      const Real xi = (T - T_sol) / dT_pc;
+      return smoothstep01(xi);
+    });
+
+// ------------------------------------------------------------
+// dT/dH: used to rewrite k*grad(T) as (k*dTdh)*grad(H)
+//
+// NOTE:
+// In mushy region:
+//   cp_app = cp_mix + L * df/dT
+//   cp_mix = (1 - f) cp_s + f cp_l
+//   df/dT  = (df/dxi) / dT_pc
+// ------------------------------------------------------------
+addFunctorProperty<Real>(
+    dTdh_name,
+    [this, T_from_h_eval, smoothstep01, dsmoothstep01](const auto & r, const auto & state) -> Real
+    {
+      const Real T_sol = _T_solidus(r, state);
+      const Real T_liq = _T_liquidus(r, state);
+      const Real L = _L(r, state);
+      const Real h = _enthalpy_in(r, state);
+
+      const Real cp_s = _cp_s(r, state);
+      const Real cp_l = _cp_l(r, state);
+
+      const Real dT_pc = T_liq - T_sol;
+
+      // Degenerate mushy interval: sharp interface
+      if (dT_pc <= 0.0)
       {
-        const Real L = _L(r, state);
-        if (L <= 0.0)
-          return 0.0;
-
-        const Real h = _enthalpy_in(r, state);
-        if (h <= 0.0)
-          return 0.0;
-        if (h >= L)
-          return 1.0;
-        return h / L;
-      });
-
-  // ------------------------------------------------------------
-  // dT/dh: used to rewrite k*grad(T) as (k*dTdh)*grad(h)
-  // ------------------------------------------------------------
-  addFunctorProperty<Real>(
-      dTdh_name,
-      [this, T_from_h_eval](const auto & r, const auto & state) -> Real
-      {
-        const Real time = PhaseChangeEnthalpyUtils::timeFromStateArg(state);
-
-        const Real T_sol = _T_solidus(r, state);
-        const Real T_liq = _T_liquidus(r, state);
-        const Real L = _L(r, state);
-        const Real h = _enthalpy_in(r, state);
-
-        const Real dT_pc = T_liq - T_sol;
-
-        // Degenerate mushy interval: sharp interface
-        if (dT_pc <= 0.0)
-        {
-          if (h < 0.0)
-          {
-            if (_integrate_cp_over_T)
-            {
-              const Real T = T_from_h_eval(r, state);
-              const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
-                  *_cp_solid_T_function, time, T);
-              return (cp > 0.0) ? 1.0 / cp : 0.0;
-            }
-            else
-            {
-              const Real cp = _cp_s(r, state);
-              return (cp != 0.0) ? 1.0 / cp : 0.0;
-            }
-          }
-          else if (h > L)
-          {
-            if (_integrate_cp_over_T)
-            {
-              const Real T = T_from_h_eval(r, state);
-              const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
-                  *_cp_liquid_T_function, time, T);
-              return (cp > 0.0) ? 1.0 / cp : 0.0;
-            }
-            else
-            {
-              const Real cp = _cp_l(r, state);
-              return (cp != 0.0) ? 1.0 / cp : 0.0;
-            }
-          }
-          else
-            return 0.0;
-        }
-
-        // Non-degenerate mushy interval
-        if (h <= 0.0)
-        {
-          if (_integrate_cp_over_T)
-          {
-            const Real T = T_from_h_eval(r, state);
-            const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
-                *_cp_solid_T_function, time, T);
-            return (cp > 0.0) ? 1.0 / cp : 0.0;
-          }
-          else
-          {
-            const Real cp = _cp_s(r, state);
-            return (cp != 0.0) ? 1.0 / cp : 0.0;
-          }
-        }
-        else if (h >= L)
-        {
-          if (_integrate_cp_over_T)
-          {
-            const Real T = T_from_h_eval(r, state);
-            const Real cp = PhaseChangeEnthalpyUtils::evalTemperatureFunction(
-                *_cp_liquid_T_function, time, T);
-            return (cp > 0.0) ? 1.0 / cp : 0.0;
-          }
-          else
-          {
-            const Real cp = _cp_l(r, state);
-            return (cp != 0.0) ? 1.0 / cp : 0.0;
-          }
-        }
+        if (h < 0.0)
+          return (cp_s > 0.0) ? 1.0 / cp_s : 0.0;
+        else if (h > L)
+          return (cp_l > 0.0) ? 1.0 / cp_l : 0.0;
         else
-          return (L > 0.0) ? dT_pc / L : 0.0;
-      });
-}
+          return 0.0;
+      }
+
+      const Real T = T_from_h_eval(r, state);
+
+      if (T <= T_sol)
+        return (cp_s > 0.0) ? 1.0 / cp_s : 0.0;
+      else if (T >= T_liq)
+        return (cp_l > 0.0) ? 1.0 / cp_l : 0.0;
+      else
+      {
+        const Real xi = (T - T_sol) / dT_pc;
+        const Real f = smoothstep01(xi);
+        const Real df_dT = dsmoothstep01(xi) / dT_pc;
+
+        const Real cp_mix = (1.0 - f) * cp_s + f * cp_l;
+        const Real cp_app = cp_mix + L * df_dT;
+
+        return (cp_app > 0.0) ? 1.0 / cp_app : 0.0;
+      }
+    });
+  }
