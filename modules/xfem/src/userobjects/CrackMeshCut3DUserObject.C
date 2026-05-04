@@ -1050,8 +1050,10 @@ CrackMeshCut3DUserObject::refineFront()
     // Refinement nodes on those segments may land outside the FEM mesh and be
     // incorrectly treated as inactive endpoints on the next step.
     bool has_inactive = (_inactive_boundary_pos.size() != 0);
-    unsigned int first_boundary_i = 1;                      // segment between pos 0 and 1
-    unsigned int last_boundary_i = _front[ifront].size() - 1; // segment between pos size-2 and size-1
+    // segment between pos 0 and 1
+    unsigned int first_boundary_i = 1;
+    // segment between pos size-2 and size-1
+    unsigned int last_boundary_i = _front[ifront].size() - 1;
 
     for (unsigned int i = i1; i >= 1; --i)
     {
