@@ -4,7 +4,7 @@
 
 Allows transfers of [MFEM variables](MFEMVariable.md) between MFEM-based applications via local
 evaluation of shape functions at target nodal projection points. The variables may be defined on
-different meshes and FESpaces of different orders, but must be real, share the same dimensionality,
+different meshes and FESpaces of different orders, but must share the same dimensionality,
 and both belong to an `MFEMProblem` in their respective applications.
 
 ## General Description

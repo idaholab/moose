@@ -493,10 +493,9 @@ public:
     {
       mooseAssert(obj, "Null object");
       auto cast_obj = dynamic_cast<T *>(obj);
-      if (obj)
-        mooseAssert(cast_obj,
-                    "Queried object " + obj->typeAndName() + " has incompatible c++ type with " +
-                        MooseUtils::prettyCppType<T>());
+      mooseAssert(cast_obj,
+                  "Queried object " + obj->typeAndName() + " has incompatible c++ type with " +
+                      MooseUtils::prettyCppType<T>());
       mooseAssert(std::find(results.begin(), results.end(), cast_obj) == results.end(),
                   "Duplicate object");
       if (show_all || obj->enabled())

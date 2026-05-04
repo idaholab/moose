@@ -10,15 +10,11 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
-#include "MFEMSubMeshTransfer.h"
 #include "MFEMExecutedObject.h"
-#include "Postprocessor.h"
-#include "VectorPostprocessor.h"
 #include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
 
@@ -56,7 +52,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 void
 MFEMProblem::initialSetup()
 {
-  FEProblemBase::initialSetup();
+  ExternalProblem::initialSetup();
 
   // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
   // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
@@ -72,7 +68,7 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
   setCurrentExecuteOnFlag(exec_type);
   executeMFEMObjects(exec_type);
 
-  FEProblemBase::execute(exec_type);
+  ExternalProblem::execute(exec_type);
 }
 
 void
@@ -260,7 +256,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   else
   {
     // Add MOOSE variable.
-    FEProblemBase::addVariable(var_type, var_name, parameters);
+    ExternalProblem::addVariable(var_type, var_name, parameters);
 
     // Add MFEM variable indirectly ("gridfunction").
     InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
@@ -407,29 +403,15 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
-  if (type == "LevelSetOlssonVortex")
-  {
-    return 2;
-  }
-  else if (type == "ParsedVectorFunction")
-  {
-    if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
-    {
-      return 3;
-    }
-    else if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y"))
-    {
-      return 2;
-    }
-    else
-    {
-      return 1;
-    }
-  }
-  else
-  {
+  if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
     return 3;
-  }
+  if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y") ||
+      type == "LevelSetOlssonVortex")
+    return 2;
+  if (parameters.isParamSetByUser("expression_x") || parameters.isParamSetByUser("value_x"))
+    return 1;
+
+  return 3;
 }
 
 const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",
@@ -539,7 +521,7 @@ MFEMProblem::addVectorPostprocessor(const std::string & type,
     addObject<MFEMExecutedObject>(type, name, parameters);
   }
   else
-    FEProblemBase::addVectorPostprocessor(type, name, parameters);
+    ExternalProblem::addVectorPostprocessor(type, name, parameters);
 }
 
 InputParameters
@@ -688,7 +670,7 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
   if (parameters.getBase() == "MFEMSubMeshTransfer")
     addObject<MFEMExecutedObject>(transfer_name, name, parameters);
   else
-    FEProblemBase::addTransfer(transfer_name, name, parameters);
+    ExternalProblem::addTransfer(transfer_name, name, parameters);
 }
 
 void

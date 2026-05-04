@@ -25,7 +25,7 @@ For transfers in the opposite direction, from libMesh-based applications to MFEM
 All MFEM to libMesh transfers executed from this class should be able to support:
 
 - transfers to lowest order scalar LAGRANGE and MONOMIAL variables
-- transfers to second order scalar LAGRANGE variables 
+- transfers to second order scalar LAGRANGE variables
 - transfers between variables belonging to dissimilar meshes
 - arbitrary number of parallel processes for both the source and target application
 - transfers between parent and child applications

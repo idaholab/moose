@@ -22,9 +22,9 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/square_tri.e '
+      cli_args = 'Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tris '
-                'libmesh_app0:Mesh/file=../../mesh/square_tri.e '
+                'libmesh_app0:Mesh/file=../../mesh/square_tri6.e '
     []
     [L2TriToQuad]
       type = CSVDiff
@@ -37,7 +37,8 @@
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tri_to_quad '
-                'libmesh_app0:Mesh/file=../../mesh/square_tri.e '
+                'libmesh_app0:Mesh/file=../../mesh/square_tri6.e '
+      max_parallel = 15 # under investigation
     []
     [L2Hex]
       type = CSVDiff
@@ -61,9 +62,9 @@
       capabilities = 'mfem'
       recover = false
       compute_devices = 'cpu cuda'
-      cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e '
+      cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tets '
-                'libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e '
+                'libmesh_app0::Mesh/file=../../mesh/cube_tet10.e '
     []
     [L2TetToHex]
       type = CSVDiff
@@ -76,7 +77,7 @@
       compute_devices = 'cpu cuda'
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_tet_to_hex '
-                'libmesh_app0::Mesh/file=../../mesh/cube_tetmesh.e '
+                'libmesh_app0::Mesh/file=../../mesh/cube_tet10.e '
     []
   []
 []

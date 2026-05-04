@@ -73,8 +73,8 @@
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
-        cli_args = 'Mesh/file=../../mesh/cube_tetmesh.e ' 
-                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+        cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
+                  'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
       []
       [TetToHex]      
@@ -86,8 +86,8 @@
         capabilities = 'mfem'
         recover = false
         compute_devices = 'cpu cuda'
-        cli_args = 'Mesh/file=../../mesh/cube.e ' 
-                  'mfem_app0:Mesh/file=../../mesh/cube_tetmesh.e ' 
+        cli_args = 'Mesh/file=../../mesh/cube.e '
+                  'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
       []      
     []
