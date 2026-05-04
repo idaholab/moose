@@ -1206,8 +1206,7 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
 void
 InputParameters::applyParameter(const InputParameters & common,
                                 const std::string & common_name,
-                                bool allow_private,
-                                bool override_default)
+                                bool allow_private)
 {
   // Disable the display of deprecated message when applying common parameters, this avoids a dump
   // of messages
@@ -1224,7 +1223,7 @@ InputParameters::applyParameter(const InputParameters & common,
   // Extract the properties from the common parameter
   const bool common_exist = common._values.find(common_name) != common._values.end();
   const bool common_priv = allow_private ? false : common.isPrivate(common_name);
-  const bool common_valid = common.isParamValid(common_name) || override_default;
+  const bool common_valid = common.isParamValid(common_name);
 
   /* In order to apply a common parameter 4 statements must be satisfied
    * (1) A local parameter must exist with the same name as the common parameter
