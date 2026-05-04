@@ -119,6 +119,14 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
+# Keep T manually declared and unrestricted so this legacy regression continues
+# to compare against the pre-scoped AuxVariable golds. The automatic
+# SubChannelAddVariablesAction path remains block-restricted for normal inputs.
+[AuxVariables]
+  [T]
+  []
+[]
+
 [ICs]
   [S_IC]
     type = SCMTriFlowAreaIC

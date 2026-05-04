@@ -97,7 +97,9 @@ SubChannel1PhaseProblem::validParams()
       "compute_power",
       "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
   params.addRequiredParam<PostprocessorName>(
-      "P_out", "The postprocessor (or scalar) that provides the value of outlet pressure [Pa]");
+      "P_out",
+      "The postprocessor (or scalar) that provides the absolute outlet pressure [Pa]. The solved "
+      "pressure variable P is relative to this value.");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   params.addRequiredParam<UserObjectName>("friction_closure",
                                           "Closure computing the friction factor");
@@ -108,8 +110,6 @@ SubChannel1PhaseProblem::validParams()
                                   "Closure computing HTC on duct (required if duct mesh exists).");
   params.addParam<bool>(
       "full_output", false, "Flag that enables the output of the maximum number of variables.");
-  params.addPrivateParam<bool>("pin_mesh_exist", false);
-  params.addPrivateParam<bool>("duct_mesh_exist", false);
   return params;
 }
 
@@ -299,6 +299,40 @@ SubChannel1PhaseProblem::initialSetup()
     _duct_HTC_closure =
         &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("duct_HTC_closure"));
   }
+}
+
+void
+SubChannel1PhaseProblem::detectDeformation()
+{
+  const Real tol = libMesh::TOLERANCE;
+  const auto pin_diameter = _subchannel_mesh.getPinDiameter();
+
+  if (_pin_mesh_exist)
+  {
+    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
+      for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
+      {
+        auto * node = _subchannel_mesh.getPinNode(i_pin, iz);
+        const Real Dpin = (*_Dpin_soln)(node);
+        if (std::abs(Dpin) <= tol)
+          mooseError("Dpin is zero at node ",
+                     node->id(),
+                     ". You must initialize Dpin to a non-zero value.");
+        if (std::abs(Dpin - pin_diameter) > tol)
+          _deformation = true;
+      }
+  }
+
+  for (unsigned int iz = 0; iz < _n_cells + 1 && !_deformation; iz++)
+    for (unsigned int i_ch = 0; i_ch < _n_channels && !_deformation; i_ch++)
+    {
+      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+
+      if ((subch_type == EChannelType::CORNER || subch_type == EChannelType::EDGE) &&
+          std::abs((*_displacement_soln)(node)) > tol)
+        _deformation = true;
+    }
 }
 
 SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
@@ -2565,6 +2599,7 @@ SubChannel1PhaseProblem::externalSolve()
         _HTC_soln->set(node, sumhw / _subchannel_mesh.getChannelPins(i_ch).size());
       }
     }
+    _HTC_soln->close();
 
     _console << "Commencing calculation of Pin surface temperature \n";
     for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
@@ -2576,30 +2611,21 @@ SubChannel1PhaseProblem::externalSolve()
         // Calculate sum of pin surface temperatures that the channels around the pin see
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {
-          Real hw = 0.0;
           const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-          if (!_deformation)
-          {
-            hw = (*_HTC_soln)(node);
-          }
-          else
-          {
-            const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-            auto mu = (*_mu_soln)(node);
-            auto S = (*_S_flow_soln)(node);
-            auto w_perim = (*_w_perim_soln)(node);
-            auto Dh_i = 4.0 * S / w_perim;
-            auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
-            auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
-            auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
-            auto Pr = (*_mu_soln)(node)*cp / k;
-            // Create Friction structure
-            _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
-            // Create nusselt number structure
-            _nusselt_args = NusseltStruct(Re, Pr, i_pin, iz, i_ch);
-            // Compute HTC
-            hw = _pin_HTC_closure->computeHTC(_friction_args, _nusselt_args, k);
-          }
+          auto mu = (*_mu_soln)(node);
+          auto S = (*_S_flow_soln)(node);
+          auto w_perim = (*_w_perim_soln)(node);
+          auto Dh_i = 4.0 * S / w_perim;
+          auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
+          auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto Pr = (*_mu_soln)(node)*cp / k;
+          // Create Friction structure
+          _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
+          // Create nusselt number structure
+          _nusselt_args = NusseltStruct(Re, Pr, i_pin, iz, i_ch);
+          // Compute HTC
+          auto hw = _pin_HTC_closure->computeHTC(_friction_args, _nusselt_args, k);
           // Compute surface temperature contribution from subchannel side
           sumTemp +=
               (*_q_prime_soln)(pin_node) / ((*_Dpin_soln)(pin_node)*M_PI * hw) + (*_T_soln)(node);

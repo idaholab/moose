@@ -24,7 +24,6 @@
     munit = moles
     temperature = 2250
     output_species_unit = mole_fraction
-    block = '0'
   []
 []
 

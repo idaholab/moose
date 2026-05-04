@@ -102,7 +102,7 @@ SubChannelAddVariablesAction::act()
   {
     vars_to_add.push_back({SubChannelApp::PIN_TEMPERATURE, pin_blocks});
     vars_to_add.push_back({SubChannelApp::PIN_DIAMETER, pin_blocks});
-    // HTC is stored on subchannels and used to compute pin-surface temperature.
+    // HTC is a subchannel-average output stored on the fluid mesh.
     vars_to_add.push_back({SubChannelApp::HEAT_TRANSFER_COEFFICIENT, fluid_blocks});
   }
 

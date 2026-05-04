@@ -40,35 +40,7 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
 void
 QuadSubChannel1PhaseProblem::initializeSolution()
 {
-  const Real tol = libMesh::TOLERANCE;
-  const auto pin_diameter = _subchannel_mesh.getPinDiameter();
-
-  if (_pin_mesh_exist)
-  {
-    for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
-      for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
-      {
-        auto * node = _subchannel_mesh.getPinNode(i_pin, iz);
-        const Real Dpin = (*_Dpin_soln)(node);
-        if (std::abs(Dpin) <= tol)
-          mooseError("Dpin is zero at node ",
-                     node->id(),
-                     ". You must initialize Dpin to a non-zero value.");
-        if (std::abs(Dpin - pin_diameter) > tol)
-          _deformation = true;
-      }
-  }
-
-  for (unsigned int iz = 0; iz < _n_cells + 1 && !_deformation; iz++)
-    for (unsigned int i_ch = 0; i_ch < _n_channels && !_deformation; i_ch++)
-    {
-      auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-
-      if ((subch_type == EChannelType::CORNER || subch_type == EChannelType::EDGE) &&
-          std::abs((*_displacement_soln)(node)) > tol)
-        _deformation = true;
-    }
+  detectDeformation();
 
   /// update surface area, wetted perimeter based on: Dpin, displacement
   if (_deformation)

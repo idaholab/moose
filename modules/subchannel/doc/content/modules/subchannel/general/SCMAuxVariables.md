@@ -16,7 +16,10 @@ When the `[SubChannel]` problem syntax is present, defining either of these mesh
 
 - Net crossflow per subchannel cell: "SumWij" $kg/s$ (This refers to the cell value immediately below the node)
 
-- Pressure: "P" $Pa$
+- Relative pressure: "P" $Pa$. This is the local pressure relative to the outlet pressure,
+  $P = P_{absolute} - P_{out}$, so `P` is zero at the outlet. The solver adds the
+  [!param](/Problem/QuadSubChannel1PhaseProblem/P_out) value back when evaluating fluid
+  properties that require absolute pressure.
 
 - Enthalpy: "h" $J/kg$
 

@@ -134,6 +134,8 @@ protected:
 
   /// Function to initialize the solution & geometry fields
   virtual void initializeSolution() = 0;
+  /// Detects whether pin diameter or duct displacement fields require geometry recalculation
+  void detectDeformation();
 
   /// Functions that computes the interpolation scheme given the Peclet number
   PetscScalar computeInterpolationCoefficients(PetscScalar Peclet = 0.0);

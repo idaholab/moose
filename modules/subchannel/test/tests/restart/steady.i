@@ -24,6 +24,21 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[AuxVariables]
+  [Dpin]
+    block = sub_channel
+  []
+  [Tduct]
+    block = sub_channel
+  []
+  [Tpin]
+    block = sub_channel
+  []
+  [duct_heat_flux]
+    block = sub_channel
+  []
+[]
+
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   fp = water
@@ -66,6 +81,18 @@ P_out = 4.923e6 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [P_ic]
+    type = ConstantIC
+    variable = P
+    value = 0.0
+  []
+
+  [DP_ic]
+    type = ConstantIC
+    variable = DP
+    value = 0.0
   []
 
   [rho_ic]

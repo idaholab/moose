@@ -1,6 +1,6 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-# Transient sub_channel calculation
+# Transient subchannel calculation
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################
