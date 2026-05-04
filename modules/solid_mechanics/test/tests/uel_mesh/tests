@@ -13,18 +13,16 @@
     command = "cd elasticity_uel; make"
     use_shell = True
     requirement = "The elastic UEL test plugin shall be built in opt."
-    method = 'opt'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree & method=opt'
   []
   [build_uel_plugin_dbg]
     type = RunCommand
     command = "cd elasticity_uel; make METHOD=dbg"
     use_shell = True
     requirement = "The elastic UEL test plugin shall be built in dbg."
-    method = 'dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree & method=dbg'
   []
 
   [mesh_only]
@@ -32,9 +30,8 @@
     input = abaqus_uel_read.i
     exodiff = abaqus_uel_read_in.e
     cli_args = '--mesh-only'
-    method = 'opt dbg'
     requirement = 'The system shall be able to load an Abaqus input file with UEL user elements.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree & (method=opt | method=dbg)'
   []
 
   [elastic_bc]
@@ -43,7 +40,7 @@
     input = elastic.i
     exodiff = elastic_out.e
     requirement = 'The system shall be able to apply essential boundary conditions from an Abaqus input file with UEL user elements.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
   [elastic_action_bc]
     type = Exodiff
@@ -51,7 +48,7 @@
     input = elastic_action.i
     exodiff = elastic_action_out.e
     requirement = 'The system shall be able to apply essential boundary conditions set up by an action from an Abaqus input file with UEL user elements.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
 
   [patch_uel]
@@ -61,7 +58,7 @@
     exodiff = PATCH_UEL_out.e
     cli_args = 'Outputs/file_base=PATCH_UEL_out'
     requirement = 'The system shall be able to load an Abaqus input file with a UEL user element applied to multiple mesh elements and apply displacement boundary conditions.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
   [patch_uel_csv]
     type = CSVDiff
@@ -69,7 +66,7 @@
     csvdiff = PATCH_UEL_out_statev_0010.csv
     cli_args = 'Outputs/file_base=PATCH_UEL_out'
     requirement = 'The system shall be able to load an Abaqus input file with a UEL user element applied to multiple mesh elements and apply displacement boundary conditions and output UEL state variables.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     prereq ='patch_uel'
   []
 
@@ -80,7 +77,7 @@
     exodiff = CUBE_UEL_BCS_out.e
     cli_args = 'Outputs/file_base=CUBE_UEL_BCS_out Mesh/file=CUBE_UEL_BCS.inp Executioner/dt=0.5 Executioner/end_time=3.0'
     requirement = 'The system shall be able to load an Abaqus input file with a UEL user element and apply distributed loads that vary over multiple steps.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
   [multistep_uel_csv]
     type = CSVDiff
@@ -88,7 +85,7 @@
     csvdiff = CUBE_UEL_BCS_out_statev_0006.csv
     cli_args = 'Outputs/file_base=CUBE_UEL_BCS_out Mesh/file=CUBE_UEL_BCS.inp Executioner/dt=0.5 Executioner/end_time=3.0'
     requirement = 'The system shall be able to load an Abaqus input file with a UEL user element and apply distributed loads that vary over multiple steps and output UEL state variables.'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     prereq = 'multistep_uel'
   []
 []
