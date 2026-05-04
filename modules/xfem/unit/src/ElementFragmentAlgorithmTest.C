@@ -3413,14 +3413,14 @@ TEST(ElementFragmentAlgorithm, duplicateEmbeddedNodeReuseOnSharedEdgeCurrentFail
   // orientation. Seed that shared edge from face 5 first, allowing adjacent-face propagation to
   // populate face 4 with the same embedded node.
   base_elem->addFaceEdgeCut(5, 3, 0.5, &embedded_a, embedded_nodes, false, true);
-  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1);
-  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1);
+  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
 
   // Revisit the same physical edge through the other face with a different embedded node.
   // Current code throws here. The intended behavior after the fix is to reuse the existing
   // embedded node on that edge/position instead of erroring out, so this test is expected to
   // fail until that logic is changed.
   base_elem->addFaceEdgeCut(4, 2, 0.5, &embedded_b, embedded_nodes, false, true);
-  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1);
-  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1);
+  ASSERT_EQ(face5_edge3->numEmbeddedNodes(), 1u);
+  ASSERT_EQ(face4_edge2->numEmbeddedNodes(), 1u);
 }
