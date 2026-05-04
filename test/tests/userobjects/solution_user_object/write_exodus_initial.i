@@ -39,6 +39,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = INITIAL
+  [out]
+    type = Exodus
+    execute_on = 'INITIAL'
+  []
 []

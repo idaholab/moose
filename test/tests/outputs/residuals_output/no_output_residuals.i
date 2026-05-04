@@ -39,8 +39,3 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-
-[Outputs]
-  execute_on = 'timestep_end'
-[]
-

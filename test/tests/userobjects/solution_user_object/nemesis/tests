@@ -5,7 +5,7 @@
   [discontinuous_value_solution_uo_p1]
     type = 'RunApp'
     input = 'discontinuous_value_solution_uo_p1.i'
-    cli_args = "Outputs/nemesis=true Outputs/exodus=false"
+    cli_args = "Outputs/out/type=Nemesis"
     requirement = 'The system shall be capable of writing out a distributed solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
   []
   [discontinuous_value_solution_uo_p2]
@@ -21,7 +21,7 @@
     type = RunApp
     input = "write_nemesis_initial.i"
     # Create more than 1 timestep and more than 1 variable
-    cli_args = "Outputs/nemesis=true Outputs/exodus=false
+    cli_args = "Outputs/out/type=Nemesis
                 AuxVariables/var1/initial_condition=2 AuxVariables/var2/initial_condition=1
                 AuxKernels/v1/type=FunctionAux AuxKernels/v1/variable=var1 AuxKernels/v1/function='2+t'
                 AuxKernels/v2/type=FunctionAux AuxKernels/v2/variable=var2 AuxKernels/v2/function='1+t'

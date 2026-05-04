@@ -23,5 +23,7 @@
 [Outputs]
   file_base := steady_state
   show = 'num_steps'
-  execute_on = 'FINAL'
+  [csv]
+    execute_on = 'FINAL'
+  []
 []
