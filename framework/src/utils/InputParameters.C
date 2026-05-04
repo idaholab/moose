@@ -1102,13 +1102,8 @@ InputParameters::applyParameters(const InputParameters & common,
   }
 
   // Loop through the coupled variables
-  for (std::set<std::string>::const_iterator it = common.coupledVarsBegin();
-       it != common.coupledVarsEnd();
-       ++it)
+  for (const auto & var_name : common._coupled_vars)
   {
-    // Variable name
-    const std::string var_name = *it;
-
     // Continue to next variable, if the current is in list of  excluded parameters
     if (std::find(exclude.begin(), exclude.end(), var_name) != exclude.end())
       continue;
