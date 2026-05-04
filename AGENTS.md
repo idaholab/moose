@@ -51,7 +51,12 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 4. Goal-Driven Execution
+## 4. Code Comments
+
+- Never delete correct preexisting code comments.
+- Add comments when the code alone does not make clear what's happening.
+
+## 5. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
