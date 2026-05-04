@@ -17,10 +17,6 @@ class TriangleManifold;
 /**
  * MeshGenerator for defining a subdomain based on whether element vertex averages lie within a
  * closed manifold.
- *
- * The generator intentionally uses Elem::vertex_average() rather than the true geometric centroid
- * to mirror the inexpensive point-sampling behavior of other subdomain tagging mesh generators in
- * MOOSE.
  */
 class ManifoldSubdomainGenerator : public MeshGenerator
 {

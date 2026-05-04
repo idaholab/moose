@@ -16,7 +16,6 @@
 #include "libmesh/unstructured_mesh.h"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -44,6 +43,14 @@ cellIndex(const Real value, const Real min_value, const Real cell_size, const st
     return num_cells - 1;
   return static_cast<std::size_t>(index);
 }
+
+class SurfaceChecker : public libMesh::MeshTetInterface
+{
+public:
+  explicit SurfaceChecker(UnstructuredMesh & mesh) : libMesh::MeshTetInterface(mesh) {}
+  void triangulate() override { mooseError("SurfaceChecker is not meant for triangulation."); }
+  std::string improveAndValidate();
+};
 }
 
 TriangleManifold::TriangleManifold(MeshBase & mesh, const Real surface_tolerance)
@@ -53,7 +60,6 @@ TriangleManifold::TriangleManifold(MeshBase & mesh, const Real surface_tolerance
     _point_locator(_mesh.sub_point_locator())
 {
   mooseAssert(_surface_tolerance > 0.0, "surface_tolerance must be strictly positive.");
-
   mooseAssert(mesh.is_serial(), "Input manifold mesh must be serialized.");
   mooseAssert(mesh.mesh_dimension() == 2, "Manifold mesh must be a surface.");
 
@@ -108,7 +114,7 @@ TriangleManifold::finalize()
   // Validate that the mesh can be used as a manifold
   // We use the same logic as determining if the mesh can the tetrahedralized.
   auto umesh = dynamic_cast<UnstructuredMesh *>(&_mesh);
-  SurfaceChecker checker(*umesh);
+  TriangleManifoldUtils::SurfaceChecker checker(*umesh);
   auto msg = checker.improveAndValidate();
   if (!msg.empty())
     mooseError(
@@ -267,7 +273,7 @@ TriangleManifold::rayCandidates(const Point & point) const
 }
 
 std::string
-SurfaceChecker::improveAndValidate()
+TriangleManifoldUtils::SurfaceChecker::improveAndValidate()
 {
   using libMesh::MeshTetInterface;
   auto result = improve_hull_integrity();

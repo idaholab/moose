@@ -33,6 +33,21 @@
     []
   []
 
+  [voxelize]
+    requirement = 'The system shall support creating manifolds defined by quad elements, converting them to triangle elements, then voxelize '
+    [positive]
+      type = RunApp
+      input = cone.i
+      detail = 'the manifold or'
+    []
+    [negative]
+      type = RunApp
+      input = cone.i
+      cli_args = 'Mesh/tag/location=OUTSIDE expected="12650"'
+      detail = 'the space around the manifold.'
+    []
+  []
+
   [errors]
     [invalid_input_dimension]
       type = RunException

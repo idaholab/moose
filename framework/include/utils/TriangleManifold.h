@@ -22,9 +22,37 @@
 #include <unordered_map>
 #include <vector>
 
+/**
+ * Utility for querying point containment against a closed triangulated surface mesh.
+ *
+ * The class takes ownership of a reference to a prepared 2D surface mesh, validates that it forms
+ * a closed 2-manifold (every triangle has exactly three neighbors, all elements are Tri3, and the
+ * mesh is consistently oriented), builds a lightweight yz-plane acceleration grid, and exposes
+ * `contains()` for point-in-solid queries.
+ *
+ * Containment is resolved in three stages:
+ *
+ * 1. Cheap global bounding-box rejection.
+ * 2. Near-surface detection via a pre-built point locator (points within `surface_tolerance` of
+ *    the mesh surface are treated as inside).
+ * 3. Odd/even parity counting on a fixed +x ray, with automatic fallback to a solid-angle
+ *    accumulation test when the ray grazes a triangle edge or vertex.
+ *
+ * The referenced mesh must outlive this object. Any geometric transforms (scale, rotation,
+ * translation) should be applied to the mesh before constructing a `TriangleManifold`.
+ */
 class TriangleManifold
 {
 public:
+  /**
+   * Build a manifold classifier from a prepared surface mesh.
+   *
+   * @param mesh Serialized 2D surface mesh that defines the closed manifold. Must outlive this
+   * object. Any desired transforms should already be applied to the mesh.
+   * @param surface_tolerance Absolute tolerance used for manifold validation and near-surface
+   * classification. Choose this relative to the mesh length scale and expected coordinate noise
+   * from the export pipeline.
+   */
   TriangleManifold(MeshBase & mesh, const Real surface_tolerance);
 
   /**
@@ -107,14 +135,6 @@ private:
   /// Global bounding box of the transformed manifold.
   const libMesh::BoundingBox _bounding_box;
 
-  // Pre-built point locator for fast close to surface check
+  /// Pre-built point locator for fast proximity-to-surface detection.
   const std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
-};
-
-class SurfaceChecker : public libMesh::MeshTetInterface
-{
-public:
-  explicit SurfaceChecker(UnstructuredMesh & mesh) : libMesh::MeshTetInterface(mesh) {}
-  void triangulate() override { mooseError("SurfaceChecker is not meant for triangulation."); }
-  std::string improveAndValidate();
 };
