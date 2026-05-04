@@ -236,7 +236,8 @@ public:
     return _linearfv_face_d_cf_mag(side, elem);
   }
   /**
-   * Get the cell-center to neighbor-center distance vector for an element side (internal faces only)
+   * Get the cell-center to neighbor-center distance vector for an element side (internal faces
+   * only)
    * @param elem The contiguous element ID
    * @param side The side index
    * @returns The cell-to-neighbor distance vector

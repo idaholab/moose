@@ -37,7 +37,7 @@ public:
   System(::SystemBase & system);
 
   /**
-   * Copy constructor — shallow-copies all Array<> members so that device memory is shared.
+   * Copy constructor - shallow-copies all Array<> members so that device memory is shared.
    * Used by FESystem in mixed FE+FV simulations.
    */
   System(const System & src);
