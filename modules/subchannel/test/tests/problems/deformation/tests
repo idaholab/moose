@@ -1,0 +1,19 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
+  issues = '#32847'
+  [quad_pin_diameter_ic_recomputes_geometry]
+    type = CSVDiff
+    input = 'quad_pin_diameter.i'
+    csvdiff = 'quad_pin_diameter_out.csv'
+    recover = False
+    requirement = 'The system shall recompute quadrilateral subchannel flow area and wetted perimeter from the Dpin initial condition when it differs from the mesh-generator pin diameter.'
+  []
+  [tri_pin_diameter_ic_recomputes_geometry]
+    type = CSVDiff
+    input = 'tri_pin_diameter.i'
+    capabilities = 'method!=dbg'
+    csvdiff = 'tri_pin_diameter_out.csv'
+    recover = False
+    requirement = 'The system shall recompute triangular subchannel flow area and wetted perimeter from the Dpin initial condition when it differs from the mesh-generator pin diameter.'
+  []
+[]
