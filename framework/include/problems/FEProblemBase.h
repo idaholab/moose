@@ -3131,9 +3131,9 @@ protected:
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  /// System array — sparsely populated (only slots for systems needing a Kokkos::System)
+  /// System array - sparsely populated (only slots for systems needing a Kokkos::System)
   Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
-  /// FESystem array — sparsely populated (only slots for systems needing a Kokkos::FESystem)
+  /// FESystem array - sparsely populated (only slots for systems needing a Kokkos::FESystem)
   Moose::Kokkos::Array<Moose::Kokkos::FESystem> _kokkos_fe_systems;
 #endif
 

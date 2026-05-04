@@ -134,7 +134,7 @@ public:
 
   /**
    * Whether this variable assembles via the FV path (ElemInfo/FaceInfo loops, no QP reinit).
-   * Static, per-class property — never toggled by requireQpComputations().
+   * Static, per-class property - never toggled by requireQpComputations().
    */
   virtual bool doesTrueFVAssembly() const;
 

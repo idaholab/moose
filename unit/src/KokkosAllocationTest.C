@@ -103,7 +103,7 @@ protected:
   std::shared_ptr<FEProblem> _fe_problem;
 };
 
-// Pure linear FV system — Kokkos::System only, no FESystem
+// Pure linear FV system - Kokkos::System only, no FESystem
 TEST_F(KokkosAllocationTest, PureLinearFVSystemAllocatesSystemOnly)
 {
   if (!_fe_problem->mesh().getKokkosMesh())
@@ -119,7 +119,7 @@ TEST_F(KokkosAllocationTest, PureLinearFVSystemAllocatesSystemOnly)
   EXPECT_FALSE(_fe_problem->getKokkosFESystems().isSlotConstructed(lin_num));
 }
 
-// Pure FE system — standalone FESystem, no Kokkos::System slot
+// Pure FE system - standalone FESystem, no Kokkos::System slot
 TEST_F(KokkosAllocationTest, PureFESystemAllocatesFESystemOnly)
 {
   if (!_fe_problem->mesh().getKokkosMesh())
@@ -135,7 +135,7 @@ TEST_F(KokkosAllocationTest, PureFESystemAllocatesFESystemOnly)
   EXPECT_TRUE(_fe_problem->getKokkosFESystems().isSlotConstructed(nl_num));
 }
 
-// Scalar-only system — Kokkos::System only, no FESystem
+// Scalar-only system - Kokkos::System only, no FESystem
 TEST_F(KokkosAllocationTest, ScalarOnlySystemAllocatesSystemOnly)
 {
   if (!_fe_problem->mesh().getKokkosMesh())
@@ -151,7 +151,7 @@ TEST_F(KokkosAllocationTest, ScalarOnlySystemAllocatesSystemOnly)
   EXPECT_FALSE(_fe_problem->getKokkosFESystems().isSlotConstructed(aux_num));
 }
 
-// FV system with QP coupling — dual allocation (System + FESystem)
+// FV system with QP coupling - dual allocation (System + FESystem)
 TEST_F(KokkosAllocationTest, LinearFVWithQpCouplingAllocatesBoth)
 {
   if (!_fe_problem->mesh().getKokkosMesh())
@@ -167,7 +167,7 @@ TEST_F(KokkosAllocationTest, LinearFVWithQpCouplingAllocatesBoth)
   EXPECT_TRUE(_fe_problem->getKokkosFESystems().isSlotConstructed(lin_num));
 }
 
-// Mixed problem — FE system standalone, FV system is System-only
+// Mixed problem - FE system standalone, FV system is System-only
 TEST_F(KokkosAllocationTest, MixedProblemCorrectAllocation)
 {
   if (!_fe_problem->mesh().getKokkosMesh())
@@ -191,7 +191,7 @@ TEST_F(KokkosAllocationTest, MixedProblemCorrectAllocation)
   EXPECT_FALSE(_fe_problem->getKokkosFESystems().isSlotConstructed(lin_num));
 }
 
-// Empty system — no allocation for either array
+// Empty system - no allocation for either array
 TEST_F(KokkosAllocationTest, EmptySystemNoAllocation)
 {
   if (!_fe_problem->mesh().getKokkosMesh())

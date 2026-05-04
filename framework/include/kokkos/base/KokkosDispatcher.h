@@ -439,7 +439,7 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosLinearFVKernelFunction(classname, alias)
 
-#define callRegisterKokkosLinearFVBoundaryConditionFunction(classname, objectname)                  \
+#define callRegisterKokkosLinearFVBoundaryConditionFunction(classname, objectname)                 \
   static char registerKokkosLinearFVBC##classname()                                                \
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
@@ -450,7 +450,7 @@ private:
     return 0;                                                                                      \
   }                                                                                                \
                                                                                                    \
-  static char combineNames(kokkos_dispatcher_linearfvbc_##classname, __COUNTER__) =               \
+  static char combineNames(kokkos_dispatcher_linearfvbc_##classname, __COUNTER__) =                \
       registerKokkosLinearFVBC##classname()
 
 #define registerKokkosLinearFVBoundaryCondition(app, classname)                                    \

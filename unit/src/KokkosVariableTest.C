@@ -102,7 +102,7 @@ protected:
     return _fe_problem->getVariable(0, name);
   }
 
-  // MONOMIAL CONSTANT so the kernel is elemental — required when coupling to a cell-centred FV var.
+  // MONOMIAL CONSTANT so the kernel is elemental - required when coupling to a cell-centred FV var.
   MooseVariableFieldBase & addAuxFEVar(const std::string & name)
   {
     InputParameters params = _factory.getValidParams("MooseVariable");
