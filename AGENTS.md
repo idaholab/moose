@@ -28,6 +28,10 @@ Before implementing:
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
+- If existing functionality can accomplish a subtask, use it, don't
+  reimplement it.
+- If existing functionality is nearly capable of a subtask, prefer
+  short extensions of it over long rewrites of it.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
@@ -64,6 +68,15 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Simple changesets
+
+**When a task has many subtasks, solve subtasks one at a time.**
+
+When proposing changes:
+- Changesets should each completely add a feature or a test or fix a bug.
+- Distinct features/tests/bugfixes should be in separate changesets.
+- Separate test coverage should be added for each change.
 
 ---
 
