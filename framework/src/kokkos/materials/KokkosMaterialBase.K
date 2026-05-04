@@ -50,6 +50,8 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
+  _fe_problem.addKokkosMeshInitializationHook(
+      std::bind(&MaterialBase::initializeMaterialRestrictable, this));
 }
 
 MaterialBase::MaterialBase(const MaterialBase & object)
@@ -69,7 +71,7 @@ MaterialBase::MaterialBase(const MaterialBase & object)
 }
 
 void
-MaterialBase::initialSetup()
+MaterialBase::initializeMaterialRestrictable()
 {
   if (_constant_option == PropertyConstantOption::SUBDOMAIN)
   {
