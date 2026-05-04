@@ -180,11 +180,6 @@ public:
   KOKKOS_FUNCTION Real3 normals(const unsigned int qp);
 
   /**
-   * Deprecated, will be removed
-   */
-  KOKKOS_FUNCTION void reinit() {}
-
-  /**
    * Set local parallelization option
    * @param local_thread_id The current local thread ID
    * @param num_local_threads The number of local threads
