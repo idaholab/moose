@@ -73,12 +73,12 @@
   [kokkos_avg]
     type = KokkosElementAverageValue
     variable = v
-    execute_on = TIMESTEP_END
+    execute_on = FINAL
   []
   [linear_fv_avg]
     type = ElementFVAverageValue
     functor = 'u'
-    execute_on = TIMESTEP_END
+    execute_on = FINAL
   []
 []
 
@@ -93,6 +93,10 @@
 [Outputs]
   [csv]
     type = CSV
-    execute_on = TIMESTEP_END
+    execute_on = FINAL
+  []
+  [console]
+    type = Console
+    execute_on = FINAL
   []
 []
