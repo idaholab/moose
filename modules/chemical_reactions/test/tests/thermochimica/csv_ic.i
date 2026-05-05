@@ -22,7 +22,6 @@
     initial_values = ic.csv
     temperature = 2250
     reinitialization_type = nodal
-    block = '0'
   []
 []
 

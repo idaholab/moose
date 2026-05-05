@@ -11,10 +11,11 @@
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 #include "AddAuxVariableAction.h"
+#include "FEProblemBase.h"
 #include "SubChannelApp.h"
 #include "AddMeshGeneratorAction.h"
 
-registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
+registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "add_aux_variable");
 
 InputParameters
 SubChannelAddVariablesAction::validParams()
@@ -27,9 +28,27 @@ SubChannelAddVariablesAction::validParams()
 
 SubChannelAddVariablesAction::SubChannelAddVariablesAction(const InputParameters & parameters)
   : Action(parameters),
-    _fe_family(AddVariableAction::getNonlinearVariableFamilies()),
-    _fe_order(AddVariableAction::getNonlinearVariableOrders())
+    _fe_family(AddAuxVariableAction::getAuxVariableFamilies()),
+    _fe_order(AddAuxVariableAction::getAuxVariableOrders())
 {
+}
+
+void
+SubChannelAddVariablesAction::addAuxVariable(const std::string & var_name,
+                                             const std::vector<SubdomainName> & blocks)
+{
+  const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();
+
+  for (const auto * aux_action : aux_actions)
+    if (aux_action->name() == var_name)
+      return;
+
+  auto params = _factory.getValidParams("MooseVariable");
+  params.set<MooseEnum>("family") = _fe_family;
+  params.set<MooseEnum>("order") = _fe_order;
+  params.set<std::vector<SubdomainName>>("block") = blocks;
+
+  _problem->addAuxVariable("MooseVariable", var_name, params);
 }
 
 void
@@ -119,35 +138,6 @@ SubChannelAddVariablesAction::act()
     vars_to_add.push_back({SubChannelApp::FRICTION_FACTOR, fluid_blocks});
   }
 
-  const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();
-
   for (const auto & var_info : vars_to_add)
-  {
-    const std::string & vn = var_info.first;
-    const std::vector<SubdomainName> & blocks = var_info.second;
-
-    bool add_action = true;
-    for (const auto * aux_action : aux_actions)
-    {
-      if (aux_action->name() == vn)
-      {
-        add_action = false;
-        break;
-      }
-    }
-
-    if (!add_action)
-      continue;
-
-    const std::string class_name = "AddAuxVariableAction";
-    InputParameters params = _action_factory.getValidParams(class_name);
-    params.set<MooseEnum>("family") = _fe_family;
-    params.set<MooseEnum>("order") = _fe_order;
-    params.set<std::vector<SubdomainName>>("block") = blocks;
-
-    std::shared_ptr<Action> action =
-        std::static_pointer_cast<Action>(_action_factory.create(class_name, vn, params));
-
-    _awh.addActionBlock(action);
-  }
+    addAuxVariable(var_info.first, var_info.second);
 }

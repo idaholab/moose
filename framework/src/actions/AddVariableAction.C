@@ -138,7 +138,7 @@ AddVariableAction::init()
                " using the 'initial_condition' and 'initial_from_file_var' parameters. Please "
                "remove one of them.");
 
-  _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling", "block"});
+  _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   // Determine the MooseVariable type
   _fv_var = _moose_object_pars.get<bool>("fv");
