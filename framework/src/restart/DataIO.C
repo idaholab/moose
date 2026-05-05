@@ -253,8 +253,7 @@ template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
 {
-  const auto tensor = t.contiguous();
-  mooseAssert(tensor.device().is_cpu(), "Restart storage currently supports only CPU tensors.");
+  const auto tensor = LibtorchUtils::toCPUContiguous(t);
   mooseAssert(tensor.scalar_type() == at::kDouble,
               "Restart storage currently supports only double tensors.");
 

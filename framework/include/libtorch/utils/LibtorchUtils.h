@@ -40,6 +40,24 @@ template <typename DataType>
 torch::Tensor vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
 
 /**
+ * Move a tensor to the configured libtorch device.
+ * @param tensor The tensor to move
+ * @param device_type The target torch device type
+ */
+void moveToLibtorchDevice(torch::Tensor & tensor, const torch::DeviceType device_type);
+
+/**
+ * Return a detached contiguous CPU copy of a tensor.
+ *
+ * This is for call sites that read tensor storage through CPU accessors or data_ptr().
+ * Moving a tensor to CPU does not guarantee that logical tensor order is backed by a dense
+ * linear memory layout; contiguous() makes that invariant explicit.
+ *
+ * @param tensor The tensor to copy to CPU
+ */
+torch::Tensor toCPUContiguous(const torch::Tensor & tensor);
+
+/**
  * Utility function that converts a `torch::Tensor` to a standard vector.
  * @tparam DataType The type of data (float,double, etc.) which the vector is filled with
  * @param tensor The tensor which needs to be converted
