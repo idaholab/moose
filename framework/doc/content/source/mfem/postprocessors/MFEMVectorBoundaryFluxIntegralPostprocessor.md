@@ -19,7 +19,6 @@ If $k$ is provided as a material coefficient, it must be defined on the boundary
 
 !listing mfem/submeshes/av_magnetostatic.i block=Postprocessors/CoilCurrent
 
-
 !syntax parameters /Postprocessors/MFEMVectorBoundaryFluxIntegralPostprocessor
 
 !syntax inputs /Postprocessors/MFEMVectorBoundaryFluxIntegralPostprocessor

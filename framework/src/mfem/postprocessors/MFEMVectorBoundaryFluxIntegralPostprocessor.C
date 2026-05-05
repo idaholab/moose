@@ -30,19 +30,15 @@ MFEMVectorBoundaryFluxIntegralPostprocessor::validParams()
 MFEMVectorBoundaryFluxIntegralPostprocessor::MFEMVectorBoundaryFluxIntegralPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    MFEMBoundaryRestrictable(parameters,
-                             *getMFEMProblem()
-                                  .getProblemData()
-                                  .gridfunctions.Get(getParam<VariableName>("variable"))
-                                  ->ParFESpace()
-                                  ->GetParMesh()),
+    MFEMBoundaryRestrictable(
+        parameters, getMFEMProblem().getMFEMVariableMesh(getParam<VariableName>("variable"))),
     _var(
         getMFEMProblem().getProblemData().gridfunctions.GetRef(getParam<VariableName>("variable"))),
     _scalar_coef(getScalarCoefficient("coefficient")),
+    _var_coef(&_var),
     _rt_fec(_var.ParFESpace()->GetMaxElementOrder(), getMesh().Dimension()),
     _rt_vector_fespace(const_cast<mfem::ParMesh *>(&getMesh()), &_rt_fec),
     _rt_var(&_rt_vector_fespace),
-    _var_coef(&_var),
     _boundary_integrator(&_rt_vector_fespace)
 {
   _boundary_integrator.AddBoundaryIntegrator(

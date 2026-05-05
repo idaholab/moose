@@ -40,10 +40,10 @@ private:
   mfem::real_t _integral;
   mfem::ParGridFunction & _var;
   mfem::Coefficient & _scalar_coef;
+  mfem::VectorGridFunctionCoefficient _var_coef;
   mfem::RT_FECollection _rt_fec;
   mfem::ParFiniteElementSpace _rt_vector_fespace;
   mfem::ParGridFunction _rt_var;
-  mfem::VectorGridFunctionCoefficient _var_coef;
   mfem::ParLinearForm _boundary_integrator;
 };
 
