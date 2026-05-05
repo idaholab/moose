@@ -74,5 +74,8 @@ ParsedNodeTransformGenerator::generate()
       (*node)(i) = evaluate(_functions[i], _func_name[i]);
   }
 
+  mesh->unset_has_cached_elem_data();
+  mesh->clear_point_locator();
+
   return mesh;
 }
