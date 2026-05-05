@@ -13,6 +13,7 @@
 #include "MooseMeshUtils.h"
 #include "TriangleManifold.h"
 
+#include "libmesh/mesh_serializer.h"
 #include "libmesh/elem.h"
 
 #include <set>
@@ -71,8 +72,7 @@ ManifoldSubdomainGenerator::generate()
   if (!manifold_mesh->is_prepared())
     manifold_mesh->prepare_for_use();
   // Must be serialized, for now
-  if (!manifold_mesh->is_serial())
-    paramError("manifold", "Manifold mesh must NOT be distributed.");
+  libMesh::MeshSerializer serial_manifold(*manifold_mesh);
   // The manifold must also be 2D
   if (*(manifold_mesh->elem_dimensions().begin()) != 2 ||
       *(manifold_mesh->elem_dimensions().rbegin()) != 2)

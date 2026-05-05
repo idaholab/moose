@@ -73,15 +73,11 @@
     []
     [non_tri]
       type = RunException
-      input = non_tri.i
+      input = cone.i
+      cli_args='Mesh/background/nx=5 Mesh/background/ny=5 Mesh/background/nz=5
+                Mesh/inactive="surface" Mesh/tag/manifold=surface_quads'
       expect_err = "At least one non-Tri3 element was found."
       detail = 'the manifold has non-TRI elements;'
-    []
-    [distributed]
-      type = RunException
-      input = distributed.i
-      expect_err = "Manifold mesh must NOT be distributed."
-      detail = 'the manifold mesh is not serialized;'
     []
   []
 []
