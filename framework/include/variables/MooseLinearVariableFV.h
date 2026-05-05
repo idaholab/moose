@@ -226,7 +226,7 @@ public:
 
   virtual void sizeMatrixTagData() override;
 
-  void requireQpComputations() const { _compute_qp_data = true; }
+  void requireQpComputations() const override { _compute_qp_data = true; }
   bool computesQpData() const override { return _compute_qp_data; }
   bool doesTrueFVAssembly() const override { return true; }
 

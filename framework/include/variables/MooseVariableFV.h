@@ -480,13 +480,6 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
-  /**
-   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
-   * default for this base class but derived variable classes may choose not to unless this API is
-   * called
-   */
-  virtual void requireQpComputations() const {}
-
   bool computesQpData() const override { return true; }
   bool doesTrueFVAssembly() const override { return false; }
 
