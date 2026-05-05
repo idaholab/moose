@@ -124,7 +124,7 @@ adaptiveSimpson(const Fun & f,
     const Scalar xm = Scalar(0.5) * (x0 + x1);
     const Scalar Sl = simpson(x0, xm);
     const Scalar Sr = simpson(xm, x1);
-    const Scalar err = std::fabs(Sl + Sr - S0);
+    const Scalar err = fabs(Sl + Sr - S0);
 
     if (err < tol || depth == 0)
       return Sl + Sr + err / Scalar(15); // Richardson correction
@@ -134,7 +134,7 @@ adaptiveSimpson(const Fun & f,
   };
 
   const Scalar S0 = simpson(a, b);
-  const Scalar tol = std::max(abs_tol, rel_tol * std::fabs(S0));
+  const Scalar tol = std::max(abs_tol, rel_tol * fabs(S0));
 
   return recurse(a, b, S0, tol, max_depth);
 }
@@ -184,7 +184,7 @@ integratedPlanckBand(Scalar n1,
 
     const Scalar expo = hp * nu / (kb * T);
 
-    const Scalar inv = std::exp(expo) - Scalar(1);
+    const Scalar inv = exp(expo) - Scalar(1);
 
     return pre / inv; // spectral emissive power
   };

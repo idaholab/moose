@@ -131,7 +131,7 @@ FVSP3ThermalRadiationBC::computeQpResidual()
     const auto kb = HeatConduction::Constants::boltzmannConstant(_boltzmann_units);
 
     const auto pre_factor = n1_pow_2 * 2.0 * hp * nu_pow_3 / (Utility::pow<2>(c0));
-    const auto inv_thermal_source = std::exp(hp * nu / (kb * Tb)) - 1.0;
+    const auto inv_thermal_source = exp(hp * nu / (kb * Tb)) - 1.0;
     thermal_rad_source = -1 * _eta(face, state) * pre_factor / inv_thermal_source;
   }
 
