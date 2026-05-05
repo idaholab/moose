@@ -23,7 +23,7 @@ makeScalarHyperParameter(const Real value)
 torch::Tensor
 makeVectorHyperParameter(const std::vector<Real> & value)
 {
-  return LibtorchUtils::vectorToTensorView(value, {long(value.size())}).clone();
+  return LibtorchUtils::vectorToTensorCopy(value, {long(value.size())});
 }
 
 torch::Tensor &
@@ -38,19 +38,19 @@ insertHyperParameter(std::unordered_map<std::string, torch::Tensor> & hyperparam
   return hyperparameters.emplace(prefixed_name, std::move(tensor)).first->second;
 }
 
+} // namespace
+
 bool
-isScalarHyperParameter(const torch::Tensor & tensor)
+CovarianceFunctionBase::isScalarHyperParameter(const torch::Tensor & tensor)
 {
   return tensor.dim() == 0;
 }
 
 bool
-isVectorHyperParameter(const torch::Tensor & tensor)
+CovarianceFunctionBase::isVectorHyperParameter(const torch::Tensor & tensor)
 {
   return tensor.dim() == 1;
 }
-
-} // namespace
 
 InputParameters
 CovarianceFunctionBase::validParams()

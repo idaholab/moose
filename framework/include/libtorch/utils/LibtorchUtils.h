@@ -25,19 +25,29 @@ namespace LibtorchUtils
  * @param detach If the gradient information needs to be detached during the conversion
  */
 template <typename DataType>
-void
-vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach = false);
+void vectorToTensor(const std::vector<DataType> & vector,
+                    torch::Tensor & tensor,
+                    const bool detach = false);
+
+/**
+ * Utility function that creates an owning tensor copy of a standard vector.
+ * @tparam DataType The vector element type
+ * @param vector The vector that needs to be copied
+ * @param sizes The desired tensor shape
+ */
+template <typename DataType>
+torch::Tensor vectorToTensorCopy(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
 
 /**
  * Utility function that creates a non-owning tensor view of a standard vector.
- * The returned tensor shares the storage of the provided vector, so the vector
- * must outlive the tensor.
+ * The returned tensor shares the mutable storage of the provided vector, so the
+ * vector must outlive the tensor and may be modified through the tensor.
  * @tparam DataType The vector element type
  * @param vector The vector that needs to be wrapped
  * @param sizes The desired tensor shape
  */
 template <typename DataType>
-torch::Tensor vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes);
+torch::Tensor vectorToTensorView(std::vector<DataType> & vector, c10::IntArrayRef sizes);
 
 /**
  * Move a tensor to the configured libtorch device.

@@ -10,6 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LoadCovarianceDataAction.h"
+#include "CovarianceFunctionBase.h"
 #include "GaussianProcessSurrogate.h"
 #include "FEProblem.h"
 #include "StochasticToolsApp.h"
@@ -20,18 +21,6 @@ namespace
 {
 
 using HyperParameterMap = CovarianceFunctionBase::HyperParameterMap;
-
-bool
-isScalarHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 0;
-}
-
-bool
-isVectorHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 1;
-}
 
 std::vector<Real>
 exportHyperParameter(const torch::Tensor & tensor)
@@ -47,19 +36,19 @@ assignRequiredHyperParameter(InputParameters & params,
 {
   if (params.have_parameter<Real>(param_name))
   {
-    if (!isScalarHyperParameter(tensor))
+    if (!CovarianceFunctionBase::isScalarHyperParameter(tensor))
       mooseError("Expected scalar hyperparameter for ", param_name, ".");
     params.set<Real>(param_name) = tensor.item<Real>();
   }
   else if (params.have_parameter<unsigned int>(param_name))
   {
-    if (!isScalarHyperParameter(tensor))
+    if (!CovarianceFunctionBase::isScalarHyperParameter(tensor))
       mooseError("Expected scalar hyperparameter for ", param_name, ".");
     params.set<unsigned int>(param_name) = cast_int<unsigned int>(tensor.item<Real>());
   }
   else if (params.have_parameter<std::vector<Real>>(param_name))
   {
-    if (!isVectorHyperParameter(tensor))
+    if (!CovarianceFunctionBase::isVectorHyperParameter(tensor))
       mooseError("Expected vector hyperparameter for ", param_name, ".");
     params.set<std::vector<Real>>(param_name) = exportHyperParameter(tensor);
   }

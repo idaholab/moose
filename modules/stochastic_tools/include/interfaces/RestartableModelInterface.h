@@ -68,11 +68,6 @@ private:
   PublicRestartable _model_restartable;
 };
 
-template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-
 template <typename T, typename... Args>
 T &
 RestartableModelInterface::declareModelData(const std::string & data_name, Args &&... args)

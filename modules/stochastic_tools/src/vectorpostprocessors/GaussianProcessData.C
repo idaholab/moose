@@ -12,24 +12,13 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "GaussianProcessData.h"
+#include "CovarianceFunctionBase.h"
 #include "LibtorchUtils.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcessData);
 
 namespace
 {
-
-bool
-isScalarHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 0;
-}
-
-bool
-isVectorHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 1;
-}
 
 std::vector<Real>
 exportHyperParameter(const torch::Tensor & tensor)
@@ -78,14 +67,14 @@ GaussianProcessData::initialize()
 
   for (const auto & iter : hyperparam_map)
   {
-    if (isScalarHyperParameter(iter.second))
+    if (CovarianceFunctionBase::isScalarHyperParameter(iter.second))
     {
       _hp_vector.push_back(&declareVector(iter.first));
       _hp_vector.back()->push_back(exportScalarHyperParameter(iter.second));
       continue;
     }
 
-    if (!isVectorHyperParameter(iter.second))
+    if (!CovarianceFunctionBase::isVectorHyperParameter(iter.second))
       mooseError("Unsupported hyperparameter rank ", iter.second.dim(), " for ", iter.first, ".");
 
     const auto vec = exportHyperParameter(iter.second);
