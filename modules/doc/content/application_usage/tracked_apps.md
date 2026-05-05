@@ -40,9 +40,11 @@ The purpose of these lists is two fold:
 
 ### Materials
 
+- [DiscoFluxM](https://github.com/lanl/DiscoFluxM) - Dislocation Transport-based Crystal Plasticity Material Model
 - [GRIME](https://github.com/shortlab/grime) - The Grand Radiation Informed Microstructural Evolver: Coupled, spatially dependent radiation damage and microstructural evolution
 - [Magpie](https://github.com/idaholab/magpie) - Mesoscale Atomistic Glue Program for Integrated Execution
 - [Pika](https://github.com/idaholab/pika) - Phase-field model for micro-structure evolution of ice
+- [Tardigrade](https://github.com/lanl/tardigrade) - Implementation of the micromorphic continuum theory of Eringen
 
 
 ### Electromagnetics, Plasmas and Additive Manufacturing
@@ -69,6 +71,7 @@ The purpose of these lists is two fold:
 
 ### Miscellaneous
 
+- [canary](https://github.com/aurora-multiphysics/canary) - Repository for storing tested UKAEA MOOSE demonstration problems, examples, and associated documentation.
 - [moopy](https://github.com/aurora-multiphysics/moopy) - Python interface that simplifies (ish) the creation of MOOSE inputs
 - [Phoenix](https://github.com/rnpratoori/phoenix) - Polymer-to-HOst Evolution via INterface eXchange is a reaction-diffusion based framework to study the evolution of polymer scaffold into a neotissue under various conditions
 - [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins.
@@ -106,9 +109,10 @@ Combined applications
 - Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors, developed at BWXT
 - MONARCH - Radiation damage modeling in semiconductors, developed at LANL
 - GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
-- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 - Fizzy - Couples FISPACT-II to MOOSE and Cardinal for radiation activation calculations
-
+- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
+- [BEEs](https://yznkxjs.xml-journal.net/en/article/doi/10.7538/yzk.2020.youxian.0515) - PWR fuel performance analysis code
+- [PHOENIX](https://www.sciencedirect.com/science/article/pii/S0306454924001920) - Helicoidal cruciform fuel performance analysis code
 
 ## Legacy software
 
@@ -132,6 +136,7 @@ Materials, solid mechanics and fuel performance
 Plasma and fusion sciences
 
 - [Achlys](https://github.com/aurora-multiphysics/achlys) - Macroscopic tritium transport processes through fusion materials
+- [Platypus](https://github.com/aurora-multiphysics/platypus) - A MOOSE-based app to enable finite element problem setup using the MFEM FE library.
 
 Fluid dynamics and Thermal hydraulics
 
