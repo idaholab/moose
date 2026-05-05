@@ -101,6 +101,9 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid, 0)),
     _mesh(_subproblem.mesh())
 {
+  // Aux kernels are used within finite element loops
+  _var.requireQpComputations();
+
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 

@@ -216,6 +216,13 @@ public:
    * (0 = current, 1 = old, 2 = older, etc).
    */
   virtual unsigned int oldestSolutionStateRequested() const = 0;
+
+  /**
+   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
+   * default but derived variable classes may choose not to unless this API is
+   * called
+   */
+  virtual void requireQpComputations() const {}
 };
 
 #define usingMooseVariableFieldBaseMembers usingMooseVariableBaseMembers
