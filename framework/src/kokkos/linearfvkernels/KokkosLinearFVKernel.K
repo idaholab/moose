@@ -9,6 +9,7 @@
 
 #include "KokkosLinearFVKernel.h"
 #include "KokkosLinearFVBoundaryCondition.h"
+#include "LinearFVBoundaryCondition.h"
 
 #include "Attributes.h"
 #include "FEProblemBase.h"
@@ -126,6 +127,31 @@ LinearFVFluxKernel::initialSetup()
   for (auto * bc : bcs)
     if (bc->variable().var() == _kokkos_var.var())
       bc->initBCData(_bc_data);
+
+  // Non-Kokkos BCs are never called by Kokkos flux kernels — they would be silently
+  // ignored, producing wrong results (typically a zero RHS).
+  std::vector<::LinearFVBoundaryCondition *> non_kokkos_bcs;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_kokkos_var.sys())
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribKokkos>(false)
+      .template condition<AttribThread>(0)
+      .queryInto(non_kokkos_bcs);
+
+  for (auto * bc : non_kokkos_bcs)
+    if (bc->variable().number() == _kokkos_var.var())
+      mooseError("Kokkos linear FV flux kernel '",
+                 name(),
+                 "' found non-Kokkos boundary condition '",
+                 bc->name(),
+                 "' (type '",
+                 bc->type(),
+                 "') for variable '",
+                 bc->variable().name(),
+                 "'. Non-Kokkos BCs are not called by Kokkos flux kernels and will produce "
+                 "incorrect results. Use the Kokkos equivalent, e.g. "
+                 "'KokkosLinearFVAdvectionDiffusionFunctorDirichletBC'.");
 }
 
 void
