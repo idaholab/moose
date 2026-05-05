@@ -605,17 +605,14 @@ petscSetDefaults(FEProblemBase & problem)
   // the options to the matrix in this function call.
   applyMatrixTypeOptions(problem);
 
-  // We care about both nonlinear and linear systems when setting the SNES prefix because
-  // SNESSetOptionsPrefix will also set its KSP prefix which could compete with linear system KSPs
   for (const auto nl_index : make_range(problem.numNonlinearSystems()))
   {
     NonlinearSystemBase & nl = problem.getNonlinearSystemBase(nl_index);
-    //
-    // prefix SNES/KSP
-    //
 
     // dig out PETSc solver
     auto * const petsc_solver = cast_ptr<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+
+    // Ensure we properly prefix SNES which in turn prefixes its KSP
     const char * snes_prefix = nullptr;
     std::string snes_prefix_str;
     if (nl.system().prefix_with_name())
@@ -626,21 +623,11 @@ petscSetDefaults(FEProblemBase & problem)
     SNES snes = petsc_solver->snes(snes_prefix);
     KSP ksp;
     LibmeshPetscCallA(nl.comm().get(), SNESGetKSP(snes, &ksp));
-
     LibmeshPetscCallA(nl.comm().get(), SNESSetMaxLinearSolveFailures(snes, 1000000));
-
     LibmeshPetscCallA(nl.comm().get(), SNESSetCheckJacobianDomainError(snes, PETSC_TRUE));
-
-    // In 3.0.0, the context pointer must actually be used, and the
-    // final argument to KSPSetConvergenceTest() is a pointer to a
-    // routine for destroying said private data context.  In this case,
-    // we use the default context provided by PETSc in addition to
-    // a few other tests.
-    {
-      LibmeshPetscCallA(
-          nl.comm().get(),
-          SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
-    }
+    LibmeshPetscCallA(
+        nl.comm().get(),
+        SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
 
     petscSetKSPDefaults(problem, ksp);
   }
@@ -649,8 +636,16 @@ petscSetDefaults(FEProblemBase & problem)
   {
     // dig out PETSc solver
     LinearSystem & lin_sys = problem.getLinearSystem(sys_index);
-    PetscLinearSolver<Number> * petsc_solver = dynamic_cast<PetscLinearSolver<Number> *>(
-        lin_sys.linearImplicitSystem().get_linear_solver());
+    auto & lm_lin_sys = lin_sys.linearImplicitSystem();
+    auto * const petsc_solver =
+        dynamic_cast<PetscLinearSolver<Number> *>(lm_lin_sys.get_linear_solver());
+    // Ensure we properly prefix KSP
+    if (lm_lin_sys.prefix_with_name())
+      petsc_solver->init(lm_lin_sys.prefix().c_str());
+    else
+      petsc_solver->init();
+    // The KSP call here would initialize without a prefix if we hadn't "manually" performed
+    // initialization above
     KSP ksp = petsc_solver->ksp();
 
     if (problem.hasLinearConvergenceObjects())
@@ -820,12 +815,15 @@ setConvergedReasonFlags(FEProblemBase & fe_problem, std::string prefix)
   auto & po = fe_problem.getPetscOptions();
 
   for (const auto & reason_flag : reason_flags)
-    if (!po.flags.isValueSet(prefix + reason_flag) &&
+  {
+    const auto full_flag = prefix + reason_flag;
+    if (!po.flags.isValueSet(full_flag) && !po.dont_add_these_options.contains(full_flag) &&
         (std::find_if(po.pairs.begin(),
                       po.pairs.end(),
-                      [&reason_flag, &prefix](auto & pair)
-                      { return pair.first == (prefix + reason_flag); }) == po.pairs.end()))
-      po.pairs.emplace_back(prefix + reason_flag, "::failed");
+                      [&full_flag](auto & pair)
+                      { return pair.first == (full_flag); }) == po.pairs.end()))
+      po.pairs.emplace_back(full_flag, "::failed");
+  }
 #endif
 }
 
@@ -1305,13 +1303,17 @@ dontAddCommonKSPOptions(FEProblemBase & fe_problem)
 void
 dontAddCommonSNESOptions(FEProblemBase & fe_problem)
 {
+  dontAddCommonSNESOptions(fe_problem, "");
+}
+
+void
+dontAddCommonSNESOptions(FEProblemBase & fe_problem, const std::string & prefix)
+{
   auto & petsc_options = fe_problem.getPetscOptions();
   for (const auto & flag : getCommonSNESFlags().getNames())
-    if (!petsc_options.dont_add_these_options.contains(flag))
-      petsc_options.dont_add_these_options.setAdditionalValue(flag);
+    dontAddPetscFlag("-" + prefix + flag.substr(1), petsc_options);
   for (const auto & key : getCommonSNESKeys().getNames())
-    if (!petsc_options.dont_add_these_options.contains(key))
-      petsc_options.dont_add_these_options.setAdditionalValue(key);
+    dontAddPetscFlag("-" + prefix + key.substr(1), petsc_options);
 }
 
 std::unique_ptr<PetscMatrix<Number>>

@@ -11,7 +11,6 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "FEProblemBase.h"
-#include "PetscSupport.h"
 
 InputParameters
 LinearFVKernel::validParams()
@@ -40,10 +39,6 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
     _sys_num(_sys.number())
 {
   addMooseVariableDependency(&_var);
-
-  // LinearFV does not need SNES options, not adding them will avoid petsc
-  // unused option warnings.
-  Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
 }
 
 void
