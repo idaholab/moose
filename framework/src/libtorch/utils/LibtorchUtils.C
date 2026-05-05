@@ -74,6 +74,19 @@ vectorToTensorView(const std::vector<DataType> & vector, c10::IntArrayRef sizes)
 template torch::Tensor vectorToTensorView<Real>(const std::vector<Real> & vector,
                                                 c10::IntArrayRef sizes);
 
+void
+moveToLibtorchDevice(torch::Tensor & tensor, const torch::DeviceType device_type)
+{
+  tensor = tensor.to(device_type);
+}
+
+torch::Tensor
+toCPUContiguous(const torch::Tensor & tensor)
+{
+  // CPU accessors can handle strides, but data_ptr()-based reads require dense logical order.
+  return tensor.detach().to(tensor.options().device(at::kCPU)).contiguous();
+}
+
 template <typename DataType>
 void
 tensorToVector(torch::Tensor & tensor, std::vector<DataType> & vector)
