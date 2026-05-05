@@ -87,12 +87,13 @@ ExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
 
   if (name_without_prefix == "noise_variance")
   {
+    const auto options = x.options().dtype(at::kDouble);
     ExponentialFunction(dKdhp,
                         x,
                         x,
                         _length_factor,
-                        torch::tensor(0.0, at::kDouble),
-                        torch::tensor(1.0, at::kDouble),
+                        torch::tensor(0.0, options),
+                        torch::tensor(1.0, options),
                         _gamma,
                         true);
     return true;
@@ -100,12 +101,13 @@ ExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
 
   if (name_without_prefix == "signal_variance")
   {
+    const auto options = x.options().dtype(at::kDouble);
     ExponentialFunction(dKdhp,
                         x,
                         x,
                         _length_factor,
-                        torch::tensor(1.0, at::kDouble),
-                        torch::tensor(0.0, at::kDouble),
+                        torch::tensor(1.0, options),
+                        torch::tensor(0.0, options),
                         _gamma,
                         false);
     return true;

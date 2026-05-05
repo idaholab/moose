@@ -12,6 +12,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "GaussianProcessData.h"
+#include "LibtorchUtils.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcessData);
 
@@ -33,8 +34,20 @@ isVectorHyperParameter(const torch::Tensor & tensor)
 std::vector<Real>
 exportHyperParameter(const torch::Tensor & tensor)
 {
-  const auto flattened = tensor.reshape({-1}).contiguous();
+  auto cpu_tensor = LibtorchUtils::toCPUContiguous(tensor);
+  if (cpu_tensor.scalar_type() != at::kDouble)
+    cpu_tensor = cpu_tensor.to(at::kDouble).contiguous();
+  const auto flattened = cpu_tensor.reshape({-1});
   return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
+}
+
+Real
+exportScalarHyperParameter(const torch::Tensor & tensor)
+{
+  auto cpu_tensor = LibtorchUtils::toCPUContiguous(tensor);
+  if (cpu_tensor.scalar_type() != at::kDouble)
+    cpu_tensor = cpu_tensor.to(at::kDouble);
+  return cpu_tensor.item<Real>();
 }
 
 } // namespace
@@ -68,7 +81,7 @@ GaussianProcessData::initialize()
     if (isScalarHyperParameter(iter.second))
     {
       _hp_vector.push_back(&declareVector(iter.first));
-      _hp_vector.back()->push_back(iter.second.item<Real>());
+      _hp_vector.back()->push_back(exportScalarHyperParameter(iter.second));
       continue;
     }
 

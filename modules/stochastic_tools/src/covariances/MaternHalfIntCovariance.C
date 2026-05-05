@@ -9,6 +9,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "MaternHalfIntCovariance.h"
+#include "LibtorchUtils.h"
 #include <cmath>
 
 registerMooseObject("StochasticToolsApp", MaternHalfIntCovariance);
@@ -64,7 +65,7 @@ MaternHalfIntCovariance::maternHalfIntFunction(torch::Tensor & K,
                                                const torch::Tensor & p,
                                                const bool is_self_covariance)
 {
-  const auto p_value = cast_int<unsigned int>(p.item<Real>());
+  const auto p_value = cast_int<unsigned int>(LibtorchUtils::toCPUContiguous(p).item<Real>());
   mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
@@ -100,12 +101,13 @@ MaternHalfIntCovariance::computedKdhyper(torch::Tensor & dKdhp,
 
   if (name_without_prefix == "noise_variance")
   {
+    const auto options = x.options().dtype(at::kDouble);
     maternHalfIntFunction(dKdhp,
                           x,
                           x,
                           _length_factor,
-                          torch::tensor(0.0, at::kDouble),
-                          torch::tensor(1.0, at::kDouble),
+                          torch::tensor(0.0, options),
+                          torch::tensor(1.0, options),
                           _p,
                           true);
     return true;
@@ -113,12 +115,13 @@ MaternHalfIntCovariance::computedKdhyper(torch::Tensor & dKdhp,
 
   if (name_without_prefix == "signal_variance")
   {
+    const auto options = x.options().dtype(at::kDouble);
     maternHalfIntFunction(dKdhp,
                           x,
                           x,
                           _length_factor,
-                          torch::tensor(1.0, at::kDouble),
-                          torch::tensor(0.0, at::kDouble),
+                          torch::tensor(1.0, options),
+                          torch::tensor(0.0, options),
                           _p,
                           false);
     return true;
@@ -141,7 +144,7 @@ MaternHalfIntCovariance::computedKdlf(torch::Tensor & K,
                                       const torch::Tensor & p,
                                       const int ind)
 {
-  const auto p_value = cast_int<unsigned int>(p.item<Real>());
+  const auto p_value = cast_int<unsigned int>(LibtorchUtils::toCPUContiguous(p).item<Real>());
 
   mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 

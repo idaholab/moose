@@ -65,12 +65,13 @@ LMC::computeCovarianceMatrix(torch::Tensor & K,
                              const torch::Tensor & xp,
                              const bool is_self_covariance) const
 {
+  const auto options = x.options().dtype(at::kDouble);
   // Create temporary vectors for constructing the covariance matrix
-  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, at::kDouble);
-  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
-  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
+  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, options);
+  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, options);
+  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, options);
   torch::Tensor K_working =
-      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
+      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, options);
 
   // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
@@ -103,8 +104,9 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
     const std::string lambda_prefix = "lambda_";
 
     // Allocate storage for the factors of the total gradient matrix
-    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
-    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
+    const auto options = x.options().dtype(at::kDouble);
+    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]}, options);
 
     if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
@@ -126,9 +128,10 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
   else
   {
     // Allocate storage for the matrix factors
-    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
-    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
-    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
+    const auto options = x.options().dtype(at::kDouble);
+    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, options);
+    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]}, options);
 
     // First, check the dependent covariances
     bool found = false;

@@ -90,25 +90,31 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   if (inputs.empty())
     mooseError("There is no data for retraining.");
 
-  _training_params = torch::zeros({long(outputs.size()), long(inputs[0].size())}, at::kDouble);
-  _training_data = torch::zeros({long(outputs.size()), 1}, at::kDouble);
+  const auto input_size = inputs[0].size();
+  std::vector<Real> flat_inputs;
+  flat_inputs.reserve(outputs.size() * input_size);
 
-  auto params_accessor = _training_params.accessor<Real, 2>();
-  auto data_accessor = _training_data.accessor<Real, 2>();
-
-  for (unsigned int i = 0; i < outputs.size(); ++i)
+  for (const auto & input : inputs)
   {
-    data_accessor[i][0] = outputs[i];
-    for (unsigned int j = 0; j < inputs[i].size(); ++j)
-      params_accessor[i][j] = inputs[i][j];
+    if (input.size() != input_size)
+      mooseError("All active learning retraining inputs must have the same dimension.");
+    flat_inputs.insert(flat_inputs.end(), input.begin(), input.end());
   }
+
+  _training_params =
+      LibtorchUtils::vectorToTensorView(flat_inputs, {long(outputs.size()), long(input_size)})
+          .clone();
+  _training_data = LibtorchUtils::vectorToTensorView(outputs, {long(outputs.size()), 1}).clone();
+
+  LibtorchUtils::moveToLibtorchDevice(_training_params, _app.getLibtorchDevice());
+  LibtorchUtils::moveToLibtorchDevice(_training_data, _app.getLibtorchDevice());
 
   // Standardize (center and scale) training params
   if (_standardize_params)
     _gp.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp.paramStandardizer().set(0, 1, inputs[0].size());
+    _gp.paramStandardizer().set(0, 1, input_size);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
@@ -137,7 +143,8 @@ void
 ActiveLearningGaussianProcess::getNormTrainingOuts(std::vector<Real> & norm_training_outs) const
 {
   norm_training_outs.resize(_training_data.size(0));
-  const auto data_accessor = _training_data.accessor<Real, 2>();
+  const auto training_data = LibtorchUtils::toCPUContiguous(_training_data);
+  const auto data_accessor = training_data.accessor<Real, 2>();
   for (unsigned int i = 0; i < norm_training_outs.size(); ++i)
     norm_training_outs[i] = data_accessor[i][0];
 }

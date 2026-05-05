@@ -40,6 +40,21 @@ flattenOutputData(const torch::Tensor & output_data)
                         {output_data.size(0) * output_data.size(1), 1});
 }
 
+torch::TensorOptions
+doubleOptionsLike(const torch::Tensor & tensor)
+{
+  return tensor.options().dtype(at::kDouble);
+}
+
+torch::Tensor
+toOptions(const torch::Tensor & tensor, const torch::TensorOptions & options)
+{
+  auto result = tensor.to(options.device());
+  if (result.scalar_type() != at::kDouble)
+    result = result.to(at::kDouble);
+  return result;
+}
+
 bool
 isScalarHyperParameter(const torch::Tensor & tensor)
 {
@@ -57,18 +72,28 @@ exportHyperParameter(const torch::Tensor & tensor)
 {
   if (!isScalarHyperParameter(tensor) && !isVectorHyperParameter(tensor))
     mooseError("Unsupported hyperparameter rank ", tensor.dim(), ".");
-  const auto flattened = tensor.reshape({-1}).contiguous();
+  auto cpu_tensor = LibtorchUtils::toCPUContiguous(tensor);
+  if (cpu_tensor.scalar_type() != at::kDouble)
+    cpu_tensor = cpu_tensor.to(at::kDouble).contiguous();
+  const auto flattened = cpu_tensor.reshape({-1});
   return {flattened.data_ptr<Real>(), flattened.data_ptr<Real>() + flattened.numel()};
 }
 
 torch::Tensor
 buildVectorHyperParameter(const std::vector<Real> & values, const torch::TensorOptions & options)
 {
-  auto tensor = torch::empty({long(values.size())}, options.dtype(at::kDouble));
+  auto tensor = torch::empty({long(values.size())}, torch::TensorOptions().dtype(at::kDouble));
   auto tensor_accessor = tensor.accessor<Real, 1>();
   for (const auto index : index_range(values))
     tensor_accessor[index] = values[index];
-  return tensor;
+  return toOptions(tensor, options);
+}
+
+void
+moveHyperParameters(HyperParameterMap & hyperparameters, const torch::TensorOptions & options)
+{
+  for (auto & iter : hyperparameters)
+    iter.second = toOptions(iter.second, options);
 }
 
 void
@@ -76,11 +101,12 @@ updateHyperParameter(torch::Tensor & tensor,
                      const std::vector<Real> & values,
                      const std::string & name)
 {
-  auto options = tensor.options().dtype(at::kDouble);
+  const auto options = doubleOptionsLike(tensor);
   if (isScalarHyperParameter(tensor))
   {
     mooseAssert(values.size() == 1, "Scalar hyperparameter update requires a single value.");
-    tensor = torch::tensor(values[0], options);
+    tensor =
+        toOptions(torch::tensor(values[0], torch::TensorOptions().dtype(at::kDouble)), options);
   }
   else if (isVectorHyperParameter(tensor))
     tensor = buildVectorHyperParameter(values, options);
@@ -139,27 +165,36 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
                                        const torch::Tensor & training_data,
                                        const GPOptimizerOptions & opts)
 {
-  mooseAssert(training_params.dim() == 2, "GaussianProcess training parameters must be rank-2.");
-  mooseAssert(training_data.dim() == 2, "GaussianProcess training responses must be rank-2.");
+  const auto options = doubleOptionsLike(training_params);
+  const auto params = toOptions(training_params, options);
+  const auto data = toOptions(training_data, options);
 
-  const auto num_samples = training_params.size(0);
-  const auto num_outputs = training_data.size(1);
+  mooseAssert(params.dim() == 2, "GaussianProcess training parameters must be rank-2.");
+  mooseAssert(data.dim() == 2, "GaussianProcess training responses must be rank-2.");
 
-  mooseAssert(training_data.size(0) == num_samples,
+  const auto num_samples = params.size(0);
+  const auto num_outputs = data.size(1);
+
+  mooseAssert(data.size(0) == num_samples,
               "Training parameter and response sample counts must match.");
   mooseAssert(num_outputs == _num_outputs,
               "Training response dimension does not match the covariance output dimension.");
 
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= num_samples);
   _batch_size = batch_decision ? opts.batch_size : num_samples;
-  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}, at::kDouble);
+  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}, options);
+
+  _hyperparam_map.clear();
+  _covariance_function->buildHyperParamMap(_hyperparam_map);
+  moveHyperParameters(_hyperparam_map, options);
+  _covariance_function->loadHyperParamMap(_hyperparam_map);
 
   if (_tuning_data.size())
-    tuneHyperParamsAdam(training_params, training_data, opts);
+    tuneHyperParamsAdam(params, data, opts);
 
-  _K = torch::empty({num_samples * num_outputs, num_samples * num_outputs}, at::kDouble);
-  _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
-  const auto flattened_tensor = flattenOutputData(training_data);
+  _K = torch::empty({num_samples * num_outputs, num_samples * num_outputs}, options);
+  _covariance_function->computeCovarianceMatrix(_K, params, params, true);
+  const auto flattened_tensor = flattenOutputData(data);
 
   // Compute the Cholesky decomposition and inverse action of the covariance matrix.
   setupStoredMatrices(flattened_tensor);
@@ -230,16 +265,20 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
                                      const torch::Tensor & training_data,
                                      const GPOptimizerOptions & opts)
 {
+  const auto options = doubleOptionsLike(training_params);
   std::vector<Real> theta_values(_num_tunable, 0.0);
   _hyperparam_map.clear();
   _covariance_function->buildHyperParamMap(_hyperparam_map);
+  moveHyperParameters(_hyperparam_map, options);
+  _covariance_function->loadHyperParamMap(_hyperparam_map);
 
   mapToVec(_tuning_data, _hyperparam_map, theta_values);
 
   auto theta = torch::from_blob(theta_values.data(),
                                 {static_cast<long>(_num_tunable)},
                                 torch::TensorOptions().dtype(at::kDouble))
-                   .clone();
+                   .clone()
+                   .to(options.device());
 
   auto adam_options = torch::optim::AdamOptions(opts.learning_rate);
   adam_options.betas(std::make_tuple(opts.b1, opts.b2));
@@ -267,8 +306,8 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
 
     std::vector<int64_t> batch_indices_vec(v_sequence.begin(), v_sequence.begin() + _batch_size);
-    auto batch_indices =
-        torch::tensor(batch_indices_vec, torch::TensorOptions().dtype(torch::kLong));
+    auto batch_indices = torch::tensor(
+        batch_indices_vec, torch::TensorOptions().dtype(torch::kLong).device(options.device()));
     auto inputs = torch::index_select(training_params, 0, batch_indices);
     auto outputs = torch::index_select(training_data, 0, batch_indices);
 
@@ -280,7 +319,8 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     auto grad = torch::from_blob(grad_values.data(),
                                  {static_cast<long>(_num_tunable)},
                                  torch::TensorOptions().dtype(at::kDouble))
-                    .clone();
+                    .clone()
+                    .to(options.device());
     optimizer.zero_grad();
     theta.mutable_grad() = grad;
     torch::Tensor theta_before_step;
@@ -292,23 +332,17 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
       torch::NoGradGuard no_grad;
       if (use_legacy_update)
         theta -= opts.lambda * theta_before_step;
-      auto theta_accessor = theta.accessor<Real, 1>();
       for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
       {
         const auto first_index = std::get<0>(iter->second);
         const auto num_entries = std::get<1>(iter->second);
         const auto min_value = std::get<2>(iter->second);
         const auto max_value = std::get<3>(iter->second);
-        for (unsigned int ii = 0; ii < num_entries; ++ii)
-        {
-          const auto global_index = first_index + ii;
-          theta_accessor[global_index] =
-              std::min(std::max(theta_accessor[global_index], min_value), max_value);
-        }
+        theta.slice(0, first_index, first_index + num_entries).clamp_(min_value, max_value);
       }
     }
 
-    const auto theta_export = theta.detach().contiguous();
+    const auto theta_export = LibtorchUtils::toCPUContiguous(theta);
     const auto * theta_data = theta_export.data_ptr<Real>();
     theta_values.assign(theta_data, theta_data + theta_export.numel());
     vecToMap(_tuning_data, _hyperparam_map, theta_values);
@@ -350,7 +384,7 @@ GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
 std::vector<Real>
 GaussianProcess::getGradient(torch::Tensor & inputs) const
 {
-  torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, at::kDouble);
+  torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, doubleOptionsLike(inputs));
   torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);

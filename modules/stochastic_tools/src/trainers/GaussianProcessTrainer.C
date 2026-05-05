@@ -150,6 +150,9 @@ GaussianProcessTrainer::postTrain()
       data_accessor[ii][jj] = _data_buffer[ii][jj];
   }
 
+  LibtorchUtils::moveToLibtorchDevice(_training_params, _app.getLibtorchDevice());
+  LibtorchUtils::moveToLibtorchDevice(_training_data, _app.getLibtorchDevice());
+
   // Standardize (center and scale) training params
   if (_standardize_params)
     _gp.standardizeParameters(_training_params);
