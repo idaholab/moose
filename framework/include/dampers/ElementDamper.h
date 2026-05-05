@@ -43,6 +43,11 @@ public:
   Real computeDamping();
 
   /**
+   * Check whether this damper's variable has DOFs/components on the given element
+   */
+  bool variableDefinedOnElement(const Elem * elem) const;
+
+  /**
    * Get the variable this damper is acting on
    */
   MooseVariable * getVariable() { return &_var; }
