@@ -10,6 +10,7 @@
       jsondiff = "mogp_lmc_out.json"
       detail = "without tuning the hyperparameters."
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [tuned]
       type = 'JSONDiff'
@@ -18,6 +19,7 @@
       detail = "with tuning the hyperparameters."
       abs_zero = 1e-6
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [load]
       type = 'JSONDiff'
@@ -27,6 +29,7 @@
       prereq = lmc/tuned
       skip_keys = "reporters train_params"
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
 []

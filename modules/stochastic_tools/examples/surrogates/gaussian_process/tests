@@ -11,6 +11,7 @@
       allow_test_objects = true
       detail = "using fixed hyperparameters, "
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [tuned]
       type = CSVDiff
@@ -18,6 +19,7 @@
       csvdiff = 'gaussian_process_uniform_1D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
       capabilities = 'petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
       detail = "and tuned hyperparameters."
     []
   []
@@ -29,6 +31,7 @@
       csvdiff = 'gaussian_process_uniform_2D_out_cart_avg_0002.csv'
       allow_test_objects = true
       capabilities = 'method=opt & libtorch'
+      compute_devices = 'cpu cuda'
       detail = "using fixed hyperparameters, "
     []
     [tuned]
@@ -37,6 +40,7 @@
       csvdiff = 'gaussian_process_uniform_2D_tuned_out_cart_avg_0002.csv'
       allow_test_objects = true
       capabilities = 'method=opt & petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
       detail = "and tuned hyperparameters."
     []
   []
@@ -49,6 +53,7 @@
       heavy = true
       allow_test_objects = true
       capabilities = 'method=opt & petsc>=3.10.0 & libtorch'
+      compute_devices = 'cpu cuda'
       detail = "by first training a GP surrogate "
     []
     [test]
@@ -59,6 +64,7 @@
       min_parallel = 4
       allow_test_objects = true
       capabilities = 'method=opt & libtorch'
+      compute_devices = 'cpu cuda'
       prereq = 4D_HC_avg/train
       detail = "then evaluating the surrogate."
     []
