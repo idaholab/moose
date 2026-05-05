@@ -11,6 +11,8 @@
       max_parallel = 1
       cli_args = "Executioner/num_steps=2"
       detail = 'using a single processor and the Expected Improvment acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_4proc]
       type = 'JSONDiff'
@@ -21,6 +23,8 @@
       min_parallel = 4
       max_parallel = 4
       detail = 'using four processors and the Expected Improvment acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_PoI]
       type = 'JSONDiff'
@@ -30,6 +34,8 @@
       cli_args = "ParallelAcquisition/expectedimprovement/type='ProbabilityofImprovement' Outputs/file_base='al_poi' Executioner/num_steps=2"
       max_parallel = 1
       detail = 'using the Probability of Improvment acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_CoV]
       type = 'JSONDiff'
@@ -39,6 +45,8 @@
       cli_args = "ParallelAcquisition/expectedimprovement/type='CoefficientOfVariation' Outputs/file_base='al_cov'"
       max_parallel = 1
       detail = 'using the Coefficient of Variation acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_EIGF]
       type = 'JSONDiff'
@@ -48,6 +56,8 @@
       cli_args = "ParallelAcquisition/expectedimprovement/type='ExpectedImprovementGlobalFit' Outputs/file_base='al_eigf'"
       max_parallel = 1
       detail = 'using the Expected Improvement for Global Fit acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_UFunc]
       type = 'JSONDiff'
@@ -57,6 +67,8 @@
       cli_args = "ParallelAcquisition/expectedimprovement/type='UFunction' Outputs/file_base='al_ufunc'"
       max_parallel = 1
       detail = 'using the U-Function acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [al_UCB]
       type = 'JSONDiff'
@@ -66,6 +78,8 @@
       cli_args = "ParallelAcquisition/expectedimprovement/type='UpperConfidenceBound' Outputs/file_base='al_ucb'"
       max_parallel = 1
       detail = 'using the Upper Confidence Bound acquisition.'
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
   [Bayesian_active_learning]
@@ -78,6 +92,8 @@
       max_parallel = 1
       min_slots = 2
       detail = 'using the Bayesian posterior targeted acquisition; '
+      capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
 []

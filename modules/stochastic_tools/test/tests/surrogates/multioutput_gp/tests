@@ -12,6 +12,7 @@
       abs_zero = 1e-6
       rel_err = 1e-4
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [tuned]
       type = 'JSONDiff'
@@ -21,6 +22,7 @@
       abs_zero = 1e-6
       rel_err = 1e-4
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [load]
       type = 'JSONDiff'
@@ -32,6 +34,7 @@
       abs_zero = 1e-6
       rel_err = 1e-4
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
 []

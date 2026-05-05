@@ -10,6 +10,7 @@
       jsondiff = 'single_proc_single_row_ufunction.json'
       detail = 'a single row in the sampler using the U learning function;'
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
@@ -21,6 +22,7 @@
       detail = 'multiple rows in the sampler using the U learning function;'
       rel_err = 1.0e-4
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
 []

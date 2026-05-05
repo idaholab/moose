@@ -10,6 +10,7 @@
       jsondiff = 'single_proc_single_row_ufunction.json'
       detail = 'a single row in the sampler using the U learning function;'
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
@@ -19,6 +20,7 @@
       cli_args = "Samplers/mc/num_batch=2 Outputs/file_base='multiple_proc_multiple_row_ufunction'"
       detail = 'multiple rows in the sampler using the U learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [SingleProc_SingleRow_Ufunction_retraining]
       type = 'JSONDiff'
@@ -28,6 +30,7 @@
                  "Outputs/file_base='single_proc_single_row_ufunction_retraining'"
       detail = 'a single row in the sampler using the U learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
     [COV_squared_exp]
       type = 'JSONDiff'
@@ -38,6 +41,7 @@
                  "Outputs/file_base='cov_squared_exp'"
       detail = 'a single row in the sampler using the COV learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
+      compute_devices = 'cpu cuda'
     []
   []
 []
