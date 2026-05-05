@@ -12,6 +12,7 @@
 #include "SolveObject.h"
 
 class SolverSystem;
+class Convergence;
 
 /**
  * A solve object for use when wanting to solve multiple systems
@@ -35,4 +36,16 @@ protected:
 
   /// Number of nonlinear systems
   unsigned int _num_nl_systems;
+
+  /// Whether we are using fixed point iterations for multi-system
+  const bool _using_multi_sys_fp_iterations;
+  /// Convergence object to assess the convergence of the multi-system fixed point iteration
+  Convergence * _multi_sys_fp_convergence;
+  /// Per-system relaxation factors for multi-system fixed point iterations (expanded to
+  /// match the number/order of systems being solved)
+  std::vector<Real> _multi_sys_fp_relax_factors;
+
+private:
+  /// Initializes/expands the multi-system fixed point relaxation factors
+  void setupMultiSystemFixedPointRelaxationFactors();
 };
