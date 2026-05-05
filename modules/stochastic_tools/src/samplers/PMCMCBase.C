@@ -127,7 +127,6 @@ PMCMCBase::proposeSamples()
 void
 PMCMCBase::executeSetUp()
 {
-  // _seed_index = _t_step > 0 ? _t_step - 1 : 0;
   _seed_index = _t_step;
   _rand_index = 0;
 

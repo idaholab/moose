@@ -53,7 +53,7 @@ uint32_t
 MooseRandomPerturbation::permutePadded(uint32_t x) const
 {
   // Split x into the upper (L) and lower (R) half_bits-wide halves.
-  uint32_t L = (x >> _half_bits) & _half_mask;
+  uint32_t L = x >> _half_bits;
   uint32_t R = x & _half_mask;
 
   for (unsigned int r = 0; r < _rounds; ++r)
