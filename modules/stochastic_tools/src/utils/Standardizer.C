@@ -72,8 +72,8 @@ Standardizer::set(const std::vector<Real> & mean, const std::vector<Real> & stde
 {
   mooseAssert(mean.size() == stdev.size(),
               "Provided mean and standard deviation vectors are of differing size.");
-  _mean = LibtorchUtils::vectorToTensorView(mean, {long(mean.size()), 1}).clone();
-  _stdev = LibtorchUtils::vectorToTensorView(stdev, {long(stdev.size()), 1}).clone();
+  _mean = LibtorchUtils::vectorToTensorCopy(mean, {long(mean.size()), 1});
+  _stdev = LibtorchUtils::vectorToTensorCopy(stdev, {long(stdev.size()), 1});
 }
 
 void

@@ -22,6 +22,12 @@ class CovarianceFunctionBase : public MooseObject, public CovarianceInterface
 public:
   using HyperParameterMap = std::unordered_map<std::string, torch::Tensor>;
 
+  /// Return true if a hyperparameter tensor stores one scalar value
+  static bool isScalarHyperParameter(const torch::Tensor & tensor);
+
+  /// Return true if a hyperparameter tensor stores a vector of values
+  static bool isVectorHyperParameter(const torch::Tensor & tensor);
+
   static InputParameters validParams();
   CovarianceFunctionBase(const InputParameters & parameters);
 

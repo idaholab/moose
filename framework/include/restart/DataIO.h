@@ -441,10 +441,6 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, ADReal & dn, void * context);
-template <>
-void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
-template <>
-void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 #ifdef MOOSE_LIBTORCH_ENABLED
 template <>
 void dataStore(std::ostream & stream, torch::Tensor & t, void * context);
@@ -819,10 +815,6 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, ADReal & dn, void * context);
-template <>
-void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
-template <>
-void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 #ifdef MOOSE_LIBTORCH_ENABLED
 template <>
 void dataLoad(std::istream & stream, torch::Tensor & t, void * context);

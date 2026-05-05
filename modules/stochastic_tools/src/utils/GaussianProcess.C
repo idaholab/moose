@@ -55,22 +55,11 @@ toOptions(const torch::Tensor & tensor, const torch::TensorOptions & options)
   return result;
 }
 
-bool
-isScalarHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 0;
-}
-
-bool
-isVectorHyperParameter(const torch::Tensor & tensor)
-{
-  return tensor.dim() == 1;
-}
-
 std::vector<Real>
 exportHyperParameter(const torch::Tensor & tensor)
 {
-  if (!isScalarHyperParameter(tensor) && !isVectorHyperParameter(tensor))
+  if (!CovarianceFunctionBase::isScalarHyperParameter(tensor) &&
+      !CovarianceFunctionBase::isVectorHyperParameter(tensor))
     mooseError("Unsupported hyperparameter rank ", tensor.dim(), ".");
   auto cpu_tensor = LibtorchUtils::toCPUContiguous(tensor);
   if (cpu_tensor.scalar_type() != at::kDouble)
@@ -102,13 +91,13 @@ updateHyperParameter(torch::Tensor & tensor,
                      const std::string & name)
 {
   const auto options = doubleOptionsLike(tensor);
-  if (isScalarHyperParameter(tensor))
+  if (CovarianceFunctionBase::isScalarHyperParameter(tensor))
   {
     mooseAssert(values.size() == 1, "Scalar hyperparameter update requires a single value.");
     tensor =
         toOptions(torch::tensor(values[0], torch::TensorOptions().dtype(at::kDouble)), options);
   }
-  else if (isVectorHyperParameter(tensor))
+  else if (CovarianceFunctionBase::isVectorHyperParameter(tensor))
     tensor = buildVectorHyperParameter(values, options);
   else
     mooseError("Unsupported hyperparameter rank ", tensor.dim(), " for ", name, ".");
