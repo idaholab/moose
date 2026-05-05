@@ -28,9 +28,19 @@ checkInputCompatibility(const torch::Tensor & input, const torch::Tensor & refer
 }
 
 torch::Tensor
-asRowVector(const torch::Tensor & column_vector)
+toStandardizerOptions(const torch::Tensor & tensor, const torch::TensorOptions & options)
 {
-  return torch::transpose(column_vector, 0, 1);
+  auto result = tensor.to(options.device());
+  if (result.scalar_type() != at::kDouble)
+    result = result.to(at::kDouble);
+  return result;
+}
+
+torch::Tensor
+asRowVector(const torch::Tensor & column_vector, const torch::Tensor & input)
+{
+  return torch::transpose(
+      toStandardizerOptions(column_vector, input.options().dtype(at::kDouble)), 0, 1);
 }
 
 } // namespace
@@ -80,37 +90,39 @@ void
 Standardizer::getStandardized(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _mean);
-  input = (input - asRowVector(_mean)) / asRowVector(_stdev);
+  input = (input - asRowVector(_mean, input)) / asRowVector(_stdev, input);
 }
 
 void
 Standardizer::getDestandardized(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _mean);
-  input = input * asRowVector(_stdev) + asRowVector(_mean);
+  input = input * asRowVector(_stdev, input) + asRowVector(_mean, input);
 }
 
 void
 Standardizer::getDescaled(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _stdev);
-  input = input * asRowVector(_stdev);
+  input = input * asRowVector(_stdev, input);
 }
 
 void
 Standardizer::getScaled(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _stdev);
-  input = input / asRowVector(_stdev);
+  input = input / asRowVector(_stdev, input);
 }
 
 /// Helper for dataStore
 void
 Standardizer::storeHelper(std::ostream & stream, void * context) const
 {
-  auto mean_accessor = _mean.accessor<Real, 2>();
-  auto stdev_accessor = _stdev.accessor<Real, 2>();
-  unsigned int n = _mean.size(0);
+  const auto mean = LibtorchUtils::toCPUContiguous(_mean);
+  const auto stdev = LibtorchUtils::toCPUContiguous(_stdev);
+  auto mean_accessor = mean.accessor<Real, 2>();
+  auto stdev_accessor = stdev.accessor<Real, 2>();
+  unsigned int n = mean.size(0);
   dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
     dataStore(stream, mean_accessor[ii][0], context);

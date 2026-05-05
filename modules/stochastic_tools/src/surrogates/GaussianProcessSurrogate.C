@@ -80,19 +80,22 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   y = std::vector<Real>(n_outputs, 0.0);
   std = std::vector<Real>(n_outputs, 0.0);
 
+  const auto options = _training_params.options().dtype(at::kDouble);
+
   torch::Tensor test_points = torch::empty({1, n_dims}, at::kDouble);
   auto points_accessor = test_points.accessor<Real, 2>();
   for (unsigned int ii = 0; ii < n_dims; ++ii)
     points_accessor[0][ii] = x[ii];
+  test_points = test_points.to(options.device());
 
   _gp.getParamStandardizer().getStandardized(test_points);
 
   torch::Tensor K_train_test =
-      torch::empty({_training_params.sizes()[0] * n_outputs, n_outputs}).to(at::kDouble);
+      torch::empty({_training_params.sizes()[0] * n_outputs, n_outputs}, options);
 
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, _training_params, test_points, false);
-  torch::Tensor K_test = torch::empty({n_outputs, n_outputs}).to(at::kDouble);
+  torch::Tensor K_test = torch::empty({n_outputs, n_outputs}, options);
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   //  Compute the predicted mean value (centered)
@@ -110,8 +113,10 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   torch::Tensor std_dev_vec =
       torch::sqrt(torch::clamp_min(torch::diagonal(pred_var), 0.0)).unsqueeze(0);
   _gp.getDataStandardizer().getDescaled(std_dev_vec);
-  auto std_accessor = std_dev_vec.accessor<Real, 2>();
-  auto pred_value_accessor = pred_value.accessor<Real, 2>();
+  const auto std_dev_cpu = LibtorchUtils::toCPUContiguous(std_dev_vec);
+  const auto pred_value_cpu = LibtorchUtils::toCPUContiguous(pred_value);
+  auto std_accessor = std_dev_cpu.accessor<Real, 2>();
+  auto pred_value_accessor = pred_value_cpu.accessor<Real, 2>();
 
   for (const auto output_i : make_range(n_outputs))
   {
