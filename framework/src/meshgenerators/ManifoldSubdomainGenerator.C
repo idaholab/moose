@@ -102,7 +102,9 @@ ManifoldSubdomainGenerator::generate()
   TriangleManifold manifold(*manifold_mesh, _surface_tolerance);
 
   // On distributed meshes, only locally owned active elements are modified on each rank.
-  for (const auto & elem : mesh->active_local_element_ptr_range())
+  // TODO: This could technically be over local elements, but changing subdomains asynchronously
+  // causes issues in downstream mesh generators like BlockDeletionGenerator.
+  for (const auto & elem : mesh->active_element_ptr_range())
   {
     if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
       continue;

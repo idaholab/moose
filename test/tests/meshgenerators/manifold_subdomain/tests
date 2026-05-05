@@ -3,33 +3,34 @@
   issues = '#32763'
 
   [stl_manifold]
+    requirement = 'The sytem shall assign a subdomain to 3D mesh elements whose vertex-average points '
     [basic_inside]
       type = RunApp
       input = basic.i
-      requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie inside a closed STL manifold.'
+      detail = 'lie inside a closed STL manifold;'
     []
     [outside]
       type = RunApp
       input = basic.i
       cli_args = 'Mesh/apply/location=OUTSIDE expected="8 56"'
-      requirement = 'The system shall assign a subdomain to 3D mesh elements whose vertex-average points lie outside a closed STL manifold.'
+      detail = 'lie outside a closed STL manifold.'
     []
     [restricted]
       type = RunApp
       input = restricted.i
-      requirement = 'The system shall restrict manifold subdomain assignment to selected existing subdomains.'
+      detail = 'lie inside a closed STL manifold and already assigned a specified subdomain;'
     []
     [rotated_translated]
       type = RunApp
       input = basic.i
       cli_args = 'Mesh/rotate/vector_value="0 0 45" expected="56 8"'
-      requirement = 'The system shall support rigid-body rotation and translation of the STL containment geometry.'
+      detail = 'lie inside a closed STL manifold that has been translated and rotated;'
     []
     [scaled]
       type = RunApp
       input = basic.i
       cli_args = 'Mesh/scale/vector_value="2 2 2" expected="64"'
-      requirement = 'The system shall support scaling STL geometry before rotation and translation for unit conversion workflows.'
+      detail = 'lie inside a closed STL manifold that has been scaled.'
     []
   []
 
@@ -38,46 +39,49 @@
     [positive]
       type = RunApp
       input = cone.i
+      cli_args='Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10 expected=188'
       detail = 'the manifold or'
     []
     [negative]
       type = RunApp
       input = cone.i
-      cli_args = 'Mesh/tag/location=OUTSIDE expected="12650"'
+      cli_args = 'Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10
+                  Mesh/tag/location=OUTSIDE expected="812"'
       detail = 'the space around the manifold.'
     []
   []
 
   [errors]
+    requirement = 'The system shall report an error if '
     [invalid_input_dimension]
       type = RunException
       input = invalid_input_dimension.i
       expect_err = 'Only 3D meshes are supported.'
-      requirement = 'The system shall report an error if manifold subdomain assignment is requested on a non-3D mesh.'
+      detail = 'manifold subdomain assignment is requested on a non-3D mesh;'
     []
     [invalid_manifold_dimension]
       type = RunException
       input = invalid_manifold_dimension.i
       expect_err = 'Only 2D meshes are supported.'
-      requirement = 'The system shall report an error if manifold subdomain assignment is requested using non-2D manifold mesh.'
+      detail = 'manifold subdomain assignment is requested using non-2D manifold mesh;'
     []
     [open_surface]
       type = RunException
       input = open_surface.i
       expect_err = 'At least one triangle without three neighbors was found.'
-      requirement = 'The system shall report an error if the surface is open or non-manifold.'
+      detail = 'the surface is open or non-manifold;'
     []
     [non_tri]
       type = RunException
       input = non_tri.i
       expect_err = "At least one non-Tri3 element was found."
-      requirement = 'The system shall report an error if the manifold has non-TRI elements.'
+      detail = 'the manifold has non-TRI elements;'
     []
     [distributed]
       type = RunException
       input = distributed.i
       expect_err = "Manifold mesh must NOT be distributed."
-      requirement = 'The system shall report an error if the manifold mesh is not serialized.'
+      detail = 'the manifold mesh is not serialized;'
     []
   []
 []
