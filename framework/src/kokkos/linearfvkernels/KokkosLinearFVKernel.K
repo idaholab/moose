@@ -13,7 +13,6 @@
 
 #include "Attributes.h"
 #include "FEProblemBase.h"
-#include "PetscSupport.h"
 
 namespace Moose::Kokkos
 {
@@ -37,10 +36,6 @@ LinearFVKernel::LinearFVKernel(const InputParameters & parameters)
                               Moose::VarKindType::VAR_SOLVER,
                               Moose::VarFieldType::VAR_FIELD_STANDARD));
   _kokkos_var.init(var, Moose::SOLUTION_TAG);
-
-  // LinearFV does not need SNES options, not adding them will avoid petsc
-  // unused option warnings.
-  Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
 }
 
 LinearFVKernel::LinearFVKernel(const LinearFVKernel & object)
