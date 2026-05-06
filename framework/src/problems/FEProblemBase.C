@@ -40,6 +40,7 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "Convergence.h"
+#include "NonlinearPreconditioning.h"
 #include "NonlinearSystem.h"
 #include "LinearSystem.h"
 #include "SolverSystem.h"
@@ -1328,6 +1329,9 @@ FEProblemBase::initialSetup()
   // Call initialSetup on the solver systems
   for (auto & sys : _solver_systems)
     sys->initialSetup();
+
+  if (_nl_preconditioning)
+    _nl_preconditioning->initialSetup();
 
   // Auxilary variable initialSetup calls
   _aux->initialSetup();
@@ -6895,6 +6899,15 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
   // Do not worry, DM setup is very cheap
   _current_nl_sys->setupDM();
+
+  // Re-wire the nonlinear preconditioner onto the (possibly freshly-created) outer SNES.
+  // Must happen after setupDM() and before solve() for the same reason as setupDM().
+  if (_nl_preconditioning)
+  {
+    const auto & inner = _nl_preconditioning->innerSysNums();
+    if (!std::count(inner.begin(), inner.end(), nl_sys_num))
+      _nl_preconditioning->wireToSNES(nl_sys_num);
+  }
 
   possiblyRebuildGeomSearchPatches();
 

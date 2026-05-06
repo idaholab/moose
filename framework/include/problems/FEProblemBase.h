@@ -101,6 +101,7 @@ class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
+class NonlinearPreconditioning;
 
 namespace Moose
 {
@@ -853,6 +854,18 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
+
+  /// Store the nonlinear preconditioning object (called from SetupNonlinearPreconditioningAction).
+  void setNonlinearPreconditioning(std::shared_ptr<NonlinearPreconditioning> nlp)
+  {
+    _nl_preconditioning = std::move(nlp);
+  }
+
+  /// Returns the NonlinearPreconditioning object, or nullptr if none has been configured.
+  NonlinearPreconditioning * getNonlinearPreconditioning() const
+  {
+    return _nl_preconditioning.get();
+  }
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
@@ -3070,6 +3083,9 @@ protected:
 
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
+
+  /// Nonlinear preconditioning object (null if [NonlinearPreconditioning] block is absent).
+  std::shared_ptr<NonlinearPreconditioning> _nl_preconditioning;
 
   /// The current nonlinear system that we are solving
   NonlinearSystemBase * _current_nl_sys;
