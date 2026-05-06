@@ -447,12 +447,26 @@ EFAFragment3D::connectSubfaces(EFAFace * start_face,
     new_frag->addFace(frag_faces[i]);
   new_frag->findFacesAdjacentToFaces();
 
+  // Collect ALL lone edges from every fragment face.
+  //
+  // The original code called loneEdgeOnFace() which returns only the FIRST lone edge
+  // per face.  That assumption breaks when the fragment contains sub-faces of a
+  // previously-established cut-plane face (i.e., crack growth cuts through a face that
+  // was itself created as the cut-plane in an earlier growth step).  Such sub-faces
+  // inherit multiple perimeter edges from the old cut-plane polygon; all of those
+  // perimeter edges are "lone" in the new fragment because no adjacent sub-face claims
+  // them.  Collecting only the first lone edge per face leaves the remaining perimeter
+  // edges out of the new cut-plane edge set, producing an open chain that cannot be
+  // sorted into a cycle by sortEdges().
+  //
+  // Collecting all lone edges is always correct: in the normal case every fragment face
+  // contributes exactly one lone edge (the single new cut edge), so the result is
+  // identical to the old behaviour.  In the multi-growth case, every lone edge on every
+  // face is a genuine boundary of the new cut plane and must appear in the cycle.
   for (unsigned int i = 0; i < new_frag->numFaces(); ++i)
-  {
-    EFAEdge * lone_edge = new_frag->loneEdgeOnFace(i);
-    if (lone_edge != nullptr) // valid edge
-      cut_plane_edges.push_back(new EFAEdge(*lone_edge));
-  }
+    for (unsigned int j = 0; j < new_frag->getFace(i)->numEdges(); ++j)
+      if (new_frag->getAdjacentFace(i, j) == nullptr)
+        cut_plane_edges.push_back(new EFAEdge(*new_frag->getFace(i)->getEdge(j)));
 
   EFAFace * cut_face = new EFAFace(cut_plane_edges.size());
   for (unsigned int i = 0; i < cut_plane_edges.size(); ++i)

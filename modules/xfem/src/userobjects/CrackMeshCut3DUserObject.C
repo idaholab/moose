@@ -200,6 +200,7 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
 
     std::vector<unsigned int> cut_edges;
     std::vector<Real> cut_pos;
+    std::vector<Point> cut_points;
 
     for (unsigned int j = 0; j < n_edges; j++)
     {
@@ -226,14 +227,36 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
         Point intersection;
         if (intersectWithEdge(*node1, *node2, vertices, intersection))
         {
-          cut_edges.push_back(j);
-          cut_pos.emplace_back(getRelativePosition(*node1, *node2, intersection));
+          const Real position = getRelativePosition(*node1, *node2, intersection);
+          bool duplicate = false;
+          for (const auto & cut_point : cut_points)
+            if ((intersection - cut_point).norm() < Xfem::tol)
+            {
+              duplicate = true;
+              break;
+            }
+
+          if (!duplicate)
+          {
+            cut_edges.push_back(j);
+            cut_pos.push_back(position);
+            cut_points.push_back(intersection);
+            // A planar crack surface crosses each structural face edge at most once.
+            // Stop after the first valid hit so that adjacent cutter triangles sharing
+            // a cutter edge or vertex cannot produce a second entry for the same
+            // structural face edge (which would give cut_edges.size() > 2 for a
+            // legitimately two-edge cut and prevent the face from being marked cut,
+            // or - if the physical-distance duplicate check is slightly too tight -
+            // yield two entries for the same edge index that reach EFA and corrupt
+            // the cut-plane edge topology that EFAFace::sortEdges() requires).
+            break;
+          }
         }
       }
     }
 
     // if two edges of an element are cut, it is considered as an element being cut
-    if (cut_edges.size() == 2)
+    if (cut_edges.size() == 2 && cut_edges[0] != cut_edges[1])
     {
       elem_cut = true;
       Xfem::CutFace mycut;
