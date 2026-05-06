@@ -29,8 +29,16 @@ ParMixedBilinearForm::Assemble(int skip_zeros)
 
   // TODO: Replace this with new mfem::ParSubMesh::IsParSubMesh implementation
   // that checks whether a mesh is a submesh of a given parent mesh.
-  // Requires MFEM dependency update.
-  if (mfem::ParSubMesh::IsParSubMesh(trial_pfes->GetParMesh()))
+  // Requires MFEM dependency update; introduced in https://github.com/mfem/mfem/pull/5239.
+  auto check_submesh = [](const mfem::ParMesh * sub, const mfem::ParMesh * parent)
+  {
+    while (mfem::ParSubMesh::IsParSubMesh(sub) &&
+           (sub = static_cast<const mfem::ParSubMesh *>(sub)->GetParent()) && sub != parent)
+      ;
+    return sub == parent;
+  };
+
+  if (check_submesh(trial_pfes->GetParMesh(), test_pfes->GetParMesh()))
     SubMeshTolerantAssemble(skip_zeros);
   else
     MixedBilinearForm::Assemble(skip_zeros);
@@ -228,6 +236,7 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
       }
     }
 
+    mfem::DofTransformation dom_dof_trans, ran_dof_trans;
     for (int i = 0; i < trial_fes->GetNBE(); i++)
     {
       const int bdr_attr = mesh->GetBdrAttribute(i);
@@ -240,8 +249,8 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
       if (ftr != NULL)
       {
         const int parent_elem_1 = parent_element_ids[ftr->Elem1No];
-        trial_fes->GetElementVDofs(ftr->Elem1No, trial_vdofs);
-        test_fes->GetElementVDofs(parent_elem_1, test_vdofs);
+        trial_fes->GetElementVDofs(ftr->Elem1No, trial_vdofs, dom_dof_trans);
+        test_fes->GetElementVDofs(parent_elem_1, test_vdofs, ran_dof_trans);
         trial_fe1 = trial_fes->GetFE(ftr->Elem1No);
         test_fe1 = test_fes->GetFE(parent_elem_1);
         // The test_fe2 object is really a dummy and not used on the
@@ -259,6 +268,7 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
 
           boundary_face_integs[k]->AssembleFaceMatrix(
               *trial_fe1, *test_fe1, *trial_fe2, *test_fe2, *ftr, elemmat);
+          TransformDual(ran_dof_trans, dom_dof_trans, elemmat);
           mat->AddSubMatrix(test_vdofs, trial_vdofs, elemmat, skip_zeros);
         }
       }
