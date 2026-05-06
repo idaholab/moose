@@ -4,7 +4,8 @@ This kernel implements irradiation-consistent temperature source.
 
 ## Overview
 
-The temperature source implemented reads as follows [!citep](larsen2002):
+The temperature source implemented reads as follows (see Eq. 3.6 in [!citep](larsen2002)):
+
 \begin{equation}
 {\sum}_{i}{\nabla}{\cdot}{\frac{1}{\kappa}}{\nabla}{(a_1\psi_1+a_2\psi_2)}
 \end{equation}

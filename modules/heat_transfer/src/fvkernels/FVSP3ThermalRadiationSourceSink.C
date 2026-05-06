@@ -18,7 +18,8 @@ InputParameters
 FVSP3ThermalRadiationSourceSink::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addClassDescription("Elemental kernel to the thermal radiation source and sink.");
+  params.addClassDescription("Elemental kernel computing the thermal radiation source and sink "
+                             "using the Planckian distribution for photon radiation.");
 
   params.addRequiredRangeCheckedParam<MooseFunctorName>(
       "T", "T>0", "The temperature of the medium.");
@@ -34,7 +35,7 @@ FVSP3ThermalRadiationSourceSink::validParams()
       "refraction_index", 1.0, "The refraction index in the spectral band.");
   params.addRequiredParam<MooseFunctorName>("kappa", "The absorptivity of the medium.");
 
-  params.addParam<std::string>("planck_units", "J*s", "Units for the Plank constant");
+  params.addParam<std::string>("planck_units", "J*s", "Units for the Planck constant");
   params.addParam<std::string>("speedoflight_units", "m/s", "Units for the Speed of Light");
   params.addParam<std::string>("boltzmann_units", "J/K", "Units for the Boltzmann constant");
 
@@ -77,6 +78,7 @@ FVSP3ThermalRadiationSourceSink::computeQpResidual()
   const auto T = _T(elem_arg, old_state);
   ADReal thermal_rad_source;
 
+  // Multi-band model
   if (_nu_low)
   {
     const auto n1 = _n1(elem_arg, state);
@@ -97,6 +99,7 @@ FVSP3ThermalRadiationSourceSink::computeQpResidual()
                                                                           _sol_units,
                                                                           _boltzmann_units);
   }
+  // Single band model
   else
   {
     const auto n1_pow_2 = Utility::pow<2>(_n1(elem_arg, state));

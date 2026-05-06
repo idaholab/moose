@@ -33,7 +33,7 @@ FVSP3TemperatureBC::validParams()
   params.addRequiredParam<Real>("nu1", "The maximum opaque frequency.");
   params.addRequiredParam<Real>("nu_min", "The minimum frequency");
 
-  params.addParam<std::string>("planck_units", "J*s", "Units for the Plank constant");
+  params.addParam<std::string>("planck_units", "J*s", "Units for the Planck constant");
   params.addParam<std::string>("speedoflight_units", "m/s", "Units for the Speed of Light");
   params.addParam<std::string>("boltzmann_units", "J/K", "Units for the Boltzmann constant");
 
@@ -54,7 +54,6 @@ FVSP3TemperatureBC::FVSP3TemperatureBC(const InputParameters & parameters)
     _planck_units(getParam<std::string>("planck_units")),
     _sol_units(getParam<std::string>("speedoflight_units")),
     _boltzmann_units(getParam<std::string>("boltzmann_units"))
-
 {
 }
 

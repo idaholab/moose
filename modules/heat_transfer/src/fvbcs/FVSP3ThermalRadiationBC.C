@@ -31,7 +31,7 @@ FVSP3ThermalRadiationBC::validParams()
       "The higher frequency for integration of the thermal radiation band.");
 
   params.addParam<MooseFunctorName>(
-      "refraction_index", 1.0, "The refraction index in the spectral band.");
+      "refraction_index", 1.0, "The refraction index in the spectral band (interior medium).");
 
   params.addRequiredParam<MooseFunctorName>("epsilon", "The optical thickness of the medium.");
   params.addRequiredParam<MooseFunctorName>(
@@ -44,7 +44,7 @@ FVSP3ThermalRadiationBC::validParams()
   params.addRequiredParam<MooseFunctorName>("beta", "Second term Coefficient");
   params.addRequiredParam<MooseFunctorName>("eta", "Third term Coefficient");
 
-  params.addParam<std::string>("planck_units", "J*s", "Units for the Plank constant");
+  params.addParam<std::string>("planck_units", "J*s", "Units for the Planck constant");
   params.addParam<std::string>("speedoflight_units", "m/s", "Units for the Speed of Light");
   params.addParam<std::string>("boltzmann_units", "J/K", "Units for the Boltzmann constant");
 
@@ -69,13 +69,9 @@ FVSP3ThermalRadiationBC::FVSP3ThermalRadiationBC(const InputParameters & paramet
     _boltzmann_units(getParam<std::string>("boltzmann_units"))
 {
   if (_order == "first")
-  {
     _squared_mu_order = _squared_mu_1;
-  }
   else
-  {
     _squared_mu_order = _squared_mu_2;
-  }
 
   if (_nu_low && !_nu_high)
     paramError(

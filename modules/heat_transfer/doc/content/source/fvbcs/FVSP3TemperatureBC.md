@@ -4,7 +4,8 @@ This boundary condition implements the Robin boundary conditions for the Tempera
 
 ## Overview
 
-The Robin boundary condition implemented reads as follows [!citep](larsen2002):
+The Robin boundary condition implemented reads as follows (see Eq. 1.4c in [!citep](larsen2002)):
+
 \begin{equation}
 \frac{1}{\varepsilon k}
 \left[
@@ -26,7 +27,8 @@ where:
 - $\nu_{1}$ is the maximum opaque frequency of the medium (SI units ($s^{-1}$))
 - $B$ is the monochromatic black body radiation intensity from under Planck function (SI unit ($W sr^{-1} m^{-2}$))
 
-Plank function:
+Planck function:
+
 \begin{equation}
 {B}({T},{\nu}) = {\frac{n_1^2}{c_0^2}}{\frac{2{h_p}{\nu^3}}{e^{{{h_p}{\nu}}/{({k_B}{T})}}-1}}
 \end{equation}

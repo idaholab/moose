@@ -4,7 +4,8 @@ This kernel implements the thermal radiative diffusion term for the SP3 thermal 
 
 ## Overview
 
-The diffusion term implemented reads as follows [!citep](larsen2002):
+The diffusion term implemented reads as follows (see 2.16 a \& b from [!citep](larsen2002)):
+
 \begin{equation}
 -{\nabla}{\cdot}{\frac{{\varepsilon}^2{\mu_i}^2}{{\kappa}}}{\nabla}{\psi_i}
 \end{equation}

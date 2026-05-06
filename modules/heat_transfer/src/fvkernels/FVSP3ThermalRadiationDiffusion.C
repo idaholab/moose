@@ -76,7 +76,6 @@ FVSP3ThermalRadiationDiffusion::computeQpResidual()
     const auto absorptivity_neighbor_val = _absorptivity(neighborArg(), state);
     const auto absorptivity_neighbor =
         absorptivity_neighbor_val > 1e-12 ? absorptivity_neighbor_val : 1e-12;
-    ;
 
     // Face interpolate coefficients
     interpolate(_coeff_interp_method,

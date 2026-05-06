@@ -12,9 +12,8 @@
 #include "FVFluxBC.h"
 
 /**
- * Robin boundary condition (temperatures) for finite volume scheme between
- * a solid and fluid where the temperatures and heat transfer coefficient
- * are given as a functors
+ * Temperature boundary condition with convection and Planckian radiation with refraction.
+ * This BC assumes heat conduction in the connected volume.
  */
 class FVSP3TemperatureBC : public FVFluxBC
 {

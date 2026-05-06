@@ -12,9 +12,10 @@
 #include "FVFluxBC.h"
 
 /**
- * Robin boundary condition (temperatures) for finite volume scheme between
- * a solid and fluid where the temperatures and heat transfer coefficient
- * are given as a functors
+ * Flux moment boundary condition with Planckian radiation with refraction.
+ * This BC is derived for SP3 thermal transport with Planckian radiation in the volume.
+ * It can be used in both single-band and multi-band cases.
+ * NOTE: a band is the equivalent to an energy group in neutron transport
  */
 class FVSP3ThermalRadiationBC : public FVFluxBC
 {
