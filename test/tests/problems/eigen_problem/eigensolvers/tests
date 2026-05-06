@@ -198,6 +198,7 @@
     type = 'RunException'
     input = 'dg_krylovschur.i'
     expect_err = 'This object has been marked as contributing to B or Bx but the eigen problem type is not a generalized one'
+    capabilities = 'slepc'
     requirement = "The system shall error if a user requests a standard eigenvalue solve when there are objects marked to contribute to the Bx vector or B matrix."
     cli_args = "Kernels/inactive=''"
   []
