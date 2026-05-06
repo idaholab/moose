@@ -40,6 +40,7 @@
       type = RunApp
       input = cone.i
       cli_args='Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10 expected=188'
+      recover = false # See #32882
       detail = 'the manifold or'
     []
     [negative]
@@ -47,6 +48,7 @@
       input = cone.i
       cli_args = 'Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10
                   Mesh/tag/location=OUTSIDE expected="812"'
+      recover = false # See #32882
       detail = 'the space around the manifold.'
     []
   []
