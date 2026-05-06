@@ -69,8 +69,6 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _portion(getParam<MooseEnum>("portion"))
 {
-  declareMeshProperty("use_distributed_mesh", false);
-
   if (_num_sectors % 2 != 0)
     paramError("num_sectors", "must be an even number.");
 

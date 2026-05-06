@@ -133,7 +133,6 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     _partition_method(getParam<MooseEnum>("partition")),
     _num_side_layers(getParam<unsigned>("num_side_layers"))
 {
-  declareMeshProperty("use_distributed_mesh", true);
 }
 
 template <>
