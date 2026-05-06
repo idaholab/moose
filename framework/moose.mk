@@ -553,11 +553,11 @@ prebuild:: | $(moose_config)
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
 moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(MOOSE_KOKKOS_LIB) $(pycapabilities_LIB)
 
-# Check for support for process substitution, and if supported, we delete a known warning on MacOS from
-# the output because it is printed thousands of times
+# Check for support for process substitution, and if supported, we delete known warnings on MacOS from
+# the output because they are printed many times
 CHECK_PROCESS_SUBSTITUTION := $(shell bash -c 'echo hello > >(cat)')
 ifeq ($(CHECK_PROCESS_SUBSTITUTION),hello)
-  SILENCE_SOME_WARNINGS = 1> >(cat >&1) 2> >(grep -v "could not create compact unwind for" >&2)
+  SILENCE_SOME_WARNINGS = 1> >(cat >&1) 2> >(grep -Ev "could not create compact unwind for|duplicate -rpath" >&2)
 endif
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
