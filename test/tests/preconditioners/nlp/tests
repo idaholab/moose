@@ -1,0 +1,12 @@
+[Tests]
+  design = 'NonlinearPreconditioning.md'
+  issues = '#32860'
+
+  [nlp_basic]
+    type = Exodiff
+    input = 'nlp_basic.i'
+    exodiff = 'nlp_basic_out.e'
+    requirement = 'The system shall support a NonlinearPreconditioning block that solves a subset '
+                  'of nonlinear systems as a nonlinear preconditioner before each outer Newton step.'
+  []
+[]

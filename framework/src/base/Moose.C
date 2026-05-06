@@ -253,6 +253,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_preconditioning",              MoosePreconditioner,       false);
   registerMooseObjectTask("add_field_split",                  Split,                     false);
+  registerTask           ("add_nl_preconditioning",                                      false);
 
   registerMooseObjectTask("add_mesh_division",                MeshDivision,              false);
   registerMooseObjectTask("add_user_object",                  UserObject,                false);
@@ -444,6 +445,7 @@ addActionTypes(Syntax & syntax)
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_field_split)" // split objects required before field split preconditioner itself
                            "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
+                           "(add_nl_preconditioning)"
                            "(create_tagged_matrices)"
                            "(add_distribution)"
                            "(add_sampler)"
@@ -763,6 +765,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Note: Preconditioner Actions will be built by this setup action
   registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
+
+  registerSyntax("SetupNonlinearPreconditioningAction", "NonlinearPreconditioning");
 
   registerSyntax("CreateExecutionerAction", "Executioner");
   registerSyntax("ReadExecutorParamsAction", "Executors/*");
