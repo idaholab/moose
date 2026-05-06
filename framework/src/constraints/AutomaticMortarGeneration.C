@@ -252,6 +252,20 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
         std::make_unique<ReplicatedMesh>(_mesh.comm(), _mesh.spatial_dimension());
 }
 
+std::string
+AutomaticMortarGeneration::mortarInterfaceName() const
+{
+  std::vector<std::string> string_vec(_primary_secondary_boundary_id_pairs.size() * 2 + 1);
+  for (const auto i : index_range(_primary_secondary_boundary_id_pairs))
+  {
+    const auto [primary_bnd_id, secondary_bnd_id] = _primary_secondary_boundary_id_pairs[i];
+    string_vec[2 * i] = std::to_string(primary_bnd_id);
+    string_vec[2 * i + 1] = std::to_string(secondary_bnd_id);
+  }
+  string_vec.back() = _on_displaced ? "displaced" : "undisplaced";
+  return MooseUtils::join(string_vec, "_");
+}
+
 void
 AutomaticMortarGeneration::initOutput()
 {
@@ -263,10 +277,7 @@ AutomaticMortarGeneration::initOutput()
   _output_params->set<FEProblemBase *>("_fe_problem_base") = &_app.feProblem();
   _output_params->set<MooseApp *>(MooseBase::app_param) = &_app;
   _output_params->set<std::string>(MooseBase::name_param) =
-      "mortar_nodal_geometry_" +
-      std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
-      std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +
-      (_on_displaced ? "displaced" : "undisplaced");
+      "mortar_nodal_geometry_" + mortarInterfaceName();
   _output_params->finalize("MortarNodalGeometryOutput");
   _app.getOutputWarehouse().addOutput(std::make_shared<MortarNodalGeometryOutput>(*_output_params));
 }
@@ -928,16 +939,24 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
-  {
-    ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
-
-    // Default to non-HDF5 output for wider compatibility
-    mortar_segment_mesh_writer.set_hdf5_writing(false);
-
-    mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
-  }
+    outputMortarMesh();
 
   buildCouplingInformation();
+}
+
+void
+AutomaticMortarGeneration::outputMortarMesh()
+{
+  ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
+
+  // Default to non-HDF5 output for wider compatibility
+  mortar_segment_mesh_writer.set_hdf5_writing(false);
+
+  std::array<std::string, 3> file_pieces = {
+      _app.getOutputFileBase(/*for_non_moose_build_output=*/true),
+      mortarInterfaceName(),
+      "mortar_segment_mesh.e"};
+  mortar_segment_mesh_writer.write(MooseUtils::join(file_pieces, "_"));
 }
 
 void
@@ -1343,12 +1362,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (msm_el->type() != TRI3)
         msm_el->subdomain_id()++;
 
-    ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
-
-    // Default to non-HDF5 output for wider compatibility
-    mortar_segment_mesh_writer.set_hdf5_writing(false);
-
-    mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
+    outputMortarMesh();
 
     // Undo increment
     for (const auto msm_el : _mortar_segment_mesh->active_local_element_ptr_range())
@@ -1436,49 +1450,97 @@ AutomaticMortarGeneration::buildCouplingInformation()
   TIMPI::push_parallel_vector_data(_mesh.comm(), coupling_info, action_functor);
 }
 
+std::vector<AutomaticMortarGeneration::MsmSubdomainStats>
+AutomaticMortarGeneration::computeMsmStatistics()
+{
+  std::vector<MsmSubdomainStats> result;
+  StatisticsVector<Real> primary;
+  StatisticsVector<Real> secondary;
+  StatisticsVector<Real> msm;
+  std::unordered_set<dof_id_type> primary_elems_seen;
+
+  for (const auto & [primary_subd_id, secondary_subd_id] : _primary_secondary_subdomain_id_pairs)
+  {
+    for (const auto * const secondary_el :
+         _mesh.active_local_subdomain_element_ptr_range(secondary_subd_id))
+    {
+      secondary.push_back(secondary_el->volume());
+      // We may not have projected onto a primary face in which case we may not have created mortar
+      // segments
+      if (auto it = _secondary_elems_to_mortar_segments.find(secondary_el->id());
+          it != _secondary_elems_to_mortar_segments.end())
+        for (const auto * const msm_elem : it->second)
+        {
+          msm.push_back(msm_elem->volume());
+          const auto & msm_info = libmesh_map_find(_msm_elem_to_info, msm_elem);
+          // Now it's also possible that we didn't project onto a primary face and we *did* create
+          // mortar segments
+          if (msm_info.primary_elem)
+          {
+            if (msm_info.primary_elem->subdomain_id() != primary_subd_id)
+              mooseError("Unhandled primary-secondary pairing when computing mortar segment "
+                         "statistics. This could happen if you have the same secondary "
+                         "lower-dimensional subdomain ID paired with multiple lower-dimensional "
+                         "primary subdomain IDs. Contact a MOOSE developer for help.");
+            if (const auto [_, inserted] = primary_elems_seen.insert(msm_info.primary_elem->id());
+                inserted)
+              primary.push_back(msm_info.primary_elem->volume());
+          }
+        }
+    }
+
+    _mesh.comm().allgather(static_cast<std::vector<Real> &>(primary));
+    _mesh.comm().allgather(static_cast<std::vector<Real> &>(secondary));
+    _mesh.comm().allgather(static_cast<std::vector<Real> &>(msm));
+
+    MsmSubdomainStats stats;
+    stats.primary_subd_id = primary_subd_id;
+    stats.secondary_subd_id = secondary_subd_id;
+    stats.secondary_lower_n_elems = secondary.size();
+    stats.secondary_lower_max_volume = secondary.maximum();
+    stats.secondary_lower_min_volume = secondary.minimum();
+    stats.secondary_lower_median_volume = secondary.median();
+    stats.primary_lower_n_elems = primary.size();
+    stats.primary_lower_max_volume = primary.maximum();
+    stats.primary_lower_min_volume = primary.minimum();
+    stats.primary_lower_median_volume = primary.median();
+    stats.msm_n_elems = msm.size();
+    stats.msm_max_volume = msm.maximum();
+    stats.msm_min_volume = msm.minimum();
+    stats.msm_median_volume = msm.median();
+    result.push_back(stats);
+
+    primary.clear();
+    secondary.clear();
+    msm.clear();
+    primary_elems_seen.clear();
+  }
+
+  return result;
+}
+
 void
 AutomaticMortarGeneration::msmStatistics()
 {
-  const bool is_root = _mesh.processor_id() == 0;
+  const auto all_stats = computeMsmStatistics();
 
-  if (is_root)
-    Moose::out << "Mortar Interface Statistics:" << std::endl;
+  if (_mesh.processor_id() != 0)
+    return;
 
-  // Count number of elements on primary and secondary sides
-  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
+  Moose::out << "Mortar Interface Statistics:" << std::endl;
+  for (const auto & stats : all_stats)
   {
-    const auto primary_subd_id = pr.first;
-    const auto secondary_subd_id = pr.second;
-
-    StatisticsVector<Real> primary;
-    StatisticsVector<Real> secondary;
-
-    for (auto * el : _mesh.active_element_ptr_range())
-    {
-      if (el->subdomain_id() == secondary_subd_id)
-        secondary.push_back(el->volume());
-      else if (el->subdomain_id() == primary_subd_id)
-        primary.push_back(el->volume());
-    }
-
-    // Gather mortar segment element volumes from all ranks to rank 0
-    // Note: when we allow more than one primary secondary pair will need to make
-    // separate mortar segment mesh for each
-    StatisticsVector<Real> msm;
-    for (auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
-      msm.push_back(msm_elem->volume());
-    _mesh.comm().gather(0, static_cast<std::vector<Real> &>(msm));
-
-    if (!is_root)
-      continue;
-
-    // Create table
     std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median"};
     std::vector<std::string> subds = {"secondary_lower", "primary_lower", "mortar_segment"};
-    std::vector<size_t> n_elems = {secondary.size(), primary.size(), msm.size()};
-    std::vector<Real> maxs = {secondary.maximum(), primary.maximum(), msm.maximum()};
-    std::vector<Real> mins = {secondary.minimum(), primary.minimum(), msm.minimum()};
-    std::vector<Real> medians = {secondary.median(), primary.median(), msm.median()};
+    std::vector<size_t> n_elems = {
+        stats.secondary_lower_n_elems, stats.primary_lower_n_elems, stats.msm_n_elems};
+    std::vector<Real> maxs = {
+        stats.secondary_lower_max_volume, stats.primary_lower_max_volume, stats.msm_max_volume};
+    std::vector<Real> mins = {
+        stats.secondary_lower_min_volume, stats.primary_lower_min_volume, stats.msm_min_volume};
+    std::vector<Real> medians = {stats.secondary_lower_median_volume,
+                                 stats.primary_lower_median_volume,
+                                 stats.msm_median_volume};
 
     FormattedTable table;
     table.clear();
@@ -1492,8 +1554,8 @@ AutomaticMortarGeneration::msmStatistics()
       table.addData<Real>(col_names[4], medians[i]);
     }
 
-    Moose::out << "secondary subdomain: " << secondary_subd_id
-               << " \tprimary subdomain: " << primary_subd_id << std::endl;
+    Moose::out << "secondary subdomain: " << stats.secondary_subd_id
+               << " \tprimary subdomain: " << stats.primary_subd_id << std::endl;
     table.printTable(Moose::out, subds.size());
   }
 }

@@ -156,7 +156,35 @@ public:
   void buildMortarSegmentMesh3d();
 
   /**
-   * Outputs mesh statistics for mortar segment mesh
+   * Statistics for one primary-secondary subdomain pair.
+   * Secondary/primary lower-d stats reflect local data (all data for replicated meshes).
+   */
+  struct MsmSubdomainStats
+  {
+    SubdomainID primary_subd_id;
+    SubdomainID secondary_subd_id;
+    std::size_t secondary_lower_n_elems;
+    Real secondary_lower_max_volume;
+    Real secondary_lower_min_volume;
+    Real secondary_lower_median_volume;
+    std::size_t primary_lower_n_elems;
+    Real primary_lower_max_volume;
+    Real primary_lower_min_volume;
+    Real primary_lower_median_volume;
+    std::size_t msm_n_elems;
+    Real msm_max_volume;
+    Real msm_min_volume;
+    Real msm_median_volume;
+  };
+
+  /**
+   * Computes mortar segment mesh statistics and returns one entry per subdomain pair.
+   * Must be called collectively on all ranks.
+   */
+  std::vector<MsmSubdomainStats> computeMsmStatistics();
+
+  /**
+   * Prints mortar segment mesh statistics to console (calls computeMsmStatistics internally)
    */
   void msmStatistics();
 
@@ -341,6 +369,16 @@ public:
   void initOutput();
 
 private:
+  /**
+   * Write the mortar segment mesh to exodus
+   */
+  void outputMortarMesh();
+
+  /**
+   * @returns A string uniquely identifying this mortar interface
+   */
+  std::string mortarInterfaceName() const;
+
   /**
    * build the \p _mortar_interface_coupling data
    */
