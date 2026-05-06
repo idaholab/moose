@@ -1507,6 +1507,20 @@ TEST(CSGBaseTest, testUniverseLinking)
   // linking tree: ROOT_UNIVERSE -> c2 -> lat1 -> univ2 + univ_out
   csg_obj->createCell("c2", lat, +s1);
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+
+  // create cell that is added to root universe
+  CSGRegion empty_region;
+  auto & cell1 = csg_obj->createCell("cell1", empty_region);
+  // remove cell from root universe so that it is orphaned
+  csg_obj->removeCellFromUniverse(csg_obj->getRootUniverse(), cell1);
+
+  // since this cell is orphaned, a warning should be raised
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Cell with name cell1 is not linked to root universe.");
+
+  // link this cell to another universe, now the cell should no longer be orphaned
+  csg_obj->addCellToUniverse(univ1, cell1);
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }
 
 /**

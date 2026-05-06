@@ -660,13 +660,15 @@ private:
   void checkUniverseLinking() const;
 
   /**
-   * @brief Recursive method to retrieve all universes linked to current universe
+   * @brief Recursive method to retrieve all universes and cells linked to current universe
    *
    * @param univ Reference to universe under consideration
-   * @param linked_universe_name List of universe names linked to current universe
+   * @param linked_universe_names List of universe names linked to current universe
+   * @param linked_cell_names List of cell names linked to current universe
    */
   void getLinkedUniverses(const CSGUniverse & univ,
-                          std::vector<std::string> & linked_universe_names) const;
+                          std::vector<std::string> & linked_universe_names,
+                          std::vector<std::string> & linked_cell_names) const;
 
   /**
    * @brief Get a const reference to the CSGSurfaceList object
