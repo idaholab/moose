@@ -32,8 +32,10 @@ ParMixedBilinearForm::Assemble(int skip_zeros)
   // Requires MFEM dependency update; introduced in https://github.com/mfem/mfem/pull/5239.
   auto check_submesh = [](const mfem::ParMesh * sub, const mfem::ParMesh * parent)
   {
-    while (mfem::ParSubMesh::IsParSubMesh(sub) &&
-           (sub = static_cast<const mfem::ParSubMesh *>(sub)->GetParent()) && sub != parent)
+    if (!mfem::ParSubMesh::IsParSubMesh(sub) ||
+        (mfem::ParSubMesh::IsParSubMesh(sub) && mfem::ParSubMesh::IsParSubMesh(parent)))
+      return false;
+    while ((sub = static_cast<const mfem::ParSubMesh *>(sub)->GetParent()) && sub != parent)
       ;
     return sub == parent;
   };
@@ -65,7 +67,12 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
   mfem::FiniteElementSpace & iterated_fes = *trial_fes;
   mfem::Mesh * mesh = iterated_fes.GetMesh();
   const auto * trial_submesh = static_cast<const mfem::ParSubMesh *>(trial_pfes->GetParMesh());
+  const auto * parent_mesh = trial_submesh->GetParent();
   const auto & parent_element_ids = trial_submesh->GetParentElementIDMap();
+  const auto & parent_face_ids = trial_submesh->GetParentFaceIDMap();
+  const auto & parent_edge_ids = trial_submesh->GetParentEdgeIDMap();
+  const auto & parent_vertex_ids = trial_submesh->GetParentVertexIDMap();
+  const auto & parent_face_to_be = parent_mesh->GetFaceToBdrElMap();
   const int num_elem = iterated_fes.GetNE();
   const int num_boundary_elem = iterated_fes.GetNBE();
 
@@ -137,14 +144,22 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
     mfem::DofTransformation dom_dof_trans, ran_dof_trans;
     for (int i = 0; i < num_boundary_elem; i++)
     {
+      const int iface = mesh->GetBdrElementFaceIndex(i);
+      const int parent_face_id = mesh->Dimension() == 3   ? parent_face_ids[iface]
+                                 : mesh->Dimension() == 2 ? parent_edge_ids[iface]
+                                                          : parent_vertex_ids[iface];
+      const int parent_bdr_elem_id = parent_face_to_be[parent_face_id];
       const int bdr_attr = mesh->GetBdrAttribute(i);
       if (bdr_attr_marker[bdr_attr - 1] == 0)
       {
         continue;
       }
+      MFEM_VERIFY(parent_bdr_elem_id != -1,
+                  "Cannot assemble a mixed boundary integrator from submesh boundary element "
+                      << i << " because it does not correspond to a parent boundary element.");
 
       trial_fes->GetBdrElementVDofs(i, trial_vdofs, dom_dof_trans);
-      test_fes->GetBdrElementVDofs(i, test_vdofs, ran_dof_trans);
+      test_fes->GetBdrElementVDofs(parent_bdr_elem_id, test_vdofs, ran_dof_trans);
       eltrans = iterated_fes.GetBdrElementTransformation(i);
 
       elmat.SetSize(test_vdofs.Size(), trial_vdofs.Size());
@@ -157,7 +172,7 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
         }
 
         boundary_integs[k]->AssembleElementMatrix2(
-            *trial_fes->GetBE(i), *test_fes->GetBE(i), *eltrans, elemmat);
+            *trial_fes->GetBE(i), *test_fes->GetBE(parent_bdr_elem_id), *eltrans, elemmat);
         elmat += elemmat;
       }
       TransformDual(ran_dof_trans, dom_dof_trans, elmat);
