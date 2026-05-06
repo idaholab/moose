@@ -13,7 +13,8 @@
 #include "SubChannelEnums.h"
 
 /**
- * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
+ * Mesh generator that builds a mesh of 1D lines representing subchannels and pins in a triangular
+ * assembly.
  */
 class SCMTriAssemblyMeshGenerator : public MeshGenerator
 {
@@ -23,6 +24,7 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Build the 1D pin elements and append them to the subchannel mesh.
   void buildPinMesh(MeshBase & mesh_base);
 
   /// unheated length of the fuel Pin at the entry of the assembly

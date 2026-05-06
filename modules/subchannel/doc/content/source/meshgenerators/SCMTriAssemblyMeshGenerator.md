@@ -10,6 +10,11 @@ This mesh generator creates the 1D subchannel and pin meshes for a triangular la
 The generated subdomains are named `subchannel` and `fuel_pins`.
 The center of the mesh is the origin.
 
+This object replaces the old chained `SCMTriSubChannelMeshGenerator` and
+`SCMTriPinMeshGenerator` input pattern. See the
+[SubChannel mesh generator migration page](modules/subchannel/general/mesh_generator_migration.md)
+for old-to-new input examples.
+
 ## Example Input File Syntax
 
 !listing /test/tests/problems/SFR/sodium-19pin/test19_monolithic.i block=TriSubChannelMesh language=moose

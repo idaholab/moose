@@ -15,9 +15,26 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <numeric>
 
 registerMooseObject("SubChannelApp", SCMQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMQuadSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           QuadSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMQuadPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           QuadPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMQuadAssemblyMeshGenerator);
 
 InputParameters
 SCMQuadAssemblyMeshGenerator::validParams()
@@ -150,21 +167,27 @@ SCMQuadAssemblyMeshGenerator::SCMQuadAssemblyMeshGenerator(const InputParameters
 void
 SCMQuadAssemblyMeshGenerator::initializeChannelData()
 {
+  // Defining the total length from 3 axial sections
   const Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
+  // Defining the position of the spacer grid in the numerical solution array
   std::vector<int> spacer_cell;
   for (const auto & elem : _spacer_z)
     spacer_cell.emplace_back(std::round(elem * _n_cells / L));
 
+  // Defining the arrays for axial resistances
   std::vector<Real> kgrid(_n_cells + 1, 0.0);
   _k_grid.resize(_n_channels, std::vector<Real>(_n_cells + 1));
 
+  // Summing the spacer resistance to the 1D grid resistance array
   for (unsigned int index = 0; index < spacer_cell.size(); index++)
     kgrid[spacer_cell[index]] += _spacer_k[index];
 
+  // Creating the 2D grid resistance array
   for (unsigned int i = 0; i < _n_channels; i++)
     _k_grid[i] = kgrid;
 
+  // Add blockage resistance to the 2D grid resistance array
   const Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()))
@@ -177,6 +200,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       }
     }
 
+  // Defining the size of the maps
   _gap_to_chan_map.resize(_n_gaps);
   _gap_to_pin_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
@@ -197,9 +221,11 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
   for (unsigned int iz = 0; iz < _n_cells + 1; iz++)
     _gij_map[iz].reserve(_n_gaps);
 
+  // Defining the signs for positive and negative flows
   const Real positive_flow = 1.0;
   const Real negative_flow = -1.0;
 
+  // Defining the subchannel types
   _subch_type.resize(_n_channels);
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx; ix++)
@@ -221,6 +247,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
         _subch_type[i_ch] = EChannelType::CENTER;
     }
 
+  // Index the east-west gaps.
   unsigned int i_gap = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx - 1; ix++)
@@ -233,6 +260,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       _sign_id_crossflow_map[i_ch].push_back(positive_flow);
       _sign_id_crossflow_map[j_ch].push_back(negative_flow);
 
+      // Make a gap size map.
       if (iy == 0 || iy == _ny - 1)
         _gij_map[0].push_back((_pitch - _pin_diameter) / 2.0 + _side_gap);
       else
@@ -241,6 +269,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       ++i_gap;
     }
 
+  // Index the north-south gaps.
   for (unsigned int iy = 0; iy < _ny - 1; iy++)
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
@@ -252,6 +281,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       _sign_id_crossflow_map[i_ch].push_back(positive_flow);
       _sign_id_crossflow_map[j_ch].push_back(negative_flow);
 
+      // Make a gap size map.
       if (ix == 0 || ix == _nx - 1)
         _gij_map[0].push_back((_pitch - _pin_diameter) / 2.0 + _side_gap);
       else
@@ -263,6 +293,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
   for (unsigned int iz = 1; iz < _n_cells + 1; iz++)
     _gij_map[iz] = _gij_map[0];
 
+  // Make pin to channel map.
   for (unsigned int iy = 0; iy < _ny - 1; iy++)
     for (unsigned int ix = 0; ix < _nx - 1; ix++)
     {
@@ -278,6 +309,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       _pin_to_chan_map[i_pin].push_back(i_chan_4);
     }
 
+  // Set the subchannel positions so that the center of the assembly is the zero point.
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx; ix++)
     {
@@ -290,11 +322,13 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
 
   if (_n_pins > 0)
   {
-    for (unsigned int iy = 0; iy < _ny; iy++)
+    // Make channel to pin map.
+    for (unsigned int iy = 0; iy < _ny; iy++) // row
       for (unsigned int ix = 0; ix < _nx; ix++)
       {
         const unsigned int i_ch = _nx * iy + ix;
 
+        // Corners contact 1/4 of one pin.
         if (iy == 0 && ix == 0)
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
         else if (iy == _ny - 1 && ix == 0)
@@ -303,6 +337,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
         else if (iy == _ny - 1 && ix == _nx - 1)
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+        // Sides contact 1/4 of two pins.
         else if (iy == 0)
         {
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
@@ -323,6 +358,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
         }
+        // Interior channels contact 1/4 of four pins.
         else
         {
           _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
@@ -332,6 +368,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
         }
       }
 
+    // Make gap to pin map.
     for (unsigned int ig = 0; ig < _n_gaps; ig++)
     {
       const auto i_ch = _gap_to_chan_map[ig].first;
@@ -339,6 +376,7 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
       const auto & i_pins = _chan_to_pin_map[i_ch];
       const auto & j_pins = _chan_to_pin_map[j_ch];
 
+      // Initialize with default values.
       _gap_to_pin_map[ig] = {10000, 10000};
 
       for (unsigned int i : i_pins)
@@ -356,10 +394,15 @@ SCMQuadAssemblyMeshGenerator::initializeChannelData()
     }
   }
 
+  // Reduce reserved memory in the channel-to-gap map.
   for (auto & gap : _chan_to_gap_map)
     gap.shrink_to_fit();
+
+  // Reduce reserved memory in the channel-to-pin map.
   for (auto & pin : _chan_to_pin_map)
     pin.shrink_to_fit();
+
+  // Reduce reserved memory in the pin-to-channel map.
   for (auto & pin : _pin_to_chan_map)
     pin.shrink_to_fit();
 }
@@ -376,6 +419,9 @@ SCMQuadAssemblyMeshGenerator::buildSubchannelMesh(MeshBase & mesh_base,
   const Real offset_x = (_nx - 1) * _pitch / 2.0;
   const Real offset_y = (_ny - 1) * _pitch / 2.0;
 
+  // Add the points in the shape of a rectilinear grid. The grid is regular on the xy-plane with a
+  // spacing of `pitch` between points. The grid along z is irregular to account for pin spacers.
+  // Store pointers in the _nodes array so we can keep track of which points are in which channels.
   dof_id_type node_id = mesh_base.n_nodes();
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx; ix++)
@@ -388,15 +434,16 @@ SCMQuadAssemblyMeshGenerator::buildSubchannelMesh(MeshBase & mesh_base,
             Point(_pitch * ix - offset_x, _pitch * iy - offset_y, _z_grid[iz]), node_id++));
     }
 
+  // Add the elements which in this case are 2-node edges that link each subchannel's nodes
+  // vertically.
   dof_id_type elem_id = mesh_base.n_elem();
   for (unsigned int iy = 0; iy < _ny; iy++)
     for (unsigned int ix = 0; ix < _nx; ix++)
       for (unsigned int iz = 0; iz < _n_cells; iz++)
       {
-        Elem * elem = new Edge2;
+        Elem * elem = mesh_base.add_elem(std::make_unique<Edge2>());
         elem->subdomain_id() = _subchannel_block_id;
         elem->set_id(elem_id++);
-        elem = mesh_base.add_elem(elem);
 
         const unsigned int i_ch = _nx * iy + ix;
         elem->set_node(0, _nodes[i_ch][iz]);
@@ -419,6 +466,9 @@ SCMQuadAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
 
   _pin_nodes.resize((_nx - 1) * (_ny - 1));
 
+  // Add the points in the shape of a rectilinear grid. The grid is regular on the xy-plane with a
+  // spacing of `pitch` between points. The grid along z is also regular. Store pointers in the
+  // _pin_nodes array so we can keep track of which points are in which pins.
   const Real offset_x = (_nx - 2) * _pitch / 2.0;
   const Real offset_y = (_ny - 2) * _pitch / 2.0;
 
@@ -434,15 +484,15 @@ SCMQuadAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
             Point(_pitch * ix - offset_x, _pitch * iy - offset_y, _z_grid[iz]), node_id++));
     }
 
+  // Add the elements which in this case are 2-node edges that link each pin's nodes vertically.
   dof_id_type elem_id = mesh_base.n_elem();
   for (unsigned int iy = 0; iy < _ny - 1; iy++)
     for (unsigned int ix = 0; ix < _nx - 1; ix++)
       for (unsigned int iz = 0; iz < _n_cells; iz++)
       {
-        Elem * elem = new Edge2;
+        Elem * elem = mesh_base.add_elem(std::make_unique<Edge2>());
         elem->subdomain_id() = _pin_block_id;
         elem->set_id(elem_id++);
-        elem = mesh_base.add_elem(elem);
 
         const unsigned int i_pin = (_nx - 1) * iy + ix;
         elem->set_node(0, _pin_nodes[i_pin][iz]);
@@ -455,6 +505,7 @@ SCMQuadAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
 void
 SCMQuadAssemblyMeshGenerator::transferMetadata(QuadSubChannelMesh & sch_mesh)
 {
+  // Move the metadata into QuadSubChannelMesh.
   sch_mesh._unheated_length_entry = _unheated_length_entry;
   sch_mesh._heated_length = _heated_length;
   sch_mesh._unheated_length_exit = _unheated_length_exit;

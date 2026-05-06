@@ -15,8 +15,25 @@
 
 #include <array>
 #include <cmath>
+#include <memory>
 
 registerMooseObject("SubChannelApp", SCMDetailedQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedQuadSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           DetailedQuadSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedQuadPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedQuadAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           DetailedQuadPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedQuadAssemblyMeshGenerator);
 
 InputParameters
 SCMDetailedQuadAssemblyMeshGenerator::validParams()
@@ -37,16 +54,11 @@ SCMDetailedQuadAssemblyMeshGenerator::validParams()
       "The side gap, not to be confused with the gap between pins, this refers to the gap "
       "next to the duct or else the distance between the subchannel centroid to the duct wall."
       "distance(edge pin center, duct wall) = pitch / 2 + side_gap [m]");
-  params.addParam<Real>(
-      "gap",
-      "The side gap, not to be confused with the gap between pins, this refers to the gap "
-      "next to the duct or else the distance between the subchannel centroid to the duct wall."
-      "distance(edge pin center, duct wall) = pitch / 2 + side_gap [m]");
-  params.deprecateParam("gap", "side_gap", "08/06/2026");
   params.addRangeCheckedParam<unsigned int>("num_radial_parts",
                                             16,
                                             "num_radial_parts>=4",
-                                            "Number of radial parts (must be at least 4).");
+                                            "Number of azimuthal sectors used to discretize each "
+                                            "circular pin cross section.");
   params.addParam<unsigned int>("subchannel_block_id", 0, "Subchannel block id.");
   params.addParam<unsigned int>("pin_block_id", 1, "Fuel pin block id.");
   return params;
@@ -64,7 +76,7 @@ SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _n_channels(0),
-    _side_gap(isParamValid("side_gap") ? getParam<Real>("side_gap") : getParam<Real>("gap")),
+    _side_gap(getParam<Real>("side_gap")),
     _num_radial_parts(getParam<unsigned int>("num_radial_parts")),
     _subchannel_block_id(getParam<unsigned int>("subchannel_block_id")),
     _pin_block_id(getParam<unsigned int>("pin_block_id")),
@@ -116,6 +128,7 @@ SCMDetailedQuadAssemblyMeshGenerator::SCMDetailedQuadAssemblyMeshGenerator(
       else
         _subch_type[i_ch] = EChannelType::CENTER;
 
+      // Set the subchannel positions so that the center of the assembly is the zero point.
       const Real offset_x = (_nx - 1) * _pitch / 2.0;
       const Real offset_y = (_ny - 1) * _pitch / 2.0;
       _subchannel_position[i_ch][0] = _pitch * ix - offset_x;
@@ -130,6 +143,8 @@ SCMDetailedQuadAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & me
   const Real dalpha = 360. / _num_radial_parts;
   const Real radius = _pin_diameter / 2.;
 
+  // Add a center node and radial boundary nodes on each axial level so each pin is discretized into
+  // triangular prism sectors.
   std::vector<std::vector<Node *>> nodes;
   nodes.resize(_n_cells + 1);
   for (unsigned int k = 0; k < _n_cells + 1; k++)
@@ -145,13 +160,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & me
     }
   }
 
+  // Add the pin volume elements, linking matching radial sectors between adjacent axial levels.
   for (unsigned int k = 0; k < _n_cells; k++)
     for (unsigned int i = 0; i < _num_radial_parts; i++)
     {
-      Elem * elem = new Prism6;
+      Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
       elem->subdomain_id() = _pin_block_id;
       elem->set_id(_elem_id++);
-      mesh_base->add_elem(elem);
       const unsigned int ctr_idx = 0;
       const unsigned int idx1 = (i % _num_radial_parts) + 1;
       const unsigned int idx2 = ((i + 1) % _num_radial_parts) + 1;
@@ -171,17 +186,29 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
   mesh_base->set_spatial_dimension(3);
 
+  // Define the resolution (the number of points used to represent a circle). This must be
+  // divisible by 4.
   const unsigned int n_pins = (_nx - 1) * (_ny - 1);
 
   const unsigned int theta_res = 16;
+  // Compute the number of points needed to represent one quarter of a circle.
   const unsigned int points_per_quad = theta_res / 4 + 1;
+
+  // Compute the points needed to represent one axial cross-flow of a subchannel. For the center
+  // subchannel there is one center point plus the points from 4 intersecting circles. For the
+  // corner subchannel there is one center point plus the points from 1 intersecting circle plus 3
+  // corners. For the side subchannel there is one center point plus the points from 2 intersecting
+  // circles plus 2 corners.
   const unsigned int points_per_center = points_per_quad * 4 + 1;
   const unsigned int points_per_corner = points_per_quad * 1 + 1 + 3;
   const unsigned int points_per_side = points_per_quad * 2 + 1 + 2;
+
+  // Compute the number of Prism6 elements which combine to create each subchannel cross-section.
   const unsigned int elems_per_center = theta_res + 4;
   const unsigned int elems_per_corner = theta_res / 4 + 4;
   const unsigned int elems_per_side = theta_res / 2 + 4;
 
+  // Specify the number and type of subchannels.
   unsigned int n_center, n_side, n_corner;
   if (_n_channels == 2)
   {
@@ -207,6 +234,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   const unsigned int elems_per_level =
       n_corner * elems_per_corner + n_side * elems_per_side + n_center * elems_per_center;
 
+  // Pin centers are generated for 2x2 and larger quad assemblies.
   std::vector<Point> pin_centers;
   if (n_pins > 0)
     QuadSubChannelMesh::generatePinCenters(_nx, _ny, _pitch, 0, pin_centers);
@@ -218,6 +246,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   mesh_base->reserve_nodes(points_per_level * (_n_cells + 1) + pin_points);
   mesh_base->reserve_elem(elems_per_level * _n_cells + pin_elems);
 
+  // Build an array of points arranged in a circle on the xy-plane. The last and first node overlap.
   const Real radius = _pin_diameter / 2.0;
   std::array<Point, theta_res + 1> circle_points;
   {
@@ -230,6 +259,10 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     }
   }
 
+  // Define "quadrant center" reference points. These will be the centers of the 4 circles that
+  // represent the fuel pins. These centers are offset slightly so that in the final mesh, there is
+  // a tiny gap between neighboring subchannel cells. That allows us to easily map a solution to
+  // this detailed mesh with a nearest-neighbor search.
   const Real shrink_factor = 0.99999;
   std::array<Point, 4> quadrant_centers;
   quadrant_centers[0] = Point(_pitch * 0.5 * shrink_factor, _pitch * 0.5 * shrink_factor, 0);
@@ -238,6 +271,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   quadrant_centers[3] = Point(_pitch * 0.5 * shrink_factor, -_pitch * 0.5 * shrink_factor, 0);
 
   const unsigned int m = theta_res / 4;
+  // Build an array of points that represent a cross-section of a center subchannel cell. The points
+  // are ordered in this fashion:
+  //     4   3
+  // 6 5       2 1
+  //       0
+  // 7 8       * *
+  //     9   *
   std::array<Point, points_per_center> center_points;
   {
     unsigned int start;
@@ -259,6 +299,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     }
   }
 
+  // Build an array of points that represent a cross-section of a top left corner subchannel cell.
+  // The points are ordered in this fashion:
+  // 5            4
+  //
+  //       0
+  //           2  3
+  // 6       1
   std::array<Point, points_per_corner> tl_corner_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -271,6 +318,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     tl_corner_points[points_per_quad + 3] = Point(-_side_gap, -_pitch * 0.5 * shrink_factor, 0);
   }
 
+  // Build an array of points that represent a cross-section of a top right corner subchannel cell.
+  // The points are ordered in this fashion:
+  // 6            5
+  //
+  //       0
+  // 1 2
+  //    3         4
   std::array<Point, points_per_corner> tr_corner_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -283,6 +337,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     tr_corner_points[points_per_quad + 3] = Point(-_pitch * 0.5 * shrink_factor, _side_gap, 0);
   }
 
+  // Build an array of points that represent a cross-section of a bottom left corner subchannel
+  // cell. The points are ordered in this fashion:
+  // 4       3
+  //           2  1
+  //       0
+  //
+  // 5            6
   std::array<Point, points_per_corner> bl_corner_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -295,6 +356,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     bl_corner_points[points_per_quad + 3] = Point(_pitch * 0.5 * shrink_factor, -_side_gap, 0);
   }
 
+  // Build an array of points that represent a cross-section of a bottom right corner subchannel
+  // cell. The points are ordered in this fashion:
+  //    1        6
+  // 3 2
+  //       0
+  //
+  // 4           5
   std::array<Point, points_per_corner> br_corner_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -307,6 +375,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     br_corner_points[points_per_quad + 3] = Point(_side_gap, _pitch * 0.5 * shrink_factor, 0);
   }
 
+  // Build an array of points that represent a cross-section of a top side subchannel cell. The
+  // points are ordered in this fashion:
+  // 8            7
+  //
+  //       0
+  // 1 2        5 6
+  //    3     4
   std::array<Point, points_per_side> top_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -323,6 +398,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     top_points[2 * points_per_quad + 2] = Point(-_pitch * 0.5 * shrink_factor, _side_gap, 0);
   }
 
+  // Build an array of points that represent a cross-section of a left side subchannel cell. The
+  // points are ordered in this fashion:
+  // 7        6
+  //            5 4
+  //      0
+  //            2 3
+  // 8        1
   std::array<Point, points_per_side> left_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -339,6 +421,13 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     left_points[2 * points_per_quad + 2] = Point(-_side_gap, -_pitch * 0.5 * shrink_factor, 0);
   }
 
+  // Build an array of points that represent a cross-section of a bottom side subchannel cell. The
+  // points are ordered in this fashion:
+  //    4    3
+  // 6 5       2 1
+  //       0
+  //
+  // 7           8
   std::array<Point, points_per_side> bottom_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -355,6 +444,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
     bottom_points[2 * points_per_quad + 2] = Point(_pitch * 0.5 * shrink_factor, -_side_gap, 0);
   }
 
+  // Build an array of points that represent a cross-section of a right side subchannel cell.
   std::array<Point, points_per_side> right_points;
   {
     for (unsigned int ii = 0; ii < points_per_quad; ii++)
@@ -373,6 +463,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
 
   if (_n_channels == 2)
   {
+    // Special handling for the smallest line meshes, which contain only side subchannels.
     unsigned int node_id = 0;
     const Real offset_x = (_nx - 1) * _pitch / 2.0;
     const Real offset_y = (_ny - 1) * _pitch / 2.0;
@@ -403,6 +494,8 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   }
   else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
   {
+    // Line meshes larger than 2 channels have two side subchannels and center subchannels between
+    // them.
     unsigned int node_id = 0;
     const Real offset_x = (_nx - 1) * _pitch / 2.0;
     const Real offset_y = (_ny - 1) * _pitch / 2.0;
@@ -445,6 +538,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   }
   else
   {
+    // General 2D quad assemblies contain corner, side, and center subchannels.
     unsigned int node_id = 0;
     const Real offset_x = (_nx - 1) * _pitch / 2.0;
     const Real offset_y = (_ny - 1) * _pitch / 2.0;
@@ -523,6 +617,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
 
   if (_n_channels == 2)
   {
+    // Build elements for the smallest line meshes.
     for (unsigned int iy = 0; iy < _ny; iy++)
       for (unsigned int ix = 0; ix < _nx; ix++)
       {
@@ -530,10 +625,9 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
         for (unsigned int iz = 0; iz < _n_cells; iz++)
           for (unsigned int i = 0; i < elems_per_side; i++)
           {
-            Elem * elem = new Prism6;
+            Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
             elem->subdomain_id() = _subchannel_block_id;
             elem->set_id(_elem_id++);
-            elem = mesh_base->add_elem(elem);
             const unsigned int indx1 =
                 iz * points_per_side + points_per_side * (_n_cells + 1) * i_ch;
             const unsigned int indx2 =
@@ -559,6 +653,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   }
   else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
   {
+    // Build elements for 1xN and Nx1 line meshes.
     unsigned int number_of_corner = 0;
     unsigned int number_of_side = 0;
     unsigned int number_of_center = 0;
@@ -594,10 +689,9 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
 
           for (unsigned int i = 0; i < elems_per_channel; i++)
           {
-            Elem * elem = new Prism6;
+            Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
             elem->subdomain_id() = _subchannel_block_id;
             elem->set_id(_elem_id++);
-            elem = mesh_base->add_elem(elem);
             elem->set_node(0, mesh_base->node_ptr(indx1));
             elem->set_node(1, mesh_base->node_ptr(indx1 + i + 1));
             elem->set_node(2,
@@ -619,6 +713,7 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
   }
   else
   {
+    // Build elements for general 2D quad assemblies.
     unsigned int number_of_corner = 0;
     unsigned int number_of_side = 0;
     unsigned int number_of_center = 0;
@@ -660,10 +755,9 @@ SCMDetailedQuadAssemblyMeshGenerator::generate()
 
           for (unsigned int i = 0; i < elems_per_channel; i++)
           {
-            Elem * elem = new Prism6;
+            Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
             elem->subdomain_id() = _subchannel_block_id;
             elem->set_id(_elem_id++);
-            elem = mesh_base->add_elem(elem);
             elem->set_node(0, mesh_base->node_ptr(indx1));
             elem->set_node(1, mesh_base->node_ptr(indx1 + i + 1));
             elem->set_node(2,

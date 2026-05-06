@@ -22,8 +22,10 @@ public:
   virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// returns the type of the subchannel given the index
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
 
+  /// Generate one detailed fuel pin volume centered at the supplied point.
   void generatePin(std::unique_ptr<MeshBase> & mesh_base, const Point & center);
 
   /// unheated length of the fuel Pin at the entry of the assembly
@@ -52,10 +54,11 @@ protected:
    * distance(edge pin center, duct wall) = pitch / 2 + side_gap [m].
    */
   const Real _side_gap;
-  /// Number of radial parts in each pin cross section
+  /// Number of azimuthal sectors used to discretize each circular pin cross section
   const unsigned int _num_radial_parts;
-  /// Subdomain IDs used for mesh blocks
+  /// Subchannel subdomain ID
   const unsigned int _subchannel_block_id;
+  /// Pin subdomain ID
   const unsigned int _pin_block_id;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;

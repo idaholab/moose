@@ -24,7 +24,9 @@ public:
 protected:
   /// returns the type of the subchannel given the index
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
+  /// rotate a point by theta radians about the origin
   Point rotatePoint(Point b, Real theta);
+  /// Generate one detailed fuel pin volume centered at the supplied point.
   void generatePin(std::unique_ptr<MeshBase> & mesh_base, const Point & center);
   /// returns the position of pin given pin index
   Point getPinPosition(unsigned int i) { return _pin_position[i]; }
@@ -49,7 +51,7 @@ protected:
   const unsigned int _n_rings;
   /// Half of gap between adjacent assemblies
   const Real _flat_to_flat;
-  /// Number of radial parts in each pin cross section
+  /// Number of azimuthal sectors used to discretize each circular pin cross section
   const unsigned int _num_radial_parts;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;

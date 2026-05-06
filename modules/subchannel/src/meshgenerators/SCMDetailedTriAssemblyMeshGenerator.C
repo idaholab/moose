@@ -11,10 +11,27 @@
 #include "TriSubChannelMesh.h"
 #include <array>
 #include <cmath>
+#include <memory>
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("SubChannelApp", SCMDetailedTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedTriSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           DetailedTriSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMDetailedTriPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           DetailedTriPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMDetailedTriAssemblyMeshGenerator);
 
 InputParameters
 SCMDetailedTriAssemblyMeshGenerator::validParams()
@@ -36,7 +53,8 @@ SCMDetailedTriAssemblyMeshGenerator::validParams()
   params.addRangeCheckedParam<unsigned int>("num_radial_parts",
                                             16,
                                             "num_radial_parts>=4",
-                                            "Number of radial parts (must be at least 4).");
+                                            "Number of azimuthal sectors used to discretize each "
+                                            "circular pin cross section.");
   params.addParam<unsigned int>("subchannel_block_id", 0, "Subchannel block id.");
   params.addParam<unsigned int>("pin_block_id", 1, "Fuel pin block id.");
   params.addParam<unsigned int>("block_id", 0, "Deprecated subchannel block id.");
@@ -317,6 +335,8 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
   const Real dalpha = 360. / _num_radial_parts;
   const Real radius = _pin_diameter / 2.;
 
+  // Add a center node and radial boundary nodes on each axial level so each pin is discretized into
+  // triangular prism sectors.
   std::vector<std::vector<Node *>> nodes;
   nodes.resize(_n_cells + 1);
   std::vector<Node *> center_nodes;
@@ -335,13 +355,13 @@ SCMDetailedTriAssemblyMeshGenerator::generatePin(std::unique_ptr<MeshBase> & mes
     }
   }
 
+  // Add the pin volume elements, linking matching radial sectors between adjacent axial levels.
   for (unsigned int k = 0; k < _n_cells; k++)
     for (unsigned int i = 0; i < _num_radial_parts; i++)
     {
-      Elem * elem = new Prism6;
+      Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
       elem->subdomain_id() = _pin_block_id;
       elem->set_id(_elem_id++);
-      mesh_base->add_elem(elem);
       const unsigned int ctr_idx = 0;
       const unsigned int idx1 = (i % _num_radial_parts) + 1;
       const unsigned int idx2 = ((i + 1) % _num_radial_parts) + 1;
@@ -807,10 +827,9 @@ SCMDetailedTriAssemblyMeshGenerator::generate()
 
       for (unsigned int i = 0; i < elems_per_channel; i++)
       {
-        Elem * elem = new Prism6;
+        Elem * elem = mesh_base->add_elem(std::make_unique<Prism6>());
         elem->subdomain_id() = _subchannel_block_id;
         elem->set_id(elem_id++);
-        elem = mesh_base->add_elem(elem);
 
         if (_verbose)
           _console << "Node 0: " << *mesh_base->node_ptr(indx1) << std::endl;

@@ -10,10 +10,27 @@
 #include "SCMTriAssemblyMeshGenerator.h"
 #include "TriSubChannelMesh.h"
 #include <cmath>
+#include <memory>
 #include "libmesh/edge_edge2.h"
 #include "libmesh/unstructured_mesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMTriSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           TriSubChannelMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           SCMTriPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMTriAssemblyMeshGenerator);
+registerMooseObjectRenamed("SubChannelApp",
+                           TriPinMeshGenerator,
+                           "06/30/2027 24:00",
+                           SCMTriAssemblyMeshGenerator);
 
 InputParameters
 SCMTriAssemblyMeshGenerator::validParams()
@@ -776,9 +793,14 @@ SCMTriAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
   _pin_nodes.clear();
   _pin_nodes.resize(_npins);
 
+  // Defining the extent of the subchannel mesh to append the pin mesh to the current subchannel
+  // mesh.
   const unsigned int node_sub = mesh_base.n_nodes();
   const unsigned int elem_sub = mesh_base.n_elem();
 
+  // Add the points in the shape of a rectilinear grid. The grid is regular on the xy-plane at the
+  // triangular lattice pin positions. The grid along z is also regular. Store pointers in the
+  // _pin_nodes array so we can keep track of which points are in which pins.
   unsigned int node_id = node_sub;
   for (unsigned int i = 0; i < _npins; i++)
   {
@@ -788,14 +810,14 @@ SCMTriAssemblyMeshGenerator::buildPinMesh(MeshBase & mesh_base)
           Point(_pin_position[i](0), _pin_position[i](1), _z_grid[iz]), node_id++));
   }
 
+  // Add the elements which in this case are 2-node edges that link each pin's nodes vertically.
   unsigned int elem_id = elem_sub;
   for (unsigned int i = 0; i < _npins; i++)
     for (unsigned int iz = 0; iz < _n_cells; iz++)
     {
-      Elem * elem = new Edge2;
+      Elem * elem = mesh_base.add_elem(std::make_unique<Edge2>());
       elem->subdomain_id() = _pin_block_id;
       elem->set_id(elem_id++);
-      elem = mesh_base.add_elem(elem);
       const int indx1 = (_n_cells + 1) * i + iz + node_sub;
       const int indx2 = (_n_cells + 1) * i + (iz + 1) + node_sub;
       elem->set_node(0, mesh_base.node_ptr(indx1));
@@ -837,10 +859,9 @@ SCMTriAssemblyMeshGenerator::generate()
   {
     for (unsigned int iz = 0; iz < _n_cells; iz++)
     {
-      Elem * elem = new Edge2;
+      Elem * elem = mesh_base->add_elem(std::make_unique<Edge2>());
       elem->subdomain_id() = _subchannel_block_id;
       elem->set_id(elem_id++);
-      elem = mesh_base->add_elem(elem);
       const int indx1 = (_n_cells + 1) * i + iz;
       const int indx2 = (_n_cells + 1) * i + (iz + 1);
       elem->set_node(0, mesh_base->node_ptr(indx1));

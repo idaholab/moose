@@ -14,7 +14,7 @@
 class SubChannelMesh;
 
 /**
- * Transfers subchannel or pin solutions from a SubChannel mesh onto a visualization mesh
+ * Transfers subchannel and pin solutions from a SubChannel mesh onto a visualization mesh
  */
 class SCMSolutionTransfer : public MultiAppTransfer
 {

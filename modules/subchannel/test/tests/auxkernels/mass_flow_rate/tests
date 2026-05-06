@@ -1,8 +1,8 @@
 [Tests]
   [blockedtest]
-    type = Exodiff
+    type = CSVDiff
     input = 'blocked_test.i'
-    exodiff = 'blocked_test_out.e'
+    csvdiff = 'blocked_test_out.csv'
     recover = false
     design = 'SCMBlockedMassFlowRateAux.md'
     issues = '#29237'
