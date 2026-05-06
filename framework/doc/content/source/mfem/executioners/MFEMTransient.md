@@ -5,7 +5,7 @@
 ## Overview
 
 `MFEMTransient` is the `Executioner` class used to solve time dependent MFEM finite element
-problems, calling the [`MFEMProblemSolve`](MFEMProblemSolve.md) solve object to execute one or more
+problems, calling the [MFEMProblemSolve.md] solve object to execute one or more
 MFEM `TimeDependentProblemOperators`.
 
 As in all `Executioner` classes using the [MFEMProblemSolve.md] solve object,

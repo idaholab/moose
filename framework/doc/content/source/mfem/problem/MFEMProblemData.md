@@ -8,8 +8,7 @@
 
 ## Overview
 
-Data stored in the `MFEMProblemData` struct is built and added to by builder methods in
-[`MFEMProblem`](problem/MFEMProblem.md).
+Data stored in the `MFEMProblemData` struct is built and added to by builder methods in [MFEMProblem.md].
 
 !listing include/mfem/problem/MFEMProblemData.h
 

@@ -12,15 +12,15 @@ and both belong to an `MFEMProblem` in their respective applications.
 `MultiAppMFEMShapeEvaluationTransfer` executes transfers in three steps:
 
 1. Extraction of a vector of node positions in the `ParFiniteElementSpace` of the destination
-   `mfem::ParGridFunction`, using [`MFEMNodalProjector`](MFEMNodalProjector.md).
+   `mfem::ParGridFunction`, using [MFEMNodalProjector.md].
 2. Interpolation of the source `mfem::ParGridFunction` at this set of node locations, using
    `mfem::FindPointsGSLIB` to perform the required gather/scatter operations to obtain a set of
    points on the local mesh partition, and perform shape function evaluations at these points.
 3. Projection of the evaluated source variable values onto the destination variable nodes, to set
-   the destination variable degrees of freedom, using [`MFEMNodalProjector`](MFEMNodalProjector.md).
+   the destination variable degrees of freedom, using [MFEMNodalProjector.md].
 
 For transfers between identical variables defined on the same mesh, users are recommended to use
-[`MultiAppMFEMCopyTransfer`](MultiAppMFEMCopyTransfer.md) for performance.
+[MultiAppMFEMCopyTransfer.md] for performance.
 
 ## Features Supported
 

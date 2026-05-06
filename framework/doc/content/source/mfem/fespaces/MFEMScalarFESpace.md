@@ -10,8 +10,7 @@ from the `fec_type` parameter, and the order is controlled using the
 `fec_order` parameter.
 
 If you need a finite element space that can't be constructed using the
-options available in this class, you can use
-[MFEMGenericFESpace](MFEMGenericFESpace.md) instead.
+options available in this class, you can use [MFEMGenericFESpace.md] instead.
 
 ## Example Input File Syntax
 
