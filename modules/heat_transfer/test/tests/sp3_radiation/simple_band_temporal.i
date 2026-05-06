@@ -44,7 +44,7 @@ nu_max = 1e17
 []
 
 [Problem]
-  nl_sys_names = 'Temp
+  nl_sys_names = 'temp
                   psi1
                   psi2'
 
@@ -55,7 +55,7 @@ nu_max = 1e17
   [Temp]
     type = MooseVariableFVReal
     initial_condition = '10'
-    solver_sys = 'Temp'
+    solver_sys = 'temp'
   []
 
   [psi1]
