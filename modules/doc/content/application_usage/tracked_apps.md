@@ -49,8 +49,8 @@ The purpose of these lists is two fold:
 
 ### Electromagnetics, Plasmas and Additive Manufacturing
 
-- [Apollo](https://github.com/aurora-multiphysics/apollo) - Enabling 3D electromagnetics simulation in MOOSE, using the MFEM FE library.
-- [CRANE](https://crane-plasma-chemistry.readthedocs.io/en/latest/) - Chemical ReAction NEtworks for plasma chemistry and thermochemistry problems.
+- [Apollo](https://github.com/aurora-multiphysics/apollo) - Enabling 3D electromagnetics simulation in MOOSE, using the MFEM FE library
+- [CRANE](https://crane-plasma-chemistry.readthedocs.io/en/latest/) - Chemical ReAction NEtworks for plasma chemistry and thermochemistry problems
 - [Ferret](https://mangerij.github.io/ferret/) - Kernels to implement the time-dependent Landau-Ginzburg theory of phase transitions for simulating ferroelectric materials
 - [MALAMUTE](https://mooseframework.inl.gov/malamute/) - Advanced manufacturing modeling and simulation
 - [Orpheus](https://github.com/aurora-multiphysics/orpheus) - Additional electromagnetics solvers in MOOSE
@@ -61,7 +61,7 @@ The purpose of these lists is two fold:
 ### Chemistry & species transport
 
 - [cats](https://github.com/aladshaw3/cats) - Catalysis And Treatment Simulations (CATS) library for MOOSE
-- [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration.
+- [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration
 
 ### Geomechanics, Ground Flow, and Earth Sciences
 
@@ -71,10 +71,10 @@ The purpose of these lists is two fold:
 
 ### Miscellaneous
 
-- [canary](https://github.com/aurora-multiphysics/canary) - Repository for storing tested UKAEA MOOSE demonstration problems, examples, and associated documentation.
+- [canary](https://github.com/aurora-multiphysics/canary) - Repository for storing tested UKAEA MOOSE demonstration problems, examples, and associated documentation
 - [moopy](https://github.com/aurora-multiphysics/moopy) - Python interface that simplifies (ish) the creation of MOOSE inputs
 - [Phoenix](https://github.com/rnpratoori/phoenix) - Polymer-to-HOst Evolution via INterface eXchange is a reaction-diffusion based framework to study the evolution of polymer scaffold into a neotissue under various conditions
-- [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins.
+- [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
 - [Isopod](https://github.com/idaholab/isopod) - Multiphysics PDE constrained optimization, mostly merged into MOOSE as the optimization module
@@ -127,7 +127,7 @@ Reactor Physics
 
 Materials, solid mechanics and fuel performance
 
-- [Crow](https://github.com/SudiptaBiswas/Crow) - MOOSE-based mesoscale simulations for solid-state sintering.
+- [Crow](https://github.com/SudiptaBiswas/Crow) - MOOSE-based mesoscale simulations for solid-state sintering
 - [DGOSPREY](https://github.com/aladshaw3/dgosprey) - Discontinuous Galerkin Off-gas SeParation and REcoverY model: joint development between INL and GIT
 - [HOGNOSE](https://github.com/shortlab/hognose) - CASL's mesoscale corrosion/oxidation code
 - [Hyrax](https://github.com/UMThorntonGroup/Hyrax) - Zirconium hydride precipitation and growth in LWR nuclear fuel cladding
@@ -136,7 +136,7 @@ Materials, solid mechanics and fuel performance
 Plasma and fusion sciences
 
 - [Achlys](https://github.com/aurora-multiphysics/achlys) - Macroscopic tritium transport processes through fusion materials
-- [Platypus](https://github.com/aurora-multiphysics/platypus) - A MOOSE-based app to enable finite element problem setup using the MFEM FE library.
+- [Platypus](https://github.com/aurora-multiphysics/platypus) - A MOOSE-based app to enable finite element problem setup using the MFEM FE library
 
 Fluid dynamics and Thermal hydraulics
 
@@ -154,8 +154,8 @@ Miscellaneous
 - ELK - Former application for the electromagnetics module
 - FENIX - Advanced fission reactor multiphysics simulation suite with Griffin and Pronghorn, notably to model Xenon and Samarium fission product transients
 - MAMMOTH - Reactor physics application
-- OSPREY - Off-gas SeParation and REcoverY for dispersed plug flow in a packed bed.
-- RAT - Reactive transport problems in subsurface porous media that involves coupled physical processes of fluid flow, solute transport, biogeochemical reactions and media-solution interactions.
+- OSPREY - Off-gas SeParation and REcoverY for dispersed plug flow in a packed bed
+- RAT - Reactive transport problems in subsurface porous media that involves coupled physical processes of fluid flow, solute transport, biogeochemical reactions and media-solution interactions
 - RATTLESNAKE - FEM Diffusion, SN, and PN code
 - YAK - Common object library for INL particle transport codes
 - YellowJacket - Nuclear reactor coolant chemistry
