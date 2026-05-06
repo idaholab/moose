@@ -17,8 +17,9 @@ class SolutionUserObjectBase;
  * Function for reading a 2D axisymmetric solution from file and mapping it to a
  * 3D Cartesian system. This function extracts values from a solution read from a
  * file via a SolutionUserObject. The appropriate transformations are applied to
- * convert either scalar or vector functions from a 2D axisymmetric frame to a
- * 3D Cartesian frame. It is possible to scale and add a constant to the solution.
+ * convert scalar, vector, or rank-two tensor functions from a 2D axisymmetric
+ * frame to a 3D Cartesian frame. It is possible to scale and add a constant to
+ * the solution.
  */
 class Axisymmetric2D3DSolutionFunction : public Function
 {
@@ -71,6 +72,15 @@ protected:
 
   /// The index of the component
   const unsigned int _component;
+
+  /// Has the tensor row index been specified (tensor mode)?
+  const bool _has_component_i;
+
+  /// The Cartesian row index of the tensor component to return (tensor mode)
+  const unsigned int _component_i;
+
+  /// The Cartesian column index of the tensor component to return (tensor mode)
+  const unsigned int _component_j;
 
   /// Are the default axes of rotation being used?
   bool _default_axes;

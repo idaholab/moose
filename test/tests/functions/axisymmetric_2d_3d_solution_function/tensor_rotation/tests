@@ -1,0 +1,158 @@
+[Tests]
+  design = 'Axisymmetric2D3DSolutionFunction.md'
+  issues = '#32880'
+
+  # --- source generators (RunApp; no gold needed) ---
+
+  [source_2d]
+    type = RunApp
+    input = 'source_2d.i'
+    recover = false
+    restep = false
+    requirement = 'The system shall run a 2D RZ steady problem that writes cylindrical tensor '
+                  'components to an Exodus file for use by downstream tests.'
+  []
+
+  [source_2d_on_axis]
+    type = RunApp
+    input = 'source_2d_on_axis.i'
+    recover = false
+    restep = false
+    requirement = 'The system shall run a 2D RZ steady problem with T_rr equal to T_tt and T_ry '
+                  'equal to zero at the axis, satisfying the axisymmetric guard condition.'
+  []
+
+  [source_2d_on_axis_bad]
+    type = RunApp
+    input = 'source_2d_on_axis_bad.i'
+    recover = false
+    restep = false
+    requirement = 'The system shall run a 2D RZ steady problem with T_rr not equal to T_tt at '
+                  'the axis, providing a source for the on-axis error test.'
+  []
+
+  [source_2d_varying]
+    type = RunApp
+    input = 'source_2d_varying.i'
+    recover = false
+    restep = false
+    requirement = 'The system shall run a 2D RZ steady problem with spatially-varying cylindrical '
+                  'tensor components for use by the analytical-reference rotation test.'
+  []
+
+  # --- tensor rotation: default y-axis ---
+
+  [default_axis]
+    type = Exodiff
+    input = 'consume_3d.i'
+    exodiff = 'consume_3d_out.e'
+    prereq = source_2d
+    recover = false
+    restep = false
+    requirement = 'The system shall rotate a rank-two cylindrical tensor field from 2D RZ to 3D '
+                  'Cartesian coordinates using the default symmetry axis (y-axis).'
+  []
+
+  # --- tensor rotation: non-default axis (z-axis) ---
+
+  [general_axis]
+    type = Exodiff
+    input = 'consume_3d_general_axis.i'
+    exodiff = 'consume_3d_general_axis_out.e'
+    prereq = source_2d
+    recover = false
+    restep = false
+    requirement = 'The system shall rotate a rank-two cylindrical tensor field from 2D RZ to 3D '
+                  'Cartesian coordinates using a user-specified symmetry axis.'
+  []
+
+  # --- on-axis: legal (T_rr == T_tt, T_ry == 0) ---
+
+  [on_axis_ok]
+    type = Exodiff
+    input = 'consume_3d_on_axis.i'
+    exodiff = 'consume_3d_on_axis_out.e'
+    prereq = source_2d_on_axis
+    recover = false
+    restep = false
+    requirement = 'The system shall correctly evaluate a rank-two tensor at on-axis nodes when the '
+                  'source tensor satisfies the axisymmetric on-axis conditions.'
+  []
+
+  # --- analytical-reference test: spatially-varying source field ---
+
+  [analytical_varying]
+    type = CSVDiff
+    input = 'consume_3d_varying.i'
+    csvdiff = 'consume_3d_varying_out.csv'
+    prereq = source_2d_varying
+    recover = false
+    restep = false
+    abs_zero = 1e-10
+    requirement = 'The system shall reproduce the closed-form Cartesian rotation of a spatially-'
+                  'varying rank-two cylindrical tensor field at every node, with the maximum nodal '
+                  'difference between the rotated and analytical components below floating-point '
+                  'tolerance.'
+  []
+
+  # --- on-axis error: T_rr != T_tt ---
+
+  [on_axis_error]
+    requirement = 'The system shall report an error when '
+    [rr_ne_tt]
+      type = RunException
+      input = 'consume_3d_on_axis_bad.i'
+      expect_err = 'r=0 and T_rr != T_tt'
+      prereq = source_2d_on_axis_bad
+      recover = false
+      restep = false
+      detail = 'a rank-two tensor is evaluated on the axis with T_rr not equal to T_tt.'
+    []
+  []
+
+  # --- bad parameter combinations ---
+
+  [bad_params]
+    requirement = 'The system shall report an error when '
+    [wrong_from_vars_length]
+      type = RunException
+      input = 'bad_params.i'
+      cli_args = "Functions/f/from_variables='T_rr T_yy T_ry'"
+      expect_err = "'from_variables' length must be 1, 2, or 4"
+      prereq = source_2d
+      recover = false
+      restep = false
+      detail = 'the from_variables list length is not 1, 2, or 4.'
+    []
+    [component_ij_without_tensor_mode]
+      type = RunException
+      input = 'bad_params.i'
+      cli_args = "Functions/f/from_variables='T_rr' Functions/f/component_i=0"
+      expect_err = "'component_i'/'component_j' is tensor mode only"
+      prereq = source_2d
+      recover = false
+      restep = false
+      detail = 'component_i or component_j is supplied with fewer than 4 from_variables.'
+    []
+    [tensor_mode_missing_component]
+      type = RunException
+      input = 'bad_params.i'
+      cli_args = "Functions/f/from_variables='T_rr T_yy T_ry T_tt' Functions/f/component_i=0"
+      expect_err = 'Tensor mode.*requires both.*component_i.*component_j'
+      prereq = source_2d
+      recover = false
+      restep = false
+      detail = 'tensor mode is active but only one of component_i or component_j is specified.'
+    []
+    [component_ij_out_of_range]
+      type = RunException
+      input = 'bad_params.i'
+      cli_args = "Functions/f/from_variables='T_rr T_yy T_ry T_tt' Functions/f/component_i=0 Functions/f/component_j=5"
+      expect_err = "'component_i'/'component_j' out of range"
+      prereq = source_2d
+      recover = false
+      restep = false
+      detail = 'a component index is outside the valid range of 0 to 2.'
+    []
+  []
+[]
