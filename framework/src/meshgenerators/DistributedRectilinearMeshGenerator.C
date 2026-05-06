@@ -133,6 +133,7 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     _partition_method(getParam<MooseEnum>("partition")),
     _num_side_layers(getParam<unsigned>("num_side_layers"))
 {
+  _mesh->setParallelType(MooseMesh::ParallelType::DISTRIBUTED);
 }
 
 template <>
