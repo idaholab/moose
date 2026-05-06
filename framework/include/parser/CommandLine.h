@@ -326,6 +326,7 @@ CommandLine::setCommandLineParam(std::list<CommandLine::Entry>::iterator entry_i
           const auto & next_entry = *next_entry_it;
           // Merge with the next Entry object and remove said next object
           entry.value = next_entry.name + *next_entry.value_separator + *next_entry.value;
+          entry.value_separator = " ";
           entry.raw_args.insert(
               entry.raw_args.end(), next_entry.raw_args.begin(), next_entry.raw_args.end());
           _entries.erase(next_entry_it);
