@@ -125,7 +125,6 @@ wire_conductivity = 1.0e7 # S/m
     coefficient = ${fparse 0.5*vacuum_reluctivity}
     dual_variable = b_field
     primal_variable = b_field
-    execution_order_group = 2
   []
 []
 

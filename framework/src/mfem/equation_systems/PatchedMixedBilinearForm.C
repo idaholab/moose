@@ -27,6 +27,9 @@ ParMixedBilinearForm::Assemble(int skip_zeros)
     }
   }
 
+  // TODO: Replace this with new mfem::ParSubMesh::IsParSubMesh implementation
+  // that checks whether a mesh is a submesh of a given parent mesh.
+  // Requires MFEM dependency update.
   if (mfem::ParSubMesh::IsParSubMesh(trial_pfes->GetParMesh()))
     SubMeshTolerantAssemble(skip_zeros);
   else
@@ -53,6 +56,8 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
   // For usual mfem::MixedBilinearFormAssemble, the iterated FESpace is test_fes
   mfem::FiniteElementSpace & iterated_fes = *trial_fes;
   mfem::Mesh * mesh = iterated_fes.GetMesh();
+  const auto * trial_submesh = static_cast<const mfem::ParSubMesh *>(trial_pfes->GetParMesh());
+  const auto & parent_element_ids = trial_submesh->GetParentElementIDMap();
   const int num_elem = iterated_fes.GetNE();
   const int num_boundary_elem = iterated_fes.GetNBE();
 
@@ -77,9 +82,10 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
     mfem::DofTransformation dom_dof_trans, ran_dof_trans;
     for (int i = 0; i < num_elem; i++)
     {
+      const int parent_elem_id = parent_element_ids[i];
       const int elem_attr = mesh->GetAttribute(i);
       trial_fes->GetElementVDofs(i, trial_vdofs, dom_dof_trans);
-      test_fes->GetElementVDofs(i, test_vdofs, ran_dof_trans);
+      test_fes->GetElementVDofs(parent_elem_id, test_vdofs, ran_dof_trans);
       eltrans = iterated_fes.GetElementTransformation(i);
 
       elmat.SetSize(test_vdofs.Size(), trial_vdofs.Size());
@@ -89,7 +95,7 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
         if (domain_integs_marker[k] == NULL || (*(domain_integs_marker[k]))[elem_attr - 1] == 1)
         {
           domain_integs[k]->AssembleElementMatrix2(
-              *trial_fes->GetFE(i), *test_fes->GetFE(i), *eltrans, elemmat);
+              *trial_fes->GetFE(i), *test_fes->GetFE(parent_elem_id), *eltrans, elemmat);
           elmat += elemmat;
         }
       }
@@ -163,18 +169,20 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
       ftr = mesh->GetInteriorFaceTransformations(i);
       if (ftr != NULL)
       {
+        const int parent_elem_1 = parent_element_ids[ftr->Elem1No];
         trial_fes->GetElementVDofs(ftr->Elem1No, trial_vdofs);
-        test_fes->GetElementVDofs(ftr->Elem1No, test_vdofs);
+        test_fes->GetElementVDofs(parent_elem_1, test_vdofs);
         trial_fe1 = trial_fes->GetFE(ftr->Elem1No);
-        test_fe1 = test_fes->GetFE(ftr->Elem1No);
+        test_fe1 = test_fes->GetFE(parent_elem_1);
         if (ftr->Elem2No >= 0)
         {
+          const int parent_elem_2 = parent_element_ids[ftr->Elem2No];
           trial_fes->GetElementVDofs(ftr->Elem2No, trial_vdofs2);
-          test_fes->GetElementVDofs(ftr->Elem2No, test_vdofs2);
+          test_fes->GetElementVDofs(parent_elem_2, test_vdofs2);
           trial_vdofs.Append(trial_vdofs2);
           test_vdofs.Append(test_vdofs2);
           trial_fe2 = trial_fes->GetFE(ftr->Elem2No);
-          test_fe2 = test_fes->GetFE(ftr->Elem2No);
+          test_fe2 = test_fes->GetFE(parent_elem_2);
         }
         else
         {
@@ -231,10 +239,11 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
       ftr = mesh->GetBdrFaceTransformations(i);
       if (ftr != NULL)
       {
+        const int parent_elem_1 = parent_element_ids[ftr->Elem1No];
         trial_fes->GetElementVDofs(ftr->Elem1No, trial_vdofs);
-        test_fes->GetElementVDofs(ftr->Elem1No, test_vdofs);
+        test_fes->GetElementVDofs(parent_elem_1, test_vdofs);
         trial_fe1 = trial_fes->GetFE(ftr->Elem1No);
-        test_fe1 = test_fes->GetFE(ftr->Elem1No);
+        test_fe1 = test_fes->GetFE(parent_elem_1);
         // The test_fe2 object is really a dummy and not used on the
         // boundaries, but we can't dereference a NULL pointer, and we don't
         // want to actually make a fake element.
@@ -266,15 +275,17 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
     for (int i = 0; i < nfaces; i++)
     {
       ftr = mesh->GetFaceElementTransformations(i);
+      const int parent_elem_1 = parent_element_ids[ftr->Elem1No];
       trial_fes->GetFaceVDofs(i, trial_vdofs);
-      test_fes->GetElementVDofs(ftr->Elem1No, test_vdofs);
+      test_fes->GetElementVDofs(parent_elem_1, test_vdofs);
       trial_face_fe = trial_fes->GetFaceElement(i);
-      test_fe1 = test_fes->GetFE(ftr->Elem1No);
+      test_fe1 = test_fes->GetFE(parent_elem_1);
       if (ftr->Elem2No >= 0)
       {
-        test_fes->GetElementVDofs(ftr->Elem2No, test_vdofs2);
+        const int parent_elem_2 = parent_element_ids[ftr->Elem2No];
+        test_fes->GetElementVDofs(parent_elem_2, test_vdofs2);
         test_vdofs.Append(test_vdofs2);
-        test_fe2 = test_fes->GetFE(ftr->Elem2No);
+        test_fe2 = test_fes->GetFE(parent_elem_2);
       }
       else
       {
@@ -331,10 +342,11 @@ ParMixedBilinearForm::SubMeshTolerantAssemble(int skip_zeros)
       if (ftr)
       {
         const int iface = mesh->GetBdrElementFaceIndex(i);
+        const int parent_elem_1 = parent_element_ids[ftr->Elem1No];
         trial_fes->GetFaceVDofs(iface, trial_vdofs);
-        test_fes->GetElementVDofs(ftr->Elem1No, test_vdofs);
+        test_fes->GetElementVDofs(parent_elem_1, test_vdofs);
         trial_face_fe = trial_fes->GetFaceElement(iface);
-        test_fe1 = test_fes->GetFE(ftr->Elem1No);
+        test_fe1 = test_fes->GetFE(parent_elem_1);
         // The test_fe2 object is really a dummy and not used on the
         // boundaries, but we can't dereference a NULL pointer, and we don't
         // want to actually make a fake element.
