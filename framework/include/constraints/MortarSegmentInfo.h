@@ -57,11 +57,6 @@ struct MortarSegmentInfo
    */
   bool isValid() const;
 
-  /**
-   * Returns true if this segment has a valid primary, false otherwise.
-   */
-  bool hasPrimary() const;
-
   Real xi1_a, xi1_b;
   Real xi2_a, xi2_b;
   const Elem * secondary_elem;
