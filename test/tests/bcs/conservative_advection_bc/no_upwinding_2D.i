@@ -16,9 +16,9 @@ nx = 40
 [Functions]
   [beta]
     type = ParsedVectorFunction
-    value_x = ${vx}
-    value_y = ${vy}
-    value_z = 0
+    expression_x = ${vx}
+    expression_y = ${vy}
+    expression_z = 0
   []
   [box_start]
     type = ParsedFunction

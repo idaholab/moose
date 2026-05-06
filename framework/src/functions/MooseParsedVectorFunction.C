@@ -19,12 +19,6 @@ MooseParsedVectorFunction::validParams()
   params += MooseParsedFunctionBase::validParams();
   params.addClassDescription(
       "Returns a vector function based on string descriptions for each component.");
-  params.addDeprecatedParam<std::string>(
-      "value_x", "x-component of function.", "value_x is deprecated, use expression_x");
-  params.addDeprecatedParam<std::string>(
-      "value_y", "y-component of function.", "value_y is deprecated, use expression_y");
-  params.addDeprecatedParam<std::string>(
-      "value_z", "z-component of function.", "value_z is deprecated, use expression_z");
   params.addParam<std::string>("expression_x", "0", "x-component of function.");
   params.addParam<std::string>("expression_y", "0", "y-component of function.");
   params.addParam<std::string>("expression_z", "0", "z-component of function.");
@@ -38,10 +32,9 @@ MooseParsedVectorFunction::validParams()
 MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters)
   : Function(parameters),
     MooseParsedFunctionBase(parameters),
-    _vector_value(verifyFunction(std::string("{") +
-                                 getRenamedParam<std::string>("value_x", "expression_x") + "}{" +
-                                 getRenamedParam<std::string>("value_y", "expression_y") + "}{" +
-                                 getRenamedParam<std::string>("value_z", "expression_z") + "}")),
+    _vector_value(verifyFunction(std::string("{") + getParam<std::string>("expression_x") + "}{" +
+                                 getParam<std::string>("expression_y") + "}{" +
+                                 getParam<std::string>("expression_z") + "}")),
     _curl_value(verifyFunction(std::string("{") + getParam<std::string>("curl_x") + "}{" +
                                getParam<std::string>("curl_y") + "}{" +
                                getParam<std::string>("curl_z") + "}")),
@@ -76,9 +69,7 @@ MooseParsedVectorFunction::gradient(Real /*t*/, const Point & /*p*/) const
 void
 MooseParsedVectorFunction::initialSetup()
 {
-  THREAD_ID tid = 0;
-  if (isParamValid("_tid"))
-    tid = getParam<THREAD_ID>("_tid");
+  THREAD_ID tid = isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0;
 
   if (!_function_ptr)
     _function_ptr = std::make_unique<MooseParsedFunctionWrapper>(

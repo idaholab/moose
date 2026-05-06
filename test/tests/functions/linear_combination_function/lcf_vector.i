@@ -24,7 +24,7 @@
     expression_x = '0.2+x*y'
   [../]
   [./conductivity]
-    type = LinearCombinationFunction # yields value_y=0.1, value_x=0.8
+    type = LinearCombinationFunction # yields expression_y=0.1, expression_x=0.8
     functions = 'conductivity_1 conductivity_2'
     w = '2 -1'
   [../]
