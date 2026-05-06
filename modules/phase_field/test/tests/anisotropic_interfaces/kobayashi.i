@@ -74,7 +74,7 @@
     constant_expressions = '0.9 10 1 4*atan(1)'
     expression = 'm:=alpha/pi * atan(gamma * (T_e - T)); 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'
     derivative_order = 2
-    outputs = exodus
+    outputs = 'out'
   [../]
   [./material]
     type = InterfaceOrientationMaterial
@@ -110,7 +110,8 @@
 []
 
 [Outputs]
-  exodus = true
-  perf_graph = true
-  execute_on = 'INITIAL FINAL'
+  [out]
+    type = Exodus
+    execute_on = 'INITIAL FINAL'
+  []
 []

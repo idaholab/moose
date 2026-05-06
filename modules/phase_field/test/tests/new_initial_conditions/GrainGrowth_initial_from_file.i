@@ -33,7 +33,9 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = FINAL
-  hide = bnds
+  [out]
+    type = Exodus
+    execute_on = FINAL
+    hide = bnds
+  []
 []

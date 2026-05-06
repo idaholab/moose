@@ -26,6 +26,7 @@
                   Problem/restart_file_base=default_cp/LATEST Problem/allow_initial_conditions_with_restart=true
                   Outputs/file_base=restart_user_ics"
       detail = 'when performing a regular checkpoint restart, but still obeying the user-defined initial condition,'
+      prereq = 'restart/default'
     []
     [restart_from_file]
       type = CSVDiff

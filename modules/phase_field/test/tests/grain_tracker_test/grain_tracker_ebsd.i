@@ -195,7 +195,8 @@
 []
 
 [Outputs]
-  execute_on = 'initial'
-  exodus = true
-  perf_graph = true
+  [out]
+    execute_on = 'initial'
+    type = Exodus
+  []
 []
