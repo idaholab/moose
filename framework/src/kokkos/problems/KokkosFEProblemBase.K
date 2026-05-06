@@ -280,12 +280,12 @@ FEProblemBase::initKokkos()
   // Initialize Kokkos mesh
   _mesh.getKokkosMesh()->update();
 
+  // Initialize Kokkos assembly
+  _kokkos_assembly.init();
+
   // Call functions that require Kokkos mesh to be initialized first
   for (auto hook : _kokkos_mesh_initialization_hooks)
     hook();
-
-  // Initialize Kokkos assembly
-  _kokkos_assembly.init();
 
   // Initialize Kokkos systems
 

@@ -38,11 +38,6 @@ public:
    */
   MaterialBase(const MaterialBase & object);
 
-  /**
-   * Setup block and boundary restrictions
-   */
-  virtual void initialSetup() override;
-
   // Unused for Kokkos materials because all subdomains are computed in parallel
   virtual void subdomainSetup() override final {}
 
@@ -195,6 +190,11 @@ private:
   // Unused for Kokkos materials because they are hidden by Kokkos functions
   virtual void initQpStatefulProperties() override final {}
   virtual void computeQpProperties() override final {}
+
+  /**
+   * Setup block and boundary restrictions for material
+   */
+  void initializeMaterialRestrictable();
 
   /**
    * Internal method for declaring a material property
