@@ -11,7 +11,7 @@
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        cli_args = 'Transfers/active=general_transfer_from_sub '        
+        cli_args = 'Transfers/active=general_transfer_from_sub '
         detail = 'running the inputs, and'
       []
       [verify]
@@ -35,7 +35,7 @@
         capabilities = 'mfem'
         compute_devices = 'cpu cuda'
         recover = false
-        cli_args = 'Transfers/active=general_transfer_from_sub'        
+        cli_args = 'Transfers/active=general_transfer_from_sub'
         detail = 'running the inputs, and '
         max_parallel = 1 # idaholab/moose#32250
       []
@@ -54,7 +54,7 @@
     []
     [VectorTransfer]
       detail = 'for vector variables '
-      [Hex]      
+      [Hex]
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_hex.csv'
@@ -64,7 +64,7 @@
         recover = false
         compute_devices = 'cpu cuda'
       []
-      [Tetra]      
+      [Tetra]
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet.csv'
@@ -77,7 +77,7 @@
                   'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet '
       []
-      [TetToHex]      
+      [TetToHex]
         type = CSVDiff
         input = mfem_parent_vector.i
         csvdiff = 'mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex.csv'
@@ -89,7 +89,7 @@
         cli_args = 'Mesh/file=../../mesh/cube.e '
                   'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
                   'Outputs/file_base=mfem_parent_mfem_sub_vector_h1_hcurl_hdiv_l2_tet_to_hex '
-      []      
+      []
     []
     [OutOfMesh]
       detail = 'for scalar variables between meshes of different geometric sizes, '
@@ -104,7 +104,7 @@
         recover = false
         compute_devices = 'cpu cuda'
       []
-    []    
+    []
   []
   [MFEMCopyTransfer]
     design = MultiAppMFEMCopyTransfer.md
@@ -183,7 +183,7 @@
       []
     []
     [ComplexToSubFromParent]
-      detail = 'representing complex variables from a parent application to a sub-application, verified by'      
+      detail = 'representing complex variables from a parent application to a sub-application, verified by'
       [run]
         type = RunApp
         input = sub_complex.i
