@@ -559,33 +559,11 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addPressureCorrectionKernels()
     getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
   }
 
-  if (_add_transient_projection_flux)
-  {
-    const std::string kernel_type = "LinearFVDivergence";
-    const std::string kernel_name = prefix() + "transient_projection_divergence";
-
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
-    params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<MooseFunctorName>("face_flux") = "transient_projection_flux";
-    params.set<bool>("force_boundary_execution") = true;
-
-    getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
-  }
-
-  if (_add_capillary_hydrostatic_flux)
-  {
-    const std::string kernel_type = "LinearFVDivergence";
-    const std::string kernel_name = prefix() + "capillary_hydrostatic_divergence";
-
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
-    params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<MooseFunctorName>("face_flux") = "capillary_hydrostatic_flux";
-    params.set<bool>("force_boundary_execution") = true;
-
-    getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
-  }
+  // The sharp-interface pressure predictor base flux already includes the
+  // transient/capillary/hydrostatic source branches through
+  // SharpInterfaceRhieChowMassFlux::updateAdditionalPressureFluxFunctors().
+  // Adding them again here would double count those branches in the pressure
+  // equation RHS.
 }
 
 void
@@ -1014,14 +992,6 @@ void
 WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
-  std::vector<MooseFunctorName> wall_pressure_source_fluxes;
-  if (_add_capillary_hydrostatic_flux)
-    wall_pressure_source_fluxes.push_back("capillary_hydrostatic_flux");
-
-  std::vector<MooseFunctorName> symmetry_pressure_source_fluxes = wall_pressure_source_fluxes;
-  if (_add_transient_projection_flux)
-    symmetry_pressure_source_fluxes.push_back("transient_projection_flux");
-
   for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
   {
     if (momentum_wall_type == "noslip")
@@ -1052,8 +1022,6 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC()
       pressure_params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
       pressure_params.set<MooseFunctorName>("HbyA_flux") = "pressure_predictor_base_phi";
       pressure_params.set<MooseFunctorName>("Ainv") = "sharp_pressure_Ainv";
-      pressure_params.set<std::vector<MooseFunctorName>>("additional_face_fluxes") =
-          wall_pressure_source_fluxes;
       getProblem().addLinearFVBC(
           pressure_bc_type, _pressure_name + "_wall_flux_" + boundary_name, pressure_params);
     }
@@ -1085,8 +1053,6 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addWallsBC()
         params.set<bool>("use_constrained_pressure_normal_gradient_only") = true;
         params.set<MooseFunctorName>("HbyA_flux") = "pressure_predictor_base_phi";
         params.set<MooseFunctorName>("Ainv") = "sharp_pressure_Ainv";
-        params.set<std::vector<MooseFunctorName>>("additional_face_fluxes") =
-            symmetry_pressure_source_fluxes;
         getProblem().addLinearFVBC(bc_type, _pressure_name + "_" + boundary_name, params);
       }
     }

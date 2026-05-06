@@ -1,8 +1,5 @@
-# Pressure audit for the sharp-interface dam-break benchmark at INITIAL and after
-# the first completed timestep. Samples the solved reduced pressure and the
-# reconstructed total pressure along a horizontal cut through the initial water
-# column to check whether startup projection / the first pressure correction
-# distorts the hydrostatic jump.
+# Short dam-break toe debug case. This keeps the real benchmark physics but adds
+# bottom-strip samplers and first-step pressure-corrector debug dumps.
 
 rho_l = 998.19
 rho_g = 1.185
@@ -15,9 +12,12 @@ domain_dims_x = ${fparse 5.0 * initial_length}
 domain_dims_y = ${fparse 1.25 * initial_length}
 dam_x = ${initial_length}
 dam_y = ${initial_length}
-cut_y = ${fparse 0.5 * dam_y}
 
 c_alpha = 0.01
+cell_dx = ${fparse domain_dims_x / 200.0}
+cell_dy = ${fparse domain_dims_y / 50.0}
+toe_row0_y = ${fparse 0.5 * cell_dy}
+toe_row1_y = ${fparse 1.5 * cell_dy}
 
 [Mesh]
   [mesh]
@@ -112,61 +112,30 @@ c_alpha = 0.01
 []
 
 [AuxVariables]
-  [total_pressure_audit]
+  [water_heights]
     type = MooseVariableFVReal
   []
-  [analytic_reduced_pressure]
-    type = MooseVariableFVReal
-  []
-  [analytic_total_pressure]
-    type = MooseVariableFVReal
-  []
-  [reduced_pressure_error]
-    type = MooseVariableFVReal
-  []
-  [total_pressure_error]
+  [water_lengths]
     type = MooseVariableFVReal
   []
 []
 
 [AuxKernels]
-  [total_pressure_audit]
+  [water_heights]
     type = ParsedAux
-    variable = total_pressure_audit
-    coupled_variables = 'alpha pressure'
-    expression = 'pressure + (alpha*${rho_l} + (1-alpha)*${rho_g})*${g}*(${domain_dims_y}-y)'
+    variable = water_heights
+    coupled_variables = 'alpha'
+    expression = 'if(alpha > 0.5, y, 0)'
     use_xyzt = true
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
-  [analytic_reduced_pressure]
+  [water_lengths]
     type = ParsedAux
-    variable = analytic_reduced_pressure
-    expression = 'if(x < ${dam_x} & y < ${dam_y}, -(${rho_l}-${rho_g})*${g}*(${domain_dims_y}-${dam_y}), 0)'
+    variable = water_lengths
+    coupled_variables = 'alpha'
+    expression = 'if(alpha > 0.5, x, 0)'
     use_xyzt = true
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [analytic_total_pressure]
-    type = ParsedAux
-    variable = analytic_total_pressure
-    expression = 'if(x < ${dam_x} & y < ${dam_y}, ${rho_l}*${g}*(${dam_y}-y) + ${rho_g}*${g}*(${domain_dims_y}-${dam_y}), ${rho_g}*${g}*(${domain_dims_y}-y))'
-    use_xyzt = true
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [reduced_pressure_error]
-    type = ParsedAux
-    variable = reduced_pressure_error
-    coupled_variables = 'pressure analytic_reduced_pressure'
-    expression = 'pressure - analytic_reduced_pressure'
-    use_xyzt = true
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [total_pressure_error]
-    type = ParsedAux
-    variable = total_pressure_error
-    coupled_variables = 'total_pressure_audit analytic_total_pressure'
-    expression = 'total_pressure_audit - analytic_total_pressure'
-    use_xyzt = true
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -214,70 +183,164 @@ c_alpha = 0.01
 
   volume_fraction_subcycles = 2
   dt = 1.0e-4
-  num_steps = 1
-  end_time = 1.0e-4
+  end_time = 0.005
+
+  dump_pressure_outer_debug_csv = true
+  dump_pressure_outer_debug_max_outer_iterations = 2
+[]
+
+[Postprocessors]
+  [compute_front_height]
+    type = ElementExtremeValue
+    variable = 'water_heights'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_front_length]
+    type = ElementExtremeValue
+    variable = 'water_lengths'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_front_length_subcell]
+    type = SubcellInterfacialPosition
+    volume_fraction = alpha
+    direction = x
+    extremum_type = max
+    threshold = 0.5
+    secondary_min = 0
+    secondary_max = '${fparse 2.5 * cell_dy}'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compute_front_height_subcell]
+    type = SubcellInterfacialPosition
+    volume_fraction = alpha
+    direction = y
+    extremum_type = max
+    threshold = 0.5
+    secondary_min = 0
+    secondary_max = '${fparse 2.5 * cell_dx}'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [total_alpha]
+    type = ElementIntegralVariablePostprocessor
+    variable = 'alpha'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [liquid_com_x]
+    type = LiquidCenterOfMass
+    volume_fraction = alpha
+    liquid_density = rho_l
+    direction = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [liquid_com_y]
+    type = LiquidCenterOfMass
+    volume_fraction = alpha
+    liquid_density = rho_l
+    direction = y
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [liquid_horizontal_momentum]
+    type = LiquidMomentum
+    volume_fraction = alpha
+    liquid_density = rho_l
+    velocity = vel_x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [alpha_min]
+    type = ElementExtremeValue
+    variable = 'alpha'
+    value_type = min
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [alpha_max]
+    type = ElementExtremeValue
+    variable = 'alpha'
+    value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_u]
+    type = ElementExtremeValue
+    variable = 'vel_x'
+    value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_v]
+    type = ElementExtremeValue
+    variable = 'vel_y'
+    value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [VectorPostprocessors]
-  [reduced_pressure_cut]
-    type = LineValueSampler
-    variable = pressure
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [total_pressure_cut]
-    type = LineValueSampler
-    variable = total_pressure_audit
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [analytic_reduced_pressure_cut]
-    type = LineValueSampler
-    variable = analytic_reduced_pressure
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [analytic_total_pressure_cut]
-    type = LineValueSampler
-    variable = analytic_total_pressure
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [reduced_pressure_error_cut]
-    type = LineValueSampler
-    variable = reduced_pressure_error
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [total_pressure_error_cut]
-    type = LineValueSampler
-    variable = total_pressure_error
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [alpha_cut]
+  [toe_alpha_row0]
     type = LineValueSampler
     variable = alpha
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
+    start_point = '0 ${toe_row0_y} 0'
+    end_point = '${domain_dims_x} ${toe_row0_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_u_row0]
+    type = LineValueSampler
+    variable = vel_x
+    start_point = '0 ${toe_row0_y} 0'
+    end_point = '${domain_dims_x} ${toe_row0_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_v_row0]
+    type = LineValueSampler
+    variable = vel_y
+    start_point = '0 ${toe_row0_y} 0'
+    end_point = '${domain_dims_x} ${toe_row0_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_p_row0]
+    type = LineValueSampler
+    variable = pressure
+    start_point = '0 ${toe_row0_y} 0'
+    end_point = '${domain_dims_x} ${toe_row0_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_alpha_row1]
+    type = LineValueSampler
+    variable = alpha
+    start_point = '0 ${toe_row1_y} 0'
+    end_point = '${domain_dims_x} ${toe_row1_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_u_row1]
+    type = LineValueSampler
+    variable = vel_x
+    start_point = '0 ${toe_row1_y} 0'
+    end_point = '${domain_dims_x} ${toe_row1_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_v_row1]
+    type = LineValueSampler
+    variable = vel_y
+    start_point = '0 ${toe_row1_y} 0'
+    end_point = '${domain_dims_x} ${toe_row1_y} 0'
+    num_points = 401
+    sort_by = x
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [toe_p_row1]
+    type = LineValueSampler
+    variable = pressure
+    start_point = '0 ${toe_row1_y} 0'
+    end_point = '${domain_dims_x} ${toe_row1_y} 0'
     num_points = 401
     sort_by = x
     execute_on = 'INITIAL TIMESTEP_END'

@@ -1,8 +1,7 @@
-# Pressure audit for the sharp-interface dam-break benchmark at INITIAL and after
-# the first completed timestep. Samples the solved reduced pressure and the
-# reconstructed total pressure along a horizontal cut through the initial water
-# column to check whether startup projection / the first pressure correction
-# distorts the hydrostatic jump.
+# Pressure-corrector debug input for the sharp-interface dam-break benchmark.
+# Freezes the initial interface, skips the momentum predictor, and performs a
+# single pressure-only outer iteration so the reduced-pressure writeback path
+# can be audited in isolation on the hydrostatic initial condition.
 
 rho_l = 998.19
 rho_g = 1.185
@@ -178,6 +177,9 @@ c_alpha = 0.01
   pressure_system = 'pressure_system'
   volume_fraction_systems = 'alpha_system'
 
+  should_solve_momentum = false
+  should_solve_volume_fractions = false
+
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
@@ -209,13 +211,58 @@ c_alpha = 0.01
   pin_pressure = true
   pressure_pin_point = '0.0 ${domain_dims_y} 0.0'
 
-  startup_pressure_initialization = 'projection-only'
-  startup_flux_corrections = 2
+  startup_pressure_initialization = 'none'
 
-  volume_fraction_subcycles = 2
   dt = 1.0e-4
   num_steps = 1
   end_time = 1.0e-4
+[]
+
+[Postprocessors]
+  [cell_divergence_l2]
+    type = RhieChowCellContinuityResidual
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    metric = l2
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
+  [cell_divergence_max]
+    type = RhieChowCellContinuityResidual
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    metric = max_abs
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
+  [face_flux_consistency_l2]
+    type = RhieChowFaceFluxConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = l2
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
+  [face_flux_consistency_internal]
+    type = RhieChowFaceFluxConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = internal_l2
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
+  [correction_branch_consistency]
+    type = SharpInterfaceFluxBranchConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = pressure_correction
+    metric = l2
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
+  [total_branch_consistency]
+    type = SharpInterfaceFluxBranchConsistencyError
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+    quantity = total
+    metric = l2
+    outputs = 'console csv'
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [VectorPostprocessors]
@@ -273,19 +320,9 @@ c_alpha = 0.01
     sort_by = x
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [alpha_cut]
-    type = LineValueSampler
-    variable = alpha
-    start_point = '0 ${cut_y} 0'
-    end_point = '${domain_dims_x} ${cut_y} 0'
-    num_points = 401
-    sort_by = x
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
 []
 
 [Outputs]
-  execute_on = 'INITIAL TIMESTEP_END'
   csv = true
-  exodus = false
+  execute_on = 'TIMESTEP_END'
 []

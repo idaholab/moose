@@ -54,6 +54,7 @@ public:
   void finalize() override {}
 
   void resetSubcycleFluxes();
+  void invalidateOuterCorrectionFluxSeed();
   void applyCorrection(const Real dt, const Real subcycle_fraction = 1.0);
   LiquidVolumeAudit liquidVolumeAudit() const;
   RhoPhiConsistencyAudit rhoPhiConsistencyAudit() const;

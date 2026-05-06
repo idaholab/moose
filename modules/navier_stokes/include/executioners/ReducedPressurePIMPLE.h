@@ -18,6 +18,7 @@ public:
   ReducedPressurePIMPLE(const InputParameters & parameters);
 
   void init() override;
+  void takeStep(Real input_dt = -1.0) override;
   Real relativeSolutionDifferenceNorm(bool check_aux) const override;
 
 protected:

@@ -393,6 +393,12 @@ SharpInterfaceVOFMULESCorrector::resetSubcycleFluxes()
     pair.second = 0.0;
 }
 
+void
+SharpInterfaceVOFMULESCorrector::invalidateOuterCorrectionFluxSeed()
+{
+  invalidatePreviousCorrectionFluxes();
+}
+
 LinearFVBoundaryCondition *
 SharpInterfaceVOFMULESCorrector::boundaryCondition(const FaceInfo & fi) const
 {
@@ -652,12 +658,14 @@ SharpInterfaceVOFMULESCorrector::publishFaceFluxes(
     const Real limited_correction = limited_correction_fluxes[i];
     const Real limited_alpha_flux = data.donor_flux + limited_correction;
 
-    _alpha_phi_bd[face_id] = data.donor_flux;
-    _alpha_phi_ho[face_id] = data.high_order_flux;
-    _alpha_phi_comp[face_id] = data.compressive_flux;
-    _alpha_phi_corr_raw[face_id] = raw_correction_fluxes[i];
-    _alpha_phi_corr[face_id] = limited_correction;
-    _alpha_phi_limited[face_id] = limited_alpha_flux;
+    // Accumulate the published face fluxes with the same subcycle weighting as rhoPhi so
+    // downstream consumers see a timestep-consistent alphaPhi/rhoPhi pair after subcycling.
+    _alpha_phi_bd[face_id] += subcycle_fraction * data.donor_flux;
+    _alpha_phi_ho[face_id] += subcycle_fraction * data.high_order_flux;
+    _alpha_phi_comp[face_id] += subcycle_fraction * data.compressive_flux;
+    _alpha_phi_corr_raw[face_id] += subcycle_fraction * raw_correction_fluxes[i];
+    _alpha_phi_corr[face_id] += subcycle_fraction * limited_correction;
+    _alpha_phi_limited[face_id] += subcycle_fraction * limited_alpha_flux;
     _rho_phi[face_id] += subcycle_fraction * rhoPhi(*data.face, limited_alpha_flux);
   }
 }

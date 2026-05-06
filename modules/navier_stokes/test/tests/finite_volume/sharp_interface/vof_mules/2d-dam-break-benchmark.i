@@ -86,8 +86,8 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
         use_mules_correction = true
-        alpha_apply_prev_corr = true
-        n_alpha_corrections = 3
+        alpha_apply_prev_corr = false
+        n_alpha_corrections = 1
         n_limiter_iterations = 6
       []
     []
@@ -153,7 +153,7 @@ cell_dy = ${fparse domain_dims_y / 50.0}
   pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
 
-  num_iterations = 20
+  num_iterations = 1
   num_piso_iterations = 0
   continue_on_max_its = true
   print_fields = false
@@ -182,15 +182,6 @@ cell_dy = ${fparse domain_dims_y / 50.0}
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
-  audit_stage_diagnostics = true
-  audit_stage_diagnostics_start_time = 0.02
-  momentum_probe_audit = true
-  momentum_probe_audit_file_base = 'dam_break_benchmark_momentum_probes'
-  momentum_probe_points = '${fparse 0.25 * dam_x} ${fparse 0.25 * dam_y} 0
-                           ${fparse 0.95 * dam_x} ${fparse 0.10 * dam_y} 0
-                           ${fparse 1.05 * dam_x} ${fparse 0.10 * dam_y} 0
-                           ${fparse 0.25 * dam_x} ${fparse 0.85 * dam_y} 0'
-  momentum_probe_audit_start_time = 0.0
 
   volume_fraction_subcycles = 2
   dt = 1.0e-4

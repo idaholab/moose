@@ -39,7 +39,7 @@ class MeshBase;
 class RhieChowMassFlux : public RhieChowFaceFluxProvider, public NonADFunctorInterface
 {
 public:
-  struct FaceMassFluxConsistencyAudit
+  struct FaceFluxConsistencyAudit
   {
     Real l2_norm = 0.0;
     Real internal_l2_norm = 0.0;
@@ -85,10 +85,13 @@ public:
   Real maxBoundaryMassFluxMagnitude() const;
   /// L2 norm of all current face mass fluxes for audit purposes.
   Real faceMassFluxL2Norm() const;
+  /// Maximum face-flux Courant number over active flow cells for the supplied timestep.
+  virtual Real maxCourant(const Real dt) const;
   /// Access the active flow faces used by this Rhie-Chow object for audit postprocessors.
   const std::vector<const FaceInfo *> & flowFacesForAudit() const { return _flow_face_info; }
-  /// Compare the stored face mass fluxes against the flux implied by the current cell/boundary U.
-  FaceMassFluxConsistencyAudit faceMassFluxConsistencyAudit() const;
+  /// Compare the stored volumetric face fluxes against the flux implied by the current
+  /// cell/boundary velocity field.
+  FaceFluxConsistencyAudit faceFluxConsistencyAudit() const;
   /// Update the values of the face velocities in the containers
   virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
@@ -102,6 +105,10 @@ public:
                                       const NumericVector<Number> * rhs_override = nullptr,
                                       const NumericVector<Number> * explicit_force = nullptr,
                                       const NumericVector<Number> * body_force = nullptr);
+  /// Cache only the relaxed predictor diagonal for startup/operator consumers that need it before
+  /// the full predictor cache is published.
+  void cacheStartupPredictorDiagonal(const unsigned int system_i,
+                                     const NumericVector<Number> & diagonal_raw);
   /// Invalidate the cached assembled/relaxed momentum predictor operator.
   void clearMomentumPredictorOperatorCache();
   /// Add explicit forcing to the momentum predictor RHS after the base operator assembly.
@@ -160,6 +167,8 @@ protected:
                             const Moose::StateArg & time_arg) const;
   /// Compute the target physical boundary mass flux rho U_b.n at a face.
   Real boundaryMassFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
+  /// Compute the target volumetric boundary flux U_b.n at a face.
+  Real boundaryVolumetricFluxTarget(const FaceInfo * fi, const Moose::StateArg & time_arg) const;
   /// Compute the normal component of the face diffusion coefficient used by pressure BCs.
   Real boundaryNormalAinv(const FaceInfo * fi) const;
   /// Determine whether a boundary face belongs to an adjustable fixed-flux pressure patch.

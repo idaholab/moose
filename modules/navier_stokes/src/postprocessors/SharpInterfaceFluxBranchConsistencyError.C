@@ -12,8 +12,6 @@
 #include "FaceInfo.h"
 #include "MooseMesh.h"
 #include "SharpInterfaceRhieChowMassFlux.h"
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("NavierStokesApp", SharpInterfaceFluxBranchConsistencyError);
 
 InputParameters
@@ -32,8 +30,6 @@ SharpInterfaceFluxBranchConsistencyError::validParams()
                              metric,
                              "Whether to compute a face-measure-weighted L2 norm or a max "
                              "absolute mismatch.");
-  params.addParam<MooseFunctorName>(
-      "density", "rho_mixture", "The density functor used to build the mass flux.");
   params.addParam<MooseFunctorName>("vel_x",
                                     "vel_x",
                                     "The x-velocity functor for the total-branch comparison.");
@@ -44,8 +40,8 @@ SharpInterfaceFluxBranchConsistencyError::validParams()
                                     "",
                                     "The z-velocity functor for the total-branch comparison.");
   params.addClassDescription("Computes a weighted internal-face consistency error for the "
-                             "sharp-interface face-flux chain, split into predictor-operator, "
-                             "pressure-correction, and total branches.");
+                             "sharp-interface volumetric face-flux chain, split into "
+                             "predictor-operator, pressure-correction, and total branches.");
   return params;
 }
 
@@ -60,7 +56,6 @@ SharpInterfaceFluxBranchConsistencyError::SharpInterfaceFluxBranchConsistencyErr
                         ? Quantity::PressureCorrection
                         : Quantity::Total),
     _metric(getParam<MooseEnum>("metric") == "max_abs" ? Metric::MaxAbs : Metric::L2),
-    _rho(getFunctor<Real>("density")),
     _vel_x(isParamValid("vel_x") && !getParam<MooseFunctorName>("vel_x").empty()
                ? &getFunctor<Real>("vel_x")
                : nullptr),
@@ -90,10 +85,6 @@ SharpInterfaceFluxBranchConsistencyError::execute()
     if (!fi || !fi->elemPtr() || !fi->neighborPtr())
       continue;
 
-    const Moose::FaceArg face_arg{
-        fi, Moose::FV::LimiterType::CentralDifference, true, false, fi->elemPtr(), nullptr};
-
-    const Real face_rho = MetaPhysicL::raw_value(_rho(face_arg, time_arg));
     const auto & elem_info = *fi->elemInfo();
     const auto & neighbor_info = *fi->neighborInfo();
 
@@ -158,9 +149,8 @@ SharpInterfaceFluxBranchConsistencyError::execute()
     {
       mooseAssert(_vel_x, "The total-branch consistency metric requires vel_x.");
 
-      const Real elem_u = MetaPhysicL::raw_value((*_vel_x)(makeElemArg(fi->elemPtr()), time_arg));
-      const Real neighbor_u =
-          MetaPhysicL::raw_value((*_vel_x)(makeElemArg(fi->neighborPtr()), time_arg));
+      const Real elem_u = (*_vel_x)(makeElemArg(fi->elemPtr()), time_arg);
+      const Real neighbor_u = (*_vel_x)(makeElemArg(fi->neighborPtr()), time_arg);
       Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                              face_velocity(0),
                              elem_u,
@@ -170,10 +160,8 @@ SharpInterfaceFluxBranchConsistencyError::execute()
 
       if (_vel_y)
       {
-        const Real elem_v =
-            MetaPhysicL::raw_value((*_vel_y)(makeElemArg(fi->elemPtr()), time_arg));
-        const Real neighbor_v =
-            MetaPhysicL::raw_value((*_vel_y)(makeElemArg(fi->neighborPtr()), time_arg));
+        const Real elem_v = (*_vel_y)(makeElemArg(fi->elemPtr()), time_arg);
+        const Real neighbor_v = (*_vel_y)(makeElemArg(fi->neighborPtr()), time_arg);
         Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                                face_velocity(1),
                                elem_v,
@@ -184,10 +172,8 @@ SharpInterfaceFluxBranchConsistencyError::execute()
 
       if (_vel_z)
       {
-        const Real elem_w =
-            MetaPhysicL::raw_value((*_vel_z)(makeElemArg(fi->elemPtr()), time_arg));
-        const Real neighbor_w =
-            MetaPhysicL::raw_value((*_vel_z)(makeElemArg(fi->neighborPtr()), time_arg));
+        const Real elem_w = (*_vel_z)(makeElemArg(fi->elemPtr()), time_arg);
+        const Real neighbor_w = (*_vel_z)(makeElemArg(fi->neighborPtr()), time_arg);
         Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                                face_velocity(2),
                                elem_w,
@@ -197,12 +183,12 @@ SharpInterfaceFluxBranchConsistencyError::execute()
       }
     }
 
-    const Real reconstructed_flux = face_rho * (face_velocity * fi->normal());
+    const Real reconstructed_flux = face_velocity * fi->normal();
     const Real stored_flux = _quantity == Quantity::PredictorOperator
-                                 ? _rhie_chow.predictorOperatorFaceMassFlux(*fi, time_arg)
+                                 ? -_rhie_chow.storedPredictorOperatorPhi(*fi)
                              : _quantity == Quantity::PressureCorrection
-                                 ? _rhie_chow.pressureCoupledWritebackMassFlux(*fi)
-                                 : _rhie_chow.rawRhieChowMassFlux(*fi);
+                                 ? _rhie_chow.storedPressureCorrectionPhi(*fi)
+                                 : _rhie_chow.getVolumetricFaceFlux(*fi);
     const Real diff = stored_flux - reconstructed_flux;
 
     if (_metric == Metric::MaxAbs)

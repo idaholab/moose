@@ -450,12 +450,56 @@ RhieChowMassFlux::faceMassFluxL2Norm() const
   return std::sqrt(squared_sum);
 }
 
-RhieChowMassFlux::FaceMassFluxConsistencyAudit
-RhieChowMassFlux::faceMassFluxConsistencyAudit() const
+Real
+RhieChowMassFlux::maxCourant(const Real dt) const
+{
+  if (dt <= 0.0)
+    return 0.0;
+
+  std::unordered_map<dof_id_type, Real> cell_flux_sum;
+  cell_flux_sum.reserve(_flow_face_info.size());
+
+  for (const auto * fi : _flow_face_info)
+  {
+    if (!fi)
+      continue;
+
+    const Real face_measure = fi->faceArea() * fi->faceCoord();
+    const Real volumetric_flux = std::abs(getVolumetricFaceFlux(*fi)) * face_measure;
+
+    if (fi->elemPtr() && hasBlocks(fi->elemPtr()->subdomain_id()))
+      cell_flux_sum[fi->elemPtr()->id()] += volumetric_flux;
+
+    if (fi->neighborPtr() && hasBlocks(fi->neighborPtr()->subdomain_id()))
+      cell_flux_sum[fi->neighborPtr()->id()] += volumetric_flux;
+  }
+
+  Real max_courant = 0.0;
+  for (const auto & elem_info : _fe_problem.mesh().elemInfoVector())
+  {
+    if (!hasBlocks(elem_info->subdomain_id()))
+      continue;
+
+    const Real volume = elem_info->volume() * elem_info->coordFactor();
+    if (volume <= libMesh::TOLERANCE)
+      continue;
+
+    const auto it = cell_flux_sum.find(elem_info->elem()->id());
+    if (it == cell_flux_sum.end())
+      continue;
+
+    max_courant = std::max(max_courant, 0.5 * dt * it->second / volume);
+  }
+
+  return max_courant;
+}
+
+RhieChowMassFlux::FaceFluxConsistencyAudit
+RhieChowMassFlux::faceFluxConsistencyAudit() const
 {
   using namespace Moose::FV;
 
-  FaceMassFluxConsistencyAudit audit;
+  FaceFluxConsistencyAudit audit;
   const auto time_arg = Moose::currentState();
 
   Real squared_sum = 0.0;
@@ -468,27 +512,24 @@ RhieChowMassFlux::faceMassFluxConsistencyAudit() const
 
     if (_vel[0]->isInternalFace(*fi))
     {
-      RealVectorValue density_times_velocity;
+      RealVectorValue face_velocity;
       const auto & elem_info = *fi->elemInfo();
       const auto & neighbor_info = *fi->neighborInfo();
 
-      const Real elem_rho = _rho(makeElemArg(fi->elemPtr()), time_arg);
-      const Real neighbor_rho = _rho(makeElemArg(fi->neighborPtr()), time_arg);
-
       for (const auto dim_i : index_range(_vel))
         interpolate(InterpMethod::Average,
-                    density_times_velocity(dim_i),
-                    _vel[dim_i]->getElemValue(elem_info, time_arg) * elem_rho,
-                    _vel[dim_i]->getElemValue(neighbor_info, time_arg) * neighbor_rho,
+                    face_velocity(dim_i),
+                    _vel[dim_i]->getElemValue(elem_info, time_arg),
+                    _vel[dim_i]->getElemValue(neighbor_info, time_arg),
                     *fi,
                     true);
 
-      reconstructed_flux = density_times_velocity * fi->normal();
+      reconstructed_flux = face_velocity * fi->normal();
     }
     else
-      reconstructed_flux = boundaryMassFluxTarget(fi, time_arg);
+      reconstructed_flux = boundaryVolumetricFluxTarget(fi, time_arg);
 
-    const Real stored_flux = libmesh_map_find(_face_mass_flux, fi->id());
+    const Real stored_flux = getVolumetricFaceFlux(*fi);
     const Real mismatch = stored_flux - reconstructed_flux;
     const Real abs_mismatch = std::abs(mismatch);
 
@@ -882,6 +923,23 @@ RhieChowMassFlux::cacheMomentumPredictorOperator(const unsigned int system_i,
 }
 
 void
+RhieChowMassFlux::cacheStartupPredictorDiagonal(const unsigned int system_i,
+                                                const NumericVector<Number> & diagonal_raw)
+{
+  mooseAssert(system_i < _momentum_implicit_systems.size() && _momentum_implicit_systems[system_i],
+              "The requested momentum component is not linked to RhieChowMassFlux.");
+
+  if (_cached_predictor_diagonal_raw.size() != _momentum_systems.size())
+    _cached_predictor_diagonal_raw.resize(_momentum_systems.size());
+
+  NumericVector<Number> & current_local_solution =
+      *(_momentum_implicit_systems[system_i]->current_local_solution);
+  _cached_predictor_diagonal_raw[system_i] = current_local_solution.zero_clone();
+  *(_cached_predictor_diagonal_raw[system_i]) = diagonal_raw;
+  _cached_predictor_diagonal_raw[system_i]->close();
+}
+
+void
 RhieChowMassFlux::updateVelocityBoundaryState()
 {
   const auto time_arg = Moose::currentState();
@@ -995,6 +1053,24 @@ RhieChowMassFlux::boundaryMassFluxTarget(const FaceInfo * fi, const Moose::State
         boundary_normal_multiplier * face_rho * boundaryVelocityValue(fi, component, time_arg);
 
   return density_times_velocity * fi->normal();
+}
+
+Real
+RhieChowMassFlux::boundaryVolumetricFluxTarget(const FaceInfo * fi,
+                                               const Moose::StateArg & time_arg) const
+{
+  mooseAssert(fi && !_vel[0]->isInternalFace(*fi),
+              "boundaryVolumetricFluxTarget should only be called on boundary faces.");
+
+  const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+  const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
+
+  RealVectorValue face_velocity;
+  for (const auto component : index_range(_vel))
+    face_velocity(component) =
+        boundary_normal_multiplier * boundaryVelocityValue(fi, component, time_arg);
+
+  return face_velocity * fi->normal();
 }
 
 Real

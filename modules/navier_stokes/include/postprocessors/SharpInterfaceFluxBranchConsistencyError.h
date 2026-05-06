@@ -44,7 +44,6 @@ protected:
   const SharpInterfaceRhieChowMassFlux & _rhie_chow;
   const Quantity _quantity;
   const Metric _metric;
-  const Moose::Functor<Real> & _rho;
   const Moose::Functor<Real> * const _vel_x;
   const Moose::Functor<Real> * const _vel_y;
   const Moose::Functor<Real> * const _vel_z;

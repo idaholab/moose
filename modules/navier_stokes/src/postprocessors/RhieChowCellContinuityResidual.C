@@ -28,9 +28,9 @@ RhieChowCellContinuityResidual::validParams()
   params.addParam<MooseEnum>("metric",
                              metric,
                              "Whether to compute a cell-volume-weighted L2 norm or a max "
-                             "absolute cell divergence from the stored face mass fluxes.");
+                             "absolute cell divergence from the stored volumetric face fluxes.");
   params.addClassDescription("Computes the discrete cell continuity residual implied by the "
-                             "current Rhie-Chow face mass fluxes.");
+                             "current Rhie-Chow volumetric face fluxes.");
   return params;
 }
 
@@ -52,20 +52,20 @@ RhieChowCellContinuityResidual::initialize()
 void
 RhieChowCellContinuityResidual::execute()
 {
-  std::unordered_map<dof_id_type, Real> cell_mass_imbalance;
+  std::unordered_map<dof_id_type, Real> cell_flux_imbalance;
 
   for (const auto * fi : _rhie_chow.flowFacesForAudit())
   {
-    const Real flux = _rhie_chow.getMassFlux(*fi) * fi->faceArea() * fi->faceCoord();
+    const Real flux = _rhie_chow.getVolumetricFaceFlux(*fi) * fi->faceArea() * fi->faceCoord();
 
     if (const auto * elem = fi->elemPtr())
-      cell_mass_imbalance[elem->id()] += flux;
+      cell_flux_imbalance[elem->id()] += flux;
 
     if (const auto * neighbor = fi->neighborPtr())
-      cell_mass_imbalance[neighbor->id()] -= flux;
+      cell_flux_imbalance[neighbor->id()] -= flux;
   }
 
-  for (const auto & [elem_id, imbalance] : cell_mass_imbalance)
+  for (const auto & [elem_id, imbalance] : cell_flux_imbalance)
   {
     const auto & elem_info = _mesh.elemInfo(elem_id);
     const Real volume = elem_info.volume();

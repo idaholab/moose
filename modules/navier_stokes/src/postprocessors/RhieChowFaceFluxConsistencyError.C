@@ -23,7 +23,7 @@ RhieChowFaceFluxConsistencyError::validParams()
   params.addRequiredParam<MooseEnum>(
       "quantity", quantity, "Which face-flux consistency norm to report.");
   params.addClassDescription(
-      "Reports the current Rhie-Chow face-mass-flux consistency audit, i.e. the mismatch "
+      "Reports the current Rhie-Chow volumetric face-flux consistency audit, i.e. the mismatch "
       "between the stored face flux and the flux reconstructed from the current velocity field.");
   return params;
 }
@@ -57,7 +57,7 @@ RhieChowFaceFluxConsistencyError::finalize()
 Real
 RhieChowFaceFluxConsistencyError::getValue() const
 {
-  const auto audit = _rhie_chow.faceMassFluxConsistencyAudit();
+  const auto audit = _rhie_chow.faceFluxConsistencyAudit();
 
   switch (_quantity)
   {

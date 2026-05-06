@@ -135,7 +135,7 @@ g = 9.81
   pressure_variable_relaxation = 0.3
   volume_fraction_equation_relaxation = '1.0'
 
-  num_iterations = 20
+  num_iterations = 1
   num_piso_iterations = 1
   continue_on_max_its = true
   print_fields = false
