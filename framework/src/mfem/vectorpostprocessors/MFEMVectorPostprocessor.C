@@ -16,7 +16,6 @@ MFEMVectorPostprocessor::validParams()
 {
   InputParameters params = MFEMExecutedObject::validParams();
   params += VectorPostprocessor::validParams();
-  params.registerSystemAttributeName("MFEMExecutedObject");
   return params;
 }
 

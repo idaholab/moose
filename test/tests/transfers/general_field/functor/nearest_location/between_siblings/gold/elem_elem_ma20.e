@@ -1,0 +1,1 @@
+../../../../nearest_node/between_siblings/gold/elem_elem_ma20.e

@@ -10,15 +10,12 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
-#include "MFEMSubMeshTransfer.h"
 #include "MFEMExecutedObject.h"
-#include "Postprocessor.h"
-#include "VectorPostprocessor.h"
+#include "MFEMVectorUtils.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -55,7 +52,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params)
 void
 MFEMProblem::initialSetup()
 {
-  FEProblemBase::initialSetup();
+  ExternalProblem::initialSetup();
 
   // MFEM indicators create their estimators during addIndicator(); markers still need an explicit
   // setup pass because they are no longer initialized through the libMesh/MOOSE user-object path.
@@ -71,7 +68,7 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
   setCurrentExecuteOnFlag(exec_type);
   executeMFEMObjects(exec_type);
 
-  FEProblemBase::execute(exec_type);
+  ExternalProblem::execute(exec_type);
 }
 
 void
@@ -259,7 +256,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   else
   {
     // Add MOOSE variable.
-    FEProblemBase::addVariable(var_type, var_name, parameters);
+    ExternalProblem::addVariable(var_type, var_name, parameters);
 
     // Add MFEM variable indirectly ("gridfunction").
     InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
@@ -403,39 +400,18 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
   parent_ptr->setImagBC(bc_ptr);
 }
 
-libMesh::Point
-pointFromMFEMVector(const mfem::Vector & vec)
-{
-  return libMesh::Point(
-      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
-}
-
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
-  if (type == "LevelSetOlssonVortex")
-  {
-    return 2;
-  }
-  else if (type == "ParsedVectorFunction")
-  {
-    if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
-    {
-      return 3;
-    }
-    else if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y"))
-    {
-      return 2;
-    }
-    else
-    {
-      return 1;
-    }
-  }
-  else
-  {
+  if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
     return 3;
-  }
+  if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y") ||
+      type == "LevelSetOlssonVortex")
+    return 2;
+  if (parameters.isParamSetByUser("expression_x") || parameters.isParamSetByUser("value_x"))
+    return 1;
+
+  return 3;
 }
 
 const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",
@@ -491,7 +467,7 @@ MFEMProblem::addFunction(const std::string & type,
     getCoefficients().declareScalar<mfem::FunctionCoefficient>(
         name,
         [&func](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
-        { return func.value(t, pointFromMFEMVector(p)); });
+        { return func.value(t, Moose::MFEM::libMeshPointFromMFEMVector(p)); });
   }
   else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
   {
@@ -501,7 +477,8 @@ MFEMProblem::addFunction(const std::string & type,
         dim,
         [&func, dim](const mfem::Vector & p, mfem::real_t t, mfem::Vector & u)
         {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          libMesh::RealVectorValue vector_value =
+              func.vectorValue(t, Moose::MFEM::libMeshPointFromMFEMVector(p));
           for (int i = 0; i < dim; i++)
           {
             u[i] = vector_value(i);
@@ -544,7 +521,7 @@ MFEMProblem::addVectorPostprocessor(const std::string & type,
     addObject<MFEMExecutedObject>(type, name, parameters);
   }
   else
-    FEProblemBase::addVectorPostprocessor(type, name, parameters);
+    ExternalProblem::addVectorPostprocessor(type, name, parameters);
 }
 
 InputParameters
@@ -693,7 +670,7 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
   if (parameters.getBase() == "MFEMSubMeshTransfer")
     addObject<MFEMExecutedObject>(transfer_name, name, parameters);
   else
-    FEProblemBase::addTransfer(transfer_name, name, parameters);
+    ExternalProblem::addTransfer(transfer_name, name, parameters);
 }
 
 void

@@ -11,39 +11,30 @@
 
 #pragma once
 
-#include <vector>
-
-#include "MultiAppTransfer.h"
-#include "MultiApp.h"
-#include "MooseAppCoordTransform.h"
+#include "MFEMMultiAppTransfer.h"
 #include "MFEMProblem.h"
 
-class MooseMesh;
-
-//*
-// Copy MFEMVariables between multiapps
-// The variables must be of the same type and dimension
-// and the MFEMMesh must be identical in both multiapps
-// */
-
-class MultiAppMFEMCopyTransfer : public MultiAppTransfer
+/**
+ * Transfer to copy MFEMVariables between multiapps.
+ * The variables must be of the same type and dimension
+ * and the MFEMMesh must be identical in both multiapps
+ */
+class MultiAppMFEMCopyTransfer : public MFEMMultiAppTransfer
 {
 public:
   static InputParameters validParams();
   MultiAppMFEMCopyTransfer(InputParameters const & params);
-  void execute() override;
-  auto const & getFromVarName(int i) { return _from_var_names.at(i); };
-  auto const & getToVarName(int i) { return _to_var_names.at(i); };
-  auto numFromVar() { return _from_var_names.size(); }
-  auto numToVar() { return _to_var_names.size(); }
 
 protected:
-  std::vector<VariableName> _from_var_names;
-  std::vector<AuxVariableName> _to_var_names;
-
-  void transfer(MFEMProblem & to_problem, MFEMProblem & from_problem);
-
+  /// Transfer all variables from active source problem to active destination problem.
+  virtual void transferVariables(bool is_target_local) override;
+  /// Check number of source and target child apps match for sibling transfer
   void checkSiblingsTransferSupported() const override;
+
+  /// Set current MFEM problem to fetch source variables from
+  virtual MFEMProblem & getActiveFromProblem() override;
+  /// Set current MFEM problem to fetch destination variables from
+  virtual MFEMProblem & getActiveToProblem() override;
 };
 
 #endif

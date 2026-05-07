@@ -1,0 +1,174 @@
+[Tests]
+  design = MultiAppMFEMShapeEvaluationTransfer.md
+  issues = '#31982'
+  [MFEM_to_libMesh_sibling_transfers]
+    requirement = "The system shall support multiapp sibling transfers from MFEM to libMesh sub-apps via shape function evaluations"
+    [nodal_nodal]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'OutputData/nodal_nodal_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal Transfers/active='mfem_to_libmesh_nodal_nodal'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables,'
+    []
+    [elem_elem]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'OutputData/elem_elem_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/elem_elem Transfers/active='mfem_to_libmesh_elem_elem'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false      
+      detail = 'between elemental variables,'
+    []    
+    [nodal_elem]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'OutputData/nodal_elem_libmesh_sub0.e'
+      cli_args = "Outputs/file_base=OutputData/nodal_elem Transfers/active='mfem_to_libmesh_nodal_elem'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'from nodal to elemental variables,'
+    []
+    [1_to_N_nodal]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'OutputData/mfem_to_libmesh_nodal_1toN_libmesh_sub0.e OutputData/mfem_to_libmesh_nodal_1toN_libmesh_sub1.e'
+      cli_args = "Outputs/file_base=OutputData/mfem_to_libmesh_nodal_1toN
+                  MultiApps/libmesh_sub/positions_objects=libmesh_locs
+                  Transfers/active='mfem_to_libmesh_nodal_nodal'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
+    []  
+  []
+  [libMesh_to_MFEM_sibling_transfers]
+    requirement = "The system shall support multiapp sibling transfers from libMesh to MFEM sub-apps via shape function evaluations"
+    [nodal_nodal]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/nodal_nodal_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal Transfers/active='libmesh_to_mfem_nodal_nodal'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/nodal_nodal_mfem_sub0;VectorPostprocessors/active=nodal_sample'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables,'
+    []
+    [elem_elem]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/elem_elem_mfem_sub0_elem_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/elem_elem Transfers/active='libmesh_to_mfem_elem_elem'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/elem_elem_mfem_sub0'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between elemental variables,'
+    []
+    [nodal_elem]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/nodal_elem_mfem_sub0_elem_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_elem Transfers/active='libmesh_to_mfem_nodal_elem'
+                  MultiApps/mfem_sub/cli_args='Outputs/file_base=OutputData/nodal_elem_mfem_sub0'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'from nodal to elemental variables,'
+    []
+    [nodal_mixed_mesh]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/nodal_nodal_mixed_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal_mixed Transfers/active='libmesh_to_mfem_nodal_nodal'
+                   MultiApps/mfem_sub/cli_args='Mesh/file=../../mesh/square_mixed.e';Outputs/file_base=OutputData/nodal_nodal_mixed_mfem_sub0
+                   MultiApps/libmesh_sub/cli_args='Mesh/file=../../mesh/square_mixed.e'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables sent from libMesh to MFEM sub-apps defined on meshes comprised of mixed element types,'
+    []
+    [1_to_N_nodal_parallel]
+      type = CSVDiff
+      input = main_between_multiapp.i
+      csvdiff = 'OutputData/1toN_nodal_nodal_mfem_sub0_nodal_sample_0001.csv'
+      cli_args = "Outputs/file_base=OutputData/1toN_nodal_nodal Transfers/active='libmesh_to_mfem_nodal_nodal'
+                  MultiApps/mfem_sub/positions_objects=mfem_locs
+                  MultiApps/mfem_sub/cli_args=VectorPostprocessors/active=nodal_sample"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
+    []
+  []
+  [MFEM_to_MFEM_sibling_transfers]
+    requirement = "The system shall support multiapp sibling transfers from MFEM to MFEM sub-apps via shape function evaluations"
+    [nodal_nodal]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'OutputData/nodal_nodal_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables sent between MFEM sub-apps defined on meshes comprised of a single element type,'
+    []
+    [1_to_N_nodal]
+      type = XMLDiff # XMLDiff used to check out-of-mesh values are correctly located
+      input = mfem_main_between_multiapp.i
+      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
+      xmldiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv1_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Run0.pvd
+                  OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv2_ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu'
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      max_parallel = 1 # XML schemadiff with multiple ranks
+      recover = false
+      max_threads = 1
+      restep = false
+      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps,'
+    []
+    [1_to_N_nodal_parallel]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"     
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'between nodal variables from nodal variables sent from one sub-app to multiple sub-apps run in parallel,'
+    []
+    [nodal_mixed_mesh]
+      type = CSVDiff
+      input = mfem_main_between_multiapp.i
+      csvdiff = 'OutputData/nodal_nodal_mixed_mfem_recv0_nodal_sample_0002.csv'
+      cli_args = "Outputs/file_base=OutputData/nodal_nodal_mixed
+                   MultiApps/mfem_recv/cli_args='Mesh/file=../../mesh/square_mixed.e'
+                   MultiApps/mfem_send/cli_args='Mesh/file=../../mesh/square_mixed.e'"
+      capabilities = 'mfem'
+      compute_devices = 'cpu'
+      recover = false
+      restep = false
+      detail = 'and between nodal variables sent between MFEM sub-apps defined on meshes comprised of mixed element types.'
+    []
+  []
+[]

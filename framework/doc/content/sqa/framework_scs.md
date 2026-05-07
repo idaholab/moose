@@ -492,7 +492,7 @@ class MyClass:
     - Include dependent header files in the *.C file whenever possible (i.e. the header uses only references or pointers in it's various declarations) and use forward declarations in the header file as needed.
     - One exception is when doing so would require end users to include multiple files to complete definitions of child objects (Errors typically show up as "incomplete class" or something similar during compilation).
 - Avoid using a global variable when possible.
-- Every destructor must be virtual.
+- Every class with virtual methods must have a virtual destructor
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
 - Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless proof is provided that it can't fail.

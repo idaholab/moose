@@ -146,8 +146,8 @@ vacuum_permeability = 1.0
 [Transfers]
   [from_external_field]
     type = MultiAppMFEMCopyTransfer
-    source_variable = h_field
-    variable = h_field
+    source_variables = h_field
+    variables = h_field
     from_multi_app = hphi_magnetostatic
   []
   [submesh_transfer_to_coil]

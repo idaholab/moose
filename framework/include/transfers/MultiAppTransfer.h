@@ -59,7 +59,9 @@ public:
       mooseError("Should not get here, there should be a multiapp");
   }
 
-  /// Get the MultiApp to transfer data from
+  /**
+   * Get the MultiApp to transfer data from
+   */
   const std::shared_ptr<MultiApp> getFromMultiApp() const
   {
     if (!_from_multi_app)
@@ -69,7 +71,9 @@ public:
       return _from_multi_app;
   }
 
-  /// Get the MultiApp to transfer data to
+  /**
+   * Get the MultiApp to transfer data to
+   */
   const std::shared_ptr<MultiApp> getToMultiApp() const
   {
     if (!_to_multi_app)
@@ -103,10 +107,14 @@ public:
       return "Parent";
   }
 
-  /// Whether the transfer owns a non-null from_multi_app
+  /**
+   * Whether the transfer owns a non-null from_multi_app
+   */
   bool hasFromMultiApp() const { return !(!_from_multi_app); }
 
-  /// Whether the transfer owns a non-null to_multi_app
+  /**
+   * Whether the transfer owns a non-null to_multi_app
+   */
   bool hasToMultiApp() const { return !(!_to_multi_app); }
 
   /**
@@ -204,24 +212,34 @@ protected:
   /// Given local app index, returns global app index.
   std::vector<unsigned int> _from_local2global_map;
 
-  /// Return the global app index from the local index in the "from-multiapp" transfer direction
+  /**
+   * Return the global app index from the local index in the "from-multiapp" transfer direction
+   */
   unsigned int getGlobalSourceAppIndex(unsigned int i_from) const;
-  /// Return the global app index from the local index in the "to-multiapp" transfer direction
+  /**
+   * Return the global app index from the local index in the "to-multiapp" transfer direction
+   */
   unsigned int getGlobalTargetAppIndex(unsigned int i_to) const;
-  /// Return the local app index from the global index in the "from-multiapp" transfer direction
-  /// We use the fact that global app indexes are consecutive on a given rank
+  /**
+   * Return the local app index from the global index in the "from-multiapp" transfer direction.
+   * We use the fact that global app indexes are consecutive on a given rank.
+   */
   unsigned int getLocalSourceAppIndex(unsigned int i_from) const;
 
-  /// Whether the transfer supports siblings transfer
+  /**
+   * Whether the transfer supports siblings transfer
+   */
   virtual void checkSiblingsTransferSupported() const
   {
     mooseError("Siblings transfer not supported. You cannot transfer both from a multiapp to "
                "another multiapp");
   }
 
-  /// Checks the execute_on flags for user object transfers with user objects on the source app
-  /// which is also the parent app. This is to prevent a common mistake lagging the data from the
-  /// user object
+  /**
+   * Checks the execute_on flags for user object transfers with user objects on the source app
+   * which is also the parent app. This is to prevent a common mistake lagging the data from the
+   * user object.
+   */
   void checkParentAppUserObjectExecuteOn(const std::string & object_name) const;
 
   /**
@@ -246,6 +264,18 @@ protected:
                                  const std::string & phase) const;
 
   /**
+   * Get the source app point from a point in the reference frame
+   * @param p the point in the reference frame
+   * @param local_i_from the local source problem index
+   * @param phase the phase of the transfer where this is being attempted in case we have
+   *              to output an info message that the coordinate collapse is not being applied
+   * @return the point in the source app frame
+   */
+  Point getPointInSourceAppFrame(const Point & p,
+                                 unsigned int local_i_from,
+                                 const std::string & phase) const;
+
+  /**
    * Helper method for checking the 'check_multiapp_execute_on' flag.
    *
    * This method was added to allow the check to be delayed by child classes,
@@ -265,7 +295,9 @@ protected:
                      const VariableName & var_name,
                      const std::string & param_name = "") const;
 
-  /// Extends bounding boxes to avoid missing points
+  /**
+   * Extends bounding boxes to avoid missing points
+   */
   void extendBoundingBoxes(const Real factor, std::vector<libMesh::BoundingBox> & bboxes) const;
 
 private:
@@ -274,6 +306,15 @@ private:
    * \p MooseAppCoordTransform object
    */
   virtual bool usesMooseAppCoordTransform() const { return false; }
+
+  /**
+   * Shared implementation for getPointInSourceAppFrame / getPointInTargetAppFrame.
+   * Calls transform.mapBack(p), skipping coordinate collapsing when a coordinate system type
+   * change is present (the reverse mapping is not uniquely defined in that case).
+   */
+  Point mapBackWithoutCollapsing(MultiAppCoordTransform & transform,
+                                 const Point & p,
+                                 const std::string & phase) const;
 
   /// The MultiApps this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _from_multi_app;

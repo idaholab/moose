@@ -28,12 +28,6 @@ MFEMFunctorMaterial::validParams()
   return params;
 }
 
-libMesh::Point
-MFEMFunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
-{
-  return libMesh::Point(vec.Elem(0), vec.Elem(1), vec.Elem(2));
-}
-
 MFEMFunctorMaterial::MFEMFunctorMaterial(const InputParameters & parameters)
   : MFEMObject(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),

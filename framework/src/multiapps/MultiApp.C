@@ -1170,10 +1170,23 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
 #ifdef MOOSE_MFEM_ENABLED
-  app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
-      _app.getMFEMDevice(Moose::PassKey<MultiApp>());
-  const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
-  app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
+  // MFEM device must only be set once across all apps
+  // FIXME: this required that the base app is an MFEM app; itwill
+  // still fail if multiple MFEM sub-apps are launched from a libMesh base app
+  if (i == 0)
+  {
+    app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
+        _app.getMFEMDevice(Moose::PassKey<MultiApp>());
+    const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
+    app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
+  }
+  else
+  {
+    app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
+        _apps[0]->getMFEMDevice(Moose::PassKey<MultiApp>());
+    const auto & mfem_device_set = _apps[0]->getMFEMDevices(Moose::PassKey<MultiApp>());
+    app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
+  }
 #endif
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {

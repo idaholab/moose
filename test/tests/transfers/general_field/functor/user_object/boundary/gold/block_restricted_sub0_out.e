@@ -1,0 +1,1 @@
+../../../../user_object/boundary/gold/block_restricted_sub0_out.e

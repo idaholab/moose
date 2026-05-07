@@ -1,0 +1,1 @@
+../../../../nearest_node/between_siblings/gold/block_restricted_same_ma20.e

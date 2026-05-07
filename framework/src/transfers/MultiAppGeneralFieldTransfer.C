@@ -19,6 +19,7 @@
 #include "Positions.h"
 #include "Factory.h"
 #include "MooseAppCoordTransform.h"
+#include "MultiAppGeneralFieldFunctorTransfer.h"
 
 // libmesh includes
 #include "libmesh/point_locator_base.h"
@@ -32,7 +33,7 @@ using namespace libMesh;
 
 namespace GeneralFieldTransfer
 {
-Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+Number OutOfMeshValue = std::numeric_limits<Real>::infinity();
 }
 
 InputParameters
@@ -55,6 +56,10 @@ MultiAppGeneralFieldTransfer::validParams()
       "extrapolation_constant",
       0,
       "Constant to use when no source app can provide a valid value for a target location.");
+  MooseEnum extrap_options("none nearest-valid-target", "none");
+  params.addParam<MooseEnum>("post_transfer_extrapolation",
+                             extrap_options,
+                             "Post treatment to apply to the field after the transfer");
 
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
@@ -153,6 +158,21 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
                               "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
+
+  // We need a level of ghosting to move elemental value one layer out when using post transfer
+  // extrapolation. We need geometric for the element vertex average, and algebraic for the dof
+  // value NOTE: we need this on the target mesh!
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        if (!obj_params.isParamValid("from_multi_app") &&
+            obj_params.get<MooseEnum>("post_transfer_extrapolation") == "nearest-valid-target")
+          rm_params.set<unsigned short>("layers") = 2;
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("displaced_target_mesh");
+      });
+
   return params;
 }
 
@@ -175,6 +195,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _search_value_conflicts(getParam<bool>("search_value_conflicts")),
     _already_output_search_value_conflicts(false),
     _search_value_conflicts_max_log(getParam<unsigned int>("value_conflicts_output")),
+    _post_transfer_extrapolation(getParam<MooseEnum>("post_transfer_extrapolation")),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _default_extrapolation_value(getParam<Real>("extrapolation_constant")),
     _bbox_factor(getParam<Real>("bbox_factor")),
@@ -518,7 +539,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   ProcessorToPointVec outgoing_points;
   extractOutgoingPoints(i, outgoing_points);
 
-  if (_from_var_names.size())
+  if (_from_var_names.size() || dynamic_cast<MultiAppGeneralFieldFunctorTransfer *>(this))
     prepareEvaluationOfInterpValues(i);
   else
     prepareEvaluationOfInterpValues(-1);
@@ -526,15 +547,15 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
   auto gather_functor =
-      [this](processor_id_type /*pid*/,
-             const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
-             std::vector<std::pair<Real, Real>> & outgoing_vals)
+      [this, &i](processor_id_type /*pid*/,
+                 const std::vector<std::pair<Point, unsigned int>> & incoming_locations,
+                 std::vector<std::pair<Real, Real>> & outgoing_vals)
   {
     outgoing_vals.resize(
         incoming_locations.size(),
-        {GeneralFieldTransfer::BetterOutOfMeshValue, GeneralFieldTransfer::BetterOutOfMeshValue});
+        {GeneralFieldTransfer::OutOfMeshValue, GeneralFieldTransfer::OutOfMeshValue});
     // Evaluate interpolation values for these incoming points
-    evaluateInterpValues(incoming_locations, outgoing_vals);
+    evaluateInterpValues(i, incoming_locations, outgoing_vals);
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
@@ -572,6 +593,9 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Set cached values into solution vector
   setSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
+
+  // Modify solution vector values (notably extrapolation options in functor transfer)
+  correctSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
 }
 
 void
@@ -946,14 +970,14 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // We should only have one closest value for each variable at any given point.
       // While there are shared Qps, on vertices for higher order variables usually,
       // the generic projector only queries each point once
-      if (_search_value_conflicts && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
+      if (_search_value_conflicts && !GeneralFieldTransfer::isOutOfMeshValue(val) &&
           value_cache.hasKey(p) != 0 && !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
         registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
 
       // if we use the nearest app, even if the value is bad we want to save the distance because
       // it's the distance to the app, if that's the closest app then so be it with the bad value
-      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val) || _use_nearest_app) &&
+      if ((!GeneralFieldTransfer::isOutOfMeshValue(val) || _use_nearest_app) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
@@ -1029,7 +1053,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - the smallest rank with the same distance
         // It is debatable whether we want invalid values from the nearest app. It could just be
         // that the app position was closer but the extent of another child app was large enough
-        if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) ||
+        if ((!GeneralFieldTransfer::isOutOfMeshValue(incoming_vals[val_offset].first) ||
              _use_nearest_app) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
              ((val.pid > pid) &&
@@ -1349,11 +1373,7 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
             "will not be output.\nIncrease 'search_value_conflicts_max_log' to output more.";
     }
     // Explicitly name source to give more context
-    std::string source_str = "unknown";
-    if (_from_var_names.size())
-      source_str = "variable '" + getFromVarName(var_index) + "'";
-    else if (isParamValid("source_user_object"))
-      source_str = "user object '" + getParam<UserObjectName>("source_user_object") + "'";
+    const std::string source_str = getDataSourceName(var_index);
 
     mooseWarning("On rank " + rank_str +
                  ", multiple valid values from equidistant points were "
@@ -1499,7 +1519,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         const auto val = val_pair.second.interp;
 
         // This will happen if meshes are mismatched
-        if (_error_on_miss && GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        if (_error_on_miss && GeneralFieldTransfer::isOutOfMeshValue(val))
         {
           const auto target_location =
               hasToMultiApp()
@@ -1530,13 +1550,22 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
         // but it can be that we want to set it to a different value than what was already there
         // for example: the source app has been displaced and was sending an indicator of its
         // position
-        if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        if (GeneralFieldTransfer::isOutOfMeshValue(val))
         {
-          if (!GeneralFieldTransfer::isBetterOutOfMeshValue(_default_extrapolation_value))
-            to_sys->solution->set(dof, _default_extrapolation_value);
+          if (!GeneralFieldTransfer::isOutOfMeshValue(_default_extrapolation_value))
+          {
+            // For nearest-valid-target, keep the out-of-mesh sentinel in the solution so
+            // that correctSolutionVectorValues can reliably identify which DOFs still need
+            // extrapolation. Writing _default_extrapolation_value here instead would make it
+            // impossible to distinguish a legitimately-transferred value that happens to equal
+            // the extrapolation constant from a DOF that never received data.
+            const auto missing_value = _post_transfer_extrapolation == "nearest-valid-target"
+                                           ? GeneralFieldTransfer::OutOfMeshValue
+                                           : _default_extrapolation_value;
+            to_sys->solution->set(dof, missing_value);
+          }
           continue;
         }
-
         to_sys->solution->set(dof, val);
       }
     }
@@ -1560,7 +1589,8 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
   {
     auto * pl = _from_point_locators[i_from].get();
     const auto from_global_num = getGlobalSourceAppIndex(i_from);
-    const auto transformed_pt = _from_transforms[from_global_num]->mapBack(pt);
+    const auto transformed_pt =
+        getPointInSourceAppFrame(pt, i_from, "Source point acceptance check");
 
     // Check point against source block restriction
     if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, transformed_pt))
@@ -1614,6 +1644,189 @@ MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
       return false;
   }
   return true;
+}
+
+void
+MultiAppGeneralFieldTransfer::correctSolutionVectorValues(
+    const unsigned int var_index,
+    const DofobjectToInterpValVec & dofobject_to_valsvec,
+    const InterpCaches & /*interp_caches*/)
+{
+  // TODO: variable component support
+
+  // Get the variable name, with the accommodation for array/vector names
+  const auto & var_name = getToVarName(var_index);
+
+  for (const auto problem_id : index_range(_to_problems))
+  {
+    auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
+
+    // libMesh EquationSystems
+    // NOTE: we would expect to set variables from the displaced equation system here
+    auto & es = getEquationSystem(*_to_problems[problem_id], false);
+
+    // libMesh system
+    System * to_sys = find_sys(es, var_name);
+
+    // libMesh mesh
+    const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
+    auto var_num = to_sys->variable_number(var_name);
+    auto sys_num = to_sys->number();
+
+    auto & fe_type = getToVariable(var_index)->feType();
+    bool is_nodal = getToVariable(var_index)->isNodal();
+
+    // We might need the synchronization of values that update provides
+    // to find the nearest target value
+    // NOTE: we are checking the buffers still for the values transfered, so we actually don't gain
+    // anything from ghosting We have to still work with buffers, how else do we know the source
+    // (from transferred buffers) or target (from all the points listed in buffers) are met
+    if (_post_transfer_extrapolation == "nearest-valid-target")
+    {
+      if (fe_type.order > CONSTANT && !is_nodal)
+        paramError("post_transfer_extrapolation",
+                   "Nearest-valid-target is not implemented for higher order elemental variables");
+      const auto & node_to_elem_map =
+          _to_problems[problem_id]->mesh(_displaced_target_mesh).nodeToElemMap();
+
+      for (const auto & val_pair : dofobject_to_val)
+      {
+        const auto dof_object_id = val_pair.first;
+
+        // Check that the value was out of bounds
+        const DofObject * dof_object = nullptr;
+        if (is_nodal)
+          dof_object = to_mesh.node_ptr(dof_object_id);
+        else
+          dof_object = to_mesh.elem_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = val_pair.second.interp;
+        if (GeneralFieldTransfer::isOutOfMeshValue(val))
+        {
+          Real nearest_value = 0.;
+          dof_id_type min_dist_id = std::numeric_limits<dof_id_type>::max();
+
+          // Find the nearest valid value
+          if (is_nodal)
+          {
+            const auto node = to_mesh.node_ptr(dof_object_id);
+            // Find nearest node
+            // NOTE: we have access to a bunch of values now here, we could interpolate!
+            Real min_distance_sq = std::numeric_limits<Real>::max();
+            for (const auto & elem_id : libmesh_map_find(node_to_elem_map, node->id()))
+            {
+              const auto elem = to_mesh.elem_ptr(elem_id);
+              for (const auto & elem_node : elem->node_ref_range())
+              {
+                Real distance_sq = (Point(elem_node) - Point(*node)).norm_sq();
+                // Avoid using another bad value from a node which did not receive data
+                // Note: if the node is on another process ID, we can't obtain the value from a
+                // buffer here Note: we could seek from the solution vector instead BUT if we do
+                // that we may be ignoring source restrictions set to the transfer.
+                // Note: Target mesh restrictions are fine since we are picking from
+                // dofobject_to_val
+                if (distance_sq < min_distance_sq && elem_node.id() != node->id())
+                {
+                  if (auto it = dofobject_to_val.find(elem_node.id());
+                      it != dofobject_to_val.end() &&
+                      !GeneralFieldTransfer::isOutOfMeshValue(it->second.interp))
+                  {
+                    min_distance_sq = distance_sq;
+                    min_dist_id = elem_node.id();
+                    nearest_value = it->second.interp;
+                  }
+                  else if (elem_node.n_dofs(sys_num, var_num) > 0)
+                  {
+                    const auto other_dof = elem_node.dof_number(sys_num, var_num, 0);
+                    try
+                    {
+                      // setSolutionVectorValues leaves DOFs that did not receive a transfer
+                      // value marked with OutOfMeshValue, so isOutOfMeshValue is sufficient
+                      // to reject them here. DOFs that did receive data (even if the value
+                      // equals _default_extrapolation_value) are accepted correctly.
+                      if (const auto sol_val = (*to_sys->current_local_solution)(other_dof);
+                          !GeneralFieldTransfer::isOutOfMeshValue(sol_val))
+                      {
+                        min_distance_sq = distance_sq;
+                        min_dist_id = elem_node.id();
+                        nearest_value = sol_val;
+                      }
+                    }
+                    catch (...)
+                    {
+                      // Access in ghosted vector failed, just keep going
+                    }
+                  }
+                }
+              }
+            }
+          }
+          else
+          {
+            const auto elem = to_mesh.elem_ptr(dof_object_id);
+            Real min_distance_sq = std::numeric_limits<Real>::max();
+            for (const auto neigh : elem->neighbor_ptr_range())
+            {
+              if (!neigh || neigh == libMesh::remote_elem)
+                continue;
+              Real distance_sq = (neigh->vertex_average() - elem->vertex_average()).norm_sq();
+              if (distance_sq < min_distance_sq)
+              {
+                if (auto it = dofobject_to_val.find(neigh->id());
+                    it != dofobject_to_val.end() &&
+                    !GeneralFieldTransfer::isOutOfMeshValue(it->second.interp))
+                {
+                  min_distance_sq = distance_sq;
+                  min_dist_id = neigh->id();
+                  nearest_value = it->second.interp;
+                }
+                // Access into ghosted solution vector. See comments for node
+                else if (neigh->n_dofs(sys_num, var_num) > 0)
+                {
+                  const auto other_dof = neigh->dof_number(sys_num, var_num, 0);
+                  try
+                  {
+                    // Same reasoning as the nodal branch: DOFs without transfer data carry
+                    // OutOfMeshValue, so isOutOfMeshValue is the correct rejection criterion.
+                    if (const auto sol_val = (*to_sys->current_local_solution)(other_dof);
+                        !GeneralFieldTransfer::isOutOfMeshValue(sol_val))
+                    {
+                      nearest_value = sol_val;
+                      min_distance_sq = distance_sq;
+                      min_dist_id = neigh->id();
+                    }
+                  }
+                  catch (...)
+                  {
+                    // Access in ghosted vector failed, just keep going
+                  }
+                }
+              }
+            }
+          }
+          nearest_value = (min_dist_id != std::numeric_limits<dof_id_type>::max())
+                              ? nearest_value
+                              : _default_extrapolation_value;
+
+          if (min_dist_id != std::numeric_limits<dof_id_type>::max())
+            to_sys->solution->set(dof, nearest_value);
+          else
+          {
+            // No valid neighbor was found; replace the out-of-mesh sentinel with the
+            // fallback value so the solution vector does not retain an invalid sentinel.
+            to_sys->solution->set(dof, _default_extrapolation_value);
+            flagSolutionWarning(
+                "Search for the valid target nearest from a target point for which no "
+                "values were found (and thus extrapolation is required) failed. This warning will "
+                "not be repeated on the console for further failures.");
+          }
+        }
+      }
+      to_sys->solution->close();
+      // Sync local solutions
+      to_sys->update();
+    }
+  }
 }
 
 bool
@@ -1944,8 +2157,15 @@ MultiAppGeneralFieldTransfer::getGlobalStartAppPerProc() const
   return global_app_start_per_proc;
 }
 
+std::string
+MultiAppGeneralFieldTransfer::getDataSourceName(unsigned int var_index) const
+{
+  mooseAssert(var_index < _from_var_names.size(), "No source variable at this index");
+  return "variable '" + getFromVarName(var_index) + "'";
+}
+
 VariableName
-MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index)
+MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index) const
 {
   mooseAssert(var_index < _from_var_names.size(), "No source variable at this index");
   VariableName var_name = _from_var_names[var_index];
@@ -1991,8 +2211,8 @@ MultiAppGeneralFieldTransfer::detectConflict(Real current_value,
   // No conflict if we're not looking for them
   if (_search_value_conflicts)
     // Only consider conflicts if the values are valid and different
-    if (current_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
-        new_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
+    if (current_value != GeneralFieldTransfer::OutOfMeshValue &&
+        new_value != GeneralFieldTransfer::OutOfMeshValue &&
         !MooseUtils::absoluteFuzzyEqual(current_value, new_value))
       // Conflict only occurs if the origin points are equidistant
       if (MooseUtils::absoluteFuzzyEqual(current_distance, new_distance))

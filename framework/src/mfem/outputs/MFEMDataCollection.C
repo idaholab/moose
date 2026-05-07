@@ -61,6 +61,13 @@ MFEMDataCollection::registerFields()
 }
 
 void
+MFEMDataCollection::setFileBaseInternal(const std::string & file_base)
+{
+  FileOutput::setFileBaseInternal(file_base);
+  getDataCollection().SetPrefixPath(_file_base);
+}
+
+void
 MFEMDataCollection::output()
 {
   mfem::DataCollection & dc(getDataCollection());
