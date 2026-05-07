@@ -29,10 +29,12 @@ ElementGenerator::validParams()
   // Element shape and location
   params.addRequiredParam<std::vector<Point>>("nodal_positions",
                                               "The x,y,z positions of the nodes");
-  params.addRequiredParam<std::vector<std::vector<dof_id_type>>>(
-      "element_connectivity",
-      "List of nodes to use for each element. Use a regular vector for all element types but "
-      "polyhedron. For a polyhedron, use ';' to delineate the nodes for each side polygon.");
+  params.addParam<std::vector<dof_id_type>>("element_connectivity",
+                                            "List of nodes to use for each element.");
+  params.addParam<std::vector<std::vector<dof_id_type>>>(
+      "polygon_faces_connectivity",
+      "List of nodes to use for each face of the polygon faces of the polyhedron. Only use this "
+      "parameter for a polyhedron 'elem_type'");
   params.addRequiredParam<MooseEnum>(
       "elem_type", elem_types, "The type of element from libMesh to generate");
 
@@ -54,11 +56,18 @@ ElementGenerator::ElementGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input", /* allow_invalid = */ true)),
     _nodal_positions(getParam<std::vector<Point>>("nodal_positions")),
-    _element_connectivity(getParam<std::vector<std::vector<dof_id_type>>>("element_connectivity")),
+    _element_connectivity(
+        isParamValid("polygon_faces_connectivity")
+            ? getParam<std::vector<std::vector<dof_id_type>>>("polygon_faces_connectivity")
+            : std::vector<std::vector<dof_id_type>>(
+                  1, getParam<std::vector<dof_id_type>>("element_connectivity"))),
     _elem_type(getParam<MooseEnum>("elem_type"))
 {
   if (_elem_type != "C0POLYHEDRON" && _element_connectivity.size() != 1)
     paramError("element_connectivity", "Must be of size 1 for all element types but polyhedra");
+  if (isParamValid("polygon_faces_connectivity") && isParamValid("element_connectivity"))
+    paramError("element_connectivity",
+               "Either 'element_connectivity' or 'polygon_faces_connectivity' must be specified");
 }
 
 std::unique_ptr<Elem>

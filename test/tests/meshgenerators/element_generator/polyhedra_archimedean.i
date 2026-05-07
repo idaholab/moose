@@ -17,7 +17,7 @@ one_ds = ${fparse 1 / silver}
                         ${fparse sqrt(2) / 4}    ${fparse 3*sqrt(2) / 4}    ${fparse sqrt(2) / 4}
                         ${fparse -sqrt(2) / 4}   ${fparse sqrt(2) / 4}   ${fparse -3*sqrt(2) / 4}
                         ${fparse sqrt(2) / 4}    ${fparse -sqrt(2) / 4}   ${fparse -3*sqrt(2) / 4}"
-    element_connectivity = '2 3 9;
+    polygon_faces_connectivity = '2 3 9;
                             1 5 11;
                             0 4 7;
                             10  8 6;
@@ -45,7 +45,7 @@ one_ds = ${fparse 1 / silver}
                        ${fparse dx + 1} -1 -${fparse sqrt(2)}
                        ${fparse dx -1} -1 -${fparse sqrt(2)}
                        ${fparse dx -1}  1 -${fparse sqrt(2)}'
-    element_connectivity = '0 1 2 3;
+    polygon_faces_connectivity = '0 1 2 3;
                             0 1 4;
                             0 4 8 5;
                             0 5 3;
@@ -95,7 +95,7 @@ one_ds = ${fparse 1 / silver}
                        ${fparse 2 * dx -1} ${one_ds} -1
                        ${fparse 2 * dx -one_ds} 1 -1'
 
-    element_connectivity = '0 1 2 3 4 5 6 7;
+    polygon_faces_connectivity = '0 1 2 3 4 5 6 7;
                             0 1 9;
                             6 7 8;
                             5 4 11;
@@ -146,7 +146,7 @@ one_ds = ${fparse 1 / silver}
                        ${fparse 3 * dx + sqrt(2)} -${fparse sqrt(2)/2} 0
                        ${fparse 3 * dx + sqrt(2)} 0 -${fparse sqrt(2)/2}'
 
-    element_connectivity = '0 1 2 3;
+    polygon_faces_connectivity = '0 1 2 3;
                             20 21 22 23;
                             4 8 16 12;
                             5 9 17 13;
@@ -192,7 +192,7 @@ one_ds = ${fparse 1 / silver}
                        ${fparse 4 * dx + 1} 0.5 0.5
                        ${fparse 4 * dx + 1} 0.5 -0.5
                        ${fparse 4 * dx + 1} -0.5 -0.5'
-    element_connectivity = '0 1 2 3;
+    polygon_faces_connectivity = '0 1 2 3;
                             2 3 5 4;
                             4 5 7 6;
                             6 7 9 8;

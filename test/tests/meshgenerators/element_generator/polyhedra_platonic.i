@@ -13,7 +13,7 @@ c = 1.5
                        -${a} ${a} -${a}
                        -${a} -${a} ${a}"
 
-    element_connectivity = '0 2 1; 0 1 3; 1 2 3; 2 0 3'
+    polygon_faces_connectivity = '0 2 1; 0 1 3; 1 2 3; 2 0 3'
     elem_type = "C0POLYHEDRON"
   []
 
@@ -29,7 +29,7 @@ c = 1.5
                        ${fparse dx + ${b} -0.7 } ${fparse b / 2} ${fparse b / 2}
                        ${fparse dx + 0 -0.7 } ${fparse b / 2} ${fparse b / 2}'
 
-    element_connectivity = '0 3 2 1;
+    polygon_faces_connectivity = '0 3 2 1;
                             0 1 5 4;
                             1 2 6 5;
                             2 3 7 6;
@@ -50,7 +50,7 @@ c = 1.5
                        ${fparse 2 * dx + 0} 0  ${c}
                        ${fparse 2 * dx + 0} 0 ${fparse -c}'
 
-    element_connectivity = '4 0 1; 4 0 2; 4 1 3; 4 2 3;
+    polygon_faces_connectivity = '4 0 1; 4 0 2; 4 1 3; 4 2 3;
                             5 0 1; 5 0 2; 5 1 3; 5 2 3'
     elem_type = "C0POLYHEDRON"
     subdomain_id = 2
@@ -81,7 +81,7 @@ c = 1.5
                        ${fparse 3 * dx - phi_inv} 0 ${fparse phi}
                        ${fparse 3 * dx - phi_inv} 0 ${fparse -phi}'
 
-    element_connectivity = '2 9 6 18 16;
+    polygon_faces_connectivity = '2 9 6 18 16;
                             2 16 0 12 14;
                             14 12 1 17 3;
                             7 11 3 17 19;
@@ -117,7 +117,7 @@ c = 1.5
                         ${fparse 4 * dx + 0}  ${phi} -1
                         '
 
-     element_connectivity = '0 8 4;
+     polygon_faces_connectivity = '0 8 4;
                              0 4 5;
                              0 5 9;
                              0 9 1;
