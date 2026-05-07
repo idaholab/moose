@@ -403,12 +403,11 @@ MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
 int
 vectorFunctionDim(const std::string & type, const InputParameters & parameters)
 {
-  if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
+  if (parameters.isParamSetByUser("expression_z"))
     return 3;
-  if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y") ||
-      type == "LevelSetOlssonVortex")
+  if (parameters.isParamSetByUser("expression_y") || type == "LevelSetOlssonVortex")
     return 2;
-  if (parameters.isParamSetByUser("expression_x") || parameters.isParamSetByUser("value_x"))
+  if (parameters.isParamSetByUser("expression_x"))
     return 1;
 
   return 3;
