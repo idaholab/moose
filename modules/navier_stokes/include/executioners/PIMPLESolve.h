@@ -41,6 +41,13 @@ protected:
                   const bool recompute_face_mass_flux,
                   const SolverParams & solver_params) override;
 
+  Real pisoAbsoluteTolerance() const;
+  bool shouldContinuePISOIterations(const unsigned int piso_iteration_counter,
+                                    const Real stage_residual,
+                                    const Real first_stage_residual) const;
+
   /// Number of H(u) and u iterations with fixed face flux.
   const unsigned int _num_piso_iterations;
+  const Real _piso_absolute_tolerance;
+  const Real _piso_relative_tolerance;
 };

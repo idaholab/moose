@@ -280,6 +280,7 @@ protected:
   FaceScalarField _sharp_pressure_predictor_flux;
   FaceScalarField _reference_face_mass_flux_for_writeback;
   FaceScalarField _corrected_face_phi;
+  FaceScalarField _previous_timestep_corrected_face_phi;
   FaceScalarField _outer_iteration_rho_phi;
   FaceScalarField _outer_iteration_phi;
   FaceScalarField _debug_update_hydrostatic_face_mass_flux_density_raw;

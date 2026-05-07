@@ -372,9 +372,9 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
     if (system_i == 0)
       momentum_solver.reuse_preconditioner(true);
 
-    // Save the normalized residual
+    // Save the normalized post-solve residual for outer residual control.
     its_normalized_residuals.push_back(
-        std::make_pair(its_resid_pair.first, momentum_solver.get_initial_residual() / norm_factor));
+        std::make_pair(its_resid_pair.first, its_resid_pair.second / norm_factor));
 
     if (_print_fields)
     {
@@ -385,7 +385,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
       _console << " velocity solution component " << system_i << std::endl;
       solution.print();
       _console << "Norm factor " << norm_factor << std::endl;
-      _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
+      _console << Moose::stringify(its_resid_pair.second) << std::endl;
     }
 
     // Printing residuals
@@ -686,8 +686,7 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   if (_rc_uo)
     _rc_uo->cachePressureEquationFlux();
 
-  const auto residuals =
-      std::make_pair(its_res_pair.first, pressure_solver.get_initial_residual() / norm_factor);
+  const auto residuals = std::make_pair(its_res_pair.first, its_res_pair.second / norm_factor);
 
   _console << " Pressure equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
            << " Linear its: " << residuals.first << std::endl;
@@ -746,8 +745,7 @@ LinearAssemblySegregatedSolve::solveSolidEnergy()
 
   _solid_energy_system->setSolution(current_local_solution);
 
-  const auto residuals =
-      std::make_pair(its_res_pair.first, solver.get_initial_residual() / norm_factor);
+  const auto residuals = std::make_pair(its_res_pair.first, its_res_pair.second / norm_factor);
 
   _console << " Solid energy equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
            << " Linear its: " << residuals.first << std::endl;
@@ -875,8 +873,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
 
   system.setSolution(current_local_solution);
 
-  const auto residuals =
-      std::make_pair(its_res_pair.first, linear_solver.get_initial_residual() / norm_factor);
+  const auto residuals = std::make_pair(its_res_pair.first, its_res_pair.second / norm_factor);
 
   _console << " Advected system: " << system.name() << " " << COLOR_GREEN << residuals.second
            << COLOR_DEFAULT << " Linear its: " << residuals.first << std::endl;
@@ -932,7 +929,7 @@ LinearAssemblySegregatedSolve::solve()
     if (_should_solve_pressure && simple_iteration_counter == 1)
       _pressure_system.computeGradients();
 
-    _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
+    _console << "Iteration " << simple_iteration_counter << " Residual norms:" << std::endl;
 
     // Solve the momentum predictor step
     if (_should_solve_momentum)
@@ -1070,8 +1067,8 @@ LinearAssemblySegregatedSolve::solve()
     bool passive_scalar_converged = false;
     unsigned int ps_iteration_counter = 0;
 
-    _console << "Passive scalar iteration " << ps_iteration_counter
-             << " Initial residual norms:" << std::endl;
+    _console << "Passive scalar iteration " << ps_iteration_counter << " Residual norms:"
+             << std::endl;
 
     while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {

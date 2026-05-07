@@ -28,8 +28,10 @@ ReducedPressurePIMPLESolve::validParams()
       "path this should remain a small outer-correction count, not a large SIMPLE-style "
       "momentum-pressure convergence loop.");
   params.setDocString("num_piso_iterations",
-                      "The number of inner pressure-correction-only PISO iterations performed "
-                      "without rebuilding the momentum matrix on each outer correction.");
+                      "The maximum number of additional inner pressure-correction-only PISO "
+                      "stages performed without rebuilding the momentum matrix on each outer "
+                      "correction. The loop exits early when the PISO residual tolerances are "
+                      "satisfied.");
   params.addClassDescription(
       "PIMPLE solve object with explicit hooks for reduced-pressure sharp-interface face-flux "
       "predictors.");
@@ -448,7 +450,7 @@ ReducedPressurePIMPLESolve::solve()
     if (_should_solve_pressure && simple_iteration_counter == 1)
       _pressure_system.computeGradients();
 
-    _console << "Iteration " << simple_iteration_counter << " Initial residual norms:" << std::endl;
+    _console << "Iteration " << simple_iteration_counter << " Residual norms:" << std::endl;
 
     if (_should_solve_momentum)
     {
@@ -554,8 +556,8 @@ ReducedPressurePIMPLESolve::solve()
     bool passive_scalar_converged = false;
     unsigned int ps_iteration_counter = 0;
 
-    _console << "Passive scalar iteration " << ps_iteration_counter
-             << " Initial residual norms:" << std::endl;
+    _console << "Passive scalar iteration " << ps_iteration_counter << " Residual norms:"
+             << std::endl;
 
     while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
     {
@@ -891,7 +893,8 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
 
   const std::string file_base = _app.getOutputFileBase();
   const std::string iter_label = "_ts" + std::to_string(_problem.timeStep()) + "_outer" +
-                                 std::to_string(_current_outer_iteration) + "_" + stage_label;
+                                 std::to_string(_current_outer_iteration) + "_piso" +
+                                 std::to_string(_current_piso_iteration) + "_" + stage_label;
 
   {
     std::ofstream out(file_base + iter_label + "_pressure_cells.csv");
@@ -1312,14 +1315,25 @@ ReducedPressurePIMPLESolve::correctVelocity(const bool /*subtract_updated_pressu
                                             const SolverParams & solver_params)
 {
   std::pair<unsigned int, Real> residual;
-  // Build the predictor/HbyA/phiHbyA state once per outer correction, then
-  // reuse that frozen predictor for the inner pressure-correction stages.
-  preparePressureCorrectorState(true);
-  dumpPressureOuterDebugState("pre_pressure_solve");
+  Real first_stage_residual = std::numeric_limits<Real>::quiet_NaN();
+  unsigned int piso_iteration_counter = 0;
+  while (true)
+  {
+    _current_piso_iteration = piso_iteration_counter + 1;
+    const bool subtract_updated_pressure = piso_iteration_counter == 0;
+    preparePressureCorrectorState(subtract_updated_pressure);
+    dumpPressureOuterDebugState("pre_pressure_solve");
+    residual = applyPressureCorrectionStage(true, false, solver_params);
+    if (piso_iteration_counter == 0)
+      first_stage_residual = residual.second;
+    if (!shouldContinuePISOIterations(
+            piso_iteration_counter, residual.second, first_stage_residual))
+      break;
+    piso_iteration_counter++;
+  }
 
-  for (unsigned int piso_iteration_counter = 0; piso_iteration_counter <= _num_piso_iterations;
-       ++piso_iteration_counter)
-    residual = applyPressureCorrectionStage(true, solver_params);
+  finalizePressureCorrectionStage();
+  _current_piso_iteration = 0;
 
   return residual;
 }
@@ -1415,11 +1429,14 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
   preparePressureCorrectorState(subtract_updated_pressure);
   dumpPressureOuterDebugState("pre_pressure_solve");
 
-  return applyPressureCorrectionStage(recompute_face_mass_flux, solver_params);
+  const auto residuals = applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
+  finalizePressureCorrectionStage();
+  return residuals;
 }
 
 std::pair<unsigned int, Real>
 ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_face_mass_flux,
+                                                         const bool relax_pressure_for_next_predictor,
                                                          const SolverParams & solver_params)
 {
 
@@ -1442,6 +1459,40 @@ ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_fa
       sharp_rc->applyAdditionalFaceMassFluxCorrection();
   }
 
+  if (relax_pressure_for_next_predictor)
+  {
+    if (auto * sharp_rc = sharpInterfaceRC())
+      sharp_rc->computeProvisionalCellVelocity();
+    else
+      _rc_uo->computeCellVelocity();
+
+    _rc_uo->updateVelocityBoundaryState();
+    dumpPressureOuterDebugState("post_pressure_writeback");
+  }
+
+  // Mirror interFoam's pEqn.H ordering more closely: inner pressure-correction
+  // stages should update phi/U from the exact pressure solve, and pressure
+  // under-relaxation should only prepare the field for the next outer momentum
+  // predictor after the final inner stage.
+  if (relax_pressure_for_next_predictor)
+  {
+    NS::FV::relaxSolutionUpdate(
+        pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
+
+    pressure_old_solution = pressure_current_solution;
+    _pressure_system.setSolution(pressure_current_solution);
+    _pressure_system.computeGradients();
+  }
+
+  return residuals;
+}
+
+void
+ReducedPressurePIMPLESolve::finalizePressureCorrectionStage()
+{
+  auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
+  auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
+
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->computeProvisionalCellVelocity();
   else
@@ -1450,15 +1501,10 @@ ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_fa
   _rc_uo->updateVelocityBoundaryState();
   dumpPressureOuterDebugState("post_pressure_writeback");
 
-  // Mirror interFoam's pEqn.H ordering: use the exact pressure correction to
-  // update phi/U, then under-relax pressure only for the next momentum
-  // predictor.
   NS::FV::relaxSolutionUpdate(
       pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
 
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
   _pressure_system.computeGradients();
-
-  return residuals;
 }

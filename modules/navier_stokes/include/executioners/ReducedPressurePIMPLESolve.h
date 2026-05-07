@@ -69,7 +69,9 @@ private:
                       const SolverParams & solver_params);
   std::pair<unsigned int, Real>
   applyPressureCorrectionStage(const bool recompute_face_mass_flux,
+                               const bool relax_pressure_for_next_predictor,
                                const SolverParams & solver_params);
+  void finalizePressureCorrectionStage();
   std::pair<unsigned int, Real>
   correctStartupContinuityOnce(const bool subtract_updated_pressure,
                                const bool recompute_face_mass_flux,
@@ -100,6 +102,7 @@ private:
   const unsigned int _dump_pressure_outer_debug_start_timestep;
   const unsigned int _dump_pressure_outer_debug_end_timestep;
   const unsigned int _dump_pressure_outer_debug_max_outer_iterations;
+  unsigned int _current_piso_iteration = 0;
   std::string _startup_pressure_initialization;
   const bool _suppress_explicit_hydrostatic_flux_during_seeded_startup;
   const unsigned int _startup_flux_corrections;

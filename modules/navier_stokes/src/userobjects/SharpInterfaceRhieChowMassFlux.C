@@ -129,6 +129,8 @@ SharpInterfaceRhieChowMassFlux::SharpInterfaceRhieChowMassFlux(const InputParame
     _reference_face_mass_flux_for_writeback(
         _moose_mesh, blockIDs(), "reference_face_mass_flux_for_writeback"),
     _corrected_face_phi(_moose_mesh, blockIDs(), "corrected_face_phi"),
+    _previous_timestep_corrected_face_phi(
+        _moose_mesh, blockIDs(), "previous_timestep_corrected_face_phi"),
     _outer_iteration_rho_phi(_moose_mesh, blockIDs(), "outer_iteration_rho_phi"),
     _outer_iteration_phi(_moose_mesh, blockIDs(), "outer_iteration_phi"),
     _debug_update_hydrostatic_face_mass_flux_density_raw(
@@ -832,6 +834,7 @@ SharpInterfaceRhieChowMassFlux::initializeAdditionalPressureFluxStorage(
     _reference_face_mass_flux_for_writeback[fi->id()] = 0.0;
     if (!preserve_corrected_face_phi)
       _corrected_face_phi[fi->id()] = 0.0;
+    _previous_timestep_corrected_face_phi[fi->id()] = 0.0;
     _outer_iteration_rho_phi[fi->id()] = 0.0;
     _outer_iteration_phi[fi->id()] = 0.0;
     _debug_update_hydrostatic_face_mass_flux_density_raw[fi->id()] = 0.0;
@@ -1074,6 +1077,9 @@ SharpInterfaceRhieChowMassFlux::initialize()
   initializeAdditionalPressureFluxStorage(/*preserve_corrected_face_phi=*/true);
   if (!_corrected_face_phi_seeded)
     cacheCurrentCorrectedVolumetricFlux();
+
+  for (const auto * fi : _sharp_interface_face_info)
+    _previous_timestep_corrected_face_phi[fi->id()] = libmesh_map_find(_corrected_face_phi, fi->id());
 }
 
 void
@@ -1889,7 +1895,7 @@ SharpInterfaceRhieChowMassFlux::computeDefaultTransientProjectionFaceAcceleratio
     return RealVectorValue();
 
   const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Time);
-  const Real old_stored_phi = _corrected_face_phi(makeCenteredFaceArg(fi), old_state);
+  const Real old_stored_phi = libmesh_map_find(_previous_timestep_corrected_face_phi, fi->id());
 
   Real old_interpolated_phi = 0.0;
   if (_vel[0]->isInternalFace(*fi))
