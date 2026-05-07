@@ -18,5 +18,6 @@
     input = 'test.py'
     test_case = TestSkewnessCorrectedDiffAdvStencil
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion and advection terms in an advection diffusion problem.'
+    min_slots = 2
   []
 []
