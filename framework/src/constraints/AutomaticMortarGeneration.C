@@ -1457,7 +1457,7 @@ AutomaticMortarGeneration::computeMsmStatistics()
   StatisticsVector<Real> primary;
   StatisticsVector<Real> secondary;
   StatisticsVector<Real> msm;
-  std::unordered_set<dof_id_type> primary_elems_seen;
+  std::unordered_map<dof_id_type, Real> primary_elems_to_volume;
 
   for (const auto & [primary_subd_id, secondary_subd_id] : _primary_secondary_subdomain_id_pairs)
   {
@@ -1482,16 +1482,24 @@ AutomaticMortarGeneration::computeMsmStatistics()
                          "statistics. This could happen if you have the same secondary "
                          "lower-dimensional subdomain ID paired with multiple lower-dimensional "
                          "primary subdomain IDs. Contact a MOOSE developer for help.");
-            if (const auto [_, inserted] = primary_elems_seen.insert(msm_info.primary_elem->id());
+            if (const auto [it, inserted] =
+                    primary_elems_to_volume.emplace(msm_info.primary_elem->id(), Real{});
                 inserted)
-              primary.push_back(msm_info.primary_elem->volume());
+              it->second = msm_info.primary_elem->volume();
+            else
+              mooseAssert(
+                  MooseUtils::absoluteFuzzyEqual(it->second, msm_info.primary_elem->volume()),
+                  "Volumes should be consistent");
           }
         }
     }
 
-    _mesh.comm().allgather(static_cast<std::vector<Real> &>(primary));
+    _mesh.comm().set_union(primary_elems_to_volume);
     _mesh.comm().allgather(static_cast<std::vector<Real> &>(secondary));
     _mesh.comm().allgather(static_cast<std::vector<Real> &>(msm));
+    primary.reserve(primary_elems_to_volume.size());
+    for (const auto [_, volume] : primary_elems_to_volume)
+      primary.push_back(volume);
 
     MsmSubdomainStats stats;
     stats.primary_subd_id = primary_subd_id;
@@ -1513,7 +1521,7 @@ AutomaticMortarGeneration::computeMsmStatistics()
     primary.clear();
     secondary.clear();
     msm.clear();
-    primary_elems_seen.clear();
+    primary_elems_to_volume.clear();
   }
 
   return result;
