@@ -5,13 +5,13 @@
 ## Overview
 
 `MFEMExecutedObject` is the base class for MFEM objects that are scheduled and executed by
-[MFEMProblem](problem/MFEMProblem.md) during a solve. It derives from
-[MFEMObject](base/MFEMObject.md), `SetupInterface`, and `DependencyResolverInterface`.
+[MFEMProblem.md] during a solve. It derives from [MFEMObject.md], [SetupInterface.md], and
+[DependencyResolverInterface.md].
 
 ## Execution ordering
 
 Execution order among `MFEMExecutedObject` instances is determined automatically by
-`DependencyResolverInterface`: the MFEM scheduler builds a dependency graph from the variable,
+[DependencyResolverInterface.md]: the MFEM scheduler builds a dependency graph from the variable,
 postprocessor, and vector postprocessor names that each object declares it consumes or produces,
 then performs a topological sort.
 
@@ -50,11 +50,11 @@ All three have empty default implementations. Derived classes override whichever
 
 The following MFEM object types derive from `MFEMExecutedObject`:
 
-- [MFEMAuxKernel](auxkernels/MFEMAuxKernel.md) — updates real auxiliary variables.
-- [MFEMComplexAuxKernel](auxkernels/MFEMComplexAuxKernel.md) — updates complex auxiliary variables.
-- [MFEMPostprocessor](postprocessors/MFEMPostprocessor.md) — computes a scalar quantity.
-- [MFEMVectorPostprocessor](vectorpostprocessors/MFEMVectorPostprocessor.md) — computes an array of values.
-- [MFEMSubMeshTransfer](transfers/MFEMSubMeshTransfer.md) — transfers variable data between a mesh and a submesh.
+- [MFEMAuxKernel.md] — updates real auxiliary variables.
+- [MFEMComplexAuxKernel.md] — updates complex auxiliary variables.
+- [MFEMPostprocessor.md] — computes a scalar quantity.
+- [MFEMVectorPostprocessor.md] — computes an array of values.
+- [MFEMSubMeshTransfer.md] — transfers variable data between a mesh and a submesh.
 - `MFEMInitialCondition` — sets the initial value on an MFEM variable.
 
 !if-end!

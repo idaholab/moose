@@ -6,6 +6,7 @@
     type = 'Exodiff'
     input = 'eigen.i'
     exodiff = 'eigen_out.e'
+    capabilities = 'slepc'
     requirement = 'The system shall support storing the solution of an eigenvalue solve such that it can be restarted later into a non-eigenvalue solve.'
   []
   [transient_from_eigen_solution]

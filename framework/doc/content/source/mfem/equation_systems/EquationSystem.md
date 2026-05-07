@@ -6,7 +6,7 @@ The EquationSystem is responsible for defining and assembling the weak form of t
 [`mfem::Operator`](https://docs.mfem.org/html/classmfem_1_1Operator.html) used to solve an iteration
 of the FE problem. This operator is passed to an
 [`mfem::NewtonSolver`](https://docs.mfem.org/html/classmfem_1_1NewtonSolver.html) in a
-[ProblemOperator](source/mfem/problem_operators/ProblemOperator.md), which handles the update of the
+[ProblemOperator.md], which handles the update of the
 state of all variables (including any required nonlinear iterations).
 
 !equation
@@ -32,8 +32,8 @@ form. [`mfem::BilinearFormIntegrators`](https://mfem.org/bilininteg/) add contri
 $A_{ij}(\varphi_i, \phi_j)$ and [`mfem::LinearFormIntegrators`](https://mfem.org/lininteg/) add
 contributions to $b_i(\varphi_i)$ when assembled.
 
-[MFEMKernels](source/mfem/kernels/MFEMKernel.md) can also contribute to domain integrators for 
-non-linear actions. This allows to form the residual $\mathcal{L}(u)$ for non-linear Newton's 
+[MFEMKernels](source/mfem/kernels/MFEMKernel.md) can also contribute to domain integrators for
+non-linear actions. This allows to form the residual $\mathcal{L}(u)$ for non-linear Newton's
 method as shown below
 
 !equation

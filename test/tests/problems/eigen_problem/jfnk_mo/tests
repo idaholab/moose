@@ -74,6 +74,7 @@
     issues = '#28993'
     input = ne_coupled_mo.i
     cli_args = "Problem/bx_norm=uint Postprocessors/uint/execute_on='initial nonlinear'"
+    capabilities = 'slepc'
     requirement = 'The system shall error if the user wants the Bx norm provided by a postprocessor but the postprocessor is not executed during residual evaluations.'
     expect_err = "If providing the Bx norm, this postprocessor must execute on linear"
   []

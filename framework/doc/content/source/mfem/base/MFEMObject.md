@@ -5,7 +5,7 @@
 ## Overview
 
 `MFEMObject` is the common base class for all MFEM objects. It provides every MFEM object with a
-typed reference to the owning [MFEMProblem](problem/MFEMProblem.md) and a set of helpers for
+typed reference to the owning [MFEMProblem.md] and a set of helpers for
 retrieving MFEM coefficients by name.
 
 `MFEMObject` also mixes in `FunctionInterface`, `PostprocessorInterface`,
@@ -18,7 +18,7 @@ The `getMFEMProblem()` method returns a typed reference to the owning `MFEMProbl
 
 ## Coefficient access
 
-MFEM coefficients declared through [MFEMFunctorMaterial](functormaterials/MFEMFunctorMaterial.md)
+MFEM coefficients declared through [MFEMFunctorMaterial.md]
 objects are stored in the `CoefficientManager` owned by `MFEMProblem`. `MFEMObject` exposes two
 families of accessor methods for them:
 
@@ -38,7 +38,7 @@ parameter, so the caller does not need to extract the string itself.
 
 `MFEMObject` is the root of the MFEM object hierarchy. Direct subclasses include:
 
-- [MFEMExecutedObject](base/MFEMExecutedObject.md) — objects that are scheduled and executed by `MFEMProblem` (aux kernels, postprocessors, transfers, initial conditions, etc.).
+- [MFEMExecutedObject.md] — objects that are scheduled and executed by `MFEMProblem` (aux kernels, postprocessors, transfers, initial conditions, etc.).
 - `MFEMSolverBase` — MFEM linear solver and preconditioner objects.
 - `MFEMKernel` / `MFEMComplexKernel` — weak-form contributions to the equation system.
 - `MFEMBoundaryCondition` — boundary conditions applied to the equation system.
