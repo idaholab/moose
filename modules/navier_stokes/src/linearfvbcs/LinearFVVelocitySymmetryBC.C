@@ -161,6 +161,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
   // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   const auto normal_component = _current_face_info->normal()(_index);
   const auto normal_component_sq = normal_component * normal_component;
-  return computeBoundaryNormalGradient() -
-         normal_component_sq / computeCellToFaceDistance() * boundary_value;
+  // Diffusion assembles flux as matrix * u - rhs. For a reflected velocity boundary value,
+  // the cross-component contribution therefore enters the RHS with the opposite sign.
+  return normal_component_sq / computeCellToFaceDistance() * boundary_value -
+         computeBoundaryNormalGradient();
 }
