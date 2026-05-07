@@ -103,7 +103,7 @@ LinearFVMomentumPorousFriction::computeDarcyCoefficient(const Moose::ElemArg & e
   const Real eps = _eps(elem_arg, state);
   mooseAssert(eps > 0.0, "Epsilon must be greater than 0!");
 
-  return (*_mu)(elem_arg, state) * (*_darcy)(elem_arg, state)(_index) / eps;
+  return (*_mu)(elem_arg, state) * (*_darcy)(elem_arg, state)(_index);
 }
 
 Real
@@ -121,5 +121,5 @@ LinearFVMomentumPorousFriction::computeForchheimerCoefficient(const Moose::ElemA
   const Real w = _w ? (*_w)(elem_arg, state) : 0.0;
   const Real speed = NS::computeSpeed(RealVectorValue(u, v, w)) / eps;
 
-  return (*_rho)(elem_arg, state) * (*_forchheimer)(elem_arg, state)(_index)*speed / eps;
+  return 0.5 * (*_rho)(elem_arg, state) * (*_forchheimer)(elem_arg, state)(_index)*speed;
 }
