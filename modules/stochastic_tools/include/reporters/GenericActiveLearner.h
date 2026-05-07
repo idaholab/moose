@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -357,3 +358,5 @@ GenericActiveLearnerTempl<SamplerType>::execute()
   // Track the current step
   _check_step = _t_step;
 }
+
+#endif
