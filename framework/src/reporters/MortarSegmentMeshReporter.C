@@ -21,8 +21,8 @@ MortarSegmentMeshReporter::validParams()
       "Reports mortar segment mesh statistics (element counts and volume statistics) for all "
       "mortar interfaces. One entry per primary-secondary subdomain pair is appended to each "
       "output vector.");
-  params.addParam<bool>(
-      "on_displaced", false, "Whether to report statistics for the displaced mortar interfaces.");
+  params.addRequiredParam<bool>(
+      "on_displaced", "Whether to report statistics for the displaced mortar interfaces.");
   return params;
 }
 
