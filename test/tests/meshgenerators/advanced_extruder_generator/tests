@@ -130,7 +130,7 @@
     exodiff = 'straight_radial_growth_in.e'
     recover = false
 
-    requirement = 'The system shall be able to extrude a mesh and proportionally increase its radial extent as it is being extruded.'
+    requirement = 'The system shall be able to extrude a mesh and linearly increase its radial extent as it is being extruded.'
     issues = '#3554 #31112'
   []
 

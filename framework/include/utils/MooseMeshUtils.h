@@ -130,6 +130,13 @@ std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
 
 /**
+ * Calculates the volume of a MeshBase.
+ * @param mesh input mesh whose volume needs to be calculated
+ * @return the volume of the mesh
+ */
+Real meshVolumeCalculator(const MeshBase & mesh);
+
+/**
  * Calculates the centroid of a MeshBase.
  * @param mesh input mesh whose centroid needs to be calculated
  * @return a Point corresponding to the mesh centroid

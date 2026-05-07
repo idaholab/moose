@@ -43,7 +43,10 @@ When extruding along an line mesh curve, specifying the biases, heights, number 
 ## Radial growth during extrusion
 
 By setting the [!param](/Mesh/AdvancedExtruderGenerator/end_radial_extent), the radial extent of the extruded mesh can be expanded or
-diminished progressively throughout the extrusion process. The [!param](/Mesh/AdvancedExtruderGenerator/radial_growth_method) can be
+diminished progressively throughout the extrusion process. The radial extent is defined as the maximum norm for all nodes of the extruded mesh
+of the distance the node to the extrusion axis. For example, for a circle that is being extruded along an axis passing through its center,
+the radial extent is equal to the radius of the circle.
+The [!param](/Mesh/AdvancedExtruderGenerator/radial_growth_method) can be
 set to a linear or cubic radial profile. The `cubic` option allows for specifying the derivative of the radial growth factor at
 the beginning and end of the extrusion using the [!param](/Mesh/AdvancedExtruderGenerator/start_radial_growth_rate) and
 [!param](/Mesh/AdvancedExtruderGenerator/end_radial_growth_rate) parameters respectively.

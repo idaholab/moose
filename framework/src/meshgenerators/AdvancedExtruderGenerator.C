@@ -352,7 +352,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
               std::to_string(_upward_boundary_ids.size()) + ") as upward_boundary_source_blocks (" +
               std::to_string(_upward_boundary_source_blocks.size()) + ") and num_elevations (" +
               std::to_string(num_elevations) +
-              "). Note that the number of heights is set to 1 when extrudingn along a curve.");
+              "). Note that the number of heights is set to 1 when extruding along a curve.");
     else
     {
       paramError("upward_boundary_ids",
@@ -382,7 +382,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
               ") as downward_boundary_source_blocks (" +
               std::to_string(_downward_boundary_source_blocks.size()) + ") and (" +
               std::to_string(num_elevations) +
-              "). Note that the number of heights is set to 1 when extrudingn along a curve.");
+              "). Note that the number of heights is set to 1 when extruding along a curve.");
     else
     {
       paramError("downward_boundary_ids",
@@ -464,16 +464,16 @@ AdvancedExtruderGenerator::generate()
                    bid,
                    "' was not found within the mesh");
 
+  // Move the meshes as requested by the mesh generator system
   std::unique_ptr<MeshBase> input = std::move(_input);
-
   std::unique_ptr<MeshBase> extrusion_curve;
   if (_extrude_along_curve)
-  {
     extrusion_curve = std::move(_extrusion_curve);
 
-    // We must serialize the curve to know how to extrude across all ranks
-    libMesh::MeshSerializer serial(*extrusion_curve);
-  }
+  // We must serialize the curve to know how to extrude across all ranks
+  std::unique_ptr<libMesh::MeshSerializer> serializer;
+  if (_extrude_along_curve)
+    serializer = std::make_unique<libMesh::MeshSerializer>(*extrusion_curve);
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
@@ -571,13 +571,25 @@ AdvancedExtruderGenerator::generate()
         MooseMeshUtils::computeMaxDistanceToAxis(*input, reference_point, reference_direction);
   }
 
+  // Compute the total extrusion distance along the axis
+  Real total_extrusion_distance_at_axis;
+  if (_extrude_along_curve)
+  {
+    if (!extrusion_curve->is_prepared())
+      extrusion_curve->prepare_for_use();
+    total_extrusion_distance_at_axis = MooseMeshUtils::meshVolumeCalculator(*extrusion_curve);
+  }
+  else
+    total_extrusion_distance_at_axis = std::accumulate(_heights.begin(), _heights.end(), 0);
+
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
     unsigned int current_node_layer = 0;
-    Point old_step;
-    Point current_step;
-    Real cumulative_step_size = 0.;
+    Point orig_node_to_previous;
+    Point orig_node_to_current;
+    Real sum_step_sizes = 0.;
+    Real sum_step_sizes_at_axis = 0.;
     // Initial distance from the node to the extrusion axis
     Real start_node_radius = (*node - reference_point).norm();
 
@@ -603,17 +615,18 @@ AdvancedExtruderGenerator::generate()
       // k is the element layer ordering within each elevation layer
       for (const auto k : make_range(num_heights_at_elevation))
       {
-        // Compute current_step, the update vector
+        // Compute 'orig_node_to_current', the update vector
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
-          current_step.zero();
+          orig_node_to_current.zero();
         else
         {
           // Shift the previous position by a certain fraction of 'height' along the extrusion
           // direction to get the new position.
 
-          // Compute current_step before any transformation
+          // Compute orig_node_to_current before any transformation
           Real step_size = 0;
+          Real step_size_at_axis = 0;
           if (_extrude_along_curve)
           {
             // current point in extrusion curve
@@ -623,7 +636,7 @@ AdvancedExtruderGenerator::generate()
 
             // Convenience vectors
             RealVectorValue a_vec = *P_current - *P_prev;
-            RealVectorValue b_vec = old_step + *node - *P_prev;
+            RealVectorValue b_vec = orig_node_to_previous + *node - *P_prev;
             Real prev_node_distance_to_spline = b_vec.norm();
 
             // Node does not lie exactly on the extrusion curve we are following
@@ -661,7 +674,10 @@ AdvancedExtruderGenerator::generate()
 
               libMesh::Point new_node_point =
                   *P_current + prev_node_distance_to_spline * dir_along_line;
-              current_step = new_node_point - *node;
+              orig_node_to_current = new_node_point - *node;
+
+              step_size = (orig_node_to_current - orig_node_to_previous).norm();
+              step_size_at_axis = (*P_current - *P_prev).norm();
             }
             // Point is on the axis of the line
             else
@@ -672,9 +688,11 @@ AdvancedExtruderGenerator::generate()
                           "Norm of direction vector is not 1!");
 
               // Calculate step size.
-              // Note: old_step + *node is the vector description of the previously-created node
-              step_size = ((*P_current - (old_step + *node)) * _direction);
-              current_step = old_step + _direction * step_size;
+              // Note: orig_node_to_previous + *node is the vector description of the
+              // previously-created node
+              step_size = ((*P_current - (orig_node_to_previous + *node)) * _direction);
+              step_size_at_axis = step_size;
+              orig_node_to_current = orig_node_to_previous + _direction * step_size;
             }
           }
           // Extruding in a fixed direction (not along a curve)
@@ -687,29 +705,34 @@ AdvancedExtruderGenerator::generate()
                             ? height / (Real)num_layers / (Real)order
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
-            current_step =
-                old_step + _direction * step_size; // update distance from starting node to new node
+            step_size_at_axis = step_size;
+            orig_node_to_current =
+                orig_node_to_previous +
+                _direction * step_size; // update distance from starting node to new node
           }
 
           // Keep track of the cumulative step size as an extrusion axis coordinate
-          cumulative_step_size += step_size;
+          sum_step_sizes += step_size;
+          sum_step_sizes_at_axis += step_size_at_axis;
 
           // Handle radial expansion. No need to perform expansion at the centerline
           if (_end_radial_extent && start_node_radius > libMesh::TOLERANCE)
           {
-            // How far along we are in the extrusion
-            // TODO: this assumes equi-distance of the nodes!!
-            Real tm1 = (Real)(current_node_layer - 1) / (Real)(total_num_layers);
-            Real t = (Real)current_node_layer / (Real)(total_num_layers);
+            // How far along we are in the extrusion, measured at the axis (=curve when extruding
+            // along a curve)
+            Real tm1 =
+                (sum_step_sizes_at_axis - step_size_at_axis) / total_extrusion_distance_at_axis;
+            Real t = sum_step_sizes_at_axis / total_extrusion_distance_at_axis;
 
             // Direction of radial expansion.
             RealVectorValue node_to_extrusion_axis;
             if (_extrude_along_curve)
-              node_to_extrusion_axis = *node + current_step - *(extrusion_curve->node_ptr(k));
+              node_to_extrusion_axis =
+                  *node + orig_node_to_current - *(extrusion_curve->node_ptr(k));
             // The radial expansion has to be performed in the rotated frame
             else if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
               node_to_extrusion_axis =
-                  *node + current_step - (reference_point + _direction * cumulative_step_size);
+                  *node + orig_node_to_current - (reference_point + _direction * sum_step_sizes);
             // when extruding in a straight line with no twisting, we can use the original radial
             // direction
             else
@@ -722,9 +745,9 @@ AdvancedExtruderGenerator::generate()
             const auto radial_ratio = AdvancedExtruderGenerator::radialExpansionRatio(t);
 
             // Compute change in step
-            current_step += (start_radial_extent * (radial_ratio_m1 - radial_ratio) +
-                             (radial_ratio - radial_ratio_m1) * _end_radial_extent) *
-                            radius_scaling * node_to_extrusion_axis.unit();
+            orig_node_to_current += (start_radial_extent * (radial_ratio_m1 - radial_ratio) +
+                                     (radial_ratio - radial_ratio_m1) * _end_radial_extent) *
+                                    radius_scaling * node_to_extrusion_axis.unit();
           }
 
           // Handle helicoidal extrusion
@@ -761,22 +784,22 @@ AdvancedExtruderGenerator::generate()
             else
             {
               // We can't use old and current step updates because they have been "twisted"
-              extrusion_axis_at_elevation = reference_point + _direction * cumulative_step_size;
+              extrusion_axis_at_elevation = reference_point + _direction * sum_step_sizes;
               prev_extrusion_axis_at_elevation =
-                  reference_point + _direction * (cumulative_step_size - step_size);
+                  reference_point + _direction * (sum_step_sizes - step_size);
             }
 
             // Scale with how far the node is from the extrusion axis, before twisting
-            twist *= (*node + current_step - extrusion_axis_at_elevation).norm();
+            twist *= (*node + orig_node_to_current - extrusion_axis_at_elevation).norm();
 
             // No need to twist or expand the point on the axis
             if (!MooseUtils::absoluteFuzzyEqual(twist1.norm(), .0))
-              current_step += twist;
+              orig_node_to_current += twist;
           }
         }
 
         // Add the new node to the mesh
-        Node * new_node = mesh->add_point(*node + current_step,
+        Node * new_node = mesh->add_point(*node + orig_node_to_current,
                                           node->id() + (current_node_layer * orig_nodes),
                                           node->processor_id());
 
@@ -806,7 +829,7 @@ AdvancedExtruderGenerator::generate()
                                        : id_to_copy);
           }
 
-        old_step = current_step;
+        orig_node_to_previous = orig_node_to_current;
         current_node_layer++;
       }
     }

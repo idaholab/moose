@@ -63,10 +63,14 @@ protected:
   /// The direction of the extrusion
   Point _direction;
 
-  /// Mesh to extrude along
+  // Attributes for extruding along a curve mesh of edges
+  /// Curve mesh to extrude along
   std::unique_ptr<MeshBase> & _extrusion_curve;
+  /// Extrusion direction to follow at the start (first layer) of the extrusion
   const libMesh::Point _start_extrusion_direction;
+  /// Extrusion direction for the final layer of the extrusion
   const libMesh::Point _end_extrusion_direction;
+  /// Whether we are extruding along a curve
   bool _extrude_along_curve;
 
   const bool _has_top_boundary;
@@ -100,7 +104,8 @@ protected:
   /// Derivative of the radial expansion function at the end of the extrusion
   const Real _end_radial_growth_rate;
 
-  /// Calculate ratio to apply to the expansion
+  /// Calculate the share of the radial expansion to apply at the local node
+  /// This share goes from 0 at the beginning of the extrusion to 1 at the end
   /// @param t coordinate along the curve (in the axial direction of extrusion)
   Real radialExpansionRatio(const Real t) const;
 };
