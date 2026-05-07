@@ -32,24 +32,20 @@ MortarSegmentMeshReporter::MortarSegmentMeshReporter(const InputParameters & par
     _secondary_lower_n_elems(declareValueByName<std::vector<unsigned int>>(
         "secondary_lower_n_elems", REPORTER_MODE_ROOT)),
     _secondary_lower_max_volume(
-        declareValueByName<std::vector<Real>>("secondary_lower_max_volume", REPORTER_MODE_ROOT)),
+        declareValueByName<std::vector<Real>>("secondary_lower_max_volume")),
     _secondary_lower_min_volume(
-        declareValueByName<std::vector<Real>>("secondary_lower_min_volume", REPORTER_MODE_ROOT)),
+        declareValueByName<std::vector<Real>>("secondary_lower_min_volume")),
     _secondary_lower_median_volume(
-        declareValueByName<std::vector<Real>>("secondary_lower_median_volume", REPORTER_MODE_ROOT)),
-    _primary_lower_n_elems(
-        declareValueByName<std::vector<unsigned int>>("primary_lower_n_elems", REPORTER_MODE_ROOT)),
-    _primary_lower_max_volume(
-        declareValueByName<std::vector<Real>>("primary_lower_max_volume", REPORTER_MODE_ROOT)),
-    _primary_lower_min_volume(
-        declareValueByName<std::vector<Real>>("primary_lower_min_volume", REPORTER_MODE_ROOT)),
+        declareValueByName<std::vector<Real>>("secondary_lower_median_volume")),
+    _primary_lower_n_elems(declareValueByName<std::vector<unsigned int>>("primary_lower_n_elems")),
+    _primary_lower_max_volume(declareValueByName<std::vector<Real>>("primary_lower_max_volume")),
+    _primary_lower_min_volume(declareValueByName<std::vector<Real>>("primary_lower_min_volume")),
     _primary_lower_median_volume(
-        declareValueByName<std::vector<Real>>("primary_lower_median_volume", REPORTER_MODE_ROOT)),
-    _msm_n_elems(declareValueByName<std::vector<unsigned int>>("msm_n_elems", REPORTER_MODE_ROOT)),
-    _msm_max_volume(declareValueByName<std::vector<Real>>("msm_max_volume", REPORTER_MODE_ROOT)),
-    _msm_min_volume(declareValueByName<std::vector<Real>>("msm_min_volume", REPORTER_MODE_ROOT)),
-    _msm_median_volume(
-        declareValueByName<std::vector<Real>>("msm_median_volume", REPORTER_MODE_ROOT))
+        declareValueByName<std::vector<Real>>("primary_lower_median_volume")),
+    _msm_n_elems(declareValueByName<std::vector<unsigned int>>("msm_n_elems")),
+    _msm_max_volume(declareValueByName<std::vector<Real>>("msm_max_volume")),
+    _msm_min_volume(declareValueByName<std::vector<Real>>("msm_min_volume")),
+    _msm_median_volume(declareValueByName<std::vector<Real>>("msm_median_volume"))
 {
 }
 
