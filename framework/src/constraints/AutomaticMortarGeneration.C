@@ -969,8 +969,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
   // Use rank-based offsets for node and element IDs so that IDs are globally unique across
   // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
-  // The main mesh max IDs are global (replicated mesh) and serve as a safe stride since the
+  // The main mesh max IDs are global and serve as a safe stride since the
   // mortar segment mesh is always far smaller than the main mesh.
+  mooseAssert(_mesh.is_prepared(),
+              "The mesh should be prepared such that our parallel id counts are correct");
   dof_id_type next_node_id = _mesh.processor_id() * _mesh.max_node_id();
   dof_id_type local_id_index = _mesh.processor_id() * _mesh.max_elem_id();
 
