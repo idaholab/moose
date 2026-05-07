@@ -43,28 +43,31 @@
     [polygon]
       type = CSVDiff
       input = 'polygon.i'
-      csvdiff = 'polygon.csv'
+      csvdiff= 'polygon_out.csv'
       recover = false
       detail = 'a polygon from user-specified nodes,'
     []
     [polyhedra_prisms]
-      type = CSVDiff
+      type = Exodiff
       input = 'polyhedra_prisms.i'
-      csvdiff = 'polyhedra_prisms_in.e'
+      cli_args = '--mesh-only'
+      exodiff= 'polyhedra_prisms_in.e'
       recover = false
       detail = 'polygonal prisms, represented as polyhedra, from user-specified nodes and faces,'
     []
     [polyhedra_platonic]
-      type = CSVDiff
+      type = Exodiff
       input = 'polyhedra_platonic.i'
-      csvdiff = 'polyhedra_platonic_in.e'
+      cli_args = '--mesh-only'
+      exodiff= 'polyhedra_platonic_in.e'
       recover = false
       detail = 'the platonic polyhedra from user-specified nodes and faces,'
     []
     [polyhedra_archimedean]
-      type = CSVDiff
+      type = Exodiff
       input = 'polyhedra_archimedean.i'
-      csvdiff = 'polyhedra_archimedean_in.e'
+      cli_args = '--mesh-only'
+      exodiff= 'polyhedra_archimedean_in.e'
       recover = false
       detail = 'the archimedean polyhedra from user-specified nodes and faces.'
     []

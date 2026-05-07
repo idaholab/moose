@@ -19,6 +19,7 @@
     type = ElementsToTetrahedronsConverter
     input = 'feg'
   []
+  allow_renumbering = false
 []
 
 [AuxVariables]
@@ -31,52 +32,6 @@
       use_xyzt = true
       execute_on = TIMESTEP_END
     []
-  []
-[]
-
-[GlobalParams]
-  min_x = -0.5
-  max_x = 0.5
-  min_y = -0.5
-  max_y = 0.5
-
-  resolution = 50
-  frame_center = '0.5 0.5 0.5'
-
-  min = -10
-  max = 12
-[]
-
-[Outputs]
-  [xy_base]
-    type = PNGOutput
-    variable = xyz
-    color = 'BWR'
-    execute_on = FINAL
-    frame_center = '0.5 0.5 0.2'
-  []
-  [xy]
-    type = PNGOutput
-    variable = xyz
-    color = 'BWR'
-    execute_on = FINAL
-    frame_center = '0.5 0.5 0.8'
-  []
-  [xz]
-    type = PNGOutput
-    variable = xyz
-    color = 'BWR'
-    execute_on = FINAL
-    first_axis = '1 0 0'
-    second_axis = '0 0 1'
-  []
-  [yz]
-    type = PNGOutput
-    variable = xyz
-    color = 'BWR'
-    execute_on = TIMESTEP_END
-    first_axis = '0 1 0'
-    second_axis = '0 0 1'
   []
 []
 
@@ -109,4 +64,8 @@
     variable = 'xyz'
     sort_by = 'id'
   []
+[]
+
+[Outputs]
+  csv = true
 []

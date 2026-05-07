@@ -1,11 +1,6 @@
 dx = 3.5
-phi = ${fparse (1 + sqrt(5)) / 2}
-phi_inv = ${fparse 1./phi}
 silver = ${fparse 1 + sqrt(2)}
 one_ds = ${fparse 1 / silver}
-a = 1.5
-b = 2
-c = 1.5
 
 [Mesh]
   [truncated_tetrahedron]

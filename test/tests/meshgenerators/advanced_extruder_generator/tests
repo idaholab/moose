@@ -136,8 +136,7 @@
   [polygons]
     type = CSVDiff
     input = 'polygons.i'
-    csvdiff = 'polygons_div_out.csv'
-    cli_args = '--mesh-only'
+    csvdiff = 'polygons_out_div_out_0001.csv'
     recover = false
     requirement = 'The system shall be able to extrude a 2D polygon mesh'
     design = 'AdvancedExtruderGenerator.md'
