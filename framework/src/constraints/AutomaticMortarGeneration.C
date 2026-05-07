@@ -967,33 +967,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
   auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  // Count local secondary and primary sub-elements in all mortar pairs so we can assign
-  // globally unique IDs during the build. The mortar segment mesh has at most
-  // (n_secondary_sub_elems + n_primary_sub_elems) * max_polygon_vertices nodes, because both
-  // surfaces cover the same interface area and each (secondary × primary) element pair
-  // intersects at most once.
-  dof_id_type local_sub_elem_count = 0;
-  for (const auto & el : as_range(_mesh.active_local_elements_begin(),
-                                   _mesh.active_local_elements_end()))
-    for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-      if (el->subdomain_id() == pr.first || el->subdomain_id() == pr.second)
-      {
-        local_sub_elem_count += el->n_sub_elem();
-        break;
-      }
-
-  // Sutherland-Hodgman intersection of two convex polygons with m and n vertices produces at most
-  // m+n vertices. The worst case is Quad4 x Quad4 = 4+4 = 8 (Tri3 x Tri3 = 6, Tri3 x Quad4 = 7).
-  // Use 8 for both nodes and elements since elements <= nodes for Tri3 MSM elements.
-  std::vector<dof_id_type> per_rank_strides;
-  _mortar_segment_mesh->comm().allgather(local_sub_elem_count * 8, per_rank_strides);
-
-  dof_id_type next_node_id = 0, local_id_index = 0;
-  for (const auto r : make_range(_mortar_segment_mesh->processor_id()))
-  {
-    next_node_id += per_rank_strides[r];
-    local_id_index += per_rank_strides[r];
-  }
+  // Use rank-based offsets for node and element IDs so that IDs are globally unique across
+  // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
+  // The main mesh max IDs are global (replicated mesh) and serve as a safe stride since the
+  // mortar segment mesh is always far smaller than the main mesh.
+  dof_id_type next_node_id = _mesh.processor_id() * _mesh.max_node_id();
+  dof_id_type local_id_index = _mesh.processor_id() * _mesh.max_elem_id();
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
