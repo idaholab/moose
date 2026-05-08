@@ -12,8 +12,21 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "DataIO.h"
+#include "MooseUtils.h"
+
+#include <fstream>
+#include <sstream>
 
 registerMooseObject("MooseApp", StatefulMaterialPropertyImporter);
+
+namespace
+{
+std::string
+prettyTypeName(const std::string & type_name)
+{
+  return MooseUtils::prettyCppType(libMesh::demangle(type_name.c_str()));
+}
+}
 
 InputParameters
 StatefulMaterialPropertyImporter::validParams()
@@ -39,6 +52,11 @@ StatefulMaterialPropertyImporter::StatefulMaterialPropertyImporter(
     const InputParameters & parameters)
   : GeneralUserObject(parameters), _file_base(getParam<std::string>("file_base"))
 {
+  const auto & execute_on = getExecuteOnEnum();
+  if (execute_on.size() != 1 || !execute_on.contains(EXEC_INITIAL))
+    paramError("execute_on",
+               "StatefulMaterialPropertyImporter must execute only on INITIAL so remapped data "
+               "is staged before the second stateful material property initialization pass.");
 }
 
 void
@@ -153,17 +171,22 @@ StatefulMaterialPropertyImporter::readSingleFile(const std::string & filename, b
       dataLoad(in, fp.name, nullptr);
       dataLoad(in, fp.type_str, nullptr);
       dataLoad(in, fp.max_state, nullptr);
-      if (fp.name != _file_props[i].name || fp.type_str != _file_props[i].type_str)
+      if (fp.name != _file_props[i].name || fp.type_str != _file_props[i].type_str ||
+          fp.max_state != _file_props[i].max_state)
         mooseError("Property registry mismatch between rank files at index ",
                    i,
                    ": expected '",
                    _file_props[i].name,
                    "' (",
-                   _file_props[i].type_str,
+                   prettyTypeName(_file_props[i].type_str),
+                   ", max state ",
+                   _file_props[i].max_state,
                    "), got '",
                    fp.name,
                    "' (",
-                   fp.type_str,
+                   prettyTypeName(fp.type_str),
+                   ", max state ",
+                   fp.max_state,
                    ") in '",
                    filename,
                    "'.");
@@ -203,6 +226,10 @@ StatefulMaterialPropertyImporter::readSingleFile(const std::string & filename, b
           {
             rec.blobs[sid][state].resize(blob_size);
             in.read(rec.blobs[sid][state].data(), blob_size);
+            if (!in.good())
+              mooseError("Failed while reading property data from .smatprop file '",
+                         filename,
+                         "'.");
           }
         }
       }
@@ -268,10 +295,18 @@ StatefulMaterialPropertyImporter::buildPropertyMapping()
       mooseError("Type mismatch for stateful property '",
                  file_prop.name,
                  "': file has '",
-                 file_prop.type_str,
+                 prettyTypeName(file_prop.type_str),
                  "', current sim has '",
-                 record.type,
+                 prettyTypeName(record.type),
                  "'.");
+    if (record.state != file_prop.max_state)
+      mooseError("State count mismatch for stateful property '",
+                 file_prop.name,
+                 "': file has max state ",
+                 file_prop.max_state,
+                 ", current sim has max state ",
+                 record.state,
+                 ".");
     _file_to_current_sid[file_sid] = record.stateful_id;
   }
 
@@ -334,7 +369,7 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
         continue;
 
       const auto current_sid = *_file_to_current_sid[file_sid];
-      const auto max_state = std::min(_file_props[file_sid].max_state, storage.maxState());
+      const auto max_state = _file_props[file_sid].max_state;
 
       for (unsigned int state = 0; state <= max_state; ++state)
       {
@@ -362,11 +397,23 @@ StatefulMaterialPropertyImporter::populateRestartableMap()
 
           const auto & nearest = stored_records[return_index[0]];
 
-          if (file_sid < nearest.blobs.size() && state < nearest.blobs[file_sid].size())
-          {
-            const auto & blob = nearest.blobs[file_sid][state];
-            assembled.write(blob.data(), blob.size());
-          }
+          if (file_sid >= nearest.blobs.size() || state >= nearest.blobs[file_sid].size() ||
+              nearest.blobs[file_sid][state].empty())
+            mooseError("Missing exported data for stateful property '",
+                       _file_props[file_sid].name,
+                       "' state ",
+                       state,
+                       " in source subdomain '",
+                       sub_name,
+                       "' while remapping element ",
+                       elem->id(),
+                       " qp ",
+                       qp,
+                       ". Ensure the exported and target simulations declare matching stateful "
+                       "properties on matched subdomains.");
+
+          const auto & blob = nearest.blobs[file_sid][state];
+          assembled.write(blob.data(), blob.size());
         }
 
         storage.addToRestartableMap(key, elem, side, current_sid, state, std::move(assembled));
