@@ -281,24 +281,40 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
   std::vector<Real> grad_values;
   const bool use_legacy_update = opts.optimizer_type == OptimizerType::LegacyAdam;
 
-  // Preserve the existing deterministic shuffle sequence, but use tensor indexing for the batch.
-  std::vector<unsigned int> v_sequence(training_params.sizes()[0]);
-  std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
+  const bool use_full_batch = _batch_size == static_cast<unsigned int>(training_params.size(0));
+  // Preserve the existing deterministic shuffle sequence for mini-batches, but avoid rebuilding
+  // shuffled full-batch tensors when the batch already contains every training sample.
+  std::vector<unsigned int> v_sequence;
+  if (!use_full_batch)
+  {
+    v_sequence.resize(training_params.size(0));
+    std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
+  }
   if (opts.show_every_nth_iteration)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING "
                << (use_legacy_update ? "legacy-compatible Adam" : "Adam") << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
   {
-    MooseRandom generator;
-    generator.seed(0, 1980);
-    generator.saveState();
-    MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
+    torch::Tensor inputs;
+    torch::Tensor outputs;
+    if (use_full_batch)
+    {
+      inputs = training_params;
+      outputs = training_data;
+    }
+    else
+    {
+      MooseRandom generator;
+      generator.seed(0, 1980);
+      generator.saveState();
+      MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
 
-    std::vector<int64_t> batch_indices_vec(v_sequence.begin(), v_sequence.begin() + _batch_size);
-    auto batch_indices = torch::tensor(
-        batch_indices_vec, torch::TensorOptions().dtype(torch::kLong).device(options.device()));
-    auto inputs = torch::index_select(training_params, 0, batch_indices);
-    auto outputs = torch::index_select(training_data, 0, batch_indices);
+      std::vector<int64_t> batch_indices_vec(v_sequence.begin(), v_sequence.begin() + _batch_size);
+      auto batch_indices = torch::tensor(
+          batch_indices_vec, torch::TensorOptions().dtype(torch::kLong).device(options.device()));
+      inputs = torch::index_select(training_params, 0, batch_indices);
+      outputs = torch::index_select(training_data, 0, batch_indices);
+    }
 
     store_loss = getLoss(inputs, outputs);
     if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
