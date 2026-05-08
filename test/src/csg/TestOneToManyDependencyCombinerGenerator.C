@@ -45,7 +45,7 @@ TestOneToManyDependencyCombinerGenerator::generateCSG()
 
   // Combine all bases from inputs into this base
   for (const auto & csg_base : _build_csg_bases)
-    csg_obj->joinOtherBase(std::move(*csg_base));
+    csg_obj->joinOtherBase(std::move(*csg_base), false);
 
   return csg_obj;
 }

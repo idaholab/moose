@@ -2,37 +2,39 @@
   [rmp]
     type = ReactorMeshParams
     dim = 2
-    geom = "Hex"
-    assembly_pitch = 3.7884
-    radial_boundary_id = 200
+    geom = "Square"
+    assembly_pitch = 2.84126
   []
 
   [pin1]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 1
-    pitch = 0.7
+    pitch = 1.42063
     num_sectors = 2
-    ring_radii = '0.1404'
-    duct_halfpitch = '0.3004'
+    ring_radii = '0.2'
+    duct_halfpitch = '0.68'
     mesh_intervals = '1 1 1'
     quad_center_elements = false
-    region_ids='1 2 3'
+    region_ids='1 2 5'
+  []
+
+  [pin2]
+    type = PinMeshGenerator
+    reactor_params = rmp
+    pin_type = 2
+    pitch = 1.42063
+    num_sectors = 2
+    mesh_intervals = '2'
+    region_ids='3'
   []
 
   [amg]
     type = AssemblyMeshGenerator
     assembly_type = 1
-    inputs = 'pin1'
+    inputs = 'pin1 pin2'
     pattern = '0 0;
-              0 0 0;
-               0 0'
-    background_intervals = 1
-    background_region_id = 4
-    duct_halfpitch = 1.7703
-    duct_intervals = 1
-    duct_region_ids = 5
-    extrude = false
+               0 1'
   []
 []
 

@@ -613,7 +613,7 @@ CSGBase::addTransformation(const CSGObjectVariant & csg_object,
         {
           // iterate on the surfaces of the region and apply the transformation to those surfaces
           const CSGRegion & region = obj.get();
-          const auto & surfaces = region.getSurfaces();
+          const auto surfaces = region.getSurfaces();
           for (const CSGSurface & surface : surfaces)
           {
             if (!checkSurfaceInBase(surface))
@@ -660,18 +660,28 @@ CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object,
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identical_surfaces)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList());
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
+                       const bool ignore_identical_surfaces,
+                       const std::string & new_root_name_join)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_join);
@@ -679,24 +689,45 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_nam
 
 void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
+                       const bool ignore_identical_surfaces,
                        const std::string & new_root_name_base,
                        const std::string & new_root_name_join)
 {
-  joinSurfaceList(base->getSurfaceList());
+  // If we are ignoring identical incoming surfaces, we need to update the cell regions to
+  // point to the references of the pre-existing surfaces
+  if (ignore_identical_surfaces)
+    updateIncomingCellRegions(base->getSurfaceList(), base->getCellList());
+  joinSurfaceList(base->getSurfaceList(), ignore_identical_surfaces);
   joinCellList(base->getCellList());
   joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
 }
 
 void
-CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
+CSGBase::updateIncomingCellRegions(CSGSurfaceList & surf_list, CSGCellList & cell_list)
 {
-  // TODO: check if surface is a duplicate (by definition) and skip
-  // adding if duplicate; must update references to the surface in cell
-  // region definitions.
+  // Iterate through all incoming surfaces and track which ones have names already
+  // defined within this CSGSurfaceList object
+  std::map<std::string, std::reference_wrapper<const CSGSurface>> identical_surface_refs;
+  auto & surf_list_map = surf_list.getSurfaceListMap();
+  for (const auto & s : surf_list_map)
+    if (hasSurface(s.first))
+      identical_surface_refs.insert({s.first, getSurfaceByName(s.first)});
+
+  if (!identical_surface_refs.empty())
+  {
+    auto & cell_list_map = cell_list.getCellListMap();
+    for (auto & c : cell_list_map)
+      c.second->updateCellRegionSurfaces(identical_surface_refs);
+  }
+}
+
+void
+CSGBase::joinSurfaceList(CSGSurfaceList & surf_list, const bool ignore_identical_surfaces)
+{
   auto & surf_list_map = surf_list.getSurfaceListMap();
   for (auto & s : surf_list_map)
-    _surface_list.addSurface(std::move(s.second));
+    _surface_list.addSurface(std::move(s.second), ignore_identical_surfaces);
 }
 
 void
@@ -786,7 +817,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
 void
 CSGBase::checkRegionSurfaces(const CSGRegion & region) const
 {
-  auto & surfs = region.getSurfaces();
+  const auto surfs = region.getSurfaces();
   for (const CSGSurface & s : surfs)
   {
     if (!checkSurfaceInBase(s))
@@ -839,27 +870,38 @@ void
 CSGBase::checkUniverseLinking() const
 {
   std::vector<std::string> linked_universe_names;
+  std::vector<std::string> linked_cell_names;
 
   // Recursively figure out which universe names are linked to root universe
-  getLinkedUniverses(getRootUniverse(), linked_universe_names);
+  getLinkedUniverses(getRootUniverse(), linked_universe_names, linked_cell_names);
 
   // Iterate through all universes in universe list and check that they exist in universes linked
-  // to root universe list
+  // to root universe
   for (const CSGUniverse & univ : getAllUniverses())
     if (std::find(linked_universe_names.begin(), linked_universe_names.end(), univ.getName()) ==
         linked_universe_names.end())
       mooseWarning("Universe with name ", univ.getName(), " is not linked to root universe.");
+
+  // Iterate through all cells in cell list and check that they exist in cells linked
+  // to root universe
+  for (const CSGCell & cell : getAllCells())
+    if (std::find(linked_cell_names.begin(), linked_cell_names.end(), cell.getName()) ==
+        linked_cell_names.end())
+      mooseWarning("Cell with name ", cell.getName(), " is not linked to root universe.");
 }
 
 void
 CSGBase::getLinkedUniverses(const CSGUniverse & univ,
-                            std::vector<std::string> & linked_universe_names) const
+                            std::vector<std::string> & linked_universe_names,
+                            std::vector<std::string> & linked_cell_names) const
 {
   linked_universe_names.push_back(univ.getName());
   const auto & univ_cells = univ.getAllCells();
   for (const CSGCell & cell : univ_cells)
+  {
+    linked_cell_names.push_back(cell.getName());
     if (cell.getFillType() == "UNIVERSE")
-      getLinkedUniverses(cell.getFillUniverse(), linked_universe_names);
+      getLinkedUniverses(cell.getFillUniverse(), linked_universe_names, linked_cell_names);
     else if (cell.getFillType() == "LATTICE")
     {
       const auto & lattice = cell.getFillLattice();
@@ -867,15 +909,16 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
         for (const auto & univ_ref : univ_list)
         {
           const CSGUniverse & lattice_univ = univ_ref.get();
-          getLinkedUniverses(lattice_univ, linked_universe_names);
+          getLinkedUniverses(lattice_univ, linked_universe_names, linked_cell_names);
         }
 
       if (lattice.getOuterType() == "UNIVERSE")
       {
         const CSGUniverse & outer_univ = lattice.getOuterUniverse();
-        getLinkedUniverses(outer_univ, linked_universe_names);
+        getLinkedUniverses(outer_univ, linked_universe_names, linked_cell_names);
       }
     }
+  }
 }
 
 nlohmann::json

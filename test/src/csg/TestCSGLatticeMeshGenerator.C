@@ -70,7 +70,7 @@ TestCSGLatticeMeshGenerator::generateCSG()
   for (const auto i : index_range(_input_names))
   {
     std::string join_name = _input_names[i] + "_univ";
-    csg_obj->joinOtherBase(std::move(*_input_csgs[i]), join_name);
+    csg_obj->joinOtherBase(std::move(*_input_csgs[i]), false, join_name);
     univ_id_names[i] = join_name;
   }
 
