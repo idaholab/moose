@@ -1,17 +1,40 @@
-rho_l = 10.0
-rho_g = 1.0
+# Martin-Moyce rectangular dam-break case matched to digitized data that exist
+# for both surge-front position and top-of-column height:
+#   n^2 = 1, a = 2.25 in.
+#
+# In Martin-Moyce notation:
+#   full base width = 2 a = 4.5 in
+#   initial height  = n^2 a = 2.25 in
+
+rho_l = 998.19
+rho_g = 1.185
 mu_l = 1.0e-3
-mu_g = 1.0e-3
+mu_g = 1.48e-5
 g = 9.81
+
+a_length = 0.05715
+n_squared_value = 1.0
+n_value = 1.0
+
+dam_x = ${fparse 2.0 * a_length}
+dam_y = ${fparse n_squared_value * a_length}
+
+# Keep roughly the same absolute resolution as the baseline 200x50 benchmark.
+domain_dims_x = ${fparse 6.0 * a_length}
+domain_dims_y = ${fparse 1.25 * dam_y}
+cell_dx = ${fparse domain_dims_x / 240.0}
+cell_dy = ${fparse domain_dims_y / 50.0}
+
+c_alpha = 0.01
 
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 2
-    dx = '1.6'
-    dy = '0.8'
-    ix = '32'
-    iy = '16'
+    dx = '${domain_dims_x}'
+    dy = '${domain_dims_y}'
+    ix = '240'
+    iy = '50'
   []
 []
 
@@ -32,7 +55,6 @@ g = 9.81
         dynamic_viscosity = 'mu_mixture'
         gravity = '0 -${g} 0'
         volume_fraction_functor = 'alpha'
-        reference_pressure_point = '0 0.8 0'
         surface_tension_coefficient = '0'
         create_curvature_producer = false
 
@@ -66,11 +88,12 @@ g = 9.81
         gas_dynamic_viscosity_name = 'mu_g'
 
         advected_interp_method = 'upwind'
-        compression_factor = '2'
+        compression_factor = '${c_alpha}'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 
         use_mules_correction = true
-        n_alpha_corrections = 3
+        alpha_apply_prev_corr = false
+        n_alpha_corrections = 1
         n_limiter_iterations = 6
       []
     []
@@ -88,11 +111,11 @@ g = 9.81
 [Functions]
   [alpha_init]
     type = ParsedFunction
-    expression = 'if(x < 0.4 & y < 0.6, 1, 0)'
+    expression = 'if(x < ${dam_x} & y < ${dam_y}, 1, 0)'
   []
   [pressure_init]
     type = ParsedFunction
-    expression = 'if(x < 0.4 & y < 0.6, -(${rho_l}-${rho_g})*${g}*0.2, 0)'
+    expression = 'if(x < ${dam_x} & y < ${dam_y}, -(${rho_l}-${rho_g})*${g}*(${domain_dims_y}-${dam_y}), 0)'
   []
 []
 
@@ -133,70 +156,79 @@ g = 9.81
   volume_fraction_petsc_options_value = 'lu'
 
   pin_pressure = true
-  pressure_pin_point = '0.0 0.8 0.0'
+  pressure_pin_point = '${fparse 0.5 * domain_dims_x} ${domain_dims_y} 0.0'
 
   startup_pressure_initialization = 'projection-only'
   startup_flux_corrections = 2
 
-  volume_fraction_subcycles = 3
-  dt = 0.0002
-  num_steps = 100
+  volume_fraction_subcycles = 2
+  dt = 1.0e-4
+  end_time = 0.5
 []
 
 [Postprocessors]
-  [alpha_average]
-    type = ElementAverageValue
-    variable = 'alpha'
-  []
   [alpha_min]
     type = ElementExtremeValue
     variable = 'alpha'
     value_type = min
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [alpha_max]
     type = ElementExtremeValue
     variable = 'alpha'
     value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vel_x_min]
-    type = ElementExtremeValue
-    variable = 'vel_x'
-    value_type = min
+  [paper_front_position_x_raw]
+    type = SubcellInterfacialPosition
+    volume_fraction = alpha
+    direction = x
+    extremum_type = max
+    threshold = 0.5
+    secondary_min = 0
+    secondary_max = '${fparse 2.5 * cell_dy}'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vel_x_max]
-    type = ElementExtremeValue
-    variable = 'vel_x'
-    value_type = max
+  [paper_top_height_y_raw]
+    type = SubcellInterfacialPosition
+    volume_fraction = alpha
+    direction = y
+    extremum_type = max
+    threshold = 0.5
+    secondary_min = 0
+    secondary_max = '${fparse 2.5 * cell_dx}'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vel_y_min]
-    type = ElementExtremeValue
-    variable = 'vel_y'
-    value_type = min
+  [paper_front_Z]
+    type = ParsedPostprocessor
+    expression = '(x - ${a_length}) / ${a_length}'
+    pp_names = 'paper_front_position_x_raw'
+    pp_symbols = 'x'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vel_y_max]
-    type = ElementExtremeValue
-    variable = 'vel_y'
-    value_type = max
+  [paper_top_H]
+    type = ParsedPostprocessor
+    expression = 'h / (${a_length} * ${n_squared_value})'
+    pp_names = 'paper_top_height_y_raw'
+    pp_symbols = 'h'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [alpha_front_near]
-    type = PointValue
+  [paper_T]
+    type = ParsedPostprocessor
+    expression = '${n_value} * t * sqrt(${g} / ${a_length})'
+    use_t = true
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [paper_tau]
+    type = ParsedPostprocessor
+    expression = 't * sqrt(${g} / ${a_length})'
+    use_t = true
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [total_alpha]
+    type = ElementIntegralVariablePostprocessor
     variable = 'alpha'
-    point = '0.45 0.05 0'
-  []
-  [alpha_front_mid]
-    type = PointValue
-    variable = 'alpha'
-    point = '0.75 0.05 0'
-  []
-  [alpha_front_far]
-    type = PointValue
-    variable = 'alpha'
-    point = '1.05 0.05 0'
-  []
-  [alpha_column_top]
-    type = PointValue
-    variable = 'alpha'
-    point = '0.20 0.55 0'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -204,4 +236,5 @@ g = 9.81
   execute_on = 'TIMESTEP_END'
   csv = true
   exodus = false
+  file_base = '2d-dam-break-benchmark-paper-n1-a2p25'
 []

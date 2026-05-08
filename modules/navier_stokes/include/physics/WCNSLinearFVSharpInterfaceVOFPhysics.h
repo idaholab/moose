@@ -40,6 +40,8 @@ private:
   const VariableName _alpha_name;
   const MooseFunctorName _gas_fraction_name;
   const std::vector<MooseFunctorName> _alpha_inlet_functors;
+  const MooseEnum _alpha_outlet_type;
+  const MooseFunctorName _alpha_outlet_backflow_functor;
   const bool _alpha_two_term_bc_expansion;
   const MooseFunctorName _compression_factor_name;
   const MooseFunctorName _interface_normal_functor_name;

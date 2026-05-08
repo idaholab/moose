@@ -72,6 +72,7 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         volume_fraction_variable = 'alpha'
         initial_volume_fraction = 'alpha_init'
         system_names = 'alpha_system'
+        volume_fraction_outlet_type = 'inlet-outlet'
 
         liquid_density_name = 'rho_l'
         gas_density_name = 'rho_g'

@@ -48,6 +48,18 @@ WCNSLinearFVSharpInterfaceVOFPhysics::validParams()
       {},
       "Fixed-value inlet functors for the transported volume fraction, ordered like the coupled "
       "flow inlet boundaries.");
+  MooseEnum volume_fraction_outlet_type("outflow inlet-outlet", "outflow");
+  params.addParam<MooseEnum>(
+      "volume_fraction_outlet_type",
+      volume_fraction_outlet_type,
+      "Outlet treatment for the transported volume fraction. 'inlet-outlet' matches the "
+      "interFoam atmosphere treatment more closely by imposing a backflow value on inflow and "
+      "zero-gradient / extrapolation on outflow.");
+  params.addParam<MooseFunctorName>(
+      "volume_fraction_outlet_backflow_functor",
+      "0",
+      "Backflow value imposed by the inlet-outlet volume-fraction BC, typically 0 for air on "
+      "an atmosphere patch.");
   params.addParam<bool>(
       "volume_fraction_two_term_bc_expansion",
       true,
@@ -157,6 +169,9 @@ WCNSLinearFVSharpInterfaceVOFPhysics::WCNSLinearFVSharpInterfaceVOFPhysics(
     _alpha_name(getParam<VariableName>("volume_fraction_variable")),
     _gas_fraction_name(getParam<MooseFunctorName>("complementary_volume_fraction_name")),
     _alpha_inlet_functors(getParam<std::vector<MooseFunctorName>>("volume_fraction_inlet_functors")),
+    _alpha_outlet_type(getParam<MooseEnum>("volume_fraction_outlet_type")),
+    _alpha_outlet_backflow_functor(
+        getParam<MooseFunctorName>("volume_fraction_outlet_backflow_functor")),
     _alpha_two_term_bc_expansion(getParam<bool>("volume_fraction_two_term_bc_expansion")),
     _compression_factor_name(getParam<MooseFunctorName>("compression_factor")),
     _interface_normal_functor_name(getParam<MooseFunctorName>("interface_normal_functor")),
@@ -390,11 +405,23 @@ WCNSLinearFVSharpInterfaceVOFPhysics::addAlphaOutletBC()
 
   for (const auto & outlet_bdy : outlet_boundaries)
   {
-    auto params = getFactory().getValidParams("LinearFVAdvectionDiffusionOutflowBC");
+    const std::string bc_type = _alpha_outlet_type == "inlet-outlet"
+                                    ? "LinearFVInletOutletScalarBC"
+                                    : "LinearFVAdvectionDiffusionOutflowBC";
+    auto params = getFactory().getValidParams(bc_type);
     params.set<LinearVariableName>("variable") = _alpha_name;
     params.set<std::vector<BoundaryName>>("boundary") = {outlet_bdy};
     params.set<bool>("use_two_term_expansion") = _alpha_two_term_bc_expansion;
-    getProblem().addLinearFVBC(
-        "LinearFVAdvectionDiffusionOutflowBC", prefix() + "alpha_outlet_" + outlet_bdy, params);
+    if (_alpha_outlet_type == "inlet-outlet")
+    {
+      const auto & velocity_names = _flow_equations_physics->getVelocityNames();
+      params.set<SolverVariableName>("u") = velocity_names[0];
+      if (dimension() >= 2)
+        params.set<SolverVariableName>("v") = velocity_names[1];
+      if (dimension() >= 3)
+        params.set<SolverVariableName>("w") = velocity_names[2];
+      params.set<MooseFunctorName>("backflow_value") = _alpha_outlet_backflow_functor;
+    }
+    getProblem().addLinearFVBC(bc_type, prefix() + "alpha_outlet_" + outlet_bdy, params);
   }
 }

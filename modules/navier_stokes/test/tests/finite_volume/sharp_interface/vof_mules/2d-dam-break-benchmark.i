@@ -18,8 +18,6 @@ dam_x = ${initial_length}
 dam_y = ${initial_length}
 
 c_alpha = 0.01
-cell_dx = ${fparse domain_dims_x / 200.0}
-cell_dy = ${fparse domain_dims_y / 50.0}
 
 [Mesh]
   [mesh]
@@ -75,6 +73,7 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         volume_fraction_variable = 'alpha'
         initial_volume_fraction = 'alpha_init'
         system_names = 'alpha_system'
+        volume_fraction_outlet_type = 'inlet-outlet'
 
         liquid_density_name = 'rho_l'
         gas_density_name = 'rho_g'
@@ -190,33 +189,43 @@ cell_dy = ${fparse domain_dims_y / 50.0}
 
 [Postprocessors]
   [compute_front_height]
-    type = ElementExtremeValue
-    variable = 'water_heights'
+    type = SubcellInterfacialTipPosition
+    volume_fraction = alpha
+    tip_direction = x
+    reported_component = y
+    extremum_type = max
+    reported_extremum_type = max
+    tip_band_width = '${fparse 2.0 * domain_dims_x / 200.0}'
+    threshold = 0.5
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [compute_front_length]
-    type = ElementExtremeValue
-    variable = 'water_lengths'
+    type = SubcellInterfacialTipPosition
+    volume_fraction = alpha
+    tip_direction = x
+    reported_component = x
+    extremum_type = max
+    threshold = 0.5
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [compute_front_length_subcell]
-    type = SubcellInterfacialPosition
+    type = SubcellInterfacialTipPosition
     volume_fraction = alpha
-    direction = x
+    tip_direction = x
+    reported_component = x
     extremum_type = max
     threshold = 0.5
-    secondary_min = 0
-    secondary_max = '${fparse 2.5 * cell_dy}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [compute_front_height_subcell]
-    type = SubcellInterfacialPosition
+    type = SubcellInterfacialTipPosition
     volume_fraction = alpha
-    direction = y
+    tip_direction = x
+    reported_component = y
     extremum_type = max
+    reported_extremum_type = max
+    tip_band_width = '${fparse 2.0 * domain_dims_x / 200.0}'
     threshold = 0.5
-    secondary_min = 0
-    secondary_max = '${fparse 2.5 * cell_dx}'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [total_alpha]
