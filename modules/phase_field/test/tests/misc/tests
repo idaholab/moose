@@ -56,4 +56,15 @@
                   'the value of a function evaluated over a set of up to four coupled variables'
     design = 'CoupledValueFunctionIC.md'
   []
+
+  [interface_normal_curvatures]
+    type = 'Exodiff'
+    input = 'interface_normal_curvatures.i'
+    exodiff = 'interface_normal_curvatures_out.e'
+    issues = '#32436'
+    requirement = 'An Material shall be implemented that can calculate the normal curvatures of'
+                  'an interface defined by an order parameter'
+    design = 'InterfaceNormalCurvatures.md'
+  []
+
 []
