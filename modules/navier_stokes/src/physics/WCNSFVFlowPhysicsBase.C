@@ -505,15 +505,21 @@ WCNSFVFlowPhysicsBase::getCoupledTurbulencePhysics() const
   // User passed it, just use that
   if (isParamValid("coupled_turbulence_physics"))
     return getCoupledPhysics<WCNSFVTurbulencePhysicsBase>(
-        getParam<PhysicsName>("coupled_flow_physics"));
+        getParam<PhysicsName>("coupled_turbulence_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {
     const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysicsBase>(true);
     for (const auto physics : all_turbulence_physics)
+    {
       if (checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
         return physics;
+      else if (_verbose)
+        mooseInfoRepeated("Detected Turbulence Physics '" + physics->name() +
+                          "' with an incompatible block restriction. It will thus not be coupled "
+                          "to this flow equations physics");
+    }
   }
   // Did not find one
   return nullptr;

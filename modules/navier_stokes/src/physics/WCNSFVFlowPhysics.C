@@ -251,13 +251,16 @@ WCNSFVFlowPhysics::addSolverVariables()
     lm_params.set<MooseEnum>("family") = "scalar";
     lm_params.set<MooseEnum>("order") = "first";
 
-    if ((type == "point-value" || type == "average") && !_problem->hasScalarVariable("lambda"))
+    if ((type == "point-value" || type == "average"))
     {
-      lm_params.set<SolverSystemName>("solver_sys") = getSolverSystem("lambda");
-      getProblem().addVariable("MooseVariableScalar", "lambda", lm_params);
+      if (!_problem->hasScalarVariable("lambda"))
+      {
+        lm_params.set<SolverSystemName>("solver_sys") = getSolverSystem("lambda");
+        getProblem().addVariable("MooseVariableScalar", "lambda", lm_params);
+      }
+      else
+        reportPotentiallyMissedParameters({"system_names"}, "MooseVariableScalar");
     }
-    else
-      reportPotentiallyMissedParameters({"system_names"}, "MooseVariableScalar");
   }
 }
 

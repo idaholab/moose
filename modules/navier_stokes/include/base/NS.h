@@ -11,6 +11,7 @@
 
 #include <string>
 #include "MathUtils.h"
+#include "MooseUtils.h"
 #include "MooseTypes.h"
 #include "libmesh/vector_value.h"
 #include "HeatConductionNames.h"
@@ -96,7 +97,10 @@ grad(const std::string & var)
 inline std::string
 time_deriv(const std::string & var)
 {
-  return MathUtils::timeDerivName(var);
+  if (MooseUtils::isFloat(var))
+    return "0";
+  else
+    return MathUtils::timeDerivName(var);
 }
 
 // Navier-Stokes Variables
