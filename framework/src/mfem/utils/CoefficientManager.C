@@ -130,6 +130,7 @@ CoefficientManager::getScalarCoefficientPtr(const std::string & name)
     {
       auto coef = std::shared_ptr<mfem::Coefficient>(const_cast<mfem::Coefficient *>(builtin),
                                                      [](mfem::Coefficient *) {});
+      this->_scalar_coeffs.trackCoefficient(coef);
       this->_scalar_coeffs.addCoefficient(name, coef);
       return coef;
     }
