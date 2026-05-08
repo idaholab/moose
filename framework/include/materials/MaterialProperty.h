@@ -292,7 +292,7 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::storeQp(std::ostream & stream, unsigned int qp) const
 {
-  auto val = MetaPhysicL::raw_value(_value[qp]);
+  auto val = _value[qp];
   storeHelper(stream, val, nullptr);
 }
 
