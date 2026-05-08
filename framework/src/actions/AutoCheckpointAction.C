@@ -60,6 +60,13 @@ AutoCheckpointAction::act()
         isParamSetByUser("wall_time_checkpoint")
             ? getParam<bool>("wall_time_checkpoint")
             : (isParamSetByUser("checkpoint") ? getParam<bool>("checkpoint") : true);
+    // Even though they didn't instruct us, we decided that we know adding this object
+    // behind-the-scenes is in the user's best interest, so we're going to treat this object's
+    // parameters as if they were set by the user and not allow generic settings in the common
+    // output section to override them. If the user wishes to control checkpoint execution behavior,
+    // they can create their own object. This set call encodes the default execute_on setting as
+    // user-set
+    cp_params.set<ExecFlagEnum>("execute_on");
 
     // We need to keep track of what type of checkpoint we are creating. system created means the
     // default value of 1 for time_step_interval is ignored.
