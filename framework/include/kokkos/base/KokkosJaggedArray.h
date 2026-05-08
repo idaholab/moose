@@ -411,7 +411,7 @@ JaggedArray<T, inner, outer, index_type, layout>::finalize()
 
   _dims.copyToDevice();
   _offsets.copyToDevice();
-  _data.create(_offsets.last() + stride);
+  _data.create(_offsets.last() + stride + 1);
 
   _finalized = true;
 }
