@@ -16,8 +16,8 @@ after remeshing, mesh refinement, or mesh transfer between application codes.
 For each quadrature point in the current mesh the importer finds the nearest exported
 quadrature point *within the same subdomain* using a [KDTree](https://en.wikipedia.org/wiki/K-d_tree)
 (one tree per subdomain, built from the physical coordinates stored in the export files).
-The old and older state values of that nearest point are then written directly into the
-material property storage of the current element.
+The state values of that nearest point are then staged for the current element and loaded
+through MOOSE's stateful material restart path.
 
 Subdomains are matched by name.  If the current mesh contains a subdomain whose name does
 not appear in any of the export files, the elements in that subdomain are silently skipped
@@ -31,11 +31,15 @@ properties in the current simulation that are absent from the files — is also 
 those properties receive their normal custom initialization from
 `initStatefulProperties()`.
 
-### Type Safety
+### Type and State Safety
 
-The property type strings stored in the file headers (demangled C++ type names) are compared
-against those registered in the current simulation.  A `mooseError` is raised if the types
-do not match, preventing silent data corruption.
+The property type identifiers stored in the file headers are compared against those registered
+in the current simulation.  A `mooseError` is raised if the types do not match, preventing
+silent data corruption. Diagnostics print demangled type names for readability.
+
+The exported and current simulations must also request the same maximum state index for each
+imported property. For example, a target simulation that requests `older` data cannot import a
+file that only contains `old` data for that property.
 
 ### Timing and Initialization Order
 

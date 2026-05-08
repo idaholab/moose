@@ -16,6 +16,7 @@
 #include "MaterialPropertyRegistry.h"
 #include "MaterialData.h"
 
+#include <sstream>
 #include <variant>
 
 // Forward declarations

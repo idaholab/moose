@@ -31,7 +31,8 @@ a previous run with a different rank count are automatically excluded.
 Each `.smatprop` file contains:
 
 1. **Header** — magic number, format version, total rank count, and a property registry
-   (property name, demangled C++ type string, maximum state index for each stateful property).
+   (property name, internal C++ type identifier, maximum state index for each stateful
+   property).
 2. **Data** — organized by subdomain name.  For every quadrature point within a subdomain:
    the physical coordinates followed by the serialized value for every stateful property at
    every state (current, old, older).

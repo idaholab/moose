@@ -14,6 +14,9 @@
 #include "Assembly.h"
 #include "DataIO.h"
 
+#include <fstream>
+#include <sstream>
+
 registerMooseObject("MooseApp", StatefulMaterialPropertyExporter);
 
 InputParameters
