@@ -56,15 +56,24 @@
   l_max_its = 1000
 []
 
+[Executioner]
+  type = MFEMSteady
+[]
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionSendApp
-    vtk_format = ASCII
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'send'
+    start_point = '0 0 0'
+    end_point = '1 1 0.1'
+    num_points = 101
   []
 []
 
-[Executioner]
-  type = MFEMSteady
+[Outputs]
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/DiffusionSendApp/send
+  []
 []
