@@ -26,12 +26,14 @@
       input = test.py
       test_case = TestLagrangeTri
       detail = 'simplex elements and'
+      min_slots = '2'
     []
     [quad]
       type = MMSTest
       input = test.py
       test_case = TestLagrangeQuad
       detail = 'tensor-product elements.'
+      min_slots = '2'
     []
   []
   [rt_mms]
