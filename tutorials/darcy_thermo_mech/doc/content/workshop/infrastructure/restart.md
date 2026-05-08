@@ -66,11 +66,11 @@ more variables.
 
 Advanced restart and recovery in MOOSE require checkpoint files
 
-Checkpoints are automatically enabled by default and are output every 1 hour of wall time (customizable interval), but can be disabled with:
+Checkpoints are automatically enabled by default and are output every 1 hour of wall time, but can be disabled with:
 
 ```moose
 [Outputs]
-  wall_time_checkpoint = false
+  checkpoint = false
 []
 ```
 
