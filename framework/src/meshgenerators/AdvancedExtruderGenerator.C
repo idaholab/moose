@@ -577,7 +577,7 @@ AdvancedExtruderGenerator::generate()
   {
     if (!extrusion_curve->is_prepared())
       extrusion_curve->prepare_for_use();
-    total_extrusion_distance_at_axis = MooseMeshUtils::meshVolumeCalculator(*extrusion_curve);
+    total_extrusion_distance_at_axis = MeshTools::volume(*extrusion_curve);
   }
   else
     total_extrusion_distance_at_axis = std::accumulate(_heights.begin(), _heights.end(), 0);

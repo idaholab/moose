@@ -17,6 +17,10 @@
 #include "FaceInfo.h"
 #include "MeshGenerator.h"
 
+// Utilities for MeshBase
+// Many of these utilities could live in libMesh, and in fact, before adding a new one here
+// you should also check mesh_tools.h in libMesh to see if it does not exist there already.
+
 namespace MooseMeshUtils
 {
 
@@ -128,13 +132,6 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                             const std::set<SubdomainName> & subdomain_name);
-
-/**
- * Calculates the volume of a MeshBase.
- * @param mesh input mesh whose volume needs to be calculated
- * @return the volume of the mesh
- */
-Real meshVolumeCalculator(const MeshBase & mesh);
 
 /**
  * Calculates the centroid of a MeshBase.

@@ -273,17 +273,6 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
   mesh.unset_is_prepared();
 }
 
-Real
-meshVolumeCalculator(const MeshBase & mesh)
-{
-  mooseAssert(mesh.is_prepared(), "Ranges need to be known");
-  Real vol = 0.0;
-  for (const auto & elem : mesh.active_local_element_ptr_range())
-    vol += elem->volume();
-  mesh.comm().sum(vol);
-  return vol;
-}
-
 Point
 meshCentroidCalculator(const MeshBase & mesh)
 {
