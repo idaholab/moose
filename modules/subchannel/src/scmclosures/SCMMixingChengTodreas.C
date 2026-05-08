@@ -43,12 +43,19 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
 
   const Real pitch = _subchannel_mesh.getPitch();
   const Real pin_diameter = _subchannel_mesh.getPinDiameter();
+  const Real pitch_to_diameter = pitch / pin_diameter;
 
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
 
   if (wire_lead_length == 0 && wire_diameter == 0)
     mooseError("This corelation applies only for wire-wrapped assemblies");
+
+  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the P/D range
+  // 1.067 <= P/D <= 1.35.
+  if (pitch_to_diameter < 1.067 || pitch_to_diameter > 1.35)
+    flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Cheng-Todreas "
+                        "wire-wrapped mixing correlation data range.");
 
   const auto chans = _subchannel_mesh.getGapChannels(i_gap);
   const unsigned int i_ch = chans.first;
@@ -92,8 +99,12 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
   const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1.0));
 
-  // Calculation of Turbulent Crossflow for wire-wrapped triangular assemblies. Cheng &
-  // Todreas (1986).
+  // Calculation of turbulent interchange flow parameters for wire-wrapped triangular assemblies
+  // from Cheng and Todreas (1986). The interior-subchannel branch below provides the base
+  // turbulent mixing beta used by the global turbulent crossflow relation
+  // w'_ij = beta * S_ij * G_bar. The edge/corner branch provides only the sweep-flow beta used
+  // by the triangular-assembly enthalpy sweep-flow term when sweep_flow is true; it is not added
+  // to the base beta for the global turbulent crossflow solve.
   // INNER SUBCHANNELS
   if ((subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER) &&
       (wire_lead_length != 0) && (wire_diameter != 0))

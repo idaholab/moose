@@ -142,6 +142,12 @@ SCMMixingKimAndChung::computeLatticeMixingParameter(const unsigned int i_gap,
   const Real Pr = avg_mu * avg_cp / avg_k;                  // Prandtl number
   const Real Pr_t = Pr * (Re / gamma) * std::sqrt(f / 8.0); // Turbulent Prandtl number
 
+  // This form is intended for liquid-metal applications; warn when the local average Prandtl
+  // number is outside the usual low-Pr liquid-metal regime.
+  if (Pr >= 0.1)
+    flagSolutionWarning("Prandtl number (Pr) outside the low-Prandtl-number liquid-metal range "
+                        "expected by the Kim-Chung turbulent mixing closure.");
+
   const Real L_x = sf * delta;  // axial length scale (gap is the lateral length scale)
   const Real lamda = gap / L_x; // aspect ratio
   const Real a_x = 1.0 - 2.0 * lamda * lamda / libMesh::pi; // velocity coefficient
@@ -158,7 +164,14 @@ SCMMixingKimAndChung::computeLatticeMixingParameter(const unsigned int i_gap,
   const Real rod_mixing = (1.0 / Pr_t) * lamda;
   const Real axial_mixing = a_x * z_FP_over_D * Str;
 
-  // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
+  // Mixing Stanton number following Kim and Chung (2001), Eq. 25, as used by
+  // Jeong et al. (2005), Eq. 19:
+  //
+  // St_g = 2/gamma^2 * sqrt(a/8) * (D_h/g)
+  //       * [lambda/Pr_t + a_x * (z_FP/D) * Str] * Re^(-b/2).
+  //
+  // The subchannel problem converts St_g to the turbulent interchange flow through
+  // w'_ij = beta * S_ij * G_bar.
   return freq_factor * (rod_mixing + axial_mixing) * std::pow(Re, -b / 2.0);
 }
 
