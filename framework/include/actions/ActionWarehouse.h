@@ -236,7 +236,7 @@ public:
    * This method executes only the actions in the warehouse that satisfy the task
    * passed in.
    */
-  void executeActionsWithAction(const std::string & name);
+  void executeActionsWithAction(const std::string & task_name);
 
   /**
    * This method sets a Boolean which is used to print information about action dependencies
