@@ -104,7 +104,9 @@ ConcentricCircleMeshGenerator::ConcentricCircleMeshGenerator(const InputParamete
 std::unique_ptr<MeshBase>
 ConcentricCircleMeshGenerator::generate()
 {
-  auto mesh = buildReplicatedMesh(2);
+  auto mesh = dynamic_pointer_cast<UnstructuredMesh>(buildMeshBaseObject(2));
+  if (!mesh) // This should never happen
+    mooseError("ConcentricCircleMeshGenerator is only implemented for unstructured meshes");
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Creating real mesh concentric circles
