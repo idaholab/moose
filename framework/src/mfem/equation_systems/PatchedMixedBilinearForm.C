@@ -27,20 +27,8 @@ ParMixedBilinearForm::Assemble(int skip_zeros)
     }
   }
 
-  // TODO: Replace this with new mfem::ParSubMesh::IsParSubMesh implementation
-  // that checks whether a mesh is a submesh of a given parent mesh.
-  // Requires MFEM dependency update; introduced in https://github.com/mfem/mfem/pull/5239.
-  auto check_submesh = [](const mfem::ParMesh * sub, const mfem::ParMesh * parent)
-  {
-    if (!mfem::ParSubMesh::IsParSubMesh(sub) ||
-        (mfem::ParSubMesh::IsParSubMesh(sub) && mfem::ParSubMesh::IsParSubMesh(parent)))
-      return false;
-    while ((sub = static_cast<const mfem::ParSubMesh *>(sub)->GetParent()) && sub != parent)
-      ;
-    return sub == parent;
-  };
-
-  if (check_submesh(trial_pfes->GetParMesh(), test_pfes->GetParMesh()))
+  if ((trial_pfes->GetParMesh() != test_pfes->GetParMesh()) &&
+      mfem::ParSubMesh::IsParSubMesh(trial_pfes->GetParMesh(), test_pfes->GetParMesh()))
     SubMeshTolerantAssemble(skip_zeros);
   else
     MixedBilinearForm::Assemble(skip_zeros);
