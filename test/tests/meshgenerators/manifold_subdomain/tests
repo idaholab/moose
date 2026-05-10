@@ -7,28 +7,33 @@
     [basic_inside]
       type = RunApp
       input = basic.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'lie inside a closed STL manifold;'
     []
     [outside]
       type = RunApp
       input = basic.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       cli_args = 'Mesh/apply/location=OUTSIDE expected="8 56"'
       detail = 'lie outside a closed STL manifold.'
     []
     [restricted]
       type = RunApp
       input = restricted.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'lie inside a closed STL manifold and already assigned a specified subdomain;'
     []
     [rotated_translated]
       type = RunApp
       input = basic.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       cli_args = 'Mesh/rotate/vector_value="0 0 45" expected="56 8"'
       detail = 'lie inside a closed STL manifold that has been translated and rotated;'
     []
     [scaled]
       type = RunApp
       input = basic.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       cli_args = 'Mesh/scale/vector_value="2 2 2" expected="64"'
       detail = 'lie inside a closed STL manifold that has been scaled.'
     []
@@ -41,6 +46,7 @@
       input = cone.i
       cli_args='Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10 expected=188'
       recover = false # See #32882
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'the manifold or'
     []
     [negative]
@@ -49,6 +55,7 @@
       cli_args = 'Mesh/background/nx=10 Mesh/background/ny=10 Mesh/background/nz=10
                   Mesh/tag/location=OUTSIDE expected="812"'
       recover = false # See #32882
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'the space around the manifold.'
     []
   []
@@ -58,6 +65,7 @@
     [invalid_input_dimension]
       type = RunException
       input = invalid_input_dimension.i
+      capabilities = 'dof_id_bytes=8' # see #32898
       expect_err = 'Only 3D meshes are supported.'
       detail = 'manifold subdomain assignment is requested on a non-3D mesh;'
     []
@@ -65,12 +73,14 @@
       type = RunException
       input = invalid_manifold_dimension.i
       expect_err = 'Only 2D meshes are supported.'
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'manifold subdomain assignment is requested using non-2D manifold mesh;'
     []
     [open_surface]
       type = RunException
       input = open_surface.i
       expect_err = 'At least one triangle without three neighbors was found.'
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'the surface is open or non-manifold;'
     []
     [non_tri]
@@ -79,6 +89,7 @@
       cli_args='Mesh/background/nx=5 Mesh/background/ny=5 Mesh/background/nz=5
                 Mesh/inactive="surface" Mesh/tag/manifold=surface_quads'
       expect_err = "At least one non-Tri3 element was found."
+      capabilities = 'dof_id_bytes=8' # see #32898
       detail = 'the manifold has non-TRI elements;'
     []
   []

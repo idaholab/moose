@@ -56,6 +56,10 @@ ManifoldSubdomainGenerator::ManifoldSubdomainGenerator(const InputParameters & p
     _has_restriction(isParamValid("restricted_subdomains")),
     _surface_tolerance(getParam<Real>("surface_tolerance"))
 {
+#if LIBMESH_DOF_ID_BYTES != 8
+  mooseDocumentedError(
+      "moose", 32898, "ManifoldSubdomainGenerator currently only works with 64-bit DoF IDs");
+#endif
 }
 
 std::unique_ptr<MeshBase>
