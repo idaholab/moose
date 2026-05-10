@@ -1,0 +1,222 @@
+on:
+  workflow_call:
+    inputs:
+      base_sha:
+        description: The base SHA to use for checkout
+        type: string
+        required: true
+
+      mpi_from:
+        description: The base container for the mpi build
+        type: string
+        required: true
+      mpi_to:
+        description: The uri for the built mpi container
+        type: string
+        required: true
+      mpi_build:
+        description: Whether or not to build the mpi container
+        type: boolean
+        required: true
+      mpi_build_args:
+        description: Extra args to pass to the MPI build
+        type: string
+        required: false
+        default: ""
+
+      petsc_to:
+        description: The uri for the built petsc container
+        type: string
+        required: true
+      petsc_build:
+        description: Whether or not to build the petsc container
+        type: boolean
+        required: true
+      petsc_build_args:
+        description: Extra args to pass to the petsc build
+        type: string
+        required: false
+        default: ""
+
+
+      libmesh_to:
+        description: The uri for the built libmesh container
+        type: string
+        required: true
+      libmesh_build:
+        description: Whether or not to build the libmesh container
+        type: boolean
+        required: true
+      libmesh_build_args:
+        description: Extra args to pass to the libmesh build
+        type: string
+        required: false
+        default: ""
+
+      moose_dev_to:
+        description: The uri for the built moose_dev container
+        type: string
+        required: true
+      moose_dev_build:
+        description: Whether or not to build the moose_dev container
+        type: boolean
+        required: true
+      moose_dev_build_args:
+        description: Extra args to pass to the moose_dev build
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  build_moose_mpi:
+    name: Build moose-mpi
+    runs-on: ubuntu-24.04
+    if: "!cancelled() && inputs.mpi_build"
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ inputs.base_sha }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/moose-mpi/Dockerfile
+          push: true
+          tags: ${{ inputs.mpi_to }}
+          cache-from: |
+            type=registry,ref=${{ inputs.mpi_to }}-cache
+            type=registry,ref=${{ inputs.mpi_to }}
+          cache-to: type=registry,ref=${{ inputs.mpi_to }}-cache,mode=max
+          build-args: |
+            BUILD_JOBS=4
+            BASE_IMAGE=${{ inputs.mpi_from }}
+            ${{ inputs.mpi_build_args }}
+
+  build_moose_petsc:
+    name: Build moose-petsc
+    runs-on: ubuntu-24.04
+    needs: [build_moose_mpi]
+    if: >-
+      !cancelled()
+      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_mpi.result)
+      && inputs.petsc_build
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ inputs.base_sha }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/moose-petsc/Dockerfile
+          push: true
+          tags: ${{ inputs.petsc_to }}
+          cache-from: |
+            type=registry,ref=${{ inputs.petsc_to }}-cache
+            type=registry,ref=${{ inputs.petsc_to }}
+          cache-to: type=registry,ref=${{ inputs.petsc_to }}-cache,mode=max
+          build-args: |
+            BUILD_JOBS=4
+            BASE_IMAGE=${{ inputs.mpi_to }}
+            ${{ inputs.petsc_build_args }}
+
+
+  build_moose_libmesh:
+    name: Build moose-libmesh
+    runs-on: ubuntu-24.04
+    needs: [build_moose_petsc]
+    if: >-
+      !cancelled()
+      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_petsc.result)
+      && inputs.libmesh_build
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ inputs.base_sha }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/moose-libmesh/Dockerfile
+          push: true
+          tags: ${{ inputs.libmesh_to }}
+          cache-from: |
+            type=registry,ref=${{ inputs.libmesh_to }}-cache
+            type=registry,ref=${{ inputs.libmesh_to }}
+          cache-to: type=registry,ref=${{ inputs.libmesh_to }}-cache,mode=max
+          build-args: |
+            BUILD_JOBS=4
+            BASE_IMAGE=${{ inputs.petsc_to }}
+            ${{ inputs.libmesh_build_args }}
+
+  build_moose_moose_dev:
+    name: Build moose-dev
+    runs-on: ubuntu-24.04
+    needs: [build_moose_libmesh]
+    if: >-
+      !cancelled()
+      && contains(fromJSON('["success", "skipped"]'), needs.build_moose_libmesh.result)
+      && inputs.moose_dev_build
+    steps:
+      - uses: idaholab/moose/checkout@actions
+        name: Checkout
+        with:
+          pr_base_sha: ${{ inputs.base_sha }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/moose-dev/Dockerfile
+          push: true
+          tags: ${{ inputs.moose_dev_to }}
+          cache-from: |
+            type=registry,ref=${{ inputs.moose_dev_to }}-cache
+            type=registry,ref=${{ inputs.moose_dev_to }}
+          cache-to: type=registry,ref=${{ inputs.moose_dev_to }}-cache,mode=max
+          build-args: |
+            BUILD_JOBS=4
+            BASE_IMAGE=${{ inputs.libmesh_to }}
+            ${{ inputs.moose_dev_build_args }}
