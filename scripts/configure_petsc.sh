@@ -108,6 +108,7 @@ function configure_petsc()
   cd "$PETSC_DIR" || exit 1
   python3 ./configure --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
+      --ignoreCxxBoundCheck=1 \
       --with-debugging=no \
       --with-fortran-bindings=0 \
       --with-mpi=1 \
@@ -128,7 +129,9 @@ function configure_petsc()
       --download-strumpack=1 \
       --download-superlu_dist=1 \
       --download-kokkos=1 \
+      --download-kokkos-commit=4.7.04 \
       --download-kokkos-kernels=1 \
+      --download-kokkos-kernels-commit=4.7.04 \
       --download-libceed=1 \
       --download-umpire \
       --download-umpire-commit=v2025.12.0 \
