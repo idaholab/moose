@@ -15,12 +15,28 @@ namespace CSG
 CSGCellList::CSGCellList() {}
 
 CSGCell &
-CSGCellList::addCell(std::unique_ptr<CSGCell> cell)
+CSGCellList::addCell(std::unique_ptr<CSGCell> cell, const bool ignore_identical_cell)
 {
-  auto name = cell->getName();
-  auto [it, inserted] = _cells.emplace(name, std::move(cell));
+  auto cell_name = cell->getName();
+  if (ignore_identical_cell)
+    // Check that cell already defined in _cells and if so, confirm it matches with input cell
+    if (auto it = _cells.find(cell_name); it != _cells.end())
+    {
+      if (*cell == *it->second)
+        return *it->second;
+      else
+        mooseError("Cell with name ",
+                   cell_name,
+                   " has the same name as an existing cell in CSGBase instance but cannot be "
+                   "discarded as it is not an identical cell.");
+    }
+
+  // Otherwise, add the cell to the cell list. At this point, we don't expect the cell
+  // to already be defined in the cell list
+  auto [it, inserted] = _cells.emplace(cell_name, std::move(cell));
   if (!inserted)
-    mooseError("Cell with name " + name + " already exists in geometry.");
+    mooseError("Cell with name " + cell_name + " already exists in geometry.");
+
   return *it->second;
 }
 

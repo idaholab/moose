@@ -534,10 +534,10 @@ public:
    * CSGBase.
    *
    * @param base pointer to a different CSGBase object
-   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
-   *                                  object
+   * @param ignore_identical_components if true, will skip adding identical components (surfaces,
+   *                                    cells, universes, lattices) to the CSGBase object
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identical_surfaces);
+  void joinOtherBase(std::unique_ptr<CSGBase> base, const bool ignore_identical_components);
 
   /**
    * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
@@ -547,12 +547,12 @@ public:
    * of this CSGBase object by default.
    *
    * @param base pointer to a different CSGBase object
-   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
-   *                                  object
+   * @param ignore_identical_components if true, will skip adding identical components (surfaces,
+   *                                    cells, universes, lattices) to the CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
   void joinOtherBase(std::unique_ptr<CSGBase> base,
-                     const bool ignore_identical_surfaces,
+                     const bool ignore_identical_components,
                      const std::string & new_root_name_join);
 
   /**
@@ -564,13 +564,13 @@ public:
    * new root universe by default.
    *
    * @param base pointer to a different CSGBase object
-   * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
-   *                                  object
+   * @param ignore_identical_components if true, will skip adding identical components (surfaces,
+   *                                    cells, universes, lattices) to the CSGBase object
    * @param new_root_name_base new name for universe generated from this root universe
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
   void joinOtherBase(std::unique_ptr<CSGBase> base,
-                     const bool ignore_identical_surfaces,
+                     const bool ignore_identical_components,
                      const std::string & new_root_name_base,
                      const std::string & new_root_name_join);
 
@@ -727,20 +727,26 @@ private:
   CSGLatticeList & getLatticeList() { return _lattice_list; }
 
   /**
-   * @brief update cell regions of incoming CSGBase to point to surfaces contained within existing
-   *        CSGBase object
+   * @brief update references of incoming CSGbase to point to those of existing CSGBase object. This
+   * includes updating the surface references of cell regions, universe/lattice references of cell
+   * fills, cell references of universes, and universe references of lattices
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
    * @param cell_list CSGCellList from a separate CSGBase object
+   * @param universe_list CSGUniverseList from a separate CSGBase object
+   * @param lattice_list CSGLatticeList from a separate CSGBase object
    */
-  void updateIncomingCellRegions(CSGSurfaceList & surf_list, CSGCellList & cell_list);
+  void updateIncomingCSGReferences(CSGSurfaceList & surf_list,
+                                   CSGCellList & cell_list,
+                                   CSGUniverseList & universe_list,
+                                   CSGLatticeList & lattice_list);
 
   /**
    * @brief join a separate CSGSurfaceList object to this one
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
    * @param ignore_identical_surfaces if true, will skip adding identical surfaces to the CSGBase
-   * object
+   *                                  object
    */
   void joinSurfaceList(CSGSurfaceList & surf_list, const bool ignore_identical_surfaces);
 
@@ -748,23 +754,29 @@ private:
    * @brief join a separate CSGCellList object to this one
    *
    * @param cell_list CSGCellList from a separate CSGBase object
+   * @param ignore_identical_cells if true, will skip adding identical cells to the CSGBase
+   *                               object
    */
-  void joinCellList(CSGCellList & cell_list);
+  void joinCellList(CSGCellList & cell_list, const bool ignore_identical_cells);
 
   /**
    * @brief join a separate CSGLatticeList object to this one
    *
    * @param lattice_list CSGLatticeList from a separate CSGBase object
+   * @param ignore_identical_lattices if true, will skip adding identical lattices to the CSGBase
+   *                                  object
    */
-  void joinLatticeList(CSGLatticeList & lattice_list);
+  void joinLatticeList(CSGLatticeList & lattice_list, const bool ignore_identical_lattices);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
    * root universes from univ_list will be combined into this root universe
    *
    * @param univ_list CSGUniverseList from a separate CSGBase object
+   * @param ignore_identical_universes if true, will skip adding identical universes to the CSGBase
+   *                                   object
    */
-  void joinUniverseList(CSGUniverseList & univ_list);
+  void joinUniverseList(CSGUniverseList & univ_list, const bool ignore_identical_universes);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
@@ -772,10 +784,14 @@ private:
    * name specified.
    *
    * @param univ_list CSGUniverseList from a separate CSGBase object
+   * @param ignore_identical_universes if true, will skip adding identical universes to the CSGBase
+   *                                   object
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe
    */
-  void joinUniverseList(CSGUniverseList & univ_list, const std::string & new_root_name_incoming);
+  void joinUniverseList(CSGUniverseList & univ_list,
+                        const bool ignore_identical_universes,
+                        const std::string & new_root_name_incoming);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
@@ -784,11 +800,14 @@ private:
    * Note: upon completion of this join method, the root universe will be empty.
    *
    * @param univ_list CSGUniverseList from a separate CSGBase object
+   * @param ignore_identical_universes if true, will skip adding identical lattices to the CSGBase
+   *                                   object
    * @param new_root_name_base new name for universe generated from this root universe
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe
    */
   void joinUniverseList(CSGUniverseList & univ_list,
+                        const bool ignore_identical_universes,
                         const std::string & new_root_name_base,
                         const std::string & new_root_name_incoming);
 

@@ -121,9 +121,10 @@ protected:
    * that calls this function
    *
    * @param cell cell to add to the CellList.
+   * @param ignore_identical_cell skip adding cell if an identical cell exists in cell list
    * @return reference to CSGCell that was added to CellList
    */
-  CSGCell & addCell(std::unique_ptr<CSGCell> cell);
+  CSGCell & addCell(std::unique_ptr<CSGCell> cell, const bool ignore_identical_cell = false);
 
   /**
    * @brief rename the specified cell
