@@ -52,16 +52,15 @@ public:
   virtual void computePressureGradientFlux();
 
   /// Get interpolation coefficients for the advected quantity
-  virtual std::pair<Real, Real> getAdvectedInterpolationCoeffs(
-      const FaceInfo & fi,
-      Moose::FV::InterpMethod method,
-      Real face_mass_flux,
-      bool apply_porosity_scaling = true) const;
+  virtual std::pair<Real, Real>
+  getAdvectedInterpolationCoeffs(const FaceInfo & fi,
+                                 Moose::FV::InterpMethod method,
+                                 Real face_mass_flux,
+                                 bool apply_porosity_scaling = true) const;
 
   /// Get porosity on a face side (returns 1 if porosity is constant/unset)
-  virtual Real getFaceSidePorosity(const FaceInfo & fi,
-                                   bool elem_side,
-                                   const Moose::StateArg & time) const;
+  virtual Real
+  getFaceSidePorosity(const FaceInfo & fi, bool elem_side, const Moose::StateArg & time) const;
 
   /// Get the signed baffle jump on a face side (returns 0 if not a baffle face)
   virtual Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const;
@@ -75,8 +74,7 @@ public:
   /// Get the pressure gradient component used in the momentum equation
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the jump-corrected pressure gradient component at an element center
-  virtual Real correctedPressureGradient(const ElemInfo & elem_info,
-                                         unsigned int component) const;
+  virtual Real correctedPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center
   virtual Real rawPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
 
@@ -170,6 +168,11 @@ protected:
   /// Update face superficial velocities from the current superficial mass flux
   void updateFaceVelocityFromMassFlux();
 
+  /// Get the prescribed velocity value on a Dirichlet boundary face
+  Real velocityBoundaryValue(unsigned int component,
+                             const FaceInfo & fi,
+                             const Moose::FaceArg & boundary_face) const;
+
   /**
    * Check the block consistency between the passed in \p var and us
    */
@@ -244,7 +247,6 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _grad_p_current;
 
-
   /**
    * Functor describing the density of the fluid
    */
@@ -278,7 +280,6 @@ protected:
   /// The subset of the FaceInfo objects that actually cover the subdomains which the
   /// flow field is defined on. Cached for performance optimization.
   std::vector<const FaceInfo *> _flow_face_info;
-
 };
 
 template <typename VarType>

@@ -20,6 +20,7 @@
 #include "PetscVectorReader.h"
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 // libMesh includes
 #include "libmesh/mesh_base.h"
@@ -293,7 +294,7 @@ RhieChowMassFlux::initFaceMassFlux()
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
         density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
-                                        raw_value((*_vel[dim_i])(boundary_face, time_arg));
+                                        velocityBoundaryValue(dim_i, *fi, boundary_face);
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -312,11 +313,18 @@ RhieChowMassFlux::getMassFlux(const FaceInfo & fi) const
 Real
 RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
 {
+  const Elem * face_side = nullptr;
+  if (!_vel[0]->isInternalFace(fi))
+  {
+    const bool elem_is_fluid = hasBlocks(fi.elemPtr()->subdomain_id());
+    face_side = elem_is_fluid ? fi.elemPtr() : fi.neighborPtr();
+  }
+
   const Moose::FaceArg face_arg{&fi,
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
                                 /*elem_is_upwind=*/true,
                                 /*correct_skewness=*/false,
-                                &fi.elem(),
+                                face_side,
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
   return libmesh_map_find(_face_mass_flux, fi.id()) / face_rho;
@@ -375,6 +383,25 @@ RhieChowMassFlux::computePressureGradientFlux()
     const Real p_grad_flux = computeFacePressureGradientFlux(*fi, p_reader);
     storePressureGradientFlux(*fi, p_grad_flux);
   }
+}
+
+Real
+RhieChowMassFlux::velocityBoundaryValue(const unsigned int component,
+                                        const FaceInfo & fi,
+                                        const Moose::FaceArg & boundary_face) const
+{
+  const auto face_type = fi.faceType(
+      std::make_pair(_vel[component]->number(), _global_momentum_system_numbers[component]));
+
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto * const bc_pointer = _vel[component]->getBoundaryCondition(bnd_id))
+      if (dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc_pointer))
+      {
+        bc_pointer->setupFaceData(&fi, face_type);
+        return bc_pointer->computeBoundaryValue();
+      }
+
+  return MetaPhysicL::raw_value((*_vel[component])(boundary_face, Moose::currentState()));
 }
 
 void
@@ -607,8 +634,7 @@ RhieChowMassFlux::populateCouplingFunctors(
 
         for (const auto dim_i : make_range(_dim))
         {
-          Real face_hbya =
-              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+          Real face_hbya = -velocityBoundaryValue(dim_i, *fi, boundary_face);
 
           if (!_body_force_kernel_names.empty())
             for (const auto & force_kernel : _body_force_kernels[dim_i])

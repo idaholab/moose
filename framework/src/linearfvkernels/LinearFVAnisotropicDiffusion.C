@@ -227,9 +227,10 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
   const Real boundary_normal_multiplier =
       (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-  grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
-                                            _current_face_info->normal()) *
-                  boundary_grad;
+  if (!diff_bc->includesMaterialPropertyMultiplier())
+    grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
+                                              _current_face_info->normal()) *
+                    boundary_grad;
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
