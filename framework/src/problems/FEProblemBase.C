@@ -125,6 +125,7 @@
 #include "Checkpoint.h"
 #include "MortarInterfaceWarehouse.h"
 #include "AutomaticMortarGeneration.h"
+#include "DependencyResolver.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -5901,24 +5902,51 @@ FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
 }
 
 bool
-FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
+FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 {
   // Active MultiApps
   const std::vector<MooseSharedPointer<MultiApp>> & multi_apps =
-      _multi_apps[type].getActiveObjects();
+      _multi_apps[exec_on].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (const auto & multi_app : multi_apps)
     multi_app->preTransfer(_dt, _time);
 
   // Execute Transfers _to_ MultiApps
-  execMultiAppTransfers(type, MultiAppTransfer::TO_MULTIAPP);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::TO_MULTIAPP);
 
   // Execute Transfers _beween_ MultiApps for the multiapps that don't execute on this flag
   // NOTE: these is usually no need to execute a transfer unless the multiapp providing its
   // data also executed. But we need to obey what the user requested for the execution schedule,
   // hence the two executions
-  execMultiAppTransfers(type, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
+
+  // Order the multiapps
+  DependencyResolver<MooseSharedPointer<MultiApp>> resolver;
+
+  // Add all the apps executing on 'exec_on' to the resolution
+  for (const auto & multi_app : multi_apps)
+    resolver.addItem(multi_app);
+  // Add all the dependencies found from active transfers executing on 'exec_on'
+  for (const auto & sibling_transfer : _between_multi_app_transfers[exec_on].getActiveObjects())
+  {
+    auto multiapp_transfer = dynamic_cast<MultiAppTransfer *>(sibling_transfer.get());
+    resolver.addEdge(multiapp_transfer->getFromMultiApp(), multiapp_transfer->getToMultiApp());
+  }
+
+  std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
+  if (multi_apps.size())
+    try
+    {
+      ordered_multi_apps = resolver.getSortedValuesSets();
+    }
+    catch (CyclicDependencyException<std::string> & e)
+    {
+      mooseError("Cyclic dependencies detected in multiapps and siblings transfers: ",
+                 MooseUtils::join(e.getCyclicDependencies(), " <- "),
+                 "\nPlease execute one of the transfers between multiapps on a different "
+                 "'execute_on' to break the cycle.");
+    }
 
   // Execute MultiApps
   if (multi_apps.size())
@@ -5926,20 +5954,23 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
     TIME_SECTION("execMultiApps", 1, "Executing MultiApps", false);
 
     if (_verbose_multiapps)
-      _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(type)
+      _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(exec_on)
                << COLOR_DEFAULT << std::endl;
 
     bool success = true;
 
-    for (const auto & multi_app : multi_apps)
+    for (const auto & multi_app_group : ordered_multi_apps)
     {
-      success = multi_app->solveStep(_dt, _time, auto_advance);
-      // no need to finish executing the subapps if one fails
-      if (!success)
-        break;
+      for (const auto & multi_app : multi_app_group)
+      {
+        success = multi_app->solveStep(_dt, _time, auto_advance);
+        // no need to finish executing the subapps if one fails
+        if (!success)
+          break;
 
-      // Execute Transfers _between_ Multiapps after each app executes
-      execMultiAppTransfers(type, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
+        // Execute Transfers _between_ Multiapps after each app executes
+        execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
+      }
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
@@ -5950,12 +5981,13 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
       return false;
 
     if (_verbose_multiapps)
-      _console << COLOR_CYAN << "Finished Executing MultiApps on " << Moose::stringify(type) << "\n"
+      _console << COLOR_CYAN << "Finished Executing MultiApps on " << Moose::stringify(exec_on)
+               << "\n"
                << COLOR_DEFAULT << std::endl;
   }
 
   // Execute Transfers _from_ MultiApps
-  execMultiAppTransfers(type, MultiAppTransfer::FROM_MULTIAPP);
+  execMultiAppTransfers(exec_on, MultiAppTransfer::FROM_MULTIAPP);
 
   // If we made it here then everything passed
   return true;
