@@ -711,7 +711,7 @@ AssemblyMeshGenerator::generateCSG()
     {
       // For innermost duct region, we create a lattice cell as the fill
       const auto pin_pitch = getMeshProperty<Real>(RGMB::pitch, _inputs[0]);
-      auto & assembly_lattice = createAssemblyLattice(pin_pitch, universe_pattern, *csg_obj);
+      auto & assembly_lattice = createRGMBLattice(pin_pitch, universe_pattern, *csg_obj);
       setAssemblyLatticeOuter(assembly_lattice, surfaces_by_axial_region, *csg_obj);
 
       // Define lattice cell
@@ -774,24 +774,6 @@ AssemblyMeshGenerator::generateCSG()
   csg_obj->createCell(name() + "_root_cell", assembly_univ, assembly_region);
 
   return csg_obj;
-}
-
-const CSG::CSGLattice &
-AssemblyMeshGenerator::createAssemblyLattice(
-    const Real pitch,
-    const std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> pattern,
-    CSG::CSGBase & csg_obj)
-{
-  // Create lattice based on whether it is hexagonal or Cartesian
-  std::string lat_name = name() + "_lattice";
-  std::unique_ptr<CSG::CSGLattice> lat_ptr;
-  if (_geom_type == "Square")
-    lat_ptr = std::make_unique<CSG::CSGCartesianLattice>(lat_name, pitch, pattern);
-  else // _geom_type == "Hex"
-    lat_ptr = std::make_unique<CSG::CSGHexagonalLattice>(lat_name, pitch, pattern);
-
-  auto & assembly_lattice = csg_obj.addLattice(std::move(lat_ptr));
-  return assembly_lattice;
 }
 
 void
