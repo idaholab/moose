@@ -1,0 +1,25 @@
+[Tests]
+  [variable-density-bernoulli]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-variable-density-bernoulli.i
+    csvdiff = 'porous-baffle-2d-variable-density-bernoulli_out.csv porous-baffle-2d-variable-density-bernoulli_out_centerline_solution_0001.csv'
+    requirement = 'The system shall preserve the variable-density Bernoulli baffle pressure jump, density profile, porosity profile, and superficial velocity profile.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [step-density-bernoulli]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-step-density-bernoulli.i
+    csvdiff = 'porous-baffle-2d-step-density-bernoulli_out.csv porous-baffle-2d-step-density-bernoulli_out_centerline_solution_0001.csv'
+    requirement = 'The system shall preserve the expected Bernoulli baffle pressure jump and velocity change across a step change in density and porosity.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]

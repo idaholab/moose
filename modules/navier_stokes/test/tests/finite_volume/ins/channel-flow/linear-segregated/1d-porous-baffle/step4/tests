@@ -1,0 +1,14 @@
+[Tests]
+  [rz-step4]
+    type = 'CSVDiff'
+    input = step4s.i
+    csvdiff = 'step4s_out.csv'
+    requirement = 'The system shall preserve the pressure drop, mass flow, velocity extrema, and enthalpy balance for the axisymmetric porous baffle step-4 channel model.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyFunctorMaterial.md'
+    cli_args = 'Outputs/csv=true Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-7
+  []
+[]

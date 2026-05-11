@@ -1,0 +1,26 @@
+[Tests]
+  [linear]
+    type = 'CSVDiff'
+    input = porous-baffle-2d.i
+    csvdiff = 'porous-baffle-2d_out.csv porous-baffle-2d_out_p_line_0001.csv porous-baffle-2d_out_u_line_0001.csv'
+    requirement = 'The system shall preserve the two-dimensional porous baffle pressure jump, zero transverse leakage, and non-oscillatory centerline velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
+
+  [insfv]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-insfv.i
+    csvdiff = 'porous-baffle-2d-insfv_out.csv porous-baffle-2d-insfv_out_p_line_0001.csv porous-baffle-2d-insfv_out_u_line_0001.csv'
+    requirement = 'The system shall preserve the two-dimensional porous baffle pressure jump and centerline velocity profile using the nonlinear incompressible finite volume solve.'
+    design = 'PINSFVRhieChowInterpolator.md BernoulliPressureVariable.md PINSFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]
