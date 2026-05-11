@@ -250,7 +250,8 @@ VariableValueTempl<is_ad>::VariableValueTempl(const VariableValueTempl<is_ad> & 
         _seed.create(_var.components());
 
       for (unsigned int comp = 0; comp < _var.components(); ++comp)
-        _seed[comp] = _var.dot() ? _var.mooseVar(comp)->sys().duDotDu(_var.var(comp)) : 1;
+        _seed[comp] =
+            _var.dot() ? _var.mooseVar(comp)->sys().duDotDu(_var.var(comp)) : (_var.old() ? 0 : 1);
 
       _seed.copyToDevice();
     }
@@ -377,7 +378,7 @@ public:
     : _var(vars, tag)
   {
   }
-  VariableGradientTempl(const std::vector<MooseVariableFieldBase *> vars,
+  VariableGradientTempl(const std::vector<MooseVariableFieldBase *> & vars,
                         const TagName & tag = Moose::SOLUTION_TAG)
     : _var(vars, tag)
   {
@@ -460,7 +461,8 @@ VariableGradientTempl<is_ad>::VariableGradientTempl(const VariableGradientTempl<
         _seed.create(_var.components());
 
       for (unsigned int comp = 0; comp < _var.components(); ++comp)
-        _seed[comp] = _var.dot() ? _var.mooseVar(comp)->sys().duDotDu(_var.var(comp)) : 1;
+        _seed[comp] =
+            _var.dot() ? _var.mooseVar(comp)->sys().duDotDu(_var.var(comp)) : (_var.old() ? 0 : 1);
 
       _seed.copyToDevice();
     }

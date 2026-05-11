@@ -153,6 +153,11 @@ public:
    */
   KOKKOS_FUNCTION bool dot() const { return _dot; }
   /**
+   * Get whether the tag is old/older value
+   * @returns Whether the tag is old/older value
+   */
+  KOKKOS_FUNCTION bool old() const { return _old; }
+  /**
    * Get the number of components
    * @returns The number of components
    */
@@ -203,6 +208,10 @@ private:
    * Whether the tag is time derivative
    */
   bool _dot = false;
+  /**
+   * Whether the tag is old/older value
+   */
+  bool _old = false;
   /**
    * Number of components
    */
