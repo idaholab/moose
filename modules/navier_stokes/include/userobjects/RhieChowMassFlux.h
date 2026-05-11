@@ -231,6 +231,11 @@ protected:
   /// Update face superficial velocities from the current superficial mass flux
   void updateFaceVelocityFromMassFlux();
 
+  /// Get the prescribed velocity value on a Dirichlet boundary face
+  Real velocityBoundaryValue(unsigned int component,
+                             const FaceInfo & fi,
+                             const Moose::FaceArg & boundary_face) const;
+
   /**
    * Check the block consistency between the passed in \p var and us
    */

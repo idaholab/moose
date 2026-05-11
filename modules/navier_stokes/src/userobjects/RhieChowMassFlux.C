@@ -22,6 +22,7 @@
 #include "LinearFVGradientManager.h"
 #include "LinearFVBoundaryCondition.h"
 #include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
+<<<<<<< HEAD
 #include "LinearFVPressureCorrectionDiffusion.h"
 #include "LinearFVMomentumPressure.h"
 #include "LinearFVPressureFluxBC.h"
@@ -632,7 +633,7 @@ RhieChowMassFlux::initFaceMassFlux()
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
         density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
-                                        raw_value((*_vel[dim_i])(boundary_face, time_arg));
+                                        velocityBoundaryValue(dim_i, *fi, boundary_face);
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -682,7 +683,7 @@ RhieChowMassFlux::getVolumetricFaceFlux(const FaceInfo & fi) const
                                 /*limiter_type=*/Moose::FV::LimiterType::CentralDifference,
                                 /*elem_is_upwind=*/true,
                                 /*correct_skewness=*/false,
-                                &fi.elem(),
+                                face_side,
                                 /*state_limiter*/ nullptr};
   const Real face_rho = _rho(face_arg, Moose::currentState());
   if (!std::isfinite(face_rho) || face_rho <= 0.0)
