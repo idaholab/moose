@@ -82,6 +82,6 @@ globalDofIndexToDerivative(const ADReal & ad_real,
 bool
 doDerivatives(const SubProblem & subproblem, const SystemBase & sys)
 {
-  return ADReal::do_derivatives && sys.number() == subproblem.currentNlSysNum();
+  return ADReal::do_derivatives && sys.number() == subproblem.currentNlJSysNum();
 }
 }

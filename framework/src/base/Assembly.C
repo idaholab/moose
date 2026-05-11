@@ -1049,7 +1049,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
   const auto sys_num = _sys.number();
   const bool do_derivatives =
-      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlJSysNum();
 
   switch (dim)
   {
@@ -1363,7 +1363,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
   const auto sys_num = _sys.number();
-  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum();
+  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlJSysNum();
 
   if (_calculate_curvatures)
   {
@@ -4236,11 +4236,18 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
 {
   if (dof_indices.size() == 0)
     return;
-  if (!(*_cm)(ivar, jvar))
+
+  const unsigned int j_sys_num = _subproblem.currentNlJSysNum();
+  const bool cross_system = j_sys_num != _sys.number();
+
+  // For same-system Jacobian, apply the coupling matrix check; skip it cross-system.
+  if (!cross_system && !(*_cm)(ivar, jvar))
     return;
 
   auto & iv = _sys.getVariable(_tid, ivar);
-  auto & jv = _sys.getVariable(_tid, jvar);
+  // For cross-system blocks, look up the column variable in JSys.
+  SystemBase & jsys = cross_system ? _subproblem.systemBaseNonlinear(j_sys_num) : _sys;
+  auto & jv = jsys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
   const unsigned int ivn = iv.number();
@@ -4256,9 +4263,9 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   const unsigned int i = ivar - ivn;
   const unsigned int j = jvar - jvn;
 
-  // DoF indices are independently given
+  // For cross-system blocks, column DOF indices come from the JSys variable.
   auto di = dof_indices;
-  auto dj = dof_indices;
+  auto dj = cross_system ? jv.dofIndices() : dof_indices;
 
   auto indof = di.size();
   auto jndof = dj.size();

@@ -608,6 +608,18 @@ DisplacedProblem::currentNlSysNum() const
 }
 
 unsigned int
+DisplacedProblem::currentNlISysNum() const
+{
+  return _mproblem.currentNlISysNum();
+}
+
+unsigned int
+DisplacedProblem::currentNlJSysNum() const
+{
+  return _mproblem.currentNlJSysNum();
+}
+
+unsigned int
 DisplacedProblem::currentLinearSysNum() const
 {
   return _mproblem.currentLinearSysNum();

@@ -419,14 +419,15 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
-    _current_linear_sys(nullptr),
+    _current_linear_sys_num(libMesh::invalid_uint),
     _using_default_nl(!isParamSetByUser("nl_sys_names")),
     _nl_sys_names(!_using_default_nl || (_using_default_nl && !_linear_sys_names.size())
                       ? getParam<std::vector<NonlinearSystemName>>("nl_sys_names")
                       : std::vector<NonlinearSystemName>()),
     _num_nl_sys(_nl_sys_names.size()),
     _nl(_num_nl_sys, nullptr),
-    _current_nl_sys(nullptr),
+    _nl_i_sys_num(libMesh::invalid_uint),
+    _nl_j_sys_num(libMesh::invalid_uint),
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
@@ -1863,12 +1864,12 @@ FEProblemBase::prepare(const Elem * elem,
   }
 
   _aux->prepare(tid);
-  const auto current_nl_sys_num = _current_nl_sys->number();
+  const auto current_nl_sys_num = currentNonlinearSystem().number();
   _assembly[tid][current_nl_sys_num]->prepareBlock(ivar, jvar, dof_indices);
   if (_has_nonlocal_coupling)
     if (_nonlocal_cm[current_nl_sys_num](ivar, jvar) != 0)
     {
-      MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
+      MooseVariableFEBase & jv = currentNonlinearSystem().getVariable(tid, jvar);
       _assembly[tid][current_nl_sys_num]->prepareBlockNonlocal(
           ivar, jvar, dof_indices, jv.allDofIndices());
     }
@@ -1879,7 +1880,7 @@ FEProblemBase::prepare(const Elem * elem,
     if (_has_nonlocal_coupling)
       if (_nonlocal_cm[current_nl_sys_num](ivar, jvar) != 0)
       {
-        MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
+        MooseVariableFEBase & jv = currentNonlinearSystem().getVariable(tid, jvar);
         _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices(), tid);
       }
   }
@@ -1927,9 +1928,9 @@ FEProblemBase::setNeighborSubdomainID(const Elem * elem, const THREAD_ID tid)
 void
 FEProblemBase::prepareAssembly(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->prepare();
+  _assembly[tid][currentNonlinearSystem().number()]->prepare();
   if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->prepareNonlocal();
+    _assembly[tid][currentNonlinearSystem().number()]->prepareNonlocal();
 
   if (_displaced_problem && (_reinit_displaced_elem || _reinit_displaced_face))
   {
@@ -1942,7 +1943,7 @@ FEProblemBase::prepareAssembly(const THREAD_ID tid)
 void
 FEProblemBase::addResidual(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidual(Assembly::GlobalDataKey{},
+  _assembly[tid][currentNonlinearSystem().number()]->addResidual(Assembly::GlobalDataKey{},
                                                          currentResidualVectorTags());
 
   if (_displaced_problem)
@@ -1952,7 +1953,7 @@ FEProblemBase::addResidual(const THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(Assembly::GlobalDataKey{},
+  _assembly[tid][currentNonlinearSystem().number()]->addResidualNeighbor(Assembly::GlobalDataKey{},
                                                                  currentResidualVectorTags());
 
   if (_displaced_problem)
@@ -1962,7 +1963,7 @@ FEProblemBase::addResidualNeighbor(const THREAD_ID tid)
 void
 FEProblemBase::addResidualLower(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualLower(Assembly::GlobalDataKey{},
+  _assembly[tid][currentNonlinearSystem().number()]->addResidualLower(Assembly::GlobalDataKey{},
                                                               currentResidualVectorTags());
 
   if (_displaced_problem)
@@ -1972,7 +1973,7 @@ FEProblemBase::addResidualLower(const THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(const THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(Assembly::GlobalDataKey{},
+  _assembly[tid][currentNonlinearSystem().number()]->addResidualScalar(Assembly::GlobalDataKey{},
                                                                currentResidualVectorTags());
 }
 
@@ -2003,18 +2004,18 @@ FEProblemBase::addCachedResidual(const THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const THREAD_ID tid)
 {
-  if (_current_nl_sys->hasVector(_current_nl_sys->timeVectorTag()))
-    _assembly[tid][_current_nl_sys->number()]->addCachedResidualDirectly(
-        residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->timeVectorTag()));
+  if (currentNonlinearSystem().hasVector(currentNonlinearSystem().timeVectorTag()))
+    _assembly[tid][currentNonlinearSystem().number()]->addCachedResidualDirectly(
+        residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().timeVectorTag()));
 
-  if (_current_nl_sys->hasVector(_current_nl_sys->nonTimeVectorTag()))
-    _assembly[tid][_current_nl_sys->number()]->addCachedResidualDirectly(
-        residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->nonTimeVectorTag()));
+  if (currentNonlinearSystem().hasVector(currentNonlinearSystem().nonTimeVectorTag()))
+    _assembly[tid][currentNonlinearSystem().number()]->addCachedResidualDirectly(
+        residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().nonTimeVectorTag()));
 
   std::vector<VectorTag> extra_residual_vector_tags;
   extra_residual_vector_tags.reserve(currentResidualVectorTags().size());
-  const auto time_tag = _current_nl_sys->timeVectorTag();
-  const auto non_time_tag = _current_nl_sys->nonTimeVectorTag();
+  const auto time_tag = currentNonlinearSystem().timeVectorTag();
+  const auto non_time_tag = currentNonlinearSystem().nonTimeVectorTag();
   for (const auto & vector_tag : currentResidualVectorTags())
     if (vector_tag._id != time_tag && vector_tag._id != non_time_tag)
       extra_residual_vector_tags.push_back(vector_tag);
@@ -2023,12 +2024,12 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const
   // to their respective system vectors after the standard TIME/NONTIME caches above.
   // Without this, NodalConstraint contributions to extra vector tags are silently
   // discarded by the blanket clearCachedResiduals.
-  _assembly[tid][_current_nl_sys->number()]->addCachedResiduals(Assembly::GlobalDataKey{},
+  _assembly[tid][currentNonlinearSystem().number()]->addCachedResiduals(Assembly::GlobalDataKey{},
                                                                 extra_residual_vector_tags);
 
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
-  _assembly[tid][_current_nl_sys->number()]->clearCachedResiduals(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->clearCachedResiduals(Assembly::GlobalDataKey{});
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -2037,10 +2038,10 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const
 void
 FEProblemBase::setResidual(NumericVector<Number> & residual, const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->setResidual(
+  _assembly[tid][currentNonlinearSystem().number()]->setResidual(
       residual,
       Assembly::GlobalDataKey{},
-      getVectorTag(_nl[_current_nl_sys->number()]->residualVectorTag()));
+      getVectorTag(_nl[currentNonlinearSystem().number()]->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -2048,8 +2049,8 @@ FEProblemBase::setResidual(NumericVector<Number> & residual, const THREAD_ID tid
 void
 FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->setResidualNeighbor(
-      residual, Assembly::GlobalDataKey{}, getVectorTag(_current_nl_sys->residualVectorTag()));
+  _assembly[tid][currentNonlinearSystem().number()]->setResidualNeighbor(
+      residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }
@@ -2057,9 +2058,9 @@ FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, const THREA
 void
 FEProblemBase::addJacobian(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobian(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobian(Assembly::GlobalDataKey{});
   if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->addJacobianNonlocal(Assembly::GlobalDataKey{});
+    _assembly[tid][currentNonlinearSystem().number()]->addJacobianNonlocal(Assembly::GlobalDataKey{});
   if (_displaced_problem)
   {
     _displaced_problem->addJacobian(tid);
@@ -2071,7 +2072,7 @@ FEProblemBase::addJacobian(const THREAD_ID tid)
 void
 FEProblemBase::addJacobianNeighbor(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighbor(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighbor(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(tid);
 }
@@ -2079,7 +2080,7 @@ FEProblemBase::addJacobianNeighbor(const THREAD_ID tid)
 void
 FEProblemBase::addJacobianNeighborLowerD(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborLowerD(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborLowerD(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighborLowerD(tid);
 }
@@ -2087,7 +2088,7 @@ FEProblemBase::addJacobianNeighborLowerD(const THREAD_ID tid)
 void
 FEProblemBase::addJacobianLowerD(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianLowerD(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianLowerD(Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianLowerD(tid);
 }
@@ -2095,13 +2096,13 @@ FEProblemBase::addJacobianLowerD(const THREAD_ID tid)
 void
 FEProblemBase::addJacobianScalar(const THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianScalar(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianScalar(Assembly::GlobalDataKey{});
 }
 
 void
 FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, const THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianOffDiagScalar(ivar,
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianOffDiagScalar(ivar,
                                                                       Assembly::GlobalDataKey{});
 }
 
@@ -2138,14 +2139,14 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
                                     const std::set<TagID> & tags,
                                     const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianBlockTags(
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianBlockTags(
       jacobian, ivar, jvar, dof_map, dof_indices, Assembly::GlobalDataKey{}, tags);
 
   if (_has_nonlocal_coupling)
-    if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
+    if (_nonlocal_cm[currentNonlinearSystem().number()](ivar, jvar) != 0)
     {
-      MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
-      _assembly[tid][_current_nl_sys->number()]->addJacobianBlockNonlocalTags(
+      MooseVariableFEBase & jv = currentNonlinearSystem().getVariable(tid, jvar);
+      _assembly[tid][currentNonlinearSystem().number()]->addJacobianBlockNonlocalTags(
           jacobian,
           ivar,
           jvar,
@@ -2160,9 +2161,9 @@ FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
   {
     _displaced_problem->addJacobianBlockTags(jacobian, ivar, jvar, dof_map, dof_indices, tags, tid);
     if (_has_nonlocal_coupling)
-      if (_nonlocal_cm[_current_nl_sys->number()](ivar, jvar) != 0)
+      if (_nonlocal_cm[currentNonlinearSystem().number()](ivar, jvar) != 0)
       {
-        MooseVariableFEBase & jv = _current_nl_sys->getVariable(tid, jvar);
+        MooseVariableFEBase & jv = currentNonlinearSystem().getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
             jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tags, tid);
       }
@@ -2179,7 +2180,7 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    const std::set<TagID> & tags,
                                    const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->addJacobianNeighborTags(jacobian,
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborTags(jacobian,
                                                                      ivar,
                                                                      jvar,
                                                                      dof_map,
@@ -2195,19 +2196,19 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
 void
 FEProblemBase::prepareShapes(unsigned int var, const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->copyShapes(var);
+  _assembly[tid][currentNonlinearSystem().number()]->copyShapes(var);
 }
 
 void
 FEProblemBase::prepareFaceShapes(unsigned int var, const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->copyFaceShapes(var);
+  _assembly[tid][currentNonlinearSystem().number()]->copyFaceShapes(var);
 }
 
 void
 FEProblemBase::prepareNeighborShapes(unsigned int var, const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->copyNeighborShapes(var);
+  _assembly[tid][currentNonlinearSystem().number()]->copyNeighborShapes(var);
 }
 
 void
@@ -2283,9 +2284,9 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
     reinitElem(elem, tid);
   }
 
-  _assembly[tid][_current_nl_sys->number()]->prepare();
+  _assembly[tid][currentNonlinearSystem().number()]->prepare();
   if (_has_nonlocal_coupling)
-    _assembly[tid][_current_nl_sys->number()]->prepareNonlocal();
+    _assembly[tid][currentNonlinearSystem().number()]->prepareNonlocal();
 
   bool have_points = n_points > 0;
   if (_displaced_problem && (_reinit_displaced_elem))
@@ -2440,7 +2441,7 @@ FEProblemBase::reinitScalars(const THREAD_ID tid, bool reinit_for_derivative_reo
 void
 FEProblemBase::reinitOffDiagScalars(const THREAD_ID tid)
 {
-  _assembly[tid][_current_nl_sys->number()]->prepareOffDiagScalar();
+  _assembly[tid][currentNonlinearSystem().number()]->prepareOffDiagScalar();
   if (_displaced_problem)
     _displaced_problem->reinitOffDiagScalars(tid);
 }
@@ -2536,7 +2537,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->prepareNeighbor(tid);
 
   // Resizes Re and Ke
-  _assembly[tid][_current_nl_sys->number()]->prepareNeighbor();
+  _assembly[tid][currentNonlinearSystem().number()]->prepareNeighbor();
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
@@ -2563,7 +2564,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->prepareNeighbor(tid);
 
   // Resizes Re and Ke
-  _assembly[tid][_current_nl_sys->number()]->prepareNeighbor();
+  _assembly[tid][currentNonlinearSystem().number()]->prepareNeighbor();
 
   // Compute the values of each variable at the points
   for (auto & nl : _nl)
@@ -6898,7 +6899,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // set up DM which is required if use a field split preconditioner
   // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
   // Do not worry, DM setup is very cheap
-  _current_nl_sys->setupDM();
+  currentNonlinearSystem().setupDM();
 
   // Re-wire the nonlinear preconditioner onto the (possibly freshly-created) outer SNES.
   // Must happen after setupDM() and before solve() for the same reason as setupDM().
@@ -6918,8 +6919,8 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
   if (_solve)
   {
-    _current_nl_sys->solve();
-    _current_nl_sys->update();
+    currentNonlinearSystem().solve();
+    currentNonlinearSystem().update();
   }
 
   // sync solutions in displaced problem
@@ -6974,11 +6975,11 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
       // Stop the solve -- this entails setting
       // SNESSetFunctionDomainError() or directly inserting NaNs in the
       // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
-      if (_current_nl_sys)
-        _current_nl_sys->stopSolve(_current_execute_on_flag, _fe_vector_tags);
+      if (_nl_i_sys_num < _nl.size())
+        currentNonlinearSystem().stopSolve(_current_execute_on_flag, _fe_vector_tags);
 
-      if (_current_linear_sys)
-        _current_linear_sys->stopSolve(_current_execute_on_flag, _fe_vector_tags);
+      if (_current_linear_sys_num < _linear_systems.size())
+        currentLinearSystem().stopSolve(_current_execute_on_flag, _fe_vector_tags);
 
       // and close Aux system (we MUST do this here; see #11525)
       _aux->solution().close();
@@ -7060,7 +7061,7 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 #endif
 
   if (_solve)
-    _current_linear_sys->solve();
+    currentLinearSystem().solve();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
@@ -7336,7 +7337,7 @@ FEProblemBase::addPredictor(const std::string & type,
 Real
 FEProblemBase::computeResidualL2Norm(NonlinearSystemBase & sys)
 {
-  _current_nl_sys = &sys;
+  setCurrentNonlinearSystem(sys.number());
   computeResidual(*sys.currentSolution(), sys.RHS(), sys.number());
   return sys.RHS().l2_norm();
 }
@@ -7344,7 +7345,7 @@ FEProblemBase::computeResidualL2Norm(NonlinearSystemBase & sys)
 Real
 FEProblemBase::computeResidualL2Norm(LinearSystem & sys)
 {
-  _current_linear_sys = &sys;
+  setCurrentLinearSystem(sys.number());
 
   // We assemble the current system to check the current residual
   computeLinearSystemSys(sys.linearImplicitSystem(),
@@ -7414,13 +7415,13 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
 
   // We associate the residual tag with the given residual vector to make sure we
   // don't filter it out below
-  _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+  currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   // We filter out tags which do not have associated vectors in the current nonlinear
   // system. This is essential to be able to use system-dependent residual tags.
-  selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
+  selectVectorTagsFromSystem(currentNonlinearSystem(), residual_vector_tags, _fe_vector_tags);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
   _fe_vector_tags.clear();
@@ -7436,14 +7437,14 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     try
     {
       // vector tags
-      _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+      currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
       const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
       mooseAssert(_fe_vector_tags.empty(),
                   "This should be empty indicating a clean starting state");
       // We filter out tags which do not have associated vectors in the current nonlinear
       // system. This is essential to be able to use system-dependent residual tags.
-      selectVectorTagsFromSystem(*_current_nl_sys, residual_vector_tags, _fe_vector_tags);
+      selectVectorTagsFromSystem(currentNonlinearSystem(), residual_vector_tags, _fe_vector_tags);
 
       setCurrentResidualVectorTags(_fe_vector_tags);
 
@@ -7456,17 +7457,17 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
           _fe_matrix_tags.insert(tag.second);
       }
 
-      _current_nl_sys->setSolution(soln);
+      currentNonlinearSystem().setSolution(soln);
 
-      _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
-      _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
+      currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
+      currentNonlinearSystem().associateMatrixToTag(jacobian, currentNonlinearSystem().systemMatrixTag());
 
       for (const auto tag : _fe_matrix_tags)
-        if (_current_nl_sys->hasMatrix(tag))
+        if (currentNonlinearSystem().hasMatrix(tag))
         {
-          auto & matrix = _current_nl_sys->getMatrix(tag);
+          auto & matrix = currentNonlinearSystem().getMatrix(tag);
           matrix.zero();
-          if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
+          if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7534,10 +7535,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       _safe_access_tagged_vectors = false;
       _safe_access_tagged_matrices = false;
 
-      _current_nl_sys->computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
+      currentNonlinearSystem().computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
 
-      _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
-      _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
+      currentNonlinearSystem().disassociateMatrixFromTag(jacobian, currentNonlinearSystem().systemMatrixTag());
+      currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
     }
     catch (...)
     {
@@ -7567,13 +7568,13 @@ FEProblemBase::computeResidualTag(const NumericVector<Number> & soln,
 {
   try
   {
-    _current_nl_sys->setSolution(soln);
+    currentNonlinearSystem().setSolution(soln);
 
-    _current_nl_sys->associateVectorToTag(residual, tag);
+    currentNonlinearSystem().associateVectorToTag(residual, tag);
 
     computeResidualTags({tag});
 
-    _current_nl_sys->disassociateVectorFromTag(residual, tag);
+    currentNonlinearSystem().disassociateVectorFromTag(residual, tag);
   }
   catch (MooseException & e)
   {
@@ -7600,13 +7601,13 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
 
   try
   {
-    _current_nl_sys->setSolution(soln);
+    currentNonlinearSystem().setSolution(soln);
 
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+    currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
 
     computeResidualTags(tags);
 
-    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
+    currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -7631,13 +7632,13 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 
   try
   {
-    _current_nl_sys->setSolution(soln);
+    currentNonlinearSystem().setSolution(soln);
 
-    _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
+    currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
 
-    computeResidualTags({tag, _current_nl_sys->residualVectorTag()});
+    computeResidualTags({tag, currentNonlinearSystem().residualVectorTag()});
 
-    _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
+    currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -7771,7 +7772,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       _app.getOutputWarehouse().residualSetup();
 
       _safe_access_tagged_vectors = false;
-      _current_nl_sys->computeResidualTags(tags);
+      currentNonlinearSystem().computeResidualTags(tags);
     }
     catch (...)
     {
@@ -7807,13 +7808,13 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian,
                                   TagID tag)
 {
-  _current_nl_sys->setSolution(soln);
+  currentNonlinearSystem().setSolution(soln);
 
-  _current_nl_sys->associateMatrixToTag(jacobian, tag);
+  currentNonlinearSystem().associateMatrixToTag(jacobian, tag);
 
   computeJacobianTags({tag});
 
-  _current_nl_sys->disassociateMatrixFromTag(jacobian, tag);
+  currentNonlinearSystem().disassociateMatrixFromTag(jacobian, tag);
 }
 
 void
@@ -7822,6 +7823,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
                                const unsigned int nl_sys_num)
 {
   setCurrentNonlinearSystem(nl_sys_num);
+  setJacobianBlockContext(nl_sys_num, nl_sys_num);
 
   _fe_matrix_tags.clear();
 
@@ -7839,13 +7841,13 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 {
   TIME_SECTION("computeJacobianInternal", 1);
 
-  _current_nl_sys->setSolution(soln);
+  currentNonlinearSystem().setSolution(soln);
 
-  _current_nl_sys->associateMatrixToTag(jacobian, _current_nl_sys->systemMatrixTag());
+  currentNonlinearSystem().associateMatrixToTag(jacobian, currentNonlinearSystem().systemMatrixTag());
 
   computeJacobianTags(tags);
 
-  _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
+  currentNonlinearSystem().disassociateMatrixFromTag(jacobian, currentNonlinearSystem().systemMatrixTag());
 }
 
 void
@@ -7860,14 +7862,14 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         TIME_SECTION("computeJacobianTags", 5, "Computing Jacobian");
 
         for (auto tag : tags)
-          if (_current_nl_sys->hasMatrix(tag))
+          if (currentNonlinearSystem().hasMatrix(tag))
           {
-            auto & matrix = _current_nl_sys->getMatrix(tag);
+            auto & matrix = currentNonlinearSystem().getMatrix(tag);
             if (_restore_original_nonzero_pattern)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
+            if (haveADObjects() && !currentNonlinearSystem().system().has_static_condensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7924,13 +7926,13 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         _safe_access_tagged_matrices = false;
 
-        _current_nl_sys->computeJacobianTags(tags);
+        currentNonlinearSystem().computeJacobianTags(tags);
 
         // For explicit Euler calculations for example we often compute the Jacobian one time and
         // then re-use it over and over. If we're performing automatic scaling, we don't want to
         // use that kernel, diagonal-block only Jacobian for our actual matrix when performing
         // solves!
-        if (!_current_nl_sys->computingScalingJacobian())
+        if (!currentNonlinearSystem().computingScalingJacobian())
           _has_jacobian = true;
       }
     }
@@ -7969,7 +7971,7 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
   computeSystems(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
-  _current_nl_sys->computeJacobianBlocks(blocks);
+  currentNonlinearSystem().computeJacobianBlocks(blocks);
   _currently_computing_jacobian = false;
 }
 
@@ -7981,8 +7983,8 @@ FEProblemBase::computeJacobianBlock(SparseMatrix<Number> & jacobian,
 {
   JacobianBlock jac_block(precond_system, jacobian, ivar, jvar);
   std::vector<JacobianBlock *> blocks = {&jac_block};
-  mooseAssert(_current_nl_sys, "This should be non-null");
-  computeJacobianBlocks(blocks, _current_nl_sys->number());
+  mooseAssert(_nl_i_sys_num < _nl.size(), "This should be non-null");
+  computeJacobianBlocks(blocks, currentNonlinearSystem().number());
 }
 
 void
@@ -7994,16 +7996,16 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   {
     try
     {
-      mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+      mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
                   "I expect these system numbers to be the same");
 
-      if (!_current_nl_sys->hasVector("lower_bound") || !_current_nl_sys->hasVector("upper_bound"))
+      if (!currentNonlinearSystem().hasVector("lower_bound") || !currentNonlinearSystem().hasVector("upper_bound"))
         return;
 
       TIME_SECTION("computeBounds", 1, "Computing Bounds");
 
-      NumericVector<Number> & _lower = _current_nl_sys->getVector("lower_bound");
-      NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
+      NumericVector<Number> & _lower = currentNonlinearSystem().getVector("lower_bound");
+      NumericVector<Number> & _upper = currentNonlinearSystem().getVector("upper_bound");
       _lower.swap(lower);
       _upper.swap(upper);
       for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -8039,31 +8041,31 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
 
   setCurrentLinearSystem(linearSysNum(sys.name()));
 
-  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
+  currentLinearSystem().associateVectorToTag(rhs, currentLinearSystem().rightHandSideVectorTag());
+  currentLinearSystem().associateMatrixToTag(system_matrix, currentLinearSystem().systemMatrixTag());
 
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   // We filter out tags which do not have associated vectors in the current
   // system. This is essential to be able to use system-dependent vector tags.
-  selectVectorTagsFromSystem(*_current_linear_sys, vector_tags, _linear_vector_tags);
-  selectMatrixTagsFromSystem(*_current_linear_sys, getMatrixTags(), _linear_matrix_tags);
+  selectVectorTagsFromSystem(currentLinearSystem(), vector_tags, _linear_vector_tags);
+  selectMatrixTagsFromSystem(currentLinearSystem(), getMatrixTags(), _linear_matrix_tags);
 
-  computeLinearSystemTags(*(_current_linear_sys->currentSolution()),
+  computeLinearSystemTags(*(currentLinearSystem().currentSolution()),
                           _linear_vector_tags,
                           _linear_matrix_tags,
                           compute_gradients);
 
-  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
-                                                 _current_linear_sys->systemMatrixTag());
-  _current_linear_sys->disassociateVectorFromTag(rhs,
-                                                 _current_linear_sys->rightHandSideVectorTag());
+  currentLinearSystem().disassociateMatrixFromTag(system_matrix,
+                                                 currentLinearSystem().systemMatrixTag());
+  currentLinearSystem().disassociateVectorFromTag(rhs,
+                                                 currentLinearSystem().rightHandSideVectorTag());
   // We reset the tags to the default containers for further operations
-  _current_linear_sys->associateVectorToTag(_current_linear_sys->getRightHandSideVector(),
-                                            _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateMatrixToTag(_current_linear_sys->getSystemMatrix(),
-                                            _current_linear_sys->systemMatrixTag());
+  currentLinearSystem().associateVectorToTag(currentLinearSystem().getRightHandSideVector(),
+                                            currentLinearSystem().rightHandSideVectorTag());
+  currentLinearSystem().associateMatrixToTag(currentLinearSystem().getSystemMatrix(),
+                                            currentLinearSystem().systemMatrixTag());
 }
 
 void
@@ -8074,11 +8076,11 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 {
   TIME_SECTION("computeLinearSystemTags", 5, "Computing Linear System");
 
-  _current_linear_sys->setSolution(soln);
+  currentLinearSystem().setSolution(soln);
 
   for (auto tag : matrix_tags)
   {
-    auto & matrix = _current_linear_sys->getMatrix(tag);
+    auto & matrix = currentLinearSystem().getMatrix(tag);
     matrix.zero();
   }
 
@@ -8128,7 +8130,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _app.getOutputWarehouse().jacobianSetup();
 
-  _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
+  currentLinearSystem().computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
@@ -8142,7 +8144,7 @@ void
 FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                     std::vector<NumericVector<Number> *> & sp)
 {
-  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+  mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
               "I expect these system numbers to be the same");
 
   sp.clear();
@@ -8151,7 +8153,7 @@ FEProblemBase::computeNearNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sy
     std::stringstream postfix;
     postfix << "_" << i;
     std::string modename = "NearNullSpace" + postfix.str();
-    sp.push_back(&_current_nl_sys->getVector(modename));
+    sp.push_back(&currentNonlinearSystem().getVector(modename));
   }
 }
 
@@ -8159,14 +8161,14 @@ void
 FEProblemBase::computeNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                 std::vector<NumericVector<Number> *> & sp)
 {
-  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+  mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
               "I expect these system numbers to be the same");
   sp.clear();
   for (unsigned int i = 0; i < subspaceDim("NullSpace"); ++i)
   {
     std::stringstream postfix;
     postfix << "_" << i;
-    sp.push_back(&_current_nl_sys->getVector("NullSpace" + postfix.str()));
+    sp.push_back(&currentNonlinearSystem().getVector("NullSpace" + postfix.str()));
   }
 }
 
@@ -8174,14 +8176,14 @@ void
 FEProblemBase::computeTransposeNullSpace(NonlinearImplicitSystem & libmesh_dbg_var(sys),
                                          std::vector<NumericVector<Number> *> & sp)
 {
-  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+  mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
               "I expect these system numbers to be the same");
   sp.clear();
   for (unsigned int i = 0; i < subspaceDim("TransposeNullSpace"); ++i)
   {
     std::stringstream postfix;
     postfix << "_" << i;
-    sp.push_back(&_current_nl_sys->getVector("TransposeNullSpace" + postfix.str()));
+    sp.push_back(&currentNonlinearSystem().getVector("TransposeNullSpace" + postfix.str()));
   }
 }
 
@@ -8193,7 +8195,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
                                 bool & changed_search_direction,
                                 bool & changed_new_soln)
 {
-  mooseAssert(_current_nl_sys && (sys.number() == _current_nl_sys->number()),
+  mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
               "I expect these system numbers to be the same");
 
   // This function replaces the old PetscSupport::dampedCheck() function.
@@ -8258,7 +8260,7 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   if (vectorTagExists(Moose::PREVIOUS_NL_SOLUTION_TAG))
   {
-    _current_nl_sys->setPreviousNewtonSolution(old_soln);
+    currentNonlinearSystem().setPreviousNewtonSolution(old_soln);
     _aux->copyCurrentIntoPreviousNL();
   }
 
@@ -8280,18 +8282,18 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
     TIME_SECTION("computeDamping", 1, "Computing Damping");
 
     // Save pointer to the current solution
-    const NumericVector<Number> * _saved_current_solution = _current_nl_sys->currentSolution();
+    const NumericVector<Number> * _saved_current_solution = currentNonlinearSystem().currentSolution();
 
-    _current_nl_sys->setSolution(soln);
+    currentNonlinearSystem().setSolution(soln);
     // For now, do not re-compute auxiliary variables.  Doing so allows a wild solution increment
     //   to get to the material models, which may not be able to cope with drastically different
     //   values.  Once more complete dependency checking is in place, auxiliary variables (and
     //   material properties) will be computed as needed by dampers.
     //    _aux.compute();
-    damping = _current_nl_sys->computeDamping(soln, update);
+    damping = currentNonlinearSystem().computeDamping(soln, update);
 
     // restore saved solution
-    _current_nl_sys->setSolution(*_saved_current_solution);
+    currentNonlinearSystem().setSolution(*_saved_current_solution);
   }
 
   return damping;
@@ -9786,23 +9788,32 @@ FEProblemBase::coordTransform()
 unsigned int
 FEProblemBase::currentNlSysNum() const
 {
-  // If we don't have nonlinear systems this should be an invalid number
-  unsigned int current_nl_sys_num = libMesh::invalid_uint;
-  if (_nl.size())
-    current_nl_sys_num = currentNonlinearSystem().number();
+  return currentNlISysNum();
+}
 
-  return current_nl_sys_num;
+unsigned int
+FEProblemBase::currentNlISysNum() const
+{
+  return _nl_i_sys_num;
+}
+
+unsigned int
+FEProblemBase::currentNlJSysNum() const
+{
+  return _nl_j_sys_num;
+}
+
+void
+FEProblemBase::setJacobianBlockContext(unsigned int i_sys, unsigned int j_sys)
+{
+  _nl_i_sys_num = i_sys;
+  _nl_j_sys_num = j_sys;
 }
 
 unsigned int
 FEProblemBase::currentLinearSysNum() const
 {
-  // If we don't have linear systems this should be an invalid number
-  unsigned int current_linear_sys_num = libMesh::invalid_uint;
-  if (_linear_systems.size())
-    current_linear_sys_num = currentLinearSystem().number();
-
-  return current_linear_sys_num;
+  return _current_linear_sys_num;
 }
 
 bool
@@ -9893,8 +9904,8 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
 {
   mooseAssert(nl_sys_num < _nl.size(),
               "System number greater than the number of nonlinear systems");
-  _current_nl_sys = _nl[nl_sys_num].get();
-  _current_solver_sys = _current_nl_sys;
+  _nl_i_sys_num = nl_sys_num;
+  _nl_j_sys_num = nl_sys_num;
 }
 
 void
@@ -9902,8 +9913,7 @@ FEProblemBase::setCurrentLinearSystem(const unsigned int sys_num)
 {
   mooseAssert(sys_num < _linear_systems.size(),
               "System number greater than the number of linear systems");
-  _current_linear_sys = _linear_systems[sys_num].get();
-  _current_solver_sys = _current_linear_sys;
+  _current_linear_sys_num = sys_num;
 }
 
 void

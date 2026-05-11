@@ -2797,6 +2797,14 @@ public:
   bool isSolverSystemNonlinear(const unsigned int sys_num) { return sys_num < _num_nl_sys; }
 
   virtual unsigned int currentNlSysNum() const override;
+  virtual unsigned int currentNlISysNum() const override;
+  virtual unsigned int currentNlJSysNum() const override;
+
+  /**
+   * Set the (ISys, JSys) context for cross-system Jacobian block assembly.
+   * ISys is the row system (residual), JSys is the column system (AD seeding).
+   */
+  void setJacobianBlockContext(unsigned int i_sys, unsigned int j_sys);
 
   virtual unsigned int currentLinearSysNum() const override;
 
@@ -3066,8 +3074,8 @@ protected:
   /// Map from linear system name to number
   std::map<LinearSystemName, unsigned int> _linear_sys_name_to_num;
 
-  /// The current linear system that we are solving
-  LinearSystem * _current_linear_sys;
+  /// Index of the current linear system being solved; invalid_uint when none is active.
+  unsigned int _current_linear_sys_num;
 
   /// Boolean to check if we have the default nonlinear system
   const bool _using_default_nl;
@@ -3087,11 +3095,10 @@ protected:
   /// Nonlinear preconditioning object (null if [NonlinearPreconditioning] block is absent).
   std::shared_ptr<NonlinearPreconditioning> _nl_preconditioning;
 
-  /// The current nonlinear system that we are solving
-  NonlinearSystemBase * _current_nl_sys;
-
-  /// The current solver system
-  SolverSystem * _current_solver_sys;
+  /// Row system index for Jacobian block assembly (ISys); set by setJacobianBlockContext.
+  unsigned int _nl_i_sys_num;
+  /// Column system index for Jacobian block assembly (JSys); AD seeding uses this system's DOFs.
+  unsigned int _nl_j_sys_num;
 
   /// Combined container to base pointer of every solver system
   std::vector<std::shared_ptr<SolverSystem>> _solver_systems;
@@ -3714,15 +3721,15 @@ FEProblemBase::getSolverSystem(const unsigned int sys_num) const
 inline NonlinearSystemBase &
 FEProblemBase::currentNonlinearSystem()
 {
-  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
-  return *_current_nl_sys;
+  mooseAssert(_nl_i_sys_num < _nl.size(), "The nonlinear system is not currently set");
+  return *_nl[_nl_i_sys_num];
 }
 
 inline const NonlinearSystemBase &
 FEProblemBase::currentNonlinearSystem() const
 {
-  mooseAssert(_current_nl_sys, "The nonlinear system is not currently set");
-  return *_current_nl_sys;
+  mooseAssert(_nl_i_sys_num < _nl.size(), "The nonlinear system is not currently set");
+  return *_nl[_nl_i_sys_num];
 }
 
 inline LinearSystem &
@@ -3744,15 +3751,17 @@ FEProblemBase::getLinearSystem(const unsigned int sys_num) const
 inline LinearSystem &
 FEProblemBase::currentLinearSystem()
 {
-  mooseAssert(_current_linear_sys, "The linear system is not currently set");
-  return *_current_linear_sys;
+  mooseAssert(_current_linear_sys_num < _linear_systems.size(),
+              "The linear system is not currently set");
+  return *_linear_systems[_current_linear_sys_num];
 }
 
 inline const LinearSystem &
 FEProblemBase::currentLinearSystem() const
 {
-  mooseAssert(_current_linear_sys, "The linear system is not currently set");
-  return *_current_linear_sys;
+  mooseAssert(_current_linear_sys_num < _linear_systems.size(),
+              "The linear system is not currently set");
+  return *_linear_systems[_current_linear_sys_num];
 }
 
 inline Assembly &
