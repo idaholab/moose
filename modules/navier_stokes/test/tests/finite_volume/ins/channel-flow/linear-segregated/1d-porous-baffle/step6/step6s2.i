@@ -271,6 +271,7 @@ axial_coordinate_shift = 1.167
     debug_baffle = false
 
     use_flux_velocity_reconstruction = true
+    flux_velocity_reconstruction_quantity = mass
     use_reconstructed_pressure_gradient = true
     flux_velocity_reconstruction_relaxation = 1.0
     flux_velocity_reconstruction_zero_flux_sidesets = 'bed_left bed_right horizontal_walls'

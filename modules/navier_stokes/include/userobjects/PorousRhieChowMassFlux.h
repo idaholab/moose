@@ -78,6 +78,7 @@ private:
   std::unordered_map<BoundaryID, bool> _pressure_baffle_form_loss_use_higher_eps_by_id;
   const bool _debug_baffle;
   const bool _use_flux_velocity_reconstruction;
+  const bool _use_mass_based_flux_velocity_reconstruction;
   const Real _flux_velocity_reconstruction_relaxation;
   const Real _reconstructed_pressure_gradient_feedback_relaxation;
   const bool _use_corrected_pressure_gradient;
