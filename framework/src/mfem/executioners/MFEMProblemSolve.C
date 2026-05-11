@@ -66,10 +66,8 @@ MFEMProblemSolve::solve()
 
   // Solve step begins
   _executioner.preSolve();
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
   _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
   _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
   _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
 
@@ -105,7 +103,6 @@ MFEMProblemSolve::solve()
   // Execute user objects, transfers, and multiapps at timestep end
   _mfem_problem.onTimestepEnd();
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-  _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _executioner.postSolve();
   // Solve step ends
@@ -114,7 +111,6 @@ MFEMProblemSolve::solve()
   {
     // Fixed point iteration loop ends right above
     _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-    _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
     _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
     _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
   }
