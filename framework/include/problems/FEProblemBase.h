@@ -1625,8 +1625,15 @@ public:
    * Execute MultiAppTransfers associated with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.
+   * @param source_app The source application to execute transfers from. Defaults to all sources
+   * @param skip_transfers_with_source_app_executing_on_type whether to skip all the transfers for
+   * which the source application is also executing on the same 'execute_on' type. If the source app
+   *        is inactive, the transfer will execute if this is true
    */
-  void execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION direction);
+  void execMultiAppTransfers(ExecFlagType type,
+                             Transfer::DIRECTION direction,
+                             const MultiAppName & source_app = "",
+                             bool skip_transfers_with_source_app_executing_on_type = false);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
