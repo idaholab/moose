@@ -60,7 +60,12 @@ The test: Every changed line should trace directly to the user's request.
 
 - Comments and documentation must use ASCII characters.
 
-## 6. Goal-Driven Execution
+## 6. Tool Use
+
+- Prefer builtin tools over bash commands whenever possible in the vein of
+  reducing permission prompting.
+
+## 7. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
