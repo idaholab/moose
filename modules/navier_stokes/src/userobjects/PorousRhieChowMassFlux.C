@@ -64,6 +64,13 @@ PorousRhieChowMassFlux::validParams()
                         false,
                         "Reconstruct cell velocity from corrected face fluxes "
                         "using an oscillation-free least-squares fit.");
+  MooseEnum reconstruction_quantity("velocity mass", "velocity");
+  params.addParam<MooseEnum>(
+      "flux_velocity_reconstruction_quantity",
+      reconstruction_quantity,
+      "Quantity to reconstruct from face fluxes when use_flux_velocity_reconstruction is true. "
+      "'velocity' reconstructs face velocity m_dot_f/rho_f directly. 'mass' reconstructs rho*u "
+      "from m_dot_f and divides by the cell density.");
   params.addRangeCheckedParam<Real>(
       "flux_velocity_reconstruction_relaxation",
       1.0,
@@ -114,6 +121,8 @@ PorousRhieChowMassFlux::PorousRhieChowMassFlux(const InputParameters & params)
     _use_interpolated_density_in_form_loss(getParam<bool>("use_interpolated_density_in_form_loss")),
     _debug_baffle(getParam<bool>("debug_baffle")),
     _use_flux_velocity_reconstruction(getParam<bool>("use_flux_velocity_reconstruction")),
+    _use_mass_based_flux_velocity_reconstruction(
+        getParam<MooseEnum>("flux_velocity_reconstruction_quantity") == "mass"),
     _flux_velocity_reconstruction_relaxation(
         getParam<Real>("flux_velocity_reconstruction_relaxation")),
     _reconstructed_pressure_gradient_feedback_relaxation(
@@ -1022,6 +1031,7 @@ PorousRhieChowMassFlux::computeCellVelocity()
 
   const auto & mesh = _fe_problem.mesh();
   const auto rz_radial_coord = mesh.getAxisymmetricRadialCoord();
+  const auto time_arg = Moose::currentState();
 
   for (const auto & elem_info : mesh.elemInfoVector())
   {
@@ -1035,6 +1045,8 @@ PorousRhieChowMassFlux::computeCellVelocity()
     bool has_one_sided_face = false;
 
     const Elem & elem = *elem_info->elem();
+    const Real cell_rho =
+        _use_mass_based_flux_velocity_reconstruction ? _rho(makeElemArg(&elem), time_arg) : 1.0;
 
     auto act = [&](const Elem &,
                    const Elem * const neighbor,
@@ -1058,10 +1070,22 @@ PorousRhieChowMassFlux::computeCellVelocity()
           M(i, j) += surface_vector(i) * surface_vector(j) / magS;
 
       const bool enforce_zero_flux = !neighbor_active && isReconstructionZeroFluxFace(*fi);
-      const Real u_n =
-          enforce_zero_flux ? 0.0 : _face_velocity.evaluate(fi) * (surface_vector / magS);
+      Real reconstructed_normal = 0.0;
+      if (!enforce_zero_flux)
+      {
+        if (_use_mass_based_flux_velocity_reconstruction)
+        {
+          const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+          const Point face_normal = elem_is_fluid ? fi->normal() : Point(-fi->normal());
+          // Reconstruct rho*u from the balanced face mass fluxes, then divide by cell rho below.
+          reconstructed_normal =
+              _face_mass_flux.evaluate(fi) * (face_normal * (surface_vector / magS));
+        }
+        else
+          reconstructed_normal = _face_velocity.evaluate(fi) * (surface_vector / magS);
+      }
       for (const auto i : make_range(_dim))
-        b_h(i) += u_n * surface_vector(i);
+        b_h(i) += reconstructed_normal * surface_vector(i);
     };
 
     Moose::FV::loopOverElemFaceInfo(
@@ -1084,7 +1108,7 @@ PorousRhieChowMassFlux::computeCellVelocity()
         const auto index = elem.dof_number(system_number, var_nums[comp_index], 0);
         const Real HbyA = (*_HbyA_raw[comp_index])(index);
         const Real Ainv = (*_Ainv_raw[comp_index])(index);
-        const Real recon_val = result_h(comp_index);
+        const Real recon_val = cell_rho != 0.0 ? result_h(comp_index) / cell_rho : 0.0;
         const Real recon_grad = Ainv != 0.0 ? (-recon_val - HbyA) / Ainv : 0.0;
         const Real base_grad = (*relaxed_grad_source[comp_index])(index);
         const Real prev_feedback_grad =
@@ -1117,7 +1141,7 @@ PorousRhieChowMassFlux::computeCellVelocity()
         const Real HbyA = (*_HbyA_raw[comp_index])(index);
         const Real Ainv = (*_Ainv_raw[comp_index])(index);
         const Real base_grad = (*relaxed_grad_source[comp_index])(index);
-        const Real recon_val = vel_result(comp_index);
+        const Real recon_val = cell_rho != 0.0 ? vel_result(comp_index) / cell_rho : 0.0;
         const Real recon_grad = Ainv != 0.0 ? (-recon_val - HbyA) / Ainv : base_grad;
         const Real prev_feedback_grad =
             have_feedback_state ? (*_grad_p_feedback_state[comp_index])(index) : base_grad;
