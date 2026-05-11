@@ -661,7 +661,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
-  registerSyntax("SetupNonlinearPreconditioningAction", "NonlinearPreconditioning");
+  registerSyntax("SetupNonlinearPreconditioningAction", "NonlinearPreconditioning/*");
 
   registerSyntax("CreateExecutionerAction", "Executioner");
   registerSyntax("ReadExecutorParamsAction", "Executors/*");

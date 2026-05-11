@@ -12,9 +12,9 @@
 #include "Action.h"
 
 /**
- * Action for the [NonlinearPreconditioning] input block.  Creates a NonlinearPreconditioning
- * object and stores it on the FEProblem so that FEProblemSolve can route inner-system solves
- * through the PETSc NPC mechanism.
+ * Action for [NonlinearPreconditioning]/<name> sub-blocks.  Each sub-block creates one
+ * NonlinearPreconditioning object; the sub-block name becomes the PETSc options prefix
+ * for the outer SNES (e.g. -<name>_snes_type, -<name>_pc_type fieldsplit, etc.).
  */
 class SetupNonlinearPreconditioningAction : public Action
 {

@@ -63,7 +63,9 @@
 []
 
 [NonlinearPreconditioning]
-  inner_nl_sys_names = 'nl1'
+  [nle]
+    inner_nl_sys_names = 'nl1'
+  []
 []
 
 [Executioner]
