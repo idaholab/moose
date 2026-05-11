@@ -1,0 +1,49 @@
+[Tests]
+  [simple]
+    type = 'CSVDiff'
+    input = step6s.i
+    csvdiff = 'step6s_out.csv'
+    requirement = 'The system shall preserve pressure drop, mass flow, velocity extrema, and enthalpy transport for the step-6 porous baffle SIMPLE model.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [simple-s2]
+    type = 'CSVDiff'
+    input = step6s2.i
+    csvdiff = 'step6s2_out.csv'
+    requirement = 'The system shall preserve pressure drop, mass flow, velocity extrema, and enthalpy transport for the second step-6 porous baffle SIMPLE geometry.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [full-s2]
+    type = 'CSVDiff'
+    input = step6full_s2.i
+    csvdiff = 'step6full_s2_out.csv'
+    requirement = 'The system shall preserve pressure drop, mass flow, velocity extrema, and enthalpy balance for the full step-6 porous baffle SIMPLE geometry.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [full-s2-slip]
+    type = 'CSVDiff'
+    input = step6full_s2_slip.i
+    csvdiff = 'step6full_s2_slip_out.csv'
+    requirement = 'The system shall preserve pressure drop, mass flow, velocity extrema, and enthalpy balance for the full step-6 porous baffle SIMPLE geometry with slip boundaries.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]

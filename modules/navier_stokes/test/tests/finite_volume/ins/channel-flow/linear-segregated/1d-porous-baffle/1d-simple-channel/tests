@@ -1,0 +1,25 @@
+[Tests]
+  [linear]
+    type = 'CSVDiff'
+    input = porous-baffle-1d.i
+    csvdiff = 'porous-baffle-1d_out.csv porous-baffle-1d_out_p_line_0001.csv porous-baffle-1d_out_u_line_0001.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the linear finite volume SIMPLE solve.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false UserObjects/rc/debug_baffle=false LinearFVKernels/p_diffusion/debug_baffle_jump=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [insfv]
+    type = 'CSVDiff'
+    input = porous-baffle-1d-insfv.i
+    csvdiff = 'porous-baffle-1d-insfv_out.csv porous-baffle-1d-insfv_out_p_line_0001.csv porous-baffle-1d-insfv_out_u_line_0001.csv'
+    requirement = 'The system shall preserve the one-dimensional porous baffle Bernoulli pressure jump and the non-oscillatory superficial velocity profile using the nonlinear incompressible finite volume solve.'
+    design = 'PINSFVRhieChowInterpolator.md BernoulliPressureVariable.md PINSFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]

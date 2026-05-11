@@ -1,0 +1,13 @@
+[Tests]
+  [param-study]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-param-study.i
+    csvdiff = 'porous-baffle-2d-param-study_out.csv porous-baffle-2d-param-study_out_p_line_0001.csv porous-baffle-2d-param-study_out_u_line_0001.csv'
+    requirement = 'The system shall preserve the pressure drop and centerline profiles for a parameterized porous baffle case with configurable inlet velocity, form loss, and Forchheimer friction.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]

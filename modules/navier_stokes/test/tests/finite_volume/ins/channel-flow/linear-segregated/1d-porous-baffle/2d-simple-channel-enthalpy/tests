@@ -1,0 +1,26 @@
+[Tests]
+  [fluid-only]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-enthalpy-fluid-only.i
+    csvdiff = 'porous-baffle-2d-enthalpy-fluid-only_out.csv porous-baffle-2d-enthalpy-fluid-only_out_p_line_0002.csv porous-baffle-2d-enthalpy-fluid-only_out_u_line_0002.csv porous-baffle-2d-enthalpy-fluid-only_out_T_fluid_line_0002.csv'
+    requirement = 'The system shall preserve pressure, velocity, and fluid enthalpy profiles through a porous baffle with fluid-only heat transport.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyFunctorMaterial.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+
+  [fluid-solid]
+    type = 'CSVDiff'
+    input = porous-baffle-2d-enthalpy.i
+    csvdiff = 'porous-baffle-2d-enthalpy_out.csv porous-baffle-2d-enthalpy_out_p_line_0002.csv porous-baffle-2d-enthalpy_out_u_line_0002.csv porous-baffle-2d-enthalpy_out_T_fluid_line_0002.csv porous-baffle-2d-enthalpy_out_T_solid_line_0002.csv'
+    requirement = 'The system shall preserve pressure, velocity, fluid temperature, and solid temperature profiles through a porous baffle with coupled fluid-solid heat transfer.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVEnergyAdvection.md LinearFVEnthalpyVolumetricHeatTransfer.md LinearFVEnthalpyFunctorMaterial.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-4
+  []
+[]

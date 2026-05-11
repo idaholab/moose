@@ -1,0 +1,2 @@
+time,delta_p,delta_p_error,delta_p_expected,p_block_1,p_block_2,p_block_jump,p_block_jump_error,p_left,p_right,u_block_1,u_block_1_error,u_block_1_expected,u_block_2,u_block_2_error,u_block_2_expected
+1,15.317050791393,11.817050791393,3.5,15.406909030741,0.44200182325175,14.964907207489,11.464907207489,15.317050791393,0,1.0041666666667,0.0041666666666667,1,1.9916666666667,-0.0083333333333333,2
