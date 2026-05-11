@@ -969,12 +969,33 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
   // Use rank-based offsets for node and element IDs so that IDs are globally unique across
   // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
-  // The main mesh max IDs are global and serve as a safe stride since the
-  // mortar segment mesh is always far smaller than the main mesh.
+  // Each rank's starting ID is an exclusive prefix sum of per-rank bounds, where each bound is
+  // local_secondary_sub_elems * visible_primary_sub_elems * 9 (max nodes per sub-element pair).
   mooseAssert(_mesh.is_prepared(),
               "The mesh should be prepared such that our parallel id counts are correct");
-  dof_id_type next_node_id = _mesh.processor_id() * _mesh.max_node_id();
-  dof_id_type local_id_index = _mesh.processor_id() * _mesh.max_elem_id();
+  // Count local secondary sub-elements (only local - each rank processes its own secondary faces)
+  // and visible primary sub-elements (local + ghost - secondary faces can clip against ghost
+  // primaries).
+  dof_id_type local_secondary_sub_elems = 0, visible_primary_sub_elems = 0;
+  for (const auto [primary_sub_id, secondary_sub_id] : _primary_secondary_subdomain_id_pairs)
+  {
+    for (const auto * const el : _mesh.active_local_subdomain_elements_ptr_range(secondary_sub_id))
+      local_secondary_sub_elems += el->n_sub_elem();
+    for (const auto * const el : _mesh.active_subdomain_elements_ptr_range(primary_sub_id))
+      visible_primary_sub_elems += el->n_sub_elem();
+  }
+  // Each secondary/primary sub-element pair yields at most 9 nodes (8-vertex clipped polygon +
+  // center point). Use an exclusive prefix scan so each rank gets a tight, non-overlapping range.
+  const dof_id_type per_rank_bound = local_secondary_sub_elems * visible_primary_sub_elems * 9;
+  std::vector<dof_id_type> per_rank_bounds;
+  _mesh.comm().allgather(per_rank_bound, per_rank_bounds);
+  dof_id_type next_node_id = 0;
+  for (const auto r : make_range(_mesh.processor_id()))
+    next_node_id += per_rank_bounds[r];
+  // Element IDs use the same starting offset: node and element IDs are separate namespaces, and
+  // element count per clip (n triangles) is always <= node count (n+1), so per_rank_bound covers
+  // both.
+  dof_id_type next_elem_id = next_node_id;
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
@@ -1297,7 +1318,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             new_elem->processor_id() = secondary_side_elem->processor_id();
             new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
-            new_elem->set_id(local_id_index++);
+            new_elem->set_id(next_elem_id++);
 
             // Attach newly created nodes
             for (auto i : index_range(elem_to_node_map[el]))
