@@ -25,23 +25,17 @@ public:
   SCMMixingKimAndChung(const InputParameters & parameters);
 
   virtual Real computeMixingParameter(const unsigned int i_gap,
-                                      const unsigned int iz,
-                                      const bool sweep_flow) const override;
+                                      const unsigned int iz) const override;
 
 protected:
-  Real computeTriLatticeMixingParameter(const unsigned int i_gap,
-                                        const unsigned int iz,
-                                        const bool sweep_flow) const;
+  Real computeTriLatticeMixingParameter(const unsigned int i_gap, const unsigned int iz) const;
 
-  Real computeQuadLatticeMixingParameter(const unsigned int i_gap,
-                                         const unsigned int iz,
-                                         const bool sweep_flow) const;
+  Real computeQuadLatticeMixingParameter(const unsigned int i_gap, const unsigned int iz) const;
 
   Real computeLatticeMixingParameter(const unsigned int i_gap,
                                      const unsigned int iz,
                                      const Real delta,
-                                     const Real sf,
-                                     const bool sweep_flow) const;
+                                     const Real sf) const;
 
   /// Keep track of the lattice type
   bool _is_tri_lattice;

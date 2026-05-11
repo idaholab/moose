@@ -29,8 +29,7 @@ SCMMixingConstantBeta::SCMMixingConstantBeta(const InputParameters & parameters)
 
 Real
 SCMMixingConstantBeta::computeMixingParameter(const unsigned int /*i_gap*/,
-                                              const unsigned int /*iz*/,
-                                              const bool /*sweep_flow*/) const
+                                              const unsigned int /*iz*/) const
 {
   return _beta;
 }

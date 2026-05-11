@@ -32,14 +32,12 @@ SCMMixingChengTodreas::SCMMixingChengTodreas(const InputParameters & parameters)
 }
 
 Real
-SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
-                                              const unsigned int iz,
-                                              const bool sweep_flow) const
+SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const
 {
   if (!_is_tri_lattice)
     mooseError("This corelation applies only for triangular assemblies");
 
-  Real beta = std::numeric_limits<double>::quiet_NaN();
+  Real beta = 0.0;
 
   const Real pitch = _subchannel_mesh.getPitch();
   const Real pin_diameter = _subchannel_mesh.getPinDiameter();
@@ -48,7 +46,7 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
 
-  if (wire_lead_length == 0 && wire_diameter == 0)
+  if (wire_lead_length == 0 || wire_diameter == 0)
     mooseError("This corelation applies only for wire-wrapped assemblies");
 
   // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the P/D range
@@ -99,15 +97,10 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
   const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1.0));
 
-  // Calculation of turbulent interchange flow parameters for wire-wrapped triangular assemblies
-  // from Cheng and Todreas (1986). The interior-subchannel branch below provides the base
-  // turbulent mixing beta used by the global turbulent crossflow relation
-  // w'_ij = beta * S_ij * G_bar. The edge/corner branch provides only the sweep-flow beta used
-  // by the triangular-assembly enthalpy sweep-flow term when sweep_flow is true; it is not added
-  // to the base beta for the global turbulent crossflow solve.
-  // INNER SUBCHANNELS
-  if ((subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER) &&
-      (wire_lead_length != 0) && (wire_diameter != 0))
+  // This beta is used by the global turbulent crossflow relation:
+  // w'_ij = beta * S_ij * G_bar. Peripheral sweep flow is handled separately by
+  // computeSweepFlowMixingParameter().
+  if (subch_type_i == EChannelType::CENTER || subch_type_j == EChannelType::CENTER)
   {
     // Calculation of geometric parameters
     // wire angle
@@ -163,10 +156,78 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
     // mixing parameter
     beta = Cm * std::sqrt(Ar1 / A1) * std::tan(theta);
   }
-  // EDGE OR CORNER SUBCHANNELS/ SWEEP FLOW
-  else if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
-           (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
-           (wire_lead_length != 0) && (wire_diameter != 0))
+  return beta;
+}
+
+Real
+SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
+                                                       const unsigned int iz) const
+{
+  if (!_is_tri_lattice)
+    mooseError("This corelation applies only for triangular assemblies");
+
+  Real beta = 0.0;
+
+  const Real pitch = _subchannel_mesh.getPitch();
+  const Real pin_diameter = _subchannel_mesh.getPinDiameter();
+  const Real pitch_to_diameter = pitch / pin_diameter;
+
+  const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
+  const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
+
+  if (wire_lead_length == 0 || wire_diameter == 0)
+    mooseError("This corelation applies only for wire-wrapped assemblies");
+
+  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the P/D range
+  // 1.067 <= P/D <= 1.35.
+  if (pitch_to_diameter < 1.067 || pitch_to_diameter > 1.35)
+    flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Cheng-Todreas "
+                        "wire-wrapped mixing correlation data range.");
+
+  const auto chans = _subchannel_mesh.getGapChannels(i_gap);
+  const unsigned int i_ch = chans.first;
+  const unsigned int j_ch = chans.second;
+
+  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
+
+  const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
+  const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
+
+  const Node * const node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+  const Node * const node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+  const Node * const node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+  const Node * const node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+
+  const Real Si_in = _S_soln(node_in_i);
+  const Real Sj_in = _S_soln(node_in_j);
+  const Real Si_out = _S_soln(node_out_i);
+  const Real Sj_out = _S_soln(node_out_j);
+
+  const Real S_total = Si_in + Sj_in + Si_out + Sj_out;
+  const Real Si = 0.5 * (Si_in + Si_out);
+  const Real Sj = 0.5 * (Sj_in + Sj_out);
+
+  const Real w_perim_i = 0.5 * (_w_perim_soln(node_in_i) + _w_perim_soln(node_out_i));
+  const Real w_perim_j = 0.5 * (_w_perim_soln(node_in_j) + _w_perim_soln(node_out_j));
+
+  const Real avg_mu =
+      (1.0 / S_total) * (_mu_soln(node_out_i) * Si_out + _mu_soln(node_in_i) * Si_in +
+                         _mu_soln(node_out_j) * Sj_out + _mu_soln(node_in_j) * Sj_in);
+
+  const Real avg_hD = 4.0 * (Si + Sj) / (w_perim_i + w_perim_j);
+
+  const Real avg_massflux =
+      0.5 * ((_mdot_soln(node_in_i) + _mdot_soln(node_in_j)) / (Si_in + Sj_in) +
+             (_mdot_soln(node_out_i) + _mdot_soln(node_out_j)) / (Si_out + Sj_out));
+
+  const Real Re = avg_massflux * avg_hD / avg_mu;
+
+  // Calculation of flow regime
+  const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
+  const Real ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1.0));
+
+  if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
+      (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
   {
     const Real theta =
         std::acos(wire_lead_length /
@@ -221,11 +282,8 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap,
       Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
     }
 
-    // Calculation of turbulent mixing parameter used for sweep flow only in enthalpy calculation
-    if (sweep_flow)
-      beta = Cs * std::sqrt(Ar2 / A2) * std::tan(theta);
-    else
-      beta = 0.0;
+    // Sweep-flow coefficient used only by the peripheral enthalpy calculation.
+    beta = Cs * std::sqrt(Ar2 / A2) * std::tan(theta);
   }
 
   return beta;

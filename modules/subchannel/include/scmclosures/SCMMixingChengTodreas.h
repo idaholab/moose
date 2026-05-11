@@ -13,9 +13,9 @@
 #include "TriSubChannelMesh.h"
 
 /**
- * Class that calculates the turbulent mixing coefficient based on the Cheng & Todreas correlations
- * (Cheng & Todreas 1986). It is used only for wire-wrapped tri lattices. Also, takes care of
- * sweep_flow.
+ * Class that calculates turbulent mixing and sweep-flow coefficients based on the
+ * Cheng & Todreas correlations (Cheng & Todreas 1986). It is used only for
+ * wire-wrapped triangular lattices.
  */
 class SCMMixingChengTodreas : public SCMMixingClosureBase
 {
@@ -24,9 +24,10 @@ public:
 
   SCMMixingChengTodreas(const InputParameters & parameters);
 
-  Real computeMixingParameter(const unsigned int i_gap,
-                              const unsigned int iz,
-                              const bool sweep_flow) const override;
+  Real computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const override;
+
+  Real computeSweepFlowMixingParameter(const unsigned int i_gap,
+                                       const unsigned int iz) const override;
 
   /// Keep track of the lattice type
   bool _is_tri_lattice;

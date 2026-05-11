@@ -27,9 +27,12 @@ public:
   /// @brief Computes the turbulent mixing coefficient for the local conditions around gap(i_gap) and axial level(iz)
   /// @param i_gap and @param iz
   /// @return the mixing coefficient (beta)
-  virtual Real computeMixingParameter(const unsigned int i_gap,
-                                      const unsigned int iz,
-                                      const bool sweep_flow = false) const = 0;
+  virtual Real computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const = 0;
+
+  /// @brief Computes the wire-wrap sweep-flow coefficient for peripheral gaps.
+  /// @return the sweep-flow coefficient; defaults to zero for closures without sweep flow.
+  virtual Real computeSweepFlowMixingParameter(const unsigned int i_gap,
+                                               const unsigned int iz) const;
 
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;

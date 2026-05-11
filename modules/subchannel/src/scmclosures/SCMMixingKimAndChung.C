@@ -45,14 +45,12 @@ SCMMixingKimAndChung::SCMMixingKimAndChung(const InputParameters & parameters)
 }
 
 Real
-SCMMixingKimAndChung::computeMixingParameter(const unsigned int i_gap,
-                                             const unsigned int iz,
-                                             const bool sweep_flow) const
+SCMMixingKimAndChung::computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const
 {
   if (_is_tri_lattice)
-    return computeTriLatticeMixingParameter(i_gap, iz, sweep_flow);
+    return computeTriLatticeMixingParameter(i_gap, iz);
   else
-    return computeQuadLatticeMixingParameter(i_gap, iz, sweep_flow);
+    return computeQuadLatticeMixingParameter(i_gap, iz);
 }
 
 /**
@@ -63,8 +61,7 @@ Real
 SCMMixingKimAndChung::computeLatticeMixingParameter(const unsigned int i_gap,
                                                     const unsigned int iz,
                                                     const Real delta,
-                                                    const Real sf,
-                                                    const bool /*sweep_flow*/) const
+                                                    const Real sf) const
 {
   const Real P_out = _scm_problem.getOutletPressure();
   const auto fp = _scm_problem.getSinglePhaseFluidProperties();
@@ -177,24 +174,22 @@ SCMMixingKimAndChung::computeLatticeMixingParameter(const unsigned int i_gap,
 
 Real
 SCMMixingKimAndChung::computeTriLatticeMixingParameter(const unsigned int i_gap,
-                                                       const unsigned int iz,
-                                                       const bool sweep_flow) const
+                                                       const unsigned int iz) const
 {
   // main differences for tri lattice: delta and sf
   const Real pitch = _sch_mesh.getPitch();
   const Real delta = pitch / std::sqrt(3.0); // centroid to centroid distance
   constexpr Real sf = 2.0 / 3.0;             // shape factor
-  return computeLatticeMixingParameter(i_gap, iz, delta, sf, sweep_flow);
+  return computeLatticeMixingParameter(i_gap, iz, delta, sf);
 }
 
 Real
 SCMMixingKimAndChung::computeQuadLatticeMixingParameter(const unsigned int i_gap,
-                                                        const unsigned int iz,
-                                                        const bool sweep_flow) const
+                                                        const unsigned int iz) const
 {
   // main differences for quad lattice: delta and sf
   const Real pitch = _sch_mesh.getPitch();
   const Real delta = pitch; // centroid to centroid distance
   constexpr Real sf = 1.0;  // shape factor
-  return computeLatticeMixingParameter(i_gap, iz, delta, sf, sweep_flow);
+  return computeLatticeMixingParameter(i_gap, iz, delta, sf);
 }

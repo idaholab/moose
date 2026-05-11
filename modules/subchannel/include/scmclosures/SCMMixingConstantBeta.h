@@ -24,8 +24,7 @@ public:
   SCMMixingConstantBeta(const InputParameters & parameters);
 
   virtual Real computeMixingParameter(const unsigned int i_gap,
-                                      const unsigned int iz,
-                                      const bool sweep_flow) const override;
+                                      const unsigned int iz) const override;
 
 protected:
   /// Turbulent mixing parameter

@@ -1871,14 +1871,29 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
 }
 
 Real
-SubChannel1PhaseProblem::computeMixingParameter(unsigned int i_gap,
-                                                unsigned int iz,
-                                                bool sweep_flow) const
+SubChannel1PhaseProblem::computeMixingParameter(unsigned int i_gap, unsigned int iz) const
 {
-  auto beta = _mixing_closure->computeMixingParameter(i_gap, iz, sweep_flow);
+  auto beta = _mixing_closure->computeMixingParameter(i_gap, iz);
   if (!std::isfinite(beta) || beta < 0.0)
     mooseError(name(),
                ": Mixing closure returned invalid beta = ",
+               beta,
+               " for gap ",
+               i_gap,
+               " at axial index ",
+               iz,
+               ". Beta must be finite and non-negative.");
+
+  return beta;
+}
+
+Real
+SubChannel1PhaseProblem::computeSweepFlowMixingParameter(unsigned int i_gap, unsigned int iz) const
+{
+  auto beta = _mixing_closure->computeSweepFlowMixingParameter(i_gap, iz);
+  if (!std::isfinite(beta) || beta < 0.0)
+    mooseError(name(),
+               ": Mixing closure returned invalid sweep-flow beta = ",
                beta,
                " for gap ",
                i_gap,

@@ -22,3 +22,10 @@ SCMMixingClosureBase::SCMMixingClosureBase(const InputParameters & parameters)
   : SCMClosureBase(parameters), _CT(getParam<Real>("CT"))
 {
 }
+
+Real
+SCMMixingClosureBase::computeSweepFlowMixingParameter(const unsigned int /*i_gap*/,
+                                                       const unsigned int /*iz*/) const
+{
+  return 0.0;
+}
