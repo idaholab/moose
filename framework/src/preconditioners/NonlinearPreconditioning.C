@@ -20,8 +20,6 @@
 #include <petscsnes.h>
 #include <petscsys.h>
 
-registerMooseObject("MooseApp", NonlinearPreconditioning);
-
 InputParameters
 NonlinearPreconditioning::validParams()
 {
@@ -91,15 +89,6 @@ NonlinearPreconditioning::wireToSNES(unsigned int sys_num)
   LibmeshPetscCallA(_fe_problem.comm().get(),
                     SNESSetOptionsPrefix(outer_snes, (name() + "_").c_str()));
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESSetFromOptions(outer_snes));
-}
-
-void
-NonlinearPreconditioning::setupNPC()
-{
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESCreate(_fe_problem.comm().get(), &_npc_snes));
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESSetType(_npc_snes, SNESSHELL));
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESShellSetSolve(_npc_snes, npcShellSolve));
-  LibmeshPetscCallA(_fe_problem.comm().get(), SNESSetApplicationContext(_npc_snes, this));
 }
 
 void
@@ -225,18 +214,6 @@ NonlinearPreconditioning::registerFieldSplitIS(SNES outer_snes, unsigned int n_s
 
   for (unsigned int i = 0; i < n_sys; ++i)
     LibmeshPetscCallA(comm, PCFieldSplitSetIS(pc, std::to_string(i).c_str(), row_is[i]));
-}
-
-PetscErrorCode
-NonlinearPreconditioning::npcShellSolve(SNES snes, Vec /*x*/)
-{
-  PetscFunctionBegin;
-  void * ctx;
-  PetscCall(SNESGetApplicationContext(snes, &ctx));
-  auto * npc = static_cast<NonlinearPreconditioning *>(ctx);
-  for (const auto sys_num : npc->_inner_sys_nums)
-    npc->_fe_problem.solve(sys_num);
-  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 PetscErrorCode
