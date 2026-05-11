@@ -1482,8 +1482,6 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
-    execTransfers(EXEC_INITIAL);
-
     bool converged = execMultiApps(EXEC_INITIAL);
     if (!converged)
       mooseError("failed to converge initial MultiApp");
@@ -6194,20 +6192,6 @@ FEProblemBase::computeMultiAppsDT(ExecFlagType type)
 }
 
 void
-FEProblemBase::execTransfers(ExecFlagType type)
-{
-  if (_transfers[type].hasActiveObjects())
-  {
-    TIME_SECTION("execTransfers", 3, "Executing Transfers");
-
-    const auto & transfers = _transfers[type].getActiveObjects();
-
-    for (const auto & transfer : transfers)
-      transfer->execute();
-  }
-}
-
-void
 FEProblemBase::addTransfer(const std::string & transfer_name,
                            const std::string & name,
                            InputParameters & parameters)
@@ -7606,8 +7590,6 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
       }
 
-      execTransfers(EXEC_LINEAR);
-
       execMultiApps(EXEC_LINEAR);
 
       for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -7845,8 +7827,6 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       for (const auto & it : _random_data_objects)
         it.second->updateSeeds(EXEC_LINEAR);
 
-      execTransfers(EXEC_LINEAR);
-
       execMultiApps(EXEC_LINEAR);
 
       for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -8000,7 +7980,6 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
         if (_displaced_problem)
           _displaced_problem->setCurrentlyComputingJacobian(true);
 
-        execTransfers(EXEC_NONLINEAR);
         execMultiApps(EXEC_NONLINEAR);
 
         for (unsigned int tid = 0; tid < n_threads; tid++)
@@ -8202,7 +8181,6 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_NONLINEAR);
 
-  execTransfers(EXEC_NONLINEAR);
   execMultiApps(EXEC_NONLINEAR);
 
   computeUserObjects(EXEC_NONLINEAR, Moose::PRE_AUX);

@@ -1688,14 +1688,6 @@ public:
                            InputParameters & parameters);
 
   /**
-   * Execute the Transfers associated with the ExecFlagType
-   *
-   * Note: This does _not_ execute MultiApp Transfers!
-   * Those are executed automatically when MultiApps are executed.
-   */
-  void execTransfers(ExecFlagType type);
-
-  /**
    * Computes the residual of a nonlinear system using whatever is sitting in the current
    * solution vector then returns the L2 norm.
    */
