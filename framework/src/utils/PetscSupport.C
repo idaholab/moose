@@ -1017,9 +1017,25 @@ getPetscValidLineSearches()
 }
 
 InputParameters
+flagAndPairOptions()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<MultiMooseEnum>(
+      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
+  params.addParam<MultiMooseEnum>(
+      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
+  params.addParam<std::vector<std::string>>(
+      "petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
+  params.addParamNamesToGroup("petsc_options petsc_options_iname petsc_options_value", "PETSc");
+  return params;
+}
+
+InputParameters
 getPetscValidParams()
 {
   InputParameters params = emptyInputParameters();
+  params += flagAndPairOptions();
 
   MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
   params.addParam<MooseEnum>("solve_type",
@@ -1037,16 +1053,7 @@ getPetscValidParams()
                              "Jacobian-free solve types. Note that the "
                              "default is wp (for Walker and Pernice).");
 
-  params.addParam<MultiMooseEnum>(
-      "petsc_options", getCommonPetscFlags(), "Singleton PETSc options");
-  params.addParam<MultiMooseEnum>(
-      "petsc_options_iname", getCommonPetscKeys(), "Names of PETSc name/value pairs");
-  params.addParam<std::vector<std::string>>(
-      "petsc_options_value",
-      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParamNamesToGroup("solve_type petsc_options petsc_options_iname petsc_options_value "
-                              "mffd_type",
-                              "PETSc");
+  params.addParamNamesToGroup("solve_type mffd_type", "PETSc");
 
   return params;
 }
