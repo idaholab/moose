@@ -73,8 +73,7 @@ public:
   /// Get the pressure gradient component used in the momentum equation
   virtual Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the jump-corrected pressure gradient component at an element center
-  virtual Real correctedPressureGradient(const ElemInfo & elem_info,
-                                         unsigned int component) const;
+  virtual Real correctedPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
   /// Get the raw (uncorrected) pressure gradient component at an element center
   virtual Real rawPressureGradient(const ElemInfo & elem_info, unsigned int component) const;
 
@@ -167,6 +166,11 @@ protected:
 
   /// Update face superficial velocities from the current superficial mass flux
   void updateFaceVelocityFromMassFlux();
+
+  /// Get the prescribed velocity value on a Dirichlet boundary face
+  Real velocityBoundaryValue(unsigned int component,
+                             const FaceInfo & fi,
+                             const Moose::FaceArg & boundary_face) const;
 
   /**
    * Check the block consistency between the passed in \p var and us
