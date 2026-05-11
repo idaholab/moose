@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "NonlinearSystemBase.h"
+#include "PetscSupport.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/petsc_solver_exception.h"
@@ -24,6 +25,7 @@ InputParameters
 NonlinearPreconditioning::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += Moose::PetscSupport::flagAndPairOptions();
   params.registerBase("NonlinearPreconditioning");
   params.addClassDescription(
       "Nonlinear preconditioning for multi-system solves: each outer Newton step is preceded by "

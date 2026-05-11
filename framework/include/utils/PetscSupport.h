@@ -226,6 +226,11 @@ void addPetscPairsToPetscOptions(
 std::set<std::string> getPetscValidLineSearches();
 
 /**
+ * @returns MOOSE input parameters for PETSc flags and key-value pairs
+ */
+InputParameters flagAndPairOptions();
+
+/**
  * Returns the PETSc options that are common between Executioners and Preconditioners
  * @return InputParameters object containing the PETSc related parameters
  *
