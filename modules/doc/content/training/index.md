@@ -3,10 +3,6 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
-- MOOSE Modeling and Simulation User Training (2026 April 16, Texas A&M) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
-
-- [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
-
 - MOOSE Developer Training (2026 June 2-4, Idaho Falls) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
 - MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
@@ -29,6 +25,10 @@ refer to the [getting_started/examples_and_tutorials/index.md] page.
 
 
 #### Past Training:
+
+- [Griffin Workshop during PHYSOR 2026](https://www.physor2026.org/info-workshop/) (2026 April 19, Turin, Italy)
+
+- MOOSE Modeling and Simulation User Training (2026 April 16, Texas A&M)
 
 - [BISON](https://mooseframework.inl.gov/bison) Fuels Performance (2026 January 8-9, Rensselaer Polytechnic Institute)
 
