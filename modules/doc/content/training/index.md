@@ -9,6 +9,8 @@ Upcoming MOOSE related training in chronological order:
 
 - MOOSE Developer Training (2026 June 2-4, Idaho Falls) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
 
+- MOOSE-based Thermal Hydraulics and Fluid Dynamics Training (2026 August 13-14, North Carolina State University) [Registration](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration)
+
 !style-end!
 
 !!!
