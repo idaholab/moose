@@ -56,7 +56,11 @@ The test: Every changed line should trace directly to the user's request.
 - Never delete correct preexisting code comments.
 - Add comments when the code alone does not make clear what's happening.
 
-## 5. Goal-Driven Execution
+## 5. Repository Requirements
+
+- Comments and documentation must use ASCII characters.
+
+## 6. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
