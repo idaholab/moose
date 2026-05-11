@@ -5791,8 +5791,6 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 {
   parallel_object_only();
 
-  parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -6034,6 +6032,19 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
                  "'execute_on' to break the cycle.");
     }
 
+  // Check that concurrent multiapps will even be used
+  if (multi_apps.size() && _num_concurrent_multiapps > 1)
+  {
+    bool has_concurrent_apps = false;
+    for (const auto & multi_app_group : ordered_multi_apps)
+      if (multi_app_group.size() > 1)
+        has_concurrent_apps = true;
+    if (!has_concurrent_apps)
+      paramWarning("num_concurrent_multiapps",
+                   "Due to application dependencies or differences in execution schedules, "
+                   "concurrent multiapps are not actually used");
+  }
+
   // Execute MultiApps
   if (multi_apps.size())
   {
@@ -6049,6 +6060,24 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
     {
       // We need the atomic to be able to 'exit' early in case of failures
       std::atomic<bool> group_success{true};
+
+      if (multi_app_group.size() > 1)
+      {
+        // Let the user know about concurrent multiapp use (new option: help them set it up)
+        if (_verbose_multiapps)
+        {
+          _console << COLOR_CYAN << "\nConcurrent MultiApps: " << std::endl;
+          for (const auto & multi_app : multi_app_group)
+            _console << multi_app->name() << " ";
+          _console << COLOR_DEFAULT << std::endl;
+        }
+
+        // Avoid race conditions on output
+        if (_num_concurrent_multiapps > 1)
+          for (const auto & multi_app : multi_app_group)
+            for (const auto app_i : make_range(multi_app->numLocalApps()))
+              multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
+      }
 
 #pragma omp parallel for schedule(dynamic) num_threads(_num_concurrent_multiapps)
       for (const auto & multi_app : multi_app_group)
@@ -6068,6 +6097,13 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
         success = false;
         break;
       }
+
+      // Output outside of threaded regions
+      if (_num_concurrent_multiapps > 1)
+        for (const auto & multi_app : multi_app_group)
+          for (const auto app_i : make_range(multi_app->numLocalApps()))
+            multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
+                .outputStep(EXEC_TIMESTEP_END);
 
       // Execute Transfers _between_ Multiapps after each app executes
       for (const auto & multi_app : multi_app_group)
