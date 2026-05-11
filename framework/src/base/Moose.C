@@ -189,7 +189,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,       false);
   registerMooseObjectTask("add_field_split",              Split,                     false);
-  registerTask           ("add_nl_preconditioning",                                  false);
+  registerMooseObjectTask("add_nl_preconditioning",       NonlinearPreconditioning,  false);
 
   registerMooseObjectTask("add_mesh_division",            MeshDivision,              false);
   registerMooseObjectTask("add_user_object",              UserObject,                false);

@@ -45,6 +45,9 @@ NonlinearPreconditioning::NonlinearPreconditioning(const InputParameters & param
 {
   for (const auto & name : getParam<std::vector<NonlinearSystemName>>("inner_nl_sys_names"))
     _inner_sys_nums.push_back(_fe_problem.nlSysNum(name));
+
+  // Store outer SNES and associated nonlinear preconditioner PETSc options under our name prefix
+  Moose::PetscSupport::storePetscOptions(_fe_problem, _name + "_", *this);
 }
 
 NonlinearPreconditioning::~NonlinearPreconditioning()

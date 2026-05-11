@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "Action.h"
+#include "MooseObjectAction.h"
 
 /**
- * Action for [NonlinearPreconditioning]/<name> sub-blocks.  Each sub-block creates one
+ * MooseObjectAction for [NonlinearPreconditioning]/<name> sub-blocks.  Each sub-block creates one
  * NonlinearPreconditioning object; the sub-block name becomes the PETSc options prefix
  * for the outer SNES (e.g. -<name>_snes_type, -<name>_pc_type fieldsplit, etc.).
  */
-class SetupNonlinearPreconditioningAction : public Action
+class SetupNonlinearPreconditioningAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
