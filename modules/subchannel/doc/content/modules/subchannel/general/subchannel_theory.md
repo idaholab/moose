@@ -142,9 +142,15 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
 \end{equation}
 
-where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
+where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. For this unresolved turbulent interchange model, the approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
 
 The mixing closure provides only this unresolved turbulent interchange coefficient. Friction closures enter the axial and lateral momentum equations through the pressure-drop terms, and heat-transfer closures enter the energy equation through pin/duct heat addition. When a mixing closure requires local flow information such as a friction factor, the selected friction closure is used internally by that empirical mixing correlation; otherwise $\beta$ is coupled to the governing equations only through $w'_{ij}$ and the optional $C_T$ momentum scaling above.
+
+### Sweep flow
+
+!! Intentional comment to provide extra spacing
+
+The turbulent interchange relation above is not applicable to wire-wrap sweep flow. In wire-wrapped triangular assemblies, sweep flow represents a directed peripheral enthalpy transport induced by the wire wrap. SCM applies the sweep-flow coefficient only in the triangular-assembly energy equation, where the term transports enthalpy between edge and corner subchannels. It is not included in the momentum exchange term and is not scaled by $C_T$; equivalently, SCM does not currently model a corresponding momentum sweep-flow closure.
 
  Additional turbulent mixing parameters are implemented as follows:
 

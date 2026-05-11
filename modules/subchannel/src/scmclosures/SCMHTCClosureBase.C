@@ -9,6 +9,7 @@
 
 #include "SCMHTCClosureBase.h"
 #include "SCM.h"
+#include "SubChannelApp.h"
 
 InputParameters
 SCMHTCClosureBase::validParams()
@@ -18,8 +19,11 @@ SCMHTCClosureBase::validParams()
 }
 
 SCMHTCClosureBase::SCMHTCClosureBase(const InputParameters & parameters)
-  : SCMClosureBase(parameters), _Dpin_soln(_subproblem.getVariable(0, "Dpin"))
+  : SCMClosureBase(parameters)
 {
+  if (_subproblem.hasVariable(SubChannelApp::PIN_DIAMETER))
+    _Dpin_soln =
+        std::make_unique<SolutionHandle>(_subproblem.getVariable(0, SubChannelApp::PIN_DIAMETER));
 }
 
 NusseltPreInfo
@@ -34,13 +38,18 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
   const bool is_duct = (nusselt_args.i_pin == std::numeric_limits<unsigned int>::max());
   if (!is_duct)
   {
-    const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-    if (_Dpin_soln(pin_node) > 0)
-      D = _Dpin_soln(pin_node);
+    if (_Dpin_soln)
+    {
+      const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
+      if ((*_Dpin_soln)(pin_node) > 0)
+        D = (*_Dpin_soln)(pin_node);
+      else
+        mooseError(name(),
+                   "The diameter of the pin is equal or smaller than zero, "
+                   "please initialize the auxiliary variable Dpin.");
+    }
     else
-      mooseError(name(),
-                 "The diameter of the pin is equal or smaller than zero, "
-                 "please initialize the auxiliary variable Dpin.");
+      D = _subchannel_mesh.getPinDiameter();
   }
   else
     D = _subchannel_mesh.getPinDiameter();

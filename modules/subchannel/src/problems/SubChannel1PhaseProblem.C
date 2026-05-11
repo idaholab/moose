@@ -103,8 +103,10 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   params.addRequiredParam<UserObjectName>("friction_closure",
                                           "Closure computing the friction factor");
-  params.addRequiredParam<UserObjectName>("mixing_closure",
-                                          "Closure computing the turbulent mixing parameter");
+  params.addRequiredParam<UserObjectName>(
+      "mixing_closure",
+      "Closure computing the turbulent mixing, wire-induced "
+      "mixing and sweep flow mixing parameter where applicable");
   params.addParam<UserObjectName>(
       "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
   params.addParam<UserObjectName>("duct_HTC_closure",
@@ -1893,13 +1895,13 @@ SubChannel1PhaseProblem::computeSweepFlowMixingParameter(unsigned int i_gap, uns
   auto beta = _mixing_closure->computeSweepFlowMixingParameter(i_gap, iz);
   if (!std::isfinite(beta) || beta < 0.0)
     mooseError(name(),
-               ": Mixing closure returned invalid sweep-flow beta = ",
+               ": Mixing closure returned invalid sweep-flow coefficient = ",
                beta,
                " for gap ",
                i_gap,
                " at axial index ",
                iz,
-               ". Beta must be finite and non-negative.");
+               ". sweep-flow coefficient must be finite and non-negative.");
 
   return beta;
 }

@@ -29,14 +29,16 @@ SCMMixingChengTodreas::SCMMixingChengTodreas(const InputParameters & parameters)
     _w_perim_soln(_subproblem.getVariable(0, "w_perim")),
     _mu_soln(_subproblem.getVariable(0, "mu"))
 {
+  if (!_is_tri_lattice)
+    mooseError("This corelation applies only for triangular assemblies");
+
+  if (_tri_sch_mesh->getWireLeadLength() == 0 || _tri_sch_mesh->getWireDiameter() == 0)
+    mooseError("This corelation applies only for wire-wrapped assemblies");
 }
 
 Real
 SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const
 {
-  if (!_is_tri_lattice)
-    mooseError("This corelation applies only for triangular assemblies");
-
   Real beta = 0.0;
 
   const Real pitch = _subchannel_mesh.getPitch();
@@ -45,21 +47,25 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
 
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
+  const Real wire_lead_to_diameter = wire_lead_length / pin_diameter;
+  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
+  const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
 
-  if (wire_lead_length == 0 || wire_diameter == 0)
-    mooseError("This corelation applies only for wire-wrapped assemblies");
-
-  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the P/D range
-  // 1.067 <= P/D <= 1.35.
+  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the ranges
+  // 1.067 <= P/D <= 1.35, 4 <= H/D <= 52, and 7 <= Npin <= 217.
   if (pitch_to_diameter < 1.067 || pitch_to_diameter > 1.35)
     flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Cheng-Todreas "
                         "wire-wrapped mixing correlation data range.");
+  if (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0)
+    flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the "
+                        "Cheng-Todreas wire-wrapped mixing correlation data range.");
+  if (num_pins < 7 || num_pins > 217)
+    flagSolutionWarning("Number of pins outside the Cheng-Todreas wire-wrapped mixing "
+                        "correlation data range.");
 
   const auto chans = _subchannel_mesh.getGapChannels(i_gap);
   const unsigned int i_ch = chans.first;
   const unsigned int j_ch = chans.second;
-
-  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
 
   const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
   const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
@@ -92,6 +98,9 @@ SCMMixingChengTodreas::computeMixingParameter(const unsigned int i_gap, const un
              (_mdot_soln(node_out_i) + _mdot_soln(node_out_j)) / (Si_out + Sj_out));
 
   const Real Re = avg_massflux * avg_hD / avg_mu;
+  if (Re < 400.0 || Re > 1.0e6)
+    flagSolutionWarning("Reynolds number (Re) outside the Cheng-Todreas wire-wrapped mixing "
+                        "correlation data range.");
 
   // Calculation of flow regime
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);
@@ -163,9 +172,6 @@ Real
 SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
                                                        const unsigned int iz) const
 {
-  if (!_is_tri_lattice)
-    mooseError("This corelation applies only for triangular assemblies");
-
   Real beta = 0.0;
 
   const Real pitch = _subchannel_mesh.getPitch();
@@ -174,21 +180,25 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
 
   const Real wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real wire_diameter = _tri_sch_mesh->getWireDiameter();
+  const Real wire_lead_to_diameter = wire_lead_length / pin_diameter;
+  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
+  const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
 
-  if (wire_lead_length == 0 || wire_diameter == 0)
-    mooseError("This corelation applies only for wire-wrapped assemblies");
-
-  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the P/D range
-  // 1.067 <= P/D <= 1.35.
+  // Cheng and Todreas (1986) fitted the wire-wrapped mixing parameters over the ranges
+  // 1.067 <= P/D <= 1.35, 4 <= H/D <= 52, and 7 <= Npin <= 217.
   if (pitch_to_diameter < 1.067 || pitch_to_diameter > 1.35)
     flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the Cheng-Todreas "
                         "wire-wrapped mixing correlation data range.");
+  if (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0)
+    flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the "
+                        "Cheng-Todreas wire-wrapped mixing correlation data range.");
+  if (num_pins < 7 || num_pins > 217)
+    flagSolutionWarning("Number of pins outside the Cheng-Todreas wire-wrapped mixing "
+                        "correlation data range.");
 
   const auto chans = _subchannel_mesh.getGapChannels(i_gap);
   const unsigned int i_ch = chans.first;
   const unsigned int j_ch = chans.second;
-
-  const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
 
   const auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
   const auto subch_type_j = _subchannel_mesh.getSubchannelType(j_ch);
@@ -221,6 +231,9 @@ SCMMixingChengTodreas::computeSweepFlowMixingParameter(const unsigned int i_gap,
              (_mdot_soln(node_out_i) + _mdot_soln(node_out_j)) / (Si_out + Sj_out));
 
   const Real Re = avg_massflux * avg_hD / avg_mu;
+  if (Re < 400.0 || Re > 1.0e6)
+    flagSolutionWarning("Reynolds number (Re) outside the Cheng-Todreas wire-wrapped mixing "
+                        "correlation data range.");
 
   // Calculation of flow regime
   const Real ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1.0);

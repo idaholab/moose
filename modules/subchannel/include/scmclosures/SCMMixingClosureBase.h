@@ -25,7 +25,7 @@ public:
   typedef SubChannel1PhaseProblem::FrictionStruct FrictionStruct;
 
   /// @brief Computes the turbulent mixing coefficient for the local conditions around gap(i_gap) and axial level(iz)
-  /// @param i_gap and @param iz
+  /// @param i_gap index of the gap
   /// @return the mixing coefficient (beta)
   virtual Real computeMixingParameter(const unsigned int i_gap, const unsigned int iz) const = 0;
 
@@ -35,10 +35,10 @@ public:
                                                const unsigned int iz) const;
 
   /// Turbulent modeling parameter used in axial momentum equation
-  const Real & _CT;
+  const Real _CT;
 
   /**
    * Return the Turbulent modeling parameter
    */
-  virtual const Real & getCT() const { return _CT; }
+  virtual Real getCT() const { return _CT; }
 };

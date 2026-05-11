@@ -168,7 +168,9 @@ SCMMixingKimAndChung::computeLatticeMixingParameter(const unsigned int i_gap,
   //       * [lambda/Pr_t + a_x * (z_FP/D) * Str] * Re^(-b/2).
   //
   // The subchannel problem converts St_g to the turbulent interchange flow through
-  // w'_ij = beta * S_ij * G_bar.
+  // w'_ij = beta * S_ij * G_bar (St_g = beta). This correlation doesn't include the
+  // molecular diffusion term which represents the conductive heat transfer,
+  // which is separately modeled in the subchannel energy equation.
   return freq_factor * (rod_mixing + axial_mixing) * std::pow(Re, -b / 2.0);
 }
 

@@ -33,7 +33,6 @@ P_out = 1.0e5 # Pa
   fp = LBE
   n_blocks = 1
   P_out = 1.0e5
-  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true

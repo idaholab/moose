@@ -12,6 +12,8 @@
 #include "SCMClosureBase.h"
 #include "SubChannel1PhaseProblem.h"
 
+#include <memory>
+
 /// structure that holds the needed data to calculate intermediate data needed to calculate the Nusselt number.
 struct NusseltPreInfo
 {
@@ -55,5 +57,5 @@ public:
                   const NusseltStruct & nusselt_info,
                   const Real conduction_k) const;
 
-  SolutionHandle _Dpin_soln;
+  std::unique_ptr<SolutionHandle> _Dpin_soln;
 };

@@ -36,7 +36,6 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = false
@@ -44,6 +43,7 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
   segregated = false
   interpolation_scheme = upwind
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
   pin_HTC_closure = 'gnielinski'
   full_output = true
 []
@@ -54,6 +54,10 @@ mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

@@ -53,7 +53,6 @@ heated_length = 1.0
   compute_power = true
   P_out = ${P_out}
   verbose_subchannel = true
-  deformation = true
   friction_closure = 'MATRA'
   mixing_closure ='constant_beta'
 []

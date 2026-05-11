@@ -24,8 +24,38 @@ SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParame
   : SCMFrictionClosureBase(parameters),
     _is_tri_lattice(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh) != nullptr),
     _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh)),
-    _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh))
+    _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh)),
+    _has_wire_wrap(_is_tri_lattice && _tri_sch_mesh->getWireDiameter() != 0.0 &&
+                   _tri_sch_mesh->getWireLeadLength() != 0.0)
 {
+  if (_is_tri_lattice &&
+      ((_tri_sch_mesh->getWireDiameter() != 0.0) != (_tri_sch_mesh->getWireLeadLength() != 0.0)))
+    mooseError(name(),
+               ": wire-wrapped bundle friction requires both wire diameter and wire lead length. "
+               "Set both to zero for a bare pin bundle.");
+
+  if (_is_tri_lattice)
+  {
+    const auto pitch = _subchannel_mesh.getPitch();
+    const auto pin_diameter = _subchannel_mesh.getPinDiameter();
+    const auto p_over_d = pitch / pin_diameter;
+    const auto wire_lead_to_diameter = _tri_sch_mesh->getWireLeadLength() / pin_diameter;
+    const unsigned int Nr = _tri_sch_mesh->getNumOfRings();
+    const unsigned int num_pins = 1 + 3 * Nr * (Nr - 1);
+
+    // The updated Cheng-Todreas detailed triangular friction factor correlation is based on
+    // data spanning 1.0 <= P/D <= 1.42, 4 <= H/D <= 52, 7 <= Npin <= 271,
+    // and 50 <= Re <= 1e6.
+    if (p_over_d < 1.0 || p_over_d > 1.42)
+      flagSolutionWarning("Pitch-over-pin diameter ratio (P/D) outside the updated "
+                          "Cheng-Todreas friction correlation data range.");
+    if (_has_wire_wrap && (wire_lead_to_diameter < 4.0 || wire_lead_to_diameter > 52.0))
+      flagSolutionWarning("Wire lead length-over-pin diameter ratio (H/D) outside the updated "
+                          "Cheng-Todreas friction correlation data range.");
+    if (num_pins < 7 || num_pins > 271)
+      flagSolutionWarning("Number of pins outside the updated Cheng-Todreas friction correlation "
+                          "data range.");
+  }
 }
 
 Real
@@ -58,6 +88,11 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   // subchannel specific in the future if we have duct deformation.
   const auto gap = _tri_sch_mesh->getDuctToPinGap();
   const auto w_over_d = (pin_diameter + gap) / pin_diameter;
+
+  if (Re < 50.0 || Re > 1.0e6)
+    flagSolutionWarning("Reynolds number (Re) outside the updated Cheng-Todreas friction "
+                        "correlation data range.");
+
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
   const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
@@ -156,7 +191,7 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   // Find the coefficients of wire-wrapped Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
   // Volume 1 Chapter 9-6 also Chen and Todreas (2018).
-  if ((wire_diameter != 0.0) && (wire_lead_length != 0.0))
+  if (_has_wire_wrap)
   {
     if (subch_type == EChannelType::CENTER)
     {
