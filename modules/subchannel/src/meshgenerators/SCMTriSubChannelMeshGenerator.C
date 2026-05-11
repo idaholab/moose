@@ -844,6 +844,7 @@ SCMTriSubChannelMeshGenerator::generate()
   sch_mesh._gap_pairs_sf = _gap_pairs_sf;
   sch_mesh._chan_pairs_sf = _chan_pairs_sf;
   sch_mesh._pin_to_chan_map = _pin_to_chan_map;
+  sch_mesh.computeAssemblyHydraulicParameters();
 
   return mesh_base;
 }

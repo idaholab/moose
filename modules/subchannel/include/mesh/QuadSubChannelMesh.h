@@ -29,6 +29,14 @@ public:
   std::unique_ptr<MooseMesh> safeClone() const override;
   void buildMesh() override;
 
+  /**
+   * Compute bundle-average inlet hydraulic quantities from generated mesh geometry
+   */
+  void computeAssemblyHydraulicParameters();
+
+  Real getSubchannelFlowArea(unsigned int i_chan, Real z) const override;
+  Real getSubchannelWettedPerimeter(unsigned int i_chan) const override;
+
   Node * getChannelNode(unsigned int i_chan, unsigned int iz) const override
   {
     return _nodes[i_chan][iz];

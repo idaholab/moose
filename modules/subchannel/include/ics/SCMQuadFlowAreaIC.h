@@ -11,8 +11,6 @@
 
 #include "QuadSubChannelBaseIC.h"
 
-class SubChannelMesh;
-
 /**
  * This class calculates the cross-sectional flow area of the quadrilateral subchannel
  */
@@ -22,7 +20,4 @@ public:
   SCMQuadFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
   static InputParameters validParams();
-
-protected:
-  const SubChannelMesh & _subchannel_mesh;
 };

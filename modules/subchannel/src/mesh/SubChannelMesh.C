@@ -17,7 +17,14 @@ SubChannelMesh::validParams()
   return params;
 }
 
-SubChannelMesh::SubChannelMesh(const InputParameters & params) : MooseMesh(params), _kij(0.0) {}
+SubChannelMesh::SubChannelMesh(const InputParameters & params)
+  : MooseMesh(params),
+    _kij(0.0),
+    _assembly_flow_area(0.0),
+    _assembly_wetted_perimeter(0.0),
+    _assembly_hydraulic_diameter(0.0)
+{
+}
 
 SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
   : MooseMesh(other_mesh),
@@ -39,6 +46,9 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
     _kij(other_mesh._kij),
     _pitch(other_mesh._pitch),
     _pin_diameter(other_mesh._pin_diameter),
+    _assembly_flow_area(other_mesh._assembly_flow_area),
+    _assembly_wetted_perimeter(other_mesh._assembly_wetted_perimeter),
+    _assembly_hydraulic_diameter(other_mesh._assembly_hydraulic_diameter),
     _n_cells(other_mesh._n_cells)
 {
   _subchannel_position = other_mesh._subchannel_position;

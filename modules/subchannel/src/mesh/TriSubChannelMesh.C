@@ -121,7 +121,7 @@ TriSubChannelMesh::channelIndex(const Point & p) const
           j = i;
           distance0 = distance1;
         } // if
-      }   // if
+      } // if
       // If subchannel belongs to outer ring
       else
       {
@@ -150,6 +150,89 @@ TriSubChannelMesh::channelIndex(const Point & p) const
 void
 TriSubChannelMesh::buildMesh()
 {
+}
+
+void
+TriSubChannelMesh::computeAssemblyHydraulicParameters()
+{
+  _assembly_flow_area = 0.0;
+  _assembly_wetted_perimeter = 0.0;
+  _assembly_hydraulic_diameter = 0.0;
+
+  const Real z = _z_grid.empty() ? 0.0 : _z_grid.front();
+
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    _assembly_flow_area += getSubchannelFlowArea(i_ch, z);
+    _assembly_wetted_perimeter += getSubchannelWettedPerimeter(i_ch);
+  }
+
+  if (_assembly_wetted_perimeter == 0.0)
+    mooseError(name(), ": Assembly wetted perimeter is zero; cannot compute hydraulic diameter.");
+
+  _assembly_hydraulic_diameter = 4.0 * _assembly_flow_area / _assembly_wetted_perimeter;
+}
+
+Real
+TriSubChannelMesh::getSubchannelFlowArea(unsigned int i_chan, Real z) const
+{
+  Real standard_area = 0.0;
+  Real rod_area = 0.0;
+  Real wire_area = 0.0;
+
+  const Real theta =
+      std::acos(_hwire / std::sqrt(std::pow(_hwire, 2) +
+                                   std::pow(libMesh::pi * (_pin_diameter + _dwire), 2)));
+  const auto subch_type = getSubchannelType(i_chan);
+  if (subch_type == EChannelType::CENTER)
+  {
+    standard_area = std::pow(_pitch, 2) * std::sqrt(3.0) / 4.0;
+    rod_area = libMesh::pi * std::pow(_pin_diameter, 2) / 8.0;
+    wire_area = libMesh::pi * std::pow(_dwire, 2) / 8.0 / std::cos(theta);
+  }
+  else if (subch_type == EChannelType::EDGE)
+  {
+    standard_area = _pitch * (_pin_diameter / 2.0 + _duct_to_pin_gap);
+    rod_area = libMesh::pi * std::pow(_pin_diameter, 2) / 8.0;
+    wire_area = libMesh::pi * std::pow(_dwire, 2) / 8.0 / std::cos(theta);
+  }
+  else
+  {
+    standard_area = 1.0 / std::sqrt(3.0) * std::pow(_pin_diameter / 2.0 + _duct_to_pin_gap, 2);
+    rod_area = libMesh::pi * std::pow(_pin_diameter, 2) / 24.0;
+    wire_area = libMesh::pi * std::pow(_dwire, 2) / 24.0 / std::cos(theta);
+  }
+
+  Real flow_area = standard_area - rod_area - wire_area;
+
+  unsigned int blockage_index = 0;
+  for (const auto & i_blockage : _index_blockage)
+  {
+    if (i_chan == i_blockage && z >= _z_blockage.front() && z <= _z_blockage.back())
+      flow_area *= _reduction_blockage[blockage_index];
+    blockage_index++;
+  }
+
+  return flow_area;
+}
+
+Real
+TriSubChannelMesh::getSubchannelWettedPerimeter(unsigned int i_chan) const
+{
+  const Real theta =
+      std::acos(_hwire / std::sqrt(std::pow(_hwire, 2) +
+                                   std::pow(libMesh::pi * (_pin_diameter + _dwire), 2)));
+  const Real rod_circumference = libMesh::pi * _pin_diameter;
+  const Real wire_circumference = libMesh::pi * _dwire;
+  const auto subch_type = getSubchannelType(i_chan);
+
+  if (subch_type == EChannelType::CENTER)
+    return 0.5 * rod_circumference + 0.5 * wire_circumference / std::cos(theta);
+  else if (subch_type == EChannelType::EDGE)
+    return 0.5 * rod_circumference + 0.5 * wire_circumference / std::cos(theta) + _pitch;
+  else
+    return (rod_circumference + wire_circumference / std::cos(theta)) / 6.0 +
+           2.0 / std::sqrt(3.0) * (_pin_diameter / 2.0 + _duct_to_pin_gap);
 }
 
 unsigned int
@@ -252,5 +335,5 @@ TriSubChannelMesh::pinPositions(std::vector<Point> & positions,
                              center(1) + distance * std::sin(theta_corrected));
       theta = theta + dtheta;
     } // j
-  }   // i
+  } // i
 }

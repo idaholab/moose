@@ -147,6 +147,31 @@ public:
   virtual const Real & getPinDiameter() const { return _pin_diameter; }
 
   /**
+   * Return undeformed bundle inlet flow area
+   */
+  Real getAssemblyFlowArea() const { return _assembly_flow_area; }
+
+  /**
+   * Return undeformed bundle inlet wetted perimeter
+   */
+  Real getAssemblyWettedPerimeter() const { return _assembly_wetted_perimeter; }
+
+  /**
+   * Return undeformed bundle-average hydraulic diameter
+   */
+  Real getAssemblyHydraulicDiameter() const { return _assembly_hydraulic_diameter; }
+
+  /**
+   * Return flow area for a subchannel at an axial location
+   */
+  virtual Real getSubchannelFlowArea(unsigned int i_chan, Real z) const = 0;
+
+  /**
+   * Return wetted perimeter for a subchannel
+   */
+  virtual Real getSubchannelWettedPerimeter(unsigned int i_chan) const = 0;
+
+  /**
    * Return a sign for the crossflow given a subchannel index and local neighbor index
    */
   virtual const Real & getCrossflowSign(unsigned int i_chan, unsigned int i_local) const = 0;
@@ -243,6 +268,12 @@ protected:
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
+  /// Bundle inlet flow area
+  Real _assembly_flow_area;
+  /// Bundle inlet wetted perimeter
+  Real _assembly_wetted_perimeter;
+  /// Bundle-average hydraulic diameter
+  Real _assembly_hydraulic_diameter;
 
   /// number of axial cells
   unsigned int _n_cells;

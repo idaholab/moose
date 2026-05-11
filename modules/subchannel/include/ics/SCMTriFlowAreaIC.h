@@ -10,7 +10,6 @@
 #pragma once
 
 #include "TriSubChannelBaseIC.h"
-#include "SubChannelMesh.h"
 
 class TriSubChannelMesh;
 
@@ -24,7 +23,4 @@ public:
   SCMTriFlowAreaIC(const InputParameters & params);
   Real value(const Point & p) override;
   static InputParameters validParams();
-
-protected:
-  const SubChannelMesh & _subchannel_mesh;
 };
