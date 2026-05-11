@@ -14,10 +14,8 @@
 #include "MooseTypes.h"
 
 #include "libmesh/petsc_macro.h"
-#ifdef LIBMESH_HAVE_PETSC
 #include <petscsnes.h>
 #include <petscmat.h>
-#endif
 
 #include <map>
 #include <memory>
@@ -32,14 +30,12 @@ class PetscMatrix;
 class FEProblemBase;
 
 /**
- * Sets up a PETSc SNESSHELL as a nonlinear preconditioner (NPC) that applies inner
- * SNES solves for a subset of systems before each outer Newton step.  This implements
- * nonlinear elimination (NLE) when only a strict subset of systems is listed; listing
- * all systems reproduces nonlinear Gauss-Seidel.
+ * Abstract base for nonlinear preconditioners (NPC) in multi-system solves.
+ * Derived classes implement setupNPC() to create and configure the inner SNES.
  *
- * In addition to the SNESSHELL NPC, this class manages off-diagonal Jacobian blocks
- * J_ij (i != j) and assembles them into a PETSc MatNest outer Jacobian operator so
- * that the outer KSP can apply block-structured preconditioners such as fieldsplit.
+ * This class manages off-diagonal Jacobian blocks J_ij (i != j) and assembles them
+ * into a PETSc MatNest outer Jacobian operator so that the outer KSP can apply
+ * block-structured preconditioners such as fieldsplit.
  */
 class NonlinearPreconditioning : public MooseObject, public PerfGraphInterface
 {
@@ -65,7 +61,9 @@ protected:
   /// Nonlinear system indices handled by the inner NPC solve.
   std::vector<unsigned int> _inner_sys_nums;
 
-#ifdef LIBMESH_HAVE_PETSC
+  /// Outer SNES
+  SNES _outer_snes = nullptr;
+  /// Nonlinear preconditioner SNES
   SNES _npc_snes = nullptr;
   /// PETSc MatNest holding all (i,j) Jacobian sub-blocks.
   Mat _mat_nest = nullptr;
@@ -78,8 +76,8 @@ protected:
   /// Matrix tag IDs for each off-diagonal block, used for tag-based routing.
   std::map<std::pair<unsigned int, unsigned int>, TagID> _off_diag_tags;
 
-  /// Create the SNESSHELL NPC object.
-  void setupNPC();
+  /// Create and configure the inner NPC SNES object.  Called once from initialSetup().
+  virtual void setupNPC() = 0;
 
   /// Allocate off-diagonal PETSc matrices and register them with the tag system.
   void allocateOffDiagMats();
@@ -94,10 +92,6 @@ protected:
   /// Register each system's IS with the outer PC for fieldsplit configuration.
   static void registerFieldSplitIS(SNES outer_snes, unsigned int n_sys);
 
-  /// PETSc SNESSHELL solve callback: runs _fe_problem.solve() for each inner system.
-  static PetscErrorCode npcShellSolve(SNES snes, Vec x);
-
   /// Outer SNES Jacobian callback: assembles all diagonal and off-diagonal blocks.
   static PetscErrorCode outerJacobianCallback(SNES snes, Vec x, Mat A, Mat P, void * ctx);
-#endif
 };

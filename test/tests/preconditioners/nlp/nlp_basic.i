@@ -63,8 +63,9 @@
 []
 
 [NonlinearPreconditioning]
-  [nle]
-    inner_nl_sys_names = 'nl1'
+  [ex]
+    type = NGS
+    inner_nl_sys_names = 'nl0 nl1'
   []
 []
 
