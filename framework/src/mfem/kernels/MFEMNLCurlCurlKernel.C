@@ -25,7 +25,7 @@ MFEMNLCurlCurlKernel::validParams()
                              "$- \\vec \\nabla x (k(\\vec \\nabla x u) \\vec\\nabla x u)$.");
   params.addParam<MFEMScalarCoefficientName>(
       "k_coefficient", "1.", "Name of property for nonlinear diffusivity coefficient k(\\nabla x u).");
-  params.addParam<MFEMScalarCoefficientName>(
+  params.addParam<MFEMVectorCoefficientName>(
       "dk_dcu_coefficient",
       "0.",
       "Name of property partial derivative of diffusivity coefficient k(\\nabla x u) with respect to the "
@@ -36,7 +36,7 @@ MFEMNLCurlCurlKernel::validParams()
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _dk_dcu_coef(getScalarCoefficient("dk_dcu_coefficient")),
+    _dk_dcu_coef(getVectorCoefficient("dk_dcu_coefficient")),
     _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
 {
 }
