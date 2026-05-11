@@ -271,6 +271,8 @@ FEProblemBase::validParams()
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
                         "(default: false)");
+  params.addParam<unsigned int>(
+      "num_concurrent_multiapps", 1, "Number of concurrent multiapps to solve at once");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -458,6 +460,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _num_concurrent_multiapps(getParam<unsigned int>("num_concurrent_multiapps")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -6044,16 +6047,31 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     for (const auto & multi_app_group : ordered_multi_apps)
     {
+      // We need the atomic to be able to 'exit' early in case of failures
+      std::atomic<bool> group_success{true};
+
+#pragma omp parallel for schedule(dynamic) num_threads(_num_concurrent_multiapps)
       for (const auto & multi_app : multi_app_group)
       {
-        success = multi_app->solveStep(_dt, _time, auto_advance);
-        // no need to finish executing the subapps if one fails
-        if (!success)
-          break;
+        // Don't solve step if a single failure occurred
+        if (!group_success.load(std::memory_order_relaxed))
+          continue;
 
-        // Execute Transfers _between_ Multiapps after each app executes
-        execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
+        bool local = multi_app->solveStep(_dt, _time, auto_advance);
+        if (!local)
+          group_success.store(false, std::memory_order_relaxed);
       }
+
+      // No need to solve the other groups if this group failed
+      if (!group_success)
+      {
+        success = false;
+        break;
+      }
+
+      // Execute Transfers _between_ Multiapps after each app executes
+      for (const auto & multi_app : multi_app_group)
+        execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
