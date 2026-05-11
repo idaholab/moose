@@ -4,7 +4,7 @@ In the phase field approach, microstructural features are described using contin
 These variables take two forms: conserved variables representing physical properties such as atom
 concentration or material density, and nonconserved order parameters describing the microstructure of
 the material, including grains and different phases.  The evolution of these continuous variables is
-a function of the Gibbs free energy and can be defined as a system of partial differential equations
+a function of the free energy and can be defined as a system of partial differential equations
 (PDEs). Thus, to define the kinetics of the system, the free energy must be described as a function
 of the continuous variables representing the microstructure.
 
@@ -13,13 +13,13 @@ system and the free energy functional comprise a specific phase field model. The
 coupled to additional physics, such as mechanics or heat conduction. These model equations may be
 solved in many ways, including finite difference, spectral methods, and the finite element method
 (FEM). The MOOSE-Phase Field module provides the necessary tools to rapidly develop a phase field
-simulation tool with the equations solved via FEM.
+model with the equations solved via FEM.
 
 ## Phase Field Summary
 
-We present this a general form of the phase field PDEs here, and then show how it can be solved via
-FEM.  The PDE's are evolution equations for the various variables and are functions of the free
-energy functional $F$.  The evolution of all conserved variables is defined using modified
+We present a general form of the phase field PDEs here, and then show how they can be solved via
+FEM.  The PDE's are evolution equations for the various variables and are derived from the free
+energy functional $F$.  The evolution of all conserved variables is determined using
 Cahn-Hilliard equations, i.e.
 
 \begin{equation} \label{eq:CH}
@@ -27,7 +27,7 @@ Cahn-Hilliard equations, i.e.
 \end{equation}
 
 where $c_i$ is a conserved variable and $M_i$ is the associated mobility.  The evolution of
-nonconserved order parameters is represented with an Allen-Cahn equation, according to
+nonconserved order parameters is determined using Allen-Cahn equations, according to
 
 \begin{equation} \label{eq:AC}
 \frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j},
@@ -43,7 +43,7 @@ F = \int_V \big[ f_{loc}(c_1, \ldots,c_N, \eta_1, \ldots, \eta_M) + f_{gr}(c_1, 
 \end{equation}
 
 where $f_{loc}$ defines the local free energy density as a function of all concentrations and order
-parameters, and varies from model to model.  The gradient energy density
+parameters, and varies from model to model.  The gradient energy density is
 
 \begin{equation}
 f_{gr} = \sum_i^N \frac{\kappa_i}{2} |\nabla c_i|^2 + \sum^M_j \frac{\kappa_j}{2} |\nabla \eta_j|^2
@@ -75,7 +75,7 @@ combining the equations listed above and evaluating the functional derivatives
       }_{\text{for}\, \kappa(c_i)}}
     \right) \label{eq:cons_residual_strong}\\
   \frac{\partial \eta_j}{\partial t} = &
-    -L \left(
+    -L_j \left(
         \frac{\partial f_{loc}}{\partial \eta_j}
       + \frac{\partial E_{d}}{\partial \eta_j}
       - \nabla\cdot (\kappa_j \nabla \eta_j)
@@ -113,7 +113,7 @@ Allen-Cahn equation yields
 
 \begin{equation}
 \begin{aligned}
-	\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
+	\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L_j\psi_m) \right) + L_j \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L_j\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
 \end{aligned}
 \end{equation}
 
@@ -125,9 +125,9 @@ in two ways.
 The first is to directly solve the equation according to
 \begin{equation}
 \begin{aligned}
-	\boldsymbol{\mathcal{R}}_{c_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i  \nabla \left( \frac{\partial f_{loc} }{\partial c_i} + \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)  - \\
+	\boldsymbol{\mathcal{R}}_{c_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i  \nabla \left( \frac{\partial f_{loc} }{\partial c_i} + \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)  + \\
 	&& \left< M_i \nabla \left(  \kappa_i \nabla^2 c_i  \right)  \cdot \vec{n}, \psi_m \right>
-	+ \left< M_i \nabla \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_{d}}{\partial c_i } \right)  \cdot \vec{n}, \psi_m \right> -  \left< \kappa_i \nabla^2 c_i, M_i \nabla \psi_m \cdot \vec{n} \right>.
+	- \left< M_i \nabla \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_{d}}{\partial c_i } \right)  \cdot \vec{n}, \psi_m \right> -  \left< \kappa_i \nabla^2 c_i, M_i \nabla \psi_m \cdot \vec{n} \right>.
 \end{aligned}
 \end{equation}
 
@@ -160,7 +160,7 @@ required. If you choose not to use them, you would develop your kernels in the u
 The Allen-Cahn residual equation, without boundary terms, is shown here:
 \begin{equation}
 \begin{aligned}
-\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)
+\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L_j\psi_m) \right) + L_j \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)
 \end{aligned}
 \end{equation}
 It is divided into three pieces, each implemented in their own kernel, as shown below
@@ -168,8 +168,8 @@ It is divided into three pieces, each implemented in their own kernel, as shown 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
 | - | - | - | - | - |
 $\left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right)$ | $\eta_j$ | - | - | [`TimeDerivative`](/TimeDerivative.md) |
-$\left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L$ | - | [`ACInterface`](/ACInterface.md) |
-$L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)$ | $\eta_j$ | $L$ | $\frac{\partial f_{loc} }{\partial \eta_j}, \frac{\partial E_d }{\partial \eta_j}$ | [`AllenCahn`](/AllenCahn.md) |
+$\left( \nabla(\kappa_j\eta_j), \nabla (L_j\psi_m) \right)$ | $\eta_j$ | $\kappa_j,\ L_j$ | - | [`ACInterface`](/ACInterface.md) |
+$L_j \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)$ | $\eta_j$ | $L_j$ | $\frac{\partial f_{loc} }{\partial \eta_j}, \frac{\partial E_d }{\partial \eta_j}$ | [`AllenCahn`](/AllenCahn.md) |
 
 The residual for the direct solution of the Cahn-Hilliard equation (without boundary terms) is
 

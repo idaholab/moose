@@ -13,6 +13,7 @@
     csvdiff = 'a_out_eigen_0001.csv'
     input = 'a.i'
     absent_out = '12 Nonlinear'
+    capabilities = 'slepc'
     requirement = 'The system shall be able to solve an eigenvalue problem using the L2 norm of Bx and the sign of its first nonzero entry for normalization with a SLEPc eigenvalue solver.'
   []
   [test7]

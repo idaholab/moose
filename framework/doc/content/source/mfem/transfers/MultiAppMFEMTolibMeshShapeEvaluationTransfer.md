@@ -5,15 +5,14 @@
 Allows transfers of [MFEM variables](MFEMVariable.md) from MFEM-based applications to libMesh-based [MooseVariables](MooseVariable.md) via local
 evaluation of shape functions at target nodal projection points. This class supports transfers between different meshes, from scalar MFEM GridFunctions to first and second order LAGRANGE and constant MONOMIAL libMesh variable types.
 
-For transfers in the opposite direction, from libMesh-based applications to MFEM-based applications, please see [MultiApplibMeshToMFEMShapeEvaluationTransfer](MultiApplibMeshToMFEMShapeEvaluationTransfer.md).
+For transfers in the opposite direction, from libMesh-based applications to MFEM-based applications, please see [MultiApplibMeshToMFEMShapeEvaluationTransfer.md].
 
 ## General Description
 
 `MultiAppMFEMTolibMeshShapeEvaluationTransfer` executes transfers in three steps:
 
 1. Extraction of a vector of node positions or element centroids of the destination libMesh solution
-   variable (similar to the method used in
-   [`MultiAppGeneralFieldTransfer`](MultiAppGeneralFieldTransfer.md)).
+   variable (similar to the method used in [MultiAppGeneralFieldTransfer.md]).
 2. Interpolation of the source `mfem::ParGridFunction` at this set of node locations, using
    `mfem::FindPointsGSLIB` to perform the required gather/scatter operations to obtain a set of
    points on the local mesh partition, and perform shape function evaluations at these points.

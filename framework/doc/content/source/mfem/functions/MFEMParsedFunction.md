@@ -9,7 +9,7 @@ to being scalar functions of position and time, can also depend on scalar
 coefficients, including any scalar variables, postprocessors, material
 properties or functions specified by the user.
 
-The input parameters are those of [ParsedFunction](/MooseParsedFunction.md)
+The input parameters are those of [MooseParsedFunction.md]
 and provide the same flexibility. Note that, in the context of MFEM problems,
 a scalar variable is a real-valued scalar field, not (necessarily) a constant
 over the entire domain as elsewhere in MOOSE.

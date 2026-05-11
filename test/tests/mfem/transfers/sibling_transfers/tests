@@ -22,9 +22,9 @@
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false
-      restep = false      
+      restep = false
       detail = 'between elemental variables,'
-    []    
+    []
     [nodal_elem]
       type = Exodiff
       input = main_between_multiapp.i
@@ -48,7 +48,7 @@
       recover = false
       restep = false
       detail = 'and from nodal variables sent from one sub-app to multiple sub-apps.'
-    []  
+    []
   []
   [libMesh_to_MFEM_sibling_transfers]
     requirement = "The system shall support multiapp sibling transfers from libMesh to MFEM sub-apps via shape function evaluations"
@@ -150,7 +150,7 @@
       type = CSVDiff
       input = mfem_main_between_multiapp.i
       csvdiff = 'OutputData/MFEMtoMFEMSiblingTransfer_mfem_recv0_nodal_sample_0002.csv'
-      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"     
+      cli_args = "MultiApps/mfem_recv/positions_objects='mfem_recv_locs'"
       capabilities = 'mfem'
       compute_devices = 'cpu'
       recover = false

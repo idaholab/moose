@@ -45,7 +45,7 @@ TestCSGUniverseCellDeleterGenerator::generateCSG()
 
   // join incoming base as separate universe
   std::string join_name = "tmp_univ";
-  csg_obj->joinOtherBase(std::move(*_build_csg), join_name);
+  csg_obj->joinOtherBase(std::move(*_build_csg), false, join_name);
 
   // store data of cell of newly created universe to recreate later
   const auto input_cell_name = getParam<MeshGeneratorName>("input") + "_box_cell";

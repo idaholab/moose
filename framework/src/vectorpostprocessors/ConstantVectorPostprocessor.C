@@ -43,15 +43,12 @@ ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters &
     paramError("value",
                "Leading dimension must be equal to leading dimension of vector_names parameter.");
 
-  if (processor_id() == 0)
+  for (unsigned int j = 0; j < nvec; ++j)
   {
-    for (unsigned int j = 0; j < nvec; ++j)
-    {
-      unsigned int ne = v[j].size();
-      _value[j]->resize(ne);
-      for (unsigned int l = 0; l < ne; ++l)
-        (*_value[j])[l] = v[j][l];
-    }
+    unsigned int ne = v[j].size();
+    _value[j]->resize(ne);
+    for (unsigned int l = 0; l < ne; ++l)
+      (*_value[j])[l] = v[j][l];
   }
 }
 

@@ -11,10 +11,10 @@
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 1
-    pitch = 1.3425
+    pitch = 0.7
     num_sectors = 2
-    ring_radii = '0.4404'
-    duct_halfpitch = '0.5404'
+    ring_radii = '0.1404'
+    duct_halfpitch = '0.3004'
     mesh_intervals = '1 1 1'
     quad_center_elements = false
     region_ids='1 2 3'

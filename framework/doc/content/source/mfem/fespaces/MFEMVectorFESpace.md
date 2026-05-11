@@ -27,8 +27,7 @@ Raviart-Thomas finite elements in a 1D reference space but with 2D
 vectors.
 
 If you need a finite element space that can't be constructed using the
-options available in this class, you can use
-[MFEMGenericFESpace](MFEMGenericFESpace.md) instead.
+options available in this class, you can use [MFEMGenericFESpace.md] instead.
 
 ## Example Input File Syntax
 

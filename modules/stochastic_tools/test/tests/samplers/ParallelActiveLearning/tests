@@ -76,6 +76,7 @@
       allow_test_objects = true
       jsondiff = 'b_al.json'
       max_parallel = 1
+      min_slots = 2
       detail = 'using the Bayesian posterior targeted acquisition; '
     []
   []

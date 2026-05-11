@@ -2,7 +2,6 @@
 
 #include "gtest/gtest.h"
 #include "Moose.h"
-#include "MFEMHyprePatch.h"
 
 class VectorPowerLawNLFIntegrator : public mfem::NonlinearFormIntegrator
 {
@@ -218,7 +217,7 @@ TEST(CheckData, NonlinearIntegratorTest)
   // Solver for the Jacobian solve in the Newton method
   mfem::Solver * jacobian_solver;
   // Set up the Jacobian solver
-  mfem::patched::HyprePCG j_pcg(h_curl_fe_space.GetComm());
+  mfem::HyprePCG j_pcg(h_curl_fe_space.GetComm());
   mfem::HypreAMS ams(&h_curl_fe_space);
   ams.SetPrintLevel(1);
   j_pcg.SetTol(1e-7);

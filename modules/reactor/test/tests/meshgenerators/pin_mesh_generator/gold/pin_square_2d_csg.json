@@ -55,53 +55,28 @@
       "fill": "rgmb_region_4",
       "filltype": "CSG_MATERIAL",
       "region_infix": [
-        [
-          "+pin1_radial_duct_3_surf_0",
-          "&",
-          "+pin1_radial_duct_3_surf_1",
-          "&",
-          "+pin1_radial_duct_3_surf_2",
-          "&",
-          "+pin1_radial_duct_3_surf_3"
-        ],
-        "&",
         "~",
         [
           "-pin1_radial_ring_2"
         ]
       ],
       "region_postfix": [
-        "pin1_radial_duct_3_surf_0",
-        "+",
-        "pin1_radial_duct_3_surf_1",
-        "+",
-        "&",
-        "pin1_radial_duct_3_surf_2",
-        "+",
-        "&",
-        "pin1_radial_duct_3_surf_3",
-        "+",
-        "&",
         "pin1_radial_ring_2",
         "-",
-        "~",
-        "&"
+        "~"
       ]
     },
-    "pin1_void_cell": {
-      "fill": "",
-      "filltype": "VOID",
+    "pin1_root_cell": {
+      "fill": "pin1_univ",
+      "filltype": "UNIVERSE",
       "region_infix": [
-        "~",
-        [
-          "+pin1_radial_duct_3_surf_0",
-          "&",
-          "+pin1_radial_duct_3_surf_1",
-          "&",
-          "+pin1_radial_duct_3_surf_2",
-          "&",
-          "+pin1_radial_duct_3_surf_3"
-        ]
+        "+pin1_radial_duct_3_surf_0",
+        "&",
+        "+pin1_radial_duct_3_surf_1",
+        "&",
+        "+pin1_radial_duct_3_surf_2",
+        "&",
+        "+pin1_radial_duct_3_surf_3"
       ],
       "region_postfix": [
         "pin1_radial_duct_3_surf_0",
@@ -114,8 +89,7 @@
         "&",
         "pin1_radial_duct_3_surf_3",
         "+",
-        "&",
-        "~"
+        "&"
       ]
     }
   },
@@ -184,13 +158,17 @@
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
+        "pin1_root_cell"
+      ],
+      "root": true
+    },
+    "pin1_univ": {
+      "cells": [
         "pin1_cell_radial_0",
         "pin1_cell_radial_1",
         "pin1_cell_radial_2",
-        "pin1_cell_radial_3",
-        "pin1_void_cell"
-      ],
-      "root": true
+        "pin1_cell_radial_3"
+      ]
     }
   }
 }

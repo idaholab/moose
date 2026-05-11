@@ -3,6 +3,12 @@
     "pin1_cell_radial_0": {
       "fill": "rgmb_region_1",
       "filltype": "CSG_MATERIAL",
+      "region_infix": [],
+      "region_postfix": []
+    },
+    "pin1_root_cell": {
+      "fill": "pin1_univ",
+      "filltype": "UNIVERSE",
       "region_infix": [
         "+pin1_radial_duct_0_surf_0",
         "&",
@@ -34,46 +40,6 @@
         "pin1_radial_duct_0_surf_5",
         "+",
         "&"
-      ]
-    },
-    "pin1_void_cell": {
-      "fill": "",
-      "filltype": "VOID",
-      "region_infix": [
-        "~",
-        [
-          "+pin1_radial_duct_0_surf_0",
-          "&",
-          "+pin1_radial_duct_0_surf_1",
-          "&",
-          "+pin1_radial_duct_0_surf_2",
-          "&",
-          "+pin1_radial_duct_0_surf_3",
-          "&",
-          "+pin1_radial_duct_0_surf_4",
-          "&",
-          "+pin1_radial_duct_0_surf_5"
-        ]
-      ],
-      "region_postfix": [
-        "pin1_radial_duct_0_surf_0",
-        "+",
-        "pin1_radial_duct_0_surf_1",
-        "+",
-        "&",
-        "pin1_radial_duct_0_surf_2",
-        "+",
-        "&",
-        "pin1_radial_duct_0_surf_3",
-        "+",
-        "&",
-        "pin1_radial_duct_0_surf_4",
-        "+",
-        "&",
-        "pin1_radial_duct_0_surf_5",
-        "+",
-        "&",
-        "~"
       ]
     }
   },
@@ -136,10 +102,14 @@
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
-        "pin1_cell_radial_0",
-        "pin1_void_cell"
+        "pin1_root_cell"
       ],
       "root": true
+    },
+    "pin1_univ": {
+      "cells": [
+        "pin1_cell_radial_0"
+      ]
     }
   }
 }

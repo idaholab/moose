@@ -24,6 +24,7 @@
     # value is returned.
     max_parallel = 1
     rel_err = 1
+    capabilities = 'slepc'
     requirement = 'The system shall be able to report the final nonlinear residual for a nonlinear eigenvalue problem.'
   []
 []

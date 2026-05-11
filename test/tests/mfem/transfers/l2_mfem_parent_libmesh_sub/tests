@@ -52,7 +52,7 @@
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'Outputs/file_base=mfem_parent_libmesh_sub_scalar_hexes '
                 'libmesh_app0::Mesh/file=../../mesh/cube.e '
-    []  
+    []
     [L2Tet]
       type = CSVDiff
       input = mfem_parent_scalar.i

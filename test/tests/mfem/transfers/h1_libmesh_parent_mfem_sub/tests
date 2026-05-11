@@ -25,7 +25,7 @@
       cli_args = 'Variables/libmesh_scalar_var/order=SECOND '
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
-                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_quads_order_2 '    
+                'Outputs/file_base=libmesh_parent_scalar_mfem_sub_quads_order_2 '
     []
     [H1Tri]
       type = CSVDiff
@@ -68,7 +68,7 @@
       cli_args = 'Mesh/file=../../mesh/square_quad9.e '
                 'mfem_app0:Mesh/file=../../mesh/square_tri6.e '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tri_to_quad '
-    []  
+    []
     [H1TriToQuadSecondOrder]
       type = CSVDiff
       input = libmesh_parent_scalar.i
@@ -115,7 +115,7 @@
                 'AuxVariables/mfem_scalar_var/order=SECOND '
                 'mfem_app0:Mesh/file=../../mesh/cube.e '
                 'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
-    []    
+    []
     [H1Tet]
       type = CSVDiff
       input = libmesh_parent_scalar.i
@@ -142,10 +142,10 @@
       cli_args = 'Mesh/file=../../mesh/cube_tet10.e '
                 'BCs/sides/boundary=Sides '
                 'Variables/libmesh_scalar_var/order=SECOND '
-                'AuxVariables/mfem_scalar_var/order=SECOND '               
+                'AuxVariables/mfem_scalar_var/order=SECOND '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tets_order_2 '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
-                'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '               
+                'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
     []
     [H1TetToHex]
       type = CSVDiff
@@ -173,10 +173,10 @@
       cli_args = 'Mesh/file=../../mesh/cube.e '
                 'BCs/sides/boundary=Sides '
                 'Variables/libmesh_scalar_var/order=SECOND '
-                'AuxVariables/mfem_scalar_var/order=SECOND '               
+                'AuxVariables/mfem_scalar_var/order=SECOND '
                 'Outputs/file_base=libmesh_parent_scalar_mfem_sub_tet_to_hex_order_2 '
                 'mfem_app0:Mesh/file=../../mesh/cube_tet10.e '
-                'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '               
-    []  
+                'mfem_app0:FESpaces/H1FESpace/fec_order=SECOND '
+    []
   []
 []

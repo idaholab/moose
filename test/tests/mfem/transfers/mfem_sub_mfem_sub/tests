@@ -1,5 +1,5 @@
 [Tests]
-  [MFEMCopyTransfer]   
+  [MFEMCopyTransfer]
     issues = '#29632'
     design = MultiAppMFEMCopyTransfer.md
     requirement = 'The system shall be able to copy MFEM variable data between sub-applications,'

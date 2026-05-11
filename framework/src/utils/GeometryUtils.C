@@ -10,6 +10,10 @@
 #include "GeometryUtils.h"
 #include "MooseUtils.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
 namespace geom_utils
 {
 
@@ -341,5 +345,90 @@ segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Po
     return true;
   else
     return false;
+}
+
+Real
+pointSegmentDistanceSq(const Point & point, const Point & a, const Point & b)
+{
+  const Point ab = b - a;
+  const auto length_sq = ab.norm_sq();
+  if (length_sq <= std::numeric_limits<Real>::epsilon())
+    return (point - a).norm_sq();
+
+  const auto t = std::clamp(((point - a) * ab) / length_sq, 0.0, 1.0);
+  const Point projection = a + t * ab;
+  return (point - projection).norm_sq();
+}
+
+Real
+pointTriangleDistanceSq(const Point & point, const Point & v0, const Point & v1, const Point & v2)
+{
+  const Point ab = v1 - v0;
+  const Point ac = v2 - v0;
+  const Point ap = point - v0;
+  const Real d1 = ab * ap;
+  const Real d2 = ac * ap;
+  if (d1 <= 0.0 && d2 <= 0.0)
+    return (point - v0).norm_sq();
+
+  const Point bp = point - v1;
+  const Real d3 = ab * bp;
+  const Real d4 = ac * bp;
+  if (d3 >= 0.0 && d4 <= d3)
+    return (point - v1).norm_sq();
+
+  const Real vc = d1 * d4 - d3 * d2;
+  if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0)
+  {
+    const Real v = d1 / (d1 - d3);
+    const Point projection = v0 + v * ab;
+    return (point - projection).norm_sq();
+  }
+
+  const Point cp = point - v2;
+  const Real d5 = ab * cp;
+  const Real d6 = ac * cp;
+  if (d6 >= 0.0 && d5 <= d6)
+    return (point - v2).norm_sq();
+
+  const Real vb = d5 * d2 - d1 * d6;
+  if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0)
+  {
+    const Real w = d2 / (d2 - d6);
+    const Point projection = v0 + w * ac;
+    return (point - projection).norm_sq();
+  }
+
+  const Real va = d3 * d6 - d5 * d4;
+  if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0)
+  {
+    const Point bc = v2 - v1;
+    const Real w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+    const Point projection = v1 + w * bc;
+    return (point - projection).norm_sq();
+  }
+
+  const Real denom = 1.0 / (va + vb + vc);
+  const Real v = vb * denom;
+  const Real w = vc * denom;
+  const Point projection = v0 + ab * v + ac * w;
+  return (point - projection).norm_sq();
+}
+
+Real
+solidAngle(const Point & point, const Point & v0, const Point & v1, const Point & v2)
+{
+  const Point a = v0 - point;
+  const Point b = v1 - point;
+  const Point c = v2 - point;
+
+  const Real la = a.norm();
+  const Real lb = b.norm();
+  const Real lc = c.norm();
+
+  const Real numerator = a * (b.cross(c));
+  const Real denominator = la * lb * lc + (a * b) * lc + (b * c) * la + (c * a) * lb;
+
+  return 2.0 * std::atan2(numerator, denominator);
 }
 } // end namespace geom_utils

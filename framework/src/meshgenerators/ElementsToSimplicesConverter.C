@@ -40,6 +40,12 @@ ElementsToSimplicesConverter::generate()
   std::unique_ptr<UnstructuredMesh> mesh =
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_input_ptr));
 
+  // all_tri() on a ReplicatedMesh skips its internal prepare_for_use() call (it only prepares
+  // for non-replicated meshes). Without preparation, element_ptr_range() may not iterate over
+  // all elements correctly, producing incomplete results. Prepare here to ensure correctness.
+  if (!mesh->is_prepared())
+    mesh->prepare_for_use();
+
   MeshTools::Modification::all_tri(*mesh);
 
   return mesh;

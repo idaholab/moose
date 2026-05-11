@@ -73,7 +73,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         export PATH={{ MINIFORGE_DIR }}/bin:$PATH
     fi
     if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}" ]; then
-        source activate {{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
+        source {{ MINIFORGE_DIR }}/etc/profile.d/conda.sh
+        conda activate {{ MOOSE_CONDA_ENV_NAME }}
     fi
 
     export PATH=/opt/code-server/bin:$PATH
@@ -125,12 +126,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
-    CODE_SERVER_VERSION=4.115.0
+    CODE_SERVER_VERSION=4.118.0
 {% if PROFILING is defined %}
     GPERFTOOLS_VERSION=2.18.1
     GO_VERSION=1.26.1
 {%- endif %}
-    MINIFORGE_VERSION=26.1.1-3
+    MINIFORGE_VERSION=26.3.2-0
     PYTHON_VERSION=3.14
     PYTORCH_VERSION=2.11.0
 
@@ -232,6 +233,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYTORCH_CONDA_ENV=pytorch_build
     conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
     source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
+    # Make sure that pip matches the python version we requested above
+    conda install -yq pip
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
     # Require CUDA if we have cuda available
@@ -330,6 +333,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # Additional options with cuda
         MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DCUDA_ARCH=sm_80")
+        # The build environment lacks libnvidia-ml.so.1, which PETSc needs, so we bypass the test that
+        # MFEM uses to check PETSc's installation during CMake configuration.
+        MFEM_OPTIONS+=("-DPETSC_EXECUTABLE_RUNS=YES")
         # Expose the compat libraries if we haven't already
         if [[ "$LD_LIBRARY_PATH" != *"${CUDA_DIR}/compat"* ]]; then
             export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}

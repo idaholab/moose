@@ -4107,7 +4107,14 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  unsigned int n_threads = libMesh::n_threads();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (parameters.isKokkosObject())
+    n_threads = 1;
+#endif
+
+  for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     // Create the general Block/Boundary MaterialBase object
     std::shared_ptr<MaterialBase> material =

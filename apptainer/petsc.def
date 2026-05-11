@@ -83,8 +83,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # Additional options with cuda
         PETSC_OPTIONS+=("--with-cuda" "--with-cuda-dir=${CUDA_DIR}" "--with-cuda-arch=80" "--download-slate" "--download-hypre-configure-arguments='--enable-gpu-aware-mpi'")
+        # The build environment lacks libnvidia-ml.so.1, so we use -Wl,--as-needed to drop that
+        # dependency, which is inherited from PETSc, when linking the simple program that SLATE
+        # uses to check the compiler during CMake configuration so that the dynamic linker does
+        # not complain when CMake subsequently runs it.
+        PETSC_OPTIONS+=("--download-slate-cmake-arguments='-DCMAKE_EXE_LINKER_FLAGS=-Wl,--as-needed'")
         # Expose the compat libraries that can be linked to during configure for building without a GPU present
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+    fi
+
+    if [ -n "$ONEAPI_ROOT" ]; then
+        # OpenBLAS fails to correctly detect mpif90(ifx), so we override relevant variables
+        PETSC_OPTIONS+=("--download-openblas-make-options=DYNAMIC_ARCH=1 NOFORTRAN=0 F_COMPILER=INTEL FEXTRALIB=")
     fi
 
     # Build PETSc

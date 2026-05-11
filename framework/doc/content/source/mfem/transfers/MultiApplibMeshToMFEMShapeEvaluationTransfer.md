@@ -8,20 +8,19 @@ via local evaluation of shape functions at target nodal projection points. This 
 transfers between different meshes, from first and second order LAGRANGE and constant MONOMIAL libMesh
 variable types to scalar MFEM GridFunctions defined on H1 and L2 conforming finite element spaces.
 
-For transfers in the opposite direction, from MFEM-based applications to libMesh-based applications, please see [MultiAppMFEMTolibMeshShapeEvaluationTransfer](MultiAppMFEMTolibMeshShapeEvaluationTransfer.md).
+For transfers in the opposite direction, from MFEM-based applications to libMesh-based applications, please see [MultiAppMFEMTolibMeshShapeEvaluationTransfer.md].
 
 ## General Description
 
 `MultiApplibMeshToMFEMShapeEvaluationTransfer` executes transfers in three steps:
 
 1. Extraction of a vector of node positions in the `ParFiniteElementSpace` of the destination
-   `mfem::ParGridFunction`, using [`MFEMNodalProjector`](MFEMNodalProjector.md).
+   `mfem::ParGridFunction`, using [MFEMNodalProjector.md].
 2. Interpolation of the source libMesh-based `MooseVariable` at this set of node locations. Required
-   gather/scatter operations are performed similarly to those in
-   [`MultiAppGeneralFieldTransfer`](MultiAppGeneralFieldTransfer.md), with interpolation analagous
-   to [`MultiAppGeneralFieldShapeEvaluationTransfer`](MultiAppGeneralFieldShapeEvaluationTransfer.md).
+   gather/scatter operations are performed similarly to those in [MultiAppGeneralFieldTransfer.md],
+   with interpolation analogous to [MultiAppGeneralFieldShapeEvaluationTransfer.md].
 3. Projection of the evaluated source variable values onto the destination variable nodes, to set
-   the destination variable degrees of freedom, using [`MFEMNodalProjector`](MFEMNodalProjector.md).
+   the destination variable degrees of freedom, using [MFEMNodalProjector.md].
 
 ## Features Supported
 
