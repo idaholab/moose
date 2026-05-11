@@ -25,18 +25,18 @@ public:
   static InputParameters validParams();
   PorousRhieChowMassFlux(const InputParameters & params);
 
-  std::pair<Real, Real> getAdvectedInterpolationCoeffs(const FaceInfo & fi,
-                                                       Moose::FV::InterpMethod method,
-                                                       Real face_mass_flux,
-                                                       bool apply_porosity_scaling = true) const override;
+  std::pair<Real, Real>
+  getAdvectedInterpolationCoeffs(const FaceInfo & fi,
+                                 Moose::FV::InterpMethod method,
+                                 Real face_mass_flux,
+                                 bool apply_porosity_scaling = true) const override;
   Real getFaceSidePorosity(const FaceInfo & fi,
                            bool elem_side,
                            const Moose::StateArg & time) const override;
   Real getSignedBaffleJump(const FaceInfo & fi, bool elem_side) const override;
   bool faceUsesOneSidedReconstruction(const FaceInfo & fi) const override;
   Real pressureGradient(const ElemInfo & elem_info, unsigned int component) const override;
-  Real correctedPressureGradient(const ElemInfo & elem_info,
-                                 unsigned int component) const override;
+  Real correctedPressureGradient(const ElemInfo & elem_info, unsigned int component) const override;
 
   void initFaceMassFlux() override;
   void initCouplingField() override;
