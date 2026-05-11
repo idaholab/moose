@@ -1013,19 +1013,15 @@ advected_interp_method = 'upwind'
   []
 
   [enthalpy_inlet]
-    type = VolumetricFlowRate
+    type = RhieChowMassFlowRate
     advected_quantity = h_fluid
-    vel_x = superficial_u
-    vel_y = superficial_v
     boundary = inlet
     rhie_chow_user_object = rc
   []
 
   [enthalpy_outlet]
-    type = VolumetricFlowRate
+    type = RhieChowMassFlowRate
     advected_quantity = h_fluid
-    vel_x = superficial_u
-    vel_y = superficial_v
     boundary = outlet
     rhie_chow_user_object = rc
     advected_interp_method = upwind
