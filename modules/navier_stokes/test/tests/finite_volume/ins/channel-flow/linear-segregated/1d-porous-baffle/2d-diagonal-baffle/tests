@@ -1,0 +1,39 @@
+[Tests]
+  [straight-diagonal]
+    type = 'CSVDiff'
+    input = porous-baffle-straight-diagonal.i
+    csvdiff = 'porous-baffle-straight-diagonal_out.csv porous-baffle-straight-diagonal_out_p_inlet_to_diag_0001.csv porous-baffle-straight-diagonal_out_p_diagonal_0001.csv porous-baffle-straight-diagonal_out_p_diag_to_outlet_0001.csv porous-baffle-straight-diagonal_out_u_inlet_to_diag_0001.csv porous-baffle-straight-diagonal_out_u_diag_to_outlet_0001.csv porous-baffle-straight-diagonal_out_v_y_left_of_interface_0001.csv porous-baffle-straight-diagonal_out_v_y_right_of_interface_0001.csv'
+    requirement = 'The system shall preserve pressure and velocity profiles across a straight channel with a diagonal porous baffle form-loss jump without introducing transverse velocity oscillations.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
+
+  [straight]
+    type = 'CSVDiff'
+    input = porous-baffle-straight.i
+    csvdiff = 'porous-baffle-straight_out.csv porous-baffle-straight_out_p_inlet_to_diag_0001.csv porous-baffle-straight_out_p_diagonal_0001.csv porous-baffle-straight_out_p_diag_to_outlet_0001.csv porous-baffle-straight_out_u_inlet_to_diag_0001.csv porous-baffle-straight_out_u_diag_to_outlet_0001.csv porous-baffle-straight_out_v_y_left_of_interface_0001.csv porous-baffle-straight_out_v_y_right_of_interface_0001.csv'
+    requirement = 'The system shall preserve the pressure drops and non-oscillatory velocity profiles for a straight channel with entry, diagonal, and exit porous baffle form losses.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/file_base=porous-baffle-straight_out Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+    abs_zero = 1e-8
+  []
+
+  [corner-l]
+    type = 'CSVDiff'
+    input = porous-baffle-corner-l.i
+    csvdiff = 'porous-baffle-corner-l_out.csv porous-baffle-corner-l_out_p_inlet_leg_0001.csv porous-baffle-corner-l_out_p_diagonal_0001.csv porous-baffle-corner-l_out_p_outlet_leg_0001.csv'
+    requirement = 'The system shall preserve the entry, corner, and exit pressure drops for an L-shaped channel with diagonal porous baffle form losses.'
+    design = 'SIMPLE.md PorousRhieChowMassFlux.md LinearFVMomentumFriction.md'
+    cli_args = 'Outputs/exodus=false Outputs/console=false'
+    recover = false
+    max_threads = 1
+    allow_warnings = true
+  []
+[]

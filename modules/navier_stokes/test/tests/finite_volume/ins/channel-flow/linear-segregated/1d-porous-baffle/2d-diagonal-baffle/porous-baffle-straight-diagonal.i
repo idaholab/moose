@@ -431,6 +431,59 @@ advected_interp_method = 'upwind'
   []
 []
 
+[Postprocessors]
+  [p_inlet]
+    type = SideAverageValue
+    variable = pressure
+    boundary = inlet
+  []
+  [p_outlet]
+    type = SideAverageValue
+    variable = pressure
+    boundary = outlet
+  []
+  [p_total_drop]
+    type = ParsedPostprocessor
+    expression = 'p_inlet - p_outlet'
+    pp_names = 'p_inlet p_outlet'
+  []
+  [p_clean_in]
+    type = ElementAverageValue
+    variable = pressure
+    block = 'clean_inlet'
+  []
+  [p_porous_1]
+    type = ElementAverageValue
+    variable = pressure
+    block = 'porous_zone_1'
+  []
+  [p_porous_2]
+    type = ElementAverageValue
+    variable = pressure
+    block = 'porous_zone_2'
+  []
+  [p_clean_out]
+    type = ElementAverageValue
+    variable = pressure
+    block = 'clean_outlet'
+  []
+  [p_entry_drop]
+    type = ParsedPostprocessor
+    expression = 'p_clean_in - p_porous_1'
+    pp_names = 'p_clean_in p_porous_1'
+  []
+  [p_baffle_drop]
+    type = ParsedPostprocessor
+    expression = 'p_porous_1 - p_porous_2'
+    pp_names = 'p_porous_1 p_porous_2'
+  []
+  [p_exit_drop]
+    type = ParsedPostprocessor
+    expression = 'p_porous_2 - p_clean_out'
+    pp_names = 'p_porous_2 p_clean_out'
+  []
+[]
+
 [VectorPostprocessors]
   [p_inlet_to_diag]
     type = LineValueSampler

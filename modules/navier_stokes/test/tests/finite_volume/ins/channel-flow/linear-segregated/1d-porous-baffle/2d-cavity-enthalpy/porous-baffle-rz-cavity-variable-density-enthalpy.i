@@ -392,6 +392,66 @@ advected_interp_method = 'upwind'
   []
 []
 
+[Postprocessors]
+  [p_lower]
+    type = ElementAverageValue
+    variable = pressure
+    block = 1
+  []
+  [p_middle]
+    type = ElementAverageValue
+    variable = pressure
+    block = 2
+  []
+  [p_upper]
+    type = ElementAverageValue
+    variable = pressure
+    block = 3
+  []
+  [p_lower_to_upper_drop]
+    type = ParsedPostprocessor
+    expression = 'p_lower - p_upper'
+    pp_names = 'p_lower p_upper'
+  []
+  [T_fluid_middle]
+    type = ElementAverageValue
+    variable = T_fluid
+    block = 2
+  []
+  [T_fluid_max]
+    type = ElementExtremeValue
+    variable = T_fluid
+    value_type = max
+  []
+  [rho_min]
+    type = ElementExtremeValue
+    variable = rho_aux
+    value_type = min
+  []
+  [superficial_r_max]
+    type = ElementExtremeValue
+    variable = superficial_r
+    value_type = max
+  []
+  [superficial_z_max]
+    type = ElementExtremeValue
+    variable = superficial_z
+    value_type = max
+  []
+[]
+
+[VectorPostprocessors]
+  [centerline_solution]
+    type = LineValueSampler
+    variable = 'pressure T_fluid rho_aux superficial_r superficial_z porosity_aux'
+    start_point = '${fparse 0.5 * radius} 0 0'
+    end_point = '${fparse 0.5 * radius} ${fparse height_bottom + height_middle + height_top} 0'
+    num_points = 65
+    sort_by = y
+    execute_on = timestep_end
+  []
+[]
+
 [Executioner]
   type = SIMPLE
   momentum_l_abs_tol = 1e-14
