@@ -71,3 +71,5 @@ make -j $MOOSE_JOBS
 cd ../test
 make -j $MOOSE_JOBS
 ```
+
+Use [this page](syntax/MFEM/index.md) as your starting point for learning how to use the MFEM capability in MOOSE.

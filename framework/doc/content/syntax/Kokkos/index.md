@@ -32,7 +32,7 @@ It supports multi-dimensional indexing.
 The dimension can either be specified through the second template argument with the default being one-dimension or using type aliases: for instance, a three-dimensional array of type `double` can be declared either by `Array<double, 3>` or `Array3D<double>`.
 The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
 They automatically return either CPU or GPU data depending on where they are being accessed.
-The index type template argument is set to 8-byte integer by default to accomodate large arrays.
+The index type template argument is set to 8-byte integer by default to accommodate large arrays.
 However, 8-byte integer computation is significantly more expensive than 4-byte integer computation.
 If your array size is small enough, consider using 4-byte indices to optimize index calculations.
 If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the fourth layout template argument can be optionally set to `Moose::Kokkos::LayoutType::RIGHT` (default is `LEFT`).
@@ -78,7 +78,7 @@ for (auto & datum : data)
 !alert note
 The GPU memory is always uninitialized upon allocation.
 
-Because the memory spaces are separate between CPU and GPU, there is no automatic synchronzation of data.
+Because the memory spaces are separate between CPU and GPU, there is no automatic synchronization of data.
 Therefore, data should be explicitly copied between them when one side is updated.
 Arrays provide three APIs for this purpose: `copyToHost()`, `copyToDevice()`, and `copyToDeviceNested()`.
 `copyToHost()` and `copyToDevice()` copies data from GPU to CPU and CPU to GPU, respectively, as their names imply.
@@ -425,7 +425,7 @@ It can be used to protect the Kokkos-related codes in non-Kokkos source files.
 Also, the build system defines another preprocessor `MOOSE_KOKKOS_SCOPE` that is only defined for the Kokkos source files.
 It is useful for protecting Kokkos codes in header files that can be included in both Kokkos and non-Kokkos source files.
 However, it is important to note that `MOOSE_KOKKOS_SCOPE` should not be used to protect member variables or virtual member functions in a class, as it can make CPU and GPU compiler see inconsistent class definitions having different sizes and cause memory misalignment.
-It is primarly used to protect inlined GPU functions with the `KOKKOS_FUNCTION` specifier in header files or non-virtual CPU functions that are not allowed to be called in non-Kokkos source files.
+It is primarily used to protect inlined GPU functions with the `KOKKOS_FUNCTION` specifier in header files or non-virtual CPU functions that are not allowed to be called in non-Kokkos source files.
 
 ## Kokkos-MOOSE Objects
 
