@@ -11,9 +11,11 @@
 
 #include "SideIntegralPostprocessor.h"
 #include "RhieChowMassFlux.h"
+#include "MathFVUtils.h"
 
 /**
- * Integrates the mass flux stored by a linear segregated Rhie-Chow user object.
+ * Integrates the mass flux stored by a linear segregated Rhie-Chow user object, optionally
+ * weighted by an advected quantity.
  */
 class RhieChowMassFlowRate : public SideIntegralPostprocessor
 {
@@ -27,4 +29,10 @@ protected:
   virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
   const RhieChowMassFlux & _mass_flux_provider;
+
+  /// Optional advected quantity to multiply by the Rhie-Chow mass flux
+  const Moose::Functor<ADReal> * const _adv_quant;
+
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
 };
