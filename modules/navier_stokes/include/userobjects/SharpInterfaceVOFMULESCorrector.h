@@ -63,6 +63,12 @@ public:
   const VariableName & variableName() const { return _variable_name; }
 
 private:
+  enum class HighOrderCorrectionScheme : unsigned char
+  {
+    Venkatakrishnan,
+    VanLeer
+  };
+
   enum class BoundaryFaceKind : unsigned char
   {
     Internal,
@@ -109,7 +115,8 @@ private:
   Real cellAlpha(const ElemInfo & elem_info) const;
   Real donorFlux(const FaceInfo & fi) const;
   Real highOrderFlux(const FaceInfo & fi) const;
-  Real limitedUpwindFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
+  Real venkatakrishnanFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
+  Real vanLeerFaceValue(const FaceInfo & fi, bool upwind_is_elem) const;
   BoundaryFaceKind classifyBoundaryFace(const FaceInfo & fi,
                                         FaceInfo::VarFaceNeighbors face_type,
                                         Real volumetric_flux) const;
@@ -126,6 +133,7 @@ private:
   const Moose::Functor<RealVectorValue> & _interface_normal;
   const Moose::Functor<Real> & _liquid_density;
   const Moose::Functor<Real> & _gas_density;
+  const HighOrderCorrectionScheme _high_order_correction_scheme;
   const unsigned int _num_alpha_corrections;
   const unsigned int _num_limiter_iterations;
   const Real _correction_relaxation;

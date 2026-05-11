@@ -21,8 +21,10 @@
 #include "FaceInfo.h"
 #include "ElemInfo.h"
 #include "SegregatedSolverUtils.h"
+#include "MathFVUtils.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <unordered_map>
 #include <vector>
@@ -56,6 +58,12 @@ SharpInterfaceVOFMULESCorrector::validParams()
   params.addRequiredParam<MooseFunctorName>(
       "interface_normal",
       "Face-oriented interface unit normal used in the explicit compression correction.");
+  MooseEnum high_order_correction_scheme("venkatakrishnan vanLeer", "venkatakrishnan");
+  params.addParam<MooseEnum>(
+      "high_order_correction_scheme",
+      high_order_correction_scheme,
+      "Higher-order correction flux added on top of the donor/upwind base flux before MULES-style "
+      "limiting.");
   params.addRangeCheckedParam<unsigned int>(
       "n_alpha_corrections", 2, "n_alpha_corrections>0", "Number of explicit correction sweeps.");
   params.addRangeCheckedParam<unsigned int>(
@@ -131,6 +139,10 @@ SharpInterfaceVOFMULESCorrector::SharpInterfaceVOFMULESCorrector(const InputPara
     _interface_normal(getFunctor<RealVectorValue>("interface_normal")),
     _liquid_density(getFunctor<Real>("liquid_density")),
     _gas_density(getFunctor<Real>("gas_density")),
+    _high_order_correction_scheme(
+        getParam<MooseEnum>("high_order_correction_scheme") == "vanLeer"
+            ? HighOrderCorrectionScheme::VanLeer
+            : HighOrderCorrectionScheme::Venkatakrishnan),
     _num_alpha_corrections(getParam<unsigned int>("n_alpha_corrections")),
     _num_limiter_iterations(getParam<unsigned int>("n_limiter_iterations")),
     _correction_relaxation(getParam<Real>("correction_relaxation")),
@@ -458,11 +470,22 @@ SharpInterfaceVOFMULESCorrector::highOrderFlux(const FaceInfo & fi) const
 
   Real high_order_alpha = 0.0;
   if (fi.neighborPtr() && face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    high_order_alpha = limitedUpwindFaceValue(fi, upwind_is_elem);
+    switch (_high_order_correction_scheme)
+    {
+      case HighOrderCorrectionScheme::Venkatakrishnan:
+        high_order_alpha = venkatakrishnanFaceValue(fi, upwind_is_elem);
+        break;
+      case HighOrderCorrectionScheme::VanLeer:
+        high_order_alpha = vanLeerFaceValue(fi, upwind_is_elem);
+        break;
+    }
   else if (auto * dirichlet_bc = dynamic_cast<LinearFVAdvectionDiffusionFunctorDirichletBC *>(bc))
   {
     (void)dirichlet_bc;
-    high_order_alpha = upwind_is_elem ? limitedUpwindFaceValue(fi, true) : boundaryValue(fi, face_type);
+    // Keep the one-sided boundary reconstruction on open outflow even when Van Leer is selected.
+    // The Van Leer correction is only defined here for internal faces with a true downwind cell.
+    high_order_alpha =
+        upwind_is_elem ? venkatakrishnanFaceValue(fi, true) : boundaryValue(fi, face_type);
   }
   else if (upwind_is_elem &&
            dynamic_cast<LinearFVAdvectionDiffusionExtrapolatedBC *>(bc))
@@ -474,7 +497,8 @@ SharpInterfaceVOFMULESCorrector::highOrderFlux(const FaceInfo & fi) const
 }
 
 Real
-SharpInterfaceVOFMULESCorrector::limitedUpwindFaceValue(const FaceInfo & fi, const bool upwind_is_elem) const
+SharpInterfaceVOFMULESCorrector::venkatakrishnanFaceValue(const FaceInfo & fi,
+                                                          const bool upwind_is_elem) const
 {
   const auto state = Moose::currentState();
   const auto & upwind_info = upwind_is_elem ? *fi.elemInfo() : *fi.neighborInfo();
@@ -484,6 +508,32 @@ SharpInterfaceVOFMULESCorrector::limitedUpwindFaceValue(const FaceInfo & fi, con
   const Point & upwind_centroid = upwind_is_elem ? fi.elemCentroid() : fi.neighborCentroid();
   const Real reconstructed = alpha_upwind + grad_upwind * (fi.faceCentroid() - upwind_centroid);
   return std::min(_max_value, std::max(_min_value, reconstructed));
+}
+
+Real
+SharpInterfaceVOFMULESCorrector::vanLeerFaceValue(const FaceInfo & fi,
+                                                  const bool upwind_is_elem) const
+{
+  mooseAssert(fi.neighborPtr(), "Van Leer correction requires an internal face with a neighbor.");
+
+  const auto state = Moose::currentState();
+  const auto & upwind_info = upwind_is_elem ? *fi.elemInfo() : *fi.neighborInfo();
+  const auto & downwind_info = upwind_is_elem ? *fi.neighborInfo() : *fi.elemInfo();
+
+  const Real phi_upwind = cellAlpha(upwind_info);
+  const Real phi_downwind = cellAlpha(downwind_info);
+  const VectorValue<Real> grad_upwind = _alpha_var->gradSln(upwind_info, state);
+  const Point upwind_to_downwind = upwind_is_elem ? fi.dCN() : Point(-fi.dCN());
+
+  const Real r_f = Moose::FV::rF(phi_upwind, phi_downwind, grad_upwind, upwind_to_downwind);
+  const Real beta = (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
+
+  const Real w_f = upwind_is_elem ? fi.gC() : (1.0 - fi.gC());
+  const Real g_unclamped = beta * (1.0 - w_f);
+  const Real g = std::min(std::max(g_unclamped, 0.0), 1.0 - w_f);
+
+  const Real phi_face = (1.0 - g) * phi_upwind + g * phi_downwind;
+  return std::min(_max_value, std::max(_min_value, phi_face));
 }
 
 SharpInterfaceVOFMULESCorrector::BoundaryFaceKind

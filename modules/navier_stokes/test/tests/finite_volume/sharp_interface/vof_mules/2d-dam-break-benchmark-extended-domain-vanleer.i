@@ -63,7 +63,7 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         orthogonality_correction = false
         momentum_two_term_bc_expansion = false
         pressure_two_term_bc_expansion = false
-        momentum_advection_interpolation = 'vanLeer'
+        momentum_advection_interpolation = 'upwind'
       []
     []
     [SharpInterfaceVOFSegregated]
@@ -80,6 +80,7 @@ cell_dy = ${fparse domain_dims_y / 50.0}
         gas_dynamic_viscosity_name = 'mu_g'
 
         advected_interp_method = 'upwind'
+        alpha_correction_scheme = 'vanLeer'
         compression_factor = '${c_alpha}'
         interface_normal_functor = 'flow_interface_unit_normal_face'
 

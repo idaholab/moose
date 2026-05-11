@@ -73,6 +73,12 @@ WCNSLinearFVSharpInterfaceVOFPhysics::validParams()
       "interface_normal_functor",
       "interface_unit_normal_face",
       "Face-oriented interface unit normal used by the explicit compression flux.");
+  MooseEnum alpha_correction_scheme("venkatakrishnan vanLeer", "venkatakrishnan");
+  params.addParam<MooseEnum>(
+      "alpha_correction_scheme",
+      alpha_correction_scheme,
+      "High-order correction used in the bounded MULES-style alpha update. The donor/base flux "
+      "remains upwind; this selects the higher-order correction flux added on top of it.");
   params.addParam<MooseFunctorName>("alpha_phi_bd_functor_name",
                                     "alpha_phi_bd",
                                     "Published donor/base alpha face flux.");
@@ -155,7 +161,8 @@ WCNSLinearFVSharpInterfaceVOFPhysics::validParams()
                                             "Gas-phase dynamic viscosity functor.");
 
   params.addParamNamesToGroup(
-      "system_names advected_interp_method compression_factor interface_normal_functor",
+      "system_names advected_interp_method compression_factor interface_normal_functor "
+      "alpha_correction_scheme",
       "Numerical scheme");
 
   params.suppressParameter<MooseEnum>("preconditioning");
@@ -175,6 +182,7 @@ WCNSLinearFVSharpInterfaceVOFPhysics::WCNSLinearFVSharpInterfaceVOFPhysics(
     _alpha_two_term_bc_expansion(getParam<bool>("volume_fraction_two_term_bc_expansion")),
     _compression_factor_name(getParam<MooseFunctorName>("compression_factor")),
     _interface_normal_functor_name(getParam<MooseFunctorName>("interface_normal_functor")),
+    _alpha_correction_scheme(getParam<MooseEnum>("alpha_correction_scheme")),
     _use_mules_correction(getParam<bool>("use_mules_correction")),
     _create_complementary_fraction(getParam<bool>("create_complementary_fraction")),
     _create_mixture_materials(getParam<bool>("create_mixture_materials")),
@@ -307,6 +315,7 @@ WCNSLinearFVSharpInterfaceVOFPhysics::addUserObjects()
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseFunctorName>("compression_factor") = _compression_factor_name;
   params.set<MooseFunctorName>("interface_normal") = _interface_normal_functor_name;
+  params.set<MooseEnum>("high_order_correction_scheme") = _alpha_correction_scheme;
   params.set<unsigned int>("n_alpha_corrections") = getParam<unsigned int>("n_alpha_corrections");
   params.set<unsigned int>("n_limiter_iterations") =
       getParam<unsigned int>("n_limiter_iterations");
