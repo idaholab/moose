@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#32186'
+  design = 'MultiAppTransfer.md'
+
+  [concurrent]
+    type = CSVDiff
+    input = 'main_between_multiapp.i'
+    cli_args = '--mpi-thread-type=multiple'
+    csvdiff = 'main_between_multiapp_out_ma10.csv main_between_multiapp_out_ma20.csv'
+    requirement = "The system shall be able to execute multiapps."
+    # Transfers execute_on don't match the MultiApps
+    allow_warnings = true
+  []
+[]
