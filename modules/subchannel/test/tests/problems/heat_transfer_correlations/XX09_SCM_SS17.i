@@ -25,7 +25,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 20
@@ -40,7 +40,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 20
     unheated_length_exit = ${unheated_length_exit}
@@ -92,6 +92,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   verbose_subchannel = true
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]
@@ -115,6 +116,14 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
   [borishanskii]
     type = SCMHTCBorishanskii
+  []
+[]
+
+# Keep T manually declared and unrestricted so this legacy regression continues
+# to compare against the pre-scoped AuxVariable golds. The automatic
+# SubChannelAddVariablesAction path remains block-restricted for normal inputs.
+[AuxVariables]
+  [T]
   []
 []
 
@@ -199,7 +208,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

@@ -38,6 +38,7 @@ n_cells = 20
   CT = 2.0
   P_tol = 1e-6
   T_tol = 1e-6
+  full_output = true
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -81,11 +82,11 @@ n_cells = 20
     value = 0.0
   []
 
-  [DP_ic]
-    type = ConstantIC
-    variable = DP
-    value = 0.0
-  []
+  # [DP_ic]
+  #   type = ConstantIC
+  #   variable = DP
+  #   value = 0.0
+  # []
 
   [Viscosity_ic]
     type = ViscosityIC

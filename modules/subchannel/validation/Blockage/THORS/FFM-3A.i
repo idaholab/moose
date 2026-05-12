@@ -18,7 +18,7 @@ vol_flow = 3.4E-03 #m3/s
 mass_flux_in = '${fparse rho *  vol_flow / Flow_area}'
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 36
@@ -62,6 +62,7 @@ P_out = 2.0e5 # Pa
   interpolation_scheme = exponential
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]
@@ -161,8 +162,6 @@ P_out = 2.0e5 # Pa
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
 []
 
 [Postprocessors]

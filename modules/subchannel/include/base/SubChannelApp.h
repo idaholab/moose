@@ -42,4 +42,5 @@ public:
   inline static const std::string DUCT_TEMPERATURE = "Tduct";
   inline static const std::string DISPLACEMENT = "displacement";
   inline static const std::string FRICTION_FACTOR = "ff";
+  inline static const std::string HEAT_TRANSFER_COEFFICIENT = "HTC";
 };

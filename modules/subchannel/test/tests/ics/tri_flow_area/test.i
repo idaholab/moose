@@ -1,5 +1,5 @@
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     n_cells = 2
     nrings = 3

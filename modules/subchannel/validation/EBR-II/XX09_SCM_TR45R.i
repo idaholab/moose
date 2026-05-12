@@ -1,6 +1,6 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
-# Transient Subchannel calculation
+# Transient subchannel calculation
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################
@@ -24,7 +24,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 50
@@ -41,66 +41,12 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 50
     unheated_length_exit = ${unheated_length_exit}
     heated_length = ${heated_length}
     pitch = ${fuel_pin_pitch}
-  []
-[]
-
-[AuxVariables]
-  [mdot]
-    block = subchannel
-  []
-  [SumWij]
-    block = subchannel
-  []
-  [P]
-    block = subchannel
-  []
-  [DP]
-    block = subchannel
-  []
-  [h]
-    block = subchannel
-  []
-  [T]
-    block = subchannel
-  []
-  [rho]
-    block = subchannel
-  []
-  [S]
-    block = subchannel
-  []
-  [w_perim]
-    block = subchannel
-  []
-  [mu]
-    block = subchannel
-  []
-  [q_prime_init]
-    block = fuel_pins
-  []
-  [power_history_field]
-    block = fuel_pins
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [displacement]
-    block = subchannel
-  []
-  [ff]
-    block = subchannel
   []
 []
 
@@ -110,7 +56,19 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
-[Problem]
+[AuxVariables]
+  [q_prime_init]
+    block = fuel_pins
+  []
+  [power_history_field]
+    block = fuel_pins
+  []
+  [q_prime]
+    block = fuel_pins
+  []
+[]
+
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
@@ -129,6 +87,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
+
+  full_output = true
 []
 
 [SCMClosures]
@@ -252,7 +212,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

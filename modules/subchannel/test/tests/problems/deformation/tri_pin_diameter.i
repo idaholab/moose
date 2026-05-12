@@ -1,36 +1,27 @@
 T_in = 588.5
-flow_area = 0.0004980799633447909 #m2
+P_out = 2.0e5
+flow_area = 0.0004980799633447909
 mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
-P_out = 2.0e5 # Pa
-length = 0.5
-num_cells = 40
+
 [TriSubChannelMesh]
   [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
-    n_cells = ${num_cells}
+    n_cells = 5
     flat_to_flat = 3.41e-2
     heated_length = 0.5
-    unheated_length_entry = 0.4
-    unheated_length_exit = 0.1
-    pin_diameter = 5.84e-3
+    pin_diameter = 5.5e-3
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
   []
-[]
-
-[AuxVariables]
-  [q_prime_aux]
-  []
-[]
-
-[Functions]
-  [axial_heat_rate]
-    type = ParsedFunction
-    expression = '(pi/2)*sin(pi*z/L)'
-    symbol_names = 'L'
-    symbol_values = '${length}'
+  [fuel_pins]
+    type = SCMTriPinMeshGenerator
+    input = sub_channel
+    nrings = 3
+    n_cells = 5
+    heated_length = 0.5
+    pitch = 7.26e-3
   []
 []
 
@@ -44,19 +35,16 @@ num_cells = 40
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
-  P_out = 2.0e5
+  P_out = ${P_out}
   CT = 2.6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
+  compute_power = false
   implicit = true
   segregated = false
-  verbose_subchannel = true
   interpolation_scheme = upwind
-  # Heat Transfer Correlation
-  pin_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
+  pin_HTC_closure = 'gnielinski'
   full_output = true
 []
 
@@ -70,42 +58,34 @@ num_cells = 40
 []
 
 [ICs]
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 5.84e-3
+  []
   [S_IC]
     type = SCMTriFlowAreaIC
     variable = S
   []
-
   [w_perim_IC]
     type = SCMTriWettedPerimIC
     variable = w_perim
   []
-
-  [q_prime_ic]
-    type = SCMTriPowerIC
-    variable = q_prime
-    power = 20000 # W
-    filename = "pin_power_profile.txt"
-    # axial_heat_rate = axial_heat_rate
-  []
-
   [T_ic]
     type = ConstantIC
     variable = T
     value = ${T_in}
   []
-
   [P_ic]
     type = ConstantIC
     variable = P
     value = 0.0
   []
-
   [DP_ic]
     type = ConstantIC
     variable = DP
     value = 0.0
   []
-
   [Viscosity_ic]
     type = ViscosityIC
     variable = mu
@@ -113,7 +93,6 @@ num_cells = 40
     T = T
     fp = sodium
   []
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
@@ -121,7 +100,6 @@ num_cells = 40
     T = T
     fp = sodium
   []
-
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
@@ -129,7 +107,6 @@ num_cells = 40
     T = T
     fp = sodium
   []
-
   [mdot_ic]
     type = ConstantIC
     variable = mdot
@@ -153,13 +130,22 @@ num_cells = 40
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
   []
-  [q_prime_AUX]
-    type = SCMTriPowerAux
-    variable = q_prime_aux
-    power = 20000 # W
-    filename = "pin_power_profile.txt" #type in name of file that describes radial power profile
-    # axial_heat_rate = axial_heat_rate
-    execute_on = 'initial'
+[]
+
+[Postprocessors]
+  [S_deformed]
+    type = SubChannelPointValue
+    variable = S
+    index = 0
+    height = 0.25
+    execute_on = 'timestep_end'
+  []
+  [w_perim_deformed]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 0
+    height = 0.25
+    execute_on = 'timestep_end'
   []
 []
 
@@ -167,23 +153,7 @@ num_cells = 40
   type = Steady
 []
 
-[Postprocessors]
-  [Total_power_IC_defaultPP]
-    type = ElementIntegralVariablePostprocessor
-    variable = q_prime
-  []
-  [Total_power_Aux_defaultPP]
-    type = ElementIntegralVariablePostprocessor
-    variable = q_prime_aux
-  []
-  [Total_power_SCMPinPowerPostprocessor]
-    type = SCMPinPowerPostprocessor
-  []
-  [Total_power_SCMTHPowerPostprocessor]
-    type = SCMTHPowerPostprocessor
-  []
-[]
-
 [Outputs]
+  console = true
   csv = true
 []

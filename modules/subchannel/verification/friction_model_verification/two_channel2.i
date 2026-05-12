@@ -42,6 +42,7 @@ P_out = 155e+5 # Pa
   P_out = ${P_out}
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

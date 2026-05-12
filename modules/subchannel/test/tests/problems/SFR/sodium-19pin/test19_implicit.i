@@ -11,7 +11,7 @@ P_out = 2.0e5 # Pa
 []
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
@@ -21,7 +21,7 @@ P_out = 2.0e5 # Pa
   []
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = subchannel
+    input = sub_channel
   []
 []
 
@@ -45,6 +45,7 @@ P_out = 2.0e5 # Pa
   verbose_subchannel = true
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]
@@ -231,7 +232,7 @@ P_out = 2.0e5 # Pa
   [Total_power]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
-    block = subchannel
+    block = sub_channel
   []
   [Total_power_SCMDuctPowerPostprocessor]
     type = SCMDuctHeatRatePostprocessor

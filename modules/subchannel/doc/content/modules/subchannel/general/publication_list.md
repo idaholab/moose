@@ -11,3 +11,5 @@ Demonstration of Pronghorn’s Subchannel Code Modeling of Liquid-Metal Reactors
 Validation of Pronghorn’s subchannel code using EBR-II shutdown heat removal tests: SHRT-17 and SHRT-45R [!cite](tano2024validation)
 
 Validation of MOOSE’s subchannel module using the AREVA FCTF heated bundle benchmark [!cite](kyriakopoulos2024validation)
+
+Numerical implementation of the MOOSE subchannel module (SCM) algorithm [!cite](kyriakopoulos2026numerical)

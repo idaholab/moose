@@ -33,6 +33,21 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[AuxVariables]
+  [Dpin]
+    block = sub_channel
+  []
+  [Tduct]
+    block = sub_channel
+  []
+  [Tpin]
+    block = sub_channel
+  []
+  [duct_heat_flux]
+    block = sub_channel
+  []
+[]
+
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   fp = water
@@ -47,6 +62,7 @@ P_out = 4.923e6 # Pa
   skip_additional_restart_data = true
   allow_initial_conditions_with_restart = true
   friction_closure = 'MATRA'
+  full_output = true
 []
 
 [SCMClosures]

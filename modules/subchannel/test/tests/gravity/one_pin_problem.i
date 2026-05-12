@@ -19,13 +19,13 @@ heated_length = 1.0
 []
 
 [QuadSubChannelMesh]
-    [subchannel]
+    [sub_channel]
         type = SCMQuadSubChannelMeshGenerator
     []
 
     [fuel_pins]
         type = SCMQuadPinMeshGenerator
-        input = subchannel
+        input = sub_channel
     []
 []
 
@@ -57,7 +57,7 @@ heated_length = 1.0
     verbose_subchannel = true
     friction_closure = 'MATRA'
     pin_HTC_closure = 'Dittus-Boelter'
-
+    full_output = true
 []
 
 [SCMClosures]

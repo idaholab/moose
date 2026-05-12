@@ -11,6 +11,8 @@
 #include "ActionFactory.h"
 #include "SubChannelApp.h"
 #include "FEProblemBase.h"
+#include "SCM.h"
+#include "SubChannelMesh.h"
 
 registerMooseAction("SubChannelApp", SubChannelCreateProblemAction, "create_problem");
 

@@ -1,30 +1,26 @@
 T_in = 359.15
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = '${fparse 1e+6 * 17.0 / 3600.}'
-P_out = 4.923e6 # Pa
+P_out = 4.923e6
+mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    pin_diameter = 0.00950
-    side_gap = 0.00095
-    heated_length = 1.00
-    spacer_z = '0.5'
-    spacer_k = '0.5'
+    nx = 3
+    ny = 3
+    n_cells = 5
+    pitch = 0.014605
+    pin_diameter = 0.012
+    side_gap = 0.0015875
+    heated_length = 0.5
   []
-
   [fuel_pins]
     type = SCMQuadPinMeshGenerator
     input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    heated_length = 1.00
+    nx = 3
+    ny = 3
+    n_cells = 5
+    pitch = 0.014605
+    heated_length = 0.5
   []
 []
 
@@ -40,14 +36,15 @@ P_out = 4.923e6 # Pa
   n_blocks = 1
   beta = 0.08
   CT = 2.6
-  P_tol = 1e-6
-  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
-  compute_power = true
+  compute_power = false
   P_out = ${P_out}
+  implicit = true
+  segregated = false
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]
@@ -64,43 +61,30 @@ P_out = 4.923e6 # Pa
     type = SCMQuadFlowAreaIC
     variable = S
   []
-
   [w_perim_IC]
     type = SCMQuadWettedPerimIC
     variable = w_perim
   []
-
-  [q_prime_IC]
-    type = SCMQuadPowerIC
-    variable = q_prime
-    power = 1.00e6 # W
-    filename = "power_profile.txt" #
-  []
-
   [T_ic]
     type = ConstantIC
     variable = T
     value = ${T_in}
   []
-
-  [Tpin_ic]
-    type = ConstantIC
-    variable = Tpin
-    value = 0.0
-  []
-
   [Dpin_ic]
     type = ConstantIC
     variable = Dpin
-    value = 0.00950
+    value = 0.012065
   []
-
   [P_ic]
     type = ConstantIC
     variable = P
     value = 0.0
   []
-
+  [DP_ic]
+    type = ConstantIC
+    variable = DP
+    value = 0.0
+  []
   [Viscosity_ic]
     type = ViscosityIC
     variable = mu
@@ -108,7 +92,6 @@ P_out = 4.923e6 # Pa
     T = T
     fp = water
   []
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
@@ -116,7 +99,6 @@ P_out = 4.923e6 # Pa
     T = T
     fp = water
   []
-
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
@@ -124,7 +106,6 @@ P_out = 4.923e6 # Pa
     T = T
     fp = water
   []
-
   [mdot_ic]
     type = ConstantIC
     variable = mdot
@@ -150,29 +131,20 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Outputs]
-  exodus = true
-  checkpoint = false
-  [Temp_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "Temp_Out.txt"
-    height = 3.658
+[Postprocessors]
+  [S_deformed]
+    type = SubChannelPointValue
+    variable = S
+    index = 4
+    height = 0.25
+    execute_on = 'timestep_end'
   []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
-    height = 3.658
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
+  [w_perim_deformed]
+    type = SubChannelPointValue
+    variable = w_perim
+    index = 4
+    height = 0.25
+    execute_on = 'timestep_end'
   []
 []
 
@@ -180,22 +152,7 @@ P_out = 4.923e6 # Pa
   type = Steady
 []
 
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "3d.i"
-    execute_on = "timestep_end"
-  []
-[]
-
-[Transfers]
-  [xfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
-  []
+[Outputs]
+  console = true
+  csv = true
 []

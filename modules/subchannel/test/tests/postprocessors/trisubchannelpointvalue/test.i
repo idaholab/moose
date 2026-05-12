@@ -1,7 +1,7 @@
 T_in = 359.15
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = 10

@@ -11,67 +11,133 @@
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
 #include "AddAuxVariableAction.h"
+#include "FEProblemBase.h"
 #include "SubChannelApp.h"
-#include <string_view>
+#include "AddMeshGeneratorAction.h"
 
-registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
+registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "add_aux_variable");
 
 InputParameters
 SubChannelAddVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Adds the variables associated with the subchannel problem");
+  params.addParam<bool>("full_output", false, "Add optional subchannel output variables");
   return params;
 }
 
 SubChannelAddVariablesAction::SubChannelAddVariablesAction(const InputParameters & parameters)
   : Action(parameters),
-    _fe_family(AddVariableAction::getNonlinearVariableFamilies()),
-    _fe_order(AddVariableAction::getNonlinearVariableOrders())
+    _fe_family(AddAuxVariableAction::getAuxVariableFamilies()),
+    _fe_order(AddAuxVariableAction::getAuxVariableOrders())
 {
+}
+
+void
+SubChannelAddVariablesAction::addAuxVariable(const std::string & var_name,
+                                             const std::vector<SubdomainName> & blocks)
+{
+  const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();
+
+  for (const auto * aux_action : aux_actions)
+    if (aux_action->name() == var_name)
+      return;
+
+  auto params = _factory.getValidParams("MooseVariable");
+  params.set<MooseEnum>("family") = _fe_family;
+  params.set<MooseEnum>("order") = _fe_order;
+  params.set<std::vector<SubdomainName>>("block") = blocks;
+
+  _problem->addAuxVariable("MooseVariable", var_name, params);
 }
 
 void
 SubChannelAddVariablesAction::act()
 {
-  std::vector<std::string> var_names = {SubChannelApp::MASS_FLOW_RATE,
-                                        SubChannelApp::SURFACE_AREA,
-                                        SubChannelApp::SUM_CROSSFLOW,
-                                        SubChannelApp::PRESSURE,
-                                        SubChannelApp::PRESSURE_DROP,
-                                        SubChannelApp::WETTED_PERIMETER,
-                                        SubChannelApp::LINEAR_HEAT_RATE,
-                                        SubChannelApp::DUCT_HEAT_FLUX,
-                                        SubChannelApp::ENTHALPY,
-                                        SubChannelApp::TEMPERATURE,
-                                        SubChannelApp::PIN_TEMPERATURE,
-                                        SubChannelApp::PIN_DIAMETER,
-                                        SubChannelApp::DUCT_TEMPERATURE,
-                                        SubChannelApp::DENSITY,
-                                        SubChannelApp::VISCOSITY,
-                                        SubChannelApp::DISPLACEMENT,
-                                        SubChannelApp::FRICTION_FACTOR};
+  bool pin_mesh_exist = false;
+  bool duct_mesh_exist = false;
 
-  // Get a list of the already existing AddAuxVariableAction
-  const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();
+  std::vector<SubdomainName> fluid_blocks;
+  std::vector<SubdomainName> pin_blocks;
+  std::vector<SubdomainName> duct_blocks;
 
-  for (auto & vn : var_names)
+  const auto & mesh_actions = _awh.getActions<AddMeshGeneratorAction>();
+
+  for (const auto * mesh_action : mesh_actions)
   {
-    const std::string class_name = "AddAuxVariableAction";
-    InputParameters params = _action_factory.getValidParams(class_name);
-    params.set<MooseEnum>("family") = _fe_family;
-    params.set<MooseEnum>("order") = _fe_order;
+    if (!mesh_action->parameters().isParamValid("type"))
+      continue;
 
-    std::shared_ptr<Action> action =
-        std::static_pointer_cast<Action>(_action_factory.create(class_name, vn, params));
+    const auto & generator_type = mesh_action->getParam<std::string>("type");
 
-    //  Avoid trying (and failing) to override the user variable selection
-    bool add_action = true;
-    for (const auto aux_action : aux_actions)
-      if (aux_action->name() == vn)
-        add_action = false;
+    if (generator_type == "SCMQuadSubChannelMeshGenerator" ||
+        generator_type == "SCMTriSubChannelMeshGenerator")
+    {
+      // Use the user-provided mesh generator block name
+      fluid_blocks = {mesh_action->name()};
+    }
 
-    if (add_action)
-      _awh.addActionBlock(action);
+    if (generator_type == "SCMTriPinMeshGenerator" || generator_type == "SCMQuadPinMeshGenerator")
+    {
+      pin_mesh_exist = true;
+      // Use the user-provided mesh generator block name
+      pin_blocks = {mesh_action->name()};
+    }
+
+    if (generator_type == "SCMTriDuctMeshGenerator" || generator_type == "SCMQuadDuctMeshGenerator")
+    {
+      duct_mesh_exist = true;
+      // Use the user-provided mesh generator block name
+      duct_blocks = {mesh_action->name()};
+    }
   }
+
+  // Backward-compatible fallback if no explicit subchannel mesh generator name was found
+  if (fluid_blocks.empty())
+    fluid_blocks = {"sub_channel"};
+
+  std::vector<std::pair<std::string, std::vector<SubdomainName>>> vars_to_add;
+
+  // Always-fluid variables
+  vars_to_add.push_back({SubChannelApp::MASS_FLOW_RATE, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::SURFACE_AREA, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::SUM_CROSSFLOW, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::PRESSURE, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::WETTED_PERIMETER, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::ENTHALPY, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::TEMPERATURE, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::DENSITY, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::VISCOSITY, fluid_blocks});
+  vars_to_add.push_back({SubChannelApp::DISPLACEMENT, fluid_blocks});
+
+  // q_prime lives on pins if pins exist, otherwise on the fluid mesh
+  if (pin_mesh_exist)
+    vars_to_add.push_back({SubChannelApp::LINEAR_HEAT_RATE, pin_blocks});
+  else
+    vars_to_add.push_back({SubChannelApp::LINEAR_HEAT_RATE, fluid_blocks});
+
+  // Pin-only variables
+  if (pin_mesh_exist)
+  {
+    vars_to_add.push_back({SubChannelApp::PIN_TEMPERATURE, pin_blocks});
+    vars_to_add.push_back({SubChannelApp::PIN_DIAMETER, pin_blocks});
+    // HTC is a subchannel-average output stored on the fluid mesh.
+    vars_to_add.push_back({SubChannelApp::HEAT_TRANSFER_COEFFICIENT, fluid_blocks});
+  }
+
+  // Duct-only variables
+  if (duct_mesh_exist)
+  {
+    vars_to_add.push_back({SubChannelApp::DUCT_HEAT_FLUX, duct_blocks});
+    vars_to_add.push_back({SubChannelApp::DUCT_TEMPERATURE, duct_blocks});
+  }
+
+  if (getParam<bool>("full_output"))
+  {
+    vars_to_add.push_back({SubChannelApp::PRESSURE_DROP, fluid_blocks});
+    vars_to_add.push_back({SubChannelApp::FRICTION_FACTOR, fluid_blocks});
+  }
+
+  for (const auto & var_info : vars_to_add)
+    addAuxVariable(var_info.first, var_info.second);
 }

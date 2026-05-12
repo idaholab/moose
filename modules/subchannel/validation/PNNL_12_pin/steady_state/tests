@@ -5,7 +5,6 @@
       type = CSVDiff
       input = 2X6_ss.i
       csvdiff = 2X6_ss_out.csv
-      # custom_cmp = 'test.exodiff'
       capabilities = 'method!=dbg'
       valgrind = NONE
       recover = false
