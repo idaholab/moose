@@ -10,7 +10,6 @@
 #include "FEProblemSolve.h"
 
 #include "FEProblem.h"
-#include "NonlinearPreconditioning.h"
 #include "NonlinearSystemBase.h"
 #include "LinearSystem.h"
 #include "Convergence.h"
@@ -491,19 +490,6 @@ FEProblemSolve::solve()
       {
         auto * const sys = _systems[sys_i];
         const bool is_nonlinear = (dynamic_cast<NonlinearSystemBase *>(sys) != nullptr);
-
-        // Skip systems driven by the nonlinear preconditioner; they are solved inside the NPC
-        // shell during each outer SNES iteration and must not also be solved here.
-        if (is_nonlinear)
-        {
-          auto * const nlp = _problem.getNonlinearPreconditioning();
-          if (nlp)
-          {
-            const auto & inner = nlp->innerSysNums();
-            if (std::find(inner.begin(), inner.end(), sys->number()) != inner.end())
-              continue;
-          }
-        }
         const Real fp_relax =
             _using_multi_sys_fp_iterations ? _multi_sys_fp_relax_factors[sys_i] : 1.0;
         const bool apply_fp_relax =

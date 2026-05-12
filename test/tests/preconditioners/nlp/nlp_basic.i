@@ -1,7 +1,8 @@
-# Basic NonlinearPreconditioning (NLE) test.
-# Two independent diffusion systems: nl0 (outer) and nl1 (inner/NPC).
-# nl1 is solved as a nonlinear preconditioner before each outer Newton step.
+# Basic NGSSNESExecutor + NewtonSNESExecutor test.
+# Two independent diffusion systems: nl0 and nl1.
+# NGSSNESExecutor sweeps both systems as the NPC for NewtonSNESExecutor.
 # Both systems have the analytic solution u=v=x on [0,1].
+# Run with --executor.
 
 [Mesh]
   type = GeneratedMesh
@@ -62,17 +63,15 @@
   []
 []
 
-[NonlinearPreconditioning]
-  [ex]
-    type = NGS
+[Executors]
+  [ngs_pc]
+    type = NGSSNESExecutor
     inner_nl_sys_names = 'nl0 nl1'
   []
-[]
-
-[Executioner]
-  type = Steady
-  solve_type = NEWTON
-  nl_abs_tol = 1e-10
+  [newton]
+    type = NewtonSNESExecutor
+    nl_preconditioning = ngs_pc
+  []
 []
 
 [Outputs]
