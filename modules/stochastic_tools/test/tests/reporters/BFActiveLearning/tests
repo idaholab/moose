@@ -11,6 +11,7 @@
       detail = 'a single row in the sampler using the U learning function;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
@@ -23,6 +24,7 @@
       rel_err = 1.0e-4
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 4 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []

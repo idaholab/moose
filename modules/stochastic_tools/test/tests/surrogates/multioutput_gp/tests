@@ -13,6 +13,7 @@
       rel_err = 1e-4
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [tuned]
       type = 'JSONDiff'
@@ -23,6 +24,7 @@
       rel_err = 1e-4
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [load]
       type = 'JSONDiff'
@@ -35,6 +37,7 @@
       rel_err = 1e-4
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []

@@ -90,28 +90,28 @@ void
 Standardizer::getStandardized(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _mean);
-  input = (input - asRowVector(_mean, input)) / asRowVector(_stdev, input);
+  input.sub_(asRowVector(_mean, input)).div_(asRowVector(_stdev, input));
 }
 
 void
 Standardizer::getDestandardized(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _mean);
-  input = input * asRowVector(_stdev, input) + asRowVector(_mean, input);
+  input.mul_(asRowVector(_stdev, input)).add_(asRowVector(_mean, input));
 }
 
 void
 Standardizer::getDescaled(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _stdev);
-  input = input * asRowVector(_stdev, input);
+  input.mul_(asRowVector(_stdev, input));
 }
 
 void
 Standardizer::getScaled(torch::Tensor & input) const
 {
   checkInputCompatibility(input, _stdev);
-  input = input / asRowVector(_stdev, input);
+  input.div_(asRowVector(_stdev, input));
 }
 
 /// Helper for dataStore

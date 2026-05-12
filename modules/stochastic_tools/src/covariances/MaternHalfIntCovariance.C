@@ -70,22 +70,21 @@ MaternHalfIntCovariance::maternHalfIntFunction(torch::Tensor & K,
               "Number of parameters do not match in covariance kernel calculation");
 
   const auto l_factor = length_factor.unsqueeze(0);
-  const auto scaled_distance = torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
+  K = torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
   const Real factor = std::sqrt(2 * p_value + 1);
   const Real normalization = std::tgamma(p_value + 1) / std::tgamma(2 * p_value + 1);
 
-  auto summation = torch::zeros_like(scaled_distance);
+  auto summation = torch::zeros_like(K);
   for (const auto tt : make_range(p_value + 1))
   {
     const Real coefficient =
         std::tgamma(p_value + tt + 1) / (std::tgamma(tt + 1) * std::tgamma(p_value - tt + 1));
-    summation =
-        summation + coefficient * torch::pow(2.0 * factor * scaled_distance, Real(p_value - tt));
+    summation = summation + coefficient * torch::pow(2.0 * factor * K, Real(p_value - tt));
   }
 
-  K = sigma_f_squared * torch::exp(-factor * scaled_distance) * normalization * summation;
+  K = sigma_f_squared * torch::exp(-factor * K) * normalization * summation;
   if (is_self_covariance)
-    K = K + sigma_n_squared * torch::eye(K.size(0), K.options());
+    K.diagonal().add_(sigma_n_squared);
 }
 
 bool

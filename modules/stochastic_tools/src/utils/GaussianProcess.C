@@ -162,16 +162,13 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
   mooseAssert(data.dim() == 2, "GaussianProcess training responses must be rank-2.");
 
   const auto num_samples = params.size(0);
-  const auto num_outputs = data.size(1);
-
   mooseAssert(data.size(0) == num_samples,
               "Training parameter and response sample counts must match.");
-  mooseAssert(num_outputs == _num_outputs,
+  mooseAssert(data.size(1) == _num_outputs,
               "Training response dimension does not match the covariance output dimension.");
 
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= num_samples);
   _batch_size = batch_decision ? opts.batch_size : num_samples;
-  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}, options);
 
   _hyperparam_map.clear();
   _covariance_function->buildHyperParamMap(_hyperparam_map);
@@ -181,7 +178,6 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
   if (_tuning_data.size())
     tuneHyperParamsAdam(params, data, opts);
 
-  _K = torch::empty({num_samples * num_outputs, num_samples * num_outputs}, options);
   _covariance_function->computeCovarianceMatrix(_K, params, params, true);
   const auto flattened_tensor = flattenOutputData(data);
 
@@ -389,8 +385,8 @@ GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
 std::vector<Real>
 GaussianProcess::getGradient(torch::Tensor & inputs) const
 {
-  torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, doubleOptionsLike(inputs));
-  torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
+  torch::Tensor dKdhp = torch::empty(
+      {_num_outputs * _batch_size, _num_outputs * _batch_size}, doubleOptionsLike(inputs));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
@@ -402,10 +398,12 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
     {
       const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
-      const auto tmp =
-          torch::trace(torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp))
+      const auto quadratic_form =
+          torch::mm(torch::transpose(_K_results_solve, 0, 1), torch::mm(dKdhp, _K_results_solve))
               .item<Real>();
-      grad_vec[global_index] = tmp / -2.0;
+      const auto inverse_trace =
+          torch::trace(torch::cholesky_solve(dKdhp, _K_cho_decomp)).item<Real>();
+      grad_vec[global_index] = (inverse_trace - quadratic_form) / 2.0;
     }
   }
   return grad_vec;

@@ -10,6 +10,7 @@
       detail = 'using the U learning function.'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []

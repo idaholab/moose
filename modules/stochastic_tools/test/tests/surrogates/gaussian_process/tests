@@ -12,6 +12,7 @@
       detail = 'training a Gaussian process model and '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_testing]
       type = CSVDiff
@@ -22,6 +23,7 @@
       prereq = store_load/GP_training
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 
@@ -35,6 +37,7 @@
       detail = 'a squared exponential kernel;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_exponential]
       type = CSVDiff
@@ -44,6 +47,7 @@
       detail = 'an exponential kernel;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_Matern_half_int]
       type = CSVDiff
@@ -53,6 +57,7 @@
       detail = 'Matern half integer kernel;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 
@@ -67,6 +72,7 @@
       detail = 'a squared exponential kernel using Adam;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_exponential_tuned_adam]
       type = CSVDiff
@@ -76,6 +82,7 @@
       detail = 'an exponential kernel using Adam;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_Matern_half_int_tuned_adam]
       type = CSVDiff
@@ -85,6 +92,7 @@
       detail = 'a Matern half integer kernel using Adam;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_Matern_half_int_tuned_adam_minibatch]
       type = CSVDiff
@@ -95,6 +103,7 @@
       detail = 'a Matern half integer kernel using Adam with mini-batch sampling;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [GP_squared_exponential_tuned_legacy_adam]
       type = CSVDiff
@@ -105,6 +114,7 @@
       detail = 'a squared exponential kernel using legacy-compatible Adam with manually supplied gradients;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
   [errors]
@@ -117,6 +127,7 @@
       expect_err = "Batch size cannot be greater than the training data set size."
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []
