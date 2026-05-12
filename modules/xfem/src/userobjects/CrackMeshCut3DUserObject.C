@@ -136,6 +136,10 @@ CrackMeshCut3DUserObject::initialSetup()
 void
 CrackMeshCut3DUserObject::initialize()
 {
+  // this is from gometricCutObject
+  _marked_elems_2d.clear();
+  _marked_elems_3d.clear();
+
   _is_mesh_modified = false;
 
   if (_grow)
@@ -853,10 +857,21 @@ CrackMeshCut3DUserObject::growFront()
 
       x = projectInteriorInactiveEndpoint(i, j, i2, x);
 
-      const dof_id_type id =
-          appendAdvancedFrontNodeCheckingDegenerateTriangles(i, j, orig_id, x, temp);
+      // For an inactive endpoint, require the post-projection displacement to be at least
+      // 50% of the active neighbor's growth length. If it falls short, leave the inactive
+      // node where it is and reuse its node ID for the new crack front element.
+      dof_id_type id;
+      if (isInactiveEndpoint(j, i2) && (x - this_point).norm() < 0.5 * growth_increment)
+      {
+        id = orig_id;
+        temp.push_back(id);
+      }
+      else
+      {
+        id = appendAdvancedFrontNodeCheckingDegenerateTriangles(i, j, orig_id, x, temp);
+        updateTrackedCrackFrontPoint(orig_id, id);
+      }
       grown_node_map[orig_id] = id;
-      updateTrackedCrackFrontPoint(orig_id, id);
     }
 
     _front.push_back(temp);
@@ -911,7 +926,7 @@ CrackMeshCut3DUserObject::computeGrowthIncrement(unsigned int front_node_index,
 }
 
 Point
-CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_index,
+CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int /*segment_index*/,
                                                           unsigned int front_node_index,
                                                           unsigned int front_size,
                                                           const Point & candidate_point) const
@@ -919,30 +934,21 @@ CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_i
   if (!isInactiveEndpoint(front_node_index, front_size))
     return candidate_point;
 
+  // The inactive endpoint already inherits the active neighbor's direction and growth
+  // increment (see findActiveBoundaryDirection() and computeGrowthIncrement()), so
+  // candidate_point = previous-step inactive position + active_dir * active_growth_length.
+  // No adjustment is needed if the candidate is still outside the body.
   std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
   pl->enable_out_of_mesh_mode();
   if ((*pl)(candidate_point) == nullptr)
     return candidate_point;
 
-  const bool at_start_of_crack_front = (front_node_index == 0 && front_size > 1);
-  const bool at_end_of_crack_front = (front_node_index + 1 == front_size && front_size > 1);
-  if (!(at_start_of_crack_front || at_end_of_crack_front))
-    return candidate_point;
-
-  const unsigned int active_neighbor_index = at_start_of_crack_front ? 1 : (front_size - 2);
-  Node * active_nd = _cutter_mesh->node_ptr(_active_boundary[segment_index][active_neighbor_index]);
-  mooseAssert(active_nd, "Active neighbor node is NULL");
-
-  Point projected_point = candidate_point;
-  const Point A = *active_nd;
-  Point ray_dir = projected_point - A;
-  const Real ray_len = ray_dir.norm();
-  if (ray_len <= libMesh::TOLERANCE)
-    return projected_point;
-  ray_dir /= ray_len;
-
+  // Candidate has crossed into the body. Snap it to the nearest point on the body's
+  // sideset-tagged exterior, then push 0.1 * _size_control outward (away from the
+  // candidate's interior position) so it lands reliably above the free surface.
   ConstBndElemRange & bnd_range = *_mesh.getBoundaryElementRange();
-
+  Point closest_pt;
+  Real best_dist2 = std::numeric_limits<Real>::max();
   for (const auto & belem : bnd_range)
   {
     const Elem * elem = belem->_elem;
@@ -950,13 +956,67 @@ CrackMeshCut3DUserObject::projectInteriorInactiveEndpoint(unsigned int segment_i
     std::vector<Point> vertices;
     for (unsigned int i = 0; i < curr_side->n_nodes(); ++i)
       vertices.push_back(*(curr_side->node_ptr(i)));
+    // Boundary sides of 3D elements are always 2D polygons with at least 3 vertices
+    // (triangle for tet sides, quad for hex sides, etc.). The plane and edge math below
+    // depends on this.
+    mooseAssert(vertices.size() >= 3, "Boundary face has fewer than 3 vertices");
 
-    Point pt;
-    if (findIntersection(A, projected_point, vertices, pt))
-      return pt + ray_dir * libMesh::TOLERANCE;
+    // Perpendicular projection of candidate onto the face plane.
+    Point fn = (vertices[1] - vertices[0]).cross(vertices[2] - vertices[0]);
+    const Real fn_norm = fn.norm();
+
+    if (fn_norm <= libMesh::TOLERANCE)
+      continue;
+    fn /= fn_norm;
+    Point face_pt = candidate_point - ((candidate_point - vertices[0]) * fn) * fn;
+
+    // If the perpendicular lands outside the polygon, fall back to the closest point on
+    // any of its edges. This is needed for growth into a corner or on faceted surfaces.
+    if (!isInsideCutPlane(vertices, face_pt))
+    {
+      const unsigned int nv = vertices.size();
+      Real best_edge_d2 = std::numeric_limits<Real>::max();
+      Point best_edge_pt = vertices[0];
+      for (unsigned int i = 0; i < nv; ++i)
+      {
+        const Point & a = vertices[i];
+        const Point & b = vertices[(i + 1) % nv];
+        const Point ab = b - a;
+        const Real len2 = ab * ab;
+        Real t = 0.0;
+        if (len2 > libMesh::TOLERANCE)
+          t = std::max(Real(0), std::min(Real(1), ((candidate_point - a) * ab) / len2));
+        const Point edge_pt = a + t * ab;
+        const Real d2 = (edge_pt - candidate_point).norm_sq();
+        if (d2 < best_edge_d2)
+        {
+          best_edge_d2 = d2;
+          best_edge_pt = edge_pt;
+        }
+      }
+      face_pt = best_edge_pt;
+    }
+
+    const Real d2 = (face_pt - candidate_point).norm_sq();
+    if (d2 < best_dist2)
+    {
+      best_dist2 = d2;
+      closest_pt = face_pt;
+    }
   }
 
-  return projected_point;
+  // No sidesets i.e. bnd_range.size()==0; so no faces for inactive node projection
+  if (best_dist2 == std::numeric_limits<Real>::max())
+    return candidate_point;
+
+  // Outward direction: candidate is inside the body, so the surface point lies outward
+  // from the candidate. The straight line from candidate through closest_pt exits the body.
+  Point outward = closest_pt - candidate_point;
+  const Real on = outward.norm();
+  if (on > libMesh::TOLERANCE)
+    outward /= on;
+
+  return closest_pt + outward * (0.1 * _size_control);
 }
 
 dof_id_type

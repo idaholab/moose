@@ -5,7 +5,9 @@
 
 rad=0.1
 offset = 0
-spin = 10
+spin = 0
+tilt = 0
+fname = 'tet_block'
 [Mesh]
   #---- CUTTER MESH
   [cicle_outline]
@@ -32,7 +34,7 @@ spin = 10
     type = TransformGenerator
     input = circle_spin
     transform = ROTATE
-    vector_value = '0 90 0'
+    vector_value = '0 ${fparse 90-tilt} 0'
   []
   [circle_move]
     type = TransformGenerator
@@ -41,24 +43,21 @@ spin = 10
     vector_value = '${offset} 0 -0.01'
     save_with_name = mesh_cutter
   []
+
   #---- FEM MESH
   [FEM_mesh]
-    type = GeneratedMeshGenerator
-    dim = 3
-    nx = 14
-    ny = 3
-    nz = 8
-    xmin = ${fparse -2*rad}
-    xmax = ${fparse 2*rad}
-    ymin = ${fparse -rad}
-    ymax = ${fparse rad}
-    zmin = 0
-    zmax = ${fparse 2*rad}
-    elem_type = HEX8
+    type = FileMeshGenerator
+    file = ${fname}.e
+  []
+  [FEM_mesh_move]
+    type = TransformGenerator
+    input = FEM_mesh
+    transform = TRANSLATE
+    vector_value = '0 -0.0001 0'
   []
   [pin]
     type = ExtraNodesetGenerator
-    input = FEM_mesh
+    input = FEM_mesh_move
     new_boundary = 'pin'
     coord = '${fparse 2*rad} ${fparse -rad} ${fparse rad}'
     use_closest_node = true
@@ -123,11 +122,9 @@ spin = 10
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-    block = 0
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   []
 []
 
@@ -145,16 +142,13 @@ spin = 10
     scale = 1.0
   []
 
-  # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-2
 
-  # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-5
   nl_abs_tol = 1e-10
 
-  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 4
