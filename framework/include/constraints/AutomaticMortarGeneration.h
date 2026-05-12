@@ -22,6 +22,7 @@
 #include "libmesh/int_range.h"
 
 // C++ includes
+#include <optional>
 #include <set>
 #include <memory>
 #include <vector>
@@ -192,6 +193,12 @@ public:
    * Clears the mortar segment mesh and accompanying data structures
    */
   void clear();
+
+  /**
+   * Invalidates the cached MSM node/element ID starting offset so that the next call to
+   * buildMortarSegmentMesh3d() recomputes it via allgather. Call this when mesh topology changes.
+   */
+  void meshChanged() { _msm_node_id_start = std::nullopt; }
 
   /**
    * returns whether this object is on the displaced mesh
@@ -556,6 +563,11 @@ private:
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;
+
+  /// Cached per-rank starting ID for 3D MSM nodes/elements. nullopt forces recomputation on next
+  /// buildMortarSegmentMesh3d() call. Reset by meshChanged() on topology change so the allgather
+  /// is skipped for displaced-mesh residual updates that only move nodes.
+  std::optional<dof_id_type> _msm_node_id_start;
 
   /// Debugging container for printing information about fraction of successful projections for
   /// secondary nodes. If !_debug then this should always be empty

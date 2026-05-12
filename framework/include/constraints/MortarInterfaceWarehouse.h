@@ -96,6 +96,12 @@ public:
   void update();
 
   /**
+   * Invalidates cached MSM node/element ID offsets on all mortar interfaces so they are
+   * recomputed on the next update(). Call when mesh topology changes.
+   */
+  void meshChanged();
+
+  /**
    * Returns whether any of the AutomaticMortarGeneration objects are running on a displaced mesh
    */
   bool hasDisplacedObjects() const { return _displaced_mortar_interfaces.size(); }

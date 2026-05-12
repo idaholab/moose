@@ -967,31 +967,31 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
   auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  // Use rank-based offsets for node and element IDs so that IDs are globally unique across
-  // processes when MeshCommunication::gather serializes the DistributedMesh for writing.
-  // Each rank's starting ID is an exclusive prefix sum of per-rank bounds, where each bound is
-  // local_secondary_sub_elems * visible_primary_sub_elems * 9 (max nodes per sub-element pair).
-  mooseAssert(_mesh.is_prepared(),
-              "The mesh should be prepared such that our parallel id counts are correct");
-  // Count local secondary sub-elements (only local - each rank processes its own secondary faces)
-  // and visible primary sub-elements (local + ghost - secondary faces can clip against ghost
-  // primaries).
-  dof_id_type local_secondary_sub_elems = 0, visible_primary_sub_elems = 0;
-  for (const auto [primary_sub_id, secondary_sub_id] : _primary_secondary_subdomain_id_pairs)
+  // Assign globally unique node/element IDs via an exclusive prefix scan: each rank's bound is
+  // local_secondary_sub_elems * visible_primary_sub_elems * 9, where 9 is the maximum nodes a
+  // single secondary/primary sub-element pair can produce (8-vertex clipped polygon + center).
+  // The result is cached and invalidated by meshChanged(), so the allgather only runs on topology
+  // changes, not on every displaced-mesh residual update.
+  if (!_msm_node_id_start.has_value())
   {
-    for (const auto * const el : _mesh.active_local_subdomain_elements_ptr_range(secondary_sub_id))
-      local_secondary_sub_elems += el->n_sub_elem();
-    for (const auto * const el : _mesh.active_subdomain_elements_ptr_range(primary_sub_id))
-      visible_primary_sub_elems += el->n_sub_elem();
+    dof_id_type local_secondary_sub_elems = 0, visible_primary_sub_elems = 0;
+    for (const auto & [primary_sub_id, secondary_sub_id] : _primary_secondary_subdomain_id_pairs)
+    {
+      for (const auto * const el :
+           _mesh.active_local_subdomain_elements_ptr_range(secondary_sub_id))
+        local_secondary_sub_elems += el->n_sub_elem();
+      for (const auto * const el : _mesh.active_subdomain_elements_ptr_range(primary_sub_id))
+        visible_primary_sub_elems += el->n_sub_elem();
+    }
+    const dof_id_type per_rank_bound = local_secondary_sub_elems * visible_primary_sub_elems * 9;
+    std::vector<dof_id_type> per_rank_bounds;
+    _mesh.comm().allgather(per_rank_bound, per_rank_bounds);
+    dof_id_type start = 0;
+    for (const auto r : make_range(_mesh.processor_id()))
+      start += per_rank_bounds[r];
+    _msm_node_id_start = start;
   }
-  // Each secondary/primary sub-element pair yields at most 9 nodes (8-vertex clipped polygon +
-  // center point). Use an exclusive prefix scan so each rank gets a tight, non-overlapping range.
-  const dof_id_type per_rank_bound = local_secondary_sub_elems * visible_primary_sub_elems * 9;
-  std::vector<dof_id_type> per_rank_bounds;
-  _mesh.comm().allgather(per_rank_bound, per_rank_bounds);
-  dof_id_type next_node_id = 0;
-  for (const auto r : make_range(_mesh.processor_id()))
-    next_node_id += per_rank_bounds[r];
+  dof_id_type next_node_id = *_msm_node_id_start;
   // Element IDs use the same starting offset: node and element IDs are separate namespaces, and
   // element count per clip (n triangles) is always <= node count (n+1), so per_rank_bound covers
   // both.
