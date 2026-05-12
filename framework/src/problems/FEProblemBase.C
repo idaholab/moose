@@ -2731,7 +2731,14 @@ FEProblemBase::getFunction(const std::string & name, const THREAD_ID tid)
 
     // Try once more
     if (!hasFunction(name, tid))
+    {
+      mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_function"),
+                  "getFunction() was called before Functions have been constructed. The requested "
+                  "Function '" +
+                      name + "' may exist in the input file, but Functions are not available yet.");
+
       mooseError("Unable to find function " + name);
+    }
   }
 
   auto * const ret = dynamic_cast<Function *>(_functions.getActiveObject(name, tid).get());
@@ -4688,7 +4695,14 @@ FEProblemBase::getUserObjectBase(const std::string & name, const THREAD_ID tid /
       .condition<AttribName>(name)
       .queryInto(objs);
   if (objs.empty())
+  {
+    mooseAssert(getMooseApp().actionWarehouse().isTaskComplete("add_user_object"),
+                "A UserObject getter was called before UserObjects have been constructed. The "
+                "requested UserObject '" +
+                    name + "' may exist in the input file, but UserObjects are not available yet.");
+
     mooseError("Unable to find user object with name '" + name + "'");
+  }
   mooseAssert(objs.size() == 1, "Should only find one UO");
   return *(objs[0]);
 }
