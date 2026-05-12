@@ -42,6 +42,7 @@ n_cells = 20
   [w_perim]
   []
   [q_prime]
+    block = fuel_pins
   []
 []
 

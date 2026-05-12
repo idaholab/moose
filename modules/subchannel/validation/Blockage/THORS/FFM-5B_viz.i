@@ -53,6 +53,9 @@
   [mu]
     block = subchannel
   []
+  [displacement]
+    block = subchannel
+  []
   [q_prime]
     block = fuel_pins
   []

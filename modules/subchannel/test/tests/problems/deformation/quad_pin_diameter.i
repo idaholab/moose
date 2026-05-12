@@ -3,23 +3,14 @@ P_out = 4.923e6
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 
 [QuadSubChannelMesh]
-  [sub_channel]
-    type = SCMQuadSubChannelMeshGenerator
+  [assembly]
+    type = SCMQuadAssemblyMeshGenerator
     nx = 3
     ny = 3
     n_cells = 5
     pitch = 0.014605
     pin_diameter = 0.012
     side_gap = 0.0015875
-    heated_length = 0.5
-  []
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 3
-    ny = 3
-    n_cells = 5
-    pitch = 0.014605
     heated_length = 0.5
   []
 []

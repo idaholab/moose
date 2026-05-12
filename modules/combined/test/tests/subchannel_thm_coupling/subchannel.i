@@ -145,7 +145,7 @@ heated_length = 1.0
     variable = T
     boundary = inlet
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
@@ -154,7 +154,7 @@ heated_length = 1.0
     area = S
     mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
-    block = sub_channel
+    block = subchannel
   []
 []
 

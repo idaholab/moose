@@ -33,6 +33,7 @@
   [w_perim]
   []
   [q_prime]
+    block = fuel_pins
   []
 []
 

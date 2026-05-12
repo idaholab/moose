@@ -199,6 +199,13 @@ P_out = 101325 # Pa
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    transfer_type = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S'
+  []
+  [xfer_q_prime]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    transfer_type = pin
+    variable = q_prime
   []
 []

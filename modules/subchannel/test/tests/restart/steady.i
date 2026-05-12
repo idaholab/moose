@@ -26,13 +26,13 @@ P_out = 4.923e6 # Pa
 
 [AuxVariables]
   [Dpin]
-    block = subchannel
+    block = fuel_pins
   []
   [Tduct]
     block = subchannel
   []
   [Tpin]
-    block = subchannel
+    block = fuel_pins
   []
   [duct_heat_flux]
     block = subchannel

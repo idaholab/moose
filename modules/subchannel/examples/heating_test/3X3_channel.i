@@ -223,6 +223,13 @@ n_cells = 20
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S w_perim'
+    transfer_type = subchannel
+    variable = 'mdot SumWij P DP h T rho mu S w_perim'
+  []
+  [xfer_q_prime]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    transfer_type = pin
+    variable = q_prime
   []
 []
