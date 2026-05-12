@@ -8,7 +8,7 @@
 [Functions]
   [growth_func_x]
     type = ParsedFunction
-    value = '(x-${offset})/sqrt((x-${offset})^2 + z^2)'
+    expression = '(x-${offset})/sqrt((x-${offset})^2 + z^2)'
   []
   [growth_func_y]
     type = ParsedFunction
@@ -16,7 +16,7 @@
   []
   [growth_func_z]
     type = ParsedFunction
-    value = 'z/sqrt((x-${offset})^2 + z^2)'
+    expression = 'z/sqrt((x-${offset})^2 + z^2)'
   []
   [growth_func_v]
     type = ParsedFunction
@@ -39,7 +39,7 @@
 []
 
 [Outputs]
-  file_base = face_crack_radialFunc_off_${offset}_spin_${spin}
+  file_base=${fname}_offset_${offset}_spin_${spin}
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh

@@ -116,28 +116,20 @@
       capabilities = 'unique_id'
       detail = ' error when the number of points on the cutter mesh do not match the number of points in the DomainIntegralAction, or'
     []
-    [face_cut_mid_function]
-      type = Exodiff
-      input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
-      cli_args = 'offset=0 spin=0'
-      exodiff = 'face_crack_function_off_0_spin_0_XFEMCutMeshOutput.e'
-      map = true # only matching cutter mesh, not xfem volume mesh
-      capabilities = 'unique_id'
-      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume using a prescribed function growth direction, or'
-    []
     [face_cut_mid_hoopStress]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_hoopStress.i'
-      cli_args = 'offset=0 spin=0'
+      cli_args = 'fname=hex_block'
       exodiff = 'face_crack_hoopStress_off_0_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
       detail = ' properly moving crack front nodes using the maximum hoop stress growth direction, or'
     []
+    #still need to regold above this
     [face_cut_mid_scc]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
-      cli_args = 'offset=0 spin=0'
+      cli_args = 'fname=hex_block'
       exodiff = 'face_crack_scc_off_0_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
@@ -146,7 +138,7 @@
     [face_cut_corner_scc]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
-      cli_args = 'offset=0.21 spin=0'
+      cli_args = 'fname=hex_block offset=0.21'
       exodiff = 'face_crack_scc_off_0.21_spin_0_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
@@ -155,7 +147,7 @@
     [inactive_refine]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
-      cli_args = 'offset=0 spin=25 Executioner/end_time=2'
+      cli_args = 'fname=hex_block spin=25 Executioner/end_time=2'
       exodiff = 'face_crack_scc_off_0_spin_25_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
@@ -164,20 +156,74 @@
     [inactive_no_refine]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_scc.i'
-      cli_args = 'offset=0 spin=15 Executioner/end_time=2'
+      cli_args = 'fname=hex_block spin=15 Executioner/end_time=2'
       exodiff = 'face_crack_scc_off_0_spin_15_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
       detail = ' not refining surface cutting crack front if refinement occurs outside volume, or'
     []
+    [face_cut_mid_function]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_function.i'
+      cli_args = 'fname=hex_block Executioner/solve_type=Linear'
+      exodiff = 'face_crack_function_off_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' without producing degenerate elements and properly moving crack front nodes outside the FEM volume using a prescribed function growth direction, or'
+    []
     [double_cut_edge]
       type = Exodiff
       input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
-      cli_args = 'offset=0 spin=4'
-      exodiff = 'face_crack_radialFunc_off_0_spin_4_XFEMCutMeshOutput.e'
+      cli_args = 'fname=hex_block spin=4 Executioner/solve_type=Linear'
+      exodiff = 'hex_block_offset_0_spin_4_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
       detail = ' growing the crack front and double cutting a volume element edge.'
+    []
+    [tet_corner]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_corner Executioner/solve_type=Linear'
+      exodiff = 'tet_corner_offset_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the crack front on the free surface when growth runs along a corner-cut FEM mesh surface, or'
+    []
+    [tet_hit_corner]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_corner offset=-0.05 Executioner/solve_type=Linear'
+      exodiff = 'tet_corner_offset_-0.05_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the crack front on the free surface when growth runs along a corner-cut FEM mesh surface, or'
+    []
+    [tet_block]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_block Executioner/solve_type=Linear'
+      exodiff = 'tet_block_offset_0_spin_0_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the crack front on the free surface without producing sliver elements when growth runs along a flat FEM mesh surface, or'
+    []
+    [tet_concave_up]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_concave_up spin=10 Executioner/solve_type=Linear'
+      exodiff = 'tet_concave_up_offset_0_spin_10_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the crack front on a concave-up curved FEM mesh surface, or'
+    []
+    [tet_concave_down]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_concave_down spin=5 Executioner/solve_type=Linear'
+      exodiff = 'tet_concave_down_offset_0_spin_5_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the crack front on a concave-down curved FEM mesh surface.'
     []
   []
   [penny_crack]
