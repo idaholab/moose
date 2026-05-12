@@ -25,7 +25,6 @@
   radius_outer = '0.1'
   poissons_ratio = 0.3
   youngs_modulus = 207000
-  block = 0
   incremental = true
 []
 
@@ -35,5 +34,5 @@
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh
   []
-  execute_on=final
+  execute_on=FINAL
 []
