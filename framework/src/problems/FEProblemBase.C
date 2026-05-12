@@ -1423,48 +1423,78 @@ FEProblemBase::initialSetup()
 
     // check that variables are defined along boundaries of boundary restricted nodal objects
     const auto & bnd_nodes = getCurrentAlgebraicBndNodeRange();
-    BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
-    Threads::parallel_reduce(bnd_nodes, bnict);
 
-    // Nodal bcs aren't threaded
-    const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
-    for (const auto & bnode : bnd_nodes)
+    bool has_nodal_uo = false;
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const auto boundary_id = bnode->_bnd_id;
-      const Node * const node = bnode->_node;
+      std::vector<NodalUserObject *> objs;
+      uo_query.clone()
+          .condition<AttribThread>(tid)
+          .condition<AttribInterfaces>(Interfaces::NodalUserObject)
+          .queryInto(objs);
+      has_nodal_uo = has_nodal_uo || objs.size();
+    }
 
-      if (node->processor_id() != this->processor_id())
-        continue;
+    bool has_nodal_aux = false;
+    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      has_nodal_aux = has_nodal_aux || _aux->nodalAuxWarehouse().hasActiveObjects(tid);
+      has_nodal_aux = has_nodal_aux || _aux->nodalVectorAuxWarehouse().hasActiveObjects(tid);
+      has_nodal_aux = has_nodal_aux || _aux->nodalArrayAuxWarehouse().hasActiveObjects(tid);
+    }
 
-      // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
-      // Lagrange on a second order mesh) and user-code can often handle that
-      const Elem * const an_elem =
-          _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
-      if (!an_elem->is_vertex(an_elem->get_node_index(node)))
-        continue;
+    bool has_nodal_bc = false;
+    for (auto & nl : _nl)
+      has_nodal_bc = has_nodal_bc || nl->getNodalBCWarehouse().hasActiveObjects();
 
-      const auto & bnd_name = _mesh.getBoundaryName(boundary_id);
+    if (has_nodal_uo || has_nodal_aux)
+    {
+      BoundaryNodeIntegrityCheckThread bnict(*this, uo_query);
+      Threads::parallel_reduce(bnd_nodes, bnict);
+    }
 
-      for (auto & nl : _nl)
+    if (has_nodal_bc)
+    {
+      // Nodal bcs aren't threaded
+      const auto & node_to_elem_map = _mesh.nodeToActiveSemilocalElemMap();
+      for (const auto & bnode : bnd_nodes)
       {
-        const auto & nodal_bcs = nl->getNodalBCWarehouse();
-        if (!nodal_bcs.hasBoundaryObjects(boundary_id, 0))
+        const auto boundary_id = bnode->_bnd_id;
+        const Node * const node = bnode->_node;
+
+        if (node->processor_id() != this->processor_id())
           continue;
 
-        const auto & bnd_objects = nodal_bcs.getBoundaryObjects(boundary_id, 0);
-        for (const auto & bnd_object : bnd_objects)
-          // Skip if this object uses geometric search because coupled variables may be defined on
-          // paired boundaries instead of the boundary this node is on
-          if (!bnd_object->requiresGeometricSearch() &&
-              bnd_object->checkVariableBoundaryIntegrity())
-          {
-            std::set<MooseVariableFieldBase *> vars_to_omit = {
-                &static_cast<MooseVariableFieldBase &>(
-                    const_cast<MooseVariableBase &>(bnd_object->variable()))};
+        // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
+        // Lagrange on a second order mesh) and user-code can often handle that
+        const Elem * const an_elem =
+            _mesh.getMesh().elem_ptr(libmesh_map_find(node_to_elem_map, node->id()).front());
+        if (!an_elem->is_vertex(an_elem->get_node_index(node)))
+          continue;
 
-            boundaryIntegrityCheckError(
-                *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
-          }
+        const auto & bnd_name = _mesh.getBoundaryName(boundary_id);
+
+        for (auto & nl : _nl)
+        {
+          const auto & nodal_bcs = nl->getNodalBCWarehouse();
+          if (!nodal_bcs.hasBoundaryObjects(boundary_id, 0))
+            continue;
+
+          const auto & bnd_objects = nodal_bcs.getBoundaryObjects(boundary_id, 0);
+          for (const auto & bnd_object : bnd_objects)
+            // Skip if this object uses geometric search because coupled variables may be defined on
+            // paired boundaries instead of the boundary this node is on
+            if (!bnd_object->requiresGeometricSearch() &&
+                bnd_object->checkVariableBoundaryIntegrity())
+            {
+              std::set<MooseVariableFieldBase *> vars_to_omit = {
+                  &static_cast<MooseVariableFieldBase &>(
+                      const_cast<MooseVariableBase &>(bnd_object->variable()))};
+
+              boundaryIntegrityCheckError(
+                  *bnd_object, bnd_object->checkAllVariables(*node, vars_to_omit), bnd_name);
+            }
+        }
       }
     }
   }
