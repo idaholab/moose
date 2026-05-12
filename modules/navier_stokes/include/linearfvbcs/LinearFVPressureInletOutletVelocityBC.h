@@ -11,6 +11,8 @@
 
 #include "LinearFVAdvectionDiffusionBC.h"
 
+class ElemInfo;
+
 /**
  * Linear-FV analog of OpenFOAM's pressureInletOutletVelocity boundary condition.
  *

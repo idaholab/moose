@@ -15,6 +15,7 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 using namespace libMesh;
 
 InputParameters
@@ -326,6 +327,14 @@ ReducedPressurePIMPLESolve::solve()
   if (!_problem.shouldSolve())
     return true;
 
+  const bool light_trace_timestep =
+      _problem.timeStep() <= 5 || (_problem.timeStep() % 25 == 0);
+
+  if (light_trace_timestep)
+    std::cerr << "[ReducedPressurePIMPLESolve] solve begin"
+              << " ts=" << _problem.timeStep() << " time=" << _problem.time()
+              << " dt=" << _problem.dt() << std::endl;
+
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
 
@@ -390,6 +399,10 @@ ReducedPressurePIMPLESolve::solve()
   {
     simple_iteration_counter++;
     _current_outer_iteration = simple_iteration_counter;
+
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] outer iteration begin"
+                << " outer=" << _current_outer_iteration << std::endl;
 
     if (_should_solve_momentum)
       // Keep the full nonlinear history on the previous outer-corrector state
@@ -462,7 +475,14 @@ ReducedPressurePIMPLESolve::solve()
       assembleMomentumPredictorOnly();
 
     if (_should_solve_pressure)
+    {
+      if (_problem.timeStep() == 1)
+        std::cerr << "[ReducedPressurePIMPLESolve] calling correctVelocity" << std::endl;
       ns_residuals[pressure_index] = correctVelocity(true, true, solver_params);
+      if (light_trace_timestep)
+        std::cerr << "[ReducedPressurePIMPLESolve] correctVelocity returned"
+                  << " residual=" << ns_residuals[pressure_index].second << std::endl;
+    }
 
     if (_has_energy_system && _should_solve_energy)
     {
@@ -545,9 +565,18 @@ ReducedPressurePIMPLESolve::solve()
                                 _turbulence_field_min_limit[i]);
     }
 
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] executing EXEC_NONLINEAR at outer-loop tail"
+                << std::endl;
     _problem.execute(EXEC_NONLINEAR);
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] EXEC_NONLINEAR complete at outer-loop tail"
+                << std::endl;
 
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
+    if (light_trace_timestep)
+      std::cerr << "[ReducedPressurePIMPLESolve] outer iteration convergence check"
+                << " converged=" << converged << std::endl;
   }
 
   if (_has_passive_scalar_systems && _should_solve_passive_scalars &&
@@ -586,6 +615,9 @@ ReducedPressurePIMPLESolve::solve()
 
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->setSuppressExplicitHydrostaticPressureFlux(false);
+
+  if (light_trace_timestep)
+    std::cerr << "[ReducedPressurePIMPLESolve] solve end converged=" << converged << std::endl;
 
   return converged;
 }
@@ -822,7 +854,6 @@ ReducedPressurePIMPLESolve::initializeStartupPressureField(const SolverParams & 
       correctVelocityOnce(true, true, solver_params);
     }
   }
-
   _problem.execute(EXEC_NONLINEAR);
 }
 
@@ -850,17 +881,38 @@ ReducedPressurePIMPLESolve::performStartupContinuityCorrections(const SolverPara
 void
 ReducedPressurePIMPLESolve::preparePressureCorrectorState(const bool subtract_updated_pressure)
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] preparePressureCorrectorState begin"
+              << " outer=" << _current_outer_iteration << " piso=" << _current_piso_iteration
+              << " subtract_updated_pressure=" << subtract_updated_pressure << std::endl;
+
   // Refresh the curvature producer before the pressure predictor stage so every
   // downstream face functor sees the latest smoothed normals / curvature.
   if (auto * curvature = sharpInterfaceCurvature())
+  {
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] updating curvature maps" << std::endl;
     curvature->updateCurvatureMaps(_print_fields);
+  }
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] computing HbyA" << std::endl;
   _rc_uo->computeHbyA(subtract_updated_pressure, _print_fields);
 
   if (auto * sharp_rc = sharpInterfaceRC())
+  {
+    if (_problem.timeStep() == 1)
+      std::cerr << "[ReducedPressurePIMPLESolve] updating additional pressure flux functors"
+                << std::endl;
     sharp_rc->updateAdditionalPressureFluxFunctors(subtract_updated_pressure, _print_fields);
+  }
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] updating pressure boundary gradients" << std::endl;
   _rc_uo->updatePressureBoundaryNormalGradients(_pin_pressure);
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] preparePressureCorrectorState end" << std::endl;
 }
 
 void
@@ -890,6 +942,11 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
       _problem.timeStep() > _dump_pressure_outer_debug_end_timestep ||
       _current_outer_iteration > _dump_pressure_outer_debug_max_outer_iterations)
     return;
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] dumpPressureOuterDebugState begin"
+              << " stage=" << stage_label << " outer=" << _current_outer_iteration
+              << " piso=" << _current_piso_iteration << std::endl;
 
   const std::string file_base = _app.getOutputFileBase();
   const std::string iter_label = "_ts" + std::to_string(_problem.timeStep()) + "_outer" +
@@ -1056,6 +1113,10 @@ ReducedPressurePIMPLESolve::dumpPressureOuterDebugState(const std::string & stag
 
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->dumpPressureCorrectorFaceDebugCSV(file_base + iter_label + "_pressure_faces.csv");
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] dumpPressureOuterDebugState end"
+              << " stage=" << stage_label << std::endl;
 }
 
 void
@@ -1083,6 +1144,7 @@ ReducedPressurePIMPLESolve::advanceSystemOuterIterationHistory(
       previous_outer_solution.close();
     }
   }
+
 }
 
 void
@@ -1343,6 +1405,10 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
                                                          const bool recompute_face_mass_flux,
                                                          const SolverParams & solver_params)
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] correctStartupContinuityOnce begin"
+              << " recompute_face_mass_flux=" << recompute_face_mass_flux << std::endl;
+
   LinearImplicitSystem & pressure_linear_system =
       libMesh::cast_ref<LinearImplicitSystem &>(_pressure_system.system());
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
@@ -1418,6 +1484,10 @@ ReducedPressurePIMPLESolve::correctStartupContinuityOnce(const bool subtract_upd
         saved_suppress_explicit_hydrostatic_pressure_flux);
   }
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] correctStartupContinuityOnce end"
+              << " its=" << residuals.first << " residual=" << residuals.second << std::endl;
+
   return residuals;
 }
 
@@ -1426,11 +1496,20 @@ ReducedPressurePIMPLESolve::correctVelocityOnce(const bool subtract_updated_pres
                                                 const bool recompute_face_mass_flux,
                                                 const SolverParams & solver_params)
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] correctVelocityOnce begin"
+              << " recompute_face_mass_flux=" << recompute_face_mass_flux << std::endl;
+
   preparePressureCorrectorState(subtract_updated_pressure);
   dumpPressureOuterDebugState("pre_pressure_solve");
 
   const auto residuals = applyPressureCorrectionStage(recompute_face_mass_flux, false, solver_params);
   finalizePressureCorrectionStage();
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] correctVelocityOnce end"
+              << " its=" << residuals.first << " residual=" << residuals.second << std::endl;
+
   return residuals;
 }
 
@@ -1439,6 +1518,11 @@ ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_fa
                                                          const bool relax_pressure_for_next_predictor,
                                                          const SolverParams & solver_params)
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] applyPressureCorrectionStage begin"
+              << " recompute_face_mass_flux=" << recompute_face_mass_flux
+              << " relax_pressure_for_next_predictor=" << relax_pressure_for_next_predictor
+              << std::endl;
 
   Moose::PetscSupport::petscSetOptions(_pressure_petsc_options, solver_params);
 
@@ -1484,27 +1568,45 @@ ReducedPressurePIMPLESolve::applyPressureCorrectionStage(const bool recompute_fa
     _pressure_system.computeGradients();
   }
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] applyPressureCorrectionStage end"
+              << " its=" << residuals.first << " residual=" << residuals.second << std::endl;
+
   return residuals;
 }
 
 void
 ReducedPressurePIMPLESolve::finalizePressureCorrectionStage()
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] finalizePressureCorrectionStage begin" << std::endl;
+
   auto & pressure_current_solution = *(_pressure_system.system().current_local_solution.get());
   auto & pressure_old_solution = *(_pressure_system.solutionPreviousNewton());
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] computing provisional cell velocity" << std::endl;
   if (auto * sharp_rc = sharpInterfaceRC())
     sharp_rc->computeProvisionalCellVelocity();
   else
     _rc_uo->computeCellVelocity();
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] updating velocity boundary state" << std::endl;
   _rc_uo->updateVelocityBoundaryState();
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] dumping post-pressure debug state" << std::endl;
   dumpPressureOuterDebugState("post_pressure_writeback");
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] relaxing pressure solution update" << std::endl;
   NS::FV::relaxSolutionUpdate(
       pressure_current_solution, pressure_old_solution, _pressure_variable_relaxation);
 
   pressure_old_solution = pressure_current_solution;
   _pressure_system.setSolution(pressure_current_solution);
   _pressure_system.computeGradients();
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[ReducedPressurePIMPLESolve] finalizePressureCorrectionStage end" << std::endl;
 }

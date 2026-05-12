@@ -17,6 +17,7 @@
 #include "LinearWCNSFVMomentumFlux.h"
 #include "SharpInterfaceRhieChowMassFlux.h"
 
+#include <iostream>
 #include <limits>
 
 using namespace libMesh;
@@ -631,6 +632,9 @@ LinearAssemblySegregatedSolve::initialSetup()
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solvePressureCorrector()
 {
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] solvePressureCorrector begin" << std::endl;
+
   _problem.setCurrentLinearSystem(_pressure_sys_number);
 
   // We will need some members from the linear system
@@ -647,7 +651,13 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   PetscLinearSolver<Real> & pressure_solver =
       libMesh::cast_ref<PetscLinearSolver<Real> &>(*pressure_system.get_linear_solver());
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] assembling pressure system" << std::endl;
   _problem.computeLinearSystemSys(pressure_system, mmat, rhs, false);
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] pressure assembly complete"
+              << " rows=" << mmat.m() << " cols=" << mmat.n() << std::endl;
 
   if (_print_fields)
   {
@@ -665,12 +675,24 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
   _pressure_linear_control.real_valued_data["abs_tol"] = _pressure_l_abs_tol * norm_factor;
   pressure_solver.set_solver_configuration(_pressure_linear_control);
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] pressure solver configured"
+              << " norm_factor=" << norm_factor
+              << " abs_tol=" << _pressure_linear_control.real_valued_data["abs_tol"] << std::endl;
+
   if (_pin_pressure)
     NS::FV::constrainSystem(mmat, rhs, _pressure_pin_value, _pressure_pin_dof);
   pressure_system.update();
 
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] calling pressure KSP solve" << std::endl;
   auto its_res_pair = pressure_solver.solve(mmat, mmat, solution, rhs);
   pressure_system.update();
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] pressure KSP solve complete"
+              << " its=" << its_res_pair.first << " residual=" << its_res_pair.second
+              << std::endl;
 
   if (_print_fields)
   {
@@ -687,6 +709,10 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
     _rc_uo->cachePressureEquationFlux();
 
   const auto residuals = std::make_pair(its_res_pair.first, its_res_pair.second / norm_factor);
+
+  if (_problem.timeStep() == 1)
+    std::cerr << "[LinearAssemblySegregatedSolve] solvePressureCorrector end"
+              << " normalized_residual=" << residuals.second << std::endl;
 
   _console << " Pressure equation: " << COLOR_GREEN << residuals.second << COLOR_DEFAULT
            << " Linear its: " << residuals.first << std::endl;

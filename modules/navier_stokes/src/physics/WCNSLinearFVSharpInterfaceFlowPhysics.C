@@ -590,6 +590,16 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addMomentumFluxKernels()
   const std::string u_names[3] = {"u", "v", "w"};
   const std::string kernel_type = "LinearWCNSFVMomentumFlux";
   const std::string kernel_name = prefix() + "ins_momentum_flux_";
+  const bool use_venkat_deferred_correction = _momentum_advection_interpolation == "venkatakrishnan";
+  const InterpolationMethodName advected_interp_method_name =
+      prefix() + "momentum_advection_deferred_correction";
+
+  if (use_venkat_deferred_correction && !getProblem().hasFVInterpolationMethod(advected_interp_method_name))
+  {
+    const std::string method_type = "FVAdvectedVenkatakrishnanDeferredCorrection";
+    InputParameters method_params = getFactory().getValidParams(method_type);
+    getProblem().addFVInterpolationMethod(method_type, advected_interp_method_name, method_params);
+  }
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
@@ -602,6 +612,9 @@ WCNSLinearFVSharpInterfaceFlowPhysics::addMomentumFluxKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>("mass_flux_functor") = "predictor_convective_mass_flux";
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
+  if (use_venkat_deferred_correction)
+    params.set<InterpolationMethodName>("advected_interp_method_name") =
+        advected_interp_method_name;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
   params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
 

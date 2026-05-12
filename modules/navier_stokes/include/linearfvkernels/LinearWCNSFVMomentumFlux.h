@@ -10,8 +10,8 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "FVAdvectedInterpolationMethod.h"
 #include "FVInterpolationMethodInterface.h"
+#include "FVAdvectedInterpolationMethod.h"
 #include "libmesh/numeric_vector.h"
 
 #include <array>
@@ -73,6 +73,10 @@ protected:
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalAdvectionNeighborMatrixContribution();
 
+  /// Computes the right hand side contribution of the advective flux on the current face
+  /// when the face is an internal face (doesn't have associated boundary conditions).
+  Real computeInternalAdvectionRHSContribution();
+
   /// Computes the matrix contribution of the stress term on the current face
   /// when the face is an internal face (doesn't have associated boundary conditions).
   Real computeInternalStressMatrixContribution();
@@ -119,15 +123,12 @@ protected:
   /// Switch to enable/disable deviatoric parts in the stress term
   const bool _use_deviatoric_terms;
 
-  /// The interpolation method to use for the advected quantity
-  const FVAdvectedInterpolationMethod & _adv_interp_method;
+  /// Container for the current advected interpolation coefficients on the face to make sure
+  /// we do not compute it multiple times for different terms.
+  std::pair<Real, Real> _advected_interp_coeffs;
 
-  /// Current advected interpolation contribution on the face
-  FVAdvectedInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
-
-  /// Reusable gradient storage used when advected interpolation requires gradients.
-  VectorValue<Real> _elem_grad_storage;
-  VectorValue<Real> _neighbor_grad_storage;
+  /// Explicit deferred-correction face-value contribution for internal advection.
+  Real _advected_rhs_face_value;
 
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
@@ -142,6 +143,13 @@ protected:
 
   /// The cached right hand side contribution
   Real _stress_rhs_contribution;
+
+  /// The interpolation method to use for the advected quantity
+  Moose::FV::InterpMethod _advected_interp_method;
+
+  /// Optional deferred-correction interpolation method for internal advection faces.
+  const FVAdvectedInterpolationMethod * _adv_interp_method;
+
 
   /// Index x|y|z, this is mainly to handle the deviatoric parts correctly in
   /// in the stress term
@@ -158,4 +166,8 @@ protected:
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
+
+  /// Reusable gradient storage used when advected interpolation requires gradients.
+  VectorValue<Real> _elem_grad_storage;
+  VectorValue<Real> _neighbor_grad_storage;
 };

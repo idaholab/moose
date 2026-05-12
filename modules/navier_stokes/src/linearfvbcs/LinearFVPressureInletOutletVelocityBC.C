@@ -9,6 +9,7 @@
 
 #include "LinearFVPressureInletOutletVelocityBC.h"
 
+#include "ElemInfo.h"
 #include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", LinearFVPressureInletOutletVelocityBC);

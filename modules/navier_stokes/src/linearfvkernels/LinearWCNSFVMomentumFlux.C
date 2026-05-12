@@ -46,9 +46,13 @@ LinearWCNSFVMomentumFlux::validParams()
   params.addParam<bool>(
       "use_deviatoric_terms", false, "If deviatoric terms in the stress terms need to be used.");
 
-  params.addRequiredParam<InterpolationMethodName>(
+  params += Moose::FV::advectedInterpolationParameter();
+  params.addParam<InterpolationMethodName>(
       "advected_interp_method_name",
-      "Name of the FVInterpolationMethod to use for the advected velocity.");
+      InterpolationMethodName(),
+      "Optional FVInterpolationMethod object name for internal-face momentum advection. "
+      "When provided, this supplies the matrix/RHS split for deferred-correction momentum "
+      "advection and overrides the enum-only internal higher-order path.");
   return params;
 }
 
@@ -63,12 +67,16 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _mu(getFunctor<Real>(getParam<MooseFunctorName>(NS::mu))),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
-    _adv_interp_method(getFVAdvectedInterpolationMethod(
-        getParam<InterpolationMethodName>("advected_interp_method_name"))),
+    _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
+    _advected_rhs_face_value(0.0),
     _face_mass_flux(0.0),
     _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),
     _stress_rhs_contribution(0.0),
+    _adv_interp_method(getParam<InterpolationMethodName>("advected_interp_method_name").empty()
+                           ? nullptr
+                           : &getFVAdvectedInterpolationMethod(
+                                 getParam<InterpolationMethodName>("advected_interp_method_name"))),
     _index(getParam<MooseEnum>("momentum_component")),
     _velocity_vars{nullptr, nullptr, nullptr},
     _coord_type(getBlockCoordSystem()),
@@ -79,8 +87,20 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   if (_use_nonorthogonal_correction || _use_deviatoric_terms)
     _var.computeCellGradients();
 
-  if (_adv_interp_method.needsGradients())
-    _var.computeCellGradients(_adv_interp_method.gradientLimiter());
+  const bool need_more_ghosting = Moose::FV::setInterpolationMethod(
+      *this, _advected_interp_method, "advected_interp_method");
+  if (_adv_interp_method)
+  {
+    if (_adv_interp_method->needsGradients())
+      _var.computeCellGradients(_adv_interp_method->gradientLimiter());
+  }
+  else if (need_more_ghosting)
+    paramError(
+        "advected_interp_method",
+        "Higher-order momentum advection requires a deferred-correction interpolation method "
+        "object. Use the flow-physics provided Venkatakrishnan deferred-correction path rather "
+        "than the old hand-rolled wider-stencil assembly.");
+
 
   auto get_velocity_var = [&](const std::string & param_name)
   {
@@ -134,16 +154,14 @@ LinearWCNSFVMomentumFlux::computeNeighborMatrixContribution()
 Real
 LinearWCNSFVMomentumFlux::computeElemRightHandSideContribution()
 {
-  return (computeInternalStressRHSContribution() +
-          _adv_interp_result.rhs_face_value * _face_mass_flux) *
+  return (computeInternalAdvectionRHSContribution() + computeInternalStressRHSContribution()) *
          _current_face_area;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeNeighborRightHandSideContribution()
 {
-  return -(computeInternalStressRHSContribution() +
-           _adv_interp_result.rhs_face_value * _face_mass_flux) *
+  return (-computeInternalAdvectionRHSContribution() - computeInternalStressRHSContribution()) *
          _current_face_area;
 }
 
@@ -171,13 +189,19 @@ LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryC
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionElemMatrixContribution()
 {
-  return _adv_interp_result.weights_matrix.first * _face_mass_flux;
+  return _advected_interp_coeffs.first * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeInternalAdvectionNeighborMatrixContribution()
 {
-  return _adv_interp_result.weights_matrix.second * _face_mass_flux;
+  return _advected_interp_coeffs.second * _face_mass_flux;
+}
+
+Real
+LinearWCNSFVMomentumFlux::computeInternalAdvectionRHSContribution()
+{
+  return _advected_rhs_face_value * _face_mass_flux;
 }
 
 Real
@@ -429,29 +453,39 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
   else
     _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
-  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  // Caching the interpolation coefficients so they will be reused for the matrix and right hand
+  // side terms
+  _advected_rhs_face_value = 0.0;
+  if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH && _adv_interp_method)
   {
     const auto state = determineState();
     const auto & elem_info = *_current_face_info->elemInfo();
     const auto & neighbor_info = *_current_face_info->neighborInfo();
-
     const Real elem_value = _var.getElemValue(elem_info, state);
     const Real neighbor_value = _var.getElemValue(neighbor_info, state);
 
-    if (_adv_interp_method.needsGradients())
+    VectorValue<Real> * elem_grad = nullptr;
+    VectorValue<Real> * neighbor_grad = nullptr;
+    if (_adv_interp_method->needsGradients())
     {
-      const auto limiter_type = _adv_interp_method.gradientLimiter();
+      const auto limiter_type = _adv_interp_method->gradientLimiter();
       _elem_grad_storage = _var.gradSln(elem_info, state, limiter_type);
       _neighbor_grad_storage = _var.gradSln(neighbor_info, state, limiter_type);
+      elem_grad = &_elem_grad_storage;
+      neighbor_grad = &_neighbor_grad_storage;
     }
 
-    _adv_interp_result = _adv_interp_method.advectedInterpolate(*_current_face_info,
-                                                                elem_value,
-                                                                neighbor_value,
-                                                                &_elem_grad_storage,
-                                                                &_neighbor_grad_storage,
-                                                                _face_mass_flux);
+    const auto adv_interp = _adv_interp_method->advectedInterpolate(
+        *_current_face_info, elem_value, neighbor_value, elem_grad, neighbor_grad, _face_mass_flux);
+    _advected_interp_coeffs = adv_interp.weights_matrix;
+    _advected_rhs_face_value = adv_interp.rhs_face_value;
   }
+  else if (_current_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    _advected_interp_coeffs =
+        interpCoeffs(_advected_interp_method, *_current_face_info, true, _face_mass_flux);
+  else
+    _advected_interp_coeffs = std::make_pair(0.0, 0.0);
+
 
   // We'll have to set this to zero to make sure that we don't accumulate values over multiple
   // faces. The matrix contribution should be fine.
@@ -476,20 +510,23 @@ LinearWCNSFVMomentumFlux::accumulateCurrentFaceResidualContributions(
         computeInternalAdvectionElemMatrixContribution() * _current_face_area;
     const Real neighbor_advection =
         computeInternalAdvectionNeighborMatrixContribution() * _current_face_area;
+    const Real advection_rhs = computeInternalAdvectionRHSContribution() * _current_face_area;
     const Real stress_matrix = computeInternalStressMatrixContribution() * _current_face_area;
     const Real stress_rhs = computeInternalStressRHSContribution() * _current_face_area;
 
     if (hasBlocks(_current_face_info->elemInfo()->subdomain_id()))
     {
       advection_residual.add(
-          dof_id_elem, elem_advection * elem_value + neighbor_advection * neighbor_value);
+          dof_id_elem,
+          elem_advection * elem_value + neighbor_advection * neighbor_value - advection_rhs);
       stress_residual.add(dof_id_elem, stress_matrix * (elem_value - neighbor_value) - stress_rhs);
     }
 
     if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
     {
       advection_residual.add(
-          dof_id_neighbor, -elem_advection * elem_value - neighbor_advection * neighbor_value);
+          dof_id_neighbor,
+          -elem_advection * elem_value - neighbor_advection * neighbor_value + advection_rhs);
       stress_residual.add(
           dof_id_neighbor, -stress_matrix * (elem_value - neighbor_value) + stress_rhs);
     }
