@@ -172,7 +172,7 @@ This can be a problem when using the moose conda environment with new versions o
 
 When encountering GLIBC-related compatibility issues on Linux machines the user has two options:
 
-1. [Rebuilding Petsc and libMesh manually](gcc_install_moose.md) using compatible compilers (most newer systems
+1. [Rebuilding PETSc and libMesh manually](gcc_install_moose.md) using compatible compilers (most newer systems
    like Ubuntu come with compatible compilers).
 
 2. Building libtorch from source. The user can find instructions on how to install libtorch
@@ -186,13 +186,13 @@ using suitable system compilers. At the time these instruction are written, only
 acceleration is tested.
 The following packages need to be also installed to enable this feature:
 
-- [A sutiable Nvidia driver](https://www.nvidia.com/en-us/drivers/)
-- [Cuda toolkit](https://developer.nvidia.com/cuda-toolkit) - only strictly required if
+- [A suitable Nvidia driver](https://www.nvidia.com/en-us/drivers/)
+- [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit) - only strictly required if
    building libtorch from source.
 
 The supported versions can be determined using the [compatibility matrix](https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix).
 Once the dependencies of MOOSE are installed, we can use the setup script to fetch
-the correct libtorch package from the official ditribution:
+the correct libtorch package from the official distribution:
 
 ```
 ./scripts/setup_libtorch.sh --version=2.1 --libtorch-distribution=cuda
@@ -206,5 +206,5 @@ The configuration and build parts of the process are the same as discussed befor
 
 On non-INL HPC systems, one can follow the manual installation process discussed above.
 On INL machines, containers are provided with readily compiled dependencies, including libtorch.
-For more information on containers, see the [instuctions](inl_hpc_install_moose.md).
+For more information on containers, see the [instructions](inl_hpc_install_moose.md).
 In this case, the `moose-dev` module already contains `libtorch`.
