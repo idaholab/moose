@@ -39,11 +39,10 @@ public:
                                    mfem::DenseMatrix & elmat) override;
 
 protected:
-  mfem::CurlCurlIntegrator _curlcurl_res_integ, _curlcurl_jac_integ;
   mfem::CurlGridFunctionCoefficient _curl_trial;
   mfem::InnerProductCoefficient _a2;
-  mfem::SumCoefficient  _jac_coeff;
-
+  mfem::SumCoefficient _jac_coeff;
+  mfem::CurlCurlIntegrator _curlcurl_res_integ, _curlcurl_jac_integ;
 };
 }
 

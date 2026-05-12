@@ -6,10 +6,10 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
+//*//
 #ifdef MOOSE_MFEM_ENABLED
 
-#include " NLCurlCurlIntegrator.h"
+#include "NLCurlCurlIntegrator.h"
 
 namespace Moose::MFEM
 {
@@ -21,7 +21,7 @@ namespace Moose::MFEM
     _a2(_curl_trial,dk_dcu),
     _jac_coeff(k,_a2),
     _curlcurl_res_integ(k, ir),
-    _curlcurl_jac_integ(_jac_coeff, ir),
+    _curlcurl_jac_integ(_jac_coeff, ir)
 {
 }
 
@@ -42,6 +42,6 @@ void
 {
   _curlcurl_jac_integ.AssembleElementGrad(el, Tr, elfun, elmat);
 }
-}
+};
 
 #endif

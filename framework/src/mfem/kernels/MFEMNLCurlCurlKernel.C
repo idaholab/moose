@@ -36,7 +36,7 @@ MFEMNLCurlCurlKernel::validParams()
 MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _k_coef(getScalarCoefficient("k_coefficient")),
-    _dk_dcu_coef(getVectorCoefficient("dk_dcu_coefficient")),
+    _dk_dcu_coeff(getVectorCoefficient("dk_dcu_coefficient")),
     _trial_var(*getMFEMProblem().getGridFunction(getTrialVariableName()))
 {
 }
@@ -44,7 +44,7 @@ MFEMNLCurlCurlKernel::MFEMNLCurlCurlKernel(const InputParameters & parameters)
 mfem::NonlinearFormIntegrator *
 MFEMNLCurlCurlKernel::createNLIntegrator()
 {
-  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _dk_dcu_coef, &_trial_var);
+  return new Moose::MFEM::NLCurlCurlIntegrator(_k_coef, _dk_dcu_coeff, &_trial_var);
 }
 
 #endif
