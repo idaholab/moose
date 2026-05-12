@@ -153,6 +153,7 @@
     exodiff = 'out_wedge_sys.e'
     max_parallel = 1
     requirement = "The system shall support periodic boundary conditions for a single variable on a wedge domain with transforms prescribed as functions."
+    min_slots = 2
   []
 
   [auto_dir_repeated_id]

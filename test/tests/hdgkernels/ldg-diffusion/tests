@@ -41,6 +41,7 @@
       input = test.py
       test_case = TestRTTri
       detail = 'simplex elements and'
+      min_slots = 2
     []
     [quad]
       type = MMSTest

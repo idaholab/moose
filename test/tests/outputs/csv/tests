@@ -41,6 +41,7 @@
 
     requirement = "The system shall support the output of postprocessors and scalars to Exodus files "
                   "for transient problems."
+    min_slots = 2
   []
   [restart]
     requirement = "The system shall support the output of CSV data:"

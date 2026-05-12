@@ -21,6 +21,7 @@
       csvdiff = rename-coupled-scalar-var_out.csv
       detail = 'coupled scalar variables'
       max_parallel = 1
+      min_slots = 2
     []
     [coupled-functor]
       type = CSVDiff

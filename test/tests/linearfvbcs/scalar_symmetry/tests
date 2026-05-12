@@ -48,5 +48,6 @@
     test_case = TestAdvection2DSymmetryNonOrthogonal
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically on nonorthogonal cells using a linear finite volume system with symmetry boundary conditions.'
     max_threads = 1 # see libmesh issue #3808
+    min_slots = 2
   []
 []
