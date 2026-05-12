@@ -11,6 +11,7 @@
       detail = "without tuning the hyperparameters."
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [tuned]
       type = 'JSONDiff'
@@ -20,6 +21,7 @@
       abs_zero = 1e-6
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [load]
       type = 'JSONDiff'
@@ -30,6 +32,7 @@
       skip_keys = "reporters train_params"
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []

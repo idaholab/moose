@@ -70,8 +70,7 @@ LMC::computeCovarianceMatrix(torch::Tensor & K,
   torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, options);
   torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, options);
   K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, options);
-  torch::Tensor K_working =
-      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, options);
+  torch::Tensor K_working;
 
   // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
@@ -173,7 +172,12 @@ LMC::computeAGradient(torch::Tensor & grad,
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
   mooseAssert(cast_int<int64_t>(index) < a_coeffs.numel(), "Incorrect LMC coefficient index.");
-  const auto basis = torch::eye(_num_outputs, a_coeffs.options()).select(0, index);
+  auto basis = torch::zeros_like(a_coeffs);
+  const auto index_tensor = torch::tensor({cast_int<int64_t>(index)},
+                                          torch::TensorOptions()
+                                              .dtype(torch::kLong)
+                                              .device(a_coeffs.device()));
+  basis.index_fill_(0, index_tensor, 1.0);
   grad = torch::outer(basis, a_coeffs) + torch::outer(a_coeffs, basis);
 }
 
@@ -183,7 +187,12 @@ LMC::computeLambdaGradient(torch::Tensor & grad,
                            const unsigned int index) const
 {
   mooseAssert(index < _num_outputs, "Incorrect LMC lambda index.");
-  const auto basis = torch::eye(_num_outputs, _lambdas[exp_i]->options()).select(0, index);
+  auto basis = torch::zeros_like(*_lambdas[exp_i]);
+  const auto index_tensor = torch::tensor({cast_int<int64_t>(index)},
+                                          torch::TensorOptions()
+                                              .dtype(torch::kLong)
+                                              .device(_lambdas[exp_i]->device()));
+  basis.index_fill_(0, index_tensor, 1.0);
   grad = torch::diag(basis);
 }
 

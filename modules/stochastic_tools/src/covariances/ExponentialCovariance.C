@@ -67,11 +67,10 @@ ExponentialCovariance::ExponentialFunction(torch::Tensor & K,
               "Number of parameters do not match in covariance kernel calculation");
 
   const auto l_factor = length_factor.unsqueeze(0);
-  torch::Tensor scaled_distance =
-      torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
-  K = sigma_f_squared * torch::exp(-torch::pow(scaled_distance, gamma));
+  K = torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
+  K = sigma_f_squared * torch::exp(-torch::pow(K, gamma));
   if (is_self_covariance)
-    K = K + sigma_n_squared * torch::eye(K.size(0), K.options());
+    K.diagonal().add_(sigma_n_squared);
 }
 
 bool

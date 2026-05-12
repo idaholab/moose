@@ -11,6 +11,7 @@
       detail = 'a single row in the sampler using the U learning function;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
@@ -21,6 +22,7 @@
       detail = 'multiple rows in the sampler using the U learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 4 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [SingleProc_SingleRow_Ufunction_retraining]
       type = 'JSONDiff'
@@ -31,6 +33,7 @@
       detail = 'a single row in the sampler using the U learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [COV_squared_exp]
       type = 'JSONDiff'
@@ -42,6 +45,7 @@
       detail = 'a single row in the sampler using the COV learning function and automatically increase the number of steps when re-training is needed;'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []

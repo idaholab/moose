@@ -64,11 +64,10 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
               "Number of parameters do not match in covariance kernel calculation");
 
   const auto l_factor = length_factor.unsqueeze(0);
-  torch::Tensor scaled_distance =
-      torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0), 2);
-  K = sigma_f_squared * torch::exp(-scaled_distance / 2.0);
+  K = torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
+  K.pow_(2).mul_(-0.5).exp_().mul_(sigma_f_squared);
   if (is_self_covariance)
-    K = K + sigma_n_squared * torch::eye(K.size(0), K.options());
+    K.diagonal().add_(sigma_n_squared);
 }
 
 bool
@@ -127,15 +126,14 @@ SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
   mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
   const auto l_factor = length_factor.unsqueeze(0);
-  const auto scaled_distance_squared =
-      torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(x, l_factor), 2.0), 2);
-  const auto base_covariance = sigma_f_squared * torch::exp(-scaled_distance_squared / 2.0);
+  K = torch::cdist(torch::div(x, l_factor), torch::div(x, l_factor), 2.0);
+  K.pow_(2).mul_(-0.5).exp_().mul_(sigma_f_squared);
   const auto coordinate = x.select(1, ind);
   const auto coordinate_distance_squared =
       torch::pow(coordinate.unsqueeze(1) - coordinate.unsqueeze(0), 2);
   const auto length_factor_ind = length_factor.select(0, ind);
 
-  K = coordinate_distance_squared / torch::pow(length_factor_ind, 3) * base_covariance;
+  K.mul_(coordinate_distance_squared).div_(torch::pow(length_factor_ind, 3));
 }
 
 #endif

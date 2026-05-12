@@ -13,6 +13,7 @@
       detail = 'using a single processor and the Expected Improvment acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_4proc]
       type = 'JSONDiff'
@@ -25,6 +26,7 @@
       detail = 'using four processors and the Expected Improvment acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 9 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_PoI]
       type = 'JSONDiff'
@@ -36,6 +38,7 @@
       detail = 'using the Probability of Improvment acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_CoV]
       type = 'JSONDiff'
@@ -47,6 +50,7 @@
       detail = 'using the Coefficient of Variation acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_EIGF]
       type = 'JSONDiff'
@@ -58,6 +62,7 @@
       detail = 'using the Expected Improvement for Global Fit acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_UFunc]
       type = 'JSONDiff'
@@ -69,6 +74,7 @@
       detail = 'using the U-Function acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
     [al_UCB]
       type = 'JSONDiff'
@@ -80,6 +86,7 @@
       detail = 'using the Upper Confidence Bound acquisition.'
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
   [Bayesian_active_learning]
@@ -94,6 +101,7 @@
       detail = 'using the Bayesian posterior targeted acquisition; '
       capabilities = 'libtorch'
       compute_devices = 'cpu cuda'
+      min_slots = 3 # Reserve extra CI memory for libtorch runtime in GP tests
     []
   []
 []
