@@ -1,0 +1,22 @@
+[Tests]
+  design = 'NewtonSNESExecutor.md'
+  issues = '#32860'
+
+  [errors]
+    requirement = 'The system shall report an error for a Newton executor'
+    [convergence_names_size]
+      type = RunException
+      input = 'two_systems.i'
+      cli_args = "Executors/outer/convergence_names='c0' --executor"
+      expect_err = "Must have the same length as 'nonlinear_system_names'"
+      detail = 'if the number of convergence names differs from the number of nonlinear systems,'
+    []
+    [missing_npc]
+      type = RunException
+      input = 'two_systems.i'
+      cli_args = '--executor'
+      expect_err = 'multiple nonlinear systems currently require'
+      detail = 'or if it targets multiple nonlinear systems without a nonlinear preconditioner.'
+    []
+  []
+[]

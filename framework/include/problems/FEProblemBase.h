@@ -47,6 +47,7 @@
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
 
+#include <functional>
 #include <unordered_map>
 #include <memory>
 
@@ -104,7 +105,6 @@ class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
-class NonlinearPreconditioning;
 
 namespace Moose
 {
@@ -883,18 +883,6 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
-
-  /// Store the nonlinear preconditioning object (called from SetupNonlinearPreconditioningAction).
-  void setNonlinearPreconditioning(std::shared_ptr<NonlinearPreconditioning> nlp)
-  {
-    _nl_preconditioning = std::move(nlp);
-  }
-
-  /// Returns the NonlinearPreconditioning object, or nullptr if none has been configured.
-  NonlinearPreconditioning * getNonlinearPreconditioning() const
-  {
-    return _nl_preconditioning.get();
-  }
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
@@ -3249,9 +3237,6 @@ protected:
 
   /// Map from nonlinear system name to number
   std::map<NonlinearSystemName, unsigned int> _nl_sys_name_to_num;
-
-  /// Nonlinear preconditioning object (null if [NonlinearPreconditioning] block is absent).
-  std::shared_ptr<NonlinearPreconditioning> _nl_preconditioning;
 
   /// Row system index for Jacobian block assembly (ISys); set by setJacobianBlockContext.
   unsigned int _nl_i_sys_num;
