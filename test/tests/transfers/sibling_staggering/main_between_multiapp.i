@@ -4,6 +4,8 @@
 [Problem]
   solve = false
   verbose_multiapps = true
+
+  execute_siblings_transfer_after_source_multiapp_execution = true
 []
 
 [Mesh]
@@ -27,6 +29,7 @@
     type = TransientMultiApp
     input_files = sub_between_diffusion2.i
     output_in_position = true
+    execution_order_group = 1
   []
 []
 
@@ -44,8 +47,6 @@
     to_multi_app = ma1
     from_postprocessor = 'time_app2'
     to_postprocessor = 'time_in_app2'
-    # Break the dependency cycle
-    execute_on = 'TIMESTEP_END'
   []
 []
 
