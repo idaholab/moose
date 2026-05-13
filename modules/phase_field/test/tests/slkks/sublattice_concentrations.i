@@ -89,7 +89,7 @@
   [F_SIGMA]
     type = DerivativeParsedMaterial
     property_name = F_SIGMA
-    outputs = exodus
+    outputs = out
     expression = 'SIGMA_0FE := 1-SIGMA_0CR;
                 SIGMA_1FE := 1-SIGMA_1CR;SIGMA_2FE := '
                '1-SIGMA_2CR; 8.3145*T*(10.0*if(SIGMA_0CR > 1.0e-15,SIGMA_0CR*log(SIGMA_0CR),0) + '
@@ -145,5 +145,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    max_output_name_length = 32 # For old gold file
+  []
 []
