@@ -91,4 +91,15 @@
     design = 'MooseVariableBase.md'
     issues = '#16809'
   []
+  [execute_on_final]
+    type = CSVDiff
+    input = simple_transient_diffusion.i
+    csvdiff = simple_transient_diffusion_out.csv
+    cli_args = "Postprocessors/avg/type=ElementAverageValue Postprocessors/avg/variable=u Outputs/csv=true Outputs/execute_on='final' Executioner/dt=10 Executioner/nl_abs_tol=1e-12"
+    recover = false # execute_on = 'final' means we won't have any checkpoint files in a half-transient
+    requirement = 'The system shall be able to apply a blanket execution on final criterion to all outputs from common output syntax.'
+    prereq = 'test_mallocs'
+    design = 'syntax/Outputs/index.md'
+    issues = '#4497'
+  []
 []
