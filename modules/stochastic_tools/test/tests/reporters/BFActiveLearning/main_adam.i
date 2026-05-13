@@ -108,9 +108,9 @@
     standardize_params = 'true'
     standardize_data = 'true'
     tune_parameters = 'covar:signal_variance covar:length_factor'
-    num_iters = 5000
-    learning_rate = 0.001
-    show_every_nth_iteration = 1
+    num_iters = 1000
+    learning_rate = 0.005
+    show_every_nth_iteration = 0
     batch_size = 200
   []
 []
