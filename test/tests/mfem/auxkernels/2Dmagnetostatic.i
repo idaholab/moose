@@ -61,7 +61,7 @@
     [B]
         type = MFEMVariable
         fespace = RTFESpace
-    [] 
+    []
 []
 
 [Kernels]
