@@ -6139,6 +6139,27 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
     ordered_multi_apps[multi_app->getParam<unsigned int>("execution_order_group")].push_back(
         multi_app);
 
+  // Follow the original execution order
+  if (!_execute_siblings_transfer_after_source_multiapp_execution || ordered_multi_apps.size() == 0)
+  {
+    ordered_multi_apps.resize(multi_apps.size());
+    for (const auto i : index_range(multi_apps))
+      ordered_multi_apps[i] = {multi_apps[i]};
+  }
+
+  // Check that concurrent multiapps will even be used
+  if (multi_apps.size() && _num_concurrent_multiapps > 1)
+  {
+    bool has_concurrent_apps = false;
+    for (const auto & multi_app_group : ordered_multi_apps)
+      if (multi_app_group.size() > 1)
+        has_concurrent_apps = true;
+    if (!has_concurrent_apps)
+      paramWarning("num_concurrent_multiapps",
+                   "Due to application dependencies or differences in execution schedules, "
+                   "concurrent multiapps are not actually used");
+  }
+
   // Execute MultiApps
   if (multi_apps.size())
   {
