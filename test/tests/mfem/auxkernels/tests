@@ -65,7 +65,7 @@
   []
   [MFEMNDtoRTAux]
     type = XMLDiff
-    input = 2dmagnetostatic.i
+    input = 2Dmagnetostatic.i
     xmldiff = 'OutputData/2Dmagnetostatic/Run0/Run0.pvd
                 OutputData/2Dmagnetostatic/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMNDtoRTAux.md'
