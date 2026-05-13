@@ -10,6 +10,7 @@
     jsondiff = 'ais_out.json'
     valgrind = none
     capabilities = 'libtorch'
+    min_slots = 2 # Reserve extra CI memory for libtorch runtime
   []
   [ais_errors]
     requirement = 'The system shall throw an error when '

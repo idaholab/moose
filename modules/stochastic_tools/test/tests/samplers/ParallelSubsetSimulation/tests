@@ -10,6 +10,7 @@
     cli_args = 'Samplers/sample/num_samplessub=4 Samplers/sample/num_subsets=3 Samplers/sample/subset_probability=0.5 Outputs/file_base=pss_reduced'
     jsondiff = 'pss_reduced.json'
     capabilities = 'libtorch'
+    min_slots = 2 # Reserve extra CI memory for libtorch runtime
   []
   [pss1]
     requirement = 'The system shall include an Parallel Subset Simulation method for sampling distribution data.'
