@@ -53,6 +53,12 @@ MFEMNDtoRTAux::MFEMNDtoRTAux(const InputParameters & parameters)
                "Detected FE collection: ",
                source_fec->Name(),
                ".");
+  if (!dynamic_cast<const mfem::RT_FECollection *>(target_fec))
+    mooseError("The target variable must use an MFEM H(div) Raviart-Thomas space. "
+               "Detected FE collection: ",
+               target_fec->Name(),
+               ".");
+
   if (source_fes->GetMesh()->Dimension() != 2 || target_fes->GetMesh()->Dimension() != 2)
     mooseError("MFEMNDtoRTAux is only valid in 2D.");
 
