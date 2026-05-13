@@ -96,18 +96,6 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
   const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
   const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-  const auto theta = std::acos(
-      wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
-                                   Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
-  const auto wd_t = (19.56 - 98.71 * (wire_diameter / pin_diameter) +
-                     303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
-                    std::pow((wire_lead_length / pin_diameter), -0.541);
-  const auto wd_l = 1.4 * wd_t;
-  const auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
-  const auto ws_l = ws_t;
-  Real pw_p = 0.0;
-  Real ar = 0.0;
-  Real a_p = 0.0;
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems
@@ -193,10 +181,23 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
   // Volume 1 Chapter 9-6 also Chen and Todreas (2018).
   if (_has_wire_wrap)
   {
+    const auto theta =
+        std::acos(wire_lead_length /
+                  std::sqrt(Utility::pow<2>(wire_lead_length) +
+                            Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
+    const auto wd_t = (19.56 - 98.71 * (wire_diameter / pin_diameter) +
+                       303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
+                      std::pow((wire_lead_length / pin_diameter), -0.541);
+    const auto wd_l = 1.4 * wd_t;
+    const auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
+    const auto ws_l = ws_t;
+    Real ar = 0.0;
+    Real a_p = 0.0;
+
     if (subch_type == EChannelType::CENTER)
     {
       // wetted perimeter for center subchannel and bare Pin bundle
-      pw_p = libMesh::pi * pin_diameter / 2.0;
+      const Real pw_p = libMesh::pi * pin_diameter / 2.0;
       // wire projected area - center subchannel wire-wrapped bundle
       ar = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
       // bare Pin bundle center subchannel flow area (normal area + wire area)

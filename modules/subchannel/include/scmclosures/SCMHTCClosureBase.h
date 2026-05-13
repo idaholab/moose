@@ -57,5 +57,10 @@ public:
                   const NusseltStruct & nusselt_info,
                   const Real conduction_k) const;
 
+protected:
+  /// Blends turbulent Nusselt number through the transition range using the base laminar value.
+  Real blendTurbulentNusseltNumber(const NusseltPreInfo & nusselt_info,
+                                   const Real turbulent_nusselt) const;
+
   std::unique_ptr<SolutionHandle> _Dpin_soln;
 };

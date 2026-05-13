@@ -77,3 +77,17 @@ SCMHTCClosureBase::computeHTC(const FrictionStruct & friction_args,
   auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
   return Nu * k / Dh_i;
 }
+
+Real
+SCMHTCClosureBase::blendTurbulentNusseltNumber(const NusseltPreInfo & info,
+                                               const Real turbulent_nusselt) const
+{
+  if (info.Re <= info.ReL)
+    return info.laminar_Nu;
+
+  if (info.Re >= info.ReT)
+    return turbulent_nusselt;
+
+  const Real weight = (info.Re - info.ReL) / (info.ReT - info.ReL);
+  return weight * turbulent_nusselt + (1.0 - weight) * info.laminar_Nu;
+}

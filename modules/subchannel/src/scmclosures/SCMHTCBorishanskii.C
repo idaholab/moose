@@ -68,20 +68,5 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
     NuT += corr_prefactor * std::pow(Pe - 200.0, 0.9);
   }
 
-  // Laminar regime
-  if (pre.Re <= pre.ReL)
-    return pre.laminar_Nu;
-
-  // Blend transitional/turbulent using precomputed thresholds
-  auto blended_Nu = [&](Real Nu_turb) -> Real
-  {
-    if (pre.Re >= pre.ReT)
-      return Nu_turb;
-
-    const Real denom = pre.ReT - pre.ReL;
-    const auto w = (pre.Re - pre.ReL) / denom;
-    return w * Nu_turb + (1.0 - w) * pre.laminar_Nu;
-  };
-
-  return blended_Nu(NuT);
+  return blendTurbulentNusseltNumber(pre, NuT);
 }
