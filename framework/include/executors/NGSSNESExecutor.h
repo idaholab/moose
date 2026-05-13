@@ -11,12 +11,12 @@
 #include "SNESExecutor.h"
 
 /**
- * Executor implementing nonlinear Gauss-Seidel (SNESNGS) over a set of libMesh nonlinear
- * systems.  Each application of the NGS preconditioner sweeps through the listed inner
- * systems in order, calling _fe_problem.solve(sys_num) for each.
+ * Executor that presents a PETSc SNESNGS object for use as a nonlinear preconditioner
+ * on a single monolithic nonlinear system.  Attach it to a NewtonSNESExecutor via
+ * nl_preconditioning; PETSc will propagate the outer SNES's DM to the SNESNGS SNES
+ * and use its default secant NGS sweep as the preconditioner.
  *
- * NGSSNESExecutor can be used as a standalone solver or as the nl_preconditioning
- * for a NewtonSNESExecutor.  It requires a multi-system problem configuration.
+ * This mirrors the -npc_snes_type ngs usage shown in PETSc's snes/tutorials/ex15.c.
  */
 class NGSSNESExecutor : public SNESExecutor
 {
@@ -28,9 +28,4 @@ public:
 
 protected:
   virtual void setupSNES() override;
-
-private:
-  std::vector<unsigned int> _inner_sys_nums;
-
-  static PetscErrorCode ngsCallback(SNES snes, Vec x, Vec b, void * ctx);
 };

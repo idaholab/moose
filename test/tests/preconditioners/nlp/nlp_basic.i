@@ -1,6 +1,7 @@
-# Basic NGSSNESExecutor + NewtonSNESExecutor test.
+# ShellBlockGSSNESExecutor + NewtonSNESExecutor test.
 # Two independent diffusion systems: nl0 and nl1.
-# NGSSNESExecutor sweeps both systems as the NPC for NewtonSNESExecutor.
+# ShellBlockGSSNESExecutor sweeps both systems as the NPC for NewtonSNESExecutor,
+# exercising the multi-system Case 3 (VecNest/MatNest) path.
 # Both systems have the analytic solution u=v=x on [0,1].
 # Run with --executor.
 
@@ -64,13 +65,13 @@
 []
 
 [Executors]
-  [ngs_pc]
-    type = NGSSNESExecutor
+  [shell_pc]
+    type = ShellBlockGSSNESExecutor
     inner_nl_sys_names = 'nl0 nl1'
   []
   [newton]
     type = NewtonSNESExecutor
-    nl_preconditioning = ngs_pc
+    nl_preconditioning = shell_pc
   []
 []
 

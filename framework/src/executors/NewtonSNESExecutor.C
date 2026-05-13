@@ -29,23 +29,13 @@ NewtonSNESExecutor::validParams()
   InputParameters params = SNESExecutor::validParams();
   params.addClassDescription(
       "Newton-type outer solver executor (SNESEWTONLS). "
-      "If 'nonlinear_system_name' is supplied, solves only that system via _fe_problem.solve(). "
-      "If omitted with a single NL system, solves system 0. "
-      "If omitted with multiple NL systems, builds a combined outer SNES with VecNest/MatNest; "
-      "nl_preconditioning is required in that path.");
-  params.addParam<NonlinearSystemName>(
-      "nonlinear_system_name",
-      "Name of a specific nonlinear system to solve (Cases 1/2). "
-      "Omit to use the multi-system combined path (Case 3).");
+      "Delegates to _fe_problem.solve() for a single nonlinear system, or builds a combined "
+      "outer SNES with VecNest/MatNest when multiple systems are present (nl_preconditioning "
+      "required in that path).");
   return params;
 }
 
-NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExecutor(params)
-{
-  if (isParamSetByUser("nonlinear_system_name"))
-    _fixed_sys_num =
-        (int)_fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name"));
-}
+NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExecutor(params) {}
 
 NewtonSNESExecutor::~NewtonSNESExecutor()
 {
@@ -62,7 +52,7 @@ NewtonSNESExecutor::setupSNES()
   // setupSNES() is only entered on the Case 3 (multi-system) path.
   const unsigned int n_sys = _fe_problem.numNonlinearSystems();
 
-  // Build VecNest for solution and (if outer solver) residual.
+  // Build VecNest for solution and residual.
   std::vector<Vec> sol_vecs(n_sys);
   std::vector<Vec> rhs_vecs(n_sys);
   for (unsigned int i = 0; i < n_sys; ++i)
@@ -74,30 +64,22 @@ NewtonSNESExecutor::setupSNES()
   }
   LibmeshPetscCallA(this->comm().get(),
                     VecCreateNest(this->comm().get(), n_sys, nullptr, sol_vecs.data(), &_vec_sol));
-  if (!_is_npc)
-    LibmeshPetscCallA(
-        this->comm().get(),
-        VecCreateNest(this->comm().get(), n_sys, nullptr, rhs_vecs.data(), &_vec_func));
+  LibmeshPetscCallA(this->comm().get(),
+                    VecCreateNest(this->comm().get(), n_sys, nullptr, rhs_vecs.data(), &_vec_func));
 
   allocateOffDiagMats();
   buildMatNest();
 
   LibmeshPetscCallA(this->comm().get(), SNESCreate(this->comm().get(), &_snes));
-
-  if (!_is_npc)
+  LibmeshPetscCallA(this->comm().get(),
+                    SNESSetFunction(_snes, _vec_func, outerResidualCallback, this));
+  LibmeshPetscCallA(this->comm().get(),
+                    SNESSetJacobian(_snes, _mat_nest, _mat_nest, outerJacobianCallback, this));
+  registerFieldSplitIS(_snes, n_sys);
+  if (_npc_executor)
   {
-    LibmeshPetscCallA(
-        this->comm().get(),
-        SNESSetFunction(_snes, _vec_func, outerResidualCallback, this));
-    LibmeshPetscCallA(
-        this->comm().get(),
-        SNESSetJacobian(_snes, _mat_nest, _mat_nest, outerJacobianCallback, this));
-    registerFieldSplitIS(_snes, n_sys);
-    if (_npc_executor)
-    {
-      LibmeshPetscCallA(this->comm().get(), SNESSetNPC(_snes, _npc_executor->getSNES()));
-      LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(_snes, PC_LEFT));
-    }
+    LibmeshPetscCallA(this->comm().get(), SNESSetNPC(_snes, _npc_executor->getSNES()));
+    LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(_snes, PC_LEFT));
   }
 
   _snes_setup_done = true;
@@ -109,21 +91,17 @@ NewtonSNESExecutor::run()
   const unsigned int n_sys = _fe_problem.numNonlinearSystems();
 
   // Determine which path to take.
-  if (!_multi_system && _fixed_sys_num < 0)
-  {
-    if (n_sys == 1)
-      _fixed_sys_num = 0;
-    else
-      _multi_system = true;
-  }
+  if (!_multi_system && !isParamSetByUser("nonlinear_system_name") && n_sys > 1)
+    _multi_system = true;
 
   if (_multi_system)
   {
-    // Case 3: combined outer Newton with VecNest/MatNest.
+    // Multi-system: combined outer Newton with VecNest/MatNest.
     if (!_npc_executor)
       mooseError(
           "NewtonSNESExecutor: multiple nonlinear systems require 'nl_preconditioning' to be set.");
 
+    // SNES setup also calls buildMatNest()
     if (!_snes_setup_done)
       setupSNES();
     else
@@ -141,29 +119,29 @@ NewtonSNESExecutor::run()
     return result;
   }
 
-  // Cases 1 and 2: delegate to _fe_problem.solve(sys_num).
-  const unsigned int sys_num = (unsigned int)_fixed_sys_num;
+  // Single-system: delegate to _fe_problem.solve(_nl_sys_num).
 
   if (_npc_executor)
   {
     // Wire the NPC onto the system's freshly-created SNES each solve via the hook.
-    _fe_problem.setNLPreSolveHook([this, sys_num](unsigned int hook_sys_num)
-    {
-      if (hook_sys_num != sys_num)
-        return;
-      SNES outer = _fe_problem.getNonlinearSystem(sys_num).getSNES();
-      LibmeshPetscCallA(this->comm().get(), SNESSetNPC(outer, _npc_executor->getSNES()));
-      LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(outer, PC_LEFT));
-    });
+    _fe_problem.setNLPreSolveHook(
+        [this](unsigned int hook_sys_num)
+        {
+          if (hook_sys_num != _nl_sys_num)
+            return;
+          SNES outer = _fe_problem.getNonlinearSystem(_nl_sys_num).getSNES();
+          LibmeshPetscCallA(this->comm().get(), SNESSetNPC(outer, _npc_executor->getSNES()));
+          LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(outer, PC_LEFT));
+        });
   }
 
-  _fe_problem.solve(sys_num);
+  _fe_problem.solve(_nl_sys_num);
 
   if (_npc_executor)
     _fe_problem.setNLPreSolveHook({});
 
   auto & result = newResult();
-  if (_fe_problem.solverSystemConverged(sys_num))
+  if (_fe_problem.solverSystemConverged(_nl_sys_num))
     result.pass("solver converged");
   else
     result.fail("solver diverged");
@@ -286,13 +264,12 @@ NewtonSNESExecutor::outerResidualCallback(SNES /*snes*/, Vec /*x*/, Vec /*f*/, v
   auto * ex = static_cast<NewtonSNESExecutor *>(ctx);
   const unsigned int n_sys = ex->_fe_problem.numNonlinearSystems();
 
-  // x is a VecNest whose sub-Vecs are the per-system solution Vecs (updated in-place by SNES).
-  // f is a VecNest whose sub-Vecs are the per-system RHS Vecs -- filled by computeResidual below.
+  // x and f are VecNests whose sub-Vecs are the per-system solution and RHS Vecs.
   for (unsigned int i = 0; i < n_sys; ++i)
   {
     auto & sys_i = ex->_fe_problem.getNonlinearSystemBase(i);
     ex->_fe_problem.setCurrentNonlinearSystem(i);
-    sys_i.computeResidual(sys_i.RHS(), sys_i.residualVectorTag());
+    sys_i.computeResidualTag(sys_i.RHS(), sys_i.residualVectorTag());
   }
   PetscFunctionReturn(PETSC_SUCCESS);
 }
