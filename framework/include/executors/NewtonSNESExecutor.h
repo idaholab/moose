@@ -26,11 +26,11 @@ class PetscMatrix;
  * Executor implementing a Newton-type outer solve (SNESEWTONLS) for one or more libMesh
  * nonlinear systems.
  *
- * Three code paths are selected at run() time:
- *   Case 1: nonlinear_system_name is supplied -- solve only that system via _fe_problem.solve().
- *   Case 2: no name, single NL system on problem -- equivalent to Case 1 with system 0.
- *   Case 3: no name, multiple NL systems -- create a combined outer SNES with VecNest/MatNest
- *           over all systems.  nl_preconditioning is required in this path.
+ * Two code paths are selected at run() time:
+ *   Single-system: delegates to _fe_problem.solve(_nl_sys_num).
+ *   Multi-system:  no nonlinear_system_name supplied and multiple NL systems exist --
+ *                  builds a combined outer SNES with VecNest/MatNest over all systems.
+ *                  nl_preconditioning is required in this path.
  */
 class NewtonSNESExecutor : public SNESExecutor
 {
@@ -45,9 +45,6 @@ protected:
   virtual void setupSNES() override;
 
 private:
-  /// System number to solve for Cases 1/2.  -1 means not yet determined.
-  int _fixed_sys_num = -1;
-
   /// True when Case 3 (multi-system combined solve) is active.
   bool _multi_system = false;
 

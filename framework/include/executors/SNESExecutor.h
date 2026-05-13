@@ -40,10 +40,6 @@ public:
   /// Return the owned SNES for NPC wiring by a parent executor.
   SNES getSNES();
 
-  /// Mark this executor as a nonlinear preconditioner for another executor.
-  /// Called by the parent executor before getSNES().  Suppresses _vec_func allocation.
-  void setIsNPC(bool v) { _is_npc = v; }
-
 protected:
   FEProblemBase & _fe_problem;
 
@@ -51,13 +47,12 @@ protected:
   /// the first call to run() (the system SNES is used directly in that path).
   SNES _snes = nullptr;
 
-  /// Combined residual Vec.  VecNest of per-system RHS Vecs in the multi-system path,
-  /// the system's own RHS Vec in the monolithic path.
-  /// Allocated only when _is_npc == false (outer solver role).
+  /// Combined residual Vec.  VecNest of per-system RHS Vecs in the multi-system path.
   Vec _vec_func = nullptr;
 
-  /// True when this executor's SNES is attached as NPC to another executor's SNES.
-  bool _is_npc = false;
+  /// Index of the nonlinear system this executor targets.  Set from nonlinear_system_name
+  /// if provided, otherwise defaults to system 0.
+  unsigned int _nl_sys_num = 0;
 
   /// Optional nonlinear preconditioner executor.  Non-null when nl_preconditioning is set.
   SNESExecutor * _npc_executor = nullptr;

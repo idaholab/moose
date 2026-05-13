@@ -17,6 +17,9 @@ SNESExecutor::validParams()
 {
   InputParameters params = Executor::validParams();
   params += Moose::PetscSupport::flagAndPairOptions();
+  params.addParam<NonlinearSystemName>(
+      "nonlinear_system_name",
+      "Name of the nonlinear system this executor targets. Defaults to the first system.");
   params.addParam<ExecutorName>(
       "nl_preconditioning",
       "Name of a SNESExecutor to use as the nonlinear preconditioner for this solver.");
@@ -26,6 +29,9 @@ SNESExecutor::validParams()
 SNESExecutor::SNESExecutor(const InputParameters & params)
   : Executor(params), _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+  if (isParamSetByUser("nonlinear_system_name"))
+    _nl_sys_num = _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name"));
+
   if (isParamSetByUser("nl_preconditioning"))
   {
     auto & npc = getExecutorByName(getParam<ExecutorName>("nl_preconditioning"));
@@ -34,7 +40,6 @@ SNESExecutor::SNESExecutor(const InputParameters & params)
       mooseError("nl_preconditioning must refer to a SNESExecutor-derived object, '",
                  getParam<ExecutorName>("nl_preconditioning"),
                  "' is not one.");
-    _npc_executor->setIsNPC(true);
   }
 }
 
