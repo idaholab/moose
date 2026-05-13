@@ -12,6 +12,7 @@
       jsondiff = 'pss_reduced.json'
       detail = 'controllable and '
       capabilities = 'libtorch'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime
     []
     [not_controllable]
       type = 'JSONDiff'
@@ -21,6 +22,7 @@
       jsondiff = 'pss_reduced.json'
       detail = 'not controllable.'
       capabilities = 'libtorch'
+      min_slots = 2 # Reserve extra CI memory for libtorch runtime
     []
   []
   [pss1]
