@@ -276,6 +276,10 @@ FEProblemBase::validParams()
                         "barrier notifications when executing "
                         "or transferring to/from Multiapps "
                         "(default: false)");
+  params.addParam<bool>("execute_siblings_transfer_after_source_multiapp_execution",
+                        false,
+                        "Whether to execute the siblings transfer staggered with the multiapp "
+                        "execution, after the 'from_multiapp' of the transfer executes");
 
   MooseEnum verbosity("false true extra", "false");
   params.addParam<MooseEnum>("verbose_setup",
@@ -464,6 +468,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
     _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _execute_siblings_transfer_after_source_multiapp_execution(
+        getParam<bool>("execute_siblings_transfer_after_source_multiapp_execution")),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -6026,7 +6032,10 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   // NOTE: these is usually no need to execute a transfer unless the multiapp providing its
   // data also executed. But we need to obey what the user requested for the execution schedule,
   // hence the two executions
-  execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
+  if (_execute_siblings_transfer_after_source_multiapp_execution)
+    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, "", true);
+  else
+    execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP);
 
   // Order the multiapps
   DependencyResolver<MooseSharedPointer<MultiApp>> resolver;
@@ -6042,19 +6051,17 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
   }
 
   std::vector<std::vector<MooseSharedPointer<MultiApp>>> ordered_multi_apps;
-  if (multi_apps.size())
+  if (_execute_siblings_transfer_after_source_multiapp_execution && multi_apps.size())
     try
     {
       ordered_multi_apps = resolver.getSortedValuesSets();
     }
     catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
     {
-      mooseWarning("Cyclic dependencies detected in multiapps and siblings transfers"
-                   "\nPlease execute one of the transfers between multiapps on a different "
-                   "'execute_on' to break the cycle.");
-      ordered_multi_apps.resize(multi_apps.size());
-      for (const auto i : index_range(multi_apps))
-        ordered_multi_apps[i] = {multi_apps[i]};
+      mooseInfo("Cyclic dependencies detected in multiapps and siblings transfers"
+                "\nPlease execute one of the transfers between multiapps on a different "
+                "'execute_on' to break the cycle.");
+      ordered_multi_apps.resize(0);
     }
 
   // Execute MultiApps
@@ -6068,15 +6075,23 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     bool success = true;
 
-    for (const auto & multi_app : multi_app_group)
+    for (const auto & [group, multi_app_group] : ordered_multi_apps)
     {
-      success = multi_app->solveStep(_dt, _time, auto_advance);
-      // no need to finish executing the subapps if one fails
-      if (!success)
-        break;
+      if (_verbose_multiapps && ordered_multi_apps.size() > 1)
+        _console << COLOR_CYAN << "\nExecuting MultiApps from group " << group << COLOR_DEFAULT
+                 << std::endl;
+
+      for (const auto & multi_app : multi_app_group)
+      {
+        success = multi_app->solveStep(_dt, _time, auto_advance);
+        // no need to finish executing the subapps if one fails
+        if (!success)
+          break;
+      }
 
       // Execute Transfers _between_ Multiapps after each app executes
-      execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
+      for (const auto & multi_app : multi_app_group)
+        execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
@@ -6091,7 +6106,7 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
                << COLOR_DEFAULT << std::endl;
   }
 
-  // Execute Transfers _from_ MultiApps
+  // Execute Transfers _from_ MultiApps (to the parent app)
   execMultiAppTransfers(exec_on, MultiAppTransfer::FROM_MULTIAPP);
 
   // If we made it here then everything passed

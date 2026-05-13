@@ -3278,6 +3278,9 @@ protected:
   /// Transfers executed just before MultiApps to transfer data between them
   ExecuteMooseObjectWarehouse<Transfer> _between_multi_app_transfers;
 
+  /// Whether to execute siblings transfers after multiapps execute
+  const bool _execute_siblings_transfer_after_source_multiapp_execution;
+
   /// A map of objects that consume random numbers
   std::map<std::string, std::unique_ptr<RandomData>> _random_data_objects;
 
