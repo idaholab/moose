@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-
 #pragma once
 
 #ifdef MOOSE_MFEM_ENABLED
@@ -17,17 +16,16 @@
 class MFEMNDtoRTAux : public MFEMAuxKernel
 {
 public:
-  static InputParameters validParams(); 
+  static InputParameters validParams();
 
   MFEMNDtoRTAux(const InputParameters & parameters);
 
   virtual void update() override;
 
 protected:
-
-const AuxVariableName _nd_source_var_name;
-const mfem::ParGridFunction & _nd_source_var;
-const mfem::real_t _sign;
+  const AuxVariableName _nd_source_var_name;
+  const mfem::ParGridFunction & _nd_source_var;
+  const mfem::real_t _sign;
 };
 
 #endif
