@@ -318,5 +318,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type=Exodus
+    max_output_name_length = 32 # For old gold file
+  []
 []
