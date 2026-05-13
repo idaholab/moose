@@ -385,8 +385,8 @@ GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
 std::vector<Real>
 GaussianProcess::getGradient(torch::Tensor & inputs) const
 {
-  torch::Tensor dKdhp = torch::empty(
-      {_num_outputs * _batch_size, _num_outputs * _batch_size}, doubleOptionsLike(inputs));
+  torch::Tensor dKdhp = torch::empty({_num_outputs * _batch_size, _num_outputs * _batch_size},
+                                     doubleOptionsLike(inputs));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
