@@ -63,4 +63,18 @@
     recover = false
     restep = false
   []
+  [MFEMNDtoRTAux]
+    type = XMLDiff
+    input = 2dmagnetostatic.i
+    xmldiff = 'OutputData/2Dmagnetostatic/Run0/Run0.pvd
+                OutputData/2Dmagnetostatic/Run0/Cycle000001/proc000000.vtu'
+    design = 'MFEMNDtoRTAux.md'
+    issues = '#32922'
+    requirement = 'The system shall have the ability to copy the DoF of a Nedelec gridfunctions onto an MFEM aux variable defined on a RT FEspace'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
 []

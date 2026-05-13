@@ -25,6 +25,7 @@ MFEMNDtoRTAux::validParams()
   params.addRequiredParam<VariableName>("nd_source",
                                         "Name of H(curl) conforming ND variable to copy.");
   params.addParam<mfem::real_t>("sign", 1.0, "Optional sign multiplier.");
+
   return params;
 }
 
@@ -74,7 +75,7 @@ MFEMNDtoRTAux::MFEMNDtoRTAux(const InputParameters & parameters)
 }
 
 void
-MFEMNDtoRTAux::update()
+MFEMNDtoRTAux::execute()
 {
   _result_var = _nd_source_var;
 

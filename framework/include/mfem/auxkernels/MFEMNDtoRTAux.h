@@ -19,8 +19,8 @@ public:
   static InputParameters validParams();
 
   MFEMNDtoRTAux(const InputParameters & parameters);
-
-  virtual void update() override;
+  ~MFEMNDtoRTAux() override = default;
+  void execute() override;
 
 protected:
   const AuxVariableName _nd_source_var_name;
