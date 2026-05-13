@@ -6068,22 +6068,18 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
 
     bool success = true;
 
-    for (const auto & multi_app_group : ordered_multi_apps)
+    for (const auto & multi_app : multi_app_group)
     {
-      for (const auto & multi_app : multi_app_group)
-      {
-        success = multi_app->solveStep(_dt, _time, auto_advance);
-        // no need to finish executing the subapps if one fails
-        if (!success)
-          break;
+      success = multi_app->solveStep(_dt, _time, auto_advance);
+      // no need to finish executing the subapps if one fails
+      if (!success)
+        break;
 
-        // Execute Transfers _between_ Multiapps after each app executes
-        execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
-      }
+      // Execute Transfers _between_ Multiapps after each app executes
+      execMultiAppTransfers(exec_on, MultiAppTransfer::BETWEEN_MULTIAPP, multi_app->name());
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
-
     _communicator.min(success);
 
     if (!success)
