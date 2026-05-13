@@ -1,6 +1,6 @@
 [Mesh]
     type = MFEMMesh
-    file = ../mesh/wire_crossection.e
+    file = ../mesh/2D_wire_crossection.e
     dim = 2
 []
 
@@ -123,7 +123,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/2Dmagnetostatic
+    file_base = OutputData/2DMagnetostatic
     vtk_format = ASCII
   []
 []
