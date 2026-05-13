@@ -35,14 +35,9 @@ MFEMDataCollection::registerFields()
 {
   // Save real fields
   mfem::DataCollection & dc(getDataCollection());
-  // For eigenproblems, the bare trial variable holds only initial-guess / essential-BC values
-  // rather than a mode solution, so skip it; modes are stored under suffixed names.
-  const auto & skip_names = _problem_data.eigenmode_parent_var_names;
 
   for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {
-    if (std::find(skip_names.begin(), skip_names.end(), gf_name) != skip_names.end())
-      continue;
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
       dc.RegisterField(gf_name, gf_ptr.get());
     else

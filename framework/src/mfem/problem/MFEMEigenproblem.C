@@ -34,6 +34,8 @@ MFEMEigenproblem::validParams()
 MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params)
 {
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
+  if (num_type == NumericType::COMPLEX)
+    mooseError("Complex numbers are not currently supported for eigenproblems.");
 }
 
 void
@@ -79,43 +81,8 @@ MFEMEigenproblem::addVariable(const std::string & var_type,
 
   addGridFunction(var_type, var_name, parameters);
 
-  /// Add raw variable name to list so it doesn't get added to output
-  getProblemData().eigenmode_parent_var_names.push_back(var_name);
-
   for (int i = 0; i < num_modes; ++i)
-    addEigenGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
-}
-
-void
-MFEMEigenproblem::addEigenGridFunction(const std::string & var_type,
-                                       const std::string & var_name,
-                                       InputParameters & parameters)
-{
-
-  if (var_type == "MFEMVariable")
-    // Add MFEM variable directly.
-    addObject<MFEMVariable>(var_type, var_name, parameters);
-  else if (var_type == "MFEMComplexVariable")
-    mooseError("Complex variables are not currently supported for eigenproblems.");
-  else
-  {
-    // Add MOOSE variable.
-    FEProblemBase::addVariable(var_type, var_name, parameters);
-
-    // Add MFEM variable indirectly ("gridfunction").
-    InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
-    addObject<MFEMVariable>("MFEMVariable", var_name, mfem_variable_params);
-  }
-
-  // Register gridfunction.
-  MFEMVariable & mfem_variable = getMFEMObject<MFEMVariable>("MooseVariableBase", var_name);
-  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
-  if (mfem_variable.getFESpace().isScalar())
-    getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
-  else
-    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
+    addGridFunction(var_type, var_name + sep + std::to_string(i), parameters);
 }
 
 #endif

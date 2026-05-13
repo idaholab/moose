@@ -46,6 +46,10 @@ EigenproblemESProblemOperator::RecoverEigenproblemSolution(
 
   const auto & trial_var_name = _trial_var_names.at(0);
   const auto & sep = _problem_data.mode_separator;
+
+  // Distribute the zeroth mode onto the base variable
+  gridfunctions.Get(trial_var_name)->Distribute(eigensolver->getEigenvector(0));
+
   for (int i = 0; i < eigenvalues.Size(); ++i)
     gridfunctions.Get(trial_var_name + sep + std::to_string(i))
         ->Distribute(eigensolver->getEigenvector(i));
