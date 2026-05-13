@@ -35,11 +35,6 @@ public:
   virtual void addVariable(const std::string & var_type,
                            const std::string & var_name,
                            InputParameters & parameters) override;
-
-  /** Registers a gridfunction to hold an eigenvector solution of an eigenproblem */
-  void addEigenGridFunction(const std::string & var_type,
-                            const std::string & var_name,
-                            InputParameters & parameters);
 };
 
 #endif
