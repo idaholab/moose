@@ -6024,12 +6024,14 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
     {
       ordered_multi_apps = resolver.getSortedValuesSets();
     }
-    catch (CyclicDependencyException<std::string> & e)
+    catch (CyclicDependencyException<MooseSharedPointer<MultiApp>> & e)
     {
-      mooseError("Cyclic dependencies detected in multiapps and siblings transfers: ",
-                 MooseUtils::join(e.getCyclicDependencies(), " <- "),
-                 "\nPlease execute one of the transfers between multiapps on a different "
-                 "'execute_on' to break the cycle.");
+      mooseWarning("Cyclic dependencies detected in multiapps and siblings transfers"
+                   "\nPlease execute one of the transfers between multiapps on a different "
+                   "'execute_on' to break the cycle.");
+      ordered_multi_apps.resize(multi_apps.size());
+      for (const auto i : index_range(multi_apps))
+        ordered_multi_apps[i] = {multi_apps[i]};
     }
 
   // Check that concurrent multiapps will even be used
