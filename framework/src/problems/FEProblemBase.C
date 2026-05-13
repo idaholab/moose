@@ -6075,10 +6075,10 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
         }
 
         // Avoid race conditions on output
-        if (_num_concurrent_multiapps > 1)
-          for (const auto & multi_app : multi_app_group)
-            for (const auto app_i : make_range(multi_app->numLocalApps()))
-              multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
+        // if (_num_concurrent_multiapps > 1)
+        //   for (const auto & multi_app : multi_app_group)
+        //     for (const auto app_i : make_range(multi_app->numLocalApps()))
+        //       multi_app->appProblemBase(multi_app->firstLocalApp() + app_i).allowOutput(false);
       }
 
 #pragma omp parallel for schedule(dynamic) num_threads(_num_concurrent_multiapps)
@@ -6101,11 +6101,11 @@ FEProblemBase::execMultiApps(ExecFlagType exec_on, bool auto_advance)
       }
 
       // Output outside of threaded regions
-      if (_num_concurrent_multiapps > 1)
-        for (const auto & multi_app : multi_app_group)
-          for (const auto app_i : make_range(multi_app->numLocalApps()))
-            multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
-                .outputStep(EXEC_TIMESTEP_END);
+      // if (_num_concurrent_multiapps > 1)
+      //   for (const auto & multi_app : multi_app_group)
+      //     for (const auto app_i : make_range(multi_app->numLocalApps()))
+      //       multi_app->appProblemBase(multi_app->firstLocalApp() + app_i)
+      //           .outputStep(EXEC_TIMESTEP_END);
 
       // Execute Transfers _between_ Multiapps after each app executes
       for (const auto & multi_app : multi_app_group)
