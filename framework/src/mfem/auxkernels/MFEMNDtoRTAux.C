@@ -38,29 +38,21 @@ MFEMNDtoRTAux::MFEMNDtoRTAux(const InputParameters & parameters)
   const mfem::ParFiniteElementSpace * source_fes = _nd_source_var.ParFESpace();
   const mfem::ParFiniteElementSpace * target_fes = _result_var.ParFESpace();
 
-    if (!source_fes)
-        paramError("nd_source", "The source ND variable has no valid ParFiniteElementSpace.");
+  if (!source_fes)
+    paramError("nd_source", "The source ND variable has no valid ParFiniteElementSpace.");
 
-    if (!target_fes)
-        mooseError("The target RT variable has no valid ParFiniteElementSpace.");
-
+  if (!target_fes)
+    mooseError("The target RT variable has no valid ParFiniteElementSpace.");
 
   const mfem::FiniteElementCollection * source_fec = source_fes->FEColl();
   const mfem::FiniteElementCollection * target_fec = target_fes->FEColl();
 
- if (!dynamic_cast<const mfem::ND_FECollection *>(source_fec))
+  if (!dynamic_cast<const mfem::ND_FECollection *>(source_fec))
     paramError("nd_source",
                "The source variable must use an MFEM H(curl) Nedelec space. "
                "Detected FE collection: ",
                source_fec->Name(),
                ".");
-
-  if (!dynamic_cast<const mfem::RT_FECollection *>(target_fec))
-    mooseError("The target variable must use an MFEM H(div) Raviart-Thomas space. "
-               "Detected FE collection: ",
-               target_fec->Name(),
-               ".");
-
   if (source_fes->GetMesh()->Dimension() != 2 || target_fes->GetMesh()->Dimension() != 2)
     mooseError("MFEMNDtoRTAux is only valid in 2D.");
 
