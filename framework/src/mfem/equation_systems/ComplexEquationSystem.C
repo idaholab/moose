@@ -291,7 +291,7 @@ ComplexEquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector 
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    trueX.GetBlock(i).SyncMemory(trueX);
     _complex_gfuncs->Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
