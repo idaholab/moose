@@ -731,15 +731,58 @@ private:
    * includes updating the surface references of cell regions, universe/lattice references of cell
    * fills, cell references of universes, and universe references of lattices
    *
-   * @param surf_list CSGSurfaceList from a separate CSGBase object
-   * @param cell_list CSGCellList from a separate CSGBase object
-   * @param universe_list CSGUniverseList from a separate CSGBase object
-   * @param lattice_list CSGLatticeList from a separate CSGBase object
+   * @param incoming_base CSGBase object that contains references that should be updated
    */
-  void updateIncomingCSGReferences(CSGSurfaceList & surf_list,
-                                   CSGCellList & cell_list,
-                                   CSGUniverseList & universe_list,
-                                   CSGLatticeList & lattice_list);
+  void updateIncomingCSGReferences(CSGBase & incoming_base);
+
+  /**
+   * @brief update surface references of incoming CSGBase to point to those of existing CSGBase
+   * object based on CSGSurface name. This involves updating the surface references of cell regions.
+   *
+   * @param identical_surface_refs map of surface names to surface references that will be used for
+   *                               replacement
+   * @param base CSGBase object that contains references that should be updated
+   */
+  void replaceSurfaceRefsByName(
+      std::map<std::string, std::reference_wrapper<const CSGSurface>> & identical_surface_refs,
+      CSGBase & base);
+
+  /**
+   * @brief update cell references of incoming CSGbase to point to those of existing CSGBase object
+   * based on CSGCell name. This involves updating the cell references of universes.
+   *
+   * @param identical_cell_refs map of cell names to cell references that will be used for
+   *                            replacement
+   * @param base CSGBase object that contains references that should be updated
+   */
+  void replaceCellRefsByName(
+      std::map<std::string, std::reference_wrapper<const CSGCell>> & identical_cell_refs,
+      CSGBase & base);
+
+  /**
+   * @brief update universe references of incoming CSGbase to point to those of existing CSGBase
+   * object based on CSGUniverse name. This involves updating the universe references of cells and
+   * universe references of lattices.
+   *
+   * @param identical_universe_refs map of universe names to universe references that will be used
+   *                                for replacement
+   * @param base CSGBase object that contains references that should be updated
+   */
+  void replaceUniverseRefsByName(
+      std::map<std::string, std::reference_wrapper<const CSGUniverse>> & identical_universe_refs,
+      CSGBase & base);
+
+  /**
+   * @brief update lattice references of incoming CSGbase to point to those of existing CSGBase
+   * object based on CSGLattice name. This involves updating the lattice references of cells.
+   *
+   * @param identical_lattice_refs map of lattice names to lattice references that will be used for
+   *                               replacement
+   * @param base CSGBase object that contains references that should be updated
+   */
+  void replaceLatticeRefsByName(
+      std::map<std::string, std::reference_wrapper<const CSGLattice>> & identical_lattice_refs,
+      CSGBase & base);
 
   /**
    * @brief join a separate CSGSurfaceList object to this one
