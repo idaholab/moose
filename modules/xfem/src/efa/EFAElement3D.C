@@ -842,9 +842,15 @@ EFAElement3D::isFinalCut() const
 }
 
 void
-EFAElement3D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
-                              std::map<unsigned int, EFANode *> & EmbeddedNodes)
+EFAElement3D::prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                       std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                       std::vector<EFANode *> & invalid_emb_out)
 {
+  // First-pass preparation: combine crack-tip faces and identify invalid embedded
+  // nodes.  The actual removal/free of the invalid nodes is deferred to a global
+  // sweep in the driver; see ElementFragmentAlgorithm::updatePhysicalLinksAndFragments
+  // for the contract.
+
   // combine the crack-tip faces in a fragment to a single intersected face
   std::set<EFAElement *>::iterator sit;
   sit = CrackTipElements.find(this);
@@ -856,10 +862,33 @@ EFAElement3D::updateFragments(const std::set<EFAElement *> & CrackTipElements,
       EFAError("crack tip elem ", _id, " must have 1 fragment");
   }
 
-  // remove the inappropriate embedded nodes on interior faces
+  // identify (but do NOT remove) inappropriate embedded nodes on interior faces
   // (MUST DO THIS AFTER combine_tip_faces())
   if (_fragments.size() == 1)
-    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes);
+    _fragments[0]->removeInvalidEmbeddedNodes(EmbeddedNodes, invalid_emb_out);
+}
+
+void
+EFAElement3D::purgeEmbeddedNodeReferences(EFANode * emb_node)
+{
+  // Strip all references to emb_node from this element's fragments and element
+  // faces.  Equivalent to removeEmbeddedNode(emb_node, false) but separated as
+  // its own entry point so the driver can iterate every element to clean
+  // long-range propagation (>1 hop from the element where the node was
+  // identified as invalid).  No neighbour propagation here -- the driver visits
+  // every element.
+  for (unsigned int i = 0; i < _fragments.size(); ++i)
+    _fragments[i]->removeEmbeddedNode(emb_node);
+  for (unsigned int i = 0; i < _faces.size(); ++i)
+    _faces[i]->removeEmbeddedNode(emb_node);
+}
+
+void
+EFAElement3D::updateFragments(const std::set<EFAElement *> & /*CrackTipElements*/,
+                              std::map<unsigned int, EFANode *> & /*EmbeddedNodes*/)
+{
+  // Cleanup half (combine_tip_faces + removeInvalidEmbeddedNodes) has already run
+  // for every element in the prior prepareForFragmentUpdate() pass.
 
   // for an element with no fragment, create one fragment identical to the element
   if (_fragments.size() == 0)
@@ -1428,8 +1457,18 @@ EFAElement3D::removeEmbeddedNode(EFANode * emb_node, bool remove_for_neighbor)
   if (remove_for_neighbor)
   {
     for (unsigned int i = 0; i < numFaces(); ++i)
+    {
       for (unsigned int j = 0; j < numFaceNeighbors(i); ++j)
         getFaceNeighbor(i, j)->removeEmbeddedNode(emb_node, false);
+
+      // Also clean up edge-only neighbors -- elements that share only an edge of face i,
+      // not the full face. Without this, freeing the embedded node here leaves dangling
+      // pointers in those neighbors' face edges and causes use-after-free downstream
+      // (e.g. in EFAFragment3D::removeInvalidEmbeddedNodes or EFAElement3D::getMasterInfo).
+      for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+        for (unsigned int k = 0; k < numEdgeNeighbors(i, j); ++k)
+          getEdgeNeighbor(i, j, k)->removeEmbeddedNode(emb_node, false);
+    }
   }
 }
 

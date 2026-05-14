@@ -821,6 +821,19 @@ CrackMeshCut3DUserObject::growFront()
               "crack-front-definition using the cutter mesh only supports one active crack front "
               "segment for now");
 
+  // Re-seed _tracked_crack_front_points from the current _active_boundary[0].
+  // The set of nodes in _active_boundary[0] can change between steps when an
+  // active tip grows outside the FEM body and becomes inactive, or when an
+  // inactive endpoint is projected back inside and becomes active. Without
+  // re-seeding, _tracked retains stale endpoint ids and refineFront()'s
+  // consistency check trips. The traversal direction (reversed relative to
+  // _active_boundary[0]) is set deterministically by sortBoundaryNodes(), so
+  // the ordering exposed through CrackFrontDefinition stays consistent across
+  // steps for tips that did not change role. The updateTrackedCrackFrontPoint
+  // calls below then migrate the orig ids to the advanced new ids.
+  if (_cfd)
+    _tracked_crack_front_points.assign(_active_boundary[0].rbegin(), _active_boundary[0].rend());
+
   const std::vector<int> front_point_index = _cfd ? getFrontPointsIndex() : std::vector<int>();
 
   // Track already-grown boundary nodes to avoid duplicates when a boundary node

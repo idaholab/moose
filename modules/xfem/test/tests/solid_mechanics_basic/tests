@@ -223,7 +223,27 @@
       exodiff = 'tet_concave_down_offset_0_spin_5_XFEMCutMeshOutput.e'
       map = true # only matching cutter mesh, not xfem volume mesh
       capabilities = 'unique_id'
-      detail = ' keeping the crack front on a concave-down curved FEM mesh surface.'
+      detail = ' keeping the crack front on a concave-down curved FEM mesh surface, or'
+    []
+    [tet_concave_up_hoopStress]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_hoopStress.i'
+      cli_args = 'fname=tet_concave_up spin=12'
+      exodiff = 'face_crack_hoopStress_off_0_spin_12_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' keeping the tracked crack front consistent on a concave-up curved FEM mesh surface when boundary nodes flip between active and inactive states under the maximum hoop stress growth direction, or'
+    []
+    [tet_block_tilt_14]
+      type = Exodiff
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_radialFunc.i'
+      cli_args = 'fname=tet_block tilt=14 Outputs/file_base=tet_block_tilt_14 Executioner/solve_type=Linear'
+      exodiff = 'tet_block_tilt_14_XFEMCutMeshOutput.e'
+      map = true # only matching cutter mesh, not xfem volume mesh
+      capabilities = 'unique_id'
+      detail = ' growing a tilted crack through a tetrahedral FEM mesh without aborting on the EFA invariant '
+               '"one embedded node must be owned by 2 faces", which fires when two geometric cut surfaces '
+               'place their intersections on the same fragment face in a single growth step.'
     []
   []
   [penny_crack]

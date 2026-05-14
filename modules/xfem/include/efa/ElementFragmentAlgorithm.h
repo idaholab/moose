@@ -37,6 +37,12 @@ private:
   std::set<EFAElement *> _crack_tip_elements;
   std::vector<EFANode *> _new_nodes;
   std::vector<EFANode *> _deleted_nodes;
+  /// Embedded nodes that were globally purged from _embedded_nodes during
+  /// updatePhysicalLinksAndFragments (class C / phantom-cut path) but cannot
+  /// be freed mid-run because inherited cut-plane faces from prior steps may
+  /// still reference them as edge endpoints. They remain live until this
+  /// algorithm object is destroyed.
+  std::vector<EFANode *> _purged_embedded_nodes;
   std::vector<EFAElement *> _child_elements;
   std::vector<EFAElement *> _parent_elements;
   std::map<EFANode *, std::set<EFAElement *>> _inverse_connectivity;
