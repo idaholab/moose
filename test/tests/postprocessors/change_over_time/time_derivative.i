@@ -60,5 +60,7 @@ function_values = '2 5 6 3'
 
 [Outputs]
   file_base = 'time_derivative'
-  csv = true
+  [csv]
+    type = CSV
+  []
 []

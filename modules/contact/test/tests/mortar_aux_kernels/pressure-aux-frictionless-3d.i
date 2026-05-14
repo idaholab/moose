@@ -345,9 +345,10 @@ offset = 0.00
 []
 
 [Outputs]
-  exodus = false
-  csv = true
-  execute_on = 'FINAL'
+  [out]
+    type = CSV
+    execute_on = 'FINAL'
+  []
 []
 
 [VectorPostprocessors]

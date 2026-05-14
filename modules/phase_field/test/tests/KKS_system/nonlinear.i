@@ -251,6 +251,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [out]
+    type = CSV
+    execute_on = FINAL
+  []
 []

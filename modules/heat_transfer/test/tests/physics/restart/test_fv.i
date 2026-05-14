@@ -59,7 +59,10 @@
 
 [Outputs]
   # Used to set up a restart from checkpoint
-  checkpoint = true
+  [out]
+    type = Checkpoint
+    execute_on = 'TIMESTEP_END'
+  []
   # Used to set up a restart from exodus file
   [exodus]
     type = Exodus

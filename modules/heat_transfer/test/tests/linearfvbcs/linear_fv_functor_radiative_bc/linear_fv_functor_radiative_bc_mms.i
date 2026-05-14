@@ -117,6 +117,8 @@ B_mms = '${fparse (T_R_mms - T_L) / (exp(1.0) - 1.0)}'
 []
 
 [Outputs]
-  csv = true
-  execute_on = final
+  [out]
+    type = CSV
+    execute_on = final
+  []
 []

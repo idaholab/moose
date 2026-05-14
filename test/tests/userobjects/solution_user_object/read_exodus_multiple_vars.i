@@ -67,6 +67,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = FINAL
+  [out]
+    type = Exodus
+    execute_on = FINAL
+  []
 []

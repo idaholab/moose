@@ -153,6 +153,7 @@ offset = 1e-2
     type = Checkpoint
     num_files = 2
     time_step_interval = 1
+    execute_on = 'TIMESTEP_END'
   []
 []
 

@@ -102,8 +102,10 @@
 []
 
 [Outputs]
-  exodus = true # Outputs to the Exodus file format
-  execute_on = 'final'
+  [out]
+    type = Exodus
+    execute_on = 'final'
+  []
 []
 
 [Problem]

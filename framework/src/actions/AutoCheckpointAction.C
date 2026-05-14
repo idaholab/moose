@@ -20,12 +20,7 @@ AutoCheckpointAction::validParams()
   params.addClassDescription(
       "Action to create shortcut syntax-specified checkpoints and automatic checkpoints.");
 
-  params.addParam<bool>("checkpoint", false, "Create checkpoint files using the default options.");
-  params.addParam<bool>(
-      "wall_time_checkpoint",
-      true,
-      "Enables the output of checkpoints based on elapsed wall time. Defaults to true unless "
-      "'checkpoint' is set to false in the input, in which case the default is changed to false.");
+  params.addParam<bool>("checkpoint", "Create checkpoint files using the default options.");
 
   return params;
 }
@@ -39,36 +34,34 @@ AutoCheckpointAction::act()
   const auto checkpoints = _app.getOutputWarehouse().getOutputs<Checkpoint>();
   const auto num_checkpoints = checkpoints.size();
 
-  const bool shortcut_syntax = getParam<bool>("checkpoint");
+  const bool user_specified_checkpoint_behavior = isParamValid("checkpoint");
+  const bool user_requested_checkpoint =
+      user_specified_checkpoint_behavior && getParam<bool>("checkpoint");
+  const bool user_requested_no_checkpoint =
+      user_specified_checkpoint_behavior && (getParam<bool>("checkpoint") == false);
 
   if (num_checkpoints > 1)
     checkpoints[0]->mooseError("Multiple Checkpoint objects are not allowed and there is more than "
                                "one Checkpoint defined in the 'Outputs' block.");
-  if (num_checkpoints == 1 && shortcut_syntax)
+  if (num_checkpoints == 1 && user_requested_checkpoint)
     paramError("checkpoint",
                "Shortcut checkpoint syntax cannot be used with another Checkpoint object in the "
                "'Outputs' block");
 
-  if (num_checkpoints == 0)
+  if (num_checkpoints == 0 &&
+      (user_requested_checkpoint || (_app.isUltimateMaster() && !user_requested_no_checkpoint)))
   {
     // If there isn't an existing checkpoint, init a new one
     auto cp_params = _factory.getValidParams("Checkpoint");
 
     cp_params.set<bool>("_built_by_moose") = true;
-    // Don't see a wall time checkpoint unless explictly requested if 'checkpoint=false'
-    cp_params.set<bool>("wall_time_checkpoint") =
-        isParamSetByUser("wall_time_checkpoint")
-            ? getParam<bool>("wall_time_checkpoint")
-            : (isParamSetByUser("checkpoint") ? getParam<bool>("checkpoint") : true);
+    if (!user_requested_checkpoint)
+      // This is our auto-created wall-time based checkpoint, so disable the time step interval by
+      // default
+      cp_params.set<unsigned int>("time_step_interval", /*allow_override_by_common_output=*/true) =
+          std::numeric_limits<unsigned int>::max();
 
-    // We need to keep track of what type of checkpoint we are creating. system created means the
-    // default value of 1 for time_step_interval is ignored.
-    if (!shortcut_syntax)
-      cp_params.set<CheckpointType>("checkpoint_type") = CheckpointType::SYSTEM_CREATED;
-
-    // We only want checkpoints in subapps if the user requests them
-    if (shortcut_syntax || _app.isUltimateMaster())
-      _problem->addOutput("Checkpoint", "checkpoint", cp_params);
+    _problem->addOutput("Checkpoint", "checkpoint", cp_params);
   }
 
   // Check for special half transient test harness case
@@ -77,7 +70,6 @@ AutoCheckpointAction::act()
     // For half transient, we want to simulate a user-created checkpoint so
     // time_step_interval works correctly.
     const auto checkpoint = _app.getOutputWarehouse().getOutputs<Checkpoint>()[0];
-    checkpoint->setAutosaveFlag(CheckpointType::USER_CREATED);
     checkpoint->_time_step_interval = 1;
   }
 }

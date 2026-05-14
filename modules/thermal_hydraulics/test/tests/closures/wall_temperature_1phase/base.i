@@ -78,6 +78,8 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = 'INITIAL'
+  [out]
+    type = CSV
+    execute_on = 'INITIAL'
+  []
 []

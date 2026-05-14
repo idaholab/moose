@@ -70,7 +70,7 @@
             2.2 3.1 0'
     function_name = gsl
     g_order = LOW
-    outputs = exodus
+    outputs = 'out'
   [../]
   [./asymmetriccrosstermbarrier_low]
     type = AsymmetricCrossTermBarrierFunctionMaterial
@@ -81,7 +81,7 @@
             -0.8 4.1  0'
     function_name = gal
     g_order = LOW
-    outputs = exodus
+    outputs = 'out'
   [../]
 
   [./asymmetriccrosstermbarrie_simple]
@@ -93,7 +93,7 @@
             1.2 4.1 0'
     function_name = gas
     g_order = SIMPLE
-    outputs = exodus
+    outputs = 'out'
   [../]
 
   [./switch1]
@@ -125,6 +125,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = final
+  [out]
+    type = Exodus
+    execute_on = final
+  []
 []

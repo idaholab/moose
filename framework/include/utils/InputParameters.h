@@ -976,6 +976,15 @@ public:
                        const bool allow_private = false);
 
   /**
+   * Variant of applyParameters that only applies parameters explicitly set by the user in
+   * @p common (i.e. isParamSetByUser() is true). Object-type defaults are therefore never
+   * overridden by common-block defaults, only by values the user actually wrote.
+   */
+  void applyCommonUserSetParameters(const InputParameters & common,
+                                    const std::vector<std::string> & exclude = {},
+                                    const bool allow_private = false);
+
+  /**
    * Method for applying common parameters
    * @param common The set of parameters to apply to the parameters stored in this object
    * @param include A vector of parameters to apply
@@ -1005,13 +1014,11 @@ public:
    *   (1) A local parameter must exist with the same name as common parameter
    *   (2) Common parameter must valid
    *   (3) Local parameter must be invalid OR not have been set from its default
-   *   (except if override_default is set)
    *   (4) Both cannot be private
    */
   void applyParameter(const InputParameters & common,
                       const std::string & common_name,
-                      bool allow_private = false,
-                      bool override_default = false);
+                      bool allow_private = false);
   // END APPLY PARAMETER METHODS
 
   /**

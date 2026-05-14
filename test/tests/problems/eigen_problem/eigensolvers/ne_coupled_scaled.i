@@ -118,6 +118,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = 'timestep_end'
+  [out]
+    type = Exodus
+    execute_on = 'timestep_end'
+  []
 []

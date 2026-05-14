@@ -26,7 +26,7 @@
     type = VariableGradientMaterial
     prop = grad_c
     variable = c
-    outputs = exodus
+    outputs = 'out'
   [../]
 []
 
@@ -41,6 +41,8 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = final
+  [out]
+    type = Exodus
+    execute_on = final
+  []
 []

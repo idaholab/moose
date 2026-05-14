@@ -323,4 +323,8 @@ advected_interp_method = 'upwind'
 [Outputs]
   exodus = true
   execute_on = 'TIMESTEP_BEGIN FINAL'
+  [out]
+    type = Checkpoint
+    execute_on = 'TIMESTEP_END'
+  []
 []

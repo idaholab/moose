@@ -101,4 +101,8 @@ file_base = 'db_churchill'
 [Outputs]
   csv = true
   file_base = ${file_base}
+  [out]
+    type = Checkpoint
+    execute_on = 'TIMESTEP_END'
+  []
 []

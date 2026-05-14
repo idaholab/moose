@@ -16,21 +16,6 @@
 #include <deque>
 #include <filesystem>
 
-/**
- * Enumerated type for determining what type of checkpoint this is.
- * SYSTEM_CREATED: This type of checkpoint is created automatically by the
- *   system for the purpose of writing checkpoints at regularly scheduled
- *   walltime intervals or when sent a signal.
- * USER_CREATED: Checkpoint is requested by the user in the input
- *   file, and can be used by the system to also output at walltime intervals or
- *   when sent a signal.
- */
-enum CheckpointType : unsigned short
-{
-  SYSTEM_CREATED,
-  USER_CREATED
-};
-
 class MaterialPropertyStorage;
 
 /**
@@ -85,9 +70,6 @@ public:
    */
   std::string directory() const;
 
-  /// Sets the autosave flag manually if the object has already been initialized.
-  void setAutosaveFlag(CheckpointType flag) { _checkpoint_type = flag; }
-
   /**
    * Gathers and records information used later for console output
    * @return A stringstream containing the following entries:
@@ -115,9 +97,6 @@ private:
 
   /// Determines if the requested values of execute_on are valid for checkpoints
   void validateExecuteOn() const;
-
-  /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
-  CheckpointType _checkpoint_type;
 
   /// Max no. of output files to store
   unsigned int _num_files;
