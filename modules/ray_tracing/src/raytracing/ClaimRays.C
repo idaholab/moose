@@ -209,7 +209,7 @@ ClaimRays::buildPointNeighbors()
     for (unsigned int v = 0; v < elem->n_vertices(); ++v)
     {
       const auto & node = elem->node_ptr(v);
-      for (const auto & neighbor_id : node_to_elem_map.at(node->id()))
+      for (const auto & neighbor_id : libmesh_map_find(node_to_elem_map, node->id()))
       {
         if (neighbor_id == elem->id())
           continue;
