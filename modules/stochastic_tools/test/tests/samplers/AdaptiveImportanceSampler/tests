@@ -9,8 +9,6 @@
     input = 'ais.i'
     jsondiff = 'ais_out.json'
     valgrind = none
-    capabilities = 'libtorch'
-    min_slots = 2 # Reserve extra CI memory for libtorch runtime
   []
   [ais_errors]
     requirement = 'The system shall throw an error when '
@@ -19,7 +17,6 @@
       input = 'ais_error1.i'
       detail = 'the selected sampler type is not of an adaptive type when performing adaptive decision;'
       expect_err = "The selected sampler is not an adaptive sampler."
-      capabilities = 'libtorch'
     []
   []
 []
