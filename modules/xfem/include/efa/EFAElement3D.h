@@ -71,6 +71,10 @@ public:
 
   virtual unsigned int getNumCuts() const;
   virtual bool isFinalCut() const;
+  virtual void prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                        std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                        std::vector<EFANode *> & invalid_emb_out);
+  virtual void purgeEmbeddedNodeReferences(EFANode * emb_node);
   virtual void updateFragments(const std::set<EFAElement *> & CrackTipElements,
                                std::map<unsigned int, EFANode *> & EmbeddedNodes);
   virtual void fragmentSanityCheck(unsigned int n_old_frag_faces,
