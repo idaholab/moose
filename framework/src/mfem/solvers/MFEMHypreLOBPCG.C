@@ -20,7 +20,6 @@ MFEMHypreLOBPCG::validParams()
   InputParameters params = MFEMEigensolverBase::validParams();
 
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
 
   return params;

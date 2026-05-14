@@ -41,7 +41,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    if (_mfem_problem.num_type == MFEMProblem::NumericType::REAL)
+    if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::REAL)
     {
       if (dynamic_cast<MFEMEigenproblem *>(&_mfem_problem))
       {
@@ -58,7 +58,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
         addProblemOperator(std::move(problem_operator));
       }
     }
-    else if (_mfem_problem.num_type == MFEMProblem::NumericType::COMPLEX)
+    else if (_mfem_problem.getNumericType() == MFEMProblem::NumericType::COMPLEX)
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
       auto problem_operator =

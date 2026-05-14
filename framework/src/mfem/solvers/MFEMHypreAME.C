@@ -19,7 +19,6 @@ MFEMHypreAME::validParams()
 {
   InputParameters params = MFEMEigensolverBase::validParams();
   params.addClassDescription("Base class for defining MFEM eigensolver classes for Moose ");
-  params.addParam<MFEMSolverName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;
 }
