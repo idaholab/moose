@@ -28,7 +28,7 @@ MultiAppMFEMTolibMeshShapeEvaluationTransfer::MultiAppMFEMTolibMeshShapeEvaluati
     InputParameters const & params)
   : MFEMMultiAppTransfer(params), _mfem_interpolator(this->comm().get())
 {
-  checkValidTransferProblemTypes<FEProblemBase, MFEMProblem>();
+  checkValidTransferProblemTypes<Moose::FEBackend::LibMesh, Moose::FEBackend::MFEM>();
 }
 
 MFEMProblem &

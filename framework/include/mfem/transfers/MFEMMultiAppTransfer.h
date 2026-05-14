@@ -12,6 +12,7 @@
 #pragma once
 
 #include "MultiAppTransfer.h"
+#include "FEProblemBase.h"
 
 /**
  * Virtual base class for MultiApp transfers to and/or from MFEMProblems.
@@ -91,7 +92,7 @@ protected:
   mfem::real_t getMFEMOutOfMeshValue() const { return _mfem_out_of_mesh_value; }
 
   /// Templated method to check source and destination problems are of the expected types
-  template <typename TO_PROBLEM, typename FROM_PROBLEM>
+  template <Moose::FEBackend TO_BACKEND, Moose::FEBackend FROM_BACKEND>
   void checkValidTransferProblemTypes();
 
 private:
@@ -111,7 +112,7 @@ private:
   mfem::real_t _mfem_out_of_mesh_value{std::numeric_limits<mfem::real_t>::infinity()};
 };
 
-template <typename TO_PROBLEM, typename FROM_PROBLEM>
+template <Moose::FEBackend TO_BACKEND, Moose::FEBackend FROM_BACKEND>
 inline void
 MFEMMultiAppTransfer::checkValidTransferProblemTypes()
 {
@@ -130,11 +131,11 @@ MFEMMultiAppTransfer::checkValidTransferProblemTypes()
     {
       for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
         if (getFromMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->appProblemBase(i)))
+            getFromMultiApp()->appProblemBase(i).feBackend() != FROM_BACKEND)
           bad_problem();
     }
     else // check source sub-app is of the expected type if it is the transfer source
-      if (!dynamic_cast<FROM_PROBLEM *>(&getFromMultiApp()->problemBase()))
+      if (getFromMultiApp()->problemBase().feBackend() != FROM_BACKEND)
         bad_problem();
   }
   if (hasToMultiApp())
@@ -144,11 +145,11 @@ MFEMMultiAppTransfer::checkValidTransferProblemTypes()
     {
       for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
         if (getToMultiApp()->hasLocalApp(i) &&
-            !dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->appProblemBase(i)))
+            getToMultiApp()->appProblemBase(i).feBackend() != TO_BACKEND)
           bad_problem();
     }
     else // check destination sub-app is of the expected type if it is the transfer destination
-      if (!dynamic_cast<TO_PROBLEM *>(&getToMultiApp()->problemBase()))
+      if (getToMultiApp()->problemBase().feBackend() != TO_BACKEND)
         bad_problem();
   }
 }
