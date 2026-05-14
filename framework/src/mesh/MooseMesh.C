@@ -619,20 +619,28 @@ MooseMesh::prepare(const MeshBase * const mesh_to_clone)
 }
 
 void
+MooseMesh::possiblyRebuildNodeToElemMap()
+{
+  // *Rebuild* the node to element map. I emphasize rebuild because if it has not been built
+  // previously we won't do anything
+  if (!_node_to_elem_map_built)
+  {
+    mooseAssert(_node_to_elem_map.empty(), "If it hasn't been built, it better well be empty");
+    return;
+  }
+
+  _node_to_elem_map.clear();
+  _node_to_elem_map_built = false;
+  internalNodeToElemMap();
+}
+
+void
 MooseMesh::update()
 {
   TIME_SECTION("update", 3, "Updating Mesh", true);
 
   // Rebuild the boundary conditions
   buildNodeListFromSideList();
-
-  // Capture whether the map needs rebuilding, then invalidate the stale data.
-  // We use clear() rather than destroying the container so that any stored references
-  // to _node_to_elem_map (e.g. in NodeFaceConstraint) remain valid through the window
-  // between the clear and the rebuild at the end of this function.
-  const bool rebuild_node_to_elem_map = _node_to_elem_map_built;
-  _node_to_elem_map.clear();
-  _node_to_elem_map_built = false;
 
   buildNodeList();
   buildBndElemList();
@@ -666,10 +674,7 @@ MooseMesh::update()
 
   _finite_volume_info_dirty = true;
 
-  // Rebuild the node to elem map, in case the object(s) who got references to the map
-  // actually do need to use it
-  if (rebuild_node_to_elem_map)
-    nodeToElemMap();
+  possiblyRebuildNodeToElemMap();
 }
 
 void

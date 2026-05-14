@@ -1548,6 +1548,11 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
+  /**
+   * rebuild the node to element map if it's been requsted previously
+   */
+  void possiblyRebuildNodeToElemMap();
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;

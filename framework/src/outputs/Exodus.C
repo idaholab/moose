@@ -214,10 +214,18 @@ Exodus::outputSetup()
     auto & lm_mesh = moose_mesh.getMesh();
     // Exodus is serial output so that we have to gather everything to "zero".
     lm_mesh.gather_to_zero();
-    // This makes the face information out-of-date on process 0 for distributed meshes, e.g.
-    // elements will have neighbors that they didn't previously have
     if ((this->processor_id() == 0) && !lm_mesh.is_replicated())
+    {
+      // In an ideal world we could just call something like moose_mesh.update() below but that
+      // method does global communication, e.g. we'd have to call it from all ranks in the
+      // communicator
+
+      // This makes the face information out-of-date on process 0 for distributed meshes, e.g.
+      // elements will have neighbors that they didn't previously have
       moose_mesh.markFiniteVolumeInfoDirty();
+      // And similarly we have both new nodes and new elements for the node to element map
+      moose_mesh.possiblyRebuildNodeToElemMap();
+    }
   };
   serialize(_problem_ptr->mesh());
 
