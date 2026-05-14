@@ -39,12 +39,12 @@ MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem
 }
 
 void
-MFEMEigenproblem::addMFEMSolver(const std::string & user_object_name,
+MFEMEigenproblem::addMFEMSolver(const std::string & type,
                                 const std::string & name,
                                 InputParameters & parameters)
 {
   getProblemData().jacobian_solver =
-      addObject<MFEMSolverBase>(user_object_name, name, parameters).front();
+      addObject<MFEMSolverBase>(type, name, parameters).front();
 
   if (!std::dynamic_pointer_cast<MFEMEigensolverBase>(getProblemData().jacobian_solver))
     mooseError("The selected solver '" + name +
