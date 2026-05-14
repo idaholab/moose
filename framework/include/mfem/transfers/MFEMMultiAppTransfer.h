@@ -116,42 +116,19 @@ template <Moose::FEBackend TO_BACKEND, Moose::FEBackend FROM_BACKEND>
 inline void
 MFEMMultiAppTransfer::checkValidTransferProblemTypes()
 {
-  auto bad_problem = [this]()
-  {
-    mooseError(
-        type(),
-        " is not compatible with the provided source and/or destination Problem types of the "
-        "provided variables.");
-  };
-
+  // Check if source sub-apps exist, and if so, if they are of the expected type
   if (hasFromMultiApp())
-  {
-    // Check if source sub-apps exist, and if so, if they are of the expected type
-    if (getFromMultiApp()->numGlobalApps())
-    {
-      for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
-        if (getFromMultiApp()->hasLocalApp(i) &&
-            getFromMultiApp()->appProblemBase(i).feBackend() != FROM_BACKEND)
-          bad_problem();
-    }
-    else // check source sub-app is of the expected type if it is the transfer source
-      if (getFromMultiApp()->problemBase().feBackend() != FROM_BACKEND)
-        bad_problem();
-  }
+    for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) &&
+          getFromMultiApp()->appProblemBase(i).feBackend() != FROM_BACKEND)
+        mooseError(type(), " is not compatible with the backend of the source app.");
+
+  // Check if destination sub-apps exist, and if so, if they are of the expected type
   if (hasToMultiApp())
-  {
-    // Check if destination sub-apps exist, and if so, if they are of the expected type
-    if (getToMultiApp()->numGlobalApps())
-    {
-      for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-        if (getToMultiApp()->hasLocalApp(i) &&
-            getToMultiApp()->appProblemBase(i).feBackend() != TO_BACKEND)
-          bad_problem();
-    }
-    else // check destination sub-app is of the expected type if it is the transfer destination
-      if (getToMultiApp()->problemBase().feBackend() != TO_BACKEND)
-        bad_problem();
-  }
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getToMultiApp()->hasLocalApp(i) &&
+          getToMultiApp()->appProblemBase(i).feBackend() != TO_BACKEND)
+        mooseError(type(), " is not compatible with the backend of the destination app.");
 }
 
 #endif
