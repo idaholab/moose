@@ -524,14 +524,23 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
     case FEFamily::LAGRANGE:
       space = "H1";
       break;
+    case FEFamily::NEDELEC_ONE:
+      space = "ND";
+      break;
+    case FEFamily::RAVIART_THOMAS:
+      space = "RT";
+      --order;
+      break;
+    case FEFamily::MONOMIAL:
+    case FEFamily::L2_LAGRANGE:
+      space = "L2";
+      break;
     case FEFamily::LAGRANGE_VEC:
       space = "H1";
       vdim = dim;
       break;
-    case FEFamily::MONOMIAL:
-      space = "L2";
-      break;
     case FEFamily::MONOMIAL_VEC:
+    case FEFamily::L2_LAGRANGE_VEC:
       space = "L2";
       vdim = dim;
       break;
