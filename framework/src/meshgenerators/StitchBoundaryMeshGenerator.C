@@ -58,6 +58,7 @@ StitchBoundaryMeshGenerator::generate()
                         use_binary_search,
                         getParam<Real>("stitching_hmin_tolerance_factor"));
 
-  mesh->unset_is_prepared();
+  // This may become redundant once stitch_surfaces handles it
+  mesh->unset_has_boundary_id_sets();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -319,6 +319,8 @@ AdvancedExtruderGenerator::generate()
   }
 
   // retrieve subdomain/sideset/nodeset name maps
+  if (!_input->preparation().has_cached_elem_data)
+    _input->cache_elem_data();
   const auto & input_subdomain_map = _input->get_subdomain_name_map();
   const auto & input_sideset_map = _input->get_boundary_info().get_sideset_name_map();
   const auto & input_nodeset_map = _input->get_boundary_info().get_nodeset_name_map();
@@ -1177,9 +1179,29 @@ AdvancedExtruderGenerator::generate()
   if (_has_top_boundary)
     boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
 
-  mesh->unset_is_prepared();
-  // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
-  // which will crash both paraview and trigger exodiff. Best to be safe.
+  // Our new mesh is still unprepared in most ways.  We don't need to
+  // repartition, since we just extruded our partitioning, but
+  // depending on our ghosting functors we might even have built some
+  // elements that can go remote!
+  mesh->unset_has_synched_id_counts();
+  mesh->unset_has_neighbor_ptrs();
+  mesh->unset_has_cached_elem_data();
+  mesh->unset_has_interior_parent_ptrs();
+  mesh->unset_has_removed_remote_elements();
+  mesh->unset_has_reinit_ghosting_functors();
+  mesh->unset_has_boundary_id_sets();
+  mesh->clear_point_locator();
+
+  // Creating the layered meshes with non-full-order elements creates
+  // a lot of leftover nodes, notably in the boundary_info, which will
+  // crash both paraview and trigger exodiff.
+  // if (extruding_quad_eights)
+  // mesh->unset_has_removed_orphaned_nodes();
+
+  // Somehow just setting the flags above isn't sufficient to handle
+  // the leftover nodes when extruding from a Quad8; this may be a
+  // libMesh bug but for now we'll work around it by forcing a full
+  // re-prepare.
   if (extruding_quad_eights)
     mesh->prepare_for_use();
 

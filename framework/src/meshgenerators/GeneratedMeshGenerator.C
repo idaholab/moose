@@ -249,6 +249,10 @@ GeneratedMeshGenerator::generate()
         _boundary_name_prefix + old_nodeset_name;
   }
 
+  // FIXME: change_boundary_id() was *supposed* to leave the mesh in
+  // a fully prepared state, but there's a libMesh bug to fix first.
+  mesh->unset_has_boundary_id_sets();
+
   // Apply the bias if any exists
   if (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0)
   {
@@ -341,6 +345,6 @@ GeneratedMeshGenerator::generate()
     }
   }
 
-  mesh->unset_is_prepared();
+  mesh->unset_has_cached_elem_data();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

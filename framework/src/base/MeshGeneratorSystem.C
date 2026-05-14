@@ -429,12 +429,18 @@ MeshGeneratorSystem::executeMeshGenerators()
 
 #ifdef DEBUG
       // Assert that the mesh is either marked as not prepared or if it is marked as prepared,
-      // that it's *actually* prepared
+      // that it's *actually* prepared.
+      //
+      // In newer version of libMesh, this also asserts that a mesh
+      // marked as partially prepared is indeed prepared in (at least)
+      // the aspects which are so marked.
       if (!MeshTools::valid_is_prepared(*current_mesh))
-        generator->mooseError("The generated mesh is marked as prepared but is not actually "
-                              "prepared. Please edit the '",
-                              generator->type(),
-                              "' class to call 'unset_is_prepared()'");
+        generator->mooseError(
+            "The generated mesh is marked as (at least partially) prepared but is not "
+            "prepared in the marked sense(s). Please edit the '",
+            generator->type(),
+            "' class to call 'unset_is_prepared()', or more fine-grained "
+            "alternatives as appropriate.");
 #endif
 
       // Now we need to possibly give this mesh to downstream generators

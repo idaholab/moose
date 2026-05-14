@@ -101,8 +101,12 @@ ElementGenerator::generate()
     }
   }
 
-  // We just added an element
-  mesh->unset_is_prepared();
+  // We won't force a repartition for this
+  elem->processor_id() = 0;
+
+  // But some other derived data may need recalculation
+  mesh->clear_point_locator();
+  mesh->unset_has_cached_elem_data();
 
   if (getParam<bool>("create_sidesets"))
     for (const auto i_side : make_range(elem->n_sides()))

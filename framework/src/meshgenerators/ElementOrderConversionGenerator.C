@@ -58,6 +58,6 @@ ElementOrderConversionGenerator::generate()
       mooseError("Invalid conversion type");
   }
 
-  mesh->unset_is_prepared();
+  // The libMesh functions above should have left the mesh prepared
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

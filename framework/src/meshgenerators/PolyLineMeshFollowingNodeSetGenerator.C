@@ -98,6 +98,10 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
   if (!base_mesh->is_serial())
     paramError("input", "Input mesh must not be distributed");
 
+  // We may rely on boundary info caches later
+  if (!base_mesh->preparation().has_boundary_id_sets)
+    base_mesh->get_boundary_info().regenerate_id_sets();
+
   // Get nodeset ID in input mesh
   const auto nodeset_id =
       MooseMeshUtils::getBoundaryID(getParam<BoundaryName>("nodeset"), *base_mesh);
@@ -209,7 +213,10 @@ done_drawing:
     bi.add_side(mesh.elem_ptr(n_elem - 1), 1, ids[1]);
   }
 
-  mesh.prepare_for_use();
+  // We just created this mesh from scratch, so nothing about it is
+  // prepared, but it also isn't marked as prepared, so we can just
+  // let the mesh generator system prepare it later.
+  // mesh->prepare_for_use();
 
   return uptr_mesh;
 }

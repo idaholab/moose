@@ -1021,7 +1021,7 @@ PatternedHexMeshGenerator::generate()
     setMeshProperty("interface_boundary_ids", interface_boundary_ids);
   }
 
-  out_mesh->unset_is_prepared();
+  out_mesh->unset_has_cached_elem_data(); // We changed subdomain ids
   auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
   return mesh;
 }

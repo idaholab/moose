@@ -160,6 +160,11 @@ CombinerGenerator::generate()
       if (!other_mesh)
         paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
 
+      // We'll be using cached subdomain sets in copyIntoMesh, so our
+      // const inputs need caches ready.
+      if (!other_mesh->preparation().has_cached_elem_data)
+        other_mesh->cache_elem_data();
+
       // Move It
       if (_positions.size())
       {
@@ -175,12 +180,17 @@ CombinerGenerator::generate()
                                    _communicator);
     }
 
-    mesh->unset_is_prepared();
+    // libMesh and MooseMeshUtils should already have marked us
+    // unprepared in the appropriate ways
     return dynamic_pointer_cast<MeshBase>(mesh);
   }
   else // Case 2
   {
     auto input_mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);
+
+    // We'll be using cached subdomain sets in copyIntoMesh
+    if (!input_mesh->preparation().has_cached_elem_data)
+      input_mesh->cache_elem_data();
 
     if (!input_mesh)
       paramError("inputs", _input_names[0], " is not a valid unstructured mesh");
@@ -238,7 +248,8 @@ CombinerGenerator::generate()
       }
     }
 
-    final_mesh->unset_is_prepared();
+    // libMesh and MooseMeshUtils should already have marked us
+    // unprepared in the appropriate ways.
     return dynamic_pointer_cast<MeshBase>(final_mesh);
   }
 }
