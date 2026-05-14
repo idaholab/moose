@@ -197,7 +197,7 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
   for (const auto * const node : triangulation_mesh.node_ptr_range())
     if (!node_id_to_local_index.count(node->id()))
     {
-      // Node inherits from Point and the triangulator operates on a 2D mesh, so
+      // Node inherits from Point and the triangulator operates on a 2D plane, so
       // the libMesh node already lives at z = 0 and we can use it directly.
       unsigned int matched_index = libMesh::invalid_uint;
       Real best_distance = std::numeric_limits<Real>::max();
@@ -214,7 +214,7 @@ triangulateConstrainedDelaunayPolygon(std::vector<Point> & poly_nodes,
 
       if (matched_index == libMesh::invalid_uint)
       {
-        matched_index = static_cast<unsigned int>(poly_nodes.size());
+        matched_index = cast_int<unsigned int>(poly_nodes.size());
         poly_nodes.push_back(*node);
       }
 
@@ -914,7 +914,7 @@ MortarSegmentHelper::getMortarSegments(const std::vector<Point> & primary_nodes,
     return;
 
   // Transform clipped poly back to (linearized) 3d and append to list
-  const auto offset = static_cast<unsigned int>(nodes.size());
+  const auto offset = cast_int<unsigned int>(nodes.size());
   for (auto pt : clipped_poly)
     nodes.emplace_back((pt(0) * _u) + (pt(1) * _v) + _center);
 
