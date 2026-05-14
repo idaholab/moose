@@ -40,7 +40,6 @@
   radius_outer = '0.1'
   poissons_ratio = 0.3
   youngs_modulus = 207000
-  block = 0
   incremental = true
 []
 

@@ -94,6 +94,26 @@ public:
 
   virtual unsigned int getNumCuts() const = 0;
   virtual bool isFinalCut() const = 0;
+  /// First-pass fragment preparation: combine crack-tip faces/edges and clean up
+  /// embedded-node configurations that arise from multi-cut conflicts.  Appends
+  /// only phantom-cut nodes (3D class C: emb_faces.size() == 2 but no exterior
+  /// face contributes a real cut) to invalid_emb_out for the driver to scrub
+  /// globally.  Lone-edge nodes (3D class A: emb_faces.size() == 1) are handled
+  /// fragment-locally inside removeInvalidEmbeddedNodes and do NOT appear in
+  /// invalid_emb_out.  Over-shared configurations (class B: emb_faces.size() > 2)
+  /// are non-manifold and trigger EFAError.  Must be called on every element
+  /// before any element's updateFragments() runs.
+  virtual void prepareForFragmentUpdate(const std::set<EFAElement *> & CrackTipElements,
+                                        std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                        std::vector<EFANode *> & invalid_emb_out) = 0;
+  /// Erase all references to emb_node from this element's edges, faces, fragments,
+  /// and interior nodes.  Used by the algorithm driver to globally purge dropped
+  /// embedded nodes from every element.  Single-hop neighbour propagation in
+  /// EFAElement3D::removeEmbeddedNode does not cover elements that received the
+  /// node via independent markCutFacesByGeometry() entries, so the driver walks
+  /// every element.  The driver does NOT free the EFANode object afterwards --
+  /// see ElementFragmentAlgorithm::updatePhysicalLinksAndFragments for why.
+  virtual void purgeEmbeddedNodeReferences(EFANode * emb_node) = 0;
   virtual void updateFragments(const std::set<EFAElement *> & CrackTipElements,
                                std::map<unsigned int, EFANode *> & EmbeddedNodes) = 0;
   virtual void fragmentSanityCheck(unsigned int n_old_frag_edges,
