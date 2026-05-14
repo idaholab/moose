@@ -149,9 +149,9 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id, Real value)
       points.push_back(std::make_pair(p, id));
     }
 
-    // Call the other addPoint() method.
-    if (elem)
-      addPoint(elem, p, id, value);
+    // Call the other addPoint() method. (no-op on elem=nullptr)
+    addPoint(elem, p, id, value);
+
     return_elem = elem;
   }
 

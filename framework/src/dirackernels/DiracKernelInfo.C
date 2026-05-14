@@ -170,7 +170,7 @@ DiracKernelInfo::findPoint(const Point & p,
 
   // But we notably need the processor which owns elem_id to return it!
   if (min_elem_id != DofObject::invalid_id)
-    if (const auto min_elem = mesh.elemPtr(min_elem_id);
+    if (const auto min_elem = mesh.queryElemPtr(min_elem_id);
         min_elem && min_elem->processor_id() == mesh.processor_id())
       return min_elem;
   return nullptr;
