@@ -109,7 +109,9 @@ includes the `bool` values:
 - Because clearing a point locator is as efficient as flagging it
   outdated, and because point locators are generated on the fly,
   a call to `mesh.clear_point_locator()` is sufficient to flag a mesh
-  geometry change that would have left a cached locator invalid.
+  change that would have left a cached locator invalid.  Any change to
+  mesh geometry (node positions) or contents (adding or removing
+  elements) invalidates a cached locator.
 
 
 ### DAG and final mesh selection id=final
