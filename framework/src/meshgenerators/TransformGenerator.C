@@ -134,8 +134,6 @@ TransformGenerator::rotateExtrinsic(MeshBase & mesh,
   // Let's not try to guess what this did to our spatial dimension (it
   // could have reduced it, depending on the input mesh!), let's just
   // mark that it needs to be recomputed.
-  // if (beta)
-  //  mesh.set_spatial_dimension(3);
   mesh.unset_has_cached_elem_data();
 
   for (auto & node : mesh.node_ptr_range())
@@ -157,7 +155,6 @@ TransformGenerator::rotateWithMatrix(MeshBase & mesh,
 #if LIBMESH_DIM == 3
   // Let's not try to guess what this did to our spatial dimension,
   // let's just mark that it needs to be recomputed.
-  // mesh.set_spatial_dimension(3);
   mesh.unset_has_cached_elem_data();
 
   for (auto & node : mesh.node_ptr_range())
