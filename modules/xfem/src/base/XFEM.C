@@ -272,6 +272,7 @@ XFEM::update(Real time,
   buildEFAMesh();
 
   _fe_problem->execute(EXEC_XFEM_MARK);
+  _fe_problem->outputStep(EXEC_XFEM_MARK);
 
   storeCrackTipOriginAndDirection();
 

@@ -143,8 +143,11 @@ EFAFragment2D::isConnected(EFAFragment * other_fragment) const
 }
 
 void
-EFAFragment2D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes)
+EFAFragment2D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes,
+                                          std::vector<EFANode *> & /*invalid_emb_out*/)
 {
+  // 2D cleanup is fragment-local (no inter-element propagation), so we still
+  // perform the removal in place.  invalid_emb_out is unused for 2D.
   // if a fragment only has 1 intersection which is in an interior edge
   // remove this embedded node (MUST DO THIS AFTER combine_tip_edges())
   if (getNumCuts() == 1)
