@@ -317,7 +317,7 @@ For example, a postprocessor value which is always provided as read-only can be 
 !alert note
 The data type should be copy-constructable.
 
-### Static Polymorphism with Curiously Recurring Template Pattern (CRTP) id=kokkos_crtp
+### Static Polymorphism id=kokkos_crtp
 
 The primary challenge in porting MOOSE to GPU lies in its heavy reliance on dynamic polymorphism using virtual functions.
 Polymorphism is the centerpiece of the +*template method pattern*+, which is a behavioral design pattern in object-oriented programming that establishes the skeleton of an algorithm in a base class while permitting derived classes to override certain steps without altering the algorithm’s overall structure, and it is the key design pattern of MOOSE.
@@ -332,8 +332,9 @@ Furthermore, not every GPU backend supports virtual functions.
 Aside from portability, using virtual functions on GPU should be avoided if possible for performance, especially when the virtual functions are called in critical paths.
 The vtable lookup itself incurs overheads, and using function pointers prevents inlining.
 GPU compilers heavily rely on the inlining to generate an optimized code, and being unable to inline functions will likely lead to a performance hit.
+Therefore, any polymorphism on GPU should be implemented statically.
 
-Therefore, any polymorphism on GPU should be implemented statically, which can be achieved by the CRTP.
+While not directly being used in Kokkos-MOOSE, the most famous static polymorphism design pattern is the Curiously Recurring Template Pattern (CRTP).
 The CRTP is a programming idiom that involves a class template inheriting from a template instantiation of itself, which is a technique used to achieve static (compile-time) polymorphism.
 The following pseudo-codes demonstrate a typical template method pattern implemented with the dynamic polymorphism and its equivalent implementation with the static polymorphism using the CRTP:
 
@@ -405,9 +406,21 @@ Because the class type of the final derived class should be seen by the base cla
 If you accidentally derive a class from a non-template class, the base class will not be able to see the derived class.
 In this case, you are encouraged to prevent unintended inheritance by explicitly adding the `final` keyword to the last level derived class.
 
-The Kokkos-MOOSE base classes are carefully designed to avoid the CRTP by leveraging a registry design pattern where external dispatchers are registered together with the objects.
-Namely, the base classes themselves are not template classes, which alleviates the burden of users in dealing with class templates.
-The hook methods provided by Kokkos-MOOSE are also template functions with respect to your object type, so you can directly cast `this` pointer in the hook methods without having to rely on class templates.
+Kokkos-MOOSE is carefully designed to avoid the CRTP by leveraging a registry design pattern, where external dispatchers are registered together with the objects.
+However, the basic principles of static polymorphism in the CRTP (templates, static casting of `this`, methods being public, function hiding) are still applicable and important to understand.
+In Kokkos-MOOSE, the base classes are not template classes, which alleviates the burden of users in dealing with class templates.
+Instead, the hook methods provided by Kokkos-MOOSE are template functions with respect to your object type, so you can directly cast `this` pointer in the hook methods without having to rely on class templates.
+For example, the `computeQpResidual` hook method of Kokkos-MOOSE [Kernels](syntax/KokkosKernels/index.md) is defined as a template function:
+
+```cpp
+template <typename Derived>
+KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                       const unsigned int qp,
+                                       AssemblyDatum & datum) const;
+```
+
+The function template argument `Derived` replaces the class template argument in the CRTP and corresponds to your derived object type.
+You can safely cast `this` pointer to the `Derived` type statically in your base class and directly call derived class methods, which are still required to be public methods.
 
 ### Separate Compilation
 

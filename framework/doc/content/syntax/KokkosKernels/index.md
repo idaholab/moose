@@ -47,8 +47,7 @@ KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                               AssemblyDatum & datum) const;
 ```
 
-The template argument `Derived` corresponds to your object type, and you can safely cast `this` pointer to the `Derived` type statically in your base class.
-It can be useful for implementing polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion, as you can directly call the derived class methods using the cast pointer.
+The template argument `Derived` can be used for implementing static polymorphism in a [CRTP-like](syntax/Kokkos/index.md#kokkos_crtp) fashion by statically casting `this` pointer to the derived type and directly calling the derived class methods using the cast pointer.
 
 Analogously to the original MOOSE, `computeQpResidual()` must be provided in the derived class, and the definition of `computeQpJacobian()` and `computeQpOffDiagJacobian()` are optional.
 The optional methods have default definitions in the base class, and redefining them in the derived class hides the base class definitions.
@@ -99,13 +98,13 @@ KokkosDiffusion::computeQpJacobian(const unsigned int i,
 }
 ```
 
-See the following source codes of `KokkosCoupledForce` for another example of a kernel:
+See the following source codes of `KokkosBodyForce` for another example of a kernel:
 
-!listing framework/include/kokkos/kernels/KokkosCoupledForce.h id=kokkos-force-header
-         caption=The `KokkosCoupledForce` header file.
+!listing framework/include/kokkos/kernels/KokkosBodyForce.h id=kokkos-force-header
+         caption=The `KokkosBodyForce` header file.
 
-!listing framework/src/kokkos/kernels/KokkosCoupledForce.K id=kokkos-force-source language=cpp
-         caption=The `KokkosCoupledForce` source file.
+!listing framework/src/kokkos/kernels/KokkosBodyForce.K id=kokkos-force-source language=cpp
+         caption=The `KokkosBodyForce` source file.
 
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
