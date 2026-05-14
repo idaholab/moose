@@ -64,7 +64,7 @@ protected:
   MFEMSolverBase * _preconditioner;
 
 private:
-  friend class ::MFEMProblemSolve;
+  friend class MFEMProblemSolve;
 };
 
 inline mfem::Solver &

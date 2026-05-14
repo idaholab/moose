@@ -19,7 +19,7 @@ namespace Moose::MFEM
 void
 EigenproblemEquationSystem::ApplyEssentialBCs()
 {
-  _ess_tdof_lists.resize(_trial_var_names.size());
+  _ess_tdof_lists.resize(1);
   mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(0));
   _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
   _global_ess_markers = 0;

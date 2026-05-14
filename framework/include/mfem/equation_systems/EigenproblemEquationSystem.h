@@ -19,7 +19,6 @@ namespace Moose::MFEM
 {
 
 /// Equation system specialization for eigenproblems.
-
 class EigenproblemEquationSystem : public EquationSystem
 {
 public:
