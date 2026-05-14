@@ -34,7 +34,7 @@ MFEMEigenproblem::validParams()
 MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params)
 {
   getProblemData().mode_separator = getParam<std::string>("mode_separator");
-  if (num_type == NumericType::COMPLEX)
+  if (_num_type == NumericType::COMPLEX)
     mooseError("Complex numbers are not currently supported for eigenproblems.");
 }
 
@@ -43,8 +43,7 @@ MFEMEigenproblem::addMFEMSolver(const std::string & type,
                                 const std::string & name,
                                 InputParameters & parameters)
 {
-  getProblemData().jacobian_solver =
-      addObject<MFEMSolverBase>(type, name, parameters).front();
+  getProblemData().jacobian_solver = addObject<MFEMSolverBase>(type, name, parameters).front();
 
   if (!std::dynamic_pointer_cast<MFEMEigensolverBase>(getProblemData().jacobian_solver))
     mooseError("The selected solver '" + name +

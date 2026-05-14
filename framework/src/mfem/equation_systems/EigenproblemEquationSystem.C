@@ -53,7 +53,9 @@ EigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
     m->AddDomainIntegrator(new mfem::VectorFEMassIntegrator(one));
 
   m->Assemble();
-  // Shift the eigenvalue corresponding to eliminated dofs to a large value
+  // Shift the eigenvalue corresponding to eliminated dofs to a large value. The BC DoFs on the
+  // stiffness matrix are set to 1 and the mass matrix BC DoFs are set to a small value eps, such
+  // that the eigenvaluesd associate with these DOFs are ~1/eps.
   m->EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
   m->Finalize();
   op.Reset(m->ParallelAssemble());

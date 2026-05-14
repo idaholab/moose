@@ -11,7 +11,7 @@ form: find $(\lambda, u)$ such that
 $$A u = \lambda M u,$$
 
 where $A$ is the stiffness matrix assembled from the problem kernels and $M$ is a mass matrix
-constructed by the eigensolver using the provided scalar coefficient.
+constructed by the eigensolver.
 
 For each variable declared in the `[Variables]` block, `MFEMEigenproblem` automatically creates
 `num_modes` additional grid functions (named `<variable><mode_separator><index>`, e.g. `u_0`,
