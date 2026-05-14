@@ -24,7 +24,7 @@
     input = 'kokkos_2d_ad_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
-    requirement = 'The Kokkos system shall provide exact Jacobian using automatic differentation.'
+    requirement = 'The Kokkos system shall provide an exact Jacobian using automatic differentation.'
     design = 'framework_stp.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'

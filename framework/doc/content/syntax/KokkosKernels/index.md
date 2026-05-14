@@ -202,7 +202,7 @@ See the following source codes of `KokkosCoupledTimeDerivative` for an example o
 
 Kokkos-MOOSE kernels also support [automatic differentiation (AD)](automatic_differentiation/index.md).
 AD kernels can be derived from `Moose::Kokkos::ADKernel` and should be registered with `registerKokkosADResidualObject()`.
-AD kernels requires `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
+AD kernels require `computeQpResidual()` to be defined with the following signature, where everything remains the same with the ordinary kernels except the return type being `Moose::Kokkos::ADReal`:
 
 ```cpp
 template <typename Derived>
@@ -211,7 +211,7 @@ KOKKOS_FUNCTION Moose::Kokkos::ADReal computeQpResidual(const unsigned int i,
                                                         AssemblyDatum & datum) const;
 ```
 
-`computeQpJacobian()` and `computeQpOffDiagJacobian()` are unused, as AD automatically assembles Jacobian.
+`computeQpJacobian()` and `computeQpOffDiagJacobian()` are unused, as AD automatically assembles the Jacobian.
 
 !syntax list /Kernels objects=True actions=False subsystems=False
 

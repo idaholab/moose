@@ -17,7 +17,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from KokkosADTimeDerivative shall be perfect.'
+    requirement = 'The Jacobian from a Kokkos-based time derivative kernel shall be perfect.'
     design = 'KokkosADTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
@@ -39,7 +39,7 @@
     run_sim = True
     ratio_tol = 1e-7
     difference_tol = 1e-6
-    requirement = 'The Jacobian from KokkosADCoupledTimeDerivative shall be perfect.'
+    requirement = 'The Jacobian from a Kokkos-based coupled variable time derivative kernel shall be perfect.'
     design = 'KokkosADCoupledTimeDerivative.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'

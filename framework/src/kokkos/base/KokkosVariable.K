@@ -50,7 +50,7 @@ Variable::init(const MooseVariableFieldBase & variable, const TagID tag)
     _dot = tag == problem.getVectorTagID(Moose::SOLUTION_DOT_TAG);
 
   if (problem.vectorTagExists(Moose::OLD_SOLUTION_TAG))
-    _old = _old || tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
+    _old = tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
 
   if (problem.vectorTagExists(Moose::OLDER_SOLUTION_TAG))
     _old = _old || tag == problem.getVectorTagID(Moose::OLDER_SOLUTION_TAG);
@@ -107,7 +107,7 @@ Variable::init(const std::vector<const MooseVariableFieldBase *> & variables, co
     _dot = tag == problem.getVectorTagID(Moose::SOLUTION_DOT_TAG);
 
   if (problem.vectorTagExists(Moose::OLD_SOLUTION_TAG))
-    _old = _old || tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
+    _old = tag == problem.getVectorTagID(Moose::OLD_SOLUTION_TAG);
 
   if (problem.vectorTagExists(Moose::OLDER_SOLUTION_TAG))
     _old = _old || tag == problem.getVectorTagID(Moose::OLDER_SOLUTION_TAG);

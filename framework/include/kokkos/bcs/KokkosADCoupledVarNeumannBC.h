@@ -30,9 +30,6 @@ protected:
   /// Variable providing the value of grad(u) on the boundary.
   const Moose::Kokkos::ADVariableValue _coupled_var;
 
-  /// The identifying number of the coupled variable
-  const unsigned int _coupled_num;
-
   /// A coefficient that is multiplied with the residual contribution
   const Real _coef;
 

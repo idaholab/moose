@@ -28,7 +28,6 @@ KokkosADCoupledVarNeumannBC::validParams()
 KokkosADCoupledVarNeumannBC::KokkosADCoupledVarNeumannBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
     _coupled_var(kokkosADCoupledValue("v")),
-    _coupled_num(coupled("v")),
     _coef(getParam<Real>("coef")),
     _scale_factor(kokkosADCoupledValue("scale_factor"))
 {

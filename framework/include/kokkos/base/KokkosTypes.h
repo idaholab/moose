@@ -40,7 +40,7 @@ struct Vector3
 
 #ifdef MOOSE_KOKKOS_SCOPE
   Vector3(const libMesh::TypeVector<T> & vector);
-  KOKKOS_INLINE_FUNCTION Vector3() { *this = T(0); }
+  KOKKOS_INLINE_FUNCTION Vector3() { *this = T{}; }
   KOKKOS_INLINE_FUNCTION Vector3(const T & scalar) { *this = scalar; }
   KOKKOS_INLINE_FUNCTION Vector3(const Vector3<T> & vector) { *this = vector; }
   KOKKOS_INLINE_FUNCTION Vector3(const T & x, const T & y, const T & z);

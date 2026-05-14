@@ -52,6 +52,9 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
     _dt(TransientInterface::_dt),
     _dt_old(TransientInterface::_dt_old)
 {
+  if (_var.isVector())
+    paramError("variable", "Kokkos residual objects do not support vector variables yet.");
+
   _kokkos_var.init(_var);
 }
 
