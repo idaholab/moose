@@ -424,8 +424,12 @@ AzimuthalBlockSplitGenerator::generate()
 
   MeshTools::Modification::rotate(mesh, -90.0, 0.0, 0.0);
 
-  // Workaround - this flagging should be done by libMesh rotate()
+  // Workaround - the point locator clear should be done in rotate()
   mesh.clear_point_locator();
+
+  // The rotate() could unset this (because spatial_dimension() can be
+  // changed) but let's unset to be sure our subdomain changes get
+  // recached.
   mesh.unset_has_cached_elem_data();
 
   for (unsigned int i = 0; i < _azimuthal_angle_meta.size(); i++)
