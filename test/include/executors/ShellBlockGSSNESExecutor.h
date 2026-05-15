@@ -23,7 +23,6 @@ public:
   ShellBlockGSSNESExecutor(const InputParameters & params);
 
   virtual Result run() override;
-  virtual void initialSetup() override;
 
 protected:
   virtual void setupSNES() override;

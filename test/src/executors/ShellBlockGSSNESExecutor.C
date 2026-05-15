@@ -31,13 +31,6 @@ ShellBlockGSSNESExecutor::validParams()
 ShellBlockGSSNESExecutor::ShellBlockGSSNESExecutor(const InputParameters & params)
   : SNESExecutor(params)
 {
-}
-
-void
-ShellBlockGSSNESExecutor::initialSetup()
-{
-  SNESExecutor::initialSetup();
-
   for (const auto & name : getParam<std::vector<ExecutorName>>("sub_snes_executors"))
     _sub_snes.push_back(&getExecutorByName<SNESExecutor>(name));
 }
