@@ -22,7 +22,7 @@ MFEMNDtoRTAux::validParams()
       "Copies the DoF coefficints of a 2D Nedelec H(curl) MFEM Variable"
       "into a Raviart-Thomas H(div) MFEM Variable. In 2D ONLY this represents a 90 degree rotation"
       "because the RT basis is the rotated ND basis.");
-  params.addRequiredParam<VariableName>("nd_source",
+  MFEMExecutedObject::addRequiredDependencyParam<VariableName>("nd_source",
                                         "Name of H(curl) conforming ND variable to copy.");
   params.addParam<mfem::real_t>(
       "scale_factor",
@@ -79,7 +79,6 @@ void
 MFEMNDtoRTAux::execute()
 {
   _result_var = _nd_source_var;
-
   _result_var *= _scale_factor;
 }
 

@@ -1,7 +1,6 @@
 [Mesh]
     type = MFEMMesh
     file = ../mesh/2D_wire_crossection.e
-    dim = 2
 []
 
 [Problem]
@@ -50,18 +49,18 @@
 []
 
 [AuxVariables]
-    [J]
-        type = MFEMVariable
-        fespace = L2FESpace
-    []
-    [gradAz]
-        type = MFEMVariable
-        fespace = HCurlFESpace
-    []
-    [B]
-        type = MFEMVariable
-        fespace = RTFESpace
-    []
+  [J]
+    type = MFEMVariable
+    fespace = L2FESpace
+  []
+  [gradAz]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []
+  [B]
+    type = MFEMVariable
+    fespace = RTFESpace
+  []
 []
 
 [Kernels]
@@ -77,22 +76,22 @@
 []
 
 [AuxKernels]
-    [J]
-        type = MFEMScalarProjectionAux
-        variable = J
-        coefficient = J_source
-    []
-    [gradAz]
-        type = MFEMGradAux
-        variable = gradAz
-        source = Az
-    []
-    [B_from_gradAz]
-        type = MFEMNDtoRTAux
-        variable = B
-        nd_source = gradAz
-        scale_factor = 1.0
-    []
+  [J]
+    type = MFEMScalarProjectionAux
+    variable = J
+    coefficient = J_source
+  []
+  [gradAz]
+    type = MFEMGradAux
+    variable = gradAz
+    source = Az
+  []
+  [B_from_gradAz]
+    type = MFEMNDtoRTAux
+    variable = B
+    nd_source = gradAz
+    scale_factor = 1.0
+  []
 []
 
 [BCs]
@@ -113,7 +112,7 @@
 [Solver]
   type = MFEMHyprePCG
   preconditioner = boomeramg
-  l_tol = 1e-16
+  l_tol = 1e-8
 []
 
 [Executioner]
