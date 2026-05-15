@@ -24,9 +24,9 @@ SCMHTCKazimiCarelli::validParams()
 SCMHTCKazimiCarelli::SCMHTCKazimiCarelli(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
-  // Check that Graber-Rieger is not used for the duct (not supported yet)
+  // Check that Kazimi-Carelli is not used for the duct (not supported yet)
   if (const auto * duct_uo = _scm_problem.getDuctHTCClosure(); duct_uo && duct_uo == this)
-    mooseError("'Graber-Rieger' is not yet supported for the 'duct_htc_correlation'.");
+    mooseError("'Kazimi-Carelli' is not yet supported for the 'duct_htc_correlation'.");
 }
 
 Real
@@ -43,22 +43,7 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args
     flagSolutionWarning(
         "Pitch over pin diameter ratio out of range for the Kazimi-Carelli correlation.");
 
-  // Laminar regime
-  if (pre.Re <= pre.ReL)
-    return pre.laminar_Nu;
-
-  // Blend transitional/turbulent using precomputed thresholds
-  auto blended_Nu = [&](Real NuT) -> Real
-  {
-    if (pre.Re >= pre.ReT)
-      return NuT;
-
-    const auto denom = (pre.ReT - pre.ReL);
-    const auto w = (pre.Re - pre.ReL) / denom;
-    return w * NuT + (1.0 - w) * pre.laminar_Nu;
-  };
-
   const auto NuT = 4.0 + 0.33 * std::pow(pre.poD, 3.8) * std::pow((Pe / 1e2), 0.86) +
                    0.16 * std::pow(pre.poD, 5);
-  return blended_Nu(NuT);
+  return blendTurbulentNusseltNumber(pre, NuT);
 }

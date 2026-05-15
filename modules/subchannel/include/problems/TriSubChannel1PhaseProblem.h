@@ -27,7 +27,6 @@ protected:
   virtual void initializeSolution() override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const override;
   virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) const override;
-  virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy) override;
   virtual void computeh(int iblock) override;
   PetscErrorCode cleanUp();
   TriSubChannelMesh & _tri_sch_mesh;

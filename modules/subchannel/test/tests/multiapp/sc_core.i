@@ -132,7 +132,6 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 1.0
   P_tol = 1.0e-2
   T_tol = 1.0e-2
 
@@ -152,8 +151,10 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
   friction_closure = 'Cheng'
-
   full_output = true
+  # Mixing Correlation
+  mixing_closure = 'Kim'
+
 []
 
 [SCMClosures]
@@ -162,6 +163,9 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [Kim]
+    type = SCMMixingKimAndChung
   []
 []
 

@@ -43,22 +43,7 @@ SCMHTCGraberRieger::computeNusseltNumber(const FrictionStruct & /*friction_args*
     flagSolutionWarning(
         "Pitch over pin diameter ratio out of range for the Graber-Rieger correlation.");
 
-  // Laminar regime
-  if (pre.Re <= pre.ReL)
-    return pre.laminar_Nu;
-
-  // Blend transitional/turbulent using precomputed thresholds
-  auto blended_Nu = [&](Real NuT) -> Real
-  {
-    if (pre.Re >= pre.ReT)
-      return NuT;
-
-    const auto denom = (pre.ReT - pre.ReL);
-    const auto w = (pre.Re - pre.ReL) / denom;
-    return w * NuT + (1.0 - w) * pre.laminar_Nu;
-  };
-
   const auto NuT =
       0.25 + 6.2 * pre.poD + (-0.007 + 0.032 * pre.poD) * std::pow(Pe, 0.8 - 0.024 * pre.poD);
-  return blended_Nu(NuT);
+  return blendTurbulentNusseltNumber(pre, NuT);
 }

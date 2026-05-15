@@ -36,21 +36,6 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
   if (pre.Pr < 1e-5 || pre.Pr > 2e3)
     flagSolutionWarning("Prandtl number (Pr) out of range for the Gnielinski correlation.");
 
-  // Laminar regime
-  if (pre.Re <= pre.ReL)
-    return pre.laminar_Nu;
-
-  // Blend transitional/turbulent using precomputed thresholds
-  auto blended_Nu = [&](Real NuT) -> Real
-  {
-    if (pre.Re >= pre.ReT)
-      return NuT;
-
-    const auto denom = (pre.ReT - pre.ReL);
-    const auto w = (pre.Re - pre.ReL) / denom;
-    return w * NuT + (1.0 - w) * pre.laminar_Nu;
-  };
-
   Real f_turb = _scm_problem.getFrictionClosure()->computeFrictionFactor(friction_args) / 8.0;
 
   /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
@@ -58,5 +43,5 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
   /// will be dominated by conduction and Nu profile should be flat.
   const auto NuT = f_turb * (pre.Re - 1e3) * (pre.Pr + 0.01) /
                    (1 + 12.7 * std::sqrt(f_turb) * (std::pow(pre.Pr + 0.01, 2. / 3.) - 1.));
-  return blended_Nu(NuT);
+  return blendTurbulentNusseltNumber(pre, NuT);
 }

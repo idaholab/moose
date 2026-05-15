@@ -33,8 +33,6 @@ P_out = 155e+5 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
-  CT = 2.0
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true
@@ -43,11 +41,17 @@ P_out = 155e+5 # Pa
   P_out = ${P_out}
   friction_closure = 'MATRA'
   full_output = true
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.0
   []
 []
 
