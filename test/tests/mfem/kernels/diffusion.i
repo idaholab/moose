@@ -109,7 +109,7 @@
   [CSV]
     type = CSV
     execute_on = 'timestep_end'
-    file_base = OutputData/Diffusion
+    file_base = OutputData/Diffusion/diffusion
   []
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection

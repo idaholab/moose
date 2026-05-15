@@ -28,7 +28,7 @@
   [MFEMDiffusion]
     type = CSVDiff
     input = diffusion.i
-    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
+    csvdiff = 'OutputData/Diffusion/diffusion_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -82,7 +82,7 @@
   [MFEMDiffusionPartial]
     type = CSVDiff
     input = diffusion.i
-    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
+    csvdiff = 'OutputData/Diffusion/diffusion_partial_line_sample_0001.csv'
     cli_args = 'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=partial '
@@ -97,11 +97,12 @@
   [MFEMDiffusionMatFree]
     type = CSVDiff
     input = diffusion.i
-    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
+    csvdiff = 'OutputData/Diffusion/diffusion_mat_free_line_sample_0001.csv'
     cli_args = 'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
-               'Executioner/assembly_level=none'
+               'Executioner/assembly_level=none '
+               'Outputs/CSV/file_base=OutputData/Diffusion/diffusion_mat_free'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
