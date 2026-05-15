@@ -303,7 +303,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
-      mfem::OperatorHandle * aux_a = new mfem::OperatorHandle;
+      std::unique_ptr<mfem::OperatorHandle> aux_a = std::make_unique<mfem::OperatorHandle>();
       aux_lf = 0.0;
       if (test_var_name == trial_var_name)
       {
