@@ -17,6 +17,10 @@
 #include "FaceInfo.h"
 #include "MeshGenerator.h"
 
+// Utilities for MeshBase
+// Many of these utilities could live in libMesh, and in fact, before adding a new one here
+// you should also check mesh_tools.h in libMesh to see if it does not exist there already.
+
 namespace MooseMeshUtils
 {
 
@@ -202,6 +206,17 @@ computeDistanceToAxis(const P & point, const Point & origin, const RealVectorVal
 {
   return (point - origin).cross(direction).norm();
 }
+
+/**
+ * Computes the maximum distance from all nodes of a mesh to a general axis
+ *
+ * @param[in] mesh mesh to get the distance from
+ * @param[in] origin  Axis starting point
+ * @param[in] direction  Axis direction
+ */
+Real computeMaxDistanceToAxis(const MeshBase & mesh,
+                              const Point & origin,
+                              const RealVectorValue & direction);
 
 /**
  * Computes a coordinate transformation factor for a general axisymmetric axis

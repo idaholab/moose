@@ -278,8 +278,7 @@ meshCentroidCalculator(const MeshBase & mesh)
 {
   Point centroid_pt = Point(0.0, 0.0, 0.0);
   Real vol_tmp = 0.0;
-  for (const auto & elem :
-       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     Real elem_vol = elem->volume();
     centroid_pt += (elem->true_centroid()) * elem_vol;
@@ -355,6 +354,21 @@ boundaryWeightedNormal(const BoundaryName & boundary, MeshBase & mesh)
   mesh.comm().sum(volume_sum);
 
   return volume_weighted_normal_sum / volume_sum;
+}
+
+Real
+computeMaxDistanceToAxis(const MeshBase & mesh,
+                         const Point & origin,
+                         const RealVectorValue & direction)
+{
+  Real distance = 0;
+  mooseAssert(MooseUtils::absoluteFuzzyEqual(direction.norm_sq(), 1),
+              "Direction should be normalized");
+  for (const auto & node : mesh.node_ptr_range())
+    if (const auto dist_node = (*node - origin).cross(direction).norm(); dist_node > distance)
+      distance = dist_node;
+  mesh.comm().max(distance);
+  return distance;
 }
 
 std::unordered_map<dof_id_type, dof_id_type>
