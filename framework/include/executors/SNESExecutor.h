@@ -40,19 +40,19 @@ public:
   /// Return the owned SNES for NPC wiring by a parent executor.
   SNES getSNES();
 
+  virtual void initialSetup() override;
+
 protected:
   FEProblemBase & _fe_problem;
 
-  /// Owned PETSc SNES.  Null in the monolithic path of NewtonSNESExecutor before
-  /// the first call to run() (the system SNES is used directly in that path).
+  /// Owned PETSc SNES
   SNES _snes = nullptr;
 
-  /// Combined residual Vec.  VecNest of per-system RHS Vecs in the multi-system path.
-  Vec _vec_func = nullptr;
+  /// VecNest wrapping per-system solution Vecs.  Built once in setupSNES().
+  Vec _vec_sol = nullptr;
 
-  /// Index of the nonlinear system this executor targets.  Set from nonlinear_system_name
-  /// if provided, otherwise defaults to system 0.
-  unsigned int _nl_sys_num = 0;
+  /// Combined residual Vec. VecNest of per-system RHS Vecs for multiple systems
+  Vec _vec_func = nullptr;
 
   /// Optional nonlinear preconditioner executor.  Non-null when nl_preconditioning is set.
   SNESExecutor * _npc_executor = nullptr;

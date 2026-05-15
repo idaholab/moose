@@ -23,10 +23,18 @@ NGSSNESExecutor::validParams()
       "Nonlinear Gauss-Seidel preconditioner (SNESNGS) for a single monolithic nonlinear system. "
       "Attach via nl_preconditioning on a NewtonSNESExecutor; PETSc propagates the outer "
       "SNES's DM to this SNES and drives the NGS sweep internally.");
+  params.addRequiredParam<NonlinearSystemName>(
+      "nonlinear_system_name",
+      "The nonlinear system that nonlinear Gauss-Seidel (NGS) should be applied to. Note that NGS "
+      "is not typically robust as a standalone solver; it's better to use as a preconditioner.");
   return params;
 }
 
-NGSSNESExecutor::NGSSNESExecutor(const InputParameters & params) : SNESExecutor(params) {}
+NGSSNESExecutor::NGSSNESExecutor(const InputParameters & params)
+  : SNESExecutor(params),
+    _nl_sys_num(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
+{
+}
 
 void
 NGSSNESExecutor::setupSNES()

@@ -48,3 +48,57 @@ Executor::exec()
   _result = result;
   return result;
 }
+
+std::string
+Executor::Result::str(const bool success_msg,
+                      const std::string & indent,
+                      const std::string & subname)
+{
+  std::string s = indent + label(success_msg, subname) + "\n";
+  for (auto & entry : subs)
+    s += entry.second.str(success_msg, indent + "    ", entry.first);
+  return s;
+}
+
+void
+Executor::Result::pass(const std::string & msg, [[maybe_unused]] const bool overwrite)
+{
+  mooseAssert(converged || overwrite,
+              "cannot override nonconverged executioner result with a passing one");
+  reason = msg;
+  converged = true;
+}
+
+void
+Executor::Result::fail(const std::string & msg)
+{
+  reason = msg;
+  converged = false;
+}
+
+bool
+Executor::Result::record(const std::string & name, const Result & r)
+{
+  subs[name] = r;
+  return r.convergedAll();
+}
+
+bool
+Executor::Result::convergedAll() const
+{
+  if (!converged)
+    return false;
+  for (auto & entry : subs)
+    if (!entry.second.convergedAll())
+      return false;
+  return true;
+}
+
+std::string
+Executor::Result::label(const bool success_msg, const std::string & subname)
+{
+  std::string state_str =
+      success_msg || !converged ? (std::string("(") + (converged ? "pass" : "FAIL") + ")") : "";
+  return subname + (subname.empty() ? "" : ":") + _name + state_str +
+         ((success_msg || !converged) && !reason.empty() ? ": " + reason : "");
+}

@@ -59,70 +59,37 @@ public:
     /// descendant's results.  If success_msg is true, then all result output
     /// that contains a message will be printed even if it converged/passed.
     /// Otherwise, messages will only be printed for unconverged/failed results.
-    std::string
-    str(bool success_msg = false, const std::string & indent = "", const std::string & subname = "")
-    {
-      std::string s = indent + label(success_msg, subname) + "\n";
-      for (auto & entry : subs)
-        s += entry.second.str(success_msg, indent + "    ", entry.first);
-      return s;
-    }
+    std::string str(bool success_msg = false,
+                    const std::string & indent = "",
+                    const std::string & subname = "");
 
     /// Marks the result as passing/converged with the given msg text
     /// describing detail about how things ran.  A result object is in this
     /// state by default, so it is not necessary to call this function for
     /// converged/passing scenarios.
-    void pass(const std::string & msg, bool overwrite = false)
-    {
-      mooseAssert(converged || overwrite,
-                  "cannot override nonconverged executioner result with a passing one");
-      ((void)(overwrite)); // avoid unused error due to assert
-      reason = msg;
-      converged = true;
-    }
+    void pass(const std::string & msg, bool overwrite = false);
 
     /// Marks the result as failing/unconverged with the given msg text
     /// describing detail about how things ran.
-    void fail(const std::string & msg)
-    {
-      reason = msg;
-      converged = false;
-    }
+    void fail(const std::string & msg);
 
     /// Records results from sub/internal executors in a executor's result.  When
     /// child-executors return a result object following their execution, this
     /// function should be called to add that info into the result hierarchy.
     /// If the child executor was identified by a label/text from the input file
     /// (e.g. via sub_solve1=foo_executor) - then "name" should be "sub_solve1".
-    bool record(const std::string & name, const Result & r)
-    {
-      subs[name] = r;
-      return r.convergedAll();
-    }
+    bool record(const std::string & name, const Result & r);
 
     /// Returns false if any single executor in the current hierarchy of results
     /// (i.e. including all child results accumulated recursively via record)
     /// had a failed/unconverged return state.  Returns true otherwise.  This
     /// is how convergence should generally be checked/tracked by executors -
     /// rather than accessing e.g. the converged member directly.
-    bool convergedAll() const
-    {
-      if (!converged)
-        return false;
-      for (auto & entry : subs)
-        if (!entry.second.convergedAll())
-          return false;
-      return true;
-    }
+    bool convergedAll() const;
 
   private:
-    std::string label(bool success_msg, const std::string & subname = "")
-    {
-      std::string state_str =
-          success_msg || !converged ? (std::string("(") + (converged ? "pass" : "FAIL") + ")") : "";
-      return subname + (subname.empty() ? "" : ":") + _name + state_str +
-             ((success_msg || !converged) && !reason.empty() ? ": " + reason : "");
-    }
+    std::string label(bool success_msg, const std::string & subname = "");
+
     std::string _name;
   };
 
@@ -143,14 +110,16 @@ public:
   /// should be called to generate new objects.  *DO NOT* catch the result by
   /// value - if you do, MOOSE cannot track result state for restart capability.
   /// You must catch result values from this function by reference.
-  Result & newResult()
-  {
-    _result = Result(this);
-    return _result;
-  }
+  Result & newResult();
 
   /// Whether the executor and all its sub-executors passed / converged
   virtual bool lastSolveConverged() const override { return _result.convergedAll(); }
+
+  /**
+   * Method for performing setup. This may be used to retrieve sub-executors which may not yet have
+   * been constructed yet at our construction time
+   */
+  virtual void initialSetup() {}
 
 protected:
   /// This function contains the primary execution implementation for a
@@ -173,3 +142,10 @@ private:
   /// a local member variable here to facilitate restart capability.
   Result _result;
 };
+
+inline Executor::Result &
+Executor::newResult()
+{
+  _result = Result(this);
+  return _result;
+}

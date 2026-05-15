@@ -23,12 +23,13 @@ public:
   ShellBlockGSSNESExecutor(const InputParameters & params);
 
   virtual Result run() override;
+  virtual void initialSetup() override;
 
 protected:
   virtual void setupSNES() override;
 
 private:
-  std::vector<unsigned int> _inner_sys_nums;
+  std::vector<SNESExecutor *> _sub_snes;
 
   static PetscErrorCode shellSolveCallback(SNES snes, Vec x);
 };

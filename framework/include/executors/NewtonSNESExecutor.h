@@ -12,6 +12,7 @@
 #include "SNESExecutor.h"
 #include "MooseTypes.h"
 
+#include <vector>
 #include <map>
 #include <memory>
 #include <utility>
@@ -25,12 +26,6 @@ class PetscMatrix;
 /**
  * Executor implementing a Newton-type outer solve (SNESEWTONLS) for one or more libMesh
  * nonlinear systems.
- *
- * Two code paths are selected at run() time:
- *   Single-system: delegates to _fe_problem.solve(_nl_sys_num).
- *   Multi-system:  no nonlinear_system_name supplied and multiple NL systems exist --
- *                  builds a combined outer SNES with VecNest/MatNest over all systems.
- *                  nl_preconditioning is required in this path.
  */
 class NewtonSNESExecutor : public SNESExecutor
 {
@@ -45,13 +40,8 @@ protected:
   virtual void setupSNES() override;
 
 private:
-  /// True when Case 3 (multi-system combined solve) is active.
-  bool _multi_system = false;
-
-  // Case 3 storage -----------------------------------------------------------
-
-  /// VecNest wrapping per-system solution Vecs.  Built once in setupSNES().
-  Vec _vec_sol = nullptr;
+  /// The nonlinear systems this SNES targets
+  std::vector<unsigned int> _nl_sys_nums;
 
   /// PETSc MatNest holding all (i,j) Jacobian sub-blocks.
   Mat _mat_nest = nullptr;
@@ -64,7 +54,7 @@ private:
   /// Matrix tag IDs for each off-diagonal block.
   std::map<std::pair<unsigned int, unsigned int>, TagID> _off_diag_tags;
 
-  // Case 3 helpers -----------------------------------------------------------
+  // Multi-system helpers -----------------------------------------------------------
 
   void allocateOffDiagMats();
   void assembleOffDiagJacobian();

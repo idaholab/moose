@@ -1051,11 +1051,19 @@ flagAndPairOptions()
 }
 
 InputParameters
-getPetscValidParams()
+kspRelatedParams()
 {
   InputParameters params = emptyInputParameters();
-  params += flagAndPairOptions();
+  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
+  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
+  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
+  return params;
+}
 
+InputParameters
+newtonKrylovParams()
+{
+  InputParameters params = emptyInputParameters();
   MooseEnum solve_type("PJFNK JFNK NEWTON FD LINEAR");
   params.addParam<MooseEnum>("solve_type",
                              solve_type,
@@ -1073,7 +1081,6 @@ getPetscValidParams()
                              "default is wp (for Walker and Pernice).");
 
   params.addParamNamesToGroup("solve_type mffd_type", "PETSc");
-
   return params;
 }
 
@@ -1367,6 +1374,16 @@ registerPetscCitation(const std::string & bibtex)
   // separated. A null "set" flag registers unconditionally; callers deduplicate by citation key.
   const std::string entry = (!bibtex.empty() && bibtex.back() == '\n') ? bibtex : bibtex + "\n";
   LibmeshPetscCallA(PETSC_COMM_WORLD, PetscCitationsRegister(entry.c_str(), nullptr));
+}
+
+void
+setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object)
+{
+  es.parameters.set<Real>("linear solver tolerance") = solver_object.getParam<Real>("l_tol");
+  es.parameters.set<Real>("linear solver absolute tolerance") =
+      solver_object.getParam<Real>("l_abs_tol");
+  es.parameters.set<unsigned int>("linear solver maximum iterations") =
+      solver_object.getParam<unsigned int>("l_max_its");
 }
 
 } // Namespace PetscSupport
