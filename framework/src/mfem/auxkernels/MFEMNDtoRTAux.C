@@ -19,7 +19,7 @@ MFEMNDtoRTAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Copies the DoF coefficints of a 2D Nedelec H(curl) MFEM Variable"
+      "Copies the DoFs of a 2D Nedelec H(curl) MFEM Variable"
       "into a Raviart-Thomas H(div) MFEM Variable. In 2D ONLY this represents a 90 degree rotation"
       "because the RT basis is the rotated ND basis.");
   MFEMExecutedObject::addRequiredDependencyParam<VariableName>(

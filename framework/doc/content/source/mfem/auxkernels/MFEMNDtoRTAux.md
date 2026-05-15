@@ -4,7 +4,7 @@
 
 ## Overview
 
-Auxkernel for copying the DoF of a source variable defined on an $H(\mathrm{curl})$ conforming Nedelec (ND) finite element (FE) space into a target variable defined on an $H(\mathrm{div})$ conforming Raviart-Thomas (RT) FE space.
+Auxkernel for copying the DoFs of a source variable defined on an $H(\mathrm{curl})$ conforming Nedelec (ND) finite element (FE) space into a target variable defined on an $H(\mathrm{div})$ conforming Raviart-Thomas (RT) FE space.
 
 This auxkernel is intended ONLY for two-dimensional MFEM ND to RT FE spaces. In 2D MFEM, the ND to RT bases are related by a 90 degree rotation, so copying the ND coefficients into a compatible RT space can be used to represent the rotated field. 
 
