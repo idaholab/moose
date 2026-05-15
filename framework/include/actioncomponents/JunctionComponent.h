@@ -17,6 +17,9 @@
 #include "ComponentBoundaryConditionInterface.h"
 #include "ComponentMeshTransformHelper.h"
 
+/**
+ * ActionComponent to connect two components
+ */
 class JunctionComponent : public virtual ActionComponent,
                           public ComponentPhysicsInterface,
                           public ComponentMaterialPropertyInterface,
@@ -32,5 +35,8 @@ protected:
   virtual void addMeshGenerators() override;
   virtual void checkIntegrity() override;
 
-  MooseEnum _junction_method;
+  /// How to connect the two components
+  const MooseEnum _junction_method;
+  /// Whether to enforce that all nodes match on a boundary when stitching them
+  bool _enforce_all_nodes_match_on_boundaries;
 };

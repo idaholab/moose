@@ -46,14 +46,10 @@ JunctionComponent::validParams()
                              "Functional form to change radius while extruding along curve.");
   params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
-  params.addRangeCheckedParam<libMesh::Real>(
-      "r_final",
-      "r_final>0.0",
-      "Final radius to extrude to. Defaults to constant radius if not specified.");
 
   // Parameters for the region between meshes
-  params.addRequiredParam<unsigned int>(
-      "n_elem_normal", "Number of elements in the normal direction of the junction");
+  params.addParam<unsigned int>("n_elem_normal",
+                                "Number of elements in the normal direction of the junction");
   params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
 
   // add curve controls
@@ -69,7 +65,7 @@ JunctionComponent::validParams()
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
 
   // add parameters to an Advanced group for additional controls
-  params.addParamNamesToGroup("sharpness num_cps edge_element_type r_final radial_growth_method "
+  params.addParamNamesToGroup("sharpness num_cps edge_element_type radial_growth_method "
                               "start_radial_growth_rate end_radial_growth_rate",
                               "Advanced");
 
@@ -91,6 +87,10 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
   // if (!_junction_method.contains("fill_gap"))
   //   errorDependentParameter("junction_method", "fill_gap_and_stitch", {"n_elem_normal",
   //   "block"});
+
+  if (_junction_method == "fill_gap" && !isParamValid("n_elem_normal"))
+    paramError("n_elem_normal",
+               "n_elem_normal must be specified if junction_method is set to fill_gap!");
 }
 
 void
@@ -234,6 +234,7 @@ JunctionComponent::addMeshGenerators()
         {name() + "_aeg_top_boundary", second_boundary}};
     stitcher_params.set<bool>("verbose_stitching") = true;
     stitcher_params.set<bool>("output") = true;
+    stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "StitchedMeshGenerator", name() + "_stitcher", stitcher_params);
     _mg_names.push_back(name() + "_stitcher");
