@@ -1,0 +1,21 @@
+[Tests]
+  design = 'source/problems/FEProblemBase.md'
+
+  [get_function_too_early]
+    type = RunException
+    input = get_function_too_early.i
+    capabilities = 'method=dbg'
+    expect_err = 'getFunction\(\) was called before Functions have been constructed'
+    requirement = 'The system shall assert that getFunction() was called too early when a Function is requested before Functions have been constructed.'
+    issues = '#28131'
+  []
+
+  [get_user_object_too_early]
+    type = RunException
+    input = get_user_object_too_early.i
+    capabilities = 'method=dbg'
+    expect_err = "A UserObject getter was called before UserObjects have been constructed"
+    requirement = 'The system shall assert that a UserObject getter was called too early when a UserObject is requested before UserObjects have been constructed.'
+    issues = '#28131'
+  []
+[]

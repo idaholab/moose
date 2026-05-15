@@ -68,6 +68,7 @@ length = 0.5
   segregated = false
   friction_closure = 'MATRA'
   pin_HTC_closure = 'Dittus-Boelter'
+  full_output = true
 []
 
 [SCMClosures]
@@ -133,7 +134,7 @@ length = 0.5
   [Dpin_ic]
     type = ConstantIC
     variable = Dpin
-    value = 0.00950
+    value = 0.125
   []
 
   [P_ic]

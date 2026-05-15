@@ -6,7 +6,7 @@
 ###################################################
 # This input file tests the ICs kernel that populates discplament for the FCTF deformed assembly.
 ###################################################
-# Steady state subchannel calculation
+# Steady state sub_channel calculation
 # Thermal-hydraulics parameters
 ###################################################
 T_in = 305.68 #Kelvin (32.53 C)
@@ -31,7 +31,7 @@ unheated_length_exit = 0.855 #m
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
     n_cells = 10
@@ -49,7 +49,7 @@ unheated_length_exit = 0.855 #m
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = ${n_rings}
     n_cells = 10
     unheated_length_entry = ${unheated_length_entry}
@@ -70,37 +70,37 @@ unheated_length_exit = 0.855 #m
 
 [AuxVariables]
   [mdot]
-    block = subchannel
+    block = sub_channel
   []
   [SumWij]
-    block = subchannel
+    block = sub_channel
   []
   [P]
-    block = subchannel
+    block = sub_channel
   []
   [DP]
-    block = subchannel
+    block = sub_channel
   []
   [h]
-    block = subchannel
+    block = sub_channel
   []
   [T]
-    block = subchannel
+    block = sub_channel
   []
   [rho]
-    block = subchannel
+    block = sub_channel
   []
   [mu]
-    block = subchannel
+    block = sub_channel
   []
   [S]
-    block = subchannel
+    block = sub_channel
   []
   [w_perim]
-    block = subchannel
+    block = sub_channel
   []
   [displacement]
-    block = subchannel
+    block = sub_channel
   []
   [q_prime]
     block = fuel_pins
@@ -209,7 +209,7 @@ unheated_length_exit = 0.855 #m
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
-    block = subchannel
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux

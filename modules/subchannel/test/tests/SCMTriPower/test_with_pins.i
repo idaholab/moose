@@ -5,7 +5,7 @@ P_out = 2.0e5 # Pa
 length = 0.5
 num_cells = 40
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
     n_cells = ${num_cells}
@@ -21,7 +21,7 @@ num_cells = 40
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = 3
     n_cells = ${num_cells}
     heated_length = 0.5
@@ -69,6 +69,7 @@ num_cells = 40
   pin_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
+  full_output = true
 []
 
 [SCMClosures]

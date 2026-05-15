@@ -7,7 +7,7 @@
 []
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     pin_diameter = 0.01
     dwire = 0.002
@@ -15,13 +15,13 @@
     spacer_z = '0'
     spacer_k = '5.0'
   []
-  [pins]
+  [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
 
   []
   [duct]
     type = SCMTriDuctMeshGenerator
-    input = pins
+    input = fuel_pins
   []
 []

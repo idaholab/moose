@@ -67,6 +67,8 @@ TriSubChannel1PhaseProblem::cleanUp()
 void
 TriSubChannel1PhaseProblem::initializeSolution()
 {
+  detectDeformation();
+
   if (_deformation)
   {
     // update surface area, wetted perimeter based on: Dpin, displacement

@@ -40,9 +40,12 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
 void
 QuadSubChannel1PhaseProblem::initializeSolution()
 {
+  detectDeformation();
+
   /// update surface area, wetted perimeter based on: Dpin, displacement
   if (_deformation)
   {
+    _console << " =========== DEFORMATION RECALCULATION ACTIVATED ============== " << std::endl;
     Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
     auto side_gap = _subchannel_mesh.getSideGap();

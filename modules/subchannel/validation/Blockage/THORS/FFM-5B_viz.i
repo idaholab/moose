@@ -56,9 +56,6 @@
   [q_prime]
     block = subchannel
   []
-  [displacement]
-    block = subchannel
-  []
 []
 
 [Problem]

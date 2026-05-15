@@ -31,7 +31,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 ###################################################
 
 [TriSubChannelMesh]
-  [subchannel]
+  [sub_channel]
     type = SCMTriSubChannelMeshGenerator
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
@@ -49,7 +49,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
   [fuel_pins]
     type = SCMTriPinMeshGenerator
-    input = subchannel
+    input = sub_channel
     nrings = '${fparse n_rings}'
     n_cells = ${n_cells}
     unheated_length_entry = '${fparse length_entry_fuel}'
@@ -73,23 +73,23 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [AuxVariables]
   [mdot]
-    block = subchannel
+    block = sub_channel
   []
   [SumWij]
-    block = subchannel
+    block = sub_channel
   []
   [P]
-    block = subchannel
+    block = sub_channel
     initial_condition = 0
   []
   [DP]
-    block = subchannel
+    block = sub_channel
   []
   [h]
-    block = subchannel
+    block = sub_channel
   []
   [T]
-    block = subchannel
+    block = sub_channel
   []
   [Tpin]
     block = fuel_pins
@@ -98,25 +98,28 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = fuel_pins
   []
   [rho]
-    block = subchannel
+    block = sub_channel
   []
   [S]
-    block = subchannel
+    block = sub_channel
   []
   [w_perim]
-    block = subchannel
+    block = sub_channel
   []
   [displacement]
-    block = subchannel
+    block = sub_channel
   []
   [ff]
-    block = subchannel
+    block = sub_channel
+  []
+  [HTC]
+    block = sub_channel
   []
   [q_prime]
     block = fuel_pins
   []
   [mu]
-    block = subchannel
+    block = sub_channel
   []
   [duct_heat_flux]
     block = duct

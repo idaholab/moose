@@ -19,13 +19,13 @@ heated_length = 1.0
 []
 
 [QuadSubChannelMesh]
-    [subchannel]
+    [sub_channel]
         type = SCMQuadSubChannelMeshGenerator
     []
 
     [fuel_pins]
         type = SCMQuadPinMeshGenerator
-        input = subchannel
+        input = sub_channel
     []
 []
 
@@ -35,48 +35,6 @@ heated_length = 1.0
         expression = '(pi/2)*sin(pi*z/L)'
         symbol_names = 'L'
         symbol_values = '${heated_length}'
-    []
-[]
-
-[AuxVariables]
-    [mdot]
-        block = subchannel
-    []
-    [SumWij]
-        block = subchannel
-    []
-    [P]
-        block = subchannel
-    []
-    [DP]
-        block = subchannel
-    []
-    [h]
-        block = subchannel
-    []
-    [T]
-        block = subchannel
-    []
-    [rho]
-        block = subchannel
-    []
-    [mu]
-        block = subchannel
-    []
-    [S]
-        block = subchannel
-    []
-    [w_perim]
-        block = subchannel
-    []
-    [q_prime]
-        block = fuel_pins
-    []
-    [Tpin]
-        block = fuel_pins
-    []
-    [Dpin]
-        block = fuel_pins
     []
 []
 
@@ -97,8 +55,7 @@ heated_length = 1.0
     compute_power = true
     P_out = ${P_out}
     verbose_subchannel = true
-    deformation = true
-  friction_closure = 'MATRA'
+    friction_closure = 'MATRA'
 []
 
 [SCMClosures]
