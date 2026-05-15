@@ -27,11 +27,6 @@ SNESExecutor::SNESExecutor(const InputParameters & params)
   : Executor(params),
     _fe_problem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
-}
-
-void
-SNESExecutor::initialSetup()
-{
   if (isParamSetByUser("nl_preconditioning"))
     _npc_executor = &getExecutor<SNESExecutor>("nl_preconditioning");
 }

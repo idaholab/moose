@@ -40,8 +40,6 @@ public:
   /// Return the owned SNES for NPC wiring by a parent executor.
   SNES getSNES();
 
-  virtual void initialSetup() override;
-
 protected:
   FEProblemBase & _fe_problem;
 
