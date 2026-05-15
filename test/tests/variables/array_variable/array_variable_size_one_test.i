@@ -13,6 +13,7 @@
     family = MONOMIAL
     components = 1
     array = true
+    initial_condition = 0.5
   []
 []
 
