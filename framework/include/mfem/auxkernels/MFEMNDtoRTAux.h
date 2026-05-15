@@ -25,7 +25,7 @@ public:
 protected:
   const AuxVariableName _nd_source_var_name;
   const mfem::ParGridFunction & _nd_source_var;
-  const mfem::real_t _sign;
+  const mfem::real_t _scale_factor;
 };
 
 #endif

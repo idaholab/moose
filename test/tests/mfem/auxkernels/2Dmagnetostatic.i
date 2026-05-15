@@ -91,7 +91,7 @@
         type = MFEMNDtoRTAux
         variable = B
         nd_source = gradAz
-        sign = -1.0
+        scale_factor = 2.0
     []
 []
 

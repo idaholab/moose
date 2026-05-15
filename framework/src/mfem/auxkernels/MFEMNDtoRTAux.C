@@ -24,7 +24,7 @@ MFEMNDtoRTAux::validParams()
       "because the RT basis is the rotated ND basis.");
   params.addRequiredParam<VariableName>("nd_source",
                                         "Name of H(curl) conforming ND variable to copy.");
-  params.addParam<mfem::real_t>("sign", 1.0, "Optional sign multiplier.");
+  params.addParam<mfem::real_t>("scale_factor", 1.0, "Optional scale factor. Negative values can be used to flip the sign of the rotation.");
 
   return params;
 }
@@ -33,7 +33,7 @@ MFEMNDtoRTAux::MFEMNDtoRTAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _nd_source_var_name(getParam<VariableName>("nd_source")),
     _nd_source_var(*getMFEMProblem().getGridFunction(_nd_source_var_name)),
-    _sign(getParam<mfem::real_t>("sign"))
+    _scale_factor(getParam<mfem::real_t>("scale_factor"))
 {
   const mfem::ParFiniteElementSpace * source_fes = _nd_source_var.ParFESpace();
   const mfem::ParFiniteElementSpace * target_fes = _result_var.ParFESpace();
@@ -77,8 +77,8 @@ MFEMNDtoRTAux::execute()
 {
   _result_var = _nd_source_var;
 
-  if (_sign != 1.0)
-    _result_var *= _sign;
+  if (_scale_factor != 1.0)
+    _result_var *= _scale_factor;
 }
 
 #endif
