@@ -1,4 +1,5 @@
 [ActionComponents]
+  combine_component_meshes = false
   [cyl1]
     type = CylinderComponent
     dimension = 2
@@ -27,10 +28,8 @@
     type = JunctionComponent
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_left'
+    first_boundary = 'cyl1_right'
     second_boundary = 'cyl2_left'
     n_elem_normal = 6
-
-    # optional parameters
   []
 []

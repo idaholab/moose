@@ -6,7 +6,7 @@
       input = 'junction_2D_fill.i'
       exodiff = 'junction_2D_fill_in.e'
       cli_args = '--mesh-only junction_2D_fill_in.e'
-      requirement = 'The system shall be able to connect two meshes by filling space between them.'
+      requirement = 'The system shall be able to connect two meshes by meshing the space between them.'
     []
     [stitch]
       type = Exodiff
@@ -22,7 +22,7 @@
       input = 'junction_3D_fill.i'
       exodiff = 'junction_3D_fill_in.e'
       cli_args = '--mesh-only junction_3D_fill_in.e'
-      requirement = 'The system shall be able to connect two meshes by filling space between them.'
+      requirement = 'The system shall be able to connect two meshes by meshing the space between them.'
     []
     [stitch]
       type = Exodiff

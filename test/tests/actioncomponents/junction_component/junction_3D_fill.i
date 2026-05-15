@@ -32,6 +32,24 @@
     second_boundary = 'cyl2_bottom_boundary'
     n_elem_normal = 6
 
-    # optional parameters
+    verbose = true
+    enforce_all_nodes_match_on_boundaries = false
+  []
+[]
+
+[Mesh]
+  [diag]
+    type = MeshDiagnosticsGenerator
+    input = junction_stitcher
+    examine_element_overlap = WARNING
+    examine_element_types = WARNING
+    examine_element_volumes = WARNING
+    examine_non_conformality = WARNING
+    examine_sidesets_orientation = WARNING
+    check_for_watertight_sidesets = WARNING
+    check_for_watertight_nodesets = WARNING
+    examine_non_matching_edges = WARNING
+    search_for_adaptivity_nonconformality = WARNING
+    check_local_jacobian = WARNING
   []
 []
