@@ -37,14 +37,21 @@ JunctionComponent::validParams()
   params.addRequiredParam<ComponentName>("second_component", "Second component to join");
   params.addRequiredParam<BoundaryName>("second_boundary", "Second boundary to connect to.");
 
-  MooseEnum junction_type("stitch_meshes fill_gap", "fill_gap");
+  MooseEnum junction_type("stitch_meshes mesh_gap", "mesh_gap");
   params.addParam<MooseEnum>("junction_method", junction_type, "How to join the two components");
 
+  /* Stitching parameters */
   params.addParam<bool>("enforce_all_nodes_match_on_boundaries",
                         true,
                         "Only stitch if all nodes match on the boundary. Defaults to true because "
                         "there is a search algorithm that forces nodes to match assuming there are "
                         "equal number of nodes on each target boundary.");
+
+  /* Meshing the gap parameters */
+  // Parameters for the region between meshes
+  params.addParam<unsigned int>("n_elem_normal",
+                                "Number of elements in the normal direction of the junction");
+  params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
 
   // Parameters for changing radius -- final radius will be calculated under the hood
   MooseEnum radial_growth_methods("LINEAR CUBIC", "CUBIC");
@@ -54,31 +61,21 @@ JunctionComponent::validParams()
   params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
 
-  // Parameters for the region between meshes
-  params.addParam<unsigned int>("n_elem_normal",
-                                "Number of elements in the normal direction of the junction");
-  // params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
-
-  params.addParam<std::vector<BoundaryName>>("1D_edge_nodesets",
-                                             std::vector<BoundaryName>(),
-                                             "Nodesets on both edges of the spline curve.");
-
-  // add curve controls
+  // 1D meshing parameters
   params.addRangeCheckedParam<libMesh::Real>(
       "sharpness", "sharpness>0 & sharpness<=1", "Sharpness of curve bend.");
   params.addParam<unsigned int>(
       "num_cps",
       6,
       "Number of control points used to draw the curve. Miniumum of degree+1 points are required.");
-
   MooseEnum edge_elem_type("EDGE2 EDGE3 EDGE4", "EDGE2");
   params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
 
-  // add parameters to an Advanced group for additional controls
-  params.addParamNamesToGroup("sharpness num_cps edge_element_type radial_growth_method "
-                              "start_radial_growth_rate end_radial_growth_rate",
-                              "Advanced");
+  params.addParamNamesToGroup("sharpness num_cps edge_element_type", "1D mesh junction");
+  params.addParamNamesToGroup(
+      "radial_growth_method start_radial_growth_rate end_radial_growth_rate",
+      "Radial expansion in 2D and 3D junction");
 
   return params;
 }
@@ -96,13 +93,18 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
   addRequiredTask("add_mesh_generator");
 
   // Check parameters
-  // if (!_junction_method.contains("fill_gap"))
-  //   errorDependentParameter("junction_method", "fill_gap_and_stitch", {"n_elem_normal",
-  //   "block"});
-
-  if (_junction_method == "fill_gap" && !isParamValid("n_elem_normal"))
-    paramError("n_elem_normal",
-               "n_elem_normal must be specified if junction_method is set to fill_gap!");
+  if (_junction_method != "mesh_gap")
+    errorDependentParameter("junction_method",
+                            "mesh_gap",
+                            {"n_elem_normal",
+                             "block",
+                             "radial_growth_method",
+                             "start_radial_growth_rate",
+                             "end_radial_growth_rate",
+                             "sharpness",
+                             "num_cps",
+                             "edge_element_type"});
+  // The 1D and 2D meshing parameters will be re-checked later, once we know the dimension
 }
 
 void
@@ -136,7 +138,6 @@ JunctionComponent::addMeshGenerators()
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
         params.set<bool>("verbose_stitching") = _verbose;
-        params.set<bool>("output") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") =
             _enforce_all_nodes_match_on_boundaries;
         _app.getMeshGeneratorSystem().addMeshGenerator(
@@ -161,7 +162,8 @@ JunctionComponent::addMeshGenerators()
     else
       mooseError("Stiching meshes of different dimensions is not implemented");
   }
-  else if (_junction_method == "fill_gap" && dimension_first > 1)
+
+  else if (_junction_method == "mesh_gap" && dimension_first > 1)
   {
     //
     // This method is set to use a B-Spline to draw a 1D curve between
@@ -253,6 +255,8 @@ JunctionComponent::addMeshGenerators()
 
     aeg_params.set<BoundaryName>("bottom_boundary") = name() + "_aeg_bottom_boundary";
     aeg_params.set<BoundaryName>("top_boundary") = name() + "_aeg_top_boundary";
+    if (isParamValid("block"))
+      paramError("block", "Not yet implemented for 2D or 3D junction");
 
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "AdvancedExtruderGenerator", name() + "_aeg", aeg_params);
@@ -287,7 +291,6 @@ JunctionComponent::addMeshGenerators()
       mesh_stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
           {first_boundary, name() + "_aeg_bottom_boundary"}};
       mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
-      mesh_stitcher_params.set<bool>("output") = _verbose;
       mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
           _enforce_all_nodes_match_on_boundaries;
       _app.getMeshGeneratorSystem().addMeshGenerator(
@@ -305,7 +308,7 @@ JunctionComponent::addMeshGenerators()
       _mg_names.push_back(name() + "_closed");
     }
   }
-  else if (_junction_method == "fill_gap" && dimension_first == 1)
+  else if (_junction_method == "mesh_gap" && dimension_first == 1)
   {
     // not all action components are guaranteed to inherit from ComponentMeshTransformerHelper,
     // which we need to specify the direction.
@@ -340,6 +343,7 @@ JunctionComponent::addMeshGenerators()
     bspline_params.set<MeshGeneratorName>("end_mesh") =
         second_component.mg_names()
             .back(); // get last name from list of generators creating the component
+    bspline_params.set<BoundaryName>("new_subdomain_name") = getParam<SubdomainName>("block");
     bspline_params.set<BoundaryName>("start_boundary") = getParam<BoundaryName>("first_boundary");
     bspline_params.set<BoundaryName>("end_boundary") = getParam<BoundaryName>("second_boundary");
     bspline_params.set<std::vector<BoundaryName>>("edge_nodesets") = {
