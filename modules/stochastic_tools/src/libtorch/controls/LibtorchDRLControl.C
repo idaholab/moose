@@ -171,8 +171,6 @@ LibtorchDRLControl::execute()
 
     _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
 
-    if (first_control_execution)
-      _current_smoothed_signal = _current_control_signals;
   }
 
   _previous_control_signal = _current_smoothed_signal;

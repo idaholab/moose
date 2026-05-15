@@ -156,6 +156,8 @@ protected:
   /// So using a shift can realign the corresponding input-output values while reading the
   /// reporters
   const bool _shift_outputs;
+  /// Average rewards over each reporter timestep window instead of sampling one boundary value.
+  const bool _average_reward_over_timestep_window;
 
   /// Storage for the current average episode reward
   Real _average_episode_reward;
@@ -225,6 +227,15 @@ private:
   std::vector<Real> extractDownsampledSequence(const std::vector<Real> & sample,
                                                unsigned int offset,
                                                unsigned int num_entries) const;
+
+  /**
+   * Average one raw reporter sequence over aligned timestep windows.
+   * @param sample Raw reporter sequence.
+   * @param num_entries Number of action-window reward entries to compute.
+   * @return Window-averaged sequence.
+   */
+  std::vector<Real> extractWindowAveragedSequence(const std::vector<Real> & sample,
+                                                  unsigned int num_entries) const;
 
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
