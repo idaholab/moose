@@ -34,7 +34,7 @@
       allow_test_objects = true
       capabilities = 'method=opt & libtorch'
       compute_devices = 'cpu cuda'
-      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+      min_slots = 4 # Reserve extra CI memory for libtorch runtime with --n-threads=2
       detail = "using fixed hyperparameters, "
     []
     [tuned]
@@ -44,7 +44,7 @@
       allow_test_objects = true
       capabilities = 'method=opt & petsc>=3.10.0 & libtorch'
       compute_devices = 'cpu cuda'
-      min_slots = 2 # Reserve extra CI memory for libtorch runtime in GP tests
+      min_slots = 3 # Reserve extra CI memory for duplicated libtorch/GP state under MPI
       detail = "and tuned hyperparameters."
     []
   []
