@@ -69,20 +69,28 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   addTaskDependency("declare_stochastic_results_vectors", "add_vector_postprocessor");
   addTaskDependency("add_reporter", "declare_stochastic_results_vectors");
 
+#ifdef MOOSE_LIBTORCH_ENABLED
   // Covariance functions (Gaussian Process)
   registerSyntaxTask("AddCovarianceAction", "Covariance/*", "add_covariance");
   registerMooseObjectTask("add_covariance", CovarianceFunctionBase, false);
   addTaskDependency("add_covariance", "add_user_object");
   addTaskDependency("add_distribution", "add_covariance");
+#endif
 
   // Mapping objects
   registerSyntaxTask("AddVariableMappingAction", "VariableMappings/*", "add_variable_mapping");
   registerMooseObjectTask("add_variable_mapping", VariableMappingBase, false);
   addTaskDependency("add_variable_mapping", "add_reporter");
+
+#ifdef MOOSE_LIBTORCH_ENABLED
   // Adds action for loading Covariance data in model
   registerTask("load_covariance_data", true);
   addTaskDependency("load_covariance_data", "load_surrogate_data");
   addTaskDependency("setup_function_complete", "load_covariance_data");
+#else
+  addTaskDependency("setup_function_complete", "load_surrogate_data");
+#endif
+
   addTaskDependency("setup_mesh", "auto_create_mesh");
   addTaskDependency("create_problem", "auto_create_problem");
   addTaskDependency("setup_executioner", "auto_create_executioner");
