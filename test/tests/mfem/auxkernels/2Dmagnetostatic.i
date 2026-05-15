@@ -132,7 +132,6 @@
 [Outputs]
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/2DMagnetostatic
+    file_base = 2DMagnetostaticewqeqwe
   []
 []
-
