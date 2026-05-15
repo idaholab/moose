@@ -239,8 +239,8 @@ JunctionComponent::addMeshGenerators()
       aeg_params.set<MeshGeneratorName>("input") =
           (MeshGeneratorName)(name() + "_blockToMeshSource");
 
-      aeg_params.set<Point>("start_extrusion_direction") = start_direction;
-      aeg_params.set<Point>("end_extrusion_direction") = end_direction;
+      aeg_params.set<RealVectorValue>("start_extrusion_direction") = start_direction;
+      aeg_params.set<RealVectorValue>("end_extrusion_direction") = end_direction;
 
       aeg_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
       aeg_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");

@@ -11,6 +11,7 @@
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
 #include "MathUtils.h"
+#include "GeometryUtils.h"
 
 #include "libmesh/boundary_info.h"
 #include "libmesh/function_base.h"
@@ -104,12 +105,12 @@ AdvancedExtruderGenerator::validParams()
       "extrusion_curve",
       "Name of the mesh generator providing the line mesh curve to be extruded along. The "
       "extrusion path follows the node order in the line mesh");
-  params.addParam<Point>(
+  params.addParam<RealVectorValue>(
       "start_extrusion_direction",
       "A vector that points in the starting direction for extruding along a curve. This vector "
       "should be the tangent vector at the FIRST node of the extrusion curve. Vector will be "
       "normalized in code, so don't worry about it here.");
-  params.addParam<Point>(
+  params.addParam<RealVectorValue>(
       "end_extrusion_direction",
       "A vector that points in the ending direction for extruding along a curve. This vector "
       "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
@@ -178,10 +179,10 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
     _extrusion_curve(getMesh("extrusion_curve", true)),
     _start_extrusion_direction(isParamValid("start_extrusion_direction")
-                                   ? getParam<Point>("start_extrusion_direction").unit()
+                                   ? getParam<RealVectorValue>("start_extrusion_direction").unit()
                                    : Point(0, 0, 0)),
     _end_extrusion_direction(isParamValid("end_extrusion_direction")
-                                 ? getParam<Point>("end_extrusion_direction").unit()
+                                 ? getParam<RealVectorValue>("end_extrusion_direction").unit()
                                  : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
     _has_top_boundary(isParamValid("top_boundary")),
@@ -561,8 +562,9 @@ AdvancedExtruderGenerator::generate()
     if (_extrude_along_curve)
       reference_direction =
           _start_extrusion_direction.norm_sq() > 0
-              ? RealVectorValue(_start_extrusion_direction)
-              : (*(extrusion_curve->node_ptr(1)) - *(extrusion_curve->node_ptr(0))).unit();
+              ? _start_extrusion_direction
+              : RealVectorValue(
+                    (*(extrusion_curve->node_ptr(1)) - *(extrusion_curve->node_ptr(0))).unit());
     else
       reference_direction = _direction;
 
@@ -611,6 +613,8 @@ AdvancedExtruderGenerator::generate()
 
       // In first layer we also add the base nodes, hence the "plus one"
       unsigned int num_heights_at_elevation = order * num_layers + (e == 0 ? 1 : 0);
+      // Keep track of the plane normal to the extrusion
+      RealVectorValue prev_intersecting_plane_normal_vec = _start_extrusion_direction;
 
       // k is the element layer ordering within each elevation layer
       for (const auto k : make_range(num_heights_at_elevation))
@@ -634,13 +638,14 @@ AdvancedExtruderGenerator::generate()
             // previous point in extrusion curve
             const Node * P_prev = extrusion_curve->node_ptr(k - 1);
 
-            // Convenience vectors
-            RealVectorValue a_vec = *P_current - *P_prev;
-            RealVectorValue b_vec = orig_node_to_previous + *node - *P_prev;
-            Real prev_node_distance_to_spline = b_vec.norm();
+            // Convenience vectors in the plane of (P_prev, prev_node, P_current, current_node)
+            RealVectorValue a_vec = (*P_current - *P_prev).unit();
+            const auto old_node = orig_node_to_previous + *node;
+            RealVectorValue b_vec = old_node - *P_prev;
+            Real node_distance_to_curve = b_vec.norm();
 
             // Node does not lie exactly on the extrusion curve we are following
-            if (prev_node_distance_to_spline > libMesh::TOLERANCE)
+            if (node_distance_to_curve > libMesh::TOLERANCE)
             {
               // normal vector to the plane to extrude the point into
               RealVectorValue intersecting_plane_normal_vec;
@@ -649,7 +654,8 @@ AdvancedExtruderGenerator::generate()
               if (k == 1)
               {
                 const auto P_next = extrusion_curve->node_ptr(k + 1);
-                intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+                intersecting_plane_normal_vec =
+                    0.5 * (_start_extrusion_direction + (*P_next - *P_current).unit());
               }
               else if (k < order * num_layers - 1)
               {
@@ -658,9 +664,11 @@ AdvancedExtruderGenerator::generate()
                 intersecting_plane_normal_vec = *P_next - *P_prev;
               }
               else
+              {
                 intersecting_plane_normal_vec = (_end_extrusion_direction.norm_sq() > 0)
-                                                    ? RealVectorValue(_end_extrusion_direction)
-                                                    : (*P_current - *P_prev);
+                                                    ? _end_extrusion_direction
+                                                    : RealVectorValue(*P_current - *P_prev);
+              }
               intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm();
 
               // normal vector to the current plane
@@ -672,12 +680,12 @@ AdvancedExtruderGenerator::generate()
                   current_plane_normal_vec.cross(intersecting_plane_normal_vec);
               dir_along_line /= dir_along_line.norm();
 
-              libMesh::Point new_node_point =
-                  *P_current + prev_node_distance_to_spline * dir_along_line;
+              new_node_point = *P_current + node_distance_to_curve * dir_along_line;
               orig_node_to_current = new_node_point - *node;
 
               step_size = (orig_node_to_current - orig_node_to_previous).norm();
               step_size_at_axis = (*P_current - *P_prev).norm();
+              prev_intersecting_plane_normal_vec = intersecting_plane_normal_vec;
             }
             // Point is on the axis of the line
             else
