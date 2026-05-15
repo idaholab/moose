@@ -115,15 +115,24 @@
   l_tol = 1e-8
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'B_from_gradAz'
+    start_point = '0 2 0'
+    end_point = '0 -2 0'
+    num_points = 10
+  []
+[]
+
 [Executioner]
   type = MFEMSteady
 []
 
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [ReportedPostprocessors]
+    type = CSV
     file_base = OutputData/2DMagnetostatic
-    vtk_format = ASCII
   []
 []
 
