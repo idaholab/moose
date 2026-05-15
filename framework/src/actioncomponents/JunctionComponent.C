@@ -172,6 +172,8 @@ JunctionComponent::addMeshGenerators()
 
     // not all action components are guaranteed to inherit from ComponentMeshTransformerHelper,
     // which we need to specify the direction.
+    // TODO: modify the spline curve generator to figure out the direction so we can support other
+    // component types
     const auto & first_component_cmth =
         _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("first_component"));
     const auto & second_component_cmth =
@@ -231,32 +233,11 @@ JunctionComponent::addMeshGenerators()
           "BlockToMeshConverterGenerator", name() + "_blockToMeshSource", _bmc_source_params);
       _mg_names.push_back(name() + "_blockToMeshSource");
 
-      // do the same for target boundary
-      InputParameters ld_target_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-      ld_target_params.set<MeshGeneratorName>("input") = second_component.mg_names().back();
-      ld_target_params.set<std::vector<BoundaryName>>("sidesets") =
-          std::vector{getParam<BoundaryName>("second_boundary")};
-      ld_target_params.set<SubdomainName>("new_block_name") =
-          (SubdomainName)(name() + "_LowerDBlockTarget");
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "LowerDBlockFromSidesetGenerator", name() + "_lowerDGenerationTarget", ld_target_params);
-      _mg_names.push_back(name() + "_lowerDGenerationTarget");
-
-      InputParameters _bmc_target_params = _factory.getValidParams("BlockToMeshConverterGenerator");
-      _bmc_target_params.set<MeshGeneratorName>("input") = name() + "_lowerDGenerationTarget";
-      _bmc_target_params.set<std::vector<SubdomainName>>("target_blocks") = {
-          (SubdomainName)(name() + "_LowerDBlockTarget")};
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "BlockToMeshConverterGenerator", name() + "_blockToMeshTarget", _bmc_target_params);
-      _mg_names.push_back(name() + "_blockToMeshTarget");
-
       // set up AdvancedExtruderGenerator
       InputParameters aeg_params = _factory.getValidParams("AdvancedExtruderGenerator");
       aeg_params.set<MeshGeneratorName>("extrusion_curve") = (MeshGeneratorName)(name() + "_curve");
       aeg_params.set<MeshGeneratorName>("input") =
           (MeshGeneratorName)(name() + "_blockToMeshSource");
-      aeg_params.set<MeshGeneratorName>("target_mesh") =
-          (MeshGeneratorName)(name() + "_blockToMeshTarget");
 
       aeg_params.set<Point>("start_extrusion_direction") = start_direction;
       aeg_params.set<Point>("end_extrusion_direction") = end_direction;
