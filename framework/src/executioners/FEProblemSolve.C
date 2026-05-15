@@ -91,10 +91,10 @@ FEProblemSolve::validParams()
                         "changing between non-linear iterations. We recommend that this tolerance "
                         "be looser than the standard linear tolerance");
 
-  params += Moose::PetscSupport::getPetscValidParams();
-  params.addParam<Real>("l_tol", 1.0e-5, "Linear Relative Tolerance");
-  params.addParam<Real>("l_abs_tol", 1.0e-50, "Linear Absolute Tolerance");
-  params.addParam<unsigned int>("l_max_its", 10000, "Max Linear Iterations");
+  params += Moose::PetscSupport::flagAndPairOptions();
+  params += Moose::PetscSupport::kspRelatedParams();
+  params += Moose::PetscSupport::newtonKrylovParams();
+
   params.addParam<std::vector<ConvergenceName>>(
       "nonlinear_convergence",
       "Name of the Convergence object(s) to use to assess convergence of the "
@@ -253,10 +253,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   // Set linear solve parameters in the equation system
   // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
   EquationSystems & es = _problem.es();
-  es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
-  es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
-  es.parameters.set<unsigned int>("linear solver maximum iterations") =
-      getParam<unsigned int>("l_max_its");
+  Moose::PetscSupport::setESLinearSolverParams(es, *this);
   es.parameters.set<bool>("reuse preconditioner") = getParam<bool>("reuse_preconditioner");
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");

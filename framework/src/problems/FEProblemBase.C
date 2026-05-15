@@ -918,6 +918,8 @@ FEProblemBase::initialSetup()
 
   SubProblem::initialSetup();
 
+  _app.initialSetup();
+
   if (_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) > 1)
     mooseError("Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
 
@@ -1940,7 +1942,7 @@ void
 FEProblemBase::addResidual(const THREAD_ID tid)
 {
   _assembly[tid][currentNonlinearSystem().number()]->addResidual(Assembly::GlobalDataKey{},
-                                                         currentResidualVectorTags());
+                                                                 currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1949,8 +1951,8 @@ FEProblemBase::addResidual(const THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(const THREAD_ID tid)
 {
-  _assembly[tid][currentNonlinearSystem().number()]->addResidualNeighbor(Assembly::GlobalDataKey{},
-                                                                 currentResidualVectorTags());
+  _assembly[tid][currentNonlinearSystem().number()]->addResidualNeighbor(
+      Assembly::GlobalDataKey{}, currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
@@ -1960,7 +1962,7 @@ void
 FEProblemBase::addResidualLower(const THREAD_ID tid)
 {
   _assembly[tid][currentNonlinearSystem().number()]->addResidualLower(Assembly::GlobalDataKey{},
-                                                              currentResidualVectorTags());
+                                                                      currentResidualVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualLower(tid);
@@ -1970,7 +1972,7 @@ void
 FEProblemBase::addResidualScalar(const THREAD_ID tid /* = 0*/)
 {
   _assembly[tid][currentNonlinearSystem().number()]->addResidualScalar(Assembly::GlobalDataKey{},
-                                                               currentResidualVectorTags());
+                                                                       currentResidualVectorTags());
 }
 
 void
@@ -2002,11 +2004,15 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const
 {
   if (currentNonlinearSystem().hasVector(currentNonlinearSystem().timeVectorTag()))
     _assembly[tid][currentNonlinearSystem().number()]->addCachedResidualDirectly(
-        residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().timeVectorTag()));
+        residual,
+        Assembly::GlobalDataKey{},
+        getVectorTag(currentNonlinearSystem().timeVectorTag()));
 
   if (currentNonlinearSystem().hasVector(currentNonlinearSystem().nonTimeVectorTag()))
     _assembly[tid][currentNonlinearSystem().number()]->addCachedResidualDirectly(
-        residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().nonTimeVectorTag()));
+        residual,
+        Assembly::GlobalDataKey{},
+        getVectorTag(currentNonlinearSystem().nonTimeVectorTag()));
 
   std::vector<VectorTag> extra_residual_vector_tags;
   extra_residual_vector_tags.reserve(currentResidualVectorTags().size());
@@ -2021,11 +2027,12 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, const
   // Without this, NodalConstraint contributions to extra vector tags are silently
   // discarded by the blanket clearCachedResiduals.
   _assembly[tid][currentNonlinearSystem().number()]->addCachedResiduals(Assembly::GlobalDataKey{},
-                                                                extra_residual_vector_tags);
+                                                                        extra_residual_vector_tags);
 
   // We do this because by adding the cached residual directly, we cannot ensure that all of the
   // cached residuals are emptied after only the two add calls above
-  _assembly[tid][currentNonlinearSystem().number()]->clearCachedResiduals(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->clearCachedResiduals(
+      Assembly::GlobalDataKey{});
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -2046,7 +2053,9 @@ void
 FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid)
 {
   _assembly[tid][currentNonlinearSystem().number()]->setResidualNeighbor(
-      residual, Assembly::GlobalDataKey{}, getVectorTag(currentNonlinearSystem().residualVectorTag()));
+      residual,
+      Assembly::GlobalDataKey{},
+      getVectorTag(currentNonlinearSystem().residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }
@@ -2056,7 +2065,8 @@ FEProblemBase::addJacobian(const THREAD_ID tid)
 {
   _assembly[tid][currentNonlinearSystem().number()]->addJacobian(Assembly::GlobalDataKey{});
   if (_has_nonlocal_coupling)
-    _assembly[tid][currentNonlinearSystem().number()]->addJacobianNonlocal(Assembly::GlobalDataKey{});
+    _assembly[tid][currentNonlinearSystem().number()]->addJacobianNonlocal(
+        Assembly::GlobalDataKey{});
   if (_displaced_problem)
   {
     _displaced_problem->addJacobian(tid);
@@ -2076,7 +2086,8 @@ FEProblemBase::addJacobianNeighbor(const THREAD_ID tid)
 void
 FEProblemBase::addJacobianNeighborLowerD(const THREAD_ID tid)
 {
-  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborLowerD(Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborLowerD(
+      Assembly::GlobalDataKey{});
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighborLowerD(tid);
 }
@@ -2098,8 +2109,8 @@ FEProblemBase::addJacobianScalar(const THREAD_ID tid /* = 0*/)
 void
 FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, const THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid][currentNonlinearSystem().number()]->addJacobianOffDiagScalar(ivar,
-                                                                      Assembly::GlobalDataKey{});
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianOffDiagScalar(
+      ivar, Assembly::GlobalDataKey{});
 }
 
 void
@@ -2176,14 +2187,15 @@ FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    const std::set<TagID> & tags,
                                    const THREAD_ID tid)
 {
-  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborTags(jacobian,
-                                                                     ivar,
-                                                                     jvar,
-                                                                     dof_map,
-                                                                     dof_indices,
-                                                                     neighbor_dof_indices,
-                                                                     Assembly::GlobalDataKey{},
-                                                                     tags);
+  _assembly[tid][currentNonlinearSystem().number()]->addJacobianNeighborTags(
+      jacobian,
+      ivar,
+      jvar,
+      dof_map,
+      dof_indices,
+      neighbor_dof_indices,
+      Assembly::GlobalDataKey{},
+      tags);
   if (_displaced_problem)
     _displaced_problem->addJacobianNeighbor(
         jacobian, ivar, jvar, dof_map, dof_indices, neighbor_dof_indices, tags, tid);
@@ -7406,7 +7418,8 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
 
   // We associate the residual tag with the given residual vector to make sure we
   // don't filter it out below
-  currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
+  currentNonlinearSystem().associateVectorToTag(residual,
+                                                currentNonlinearSystem().residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
@@ -7428,7 +7441,8 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     try
     {
       // vector tags
-      currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
+      currentNonlinearSystem().associateVectorToTag(residual,
+                                                    currentNonlinearSystem().residualVectorTag());
       const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
       mooseAssert(_fe_vector_tags.empty(),
@@ -7450,8 +7464,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       currentNonlinearSystem().setSolution(soln);
 
-      currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
-      currentNonlinearSystem().associateMatrixToTag(jacobian, currentNonlinearSystem().systemMatrixTag());
+      currentNonlinearSystem().associateVectorToTag(residual,
+                                                    currentNonlinearSystem().residualVectorTag());
+      currentNonlinearSystem().associateMatrixToTag(jacobian,
+                                                    currentNonlinearSystem().systemMatrixTag());
 
       for (const auto tag : _fe_matrix_tags)
         if (currentNonlinearSystem().hasMatrix(tag))
@@ -7528,8 +7544,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       currentNonlinearSystem().computeResidualAndJacobianTags(_fe_vector_tags, _fe_matrix_tags);
 
-      currentNonlinearSystem().disassociateMatrixFromTag(jacobian, currentNonlinearSystem().systemMatrixTag());
-      currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
+      currentNonlinearSystem().disassociateMatrixFromTag(
+          jacobian, currentNonlinearSystem().systemMatrixTag());
+      currentNonlinearSystem().disassociateVectorFromTag(
+          residual, currentNonlinearSystem().residualVectorTag());
     }
     catch (...)
     {
@@ -7594,11 +7612,13 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
   {
     currentNonlinearSystem().setSolution(soln);
 
-    currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
+    currentNonlinearSystem().associateVectorToTag(residual,
+                                                  currentNonlinearSystem().residualVectorTag());
 
     computeResidualTags(tags);
 
-    currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
+    currentNonlinearSystem().disassociateVectorFromTag(
+        residual, currentNonlinearSystem().residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -7625,11 +7645,13 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
   {
     currentNonlinearSystem().setSolution(soln);
 
-    currentNonlinearSystem().associateVectorToTag(residual, currentNonlinearSystem().residualVectorTag());
+    currentNonlinearSystem().associateVectorToTag(residual,
+                                                  currentNonlinearSystem().residualVectorTag());
 
     computeResidualTags({tag, currentNonlinearSystem().residualVectorTag()});
 
-    currentNonlinearSystem().disassociateVectorFromTag(residual, currentNonlinearSystem().residualVectorTag());
+    currentNonlinearSystem().disassociateVectorFromTag(
+        residual, currentNonlinearSystem().residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -7834,11 +7856,13 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 
   currentNonlinearSystem().setSolution(soln);
 
-  currentNonlinearSystem().associateMatrixToTag(jacobian, currentNonlinearSystem().systemMatrixTag());
+  currentNonlinearSystem().associateMatrixToTag(jacobian,
+                                                currentNonlinearSystem().systemMatrixTag());
 
   computeJacobianTags(tags);
 
-  currentNonlinearSystem().disassociateMatrixFromTag(jacobian, currentNonlinearSystem().systemMatrixTag());
+  currentNonlinearSystem().disassociateMatrixFromTag(jacobian,
+                                                     currentNonlinearSystem().systemMatrixTag());
 }
 
 void
@@ -7990,7 +8014,8 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
       mooseAssert(_nl_i_sys_num < _nl.size() && (sys.number() == currentNonlinearSystem().number()),
                   "I expect these system numbers to be the same");
 
-      if (!currentNonlinearSystem().hasVector("lower_bound") || !currentNonlinearSystem().hasVector("upper_bound"))
+      if (!currentNonlinearSystem().hasVector("lower_bound") ||
+          !currentNonlinearSystem().hasVector("upper_bound"))
         return;
 
       TIME_SECTION("computeBounds", 1, "Computing Bounds");
@@ -8033,7 +8058,8 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
   setCurrentLinearSystem(linearSysNum(sys.name()));
 
   currentLinearSystem().associateVectorToTag(rhs, currentLinearSystem().rightHandSideVectorTag());
-  currentLinearSystem().associateMatrixToTag(system_matrix, currentLinearSystem().systemMatrixTag());
+  currentLinearSystem().associateMatrixToTag(system_matrix,
+                                             currentLinearSystem().systemMatrixTag());
 
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
@@ -8049,14 +8075,14 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
                           compute_gradients);
 
   currentLinearSystem().disassociateMatrixFromTag(system_matrix,
-                                                 currentLinearSystem().systemMatrixTag());
+                                                  currentLinearSystem().systemMatrixTag());
   currentLinearSystem().disassociateVectorFromTag(rhs,
-                                                 currentLinearSystem().rightHandSideVectorTag());
+                                                  currentLinearSystem().rightHandSideVectorTag());
   // We reset the tags to the default containers for further operations
   currentLinearSystem().associateVectorToTag(currentLinearSystem().getRightHandSideVector(),
-                                            currentLinearSystem().rightHandSideVectorTag());
+                                             currentLinearSystem().rightHandSideVectorTag());
   currentLinearSystem().associateMatrixToTag(currentLinearSystem().getSystemMatrix(),
-                                            currentLinearSystem().systemMatrixTag());
+                                             currentLinearSystem().systemMatrixTag());
 }
 
 void
@@ -8273,7 +8299,8 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
     TIME_SECTION("computeDamping", 1, "Computing Damping");
 
     // Save pointer to the current solution
-    const NumericVector<Number> * _saved_current_solution = currentNonlinearSystem().currentSolution();
+    const NumericVector<Number> * _saved_current_solution =
+        currentNonlinearSystem().currentSolution();
 
     currentNonlinearSystem().setSolution(soln);
     // For now, do not re-compute auxiliary variables.  Doing so allows a wild solution increment

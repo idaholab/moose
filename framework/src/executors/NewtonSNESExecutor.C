@@ -32,25 +32,41 @@ NewtonSNESExecutor::validParams()
       "Delegates to _fe_problem.solve() for a single nonlinear system, or builds a combined "
       "outer SNES with VecNest/MatNest when multiple systems are present (nl_preconditioning "
       "required in that path).");
+  params += Moose::PetscSupport::kspRelatedParams();
+  params.addRequiredParam<std::vector<NonlinearSystemName>>(
+      "nonlinear_system_names", "Name of the nonlinear systems this executor targets.");
   return params;
 }
 
-NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExecutor(params) {}
+NewtonSNESExecutor::NewtonSNESExecutor(const InputParameters & params) : SNESExecutor(params)
+{
+  // I don't actually know if this is possible with the parser like if the user passes an empty
+  // string
+  const auto & nl_sys_names = getParam<std::vector<NonlinearSystemName>>("nonlinear_system_names");
+  if (nl_sys_names.empty())
+    paramError("nonlinear_system_names", "Empty string passed?");
+
+  for (const auto & nl_sys_name : nl_sys_names)
+    _nl_sys_nums.push_back(_fe_problem.nlSysNum(nl_sys_name));
+
+  Moose::PetscSupport::setESLinearSolverParams(_fe_problem.es(), *this);
+}
 
 NewtonSNESExecutor::~NewtonSNESExecutor()
 {
-  if (_vec_sol)
-    PetscCallAbort(this->comm().get(), VecDestroy(&_vec_sol));
   if (_mat_nest)
     PetscCallAbort(this->comm().get(), MatDestroy(&_mat_nest));
-  // _snes and _vec_func are destroyed by ~SNESExecutor
 }
 
 void
 NewtonSNESExecutor::setupSNES()
 {
-  // setupSNES() is only entered on the Case 3 (multi-system) path.
-  const unsigned int n_sys = _fe_problem.numNonlinearSystems();
+  const auto n_sys = _nl_sys_nums.size();
+
+  if (n_sys == 1)
+    // We don't need to create a new SNES with Nest data structures. We'll just be leveraging the
+    // libMesh solver's SNES
+    return;
 
   // Build VecNest for solution and residual.
   std::vector<Vec> sol_vecs(n_sys);
@@ -76,11 +92,6 @@ NewtonSNESExecutor::setupSNES()
   LibmeshPetscCallA(this->comm().get(),
                     SNESSetJacobian(_snes, _mat_nest, _mat_nest, outerJacobianCallback, this));
   registerFieldSplitIS(_snes, n_sys);
-  if (_npc_executor)
-  {
-    LibmeshPetscCallA(this->comm().get(), SNESSetNPC(_snes, _npc_executor->getSNES()));
-    LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(_snes, PC_LEFT));
-  }
 
   _snes_setup_done = true;
 }
@@ -88,63 +99,51 @@ NewtonSNESExecutor::setupSNES()
 Executor::Result
 NewtonSNESExecutor::run()
 {
-  const unsigned int n_sys = _fe_problem.numNonlinearSystems();
+  auto & result = newResult();
 
-  // Determine which path to take.
-  if (!_multi_system && !isParamSetByUser("nonlinear_system_name") && n_sys > 1)
-    _multi_system = true;
+  static const std::string solve_converged_msg = "Solve converged";
+  static const std::string solve_didnt_converge_msg = "Solve failed to converge";
 
-  if (_multi_system)
+  if (_nl_sys_nums.size() == 1)
   {
-    // Multi-system: combined outer Newton with VecNest/MatNest.
-    if (!_npc_executor)
-      mooseError(
-          "NewtonSNESExecutor: multiple nonlinear systems require 'nl_preconditioning' to be set.");
+    const auto nl_sys_num = _nl_sys_nums[0];
 
-    // SNES setup also calls buildMatNest()
-    if (!_snes_setup_done)
-      setupSNES();
+    // Wire the nonlinear preconditioner if we have it
+    if (_npc_executor)
+      LibmeshPetscCallA(this->comm().get(),
+                        SNESSetNPC(_fe_problem.getNonlinearSystem(nl_sys_num).getSNES(),
+                                   _npc_executor->getSNES()));
+
+    _fe_problem.solve(nl_sys_num);
+    if (_fe_problem.solverSystemConverged(nl_sys_num))
+      result.pass(solve_converged_msg);
     else
-      buildMatNest();
-
-    LibmeshPetscCallA(this->comm().get(), SNESSolve(_snes, nullptr, _vec_sol));
-
-    SNESConvergedReason reason;
-    LibmeshPetscCallA(this->comm().get(), SNESGetConvergedReason(_snes, &reason));
-    auto & result = newResult();
-    if (reason > 0)
-      result.pass("SNES converged");
-    else
-      result.fail("SNES diverged");
+      result.fail(solve_didnt_converge_msg);
     return result;
   }
 
-  // Single-system: delegate to _fe_problem.solve(_nl_sys_num).
+  //
+  // Multi-system: combined outer Newton with VecNest/MatNest.
+  //
 
-  if (_npc_executor)
-  {
-    // Wire the NPC onto the system's freshly-created SNES each solve via the hook.
-    _fe_problem.setNLPreSolveHook(
-        [this](unsigned int hook_sys_num)
-        {
-          if (hook_sys_num != _nl_sys_num)
-            return;
-          SNES outer = _fe_problem.getNonlinearSystem(_nl_sys_num).getSNES();
-          LibmeshPetscCallA(this->comm().get(), SNESSetNPC(outer, _npc_executor->getSNES()));
-          LibmeshPetscCallA(this->comm().get(), SNESSetNPCSide(outer, PC_LEFT));
-        });
-  }
+  if (!_npc_executor)
+    mooseError("NewtonSNESExecutor: multiple nonlinear systems currently require "
+               "'nl_preconditioning' to be set.");
 
-  _fe_problem.solve(_nl_sys_num);
-
-  if (_npc_executor)
-    _fe_problem.setNLPreSolveHook({});
-
-  auto & result = newResult();
-  if (_fe_problem.solverSystemConverged(_nl_sys_num))
-    result.pass("solver converged");
+  // SNES setup also calls buildMatNest()
+  if (!_snes_setup_done)
+    setupSNES();
   else
-    result.fail("solver diverged");
+    buildMatNest();
+
+  LibmeshPetscCallA(this->comm().get(), SNESSolve(_snes, nullptr, _vec_sol));
+
+  SNESConvergedReason reason;
+  LibmeshPetscCallA(this->comm().get(), SNESGetConvergedReason(_snes, &reason));
+  if (reason > 0)
+    result.pass(solve_converged_msg);
+  else
+    result.fail(solve_didnt_converge_msg);
   return result;
 }
 

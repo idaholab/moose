@@ -23,17 +23,23 @@ ShellBlockGSSNESExecutor::validParams()
       "SNESSHELL-based block Gauss-Seidel executor for testing the multi-system Case 3 "
       "path of NewtonSNESExecutor.  Sweeps the listed nonlinear systems in order, calling "
       "_fe_problem.solve() for each.");
-  params.addRequiredParam<std::vector<NonlinearSystemName>>(
-      "inner_nl_sys_names",
-      "Names of the nonlinear systems to sweep in each shell solve application, in order.");
+  params.addRequiredParam<std::vector<ExecutorName>>(
+      "sub_snes_executors", "The sub-SNES executors who we will sweep over");
   return params;
 }
 
 ShellBlockGSSNESExecutor::ShellBlockGSSNESExecutor(const InputParameters & params)
   : SNESExecutor(params)
 {
-  for (const auto & name : getParam<std::vector<NonlinearSystemName>>("inner_nl_sys_names"))
-    _inner_sys_nums.push_back(_fe_problem.nlSysNum(name));
+}
+
+void
+ShellBlockGSSNESExecutor::initialSetup()
+{
+  SNESExecutor::initialSetup();
+
+  for (const auto & name : getParam<std::vector<ExecutorName>>("sub_snes_executors"))
+    _sub_snes.push_back(&getExecutorByName<SNESExecutor>(name));
 }
 
 void
@@ -50,20 +56,19 @@ Executor::Result
 ShellBlockGSSNESExecutor::run()
 {
   auto & result = newResult();
-  for (const auto sys_num : _inner_sys_nums)
-    _fe_problem.solve(sys_num);
-  result.pass("block GS sweep complete");
+  for (auto * const sub_snes : _sub_snes)
+    result.record(sub_snes->name(), sub_snes->exec());
   return result;
 }
 
+// Will be called when this is a preconditioner
 PetscErrorCode
 ShellBlockGSSNESExecutor::shellSolveCallback(SNES snes, Vec /*x*/)
 {
   PetscFunctionBegin;
   void * ctx;
   PetscCall(SNESGetApplicationContext(snes, &ctx));
-  auto * ex = static_cast<ShellBlockGSSNESExecutor *>(ctx);
-  for (const auto sys_num : ex->_inner_sys_nums)
-    ex->_fe_problem.solve(sys_num);
+  auto * const ex = static_cast<ShellBlockGSSNESExecutor *>(ctx);
+  ex->run();
   PetscFunctionReturn(PETSC_SUCCESS);
 }

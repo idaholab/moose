@@ -336,7 +336,7 @@ public:
    * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() const;
-  Executor * getExecutor() const { return _executor.get(); }
+  Executor * getExecutor() const { return _executor; }
   NullExecutor * getNullExecutor() const { return _null_executor.get(); }
   bool useExecutor() const { return _use_executor; }
   FEProblemBase & feProblem() const;
@@ -345,7 +345,6 @@ public:
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
-  void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
   void
   addExecutor(const std::string & type, const std::string & name, const InputParameters & params);
 
@@ -375,10 +374,9 @@ public:
    * Get an Executor
    *
    * @param name The name of the Executor
-   * @param fail_if_not_found Whether or not to fail if the executor doesn't exist.  If this is
-   * false then this function will return a NullExecutor
    */
-  Executor & getExecutor(const std::string & name, bool fail_if_not_found = true);
+  template <typename T>
+  T & getExecutor(const std::string & name);
 
   /**
    * This info is stored here because we need a "globalish" place to put it in
@@ -1140,6 +1138,11 @@ public:
    */
   static bool isInTree();
 
+  /**
+   * calls initial setup on things like executors
+   */
+  void initialSetup();
+
 protected:
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::CapabilitiesTest, mooseAppAddBoolCapability);
@@ -1320,10 +1323,10 @@ protected:
   std::shared_ptr<Executioner> _executioner;
 
   /// Pointer to the Executor of this run
-  std::shared_ptr<Executor> _executor;
+  Executor * _executor = nullptr;
 
   /// Pointers to all of the Executors for this run
-  std::map<std::string, std::shared_ptr<Executor>> _executors;
+  std::map<std::string, std::unique_ptr<Executor>> _executors;
 
   /// Used in building the Executors
   /// Maps the name of the Executor block to the <type, params>
@@ -1431,6 +1434,12 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * Private helper to avoid requiring the full Executor type in the header; accomodate's the
+   * templated getExecutor method
+   */
+  static const std::string & executorType(const Executor & executor);
+
   /**
    * Internal function used to recursively create the executor objects.
    *
@@ -1749,3 +1758,26 @@ MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
   return _mfem_devices;
 }
 #endif
+
+template <typename T>
+T &
+MooseApp::getExecutor(const std::string & name)
+{
+  static const T * const ex = nullptr;
+
+  auto it = _executors.find(name);
+
+  if (it != _executors.end())
+  {
+    if (auto * ret = dynamic_cast<T *>(it->second.get()))
+      return *ret;
+    else
+      mooseError("Requested type '",
+                 MooseUtils::prettyCppType(ex),
+                 "' cannot be casted to from type '",
+                 executorType(*it->second),
+                 "'");
+  }
+  else
+    mooseError("Executor not found: ", name);
+}

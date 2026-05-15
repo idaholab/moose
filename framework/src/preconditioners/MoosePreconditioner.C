@@ -46,7 +46,8 @@ MoosePreconditioner::validParams()
       "nl_sys",
       "The nonlinear system whose linearization this preconditioner should be applied to.");
 
-  params += Moose::PetscSupport::getPetscValidParams();
+  params += Moose::PetscSupport::flagAndPairOptions();
+  params += Moose::PetscSupport::newtonKrylovParams();
 
   return params;
 }

@@ -11,12 +11,7 @@
 #include "SNESExecutor.h"
 
 /**
- * Executor that presents a PETSc SNESNGS object for use as a nonlinear preconditioner
- * on a single monolithic nonlinear system.  Attach it to a NewtonSNESExecutor via
- * nl_preconditioning; PETSc will propagate the outer SNES's DM to the SNESNGS SNES
- * and use its default secant NGS sweep as the preconditioner.
- *
- * This mirrors the -npc_snes_type ngs usage shown in PETSc's snes/tutorials/ex15.c.
+ * Executor that presents a PETSc SNESNGS object. PETSc will apply a default secant NGS sweep
  */
 class NGSSNESExecutor : public SNESExecutor
 {
@@ -28,4 +23,7 @@ public:
 
 protected:
   virtual void setupSNES() override;
+
+  /// The nonlinear system this SNES will be applied to
+  const unsigned int _nl_sys_num;
 };

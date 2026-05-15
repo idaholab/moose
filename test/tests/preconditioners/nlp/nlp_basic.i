@@ -67,11 +67,20 @@
 [Executors]
   [shell_pc]
     type = ShellBlockGSSNESExecutor
-    inner_nl_sys_names = 'nl0 nl1'
+    sub_snes_executors = 'sub0 sub1'
   []
-  [newton]
+  [outer]
     type = NewtonSNESExecutor
     nl_preconditioning = shell_pc
+    nonlinear_system_names = 'nl0 nl1'
+  []
+  [sub0]
+    type = NewtonSNESExecutor
+    nonlinear_system_names = 'nl0'
+  []
+  [sub1]
+    type = NewtonSNESExecutor
+    nonlinear_system_names = 'nl1'
   []
 []
 

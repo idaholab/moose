@@ -28,7 +28,9 @@ BinaryTestExecutor::validParams()
 }
 
 BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
-  : Executor(parameters), _inner1(getExecutor("inner1")), _inner2(getExecutor("inner2"))
+  : Executor(parameters),
+    _inner1(getExecutor<Executor>("inner1")),
+    _inner2(getExecutor<Executor>("inner2"))
 {
 }
 

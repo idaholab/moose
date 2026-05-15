@@ -27,9 +27,11 @@ class NonlinearSystemBase;
 class CommandLine;
 class InputParameters;
 class ParallelParamObject;
+class MooseBase;
 
 namespace libMesh
 {
+class EquationSystems;
 class DofMapBase;
 }
 
@@ -212,13 +214,14 @@ std::set<std::string> getPetscValidLineSearches();
 InputParameters flagAndPairOptions();
 
 /**
- * Returns the PETSc options that are common between Executioners and Preconditioners
- * @return InputParameters object containing the PETSc related parameters
- *
- * The output of this function should be added to the the parameters object of the overarching class
- * @see CreateExecutionerAction
+ * @returns options related to the Newton-Krylov nonlinear solver method
  */
-InputParameters getPetscValidParams();
+InputParameters newtonKrylovParams();
+
+/**
+ * @returns options related to linear/Krylov solvers
+ */
+InputParameters kspRelatedParams();
 
 /// A helper function to produce a MultiMooseEnum with commonly used PETSc single options (flags)
 MultiMooseEnum getCommonPetscFlags();
@@ -341,6 +344,11 @@ createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
                      Mat & petsc_mat,
                      const std::string & binary_mat_file,
                      unsigned int mat_number_to_load = 1);
+
+/**
+ * sets linear solver related parameters on the EquationSystems object from a MOOSE solver object
+ */
+void setESLinearSolverParams(libMesh::EquationSystems & es, const MooseBase & solver_object);
 
 #define SNESGETLINESEARCH SNESGetLineSearch
 }

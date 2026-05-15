@@ -473,7 +473,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
     _use_executor(getParam<bool>("use_executor")),
-    _null_executor(NULL),
+    _null_executor(nullptr),
     _use_nonlinear(true),
     _use_eigen_value(false),
     _enable_unused_check(ERROR_UNUSED),
@@ -1434,7 +1434,7 @@ MooseApp::errorCheck()
   if (isParamSetByUser("mesh_only"))
     return;
 
-  if (!_executor.get() && !_executioner.get())
+  if (!_executor && !_executioner.get())
   {
     if (!_early_exit_param.empty())
     {
@@ -1651,8 +1651,8 @@ MooseApp::disableCheckUnusedFlag()
 FEProblemBase &
 MooseApp::feProblem() const
 {
-  mooseAssert(_executor.get() || _executioner.get(), "No executioner yet, calling too early!");
-  return _executor.get() ? _executor->feProblem() : _executioner->feProblem();
+  mooseAssert(_executor || _executioner.get(), "No executioner yet, calling too early!");
+  return _executor ? _executor->feProblem() : _executioner->feProblem();
 }
 
 void
@@ -1660,11 +1660,11 @@ MooseApp::addExecutor(const std::string & type,
                       const std::string & name,
                       const InputParameters & params)
 {
-  std::shared_ptr<Executor> executor = _factory.create<Executor>(type, name, params);
+  auto executor = _factory.createUnique<Executor>(type, name, params);
 
   if (_executors.count(executor->name()) > 0)
     mooseError("an executor with name '", executor->name(), "' already exists");
-  _executors[executor->name()] = executor;
+  _executors[executor->name()] = std::move(executor);
 }
 
 void
@@ -1720,17 +1720,22 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name,
   // Build the dependencies first
   const auto & params = *_executor_params[current_executor_name].second;
 
-  for (const auto & param : params)
+  auto add_dependency = [&](const auto & dependency_name)
   {
-    if (params.have_parameter<ExecutorName>(param.first))
-    {
-      const auto & dependency_name = params.get<ExecutorName>(param.first);
+    possible_roots.remove(dependency_name);
 
-      possible_roots.remove(dependency_name);
+    if (!dependency_name.empty())
+      recursivelyCreateExecutors(dependency_name, possible_roots, current_branch);
+  };
 
-      if (!dependency_name.empty())
-        recursivelyCreateExecutors(dependency_name, possible_roots, current_branch);
-    }
+  for (const auto & [param_name, _] : params)
+  {
+    if (const auto * const value = params.queryParam<ExecutorName>(param_name); value)
+      add_dependency(*value);
+    else if (const auto * const values = params.queryParam<std::vector<ExecutorName>>(param_name);
+             values)
+      for (const auto & dependency_name : *values)
+        add_dependency(dependency_name);
   }
 
   // Add this Executor
@@ -1794,27 +1799,13 @@ MooseApp::createExecutors()
   }
 
   // Set the root executor
-  _executor = _executors[possible_roots.front()];
-}
-
-Executor &
-MooseApp::getExecutor(const std::string & name, bool fail_if_not_found)
-{
-  auto it = _executors.find(name);
-
-  if (it != _executors.end())
-    return *it->second;
-
-  if (fail_if_not_found)
-    mooseError("Executor not found: ", name);
-
-  return *_null_executor;
+  _executor = _executors[possible_roots.front()].get();
 }
 
 Executioner *
 MooseApp::getExecutioner() const
 {
-  return _executioner.get() ? _executioner.get() : _executor.get();
+  return _executioner.get() ? _executioner.get() : _executor;
 }
 
 void
@@ -3370,3 +3361,16 @@ MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMPr
                "'");
 }
 #endif
+
+const std::string &
+MooseApp::executorType(const Executor & ex)
+{
+  return ex.type();
+}
+
+void
+MooseApp::initialSetup()
+{
+  for (auto & [_, executor] : _executors)
+    executor->initialSetup();
+}
