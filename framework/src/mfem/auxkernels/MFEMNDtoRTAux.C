@@ -80,8 +80,7 @@ MFEMNDtoRTAux::execute()
 {
   _result_var = _nd_source_var;
 
-  if (_scale_factor != 1.0)
-    _result_var *= _scale_factor;
+  _result_var *= _scale_factor;
 }
 
 #endif
