@@ -45,7 +45,7 @@ EigenproblemEquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
 {
   mfem::ConstantCoefficient one(1.0);
   mfem::ParFiniteElementSpace * fespace = _test_pfespaces.at(0);
-  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(fespace);
+  std::unique_ptr<mfem::ParBilinearForm> m = std::make_unique<mfem::ParBilinearForm>(fespace);
 
   if (fespace->GetTypicalFE()->GetRangeType() == mfem::FiniteElement::SCALAR)
     m->AddDomainIntegrator(new mfem::MassIntegrator(one));
