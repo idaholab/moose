@@ -30,7 +30,6 @@ public:
 
 protected:
   virtual void addMeshGenerators() override;
-  virtual void setupComponent() override;
   virtual void checkIntegrity() override;
 
   MooseEnum _junction_method;
