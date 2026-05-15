@@ -129,6 +129,10 @@ LibtorchDRLControlTrainer::validParams()
 
   params.addParam<unsigned int>(
       "timestep_window", 1, "Use every nth reporter timestep when assembling trajectories.");
+  params.addParam<bool>("average_reward_over_timestep_window",
+                        false,
+                        "Average reward reporter values over each timestep_window interval instead "
+                        "of sampling one value at the end of the interval.");
 
   return params;
 }
@@ -166,6 +170,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
+    _average_reward_over_timestep_window(getParam<bool>("average_reward_over_timestep_window")),
     _average_episode_reward(0.0),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
     _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
@@ -284,18 +289,25 @@ LibtorchDRLControlTrainer::execute()
 
   _update_counter--;
 
-  if (_update_counter != 0 || _trajectory_buffer.empty())
+  bool has_trajectory_data = !_trajectory_buffer.empty();
+  _communicator.max(has_trajectory_data);
+
+  if (_update_counter != 0 || !has_trajectory_data)
     return;
 
   computeEpisodeRewardStatistics();
+  _communicator.broadcast(_average_episode_reward, 0);
+  _communicator.broadcast(_std_episode_reward, 0);
 
-  if (_average_episode_reward > _highest_reward)
+  if (processor_id() == 0 && _average_episode_reward > _highest_reward)
   {
     torch::save(_control_nn, _control_nn->name() + "_best");
     _highest_reward = _average_episode_reward;
   }
+  _communicator.broadcast(_highest_reward, 0);
 
-  _value_estimator.computeValueTargets(_trajectory_buffer, *_critic_nn);
+  if (processor_id() == 0)
+    _value_estimator.computeValueTargets(_trajectory_buffer, *_critic_nn);
   const auto batch = _trajectory_buffer.flatten();
 
   trainController(batch);
@@ -359,12 +371,15 @@ LibtorchDRLControlTrainer::computeEpisodeRewardStatistics()
 void
 LibtorchDRLControlTrainer::trainController(const LibtorchRLTrajectoryBuffer::TensorBatch & batch)
 {
-  if (!batch.size())
+  bool has_batch_data = batch.size();
+  _communicator.max(has_batch_data);
+
+  if (!has_batch_data)
     return;
 
   // We only train on the rank 0 partition. Libtorch should still be able to
   // fetch the local threads which are available.
-  if (processor_id() == 0)
+  if (processor_id() == 0 && batch.size())
   {
     auto shuffle_generator = Moose::makeLibtorchCPUGenerator(
         static_cast<uint64_t>(_seed) + static_cast<uint64_t>(_fe_problem.timeStep()));
@@ -414,8 +429,11 @@ LibtorchDRLControlTrainer::trainController(const LibtorchRLTrajectoryBuffer::Ten
 
   // Save the controller neural net so our controller can read it, we also save the critic if we
   // want to continue training
-  torch::save(_control_nn, _control_nn->name());
-  torch::save(_critic_nn, _critic_nn->name());
+  if (processor_id() == 0)
+  {
+    torch::save(_control_nn, _control_nn->name());
+    torch::save(_critic_nn, _critic_nn->name());
+  }
 }
 
 void
@@ -474,7 +492,9 @@ LibtorchDRLControlTrainer::collectTrajectoriesFromReporters()
     }
 
     trajectory.rewards =
-        extractDownsampledSequence(reward_sample, _timestep_window, num_transitions);
+        _average_reward_over_timestep_window
+            ? extractWindowAveragedSequence(reward_sample, num_transitions)
+            : extractDownsampledSequence(reward_sample, _timestep_window, num_transitions);
 
     _trajectory_buffer.addTrajectory(std::move(trajectory));
   }
@@ -506,6 +526,27 @@ LibtorchDRLControlTrainer::extractDownsampledSequence(const std::vector<Real> & 
       mooseError("Reporter data is shorter than required by the configured timestep window and "
                  "history stacking.");
     values.push_back(sample[raw_index]);
+  }
+
+  return values;
+}
+
+std::vector<Real>
+LibtorchDRLControlTrainer::extractWindowAveragedSequence(const std::vector<Real> & sample,
+                                                         const unsigned int num_entries) const
+{
+  std::vector<Real> values;
+  values.reserve(num_entries);
+
+  for (const auto entry_i : make_range(num_entries))
+  {
+    const auto window_begin = 1 + entry_i * _timestep_window;
+    const auto window_end = window_begin + _timestep_window;
+    if (window_end > sample.size())
+      mooseError("Reporter reward data is shorter than required by the configured timestep window.");
+
+    const Real sum = std::accumulate(sample.begin() + window_begin, sample.begin() + window_end, 0.0);
+    values.push_back(sum / _timestep_window);
   }
 
   return values;
