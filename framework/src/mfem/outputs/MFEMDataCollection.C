@@ -18,6 +18,8 @@ MFEMDataCollection::validParams()
   params.addClassDescription("Output for controlling MFEMDataCollection inherited data.");
   params.addParam<std::string>("submesh",
                                "Submesh to output variables on. Leave blank to use base mesh.");
+  params.addParam<std::vector<VariableName>>(
+      "hide", {}, "A list of variables that should NOT be included in the collection.");
   return params;
 }
 
@@ -26,7 +28,8 @@ MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
     _problem_data(static_cast<MFEMProblem *>(_problem_ptr)->getProblemData()),
     _pmesh(parameters.isParamValid("submesh")
                ? _problem_data.submeshes.GetRef(getParam<std::string>("submesh"))
-               : const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get()))
+               : const_cast<mfem::ParMesh &>(*_problem_data.pmesh.get())),
+    _hidden(getParam<std::vector<VariableName>>("hide"))
 {
 }
 
@@ -38,7 +41,9 @@ MFEMDataCollection::registerFields()
 
   for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {
-    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+    if (std::find(_hidden.begin(), _hidden.end(), gf_name) != _hidden.end())
+      continue;
+    else if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
       dc.RegisterField(gf_name, gf_ptr.get());
     else
       mooseInfo("The variable ",
@@ -49,7 +54,9 @@ MFEMDataCollection::registerFields()
   // Save complex fields
   for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
   {
-    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+    if (std::find(_hidden.begin(), _hidden.end(), gf_name) != _hidden.end())
+      continue;
+    else if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
     {
       dc.RegisterField(gf_name + "_real", &gf_ptr->real());
       dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
