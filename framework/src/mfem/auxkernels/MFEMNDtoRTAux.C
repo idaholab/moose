@@ -24,7 +24,10 @@ MFEMNDtoRTAux::validParams()
       "because the RT basis is the rotated ND basis.");
   params.addRequiredParam<VariableName>("nd_source",
                                         "Name of H(curl) conforming ND variable to copy.");
-  params.addParam<mfem::real_t>("scale_factor", 1.0, "Optional scale factor. Negative values can be used to flip the sign of the rotation.");
+  params.addParam<mfem::real_t>(
+      "scale_factor",
+      1.0,
+      "Optional scale factor. Negative values can be used to flip the sign of the rotation.");
 
   return params;
 }
