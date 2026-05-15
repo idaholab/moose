@@ -228,12 +228,12 @@ dataStore(std::ostream & stream, torch::Tensor & t, void * context)
   mooseAssert(tensor.scalar_type() == at::kDouble,
               "Restart storage currently supports only double tensors.");
 
-  unsigned int rank = tensor.dim();
-  stream.write((char *)&rank, sizeof(rank));
+  auto rank = cast_int<unsigned int>(tensor.dim());
+  dataStore(stream, rank, nullptr);
   for (unsigned int dim = 0; dim < rank; ++dim)
   {
-    unsigned int size = tensor.sizes()[dim];
-    stream.write((char *)&size, sizeof(size));
+    auto size = cast_int<unsigned int>(tensor.sizes()[dim]);
+    dataStore(stream, size, nullptr);
   }
 
   const auto flattened = tensor.reshape({tensor.numel()});
@@ -588,13 +588,13 @@ void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)
 {
   unsigned int rank = 0;
-  stream.read((char *)&rank, sizeof(rank));
+  dataLoad(stream, rank, nullptr);
 
   std::vector<int64_t> sizes(rank);
   for (unsigned int dim = 0; dim < rank; ++dim)
   {
     unsigned int size = 0;
-    stream.read((char *)&size, sizeof(size));
+    dataLoad(stream, size, nullptr);
     sizes[dim] = size;
   }
 
