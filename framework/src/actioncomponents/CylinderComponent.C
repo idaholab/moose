@@ -112,7 +112,7 @@ CylinderComponent::addMeshGenerators()
         paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = getParam<std::vector<unsigned int>>("n_radial")[0];
     }
-    else if (isParamValid("n_radial"))
+    else if (isParamSetByUser("n_radial"))
       paramError("n_radial", "Should not be provided for a 1D cylinder");
     if (isParamValid("block"))
     {
