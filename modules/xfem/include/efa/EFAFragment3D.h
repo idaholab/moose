@@ -12,6 +12,7 @@
 #include "EFAFragment.h"
 
 #include <limits>
+#include <set>
 
 class EFAEdge;
 class EFAFace;
@@ -65,7 +66,8 @@ public:
 private:
   EFAFragment3D * connectSubfaces(EFAFace * start_face,
                                   unsigned int startOldFaceID,
-                                  std::vector<std::vector<EFAFace *>> & subfaces);
+                                  std::vector<std::vector<EFAFace *>> & subfaces,
+                                  std::set<EFAFace *> & claimed_subfaces);
   EFAEdge * loneEdgeOnFace(unsigned int face_id) const;
   void combine_two_faces(unsigned int face_id1, unsigned int face_id2, const EFAFace * elem_face);
 };
