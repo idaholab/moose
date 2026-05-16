@@ -4,9 +4,9 @@
     type = CylinderComponent
     dimension = 3
     length = 1
-    n_axial = 4
+    n_axial = 2
     radius = 1
-    n_sectors = 6
+    n_sectors = 2
 
     # optional parameters
     direction = '0 1 0'
@@ -16,9 +16,9 @@
     type = CylinderComponent
     dimension = 3
     length = 1
-    n_axial = 4
+    n_axial = 2
     radius = 1
-    n_sectors = 6
+    n_sectors = 2
 
     # optional parameters
     direction = '1 0 0'
@@ -30,10 +30,9 @@
     second_component = cyl2
     first_boundary = 'cyl1_top_boundary'
     second_boundary = 'cyl2_bottom_boundary'
-    n_elem_normal = 6
+    n_elem_normal = 4
 
     verbose = true
-    enforce_all_nodes_match_on_boundaries = false
   []
 []
 
