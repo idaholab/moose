@@ -105,6 +105,11 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
                              "sharpness",
                              "num_cps",
                              "edge_element_type"});
+  else
+  {
+    if (!isParamValid("n_elem_normal"))
+      paramError("n_elem_normal", "Should be specified if junction_method = 'mesh_gap'");
+  }
   // The 1D and 2D meshing parameters will be re-checked later, once we know the dimension
 }
 
@@ -202,9 +207,10 @@ JunctionComponent::addMeshGenerators()
     if (dimension_first == 1)
     {
       if (isParamValid("block"))
-        bspline_params.set<BoundaryName>("new_subdomain_name") = getParam<SubdomainName>("block");
+        bspline_params.set<SubdomainName>("new_subdomain_name") = getParam<SubdomainName>("block");
       bspline_params.set<std::vector<BoundaryName>>("edge_nodesets") = {
           name() + "_bspline_start_node", name() + "_bspline_end_node"};
+      bspline_params.set<bool>("output") = _verbose;
     }
 
     _app.getMeshGeneratorSystem().addMeshGenerator(
@@ -264,16 +270,19 @@ JunctionComponent::addMeshGenerators()
       InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
       stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
           std::vector<MeshGeneratorName>{first_component.mg_names().back(),
-                                         name() + "_aeg",
+                                         _mg_names.back(),
                                          second_component.mg_names().back()};
       if (dimension_first > 1)
         stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, name() + "_aeg_bottom_boundary"},
             {name() + "_aeg_top_boundary", second_boundary}};
       else
+      {
+        stitcher_params.set<bool>("clear_stitched_boundary_ids") = false;
         stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, name() + "_bspline_start_node"},
             {name() + "_bspline_end_node", second_boundary}};
+      }
 
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
       stitcher_params.set<bool>("output") = _verbose;
@@ -289,7 +298,7 @@ JunctionComponent::addMeshGenerators()
       // issues with element overlap.
       InputParameters mesh_stitcher_params = _factory.getValidParams("StitchMeshGenerator");
       mesh_stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
-          std::vector<MeshGeneratorName>{first_component.mg_names().back(), name() + "_aeg"};
+          std::vector<MeshGeneratorName>{first_component.mg_names().back(), _mg_names.back()};
       if (dimension_first > 1)
         mesh_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{first_boundary, name() + "_aeg_bottom_boundary"}};
@@ -316,6 +325,11 @@ JunctionComponent::addMeshGenerators()
   }
   else
     mooseError("junction_method specified is invalid!");
+
+  // For now this is a safe choice. We might want to decide otherwise once we
+  // do mixed-dimensions. Build the junction with the dimension of the first component?
+  mooseAssert(dimension_first == dimension_second, "Should be the same");
+  _dimension = std::max(dimension_first, dimension_second);
 }
 
 void
