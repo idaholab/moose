@@ -191,10 +191,11 @@ AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
 
   const auto fe_field_type = FEInterface::field_type(_fe_type);
   const bool is_vector = fe_field_type == TYPE_VECTOR;
+  const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
 
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
-  else if (_components == 1)
+  else if (!is_array)
   {
     if (is_vector)
       action_params.set<std::string>("type") = "VectorConstantIC";
@@ -224,7 +225,7 @@ AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
-  if (_components > 1)
+  if (is_array)
   {
     RealEigenVector v(_components);
     for (unsigned int i = 0; i < _components; ++i)
