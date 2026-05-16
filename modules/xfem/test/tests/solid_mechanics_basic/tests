@@ -245,6 +245,18 @@
                '"one embedded node must be owned by 2 faces", which fires when two geometric cut surfaces '
                'place their intersections on the same fragment face in a single growth step.'
     []
+    [tet_block_tilt_neg20_no_double_free]
+      type = RunException
+      input = 'face_crack_3d_domain.i face_crack_3d_xfem_hoopStress.i'
+      cli_args = 'fname=tet_block_refine tilt=-20 Executioner/end_time=3'
+      expect_err = 'Incorrect link size for element that has been completely cut'
+      capabilities = 'unique_id & method=opt'
+      valgrind = NONE
+      detail = ' splitting a thoroughly-cut 3D fragment so that no EFAFace pointer is shared between '
+               'the two resulting fragments, eliminating the double-free in EFAFace::~EFAFace.  The '
+               'run still aborts on a downstream topology-count check (separate algorithmic bug in '
+               'connectSubfaces) but no longer triggers a malloc abort.'
+    []
   []
   [penny_crack]
     requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics '
