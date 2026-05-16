@@ -28,7 +28,7 @@
     second_component = cyl2
     first_boundary = 'cyl1_right'
     second_boundary = 'cyl2_left'
-    junction_method = mesh_gap
+    junction_method = extrude_boundary
     n_elem_normal = 4
   []
   [cyl3]
@@ -50,7 +50,7 @@
     second_component = cyl3
     first_boundary = 'cyl2_right'
     second_boundary = 'cyl3_left'
-    junction_method = mesh_gap
+    junction_method = extrude_boundary
     n_elem_normal = 4
   []
   [cyl4]
@@ -72,7 +72,7 @@
     second_component = cyl4
     first_boundary = 'cyl3_right'
     second_boundary = 'cyl4_left'
-    junction_method = mesh_gap
+    junction_method = extrude_boundary
     n_elem_normal = 4
   []
   [junction_bottom_left]
@@ -83,7 +83,7 @@
     second_component = junction_top_left
     first_boundary = 'cyl4_right'
     second_boundary = 'cyl1_left'
-    junction_method = mesh_gap
+    junction_method = extrude_boundary
     n_elem_normal = 4
   []
 []

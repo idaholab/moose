@@ -37,7 +37,7 @@ JunctionComponent::validParams()
   params.addRequiredParam<ComponentName>("second_component", "Second component to join");
   params.addRequiredParam<BoundaryName>("second_boundary", "Second boundary to connect to.");
 
-  MooseEnum junction_type("stitch_meshes mesh_gap", "mesh_gap");
+  MooseEnum junction_type("stitch_meshes extrude_boundary", "extrude_boundary");
   params.addParam<MooseEnum>("junction_method", junction_type, "How to join the two components");
 
   /* Stitching parameters */
@@ -94,9 +94,9 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
   addRequiredTask("add_mesh_generator");
 
   // Check parameters
-  if (_junction_method != "mesh_gap")
+  if (_junction_method != "extrude_boundary")
     errorDependentParameter("junction_method",
-                            "mesh_gap",
+                            "extrude_boundary",
                             {"n_elem_normal",
                              "block",
                              "radial_growth_method",
@@ -108,7 +108,7 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
   else
   {
     if (!isParamValid("n_elem_normal"))
-      paramError("n_elem_normal", "Should be specified if junction_method = 'mesh_gap'");
+      paramError("n_elem_normal", "Should be specified if junction_method = 'extrude_boundary'");
   }
   // The 1D and 2D meshing parameters will be re-checked later, once we know the dimension
 }
@@ -169,7 +169,7 @@ JunctionComponent::addMeshGenerators()
       mooseError("Stiching meshes of different dimensions is not implemented");
   }
 
-  else if (_junction_method == "mesh_gap")
+  else if (_junction_method == "extrude_boundary")
   {
     //
     // This method is set to use a B-Spline to draw a 1D curve between
