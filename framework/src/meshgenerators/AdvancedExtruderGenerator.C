@@ -638,8 +638,7 @@ AdvancedExtruderGenerator::generate()
             // previous point in extrusion curve
             const Node * P_prev = extrusion_curve->node_ptr(k - 1);
 
-            // Convenience vectors in the plane of (P_prev, prev_node, P_current, current_node)
-            RealVectorValue a_vec = (*P_current - *P_prev).unit();
+            // Quantites for the previous position of the extruded node
             const auto old_node = orig_node_to_previous + *node;
             RealVectorValue b_vec = old_node - *P_prev;
             Real node_distance_to_curve = b_vec.norm();
@@ -671,16 +670,34 @@ AdvancedExtruderGenerator::generate()
               }
               intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm();
 
-              // normal vector to the current plane
-              RealVectorValue current_plane_normal_vec = a_vec.cross(b_vec);
-              current_plane_normal_vec /= current_plane_normal_vec.norm();
+              Point new_node_point;
+              // If the extrusion direction and the previous plane normal are aligned,
+              // we can't define a rotation axis. We simply translate the points
+              if (MooseUtils::absoluteFuzzyEqual(
+                      prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec)
+                          .norm_sq(),
+                      0))
+                new_node_point = old_node + *P_current - *P_prev;
+              // We use a rotation from the previous extrusion plane normal to the current one
+              // We have tried in the past:
+              // - assuming (P_prev, P_current, old_node, current_node) are coplanar
+              // - assuming (P_prev, P_current) and (old_node, current_node) are parallel
+              // Both result in a slight deformation of the shape during extrusion.
+              else
+              {
+                auto axis = prev_intersecting_plane_normal_vec.cross(intersecting_plane_normal_vec);
+                const auto sin_th = axis.norm();
+                axis /= sin_th;
+                Real cos_th = prev_intersecting_plane_normal_vec * intersecting_plane_normal_vec;
+                // Rodrigues formula for rotation
+                const auto new_v = cos_th * b_vec + axis.cross(b_vec) * sin_th +
+                                   axis * (axis * b_vec) * (1. - cos_th);
 
-              // calculate the line of intersection's slope
-              RealVectorValue dir_along_line =
-                  current_plane_normal_vec.cross(intersecting_plane_normal_vec);
-              dir_along_line /= dir_along_line.norm();
+                mooseAssert(MooseUtils::absoluteFuzzyEqual(new_v.norm(), b_vec.norm()),
+                            "Radial extent be conserved");
+                new_node_point = *P_current + new_v;
+              }
 
-              new_node_point = *P_current + node_distance_to_curve * dir_along_line;
               orig_node_to_current = new_node_point - *node;
 
               step_size = (orig_node_to_current - orig_node_to_previous).norm();
