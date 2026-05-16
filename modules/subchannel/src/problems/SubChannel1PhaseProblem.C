@@ -163,7 +163,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _HTC_soln(nullptr)
 {
   if (params.isParamSetByUser("beta") || params.isParamSetByUser("constant_beta"))
-    paramError("turbulent mixing modeling:",
+    paramError("beta",
                "You are using a deprecated parameter. Please use the mixing_closure system.");
   if (_pin_mesh_exist && !isParamValid("pin_HTC_closure"))
     paramError("pin_HTC_closure", "required when a pin mesh exists.");
