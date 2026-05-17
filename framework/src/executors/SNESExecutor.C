@@ -29,6 +29,9 @@ SNESExecutor::SNESExecutor(const InputParameters & params)
 {
   if (isParamSetByUser("nl_preconditioning"))
     _npc_executor = &getExecutor<SNESExecutor>("nl_preconditioning");
+  // Ensure AddDefaultConvergenceAction will provision default Convergence objects for any
+  // nonlinear systems not explicitly wired by an executor.
+  _fe_problem.setNeedToAddDefaultNonlinearConvergence();
 }
 
 SNESExecutor::~SNESExecutor()

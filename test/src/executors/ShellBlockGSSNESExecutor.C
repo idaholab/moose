@@ -9,8 +9,10 @@
 
 #include "ShellBlockGSSNESExecutor.h"
 #include "FEProblem.h"
+#include "NonlinearSystem.h"
 
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/petsc_vector.h"
 #include <petscsnes.h>
 
 registerMooseObject("MooseTestApp", ShellBlockGSSNESExecutor);
@@ -25,11 +27,14 @@ ShellBlockGSSNESExecutor::validParams()
       "_fe_problem.solve() for each.");
   params.addRequiredParam<std::vector<ExecutorName>>(
       "sub_snes_executors", "The sub-SNES executors who we will sweep over");
+  MooseEnum sweep_type("multiplicative symmetric_multiplicative", "multiplicative");
+  params.addParam<MooseEnum>("sweep_type", sweep_type, "multiplicative performs a forward sweep "
+                             "only; symmetric_multiplicative adds a backward sweep (1..N, N-1..1)");
   return params;
 }
 
 ShellBlockGSSNESExecutor::ShellBlockGSSNESExecutor(const InputParameters & params)
-  : SNESExecutor(params)
+  : SNESExecutor(params), _sweep_type(getParam<MooseEnum>("sweep_type"))
 {
   for (const auto & name : getParam<std::vector<ExecutorName>>("sub_snes_executors"))
     _sub_snes.push_back(&getExecutorByName<SNESExecutor>(name));
@@ -49,19 +54,57 @@ Executor::Result
 ShellBlockGSSNESExecutor::run()
 {
   auto & result = newResult();
-  for (auto * const sub_snes : _sub_snes)
-    result.record(sub_snes->name(), sub_snes->exec());
+
+  for (auto * const sub : _sub_snes)
+    result.record(sub->name(), sub->exec());
+
+  // Backward sweep for symmetric multiplicative, excluding the last element of the
+  // forward sweep (which was just solved and has not had any inputs change since).
+  if (_sweep_type == "symmetric_multiplicative")
+    for (auto it = std::next(_sub_snes.rbegin()); it != _sub_snes.rend(); ++it)
+      result.record((*it)->name(), (*it)->exec());
+
   return result;
 }
 
 // Will be called when this is a preconditioner
 PetscErrorCode
-ShellBlockGSSNESExecutor::shellSolveCallback(SNES snes, Vec /*x*/)
+ShellBlockGSSNESExecutor::shellSolveCallback(SNES snes, Vec x)
 {
   PetscFunctionBegin;
   void * ctx;
   PetscCall(SNESGetApplicationContext(snes, &ctx));
   auto * const ex = static_cast<ShellBlockGSSNESExecutor *>(ctx);
+
+  // x is a VecNest holding the current Newton iterate (copied there by SNESApplyNPC).
+  // Copy it into the libmesh solution vecs so sub-solves start from the right point.
+  PetscInt n_sub;
+  PetscCall(VecNestGetSize(x, &n_sub));
+  for (PetscInt i = 0; i < n_sub; ++i)
+  {
+    Vec sub_x;
+    PetscCall(VecNestGetSubVec(x, i, &sub_x));
+    Vec sol_i =
+        cast_ptr<libMesh::PetscVector<libMesh::Number> *>(
+            ex->_fe_problem.getNonlinearSystem(i).system().solution.get())
+            ->vec();
+    PetscCall(VecCopy(sub_x, sol_i));
+  }
+
   ex->run();
+
+  // Write the NPC output (updated libmesh solution vecs) back into x so SNESApplyNPC
+  // can compute the fixed-point residual x - NPC(x).
+  for (PetscInt i = 0; i < n_sub; ++i)
+  {
+    Vec sub_x;
+    PetscCall(VecNestGetSubVec(x, i, &sub_x));
+    Vec sol_i =
+        cast_ptr<libMesh::PetscVector<libMesh::Number> *>(
+            ex->_fe_problem.getNonlinearSystem(i).system().solution.get())
+            ->vec();
+    PetscCall(VecCopy(sol_i, sub_x));
+  }
+
   PetscFunctionReturn(PETSC_SUCCESS);
 }

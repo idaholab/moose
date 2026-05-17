@@ -1,12 +1,11 @@
 [Tests]
-  design = 'NonlinearPreconditioning.md'
+  design = 'syntax/Executors/index.md'
   issues = '#32860'
-
   [nlp_basic]
-    type = Exodiff
+    type = CSVDiff
     input = 'nlp_basic.i'
-    exodiff = 'nlp_basic_out.e'
-    requirement = 'The system shall support a NonlinearPreconditioning block that solves a subset '
-                  'of nonlinear systems as a nonlinear preconditioner before each outer Newton step.'
+    csvdiff = 'nlp_basic_csv.csv'
+    requirement = 'The system shall be able to solve two decoupled diffusion problems using an outer Newton-Krylov nonlinear solver with block Gauss-Seidel nonlinear preconditioning using sub Newton-Krylov nonlinear solvers.'
+    cli_args = '--executor'
   []
 []

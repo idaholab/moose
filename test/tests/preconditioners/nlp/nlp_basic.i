@@ -10,7 +10,7 @@
   dim = 1
   xmin = 0
   xmax = 1
-  nx = 10
+  nx = 5
 []
 
 [Problem]
@@ -31,10 +31,20 @@
     type = Diffusion
     variable = u
   []
+  # [coupled_uv]
+  #   type = CoupledForce
+  #   v = v
+  #   variable = u
+  # []
   [diff_v]
     type = Diffusion
     variable = v
   []
+  # [coupled_vu]
+  #   type = CoupledForce
+  #   variable = v
+  #   v = u
+  # []
 []
 
 [BCs]
@@ -64,6 +74,17 @@
   []
 []
 
+[Convergence]
+  [nl0]
+    type = DefaultNonlinearConvergence
+    nl_abs_tol = 1e-12
+  []
+  [nl1]
+    type = DefaultNonlinearConvergence
+    nl_abs_tol = 1e-12
+  []
+[]
+
 [Executors]
   [shell_pc]
     type = ShellBlockGSSNESExecutor
@@ -77,13 +98,39 @@
   [sub0]
     type = NewtonSNESExecutor
     nonlinear_system_names = 'nl0'
+    convergence_names = 'nl0'
   []
   [sub1]
     type = NewtonSNESExecutor
     nonlinear_system_names = 'nl1'
+    convergence_names = 'nl1'
+  []
+  [steady]
+    type = SteadyExecutor
+    inner_executors = 'outer'
+  []
+[]
+
+[Postprocessors]
+  [u]
+    type = ElementAverageValue
+    variable = u
+    execute_on = 'final'
+  []
+  [v]
+    type = ElementAverageValue
+    variable = v
+    execute_on = 'final'
   []
 []
 
 [Outputs]
-  exodus = true
+  [csv]
+    type = CSV
+    execute_on = 'final'
+  []
+  [console]
+    type = Console
+    execute_postprocessors_on = 'final'
+  []
 []

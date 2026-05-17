@@ -2936,7 +2936,8 @@ FEProblemBase::addConvergence(const std::string & type,
 }
 
 void
-FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
+FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply,
+                                              const std::vector<ConvergenceName> & conv_names)
 {
   const std::string class_name = "DefaultNonlinearConvergence";
   InputParameters params = _factory.getValidParams(class_name);
@@ -8555,12 +8556,12 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               const unsigned int nl_sys_num)
+FEProblemBase::computeJacobian(const NumericVector<libMesh::Number> & soln,
+                               libMesh::SparseMatrix<libMesh::Number> & jacobian,
+                               const unsigned int nl_sys_i_num,
+                               const unsigned int nl_sys_j_num)
 {
-  setCurrentNonlinearSystem(nl_sys_num);
-  setJacobianBlockContext(nl_sys_num, nl_sys_num);
+  setJacobianBlockContext(nl_sys_i_num, nl_sys_j_num);
 
   _fe_matrix_tags.clear();
 
@@ -8572,21 +8573,29 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
 }
 
 void
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & jacobian,
+                               const unsigned int nl_sys_num)
+{
+  computeJacobian(soln, jacobian, nl_sys_num, nl_sys_num);
+}
+
+void
 FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & jacobian,
                                        const std::set<TagID> & tags)
 {
   TIME_SECTION("computeJacobianInternal", 1);
 
-  currentNonlinearSystem().setSolution(soln);
+  auto & nl_sys = currentNonlinearSystem();
 
-  currentNonlinearSystem().associateMatrixToTag(jacobian,
-                                                currentNonlinearSystem().systemMatrixTag());
+  nl_sys.setSolution(soln);
+
+  nl_sys.associateMatrixToTag(jacobian, nl_sys.systemMatrixTag());
 
   computeJacobianTags(tags);
 
-  currentNonlinearSystem().disassociateMatrixFromTag(jacobian,
-                                                     currentNonlinearSystem().systemMatrixTag());
+  nl_sys.disassociateMatrixFromTag(jacobian, nl_sys.systemMatrixTag());
 }
 
 void
@@ -10514,6 +10523,33 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
 
   for (const auto i : make_range(numNonlinearSystems()))
     _nl[i]->setConvergenceName(convergence_names[i]);
+}
+
+void
+FEProblemBase::setNonlinearConvergence(const NonlinearSystemName & nl_sys_name,
+                                       const ConvergenceName & convergence_name)
+{
+  if (!_nonlinear_convergence_names)
+    _nonlinear_convergence_names.emplace(numNonlinearSystems());
+  const auto sys_num = nlSysNum(nl_sys_name);
+  auto & slot = (*_nonlinear_convergence_names)[sys_num];
+  if (!slot.empty())
+    mooseError("A convergence object has already been set for nonlinear system '",
+               nl_sys_name,
+               "': '",
+               slot,
+               "'");
+  slot = convergence_name;
+  _nl[sys_num]->setConvergenceName(convergence_name);
+}
+
+bool
+FEProblemBase::hasNonlinearConvergenceName(const NonlinearSystemName & nl_sys_name) const
+{
+  if (!_nonlinear_convergence_names)
+    return false;
+  const auto sys_num = nlSysNum(nl_sys_name);
+  return !(*_nonlinear_convergence_names)[sys_num].empty();
 }
 
 void

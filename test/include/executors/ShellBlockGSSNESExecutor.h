@@ -9,12 +9,16 @@
 #pragma once
 
 #include "SNESExecutor.h"
+#include "MooseEnum.h"
 
 /**
  * Test executor that wraps a SNESSHELL to perform a block Gauss-Seidel sweep over
  * multiple nonlinear systems.  Used to exercise the multi-system Case 3 path of
  * NewtonSNESExecutor while being honest that no named PETSc SNES type implements
  * this algorithm.
+ *
+ * sweep_type = multiplicative           forward sweep only (1..N)
+ * sweep_type = symmetric_multiplicative forward then backward sweep (1..N, N-1..1)
  */
 class ShellBlockGSSNESExecutor : public SNESExecutor
 {
@@ -29,6 +33,7 @@ protected:
 
 private:
   std::vector<SNESExecutor *> _sub_snes;
+  const MooseEnum _sweep_type;
 
   static PetscErrorCode shellSolveCallback(SNES snes, Vec x);
 };

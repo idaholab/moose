@@ -1373,7 +1373,9 @@ mooseSlepcEPSSNESSetCustomizePC(EPS eps)
 }
 
 PetscErrorCode
-mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
+mooseSlepcEPSSNESKSPSetPCSide(const FEProblemBase & problem,
+                              const SolverSystem & solver_system,
+                              EPS eps)
 {
   SNES snes;
   KSP ksp;
@@ -1384,9 +1386,9 @@ mooseSlepcEPSSNESKSPSetPCSide(FEProblemBase & problem, EPS eps)
   // Get KSP from SNES
   LibmeshPetscCallQ(SNESGetKSP(snes, &ksp));
 
-  Moose::PetscSupport::petscSetDefaultPCSide(problem, ksp);
+  Moose::PetscSupport::petscSetDefaultPCSide(problem, solver_system, ksp);
 
-  Moose::PetscSupport::petscSetDefaultKSPNormType(problem, ksp);
+  Moose::PetscSupport::petscSetDefaultKSPNormType(problem, solver_system, ksp);
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
