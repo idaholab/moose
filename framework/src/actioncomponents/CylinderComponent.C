@@ -184,6 +184,7 @@ CylinderComponent::addMeshGenerators()
         "AdvancedExtruderGenerator", name() + "_base", ext_params);
     _mg_names.push_back(name() + "_base");
   }
+  _top_mg_name = _mg_names.back();
 
   ComponentMeshTransformHelper::addMeshGenerators();
 }

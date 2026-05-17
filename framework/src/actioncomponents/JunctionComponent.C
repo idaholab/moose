@@ -28,7 +28,6 @@ JunctionComponent::validParams()
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
-  params += ComponentMeshTransformHelper::validParams();
 
   params.addClassDescription("Component to join two other components.");
 
@@ -87,7 +86,6 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
-    ComponentMeshTransformHelper(params),
     _junction_method(getParam<MooseEnum>("junction_method")),
     _enforce_all_nodes_match_on_boundaries(getParam<bool>("enforce_all_nodes_match_on_boundaries"))
 {
@@ -116,9 +114,9 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
 void
 JunctionComponent::addMeshGenerators()
 {
-  const auto & first_component =
+  auto & first_component =
       _awh.getAction<ActionComponent>(getParam<ComponentName>("first_component"));
-  const auto & second_component =
+  auto & second_component =
       _awh.getAction<ActionComponent>(getParam<ComponentName>("second_component"));
   const auto first_boundary = getParam<BoundaryName>("first_boundary");
   const auto second_boundary = getParam<BoundaryName>("second_boundary");
@@ -139,8 +137,9 @@ JunctionComponent::addMeshGenerators()
       if (getParam<ComponentName>("first_component") != getParam<ComponentName>("second_component"))
       { // Stitch the two meshes
         InputParameters params = _factory.getValidParams("StitchMeshGenerator");
-        params.set<std::vector<MeshGeneratorName>>("inputs") = {first_component.mg_names().back(),
-                                                                second_component.mg_names().back()};
+        params.set<std::vector<MeshGeneratorName>>("inputs") = {
+            first_component.getCurrentTopLevelMeshGeneratorName(),
+            second_component.getCurrentTopLevelMeshGeneratorName()};
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
         params.set<bool>("verbose_stitching") = _verbose;
@@ -156,7 +155,8 @@ JunctionComponent::addMeshGenerators()
         // issues with element overlap.
 
         InputParameters params = _factory.getValidParams("StitchBoundaryMeshGenerator");
-        params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
+        params.set<MeshGeneratorName>("input") =
+            first_component.getCurrentTopLevelMeshGeneratorName();
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
         params.set<bool>("show_info") = _verbose;
@@ -197,8 +197,10 @@ JunctionComponent::addMeshGenerators()
     if (isParamValid("sharpness"))
       bspline_params.set<Real>("sharpness") = getParam<Real>("sharpness");
     bspline_params.set<unsigned int>("num_cps") = getParam<unsigned int>("num_cps");
-    bspline_params.set<MeshGeneratorName>("start_mesh") = first_component.mg_names().back();
-    bspline_params.set<MeshGeneratorName>("end_mesh") = second_component.mg_names().back();
+    bspline_params.set<MeshGeneratorName>("start_mesh") =
+        first_component.meshGeneratorNames().back();
+    bspline_params.set<MeshGeneratorName>("end_mesh") =
+        second_component.meshGeneratorNames().back();
     bspline_params.set<BoundaryName>("boundary_providing_start_point") =
         getParam<BoundaryName>("first_boundary");
     bspline_params.set<BoundaryName>("boundary_providing_end_point") =
@@ -222,7 +224,8 @@ JunctionComponent::addMeshGenerators()
     {
       // create lower dimension mesh on the boundary
       InputParameters ld_source_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-      ld_source_params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
+      ld_source_params.set<MeshGeneratorName>("input") =
+          first_component.meshGeneratorNames().back();
       ld_source_params.set<std::vector<BoundaryName>>("sidesets") =
           std::vector{getParam<BoundaryName>("first_boundary")};
       ld_source_params.set<SubdomainName>("new_block_name") =
@@ -265,13 +268,14 @@ JunctionComponent::addMeshGenerators()
     }
 
     // Stitch the extrusion / curve (in 1D) to the components
-    if (getParam<ComponentName>("first_component") != getParam<ComponentName>("second_component"))
+    if (first_component.getCurrentTopLevelMeshGeneratorName() !=
+        second_component.getCurrentTopLevelMeshGeneratorName())
     {
       InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
       stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
-          std::vector<MeshGeneratorName>{first_component.mg_names().back(),
+          std::vector<MeshGeneratorName>{first_component.getCurrentTopLevelMeshGeneratorName(),
                                          _mg_names.back(),
-                                         second_component.mg_names().back()};
+                                         second_component.getCurrentTopLevelMeshGeneratorName()};
       if (dimension_first > 1)
         stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, name() + "_aeg_bottom_boundary"},
@@ -298,7 +302,8 @@ JunctionComponent::addMeshGenerators()
       // issues with element overlap.
       InputParameters mesh_stitcher_params = _factory.getValidParams("StitchMeshGenerator");
       mesh_stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
-          std::vector<MeshGeneratorName>{first_component.mg_names().back(), _mg_names.back()};
+          std::vector<MeshGeneratorName>{first_component.getCurrentTopLevelMeshGeneratorName(),
+                                         _mg_names.back()};
       if (dimension_first > 1)
         mesh_stitcher_params.set<std::vector<std::vector<std::string>>>(
             "stitch_boundaries_pairs") = {{first_boundary, name() + "_aeg_bottom_boundary"}};
@@ -325,6 +330,10 @@ JunctionComponent::addMeshGenerators()
   }
   else
     mooseError("junction_method specified is invalid!");
+
+  _top_mg_name = _mg_names.back();
+  first_component.setCurrentTopLevelMeshGeneratorName(_top_mg_name);
+  second_component.setCurrentTopLevelMeshGeneratorName(_top_mg_name);
 
   // For now this is a safe choice. We might want to decide otherwise once we
   // do mixed-dimensions. Build the junction with the dimension of the first component?
