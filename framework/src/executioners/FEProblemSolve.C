@@ -65,22 +65,6 @@ FEProblemSolve::validParams()
   InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  std::set<std::string> line_searches = mooseLineSearches();
-
-  std::set<std::string> alias_line_searches = {"default", "none", "basic"};
-  line_searches.insert(alias_line_searches.begin(), alias_line_searches.end());
-  std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
-  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
-  std::string line_search_string = Moose::stringify(line_searches, " ");
-  MooseEnum line_search(line_search_string, "default");
-  std::string addtl_doc_str(" (Note: none = basic)");
-  params.addParam<MooseEnum>(
-      "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
-  MooseEnum line_search_package("petsc moose", "petsc");
-  params.addParam<MooseEnum>("line_search_package",
-                             line_search_package,
-                             "The solver package to use to conduct the line-search");
-
   params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
                             2,
                             "The number of times lambda is allowed to be cut in half in the "
@@ -204,8 +188,7 @@ FEProblemSolve::validParams()
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
       "Solver variable scaling");
-  params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
-                              "contact_line_search_allowed_lambda_cuts",
+  params.addParamNamesToGroup("contact_line_search_ltol contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
   params.addParamNamesToGroup("multi_system_fixed_point multi_system_fixed_point_convergence "
                               "multi_system_fixed_point_relaxation_factor",

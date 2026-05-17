@@ -1055,7 +1055,19 @@ newtonKrylovParams()
                              "Jacobian-free solve types. Note that the "
                              "default is wp (for Walker and Pernice).");
 
-  params.addParamNamesToGroup("solve_type mffd_type", "PETSc");
+  std::set<std::string> line_searches = {"default", "none", "basic", "contact", "project"};
+  const auto petsc_line_searches = getPetscValidLineSearches();
+  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
+  MooseEnum line_search(Moose::stringify(line_searches, " "), "default");
+  params.addParam<MooseEnum>(
+      "line_search", line_search, "Specifies the line search type (Note: none = basic)");
+
+  MooseEnum line_search_package("petsc moose", "petsc");
+  params.addParam<MooseEnum>("line_search_package",
+                             line_search_package,
+                             "The solver package to use to conduct the line-search");
+
+  params.addParamNamesToGroup("solve_type mffd_type line_search line_search_package", "PETSc");
   return params;
 }
 
