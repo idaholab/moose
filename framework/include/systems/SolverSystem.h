@@ -88,7 +88,7 @@ public:
   /**
    * Get the current preconditioner side.
    */
-  Moose::PCSideType getPCSide() { return _pc_side; }
+  Moose::PCSideType getPCSide() const { return _pc_side; }
 
   /**
    * Set the norm in which the linear convergence will be measured.
@@ -99,7 +99,7 @@ public:
   /**
    * Get the norm in which the linear convergence is measured.
    */
-  Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
+  Moose::MooseKSPNormType getMooseKSPNormType() const { return _ksp_norm; }
 
   virtual const NumericVector<Number> * const & currentSolution() const override final;
 

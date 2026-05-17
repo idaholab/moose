@@ -28,6 +28,7 @@ class CommandLine;
 class InputParameters;
 class ParallelParamObject;
 class MooseBase;
+class SolverSystem;
 
 namespace libMesh
 {
@@ -88,7 +89,8 @@ void petscSetOptions(const PetscOptions & po,
 /**
  * Set the default options for a KSP
  */
-void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
+void
+petscSetKSPDefaults(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp);
 
 /**
  * Set the defaults for a libMesh LinearSolver
@@ -97,9 +99,12 @@ void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
  */
 template <typename T>
 void
-setLinearSolverDefaults(FEProblemBase & problem, libMesh::LinearSolver<T> & linear_solver)
+setLinearSolverDefaults(const FEProblemBase & problem,
+                        const SolverSystem & solver_system,
+                        libMesh::LinearSolver<T> & linear_solver)
 {
   petscSetKSPDefaults(problem,
+                      solver_system,
                       libMesh::cast_ref<libMesh::PetscLinearSolver<T> &>(linear_solver).ksp());
 }
 
@@ -275,12 +280,15 @@ void addPetscOptionsFromCommandline(FEProblemBase * const problem = nullptr);
 /**
  * Setup which side we want to apply preconditioner
  */
-void petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp);
+void
+petscSetDefaultPCSide(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp);
 
 /**
  * Set norm type
  */
-void petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp);
+void petscSetDefaultKSPNormType(const FEProblemBase & problem,
+                                const SolverSystem & solver_system,
+                                KSP ksp);
 
 /**
  * This method takes an adjacency matrix, and a desired number of colors and applies

@@ -46,13 +46,14 @@ private:
   /// PETSc MatNest holding all (i,j) Jacobian sub-blocks.
   Mat _mat_nest = nullptr;
 
-  /// Off-diagonal Jacobian blocks J_ij (i != j).
-  std::map<std::pair<unsigned int, unsigned int>,
-           std::unique_ptr<libMesh::PetscMatrix<libMesh::Number>>>
-      _off_diag_mats;
+  struct MatData
+  {
+    std::unique_ptr<libMesh::PetscMatrix<libMesh::Number>> mat;
+    TagID tag;
+  };
 
-  /// Matrix tag IDs for each off-diagonal block.
-  std::map<std::pair<unsigned int, unsigned int>, TagID> _off_diag_tags;
+  /// Off-diagonal Jacobian blocks J_ij (i != j).
+  std::map<std::pair<unsigned int, unsigned int>, MatData> _off_diag_mats;
 
   // Multi-system helpers -----------------------------------------------------------
 
@@ -60,8 +61,26 @@ private:
   void assembleOffDiagJacobian();
   void buildMatNest();
 
-  static void registerFieldSplitIS(SNES snes, unsigned int n_sys);
-
   static PetscErrorCode outerResidualCallback(SNES snes, Vec x, Vec f, void * ctx);
   static PetscErrorCode outerJacobianCallback(SNES snes, Vec x, Mat A, Mat P, void * ctx);
+
+  //
+  // shell machinery for an outer SNES
+  //
+
+  /// Shell matrix representing multiplication of the nonlinear preconditioner
+  /// and the full Jacobian. I think of it as representing B*A, where B is what
+  /// PETSc typically uses to denote the preconditioner (*not* what MOOSE calls
+  /// the preconditioning matrix P, but something more like P^{-1}). Precisely,
+  /// this will apply block_diag(J_i^{-1}) * J_global -- the Jacobian of the
+  /// field-split-preconditioned residual F_NP(x) = x - NPC(x), where NPC(x) is
+  /// x - block_diag(J_i^{-1}) * R(x), e.g. the result of the nonlinear
+  /// preconditioner is an updated solution vector and the outer Newton solver
+  /// is solving a fixed point problem.
+  Mat _jac_shell = nullptr;
+
+  /// Work VecNest for W = J_global * v inside shellMatMult.
+  Vec _work = nullptr;
+
+  static PetscErrorCode shellMatMult(Mat m, Vec X, Vec Y);
 };

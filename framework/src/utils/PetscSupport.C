@@ -515,6 +515,8 @@ getPetscPCSide(Moose::PCSideType pcs)
 {
   switch (pcs)
   {
+    case Moose::PCS_DEFAULT:
+      return PC_SIDE_DEFAULT;
     case Moose::PCS_LEFT:
       return PC_LEFT;
     case Moose::PCS_RIGHT:
@@ -549,33 +551,25 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 }
 
 void
-petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
+petscSetDefaultKSPNormType(const FEProblemBase & problem,
+                           const SolverSystem & solver_system,
+                           KSP ksp)
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
-  {
-    SolverSystem & sys = problem.getSolverSystem(i);
-    LibmeshPetscCallA(problem.comm().get(),
-                      KSPSetNormType(ksp, getPetscKSPNormType(sys.getMooseKSPNormType())));
-  }
+  LibmeshPetscCallA(problem.comm().get(),
+                    KSPSetNormType(ksp, getPetscKSPNormType(solver_system.getMooseKSPNormType())));
 }
 
 void
-petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
+petscSetDefaultPCSide(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
 {
-  for (const auto i : make_range(problem.numSolverSystems()))
-  {
-    SolverSystem & sys = problem.getSolverSystem(i);
-
-    // PETSc 3.2.x+
-    if (sys.getPCSide() != Moose::PCS_DEFAULT)
-      LibmeshPetscCallA(problem.comm().get(), KSPSetPCSide(ksp, getPetscPCSide(sys.getPCSide())));
-  }
+  LibmeshPetscCallA(problem.comm().get(),
+                    KSPSetPCSide(ksp, getPetscPCSide(solver_system.getPCSide())));
 }
 
 void
-petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
+petscSetKSPDefaults(const FEProblemBase & problem, const SolverSystem & solver_system, KSP ksp)
 {
-  auto & es = problem.es();
+  const auto & es = problem.es();
 
   PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");
   PetscReal atol = es.parameters.get<Real>("linear solver absolute tolerance");
@@ -589,9 +583,9 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
   // 1e100 is because we don't use divtol currently
   LibmeshPetscCallA(problem.comm().get(), KSPSetTolerances(ksp, rtol, atol, 1e100, maxits));
 
-  petscSetDefaultPCSide(problem, ksp);
+  petscSetDefaultPCSide(problem, solver_system, ksp);
 
-  petscSetDefaultKSPNormType(problem, ksp);
+  petscSetDefaultKSPNormType(problem, solver_system, ksp);
 }
 
 void
@@ -629,7 +623,7 @@ petscSetDefaults(FEProblemBase & problem)
         nl.comm().get(),
         SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
 
-    petscSetKSPDefaults(problem, ksp);
+    petscSetKSPDefaults(problem, nl, ksp);
   }
 
   for (auto sys_index : make_range(problem.numLinearSystems()))

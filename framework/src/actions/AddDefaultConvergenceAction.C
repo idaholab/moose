@@ -54,13 +54,27 @@ AddDefaultConvergenceAction::addDefaultNonlinearConvergence()
 {
   if (_problem->needToAddDefaultNonlinearConvergence())
   {
-    const std::string default_name = "default_nonlinear_convergence";
-    // Create a default convergence for every nonlinear system
-    std::vector<ConvergenceName> default_name_vec;
+    const std::string default_prefix = "default_nonlinear_convergence";
+    // Only add defaults for systems that were not explicitly wired by an executor.
+    std::vector<ConvergenceName> newly_added;
     for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
-      default_name_vec.push_back(default_name + nl_sys_name);
-    _problem->setNonlinearConvergenceNames(default_name_vec);
-    _problem->addDefaultNonlinearConvergence(getMooseApp().getExecutioner()->parameters());
+      if (!_problem->hasNonlinearConvergenceName(nl_sys_name))
+      {
+        const ConvergenceName conv_name = default_prefix + nl_sys_name;
+        _problem->setNonlinearConvergence(nl_sys_name, conv_name);
+        newly_added.push_back(conv_name);
+      }
+
+    if (!newly_added.empty())
+    {
+      const std::string class_name = "DefaultNonlinearConvergence";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.applyParameters(getMooseApp().getExecutioner()->parameters());
+      params.applyParameters(_problem->parameters());
+      params.set<bool>("added_as_default") = true;
+      for (const auto & conv_name : newly_added)
+        _problem->addConvergence(class_name, conv_name, params);
+    }
   }
 
   checkUnusedNonlinearConvergenceParameters();
