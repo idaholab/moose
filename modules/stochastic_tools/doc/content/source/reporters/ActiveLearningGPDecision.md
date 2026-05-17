@@ -1,6 +1,7 @@
 # ActiveLearningGPDecision
 
-!if function=hasCapability('libtorch')
+!if! function=hasCapability('libtorch')
+
 !syntax description /Reporters/ActiveLearningGPDecision
 
 ## Description
@@ -85,7 +86,6 @@ The following samplers are also supported with the `ActiveLearningGPDecision` re
 
   See [AISActiveLearning](AISActiveLearning.md) for more information.
 
-!if! function=hasCapability('libtorch')
 !syntax parameters /Reporters/ActiveLearningGPDecision
 
 !syntax inputs /Reporters/ActiveLearningGPDecision
